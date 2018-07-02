@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mijn openstad</title>
+  <!-- Needed for mobile sites to work -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Style sheets -->
+  <link rel="stylesheet" type="text/css" href="../stylesheets/pure-min.css">
+  <link rel="stylesheet" type="text/css" href="../stylesheets/base.css">
+  <link rel="stylesheet" type="text/css" href="../stylesheets/index-modules.css">
+  <script type="text/javascript" src="../javascripts/jquery.min.js"></script>
+
+  <!-- Javascript -->
+  <script type="text/javascript">
+    $(document).ready(function () {
+      var http = location.protocol;
+      var slashes = http.concat("//");
+      var port = location.port ? ':' + location.port : '';
+      var host = slashes.concat(window.location.hostname) + port;
+      var fragment = window.location.hash;
+
+      //replace the host name from the URL and replace all the links we have with the host name as well.
+      $(".hostname").text(host);
+      $("#authcode").attr("href", "/dialog/authorize?redirect_uri=" + host + "&response_type=code&client_id=abc123&scope=offline_access");
+      $("#implicit").attr("href", "/dialog/authorize?redirect_uri=" + host + "&response_type=token&client_id=abc123");
+
+      if (!fragment) {
+        //They did not come from the implicit work flow, so show the main work flow of the page.
+        $("#main").show();
+      } else {
+        //If we have a fragment then they must have come from the URL during an implicit call.  So show the
+        //implicit work flow.
+        $("#implicitDiv").show();
+        $("#accessTokenResult").text(fragment.substring(fragment.indexOf("access_token="), fragment.indexOf("&")));
+        $("#expirationResult").text(fragment.substring(fragment.indexOf("expires_in="), fragment.indexOf("&token_type=")));
+        $("#tokenTypeResult").text(fragment.substring(fragment.indexOf("token_type=")));
+        $(".access_token").text(fragment.substring((fragment.indexOf("access_token=") + "access_token".length + 1), fragment.indexOf("&")));
+      }
+
+      $("#apiEndPointButton").click(function (event) {
+        //They clicked on the api end point button, so hide the implicit work flow and
+        //make the ajax call to get the user information using the fragment from the URL
+        $.ajax({
+          type: 'GET',
+          dataType: 'json',
+          url: '/api/userinfo',
+          headers: {
+            "Authorization": "Bearer " + fragment.substring(14, fragment.indexOf("&"))
+          },
+          success: function (result) {
+            $("#implicitDiv").hide();
+            $("#userInformation").show();
+            $("#userJsonInfo").text(JSON.stringify(result, undefined, 4));
+          }
+        });
+      });
+
+      $("#resourceOwnerSubmitPostButton").click(function (event) {
+        //They clicked on the Submit Post button underneath the resource owner section
+        $.ajax({
+          type: 'POST',
+          dataType: 'json',
+          url: "/oauth/token",
+          headers: {
+            //This is abc123:ssh-secret base 64 encoded
+            "Authorization": "Basic YWJjMTIzOnNzaC1zZWNyZXQ="
+          },
+          data: 'grant_type=password&username=bob&password=secret&scope=offline_access',
+          success: function (result) {
+            //Hide the main screen because we were successful, add the access token info, and
+            //show the resource owner token section
+            $("#main").hide();
+            $(".access_token").text(result.access_token);
+            $("#accessToken").show();
+            $("#fullResult").append(JSON.stringify(result, undefined, 4));
+
+            $("#accessTokenCallApiButton").click(function (event) {
+              //They clicked on the resource owner token api call
+              $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                url: '/api/userinfo',
+                headers: {
+                  "Authorization": "Bearer " + result.access_token
+                },
+                success: function (result) {
+                  $("#accessToken").hide();
+                  $("#userInformation").show();
+                  $("#userJsonInfo").text(JSON.stringify(result, undefined, 4));
+                }
+              });
+            });
+          }
+        });
+      });
+
+      $("#clientSubmitPostButton").click(function (event) {
+        //They clicked on the Submit Post button underneath the client section
+        $.ajax({
+          type: 'POST',
+          dataType: 'json',
+          url: "/oauth/token",
+          headers: {
+            //This is abc123:ssh-secret base 64 encoded
+            "Authorization": "Basic YWJjMTIzOnNzaC1zZWNyZXQ="
+          },
+          data: 'grant_type=client_credentials',
+          success: function (result) {
+            $("#main").hide();
+            $(".access_token").text(result.access_token);
+            $("#accessToken").show();
+            $("#fullResult").append(JSON.stringify(result, undefined, 4));
+
+            $("#accessTokenCallApiButton").click(function (event) {
+              $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                url: '/api/userinfo',
+                headers: {
+                  "Authorization": "Bearer " + result.access_token
+                },
+                success: function (result) {
+                  $("#accessToken").hide();
+                  $("#userInformation").show();
+                  $("#userJsonInfo").text(JSON.stringify(result, undefined, 4));
+                }
+              });
+            });
+          }
+        });
+      });
+    });
+  </script>
+</head>
+
+<body>
+  <h1> Mijn Openstad </h1>
+</body>
+</html>
