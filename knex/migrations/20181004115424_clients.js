@@ -1,12 +1,12 @@
 
 exports.up = function(knex, Promise) {
-  return knex.schema.createTable('sites', function(table) {
+  return knex.schema.createTable('clients', function(table) {
     table.increments();
     table.string('name').notNullable();
     table.string('clientId').notNullable();
     table.string('clientSecret').notNullable();
-    table.timestamp('created_at').defaultTo(knex.fn.now())
-    table.timestamp('updated_at').defaultTo(knex.fn.now())
+    table.timestamp('createdAt').defaultTo(knex.fn.now())
+    table.timestamp('updatedAt').defaultTo(knex.fn.now())
   });
 };
 

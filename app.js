@@ -1,28 +1,34 @@
 'use strict';
 
-const bodyParser     = require('body-parser');
-const client         = require('./client');
-const cookieParser   = require('cookie-parser');
-const config         = require('./config');
-const db             = require('./db');
-const express        = require('express');
-const expressSession = require('express-session');
-const fs             = require('fs');
-const https          = require('https');
-const oauth2         = require('./oauth2');
-const passport       = require('passport');
-const path           = require('path');
-const site           = require('./site');
-const token          = require('./token');
-const user           = require('./user');
+const bodyParser                  = require('body-parser');
+//const client                      = require('./client');
+const cookieParser                = require('cookie-parser');
+const config                      = require('./config');
+const db                          = require('./db');
+const express                     = require('express');
+const expressSession              = require('express-session');
+const fs                          = require('fs');
+const https                       = require('https');
+const oauth2                      = require('./oauth2');
+const passport                    = require('passport');
+const path                        = require('path');
+const site                        = require('./site');
+const token                       = require('./token');
+const user                        = require('./user');
+const nunjucks                    = require('nunjucks');
+const dateFilter                  = require('./nunjucks/dateFilter');
+const currencyFilter              = require('./nunjucks/currency');
+const limitTo                     = require('./nunjucks/limitTo');
+const jsonFilter                  = require('./nunjucks/json');
+const timestampFilter             = require('./nunjucks/timestamp');
+const replaceIdeaVariablesFilter  = require('./nunjucks/replaceIdeaVariables');
 
-console.log('Using MemoryStore for the data store');
-console.log('Using MemoryStore for the Session');
 const MemoryStore = expressSession.MemoryStore;
 
 // Express configuration
 const app = express();
-app.set('view engine', 'ejs');
+const nunjucksEnv = nunjucks.configure('views', { autoescape: true, express: app });
+app.set('view engine', 'html');
 app.set('port', process.env.PORT || 4000);
 app.use(cookieParser());
 
@@ -44,7 +50,6 @@ app.use(passport.session());
 // Passport configuration
 require('./auth');
 
-
 app.get('/',        site.index);
 app.get('/login',   site.loginForm);
 app.post('/login',  site.login);
@@ -56,7 +61,7 @@ app.post('/dialog/authorize/decision', oauth2.decision);
 app.post('/oauth/token',               oauth2.token);
 
 app.get('/api/userinfo',   user.info);
-app.get('/api/clientinfo', client.info);
+// app.get('/api/clientinfo', client.info);
 
 // Mimicking google's token info endpoint from
 // https://developers.google.com/accounts/docs/OAuth2UserAgent#validatetoken

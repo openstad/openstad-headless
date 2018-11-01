@@ -1,16 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>OAuth2Orize Recipes</title>
-  <!-- Needed for mobile sites to work -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends 'layout.html' %}
 
-  <!-- Style sheets -->
-  <link rel="stylesheet" type="text/css" href="../stylesheets/pure-min.css">
-  <link rel="stylesheet" type="text/css" href="../stylesheets/base.css">
-  <link rel="stylesheet" type="text/css" href="../stylesheets/index-modules.css">
-  <script type="text/javascript" src="../javascripts/jquery.min.js"></script>
+{% block body %}
   <script type="text/javascript">
+
     $(document).ready(function () {
       /**
        * Gets a parameter by name.  Lifted from stackoverflow here:
@@ -63,9 +55,6 @@
       });
     });
   </script>
-</head>
-
-<body>
 
 <!-- Authorization code section -->
 <div id="authCode">
@@ -130,6 +119,4 @@ Authorization: Bearer <span id="access_token"></span>
   </p>
   <pre><span id="userInfo"></span></pre>
 </div>
-
-</body>
-</html>
+{% endblock %}

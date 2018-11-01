@@ -34,9 +34,9 @@ validate.logAndThrow = (msg) => {
  */
 validate.user = (user, password) => {
   validate.userExists(user);
-  if (user.password !== password) {
-    console.log('User password does not match');
+  // Load hash from your password DB.
 
+  if (!bcrypt.compareSync(password, user.password)) {
     validate.logAndThrow('User password does not match');
   }
   return user;

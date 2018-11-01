@@ -1,16 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Mijn openstad</title>
-  <!-- Needed for mobile sites to work -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends 'layout.html' %}
 
-  <!-- Style sheets -->
-  <link rel="stylesheet" type="text/css" href="../stylesheets/pure-min.css">
-  <link rel="stylesheet" type="text/css" href="../stylesheets/base.css">
-  <link rel="stylesheet" type="text/css" href="../stylesheets/index-modules.css">
-  <script type="text/javascript" src="../javascripts/jquery.min.js"></script>
-
+{% block body %}
   <!-- Javascript -->
   <script type="text/javascript">
     $(document).ready(function () {
@@ -132,9 +122,6 @@
       });
     });
   </script>
-</head>
 
-<body>
   <h1> Mijn Openstad </h1>
-</body>
-</html>
+  {% endblock %}

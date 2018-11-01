@@ -2,15 +2,15 @@
 
 const login    = require('connect-ensure-login');
 const passport = require('passport');
-
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 /**
- * Render the index.ejs or index-with-code.js depending on if query param has code or not
+ * Render the index.html or index-with-code.js depending on if query param has code or not
  * @param   {Object} req - The request
  * @param   {Object} res - The response
  * @returns {undefined}
  */
 exports.index = (req, res) => {
-  console.log('---- her we are');
   if (!req.query.code) {
     res.render('index');
   } else {
@@ -19,7 +19,7 @@ exports.index = (req, res) => {
 };
 
 /**
- * Render the login.ejs
+ * Render the login.html
  * @param   {Object} req - The request
  * @param   {Object} res - The response
  * @returns {undefined}
@@ -28,13 +28,60 @@ exports.loginForm = (req, res) => {
   res.render('login');
 };
 
+exports.registerForm = (req, res) => {
+  res.render('login');
+};
+
+exports.registerForm = (req, res) => {
+  res.render('login');
+};
+
+exports.registerUser = (req, req, next) => {
+  const { firstName, lastName, email, password, loginViaToken } = req.body;
+
+  /**
+   * @TODO Validate
+   */
+
+  /**
+   * Validate email doesn't exists
+   */
+
+  knex('users')
+    .where({ email: email })
+    .then((rows) => {
+      const userExists = rows.length > 0;
+
+      if (userExists && loginViaToken) {
+      // sendEmailWithLoginUrl(user);
+      } else if (userExists) {
+        errors[] = 'Er bestaat al een account voor deze email';
+      } else {
+        const hashedPassword = bcrypt.hashSync(password, saltRounds);
+
+        new User({ firstName, lastName, email, hashedPassword })
+        .then((userResponse) => {
+          if (loginViaToken) {
+            // sendEmailWithLoginUrl(user);
+          } else {
+            res.redirect('/login');
+          }
+        })
+        .catch((err) => { next(err) })
+      }
+
+
+    });
+}
+
+
 /**
  * Authenticate normal login page using strategy of authenticate
  */
 exports.login = [
   passport.authenticate('local', { successReturnToOrRedirect: '/', failureRedirect: '/login' }),
 ];
- 
+
 /**
  * Logout of the system and redirect to root
  * @param   {Object}   req - The request
@@ -46,8 +93,10 @@ exports.logout = (req, res) => {
   res.redirect('/');
 };
 
+
+
 /**
- * Render account.ejs but ensure the user is logged in before rendering
+ * Render account.html but ensure the user is logged in before rendering
  * @param   {Object}   req - The request
  * @param   {Object}   res - The response
  * @returns {undefined}

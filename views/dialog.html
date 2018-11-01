@@ -1,20 +1,8 @@
-<!DOCTYPE html>
-<html>
+{% extends 'layout.html' %}
 
-<head>
-  <title>Mijn Openstad | gemeente Amsterdam</title>
-  <!-- Needed for mobile sites to work -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Style sheets -->
-  <link rel="stylesheet" type="text/css" href="/stylesheets/pure-min.css">
-  <link rel="stylesheet" type="text/css" href="/stylesheets/base.css">
-  <link rel="stylesheet" type="text/css" href="/stylesheets/dialog-modules.css">
-</head>
-<body>
-
+{% block body %}
 <form action="/dialog/authorize/decision" method="post" class="pure-form pure-form-stacked">
-  <input name="transaction_id" type="hidden" value="<%= transactionID %>">
+  <input name="transaction_id" type="hidden" value="{{transactionID}}">
   <fieldset>
     <!-- Upper box with Title, username, and password -->
     <div class="upper-box">
@@ -30,8 +18,8 @@
       <div class="pure-control-group labels">
         <p>
 
-        <p><%= user.name %>,</p>
-        The application <b><%= client.name %></b> is requesting access to your account.
+        <p>{{ user.name }},</p>
+        The application <b><{{ client.name }}</b> is requesting access to your account.
         <p>Do you approve?</p>
         </p>
       </div>
@@ -49,6 +37,4 @@
     </div>
   </fieldset>
 </form>
-
-</body>
-</html>
+{% endblock %}

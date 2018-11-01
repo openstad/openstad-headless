@@ -20,14 +20,14 @@ passport.use(new LocalStrategy(
     usernameField: 'email',
   },
   (email, password, done) => {
-    console.log('---- email', email);
-    db.users.findByEmail(email)
-    .then(user => validate.user(user, password))
-    .then(user => done(null, user))
-    .catch((error) => {
-      console.log('--- error', error);
-      done(null, false);
-    });
+    new User({ email: email })
+      .fetch()
+      .then(user => validate.user(user, password))
+      .then(user => done(null, user))
+      .catch((error) => {
+        console.log('--- error', error);
+        done(null, false);
+      });
 }));
 
 /**

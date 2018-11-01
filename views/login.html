@@ -1,17 +1,6 @@
-<!DOCTYPE html>
-<html>
+{% extends 'layout.html' %}
 
-<head>
-  <title>OAuth2Orize Recipes Login</title>
-  <!-- Needed for mobile sites to work -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Style sheets -->
-  <link rel="stylesheet" type="text/css" href="/stylesheets/pure-min.css">
-  <link rel="stylesheet" type="text/css" href="/stylesheets/base.css">
-  <link rel="stylesheet" type="text/css" href="/stylesheets/sign-in-modules.css">
-</head>
-<body>
+{% block body %}
 
 <!-- HTML login screen form -->
 <form action="/login" method="post" class="pure-form pure-form-stacked">
@@ -59,6 +48,4 @@
     </div>
   </fieldset>
 </form>
-
-</body>
-</html>
+{% endblock %}
