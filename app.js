@@ -12,7 +12,7 @@ const https                       = require('https');
 const oauth2                      = require('./oauth2');
 const passport                    = require('passport');
 const path                        = require('path');
-const site                        = require('./site');
+const auth                        = require('./controllers/auth');
 const token                       = require('./token');
 const user                        = require('./user');
 const nunjucks                    = require('nunjucks');
@@ -50,11 +50,11 @@ app.use(passport.session());
 // Passport configuration
 require('./auth');
 
-app.get('/',        site.index);
-app.get('/login',   site.loginForm);
-app.post('/login',  site.login);
-app.get('/logout',  site.logout);
-app.get('/account', site.account);
+app.get('/',        auth.index);
+app.get('/login',   auth.loginForm);
+app.post('/login',  auth.login);
+app.get('/logout',  auth.logout);
+app.get('/account', auth.account);
 
 app.get('/dialog/authorize',           oauth2.authorization);
 app.post('/dialog/authorize/decision', oauth2.decision);

@@ -47,10 +47,11 @@ exports.registerUser = (req, req, next) => {
    * Validate email doesn't exists
    */
 
-  knex('users')
+  User.
     .where({ email: email })
-    .then((rows) => {
-      const userExists = rows.length > 0;
+    .fetch()
+    .then((user) => {
+      const userExists = !! user;
 
       if (userExists && loginViaToken) {
       // sendEmailWithLoginUrl(user);

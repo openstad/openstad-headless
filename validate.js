@@ -4,12 +4,14 @@ const config  = require('./config');
 const db      = require('./db');
 const utils   = require('./utils');
 const process = require('process');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 /** Validate object to attach all functions to  */
-const validate = Object.create(null);
+const validate = {};
 
 /** Suppress tracing for things like unit testing */
-const suppressTrace = process.env.OAUTHRECIPES_SURPRESS_TRACE === 'true';
+const displayTrace = process.env.DISPLAY_TRACE === 'true';
 
 /**
  * Log the message and throw it as an Error
@@ -18,9 +20,10 @@ const suppressTrace = process.env.OAUTHRECIPES_SURPRESS_TRACE === 'true';
  * @returns {undefined}
  */
 validate.logAndThrow = (msg) => {
-  if (!suppressTrace) {
+  if (displayTrace) {
     console.trace(msg);
   }
+  
   throw new Error(msg);
 };
 
@@ -39,6 +42,7 @@ validate.user = (user, password) => {
   if (!bcrypt.compareSync(password, user.password)) {
     validate.logAndThrow('User password does not match');
   }
+
   return user;
 };
 
@@ -49,8 +53,7 @@ validate.user = (user, password) => {
  * @returns {Object} The user if valid
  */
 validate.userExists = (user) => {
-  if (user == null) {
-    console.log('User does not exist');
+  if (user === null) {
     validate.logAndThrow('User does not exist');
   }
   return user;

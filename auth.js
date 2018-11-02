@@ -7,6 +7,8 @@ const { BasicStrategy }                    = require('passport-http');
 const { Strategy: ClientPasswordStrategy } = require('passport-oauth2-client-password');
 const { Strategy: BearerStrategy }         = require('passport-http-bearer');
 const validate                             = require('./validate');
+const User                                 = require('./models').User;
+const Client                               = require('./models').Client;
 
 /**
  * LocalStrategy
@@ -20,12 +22,12 @@ passport.use(new LocalStrategy(
     usernameField: 'email',
   },
   (email, password, done) => {
-    new User({ email: email })
+    User
+      .where({ email: email })
       .fetch()
       .then(user => validate.user(user, password))
       .then(user => done(null, user))
       .catch((error) => {
-        console.log('--- error', error);
         done(null, false);
       });
 }));
@@ -41,11 +43,14 @@ passport.use(new LocalStrategy(
  * to the `Authorization` header).  While this approach is not recommended by
  * the specification, in practice it is quite common.
  */
+
 passport.use(new BasicStrategy((clientId, clientSecret, done) => {
-  db.clients.findByClientId(clientId)
-  .then(client => validate.client(client, clientSecret))
-  .then(client => done(null, client))
-  .catch(() => done(null, false));
+  Client
+    .where({'clientId': clientId})
+    .fetch()
+    .then(client => validate.client(client, clientSecret))
+    .then(client => done(null, client))
+    .catch(() => done(null, false));
 }));
 
 /**
@@ -56,10 +61,12 @@ passport.use(new BasicStrategy((clientId, clientSecret, done) => {
  * which accepts those credentials and calls done providing a client.
  */
 passport.use(new ClientPasswordStrategy((clientId, clientSecret, done) => {
-  db.clients.findByClientId(clientId)
-  .then(client => validate.client(client, clientSecret))
-  .then(client => done(null, client))
-  .catch(() => done(null, false));
+  Client
+    .where({'clientId': clientId})
+    .fetch()
+    .then(client => validate.client(client, clientSecret))
+    .then(client => done(null, client))
+    .catch(() => done(null, false));
 }));
 
 /**
@@ -98,7 +105,9 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser((id, done) => {
-  db.users.find(id)
-  .then(user => done(null, user))
-  .catch(err => done(err));
+  User
+    .where({id: id})
+    .fetch()
+    .then(user => done(null, user))
+    .catch(err => done(err));
 });
