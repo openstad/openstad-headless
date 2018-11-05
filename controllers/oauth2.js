@@ -1,4 +1,6 @@
 'use strict';
+const Client = require('../models').Client;
+const User = require('../models').User;
 
 // Register supported grant types.
 //
@@ -7,13 +9,13 @@
 // through a process of the user granting access, and the client exchanging
 // the grant for an access token.
 
-const config      = require('./config');
-const db          = require('./db');
+const config      = require('../config');
+const db          = require('../db');
 const login       = require('connect-ensure-login');
 const oauth2orize = require('oauth2orize');
 const passport    = require('passport');
-const utils       = require('./utils');
-const validate    = require('./validate');
+const utils       = require('../utils');
+const validate    = require('../validate');
 
 // create OAuth 2.0 server
 const server = oauth2orize.createServer();
@@ -86,7 +88,8 @@ server.exchange(oauth2orize.exchange.code((client, code, redirectURI, done) => {
  * application issues an access token on behalf of the user who authorized the code.
  */
 server.exchange(oauth2orize.exchange.password((client, username, password, scope, done) => {
-  db.users.findByUsername(username)
+  User({email: username})
+  .fetch
   .then(user => validate.user(user, password))
   .then(user => validate.generateTokens({ scope, userID: user.id, clientID: client.id }))
   .then((tokens) => {
@@ -155,7 +158,8 @@ server.exchange(oauth2orize.exchange.refreshToken((client, refreshToken, scope, 
 exports.authorization = [
   login.ensureLoggedIn(),
   server.authorization((clientID, redirectURI, scope, done) => {
-    db.clients.findByClientId(clientID)
+    new Client({clientId: clientID})
+    .fetch()
     .then((client) => {
       if (client) {
         client.scope = scope; // eslint-disable-line no-param-reassign
@@ -172,7 +176,8 @@ exports.authorization = [
     // TODO:  Make a mechanism so that if this isn't a trusted client, the user can record that
     // they have consented but also make a mechanism so that if the user revokes access to any of
     // the clients then they will have to re-consent.
-    db.clients.findByClientId(req.query.client_id)
+    new Client({clientId: req.query.client_id})
+    .fetch()
     .then((client) => {
       if (client != null && client.trustedClient && client.trustedClient === true) {
         // This is how we short call the decision like the dialog below does
@@ -230,8 +235,8 @@ exports.token = [
 server.serializeClient((client, done) => done(null, client.id));
 
 server.deserializeClient((id, done) => {
-  db.clients.find(id)
+  new Client({clientId: id})
+  .fetch()
   .then(client => done(null, client))
   .catch(err => done(err));
 });
-

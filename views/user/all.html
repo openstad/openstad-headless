@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<a href="/user/new"> Add new user </a>
+
+<table class="uk-table">
+  <thead>
+      <tr>
+        <th>First name</th>
+        <th>Last name</th>
+        <th>Email</th>
+        <th></th>
+      </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+      <tr>
+          <td>
+            {{user.firstName}}
+          </td>
+          <td>
+            {{user.lastName}}
+          </td>
+          <td>
+            {{user.email}}
+          </td>
+          <td>
+            <a href="/admin/user/{{user.id}}" target="_blank">
+              Bewerken
+            </a>
+          </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

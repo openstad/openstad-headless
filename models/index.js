@@ -12,8 +12,3 @@ exports.User = bookshelf.Model.extend({
   hasTimestamps: true,
   hasTimestamps: ['created_at', 'updated_at']
 });
-
-
-exports.Users = bookshelf.Collection.extend({
-  model: User
-});

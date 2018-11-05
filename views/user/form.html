@@ -1,0 +1,65 @@
+<form
+  method="post"
+  {% if user %}
+  action="/admin/user/{{client.id}}"
+  {% else %}
+  action="/admin/user"
+  {% endif %}
+>
+  <div class="form-group">
+    <div class="col-xs-12 col-sm-12">
+    <h3> First name </h3>
+    <input
+      type="text"
+      required
+      name="firstName"
+      maxlength="60"
+      {% if idea %} value="{{user.firstName}}" {% endif %}
+    />
+  </div>
+  <div class="form-group">
+    <div class="col-xs-12 col-sm-12">
+      <h3> Last name </h3>
+      <input
+        type="text"
+        required
+        name="lastName"
+        maxlength="60"
+        {% if idea %} value="{{user.lastName}}" {% endif %}
+      />
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-xs-12 col-sm-12">
+      <h3> E-mail </h3>
+      <input
+        type="text"
+        required
+        name="email"
+        maxlength="60"
+        {% if idea %} value="{{user.email}}" {% endif %}
+      />
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-xs-12 col-sm-12">
+      <h3> Password </h3>
+      <input
+        type="text"
+        required
+        name="password"
+        maxlength="60"
+      />
+    </div>
+  </div>
+
+  {% include '/user/address-form.html'%}
+
+  <button type="submit">
+    {% if user %}
+    Save changes
+    {% elseif %}
+    Create user
+    {% endif %}
+  </button>
+</form>

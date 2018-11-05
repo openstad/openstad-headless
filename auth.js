@@ -6,6 +6,8 @@ const { Strategy: LocalStrategy }          = require('passport-local');
 const { BasicStrategy }                    = require('passport-http');
 const { Strategy: ClientPasswordStrategy } = require('passport-oauth2-client-password');
 const { Strategy: BearerStrategy }         = require('passport-http-bearer');
+const { Strategy: AuthTokenStrategy }      = require('passport-auth-token');
+
 const validate                             = require('./validate');
 const User                                 = require('./models').User;
 const Client                               = require('./models').Client;
@@ -31,6 +33,41 @@ passport.use(new LocalStrategy(
         done(null, false);
       });
 }));
+
+passport.use('authtoken', new AuthTokenStrategy(
+  function(token, done) {
+    AccessToken.findOne({
+      id: token
+    }, function(error, accessToken) {
+      if (error) {
+        return done(error);
+      }
+
+      if (accessToken) {
+        if (!token.isValid(accessToken)) {
+          return done(null, false);
+        }
+
+        User.findOne({
+          id: accessToken.userId
+        }, function(error, user) {
+          if (error) {
+            return done(error);
+          }
+
+          if (!user) {
+            return done(null, false);
+          }
+
+          return done(null, user);
+        });
+      } else {
+        return done(null);
+      }
+    });
+  }
+));
+
 
 /**
  * BasicStrategy & ClientPasswordStrategy

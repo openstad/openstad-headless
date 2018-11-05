@@ -12,9 +12,22 @@
   <script type="text/javascript" src="../javascripts/jquery.min.js"></script>
 </head>
 <body>
+  <nav class="uk-navbar-container uk-margin" uk-navbar>
+    <div class="uk-navbar-left">
+        <a class="uk-navbar-item uk-logo" href="#">Gemeente Amsterdam</a>
+
+        <ul class="uk-navbar-nav">
+          <li><a href="/admin/clients"> Clients </a></li>
+          <li><a href="/admin/users"> Users </a></li>
+        </ul>
+
+    </div>
+  </nav>
   <div class="uk-section uk-section-muted">
     <div class="uk-container">
-      {% block body %}{% endblock %}
+      <div class="uk-width-xxlarge" >
+        {% block body %}{% endblock %}
+      </div>
     </div>
   </div>
 </body>

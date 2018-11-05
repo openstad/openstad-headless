@@ -1,18 +1,38 @@
 {% extends 'layout.html' %}
 
 {% block body %}
+<a href="/client/new"> Add new client </a>
 <table class="uk-table">
   <thead>
       <tr>
-        <th>Table Heading</th>
-        <th>Table Heading</th>
-        <th>Table Heading</th>
+        <th>Name</th>
+        <th>Client ID</th>
+        <th>Client Secret</th>
+        <th></th>
       </tr>
   </thead>
   <tbody>
+    {% for client in clients %}
       <tr>
-          <td></td>
+          <td>
+            {{client.name}}
+          </td>
+          <td>
+            {{client.description}}
+          </td>
+          <td>
+            {{client.clientId}}
+          </td>
+          <td>
+            {{client.clientSecret}}
+          </td>
+          <td>
+            <a href="/admin/client/{{client.id}}" target="_blank">
+              Bewerken
+            </a>
+          </td>
       </tr>
+    {% endfor %}
   </tbody>
 </table>
 {% endblock %}
