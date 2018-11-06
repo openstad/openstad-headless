@@ -1,6 +1,10 @@
-{% extends 'layout.html' %}
+{% extends 'layout-admin.html' %}
 
 {% block body %}
-<h3> Edit user </h3>
-{% include '/user/form.html' %}
+<div class="card">
+  <div class="card-body">
+    <h3> Edit user </h3>
+    {% include 'user/form.html' %}
+  </div>
+</div>
 {% endblock %}

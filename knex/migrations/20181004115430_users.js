@@ -11,6 +11,7 @@ exports.up = function(knex, Promise) {
     table.string('city');
     table.string('suffix');
     table.string('postcode');
+    table.string('password');
     table.string('resetPasswordToken');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());

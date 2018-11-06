@@ -8,57 +8,60 @@
 >
   <div class="form-group">
     <div class="col-xs-12 col-sm-12">
-    <h3> First name </h3>
+    <label> First name </label>
     <input
       type="text"
-      required
       name="firstName"
+      class="form-input"
       maxlength="60"
-      {% if idea %} value="{{user.firstName}}" {% endif %}
+      {% if user %} value="{{user.firstName}}" {% endif %}
     />
   </div>
   <div class="form-group">
     <div class="col-xs-12 col-sm-12">
-      <h3> Last name </h3>
+      <label> Last name </label>
       <input
         type="text"
-        required
+
         name="lastName"
         maxlength="60"
-        {% if idea %} value="{{user.lastName}}" {% endif %}
+        class="form-input"
+        {% if user %} value="{{user.lastName}}" {% endif %}
       />
     </div>
   </div>
   <div class="form-group">
     <div class="col-xs-12 col-sm-12">
-      <h3> E-mail </h3>
+      <label> E-mail </label>
       <input
         type="text"
         required
         name="email"
         maxlength="60"
-        {% if idea %} value="{{user.email}}" {% endif %}
+        class="form-input"
+        {% if user %} value="{{user.email}}" {% endif %}
       />
     </div>
   </div>
   <div class="form-group">
     <div class="col-xs-12 col-sm-12">
-      <h3> Password </h3>
+      <label> Password </label>
       <input
         type="text"
         required
         name="password"
+        class="form-input"
         maxlength="60"
       />
     </div>
   </div>
 
-  {% include '/user/address-form.html'%}
+  {% include 'user/address-form.html' %}
 
-  <button type="submit">
+  <button type="submit" class="btn">
     {% if user %}
     Save changes
-    {% elseif %}
+    {% else %}
     Create user
     {% endif %}
   </button>

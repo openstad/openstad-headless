@@ -11,7 +11,6 @@ const fs                          = require('fs');
 const https                       = require('https');
 const passport                    = require('passport');
 const path                        = require('path');
-const user                        = require('./user');
 const nunjucks                    = require('nunjucks');
 const dateFilter                  = require('./nunjucks/dateFilter');
 const currencyFilter              = require('./nunjucks/currency');
@@ -19,6 +18,7 @@ const limitTo                     = require('./nunjucks/limitTo');
 const jsonFilter                  = require('./nunjucks/json');
 const timestampFilter             = require('./nunjucks/timestamp');
 const replaceIdeaVariablesFilter  = require('./nunjucks/replaceIdeaVariables');
+const flash       = require('express-flash');
 
 const MemoryStore = expressSession.MemoryStore;
 
@@ -43,9 +43,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
-
+app.use(flash());
 // Passport configuration
 require('./auth');
+
+// static resources for stylesheets, images, javascript files
+app.use(express.static(path.join(__dirname, 'public')));
 
 require('./routes')(app);
 

@@ -19,3 +19,6 @@ https://github.com/FrankHassanabad/Oauth2orizeRecipes/wiki/Security-Scenarios
 
 See the curl folder for headless operations and ad-hoc testing  
 [curl/README.md](curl/README.md)
+
+See url for token:
+{{ssoUrl}}/dialog/authorize?redirect_uri=...&response_type=token&client_id=...&scope=o

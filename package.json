@@ -21,6 +21,7 @@
     "knex": "^0.15.2",
     "moment-timezone": "^0.5.23",
     "mysql": "^2.16.0",
+    "nodemon": "^1.18.6",
     "nunjucks": "^3.1.3",
     "oauth2orize": "^1.0.x",
     "passport": "^0.3.x",
@@ -36,7 +37,8 @@
     "start": "node app.js",
     "test": "mocha test test/db test/config",
     "test:watch": "npm run test -- --watch",
-    "test:integration": "mocha test/integration"
+    "test:integration": "mocha test/integration",
+    "dev": "nodemon server.js"
   },
   "engines": {
     "node": ">=6.7.0",

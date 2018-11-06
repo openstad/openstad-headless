@@ -1,17 +1,17 @@
 const Client = require('../models').Client;
 const hat = require('hat');
 
-exports.all = () => {
+exports.all = (req, res, next) => {
   res.render('client/all', {
     clients: req.clients
   });
 }
 
-exports.new = () => {
+exports.new = (req, res, next) => {
   res.render('client/new');
 }
 
-exports.edit = () => {
+exports.edit = (req, res, next) => {
   res.render('client/edit', {
     client: req.client
   });
@@ -20,21 +20,25 @@ exports.edit = () => {
 /**
  * @TODO validation
  */
-exports.create = () => {
+exports.create = (req, res, next) => {
   const { name, description } = req.body;
 
   /**
    * Generate unique clientId & secret
    */
-  const clientId = hat.rack();
-  const clientSecret = hat.rack();
-
-  new Client({
+  const rack =  hat.rack();
+  const clientId = rack();
+  const clientSecret = rack();
+  const data = {
     name: name,
     description: description,
     clientId: clientId,
     clientSecret: clientSecret
-  })
+  };
+
+  console.log('-----> data', data);
+
+  new Client(data)
   .save()
   .then((response) => {
     req.flash('success', { msg: 'Succesfully created '});

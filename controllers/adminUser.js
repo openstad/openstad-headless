@@ -1,6 +1,8 @@
 const User = require('../models').User;
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
-exports.all = (req, res) => {
+exports.all = (req, res, next) => {
   res.render('user/all', {
     users: req.users
   });
@@ -12,14 +14,14 @@ exports.edit = (req, res) => {
   });
 }
 
-exports.update = (req, res) => {
+exports.new = (req, res) => {
   res.render('user/new');
 }
 
 /**
  * @TODO validation
  */
-exports.create = () => {
+exports.create = (req, res, next) => {
   let { firstName, lastName, email, street_name, house_number, suffix, postcode, city, phone, password } = req.body;
 
   password = bcrypt.hashSync(password, saltRounds);
@@ -28,18 +30,18 @@ exports.create = () => {
     firstName: firstName,
     lastName: lastName,
     email: email,
-    street_name: street_name,
-    house_number: house_number,
+    streetName: street_name,
+    houseNumber: house_number,
     suffix: suffix,
     postcode: postcode,
     city: city,
-    phone: phone,
+    phoneNumber: phone,
     password: password
   })
   .save()
   .then((response) => {
     req.flash('success', { msg: 'Succesfully created '});
-    res.redirect('/admin/client/' + response.id );
+    res.redirect('/admin/user/' + response.id );
   })
   .catch((err) => {
     next(err);

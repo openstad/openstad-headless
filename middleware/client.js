@@ -14,12 +14,12 @@ exports.withAll = (req, res, next) => {
 
 exports.withOne = (req, res, next) => {
   new Client({
-    id: req.clientId
+    id: req.params.clientId
   })
   .fetch()
   .then((response) => {
-     console.log('response', response);
-     req.client = response;
+     console.log('client response', response.serialize());
+     req.client = response.serialize();
      next();
   })
   .catch((err) => {

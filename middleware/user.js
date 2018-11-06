@@ -1,6 +1,6 @@
 const User = require('../models').User;
 
-exports.withAll = () => {
+exports.withAll = (req, res, next) => {
   User
     .fetchAll()
     .then((response) => {
@@ -14,11 +14,11 @@ exports.withAll = () => {
 
 exports.withOne = (req, res, next) => {
   new User({
-    id: req.userId
+    id: req.params.userId
   })
     .fetch()
     .then((response) => {
-      req.user = response;
+      req.user = response.serialize();
       next();
     })
     .catch((err) => {
@@ -27,11 +27,12 @@ exports.withOne = (req, res, next) => {
 }
 
 exports.withOneByEmail = (req, res, next) => {
-  User.
-    .where({ email: req.body.email })
+  new User({ email: req.body.email })
     .fetch()
     .then((user) => {
-      req.user = response;
+      console.log('user response', user);
+
+      req.user = user.serialize();
       next();
     })
     .catch((err) => {
@@ -39,6 +40,6 @@ exports.withOneByEmail = (req, res, next) => {
     });
 }
 
-exports.validate = () => {
+exports.validate = (req, res, next) => {
 
 }

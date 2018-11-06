@@ -5,30 +5,37 @@
   <!-- Needed for mobile sites to work -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Style sheets -->
-  <link rel="stylesheet" type="text/css" href="../stylesheets/pure-min.css">
-  <link rel="stylesheet" type="text/css" href="../stylesheets/base.css">
-  <link rel="stylesheet" type="text/css" href="../stylesheets/index-modules.css">
-  <script type="text/javascript" src="../javascripts/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
+  <link rel="stylesheet" type="text/css" href="/stylesheets/base.css">
+  <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
 </head>
 <body>
-  <nav class="uk-navbar-container uk-margin" uk-navbar>
-    <div class="uk-navbar-left">
-        <a class="uk-navbar-item uk-logo" href="#">Gemeente Amsterdam</a>
+  <div class="header">
+        <header class="navbar">
+          <section class="navbar-section">
+            <a href="/admin/clients" class="navbar-brand mr-2">
+              <img src="/img/andreas.svg" width="8" />
+              <span class="text"> Openstad </span>
+            </a>
 
-        <ul class="uk-navbar-nav">
-          <li><a href="/admin/clients"> Clients </a></li>
-          <li><a href="/admin/users"> Users </a></li>
-        </ul>
+          </section>
+          <section class="navbar-section">
+            <a href="/admin/clients" class="btn btn-link"> Clients </a>
+            <a href="/admin/users" class="btn btn-link"> Users </a>
+            <a href="/admin/users" class="btn btn-link">
+              <i class="icon icon-shutdown"></i>
+            </a>
+          </section>
+        </header>
+  </div>
+  <div class="container grid-lg">
 
+    <div class="toolbar">
+      {% block toolbar %}{% endblock %}
     </div>
-  </nav>
-  <div class="uk-section uk-section-muted">
-    <div class="uk-container">
-      <div class="uk-width-xxlarge" >
-        {% block body %}{% endblock %}
-      </div>
-    </div>
+
+    {% block body %}{% endblock %}
   </div>
 </body>
 </html>

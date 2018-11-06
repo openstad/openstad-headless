@@ -25,18 +25,29 @@ exports.index = (req, res) => {
  * @returns {undefined}
  */
 exports.login = (req, res) => {
-  res.render('login');
+  res.render('auth/login');
 };
 
 exports.register = (req, res) => {
-  res.render('register');
+  res.render('auth/register');
 };
 
-exports.registerOrLoginWithEmail = (req, res) => {
-  res.render('register-or-login-with-email');
+exports.forgot = (req, res) => {
+  res.render('auth/forgot');
 };
 
-exports.postRegister = (req, req, next) => {
+exports.reset = (req, res) => {
+  res.render('auth/reset', {
+    token: req.query.token
+  });
+};
+
+
+exports.registerOrLoginWithToken = (req, res) => {
+  res.render('auth/register-or-login-with-token');
+};
+
+exports.postRegister = (req, res, next) => {
   const errors = [];
   let { firstName, lastName, email, password } = req.body;
 
@@ -48,16 +59,22 @@ exports.postRegister = (req, req, next) => {
     password = bcrypt.hashSync(password, saltRounds);
 
     new User({ firstName, lastName, email, password })
-    .then(() => {
-      res.redirect('/');
-    })
+    .then(() => { res.redirect('/'); })
     .catch((err) => { next(err) });
   } else {
     res.redirect('/');
   }
 }
 
-exports.postLoginOrRegisterWithEmailLink = (req, req, next) => {
+exports.postReset = (req, res, next) => {
+
+}
+
+exports.postForgot = (req, res, next) => {
+
+}
+
+exports.postLoginOrRegisterWithEmailLink = (req, res, next) => {
   const onSuccess = (user) => {
     sendEmailWithLoginUrl(user);
     res.redirect('/');
@@ -76,17 +93,16 @@ exports.postLoginOrRegisterWithEmailLink = (req, req, next) => {
 /**
  * Authenticate normal login page using strategy of authenticate
  */
-exports.login = [
+exports.postLogin = [
   passport.authenticate('local', { successReturnToOrRedirect: '/', failureRedirect: '/login' }),
 ];
 
-exports.loginwithToken = [
-  passport.authenticate('authtoken',  {
-      session: true,
-      optional: false
-    }
-  ))
-];
+exports.loginWithToken = [passport.authenticate('authtoken',  {
+  successReturnToOrRedirect: '/',
+  failureRedirect: '/login-with-token',
+  session: true,
+  optional: false
+})];
 
 /**
  * Logout of the system and redirect to root

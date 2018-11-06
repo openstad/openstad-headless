@@ -1,3 +1,3 @@
-exports.ensure = (req, res) => {
+exports.ensure = (req, res, next) => {
   next();
 }

@@ -7,7 +7,6 @@ const { BasicStrategy }                    = require('passport-http');
 const { Strategy: ClientPasswordStrategy } = require('passport-oauth2-client-password');
 const { Strategy: BearerStrategy }         = require('passport-http-bearer');
 const { Strategy: AuthTokenStrategy }      = require('passport-auth-token');
-
 const validate                             = require('./validate');
 const User                                 = require('./models').User;
 const Client                               = require('./models').Client;
@@ -20,12 +19,10 @@ const Client                               = require('./models').Client;
  * a user is logged in before asking them to approve the request.
  */
 passport.use(new LocalStrategy(
-  {
-    usernameField: 'email',
-  },
+  {usernameField: 'email'},
   (email, password, done) => {
     User
-      .where({ email: email })
+      .where({email: email})
       .fetch()
       .then(user => validate.user(user, password))
       .then(user => done(null, user))
@@ -33,41 +30,6 @@ passport.use(new LocalStrategy(
         done(null, false);
       });
 }));
-
-passport.use('authtoken', new AuthTokenStrategy(
-  function(token, done) {
-    AccessToken.findOne({
-      id: token
-    }, function(error, accessToken) {
-      if (error) {
-        return done(error);
-      }
-
-      if (accessToken) {
-        if (!token.isValid(accessToken)) {
-          return done(null, false);
-        }
-
-        User.findOne({
-          id: accessToken.userId
-        }, function(error, user) {
-          if (error) {
-            return done(error);
-          }
-
-          if (!user) {
-            return done(null, false);
-          }
-
-          return done(null, user);
-        });
-      } else {
-        return done(null);
-      }
-    });
-  }
-));
-
 
 /**
  * BasicStrategy & ClientPasswordStrategy
@@ -83,7 +45,7 @@ passport.use('authtoken', new AuthTokenStrategy(
 
 passport.use(new BasicStrategy((clientId, clientSecret, done) => {
   Client
-    .where({'clientId': clientId})
+    .where({clientId: clientId})
     .fetch()
     .then(client => validate.client(client, clientSecret))
     .then(client => done(null, client))
@@ -99,7 +61,7 @@ passport.use(new BasicStrategy((clientId, clientSecret, done) => {
  */
 passport.use(new ClientPasswordStrategy((clientId, clientSecret, done) => {
   Client
-    .where({'clientId': clientId})
+    .where({clientId: clientId})
     .fetch()
     .then(client => validate.client(client, clientSecret))
     .then(client => done(null, client))

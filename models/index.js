@@ -10,5 +10,5 @@ exports.Client = bookshelf.Model.extend({
 exports.User = bookshelf.Model.extend({
   tableName: 'users',
   hasTimestamps: true,
-  hasTimestamps: ['created_at', 'updated_at']
+  hasTimestamps: ['createdAt', 'updatedAt']
 });

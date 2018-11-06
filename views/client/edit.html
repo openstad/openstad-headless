@@ -1,47 +1,51 @@
-{% extends 'layout.html' %}
+{% extends 'layout-admin.html' %}
 
 {% block body %}
-
+<div class="card">
+  <div class="card-body">
 <form
   method="post"
-  action="/admin.client/{{client.id}}"
+  action="/admin/client/{{client.id}}"
 >
   <div class="form-group">
-    <h3> Name </h3>
+    <label> Name </label>
     <input
       type="text"
       required
       maxlength="60"
-      {% if idea %} value="{{client.name}}" {% endif %}
+      class="form-input"
+      {% if client %} value="{{client.name}}" {% endif %}
     />
   </div>
   <div class="form-group">
-    <h3> Description </h3>
+    <label> Description </label>
     <textarea
       required
       name="description"
+      class="form-input"
       maxlength="244"
-      {% if idea %} value="{{client.description}}" {% endif %}
-    ></textarea>
+    >{{client.description}}</textarea>
   </div>
   <div class="form-group">
-    <h3> Client id </h3>
+    <label> Client id </label>
     <input
       type="text"
       required
+      class="form-input"
       disabled
       maxlength="60"
-      {% if idea %} value="{{client.clientId}}" {% endif %}
+      {% if client %} value="{{client.clientId}}" {% endif %}
     />
   </div>
   <div class="form-group">
-    <h3> Client Secret</h3>
+    <label> Client Secret</label>
     <input
       type="text"
+      class="form-input"
       required
       disabled
       maxlength="60"
-      {% if idea %} value="{{client.clientSecret}}" {% endif %}
+      {% if client %} value="{{client.clientSecret}}" {% endif %}
     />
   </div>
   <button type="submit">
