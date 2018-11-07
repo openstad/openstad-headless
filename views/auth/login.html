@@ -1,71 +1,72 @@
 {% extends 'layout.html' %}
 
 {% block body %}
+  <!-- HTML login screen form -->
+  <form action="/login" method="post" class="pure-form pure-form-stacked">
+    <fieldset>
+      <!-- Upper box with Title, username, and password -->
 
-<!-- HTML login screen form -->
-<form action="/login" method="post" class="pure-form pure-form-stacked">
-  <fieldset>
-    <!-- Upper box with Title, username, and password -->
-      <div class="mainlogo ga-tracked" href="https://www.amsterdam.nl/" tabindex="4">
-        <span class="logoset">
-          <img src="/img/andreas.svg" class="alt-logo" alt="Gemeente Amsterdam">
-        </span>
-          <span class="logotexts">
-            <span class="logotext red">Gemeente</span>
-            <span class="logotext red">Amsterdam</span>
-        </span>
+      <div class="center-block">
+        {% include 'elements/logo.html' %}
       </div>
-    <div class="upper-box">
-      <!-- Title -->
-      <div>
-      <!--  <div class="subtext">
-          Mijn openstad
-        </div> !-->
-      </div>
-      <div class="pure-control-group">
-        <!-- Username label and input -->
-        <label class="labels" for="name">Email:</label>
 
-        <div class="input-fields">
-          <input class="pure-input-1 input-fields" id="name" type="text" placeholder="Hint: bob@bob.nl" name="email"/>
+      <div class="card">
+
+        <div class="upper-box card-body">
+          <!-- Title -->
+          <div>
+          <!--  <div class="subtext">
+              Mijn openstad
+            </div> !-->
+          </div>
+          <div class="form-group">
+            <!-- Username label and input -->
+            <div class="input-fields">
+              <input
+                id="name"
+                type="text"
+                placeholder="E-mail"
+                name="email"
+                class="form-input"
+              />
+            </div>
+          </div>
+          <div class="form-group">
+            <!-- Password label and input -->
+            <div class="input-fields">
+              <input
+                class="form-input"
+                id="password"
+                type="password"
+                placeholder="Password"
+                name="password"
+              />
+            </div>
+        </div>
+
+        <!-- Bottom box with Sign in -->
+        <div class="bottom-box form-group">
+          <div class="pure-controls sign-in-button">
+            <button
+              type="submit"
+              value="Submit"
+              class="btn btn-primary"
+            >
+              Inloggen
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <a href="/forgot">Wachtwoord vergeten?</a>
+        </div>
         </div>
       </div>
-      <div class="pure-control-group">
-        <!-- Password label and input -->
-        <label class="labels" for="password">Password:</label>
+    </fieldset>
+  </form>
 
-        <div class="input-fields">
-          <input
-            class="pure-input-1 input-fields"
-            id="password"
-            type="password"
-            placeholder="Hint: secret"
-            name="password"
-          />
-        </div>
-      </div>
-    </div>
-    <!-- Bottom box with Sign in -->
-    <div class="bottom-box">
-      <div class="pure-controls sign-in-button">
-        <button
-          type="submit"
-          value="Submit"
-          class="pure-button pure-button-primary"
-        >
-          Inloggen
-        </button>
-      </div>
-    </div>
-    <div class="form-group">
-      <a href="/forgot"><strong>Wachtwoord vergeten?</strong></a>
-    </div>
-  </fieldset>
-</form>
-
-<p class="text-center">
-  Nog geen account?
-  <a href="/register"><strong>Registreren</strong></a>
-</p>
+  <p class="text-center">
+    Nog geen account?
+    <a href="/register">Registreren</a>
+  </p>
 
 {% endblock %}

@@ -1,52 +1,49 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="login-container container">
-  <div class="panel">
-    <div class="panel-body">
-      {% if messages.error %}
-      <div role="alert" class="alert alert-danger">
-        {% for error in messages.error %}
-        <div>{{ error.msg }}</div>
-        {% endfor %}
-      </div>
-      {% endif %}
-      <form method="POST">
-         <input type="hidden" name="_csrf" value="{{csrfToken}}" />
-        <legend>Registreren</legend>
-        <div class="form-group">
-          <label for="name">Voornaam</label>
-          <input type="text" name="name" id="name" placeholder="Voornaam" class="form-control" autofocus>
-        </div>
-        <div class="form-group">
-          <label for="name">Achternaam</label>
-          <input type="text" name="name" id="name" placeholder="Achternaam" class="form-control" autofocus>
-        </div>
-        <div class="form-group">
-          <label for="email">E-mail</label>
-          <input type="email" name="email" id="email" placeholder="voorbeeld@email.com" class="form-control">
-        </div>
-        <div class="form-group">
-          <label for="password">Wachtwoord</label>
-          <input type="password" name="password" id="password" placeholder="Wachtwoord" class="form-control">
-        </div>
-        <div class="form-group">
-          <label for="password">Wachtwoord herhalen</label>
-          <input type="password" name="password_repeat" id="password" placeholder="Herhaal wachtwoord" class="form-control">
-        </div>
-        <!--
-        <div class="form-group">
-          <small class="text-muted">By signing up, you agree to the <a href="/">Terms of Service</a>.</small>
-        </div>
-        !-->
-        <button type="submit" class="btn btn-primary">Account aanmaken</button>
-      </form>
-      <div class="btn-toolbar text-center">
-      </div>
-    </div>
-  </div>
-  <p class="text-center">
-    Heb je al een account? <a href="/login"><strong>Log hier in</strong></a>
-  </p>
+<div class="center-block">
+  {% include 'elements/logo.html' %}
 </div>
+
+{% include 'elements/flash.html' %}
+
+<div class="card">
+  <div class="upper-box card-body">
+
+    <form method="POST">
+      <legend>Registreren</legend>
+      <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+      <div class="form-group">
+        <input type="text" name="name" id="name" placeholder="Voornaam" class="form-input" autofocus>
+      </div>
+      <div class="form-group">
+        <input type="text" name="name" id="name" placeholder="Achternaam" class="form-input" autofocus>
+      </div>
+      <div class="form-group">
+        <input type="email" name="email" id="email" placeholder="Email" class="form-input">
+      </div>
+
+      <br />
+
+      <div class="form-group">
+        <input type="password" name="password" id="password" placeholder="Wachtwoord" class="form-input">
+      </div>
+      <div class="form-group">
+        <input type="password" name="password_repeat" id="password" placeholder="Herhaal wachtwoord" class="form-input">
+      </div>
+      <!--
+      <div class="form-group">
+        <small class="text-muted">By signing up, you agree to the <a href="/">Terms of Service</a>.</small>
+      </div>
+      !-->
+
+      <button type="submit" class="btn btn-primary">Account aanmaken</button>
+    </form>
+  </div>
+</div>
+<br />
+
+<p class="text-center">
+  Heb je al een account? <a href="/login">Log hier in</a>
+</p>
 {% endblock %}

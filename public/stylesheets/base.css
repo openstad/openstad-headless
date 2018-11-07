@@ -12,8 +12,6 @@ body {
   background: #f2f4f8;
 }
 
-
-
 .header {
   background: white;
   padding: 10px;
@@ -34,17 +32,63 @@ body {
 .align-right {
   text-align: right;
 }
+
 .align-right > * {
   display: inline-block;
   margin: 0 5px;
 }
+
 .align-right > :last-child {
   margin-right: 0;
 }
+
 .toolbar {
   margin: 40px 0;
 }
 
 .form-input:not(:placeholder-shown):invalid {
-      border: .05rem solid #bcc3ce;
+  border: .05rem solid #bcc3ce;
+}
+
+.center-block {
+  margin: 0 auto;
+}
+
+.small-container {
+  margin: 0 auto;
+  max-width: 300px;
+}
+
+.center-block > * {
+  margin: 0 auto;
+}
+
+.mainlogo {
+  position: relative;
+  height: 90px;
+  width: 160px;
+}
+
+.mainlogo .logoset img {
+  border: 0;
+  height: auto;
+  left: 15px;
+  margin: 0;
+  position: absolute;
+  top: 21px;
+  width: 16px;
+}
+
+.mainlogo .logotexts {
+  color: #EC0000;
+  top: 18px;
+  left: 39px;
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 700;
+  position: absolute;
+}
+
+a:visited {
+    color: #004699;
 }
