@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends 'layout-login.html' %}
 
 {% block body %}
 <div class="center-block">
@@ -10,7 +10,7 @@
 <div class="card">
   <div class="upper-box card-body">
 
-    <form method="POST">
+    <form method="POST" action="/register">
       <legend>Registreren</legend>
       <input type="hidden" name="_csrf" value="{{csrfToken}}" />
       <div class="form-group">

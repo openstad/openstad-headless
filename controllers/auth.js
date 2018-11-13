@@ -3,6 +3,7 @@ const passport = require('passport');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const hat = require('hat');
+const User = require('../models').User;
 
 /**
  * Render the index.html or index-with-code.js depending on if query param has code or not
@@ -25,6 +26,7 @@ exports.index = (req, res) => {
  * @returns {undefined}
  */
 exports.login = (req, res) => {
+//  console.log('req', req.sessions, req.session, req.cookies);
   res.render('auth/login');
 };
 
@@ -51,18 +53,23 @@ exports.postRegister = (req, res, next) => {
   const errors = [];
   let { firstName, lastName, email, password } = req.body;
 
-  if (req.user) {
-    errors.push('Er bestaat al een account voor deze email');
-  }
+  //if (req.user) {
+//    errors.push('Er bestaat al een account voor deze email');
+//  }
 
-  if (!errors) {
+  if (errors.length === 0) {
     password = bcrypt.hashSync(password, saltRounds);
 
     new User({ firstName, lastName, email, password })
-    .then(() => { res.redirect('/'); })
+    .save()
+    .then(() => {
+      res.redirect('/login');
+    })
     .catch((err) => { next(err) });
   } else {
-    res.redirect('/');
+    console.log('errors', errors);
+    req.flash('error', { errors });
+    res.redirect('/register');
   }
 }
 
@@ -85,8 +92,9 @@ exports.postLoginOrRegisterWithEmailLink = (req, res, next) => {
     const hashedPassword = bcrypt.hashSync(hat.rack(), saltRounds);
 
     new User({ email, hashedPassword })
-    .then(onSuccess)
-    .catch((err) => { next(err) });
+      .fetch()
+      .then(onSuccess)
+      .catch((err) => { next(err) });
   }
 }
 
@@ -122,5 +130,9 @@ exports.logout = (req, res) => {
  * @returns {undefined}
  */
 exports.account =  (req, res) => {
-  res.render('account', { user: req.user });
+  res.render('user/profile', { user: req.user });
+};
+
+exports.postAccount =  (req, res) => {
+  res.render('user/profile', { user: req.user });
 };

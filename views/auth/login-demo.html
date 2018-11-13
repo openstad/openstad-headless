@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends 'layout-login.html' %}
 
 {% block body %}
 <!-- Shown after the user clicks and gets an access token -->
@@ -9,15 +9,14 @@
   <h2>
     Access Token
   </h2>
-
   <p>
     You can use your access token to call an endpoint such as a user info endpoint.
     To do this, set the Authorization Bearer to have your access token.
   </p>
-    <pre>GET /api/userinfo HTTP/1.1
-    Host: <span class="hostname">{{ssoUrl}}</span>
-    Authorization: Bearer <span id="access_token">{{token}}</span>
-    </pre>
+  <pre>GET /api/userinfo HTTP/1.1
+  Host: <span class="hostname">{{ssoUrl}}</span>
+  Authorization: Bearer <span id="access_token">{{token}}</span>
+  </pre>
 </div>
 </div>
 </div>

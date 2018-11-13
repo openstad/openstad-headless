@@ -18,7 +18,7 @@ const limitTo                     = require('./nunjucks/limitTo');
 const jsonFilter                  = require('./nunjucks/json');
 const timestampFilter             = require('./nunjucks/timestamp');
 const replaceIdeaVariablesFilter  = require('./nunjucks/replaceIdeaVariables');
-const flash       = require('express-flash');
+const flash                       = require('express-flash');
 
 const MemoryStore = expressSession.MemoryStore;
 

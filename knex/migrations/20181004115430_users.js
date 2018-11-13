@@ -6,8 +6,8 @@ exports.up = function(knex, Promise) {
     table.string('lastName');
     table.string('email');
     table.string('phoneNumber');
-    table.string('streetName').notNullable();
-    table.string('houseNumber').notNullable();
+    table.string('streetName');
+    table.string('houseNumber');
     table.string('city');
     table.string('suffix');
     table.string('postcode');

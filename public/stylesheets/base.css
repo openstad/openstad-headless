@@ -17,6 +17,10 @@ body {
   padding: 10px;
 }
 
+.header--account {
+  padding: 3px;
+}
+
 .navbar .navbar-brand {
   width: 200px;
 }

@@ -161,6 +161,7 @@ exports.authorization = [
     new Client({clientId: clientID})
     .fetch()
     .then((client) => {
+      client = client.serialize();
       if (client) {
         client.scope = scope; // eslint-disable-line no-param-reassign
       }
@@ -176,20 +177,29 @@ exports.authorization = [
     // TODO:  Make a mechanism so that if this isn't a trusted client, the user can record that
     // they have consented but also make a mechanism so that if the user revokes access to any of
     // the clients then they will have to re-consent.
+    console.log('req.query.client_id ===>',  req.query.client_id);
+
     new Client({clientId: req.query.client_id})
     .fetch()
     .then((client) => {
-      if (client != null && client.trustedClient && client.trustedClient === true) {
+      client = client.serialize();
+      console.log('client ===>', client);
+
+      if (client != null) {//  && client.trustedClient && client.trustedClient === true) {
         // This is how we short call the decision like the dialog below does
         server.decision({ loadTransaction: false }, (serverReq, callback) => {
           callback(null, { allow: true });
         })(req, res, next);
       } else {
+        console.log('client ===>', req.oauth2);
+
         res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
       }
     })
-    .catch(() =>
-      res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client }));
+    .catch((error) => {
+      console.log('error ===>', error);
+      res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
+    });
   }];
 
 /**
@@ -235,8 +245,9 @@ exports.token = [
 server.serializeClient((client, done) => done(null, client.id));
 
 server.deserializeClient((id, done) => {
-  new Client({clientId: id})
+  console.log('id', id);
+  new Client({id: id})
   .fetch()
-  .then(client => done(null, client))
+  .then(client => done(null, client.serialize()))
   .catch(err => done(err));
 });

@@ -21,12 +21,20 @@ const Client                               = require('./models').Client;
 passport.use(new LocalStrategy(
   {usernameField: 'email'},
   (email, password, done) => {
+    console.log('email, password', email, password);
+
     User
       .where({email: email})
       .fetch()
-      .then(user => validate.user(user, password))
+      .then((user) => {
+        user = user.serialize();
+        console.log('====> user', user);
+        return validate.user(user, password)
+      })
       .then(user => done(null, user))
       .catch((error) => {
+        console.log('====> error', error);
+
         done(null, false);
       });
 }));
@@ -80,6 +88,7 @@ passport.use(new ClientPasswordStrategy((clientId, clientSecret, done) => {
  * illustrative purposes
  */
 passport.use(new BearerStrategy((accessToken, done) => {
+  console.log('aaaaaccccesss', accessToken);
   db.accessTokens.find(accessToken)
   .then(token => validate.token(token, accessToken))
   .then(token => done(null, token, { scope: '*' }))

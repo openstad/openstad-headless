@@ -1,10 +1,11 @@
 'use strict';
-
+const process = require('process');
+const bcrypt = require('bcrypt');
 const config  = require('./config');
 const db      = require('./db');
 const utils   = require('./utils');
-const process = require('process');
-const bcrypt = require('bcrypt');
+const Client = require('./models').Client;
+const User = require('./models').User;
 const saltRounds = 10;
 
 /** Validate object to attach all functions to  */
@@ -23,7 +24,7 @@ validate.logAndThrow = (msg) => {
   if (displayTrace) {
     console.trace(msg);
   }
-  
+
   throw new Error(msg);
 };
 
@@ -99,12 +100,20 @@ validate.clientExists = (client) => {
 validate.token = (token, accessToken) => {
   utils.verifyToken(accessToken);
 
+//  console.log('accccesToken', accessToken);
+  console.log('token', token);
+
   // token is a user token
   if (token.userID != null) {
     return db.users.find(token.userID)
     .then(user => validate.userExists(user))
     .then(user => user);
   }
+
+  return new Client({clientId: token.clientID})
+    .fetch()
+    .then((client) => { return client.serialize(); });
+
   // token is a client token
   return db.clients.find(token.clientID)
   .then(client => validate.clientExists(client))

@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends 'layout-login.html' %}
 
 {% block body %}
 <form action="/dialog/authorize/decision" method="post" class="pure-form pure-form-stacked">
@@ -19,7 +19,7 @@
         <p>
 
         <p>{{ user.name }},</p>
-        The application <b><{{ client.name }}</b> is requesting access to your account.
+        The application <b>{{ client.name }}</b> is requesting access to your account.
         <p>Do you approve?</p>
         </p>
       </div>

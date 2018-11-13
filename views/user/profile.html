@@ -1,70 +1,86 @@
-{% extends 'layout-admin.html' %}
+{% extends 'layout-account.html' %}
 
 {% block body %}
-<div class="container margin-l-bottom">
-  <div class="row">
-    <div class="col-xs-12 col-sm-6">
-      <h1>Profiel</h1>
 
-      <h3 class="margin-l-top margin-m-bottom"> Persoonlijke gegevens </h3>
+<h4>Openstad Account</h4>
+<div class="card">
+  <div class="card-body">
+    <h5> Persoonlijke gegevens </h5>
 
-      <form method="POST" action="/account?_method=PUT" >
-         <input type="hidden" name="_csrf" value="{{csrfToken}}" />
-        <div class="form-group row">
-          <div class="col-sm-12">
-            <label for="first-name">Voornaam</label>
-            <input type="text" name="first_name" id="first-name" value="{{user.username}}" />
-          </div>
-        </div>
-        <div class="form-group row">
-          <div class="col-sm-12">
-            <label for="last-name">Achternaam</label>
-            <input type="text" name="last_name" id="last-name" value="{{user.last_name}}" />
-          </div>
-        </div>
-        {}
-        <div class="info-box margin-m-hor">
-          <div class="info-box-header">
-            Wat is de privacy van mijn gegevens?
-          </div>
-          <div class="info-box-body">
-            Er wordt discreet met je gegevens om gegaan.
-            Alléén uw naam is publiekelijk zichtbaar bij uw reacties, plannen of aanvragen.
-            De rest van de gegevens zijn alleen beschikbaar voor de beheerders van de gemeente
-            en worden uitsluitend gebruikt om contact met u op te nemen wanneer nodig.
-          </div>
-        </div>
-        <div class="form-group row">
-          <div class="col-sm-12">
-            <button type="submit" class="btn btn-primary pull-right">Bewaar</button>
-          </div>
-        </div>
-      </form>
+    <form method="POST" action="/account" >
+       <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+       <div class="form-group row">
+         <label for="first-name">Email</label>
+         <input
+           type="text"
+           id="first-name"
+           value="{{user.email}}"
+           class="form-input"
+           disabled
+         />
+       </div>
+      <div class="form-group row">
+        <label for="first-name">Voornaam</label>
+        <input
+          type="text"
+          name="first_name"
+          id="first-name"
+          value="{{user.first_name}}"
+          class="form-input"
+        />
+      </div>
+      <div class="form-group row">
+        <label for="last-name">Achternaam</label>
+        <input
+          type="text"
+          name="last_name"
+          id="last-name"
+          value="{{user.last_name}}"
+          class="form-input"
+        />
+      </div>
+      <div class="form-group row">
+        <button type="submit" class="btn btn-primary pull-right">Bewaar</button>
+      </div>
+    </form>
+</div>
 
-      <h3 class="margin-l-top margin-m-bottom"> Wachtwoord wijzigen </h3>
 
-      <form method="POST" action="/account?_method=PUT" >
-         <input type="hidden" name="_csrf" value="{{csrfToken}}" />
-        <div class="form-group row">
-          <div class="col-sm-12">
-            <label for="password">Huidig wachtwoord</label>
-            <input type="password" name="password" id="password" class="">
-          </div>
-        </div>
-        <div class="form-group row">
-          <div class="col-sm-12">
-            <label for="confirm">Nieuw wachtwoord</label>
-            <input type="password" name="confirm" id="confirm" class="">
-          </div>
-        </div>
-        <div class="form-group row">
-          <div class="col-sm-12">
-            <button type="submit" class="btn btn-primary pull-right">Bewaar</button>
-          </div>
-        </div>
-      </form>
 
-    </div>
+</div>
+
+
+<div class="info-box margin-m-hor">
+  <div class="info-box-header">
+    Wat is de privacy van mijn gegevens?
+  </div>
+  <div class="info-box-body">
+    Er wordt discreet met je gegevens om gegaan.
+    Alléén uw naam is publiekelijk zichtbaar bij uw reacties, plannen of aanvragen.
+    De rest van de gegevens zijn alleen beschikbaar voor de beheerders van de gemeente
+    en worden uitsluitend gebruikt om contact met u op te nemen wanneer nodig.
   </div>
 </div>
+
+    <div class="card">
+      <div class="card-body">
+    <h5 class="margin-l-top margin-m-bottom"> Wachtwoord wijzigen </h5>
+
+    <form method="POST" action="/account" >
+       <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+      <div class="form-group row">
+          <label for="password">Huidig wachtwoord</label>
+          <input type="password" name="password" id="password"  class="form-input">
+      </div>
+      <div class="form-group row">
+          <label for="confirm">Nieuw wachtwoord</label>
+          <input type="password" name="confirm" id="confirm"  class="form-input">
+      </div>
+      <div class="form-group row">
+          <button type="submit" class="btn btn-primary pull-right">Bewaar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 {% endblock %}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gemeente Amsterdam</title>
+  <!-- Needed for mobile sites to work -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Style sheets -->
+  <link rel="stylesheet" href="/stylesheets/spectre.min.css">
+  <link rel="stylesheet" href="/stylesheets/spectre-icons.min.css">
+  <link rel="stylesheet" type="text/css" href="/stylesheets/base.css">
+  <script type="text/javascript" src="../javascripts/jquery.min.js"></script>
+</head>
+<body>
+  <div class="header header--acount">
+        <header class="navbar">
+          <section class="navbar-section">
+            {% include 'elements/logo.html' %}
+          </section>
+          <section class="navbar-section">
+            <a href="logout" class="btn btn-link">
+              <i class="icon icon-shutdown"></i> Uitloggen
+            </a>
+          </section>
+        </header>
+  </div>
+  <br />
+  <br />
+    {% if user %}
+    <a href="/logout" class="pull-right">
+      Uitloggen
+    </a>
+    {% endif %}
+
+    <div class="container grid-sm">
+      {% block body %}{% endblock %}
+    </div>
+  </div>
+</body>
+</html>
