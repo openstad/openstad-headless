@@ -70,6 +70,10 @@ validate.userExists = (user) => {
  */
 validate.client = (client, clientSecret) => {
   validate.clientExists(client);
+
+  console.log('====> client', client);
+  console.log('====> clientSecret', clientSecret);
+
   if (client.clientSecret !== clientSecret) {
     validate.logAndThrow('Client secret does not match');
   }
@@ -105,9 +109,9 @@ validate.token = (token, accessToken) => {
 
   // token is a user token
   if (token.userID != null) {
-    return db.users.find(token.userID)
-    .then(user => validate.userExists(user))
-    .then(user => user);
+    return new User({id: token.userID})
+            .fetch()
+            .then((client) => { return client.serialize(); });
   }
 
   return new Client({clientId: token.clientID})

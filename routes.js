@@ -29,6 +29,7 @@ module.exports = function(app){
   app.get('/dialog/authorize', oauth2Controller.authorization);
   app.post('/dialog/authorize/decision', oauth2Controller.decision);
   app.post('/oauth/token', oauth2Controller.token);
+  app.get('/oauth/token', oauth2Controller.token);
 
   app.get('/api/userinfo', userController.info);
   // app.get('/api/clientinfo', client.info);

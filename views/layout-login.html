@@ -9,16 +9,19 @@
   <link rel="stylesheet" href="/stylesheets/spectre.min.css">
   <link rel="stylesheet" href="/stylesheets/spectre-icons.min.css">
   <link rel="stylesheet" type="text/css" href="/stylesheets/base.css">
-  <script type="text/javascript" src="../javascripts/jquery.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.validate.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.validate.nl.js"></script>
+  <script type="text/javascript" src="/javascripts/main.js"></script>
+
 </head>
 <body>
   <div class="uk-section uk-section-muted">
-    {% if user %}
-    <a href="/logout" class="pull-right">
-      Uitloggen
-    </a>
-    {% endif %}
-
+    <br />
+    <div class="center-block">
+      {% include 'elements/logo.html' %}
+    </div>
+    <br />
     <div class="small-container">
       {% block body %}{% endblock %}
     </div>

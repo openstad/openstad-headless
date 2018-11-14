@@ -2,14 +2,9 @@
 
 {% block body %}
   <!-- HTML login screen form -->
-  <form action="/login" method="POST" >
+  <form action="/login" method="POST" class="validate-form">
     <fieldset>
       <!-- Upper box with Title, username, and password -->
-
-      <div class="center-block">
-        {% include 'elements/logo.html' %}
-      </div>
-
       <div class="card">
 
         <div class="upper-box card-body">
@@ -28,6 +23,7 @@
                 placeholder="E-mail"
                 name="email"
                 class="form-input"
+                required
               />
             </div>
           </div>
@@ -40,6 +36,7 @@
                 type="password"
                 placeholder="Password"
                 name="password"
+                required
               />
             </div>
         </div>

@@ -1,10 +1,6 @@
 {% extends 'layout-login.html' %}
 
 {% block body %}
-<div class="center-block">
-  {% include 'elements/logo.html' %}
-</div>
-
 {% include 'elements/flash.html' %}
 
 <div class="card">
@@ -16,7 +12,7 @@
           <p>
             Laat je e-mail achter en we mailen je instructies voor het resetten van je wachtwoord.
           </p>
-          <input type="email" name="email" id="email" placeholder="Email" class="form-input" autofocus>
+          <input type="email" name="email" id="email" placeholder="Email" class="form-input" required autofocus>
         </div>
         <button type="submit" class="btn btn-primary">Stuur e-mail</button>
       </form>

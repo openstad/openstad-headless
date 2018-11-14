@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const hat = require('hat');
 const User = require('../models').User;
+const login  = require('connect-ensure-login');
 
 /**
  * Render the index.html or index-with-code.js depending on if query param has code or not
@@ -12,10 +13,10 @@ const User = require('../models').User;
  * @returns {undefined}
  */
 exports.index = (req, res) => {
-  if (!req.query.code) {
-    res.render('index');
+  if (req.user) {
+    res.redirect('/account');
   } else {
-    res.render('index-with-code');
+    res.redirect('/login');
   }
 };
 
@@ -26,7 +27,6 @@ exports.index = (req, res) => {
  * @returns {undefined}
  */
 exports.login = (req, res) => {
-//  console.log('req', req.sessions, req.session, req.cookies);
   res.render('auth/login');
 };
 
@@ -43,7 +43,6 @@ exports.reset = (req, res) => {
     token: req.query.token
   });
 };
-
 
 exports.registerOrLoginWithToken = (req, res) => {
   res.render('auth/register-or-login-with-token');
@@ -67,7 +66,6 @@ exports.postRegister = (req, res, next) => {
     })
     .catch((err) => { next(err) });
   } else {
-    console.log('errors', errors);
     req.flash('error', { errors });
     res.redirect('/register');
   }
@@ -129,9 +127,21 @@ exports.logout = (req, res) => {
  * @param   {Object}   res - The response
  * @returns {undefined}
  */
+
+ exports.account = [
+   login.ensureLoggedIn(),
+   (req, res) => {
+     res.render('user/profile', {
+       user: req.user
+     });
+   }
+ ]
+
+/*
 exports.account =  (req, res) => {
   res.render('user/profile', { user: req.user });
 };
+*/
 
 exports.postAccount =  (req, res) => {
   res.render('user/profile', { user: req.user });

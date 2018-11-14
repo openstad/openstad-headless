@@ -1,5 +1,6 @@
 const User = require('../models').User;
 const passport = require('passport');
+const login       = require('connect-ensure-login');
 
 /**
  * Simple informational end point, if you want to get information
@@ -25,9 +26,10 @@ exports.info = [
     // `BearerStrategy`.  It is typically used to indicate scope of the token,
     // and used in access control checks.  For illustrative purposes, this
     // example simply returns the scope in the response.
+
     res.json({
       user_id: req.user.id,
-      email: req.email,
+      email: req.user.email,
       role: '',
       name: req.user.name,
       scope: req.authInfo.scope
@@ -35,8 +37,12 @@ exports.info = [
   },
 ];
 
-exports.profile = (req, res) => {
-  res.render('user/profile', {
-    user: req.user
-  });
-}
+exports.profile = [
+  login.ensureLoggedIn(),
+  (req, res) => {
+    console.log('req.user', req.user);
+    res.render('user/profile', {
+      user: req.user
+    });
+  }
+]

@@ -9,7 +9,7 @@
  * padding the top.
  */
 body {
-  background: #f2f4f8;
+  background: #F3F3F3;
 }
 
 .header {
@@ -69,24 +69,24 @@ body {
 
 .mainlogo {
   position: relative;
-  height: 90px;
-  width: 160px;
+  height: 56px;
+  width: 130px;
 }
 
 .mainlogo .logoset img {
   border: 0;
   height: auto;
-  left: 15px;
+  left: auto;
   margin: 0;
   position: absolute;
-  top: 21px;
+  top: 0;
   width: 16px;
 }
 
 .mainlogo .logotexts {
   color: #EC0000;
-  top: 18px;
-  left: 39px;
+  top: -3px;
+  left: 27px;
   font-size: 18px;
   line-height: 1.2;
   font-weight: 700;
@@ -95,4 +95,28 @@ body {
 
 a:visited {
     color: #004699;
+}
+
+.form-input {
+  font-size: 15px;
+}
+
+label.error {
+  font-size: 11px;
+  color: #ff5353;
+}
+
+
+.info-box .info-box-header {
+  background-color: #e5e5e5;
+  padding: 12px 15px;
+  font-weight: 600;
+  color: #000;
+}
+.info-box .info-box-body {
+  padding: 15px;
+  border-right: 3px solid #e5e5e5;
+  border-bottom: 3px solid #e5e5e5;
+  border-left: 3px solid #e5e5e5;
+  background: #fff;
 }

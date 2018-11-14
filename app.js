@@ -38,12 +38,12 @@ app.use(expressSession({
   key               : 'authorization.sid',
   cookie            : { maxAge: config.session.maxAge },
 }));
+app.use(flash());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(flash());
 // Passport configuration
 require('./auth');
 

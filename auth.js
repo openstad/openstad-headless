@@ -21,21 +21,16 @@ const Client                               = require('./models').Client;
 passport.use(new LocalStrategy(
   {usernameField: 'email'},
   (email, password, done) => {
-    console.log('email, password', email, password);
-
     User
       .where({email: email})
       .fetch()
       .then((user) => {
         user = user.serialize();
-        console.log('====> user', user);
         return validate.user(user, password)
       })
       .then(user => done(null, user))
       .catch((error) => {
-        console.log('====> error', error);
-
-        done(null, false);
+         return done(null, false, { message: 'Onjuiste inlog.' });
       });
 }));
 
@@ -55,7 +50,7 @@ passport.use(new BasicStrategy((clientId, clientSecret, done) => {
   Client
     .where({clientId: clientId})
     .fetch()
-    .then(client => validate.client(client, clientSecret))
+    .then(client => validate.client(client.serialize(), clientSecret))
     .then(client => done(null, client))
     .catch(() => done(null, false));
 }));
@@ -71,7 +66,7 @@ passport.use(new ClientPasswordStrategy((clientId, clientSecret, done) => {
   Client
     .where({clientId: clientId})
     .fetch()
-    .then(client => validate.client(client, clientSecret))
+    .then(client => validate.client(client.serialize(), clientSecret))
     .then(client => done(null, client))
     .catch(() => done(null, false));
 }));
@@ -88,11 +83,10 @@ passport.use(new ClientPasswordStrategy((clientId, clientSecret, done) => {
  * illustrative purposes
  */
 passport.use(new BearerStrategy((accessToken, done) => {
-  console.log('aaaaaccccesss', accessToken);
   db.accessTokens.find(accessToken)
-  .then(token => validate.token(token, accessToken))
-  .then(token => done(null, token, { scope: '*' }))
-  .catch(() => done(null, false));
+    .then(token => validate.token(token, accessToken))
+    .then(token => done(null, token, { scope: '*' }))
+    .catch(() => done(null, false));
 }));
 
 // Register serialialization and deserialization functions.
@@ -116,6 +110,6 @@ passport.deserializeUser((id, done) => {
   User
     .where({id: id})
     .fetch()
-    .then(user => done(null, user))
+    .then(user => done(null, user.serialize()))
     .catch(err => done(err));
 });
