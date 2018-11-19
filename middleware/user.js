@@ -45,28 +45,29 @@ exports.withOneByEmail = (req, res, next) => {
 exports.validateUser = (req, res, next) => {
   console.log('usereusu');
   userFields.forEach ((field) => {
-    let fields = req.assert(field.key, field.message);
+    let fields = req.assert(field.key, field.message)
 
-    if (fields.required) {
-      fields.notEmpty();
+    if (field.required) {
+      fields.not().isEmpty();
     }
 
-    if (fields.maxLength) {
+    if (field.maxLength) {
       fields.isLength({ maxLength: fields.maxLength });
     }
 
-    if (fields.email) {
+    if (field.email) {
       fields.isEmail();
     }
   });
 
-  const errors = req.validationResult();
+//  const errors = req.validationResult();
+  var errors = req.validationErrors();
 
-
-  if (errors.isEmpty()) {
-    next();
-  } else {
+  if (errors) {
+    req.flash('error', errors);
     res.redirect('/clientsss');
+  } else {
+    next();
   }
 }
 
