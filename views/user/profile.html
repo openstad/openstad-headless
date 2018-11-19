@@ -27,7 +27,7 @@
               <label for="first-name">Voornaam</label>
               <input
                 type="text"
-                name="first_name"
+                name="firstName"
                 id="first-name"
                 value="{{user.firstName}}"
                 class="form-input"
@@ -37,7 +37,7 @@
               <label for="last-name">Achternaam</label>
               <input
                 type="text"
-                name="last_name"
+                name="lastName"
                 id="last-name"
                 value="{{user.lastName}}"
                 class="form-input"
@@ -54,7 +54,7 @@
         <div class="card-body">
       <h5 class="margin-l-top margin-m-bottom"> Wachtwoord wijzigen </h5>
 
-      <form method="POST" action="/account" >
+      <form method="POST" action="/password" >
          <input type="hidden" name="_csrf" value="{{csrfToken}}" />
         <div class="form-group row">
             <label for="password">Huidig wachtwoord</label>

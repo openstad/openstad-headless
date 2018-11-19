@@ -51,25 +51,27 @@ exports.create = (req, res, next) => {
 exports.update = (req, res) => {
   const keysToUpdate = ['firstName', 'lastName', 'email', 'street_name', 'house_number', 'suffix', 'postcode', 'city', 'phone', 'password'];
 
-  keysToUpdate.forEach((key) => {
-    if (req.body[key]) {
-      let value = req.body[key];
+  new User({id: req.user.id})
+    .fetch()
+    .then((user) => {
+      keysToUpdate.forEach((key) => {
+        if (req.body[key]) {
+          user.set(key, req.body[key]);
 
-      if (key === 'password') {
-        value = bcrypt.hashSync(value, saltRounds);
-      }
+          if (key === 'password') {
+            value = bcrypt.hashSync(value, saltRounds);
+          }
+        }
+      });
 
-      req.client.set(key, value);
-    }
-  });
-
-  req.client
-    .save()
-    .then(() => {
-      req.flash('success', { msg: 'Updated client!' });
-      res.redirect('/admin/client/' + response.id);
-    })
-    .catch((err) => {
-      next(err);
-    })
+      user
+        .save()
+        .then(() => {
+          req.flash('success', { msg: 'Updated client!' });
+          res.redirect('/admin/client/' + response.id);
+        })
+        .catch((err) => {
+          next(err);
+        })
+    });
 }

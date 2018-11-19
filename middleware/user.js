@@ -1,4 +1,6 @@
 const User = require('../models').User;
+const { check } = require('express-validator/check')
+const userFields = require('../config/userValidation').fields;
 
 exports.withAll = (req, res, next) => {
   User
@@ -40,6 +42,36 @@ exports.withOneByEmail = (req, res, next) => {
     });
 }
 
-exports.validate = (req, res, next) => {
+exports.validateUser = (req, res, next) => {
+  console.log('usereusu');
+  userFields.forEach ((field) => {
+    let fields = req.assert(field.key, field.message);
 
+    if (fields.required) {
+      fields.notEmpty();
+    }
+
+    if (fields.maxLength) {
+      fields.isLength({ maxLength: fields.maxLength });
+    }
+
+    if (fields.email) {
+      fields.isEmail();
+    }
+  });
+
+  const errors = req.validationResult();
+
+
+  if (errors.isEmpty()) {
+    next();
+  } else {
+    res.redirect('/clientsss');
+  }
+}
+
+exports.validatePassword = (req, res, next) => {
+  if (req.body.password !== req.body.passwordRepeat) {
+
+  }
 }

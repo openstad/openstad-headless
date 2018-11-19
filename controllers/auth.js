@@ -121,28 +121,32 @@ exports.logout = (req, res) => {
   res.redirect('/');
 };
 
-/**
- * Render account.html but ensure the user is logged in before rendering
- * @param   {Object}   req - The request
- * @param   {Object}   res - The response
- * @returns {undefined}
- */
 
- exports.account = [
-   login.ensureLoggedIn(),
-   (req, res) => {
-     res.render('user/profile', {
-       user: req.user
-     });
-   }
- ]
+exports.postPassword =  (req, res) => {
+  new User({id: req.user.id})
+    .fetch()
+    .then((user) => {
+      if (req.body.password === 'password') {
+        value = bcrypt.hashSync(value, saltRounds);
+        user.set(key, );
+      }
+      
+      user
+        .save()
+        .then(() => {
+          req.flash('success', { msg: 'Updated client!' });
+          res.redirect('/admin/client/' + response.id);
+        })
+        .catch((err) => {
+          next(err);
+        })
+    });
+};
+
+
 
 /*
 exports.account =  (req, res) => {
   res.render('user/profile', { user: req.user });
 };
 */
-
-exports.postAccount =  (req, res) => {
-  res.render('user/profile', { user: req.user });
-};

@@ -1,6 +1,6 @@
 const User = require('../models').User;
 const passport = require('passport');
-const login       = require('connect-ensure-login');
+const login  = require('connect-ensure-login');
 
 /**
  * Simple informational end point, if you want to get information
@@ -37,12 +37,45 @@ exports.info = [
   },
 ];
 
-exports.profile = [
-  login.ensureLoggedIn(),
-  (req, res) => {
-    console.log('req.user', req.user);
-    res.render('user/profile', {
-      user: req.user
-    });
-  }
-]
+
+/**
+ * Render account.html but ensure the user is logged in before rendering
+ * @param   {Object}   req - The request
+ * @param   {Object}   res - The response
+ * @returns {undefined}
+ */
+ exports.account = [
+   login.ensureLoggedIn(),
+   (req, res) => {
+     res.render('user/profile', {
+       user: req.user
+     });
+   }
+ ];
+
+ exports.postAccount = [
+   login.ensureLoggedIn(),
+   (req, res) => {
+     const keysToUpdate = ['firstName', 'lastName', 'email', 'street_name', 'house_number', 'suffix', 'postcode', 'city', 'phone']
+     console.log('user ===>>>> ');
+     new User({id: req.user.id})
+       .fetch()
+       .then((user) => {
+         keysToUpdate.forEach((key) => {
+           if (req.body[key]) {
+             user.set(key, req.body[key]);
+           }
+         });
+
+         user
+           .save()
+           .then(() => {
+             req.flash('success', { msg: 'Opgeslagen' });
+             res.redirect('/account');
+           })
+           .catch((err) => {
+             next(err);
+           })
+       });
+   }
+ ];

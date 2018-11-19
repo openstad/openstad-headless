@@ -20,7 +20,9 @@ module.exports = function(app){
   app.get('/reset', authController.reset);
 
   app.get('/logout', authController.logout);
-  app.get('/account', authController.account);
+  app.get('/account', userController.account);
+  app.post('/account', userMiddleware.validateUser, userController.postAccount);
+
   app.post('/login', authController.postLogin);
   app.post('/register', authController.postRegister);
   app.post('/forgot', authController.postForgot);

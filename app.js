@@ -1,4 +1,5 @@
 'use strict';
+require('dotenv').config();
 
 const bodyParser                  = require('body-parser');
 //const client                      = require('./client');
@@ -19,6 +20,7 @@ const jsonFilter                  = require('./nunjucks/json');
 const timestampFilter             = require('./nunjucks/timestamp');
 const replaceIdeaVariablesFilter  = require('./nunjucks/replaceIdeaVariables');
 const flash                       = require('express-flash');
+const expressValidator            = require('express-validator');
 
 const MemoryStore = expressSession.MemoryStore;
 
@@ -44,6 +46,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(expressValidator());
 // Passport configuration
 require('./auth');
 
