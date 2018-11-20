@@ -3,6 +3,8 @@
 {% block body %}
   <!-- HTML login screen form -->
   <form action="/login" method="POST" class="validate-form">
+    <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+
     <fieldset>
       <!-- Upper box with Title, username, and password -->
       <div class="card">

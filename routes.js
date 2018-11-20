@@ -1,3 +1,4 @@
+const login                    = require('connect-ensure-login');
 const oauth2Controller         = require('./controllers/oauth2');
 const tokenController          = require('./controllers/token');
 const authController           = require('./controllers/auth');
@@ -7,14 +8,15 @@ const adminClientController    = require('./controllers/adminClient');
 const adminMiddleware          = require('./middleware/admin');
 const clientMiddleware         = require('./middleware/client');
 const userMiddleware           = require('./middleware/user');
-const login                    = require('connect-ensure-login');
-
+const tokenMw                  = require('./middleware/token');
 //login.ensureLoggedIn();
+
 
 module.exports = function(app){
   app.get('/', authController.index);
   app.get('/login', authController.login);
-  app.get('/login-with-token', authController.loginWithToken);
+  app.get('/login-with-email-url', authController.registerOrLoginWithEmailUrl);
+  app.post('/login-with-email-url', authController.postLoginOrRegisterWithEmailUrl);
 
   app.get('/register', authController.register);
   app.get('/forgot', authController.forgot);
@@ -25,9 +27,10 @@ module.exports = function(app){
   app.post('/account', login.ensureLoggedIn(), userMiddleware.validateUser, userController.postAccount);
   app.post('/password', login.ensureLoggedIn(), userMiddleware.validatePassword, userController.postAccount);
 
+  app.post('/register-token', tokenMw.addUser, auth.completeRegistration);
 
   app.post('/login', authController.postLogin);
-  app.post('/register', authController.postRegister);
+  app.post('/register', userMiddleware.validateUser, authController.postRegister);
   app.post('/forgot', authController.postForgot);
   app.post('/reset', authController.postReset);
 

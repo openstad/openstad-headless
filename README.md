@@ -11,6 +11,21 @@ npm install
 npm start
 ```
 
+
+.env values
+
+
+APP_URL
+EMAIL_ASSETS_URL
+MAIL_SERVER_URL
+MAIL_SERVER_PORT
+MAIL_SERVER_SECURE
+MAIL_SERVER_PASSWORD
+MAIL_ASSETS_URL
+
+FROM_EMAIL
+FROM_NAME
+
 Go here for how to use the REST API
 https://github.com/FrankHassanabad/Oauth2orizeRecipes/wiki/OAuth2orize-Authorization-Server-Tests
 

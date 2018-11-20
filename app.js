@@ -21,6 +21,7 @@ const timestampFilter             = require('./nunjucks/timestamp');
 const replaceIdeaVariablesFilter  = require('./nunjucks/replaceIdeaVariables');
 const flash                       = require('express-flash');
 const expressValidator            = require('express-validator');
+const csurf                       = require('csurf');
 
 const MemoryStore = expressSession.MemoryStore;
 
@@ -47,6 +48,10 @@ app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(expressValidator());
+
+const csrfProtection = csurf({cookie:true});
+app.use(csrfProtection);
+
 // Passport configuration
 require('./auth');
 
