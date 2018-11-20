@@ -1,22 +1,24 @@
 const Promise = require('bluebird');
-const LoginToken = require('../models').LoginToken;
+const LoginTo ken = require('../models').LoginToken;
+const appUrl = proccess.env.APP_URL;
 
 /**
  *
  */
-exports.format = (clientId, userId) => {
+exports.format = (clientId, user) => {
   return new Promise((resolve, reject) =>  {
     new LoginToken({
-      userId: userId
+      userId: user.get('id'),
       token: token
     })
     .save()
-    .then((token) => {
-      const url = token
-      resolve(err);
+    .then((loginToken) => {
+      const base = user.get('firstName').length === 0 && user.get('lastName').length ? 
+      const url = `${appUrl}/login-with-token?=${loginToken.get('token')}&client_id=${clientId}`;
+      resolve(url);
     })
     .catch((err) => {
-      resolve(err);
+      reject(err);
     });
   });
 

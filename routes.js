@@ -10,13 +10,28 @@ const clientMiddleware         = require('./middleware/client');
 const userMiddleware           = require('./middleware/user');
 const tokenMw                  = require('./middleware/token');
 //login.ensureLoggedIn();
+const ExpressBrute = require('express-brute');
+
+const bruteForce = new ExpressBrute(new ExpressBrute.MemoryStore(), {
+	freeRetries  : 10,
+	minWait      : 5000,
+	maxWait      : 900000, // 15 min
+	lifetime     : 86400, // 24 hours
+	failCallback : function( req, res, next, nextValidRequestDate ) {
+		var retryAfter = Math.ceil((nextValidRequestDate.getTime() - Date.now())/1000);
+		res.header('Retry-After', retryAfter);
+		res.locals.nextValidRequestDate = nextValidRequestDate;
+		res.locals.retryAfter           = retryAfter;
+		next(createError(429, {nextValidRequestDate: nextValidRequestDate}));
+	}
+});
 
 
 module.exports = function(app){
   app.get('/', authController.index);
   app.get('/login', authController.login);
   app.get('/login-with-email-url', authController.registerOrLoginWithEmailUrl);
-  app.post('/login-with-email-url', authController.postLoginOrRegisterWithEmailUrl);
+  app.post('/login-with-email-url', bruteForce.prevent, authController.postLoginOrRegisterWithEmailUrl);
 
   app.get('/register', authController.register);
   app.get('/forgot', authController.forgot);
@@ -29,14 +44,14 @@ module.exports = function(app){
 
   app.post('/register-token', tokenMw.addUser, auth.completeRegistration);
 
-  app.post('/login', authController.postLogin);
-  app.post('/register', userMiddleware.validateUser, authController.postRegister);
-  app.post('/forgot', authController.postForgot);
-  app.post('/reset', authController.postReset);
+  app.post('/login', bruteForce.prevent, authController.postLogin);
+  app.post('/register', bruteForce.prevent, userMiddleware.validateUser, authController.postRegister);
+  app.post('/forgot', bruteForce.prevent, authController.postForgot);
+  app.post('/reset', bruteForce.prevent, authController.postReset);
 
   app.get('/dialog/authorize', oauth2Controller.authorization);
-  app.post('/dialog/authorize/decision', oauth2Controller.decision);
-  app.post('/oauth/token', oauth2Controller.token);
+  app.post('/dialog/authorize/decision', bruteForce.prevent, oauth2Controller.decision);
+  app.post('/oauth/token', bruteForce.prevent, oauth2Controller.token);
   app.get('/oauth/token', oauth2Controller.token);
 
   app.get('/api/userinfo', userController.info);

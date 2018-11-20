@@ -15,6 +15,7 @@
     "dotenv": "^6.0.0",
     "ejs": "^2.5.x",
     "express": "^4.10.x",
+    "express-brute": "^1.0.1",
     "express-flash": "0.0.2",
     "express-session": "^1.9.x",
     "express-validator": "^5.3.0",
