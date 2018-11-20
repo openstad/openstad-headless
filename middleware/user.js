@@ -43,13 +43,14 @@ exports.withOneByEmail = (req, res, next) => {
 }
 
 exports.validateUser = (req, res, next) => {
-  console.log('usereusu');
-  userFields.forEach ((field) => {
+/*  userFields.forEach ((field) => {
     let fields = req.assert(field.key, field.message)
 
     if (field.required) {
       fields.not().isEmpty();
     }
+
+    console.log('fields', field);
 
     if (field.maxLength) {
       fields.isLength({ maxLength: fields.maxLength });
@@ -59,20 +60,32 @@ exports.validateUser = (req, res, next) => {
       fields.isEmail();
     }
   });
+*/
+
+  req.check(userFields);
+
+  req.getValidationResult()
 
 //  const errors = req.validationResult();
   var errors = req.validationErrors();
 
   if (errors) {
     req.flash('error', errors);
-    res.redirect('/clientsss');
+    res.redirect(req.header('Referer') || '/account');
   } else {
     next();
   }
 }
 
 exports.validatePassword = (req, res, next) => {
-  if (req.body.password !== req.body.passwordRepeat) {
-
+  if (
+    req.body.password
+    && req.body.password === req.body.password_confirm
+    && req.body.password.length >= 5
+  ) {
+    next();
+  } else {
+    req.flash('error', {msg: 'Incorrect wachtwoord'});
+    res.redirect(req.header('Referer') || '/account');
   }
 }

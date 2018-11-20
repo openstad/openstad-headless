@@ -7,6 +7,7 @@ const adminClientController    = require('./controllers/adminClient');
 const adminMiddleware          = require('./middleware/admin');
 const clientMiddleware         = require('./middleware/client');
 const userMiddleware           = require('./middleware/user');
+const login                    = require('connect-ensure-login');
 
 //login.ensureLoggedIn();
 
@@ -20,8 +21,10 @@ module.exports = function(app){
   app.get('/reset', authController.reset);
 
   app.get('/logout', authController.logout);
-  app.get('/account', userController.account);
-  app.post('/account', userMiddleware.validateUser, userController.postAccount);
+  app.get('/account', login.ensureLoggedIn(), userController.account);
+  app.post('/account', login.ensureLoggedIn(), userMiddleware.validateUser, userController.postAccount);
+  app.post('/password', login.ensureLoggedIn(), userMiddleware.validatePassword, userController.postAccount);
+
 
   app.post('/login', authController.postLogin);
   app.post('/register', authController.postRegister);

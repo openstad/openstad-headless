@@ -54,7 +54,6 @@ exports.info = [
  ];
 
  exports.postAccount = [
-   login.ensureLoggedIn(),
    (req, res) => {
      const keysToUpdate = ['firstName', 'lastName', 'email', 'street_name', 'house_number', 'suffix', 'postcode', 'city', 'phone']
      console.log('user ===>>>> ');
