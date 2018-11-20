@@ -111,7 +111,9 @@ exports.postLoginOrRegisterWithEmailUrl = (req, res, next) => {
     const handleSending = (req, res, next) => {
       tokenUrl
         .format(req.user)
-        .then(sendEmail)
+        .then((tokenUrl) => {
+          sendEmail(tokenUrl, client);
+        })
         .then((result) => {
           req.flash('success', {msg: 'De e-mail is verstuurd!'});
           res.redirect(req.header('Referer') || '/login-with-email-url');
@@ -132,8 +134,10 @@ exports.postLoginOrRegisterWithEmailUrl = (req, res, next) => {
         subject: 'Inloggen bij ' + client.name,
         template: 'email/login-url',
         variables: {
-          url: tokenUrl,
-          firstName: user.firstName
+          tokenUrl: tokenUrl,
+          firstName: user.firstName,
+          clientUrl: client.get('url'),
+          clientName: client.get('name')
         }
       });
     }
