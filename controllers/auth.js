@@ -1,10 +1,10 @@
 'use strict';
-const passport = require('passport');
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
-const hat = require('hat');
-const User = require('../models').User;
-const login            = require('connect-ensure-login');
+const passport          = require('passport');
+const bcrypt            = require('bcrypt');
+const saltRounds        = 10;
+const hat               = require('hat');
+const User              = require('../models').User;
+const login             = require('connect-ensure-login');
 
 /**
  * Render the index.html or index-with-code.js depending on if query param has code or not
