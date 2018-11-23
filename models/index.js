@@ -17,5 +17,5 @@ exports.User = bookshelf.Model.extend({
 exports.LoginToken = bookshelf.Model.extend({
   tableName: 'login_tokens',
   hasTimestamps: true,
-  hasTimestamps: ['createdAt']
+  hasTimestamps: ['createdAt',  'updatedAt']
 });

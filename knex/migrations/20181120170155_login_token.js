@@ -5,6 +5,7 @@ exports.up = function(knex, Promise) {
     table.string('token').notNullable();
     table.integer('userId').unsigned().notNullable().references('id').inTable('users');
     table.timestamp('createdAt').defaultTo(knex.fn.now())
+    table.timestamp('updatedAt').defaultTo(knex.fn.now());
   });
 };
 

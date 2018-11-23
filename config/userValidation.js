@@ -17,6 +17,7 @@ exports.fields = {
       options:{ min: 1, maxLength: 155 }
     }
   },
+  // E-mail is not validated, since in most re
   email : {
     errorMessage: 'E-mail is niet correct',
     isLength: { options:{ min: 1, maxLength: 155 }},

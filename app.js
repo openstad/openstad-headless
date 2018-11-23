@@ -52,6 +52,12 @@ app.use(expressValidator());
 const csrfProtection = csurf({cookie:true});
 app.use(csrfProtection);
 
+app.use((req, res, next) => {
+  nunjucksEnv.addGlobal('csrfToken', req.csrfToken());
+  next();
+});
+
+
 // Passport configuration
 require('./auth');
 

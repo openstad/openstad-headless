@@ -13,18 +13,29 @@ exports.withAll = (req, res, next) => {
 }
 
 exports.withOne = (req, res, next) => {
-  new Client({
-    id: req.params.clientId
-  })
-  .fetch()
-  .then((response) => {
-     console.log('client response', response.serialize());
-     req.client = response.serialize();
-     next();
-  })
-  .catch((err) => {
-    next(err);
-  });
+  const clientId = req.body.clientId ? req.body.clientId : req.query.clientId;
+  console.log('====> clientId', clientId);
+
+  if (clientId) {
+    new Client({
+      clientId: clientId
+    })
+    .fetch()
+    .then((client) => {
+       req.clientModel = client;
+       req.client = client.serialize();
+       next();
+    })
+    .catch((err) => {
+      next(err);
+    });
+  } else {
+    next({
+      status: 500,
+      msg: 'No clientID found'
+    });
+
+  }
 }
 
 exports.validate = (req, res, next) => {

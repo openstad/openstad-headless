@@ -1,29 +1,41 @@
 const Promise = require('bluebird');
-const LoginTo ken = require('../models').LoginToken;
-const appUrl = proccess.env.APP_URL;
+const LoginToken = require('../models').LoginToken;
+const appUrl = process.env.APP_URL;
+const hat = require('hat');
 
 /**
  *
  */
-exports.format = (clientId, user) => {
+const getUrl = (user, client, token) => {
+  const slug = user.firstName.length > 0 && user.lastName.length > 0 ?  'login-with-token' : 'register-with-token';
+  console.log('====> slug', slug);
+  console.log('====> user.firstName.length', user.firstName.length);
+  console.log('====> user.firstName.length', user.lastName.length);
+
+  return `${appUrl}/${slug}?token=${token}&clientId=${client.clientId}`;
+}
+
+exports.format = (client, user) => {
   return new Promise((resolve, reject) =>  {
+    const token = hat();
+
     new LoginToken({
-      userId: user.get('id'),
+      userId: user.id,
       token: token
     })
     .save()
     .then((loginToken) => {
-      const base = user.get('firstName').length === 0 && user.get('lastName').length ? 
-      const url = `${appUrl}/login-with-token?=${loginToken.get('token')}&client_id=${clientId}`;
+      const url = getUrl(user, client, token);
       resolve(url);
     })
     .catch((err) => {
       reject(err);
     });
   });
-
 }
 
-exports.getUserIdForToken(token) => {
+exports.getUrl = getUrl;
+
+exports.getUserIdForToken = (token) => {
 
 }

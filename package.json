@@ -12,6 +12,7 @@
     "bookshelf": "^0.13.3",
     "connect-ensure-login": "^0.1.x",
     "cookie-parser": "^1.3.x",
+    "csurf": "^1.9.0",
     "dotenv": "^6.0.0",
     "ejs": "^2.5.x",
     "express": "^4.10.x",
@@ -35,6 +36,7 @@
     "passport-local": "^1.0.x",
     "passport-oauth2-client-password": "^0.1.x",
     "passport-url": "^1.0.4",
+    "request-promise": "^4.2.2",
     "uuid": "^3.0.1"
   },
   "scripts": {

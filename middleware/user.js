@@ -15,12 +15,15 @@ exports.withAll = (req, res, next) => {
 }
 
 exports.withOne = (req, res, next) => {
+  const userId = req.body.userId ? req.body.userId : req.params.userId;
+
   new User({
-    id: req.params.userId
+    id: userId
   })
     .fetch()
-    .then((response) => {
-      req.user = response.serialize();
+    .then((user) => {
+      req.userModel = user;
+      req.user = user.serialize();
       next();
     })
     .catch((err) => {
@@ -29,11 +32,11 @@ exports.withOne = (req, res, next) => {
 }
 
 exports.withOneByEmail = (req, res, next) => {
+  const email = req.body.email ? req.body.email : req.query.email;
   new User({ email: req.body.email })
     .fetch()
     .then((user) => {
-      console.log('user response', user);
-
+      req.userModel = user;
       req.user = user.serialize();
       next();
     })
@@ -61,6 +64,13 @@ exports.validateUser = (req, res, next) => {
     }
   });
 */
+
+  /**
+   * Set user email to the body, in order to validate the email in user
+   */
+  if (!req.body.email && req.user) {
+    req.body.email = req.user.email;
+  }
 
   req.check(userFields);
 

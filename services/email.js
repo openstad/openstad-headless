@@ -3,14 +3,11 @@ const rp = require('request-promise');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const Promise = require("bluebird");
-
-/*
-var dateFilter        = require('../nunjucks/dateFilter');
-var currencyFilter    = require('../nunjucks/currency');
-var limitTo           = require('../nunjucks/limitTo');
-var jsonFilter        = require('../nunjucks/json');
-var timestampFilter   = require('../nunjucks/timestamp');
-*/
+const dateFilter        = require('../nunjucks/dateFilter');
+const currencyFilter    = require('../nunjucks/currency');
+const limitTo           = require('../nunjucks/limitTo');
+const jsonFilter        = require('../nunjucks/json');
+const timestampFilter   = require('../nunjucks/timestamp');
 
 exports.send = function ({subject, toName, toEmail, template, variables, fromEmail, fromName, replyTo}) {
 
@@ -29,10 +26,13 @@ exports.send = function ({subject, toName, toEmail, template, variables, fromEma
     autoescape: true,
   });
 
+  nunjucksEnv.addFilter('date', dateFilter);
+
   /**
    * Render email template
    */
   const mail = nunjucks.render(template, variables);
+  console.log('====> mail', mail, template, variables);
 
   /**
     * Format the to name
@@ -44,6 +44,7 @@ exports.send = function ({subject, toName, toEmail, template, variables, fromEma
    */
   fromEmail = fromEmail ? fromEmail : process.env.FROM_EMAIL;
   fromName = fromName ? fromName : process.env.FROM_NAME;
+
 
   /**
    * Format Message object
@@ -80,7 +81,7 @@ exports.send = function ({subject, toName, toEmail, template, variables, fromEma
         } else {
           console.log('Message sent: %s', info.messageId);
           // Preview only available when sending through an Ethereal account
-          console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+        //  console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
           resolve();
         }
 

@@ -1,11 +1,11 @@
-{% extends 'emails/layout.html' %}
+{% extends 'email/layout.html' %}
 
 {% block body %}
 <h2 style="margin-bottom: 4px; font-size: 25px;">Inloglink aangevraagd</h2>
 
 {% if firstName %}
 <br />
-<b> Beste {{firstName}}, </b>
+<b> Beste {{name}}, </b>
 <br />
 {% endif %}
 <br />
@@ -16,7 +16,6 @@ Klik op de knop hieronder om automatisch in te loggen.
 <br />
 De knop is 48 uur geldig.
 <br />
-<br />
 <p align="middle" style="margin: 10px 0;">
 	<a
     href="{{tokenUrl}}"
@@ -26,11 +25,8 @@ De knop is 48 uur geldig.
 		<b>Log in</b>
 	</a>
 </p>
-
-<br />
 <p style="font-size:0.7em;font-style:italic;margin-bottom:5em" align="center">
   Of gebruik deze link in je browser:
-	<br />
   <a
     href="{{tokenUrl}}"
     style="color:#ec0000"

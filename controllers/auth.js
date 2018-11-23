@@ -5,7 +5,8 @@ const saltRounds        = 10;
 const hat               = require('hat');
 const User              = require('../models').User;
 const login             = require('connect-ensure-login');
-
+const tokenUrl          = require('../services/tokenUrl');
+const emailService      = require('../services/email');
 /**
  * Render the index.html or index-with-code.js depending on if query param has code or not
  * @param   {Object} req - The request
@@ -44,11 +45,11 @@ exports.reset = (req, res) => {
   });
 };
 
-exports.registerOrLoginWithEmailUrl = (req, res) => {
-  res.render('auth/login-with-email-url');
+exports.loginWithToken = (req, res) => {
+  res.render('auth/login-with-email-url', {
+    clientId: req.query.clientId,
+  });
 };
-
-
 
 exports.postRegister = (req, res, next) => {
   const errors = [];
@@ -89,20 +90,24 @@ exports.postLoginOrRegisterWithEmailUrl = (req, res, next) => {
     .fetch()
     .then((user) => {
       if (user) {
-        req.user = user;
+        req.user = user.serialize();
         handleSending(req, res, next);
       } else {
-        new User({ email, hashedPassword })
-          .fetch()
+        /**
+         * Create a new user
+         */
+        new User({ email: req.body.email })
+          .save()
           .then((user) => {
-            req.user = user;
+            req.user = user.serialize();
             handleSending(req, res, next);
           })
           .catch((err) => { next(err) });
       }
     })
     .catch((err) => {
-      next(err);
+      req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
+      res.redirect(req.header('Referer') || '/login-with-email-url');
     });
 
     /**
@@ -110,9 +115,10 @@ exports.postLoginOrRegisterWithEmailUrl = (req, res, next) => {
      */
     const handleSending = (req, res, next) => {
       tokenUrl
-        .format(req.user)
+        .format(req.client, req.user)
         .then((tokenUrl) => {
-          sendEmail(tokenUrl, client);
+
+          sendEmail(tokenUrl, req.user, req.client);
         })
         .then((result) => {
           req.flash('success', {msg: 'De e-mail is verstuurd!'});
@@ -127,17 +133,17 @@ exports.postLoginOrRegisterWithEmailUrl = (req, res, next) => {
     /**
      * Send email
      */
-    const sendEmail = (tokenUrl) => {
+    const sendEmail = (tokenUrl, user, client) => {
       return emailService.send({
         toName: (user.firstName + ' ' + user.lastName).trim(),
         toEmail: user.email,
         subject: 'Inloggen bij ' + client.name,
-        template: 'email/login-url',
+        template: 'emails/login-url.html',
         variables: {
           tokenUrl: tokenUrl,
           firstName: user.firstName,
-          clientUrl: client.get('url'),
-          clientName: client.get('name')
+          clientUrl: client.mainUrl,
+          clientName: client.name,
         }
       });
     }
@@ -151,61 +157,44 @@ exports.postLogin = [
 ];
 
 exports.registerWithToken = (req, res, next) => {
-  const errors = [];
-  const { email } = req.body;
-
-  if (errors.length === 0) {
-    password = bcrypt.hashSync(password, saltRounds);
-
-    new User({ firstName, lastName, email, password })
-    .save()
-    .then(() => {
-      res.redirect('/login');
-    })
-    .catch((err) => { next(err) });
-  } else {
-    req.flash('error', { errors });
-    res.redirect('/register');
-  }
+  res.render('auth/register-with-token', {
+    token: req.query.token,
+    user: req.user,
+    client: req.client
+  });
 }
 
-exports.postLoginWithToken = (req, res, next) => {
+exports.postRegisterWithToken = (req, res, next) => {
+  const { firstName, lastName, postcode, token } = req.body;
+  const userModel = req.userModel;
 
-}
+  /**
+   * Set Values on register
+   */
+  userModel.set('firstName', firstName);
+  userModel.set('lastName', lastName);
+  userModel.set('postcode', postcode);
 
-exports.completeRegistration = [ (req, res, next) => {
-  const errors = [];
-  const email = req.user.email;
-  const { firstName, lastName } = req.body;
+  userModel
+  .save()
+  .then((userReponse) => {
+    /**
+     * After succesfull registration redirect to token login url, for automagic login
+     */
+    const user = userReponse.serialize();
+    res.redirect(tokenUrl.getUrl(user, req.client, token));
+  })
+  .catch((err) => { next(err) });
 
-  if (errors.length === 0) {
-    password = bcrypt.hashSync(password, saltRounds);
-
-    new User({ firstName, lastName, email, password })
-    .save()
-    .then(() => {
-      res.redirect('/login');
-    })
-    .catch((err) => { next(err) });
-  } else {
-    req.flash('error', { errors });
-    res.redirect('/register');
-  }
-}]
-
-
-exports.postLoginWithToken = [
-  passport.authenticate('url', { successReturnToOrRedirect: '/', failureRedirect: '/login-with-token' }),
-];
-
+};
 
 exports.loginWithToken = [
-  passport.authenticate('authtoken',  {
+  passport.authenticate('url', {
     successReturnToOrRedirect: '/',
     failureRedirect: '/login-with-token',
     session: true,
     optional: false
-  })
+  }),
 ];
 
 /**

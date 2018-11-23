@@ -36,8 +36,6 @@ exports.create = (req, res, next) => {
     clientSecret: clientSecret
   };
 
-  console.log('-----> data', data);
-
   new Client(data)
   .save()
   .then((response) => {

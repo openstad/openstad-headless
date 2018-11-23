@@ -17,12 +17,14 @@
 						<input
 							type="email"
 							value=""
+							name="email"
 							placeholder="E-mail"
 							class="form-input"
 							required
 						/>
 					</div>
-					<input type="hidden" name="_csrf" value="{{$csrfToken}}">
+					<input type="hidden" name="_csrf" value="{{csrfToken}}">
+					<input type="hidden" name="clientId" value="{{clientId}}">
 					<input type="submit" value="Versturen e-mail" class="btn btn-primary">
 			</form>
 		</div>

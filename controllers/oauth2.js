@@ -182,8 +182,8 @@ exports.authorization = [
     new Client({clientId: req.query.client_id})
     .fetch()
     .then((client) => {
+
       client = client.serialize();
-      console.log('client ===>', client);
 
       if (client != null) {//  && client.trustedClient && client.trustedClient === true) {
         // This is how we short call the decision like the dialog below does
@@ -191,13 +191,10 @@ exports.authorization = [
           callback(null, { allow: true });
         })(req, res, next);
       } else {
-        console.log('client ===>', req.oauth2);
-
         res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
       }
     })
     .catch((error) => {
-      console.log('error ===>', error);
       res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
     });
   }];

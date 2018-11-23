@@ -11,6 +11,10 @@ const validate                             = require('./validate');
 const User                                 = require('./models').User;
 const Client                               = require('./models').Client;
 const LoginToken                           = require('./models').LoginToken;
+
+const  UrlStrategy = require('./url-strategy');
+
+
 /**
  * LocalStrategy
  *
@@ -34,33 +38,37 @@ passport.use(new LocalStrategy(
       });
 }));
 
-exports.registerOrLoginWithEmailUrl = () => {}
-
-var url =
 
 passport.use(new UrlStrategy({
     failRedirect : "/login-with-email-url",
     varName : "token"
   }, function (token, done) { // put your check logic here
-    new LoginToken({token: token}).query((q) => {
+    new LoginToken({token: token})
+    /*.query((q) => {
       /**
        * Only select tokens that are younger then 2 days
        * created_at is "bigger then" 48 hours ago
        */
+       /*
       const days = 2;
       const msForADay = 86400000;
       const timeAgo = new Date(date.setTime(date.getTime() + (days * msForADay)));
       q.where('createdAt', '>=', timeAgo);
       q.orderBy('createdAt', 'DESC');
-    })
+    }) */
     .fetch()
     .then((token) => {
       if (token) {
         new User({id: token.get('userId')})
-          .then()
-          .fetch((user) => {
-            done(null, {user: user.serialize()});
+          .fetch()
+          .then((user) => {
+            /*return done(null, {
+            //  userModel: user,
+              user: user.serialize()
+            });*/
+            return user.serialize();
           })
+          .then(user => done(null, user))
           .catch((err) => {
             next(err);
           });
