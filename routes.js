@@ -31,7 +31,10 @@ module.exports = function(app){
   app.get('/login', authController.login);
   app.get('/login-with-token', bruteForce.prevent, clientMw.withOne, authController.loginWithToken);
 	app.get('/register-with-token', tokenMw.addUser, clientMw.withOne, authController.registerWithToken);
-  //app.post('/login-with-token', bruteForce.prevent, ByPublicId, authController.postLoginOrRegisterWithEmailUrl);
+	app.get('/login-with-email-url', clientMw.withOne, authController.loginWithEmailUrl);
+	app.post('/login-with-email-url', clientMw.withOne, authController.postLoginOrRegisterWithEmailUrl);
+
+	//app.post('/login-with-token', bruteForce.prevent, ByPublicId, authController.postLoginOrRegisterWithEmailUrl);
 	app.post('/register-with-token', bruteForce.prevent, tokenMw.addUser, userMw.validateUser, clientMw.withOne, authController.postRegisterWithToken);
 
   app.get('/register', authController.register);

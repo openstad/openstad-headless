@@ -45,7 +45,7 @@ exports.reset = (req, res) => {
   });
 };
 
-exports.loginWithToken = (req, res) => {
+exports.loginWithEmailUrl = (req, res) => {
   res.render('auth/login-with-email-url', {
     clientId: req.query.clientId,
   });
@@ -125,6 +125,7 @@ exports.postLoginOrRegisterWithEmailUrl = (req, res, next) => {
           res.redirect(req.header('Referer') || '/login-with-email-url');
         })
         .catch((err) => {
+          console.log('====? eerrr', err);
           req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
           res.redirect(req.header('Referer') || '/login-with-email-url');
         });
@@ -169,18 +170,18 @@ exports.postRegisterWithToken = (req, res, next) => {
   const userModel = req.userModel;
 
   /**
-   * Set Values on register
+   * Set Values for user; validation is taken care of in middleware
    */
   userModel.set('firstName', firstName);
   userModel.set('lastName', lastName);
   userModel.set('postcode', postcode);
 
+  /**
+   * After succesfull registration redirect to token login url, for automagic login
+   */
   userModel
   .save()
   .then((userReponse) => {
-    /**
-     * After succesfull registration redirect to token login url, for automagic login
-     */
     const user = userReponse.serialize();
     res.redirect(tokenUrl.getUrl(user, req.client, token));
   })
@@ -188,14 +189,32 @@ exports.postRegisterWithToken = (req, res, next) => {
 
 };
 
-exports.loginWithToken = [
-  passport.authenticate('url', {
-    successReturnToOrRedirect: '/',
-    failureRedirect: '/login-with-token',
-    session: true,
-    optional: false
-  }),
-];
+
+exports.loginWithToken =  (req, res, next) => {
+  passport.authenticate('url', function(err, user, info) {
+    if (err) { return next(err); }
+    // Redirect if it fails
+    console.log('====> user 1', user);
+
+    if (!user) {
+      console.log('====> user 5', user);
+
+      return res.redirect(`/login-with-email-url?clientId=${req.client.clientId}`);
+    }
+
+    req.logIn(user, function(err) {
+      if (err) { return next(err); }
+
+      // Redirect if it succeeds
+      const authorizeUrl = `/dialog/authorize?redirect_uri=${req.client.redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+    //  const authorizeUrl = '/account';
+      return res.redirect(authorizeUrl);
+    });
+  })(req, res, next);
+};
+
+
+
 
 /**
  * Logout of the system and redirect to root

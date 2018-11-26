@@ -14,7 +14,6 @@ var UrlStrategy = function (options, verify) {
     this._passReqToCallback = false;
     this.failRedirect = options.failRedirect;
     this.varName = options.varName;
-
 }
 
 UrlStrategy.prototype.authenticate = function(req, options) {

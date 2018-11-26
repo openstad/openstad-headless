@@ -11,8 +11,7 @@ const validate                             = require('./validate');
 const User                                 = require('./models').User;
 const Client                               = require('./models').Client;
 const LoginToken                           = require('./models').LoginToken;
-
-const  UrlStrategy = require('./url-strategy');
+const  UrlStrategy                          = require('./url-strategy');
 
 
 /**
@@ -43,6 +42,7 @@ passport.use(new UrlStrategy({
     failRedirect : "/login-with-email-url",
     varName : "token"
   }, function (token, done) { // put your check logic here
+    console.log('=====> token', token);
     new LoginToken({token: token})
     /*.query((q) => {
       /**
@@ -58,6 +58,9 @@ passport.use(new UrlStrategy({
     }) */
     .fetch()
     .then((token) => {
+      console.log('=====> token', token);
+      console.log('=====> uerID', token.get('userId'));
+
       if (token) {
         new User({id: token.get('userId')})
           .fetch()
@@ -66,11 +69,15 @@ passport.use(new UrlStrategy({
             //  userModel: user,
               user: user.serialize()
             });*/
+            console.log('=====> user', user.serialize());
+
             return user.serialize();
           })
           .then(user => done(null, user))
           .catch((err) => {
-            next(err);
+            console.log('=====> errerrerrerr', err);
+
+            done(err);
           });
       } else {
         done("Token not found");

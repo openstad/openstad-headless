@@ -7,11 +7,8 @@ const hat = require('hat');
  *
  */
 const getUrl = (user, client, token) => {
-  const slug = user.firstName.length > 0 && user.lastName.length > 0 ?  'login-with-token' : 'register-with-token';
+  const slug = user.firstName && user.firstName.length > 0 &&  user.lastName && user.lastName.length > 0 ?  'login-with-token' : 'register-with-token';
   console.log('====> slug', slug);
-  console.log('====> user.firstName.length', user.firstName.length);
-  console.log('====> user.firstName.length', user.lastName.length);
-
   return `${appUrl}/${slug}?token=${token}&clientId=${client.clientId}`;
 }
 

@@ -4,6 +4,7 @@ exports.up = function(knex, Promise) {
     table.increments();
     table.string('name').notNullable();
     table.string('siteUrl').notNullable();
+    table.string('redirectUrl').notNullable();
     table.string('description').notNullable();
     table.string('clientId').notNullable();
     table.string('clientSecret').notNullable();
