@@ -14,7 +14,6 @@ exports.withAll = (req, res, next) => {
 
 exports.withOne = (req, res, next) => {
   const clientId = req.body.clientId ? req.body.clientId : req.query.clientId;
-  console.log('====> clientId', clientId);
 
   if (clientId) {
     new Client({

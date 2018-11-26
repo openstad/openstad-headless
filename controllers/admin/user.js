@@ -1,5 +1,5 @@
-const User = require('../models').User;
 const bcrypt = require('bcrypt');
+const User = require('../../models').User;
 const saltRounds = 10;
 
 exports.all = (req, res, next) => {

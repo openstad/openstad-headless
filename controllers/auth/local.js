@@ -1,6 +1,6 @@
 /**
  * Controller responsible for handling the logic for Local login
- * (standard login with password, forgot & register)
+ * (standard login with password & register)
  */
 
  'use strict';
@@ -34,23 +34,12 @@
  * @param   {Object} res - The response
  * @returns {undefined}
  */
-
 exports.login = (req, res) => {
   res.render('auth/login');
 };
 
 exports.register = (req, res) => {
   res.render('auth/register');
-};
-
-exports.forgot = (req, res) => {
-  res.render('auth/forgot');
-};
-
-exports.reset = (req, res) => {
-  res.render('auth/reset', {
-    token: req.query.token
-  });
 };
 
 exports.postRegister = (req, res, next) => {
@@ -82,11 +71,3 @@ exports.postRegister = (req, res, next) => {
 exports.postLogin = [
   passport.authenticate('local', { successReturnToOrRedirect: '/', failureRedirect: '/login' }),
 ];
-
-exports.postReset = (req, res, next) => {
-
-}
-
-exports.postForgot = (req, res, next) => {
-
-}

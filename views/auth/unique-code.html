@@ -1,0 +1,35 @@
+{% extends 'layouts/main.html' %}
+
+{% block body %}
+<div>
+		<div class="upper-box card-body">
+			<h1>Aanmelden</h1>
+			<p>
+        Vul hieronder je unieke code in om een OpenStad account aan te maken.
+        Deze code heb je thuis gestuurd gekregen van ons.
+			</p>
+			<form method="post" action="/login-with-email-url">
+					<div class="form-group">
+						<label>
+							Unieke code:
+						</label>
+						<input
+							type="text"
+							value=""
+							name="unique_code"
+							class="form-input"
+							required
+						/>
+					</div>
+					<input type="hidden" name="_csrf" value="{{csrfToken}}">
+					<input type="hidden" name="clientId" value="{{clientId}}">
+					<input type="submit" value="Aanmelden" class="btn btn-primary">
+			</form>
+		</div>
+		<br />
+		<p>
+			Let op, de unieke code is hoofdlettergevoelig! Werkt deze nog steeds niet?
+			<a href="mailto:info@openstad.nl">neem contact met ons op.</a>
+		</p>
+</div>
+{% endblock %}

@@ -1,5 +1,5 @@
-const Client = require('../models').Client;
 const hat = require('hat');
+const Client = require('../../models').Client;
 
 exports.all = (req, res, next) => {
   res.render('client/all', {

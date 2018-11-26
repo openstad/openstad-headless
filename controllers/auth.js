@@ -8,15 +8,6 @@ const login             = require('connect-ensure-login');
 const tokenUrl          = require('../services/tokenUrl');
 const emailService      = require('../services/email');
 
-
-exports.loginWithEmailUrl = (req, res) => {
-  res.render('auth/login-with-email-url', {
-    clientId: req.query.clientId,
-  });
-};
-
-
-
 exports.postLoginOrRegisterWithEmailUrl = (req, res, next) => {
   /**
    * Check if user exists
@@ -84,10 +75,6 @@ exports.postLoginOrRegisterWithEmailUrl = (req, res, next) => {
       });
     }
 }
-
-
-
-
 
 /**
  * Logout of the system and redirect to root
