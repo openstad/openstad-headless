@@ -23,10 +23,12 @@
     "hat": "0.0.3",
     "jsonwebtoken": "^7.2.1",
     "knex": "^0.15.2",
+    "less": "^3.8.1",
     "moment-timezone": "^0.5.23",
     "mysql": "^2.16.0",
     "nodemailer": "^2.3.0",
     "nodemon": "^1.18.6",
+    "npm-run-all": "^4.1.5",
     "nunjucks": "^3.1.3",
     "oauth2orize": "^1.0.x",
     "passport": "^0.3.x",
@@ -45,7 +47,10 @@
     "test": "mocha test test/db test/config",
     "test:watch": "npm run test -- --watch",
     "test:integration": "mocha test/integration",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "watch": "npm-run-all --parallel watch:*",
+    "watch:css": "nodemon -e less -w public/css -x npm run build:css",
+    "build:css": "lessc public/css/main.less > public/css/main.css"
   },
   "engines": {
     "node": ">=6.7.0",

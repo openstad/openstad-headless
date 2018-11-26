@@ -1,10 +1,9 @@
-{% extends 'layout-login.html' %}
+{% extends 'layouts/main.html' %}
 
 {% block body %}
-<div id="register">
-	<div class="card">
+<div>
 		<div class="upper-box card-body">
-			<legend>Registreren of inloggen <br />per e-mail</legend>
+			<h1>Registreren of inloggen <br /> per e-mail</h1>
 			<p>
 				Je ontvangt per email een link waarmee je kan inloggen.
 				Hierna ben je gelijk ingelogd voor 6 maanden of totdat je uitlogt.
@@ -14,20 +13,28 @@
 	    </p>
 			<form method="post" action="/login-with-email-url">
 					<div class="form-group">
+						<label>
+							Emailadres:
+						</label>
 						<input
 							type="email"
 							value=""
 							name="email"
-							placeholder="E-mail"
 							class="form-input"
 							required
 						/>
 					</div>
 					<input type="hidden" name="_csrf" value="{{csrfToken}}">
 					<input type="hidden" name="clientId" value="{{clientId}}">
-					<input type="submit" value="Versturen e-mail" class="btn btn-primary">
+					<input type="submit" value="Stuur link" class="btn btn-primary">
 			</form>
 		</div>
-	</div>
+		<br />
+		<p>
+			Geen mail gekregen na het versturen van de link?
+			Kijk dan in je spam-folder of
+			<a href="mailto:info@openstad.nl">neem contact met ons op.</a>
+		</p>
+
 </div>
 {% endblock %}

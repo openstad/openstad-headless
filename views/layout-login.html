@@ -6,9 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- Style sheets -->
-  <link rel="stylesheet" href="/stylesheets/spectre.min.css">
-  <link rel="stylesheet" href="/stylesheets/spectre-icons.min.css">
-  <link rel="stylesheet" type="text/css" href="/stylesheets/base.css">
+  <link rel="stylesheet" type="text/css" href="/css/main.css">
+
   <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
   <script type="text/javascript" src="/javascripts/jquery.validate.min.js"></script>
   <script type="text/javascript" src="/javascripts/jquery.validate.nl.js"></script>
@@ -16,17 +15,10 @@
 
 </head>
 <body>
-  <div class="uk-section uk-section-muted">
-    <br />
-    <div class="center-block">
-      {% include 'elements/logo.html' %}
-    </div>
-    <br />
     {% include 'elements/flash.html' %}
 
     <div class="small-container">
       {% block body %}{% endblock %}
     </div>
-  </div>
 </body>
 </html>

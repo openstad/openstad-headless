@@ -1,0 +1,111 @@
+.form-group {
+
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="password"],
+  textarea {
+    display: block;
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    border: 1px solid #888;
+    box-shadow: none;
+    padding: 0 10px;
+    max-width: 300px;
+  }
+
+  textarea {
+    height: 80px;
+    line-height: 1.2;
+    padding-top: 15px;
+  }
+}
+
+
+#idea-form .form-group, #article-form .form-group{
+  margin: 70px 0;
+}
+
+label.error {
+  margin: 10px 0;
+  color: red;
+  font-weight: 700;
+}
+
+.comment-form .error {
+  float: right;
+  clear: both;
+}
+
+.select, .text-input {
+  background-color: white;
+  font-size: 16px;
+  font-weight: 500;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: normal;
+  letter-spacing: normal;
+  color: #000000;
+  border: 1px solid #787878;
+  height: 44px;
+  border-radius: 0;
+}
+
+.select {
+  outline: 1px solid #787878;
+  outline-offset: -1px;
+  border:0;
+}
+
+
+.textarea {
+  border: solid 1px #787878;
+  min-height: 180px;
+}
+
+.radio input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+}
+.radio .radio-label {
+  padding: 0;
+  font-size: 14px;
+  font-family: 'Avenir_Custom';
+}
+.radio input[type="radio"] + .radio-label:before {
+  content: '';
+  background: #ffffff;
+  border-radius: 100%;
+  border: 1px solid #b4b4b4;
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  position: relative;
+  top: -0.2em;
+  margin-right: 1em;
+  vertical-align: top;
+  cursor: pointer;
+  text-align: center;
+  transition: all 250ms ease;
+}
+.radio input[type="radio"]:checked + .radio-label:before {
+  background-color: #010101;
+  box-shadow: inset 0 0 0 5px #ffffff;
+}
+.radio input[type="radio"]:focus + .radio-label:before {
+  outline: none;
+  border-color: #3197EE;
+}
+.radio input[type="radio"]:disabled + .radio-label:before {
+  box-shadow: inset 0 0 0 4px #f4f4f4;
+  border-color: #b4b4b4;
+  background: #b4b4b4;
+}
+.radio input[type="radio"] + .radio-label:empty:before {
+  margin-right: 0;
+}
+textarea:disabled {
+  background: #efefef;
+  border: none;
+}

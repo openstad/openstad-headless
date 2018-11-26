@@ -1,0 +1,165 @@
+header {
+	box-sizing: border-box;
+	height: 110px;
+	margin: 0 0;
+	padding: 0 15px;
+	position: relative;
+	width: 100%;
+
+	@media @screen-md {
+		width: 90%;
+	}
+
+	@media screen and (max-width: @screen-sm) {
+		height: 63px;
+		width: 100%;
+	}
+
+	@media screen and (max-width: @screen-sm) {
+		padding: 0;
+	}
+
+	h2 {
+		@media screen and (max-width: 341px) {
+			font-size: 16px;
+		}
+		@media screen and (max-width: 411px) {
+			font-size: 16px;
+		}
+	}
+	.fold {
+		@media screen and (max-width: 341px) {
+			display: none;
+		}
+		@media screen and (max-width: 411px) {
+			display: none;
+		}
+	}
+
+	a:visited h1, h1 {
+		box-sizing: border-box;
+	  color: black;
+		font-family: 'Avenir_Custom'-Medium;
+	  font-size: 22px;
+	  font-weight: 500;
+	  right: 0;
+	  line-height: 1em;
+	  margin: 0;
+	  max-width: 485px;
+	  text-decoration: none;
+	  padding-top: 22px;
+		float: right;
+
+		@media screen and (max-width: 411px) {
+			font-size: 17px;
+		}
+		@media screen and (max-width: 341px) {
+
+			font-size: 15px;
+		}
+
+		@media @screen-sm {
+			font-size: 18px;
+			line-height: 22px;
+			text-align: right;
+			/*right: 10px;
+			top: 8px;*/
+		}
+	}
+
+
+}
+
+
+.logo-container {
+	position: absolute;
+	top: 10px;
+	left: 0;
+
+	@media screen and (max-width: 991px) {
+		left: 28px;
+	}
+
+	@media screen and (max-width: @screen-sm) {
+		top: 0;
+	}
+
+	#amsterdam {
+		color: #ec0000;
+		font-family: 'Avenir_Custom';
+		top: 15px;
+		left: 10px;
+		font-size: 15px;
+		line-height: 1;
+		font-weight: 800;
+		position: absolute;
+
+		@media screen and (max-width: 411px) {
+			left: 7px;
+			font-size: 13px;
+			line-height: 14px;
+		}
+	}
+
+	img {
+		border: 0;
+    height: 65px;
+    width: auto;
+    left: -19px;
+    top: 15px;
+    position: absolute;
+    display: block;
+    max-width: none;
+
+		@media screen and (max-width: @screen-sm) {
+			height: 39px;
+	    left: -13px;
+		}
+
+		@media @screen-lg  {
+			left: 0;
+		}
+
+		@media @screen-sm {
+			width: 12px;
+		}
+
+		@media screen and (max-width: 341px) {
+		/*	width: 10px;
+			padding-bottom: 40px;
+			padding-top: 20px;*/
+		}
+	}
+
+}
+
+* {
+	box-sizing: border-box;
+}
+
+/*
+.row {
+
+	:after {
+		//content: "";
+		display: table;
+		clear: both;
+	}
+
+	@media screen and (max-width: 695px) {
+			margin: 0;
+	}
+}
+*/
+
+/* Create two equal columns that floats next to each other */
+.column {
+	float: left;
+	width: 50%;
+	height: 100px; /* Should be removed. Only for demonstration */
+
+	@media screen and (max-width: 310px) {
+		height: 50px;
+		width: 100%;
+	}
+}
