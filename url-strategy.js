@@ -24,7 +24,7 @@ UrlStrategy.prototype.authenticate = function(req, options) {
         self.success(user, info);
     }
 
-    this._verify(req.query[this.varName], verified);
+    this._verify(req.body[this.varName], verified, req.client);
 };
 
 module.exports = UrlStrategy;

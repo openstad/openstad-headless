@@ -56,8 +56,8 @@ exports.info = [
  exports.postAccount = [
    (req, res) => {
      const keysToUpdate = ['firstName', 'lastName', 'email', 'street_name', 'house_number', 'suffix', 'postcode', 'city', 'phone']
-     console.log('user ===>>>> ');
-     new User({id: req.user.id})
+
+     new User({ id: req.user.id })
        .fetch()
        .then((user) => {
          keysToUpdate.forEach((key) => {
@@ -66,15 +66,32 @@ exports.info = [
            }
          });
 
+         // Save user and redirect back
          user
            .save()
-           .then(() => {
-             req.flash('success', { msg: 'Opgeslagen' });
-             res.redirect('/account');
-           })
-           .catch((err) => {
-             next(err);
-           })
+           .then(() => { req.flash('success', { msg: 'Opgeslagen' }); res.redirect('/account'); })
+           .catch((err) => { next(err); })
        });
    }
  ];
+
+ exports.postPassword = (req, res, next) => {
+   new User({id: req.user.id})
+     .fetch()
+     .then((user) => {
+       if (req.body.password === 'password') {
+         value = bcrypt.hashSync(value, saltRounds);
+         user.set(key, );
+       }
+
+       user
+         .save()
+         .then(() => {
+           req.flash('success', { msg: 'Updated client!' });
+           res.redirect('/admin/client/' + response.id);
+         })
+         .catch((err) => {
+           next(err);
+         })
+     });
+ };

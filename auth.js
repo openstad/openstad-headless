@@ -11,7 +11,8 @@ const validate                             = require('./validate');
 const User                                 = require('./models').User;
 const Client                               = require('./models').Client;
 const LoginToken                           = require('./models').LoginToken;
-const  UrlStrategy                          = require('./url-strategy');
+const UniqueCode                           = require('./models').UniqueCode;
+const UrlStrategy                          = require('./url-strategy');
 
 
 /**
@@ -27,17 +28,18 @@ passport.use(new LocalStrategy(
     User
       .where({email: email})
       .fetch()
-      .then((user) => {
-        user = user.serialize();
-        return validate.user(user, password)
-      })
+      .then((user) => { user = user.serialize(); return validate.user(user, password) })
       .then(user => done(null, user))
-      .catch((error) => {
-         return done(null, false, { message: 'Onjuiste inlog.' });
-      });
+      .catch(error => done(null, false, { message: 'Onjuiste inlog.' }));
 }));
 
-
+/**
+ * UrlStrategy
+ *
+ * This strategy is used to authenticate users based upon a URL link
+ * For instance, user gives email, email contains url,
+ * user clicks url and is automatically logged in
+ */
 passport.use(new UrlStrategy({
     failRedirect : "/login-with-email-url",
     varName : "token"
@@ -58,27 +60,75 @@ passport.use(new UrlStrategy({
     }) */
     .fetch()
     .then((token) => {
-      console.log('=====> token', token);
-      console.log('=====> uerID', token.get('userId'));
-
       if (token) {
         new User({id: token.get('userId')})
           .fetch()
-          .then((user) => {
-            /*return done(null, {
-            //  userModel: user,
-              user: user.serialize()
-            });*/
-            console.log('=====> user', user.serialize());
-
-            return user.serialize();
-          })
+          .then((user) => { return user.serialize(); })
           .then(user => done(null, user))
-          .catch((err) => {
-            console.log('=====> errerrerrerr', err);
+          .catch((err) => { done(err); });
+      } else {
+        done("Token not found");
+      }
+    });
+}));
 
-            done(err);
-          });
+
+passport.use(new UrlStrategy({
+    failRedirect : "/login-unique-code",
+    varName : "unique_code"
+  }, function (code, done, body) { // put your check logic here
+    new UniqueCode({
+      code: code,
+      clientId: body.clientId
+    })
+    /*.query((q) => {
+      /**
+       * Only select tokens that are younger then 2 days
+       * created_at is "bigger then" 48 hours ago
+       */
+       /*
+      const days = 2;
+      const msForADay = 86400000;
+      const timeAgo = new Date(date.setTime(date.getTime() + (days * msForADay)));
+      q.where('createdAt', '>=', timeAgo);
+      q.orderBy('createdAt', 'DESC');
+    }) */
+    .fetch()
+    .then((uniqueCode) => {
+      if (uniqueCode) {
+        const isUsed = uniqueCode.get('isUsed');
+        const userId = uniqueCode.get('userId');
+
+        if (isUsed) {
+          done("Token has been used");
+        } else if (userId) {
+          /**
+           * In case of existing user fetch the user
+           */
+          new User({id: userId})
+            .fetch()
+            .then((fetchedUser) => { return fetchedUser.serialize(); })
+            .then(user => done(null, user))
+            .catch((err) => { done(err); });
+        } else {
+          let user;
+          /**
+           * Create an "empty" user
+           * Initial token registration asks for no information
+           * Client can ask for more information after registration
+           * Not connected to existing users because of privacy reasons
+           */
+          new User({})
+            .save()
+            .then((newUser) => {
+              user = newUser;
+              // set userId in uniqueCode to user
+              uniqueCode.set('userId', newUser.get('id'));
+              return uniqueCode.save();
+            })
+            .then((response) => user.serialize())
+            .then(user => done(null, user))
+            .catch((err) => { done(err); });
       } else {
         done("Token not found");
       }
