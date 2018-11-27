@@ -23,6 +23,7 @@ const userMw           				 = require('./middleware/user');
 const tokenMw                  = require('./middleware/token');
 const bruteForce 							 = require('./middleware/bruteForce').default;
 const authMw                   = require('./middleware/auth');
+
 module.exports = function(app){
   app.get('/', authController.index);
 

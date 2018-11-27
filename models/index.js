@@ -37,3 +37,10 @@ exports.UniqueCode = bookshelf.Model.extend({
   hasTimestamps: true,
   hasTimestamps: ['createdAt',  'updatedAt']
 });
+
+
+exports.PasswordResetToken  = bookshelf.Model.extend({
+  tableName: 'password_reset_tokens',
+  hasTimestamps: true,
+  hasTimestamps: ['createdAt',  'updatedAt']
+});

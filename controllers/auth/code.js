@@ -19,7 +19,7 @@ exports.postLogin = (req, res, next) => {
 
     // Redirect if it fails to the original e-mail screen
     if (!user) {
-      return res.redirect(`/login-unique-code?clientId=${req.client.clientId}`);
+      return res.redirect(`/auth/code/login?clientId=${req.client.clientId}`);
     }
 
     req.logIn(user, function(err) {

@@ -35,17 +35,23 @@
  * @returns {undefined}
  */
 exports.login = (req, res) => {
-  res.render('auth/login');
+  res.render('auth/local/login');
 };
 
+/**
+ * Render the register.html
+ * @param   {Object} req - The request
+ * @param   {Object} res - The response
+ * @returns {undefined}
+ */
 exports.register = (req, res) => {
-  res.render('auth/register');
+  res.render('auth/local/register');
 };
 
 exports.postRegister = (req, res, next) => {
   const errors = [];
   const { email } = req.body;
-  
+
   if (errors.length === 0) {
     password = bcrypt.hashSync(password, saltRounds);
 
