@@ -12,20 +12,20 @@
  const emailService      = require('../../services/email');
 
 exports.login  = (req, res) => {
-  res.render('auth/login-with-email-url', {
+  res.render('auth/url/login', {
     clientId: req.query.clientId,
   });
 };
 
 exports.register = (req, res, next) => {
-  res.render('auth/register-with-token', {
+  res.render('auth/url/register', {
    token: req.query.token,
    user: req.user,
    client: req.client
   });
 }
 
-exports.postLoginOrRegisterWithEmailUrl = (req, res, next) => {
+exports.postLogin = (req, res, next) => {
   /**
    * Check if user exists
    */

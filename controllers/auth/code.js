@@ -8,7 +8,7 @@ const tokenUrl          = require('../../services/tokenUrl');
 const emailService      = require('../../services/email');
 
 exports.login = (req, res, next) => {
-  res.render('auth/unique-code', {
+  res.render('auth/code/login', {
     client: req.client
   });
 }

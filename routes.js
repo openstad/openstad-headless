@@ -8,7 +8,7 @@ const userController           = require('./controllers/user/user');
 const adminUserController      = require('./controllers/admin/user');
 const adminClientController    = require('./controllers/admin/client');
 
-// AUTH CONTROLLERs
+//AUTH CONTROLLERS
 const authChoose	 						 = require('./controllers/auth/choose');
 const authUrl 		 						 = require('./controllers/auth/url');
 const authForgot							 = require('./controllers/auth/forgot');
@@ -22,7 +22,7 @@ const clientMw      				   = require('./middleware/client');
 const userMw           				 = require('./middleware/user');
 const tokenMw                  = require('./middleware/token');
 const bruteForce 							 = require('./middleware/bruteForce').default;
-
+const authMw                   = require('./middleware/auth');
 module.exports = function(app){
   app.get('/', authController.index);
 
@@ -34,10 +34,9 @@ module.exports = function(app){
 	app.get('/login', bruteForce.prevent, clientMw.addOne, choose.index);
 
 	/**
-	 * Shared middleware for all routes
+	 * Shared middleware for all auth routes, adding client and per
 	 */
 	app.use('/auth', [bruteForce.prevent, clientMw.addOne]);
-
 
 	/**
 	 * Login & register with local login
@@ -46,10 +45,10 @@ module.exports = function(app){
 	app.use('/auth/local', [clientMw.setAuthType('Local'), clientMw.validate]);
 
 	//routes
-	app.get('/auth/local/login', 			authLocal.login);
-	app.post('/auth/local/login', 		authMw.validateLogin, authLocal.postLogin);
-	app.get('/auth/local/register', 	authLocal.register);
-	app.post('/auth/local/register',	userMw.validateUser, authLocal.postRegister);
+	app.get('/auth/local/login', authLocal.login);
+	app.post('/auth/local/login', authMw.validateLogin, authLocal.postLogin);
+	app.get('/auth/local/register', authLocal.register);
+	app.post('/auth/local/register', userMw.validateUser, authLocal.postRegister);
 
 	/**
 	 * Deal with forgot PW
@@ -78,6 +77,7 @@ module.exports = function(app){
 	 */
 	app.use('/auth/digid', [clientMw.setAuthType('DigiD'), clientMw.validate]);
  	app.get('/auth/digid/login', authDigiD.login);
+  app.post('/auth/digid/login', authDigiD.postLogin);
 
 	/**
 	 * Auth routes for UniqueCode
@@ -95,7 +95,7 @@ module.exports = function(app){
 	/**
 	 * Logout (all types :))
 	 */
-	app.get('/logout', clientMw.addOne, authController.logout);
+	app.get('/logout', clientMw.addOne, authLocal.logout);
 
 	/**
 	 * Show account, add client, but not obligated

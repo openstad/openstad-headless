@@ -22,29 +22,20 @@ exports.edit = (req, res, next) => {
  */
 exports.create = (req, res, next) => {
   const { name, description } = req.body;
-
-  /**
-   * Generate unique clientId & secret
-   */
   const rack =  hat.rack();
-  const clientId = rack();
-  const clientSecret = rack();
-  const data = {
-    name: name,
-    description: description,
-    clientId: clientId,
-    clientSecret: clientSecret
-  };
 
-  new Client(data)
-  .save()
-  .then((response) => {
-    req.flash('success', { msg: 'Succesfully created '});
-    res.redirect('/admin/client/' + response.id  || '/');
+  new Client({
+      name: name,
+      description: description,
+      clientId: rack(),
+      clientSecret: rack()
   })
-  .catch((err) => {
-    next(err);
-  })
+    .save()
+    .then((response) => {
+      req.flash('success', { msg: 'Succesfully created '});
+      res.redirect('/admin/client/' + response.id  || '/');
+    })
+    .catch((err) => { next(err); });
 }
 
 exports.update = (req, res) => {
@@ -58,7 +49,5 @@ exports.update = (req, res) => {
       req.flash('success', { msg: 'Updated client!'});
       res.redirect('/admin/client/' + response.id  || '/');
     })
-    .catch((err) => {
-      next(err);
-    })
+    .catch((err) => { next(err); })
 }

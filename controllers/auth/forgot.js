@@ -10,13 +10,13 @@
  const User              = require('../../models').User;
  const tokenUrl          = require('../../services/tokenUrl');
  const emailService      = require('../../services/email');
- 
+
  exports.forgot = (req, res) => {
-   res.render('auth/forgot');
+   res.render('auth/forgot/forgot');
  };
 
  exports.reset = (req, res) => {
-   res.render('auth/reset', {
+   res.render('auth/forgot/reset', {
      token: req.query.token
    });
  };

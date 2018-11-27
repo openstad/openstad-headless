@@ -45,20 +45,14 @@ exports.register = (req, res) => {
 exports.postRegister = (req, res, next) => {
   const errors = [];
   const { email } = req.body;
-
-  //if (req.user) {
-//    errors.push('Er bestaat al een account voor deze email');
-//  }
-
+  
   if (errors.length === 0) {
     password = bcrypt.hashSync(password, saltRounds);
 
     new User({ firstName, lastName, email, password })
-    .save()
-    .then(() => {
-      res.redirect('/login');
-    })
-    .catch((err) => { next(err) });
+      .save()
+      .then(() => { res.redirect('/login'); })
+      .catch((err) => { next(err) });
   } else {
     req.flash('error', { errors });
     res.redirect('/register');
