@@ -6,6 +6,7 @@ const login             = require('connect-ensure-login');
 const User              = require('../../models').User;
 const tokenUrl          = require('../../services/tokenUrl');
 const emailService      = require('../../services/email');
+const authCodeConfig    = require('../../config/auth').get('UniqueCode');
 
 exports.login = (req, res, next) => {
   res.render('auth/code/login', {
@@ -19,7 +20,7 @@ exports.postLogin = (req, res, next) => {
 
     // Redirect if it fails to the original e-mail screen
     if (!user) {
-      return res.redirect(`/auth/code/login?clientId=${req.client.clientId}`);
+      return res.redirect(`${authCodeConfig.loginUrl}?clientId=${req.client.clientId}`);
     }
 
     req.logIn(user, function(err) {

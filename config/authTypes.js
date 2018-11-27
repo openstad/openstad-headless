@@ -5,8 +5,7 @@ const formatLoginUrl = (slug) => {
 const formatRegisterUrl = (slug) => {
   return `/auth/${slug}/register`;
 }
-
-export.types = {
+const types = {
   [
     key: 'UniqueCode',
     label: 'Unieke code',
@@ -28,4 +27,11 @@ export.types = {
     label: 'Digid code',
     loginUrl: formatLoginUrl('digid'),
   ],
+};
+
+const get = (key) => {
+  return types.find(type => type.key === key);
 }
+
+export.types = types;
+export.get = get;

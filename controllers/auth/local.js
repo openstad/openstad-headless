@@ -11,8 +11,7 @@
  const hat               = require('hat');
  const login             = require('connect-ensure-login');
  const User              = require('../../models').User;
- const tokenUrl          = require('../../services/tokenUrl');
- const emailService      = require('../../services/email');
+ const authLocalConfig   = require('../../config/auth').get('UniqueCode');
 
  /**
   * Render the index.html or index-with-code.js depending on if query param has code or not
@@ -57,7 +56,7 @@ exports.postRegister = (req, res, next) => {
 
     new User({ firstName, lastName, email, password })
       .save()
-      .then(() => { res.redirect('/login'); })
+      .then(() => { res.redirect(authLocalConfig.loginUrl); })
       .catch((err) => { next(err) });
   } else {
     req.flash('error', { errors });

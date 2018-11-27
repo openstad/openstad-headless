@@ -10,7 +10,10 @@
  const User              = require('../../models').User;
  const tokenUrl          = require('../../services/tokenUrl');
  const emailService      = require('../../services/email');
- const password           = require('../../services/password');
+ const password          = require('../../services/password');
+ const authLocalConfig   = require('../../config/auth').get('Local');
+
+
  exports.forgot = (req, res) => {
    res.render('auth/forgot/forgot');
  };
@@ -21,10 +24,25 @@
    });
  };
 
+/**
+ * In case of reset (validation is done with middleware)
+ */
  exports.postReset = (req, res, next) => {
+   new User({id: req.user.id})
+     .fetch()
+     .then((user) => {
+       user.set('password', bcrypt.hashSync(req.body.password, saltRounds));
 
-
-
+       user
+         .save()
+         .then(() => {
+           req.flash('success', { msg: 'Wachtwoord aangepast, je kan nu inloggen!' });
+           res.redirect(authLocalConfig.loginUrl);
+         })
+         .catch((err) => {
+           next(err);
+         })
+     });
  }
 
  exports.postForgot = (req, res, next) => {
@@ -42,12 +60,14 @@
        req.user = user.serialize();
        return password.formatResetLink(req.client, req.user)
      })
-     .then((url) => {
-
+     .then((url) => { return sendEmail(url, req.user, req.client); })
+     .then(() => {
+       req.flash('success', {msg: 'We hebben een e-mail naar je verstuurd'});
+       res.redirect(req.header('Referer') || authLocalConfig.loginUrl);
      })
      .catch((err) => {
-       req.flash('error', {msg: 'E-mail adres is niet beknd bij ons.'});
-       res.redirect(req.header('Referer') || '/login-with-email-url');
+       req.flash('error', {msg: 'E-mail adres is niet bekend bij ons.'});
+       res.redirect(req.header('Referer') || authLocalConfig.loginUrl);
      });
 
 

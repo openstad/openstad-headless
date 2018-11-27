@@ -99,3 +99,15 @@ exports.validatePassword = (req, res, next) => {
     res.redirect(req.header('Referer') || '/account');
   }
 }
+
+exports.validateEmail = (req, res, next) => {
+  if (
+    req.body.email
+    && req.body.email === req.user.email
+  ) {
+    next();
+  } else {
+    req.flash('error', {msg: 'Incorrect wachtwoord'});
+    res.redirect(req.header('Referer') || '/account');
+  }
+}

@@ -79,16 +79,13 @@ exports.info = [
    new User({id: req.user.id})
      .fetch()
      .then((user) => {
-       if (req.body.password === 'password') {
-         value = bcrypt.hashSync(value, saltRounds);
-         user.set(key, );
-       }
+       user.set('password', bcrypt.hashSync(req.body.password, saltRounds));
 
        user
          .save()
          .then(() => {
-           req.flash('success', { msg: 'Updated client!' });
-           res.redirect('/admin/client/' + response.id);
+           req.flash('success', { msg: 'Wachtwoord aangepast, je kan nu inloggen!' });
+           res.redirect(authLocalConfig.loginUrl);
          })
          .catch((err) => {
            next(err);

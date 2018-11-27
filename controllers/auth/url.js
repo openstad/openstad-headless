@@ -2,14 +2,15 @@
  * Controller responsible for handling the logic for Url login
  * (login in with a link, for now send by e-mail)
  */
- const passport          = require('passport');
- const bcrypt            = require('bcrypt');
- const saltRounds        = 10;
- const hat               = require('hat');
- const login             = require('connect-ensure-login');
- const User              = require('../../models').User;
- const tokenUrl          = require('../../services/tokenUrl');
- const emailService      = require('../../services/email');
+const passport          = require('passport');
+const bcrypt            = require('bcrypt');
+const saltRounds        = 10;
+const hat               = require('hat');
+const login             = require('connect-ensure-login');
+const User              = require('../../models').User;
+const tokenUrl          = require('../../services/tokenUrl');
+const emailService      = require('../../services/email');
+const authUrlConfig     = require('../../config/auth').get('Url');
 
 exports.login  = (req, res) => {
   res.render('auth/url/login', {
@@ -50,7 +51,7 @@ exports.postLogin = (req, res, next) => {
     })
     .catch((err) => {
       req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
-      res.redirect(req.header('Referer') || '/login-with-email-url');
+      res.redirect(req.header('Referer') || authUrlConfig.loginUrl);
     });
 
     /**

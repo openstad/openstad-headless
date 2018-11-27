@@ -23,6 +23,7 @@ const userMw           				 = require('./middleware/user');
 const tokenMw                  = require('./middleware/token');
 const bruteForce 							 = require('./middleware/bruteForce').default;
 const authMw                   = require('./middleware/auth');
+const passwordResetMw          = require('./middleware/passwordReset');
 
 module.exports = function(app){
   app.get('/', authController.index);
@@ -56,8 +57,8 @@ module.exports = function(app){
 	 */
 	app.get('/auth/local/forgot', authForgot.forgot);
 	app.post('/auth/local/forgot', authForgot.postForgot);
-	app.get('/auth/local/reset', authForgot.reset);
-	app.post('/auth/local/reset', authForgot.postReset);
+	app.get('/auth/local/reset', passwordResetMw.validate, authForgot.reset);
+	app.post('/auth/local/reset', passwordResetMw.validate, userMw.addOne, userMw.validateEmail, autMw.validatePassword, authForgot.postReset);
 
 	/**
 	 * Auth routes for URL login
