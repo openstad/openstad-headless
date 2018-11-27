@@ -8,11 +8,15 @@ exports.up = function(knex, Promise) {
     table.string('description').notNullable();
     table.string('clientId').notNullable();
     table.string('clientSecret').notNullable();
-    table.timestamp('createdAt').defaultTo(knex.fn.now())
-    table.timestamp('updatedAt').defaultTo(knex.fn.now())
+    table.json('loginOptions').notNullable();
+    table.json('requiredFields');
+    table.timestamp('createdAt').defaultTo(knex.fn.now());
+    table.timestamp('updatedAt').defaultTo(knex.fn.now());
+    table.unique('clientId');
+    table.unique('clientSecret');
   });
 };
 
 exports.down = function(knex, Promise) {
-  knex.schema.dropTable('sites');
+  knex.schema.dropTable('clients');
 };

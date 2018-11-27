@@ -1,56 +1,109 @@
 const login                    = require('connect-ensure-login');
-const oauth2Controller         = require('./controllers/oauth2');
-const tokenController          = require('./controllers/token');
-const authController           = require('./controllers/auth');
-const userController           = require('./controllers/user');
-const adminUserController      = require('./controllers/adminUser');
-const adminClientController    = require('./controllers/adminClient');
 const ExpressBrute 					   = require('express-brute');
 
+//CONTROLERS
+const oauth2Controller 				 = require('./controllers/oauth/oauth2');
+const tokenController          = require('./controllers/oauth/token');
+const userController           = require('./controllers/user/user');
+const adminUserController      = require('./controllers/admin/user');
+const adminClientController    = require('./controllers/admin/client');
+
+// AUTH CONTROLLERs
+const authChoose	 						 = require('./controllers/auth/choose');
+const authUrl 		 						 = require('./controllers/auth/url');
+const authForgot							 = require('./controllers/auth/forgot');
+const authDigiD							 	 = require('./controllers/auth/digid');
+const authLocal							 	 = require('./controllers/auth/local');
+const authCode							 	 = require('./controllers/auth/code');
+
+//MIDDLEWARE
 const adminMiddleware          = require('./middleware/admin');
 const clientMw      				   = require('./middleware/client');
 const userMw           				 = require('./middleware/user');
 const tokenMw                  = require('./middleware/token');
-
-const bruteForce = new ExpressBrute(new ExpressBrute.MemoryStore(), {
-	freeRetries  : 10,
-	minWait      : 5000,
-	maxWait      : 900000, // 15 min
-	lifetime     : 86400, // 24 hours
-	failCallback : function( req, res, next, nextValidRequestDate ) {
-		var retryAfter = Math.ceil((nextValidRequestDate.getTime() - Date.now())/1000);
-		res.header('Retry-After', retryAfter);
-		res.locals.nextValidRequestDate = nextValidRequestDate;
-		res.locals.retryAfter           = retryAfter;
-		next(createError(429, {nextValidRequestDate: nextValidRequestDate}));
-	}
-});
+const bruteForce 							 = require('./middleware/bruteForce').default;
 
 module.exports = function(app){
   app.get('/', authController.index);
-  app.get('/login', authController.login);
-  app.get('/login-with-token', bruteForce.prevent, clientMw.withOne, authController.loginWithToken);
-	app.get('/register-with-token', tokenMw.addUser, clientMw.withOne, authController.registerWithToken);
-	app.get('/login-with-email-url', clientMw.withOne, authController.loginWithEmailUrl);
-	app.post('/login-with-email-url', clientMw.withOne, authController.postLoginOrRegisterWithEmailUrl);
 
-	//app.post('/login-with-token', bruteForce.prevent, ByPublicId, authController.postLoginOrRegisterWithEmailUrl);
-	app.post('/register-with-token', bruteForce.prevent, tokenMw.addUser, userMw.validateUser, clientMw.withOne, authController.postRegisterWithToken);
+	/**
+	 * Login routes for clients,
+	 * checks if one or more options of authentications is available
+	 * and either shows choice or redirects if one option
+	 */
+	app.get('/login', bruteForce.prevent, clientMw.addOne, choose.index);
 
-  app.get('/register', authController.register);
-  app.get('/forgot', authController.forgot);
-  app.get('/reset', authController.reset);
-
-  app.get('/logout', authController.logout);
-  app.get('/account', login.ensureLoggedIn(), userController.account);
-  app.post('/account', login.ensureLoggedIn(), userMw.validateUser, userController.postAccount);
-  app.post('/password', login.ensureLoggedIn(), userMw.validatePassword, userController.postAccount);
+	/**
+	 * Shared middleware for all routes
+	 */
+	app.use('/auth', [bruteForce.prevent, clientMw.addOne]);
 
 
-  app.post('/login', bruteForce.prevent, authController.postLogin);
-  app.post('/register', bruteForce.prevent, userMw.validateUser, authController.postRegister);
-  app.post('/forgot', bruteForce.prevent, authController.postForgot);
-  app.post('/reset', bruteForce.prevent, authController.postReset);
+	/**
+	 * Login & register with local login
+	 */
+	//shared middleware
+	app.use('/auth/local', [clientMw.setAuthType('Local'), clientMw.validate]);
+
+	//routes
+	app.get('/auth/local/login', 			authLocal.login);
+	app.post('/auth/local/login', 		authMw.validateLogin, authLocal.postLogin);
+	app.get('/auth/local/register', 	authLocal.register);
+	app.post('/auth/local/register',	userMw.validateUser, authLocal.postRegister);
+
+	/**
+	 * Deal with forgot PW
+	 */
+	app.get('/auth/local/forgot', authForgot.forgot);
+	app.post('/auth/local/forgot', authForgot.postForgot);
+	app.get('/auth/local/reset', authForgot.reset);
+	app.post('/auth/local/reset', authForgot.postReset);
+
+	/**
+	 * Auth routes for URL login
+	 */
+	 // shared middleware
+	app.use('/auth/url', [clientMw.setAuthType('Url'), clientMw.validate]);
+
+	// routes
+	app.get('/auth/url/login', authUrl.login);
+	app.post('/auth/url/login', authUrl.postLogin);
+	app.get('/auth/url/authenticate', authUrl.authenticate);
+	app.get('/auth/url/register', authUrl.register);
+	app.post('/auth/url/register', authUrl.postRegister);
+
+	/**
+	 * Auth routes for DigiD
+	 * @TODO: available routes
+	 */
+	app.use('/auth/digid', [clientMw.setAuthType('DigiD'), clientMw.validate]);
+ 	app.get('/auth/digid/login', authDigiD.login);
+
+	/**
+	 * Auth routes for UniqueCode
+	 */
+	app.use('/auth/code', [clientMw.setAuthType('UniqueCode'), clientMw.validate]);
+	app.get('/auth/code/login', authCode.login);
+	app.post('/auth/code/login', authCode.postLogin);
+
+	/**
+	 * Register extra info;
+	 * In case client specifies required fields
+	 */
+//	app.get('/register/info')
+
+	/**
+	 * Logout (all types :))
+	 */
+	app.get('/logout', clientMw.addOne, authController.logout);
+
+	/**
+	 * Show account, add client, but not obligated
+	 */
+	app.use('/user', [login.ensureLoggedIn(), clientMw.addOne]);
+  app.get('/account', userController.account);
+  app.post('/account', userMw.validateUser, userController.postAccount);
+  app.post('/password', userMw.validatePassword, userController.postAccount);
 
   app.get('/dialog/authorize', oauth2Controller.authorization);
   app.post('/dialog/authorize/decision', bruteForce.prevent, oauth2Controller.decision);

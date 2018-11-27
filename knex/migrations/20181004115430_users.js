@@ -15,6 +15,7 @@ exports.up = function(knex, Promise) {
     table.string('resetPasswordToken');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
+    table.unique('email');
   });
 };
 
