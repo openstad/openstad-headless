@@ -8,8 +8,9 @@ exports.up = function(knex, Promise) {
     table.string('description').notNullable();
     table.string('clientId').notNullable();
     table.string('clientSecret').notNullable();
-    table.json('loginOptions').notNullable();
-    table.json('requiredFields');
+    table.json('authTypes').notNullable();
+    table.json('exposedUserFields');
+    table.json('requiredUserFields');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
     table.unique('clientId');

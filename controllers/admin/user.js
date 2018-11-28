@@ -3,19 +3,19 @@ const User = require('../../models').User;
 const saltRounds = 10;
 
 exports.all = (req, res, next) => {
-  res.render('user/all', {
+  res.render('admin/user/all', {
     users: req.users
   });
 }
 
 exports.edit = (req, res) => {
-  res.render('user/edit', {
+  res.render('admin/user/edit', {
     user: req.user
   });
 }
 
 exports.new = (req, res) => {
-  res.render('user/new');
+  res.render('admin/user/new');
 }
 
 /**
@@ -49,7 +49,7 @@ exports.create = (req, res, next) => {
 }
 
 exports.update = (req, res) => {
-  const keysToUpdate = ['firstName', 'lastName', 'email', 'street_name', 'house_number', 'suffix', 'postcode', 'city', 'phone', 'password'];
+  const keysToUpdate = ['firstName', 'lastName', 'email', 'street_name', 'house_number', 'suffix', 'postcode', 'city', 'phone', 'password', 'requiredFields', 'exposedFields', 'authTypes'];
 
   new User({id: req.user.id})
     .fetch()
@@ -67,8 +67,8 @@ exports.update = (req, res) => {
       user
         .save()
         .then(() => {
-          req.flash('success', { msg: 'Updated client!' });
-          res.redirect('/admin/client/' + response.id);
+          req.flash('success', { msg: 'Updated user!' });
+          res.redirect('/admin/client/user' + response.id);
         })
         .catch((err) => {
           next(err);

@@ -1,6 +1,6 @@
 const User = require('../models').User;
 const { check } = require('express-validator/check')
-const userFields = require('../config/userValidation').fields;
+const userProfileValidation = require('../config/user').validation.profile;
 
 exports.withAll = (req, res, next) => {
   User
@@ -72,7 +72,7 @@ exports.validateUser = (req, res, next) => {
     req.body.email = req.user.email;
   }
 
-  req.check(userFields);
+  req.check(userProfileValidation);
 
   req.getValidationResult()
 

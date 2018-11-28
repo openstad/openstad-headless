@@ -1,35 +1,60 @@
 const hat = require('hat');
 const Client = require('../../models').Client;
+const userFields = require('../../config/user').fields;
+const authTypes = require('../../config/authTypes').types;
 
+/**
+ * [all description]
+ * @param  {[type]}   req  [description]
+ * @param  {[type]}   res  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
 exports.all = (req, res, next) => {
-  res.render('client/all', {
+  res.render('admin/client/all', {
     clients: req.clients
   });
 }
 
+/**
+ * [new description]
+ * @param  {[type]}   req  [description]
+ * @param  {[type]}   res  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
 exports.new = (req, res, next) => {
-  res.render('client/new');
+  res.render('admin/client/new', {
+    requiredUserFields: userFields,
+    exposedUserFields: userFields,
+    authTypes: authTypes
+  });
 }
 
+
 exports.edit = (req, res, next) => {
-  res.render('client/edit', {
-    client: req.client
+  res.render('admin/client/edit', {
+    client: req.client,
+    requiredUserFields: userFields,
+    exposedUserFields: userFields,
+    authTypes: authTypes
   });
 }
 
 /**
- * @TODO validation
+ * [create description]
+ * @param  {[type]}   req  [description]
+ * @param  {[type]}   res  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
  */
 exports.create = (req, res, next) => {
-  const { name, description } = req.body;
-  const rack =  hat.rack();
+  const { name, description, exposedFields, requiredFields, authTypes } = req.body;
+  const rack = hat.rack();
+  const clientId = rack();
+  const clientSecret = rack();
 
-  new Client({
-      name: name,
-      description: description,
-      clientId: rack(),
-      clientSecret: rack()
-  })
+  new Client({ name, description, exposedFields, requiredFields, authTypes, clientId, clientSecret })
     .save()
     .then((response) => {
       req.flash('success', { msg: 'Succesfully created '});
@@ -45,9 +70,9 @@ exports.update = (req, res) => {
   req.client.set('description', description);
   req.client
     .save()
-    .then(() => {
+    .then((response) => {
       req.flash('success', { msg: 'Updated client!'});
-      res.redirect('/admin/client/' + response.id  || '/');
+      res.redirect('/admin/client/' + response.get('id')  || '/');
     })
     .catch((err) => { next(err); })
 }

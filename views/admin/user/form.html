@@ -58,6 +58,21 @@
 
   {% include 'user/address-form.html' %}
 
+
+  <h3> Roles per client </h3>
+  {% for client in clients %}
+    <h4> {{client.name}} <h4>
+    {% for role in roles %}
+      <label>
+        {{role.label}}
+        <input
+          type="checkbox"
+          name="{{client.key}}[{{role.key}}]"
+        />
+      </label>
+    {% endfor %}
+  {% endfor %}
+
   <button type="submit" class="btn">
     {% if user %}
     Save changes

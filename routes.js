@@ -7,6 +7,8 @@ const tokenController          = require('./controllers/oauth/token');
 const userController           = require('./controllers/user/user');
 const adminUserController      = require('./controllers/admin/user');
 const adminClientController    = require('./controllers/admin/client');
+const adminRoleController      = require('./controllers/admin/role');
+const adminCodeController      = require('./controllers/admin/code');
 
 //AUTH CONTROLLERS
 const authChoose	 						 = require('./controllers/auth/choose');
@@ -24,6 +26,8 @@ const tokenMw                  = require('./middleware/token');
 const bruteForce 							 = require('./middleware/bruteForce').default;
 const authMw                   = require('./middleware/auth');
 const passwordResetMw          = require('./middleware/passwordReset');
+const roleMw                   = require('./middleware/role');
+const codeMw                   = require('./middleware/code');
 
 module.exports = function(app){
   app.get('/', authController.index);
@@ -53,7 +57,7 @@ module.exports = function(app){
 	app.post('/auth/local/register', userMw.validateUser, authLocal.postRegister);
 
 	/**
-	 * Deal with forgot PW
+	 * Deal with forgot password
 	 */
 	app.get('/auth/local/forgot', authForgot.forgot);
 	app.post('/auth/local/forgot', authForgot.postForgot);
@@ -126,18 +130,45 @@ module.exports = function(app){
   /**
    * Admin user routes
    */
-  app.get('/admin/users', adminMiddleware.ensure, userMw.withAll, adminUserController.all);
-  app.get('/admin/user/:userId', adminMiddleware.ensure, userMw.withOne, adminUserController.edit);
-  app.get('/admin/user', adminMiddleware.ensure, adminUserController.new);
-  app.post('/admin/user', adminMiddleware.ensure, adminUserController.create);
-  app.post('/admin/user/:userId', adminMiddleware.ensure, userMw.withOne, adminUserController.update);
+
+  //shared middlware for all admin routes
+  app.use('/admin/client', [login.ensureLoggedIn(), adminMiddleware.ensure]);
+
+  app.get('/admin/users', userMw.withAll, adminUserController.all);
+  app.get('/admin/user/:userId', userMw.withOne, adminUserController.edit);
+  app.get('/admin/user', adminUserController.new);
+  app.post('/admin/user', adminUserController.create);
+  app.post('/admin/user/:userId',  userMw.withOne, adminUserController.update);
 
   /**
    * Admin client routes
    */
-  app.get('/admin/clients', adminMiddleware.ensure, clientMw.withAll, adminClientController.all);
-  app.get('/admin/client/:clientId', adminMiddleware.ensure, clientMw.withOne, adminClientController.edit);
-  app.get('/admin/client', adminMiddleware.ensure, adminClientController.new);
-  app.post('/admin/client', adminMiddleware.ensure, adminClientController.create);
-  app.post('/admin/client/:clientId', adminMiddleware.ensure, clientMw.withOne, adminClientController.update);
+  app.get('/admin/clients', clientMw.withAll, adminClientController.all);
+  app.get('/admin/client/:clientId', clientMw.withOne, adminClientController.edit);
+  app.get('/admin/client', adminClientController.new);
+  app.post('/admin/client', adminClientController.create);
+  app.post('/admin/client/:clientId', clientMw.withOne, adminClientController.update);
+
+  /**
+   * Admin role routes
+   */
+  app.get('/admin/roles', roleMw.withAll, adminClientController.all);
+  app.get('/admin/role/:roleId', roleMw.withOne, adminClientController.edit);
+  app.get('/admin/role', adminRoleController.new);
+  app.post('/admin/role', adminRoleController.create);
+  app.post('/admin/role/:roleId', clientMw.withOne, adminRoleController.update);
+
+  /**
+   * Admin code routes
+   */
+  app.get('/admin/codes', codeMw.withAll, adminCodeController.all);
+  app.get('/admin/code', adminCodeController.new);
+  app.get('/admin/code/bulk', adminCodeController.bulk);
+  app.post('/admin/code/bulk', adminCodeController.postBulk);
+  app.post('/admin/code', adminCodeController.create);
+  //  app.get('/admin/code/:codeId', codeMw.withOne, adminCodeController.edit);
+
+//  app.post('/admin/code/:roleId', codeMw.withOne, adminCodeController.update);
+
+
 }

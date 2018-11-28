@@ -1,0 +1,26 @@
+<form
+  method="post"
+  action="/admin/client/{{client.id}}"
+>
+  <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+  <div class="form-group">
+    <label> Unique Code </label>
+    <input
+      type="text"
+      required
+      maxlength="60"
+      class="form-input"
+      {% if client %} value="{{code.code}}" {% endif %}
+    />
+  </div>
+
+  <select name="clientId">
+    {% for client in clients %}
+      <option value="client.id">{{client.name}}</option>
+    {% endfor %}
+  </select>
+
+  <button type="submit">
+    Save
+  </button>
+</form>

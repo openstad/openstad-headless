@@ -3,7 +3,6 @@ const bookshelf = require('bookshelf')(knex);
 const jsonColumns = require('bookshelf-json-columns');
 bookshelf.plugin(jsonColumns);
 
-
 exports.Client = bookshelf.Model.extend({
   tableName: 'clients',
   hasTimestamps: true,
@@ -16,7 +15,7 @@ exports.Client = bookshelf.Model.extend({
     return authTypes.map((authType) => {
       let configAuthType = configAuthTypes.find(type => type.key === authType.key);
       return Object.assign(authType, configAuthType);
-    })
+    });
   }
 });
 
@@ -38,6 +37,11 @@ exports.UniqueCode = bookshelf.Model.extend({
   hasTimestamps: ['createdAt',  'updatedAt']
 });
 
+exports.Role = bookshelf.Model.extend({
+  tableName: 'role',
+  hasTimestamps: true,
+  hasTimestamps: ['createdAt',  'updatedAt']
+});
 
 exports.PasswordResetToken  = bookshelf.Model.extend({
   tableName: 'password_reset_tokens',
