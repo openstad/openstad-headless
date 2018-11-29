@@ -1,4 +1,4 @@
-const UniqueCode = require('../../models').UniqueCode;
+const UniqueCode = require('../models').UniqueCode;
 
 exports.withOne = (req, res, next) => {
   const codeId = req.body.codeId ? req.body.codeId : req.params.codeId;

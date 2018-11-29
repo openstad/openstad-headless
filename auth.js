@@ -129,6 +129,7 @@ passport.use(new UrlStrategy({
             .then((response) => user.serialize())
             .then(user => done(null, user))
             .catch((err) => { done(err); });
+          }
       } else {
         done("Token not found");
       }

@@ -16,7 +16,7 @@ exports.validate = (req, res, next) => {
         next({
           name: 'NoTokenFound',
           status: 404,
-          message: 'Token not found or expired."
+          message: 'Token not found or expired.'
         });
       }
     })

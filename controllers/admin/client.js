@@ -1,7 +1,7 @@
 const hat = require('hat');
 const Client = require('../../models').Client;
 const userFields = require('../../config/user').fields;
-const authTypes = require('../../config/authTypes').types;
+const authTypes = require('../../config/auth').types;
 
 /**
  * [all description]

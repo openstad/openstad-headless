@@ -1,4 +1,4 @@
-const Role = require('../../models').Rolert;
+const Role = require('../models').Rolert;
 
 exports.withOne = (req, res, next) => {
   const codeId = req.body.codeId ? req.body.codeId : req.params.codeId;

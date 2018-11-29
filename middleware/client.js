@@ -1,5 +1,5 @@
-const Client = require('../../models').Client;
-const authTypesConfig = require('../../config').authTypes;
+const Client = require('../models').Client;
+const authTypesConfig = require('../config').authTypes;
 
 exports.withAll = (req, res, next) => {
   Client
@@ -36,7 +36,7 @@ exports.withOne = (req, res, next) => {
 /**
  * Add the login option
  */
-exports.setAuthType(authType) => {
+exports.setAuthType = (authType) => {
   return (req, res, next) => {
     req.authType = authType;
     next();
@@ -54,7 +54,7 @@ exports.validate = (req, res, next) => {
     next({
       name: 'BadClientError',
       status: 403,
-      message: 'No auth types were configured for client."
+      message: 'No auth types were configured for client.'
     });
   }
 
@@ -65,7 +65,7 @@ exports.validate = (req, res, next) => {
     next({
       name: 'BadClientError',
       status: 403,
-      message: 'Chosen auth type is not allowed for client."
+      message: 'Chosen auth type is not allowed for client.'
     });
   }
 

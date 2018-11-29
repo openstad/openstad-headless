@@ -5,7 +5,7 @@ const csv           = require("fast-csv");
 
 exports.all = (req, res, next) => {
   res.render('admin/code/all', {
-    roles: req.roles
+    codes: req.codes
   });
 }
 
@@ -17,12 +17,13 @@ exports.bulk = (req, res, next) => {
   res.render('admin/code/bulk');
 }
 
+/*
 exports.edit = (req, res, next) => {
   res.render('admin/code/edit', {
-    roles: req.role
+    code: req.code
   });
 }
-
+*/
 exports.postBulk = [upload.single('file'), (req, res, next) => {
   //var stream = fs.createReadStream("my.csv");
   const codes = [];
@@ -91,7 +92,7 @@ exports.postBulk = [upload.single('file'), (req, res, next) => {
           new UniqueCode({code: code, clientId: clientId})
             .save()
             .then(() => { codeStatus.processed = true; });
-        {}
+        }
       })
       .catch((error) => {
         codeStatus.error = true;

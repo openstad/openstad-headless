@@ -1,6 +1,14 @@
 <form
   method="post"
-  action="/admin/client/{{client.id}}"
+  action="/admin/code"
+  enctype="multipart/form-data"
+>
+
+<form
+  id="idea-form"
+  method="POST"
+  action="{{actionUrl}}"
+  class="add-warning-when-leaving-page"
 >
   <input type="hidden" name="_csrf" value="{{csrfToken}}" />
   <div class="form-group">

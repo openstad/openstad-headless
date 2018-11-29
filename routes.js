@@ -15,7 +15,7 @@ const authChoose	 						 = require('./controllers/auth/choose');
 const authUrl 		 						 = require('./controllers/auth/url');
 const authForgot							 = require('./controllers/auth/forgot');
 const authDigiD							 	 = require('./controllers/auth/digid');
-const authLocal							 	 = require('./controllers/auth/local');
+const authLocal							   = require('./controllers/auth/local');
 const authCode							 	 = require('./controllers/auth/code');
 
 //MIDDLEWARE
@@ -30,14 +30,14 @@ const roleMw                   = require('./middleware/role');
 const codeMw                   = require('./middleware/code');
 
 module.exports = function(app){
-  app.get('/', authController.index);
+  app.get('/', authLocal.index);
 
 	/**
 	 * Login routes for clients,
 	 * checks if one or more options of authentications is available
 	 * and either shows choice or redirects if one option
 	 */
-	app.get('/login', bruteForce.prevent, clientMw.addOne, choose.index);
+	app.get('/login', bruteForce.prevent, clientMw.addOne, authChoose.index);
 
 	/**
 	 * Shared middleware for all auth routes, adding client and per
@@ -166,6 +166,8 @@ module.exports = function(app){
   app.get('/admin/code/bulk', adminCodeController.bulk);
   app.post('/admin/code/bulk', adminCodeController.postBulk);
   app.post('/admin/code', adminCodeController.create);
+  app.post('/admin/code/destroy/:codeId', adminCodeController.destroy);
+
   //  app.get('/admin/code/:codeId', codeMw.withOne, adminCodeController.edit);
 
 //  app.post('/admin/code/:roleId', codeMw.withOne, adminCodeController.update);

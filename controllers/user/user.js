@@ -1,6 +1,7 @@
-const User = require('../../models').User;
-const passport = require('passport');
-const login  = require('connect-ensure-login');
+const passport  = require('passport');
+const login     = require('connect-ensure-login');
+const User      = require('../../models').User;
+
 
 /**
  * Simple informational end point, if you want to get information

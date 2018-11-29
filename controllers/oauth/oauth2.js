@@ -1,6 +1,13 @@
 'use strict';
-const Client = require('../models').Client;
-const User = require('../models').User;
+const login       = require('connect-ensure-login');
+const oauth2orize = require('oauth2orize');
+const passport    = require('passport');
+const config      = require('../../config');
+const db          = require('../../db');
+const utils       = require('../../utils');
+const validate    = require('../../validate');
+const Client      = require('../../models').Client;
+const User        = require('../../models').User;
 
 // Register supported grant types.
 //
@@ -9,13 +16,7 @@ const User = require('../models').User;
 // through a process of the user granting access, and the client exchanging
 // the grant for an access token.
 
-const config      = require('../config');
-const db          = require('../db');
-const login       = require('connect-ensure-login');
-const oauth2orize = require('oauth2orize');
-const passport    = require('passport');
-const utils       = require('../utils');
-const validate    = require('../validate');
+
 
 // create OAuth 2.0 server
 const server = oauth2orize.createServer();

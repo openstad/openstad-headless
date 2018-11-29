@@ -1,4 +1,4 @@
-const loginFields = require('../config/userValidation').loginFields;
+const loginFields = require('../config/user').loginFields;
 
 
 exports.validateLogin = (req, res, next) => {
