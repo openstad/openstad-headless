@@ -8,10 +8,13 @@
 				Voor {{client.name}} kan je kiezen hoe je wilt inloggen uit
         de volgende opties:
 			</p>
+
       {% for authType in authTypes %}
-        <a href="{{authType.loginUrl}}">
+        <a href="{{authType.loginUrl}}?clientId={{clientId}}" class="btn btn-primary">
           {{authType.label}}
         </a>
+				<hr />
+
       {% endfor %}
 		</div>
 

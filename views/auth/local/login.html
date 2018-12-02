@@ -2,8 +2,10 @@
 
 {% block body %}
   <!-- HTML login screen form -->
-  <form action="/login" method="POST" class="validate-form">
+  <h1> Inloggen </h1>
+  <form action="{{loginUrl}}" method="POST" class="validate-form">
     <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+    <input type="hidden" name="clientId" value="{{clientId}}" />
 
     <fieldset>
       <!-- Upper box with Title, username, and password -->

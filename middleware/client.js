@@ -13,6 +13,9 @@ exports.withAll = (req, res, next) => {
 }
 
 exports.withOne = (req, res, next) => {
+  console.log('req.body.clientIdreq.body.clientIdreq.body.clientId', req.body.clientId);
+  console.log('req.body', req.body);
+
   const clientId = req.body.clientId ? req.body.clientId : req.query.clientId;
 
   if (clientId) {
@@ -82,29 +85,22 @@ exports.setAuthType = (authType) => {
 }
 
 exports.validate = (req, res, next) => {
-  let authTypes = req.client.authTypes;
+  let authTypes = req.clientModel.getAuthTypes(req.clientModel);
   const allowedType = authTypes && authTypes.length > 0 ? authTypes.find(option => option.key === req.authType) : false;
 
   /**
    * Check if any login options are defined for the client, otherwise error!
    */
   if (!authTypes) {
-    next({
-      name: 'BadClientError',
-      status: 403,
-      message: 'No auth types were configured for client.'
-    });
+    throw new Error('No auth types selected');
   }
 
   /**
    * Check if auth type is allowed for client
    */
   if (!allowedType) {
-    next({
-      name: 'BadClientError',
-      status: 403,
-      message: 'Chosen auth type is not allowed for client.'
-    });
+    throw new Error('Auth types not allowed');
+
   }
 
   next();

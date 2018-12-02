@@ -14,8 +14,8 @@ exports.Client = bookshelf.Model.extend({
     const authTypes = JSON.parse(model.get('authTypes'));
 
     return authTypes.map((authType) => {
-      let configAuthType = configAuthTypes.find(type => type.key === authType.key);
-      return Object.assign(authType, configAuthType);
+      let configAuthType = configAuthTypes.find(type => type.key === authType);
+      return  configAuthType;
     });
   }
 });

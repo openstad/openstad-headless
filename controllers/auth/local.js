@@ -11,7 +11,7 @@
  const hat               = require('hat');
  const login             = require('connect-ensure-login');
  const User              = require('../../models').User;
- const authLocalConfig   = require('../../config/auth').get('UniqueCode');
+ const authLocalConfig   = require('../../config/auth').get('Local');
 
  /**
   * Render the index.html or index-with-code.js depending on if query param has code or not
@@ -34,7 +34,10 @@
  * @returns {undefined}
  */
 exports.login = (req, res) => {
-  res.render('auth/local/login');
+  res.render('auth/local/login', {
+    loginUrl: authLocalConfig.loginUrl,
+    clientId: req.client.clientId
+  });
 };
 
 /**

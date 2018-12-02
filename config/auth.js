@@ -20,7 +20,7 @@ const types = [
   },
   {
     key: 'Url',
-    label: 'Inlog via URL',
+    label: 'E-mail een inloglink',
     loginUrl: formatLoginUrl('url')
   },
   {

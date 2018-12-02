@@ -33,11 +33,23 @@ exports.new = (req, res, next) => {
 
 
 exports.edit = (req, res, next) => {
+  console.log('JSON.parse(req.client.authTypes)', req.client);
+  const clientAuthTypes = JSON.parse(req.client.authTypes);
+  const clientExposedUserFields =  JSON.parse(req.client.exposedUserFields);
+  const clientRequiredUserFields =   JSON.parse(req.client.requiredUserFields);
+
+  console.log('clientAuthTypes', clientAuthTypes);
+  console.log('clientExposedUserFields', clientExposedUserFields);
+  console.log('clientRequiredUserFields',clientRequiredUserFields);
+
   res.render('admin/client/edit', {
     client: req.client,
     requiredUserFields: userFields,
     exposedUserFields: userFields,
-    authTypes: authTypes
+    authTypes: authTypes,
+    clientAuthTypes: clientAuthTypes,
+    clientExposedUserFields: clientExposedUserFields,
+    clientRequiredUserFields: clientRequiredUserFields,
   });
 }
 
@@ -70,18 +82,18 @@ exports.create = (req, res, next) => {
     .catch((err) => { next(err); });
 }
 
-exports.update = (req, res) => {
+exports.update = (req, res, next) => {
   const { name, description, exposedUserFields, requiredUserFields, redirectUrl, siteUrl, authTypes } = req.body;
 
-  req.client.set('title', name);
-  req.client.set('description', description);
-  req.client.set('siteUrl', siteUrl);
-  req.client.set('redirectUrl', redirectUrl);
-  req.client.set('exposedUserFields', JSON.stringify(exposedUserFields));
-  req.client.set('requiredUserFields', JSON.stringify(requiredUserFields));
-  req.client.set('authTypes', JSON.stringify(authTypes));
+  req.clientModel.set('name', name);
+  req.clientModel.set('description', description);
+  req.clientModel.set('siteUrl', siteUrl);
+  req.clientModel.set('redirectUrl', redirectUrl);
+  req.clientModel.set('exposedUserFields', JSON.stringify(exposedUserFields));
+  req.clientModel.set('requiredUserFields', JSON.stringify(requiredUserFields));
+  req.clientModel.set('authTypes', JSON.stringify(authTypes));
 
-  req.client
+  req.clientModel
     .save()
     .then((response) => {
       req.flash('success', { msg: 'Updated client!'});

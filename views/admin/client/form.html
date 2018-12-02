@@ -73,14 +73,17 @@
 
   <div class="form-group">
     <label> Authentication types </label> <br/>
+
     {% for authType in authTypes %}
-<label>
-    <input
-      type="checkbox"
-      name="authTypes[]"
-      value="{{authType.key}}"
-    />
-    {{authType.label}} <label>
+    <label>
+      <input
+        type="checkbox"
+        name="authTypes[]"
+        value="{{authType.key}}"
+        {% if (client) and  (clientAuthTypes.indexOf(authType.key)) >= 0 %} checked {% endif %}
+      />
+      {{authType.label}}
+    </label>
     <br/>
     {% endfor %}
   </div>
@@ -89,13 +92,14 @@
     <label> Required fields </label><br/>
     {% for requiredField in requiredUserFields %}
     <label>
-    <input
-      type="checkbox"
-      name="requiredUserFields[]"
-      value="{{requiredField.key}}"
-    />
-     {{requiredField.label}} <label>
-
+      <input
+        type="checkbox"
+        name="requiredUserFields[]"
+        value="{{requiredField.key}}"
+        {% if (client) and (clientRequiredUserFields.indexOf(requiredField.key)) >= 0 %} checked {% endif %}
+      />
+       {{requiredField.label}}
+    </label>
     <br/>
     {% endfor %}
   </div>
@@ -106,13 +110,14 @@
     <label> Exposed fields </label><br/>
     {% for exposedField in exposedUserFields %}
     <label>
-    <input
-      type="checkbox"
-      name="exposedUserFields[]"
-      value="{{authType.key}}"
-    />
-     {{exposedField.label}} <label>
-
+      <input
+        type="checkbox"
+        name="exposedUserFields[]"
+        value="{{exposedField.key}}"
+        {% if (client) and (clientExposedUserFields.indexOf(exposedField.key)) >= 0 %} checked {% endif %}
+      />
+       {{exposedField.label}}
+     </label>
     <br/>
     {% endfor %}
   </div>

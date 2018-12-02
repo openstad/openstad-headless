@@ -11,12 +11,12 @@
 
    if (availableAuthTypes.length === 1) {
      let availableAuthType = availableAuthTypes.shift();
-     console.log(availableAuthType);
-
      res.redirect(availableAuthType.loginUrl);
    } else {
+     console.log('availableAuthTypes', availableAuthTypes);
      res.render('auth/choose', {
-        authTypes: availableAuthTypes
+        authTypes: availableAuthTypes,
+        clientId: req.client.clientId
      })
    }
  };
