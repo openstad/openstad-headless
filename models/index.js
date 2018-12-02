@@ -1,16 +1,17 @@
 const knex = require('../knex/knex.js');
 const bookshelf = require('bookshelf')(knex);
 const jsonColumns = require('bookshelf-json-columns');
+const configAuthTypes = require('../config/auth.js').types;
 bookshelf.plugin(jsonColumns);
 
 exports.Client = bookshelf.Model.extend({
+
   tableName: 'clients',
   hasTimestamps: true,
   hasTimestamps: ['createdAt', 'updatedAt'],
   jsonColumns: ['authTypes', 'requiredFields'],
-  getAuthTypes: () => {
-    const authTypes = this.get('authTypes');
-    console.log('=====<><><><> authTypes', authTypes);
+  getAuthTypes: (model) => {
+    const authTypes = JSON.parse(model.get('authTypes'));
 
     return authTypes.map((authType) => {
       let configAuthType = configAuthTypes.find(type => type.key === authType.key);

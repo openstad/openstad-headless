@@ -1,5 +1,18 @@
 const UniqueCode = require('../models').UniqueCode;
 
+exports.withAll = (req, res, next) => {
+  UniqueCode
+  .fetchAll()
+  .then((codes) => {
+     req.codesCollection = codes;
+     req.codes = codes.serialize();
+     next();
+  })
+  .catch((err) => { next(err); });
+}
+
+
+
 exports.withOne = (req, res, next) => {
   const codeId = req.body.codeId ? req.body.codeId : req.params.codeId;
 

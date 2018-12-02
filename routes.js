@@ -32,17 +32,18 @@ const codeMw                   = require('./middleware/code');
 module.exports = function(app){
   app.get('/', authLocal.index);
 
+
 	/**
 	 * Login routes for clients,
 	 * checks if one or more options of authentications is available
 	 * and either shows choice or redirects if one option
 	 */
-	app.get('/login', bruteForce.prevent, clientMw.addOne, authChoose.index);
+	app.get('/login', clientMw.withOne, authChoose.index);
 
 	/**
 	 * Shared middleware for all auth routes, adding client and per
 	 */
-	app.use('/auth', [bruteForce.prevent, clientMw.addOne]);
+	app.use('/auth', [bruteForce.prevent, clientMw.withOne]);
 
 	/**
 	 * Login & register with local login
@@ -62,7 +63,7 @@ module.exports = function(app){
 	app.get('/auth/local/forgot', authForgot.forgot);
 	app.post('/auth/local/forgot', authForgot.postForgot);
 	app.get('/auth/local/reset', passwordResetMw.validate, authForgot.reset);
-	app.post('/auth/local/reset', passwordResetMw.validate, userMw.addOne, userMw.validateEmail, autMw.validatePassword, authForgot.postReset);
+	app.post('/auth/local/reset', passwordResetMw.validate, userMw.withOne, userMw.validateEmail, userMw.validatePassword, authForgot.postReset);
 
 	/**
 	 * Auth routes for URL login
@@ -101,12 +102,12 @@ module.exports = function(app){
 	/**
 	 * Logout (all types :))
 	 */
-	app.get('/logout', clientMw.addOne, authLocal.logout);
+	app.get('/logout', clientMw.withOne, authLocal.logout);
 
 	/**
 	 * Show account, add client, but not obligated
 	 */
-	app.use('/user', [login.ensureLoggedIn(), clientMw.addOne]);
+	app.use('/user', [login.ensureLoggedIn(), clientMw.withOne]);
   app.get('/account', userController.account);
   app.post('/account', userMw.validateUser, userController.postAccount);
   app.post('/password', userMw.validatePassword, userController.postAccount);
@@ -132,7 +133,7 @@ module.exports = function(app){
    */
 
   //shared middlware for all admin routes
-  app.use('/admin/client', [login.ensureLoggedIn(), adminMiddleware.ensure]);
+  //app.use('/admin/client', [login.ensureLoggedIn(), adminMiddleware.ensure]);
 
   app.get('/admin/users', userMw.withAll, adminUserController.all);
   app.get('/admin/user/:userId', userMw.withOne, adminUserController.edit);
@@ -144,10 +145,10 @@ module.exports = function(app){
    * Admin client routes
    */
   app.get('/admin/clients', clientMw.withAll, adminClientController.all);
-  app.get('/admin/client/:clientId', clientMw.withOne, adminClientController.edit);
+  app.get('/admin/client/:clientId', clientMw.withOneById, adminClientController.edit);
   app.get('/admin/client', adminClientController.new);
   app.post('/admin/client', adminClientController.create);
-  app.post('/admin/client/:clientId', clientMw.withOne, adminClientController.update);
+  app.post('/admin/client/:clientId', clientMw.withOneById, adminClientController.update);
 
   /**
    * Admin role routes

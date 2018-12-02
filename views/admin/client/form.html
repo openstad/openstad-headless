@@ -9,8 +9,32 @@
       type="text"
       required
       maxlength="60"
+      name="name"
       class="form-input"
       {% if client %} value="{{client.name}}" {% endif %}
+    />
+  </div>
+
+  <div class="form-group">
+    <label> Site URL </label>
+    <input
+      type="text"
+      required
+      maxlength="60"
+      name="siteUrl"
+      class="form-input"
+      {% if client %} value="{{client.siteUrl}}" {% endif %}
+    />
+  </div>
+  <div class="form-group">
+    <label> Redirect URL </label>
+    <input
+      type="text"
+      required
+      maxlength="60"
+      name="redirectUrl"
+      class="form-input"
+      {% if client %} value="{{client.redirectUrl}}" {% endif %}
     />
   </div>
   <div class="form-group">
@@ -48,40 +72,48 @@
   {% endif %}
 
   <div class="form-group">
-    <label> Authentication types </label>
+    <label> Authentication types </label> <br/>
     {% for authType in authTypes %}
-    <label> {{authType.label}} <label>
+<label>
     <input
       type="checkbox"
-      name="required_field[]"
+      name="authTypes[]"
       value="{{authType.key}}"
     />
+    {{authType.label}} <label>
+    <br/>
     {% endfor %}
   </div>
 
   <div class="form-group">
-    <label> Required fields </label>
+    <label> Required fields </label><br/>
     {% for requiredField in requiredUserFields %}
-    <label> {{requiredField.label}} <label>
+    <label>
     <input
       type="checkbox"
-      name="required_field[]"
+      name="requiredUserFields[]"
       value="{{requiredField.key}}"
     />
+     {{requiredField.label}} <label>
+
+    <br/>
     {% endfor %}
   </div>
 
 
 
   <div class="form-group">
-    <label> Exposed fields </label>
+    <label> Exposed fields </label><br/>
     {% for exposedField in exposedUserFields %}
-    <label> {{exposedField.label}} <label>
+    <label>
     <input
       type="checkbox"
-      name="required_field[]"
+      name="exposedUserFields[]"
       value="{{authType.key}}"
     />
+     {{exposedField.label}} <label>
+
+    <br/>
     {% endfor %}
   </div>
 

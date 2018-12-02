@@ -49,12 +49,19 @@ exports.edit = (req, res, next) => {
  * @return {[type]}        [description]
  */
 exports.create = (req, res, next) => {
-  const { name, description, exposedFields, requiredFields, authTypes } = req.body;
+  const { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes } = req.body;
   const rack = hat.rack();
   const clientId = rack();
   const clientSecret = rack();
 
-  new Client({ name, description, exposedFields, requiredFields, authTypes, clientId, clientSecret })
+  const values = { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes, clientId, clientSecret };
+
+  values.exposedUserFields = JSON.stringify(values.exposedUserFields);
+  values.requiredUserFields = JSON.stringify(values.requiredUserFields);
+  values.authTypes = JSON.stringify(values.authTypes);
+
+
+  new Client(values)
     .save()
     .then((response) => {
       req.flash('success', { msg: 'Succesfully created '});
@@ -64,10 +71,16 @@ exports.create = (req, res, next) => {
 }
 
 exports.update = (req, res) => {
-  const { name, description } = req.body;
+  const { name, description, exposedUserFields, requiredUserFields, redirectUrl, siteUrl, authTypes } = req.body;
 
   req.client.set('title', name);
   req.client.set('description', description);
+  req.client.set('siteUrl', siteUrl);
+  req.client.set('redirectUrl', redirectUrl);
+  req.client.set('exposedUserFields', JSON.stringify(exposedUserFields));
+  req.client.set('requiredUserFields', JSON.stringify(requiredUserFields));
+  req.client.set('authTypes', JSON.stringify(authTypes));
+
   req.client
     .save()
     .then((response) => {

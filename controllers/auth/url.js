@@ -120,13 +120,13 @@ exports.postRegister = (req, res, next) => {
 };
 
 
-exports.postLogin =  (req, res, next) => {
+exports.authenticate =  (req, res, next) => {
  passport.authenticate('url', function(err, user, info) {
    if (err) { return next(err); }
 
    // Redirect if it fails to the original e-mail screen
    if (!user) {
-     return res.redirect(`/login-with-email-url?clientId=${req.client.clientId}`);
+     return res.redirect(`/auth/url/login?clientId=${req.client.clientId}`);
    }
 
    req.logIn(user, function(err) {

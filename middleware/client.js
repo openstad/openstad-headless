@@ -19,17 +19,55 @@ exports.withOne = (req, res, next) => {
     new Client({ clientId: clientId })
     .fetch()
     .then((client) => {
-      req.clientModel = client;
-      req.client = client.serialize();
-      next();
+      if (client) {
+        req.clientModel = client;
+        req.client = client.serialize();
+        next();
+      } else {
+        throw new Error('No Client found for clientID');
+      }
     })
     .catch((err) => { next(err); });
   } else {
+    throw new Error('No Client ID is set for login',);
+/*
     next({
-      status: 500,
-      msg: 'No clientID found'
+      name: 'ClientNotFoundError',
+      status: 404,
+      message:
     });
+*/
+  }
+}
 
+
+exports.withOneById = (req, res, next) => {
+  const clientId = req.params.clientId;
+
+  console.log('====> clientId', clientId);
+
+  if (clientId) {
+    new Client({ id: clientId })
+    .fetch()
+    .then((client) => {
+      if (client) {
+        req.clientModel = client;
+        req.client = client.serialize();
+        next();
+      } else {
+        throw new Error('No Client found for clientID');
+      }
+    })
+    .catch((err) => { next(err); });
+  } else {
+    throw new Error('No Client ID is set for login',);
+/*
+    next({
+      name: 'ClientNotFoundError',
+      status: 404,
+      message:
+    });
+*/
   }
 }
 
