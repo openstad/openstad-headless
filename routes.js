@@ -1,5 +1,4 @@
 const login                    = require('connect-ensure-login');
-const ExpressBrute 					   = require('express-brute');
 
 //CONTROLERS
 const oauth2Controller 				 = require('./controllers/oauth/oauth2');
@@ -52,18 +51,18 @@ module.exports = function(app){
 	app.use('/auth/local', [clientMw.setAuthType('Local'), clientMw.validate]);
 
 	//routes
-	app.get('/auth/local/login', authLocal.login);
-	app.post('/auth/local/login', authMw.validateLogin, authLocal.postLogin);
-	app.get('/auth/local/register', authLocal.register);
+	app.get('/auth/local/login',     authLocal.login);
+	app.post('/auth/local/login',    authMw.validateLogin, authLocal.postLogin);
+	app.get('/auth/local/register',  authLocal.register);
 	app.post('/auth/local/register', userMw.validateUser, authLocal.postRegister);
 
 	/**
 	 * Deal with forgot password
 	 */
-	app.get('/auth/local/forgot', authForgot.forgot);
-	app.post('/auth/local/forgot', authForgot.postForgot);
-	app.get('/auth/local/reset', passwordResetMw.validate, authForgot.reset);
-	app.post('/auth/local/reset', passwordResetMw.validate, userMw.withOne, userMw.validateEmail, userMw.validatePassword, authForgot.postReset);
+	app.get('/auth/local/forgot',    authForgot.forgot);
+	app.post('/auth/local/forgot',   authForgot.postForgot);
+	app.get('/auth/local/reset',     passwordResetMw.validate, authForgot.reset);
+	app.post('/auth/local/reset',    passwordResetMw.validate, userMw.withOne, userMw.validateEmail, userMw.validatePassword, authForgot.postReset);
 
 	/**
 	 * Auth routes for URL login
@@ -72,26 +71,26 @@ module.exports = function(app){
 	app.use('/auth/url', [clientMw.setAuthType('Url'), clientMw.validate]);
 
 	// routes
-	app.get('/auth/url/login', authUrl.login);
-	app.post('/auth/url/login', authUrl.postLogin);
-	app.get('/auth/url/authenticate', authUrl.authenticate);
-	app.get('/auth/url/register', authUrl.register);
-	app.post('/auth/url/register', authUrl.postRegister);
+	app.get('/auth/url/login',         authUrl.login);
+	app.post('/auth/url/login',        authUrl.postLogin);
+	app.get('/auth/url/authenticate',  authUrl.authenticate);
+	app.get('/auth/url/register',      authUrl.register);
+	app.post('/auth/url/register',     authUrl.postRegister);
 
 	/**
 	 * Auth routes for DigiD
 	 * @TODO: available routes
 	 */
 	app.use('/auth/digid', [clientMw.setAuthType('DigiD'), clientMw.validate]);
- 	app.get('/auth/digid/login', authDigiD.login);
-  app.post('/auth/digid/login', authDigiD.postLogin);
+ 	app.get('/auth/digid/login',  clientMw.withOne, authDigiD.login);
+  app.post('/auth/digid/login', clientMw.withOne, authDigiD.postLogin);
 
 	/**
 	 * Auth routes for UniqueCode
 	 */
 	app.use('/auth/code', [clientMw.setAuthType('UniqueCode'), clientMw.validate]);
-	app.get('/auth/code/login', authCode.login);
-	app.post('/auth/code/login', authCode.postLogin);
+	app.get('/auth/code/login',  clientMw.withOne, authCode.login);
+	app.post('/auth/code/login', clientMw.withOne, authCode.postLogin);
 
 	/**
 	 * Register extra info;
@@ -108,14 +107,14 @@ module.exports = function(app){
 	 * Show account, add client, but not obligated
 	 */
 	app.use('/user', [login.ensureLoggedIn(), clientMw.withOne]);
-  app.get('/account', userController.account);
-  app.post('/account', userMw.validateUser, userController.postAccount);
-  app.post('/password', userMw.validatePassword, userController.postAccount);
+  app.get('/account',    userController.account);
+  app.post('/account',   userMw.validateUser, userController.postAccount);
+  app.post('/password',  userMw.validatePassword, userController.postAccount);
 
-  app.get('/dialog/authorize', oauth2Controller.authorization);
-  app.post('/dialog/authorize/decision', bruteForce.prevent, oauth2Controller.decision);
-  app.post('/oauth/token', bruteForce.prevent, oauth2Controller.token);
-  app.get('/oauth/token', oauth2Controller.token);
+  app.get('/dialog/authorize',            oauth2Controller.authorization);
+  app.post('/dialog/authorize/decision',  bruteForce.prevent, oauth2Controller.decision);
+  app.post('/oauth/token',                bruteForce.prevent, oauth2Controller.token);
+  app.get('/oauth/token',                 oauth2Controller.token);
 
   app.get('/api/userinfo', userController.info);
   // app.get('/api/clientinfo', client.info);
@@ -135,43 +134,37 @@ module.exports = function(app){
   //shared middlware for all admin routes
   //app.use('/admin/client', [login.ensureLoggedIn(), adminMiddleware.ensure]);
 
-  app.get('/admin/users', userMw.withAll, adminUserController.all);
-  app.get('/admin/user/:userId', userMw.withOne, adminUserController.edit);
-  app.get('/admin/user', adminUserController.new);
-  app.post('/admin/user', adminUserController.create);
-  app.post('/admin/user/:userId',  userMw.withOne, adminUserController.update);
+  app.get('/admin/users',         userMw.withAll, adminUserController.all);
+  app.get('/admin/user/:userId',  userMw.withOne, adminUserController.edit);
+  app.get('/admin/user',          adminUserController.new);
+  app.post('/admin/user',         adminUserController.create);
+  app.post('/admin/user/:userId', userMw.withOne, adminUserController.update);
 
   /**
    * Admin client routes
    */
-  app.get('/admin/clients', clientMw.withAll, adminClientController.all);
-  app.get('/admin/client/:clientId', clientMw.withOneById, adminClientController.edit);
-  app.get('/admin/client', adminClientController.new);
-  app.post('/admin/client', adminClientController.create);
+  app.get('/admin/clients',           clientMw.withAll, adminClientController.all);
+  app.get('/admin/client/:clientId',  clientMw.withOneById, adminClientController.edit);
+  app.get('/admin/client',            adminClientController.new);
+  app.post('/admin/client',           adminClientController.create);
   app.post('/admin/client/:clientId', clientMw.withOneById, adminClientController.update);
 
   /**
    * Admin role routes
    */
-  app.get('/admin/roles', roleMw.withAll, adminClientController.all);
-  app.get('/admin/role/:roleId', roleMw.withOne, adminClientController.edit);
-  app.get('/admin/role', adminRoleController.new);
-  app.post('/admin/role', adminRoleController.create);
+  app.get('/admin/roles',         roleMw.withAll, adminRoleController.all);
+  app.get('/admin/role/:roleId',  roleMw.withOne, adminRoleController.edit);
+  app.get('/admin/role',          adminRoleController.new);
+  app.post('/admin/role',         adminRoleController.create);
   app.post('/admin/role/:roleId', clientMw.withOne, adminRoleController.update);
 
   /**
    * Admin code routes
    */
-  app.get('/admin/codes', codeMw.withAll, adminCodeController.all);
-  app.get('/admin/code', adminCodeController.new);
-  app.get('/admin/code/bulk', adminCodeController.bulk);
-  app.post('/admin/code/bulk', adminCodeController.postBulk);
-  app.post('/admin/code', adminCodeController.create);
-  app.post('/admin/code/destroy/:codeId', adminCodeController.destroy);
-
-  //  app.get('/admin/code/:codeId', codeMw.withOne, adminCodeController.edit);
-
-//  app.post('/admin/code/:roleId', codeMw.withOne, adminCodeController.update);
-
-
+  app.get('/admin/codes',       codeMw.withAll, adminCodeController.all);
+  app.get('/admin/code',        clientMw.withAll, adminCodeController.new);
+  app.get('/admin/code/bulk',   clientMw.withAll, adminCodeController.bulk);
+  app.post('/admin/code/bulk',            adminCodeController.postBulk);
+  app.post('/admin/code',                   adminCodeController.create);
+  app.post('/admin/code/destroy/:codeId',   adminCodeController.destroy);
 }

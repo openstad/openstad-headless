@@ -1,6 +1,5 @@
 var passport = require('passport-strategy')
 
-
 var UrlStrategy = function (options, verify) {
     if (typeof options == 'function') {
         verify = options;
@@ -20,7 +19,7 @@ UrlStrategy.prototype.authenticate = function(req, options) {
     var self = this;
 
     function verified(err, user, info) {
-        if (err) { return self.redirect(self.failRedirect); }
+    //    if (err) { return self.redirect(self.failRedirect); }
         self.success(user, info);
     }
 

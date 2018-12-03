@@ -39,7 +39,7 @@ exports.UniqueCode = bookshelf.Model.extend({
 });
 
 exports.Role = bookshelf.Model.extend({
-  tableName: 'role',
+  tableName: 'roles',
   hasTimestamps: true,
   hasTimestamps: ['createdAt',  'updatedAt']
 });

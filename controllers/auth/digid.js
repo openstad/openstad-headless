@@ -9,7 +9,8 @@ const emailService      = require('../../services/email');
 
 exports.login = (req, res, next) => {
   res.render('auth/digid/login', {
-    client: req.client
+    client: req.client,
+    clientId: req.client.cliendId
   });
 }
 

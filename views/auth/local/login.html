@@ -21,10 +21,12 @@
           <div class="form-group">
             <!-- Username label and input -->
             <div class="input-fields">
+              <label>
+                E-mail:
+              </label>
               <input
                 id="name"
                 type="text"
-                placeholder="E-mail"
                 name="email"
                 class="form-input"
                 required
@@ -34,11 +36,13 @@
           <div class="form-group">
             <!-- Password label and input -->
             <div class="input-fields">
+              <label>
+                Wachtwoord:
+              </label>
               <input
                 class="form-input"
                 id="password"
                 type="password"
-                placeholder="Password"
                 name="password"
                 required
               />
@@ -58,16 +62,16 @@
           </div>
         </div>
         <div class="form-group">
-          <a href="/forgot">Wachtwoord vergeten?</a>
+          <a href="/auth/local/register?clientId={{clientId}}">Wachtwoord vergeten?</a>
         </div>
         </div>
       </div>
     </fieldset>
   </form>
 
-  <p class="text-center">
+  <p>
     Nog geen account?
-    <a href="/register">Registreren</a>
+    <a href="/auth/local/register?clientId={{clientId}}">Registreren</a>
   </p>
 
 {% endblock %}

@@ -13,14 +13,16 @@
  const password          = require('../../services/password');
  const authLocalConfig   = require('../../config/auth').get('Local');
 
-
  exports.forgot = (req, res) => {
-   res.render('auth/forgot/forgot');
+   res.render('auth/forgot/forgot', {
+     clientId: req.client.cliendId
+   });
  };
 
  exports.reset = (req, res) => {
    res.render('auth/forgot/reset', {
-     token: req.query.token
+     token: req.query.token,
+     clientId: req.client.clientId
    });
  };
 
@@ -69,7 +71,6 @@
        req.flash('error', {msg: 'E-mail adres is niet bekend bij ons.'});
        res.redirect(req.header('Referer') || authLocalConfig.loginUrl);
      });
-
 
    /**
     * Send email

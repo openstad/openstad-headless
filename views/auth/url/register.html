@@ -9,7 +9,10 @@
 				Voor {{client.name}} zijn
         de volgende velden nodig om de registratie af te ronden.
 			</p>
-			<form method="post" action="/register-with-token">
+			<form
+				method="post"
+				action="{{registerUrl}}"
+			>
           <div class="form-group">
             <input type="text" name="firstName" id="first_name" placeholder="Voornaam" class="form-input" autofocus required >
           </div>

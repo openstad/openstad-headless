@@ -22,7 +22,8 @@ exports.register = (req, res, next) => {
   res.render('auth/url/register', {
    token: req.query.token,
    user: req.user,
-   client: req.client
+   client: req.client,
+   clientId: req.client.clientId
   });
 }
 

@@ -10,11 +10,15 @@ exports.all = (req, res, next) => {
 }
 
 exports.new = (req, res, next) => {
-  res.render('admin/code/new');
+  res.render('admin/code/new', {
+    clients: req.clients
+  });
 }
 
 exports.bulk = (req, res, next) => {
-  res.render('admin/code/bulk');
+  res.render('admin/code/bulk', {
+    clients: req.clients
+  });
 }
 
 /*
@@ -110,13 +114,15 @@ exports.postBulk = [upload.single('file'), (req, res, next) => {
  * @TODO validation in middleware
  */
 exports.create = (req, res, next) => {
-  const { name } = req.body;
+  const { code, clientId } = req.body;
 
-  new UniqueCode({ name })
+  console.log('body', req.body);
+
+  new UniqueCode({ code, clientId })
     .save()
     .then((response) => {
       req.flash('success', { msg: 'Succesfully created '});
-      res.redirect('/admin/client/roles' || '/');
+      res.redirect('/admin/codes' || '/');
     })
     .catch((err) => { next(err); });
 }

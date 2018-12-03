@@ -11,9 +11,8 @@
 
    if (availableAuthTypes.length === 1) {
      let availableAuthType = availableAuthTypes.shift();
-     res.redirect(availableAuthType.loginUrl);
+     res.redirect(availableAuthType.loginUrl + '?clientId=' + req.client.clientId);
    } else {
-     console.log('availableAuthTypes', availableAuthTypes);
      res.render('auth/choose', {
         authTypes: availableAuthTypes,
         clientId: req.client.clientId

@@ -33,14 +33,9 @@ exports.new = (req, res, next) => {
 
 
 exports.edit = (req, res, next) => {
-  console.log('JSON.parse(req.client.authTypes)', req.client);
   const clientAuthTypes = JSON.parse(req.client.authTypes);
   const clientExposedUserFields =  JSON.parse(req.client.exposedUserFields);
   const clientRequiredUserFields =   JSON.parse(req.client.requiredUserFields);
-
-  console.log('clientAuthTypes', clientAuthTypes);
-  console.log('clientExposedUserFields', clientExposedUserFields);
-  console.log('clientRequiredUserFields',clientRequiredUserFields);
 
   res.render('admin/client/edit', {
     client: req.client,

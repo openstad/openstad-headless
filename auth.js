@@ -12,7 +12,7 @@ const User                                 = require('./models').User;
 const Client                               = require('./models').Client;
 const LoginToken                           = require('./models').LoginToken;
 const UniqueCode                           = require('./models').UniqueCode;
-const UrlStrategy                          = require('./url-strategy');
+const TokenStrategy                        = require('./url-strategy');
 
 
 /**
@@ -40,11 +40,10 @@ passport.use(new LocalStrategy(
  * For instance, user gives email, email contains url,
  * user clicks url and is automatically logged in
  */
-passport.use(new UrlStrategy({
-    failRedirect : "/login-with-email-url",
+passport.use(new TokenStrategy({
+    failRedirect : "/auth/url/login",
     varName : "token"
   }, function (token, done) { // put your check logic here
-    console.log('=====> token', token);
     new LoginToken({token: token})
     /*.query((q) => {
       /**
@@ -73,13 +72,14 @@ passport.use(new UrlStrategy({
 }));
 
 
-passport.use(new UrlStrategy({
-    failRedirect : "/login-unique-code",
+passport.use('uniqueCode', new TokenStrategy({
+  //   failRedirect : "/auth/code/login",
     varName : "unique_code"
-  }, function (code, done, body) { // put your check logic here
+  }, function (code, done, client) { // put your check logic here
+
     new UniqueCode({
       code: code,
-      clientId: body.clientId
+      clientId: client.id
     })
     /*.query((q) => {
       /**
@@ -95,6 +95,8 @@ passport.use(new UrlStrategy({
     }) */
     .fetch()
     .then((uniqueCode) => {
+      console.log('===> uniqueCode', uniqueCode)
+
       if (uniqueCode) {
         const isUsed = uniqueCode.get('isUsed');
         const userId = uniqueCode.get('userId');

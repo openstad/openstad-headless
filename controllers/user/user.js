@@ -48,7 +48,7 @@ exports.info = [
  exports.account = [
    login.ensureLoggedIn(),
    (req, res) => {
-     res.render('user/profile', {
+     res.render('account/profile', {
        user: req.user
      });
    }

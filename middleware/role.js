@@ -1,4 +1,4 @@
-const Role = require('../models').Rolert;
+const Role = require('../models').Role;
 
 exports.withAll = (req, res, next) => {
   Role

@@ -3,20 +3,20 @@ const authTypesConfig = require('../config').authTypes;
 
 exports.withAll = (req, res, next) => {
   Client
-  .fetchAll()
-  .then((clients) => {
-     req.clientsCollection = clients;
-     req.clients = clients.serialize();
-     next();
-  })
-  .catch((err) => { next(err); });
+    .fetchAll()
+    .then((clients) => {
+       req.clientsCollection = clients;
+       req.clients = clients.serialize();
+       next();
+    })
+    .catch((err) => { next(err); });
 }
 
+var counter =1;
 exports.withOne = (req, res, next) => {
-  console.log('req.body.clientIdreq.body.clientIdreq.body.clientId', req.body.clientId);
-  console.log('req.body', req.body);
+  const clientId = req.body && req.body.clientId ? req.body.clientId : req.query.clientId;
 
-  const clientId = req.body.clientId ? req.body.clientId : req.query.clientId;
+  counter++;
 
   if (clientId) {
     new Client({ clientId: clientId })

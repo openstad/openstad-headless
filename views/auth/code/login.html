@@ -8,7 +8,11 @@
         Vul hieronder je unieke code in om een OpenStad account aan te maken.
         Deze code heb je thuis gestuurd gekregen van ons.
 			</p>
-			<form method="post" action="/login-with-email-url">
+			<form
+				method="post"
+				action="/auth/code/login?clientId={{clientId}}"
+			>
+			
 					<div class="form-group">
 						<label>
 							Unieke code:

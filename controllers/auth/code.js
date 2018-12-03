@@ -10,13 +10,14 @@ const authCodeConfig    = require('../../config/auth').get('UniqueCode');
 
 exports.login = (req, res, next) => {
   res.render('auth/code/login', {
-    client: req.client
+    client: req.client,
+    clientId: req.client.clientId
   });
 }
 
 exports.postLogin = (req, res, next) => {
   passport.authenticate('uniqueCode', function(err, user, info) {
-    if (err) { return next(err); }
+    //if (err) { return next(err); }
 
     // Redirect if it fails to the original e-mail screen
     if (!user) {
