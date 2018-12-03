@@ -1,6 +1,6 @@
 var passport = require('passport-strategy')
 
-var UrlStrategy = function (options, verify) {
+var TokenStrategy = function (options, verify) {
     if (typeof options == 'function') {
         verify = options;
         options = {};
@@ -15,7 +15,7 @@ var UrlStrategy = function (options, verify) {
     this.varName = options.varName;
 }
 
-UrlStrategy.prototype.authenticate = function(req, options) {
+TokenStrategy.prototype.authenticate = function(req, options) {
     var self = this;
 
     function verified(err, user, info) {
@@ -26,4 +26,4 @@ UrlStrategy.prototype.authenticate = function(req, options) {
     this._verify(req.body[this.varName], verified, req.client);
 };
 
-module.exports = UrlStrategy;
+module.exports = TokenStrategy;

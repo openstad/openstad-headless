@@ -12,7 +12,7 @@ const User                                 = require('./models').User;
 const Client                               = require('./models').Client;
 const LoginToken                           = require('./models').LoginToken;
 const UniqueCode                           = require('./models').UniqueCode;
-const TokenStrategy                        = require('./url-strategy');
+const TokenStrategy                        = require('./token-strategy');
 
 
 /**

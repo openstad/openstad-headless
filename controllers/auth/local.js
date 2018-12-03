@@ -47,19 +47,22 @@ exports.login = (req, res) => {
  * @returns {undefined}
  */
 exports.register = (req, res) => {
-  res.render('auth/local/register');
+  res.render('auth/local/register', {
+    clientId: req.client.clientId
+  });
 };
 
 exports.postRegister = (req, res, next) => {
   const errors = [];
-  const { email } = req.body;
+  const { firstName, lastName, email } = req.body;
+  let {password} = req.body;
 
   if (errors.length === 0) {
     password = bcrypt.hashSync(password, saltRounds);
 
     new User({ firstName, lastName, email, password })
       .save()
-      .then(() => { res.redirect(authLocalConfig.loginUrl); })
+      .then(() => { res.redirect(authLocalConfig.loginUrl+ '?clientId=' + req.client.clientId); })
       .catch((err) => { next(err) });
   } else {
     req.flash('error', { errors });
@@ -70,9 +73,25 @@ exports.postRegister = (req, res, next) => {
 /**
  * Authenticate normal login page using strategy of authenticate
  */
-exports.postLogin = [
-  passport.authenticate('local', { successReturnToOrRedirect: '/', failureRedirect: '/login' }),
-];
+exports.postLogin = (req, res, next) => {
+  passport.authenticate('local', function(err, user, info) {
+
+    if (err) { return next(err); }
+
+    // Redirect if it fails to the original e-mail screen
+    if (!user) {
+      return res.redirect(`${authLocalConfig.loginUrl}?clientId=${req.client.clientId}`);
+    }
+
+    req.logIn(user, function(err) {
+      if (err) { return next(err); }
+
+      // Redirect if it succeeds to authorize screen
+      const authorizeUrl = `/dialog/authorize?redirect_uri=${req.client.redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+      return res.redirect(authorizeUrl);
+    });
+  })(req, res, next);
+}
 
 /**
  * Logout of the system and redirect to root

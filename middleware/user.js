@@ -74,6 +74,16 @@ exports.validateUser = (req, res, next) => {
 
   req.check(userProfileValidation);
 
+  req.check('email').custom(value => {
+    return
+      new User({ email: value  })
+        .then(user => {
+          if (user) {
+            return Promise.reject('E-mail already in use');
+          }
+        });
+  });
+
   req.getValidationResult()
 
 //  const errors = req.validationResult();

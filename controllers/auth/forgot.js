@@ -15,7 +15,7 @@
 
  exports.forgot = (req, res) => {
    res.render('auth/forgot/forgot', {
-     clientId: req.client.cliendId
+     clientId: req.client.clientId
    });
  };
 

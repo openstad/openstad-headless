@@ -70,7 +70,6 @@ exports.postLogin = (req, res, next) => {
           res.redirect(req.header('Referer') || '/login-with-email-url');
         })
         .catch((err) => {
-          console.log('====? eerrr', err);
           req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
           res.redirect(req.header('Referer') || '/login-with-email-url');
         });
@@ -137,5 +136,6 @@ exports.authenticate =  (req, res, next) => {
      const authorizeUrl = `/dialog/authorize?redirect_uri=${req.client.redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
      return res.redirect(authorizeUrl);
    });
+
  })(req, res, next);
 };
