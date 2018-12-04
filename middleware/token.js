@@ -3,22 +3,21 @@ const User       = require('../models').User;
 
 exports.addUser = ((req, res, next) => {
   const tokenToQuery = req.body.token ?  req.body.token : req.query.token;
-
   new LoginToken({token: tokenToQuery})
-    /*.query((q) => {
-      /**
-       * Only select tokens that are younger then 2 days
-       * created_at is "bigger then" 48 hours ago
-       */
-    /*  const days = 2;
-      const msForADay = 86400000;
-      const date = new Date();
-      const timeAgo = new Date(date.setTime(date.getTime() + (days * msForADay)));
-      console.log('---> timeAgo', timeAgo);
+      .query((q) => {
+        /**
+         * Only select tokens that are younger then 2 days
+         * created_at is "bigger then" 48 hours ago
+         */
 
-    //  q.where('createdAt', '>=', timeAgo);
-      q.orderBy('createdAt', 'DESC');
-    })*/
+        const days = 2;
+        const msForADay = 86400000;
+        const date = new Date();
+        const timeAgo = new Date(date.setTime(date.getTime() - (days * msForADay)));
+
+        q.where('createdAt', '>=', timeAgo);
+        q.orderBy('createdAt', 'DESC');
+    })
     .fetch()
     .then((token) => {
       if (token) {

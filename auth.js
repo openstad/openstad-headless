@@ -40,23 +40,28 @@ passport.use(new LocalStrategy(
  * For instance, user gives email, email contains url,
  * user clicks url and is automatically logged in
  */
-passport.use(new TokenStrategy({
+passport.use('url', new TokenStrategy({
     failRedirect : "/auth/url/login",
     varName : "token"
   }, function (token, done) { // put your check logic here
+    console.log('tokentokentoken', token);
     new LoginToken({token: token})
-    /*.query((q) => {
+      .query((q) => {
       /**
        * Only select tokens that are younger then 2 days
        * created_at is "bigger then" 48 hours ago
        */
-       /*
+
       const days = 2;
       const msForADay = 86400000;
-      const timeAgo = new Date(date.setTime(date.getTime() + (days * msForADay)));
+      const date = new Date();
+      const timeAgo = new Date(date.setTime(date.getTime() - (days * msForADay)));
+
+      console.log(timeAgo);
+
       q.where('createdAt', '>=', timeAgo);
       q.orderBy('createdAt', 'DESC');
-    }) */
+    })
     .fetch()
     .then((token) => {
       if (token) {

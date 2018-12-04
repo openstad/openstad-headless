@@ -23,7 +23,9 @@ TokenStrategy.prototype.authenticate = function(req, options) {
         self.success(user, info);
     }
 
-    this._verify(req.body[this.varName], verified, req.client);
+    const token = req.body[this.varName] ? req.body[this.varName] : req.query[this.varName];
+
+    this._verify(token, verified, req.client);
 };
 
 module.exports = TokenStrategy;

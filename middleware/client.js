@@ -14,7 +14,6 @@ exports.withAll = (req, res, next) => {
 
 var counter =1;
 exports.withOne = (req, res, next) => {
-  console.log('===>', req.client);
 
   let clientId = req.body && req.body.clientId ? req.body.clientId : req.query.clientId;
   if (!clientId) {
@@ -108,7 +107,6 @@ exports.validate = (req, res, next) => {
 }
 
 exports.checkRequiredUserFields = (req, res, next) => {
-  console.log('===>', req.client);
   const requiredFields = JSON.parse(req.client.requiredUserFields);
   const user = req.user;
   let error;
