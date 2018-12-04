@@ -29,8 +29,6 @@ exports.addUser = ((req, res, next) => {
         .then((user) => {
           req.userModel = user;
           req.user = user.serialize();
-          console.log('----> userID', req.user);
-
           next();
         })
         .catch((err) => {
