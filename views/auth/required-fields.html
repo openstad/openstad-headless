@@ -1,0 +1,38 @@
+{% extends 'layouts/main.html' %}
+
+{% block body %}
+<div>
+		<div class="upper-box card-body">
+			<h1>Registreren</h1>
+			<p>
+				Voor {{client.name}} zijn de volgende velden nodig:
+			</p>
+
+      <form method="POST" action="/auth/required-fields">
+        <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+        <input type="hidden" name="clientId" value="{{clientId}}" />
+        {% for requiredField in requiredFields %}
+				<div class="form-group">
+					<label> {{requiredField.label}} </label>
+          <input
+            type="text"
+            required
+            name="{{requiredField.key}}"
+            class="input-{{requiredField}} input-field"
+          />
+				</div>
+        {% endfor %}
+        <button class="btn btn-primary">
+          Opslaan
+        </button>
+      </form>
+		</div>
+
+		<p>
+			Vragen of feedback?
+			<a href="mailto:info@openstad.nl">
+        neem contact met ons op.
+      </a>
+		</p>
+</div>
+{% endblock %}

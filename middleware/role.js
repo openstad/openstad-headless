@@ -13,10 +13,10 @@ exports.withAll = (req, res, next) => {
 
 
 exports.withOne = (req, res, next) => {
-  const codeId = req.body.codeId ? req.body.codeId : req.params.codeId;
+  const roleId = req.body.roleId ? req.body.roleId : req.params.roleId;
 
   new Role({
-    id: codeId
+    id: roleId
   })
     .fetch()
     .then((role) => {

@@ -1,4 +1,6 @@
-const login                    = require('connect-ensure-login');
+const multer                   = require('multer');
+//const upload                   = multer({ dest: 'uploads/' });
+const upload                   = multer();
 
 //CONTROLERS
 const oauth2Controller 				 = require('./controllers/oauth/oauth2');
@@ -16,6 +18,7 @@ const authForgot							 = require('./controllers/auth/forgot');
 const authDigiD							 	 = require('./controllers/auth/digid');
 const authLocal							   = require('./controllers/auth/local');
 const authCode							 	 = require('./controllers/auth/code');
+const authRequiredFields	     = require('./controllers/auth/required');
 
 //MIDDLEWARE
 const adminMiddleware          = require('./middleware/admin');
@@ -106,15 +109,19 @@ module.exports = function(app){
 	/**
 	 * Show account, add client, but not obligated
 	 */
-	app.use('/user', [login.ensureLoggedIn(), clientMw.withOne]);
+	app.use('/user', [authMw.check, clientMw.withOne]);
   app.get('/account',    userController.account);
   app.post('/account',   userMw.validateUser, userController.postAccount);
   app.post('/password',  userMw.validatePassword, userController.postAccount);
 
-  app.get('/dialog/authorize',            oauth2Controller.authorization);
-  app.post('/dialog/authorize/decision',  bruteForce.prevent, oauth2Controller.decision);
-  app.post('/oauth/token',                bruteForce.prevent, oauth2Controller.token);
-  app.get('/oauth/token',                 oauth2Controller.token);
+  app.use('/auth/required-fields', [authMw.check, clientMw.withOne]);
+  app.get('/auth/required-fields', authRequiredFields.index);
+  app.post('/auth/required-fields', clientMw.withOne, authRequiredFields.post);
+
+  app.get('/dialog/authorize',            clientMw.withOne, authMw.check, clientMw.checkRequiredUserFields, oauth2Controller.authorization);
+  app.post('/dialog/authorize/decision',  clientMw.withOne, bruteForce.prevent,             oauth2Controller.decision);
+  app.post('/oauth/token',                clientMw.withOne, bruteForce.prevent,             oauth2Controller.token);
+  app.get('/oauth/token',                 clientMw.withOne, oauth2Controller.token);
 
   app.get('/api/userinfo', userController.info);
   // app.get('/api/clientinfo', client.info);
@@ -132,7 +139,7 @@ module.exports = function(app){
    */
 
   //shared middlware for all admin routes
-  //app.use('/admin/client', [login.ensureLoggedIn(), adminMiddleware.ensure]);
+  //app.use('/admin/client', [authMw.check, adminMiddleware.ensure]);
 
   app.get('/admin/users',         userMw.withAll, adminUserController.all);
   app.get('/admin/user/:userId',  userMw.withOne, adminUserController.edit);
@@ -156,7 +163,7 @@ module.exports = function(app){
   app.get('/admin/role/:roleId',  roleMw.withOne, adminRoleController.edit);
   app.get('/admin/role',          adminRoleController.new);
   app.post('/admin/role',         adminRoleController.create);
-  app.post('/admin/role/:roleId', clientMw.withOne, adminRoleController.update);
+  app.post('/admin/role/:roleId', roleMw.withOne, adminRoleController.update);
 
   /**
    * Admin code routes
@@ -164,7 +171,7 @@ module.exports = function(app){
   app.get('/admin/codes',                   codeMw.withAll, adminCodeController.all);
   app.get('/admin/code',                    clientMw.withAll, adminCodeController.new);
   app.get('/admin/code/bulk',               clientMw.withAll, adminCodeController.bulk);
-  app.post('/admin/code/bulk',              adminCodeController.postBulk);
+  app.post('/admin/code/bulk',              upload.single('file'),  adminCodeController.postBulk);
   app.post('/admin/code',                   adminCodeController.create);
   app.post('/admin/code/destroy/:codeId',   adminCodeController.destroy);
 }

@@ -12,8 +12,9 @@ exports.new = (req, res, next) => {
 }
 
 exports.edit = (req, res, next) => {
+  console.log('---> req.role', req.role);
   res.render('admin/role/edit', {
-    roles: req.role
+    role: req.role
   });
 }
 
@@ -27,13 +28,13 @@ exports.create = (req, res, next) => {
     .save()
     .then((response) => {
       req.flash('success', { msg: 'Succesfully created '});
-      res.redirect('/admin/client/roles' || '/');
+      res.redirect('/admin/roles' || '/');
     })
     .catch((err) => { next(err); });
 }
 
 exports.update = (req, res) => {
-  const { name, description } = req.body;
+  const { name } = req.body;
 
   req.roleModel.set('name', name);
 

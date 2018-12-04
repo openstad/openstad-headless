@@ -1,6 +1,5 @@
 const ExpressBrute = require('express-brute');
 
-
 //CONFIGURE BRUTE FORCE PROTECT
 exports.default = new ExpressBrute(new ExpressBrute.MemoryStore(), {
 	freeRetries  : 1000,

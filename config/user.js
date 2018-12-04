@@ -1,11 +1,11 @@
 exports.fields = [
   {
     key: 'firstName',
-    label: 'Firstname'
+    label: 'Voornaam'
   },
   {
     key: 'lastName',
-    label: 'Lastname'
+    label: 'Achternaam'
   },
   {
     key: 'postcode',

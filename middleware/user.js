@@ -18,9 +18,7 @@ exports.withAll = (req, res, next) => {
 exports.withOne = (req, res, next) => {
   const userId = req.body.userId ? req.body.userId : req.params.userId;
 
-  new User({
-    id: userId
-  })
+  new User({ id: userId  })
     .fetch()
     .then((user) => {
       req.userModel = user;
@@ -45,6 +43,7 @@ exports.withOneByEmail = (req, res, next) => {
       next(err);
     });
 }
+
 
 exports.validateUser = (req, res, next) => {
 /*  userFields.forEach ((field) => {

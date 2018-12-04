@@ -14,8 +14,12 @@ exports.withAll = (req, res, next) => {
 
 var counter =1;
 exports.withOne = (req, res, next) => {
-  const clientId = req.body && req.body.clientId ? req.body.clientId : req.query.clientId;
+  console.log('===>', req.client);
 
+  let clientId = req.body && req.body.clientId ? req.body.clientId : req.query.clientId;
+  if (!clientId) {
+    clientId = req.query.client_id;
+  }
   counter++;
 
   if (clientId) {
@@ -32,7 +36,7 @@ exports.withOne = (req, res, next) => {
     })
     .catch((err) => { next(err); });
   } else {
-    throw new Error('No Client ID is set for login',);
+    throw new Error('No Client ID is set for login');
 /*
     next({
       name: 'ClientNotFoundError',
@@ -98,8 +102,26 @@ exports.validate = (req, res, next) => {
    */
   if (!allowedType) {
     throw new Error('Auth types not allowed');
-
   }
 
   next();
+}
+
+exports.checkRequiredUserFields = (req, res, next) => {
+  console.log('===>', req.client);
+  const requiredFields = JSON.parse(req.client.requiredUserFields);
+  const user = req.user;
+  let error;
+
+  requiredFields.forEach((field) => {
+    // if at least one required field is empty, set to error
+    error = error || !req.user[field];
+  });
+
+  // if error redirect to register
+  if (error) {
+    res.redirect('/auth/required-fields?clientId=' + req.client.clientId || '/account');
+  } else {
+    next();
+  }
 }

@@ -6,17 +6,17 @@
   <div class="card-body">
     <form
       method="post"
-      action="/admin/role/bulk"
+      action="/admin/code/bulk?_csrf={{csrfToken}}"
       enctype="multipart/form-data"
     >
       <h3> Bulk upload CSV File </h3>
       <br />
-      <input type="file" name="csv_file" />
+      <input type="file" name="file" />
       <br />
       <br />
       <select name="clientId">
         {% for client in clients %}
-          <option value="client.id">{{client.name}}</option>
+          <option value="{{client.id}}">{{client.name}}</option>
         {% endfor %}
       </select>
       <br />

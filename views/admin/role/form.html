@@ -1,10 +1,24 @@
-{% extends 'layouts/admin.html' %}
+<form
+  method="post"
+  action="/admin/role/{{role.id}}"
+>
+  <input type="hidden" name="_csrf" value="{{csrfToken}}" />
 
-{% block body %}
-<div class="card">
-  <div class="card-body">
-    <h1> New Role </h1>
-    {% include 'admin/role/form.html' %}
+  <div class="form-group">
+    <label> Name </label>
+    <input
+      type="text"
+      required
+      maxlength="60"
+      name="name"
+      class="form-input"
+      value="{{role.name}}"
+    />
   </div>
-</div>
-{% endblock %}
+
+  <button type="submit" class="btn btn-primary">
+    Save
+  </button>
+</form>
+<br />
+<br />
