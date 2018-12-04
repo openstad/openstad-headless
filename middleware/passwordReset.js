@@ -1,4 +1,4 @@
-const PasswordResetToken = require('../models').LoginToken;
+const PasswordResetToken = require('../models').PasswordResetToken;
 const User = require('../models').User;
 
 exports.validate = (req, res, next) => {
@@ -13,11 +13,7 @@ exports.validate = (req, res, next) => {
         req.body.userId = passwordResetToken.get('userId');
         next();
       } else {
-        next({
-          name: 'NoTokenFound',
-          status: 404,
-          message: 'Token not found or expired.'
-        });
+        throw new Error('No token found');
       }
     })
     .catch((err) => {

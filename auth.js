@@ -95,8 +95,6 @@ passport.use('uniqueCode', new TokenStrategy({
     }) */
     .fetch()
     .then((uniqueCode) => {
-      console.log('===> uniqueCode', uniqueCode)
-
       if (uniqueCode) {
         const isUsed = uniqueCode.get('isUsed');
         const userId = uniqueCode.get('userId');

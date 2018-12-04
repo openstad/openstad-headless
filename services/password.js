@@ -7,7 +7,7 @@ const hat = require('hat');
  *
  */
 const getUrl = (user, client, token) => {
-  return `${appUrl}/${slug}?token=${token}&clientId=${client.clientId}`;
+  return `${appUrl}/auth/local/reset?token=${token}&clientId=${client.clientId}`;
 }
 
 exports.formatResetLink = (client, user) => {
@@ -20,7 +20,7 @@ exports.formatResetLink = (client, user) => {
     })
     .save()
     .then((resetToken) => {
-      const url = getUrl(user, client, resetToken);
+      const url = getUrl(user, client, resetToken.get('token'));
       resolve(url);
     })
     .catch((err) => {

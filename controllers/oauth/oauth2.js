@@ -178,8 +178,6 @@ exports.authorization = [
     // TODO:  Make a mechanism so that if this isn't a trusted client, the user can record that
     // they have consented but also make a mechanism so that if the user revokes access to any of
     // the clients then they will have to re-consent.
-    console.log('req.query.client_id ===>',  req.query.client_id);
-
     new Client({clientId: req.query.client_id})
     .fetch()
     .then((client) => {
@@ -243,7 +241,6 @@ exports.token = [
 server.serializeClient((client, done) => done(null, client.id));
 
 server.deserializeClient((id, done) => {
-  console.log('id', id);
   new Client({id: id})
   .fetch()
   .then(client => done(null, client.serialize()))

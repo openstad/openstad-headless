@@ -39,7 +39,7 @@
          .save()
          .then(() => {
            req.flash('success', { msg: 'Wachtwoord aangepast, je kan nu inloggen!' });
-           res.redirect(authLocalConfig.loginUrl);
+           res.redirect(authLocalConfig.loginUrl + '?clientId=' + req.client.clientId);
          })
          .catch((err) => {
            next(err);
@@ -65,11 +65,11 @@
      .then((url) => { return sendEmail(url, req.user, req.client); })
      .then(() => {
        req.flash('success', {msg: 'We hebben een e-mail naar je verstuurd'});
-       res.redirect(req.header('Referer') || authLocalConfig.loginUrl);
+       res.redirect(req.header('Referer') || authLocalConfig.loginUrl + '?clientId=' + req.client.clientId);
      })
      .catch((err) => {
        req.flash('error', {msg: 'E-mail adres is niet bekend bij ons.'});
-       res.redirect(req.header('Referer') || authLocalConfig.loginUrl);
+       res.redirect(req.header('Referer') || authLocalConfig.loginUrl + '?clientId=' + req.client.clientId);
      });
 
    /**

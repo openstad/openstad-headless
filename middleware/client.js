@@ -47,8 +47,6 @@ exports.withOne = (req, res, next) => {
 exports.withOneById = (req, res, next) => {
   const clientId = req.params.clientId;
 
-  console.log('====> clientId', clientId);
-
   if (clientId) {
     new Client({ id: clientId })
     .fetch()

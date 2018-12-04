@@ -104,7 +104,6 @@ exports.postBulk = [upload.single('file'), (req, res, next) => {
       })
    })
    .on("end", function(){
-      console.log("done");
       checkAllCodes(codes);
    });
 

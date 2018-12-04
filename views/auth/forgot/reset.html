@@ -7,14 +7,16 @@
       <form method="POST" class="validate-form">
          <input type="hidden" name="_csrf" value="{{csrfToken}}" />
          <input type="hidden" name="token" value="{{token}}" />
-        <legend>Reset Password</legend>
+        <h1>
+          Herstel je wachtwoord
+        </h1>
         <div class="form-group">
-          <label for="password">New Password</label>
-          <input type="password" name="password" id="password" placeholder="New password" class="form-control" autofocus>
+          <label for="password">Nieuw wachtwoord</label>
+          <input type="password" name="password" id="password" placeholder="New password" class="form-input" autofocus>
         </div>
         <div class="form-group">
-          <label for="confirm">Confirm Password</label>
-          <input type="password" name="confirm" id="confirm" placeholder="Confirm password" class="form-control">
+          <label for="confirm">Herhaal nieuwe wachtwoord</label>
+          <input type="password" name="password_confirm" id="confirm" placeholder="Confirm password" class="form-input">
         </div>
         <div class="form-group">
           <button type="submit" class="btn btn-primary">Change Password</button>

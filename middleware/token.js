@@ -3,7 +3,6 @@ const User       = require('../models').User;
 
 exports.addUser = ((req, res, next) => {
   const tokenToQuery = req.body.token ?  req.body.token : req.query.token;
-  console.log('---> ', tokenToQuery);
 
   new LoginToken({token: tokenToQuery})
 
@@ -24,7 +23,6 @@ exports.addUser = ((req, res, next) => {
   .fetch()
   .then((token) => {
     if (token) {
-      console.log('----> userID', token.get('userId'));
       new User
         ({id: token.get('userId')})
         .fetch()
@@ -39,7 +37,6 @@ exports.addUser = ((req, res, next) => {
           next(err);
         });
     } else {
-      console.log('ttttt');
       next({
         name: 'LoginTokenNotFound',
         msg: 'No token found.',

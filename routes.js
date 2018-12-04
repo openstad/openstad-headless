@@ -54,7 +54,7 @@ module.exports = function(app){
 	app.get('/auth/local/login',     authLocal.login);
 	app.post('/auth/local/login',    authMw.validateLogin, authLocal.postLogin);
 	app.get('/auth/local/register',  authLocal.register);
-	app.post('/auth/local/register', userMw.validateUser, authLocal.postRegister);
+	app.post('/auth/local/register', userMw.validateUser, userMw.validateUniqueEmail, authLocal.postRegister);
 
 	/**
 	 * Deal with forgot password
@@ -62,7 +62,7 @@ module.exports = function(app){
 	app.get('/auth/local/forgot',    authForgot.forgot);
 	app.post('/auth/local/forgot',   authForgot.postForgot);
 	app.get('/auth/local/reset',     passwordResetMw.validate, authForgot.reset);
-	app.post('/auth/local/reset',    passwordResetMw.validate, userMw.withOne, userMw.validateEmail, userMw.validatePassword, authForgot.postReset);
+	app.post('/auth/local/reset',    passwordResetMw.validate, userMw.withOne, userMw.validatePassword, authForgot.postReset);
 
 	/**
 	 * Auth routes for URL login
@@ -161,10 +161,10 @@ module.exports = function(app){
   /**
    * Admin code routes
    */
-  app.get('/admin/codes',       codeMw.withAll, adminCodeController.all);
-  app.get('/admin/code',        clientMw.withAll, adminCodeController.new);
-  app.get('/admin/code/bulk',   clientMw.withAll, adminCodeController.bulk);
-  app.post('/admin/code/bulk',            adminCodeController.postBulk);
+  app.get('/admin/codes',                   codeMw.withAll, adminCodeController.all);
+  app.get('/admin/code',                    clientMw.withAll, adminCodeController.new);
+  app.get('/admin/code/bulk',               clientMw.withAll, adminCodeController.bulk);
+  app.post('/admin/code/bulk',              adminCodeController.postBulk);
   app.post('/admin/code',                   adminCodeController.create);
   app.post('/admin/code/destroy/:codeId',   adminCodeController.destroy);
 }

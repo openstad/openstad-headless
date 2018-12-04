@@ -1,5 +1,6 @@
-const User = require('../models').User;
-const { check } = require('express-validator/check')
+const { check }             = require('express-validator/check')
+//const Promise               = require('bluebird');
+const User                  = require('../models').User;
 const userProfileValidation = require('../config/user').validation.profile;
 
 exports.withAll = (req, res, next) => {
@@ -74,16 +75,26 @@ exports.validateUser = (req, res, next) => {
 
   req.check(userProfileValidation);
 
-  req.check('email').custom(value => {
-    return
+/*
+  req.check('email').custom((value) => {
+    return new Promise((resolve, reject) => {
       new User({ email: value  })
-        .then(user => {
+        .fetch()
+        .then((user) => {
+          console.log('===> user', user);
+
           if (user) {
-            return Promise.reject('E-mail already in use');
+            console.log('===> E-mail already in use');
+            //return Promise.reject('asadasdadsasd')
+            throw new Error('E-mail al in gebruik!');
+            //return reject('E-mail already in use');
+          } else {
+            return resolve();
           }
         });
+    })
   });
-
+*/
   req.getValidationResult()
 
 //  const errors = req.validationResult();
@@ -95,6 +106,21 @@ exports.validateUser = (req, res, next) => {
   } else {
     next();
   }
+}
+
+exports.validateUniqueEmail  = (req, res, next) => {
+  new User({ email: req.body.email  })
+    .fetch()
+    .then(user => {
+      if (user) {
+        req.flash('error', {
+          msg: 'E-mail al in gebruik!'
+        });
+        res.redirect(req.header('Referer') || '/account');
+      } else {
+        next();
+      }
+    });
 }
 
 exports.validatePassword = (req, res, next) => {
@@ -117,7 +143,7 @@ exports.validateEmail = (req, res, next) => {
   ) {
     next();
   } else {
-    req.flash('error', {msg: 'Incorrect wachtwoord'});
+    req.flash('error', {msg: 'Incorrect email'});
     res.redirect(req.header('Referer') || '/account');
   }
 }
