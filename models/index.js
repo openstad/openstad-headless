@@ -4,7 +4,7 @@ const jsonColumns = require('bookshelf-json-columns');
 const configAuthTypes = require('../config/auth.js').types;
 bookshelf.plugin(jsonColumns);
 
-exports.Client = bookshelf.Model.extend({
+const Client = bookshelf.Model.extend({
 
   tableName: 'clients',
   hasTimestamps: true,
@@ -20,32 +20,52 @@ exports.Client = bookshelf.Model.extend({
   }
 });
 
-exports.User = bookshelf.Model.extend({
-  tableName: 'users',
-  hasTimestamps: true,
-  hasTimestamps: ['createdAt', 'updatedAt']
-});
 
-exports.LoginToken = bookshelf.Model.extend({
+
+const LoginToken = bookshelf.Model.extend({
   tableName: 'login_tokens',
   hasTimestamps: true,
   hasTimestamps: ['createdAt',  'updatedAt']
 });
 
-exports.UniqueCode = bookshelf.Model.extend({
+const UniqueCode = bookshelf.Model.extend({
   tableName: 'unique_codes',
   hasTimestamps: true,
   hasTimestamps: ['createdAt',  'updatedAt']
 });
 
-exports.Role = bookshelf.Model.extend({
+const Role = bookshelf.Model.extend({
   tableName: 'roles',
   hasTimestamps: true,
   hasTimestamps: ['createdAt',  'updatedAt']
 });
 
-exports.PasswordResetToken  = bookshelf.Model.extend({
+const UserRole = bookshelf.Model.extend({
+  tableName: 'user_roles',
+  hasTimestamps: true,
+  hasTimestamps: ['createdAt',  'updatedAt']
+});
+
+const PasswordResetToken  = bookshelf.Model.extend({
   tableName: 'password_reset_tokens',
   hasTimestamps: true,
   hasTimestamps: ['createdAt',  'updatedAt']
 });
+
+const User = bookshelf.Model.extend({
+  tableName: 'users',
+  hasTimestamps: true,
+  hasTimestamps: ['createdAt', 'updatedAt'],
+  /*roles: function(){
+    console.log(this);
+   return this.belongsToMany(Role).withPivot(['user_roles']);
+ }*/
+});
+
+exports.Client = Client;
+exports.User = User;
+exports.LoginToken = LoginToken;
+exports.UniqueCode = UniqueCode;
+exports.Role = Role;
+exports.UserRole = UserRole;
+exports.PasswordResetToken = PasswordResetToken;

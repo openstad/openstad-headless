@@ -1,7 +1,11 @@
 const { check }             = require('express-validator/check')
 //const Promise               = require('bluebird');
 const User                  = require('../models').User;
+const UserRole              = require('../models').UserRole;
+const Role                  = require('../models').Role;
 const userProfileValidation = require('../config/user').validation.profile;
+
+
 
 exports.withAll = (req, res, next) => {
   User
@@ -21,13 +25,46 @@ exports.withOne = (req, res, next) => {
   new User({ id: userId  })
     .fetch()
     .then((user) => {
-      req.userModel = user;
-      req.user = user.serialize();
-      next();
+      const userModel = user;
+      const userData = user.serialize();
+
+       UserRole
+        .query(function(qb){ qb.where('userId' , userData.id) ; })
+        .fetchAll()
+        .then((userRoles) => {
+          userData.roles = userRoles.serialize();
+          req.userModel = userModel;
+          req.user = userData;
+          next();
+        });
     })
     .catch((err) => {
       next(err);
     });
+}
+
+exports.withRoleForClient = (req, res, next) => {
+  new UserRole({ userId: req.user.id, clientId: req.client.id })
+     .fetch()
+     .then((userRole) => {
+       if (userRole) {
+         const roleId = userRole.get('roleId');
+         return new Role ({id: roleId}).fetch();
+       } else {
+         next();
+       }
+     })
+     .then((role) => {
+       if (role) {
+         req.user.role = role.get('name');
+       }
+
+       next();
+
+     })
+     .catch((err) => {
+       next(err);
+     });
 }
 
 exports.withOneByEmail = (req, res, next) => {

@@ -1,11 +1,12 @@
 <form
   method="post"
   {% if user %}
-  action="/admin/user/{{client.id}}"
+  action="/admin/user/{{user.id}}"
   {% else %}
   action="/admin/user"
   {% endif %}
 >
+  <input type="hidden" name="_csrf" value="{{csrfToken}}" />
   <div class="form-group">
     <div class="col-xs-12 col-sm-12">
     <label> First name </label>
@@ -43,12 +44,39 @@
       />
     </div>
   </div>
+
+  {% include 'admin/user/address-form.html' %}
+
+
+  <h3> Roles per client </h3>
+  <table class="table">
+  {% for client in clients %}
+      <tr>
+        <td>
+          <b> {{client.name}} </b>
+        </td>
+        {% for role in roles %}
+        <td>
+          <label>
+            <input
+              type="radio"
+              name="roles['{{client.id}}']"
+              value="{{role.id}}"
+              {% if role.id === client.userRole.roleId %} checked {% endif %}
+            />
+            {{role.name}}
+          </label>
+        </td>
+        {% endfor %}
+      </tr>
+  {% endfor %}
+</table>
+  <br />
   <div class="form-group">
     <div class="col-xs-12 col-sm-12">
       <label> Password </label>
       <input
-        type="text"
-        required
+        type="password"
         name="password"
         class="form-input"
         maxlength="60"
@@ -56,22 +84,6 @@
     </div>
   </div>
 
-  {% include 'admin/user/address-form.html' %}
-
-
-  <h3> Roles per client </h3>
-  {% for client in clients %}
-    <h4> {{client.name}} <h4>
-    {% for role in roles %}
-      <label>
-        {{role.label}}
-        <input
-          type="checkbox"
-          name="{{client.key}}[{{role.key}}]"
-        />
-      </label>
-    {% endfor %}
-  {% endfor %}
 
   <button type="submit" class="btn">
     {% if user %}

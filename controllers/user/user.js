@@ -1,4 +1,3 @@
-const passport  = require('passport');
 const login     = require('connect-ensure-login');
 const User      = require('../../models').User;
 
@@ -21,17 +20,18 @@ const User      = require('../../models').User;
  * @returns {undefined}
  */
 exports.info = [
-  passport.authenticate('bearer', { session: false }),
   (req, res) => {
     // req.authInfo is set using the `info` argument supplied by
     // `BearerStrategy`.  It is typically used to indicate scope of the token,
     // and used in access control checks.  For illustrative purposes, this
     // example simply returns the scope in the response.
 
+
+
     res.json({
       user_id: req.user.id,
       email: req.user.email,
-      role: '',
+      role: req.user.role,
       name: req.user.name,
       scope: req.authInfo.scope
     });

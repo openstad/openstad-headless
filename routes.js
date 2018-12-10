@@ -1,6 +1,7 @@
 const multer                   = require('multer');
 //const upload                   = multer({ dest: 'uploads/' });
 const upload                   = multer();
+const passport                 = require('passport');
 
 //CONTROLERS
 const oauth2Controller 				 = require('./controllers/oauth/oauth2');
@@ -104,7 +105,7 @@ module.exports = function(app){
 	/**
 	 * Logout (all types :))
 	 */
-	app.get('/logout', clientMw.withOne, authLocal.logout);
+	app.get('/logout', authLocal.logout);
 
 	/**
 	 * Show account, add client, but not obligated
@@ -123,8 +124,8 @@ module.exports = function(app){
   app.post('/oauth/token',                clientMw.withOne, bruteForce.prevent,             oauth2Controller.token);
   app.get('/oauth/token',                 clientMw.withOne, oauth2Controller.token);
 
-  app.get('/api/userinfo', userController.info);
-  // app.get('/api/clientinfo', client.info);
+  app.get('/api/userinfo',    passport.authenticate('bearer', { session: false }), clientMw.withOne, userMw.withRoleForClient, userController.info);
+  //app.get('/api/clientinfo', client.info);
 
   // Mimicking google's token info endpoint from
   // https://developers.google.com/accounts/docs/OAuth2UserAgent#validatetoken
@@ -139,11 +140,11 @@ module.exports = function(app){
    */
 
   //shared middlware for all admin routes
-  //app.use('/admin/client', [authMw.check, adminMiddleware.ensure]);
+  app.use('/admin', [adminMiddleware.addClient, authMw.check, userMw.withRoleForClient, adminMiddleware.ensure]);
 
   app.get('/admin/users',         userMw.withAll, adminUserController.all);
-  app.get('/admin/user/:userId',  userMw.withOne, adminUserController.edit);
-  app.get('/admin/user',          adminUserController.new);
+  app.get('/admin/user/:userId',  clientMw.withAll, roleMw.withAll, userMw.withOne, adminUserController.edit);
+  app.get('/admin/user',          clientMw.withAll, roleMw.withAll, adminUserController.new);
   app.post('/admin/user',         adminUserController.create);
   app.post('/admin/user/:userId', userMw.withOne, adminUserController.update);
 
@@ -159,11 +160,11 @@ module.exports = function(app){
   /**
    * Admin role routes
    */
-  app.get('/admin/roles',         roleMw.withAll, adminRoleController.all);
-  app.get('/admin/role/:roleId',  roleMw.withOne, adminRoleController.edit);
-  app.get('/admin/role',          adminRoleController.new);
-  app.post('/admin/role',         adminRoleController.create);
-  app.post('/admin/role/:roleId', roleMw.withOne, adminRoleController.update);
+  app.get('/admin/roles',           roleMw.withAll, adminRoleController.all);
+  app.get('/admin/role/:roleId',    roleMw.withOne, adminRoleController.edit);
+  app.get('/admin/role',            adminRoleController.new);
+  app.post('/admin/role',           adminRoleController.create);
+  app.post('/admin/role/:roleId',   roleMw.withOne, adminRoleController.update);
 
   /**
    * Admin code routes
@@ -174,4 +175,18 @@ module.exports = function(app){
   app.post('/admin/code/bulk',              upload.single('file'),  adminCodeController.postBulk);
   app.post('/admin/code',                   adminCodeController.create);
   app.post('/admin/code/destroy/:codeId',   adminCodeController.destroy);
+
+  /**
+   * Error routes
+   */
+  // Handle 404
+  app.use(function(req, res) {
+     res.status(404).render('errors/404');
+  });
+
+  // Handle 500
+  app.use(function(err, req, res, next) {
+    console.log('---> err', err);
+    res.status(500).render('errors/500');
+  });
 }

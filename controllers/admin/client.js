@@ -27,7 +27,7 @@ exports.new = (req, res, next) => {
   res.render('admin/client/new', {
     requiredUserFields: userFields,
     exposedUserFields: userFields,
-    authTypes: authTypes
+    authTypes: authTypes,
   });
 }
 
@@ -45,6 +45,8 @@ exports.edit = (req, res, next) => {
     clientAuthTypes: clientAuthTypes,
     clientExposedUserFields: clientExposedUserFields,
     clientRequiredUserFields: clientRequiredUserFields,
+    roles: req.roles,
+    clients: req.clients
   });
 }
 
