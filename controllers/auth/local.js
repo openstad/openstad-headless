@@ -80,6 +80,7 @@ exports.postLogin = (req, res, next) => {
 
     // Redirect if it fails to the original e-mail screen
     if (!user) {
+      req.flash('error', {msg: 'Onjuiste combinatie e-mail/Wachtwoord'});
       return res.redirect(`${authLocalConfig.loginUrl}?clientId=${req.client.clientId}`);
     }
 
@@ -101,5 +102,5 @@ exports.postLogin = (req, res, next) => {
  */
 exports.logout = (req, res) => {
   req.logout();
-  res.redirect('/');
+  res.redirect('/login?clientId=' + req.query.clientId);
 };

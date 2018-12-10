@@ -112,12 +112,12 @@ module.exports = function(app){
 	 */
 	app.use('/user', [authMw.check, clientMw.withOne]);
   app.get('/account',    userController.account);
-  app.post('/account',   userMw.validateUser, userController.postAccount);
+  app.post('/account',   userMw.validateUser, userMw.validateUniqueEmail, userController.postAccount);
   app.post('/password',  userMw.validatePassword, userController.postAccount);
 
   app.use('/auth/required-fields', [authMw.check, clientMw.withOne]);
   app.get('/auth/required-fields', authRequiredFields.index);
-  app.post('/auth/required-fields', clientMw.withOne, authRequiredFields.post);
+  app.post('/auth/required-fields', clientMw.withOne, userMw.validateUniqueEmail, authRequiredFields.post);
 
   app.get('/dialog/authorize',            clientMw.withOne, authMw.check, clientMw.checkRequiredUserFields, oauth2Controller.authorization);
   app.post('/dialog/authorize/decision',  clientMw.withOne, bruteForce.prevent,             oauth2Controller.decision);

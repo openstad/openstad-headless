@@ -126,6 +126,7 @@ exports.authenticate =  (req, res, next) => {
 
    // Redirect if it fails to the original e-mail screen
    if (!user) {
+     req.flash('error', {msg: 'De url is geen geldige login url, wellicht is deze verlopen'});
      return res.redirect(`/auth/url/login?clientId=${req.client.clientId}`);
    }
 

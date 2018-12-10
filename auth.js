@@ -44,7 +44,6 @@ passport.use('url', new TokenStrategy({
     failRedirect : "/auth/url/login",
     varName : "token"
   }, function (token, done) { // put your check logic here
-    console.log('tokentokentoken', token);
     new LoginToken({token: token})
       .query((q) => {
       /**

@@ -19,7 +19,6 @@ exports.index = (req, res, next) => {
 exports.post = (req, res, next) => {
   const clientRequiredUserFields = JSON.parse(req.client.requiredUserFields);
 
-
   clientRequiredUserFields.forEach((field) => {
     if (req.body[field]) {
       req.userModel.set(field, req.body[field]);

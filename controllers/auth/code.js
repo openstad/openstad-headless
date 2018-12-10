@@ -21,6 +21,7 @@ exports.postLogin = (req, res, next) => {
 
     // Redirect if it fails to the original e-mail screen
     if (!user) {
+      req.flash('error', {msg: 'De code is niet geldig'});
       return res.redirect(`${authCodeConfig.loginUrl}?clientId=${req.client.clientId}`);
     }
 

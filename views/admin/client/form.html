@@ -3,7 +3,7 @@
   action="/admin/client/{{client.id}}"
 >
   <input type="hidden" name="_csrf" value="{{csrfToken}}" />
-  
+
   <div class="form-group">
     <label> Name </label>
     <input
@@ -81,7 +81,7 @@
         type="checkbox"
         name="authTypes[]"
         value="{{authType.key}}"
-        {% if (client) and  (clientAuthTypes.indexOf(authType.key)) >= 0 %} checked {% endif %}
+        {% if (client) and (clientAuthTypes) and (clientAuthTypes.indexOf(authType.key)) >= 0 %} checked {% endif %}
       />
       {{authType.label}}
     </label>
@@ -97,7 +97,7 @@
         type="checkbox"
         name="requiredUserFields[]"
         value="{{requiredField.key}}"
-        {% if (client) and (clientRequiredUserFields.indexOf(requiredField.key)) >= 0 %} checked {% endif %}
+        {% if (client) and (clientRequiredUserFields) and (clientRequiredUserFields.indexOf(requiredField.key)) >= 0 %} checked {% endif %}
       />
        {{requiredField.label}}
     </label>
@@ -115,7 +115,7 @@
         type="checkbox"
         name="exposedUserFields[]"
         value="{{exposedField.key}}"
-        {% if (client) and (clientExposedUserFields.indexOf(exposedField.key)) >= 0 %} checked {% endif %}
+        {% if (client) and (clientExposedUserFields) and (clientExposedUserFields.indexOf(exposedField.key)) >= 0 %} checked {% endif %}
       />
        {{exposedField.label}}
      </label>

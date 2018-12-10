@@ -16,6 +16,7 @@ exports.addClient = (req, res, next) => {
     .then((clientModel) => {
       req.clientModel = clientModel;
       req.client = clientModel.serialize();
+      res.locals.client = req.client;
       next();
     })
     .catch((err) => {

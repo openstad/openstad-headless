@@ -159,6 +159,8 @@ a {
     background-color: transparent;
 }
 
+
+
 @inward-easing: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 @outward-easing: cubic-bezier(0.77, 0, 0.175, 1);
 @downward-easing: cubic-bezier(0.47, 0, 0.745, 0.715);
@@ -247,6 +249,7 @@ a {
   animation-name: flashAnimateDown;
   animation-timing-function: @downward-easing;
 }
+
 
 /*================ animations ================*/
 

@@ -111,10 +111,12 @@ exports.checkRequiredUserFields = (req, res, next) => {
   const user = req.user;
   let error;
 
-  requiredFields.forEach((field) => {
-    // if at least one required field is empty, set to error
-    error = error || !req.user[field];
-  });
+  if (requiredFields) {
+    requiredFields.forEach((field) => {
+      // if at least one required field is empty, set to error
+      error = error || !req.user[field];
+    });
+  }
 
   // if error redirect to register
   if (error) {
