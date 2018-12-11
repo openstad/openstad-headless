@@ -49,18 +49,21 @@ exports.withRoleForClient = (req, res, next) => {
      .then((userRole) => {
        if (userRole) {
          const roleId = userRole.get('roleId');
-         return new Role ({id: roleId}).fetch();
+         new Role ({id: roleId})
+          .fetch()
+          .then(() => {
+            if (role) {
+              req.user.role = role.get('name');
+            }
+
+            next();
+          })
+          .catch((err) => {
+            next(err);
+          })
        } else {
          next();
        }
-     })
-     .then((role) => {
-       if (role) {
-         req.user.role = role.get('name');
-       }
-
-       next();
-
      })
      .catch((err) => {
        next(err);

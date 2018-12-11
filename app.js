@@ -30,6 +30,8 @@ const app = express();
 const nunjucksEnv = nunjucks.configure('views', { autoescape: true, express: app });
 app.set('view engine', 'html');
 app.set('port', process.env.PORT || 4000);
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.use(cookieParser());
 
 // Session Configuration
@@ -49,11 +51,13 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(expressValidator());
 
-const csrfProtection = csurf({cookie:true});
-app.use(csrfProtection);
+// const csrfProtection = csurf({cookie:true});
+
+//app.use(csrfProtection);
 
 app.use((req, res, next) => {
-  nunjucksEnv.addGlobal('csrfToken', req.csrfToken());
+  //console.log( req.csrfToken());
+  //nunjucksEnv.addGlobal('csrfToken', req.csrfToken());
   next();
 });
 
@@ -62,7 +66,6 @@ app.use((req, res, next) => {
 require('./auth');
 
 // static resources for stylesheets, images, javascript files
-app.use(express.static(path.join(__dirname, 'public')));
 
 require('./routes')(app);
 

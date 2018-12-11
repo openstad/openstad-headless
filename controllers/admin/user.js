@@ -90,10 +90,7 @@ exports.update = (req, res, next) => {
   }
 
 
-  console.log('===> saveRoles', saveRoles);
-
   Promise.map(saveRoles, (saveRole) => {
-    console.log('==> saveRole', saveRole);
     return saveRole();
   })
   .then(() => {
@@ -104,7 +101,6 @@ exports.update = (req, res, next) => {
     res.redirect('/admin/user/' + req.user.id);
   })
   .catch((err) => {
-    console.log('Error:', err);
     req.flash('error', { msg: 'Error!' });
     res.redirect('/admin/user/' + req.user.id);
   })
@@ -116,12 +112,10 @@ const createOrUpdateUserRole = (clientId, userId, roleId) =>{
     new UserRole({clientId, userId})
       .fetch()
       .then((userRole) => {
-        console.log('====> createOrUpdateUserRole', clientId, userId, roleId);
         if (userRole) {
           userRole.set('roleId', roleId);
           return userRole.save();
         } else {
-          console.log('rerererer', clientId);
           return new UserRole({ clientId, roleId, userId }).save();
         }
       })

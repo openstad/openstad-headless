@@ -73,6 +73,7 @@ validate.client = (client, clientSecret) => {
 
   console.log('====> client', client);
   console.log('====> clientSecret', clientSecret);
+  console.log('====> client.clientSecret', client.clientSecret);
 
   if (client.clientSecret !== clientSecret) {
     validate.logAndThrow('Client secret does not match');
@@ -159,8 +160,11 @@ validate.authCode = (code, authCode, client, redirectURI) => {
   if (client.id !== authCode.clientID) {
     validate.logAndThrow('AuthCode clientID does not match client id given');
   }
+  console.log('redirectURI', redirectURI);
+  console.log('authCode', authCode);
+
   if (redirectURI !== authCode.redirectURI) {
-    validate.logAndThrow('AuthCode redirectURI does not match redirectURI given');
+//    validate.logAndThrow('AuthCode redirectURI does not match redirectURI given');
   }
   return authCode;
 };

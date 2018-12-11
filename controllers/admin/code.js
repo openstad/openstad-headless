@@ -52,7 +52,6 @@ exports.postBulk = (req, res, next) => {
   const lines = csvToArray(csvString);
 
   lines.forEach((line) => {
-    console.log('line', line);
     let code = line[0];
 
     let codeStatus = {
@@ -135,8 +134,6 @@ exports.postBulk = (req, res, next) => {
  */
 exports.create = (req, res, next) => {
   const { code, clientId } = req.body;
-
-  console.log('body', req.body);
 
   new UniqueCode({ code, clientId })
     .save()

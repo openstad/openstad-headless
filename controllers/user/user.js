@@ -19,24 +19,22 @@ const User      = require('../../models').User;
  * @param {Object} res The response
  * @returns {undefined}
  */
-exports.info = [
-  (req, res) => {
-    // req.authInfo is set using the `info` argument supplied by
-    // `BearerStrategy`.  It is typically used to indicate scope of the token,
-    // and used in access control checks.  For illustrative purposes, this
-    // example simply returns the scope in the response.
+exports.info = (req, res) => {
+  // req.authInfo is set using the `info` argument supplied by
+  // `BearerStrategy`.  It is typically used to indicate scope of the token,
+  // and used in access control checks.  For illustrative purposes, this
+  // example simply returns the scope in the response.
 
 
 
-    res.json({
-      user_id: req.user.id,
-      email: req.user.email,
-      role: req.user.role,
-      name: req.user.name,
-      scope: req.authInfo.scope
-    });
-  },
-];
+  res.json({
+    user_id: req.user.id,
+    email: req.user.email,
+    role: req.user.role,
+    name: req.user.name,
+    scope: req.authInfo.scope
+  });
+}
 
 
 /**

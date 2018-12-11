@@ -12,7 +12,6 @@ exports.new = (req, res, next) => {
 }
 
 exports.edit = (req, res, next) => {
-  console.log('---> req.role', req.role);
   res.render('admin/role/edit', {
     role: req.role
   });

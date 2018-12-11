@@ -33,6 +33,12 @@ const roleMw                   = require('./middleware/role');
 const codeMw                   = require('./middleware/code');
 
 module.exports = function(app){
+  app.use(function(req, res, next) {
+    console.log('====> REQUEST:', req.originalUrl);
+    console.log('====> query:', req.query);
+    next();
+  });
+
   app.get('/', authLocal.index);
 
 
@@ -121,9 +127,13 @@ module.exports = function(app){
 
   app.get('/dialog/authorize',            clientMw.withOne, authMw.check, clientMw.checkRequiredUserFields, oauth2Controller.authorization);
   app.post('/dialog/authorize/decision',  clientMw.withOne, bruteForce.prevent,             oauth2Controller.decision);
-  app.post('/oauth/token',                clientMw.withOne, bruteForce.prevent,             oauth2Controller.token);
-  app.get('/oauth/token',                 clientMw.withOne, oauth2Controller.token);
+  app.post('/oauth/token',                oauth2Controller.token);
+  app.get('/oauth/token',                 oauth2Controller.token);
+//   clientMw.withOne,
+//clientMw.withOne, bruteForce.prevent,
 
+
+//
   app.get('/api/userinfo',    passport.authenticate('bearer', { session: false }), clientMw.withOne, userMw.withRoleForClient, userController.info);
   //app.get('/api/clientinfo', client.info);
 

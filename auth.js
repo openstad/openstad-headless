@@ -192,7 +192,9 @@ passport.use(new ClientPasswordStrategy((clientId, clientSecret, done) => {
 passport.use(new BearerStrategy((accessToken, done) => {
   db.accessTokens.find(accessToken)
     .then(token => validate.token(token, accessToken))
-    .then(token => done(null, token, { scope: '*' }))
+    .then((token) => {
+      return done(null, token, { scope: '*' });
+    })
     .catch(() => done(null, false));
 }));
 
