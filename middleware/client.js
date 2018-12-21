@@ -64,7 +64,7 @@ exports.withOneById = (req, res, next) => {
     })
     .catch((err) => { next(err); });
   } else {
-    throw new Error('No Client ID is set for login',);
+    throw new Error('No Client ID is set for login');
 /*
     next({
       name: 'ClientNotFoundError',
