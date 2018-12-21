@@ -51,11 +51,10 @@ exports.withRoleForClient = (req, res, next) => {
          const roleId = userRole.get('roleId');
          new Role ({id: roleId})
           .fetch()
-          .then(() => {
+          .then((role) => {
             if (role) {
               req.user.role = role.get('name');
             }
-
             next();
           })
           .catch((err) => {
