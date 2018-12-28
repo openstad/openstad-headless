@@ -31,7 +31,8 @@ exports.info = (req, res) => {
     user_id: req.user.id,
     email: req.user.email,
     role: req.user.role,
-    name: req.user.name,
+    firstName: req.user.firstName,
+    lastName: req.user.lastName,
     scope: req.authInfo.scope
   });
 }
