@@ -111,7 +111,7 @@ module.exports = function(app){
 	/**
 	 * Logout (all types :))
 	 */
-	app.get('/logout', authLocal.logout);
+	app.get('/logout', clientMw.withOne, authLocal.logout);
 
 	/**
 	 * Show account, add client, but not obligated

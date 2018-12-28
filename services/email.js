@@ -31,7 +31,6 @@ exports.send = function ({subject, toName, toEmail, template, variables, fromEma
    * Render email template
    */
   const mail = nunjucks.render(template, variables);
-  console.log('====> mail', mail, template, variables);
 
   /**
     * Format the to name

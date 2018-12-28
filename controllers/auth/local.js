@@ -104,5 +104,6 @@ exports.postLogin = (req, res, next) => {
  */
 exports.logout = (req, res) => {
   req.logout();
-  res.redirect('/login?clientId=' + req.query.clientId);
+  res.redirect(req.client.siteUrl);
+//  res.redirect('/login?clientId=' + req.query.clientId);
 };
