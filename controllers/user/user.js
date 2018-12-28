@@ -25,8 +25,6 @@ exports.info = (req, res) => {
   // and used in access control checks.  For illustrative purposes, this
   // example simply returns the scope in the response.
 
-
-
   res.json({
     user_id: req.user.id,
     email: req.user.email,
