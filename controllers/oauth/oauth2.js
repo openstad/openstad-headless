@@ -11,7 +11,6 @@ const Client      = require('../../models').Client;
 const User        = require('../../models').User;
 
 
-
 // Register supported grant types.
 //
 // OAuth 2.0 specifies a framework that allows users to grant client
@@ -175,9 +174,12 @@ exports.authorization = [
        */
       const allowedDomains = client.allowedDomains ? JSON.parse(client.allowedDomains) : false;
       const redirectUrlHost = new URL(redirectURI).hostname;
+      console.log('====> redirectUrlHost', redirectUrlHost);
 
       // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
       if (!allowedDomains || allowedDomains.indexOf(redirectURI) !== -1) {
+        console.log('====> error no matcht', allowedDomains);
+
         throw new Error('Redirect host doesn\'t match the client host');
       }
 
