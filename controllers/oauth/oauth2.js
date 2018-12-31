@@ -2,6 +2,7 @@
 const login       = require('connect-ensure-login');
 const oauth2orize = require('oauth2orize');
 const passport    = require('passport');
+const URL         = require('url').URL;
 const config      = require('../../config');
 const db          = require('../../db');
 const utils       = require('../../utils');
