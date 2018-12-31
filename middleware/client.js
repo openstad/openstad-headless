@@ -123,20 +123,18 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
             throw new Error('Not validated with Unique Code');
           }
         })
-        .catch((e) => { throw new Error('Not validated with Unique Code'); })
+        .catch((error) => {
+          if (errorCallback) {
+            errorCallback(req, res, next);
+          } else {
+            next(error);
+          }
+        });
+
       } else {
         next();
       }
-    })
-    .catch((error) => {
-      if (errorCallback) {
-        errorCallback(req, res, next);
-      } else {
-        next(error);
-      }
-    });
-
-  }
+    }
 }
 
 exports.checkRequiredUserFields = (req, res, next) => {
