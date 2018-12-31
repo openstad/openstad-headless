@@ -105,15 +105,13 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
   //validate code auth type
   console.log('a');
   return (req, res, next) => {
-      const clientId = req.query.client_id;
-
       const authTypes = JSON.parse(req.client.authTypes);
       console.log('---authTypes ', authTypes);
 
       if (authTypes.indexOf('UniqueCode') !== -1) {
         console.log('---UniqueCode');
 
-        new UniqueCode({ clientId: client.id, userId: user.id })
+        new UniqueCode({ clientId: req.client.id, userId: req.user.id })
         .fetch()
         .then((codeResponse) => {
           console.log('codeResponse', codeResponse);
