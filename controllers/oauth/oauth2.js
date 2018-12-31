@@ -175,7 +175,8 @@ exports.authorization = [
       const allowedDomains = client.allowedDomains ? JSON.parse(client.allowedDomains) : false;
       const redirectUrlHost = new URL(redirectURI).hostname;
       console.log('====> redirectUrlHost', redirectUrlHost);
-      console.log('====> the check', allowedDomains && allowedDomains.indexOf(redirectURI) !== -1);
+      console.log('====> the check domains', allowedDomains );
+      console.log('====> the check index', allowedDomains.indexOf(redirectURI));
 
       // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
       if (allowedDomains && allowedDomains.indexOf(redirectURI) !== -1) {
