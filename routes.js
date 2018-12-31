@@ -40,6 +40,14 @@ const loginBruteForce = bruteForce.user.getMiddleware({
   }
 });
 
+const uniqueCodeBruteForce = bruteForce.user.getMiddleware({
+  key: function(req, res, next) {
+      // prevent too many attempts for the same username
+      next(req.body.unique_code);
+  }
+});
+
+
 module.exports = function(app){
   app.use(function(req, res, next) {
     console.log('====> REQUEST:', req.originalUrl);
@@ -106,9 +114,9 @@ module.exports = function(app){
 	/**
 	 * Auth routes for UniqueCode
 	 */
-	app.use('/auth/code', [clientMw.setAuthType('UniqueCode'), clientMw.validate]);
-	app.get('/auth/code/login',  clientMw.withOne, authCode.login);
-	app.post('/auth/code/login', clientMw.withOne, authCode.postLogin);
+	app.use('/auth/code', [clientMw.withOne, uniqueCodeBruteForce, clientMw.setAuthType('UniqueCode'), clientMw.validate]);
+	app.get('/auth/code/login', authCode.login);
+	app.post('/auth/code/login', authCode.postLogin);
 
 	/**
 	 * Register extra info;
