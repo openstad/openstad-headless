@@ -114,9 +114,9 @@ module.exports = function(app){
 	/**
 	 * Auth routes for UniqueCode
 	 */
-	app.use('/auth/code', [clientMw.withOne, uniqueCodeBruteForce, clientMw.setAuthType('UniqueCode'), clientMw.validate]);
-	app.get('/auth/code/login', authCode.login);
-	app.post('/auth/code/login', authCode.postLogin);
+	app.use('/auth/code', [clientMw.withOne, clientMw.setAuthType('UniqueCode'), clientMw.validate]);
+	app.get('/auth/code/login',  authCode.login);
+	app.post('/auth/code/login', uniqueCodeBruteForce, authCode.postLogin);
 
 	/**
 	 * Register extra info;
