@@ -8,6 +8,9 @@ const utils       = require('../../utils');
 const validate    = require('../../validate');
 const Client      = require('../../models').Client;
 const User        = require('../../models').User;
+const clientMw    = require('../../middleware/client');
+
+
 
 // Register supported grant types.
 //
@@ -166,37 +169,49 @@ exports.authorization = [
       if (client) {
         client.scope = scope; // eslint-disable-line no-param-reassign
       }
-      // WARNING: For security purposes, it is highly advisable to check that
-      //          redirectURI provided by the client matches one registered with
-      //          the server.  For simplicity, this example does not.  You have
-      //          been warned.
+
+      /**
+       * Check if redirectURI same host as registered
+       */
+      const allowedDomains = client.allowedDomains ? JSON.parse(client.allowedDomains) : false;
+      const redirectUrlHost = new Url(redirectURI).hostname;
+
+      // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
+      if (!allowedDomains || allowedDomains.indexOf(redirectURI) !== -1) {
+        throw new Error('Redirect host doesn\'t match the client host');
+      }
+
       return done(null, client, redirectURI);
     })
     .catch(err => done(err));
-  }), (req, res, next) => {
+  }),
+  clientMw.checkUniqueCodeAuth((req, res) => {
+    res.redirect('/login?clientId=' + req.query.client_id);
+  }),
+  (req, res, next) => {
     // Render the decision dialog if the client isn't a trusted client
     // TODO:  Make a mechanism so that if this isn't a trusted client, the user can record that
     // they have consented but also make a mechanism so that if the user revokes access to any of
     // the clients then they will have to re-consent.
     new Client({clientId: req.query.client_id})
-    .fetch()
-    .then((client) => {
+      .fetch()
+      .then((client) => {
+        client = client.serialize();
 
-      client = client.serialize();
-
-      if (client != null) {//  && client.trustedClient && client.trustedClient === true) {
-        // This is how we short call the decision like the dialog below does
-        server.decision({ loadTransaction: false }, (serverReq, callback) => {
-          callback(null, { allow: true });
-        })(req, res, next);
-      } else {
+        if (client != null) {//  && client.trustedClient && client.trustedClient === true) {
+          // This is how we short call the decision like the dialog below does
+          server.decision({ loadTransaction: false }, (serverReq, callback) => {
+            callback(null, { allow: true });
+          })(req, res, next);
+        } else {
+          res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
+        }
+      })
+      .catch((error) => {
         res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
-      }
-    })
-    .catch((error) => {
-      res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
-    });
-  }];
+      });
+  },
+];
 
 /**
  * User decision endpoint

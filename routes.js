@@ -134,7 +134,7 @@ module.exports = function(app){
 
 
 //
-  app.get('/api/userinfo',    passport.authenticate('bearer', { session: false }), clientMw.withOne, userMw.withRoleForClient, userController.info);
+  app.get('/api/userinfo', passport.authenticate('bearer', { session: false }), clientMw.withOne, clientMw.checkUniqueCodeAuth(), userMw.withRoleForClient, userController.info);
   //app.get('/api/clientinfo', client.info);
 
   // Mimicking google's token info endpoint from

@@ -1,4 +1,6 @@
 const Client = require('../models').Client;
+const UniqueCode = require('../models').UniqueCode;
+
 const authTypesConfig = require('../config').authTypes;
 
 exports.withAll = (req, res, next) => {
@@ -36,13 +38,6 @@ exports.withOne = (req, res, next) => {
     .catch((err) => { next(err); });
   } else {
     throw new Error('No Client ID is set for login');
-/*
-    next({
-      name: 'ClientNotFoundError',
-      status: 404,
-      message:
-    });
-*/
   }
 }
 
@@ -104,6 +99,40 @@ exports.validate = (req, res, next) => {
   }
 
   next();
+}
+
+exports.checkUniqueCodeAuth = (errorCallback) => {
+  //validate code auth type
+  return (req, res, next) => {
+    const clientId = req.query.client_id;
+    new Client({clientId: req.query.client_id})
+    .fetch()
+    .then((client) => {
+      client = client.serialize();
+      const authTypes = JSON.parse(client.authTypes);
+
+      if (authTypes.indexOf('UniqueCode') !== -1) {
+        new UniqueCode({ clientId: client.id, userId: user.id })
+        .fetch()
+        .then((codeResponse) => {
+          if (!!codeResponse) {
+            next()
+          } else {
+            throw new Error('Not validated with Unique Code');
+          }
+        })
+        .catch((e) => {   throw new Error('Not validated with Unique Code'); })
+      }
+    })
+    .catch((error) => {
+      if (errorCallback) {
+        errorCallback(req, res, next)
+      } else {
+        next(error);
+      }
+    });
+
+  }
 }
 
 exports.checkRequiredUserFields = (req, res, next) => {
