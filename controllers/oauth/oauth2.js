@@ -9,7 +9,6 @@ const utils       = require('../../utils');
 const validate    = require('../../validate');
 const Client      = require('../../models').Client;
 const User        = require('../../models').User;
-const clientMw    = require('../../middleware/client');
 
 
 
@@ -185,9 +184,6 @@ exports.authorization = [
       return done(null, client, redirectURI);
     })
     .catch(err => done(err));
-  }),
-  clientMw.checkUniqueCodeAuth((req, res) => {
-    res.redirect('/login?clientId=' + req.query.client_id);
   }),
   (req, res, next) => {
     // Render the decision dialog if the client isn't a trusted client

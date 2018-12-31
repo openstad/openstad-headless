@@ -125,8 +125,8 @@ module.exports = function(app){
   app.get('/auth/required-fields', authRequiredFields.index);
   app.post('/auth/required-fields', clientMw.withOne, userMw.validateUniqueEmail, authRequiredFields.post);
 
-  app.get('/dialog/authorize',            clientMw.withOne, authMw.check, clientMw.checkRequiredUserFields, oauth2Controller.authorization);
-  app.post('/dialog/authorize/decision',  clientMw.withOne, bruteForce.prevent,             oauth2Controller.decision);
+  app.get('/dialog/authorize',            clientMw.withOne, authMw.check, clientMw.checkRequiredUserFields,  clientMw.checkUniqueCodeAuth((req, res) => { return res.redirect('/login?clientId=' + req.query.client_id);}), oauth2Controller.authorization);
+  app.post('/dialog/authorize/decision',  clientMw.withOne, clientMw.checkUniqueCodeAuth(), bruteForce.prevent, oauth2Controller.decision);
   app.post('/oauth/token',                oauth2Controller.token);
   app.get('/oauth/token',                 oauth2Controller.token);
 //   clientMw.withOne,
