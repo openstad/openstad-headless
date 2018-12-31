@@ -105,40 +105,31 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
   //validate code auth type
   console.log('a');
   return (req, res, next) => {
-    console.log('b');
+      const clientId = req.query.client_id;
 
-    const clientId = req.query.client_id;
-    new Client({clientId: req.query.client_id})
-    .fetch()
-    .then((client) => {
-      console.log('c');
-      client = client.serialize();
-      const authTypes = JSON.parse(client.authTypes);
+      const authTypes = JSON.parse(req.client.authTypes);
+      console.log('---authTypes ', authTypes);
 
       if (authTypes.indexOf('UniqueCode') !== -1) {
+        console.log('---UniqueCode');
+
         new UniqueCode({ clientId: client.id, userId: user.id })
         .fetch()
         .then((codeResponse) => {
-          console.log('d');
-
+          console.log('codeResponse', codeResponse);
           if (!!codeResponse) {
-
-            console.log('e');
             next();
           } else {
-            console.log('f');
             throw new Error('Not validated with Unique Code');
           }
         })
         .catch((e) => { throw new Error('Not validated with Unique Code'); })
+      } else {
+        next();
       }
     })
     .catch((error) => {
-      console.log('g');
-
       if (errorCallback) {
-        console.log('h');
-
         errorCallback(req, res, next);
       } else {
         next(error);
