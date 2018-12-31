@@ -89,6 +89,15 @@ const options = {
   cert : fs.readFileSync(path.join(__dirname, 'certs/certificate.pem')),
 };
 
+// Set the ip-address of your trusted reverse proxy server such as
+// haproxy or Apache mod proxy or nginx configured as proxy or others.
+// The proxy server should insert the ip address of the remote client
+// through request header 'X-Forwarded-For' as
+// 'X-Forwarded-For: some.client.ip.address'
+// Insertion of the forward header is an option on most proxy software
+app.set('trust proxy', '127.0.0.1');
+
+
 // Create our HTTPS server listening on port 3000.
 //https.createServer(options, app).listen(3000);
 

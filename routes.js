@@ -26,11 +26,19 @@ const adminMiddleware          = require('./middleware/admin');
 const clientMw      				   = require('./middleware/client');
 const userMw           				 = require('./middleware/user');
 const tokenMw                  = require('./middleware/token');
-const bruteForce 							 = require('./middleware/bruteForce').default;
+const bruteForce 							 = require('./middleware/bruteForce');
 const authMw                   = require('./middleware/auth');
 const passwordResetMw          = require('./middleware/passwordReset');
 const roleMw                   = require('./middleware/role');
 const codeMw                   = require('./middleware/code');
+
+
+const loginBruteForce = bruteForce.user.getMiddleware({
+  key: function(req, res, next) {
+      // prevent too many attempts for the same username
+      next(req.body.email);
+  }
+});
 
 module.exports = function(app){
   app.use(function(req, res, next) {
@@ -52,7 +60,7 @@ module.exports = function(app){
 	/**
 	 * Shared middleware for all auth routes, adding client and per
 	 */
-	app.use('/auth', [bruteForce.prevent, clientMw.withOne]);
+	app.use('/auth', [clientMw.withOne, bruteForce.global.prevent]);
 
 	/**
 	 * Login & register with local login
@@ -62,7 +70,7 @@ module.exports = function(app){
 
 	//routes
 	app.get('/auth/local/login',     authLocal.login);
-	app.post('/auth/local/login',    authMw.validateLogin, authLocal.postLogin);
+	app.post('/auth/local/login',    loginBruteForce, authMw.validateLogin, authLocal.postLogin);
 	app.get('/auth/local/register',  authLocal.register);
 	app.post('/auth/local/register', userMw.validateUser, userMw.validateUniqueEmail, authLocal.postRegister);
 
@@ -125,12 +133,15 @@ module.exports = function(app){
   app.get('/auth/required-fields', authRequiredFields.index);
   app.post('/auth/required-fields', clientMw.withOne, userMw.validateUniqueEmail, authRequiredFields.post);
 
+
+  app.use('/dialog', [bruteForce.global.prevent]);
+
   app.get('/dialog/authorize',            clientMw.withOne, authMw.check, clientMw.checkRequiredUserFields,  clientMw.checkUniqueCodeAuth((req, res) => { return res.redirect('/login?clientId=' + req.query.client_id);}), oauth2Controller.authorization);
-  app.post('/dialog/authorize/decision',  clientMw.withOne, clientMw.checkUniqueCodeAuth(), bruteForce.prevent, oauth2Controller.decision);
+  app.post('/dialog/authorize/decision',  clientMw.withOne, clientMw.checkUniqueCodeAuth(), bruteForce.global.prevent, oauth2Controller.decision);
   app.post('/oauth/token',                oauth2Controller.token);
   app.get('/oauth/token',                 oauth2Controller.token);
 //   clientMw.withOne,
-//clientMw.withOne, bruteForce.prevent,
+//clientMw.withOne, bruteForce.global.prevent,
 
 
 //
@@ -189,6 +200,7 @@ module.exports = function(app){
   /**
    * Error routes
    */
+
   // Handle 404
   app.use(function(req, res) {
      res.status(404).render('errors/404');
