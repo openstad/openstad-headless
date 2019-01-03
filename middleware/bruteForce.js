@@ -26,7 +26,7 @@ exports.user = new ExpressBrute(new ExpressBrute.MemoryStore(), {
 
 //CONFIGURE BRUTE FORCE PROTECT
 exports.global = new ExpressBrute(new ExpressBrute.MemoryStore(), {
-	freeRetries: 10000000,
+	freeRetries: 100000,
 	attachResetToRequest: false,
 	refreshTimeoutOnRequest: false,
 	minWait: 25*60*60*1000, // 1 day 1 hour (should never reach this wait time)
