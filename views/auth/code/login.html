@@ -3,19 +3,17 @@
 {% block body %}
 <div>
 		<div class="upper-box card-body">
-			<h1>Aanmelden</h1>
-			<p>
-        Vul hieronder je unieke code in om een OpenStad account aan te maken.
-        Deze code heb je thuis gestuurd gekregen van ons.
+			<h1 class="title">{{title}}</h1>
+			<p class="intro">
+        {{description}}
 			</p>
 			<form
 				method="post"
 				action="/auth/code/login?clientId={{clientId}}"
 			>
-			
 					<div class="form-group">
 						<label>
-							Unieke code:
+							{{label}}
 						</label>
 						<input
 							type="text"
@@ -27,13 +25,13 @@
 					</div>
 					<input type="hidden" name="_csrf" value="{{csrfToken}}">
 					<input type="hidden" name="clientId" value="{{clientId}}">
-					<input type="submit" value="Aanmelden" class="btn btn-primary">
+					<br />
+					<input type="submit" value="{{buttonText}}" class="btn btn-primary">
 			</form>
 		</div>
 		<br />
 		<p>
-			Let op, de unieke code is hoofdlettergevoelig! Werkt deze nog steeds niet?
-			<a href="mailto:info@openstad.nl">neem contact met ons op.</a>
+			{{helpText | safe}}
 		</p>
 </div>
 {% endblock %}

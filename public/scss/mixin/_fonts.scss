@@ -1,0 +1,69 @@
+
+%headerfont {
+  @if $media-type == "screen" {
+    font-weight: 700;
+  }
+  @else if $media-type == "print" {
+    font-family: $printfont-heading;
+    font-weight: 700;
+  }
+  @else {
+    @media screen {
+      font-weight: 700;
+    }
+    @media print {
+      font-family: $printfont-heading;
+      font-weight: 700;
+    }
+  }
+}
+
+@mixin headerfont {
+  @extend %headerfont;
+}
+
+%textfont {
+  @if $media-type == "screen" {
+    font-weight: 400;
+  }
+  @else if $media-type == "print" {
+    font-family: $printfont-text;
+    font-weight: 400;
+  }
+  @else {
+    @media screen {
+      font-weight: 400;
+    }
+    @media print {
+      font-family: $printfont-text;
+      font-weight: 400;
+    }
+  }
+}
+
+@mixin textfont {
+  @extend %textfont;
+}
+
+%navfont {
+  @if $media-type == "screen" {
+    font-weight: 500;
+  }
+  @else if $media-type == "print" {
+    font-family: $printfont-text;
+    font-weight: 700;
+  }
+  @else {
+    @media screen {
+      font-weight: 500;
+    }
+    @media print {
+      font-family: $printfont-text;
+      font-weight: 700;
+    }
+  }
+}
+
+@mixin navfont {
+  @extend %navfont;
+}

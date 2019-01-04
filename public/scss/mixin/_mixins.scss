@@ -1,0 +1,448 @@
+$has-focus: false;
+
+@mixin simple-bg-focus($has-focus: false) {
+  @if $sg-patterns == true or $has-focus == true {
+    &:focus,
+    &.has-focus {
+      @extend %simple-bg-focus;
+    }
+  }
+
+  @else {
+    &:focus {
+      @extend %simple-bg-focus;
+    }
+  }
+}
+
+@mixin link-focus($has-focus: false) {
+  @include simple-bg-focus($has-focus);
+}
+
+@mixin simple-bg-focus-style {
+  background-color: $color-highlight !important;
+  color: $color-black !important;
+  outline: 0;
+}
+
+@mixin no-bg-focus {
+  @extend %no-bg-focus;
+}
+
+@mixin simple-outline-focus($outline-width: 4px, $has-focus: false, $pseudo-focus: false) {
+  @if $sg-patterns == true or $has-focus == true {
+    &:focus,
+    &.has-focus {
+      @extend %simple-outline-focus;
+
+      @if $outline-width != 4px {
+        outline-width: $outline-width;
+      }
+
+      a {
+        outline: 0;
+      }
+    }
+  }
+
+  @if $pseudo-focus == true {
+    &.has-focus {
+      @extend %simple-outline-focus;
+
+      @if $outline-width != 4px {
+        outline-width: $outline-width;
+      }
+
+      a {
+        outline: 0;
+      }
+    }
+  }
+
+  @else {
+    &:focus {
+      @extend %simple-outline-focus;
+
+      @if $outline-width != 4px {
+        outline-width: $outline-width;
+      }
+
+      a {
+        outline: 0;
+      }
+    }
+  }
+}
+
+@mixin simple-outline-focus-style($outline-width: 4px) {
+  color: $color-black !important;
+  outline: $outline-width solid $color-highlight;
+  outline-offset: 0;
+}
+
+@mixin no-outline-focus {
+  @extend %no-outline-focus;
+}
+
+@mixin list-item-links-focus($outline-width: 4px, $has-focus: false) {
+  @if $sg-patterns == true or $has-focus == true {
+    &:focus,
+    &.has-focus {
+      @extend %simple-bg-focus;
+      margin: 0;
+      outline: $outline-width solid $color-highlight;
+      padding: 0 0 0 15px;
+
+      span {
+        color: $color-black !important;
+      }
+    }
+  }
+
+  @else {
+    &:focus {
+      @extend %simple-bg-focus;
+      margin: 0;
+      outline: $outline-width solid $color-highlight;
+      padding: 0 0 0 15px;
+
+      span {
+        color: $color-black !important;
+      }
+    }
+  }
+}
+
+@mixin inline-link-focus($outline-width: 4px, $has-focus: false) {
+  @if $sg-patterns == true or $has-focus == true {
+    &:focus,
+    &.has-focus {
+      @extend %simple-bg-focus;
+      margin: 0 #{$outline-width * -1};
+      padding: 0 $outline-width;
+    }
+  }
+
+  @else {
+    &:focus {
+      @extend %simple-bg-focus;
+      margin: 0 #{$outline-width * -1};
+      padding: 0 $outline-width;
+    }
+  }
+}
+
+@mixin button-focus($outline-width: 4px) {
+  @if $sg-patterns == true or $has-focus == true {
+    &:focus,
+    &.has-focus {
+      @extend %simple-outline-focus;
+      @if $outline-width != 4px {
+        outline-width: $outline-width;
+      }
+    }
+  }
+
+  @else {
+    &:focus {
+      @extend %simple-outline-focus;
+      @if $outline-width != 4px {
+        outline-width: $outline-width;
+      }
+    }
+  }
+}
+
+@mixin input-color ($size, $color) {
+  -webkit-appearance: none; // sass-lint:disable-line no-vendor-prefixes
+  box-shadow: inset 0 0 0 $size $color;
+}
+
+@mixin link-list-on-hover-underline {
+  ul.links li {
+    > a {
+      &,
+      &:hover {
+        text-decoration: none;
+      }
+
+      .linklabel {
+        border-bottom: 2px solid transparent;
+      }
+    }
+
+    &.selected,
+    &.active {
+      > a {
+        .linklabel {
+          border-bottom-color: $color-red;
+        }
+      }
+    }
+
+    > a:hover {
+      .linklabel {
+        border-bottom-color: $color-red;
+        color: $color-red;
+      }
+    }
+  }
+}
+
+@mixin visuallyhidden {
+  // Hide only visually, but have it available for screenreaders: h5bp.com/v
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+@mixin visually {
+  // Allow the element to be focusable. when navigated to via the keyboard: h5bp.com/p
+  clip: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  position: static;
+  width: auto;
+}
+
+@mixin font-size($px) {
+  font-size: rem($px);
+}
+
+@mixin line-height($px) {
+  line-height: rem($px);
+}
+
+@mixin font($fontsize, $lineheight) {
+  @include font-size($fontsize);
+  @include line-height($lineheight);
+}
+
+@mixin base-font {
+  @include font(16px, 22px);
+  color: $color-black;
+  font-family: $screenfont;
+}
+
+@mixin getbgpos($posx, $posy, $size, $offsetx: 0, $offsety: 0) {
+  background-position: calcposx($posx, $size, $offsetx) calcposy($posy, $size, $offsety);
+}
+
+@mixin getsprite($posx, $posy, $size, $location, $offsetx: 0, $offsety: 0) {
+  background-image: url($location);
+  background-position: calcposx($posx, $size, $offsetx) calcposy($posy, $size, $offsety);
+  background-repeat: no-repeat;
+}
+
+// Placeholder text
+@mixin placeholder($color: #ccc) {
+  &::-moz-placeholder { // sass-lint:disable-line no-vendor-prefixes
+    opacity: 1;
+  }
+
+  &::placeholder {
+    color: $color;
+    font-weight: 700;
+  }
+}
+
+// Images behaviour
+@mixin image-auto-size {
+  height: auto !important;
+  max-height: none !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+@mixin validation-border($color: $color-red) {
+  border-left: 2px solid $color;
+  padding-left: 13px;
+}
+
+@mixin button-type($type, $background-color, $color) {
+  $button-arrow-size: 15px;
+
+  @include button-focus;
+
+  &.#{$type} {
+    .working::before {
+      border-top: 15px solid $background-color;
+    }
+
+    &.arrow-left::after,
+    &.arrow-right::after {
+      border-bottom: calc(#{$button-lineheight / 2} + #{$rowheight / 4}) solid transparent;
+      border-top: calc(#{$button-lineheight / 2} + #{$rowheight / 4}) solid transparent;
+      box-sizing: border-box;
+      content: "";
+      position: absolute;
+      top: 0;
+    }
+
+    &.arrow-left {
+      margin-left: $button-arrow-size;
+
+      &::after {
+        border-right: $button-arrow-size solid $background-color;
+        right: 100%;
+      }
+    }
+
+    &.arrow-right {
+      margin-right: $button-arrow-size;
+
+      &::after {
+        border-left: $button-arrow-size solid $background-color;
+        left: 100%;
+      }
+    }
+  }
+
+  &.#{$type},
+  &.#{$type}:visited {
+    background-color: $background-color;
+
+    &,
+    .value {
+      color: $color;
+    }
+
+    &:focus,
+    &.has-focus {
+      color: $color;
+    }
+  }
+
+  &.#{$type}:enabled:active,
+  &.#{$type}:enabled:hover {
+    background-color: darken($background-color, 10%);
+
+    &.arrow-left::after {
+      border-right-color: darken($background-color, 10%);
+    }
+
+    &.arrow-right::after {
+      border-left-color: darken($background-color, 10%);
+    }
+
+    .working::before {
+      border-top-color: darken($background-color, 10%);
+    }
+  }
+}
+
+@mixin rich-content-styles {
+  h2,
+  h4,
+  p + p {
+    margin-top: 1em;
+  }
+
+  h3:not(:first-child) {
+    margin-top: 30px;
+  }
+
+  a {
+    color: $color-darkblue;
+
+    &:active,
+    &:hover {
+      color: $color-red;
+    }
+
+    &:visited {
+      color: $color-purple;
+    }
+  }
+
+  ul:not(.links),
+  ol {
+    li {
+      margin-bottom: 6px;
+    }
+  }
+
+  ol {
+    margin: 10px 16px 10px 60px;
+    padding-left: 0;
+
+    li {
+      padding-left: 2px;
+    }
+  }
+
+  ul:not(.links) {
+    margin: 10px 16px 10px 60px;
+
+    li {
+      list-style: none;
+      margin-left: -16px;
+    }
+
+    li:not(.links) {
+      padding-left: 18px;
+
+      &::before {
+        color: $color-text-darkgrey;
+        content: "\25A0";
+        display: block;
+        left: -18px;
+        max-height: 0;
+        max-width: 0;
+        position: relative;
+      }
+    }
+  }
+}
+
+@mixin richcontent-on-bg($color) {
+  ul:not(.links) {
+
+    @if best-contrast-on($color) == #000 {
+      li::before {
+        @extend %dark-color-on-bg;
+      }
+    }
+    @else if best-contrast-on($color) == #fff {
+      li::before {
+        @extend %light-color-on-bg;
+      }
+    }
+  }
+
+  #{$rich-content-class} {
+    @if best-contrast-on($color) == #fff {
+      a,
+      a:active,
+      a:hover,
+      a:visited {
+        @extend %light-color-on-bg;
+      }
+
+      ul:not(.links) {
+        li:not(.links) {
+          &::before {
+            color: $color-white;
+          }
+        }
+      }
+    }
+    @else {
+      a:hover,
+      a:active {
+        color: $color-red;
+      }
+
+      a,
+      a:visited {
+        @extend %dark-color-on-bg;
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="35px" height="25px" viewBox="0 0 35 25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Quote - Big</title>
+    <desc>Quote Big SVG for Amsterdam PatternLab</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Typografie-1.0-(10-mei)" transform="translate(-336.000000, -4719.000000)" fill="#EE0000">
+            <g id="Group-22" transform="translate(336.000000, 4719.000000)">
+                <g id="Group-8" transform="translate(19.000000, 0.000000)">
+                    <rect id="Rectangle-4" x="0" y="8.92857143" width="15.9605911" height="16.0714286"></rect>
+                    <path d="M1.77339901,0.892857143 C1.79081808,0.873182416 9.78723451,0.857208124 9.75369458,0.892857143 C7.70785628,3.06734358 7.98029557,8.92857143 7.98029557,8.92857143 L-3.63797881e-12,8.92857143 C-3.63797881e-12,8.92857143 -3.63797881e-12,2.84750802 1.77339901,0.892857143 Z" id="Rectangle-6"></path>
+                </g>
+                <g id="Group-8-Copy">
+                    <rect id="Rectangle-4" x="0" y="8.92857143" width="15.9605911" height="16.0714286"></rect>
+                    <path d="M1.77339901,0.892857143 C1.79081808,0.873182416 9.78723451,0.857208124 9.75369458,0.892857143 C7.70785628,3.06734358 7.98029557,8.92857143 7.98029557,8.92857143 L-7.27595761e-12,8.92857143 C-7.27595761e-12,8.92857143 -7.27595761e-12,2.84750802 1.77339901,0.892857143 Z" id="Rectangle-6"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

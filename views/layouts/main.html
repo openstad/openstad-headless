@@ -22,7 +22,9 @@
           {% block body %}{% endblock %}
         </div>
         <div class="col-xs-12 col-sm-3 pull-right">
+          {% if displaySidebar %}
           {% include 'elements/sidebar.html' %}
+          {% endif %}
         </div>
       </div>
     </div>

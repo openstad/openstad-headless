@@ -53,7 +53,7 @@ exports.info = (req, res) => {
 
  exports.postAccount = [
    (req, res) => {
-     const keysToUpdate = ['firstName', 'lastName', 'email', 'street_name', 'house_number', 'suffix', 'postcode', 'city', 'phone']
+     const keysToUpdate = ['firstName', 'lastName', 'street_name', 'house_number', 'suffix', 'postcode', 'city', 'phone']
 
      new User({ id: req.user.id })
        .fetch()

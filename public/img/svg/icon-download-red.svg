@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="18px" viewBox="0 0 16 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 45.2 (43514) - http://www.bohemiancoding.com/sketch -->
+    <title>Icon Download - Red</title>
+    <desc>Icon Download Red SVG for Amsterdam PatternLab</desc>
+    <defs></defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Button-downloaden" transform="translate(-15.000000, -13.000000)" fill-rule="nonzero" fill="#EC0000">
+            <g id="GASD_icoon_Downloaden" transform="translate(15.000000, 13.000000)">
+                <polygon id="Shape" points="16 17.2307692 0 17.2307692 0 10.2564103 2.05128205 10.2564103 2.05128205 15.1794872 13.9487179 15.1794872 13.9487179 10.2564103 16 10.2564103"></polygon>
+                <polygon id="Shape" points="11.4871795 6.81025641 8.94358974 9.39487179 8.94358974 0 6.89230769 0 6.89230769 9.39487179 4.34871795 6.81025641 2.87179487 8.24615385 7.95897436 13.374359 12.9641026 8.24615385"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

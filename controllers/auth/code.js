@@ -1,3 +1,5 @@
+const authType = 'UniqueCode';
+
 const passport          = require('passport');
 const bcrypt            = require('bcrypt');
 const saltRounds        = 10;
@@ -6,12 +8,23 @@ const login             = require('connect-ensure-login');
 const User              = require('../../models').User;
 const tokenUrl          = require('../../services/tokenUrl');
 const emailService      = require('../../services/email');
-const authCodeConfig    = require('../../config/auth').get('UniqueCode');
+const authCodeConfig    = require('../../config/auth').get(authType);
 
 exports.login = (req, res, next) => {
+  const config = req.client.config ? JSON.parse(req.client.config) : {};
+  const backUrl = config && config.backUrl ? config.backUrl : req.client.siteUrl;
+  const configAuthType = config.authTypes && config.authTypes[authType] ? config.authTypes[authType] : {};
+
   res.render('auth/code/login', {
     client: req.client,
-    clientId: req.client.clientId
+    clientId: req.client.clientId,
+    title: configAuthType.title ? configAuthType.title : authCodeConfig.title,
+    description: configAuthType.description ?  configAuthType.description : authCodeConfig.description,
+    label: configAuthType.label ?  configAuthType.label : authCodeConfig.label,
+    helpText: configAuthType.helpText ? configAuthType.helpText : authCodeConfig.helpText,
+    buttonText: configAuthType.buttonText ? configAuthType.buttonText : authCodeConfig.buttonText,
+    displaySidebar: configAuthType.displaySidebar ? configAuthType.displaySidebar : authCodeConfig.displaySidebar,
+    backUrl: authCodeConfig.displayBackbutton ? backUrl : false
   });
 }
 
@@ -21,7 +34,7 @@ exports.postLogin = (req, res, next) => {
 
     // Redirect if it fails to the original e-mail screen
     if (!user) {
-      req.flash('error', {msg: 'De code is niet geldig'});
+      req.flash('error', {msg: authCodeConfig.errorMessage});
       return res.redirect(`${authCodeConfig.loginUrl}?clientId=${req.client.clientId}`);
     }
 

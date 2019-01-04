@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Search button: Right</title>
+    <desc>Search button Right SVG for Amsterdam PatternLab</desc>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="32" height="32"></rect>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="[2a.BOARD]-Formulieren-&amp;-Interactieve-elementen-1.4-(11-mei)-[BOARD]" transform="translate(-917.000000, -7037.000000)">
+            <g id="Group-13" transform="translate(917.000000, 7037.000000)">
+                <g id="Rectangle-40-Copy-2">
+                    <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-1"></use>
+                    <rect stroke="#004699" stroke-width="1" x="0.5" y="0.5" width="31" height="31"></rect>
+                </g>
+                <polygon id="Fill-3-Copy-12" fill="#004699" points="19.3627555 15.9985096 13.3622588 10 12.0009936 11.3612652 16.6392315 15.9995032 12 20.6387348 13.3612652 22"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

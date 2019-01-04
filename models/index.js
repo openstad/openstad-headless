@@ -20,8 +20,6 @@ const Client = bookshelf.Model.extend({
   }
 });
 
-
-
 const LoginToken = bookshelf.Model.extend({
   tableName: 'login_tokens',
   hasTimestamps: true,

@@ -2,7 +2,10 @@
 
 {% block body %}
   <!-- HTML login screen form -->
-  <h1> Inloggen </h1>
+  <h1 class="title">Inloggen</h1>
+  <p class="intro">
+    {{description}}
+  </p>
   <form action="{{loginUrl}}" method="POST" class="validate-form">
     <input type="hidden" name="_csrf" value="{{csrfToken}}" />
     <input type="hidden" name="clientId" value="{{clientId}}" />
