@@ -35,6 +35,29 @@ a {
   }
 }
 
+.backlink {
+  text-decoration: none !important;
+  padding-left: 18px !important;
+  color: #666666 !important;
+
+  &:before {
+    background: url(../img/svg/caret-left-darkgrey.svg);
+    content: " ";
+    position: absolute;
+    top: 16px;
+    left: 0;
+    height: 14px;
+    width: 10px;
+    background-repeat: no-repeat;
+  }
+
+  &:hover {
+    color: #666666 !important;
+  }
+}
+
+
+
 
 @import 'footer';
 @import 'header';

@@ -1,27 +1,203 @@
-
-.mainlogo {
-  position: relative;
-  height: 56px;
-  width: 130px;
-  margin-top: 25px;
+.logoset {
+	display: inline-block;
+	min-height: 68px;
 }
 
-.mainlogo .logoset img {
-  border: 0;
-  height: auto;
-  left: auto;
-  margin: 0;
-  position: absolute;
-  top: 0;
-  width: 16px;
+.logoset::before {
+	content: "";
+	display: block;
+	font-family: "Avenir W01", arial, sans-serif;
+	font-weight: 400;
+	height: 0;
+	position: absolute;
+	width: 0;
 }
 
-.mainlogo .logotexts {
-  color: #EC0000;
-  top: -3px;
-  left: 27px;
-  font-size: 18px;
-  line-height: 1.2;
-  font-weight: 700;
-  position: absolute;
+.logoset::after {
+	content: "";
+	display: block;
+	font-family: "Avenir W01", arial, sans-serif;
+	font-weight: 700;
+	height: 0;
+	position: absolute;
+	width: 0;
+}
+
+.logoset .screen-logo {
+	height: 68px;
+}
+
+.logoset .alt-logo {
+	display: none;
+	height: 68px;
+}
+
+.logoset .print-logo {
+	display: none;
+	width: 24px;
+}
+
+@media screen and (max-width: 539px) {
+	.logoset .screen-logo,
+	.logoset .alt-logo {
+		height: 41px;
+	}
+}
+
+.logotext {
+	font-size: 13px;
+	color: #000;
+	display: block;
+	line-height: 1em;
+	margin: 0 0 0 30px;
+	padding: 0;
+}
+
+.logotext.red {
+	color: #ec0000;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+@media screen and (max-width: 539px) {
+	.logotext {
+		font-size: 14px;
+		margin: 0 0 0 22px;
+	}
+}
+
+@media screen and (max-width: 539px) {
+	.logotext {
+		line-height: 1;
+	}
+	.logotext:first-child {
+    margin-top: 1px;
+	}
+}
+
+.subidentiteit .logotext,
+.sponsored .logotext {
+	line-height: 1em;
+}
+
+.subidentiteit .logotext+.logotext,
+.sponsored .logotext+.logotext {
+	margin-top: 0;
+}
+
+.subidentiteit .logotext {
+	font-size: 1.4375rem;
+}
+
+@media screen and (max-width: 539px) {
+	.subidentiteit .logotext {
+		font-size: 0.875rem;
+	}
+}
+
+.sponsored .logotext {
+	font-size: 0.8125rem;
+}
+
+@media screen and (max-width: 539px) {
+	.sponsored .logotext {
+		font-size: 0.875rem;
+	}
+}
+
+@media screen and (min-width: 540px) {
+	.subsitetitle {
+		display: block;
+		margin-left: 140px;
+	}
+}
+
+.subsitetitle a {
+	color: #000;
+	text-decoration: none;
+	font-weight: 700;
+}
+
+@media screen and (max-width: 539px) {
+	.subsitetitle a {
+		font-size: 18px;
+	}
+}
+
+@media screen and (min-width: 540px) {
+	.subsitetitle a {
+		font-size: 28px;
+	}
+}
+
+.sitelogo {
+	margin: 16px 0;
+	min-height: 34px;
+	position: relative;
+}
+
+.sitelogo .mainlogo {
+	display: inline-block;
+	min-height: 68px;
+	text-decoration: none;
+}
+
+.sitelogo .mainlogo:focus,
+.sitelogo .mainlogo.has-focus {
+	outline: 4px solid #ffc90e;
+}
+
+.sitelogo .mainlogo:not(.freeform-logo) .logoset {
+	position: absolute;
+	top: 0;
+}
+
+.sitelogo .mainlogo.freeform-logo {
+	margin-left: 30px;
+}
+
+.sitelogo .mainlogo.freeform-logo .logoset,
+.sitelogo .mainlogo.freeform-logo .logotexts {
+	float: left;
+}
+
+.sitelogo .mainlogo.freeform-logo .logoset .screen-logo {
+	max-height: 46px;
+}
+
+.sitelogo .mainlogo.freeform-logo .logotext {
+	margin-left: 10px;
+}
+
+@media screen and (max-width: 539px) {
+	.sitelogo {
+		margin: 10px 0;
+	}
+	.sitelogo .mainlogo {
+		float: left;
+		min-height: 41px;
+	}
+	.sitelogo .mainlogo.freeform-logo {
+		margin-left: 0;
+	}
+	.sitelogo .subsitetitle {
+		display: block;
+		margin-left: 120px;
+    line-height: 1.2;
+    font-size: 18px;
+	}
+	.sitelogo .subsitetitle a {
+		//line-height: 1;
+	}
+}
+
+@media screen and (min-width: 540px) {
+	.sitelogo a.mainlogo {
+		float: left;
+	}
+	.sitelogo .subsitetitle {
+		margin-left: 140px;
+		margin-top: -3px;
+
+	}
 }
