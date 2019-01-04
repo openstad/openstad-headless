@@ -51,9 +51,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(expressValidator());
 
-// const csrfProtection = csurf({cookie:true});
-
-//app.use(csrfProtection);
+const csrfProtection = csurf({cookie:true});
+app.use(csrfProtection);
 
 app.use((req, res, next) => {
   //console.log( req.csrfToken());
