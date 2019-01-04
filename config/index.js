@@ -57,3 +57,8 @@ exports.session = {
   maxAge : 3600000 * 24 * 7 * 52,
   secret : 'jdsch9wfiubaweb1221sjasdj', // TODO: You need to change this secret to something that you choose for your secret
 };
+
+exports.client = {
+  defaultEmail: '',
+  defaultProjectUrl: ''
+}

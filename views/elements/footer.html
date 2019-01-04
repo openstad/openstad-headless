@@ -2,30 +2,37 @@
 	<div class="container">
     <div class="row">
 
-				<div class="col-md-3 col-sm-6 col-xs-12">
+			{% if clientDisclaimerUrl %}
+
+			<div class="col-md-3 col-sm-6 col-xs-12">
 					<h2>Over deze site</h2>
 					<ul>
-						<li><a href="/disclaimer">Disclaimer</a></li>
-				<!--		<li><a href="http://buurt-api.dev.baboom.nl/connect/mijnopenstad">Inlogen mijn openstad</a></li>
-						<li><a href="http://mijnopenstad.dev.baboom.nl/logout?redirectUrl">Uitloggen mijn openstad</a></li>
-						<li><a href="http://mijnopenstad.dev.baboom.nl/account">Account mijn openstad</a></li> !-->
+						<li><a href="{{clientDisclaimerUrl}}">Disclaimer</a></li>
 					</ul>
 				</div>
+				{% endif %}
 
+
+				{% if clientProjectUrl %}
 				<div class="col-md-3  col-sm-6 col-xs-12">
 					<h2>Meer informatie</h2>
 					<ul>
-						<li><a href="https://www.amsterdam.nl/javabrug" target="_blank">Volg de project­pagina op amsterdam.nl</a></li>
+						<li><a href="{{clientProjectUrl}}" target="_blank">
+							Volg de project­pagina op amsterdam.nl
+						</a>
+					</li>
 					</ul>
 				</div>
+				{% endif %}
 
+				{% if clientEmail %}
 				<div class="col-md-3 col-sm-6 col-xs-12">
 					<h2>Contact</h2>
 					<p>
 						Heeft u vragen over het gebruik van deze site?
 					</p>
 					<ul>
-						<li><a href="mailto:javabrug@amsterdam.nl">Mail uw vraag</a></li>
+						<li><a href="mailto:{{clientEmail}}">Mail uw vraag</a></li>
 					</ul>
 				</div>
 
@@ -35,9 +42,11 @@
 						Heeft u opmerkingen over deze site? Of tips?
 					</p>
 					<ul>
-						<li><a href="mailto:javabrug@amsterdam.nl">Stuur een reactie</a></li>
+						<li><a href="mailto:{{projectEmail}}">Stuur een reactie</a></li>
 					</ul>
 				</div>
+				{% endif %}
+
       </div>
 		</div>
 	</footer>

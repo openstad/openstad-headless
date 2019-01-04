@@ -6811,6 +6811,12 @@ button.close {
 #main {
   min-height: 650px;
 }
+@media screen and (max-width: 768px) {
+  #main {
+    min-height: 0;
+    margin-bottom: 50px;
+  }
+}
 .row img {
   max-width: 100%;
 }
@@ -6835,6 +6841,7 @@ a:hover {
   text-decoration: none !important;
   padding-left: 18px !important;
   color: #666666 !important;
+  position: relative;
 }
 .backlink:before {
   background: url(../img/svg/caret-left-darkgrey.svg);
@@ -6848,6 +6855,111 @@ a:hover {
 }
 .backlink:hover {
   color: #666666 !important;
+}
+body {
+  font-family: 'Avenir_Custom';
+  /*span {
+    font-family: 'Avenir_Custom';
+    font-size: 14px;
+    font-weight: 600;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: 1.5;
+    letter-spacing: normal;
+    color: #000000;
+  }*/
+}
+body h1 {
+  font-family: 'Avenir_Custom';
+  font-size: 32px;
+  font-weight: 700;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 1.3;
+  letter-spacing: normal;
+  color: #000000;
+}
+body h2 {
+  font-family: 'Avenir_Custom';
+  font-size: 28px;
+  font-weight: 700;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 1.3;
+  letter-spacing: normal;
+  color: #434343;
+}
+body h3 {
+  font-family: 'Avenir_Custom';
+  font-size: 24px;
+  font-weight: 700;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 1.5;
+  letter-spacing: normal;
+  color: #000000;
+}
+body h4 {
+  font-family: 'Avenir_Custom';
+  font-size: 18px;
+  font-weight: 700;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 1.56;
+  letter-spacing: normal;
+  color: #000000;
+}
+body h5 {
+  font-family: 'Avenir_Custom';
+  font-size: 16px;
+  font-weight: 700;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 1.5;
+  letter-spacing: normal;
+  color: #000000;
+}
+body p {
+  font-family: 'Avenir_Custom';
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 1.5;
+  letter-spacing: normal;
+  color: #000000;
+}
+body .glyphicon-menu-right {
+  margin-right: 8px;
+}
+body .glyphicon-chevron-down {
+  margin-left: 15px;
+}
+@media screen and (max-width: 768px) {
+  body h1,
+  body .h1 {
+    font-size: 28px;
+  }
+  body h2,
+  body .h2 {
+    font-size: 22px;
+  }
+  body h3,
+  body .h3 {
+    font-size: 19px;
+  }
+  body h4,
+  body .h4 {
+    font-size: 16px;
+  }
+  body h5,
+  body .h5 {
+    font-size: 14px;
+  }
+  body p,
+  body .p {
+    font-size: 14px;
+  }
 }
 footer {
   background-color: #666;
@@ -6870,17 +6982,20 @@ footer ul {
   padding: 0;
 }
 footer ul li {
-  background-image: url('/img/arrow_right_white.svg');
+  background-image: url(../img/svg/arrow-right-white.svg);
   background-position: top 2px left;
   background-repeat: no-repeat;
   background-size: auto 1em;
   padding-left: 15px;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 5px 0px;
+  padding-left: 20px;
 }
 footer ul li a {
   color: #FFF;
+  font-weight: 600;
   text-decoration: none;
-  font-size: 16px;
-  font-weight: 500;
 }
 footer ul li a:hover {
   color: #FFF;
@@ -7085,111 +7200,6 @@ header {
   font-weight: 900;
   src: local(''), url('/fonts/AvenirLTStd-BlackOblique.woff') format('woff');
 }
-body {
-  font-family: 'Avenir_Custom';
-  /*span {
-    font-family: 'Avenir_Custom';
-    font-size: 14px;
-    font-weight: 600;
-    font-style: normal;
-    font-stretch: normal;
-    line-height: 1.5;
-    letter-spacing: normal;
-    color: #000000;
-  }*/
-}
-body h1 {
-  font-family: 'Avenir_Custom';
-  font-size: 32px;
-  font-weight: 700;
-  font-style: normal;
-  font-stretch: normal;
-  line-height: 1.3;
-  letter-spacing: normal;
-  color: #000000;
-}
-body h2 {
-  font-family: 'Avenir_Custom';
-  font-size: 28px;
-  font-weight: 700;
-  font-style: normal;
-  font-stretch: normal;
-  line-height: 1.3;
-  letter-spacing: normal;
-  color: #434343;
-}
-body h3 {
-  font-family: 'Avenir_Custom';
-  font-size: 24px;
-  font-weight: 700;
-  font-style: normal;
-  font-stretch: normal;
-  line-height: 1.5;
-  letter-spacing: normal;
-  color: #000000;
-}
-body h4 {
-  font-family: 'Avenir_Custom';
-  font-size: 18px;
-  font-weight: 700;
-  font-style: normal;
-  font-stretch: normal;
-  line-height: 1.56;
-  letter-spacing: normal;
-  color: #000000;
-}
-body h5 {
-  font-family: 'Avenir_Custom';
-  font-size: 16px;
-  font-weight: 700;
-  font-style: normal;
-  font-stretch: normal;
-  line-height: 1.5;
-  letter-spacing: normal;
-  color: #000000;
-}
-body p {
-  font-family: 'Avenir_Custom';
-  font-size: 16px;
-  font-weight: normal;
-  font-style: normal;
-  font-stretch: normal;
-  line-height: 1.5;
-  letter-spacing: normal;
-  color: #000000;
-}
-body .glyphicon-menu-right {
-  margin-right: 8px;
-}
-body .glyphicon-chevron-down {
-  margin-left: 15px;
-}
-@media screen and (max-width: 768px) {
-  body h1,
-  body .h1 {
-    font-size: 28px;
-  }
-  body h2,
-  body .h2 {
-    font-size: 22px;
-  }
-  body h3,
-  body .h3 {
-    font-size: 19px;
-  }
-  body h4,
-  body .h4 {
-    font-size: 16px;
-  }
-  body h5,
-  body .h5 {
-    font-size: 14px;
-  }
-  body p,
-  body .p {
-    font-size: 14px;
-  }
-}
 .logoset {
   display: inline-block;
   min-height: 68px;
@@ -7223,7 +7233,7 @@ body .glyphicon-chevron-down {
   display: none;
   width: 24px;
 }
-@media screen and (max-width: 539px) {
+@media screen and (max-width: 993px) {
   .logoset .screen-logo,
   .logoset .alt-logo {
     height: 41px;
@@ -7242,13 +7252,13 @@ body .glyphicon-chevron-down {
   font-weight: 700;
   text-decoration: none;
 }
-@media screen and (max-width: 539px) {
+@media screen and (max-width: 993px) {
   .logotext {
     font-size: 14px;
     margin: 0 0 0 22px;
   }
 }
-@media screen and (max-width: 539px) {
+@media screen and (max-width: 993px) {
   .logotext {
     line-height: 1;
   }
@@ -7267,7 +7277,7 @@ body .glyphicon-chevron-down {
 .subidentiteit .logotext {
   font-size: 1.4375rem;
 }
-@media screen and (max-width: 539px) {
+@media screen and (max-width: 993px) {
   .subidentiteit .logotext {
     font-size: 0.875rem;
   }
@@ -7275,12 +7285,12 @@ body .glyphicon-chevron-down {
 .sponsored .logotext {
   font-size: 0.8125rem;
 }
-@media screen and (max-width: 539px) {
+@media screen and (max-width: 993px) {
   .sponsored .logotext {
     font-size: 0.875rem;
   }
 }
-@media screen and (min-width: 540px) {
+@media screen and (min-width: 992px) {
   .subsitetitle {
     display: block;
     margin-left: 140px;
@@ -7291,12 +7301,12 @@ body .glyphicon-chevron-down {
   text-decoration: none;
   font-weight: 700;
 }
-@media screen and (max-width: 539px) {
+@media screen and (max-width: 993px) {
   .subsitetitle a {
     font-size: 18px;
   }
 }
-@media screen and (min-width: 540px) {
+@media screen and (min-width: 992px) {
   .subsitetitle a {
     font-size: 28px;
   }
@@ -7305,6 +7315,11 @@ body .glyphicon-chevron-down {
   margin: 16px 0;
   min-height: 34px;
   position: relative;
+}
+@media screen and (min-width: 992px) {
+  .sitelogo {
+    margin-left: -28px;
+  }
 }
 .sitelogo .mainlogo {
   display: inline-block;
@@ -7332,7 +7347,7 @@ body .glyphicon-chevron-down {
 .sitelogo .mainlogo.freeform-logo .logotext {
   margin-left: 10px;
 }
-@media screen and (max-width: 539px) {
+@media screen and (max-width: 993px) {
   .sitelogo {
     margin: 10px 0;
   }
@@ -7350,7 +7365,7 @@ body .glyphicon-chevron-down {
     font-size: 18px;
   }
 }
-@media screen and (min-width: 540px) {
+@media screen and (min-width: 992px) {
   .sitelogo a.mainlogo {
     float: left;
   }
@@ -7571,6 +7586,14 @@ body .glyphicon-chevron-down {
   bottom: 0;
   left: 0;
   right: 0;
+}
+#navbar .nav-link a {
+  margin-left: 0;
+  padding-top: 11px;
+  font-size: 18px;
+}
+.navbar-nav {
+  margin: 0;
 }
 .btn {
   border-radius: 0;

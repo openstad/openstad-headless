@@ -15,9 +15,12 @@ exports.withAll = (req, res, next) => {
 }
 
 var counter =1;
-exports.withOne = (req, res, next) => {
 
+
+
+exports.withOne = (req, res, next) => {
   let clientId = req.body && req.body.clientId ? req.body.clientId : req.query.clientId;
+
   if (!clientId) {
     clientId = req.query.client_id;
   }
@@ -30,6 +33,12 @@ exports.withOne = (req, res, next) => {
       if (client) {
         req.clientModel = client;
         req.client = client.serialize();
+
+        const clientConfig = JSON.parse(req.client.config);
+        res.locals.clientProjectUrl = clientConfig.projectUrl;
+        res.locals.clientEmail = clientConfig.contactEmail;
+        res.locals.clientDisclaimerUrl = clientConfig.clientDisclaimerUrl;
+
         next();
       } else {
         throw new Error('No Client found for clientID');
@@ -106,11 +115,8 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
   console.log('a');
   return (req, res, next) => {
       const authTypes = JSON.parse(req.client.authTypes);
-      console.log('---authTypes ', authTypes);
 
       if (authTypes.indexOf('UniqueCode') !== -1) {
-        console.log('---UniqueCode');
-
         new UniqueCode({ clientId: req.client.id, userId: req.user.id })
         .fetch()
         .then((codeResponse) => {

@@ -7,6 +7,11 @@
 
 #main {
   min-height: 650px;
+
+  @media screen and (max-width: @screen-sm) {
+    min-height: 0;
+    margin-bottom: 50px;
+  }
 }
 
 .row img {
@@ -39,6 +44,7 @@ a {
   text-decoration: none !important;
   padding-left: 18px !important;
   color: #666666 !important;
+  position: relative;
 
   &:before {
     background: url(../img/svg/caret-left-darkgrey.svg);
@@ -58,11 +64,11 @@ a {
 
 
 
+@import 'typography';
 
 @import 'footer';
 @import 'header';
 @import 'fonts';
-@import 'typography';
 @import 'logo';
 @import 'navbar';
 @import 'buttons';
