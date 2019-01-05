@@ -48,6 +48,17 @@ const uniqueCodeBruteForce = bruteForce.user.getMiddleware({
 });
 
 
+const csurf                       = require('csurf');
+const csrfProtection = csurf({cookie:true});
+app.use(csrfProtection);
+
+const addCsrfGlobal = (req, res, next) => {
+  nunjucksEnv.addGlobal('csrfToken', req.csrfToken());
+  next();
+});
+
+
+
 module.exports = function(app){
   app.use(function(req, res, next) {
     console.log('====> REQUEST:', req.originalUrl);
@@ -74,7 +85,7 @@ module.exports = function(app){
 	 * Login & register with local login
 	 */
 	//shared middleware
-	app.use('/auth/local', [clientMw.setAuthType('Local'), clientMw.validate]);
+	app.use('/auth/local', [clientMw.setAuthType('Local'), clientMw.validate, csrfProtection, addCsrfGlobal]);
 
 	//routes
 	app.get('/auth/local/login',     authLocal.login);
@@ -94,7 +105,7 @@ module.exports = function(app){
 	 * Auth routes for URL login
 	 */
 	 // shared middleware
-	app.use('/auth/url', [clientMw.setAuthType('Url'), clientMw.validate]);
+	app.use('/auth/url', [clientMw.setAuthType('Url'), clientMw.validate, csrfProtection, addCsrfGlobal]);
 
 	// routes
 	app.get('/auth/url/login',         authUrl.login);
@@ -107,14 +118,14 @@ module.exports = function(app){
 	 * Auth routes for DigiD
 	 * @TODO: available routes
 	 */
-	app.use('/auth/digid', [clientMw.setAuthType('DigiD'), clientMw.validate]);
+	app.use('/auth/digid', [clientMw.setAuthType('DigiD'), clientMw.validate, csrfProtection, addCsrfGlobal]);
  	app.get('/auth/digid/login',  clientMw.withOne, authDigiD.login);
   app.post('/auth/digid/login', clientMw.withOne, authDigiD.postLogin);
 
 	/**
 	 * Auth routes for UniqueCode
 	 */
-	app.use('/auth/code', [clientMw.withOne, clientMw.setAuthType('UniqueCode'), clientMw.validate]);
+	app.use('/auth/code', [clientMw.withOne, clientMw.setAuthType('UniqueCode'), clientMw.validate, csrfProtection, addCsrfGlobal]);
 	app.get('/auth/code/login',  authCode.login);
 	app.post('/auth/code/login', uniqueCodeBruteForce, authCode.postLogin);
 
