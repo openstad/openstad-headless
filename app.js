@@ -55,8 +55,7 @@ const csrfProtection = csurf({cookie:true});
 app.use(csrfProtection);
 
 app.use((req, res, next) => {
-  //console.log( req.csrfToken());
-  //nunjucksEnv.addGlobal('csrfToken', req.csrfToken());
+  nunjucksEnv.addGlobal('csrfToken', req.csrfToken());
   next();
 });
 
