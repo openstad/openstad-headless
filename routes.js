@@ -48,16 +48,13 @@ const uniqueCodeBruteForce = bruteForce.user.getMiddleware({
 });
 
 
-const csurf                       = require('csurf');
+const csurf      = require('csurf');
 const csrfProtection = csurf({cookie:true});
-app.use(csrfProtection);
 
 const addCsrfGlobal = (req, res, next) => {
   nunjucksEnv.addGlobal('csrfToken', req.csrfToken());
   next();
-});
-
-
+};
 
 module.exports = function(app){
   app.use(function(req, res, next) {
@@ -144,9 +141,9 @@ module.exports = function(app){
 	 * Show account, add client, but not obligated
 	 */
 	app.use('/user', [authMw.check, clientMw.withOne]);
-  app.get('/account',    userController.account);
-  app.post('/account',   userMw.validateUser, userMw.validateUniqueEmail, userController.postAccount);
-  app.post('/password',  userMw.validatePassword, userController.postAccount);
+  app.get('/account',    csrfProtection, addCsrfGlobal, userController.account);
+  app.post('/account',   csrfProtection, addCsrfGlobal, userMw.validateUser, userMw.validateUniqueEmail, userController.postAccount);
+  app.post('/password',  csrfProtection, addCsrfGlobal, userMw.validatePassword, userController.postAccount);
 
   app.use('/auth/required-fields', [authMw.check, clientMw.withOne]);
   app.get('/auth/required-fields', authRequiredFields.index);
