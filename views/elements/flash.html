@@ -37,18 +37,7 @@
 {% endfor %}
 {% endif %}
 {% if (messages.error)  %}
-{% for error in messages.error %}
-<div class="flash-container">
-  <div role="alert" class="flash-message flash-message--error">
-      <p class="flash-message__content" aria-live="off" tabindex="-1">
-         {{ error.msg }}
-      </p>
-      <div class="flash-message__close-button">
-        <button aria-label="close message" class="close-button" name="button" type="button">x</button>
-      </div>
-  </div>
-</div>
-{% endfor %}
+
 {% endif %}
 {% if messages.info %}
 {% for info in messages.info %}

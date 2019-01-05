@@ -15,13 +15,22 @@
 						<label>
 							{{label}}
 						</label>
-						<input
-							type="text"
-							value=""
-							name="unique_code"
-							class="form-input"
-							required
-						/>
+
+						<div {% if (messages.error) %} class="side-error" {% endif%}>
+						{% if (messages.error)  %}
+							{% for error in messages.error %}
+								<span class="error-label"> {{ error.msg }} </span>
+							{% endfor %}
+						{% endif %}
+
+							<input
+								type="text"
+								value=""
+								name="unique_code"
+								class="form-input"
+								required
+							/>
+						</div>
 					</div>
 					<input type="hidden" name="_csrf" value="{{csrfToken}}">
 					<input type="hidden" name="clientId" value="{{clientId}}">

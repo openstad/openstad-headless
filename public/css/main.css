@@ -6817,6 +6817,15 @@ button.close {
     margin-bottom: 50px;
   }
 }
+.side-error {
+  padding-left: 15px;
+  color: #ea1d25;
+  border-left: 2px solid #ea1d25;
+}
+.error-label {
+  margin: 10px 0;
+  display: block;
+}
 .row img {
   max-width: 100%;
 }

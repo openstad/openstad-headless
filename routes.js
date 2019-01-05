@@ -52,14 +52,12 @@ const csurf      = require('csurf');
 const csrfProtection = csurf({cookie:true});
 
 const addCsrfGlobal = (req, res, next) => {
-  nunjucksEnv.addGlobal('csrfToken', req.csrfToken());
+  req.nunjucksEnv.addGlobal('csrfToken', req.csrfToken());
   next();
 };
 
 module.exports = function(app){
   app.use(function(req, res, next) {
-    console.log('====> REQUEST:', req.originalUrl);
-    console.log('====> query:', req.query);
     next();
   });
 
@@ -224,7 +222,6 @@ module.exports = function(app){
 
   // Handle 500
   app.use(function(err, req, res, next) {
-    console.log('---> err', err);
     res.status(500).render('errors/500');
   });
 }

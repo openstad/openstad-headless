@@ -1,6 +1,7 @@
 $(function() {
   initFormsValidation();
   initHideFlash();
+  initRemoveErrorLabelOnType();
 });
 
 function initFormsValidation () {
@@ -19,6 +20,15 @@ function initFormsValidation () {
   });
 }
 
+
+function initRemoveErrorLabelOnType ( ){
+
+  $('.side-error input').on('keydown', function () {
+    var $sideError = $(this).closest('.side-error')
+    $sideError.find('.error-label').remove();
+    $sideError.removeClass('side-error');
+  })
+}
 
 function initHideFlash() {
   $('.flash-container .close-button').click(function() {
