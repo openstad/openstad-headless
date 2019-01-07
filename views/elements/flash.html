@@ -24,7 +24,7 @@
 
 {% if messages.success %}
 {% for success in messages.success %}
-<div class="flash-container">
+<div class="flash-container {% if flashRelative %} flash-container-relative {% endif %}">
   <div role="alert" class="flash-message flash-message--success">
     <p class="flash-message__content" aria-live="off" tabindex="-1">
       {{ success.msg }}

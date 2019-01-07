@@ -7600,6 +7600,7 @@ header {
   margin-left: 0;
   padding-top: 11px;
   font-size: 18px;
+  text-decoration: none;
 }
 .navbar-nav {
   margin: 0;
@@ -7661,6 +7662,15 @@ header {
   box-shadow: none;
   padding: 0 10px;
   max-width: 300px;
+}
+.form-group input[type="text"]:disabled,
+.form-group input[type="email"]:disabled,
+.form-group input[type="number"]:disabled,
+.form-group input[type="password"]:disabled,
+.form-group textarea:disabled {
+  background: #e6e6e6;
+  opacity: 1;
+  border: none;
 }
 .form-group textarea {
   height: 80px;
@@ -7761,6 +7771,9 @@ textarea:disabled {
   pointer-events: none;
   z-index: 100;
   padding: 0.75rem;
+}
+.flash-container-relative {
+  position: relative;
 }
 .flash-message {
   background: #f3f3f3;

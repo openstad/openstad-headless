@@ -44,9 +44,14 @@ exports.info = (req, res) => {
  */
  exports.account = [
    login.ensureLoggedIn(),
+
    (req, res) => {
+     console.log();
+
      res.render('account/profile', {
-       user: req.user
+       user: req.user,
+       client: req.client,
+       displayLogout: true,
      });
    }
  ];
@@ -67,7 +72,10 @@ exports.info = (req, res) => {
          // Save user and redirect back
          user
            .save()
-           .then(() => { req.flash('success', { msg: 'Opgeslagen' }); res.redirect('/account'); })
+           .then(() => {
+             req.flash('success', { msg: 'Opgeslagen' });
+             res.redirect('/account?clientId=' + req.client.clientId); 
+           })
            .catch((err) => { next(err); })
        });
    }
@@ -83,7 +91,8 @@ exports.info = (req, res) => {
          .save()
          .then(() => {
            req.flash('success', { msg: 'Wachtwoord aangepast, je kan nu inloggen!' });
-           res.redirect(authLocalConfig.loginUrl);
+      //     res.redirect(authLocalConfig.loginUrl + '?clientId=');
+           res.redirect('/account?clientId=' + req.client.clientId);
          })
          .catch((err) => {
            next(err);

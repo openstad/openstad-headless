@@ -138,10 +138,10 @@ module.exports = function(app){
 	/**
 	 * Show account, add client, but not obligated
 	 */
-	app.use('/user', [authMw.check, clientMw.withOne]);
-  app.get('/account',    csrfProtection, addCsrfGlobal, userController.account);
-  app.post('/account',   csrfProtection, addCsrfGlobal, userMw.validateUser, userMw.validateUniqueEmail, userController.postAccount);
-  app.post('/password',  csrfProtection, addCsrfGlobal, userMw.validatePassword, userController.postAccount);
+	app.use('/user', [ clientMw.withOne, authMw.check, clientMw.withOne]);
+  app.get('/account',   clientMw.withOne, csrfProtection, addCsrfGlobal, userController.account);
+  app.post('/account',  clientMw.withOne, csrfProtection, addCsrfGlobal, userMw.validateUser, userMw.validateUniqueEmail, userController.postAccount);
+  app.post('/password',  clientMw.withOne, csrfProtection, addCsrfGlobal, userMw.validatePassword, userController.postAccount);
 
   app.use('/auth/required-fields', [authMw.check, clientMw.withOne]);
   app.get('/auth/required-fields', authRequiredFields.index);
