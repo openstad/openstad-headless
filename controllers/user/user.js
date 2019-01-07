@@ -43,11 +43,7 @@ exports.info = (req, res) => {
  * @returns {undefined}
  */
  exports.account = [
-   login.ensureLoggedIn(),
-
    (req, res) => {
-     console.log();
-
      res.render('account/profile', {
        user: req.user,
        client: req.client,
@@ -74,7 +70,7 @@ exports.info = (req, res) => {
            .save()
            .then(() => {
              req.flash('success', { msg: 'Opgeslagen' });
-             res.redirect('/account?clientId=' + req.client.clientId); 
+             res.redirect('/account?clientId=' + req.client.clientId);
            })
            .catch((err) => { next(err); })
        });
