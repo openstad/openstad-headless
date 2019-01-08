@@ -73,8 +73,8 @@ passport.use('url', new TokenStrategy({
         new User({id: token.get('userId')})
           .fetch()
           .then((user) => { return user.serialize(); })
-          .then(user => done(null, user))
-          .catch((err) => { done(err); });
+          .then(user => {console.log('success', user);  return done(null, user) } )
+          .catch((err) => { console.log('err', err); return done(err); });
       } else {
         console.log('Token not found');
 
