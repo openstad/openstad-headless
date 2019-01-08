@@ -14,9 +14,12 @@
 				action="{{loginUrl}}"
 			>
 					<div class="form-group">
+						{% include 'elements/error-flash.html' %}
+
 						<label>
 							Emailadres:
 						</label>
+
 						<input
 							type="email"
 							value=""

@@ -124,13 +124,18 @@ exports.authenticate =  (req, res, next) => {
  passport.authenticate('url', function(err, user, info) {
    if (err) { return next(err); }
 
+   console.log('err', err);
    // Redirect if it fails to the original e-mail screen
    if (!user) {
+     console.log('!user', user, info);
+
      req.flash('error', {msg: 'De url is geen geldige login url, wellicht is deze verlopen'});
      return res.redirect(`/auth/url/login?clientId=${req.client.clientId}`);
    }
 
    req.logIn(user, function(err) {
+     console.log('logIn err', err);
+
      if (err) { return next(err); }
 
      // Redirect if it succeeds to authorize screen
