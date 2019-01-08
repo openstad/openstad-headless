@@ -14,13 +14,18 @@ exports.addUser = ((req, res, next) => {
         const msForADay = 86400000;
         const date = new Date();
         const timeAgo = new Date(date.setTime(date.getTime() - (days * msForADay)));
+        console.log('======> timeAgo',timeAgo);
 
         q.where('createdAt', '>=', timeAgo);
         q.orderBy('createdAt', 'DESC');
     })
     .fetch()
     .then((token) => {
+      console.log('======> token');
+
       if (token) {
+        console.log('======> user id', token.get('userId'));
+
         new User
           ({id: token.get('userId')})
           .fetch()
@@ -33,6 +38,8 @@ exports.addUser = ((req, res, next) => {
             next(err);
           });
       } else {
+        console.log('======> No token found.');
+
         next({
           name: 'LoginTokenNotFound',
           msg: 'No token found.',
@@ -41,6 +48,7 @@ exports.addUser = ((req, res, next) => {
       }
     })
     .catch((err) => {
+      console.log('======> err', err);
       next(err);
     });
 });
