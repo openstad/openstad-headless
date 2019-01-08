@@ -20,7 +20,9 @@ exports.post = (req, res, next) => {
   const clientRequiredUserFields = JSON.parse(req.client.requiredUserFields);
 
   clientRequiredUserFields.forEach((field) => {
-    if (req.body[field]) {
+    if (field === 'email' && !!req.user.email)  {
+      //break;
+    } else if (req.body[field]) {
       req.userModel.set(field, req.body[field]);
     }
   });
