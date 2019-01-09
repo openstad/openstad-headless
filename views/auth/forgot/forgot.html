@@ -7,11 +7,14 @@
   <div class="upper-box card-body">
       <form method="POST">
          <input type="hidden" name="_csrf" value="{{csrfToken}}" />
-        <legend>Wachtwoord vergeten</legend>
+        <h1>Wachtwoord vergeten</h1>
+        {% include 'elements/error-flash.html' %}
+
         <div class="form-group">
-          <p>
+          <p class="intro">
             Laat je e-mail achter en we mailen je instructies voor het resetten van je wachtwoord.
           </p>
+          <label> Email </label>
           <input type="email" name="email" id="email" placeholder="Email" class="form-input" required autofocus>
         </div>
         <button type="submit" class="btn btn-primary">Stuur e-mail</button>

@@ -165,7 +165,7 @@ exports.validatePassword = (req, res, next) => {
   if (
     req.body.password
     && req.body.password === req.body.password_confirm
-    && req.body.password.length >= 5
+    && req.body.password.length >= 8
   ) {
     next();
   } else {

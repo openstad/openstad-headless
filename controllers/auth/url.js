@@ -12,6 +12,8 @@ const tokenUrl          = require('../../services/tokenUrl');
 const emailService      = require('../../services/email');
 const authUrlConfig     = require('../../config/auth').get('Url');
 
+
+
 exports.login  = (req, res) => {
   res.render('auth/url/login', {
     clientId: req.query.clientId,
@@ -51,6 +53,7 @@ exports.postLogin = (req, res, next) => {
       }
     })
     .catch((err) => {
+      console.log('===> err', err);
       req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
       res.redirect(req.header('Referer') || authUrlConfig.loginUrl);
     });
@@ -59,17 +62,16 @@ exports.postLogin = (req, res, next) => {
      * Format the URL and the Send it to the user
      */
     const handleSending = (req, res, next) => {
-      tokenUrl
-        .format(req.client, req.user)
-        .then((tokenUrl) => {
-
-          sendEmail(tokenUrl, req.user, req.client);
-        })
+      tokenUrl.invalidateTokensForUser(req.user.id)
+        .then(() => { return tokenUrl.format(req.client, req.user); })
+        .then((tokenUrl) => { sendEmail(tokenUrl, req.user, req.client); })
         .then((result) => {
           req.flash('success', {msg: 'De e-mail is verstuurd!'});
           res.redirect(req.header('Referer') || '/login-with-email-url');
         })
         .catch((err) => {
+          console.log('===> err', err);
+
           req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
           res.redirect(req.header('Referer') || '/login-with-email-url');
         });
@@ -122,25 +124,35 @@ exports.postRegister = (req, res, next) => {
 
 exports.authenticate =  (req, res, next) => {
  passport.authenticate('url', function(err, user, info) {
+   console.log('errr', err);
    if (err) { return next(err); }
 
-   console.log('err', err);
    // Redirect if it fails to the original e-mail screen
    if (!user) {
-     console.log('!user', user, info);
-
      req.flash('error', {msg: 'De url is geen geldige login url, wellicht is deze verlopen'});
      return res.redirect(`/auth/url/login?clientId=${req.client.clientId}`);
    }
 
    req.logIn(user, function(err) {
-     console.log('logIn err', err);
+     console.log('1111');
 
      if (err) { return next(err); }
 
-     // Redirect if it succeeds to authorize screen
-     const authorizeUrl = `/dialog/authorize?redirect_uri=${req.client.redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
-     return res.redirect(authorizeUrl);
+     console.log('user.id', user.id);
+
+     return tokenUrl.invalidateTokensForUser(user.id)
+      .then((response) => {
+        console.log('neieniene', response);
+
+        // Redirect if it succeeds to authorize screen
+        const authorizeUrl = `/dialog/authorize?redirect_uri=${req.client.redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+        return res.redirect(authorizeUrl);
+      })
+      .catch((err) => {
+        console.log('ewwwrr', err);
+
+        next(err);
+      });
    });
 
  })(req, res, next);

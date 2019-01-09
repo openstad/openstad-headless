@@ -3,29 +3,24 @@ const User       = require('../models').User;
 
 exports.addUser = ((req, res, next) => {
   const tokenToQuery = req.body.token ?  req.body.token : req.query.token;
-  new LoginToken({token: tokenToQuery})
+  new LoginToken({token: tokenToQuery, valid: true})
       .query((q) => {
         /**
-         * Only select tokens that are younger then 2 days
-         * created_at is "bigger then" 48 hours ago
+         * Only select tokens that are younger then 5 min
          */
-
         const days = 2;
         const msForADay = 86400000;
+        const minutes = 5;
+        const msForAMinute = 60000;
         const date = new Date();
-        const timeAgo = new Date(date.setTime(date.getTime() - (days * msForADay)));
-        console.log('======> timeAgo',timeAgo);
+        const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
 
         q.where('createdAt', '>=', timeAgo);
         q.orderBy('createdAt', 'DESC');
     })
     .fetch()
     .then((token) => {
-      console.log('======> token');
-
       if (token) {
-        console.log('======> user id', token.get('userId'));
-
         new User
           ({id: token.get('userId')})
           .fetch()
@@ -38,8 +33,6 @@ exports.addUser = ((req, res, next) => {
             next(err);
           });
       } else {
-        console.log('======> No token found.');
-
         next({
           name: 'LoginTokenNotFound',
           msg: 'No token found.',
@@ -48,7 +41,6 @@ exports.addUser = ((req, res, next) => {
       }
     })
     .catch((err) => {
-      console.log('======> err', err);
       next(err);
     });
 });

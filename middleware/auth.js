@@ -39,3 +39,12 @@ exports.check = (req, res, next) => {
       });
   }
 }
+
+exports.passwordValidate = (req, res, next) => {
+  if (req.body.password.length >= 8) {
+    next();
+  } else {
+    req.flash('error', {msg: 'Wachtwoord moet min 8 karakters lang zijn'});
+    res.redirect(req.header('Referer') || '/account');
+  }
+}

@@ -57,11 +57,11 @@
          <input type="hidden" name="_csrf" value="{{csrfToken}}" />
         <div class="form-group">
             <label for="password">Huidig wachtwoord</label>
-            <input type="password" name="password" id="password"  class="form-input">
+            <input type="password" name="password" id="password" minlength="8" class="form-input">
         </div>
         <div class="form-group">
             <label for="confirm">Nieuw wachtwoord</label>
-            <input type="password" name="password_confirm" id="confirm"  class="form-input">
+            <input type="password" name="password_confirm" id="confirm" minlength="8" class="form-input">
         </div>
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Bewaar</button>

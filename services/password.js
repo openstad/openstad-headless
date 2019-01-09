@@ -28,3 +28,14 @@ exports.formatResetLink = (client, user) => {
     });
   });
 }
+
+exports.invalidateTokensForUser = (userId) => {
+  console.log('userId', userId);
+
+  return PasswordResetToken
+    .where({userId: userId})
+    .save(
+        {valid: false},
+        {method: 'update', patch: true}
+     );
+}

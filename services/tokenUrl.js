@@ -32,6 +32,11 @@ exports.format = (client, user) => {
 
 exports.getUrl = getUrl;
 
-exports.getUserIdForToken = (token) => {
-
+exports.invalidateTokensForUser = (userId) => {
+  return LoginToken
+    .where({userId: userId})
+    .save(
+        {valid: false},
+        {method: 'update', patch: true}
+     );
 }

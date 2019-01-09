@@ -5,18 +5,22 @@
   <div class="panel">
     <div class="panel-body">
       <form method="POST" class="validate-form">
-         <input type="hidden" name="_csrf" value="{{csrfToken}}" />
-         <input type="hidden" name="token" value="{{token}}" />
+        <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+        <input type="hidden" name="token" value="{{token}}" />
         <h1 class="title">
           Herstel je wachtwoord
         </h1>
         <div class="form-group">
+          <label for="email">E-mail</label>
+          <input type="email" name="email" id="email" placeholder="E-mail" class="form-input"  autofocus>
+        </div>
+        <div class="form-group">
           <label for="password">Nieuw wachtwoord</label>
-          <input type="password" name="password" id="password" placeholder="New password" class="form-input" autocomplete="off" autofocus>
+          <input type="password" name="password" id="password" minlength="8" placeholder="New password" class="form-input" autocomplete="off" >
         </div>
         <div class="form-group">
           <label for="confirm">Herhaal nieuwe wachtwoord</label>
-          <input type="password" name="password_confirm" id="confirm" placeholder="Confirm password" autocomplete="off" class="form-input">
+          <input type="password" name="password_confirm" id="confirm" minlength="8" placeholder="Confirm password" autocomplete="off" class="form-input">
         </div>
         <div class="form-group">
           <button type="submit" class="btn btn-primary">Change Password</button>

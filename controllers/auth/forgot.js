@@ -33,17 +33,24 @@
    new User({id: req.user.id})
      .fetch()
      .then((user) => {
+
+       if (req.body.email !== user.get('email')) {
+         throw new Error('E-mail not the same');
+       }
+
        user.set('password', bcrypt.hashSync(req.body.password, saltRounds));
 
-       user
-         .save()
-         .then(() => {
-           req.flash('success', { msg: 'Wachtwoord aangepast, je kan nu inloggen!' });
-           res.redirect(authLocalConfig.loginUrl + '?clientId=' + req.client.clientId);
-         })
-         .catch((err) => {
-           next(err);
-         })
+       return password.invalidateTokensForUser(req.user.id)
+          .then(() => {
+            return user.save();
+          })
+          .then(() => {
+             req.flash('success', { msg: 'Wachtwoord aangepast, je kan nu inloggen!' });
+             res.redirect(authLocalConfig.loginUrl + '?clientId=' + req.client.clientId);
+           })
+           .catch((err) => {
+             next(err);
+           })
      });
  }
 
@@ -60,7 +67,10 @@
        }
 
        req.user = user.serialize();
-       return password.formatResetLink(req.client, req.user)
+       return password.invalidateTokensForUser(req.user.id);
+     })
+     .then(()=> {
+       return password.formatResetLink(req.client, req.user);
      })
      .then((url) => { return sendEmail(url, req.user, req.client); })
      .then(() => {
@@ -68,6 +78,7 @@
        res.redirect(req.header('Referer') || authLocalConfig.loginUrl + '?clientId=' + req.client.clientId);
      })
      .catch((err) => {
+       console.log('err');
        req.flash('error', {msg: 'E-mail adres is niet bekend bij ons.'});
        res.redirect(req.header('Referer') || authLocalConfig.loginUrl + '?clientId=' + req.client.clientId);
      });

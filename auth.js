@@ -46,7 +46,10 @@ passport.use('url', new TokenStrategy({
   }, function (token, done) { // put your check logic here
     console.log('token 1', token);
 
-    new LoginToken({token: token})
+    new LoginToken({
+      token: token,
+      valid: true
+    })
       .query((q) => {
       /**
        * Only select tokens that are younger then 2 days
@@ -55,8 +58,10 @@ passport.use('url', new TokenStrategy({
 
       const days = 2;
       const msForADay = 86400000;
+      const minutes = 5;
+      const msForAMinute = 60000;
       const date = new Date();
-      const timeAgo = new Date(date.setTime(date.getTime() - (days * msForADay)));
+      const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
 
       console.log('timeAgo', timeAgo);
 
@@ -65,19 +70,14 @@ passport.use('url', new TokenStrategy({
     })
     .fetch()
     .then((token) => {
-      console.log('token 2', token);
 
       if (token) {
-        console.log('token in userId', token.get('userId'));
-
         new User({id: token.get('userId')})
           .fetch()
           .then((user) => { return user.serialize(); })
           .then(user => {console.log('success', user);  return done(null, user) } )
           .catch((err) => { console.log('err', err); return done(err); });
       } else {
-        console.log('Token not found');
-
         done("Token not found");
       }
     });
