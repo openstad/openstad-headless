@@ -33,10 +33,19 @@ exports.format = (client, user) => {
 exports.getUrl = getUrl;
 
 exports.invalidateTokensForUser = (userId) => {
-  return LoginToken
-    .where({userId: userId})
-    .save(
-        {valid: false},
-        {method: 'update', patch: true}
-     );
+  return new Promise((resolve, reject) => {
+    if (!userId) {
+      resolve();
+    } else {
+      LoginToken
+      .where({userId: userId})
+      .save(
+          {valid: false},
+          {method: 'update', patch: true}
+       )
+       .then(() => { resolve(); })
+       .catch(() => { resolve(); })
+     }
+  });
+
 }

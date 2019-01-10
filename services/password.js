@@ -30,12 +30,19 @@ exports.formatResetLink = (client, user) => {
 }
 
 exports.invalidateTokensForUser = (userId) => {
-  console.log('userId', userId);
 
-  return PasswordResetToken
-    .where({userId: userId})
-    .save(
-        {valid: false},
-        {method: 'update', patch: true}
-     );
+  return new Promise((resolve, reject) => {
+    if (!userId) {
+      resolve();
+    } else {
+      PasswordResetToken
+      .where({userId: userId})
+      .save(
+          {valid: false},
+          {method: 'update', patch: true}
+       )
+       .then(() => { resolve(); })
+       .catch(() => { resolve(); })
+     }
+  });
 }
