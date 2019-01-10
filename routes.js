@@ -145,7 +145,7 @@ module.exports = function(app){
 
   app.use('/auth/required-fields', [authMw.check, clientMw.withOne]);
   app.get('/auth/required-fields', authRequiredFields.index);
-  app.post('/auth/required-fields', clientMw.withOne, userMw.validateUniqueEmail, authRequiredFields.post);
+  app.post('/auth/required-fields', clientMw.withOne, authRequiredFields.post);
 
 
   app.use('/dialog', [bruteForce.global.prevent]);
