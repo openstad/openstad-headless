@@ -5,6 +5,8 @@
   <div class="panel">
     <div class="panel-body">
       <form method="POST" class="validate-form">
+        {% include 'elements/error-flash.html' %}
+
         <input type="hidden" name="_csrf" value="{{csrfToken}}" />
         <input type="hidden" name="token" value="{{token}}" />
         <h1 class="title">
