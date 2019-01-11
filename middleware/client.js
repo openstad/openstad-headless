@@ -14,17 +14,12 @@ exports.withAll = (req, res, next) => {
     .catch((err) => { next(err); });
 }
 
-var counter =1;
-
-
-
 exports.withOne = (req, res, next) => {
   let clientId = req.body && req.body.clientId ? req.body.clientId : req.query.clientId;
 
   if (!clientId) {
     clientId = req.query.client_id;
   }
-  counter++;
 
   if (clientId) {
     new Client({ clientId: clientId })
@@ -129,7 +124,12 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
         })
         .catch((error) => {
           if (errorCallback) {
-            errorCallback(req, res, next);
+            try {
+              errorCallback(req, res, next);
+            } catch (err) {
+              console.log('===> e',err);
+              next(err)
+            }
           } else {
             next(error);
           }
@@ -142,6 +142,7 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
 }
 
 exports.checkRequiredUserFields = (req, res, next) => {
+  console.log('checkRequiredUserFields');
   const requiredFields = JSON.parse(req.client.requiredUserFields);
   const user = req.user;
   let error;
