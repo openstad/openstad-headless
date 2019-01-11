@@ -109,6 +109,8 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
   //validate code auth type
   console.log('a');
   return (req, res, next) => {
+    console.log('12312312');
+
       const authTypes = JSON.parse(req.client.authTypes);
 
       if (authTypes.indexOf('UniqueCode') !== -1) {
@@ -123,7 +125,11 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
           }
         })
         .catch((error) => {
+          console.log('error checkRequiredUserFields');
+
           if (errorCallback) {
+            console.log('error errorCallback', errorCallback);
+
             try {
               errorCallback(req, res, next);
             } catch (err) {
@@ -136,6 +142,8 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
         });
 
       } else {
+        console.log('next next next ');
+
         next();
       }
     }
