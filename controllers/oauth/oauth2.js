@@ -161,6 +161,8 @@ server.exchange(oauth2orize.exchange.refreshToken((client, refreshToken, scope, 
 exports.authorization = [
   login.ensureLoggedIn(),
   server.authorization((clientID, redirectURI, scope, done) => {
+    console.log('===> clientID', clientID);
+
     new Client({clientId: clientID})
     .fetch()
     .then((client) => {
@@ -175,10 +177,14 @@ exports.authorization = [
       const allowedDomains = client.allowedDomains ? JSON.parse(client.allowedDomains) : false;
       const redirectUrlHost = new URL(redirectURI).hostname;
 
+      console.log('===> allowedDomains', allowedDomains);
+
       // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
       if (allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1) {
         return done(null, client, redirectURI);
       } else {
+        console.log('===> Redirect host doesn\'t match the client host');
+
         throw new Error('Redirect host doesn\'t match the client host');
       }
 
@@ -195,6 +201,8 @@ exports.authorization = [
       .then((client) => {
         client = client.serialize();
 
+        console.log('clientclientclientclient', client);
+
         if (client != null) {//  && client.trustedClient && client.trustedClient === true) {
           // This is how we short call the decision like the dialog below does
           server.decision({ loadTransaction: false }, (serverReq, callback) => {
@@ -205,6 +213,8 @@ exports.authorization = [
         }
       })
       .catch((error) => {
+        console.log('error', error);
+
         res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
       });
   },
