@@ -38,6 +38,14 @@ app.use((req, res, next) => {
   next();
 })
 
+app.use((req, res, next) => {
+  console.log('=====> REQUEST: ', req.originalUrl);
+  console.log('=====> query: ', req.query);
+
+  next();
+})
+
+
 // Session Configuration
 app.use(expressSession({
   saveUninitialized : true,
