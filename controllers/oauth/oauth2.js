@@ -206,9 +206,6 @@ exports.authorization = [
         if (client != null) {//  && client.trustedClient && client.trustedClient === true) {
           // This is how we short call the decision like the dialog below does
           server.decision({ loadTransaction: false }, (serverReq, callback) => {
-            console.log('===> serverReq', serverReq);
-            console.log('===> callback', callback);
-
             callback(null, { allow: true });
           })(req, res, next);
         } else {
