@@ -29,7 +29,7 @@ exports.login = (req, res, next) => {
 }
 
 exports.postLogin = (req, res, next) => {
-  passport.authenticate('uniqueCode', function(err, user, info) {
+  passport.authenticate('uniqueCode', { session: false }, function(err, user, info) {
     //if (err) { return next(err); }
 
     // Redirect if it fails to the original e-mail screen
