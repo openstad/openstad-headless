@@ -31,6 +31,7 @@ const authMw                   = require('./middleware/auth');
 const passwordResetMw          = require('./middleware/passwordReset');
 const roleMw                   = require('./middleware/role');
 const codeMw                   = require('./middleware/code');
+const logMW                    = require('./middleware/log');
 
 
 const loginBruteForce = bruteForce.user.getMiddleware({
@@ -122,7 +123,7 @@ module.exports = function(app){
 	 */
 	app.use('/auth/code', [clientMw.withOne, clientMw.setAuthType('UniqueCode'), clientMw.validate, csrfProtection, addCsrfGlobal]);
 	app.get('/auth/code/login',  authCode.login);
-	app.post('/auth/code/login', uniqueCodeBruteForce, authCode.postLogin);
+	app.post('/auth/code/login', uniqueCodeBruteForce, logMw.logPostUniqueCode, authCode.postLogin);
 
 	/**
 	 * Register extra info;

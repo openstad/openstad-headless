@@ -1,5 +1,8 @@
 const UniqueCode = require('../models').UniqueCode;
 
+console.log('log log');
+
+
 exports.withAll = (req, res, next) => {
   UniqueCode
   .fetchAll()

@@ -60,6 +60,12 @@ const User = bookshelf.Model.extend({
  }*/
 });
 
+const ActionLog  = bookshelf.Model.extend({
+  tableName: 'action_log',
+  hasTimestamps: true,
+  hasTimestamps: ['createdAt',  'updatedAt']
+});
+
 exports.Client = Client;
 exports.User = User;
 exports.LoginToken = LoginToken;
