@@ -51,7 +51,13 @@ const uniqueCodeBruteForce = bruteForce.user.getMiddleware({
 
 
 const csurf      = require('csurf');
-const csrfProtection = csurf({cookie:true});
+const csrfProtection = csurf({
+  cookie: {
+    httpOnly: true,
+    secure: true,
+    sameSite: true
+  }
+);
 
 const addCsrfGlobal = (req, res, next) => {
   req.nunjucksEnv.addGlobal('csrfToken', req.csrfToken());
