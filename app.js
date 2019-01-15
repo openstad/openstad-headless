@@ -38,12 +38,13 @@ app.use((req, res, next) => {
   next();
 })
 
+/*
 app.use((req, res, next) => {
   console.log('=====> REQUEST: ', req.originalUrl);
   console.log('=====> query: ', req.query);
-
   next();
-})
+});
+*/
 
 
 // Session Configuration
@@ -53,7 +54,12 @@ app.use(expressSession({
   secret            : config.session.secret,
   store             : new MemoryStore(),
   key               : 'authorization.sid',
-  cookie            : { maxAge: config.session.maxAge },
+  cookie            : {
+    maxAge: config.session.maxAge,
+    secure: process.env.COOKIE_SECURE || true,
+    httpOnly: true,
+    sameSite: true
+  },
 }));
 app.use(flash());
 
