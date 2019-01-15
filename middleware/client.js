@@ -107,17 +107,13 @@ exports.validate = (req, res, next) => {
 
 exports.checkUniqueCodeAuth = (errorCallback) => {
   //validate code auth type
-  console.log('a');
   return (req, res, next) => {
-    console.log('12312312');
-
       const authTypes = JSON.parse(req.client.authTypes);
 
       if (authTypes.indexOf('UniqueCode') !== -1) {
         new UniqueCode({ clientId: req.client.id, userId: req.user.id })
         .fetch()
         .then((codeResponse) => {
-          console.log('codeResponse', codeResponse);
           if (!!codeResponse) {
             next();
           } else {
@@ -128,12 +124,9 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
           console.log('error checkRequiredUserFields');
 
           if (errorCallback) {
-            console.log('error errorCallback', errorCallback);
-
             try {
               errorCallback(req, res, next);
             } catch (err) {
-              console.log('===> e',err);
               next(err)
             }
           } else {
@@ -142,15 +135,12 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
         });
 
       } else {
-        console.log('next next next ');
-
         next();
       }
     }
 }
 
 exports.checkRequiredUserFields = (req, res, next) => {
-  console.log('checkRequiredUserFields');
   const requiredFields = JSON.parse(req.client.requiredUserFields);
   const user = req.user;
   let error;
