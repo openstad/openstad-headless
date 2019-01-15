@@ -7,15 +7,13 @@ console.log('log log');
  */
 exports.logAction = (action) => {
   return (req, res, next) => {
-
     new ActionLog({
       action: action,
       userId: req.user.id,
       clientId: req.client.id,
     })
     .save()
-    .then(() => {
-      next();
+    .then(() => { next();
     })
     .catch((err) => {
       console.log('==> err ', err);
@@ -28,20 +26,28 @@ exports.logAction = (action) => {
 exports.logPostUniqueCode = (req, res, next) => {
       const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
-      new ActionLog({
+      const values = {
         method: 'post',
         name: 'UniqueCode',
-        value: req.body.code,
-        
+        value: req.body.unique_code,
         clientId: req.client.id,
         ip: ip
-      })
-      .save()
-      .then(() => {
-        next();
-      })
-      .catch((err) => {
-        console.log('==> err ', err);
-        next(err);
-      });
+      }
+
+
+      try {
+        new ActionLog(values)
+          .save()
+          .then(() => {
+            console.log('==> save? ');
+            next();
+          })
+          .catch((err) => {
+            console.log('==> err ', err);
+            next(err);
+          });
+      } catch (e) {
+        console.log('==> errrr ', e);
+
+      }
 }

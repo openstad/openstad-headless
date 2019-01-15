@@ -31,7 +31,8 @@ const authMw                   = require('./middleware/auth');
 const passwordResetMw          = require('./middleware/passwordReset');
 const roleMw                   = require('./middleware/role');
 const codeMw                   = require('./middleware/code');
-const logMW                    = require('./middleware/log');
+const logMw                    = require('./middleware/log');
+
 
 
 const loginBruteForce = bruteForce.user.getMiddleware({

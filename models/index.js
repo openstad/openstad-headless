@@ -73,3 +73,4 @@ exports.UniqueCode = UniqueCode;
 exports.Role = Role;
 exports.UserRole = UserRole;
 exports.PasswordResetToken = PasswordResetToken;
+exports.ActionLog = ActionLog;

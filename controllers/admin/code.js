@@ -63,6 +63,8 @@ exports.postBulk = (req, res, next) => {
 
     codes.push(codeStatus);
 
+    // jwt_token / buurtbudget / JWT-token
+
     /**
      * Fetch uniqueCode
      * if exists, set to duplicate
