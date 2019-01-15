@@ -57,7 +57,7 @@ const csrfProtection = csurf({
     secure: true,
     sameSite: true
   }
-);
+});
 
 const addCsrfGlobal = (req, res, next) => {
   req.nunjucksEnv.addGlobal('csrfToken', req.csrfToken());
