@@ -8,6 +8,7 @@
 				Voor {{client.name}} kan je kiezen hoe je wilt inloggen uit
         de volgende opties:
 			</p>
+			{% include 'elements/error-flash.html' %}
 
       {% for authType in authTypes %}
         <a href="{{authType.loginUrl}}?clientId={{clientId}}" class="btn btn-primary">

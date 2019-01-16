@@ -39,7 +39,6 @@ exports.logPostUniqueCode = (req, res, next) => {
         new ActionLog(values)
           .save()
           .then(() => {
-            console.log('==> save? ');
             next();
           })
           .catch((err) => {
@@ -48,6 +47,5 @@ exports.logPostUniqueCode = (req, res, next) => {
           });
       } catch (e) {
         console.log('==> errrr ', e);
-
       }
 }

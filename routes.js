@@ -45,12 +45,12 @@ const loginBruteForce = bruteForce.user.getMiddleware({
 const uniqueCodeBruteForce = bruteForce.user.getMiddleware({
   key: function(req, res, next) {
       // prevent too many attempts for the same username
-      next(req.body.unique_code);
+      next('unique_code');
   }
 });
 
 
-const csurf      = require('csurf');
+const csurf = require('csurf');
 const csrfProtection = csurf({
   cookie: {
     httpOnly: true,
