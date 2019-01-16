@@ -178,6 +178,7 @@ exports.authorization = [
       const redirectUrlHost = new URL(redirectURI).hostname;
 
       console.log('===> allowedDomains', allowedDomains);
+      console.log('===> redirectUrlHost', redirectUrlHost);
 
       // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
       if (allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1) {
