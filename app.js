@@ -56,7 +56,7 @@ app.use(expressSession({
   key               : 'authorization.sid',
   cookie            : {
     maxAge: config.session.maxAge,
-    secure: process.env.COOKIE_SECURE || true,
+    secure: process.env.COOKIE_SECURE_OFF === 'yes' ? false : true,
     httpOnly: true,
     sameSite: true
   },

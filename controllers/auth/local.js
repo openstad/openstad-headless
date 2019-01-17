@@ -91,7 +91,9 @@ exports.postLogin = (req, res, next) => {
   //    const redirectTo = req.session.returnTo ? req.session.returnTo : req.client.redirectUrl;
 
       // Redirect if it succeeds to authorize screen
-      return res.redirect(authorizeUrl);
+      req.brute.reset(() => {
+        return res.redirect(authorizeUrl);
+      });
     });
   })(req, res, next);
 }
