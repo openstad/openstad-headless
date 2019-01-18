@@ -161,7 +161,6 @@ server.exchange(oauth2orize.exchange.refreshToken((client, refreshToken, scope, 
 exports.authorization = [
   login.ensureLoggedIn(),
   server.authorization((clientID, redirectURI, scope, done) => {
-    console.log('===> clientID', clientID);
 
     new Client({clientId: clientID})
     .fetch()
@@ -177,8 +176,6 @@ exports.authorization = [
       const allowedDomains = client.allowedDomains ? JSON.parse(client.allowedDomains) : false;
       const redirectUrlHost = new URL(redirectURI).hostname;
 
-      console.log('===> allowedDomains', allowedDomains);
-      console.log('===> redirectUrlHost', redirectUrlHost);
 
       // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
       if (allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1) {
@@ -201,8 +198,6 @@ exports.authorization = [
       .fetch()
       .then((client) => {
         client = client.serialize();
-
-        console.log('clientclientclientclient', client);
 
         if (client != null) {//  && client.trustedClient && client.trustedClient === true) {
           // This is how we short call the decision like the dialog below does

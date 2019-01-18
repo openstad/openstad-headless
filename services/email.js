@@ -55,8 +55,6 @@ exports.send = function ({subject, toName, toEmail, template, variables, fromEma
     html: mail,
   };
 
-  console.log('message', message);
-
   if (replyTo) {
     message.replyTo = replyTo;
   }

@@ -121,8 +121,6 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
           }
         })
         .catch((error) => {
-          console.log('error checkRequiredUserFields');
-
           if (errorCallback) {
             try {
               errorCallback(req, res, next);

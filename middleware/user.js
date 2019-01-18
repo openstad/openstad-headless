@@ -119,10 +119,7 @@ exports.validateUser = (req, res, next) => {
       new User({ email: value  })
         .fetch()
         .then((user) => {
-          console.log('===> user', user);
-
           if (user) {
-            console.log('===> E-mail already in use');
             //return Promise.reject('asadasdadsasd')
             throw new Error('E-mail al in gebruik!');
             //return reject('E-mail already in use');

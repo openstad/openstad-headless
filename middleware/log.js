@@ -1,7 +1,5 @@
 const ActionLog = require('../models').ActionLog;
 
-console.log('log log');
-
 /**
  * Add the login option
  */
