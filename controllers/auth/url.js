@@ -138,16 +138,18 @@ exports.authenticate =  (req, res, next) => {
 
    req.logIn(user, function(err) {
 
+     console.log('user', user);
+
      if (err) { return next(err); }
 
      return tokenUrl.invalidateTokensForUser(user.id)
       .then((response) => {
-          req.brute.reset(() => {
+        req.brute.reset(() => {
             // Redirect if it succeeds to authorize screen
+
             const authorizeUrl = `/dialog/authorize?redirect_uri=${req.client.redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
             return res.redirect(authorizeUrl);
           });
-
       })
       .catch((err) => {
         next(err);

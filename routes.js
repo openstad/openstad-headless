@@ -120,7 +120,7 @@ module.exports = function(app){
 	// routes
 	app.get('/auth/url/login',         authUrl.login);
 	app.post('/auth/url/login',        emailUrlBruteForce, authUrl.postLogin);
-	app.get('/auth/url/authenticate',  authUrl.authenticate);
+	app.get('/auth/url/authenticate',   emailUrlBruteForce, authUrl.authenticate);
 	//app.get('/auth/url/register',      authUrl.register);
 	//app.post('/auth/url/register',     authUrl.postRegister);
 
@@ -237,6 +237,7 @@ module.exports = function(app){
 
   // Handle 500
   app.use(function(err, req, res, next) {
+    console.log('===> err', err);
     res.status(500).render('errors/500');
   });
 }

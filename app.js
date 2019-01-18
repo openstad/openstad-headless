@@ -33,10 +33,12 @@ app.set('port', process.env.PORT || 4000);
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cookieParser());
+
 app.use((req, res, next) => {
   req.nunjucksEnv = nunjucksEnv;
   next();
-})
+});
+
 
 /*
 app.use((req, res, next) => {
