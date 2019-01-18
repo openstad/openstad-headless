@@ -49,6 +49,13 @@ const uniqueCodeBruteForce = bruteForce.user.getMiddleware({
   }
 });
 
+const emailUrlBruteForce = bruteForce.user.getMiddleware({
+  key: function(req, res, next) {
+      // prevent too many attempts for the same username
+      next(req.body.email);
+  }
+});
+
 
 const csurf = require('csurf');
 const csrfProtection = csurf({
@@ -112,10 +119,10 @@ module.exports = function(app){
 
 	// routes
 	app.get('/auth/url/login',         authUrl.login);
-	app.post('/auth/url/login',        authUrl.postLogin);
+	app.post('/auth/url/login',        emailUrlBruteForce, authUrl.postLogin);
 	app.get('/auth/url/authenticate',  authUrl.authenticate);
-	app.get('/auth/url/register',      authUrl.register);
-	app.post('/auth/url/register',     authUrl.postRegister);
+	//app.get('/auth/url/register',      authUrl.register);
+	//app.post('/auth/url/register',     authUrl.postRegister);
 
 	/**
 	 * Auth routes for DigiD

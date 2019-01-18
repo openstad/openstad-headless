@@ -80,9 +80,13 @@ exports.postLogin = (req, res, next) => {
      * Send email
      */
     const sendEmail = (tokenUrl, user, client) => {
+      const clientConfig = client.config ? JSON.parse(client.config) : {};
+
       return emailService.send({
         toName: (user.firstName + ' ' + user.lastName).trim(),
         toEmail: user.email,
+        fromEmail: clientConfig.fromEmail,
+        fromName: clientConfig.fromName,
         subject: 'Inloggen bij ' + client.name,
         template: 'emails/login-url.html',
         variables: {
@@ -133,23 +137,19 @@ exports.authenticate =  (req, res, next) => {
    }
 
    req.logIn(user, function(err) {
-     console.log('1111');
 
      if (err) { return next(err); }
 
-     console.log('user.id', user.id);
-
      return tokenUrl.invalidateTokensForUser(user.id)
       .then((response) => {
-        console.log('neieniene', response);
+          req.brute.reset(() => {
+            // Redirect if it succeeds to authorize screen
+            const authorizeUrl = `/dialog/authorize?redirect_uri=${req.client.redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+            return res.redirect(authorizeUrl);
+          });
 
-        // Redirect if it succeeds to authorize screen
-        const authorizeUrl = `/dialog/authorize?redirect_uri=${req.client.redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
-        return res.redirect(authorizeUrl);
       })
       .catch((err) => {
-        console.log('ewwwrr', err);
-
         next(err);
       });
    });

@@ -92,9 +92,13 @@
     * Send email
     */
    const sendEmail = (resetUrl, user, client) => {
+     const clientConfig = client.config ? JSON.parse(client.config) : {};
+
      return emailService.send({
        toName: (user.firstName + ' ' + user.lastName).trim(),
        toEmail: user.email,
+       fromEmail: clientConfig.fromEmail,
+       fromName: clientConfig.fromName,
        subject: 'Wachtwoord herstellen voor ' + client.name,
        template: 'emails/password-reset.html',
        variables: {
