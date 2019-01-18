@@ -36,6 +36,6 @@ function initHideFlash() {
   });
 
   setTimeout(function() {
-    $('.flash-container').remove();
+  //  $('.flash-container').remove();
   }, 5000);
 }
