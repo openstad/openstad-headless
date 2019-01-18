@@ -15,7 +15,8 @@
    } else {
      res.render('auth/choose', {
         authTypes: availableAuthTypes,
-        clientId: req.client.clientId
+        clientId: req.client.clientId,
+        client: req.client,
      })
    }
  };

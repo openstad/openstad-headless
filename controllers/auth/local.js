@@ -36,7 +36,8 @@
 exports.login = (req, res) => {
   res.render('auth/local/login', {
     loginUrl: authLocalConfig.loginUrl,
-    clientId: req.client.clientId
+    clientId: req.client.clientId,
+    client: req.client,
   });
 };
 

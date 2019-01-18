@@ -15,6 +15,7 @@ const authUrlConfig     = require('../../config/auth').get('Url');
 exports.login  = (req, res) => {
   res.render('auth/url/login', {
     clientId: req.query.clientId,
+    client: req.client,
   });
 };
 

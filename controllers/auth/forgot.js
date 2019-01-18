@@ -15,14 +15,16 @@
 
  exports.forgot = (req, res) => {
    res.render('auth/forgot/forgot', {
-     clientId: req.client.clientId
+     clientId: req.client.clientId,
+     client: req.client,
    });
  };
 
  exports.reset = (req, res) => {
    res.render('auth/forgot/reset', {
      token: req.query.token,
-     clientId: req.client.clientId
+     clientId: req.client.clientId,
+     client: req.client,
    });
  };
 

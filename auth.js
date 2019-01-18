@@ -44,7 +44,6 @@ passport.use('url', new TokenStrategy({
     failRedirect : "/auth/url/login",
     varName : "token"
   }, function (token, done) { // put your check logic here
-    console.log('token 1', token);
 
     new LoginToken({
       token: token,
@@ -63,7 +62,6 @@ passport.use('url', new TokenStrategy({
       const date = new Date();
       const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
 
-      console.log('timeAgo', timeAgo);
 
       q.where('createdAt', '>=', timeAgo);
       q.orderBy('createdAt', 'DESC');
@@ -75,8 +73,8 @@ passport.use('url', new TokenStrategy({
         new User({id: token.get('userId')})
           .fetch()
           .then((user) => { return user.serialize(); })
-          .then(user => {console.log('success', user);  return done(null, user) } )
-          .catch((err) => { console.log('err', err); return done(err); });
+          .then(user => { return done(null, user) } )
+          .catch((err) => { return done(err); });
       } else {
         done("Token not found");
       }
