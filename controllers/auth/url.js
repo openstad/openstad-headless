@@ -19,6 +19,13 @@ exports.login  = (req, res) => {
   });
 };
 
+exports.authenticate  = (req, res) => {
+  res.render('auth/url/authenticate', {
+    clientId: req.query.clientId,
+    client: req.client,
+  });
+};
+
 exports.register = (req, res, next) => {
   res.render('auth/url/register', {
    token: req.query.token,
@@ -125,9 +132,8 @@ exports.postRegister = (req, res, next) => {
 };
 
 
-exports.authenticate =  (req, res, next) => {
+exports.postAuthenticate =  (req, res, next) => {
  passport.authenticate('url', function(err, user, info) {
-   console.log('errr', err);
    if (err) { return next(err); }
 
    // Redirect if it fails to the original e-mail screen
@@ -137,9 +143,6 @@ exports.authenticate =  (req, res, next) => {
    }
 
    req.logIn(user, function(err) {
-
-     console.log('user', user);
-
      if (err) { return next(err); }
 
      return tokenUrl.invalidateTokensForUser(user.id)

@@ -118,9 +118,10 @@ module.exports = function(app){
 	app.use('/auth/url', [clientMw.setAuthType('Url'), clientMw.validate, csrfProtection, addCsrfGlobal]);
 
 	// routes
-	app.get('/auth/url/login',         authUrl.login);
-	app.post('/auth/url/login',        emailUrlBruteForce, authUrl.postLogin);
-	app.get('/auth/url/authenticate',   emailUrlBruteForce, authUrl.authenticate);
+	app.get('/auth/url/login',          authUrl.login);
+	app.post('/auth/url/login',         emailUrlBruteForce, authUrl.postLogin);
+  app.get('/auth/url/authenticate',   authUrl.authenticate);
+	app.post('/auth/url/authenticate',   emailUrlBruteForce, authUrl.postAuthenticate);
 	//app.get('/auth/url/register',      authUrl.register);
 	//app.post('/auth/url/register',     authUrl.postRegister);
 
