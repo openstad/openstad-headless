@@ -76,8 +76,6 @@ exports.postLogin = (req, res, next) => {
           res.redirect(req.header('Referer') || '/login-with-email-url');
         })
         .catch((err) => {
-          console.log('===> err', err);
-
           req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
           res.redirect(req.header('Referer') || '/login-with-email-url');
         });
@@ -133,7 +131,7 @@ exports.postRegister = (req, res, next) => {
 
 
 exports.postAuthenticate =  (req, res, next) => {
- passport.authenticate('url', function(err, user, info) {
+ passport.authenticate('url', { session: true }, function(err, user, info) {
    if (err) { return next(err); }
 
    // Redirect if it fails to the original e-mail screen
