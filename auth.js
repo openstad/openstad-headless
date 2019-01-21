@@ -43,7 +43,7 @@ passport.use(new LocalStrategy(
 passport.use('url', new TokenStrategy({
     failRedirect : "/auth/url/login",
     varName : "token",
-    session: false
+    session: true
   }, function (token, done) { // put your check logic here
 
     new LoginToken({
