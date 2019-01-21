@@ -21,6 +21,7 @@ const timestampFilter             = require('./nunjucks/timestamp');
 const replaceIdeaVariablesFilter  = require('./nunjucks/replaceIdeaVariables');
 const flash                       = require('express-flash');
 const expressValidator            = require('express-validator');
+const FileStore                   = require('session-file-store')(expressSession);
 
 
 const MemoryStore = expressSession.MemoryStore;
@@ -55,6 +56,9 @@ app.use(expressSession({
   resave            : true,
   secret            : config.session.secret,
   store             : new MemoryStore(),
+  store             : new FileStore({
+    ttl: 3600 * 24 * 31
+  }),
   key               : 'authorization.sid',
   cookie            : {
     maxAge: config.session.maxAge,
@@ -62,6 +66,7 @@ app.use(expressSession({
     httpOnly: true,
     sameSite: true
   },
+
 }));
 app.use(flash());
 
