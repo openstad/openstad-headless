@@ -131,7 +131,7 @@ exports.postRegister = (req, res, next) => {
 
 
 exports.postAuthenticate =  (req, res, next) => {
- passport.authenticate('url', { session: true }, function(err, user, info) {
+ passport.authenticate('url', { session: false }, function(err, user, info) {
    if (err) { return next(err); }
 
    // Redirect if it fails to the original e-mail screen
