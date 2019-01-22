@@ -58,10 +58,11 @@ const emailUrlBruteForce = bruteForce.user.getMiddleware({
 
 
 const csurf = require('csurf');
+
 const csrfProtection = csurf({
   cookie: {
     httpOnly: true,
-    secure: true,
+    secure: process.env.COOKIE_SECURE_OFF === 'yes' ? false : true,
     sameSite: true
   }
 });

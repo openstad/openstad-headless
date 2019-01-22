@@ -14,7 +14,6 @@ const LoginToken                           = require('./models').LoginToken;
 const UniqueCode                           = require('./models').UniqueCode;
 const TokenStrategy                        = require('./token-strategy');
 
-
 /**
  * LocalStrategy
  *
