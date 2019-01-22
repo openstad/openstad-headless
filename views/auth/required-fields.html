@@ -9,7 +9,7 @@
 			</p>
 			{% include 'elements/error-flash.html' %}
 
-      <form method="POST" action="/auth/required-fields">
+      <form method="POST" action="/auth/required-fields" class="validate-form">
         <input type="hidden" name="_csrf" value="{{csrfToken}}" />
         <input type="hidden" name="clientId" value="{{clientId}}" />
         {% for requiredField in requiredFields %}
