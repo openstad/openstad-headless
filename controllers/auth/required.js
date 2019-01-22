@@ -7,12 +7,20 @@ exports.index = (req, res, next) => {
     return userFields.find(userField => userField.key === field);
   })
 
-  requiredUserFields = requiredUserFields.filter(field => !req.user[field.key])
+  requiredUserFields = requiredUserFields.filter(field => !req.user[field.key]);
+
+  const config = req.client.config ? JSON.parse(req.client.config) : {};
+  const configRequiredFields = config && config.requiredFields ? config.requiredFields : {};
+
 
   res.render('auth/required-fields', {
     client: req.client,
     clientId: req.client.clientId,
-    requiredFields: requiredUserFields
+    requiredFields: requiredUserFields,
+    info: configRequiredFields.info,
+    description: configRequiredFields.description,
+    title: configRequiredFields.title,
+    buttonText: configRequiredFields.buttonText
   });
 }
 
