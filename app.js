@@ -64,7 +64,7 @@ app.use(expressSession({
     maxAge: config.session.maxAge,
     secure: process.env.COOKIE_SECURE_OFF === 'yes' ? false : true,
     httpOnly: true,
-    sameSite: true
+    sameSite: false
   },
 
 }));
