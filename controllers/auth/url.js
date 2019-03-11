@@ -70,7 +70,7 @@ exports.postLogin = (req, res, next) => {
     const handleSending = (req, res, next) => {
       tokenUrl.invalidateTokensForUser(req.user.id)
         .then(() => { return tokenUrl.format(req.client, req.user); })
-        .then((tokenUrl) => { sendEmail(tokenUrl, req.user, req.client); })
+        .then((tokenUrl) => { return sendEmail(tokenUrl, req.user, req.client); })
         .then((result) => {
           req.flash('success', {msg: 'De e-mail is verstuurd!'});
           res.redirect(req.header('Referer') || '/login-with-email-url');
