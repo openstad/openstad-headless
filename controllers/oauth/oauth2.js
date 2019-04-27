@@ -182,7 +182,6 @@ exports.authorization = [
         return done(null, client, redirectURI);
       } else {
         console.log('===> Redirect host doesn\'t match the client host');
-
         throw new Error('Redirect host doesn\'t match the client host');
       }
 

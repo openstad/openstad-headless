@@ -106,8 +106,20 @@ exports.postLogin = (req, res, next) => {
  * @returns {undefined}
  */
 exports.logout = (req, res) => {
-  req.logout();
+//  req.logout();
   const config = JSON.parse(req.client.config);
-  const redirectUrl = config && config.logoutUrl ? config.logoutUrl : req.client.siteUrl;
-  res.redirect(redirectUrl);
+  const allowedDomains = req.client.allowedDomains ? JSON.parse(req.client.allowedDomains) : false;
+  let redirectURL = req.query.redirectUrl;
+  const redirectUrlHost = redirectURL ? new URL(redirectURL).hostname : false;
+  console.log('redirectUrlHost', redirectUrlHost);
+  redirectURL = redirectUrlHost && allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1 ? redirectURL : false;
+  console.log('redirectURL', allowedDomains, allowedDomains.indexOf(redirectUrlHost));
+
+  console.log('redirectURL', redirectURL);
+
+  if (!redirectURL) {
+    redirectURL =  config && config.logoutUrl ? config.logoutUrl : req.client.siteUrl
+  }
+
+  res.redirect(redirectURL);
 };
