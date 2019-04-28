@@ -12,6 +12,7 @@
  const login             = require('connect-ensure-login');
  const User              = require('../../models').User;
  const authLocalConfig   = require('../../config/auth').get('Local');
+ const URL               = require('url').URL;
 
  /**
   * Render the index.html or index-with-code.js depending on if query param has code or not
@@ -112,6 +113,10 @@ exports.logout = (req, res) => {
   let redirectURL = req.query.redirectUrl;
   const redirectUrlHost = redirectURL ? new URL(redirectURL).hostname : false;
   redirectURL = redirectUrlHost && allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1 ? redirectURL : false;
+
+  console.log('redirectURL redirectURL', redirectURL);
+  console.log('redirectURL redirectURL', redirectURL);
+
 
   if (!redirectURL) {
     redirectURL =  config && config.logoutUrl ? config.logoutUrl : req.client.siteUrl
