@@ -11,7 +11,7 @@
 	    </p>
 			<form
 				method="post"
-				action="{{loginUrl}}"
+				action="{{loginUrl}}?redirect_uri={{redirectUrl}}"
 			>
 					<div class="form-group">
 						{% include 'elements/error-flash.html' %}
@@ -30,6 +30,7 @@
 					</div>
 					<input type="hidden" name="_csrf" value="{{csrfToken}}">
 					<input type="hidden" name="clientId" value="{{clientId}}">
+
 					<input type="submit" value="Stuur link" class="btn btn-primary">
 			</form>
 		</div>

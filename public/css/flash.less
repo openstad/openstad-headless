@@ -17,9 +17,14 @@
   padding: 0;
   margin-top: 15px;
 
-    &-relative {
-      position: relative;
-    }
+  &-relative {
+    position: relative;
+  }
+  
+  @media screen and (max-width: @screen-sm) {
+    bottom: auto;
+    top: 7px;
+  }
 }
 
 

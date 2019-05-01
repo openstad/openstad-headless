@@ -7766,21 +7766,27 @@ textarea:disabled {
   border: none;
 }
 .flash-container {
-  align-items: left;
   right: 0;
-  bottom: 2rem;
+  /* bottom: 2rem; */
   left: 0;
-  display: flex;
-  justify-content: flex-end;
-  flex-direction: column-reverse;
+  /* display: flex; */
+  /* justify-content: flex-end; */
+  /* flex-direction: column-reverse; */
   position: relative;
   width: 100%;
   pointer-events: none;
   z-index: 100;
   padding: 0;
+  margin-top: 15px;
 }
 .flash-container-relative {
   position: relative;
+}
+@media screen and (max-width: 768px) {
+  .flash-container {
+    bottom: auto;
+    top: 7px;
+  }
 }
 .flash-message {
   background: #f3f3f3;

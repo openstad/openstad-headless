@@ -20,7 +20,8 @@ exports.index = (req, res, next) => {
     info: configRequiredFields.info,
     description: configRequiredFields.description,
     title: configRequiredFields.title,
-    buttonText: configRequiredFields.buttonText
+    buttonText: configRequiredFields.buttonText,
+    redirect_uri: req.query.redirect_uri
   });
 }
 

@@ -45,6 +45,10 @@ passport.use('url', new TokenStrategy({
     session: true
   }, function (token, done) { // put your check logic here
 
+
+    console.log(';;;;;token', token);
+
+
     new LoginToken({
       token: token,
       valid: true

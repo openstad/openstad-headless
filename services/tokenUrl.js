@@ -6,12 +6,12 @@ const hat = require('hat');
 /**
  *
  */
-const getUrl = (user, client, token) => {
+const getUrl = (user, client, token, redirectUrl) => {
   const slug = 'auth/url/authenticate';
-  return `${appUrl}/${slug}?token=${token}&clientId=${client.clientId}`;
+  return `${appUrl}/${slug}?token=${token}&clientId=${client.clientId}&redirect_uri=${redirectUrl}`;
 }
 
-exports.format = (client, user) => {
+exports.format = (client, user, redirectUrl) => {
   return new Promise((resolve, reject) =>  {
     const token = hat();
 
@@ -21,7 +21,7 @@ exports.format = (client, user) => {
     })
     .save()
     .then((loginToken) => {
-      const url = getUrl(user, client, token);
+      const url = getUrl(user, client, token, redirectUrl);
       resolve(url);
     })
     .catch((err) => {
