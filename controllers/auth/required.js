@@ -27,6 +27,7 @@ exports.index = (req, res, next) => {
 
 exports.post = (req, res, next) => {
   const clientRequiredUserFields = JSON.parse(req.client.requiredUserFields);
+  const redirectUrl = req.query.redirect_uri ? req.query.redirect_uri : req.client.redirectUrl;
 
   clientRequiredUserFields.forEach((field) => {
     if (field === 'email' && !!req.user.email)  {
@@ -39,7 +40,7 @@ exports.post = (req, res, next) => {
   req.userModel
     .save()
     .then(() => {
-      const authorizeUrl = `/dialog/authorize?redirect_uri=${req.client.redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+      const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
       res.redirect(authorizeUrl);
     })
     .catch((err) => {
