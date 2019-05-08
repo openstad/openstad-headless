@@ -152,7 +152,7 @@ exports.checkRequiredUserFields = (req, res, next) => {
 
   // if error redirect to register
   if (error) {
-    res.redirect('/auth/required-fields?clientId=' + req.client.clientId || '/account');
+    res.redirect(`/auth/required-fields?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri}`);
   } else {
     next();
   }
