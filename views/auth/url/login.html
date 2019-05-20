@@ -11,7 +11,7 @@
 	    </p>
 			<form
 				method="post"
-				action="{{loginUrl}}?redirect_uri={{redirectUrl}}"
+				action="{{loginUrl}}?&clientId={{clientId}}&redirect_uri={{redirectUrl}}"
 			>
 					<div class="form-group">
 						{% include 'elements/error-flash.html' %}
