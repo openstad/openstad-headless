@@ -45,27 +45,18 @@ passport.use('url', new TokenStrategy({
     session: true
   }, function (token, done) { // put your check logic here
 
-
-    console.log(';;;;;token', token);
-
-
     new LoginToken({
       token: token,
       valid: true
     })
       .query((q) => {
       /**
-       * Only select tokens that are younger then 2 days
-       * created_at is "bigger then" 48 hours ago
+       * Only select tokens that are younger then 60 minutes
        */
-
-      const days = 2;
-      const msForADay = 86400000;
-      const minutes = 5;
+      const minutes = 60;
       const msForAMinute = 60000;
       const date = new Date();
       const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
-
 
       q.where('createdAt', '>=', timeAgo);
       q.orderBy('createdAt', 'DESC');
