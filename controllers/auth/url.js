@@ -65,11 +65,12 @@ exports.postLogin = (req, res, next) => {
       req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
       res.redirect(req.header('Referer') || authUrlConfig.loginUrl);
     });
+    const clientConfig = req.client.config ? JSON.parse(req.client.config) : {};
 
     /**
      * Format the URL and the Send it to the user
      */
-    const redirectUrl = req.client.config && req.client.config.emailRedirectUrl ? req.client.config.emailRedirectUrl : req.query.redirect_uri;
+    const redirectUrl =  clientConfig && clientConfig.emailRedirectUrl ? clientConfig.emailRedirectUrl : req.query.redirect_uri;
 
     const handleSending = (req, res, next) => {
       tokenUrl.invalidateTokensForUser(req.user.id)
