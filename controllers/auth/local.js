@@ -114,10 +114,6 @@ exports.logout = (req, res) => {
   const redirectUrlHost = redirectURL ? new URL(redirectURL).hostname : false;
   redirectURL = redirectUrlHost && allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1 ? redirectURL : false;
 
-  console.log('redirectURL redirectURL', redirectURL);
-  console.log('redirectURL redirectURL', redirectURL);
-
-
   if (!redirectURL) {
     redirectURL =  config && config.logoutUrl ? config.logoutUrl : req.client.siteUrl
   }

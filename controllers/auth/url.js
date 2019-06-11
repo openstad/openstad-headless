@@ -69,12 +69,14 @@ exports.postLogin = (req, res, next) => {
     /**
      * Format the URL and the Send it to the user
      */
+    const redirectUrl = req.client.config && req.client.config.emailRedirectUrl ? req.client.config.emailRedirectUrl : req.query.redirect_uri;
+
     const handleSending = (req, res, next) => {
       tokenUrl.invalidateTokensForUser(req.user.id)
-        .then(() => { return tokenUrl.format(req.client, req.user, req.query.redirect_uri); })
+        .then(() => { return tokenUrl.format(req.client, req.user, redirectUrl); })
         .then((tokenUrl) => { return sendEmail(tokenUrl, req.user, req.client); })
         .then((result) => {
-          req.flash('success', {msg: 'De e-mail is verstuurd!'});
+          req.flash('success', {msg: 'De e-mail is verstuurd naar: ' + req.user.email});
           res.redirect(req.header('Referer') || '/login-with-email-url');
         })
         .catch((err) => {
@@ -155,7 +157,6 @@ exports.postAuthenticate =  (req, res, next) => {
             //check if allowed url will be done by authorize screen
             const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
-            console.log('authorizeUrl', authorizeUrl);
             return res.redirect(authorizeUrl);
           });
       })
