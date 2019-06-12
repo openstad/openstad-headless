@@ -69,7 +69,6 @@ exports.create = (req, res, next) => {
   values.requiredUserFields = JSON.stringify(values.requiredUserFields);
   values.authTypes = JSON.stringify(values.authTypes);
 
-
   new Client(values)
     .save()
     .then((response) => {

@@ -32,7 +32,7 @@
  * In case of reset (validation is done with middleware)
  */
  exports.postReset = (req, res, next) => {
-   new User({id: req.user.id})
+   new User({id: req.userObject.id})
      .fetch()
      .then((user) => {
 

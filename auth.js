@@ -155,6 +155,7 @@ passport.use('uniqueCode', new TokenStrategy({
  */
 
 passport.use(new BasicStrategy((clientId, clientSecret, done) => {
+  console.log('bbbbbbb', clientId, clientSecret);
   Client
     .where({clientId: clientId})
     .fetch()
@@ -171,6 +172,8 @@ passport.use(new BasicStrategy((clientId, clientSecret, done) => {
  * which accepts those credentials and calls done providing a client.
  */
 passport.use(new ClientPasswordStrategy((clientId, clientSecret, done) => {
+  console.log('aaaaaaa', clientId, clientSecret);
+
   Client
     .where({clientId: clientId})
     .fetch()

@@ -11,6 +11,7 @@ const adminUserController      = require('./controllers/admin/user');
 const adminClientController    = require('./controllers/admin/client');
 const adminRoleController      = require('./controllers/admin/role');
 const adminCodeController      = require('./controllers/admin/code');
+const adminApiUserController   = require('./controllers/admin/api/user');
 
 //AUTH CONTROLLERS
 const authChoose	 						 = require('./controllers/auth/choose');
@@ -199,6 +200,17 @@ module.exports = function(app){
   app.get('/admin/user',          clientMw.withAll, roleMw.withAll, adminUserController.new);
   app.post('/admin/user',         adminUserController.create);
   app.post('/admin/user/:userId', userMw.withOne, adminUserController.update);
+
+
+  app.use('/api/admin', [adminMiddleware.addClient, passport.authenticate(['basic', 'oauth2-client-password'], { session: false })]);
+
+  //app.use('/admin/api', [adminMiddleware.addClient]);
+
+  app.get('/api/admin/users',         userMw.withAll, adminApiUserController.all);
+  app.get('/api/admin/:userId',  clientMw.withAll, roleMw.withAll, userMw.withOne, adminApiUserController.show);
+  app.get('/api/admin/api/user',          clientMw.withAll, roleMw.withAll, adminApiUserController.show);
+  app.post('/api/admin/api/user',         userMw.create, userMw.saveRoles, adminApiUserController.create);
+  app.post('/api/admin/user/:userId', userMw.withOne, userMw.update, userMw.saveRoles, adminApiUserController.update);
 
   /**
    * Admin client routes
