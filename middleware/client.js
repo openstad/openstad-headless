@@ -1,5 +1,8 @@
 const Client = require('../models').Client;
 const UniqueCode = require('../models').UniqueCode;
+const hat = require('hat');
+const userFields = require('../config/user').fields;
+const authTypes = require('../config/auth').types;
 
 const authTypesConfig = require('../config').authTypes;
 
@@ -156,4 +159,45 @@ exports.checkRequiredUserFields = (req, res, next) => {
   } else {
     next();
   }
+}
+
+exports.create =  (req, res, next) => {
+  const { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes } = req.body;
+  const rack = hat.rack();
+  const clientId = rack();
+  const clientSecret = rack();
+
+  const values = { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes, clientId, clientSecret };
+
+  values.exposedUserFields = JSON.stringify(values.exposedUserFields);
+  values.requiredUserFields = JSON.stringify(values.requiredUserFields);
+  values.authTypes = JSON.stringify(values.authTypes);
+
+  new Client(values)
+    .save()
+    .then((response) => {
+      req.clientModel = client;
+      req.client = client.serialize();
+      next();
+    })
+    .catch((err) => { next(err); });
+}
+
+exports.update = (req, res, next) => {
+  const { name, description, exposedUserFields, requiredUserFields, redirectUrl, siteUrl, authTypes } = req.body;
+
+  req.clientModel.set('name', name);
+  req.clientModel.set('description', description);
+  req.clientModel.set('siteUrl', siteUrl);
+  req.clientModel.set('redirectUrl', redirectUrl);
+  req.clientModel.set('exposedUserFields', JSON.stringify(exposedUserFields));
+  req.clientModel.set('requiredUserFields', JSON.stringify(requiredUserFields));
+  req.clientModel.set('authTypes', JSON.stringify(authTypes));
+
+  req.clientModel
+    .save()
+    .then((response) => {
+      next();
+    })
+    .catch((err) => { next(err); })
 }

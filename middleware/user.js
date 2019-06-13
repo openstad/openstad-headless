@@ -164,7 +164,8 @@ exports.create =  (req, res, next) => {
   })
   .save()
   .then((response) => {
-    req.userObject = response;
+    req.userObject = response.serialize();
+    req.userObjectModel = response;
     next();
   })
   .catch((err) => {
@@ -194,29 +195,37 @@ exports.update = (req, res, next) => {
       next();
     })
     .catch((err) => {
+      console.log('==> update err', err);
+
       next(err);
     });
 }
 
 exports.saveRoles = (req, res, next) => {
   const roles = req.body.roles;
+  console.log('==> roles', roles);
 
   if (!roles) {
     next();
   } else {
-    const userId = req.params.userId;
+    const userId = req.userObject.id;
     const saveRoles = [];
 
     for (clientId in roles) {
       let roleId = roles[clientId];
       let parsedClientId = parseInt(clientId.replace('\'', ''), 10);
+      console.log('==> parsedClientId', parsedClientId);
+
       saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
     }
 
     Promise
       .map(saveRoles, saveRole => saveRole())
       .then(() => { next(); })
-      .catch((err) => { next(err); });
+      .catch((err) => {
+         console.log('==> update err', err);
+         next(err);
+       });
   }
 }
 

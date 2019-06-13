@@ -12,6 +12,9 @@ const adminClientController    = require('./controllers/admin/client');
 const adminRoleController      = require('./controllers/admin/role');
 const adminCodeController      = require('./controllers/admin/code');
 const adminApiUserController   = require('./controllers/admin/api/user');
+const adminApiClientController = require('./controllers/admin/api/client');
+const adminApiRoleController   = require('./controllers/admin/api/role');
+
 
 //AUTH CONTROLLERS
 const authChoose	 						 = require('./controllers/auth/choose');
@@ -202,15 +205,22 @@ module.exports = function(app){
   app.post('/admin/user/:userId', userMw.withOne, adminUserController.update);
 
 
-  app.use('/api/admin', [adminMiddleware.addClient, passport.authenticate(['basic', 'oauth2-client-password'], { session: false })]);
+  app.use('/api/admin', [passport.authenticate(['basic', 'oauth2-client-password'], { session: false })]);
 
   //app.use('/admin/api', [adminMiddleware.addClient]);
 
   app.get('/api/admin/users',         userMw.withAll, adminApiUserController.all);
   app.get('/api/admin/user/:userId',  clientMw.withAll, roleMw.withAll, userMw.withOne, adminApiUserController.show);
-  app.get('/api/admin/api/user',          clientMw.withAll, roleMw.withAll, adminApiUserController.show);
-  app.post('/api/admin/api/user',         userMw.create, userMw.saveRoles, adminApiUserController.create);
+  app.post('/api/admin/user',         userMw.create, userMw.saveRoles, adminApiUserController.create);
   app.post('/api/admin/user/:userId', userMw.withOne, userMw.update, userMw.saveRoles, adminApiUserController.update);
+
+  app.get('/api/admin/clients',            clientMw.withAll, adminApiClientController.all);
+  app.get('/api/admin/client/:clientId',   clientMw.withOne, adminApiClientController.show);
+  app.post('/api/admin/client',            clientMw.create,  adminApiClientController.create);
+  app.post('/api/admin/client/:clientId',  clientMw.withOne, clientMw.update, adminApiClientController.update);
+
+  app.get('/api/admin/roles',  roleMw.withAll, adminApiRoleController.all);
+
 
   /**
    * Admin client routes
