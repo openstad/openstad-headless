@@ -24,6 +24,10 @@ exports.withOne = (req, res, next) => {
     clientId = req.query.client_id;
   }
 
+  if (!clientId) {
+    clientId = req.params.clientId;
+  }
+
   if (clientId) {
     new Client({ clientId: clientId })
     .fetch()
@@ -141,6 +145,10 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
     }
 }
 
+
+/**
+ * Check if required fields is set
+ */
 exports.checkRequiredUserFields = (req, res, next) => {
   const requiredFields = JSON.parse(req.client.requiredUserFields);
   const user = req.user;
@@ -196,6 +204,17 @@ exports.update = (req, res, next) => {
 
   req.clientModel
     .save()
+    .then((response) => {
+      next();
+    })
+    .catch((err) => { next(err); })
+}
+
+
+
+exports.deleteOne = (req, res, next) => {
+  req.clientModel
+    .destroy()
     .then((response) => {
       next();
     })

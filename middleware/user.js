@@ -289,3 +289,12 @@ exports.validateEmail = (req, res, next) => {
     res.redirect(req.header('Referer') || '/account');
   }
 }
+
+exports.deleteOne = (req, res, next) => {
+  req.userObjectModel
+    .destroy()
+    .then(() => {
+      next();
+    })
+    .catch((err) => { next(err); });
+}

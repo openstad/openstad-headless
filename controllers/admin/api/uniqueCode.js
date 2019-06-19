@@ -1,21 +1,21 @@
-const outputClient = (req, res, next) => {
-  res.json(req.client);
-}
+const outputUniqueCode = (req, res, next) => {
+  res.json(req.uniqueCode);
+};
 
 exports.all = (req, res, next) => {
-  res.json(req.clients);
-}
+  res.json(req.uniqueCodes);
+};
 
 exports.show = [
-  outputClient
+  outputUniqueCode
 ];
 
 exports.create = [
-  outputClient
+  outputUniqueCode
 ];
 
 exports.update = [
-  outputClient
+  outputUniqueCode
 ];
 
 exports.delete = [

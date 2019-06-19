@@ -14,6 +14,7 @@ const adminCodeController      = require('./controllers/admin/code');
 const adminApiUserController   = require('./controllers/admin/api/user');
 const adminApiClientController = require('./controllers/admin/api/client');
 const adminApiRoleController   = require('./controllers/admin/api/role');
+const adminApiUniqueCodeController   = require('./controllers/admin/api/uniqueCode');
 
 
 //AUTH CONTROLLERS
@@ -36,7 +37,7 @@ const passwordResetMw          = require('./middleware/passwordReset');
 const roleMw                   = require('./middleware/role');
 const codeMw                   = require('./middleware/code');
 const logMw                    = require('./middleware/log');
-
+const uniqueCodeMw             = require('./middleware/uniqueCode');
 
 
 const loginBruteForce = bruteForce.user.getMiddleware({
@@ -213,14 +214,31 @@ module.exports = function(app){
   app.get('/api/admin/user/:userId',  clientMw.withAll, roleMw.withAll, userMw.withOne, adminApiUserController.show);
   app.post('/api/admin/user',         userMw.create, userMw.saveRoles, adminApiUserController.create);
   app.post('/api/admin/user/:userId', userMw.withOne, userMw.update, userMw.saveRoles, adminApiUserController.update);
+  app.post('/api/admin/user/:userId/delete', userMw.withOne, userMw.deleteOne, adminApiUserController.delete);
 
-  app.get('/api/admin/clients',            clientMw.withAll, adminApiClientController.all);
-  app.get('/api/admin/client/:clientId',   clientMw.withOne, adminApiClientController.show);
-  app.post('/api/admin/client',            clientMw.create,  adminApiClientController.create);
-  app.post('/api/admin/client/:clientId',  clientMw.withOne, clientMw.update, adminApiClientController.update);
+  app.get('/api/admin/clients',               clientMw.withAll, adminApiClientController.all);
+  app.get('/api/admin/client/:clientId',      clientMw.withOne, adminApiClientController.show);
+  app.post('/api/admin/client',               clientMw.create,  adminApiClientController.create);
+  app.post('/api/admin/client/:clientId',     clientMw.withOne, clientMw.update, adminApiClientController.update);
+  app.post('/api/admin/user/:userId/delete',  clientMw.withOne, clientMw.deleteOne, adminApiClientController.delete);
 
-  app.get('/api/admin/roles',  roleMw.withAll, adminApiRoleController.all);
+  app.get('/api/admin/roles', roleMw.withAll, adminApiRoleController.all);
 
+  app.get('/api/admin/unique-codes',                        uniqueCodeMw.withAll,   adminApiUniqueCodeController.all);
+  app.get('/api/admin/unique-codes/:uniqueCodeid',          uniqueCodeMw.withOne,   adminApiUniqueCodeController.show);
+  app.post('/api/admin/unique-codes/:uniqueCodeid/delete',  uniqueCodeMw.withOne,   uniqueCodeMw.deleteOne, adminApiUniqueCodeController.delete);
+
+  // only use this error handler middleware in "/api" based routes
+  app.use("/api/admin/", function(err, req, res, next){
+
+    // use the error's status or default to 500
+    res.status(err.status || 500);
+
+    // send back json data
+    res.send({
+      message: err.message
+    })
+  });
 
   /**
    * Admin client routes
