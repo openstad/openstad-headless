@@ -3,7 +3,7 @@ const outputUniqueCode = (req, res, next) => {
 };
 
 exports.all = (req, res, next) => {
-  res.json(req.uniqueCodes);
+  res.json(req.codes);
 };
 
 exports.show = [
