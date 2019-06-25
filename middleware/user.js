@@ -55,7 +55,7 @@ exports.withRoleForClient = (req, res, next) => {
           .fetch()
           .then((role) => {
             if (role) {
-              req.userObject.role = role.get('name');
+              req.user.role = role.get('name');
             }
             next();
           })

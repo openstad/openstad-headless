@@ -172,7 +172,7 @@ module.exports = function(app){
 
   app.use('/dialog', [bruteForce.global.prevent]);
 
-  app.get('/dialog/authorize',            clientMw.withOne, authMw.check, clientMw.checkRequiredUserFields,  clientMw.checkUniqueCodeAuth((req, res) => { console.log('----<'); return res.redirect('/login?clientId=' + req.query.client_id);}), oauth2Controller.authorization);
+  app.get('/dialog/authorize',            clientMw.withOne, authMw.check, clientMw.checkRequiredUserFields,  clientMw.checkUniqueCodeAuth((req, res) => { return res.redirect('/login?clientId=' + req.query.client_id);}), oauth2Controller.authorization);
   app.post('/dialog/authorize/decision',  clientMw.withOne, clientMw.checkUniqueCodeAuth(), bruteForce.global.prevent, oauth2Controller.decision);
   app.post('/oauth/token',                oauth2Controller.token);
   app.get('/oauth/token',                 oauth2Controller.token);

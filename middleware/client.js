@@ -41,6 +41,12 @@ exports.withOne = (req, res, next) => {
         res.locals.clientEmail = clientConfig.contactEmail;
         res.locals.clientDisclaimerUrl = clientConfig.clientDisclaimerUrl;
 
+
+        req.client.authTypes            = JSON.parse(req.client.authTypes);
+        req.client.exposedUserFields    = JSON.parse(req.client.exposedUserFields);
+        req.client.requiredUserFields   = JSON.parse(req.client.requiredUserFields);
+        req.client.config               = JSON.parse(req.client.config);
+
         next();
       } else {
         throw new Error('No Client found for clientID');
@@ -170,20 +176,21 @@ exports.checkRequiredUserFields = (req, res, next) => {
 }
 
 exports.create =  (req, res, next) => {
-  const { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes } = req.body;
+  const { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes, config } = req.body;
   const rack = hat.rack();
   const clientId = rack();
   const clientSecret = rack();
 
-  const values = { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes, clientId, clientSecret };
+  const values = { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes, clientId, clientSecret, config};
 
   values.exposedUserFields = JSON.stringify(values.exposedUserFields);
   values.requiredUserFields = JSON.stringify(values.requiredUserFields);
   values.authTypes = JSON.stringify(values.authTypes);
+  values.config = JSON.stringify(values.config);
 
   new Client(values)
     .save()
-    .then((response) => {
+    .then((client) => {
       req.clientModel = client;
       req.client = client.serialize();
       next();
@@ -192,7 +199,8 @@ exports.create =  (req, res, next) => {
 }
 
 exports.update = (req, res, next) => {
-  const { name, description, exposedUserFields, requiredUserFields, redirectUrl, siteUrl, authTypes } = req.body;
+  const { name, description, exposedUserFields, requiredUserFields, redirectUrl, siteUrl, authTypes, config } = req.body;
+
 
   req.clientModel.set('name', name);
   req.clientModel.set('description', description);
@@ -201,13 +209,19 @@ exports.update = (req, res, next) => {
   req.clientModel.set('exposedUserFields', JSON.stringify(exposedUserFields));
   req.clientModel.set('requiredUserFields', JSON.stringify(requiredUserFields));
   req.clientModel.set('authTypes', JSON.stringify(authTypes));
+  req.clientModel.set('config', JSON.stringify(config));
 
   req.clientModel
     .save()
-    .then((response) => {
+    .then((client) => {
+      console.log('update success');
+
       next();
     })
-    .catch((err) => { next(err); })
+    .catch((err) => {
+      console.log('update err', err);
+      next(err);
+    })
 }
 
 

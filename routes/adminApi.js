@@ -32,7 +32,7 @@ module.exports = (app) => {
   app.get('/api/admin/client/:clientId',      clientMw.withOne, adminApiClientController.show);
   app.post('/api/admin/client',               clientMw.create,  adminApiClientController.create);
   app.post('/api/admin/client/:clientId',     clientMw.withOne, clientMw.update, adminApiClientController.update);
-  app.post('/api/admin/user/:userId/delete',  clientMw.withOne, clientMw.deleteOne, adminApiClientController.delete);
+  app.post('/api/admin/client/:clientId/delete',  clientMw.withOne, clientMw.deleteOne, adminApiClientController.delete);
 
   app.get('/api/admin/roles', roleMw.withAll, adminApiRoleController.all);
 
@@ -43,6 +43,7 @@ module.exports = (app) => {
 
   // only use this error handler middleware in "/api" based routes
   app.use("/api/admin/", function(err, req, res, next){
+    console.log('===> err', err);
 
     // use the error's status or default to 500
     res.status(err.status || 500);
