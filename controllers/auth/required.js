@@ -1,7 +1,7 @@
 const userFields = require('../../config/user').fields;
 
 exports.index = (req, res, next) => {
-  let requiredUserFields =   JSON.parse(req.client.requiredUserFields);
+  let requiredUserFields = req.client.requiredUserFields;
 
   requiredUserFields = requiredUserFields.map((field) => {
     return userFields.find(userField => userField.key === field);
@@ -9,7 +9,7 @@ exports.index = (req, res, next) => {
 
   requiredUserFields = requiredUserFields.filter(field => !req.user[field.key]);
 
-  const config = req.client.config ? JSON.parse(req.client.config) : {};
+  const config = req.client.config ? req.client.config : {};
   const configRequiredFields = config && config.requiredFields ? config.requiredFields : {};
 
 
@@ -26,7 +26,7 @@ exports.index = (req, res, next) => {
 }
 
 exports.post = (req, res, next) => {
-  const clientRequiredUserFields = JSON.parse(req.client.requiredUserFields);
+  const clientRequiredUserFields = req.client.requiredUserFields;
   const redirectUrl = req.query.redirect_uri ? req.query.redirect_uri : req.client.redirectUrl;
 
   clientRequiredUserFields.forEach((field) => {

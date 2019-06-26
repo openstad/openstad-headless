@@ -92,7 +92,7 @@
     * Send email
     */
    const sendEmail = (resetUrl, user, client) => {
-     const clientConfig = client.config ? JSON.parse(client.config) : {};
+     const clientConfig = client.config ? client.config : {};
 
      return emailService.send({
        toName: (user.firstName + ' ' + user.lastName).trim(),

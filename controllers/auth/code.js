@@ -11,7 +11,7 @@ const emailService      = require('../../services/email');
 const authCodeConfig    = require('../../config/auth').get(authType);
 
 exports.login = (req, res, next) => {
-  const config = req.client.config ? JSON.parse(req.client.config) : {};
+  const config = req.client.config ? req.client.config : {};
   const backUrl = config && config.backUrl ? config.backUrl : req.client.siteUrl;
   const configAuthType = config.authTypes && config.authTypes[authType] ? config.authTypes[authType] : {};
 

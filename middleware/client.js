@@ -46,6 +46,7 @@ exports.withOne = (req, res, next) => {
         req.client.exposedUserFields    = JSON.parse(req.client.exposedUserFields);
         req.client.requiredUserFields   = JSON.parse(req.client.requiredUserFields);
         req.client.config               = JSON.parse(req.client.config);
+        req.client.allowedDomains       = JSON.parse(req.client.allowedDomains);
 
         next();
       } else {
@@ -121,7 +122,7 @@ exports.validate = (req, res, next) => {
 exports.checkUniqueCodeAuth = (errorCallback) => {
   //validate code auth type
   return (req, res, next) => {
-      const authTypes = JSON.parse(req.client.authTypes);
+      const authTypes = req.client.authTypes;
 
       if (authTypes.indexOf('UniqueCode') !== -1) {
         new UniqueCode({ clientId: req.client.id, userId: req.user.id })
@@ -156,7 +157,7 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
  * Check if required fields is set
  */
 exports.checkRequiredUserFields = (req, res, next) => {
-  const requiredFields = JSON.parse(req.client.requiredUserFields);
+  const requiredFields = req.client.requiredUserFields;
   const user = req.user;
   let error;
 

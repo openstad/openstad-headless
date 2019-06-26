@@ -37,7 +37,50 @@ exports.register = (req, res, next) => {
   });
 }
 
+
+const handleSending = (req, res, next) => {
+  tokenUrl.invalidateTokensForUser(req.user.id)
+    .then(() => { return tokenUrl.format(req.client, req.user, req.redirectUrl); })
+    .then((tokenUrl) => { return sendEmail(tokenUrl, req.user, req.client); })
+    .then((result) => {
+      req.flash('success', {msg: 'De e-mail is verstuurd naar: ' + req.user.email});
+      res.redirect(req.header('Referer') || '/login-with-email-url');
+    })
+    .catch((err) => {
+      console.log('e0mail error', err);
+      req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
+      res.redirect(req.header('Referer') || '/login-with-email-url');
+    });
+}
+
+/**
+ * Send email
+ */
+const sendEmail = (tokenUrl, user, client) => {
+  const clientConfig = client.config ? client.config : {};
+
+  return emailService.send({
+    toName: (user.firstName + ' ' + user.lastName).trim(),
+    toEmail: user.email,
+    fromEmail: clientConfig.fromEmail,
+    fromName: clientConfig.fromName,
+    subject: 'Inloggen bij ' + client.name,
+    template: 'emails/login-url.html',
+    variables: {
+      tokenUrl: tokenUrl,
+      firstName: user.firstName,
+      clientUrl: client.mainUrl,
+      clientName: client.name,
+    }
+  });
+}
+
+
 exports.postLogin = (req, res, next) => {
+  const clientConfig = req.client.config ? req.client.config : {};
+  const redirectUrl =  clientConfig && clientConfig.emailRedirectUrl ? clientConfig.emailRedirectUrl : req.query.redirect_uri;
+  req.redirectUrl = redirectUrl;
+
   /**
    * Check if user exists
    */
@@ -65,49 +108,13 @@ exports.postLogin = (req, res, next) => {
       req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
       res.redirect(req.header('Referer') || authUrlConfig.loginUrl);
     });
-    const clientConfig = req.client.config ? JSON.parse(req.client.config) : {};
 
     /**
      * Format the URL and the Send it to the user
      */
-    const redirectUrl =  clientConfig && clientConfig.emailRedirectUrl ? clientConfig.emailRedirectUrl : req.query.redirect_uri;
 
-    const handleSending = (req, res, next) => {
-      tokenUrl.invalidateTokensForUser(req.user.id)
-        .then(() => { return tokenUrl.format(req.client, req.user, redirectUrl); })
-        .then((tokenUrl) => { return sendEmail(tokenUrl, req.user, req.client); })
-        .then((result) => {
-          req.flash('success', {msg: 'De e-mail is verstuurd naar: ' + req.user.email});
-          res.redirect(req.header('Referer') || '/login-with-email-url');
-        })
-        .catch((err) => {
-          console.log('e0mail error', err);
-          req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
-          res.redirect(req.header('Referer') || '/login-with-email-url');
-        });
-    }
 
-    /**
-     * Send email
-     */
-    const sendEmail = (tokenUrl, user, client) => {
-      const clientConfig = client.config ? JSON.parse(client.config) : {};
 
-      return emailService.send({
-        toName: (user.firstName + ' ' + user.lastName).trim(),
-        toEmail: user.email,
-        fromEmail: clientConfig.fromEmail,
-        fromName: clientConfig.fromName,
-        subject: 'Inloggen bij ' + client.name,
-        template: 'emails/login-url.html',
-        variables: {
-          tokenUrl: tokenUrl,
-          firstName: user.firstName,
-          clientUrl: client.mainUrl,
-          clientName: client.name,
-        }
-      });
-    }
 }
 
 
@@ -150,6 +157,8 @@ exports.postAuthenticate =  (req, res, next) => {
 
    req.logIn(user, function(err) {
      if (err) { return next(err); }
+
+     console.log('useruseruser', user);
 
      return tokenUrl.invalidateTokensForUser(user.id)
       .then((response) => {
