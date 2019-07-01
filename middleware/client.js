@@ -177,17 +177,19 @@ exports.checkRequiredUserFields = (req, res, next) => {
 }
 
 exports.create =  (req, res, next) => {
-  const { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes, config } = req.body;
+  const { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes, config, allowedDomains } = req.body;
   const rack = hat.rack();
   const clientId = rack();
   const clientSecret = rack();
 
-  const values = { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes, clientId, clientSecret, config};
+  const values = { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes, clientId, clientSecret, allowedDomains, config};
 
   values.exposedUserFields = JSON.stringify(values.exposedUserFields);
   values.requiredUserFields = JSON.stringify(values.requiredUserFields);
   values.authTypes = JSON.stringify(values.authTypes);
   values.config = JSON.stringify(values.config);
+  values.allowedDomains = JSON.stringify(values.allowedDomains);
+
 
   new Client(values)
     .save()
@@ -200,8 +202,7 @@ exports.create =  (req, res, next) => {
 }
 
 exports.update = (req, res, next) => {
-  const { name, description, exposedUserFields, requiredUserFields, redirectUrl, siteUrl, authTypes, config } = req.body;
-
+  const { name, description, exposedUserFields, requiredUserFields, redirectUrl, siteUrl, authTypes, config, allowedDomains } = req.body;
 
   req.clientModel.set('name', name);
   req.clientModel.set('description', description);
@@ -211,12 +212,12 @@ exports.update = (req, res, next) => {
   req.clientModel.set('requiredUserFields', JSON.stringify(requiredUserFields));
   req.clientModel.set('authTypes', JSON.stringify(authTypes));
   req.clientModel.set('config', JSON.stringify(config));
+  req.clientModel.set('allowedDomains', JSON.stringify(allowedDomains));
 
   req.clientModel
     .save()
     .then((client) => {
       console.log('update success');
-
       next();
     })
     .catch((err) => {

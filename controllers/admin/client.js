@@ -67,7 +67,9 @@ exports.create = (req, res, next) => {
 
   values.exposedUserFields = JSON.stringify(values.exposedUserFields);
   values.requiredUserFields = JSON.stringify(values.requiredUserFields);
-  values.authTypes = JSON.stringify(values.authTypes);
+  values.allowedDomains = JSON.stringify(values.allowedDomains);
+
+
 
   new Client(values)
     .save()
