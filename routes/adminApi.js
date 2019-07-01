@@ -37,9 +37,9 @@ module.exports = (app) => {
   app.get('/api/admin/roles', roleMw.withAll, adminApiRoleController.all);
 
   app.get('/api/admin/unique-codes',                       clientMw.withOne,     codeMw.withAll,   adminApiUniqueCodeController.all);
-  app.get('/api/admin/unique-code/:uniqueCodeid',          clientMw.withOne,     codeMw.withOne,   adminApiUniqueCodeController.show);
+  app.get('/api/admin/unique-code/:codeId',          clientMw.withOne,     codeMw.withOne,   adminApiUniqueCodeController.show);
   app.post('/api/admin/unique-code',                       clientMw.withOne,     codeMw.create,    adminApiUniqueCodeController.show);
-  app.post('/api/admin/unique-code/:uniqueCodeid/delete',  codeMw.withOne,       codeMw.deleteOne, adminApiUniqueCodeController.delete);
+  app.post('/api/admin/unique-code/:codeId/delete',  codeMw.withOne,       codeMw.deleteOne, adminApiUniqueCodeController.delete);
 
   // only use this error handler middleware in "/api" based routes
   app.use("/api/admin/", function(err, req, res, next){

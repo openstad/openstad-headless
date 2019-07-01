@@ -1,4 +1,4 @@
-exports.module = () => {
+module.exports = () => {
   var text = "";
   var numbers = "23456789";
   var letters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";

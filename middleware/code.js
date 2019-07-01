@@ -2,17 +2,17 @@ const UniqueCode = require('../models').UniqueCode;
 const generateCode = require('../utils/generateCode');
 
 exports.withAll = (req, res, next) => {
-  const publicClientId = req.params.clientId;
-  //Careful client.id is different from req.params.clientId
-  const query = req.query.clientId ? { clientId: req.client.id }: {};
-
-//  console.log('query', query);
 
   UniqueCode
-    .fetchAll(query)
+    .query(function (qb) {
+      if (req.query.clientId) {
+        qb.where('clientId',  req.client.id);
+      }
+      qb.orderBy('id', 'DESC');
+      qb.limit(1000);
+    })
+    .fetchAll()
     .then((codes) => {
-      console.log('codes', codes);
-
        req.codesCollection = codes;
        req.codes = codes.serialize();
        next();
@@ -22,6 +22,8 @@ exports.withAll = (req, res, next) => {
 
 exports.withOne = (req, res, next) => {
   const codeId = req.body.codeId ? req.body.codeId : req.params.codeId;
+
+  console.lo
 
   new UniqueCode({ id: codeId })
     .fetch()
@@ -43,6 +45,7 @@ exports.create = (req, res, next) => {
     .then((code) => {
       req.codeModel = code;
       req.code = code.serialize();
+      console.log('req.code ', req.code );
       next();
     })
     .catch((err) => { next(err); });
