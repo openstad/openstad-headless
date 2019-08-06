@@ -15,14 +15,16 @@
 
  exports.forgot = (req, res) => {
    res.render('auth/forgot/forgot', {
-     clientId: req.client.clientId
+     clientId: req.client.clientId,
+     client: req.client,
    });
  };
 
  exports.reset = (req, res) => {
    res.render('auth/forgot/reset', {
      token: req.query.token,
-     clientId: req.client.clientId
+     clientId: req.client.clientId,
+     client: req.client,
    });
  };
 
@@ -30,7 +32,7 @@
  * In case of reset (validation is done with middleware)
  */
  exports.postReset = (req, res, next) => {
-   new User({id: req.user.id})
+   new User({id: req.userObject.id})
      .fetch()
      .then((user) => {
 
@@ -90,9 +92,13 @@
     * Send email
     */
    const sendEmail = (resetUrl, user, client) => {
+     const clientConfig = client.config ? client.config : {};
+
      return emailService.send({
        toName: (user.firstName + ' ' + user.lastName).trim(),
        toEmail: user.email,
+       fromEmail: clientConfig.fromEmail,
+       fromName: clientConfig.fromName,
        subject: 'Wachtwoord herstellen voor ' + client.name,
        template: 'emails/password-reset.html',
        variables: {

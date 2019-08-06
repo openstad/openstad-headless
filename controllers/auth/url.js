@@ -15,6 +15,16 @@ const authUrlConfig     = require('../../config/auth').get('Url');
 exports.login  = (req, res) => {
   res.render('auth/url/login', {
     clientId: req.query.clientId,
+    client: req.client,
+    redirectUrl: req.query.redirect_uri,
+  });
+};
+
+exports.authenticate  = (req, res) => {
+  res.render('auth/url/authenticate', {
+    clientId: req.query.clientId,
+    client: req.client,
+    redirectUrl: req.query.redirect_uri
   });
 };
 
@@ -27,7 +37,50 @@ exports.register = (req, res, next) => {
   });
 }
 
+
+const handleSending = (req, res, next) => {
+  tokenUrl.invalidateTokensForUser(req.user.id)
+    .then(() => { return tokenUrl.format(req.client, req.user, req.redirectUrl); })
+    .then((tokenUrl) => { return sendEmail(tokenUrl, req.user, req.client); })
+    .then((result) => {
+      req.flash('success', {msg: 'De e-mail is verstuurd naar: ' + req.user.email});
+      res.redirect(req.header('Referer') || '/login-with-email-url');
+    })
+    .catch((err) => {
+      console.log('e0mail error', err);
+      req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
+      res.redirect(req.header('Referer') || '/login-with-email-url');
+    });
+}
+
+/**
+ * Send email
+ */
+const sendEmail = (tokenUrl, user, client) => {
+  const clientConfig = client.config ? client.config : {};
+
+  return emailService.send({
+    toName: (user.firstName + ' ' + user.lastName).trim(),
+    toEmail: user.email,
+    fromEmail: clientConfig.fromEmail,
+    fromName: clientConfig.fromName,
+    subject: 'Inloggen bij ' + client.name,
+    template: 'emails/login-url.html',
+    variables: {
+      tokenUrl: tokenUrl,
+      firstName: user.firstName,
+      clientUrl: client.mainUrl,
+      clientName: client.name,
+    }
+  });
+}
+
+
 exports.postLogin = (req, res, next) => {
+  const clientConfig = req.client.config ? req.client.config : {};
+  const redirectUrl =  clientConfig && clientConfig.emailRedirectUrl ? clientConfig.emailRedirectUrl : req.query.redirect_uri;
+  req.redirectUrl = redirectUrl;
+
   /**
    * Check if user exists
    */
@@ -59,39 +112,9 @@ exports.postLogin = (req, res, next) => {
     /**
      * Format the URL and the Send it to the user
      */
-    const handleSending = (req, res, next) => {
-      tokenUrl.invalidateTokensForUser(req.user.id)
-        .then(() => { return tokenUrl.format(req.client, req.user); })
-        .then((tokenUrl) => { sendEmail(tokenUrl, req.user, req.client); })
-        .then((result) => {
-          req.flash('success', {msg: 'De e-mail is verstuurd!'});
-          res.redirect(req.header('Referer') || '/login-with-email-url');
-        })
-        .catch((err) => {
-          console.log('===> err', err);
 
-          req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
-          res.redirect(req.header('Referer') || '/login-with-email-url');
-        });
-    }
 
-    /**
-     * Send email
-     */
-    const sendEmail = (tokenUrl, user, client) => {
-      return emailService.send({
-        toName: (user.firstName + ' ' + user.lastName).trim(),
-        toEmail: user.email,
-        subject: 'Inloggen bij ' + client.name,
-        template: 'emails/login-url.html',
-        variables: {
-          tokenUrl: tokenUrl,
-          firstName: user.firstName,
-          clientUrl: client.mainUrl,
-          clientName: client.name,
-        }
-      });
-    }
+
 }
 
 
@@ -120,35 +143,34 @@ exports.postRegister = (req, res, next) => {
 };
 
 
-exports.authenticate =  (req, res, next) => {
- passport.authenticate('url', function(err, user, info) {
-   console.log('errr', err);
+exports.postAuthenticate =  (req, res, next) => {
+ passport.authenticate('url', { session: true }, function(err, user, info) {
    if (err) { return next(err); }
+   const redirectUrl = req.query.redirect_uri ? req.query.redirect_uri : req.client.redirectUrl;
+
 
    // Redirect if it fails to the original e-mail screen
    if (!user) {
      req.flash('error', {msg: 'De url is geen geldige login url, wellicht is deze verlopen'});
-     return res.redirect(`/auth/url/login?clientId=${req.client.clientId}`);
+     return res.redirect(`/auth/url/login?clientId=${req.client.clientId}&redirect_uri=${redirectUrl}`);
    }
 
    req.logIn(user, function(err) {
-     console.log('1111');
-
      if (err) { return next(err); }
 
-     console.log('user.id', user.id);
+     console.log('useruseruser', user);
 
      return tokenUrl.invalidateTokensForUser(user.id)
       .then((response) => {
-        console.log('neieniene', response);
+        req.brute.reset(() => {
+            // Redirect if it succeeds to authorize screen
+            //check if allowed url will be done by authorize screen
+            const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
-        // Redirect if it succeeds to authorize screen
-        const authorizeUrl = `/dialog/authorize?redirect_uri=${req.client.redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
-        return res.redirect(authorizeUrl);
+            return res.redirect(authorizeUrl);
+          });
       })
       .catch((err) => {
-        console.log('ewwwrr', err);
-
         next(err);
       });
    });

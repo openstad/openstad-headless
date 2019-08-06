@@ -19,7 +19,7 @@ exports.edit = (req, res) => {
   });
 
   res.render('admin/user/edit', {
-    user: req.user,
+    user: req.userObject,
     roles: req.roles,
     clients: userClients,
     userRoles: userRoles
@@ -74,7 +74,7 @@ exports.update = (req, res, next) => {
         value = bcrypt.hashSync(value, saltRounds);
       }
 
-      req.userModel.set(key, value);
+      req.userObjectModel.set(key, value);
     }
   });
 
@@ -94,20 +94,20 @@ exports.update = (req, res, next) => {
     return saveRole();
   })
   .then(() => {
-    return req.userModel.save();
+    return req.userObjectModel.save();
   })
   .then(() => {
     req.flash('success', { msg: 'Updated user!' });
-    res.redirect('/admin/user/' + req.user.id);
+    res.redirect('/admin/user/' + req.userObject.id);
   })
   .catch((err) => {
     req.flash('error', { msg: 'Error!' });
-    res.redirect('/admin/user/' + req.user.id);
+    res.redirect('/admin/user/' + req.userObject.id);
   })
 
 }
 
-const createOrUpdateUserRole = (clientId, userId, roleId) =>{
+const createOrUpdateUserRole = (clientId, userId, roleId) => {
   return new Promise ((resolve, reject) => {
     new UserRole({clientId, userId})
       .fetch()
@@ -126,5 +126,4 @@ const createOrUpdateUserRole = (clientId, userId, roleId) =>{
         reject(err)
       });
   });
-
 }

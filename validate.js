@@ -71,10 +71,6 @@ validate.userExists = (user) => {
 validate.client = (client, clientSecret) => {
   validate.clientExists(client);
 
-  console.log('====> client', client);
-  console.log('====> clientSecret', clientSecret);
-  console.log('====> client.clientSecret', client.clientSecret);
-
   if (client.clientSecret !== clientSecret) {
     validate.logAndThrow('Client secret does not match');
   }

@@ -12,6 +12,7 @@
  const login             = require('connect-ensure-login');
  const User              = require('../../models').User;
  const authLocalConfig   = require('../../config/auth').get('Local');
+ const URL               = require('url').URL;
 
  /**
   * Render the index.html or index-with-code.js depending on if query param has code or not
@@ -36,7 +37,8 @@
 exports.login = (req, res) => {
   res.render('auth/local/login', {
     loginUrl: authLocalConfig.loginUrl,
-    clientId: req.client.clientId
+    clientId: req.client.clientId,
+    client: req.client,
   });
 };
 
@@ -91,7 +93,9 @@ exports.postLogin = (req, res, next) => {
   //    const redirectTo = req.session.returnTo ? req.session.returnTo : req.client.redirectUrl;
 
       // Redirect if it succeeds to authorize screen
-      return res.redirect(authorizeUrl);
+      req.brute.reset(() => {
+        return res.redirect(authorizeUrl);
+      });
     });
   })(req, res, next);
 }
@@ -104,7 +108,15 @@ exports.postLogin = (req, res, next) => {
  */
 exports.logout = (req, res) => {
   req.logout();
-  const config = JSON.parse(req.client.config);
-  const redirectUrl = config && config.logoutUrl ? config.logoutUrl : req.client.siteUrl;
-  res.redirect(redirectUrl);
+  const config = req.client.config;
+  const allowedDomains = req.client.allowedDomains ? req.client.allowedDomains : false;
+  let redirectURL = req.query.redirectUrl;
+  const redirectUrlHost = redirectURL ? new URL(redirectURL).hostname : false;
+  redirectURL = redirectUrlHost && allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1 ? redirectURL : false;
+
+  if (!redirectURL) {
+    redirectURL =  config && config.logoutUrl ? config.logoutUrl : req.client.siteUrl
+  }
+
+  res.redirect(redirectURL);
 };

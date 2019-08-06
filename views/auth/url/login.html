@@ -11,7 +11,7 @@
 	    </p>
 			<form
 				method="post"
-				action="{{loginUrl}}"
+				action="{{loginUrl}}?&clientId={{clientId}}&redirect_uri={{redirectUrl}}"
 			>
 					<div class="form-group">
 						{% include 'elements/error-flash.html' %}
@@ -30,6 +30,7 @@
 					</div>
 					<input type="hidden" name="_csrf" value="{{csrfToken}}">
 					<input type="hidden" name="clientId" value="{{clientId}}">
+
 					<input type="submit" value="Stuur link" class="btn btn-primary">
 			</form>
 		</div>
@@ -37,7 +38,7 @@
 		<p>
 			Geen mail gekregen na het versturen van de link?
 			Kijk dan in je spam-folder of
-			<a href="mailto:info@openstad.nl">neem contact met ons op.</a>
+			<a href="mailto:{{clientEmail}}">neem contact met ons op.</a>
 		</p>
 
 </div>

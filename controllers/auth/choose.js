@@ -11,11 +11,19 @@
 
    if (availableAuthTypes.length === 1) {
      let availableAuthType = availableAuthTypes.shift();
-     res.redirect(availableAuthType.loginUrl + '?clientId=' + req.client.clientId);
+     let url = availableAuthType.loginUrl + '?clientId=' + req.client.clientId;
+     
+     if (req.query.redirect_uri) {
+       url =  url + '&redirect_uri=' + req.query.redirect_uri;
+     }
+
+     res.redirect(url);
    } else {
      res.render('auth/choose', {
         authTypes: availableAuthTypes,
-        clientId: req.client.clientId
+        clientId: req.client.clientId,
+        client: req.client,
+        redirect_uri: req.query.redirect_uri
      })
    }
  };

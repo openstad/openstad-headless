@@ -4,7 +4,9 @@ const User                  = require('../models').User;
 const UserRole              = require('../models').UserRole;
 const Role                  = require('../models').Role;
 const userProfileValidation = require('../config/user').validation.profile;
-
+const bcrypt                = require('bcrypt');
+const saltRounds            = 10;
+const Promise               = require('bluebird');
 
 
 exports.withAll = (req, res, next) => {
@@ -33,8 +35,8 @@ exports.withOne = (req, res, next) => {
         .fetchAll()
         .then((userRoles) => {
           userData.roles = userRoles.serialize();
-          req.userModel = userModel;
-          req.user = userData;
+          req.userObjectModel = userModel;
+          req.userObject = userData;
           next();
         });
     })
@@ -74,8 +76,8 @@ exports.withOneByEmail = (req, res, next) => {
   new User({ email: req.body.email })
     .fetch()
     .then((user) => {
-      req.userModel = user;
-      req.user = user.serialize();
+      req.userObjectModel = user;
+      req.userObject = user.serialize();
       next();
     })
     .catch((err) => {
@@ -119,10 +121,7 @@ exports.validateUser = (req, res, next) => {
       new User({ email: value  })
         .fetch()
         .then((user) => {
-          console.log('===> user', user);
-
           if (user) {
-            console.log('===> E-mail already in use');
             //return Promise.reject('asadasdadsasd')
             throw new Error('E-mail al in gebruik!');
             //return reject('E-mail already in use');
@@ -144,6 +143,111 @@ exports.validateUser = (req, res, next) => {
   } else {
     next();
   }
+}
+
+exports.create =  (req, res, next) => {
+  let { firstName, lastName, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, password } = req.body;
+
+  password = bcrypt.hashSync(password, saltRounds);
+
+  new User({
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    streetName: streetName,
+    houseNumber: houseNumber,
+    suffix: suffix,
+    postcode: postcode,
+    city: city,
+    phoneNumber: phoneNumber,
+    password: password
+  })
+  .save()
+  .then((response) => {
+    req.userObject = response.serialize();
+    req.userObjectModel = response;
+    next();
+  })
+  .catch((err) => {
+    next(err);
+  });
+}
+
+exports.update = (req, res, next) => {
+  const keysToUpdate = ['firstName', 'lastName', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes'];
+
+  keysToUpdate.forEach((key) => {
+    if (req.body[key]) {
+      let value = req.body[key];
+
+      if (key === 'password') {
+        value = bcrypt.hashSync(value, saltRounds);
+      }
+
+      req.userObjectModel.set(key, value);
+    }
+  });
+
+  req.userObjectModel.save()
+    .then((response) => {
+      req.userObject = response.serialize();
+      req.userObjectModel = response;
+      next();
+    })
+    .catch((err) => {
+      console.log('==> update err', err);
+
+      next(err);
+    });
+}
+
+exports.saveRoles = (req, res, next) => {
+  const roles = req.body.roles;
+  console.log('==> roles', roles);
+
+  if (!roles) {
+    next();
+  } else {
+    const userId = req.userObject.id;
+    const saveRoles = [];
+
+    for (clientId in roles) {
+      let roleId = roles[clientId];
+      let parsedClientId = parseInt(clientId.replace('\'', ''), 10);
+      console.log('==> parsedClientId', parsedClientId);
+
+      saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
+    }
+
+    Promise
+      .map(saveRoles, saveRole => saveRole())
+      .then(() => { next(); })
+      .catch((err) => {
+         console.log('==> update err', err);
+         next(err);
+       });
+  }
+}
+
+const createOrUpdateUserRole = (clientId, userId, roleId) => {
+  return new Promise ((resolve, reject) => {
+    new UserRole({clientId, userId})
+      .fetch()
+      .then((userRole) => {
+        if (userRole) {
+          userRole.set('roleId', roleId);
+          return userRole.save();
+        } else {
+          return new UserRole({ clientId, roleId, userId }).save();
+        }
+      })
+      .then(()=> {
+        resolve()
+      })
+      .catch((err) => {
+        reject(err)
+      });
+  });
 }
 
 exports.validateUniqueEmail  = (req, res, next) => {
@@ -184,4 +288,13 @@ exports.validateEmail = (req, res, next) => {
     req.flash('error', {msg: 'Incorrect email'});
     res.redirect(req.header('Referer') || '/account');
   }
+}
+
+exports.deleteOne = (req, res, next) => {
+  req.userObjectModel
+    .destroy()
+    .then(() => {
+      next();
+    })
+    .catch((err) => { next(err); });
 }

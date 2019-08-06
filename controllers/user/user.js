@@ -30,6 +30,7 @@ exports.info = (req, res) => {
     email: req.user.email,
     role: req.user.role,
     firstName: req.user.firstName,
+    postcode: req.user.postcode,
     lastName: req.user.lastName,
     scope: req.authInfo.scope
   });

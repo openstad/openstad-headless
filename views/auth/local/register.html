@@ -1,12 +1,14 @@
 {% extends 'layouts/main.html' %}
 
 {% block body %}
-{% include 'elements/flash.html' %}
 
 <div class="card">
   <div class="upper-box card-body">
 
     <form method="POST" action="/auth/local/register" class="validate-form">
+      {% include 'elements/error-flash.html' %}
+
+
       <h1>Registreren</h1>
       <input type="hidden" name="_csrf" value="{{csrfToken}}" />
       <input type="hidden" name="clientId" value="{{clientId}}" />

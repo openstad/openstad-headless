@@ -7766,26 +7766,31 @@ textarea:disabled {
   border: none;
 }
 .flash-container {
-  align-items: center;
   right: 0;
-  bottom: 2rem;
+  /* bottom: 2rem; */
   left: 0;
-  display: flex;
-  justify-content: flex-end;
-  flex-direction: column-reverse;
-  position: fixed;
+  /* display: flex; */
+  /* justify-content: flex-end; */
+  /* flex-direction: column-reverse; */
+  position: relative;
   width: 100%;
   pointer-events: none;
   z-index: 100;
-  padding: 0.75rem;
+  padding: 0;
+  margin-top: 15px;
 }
 .flash-container-relative {
   position: relative;
 }
+@media screen and (max-width: 768px) {
+  .flash-container {
+    bottom: auto;
+    top: 7px;
+  }
+}
 .flash-message {
   background: #f3f3f3;
   border-radius: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   color: #ffffff;
   cursor: default;
   display: flex;
@@ -7806,13 +7811,16 @@ textarea:disabled {
 }
 .flash-message__content {
   margin: 0;
-  padding: 1rem 2rem;
+  padding: 13px 20px;
   font-weight: 700;
   color: black;
 }
 .flash-message__close-button {
   border-left: 1px solid rgba(255, 255, 255, 0.2);
-  display: flex;
+  display: block;
+  position: absolute;
+  right: 0;
+  top: 4px;
 }
 .flash-message__close-button .close-button {
   background: transparent;

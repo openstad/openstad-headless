@@ -43,6 +43,7 @@
     "passport-oauth2-client-password": "^0.1.x",
     "passport-url": "^1.0.4",
     "request-promise": "^4.2.2",
+    "session-file-store": "^1.2.0",
     "uuid": "^3.0.1"
   },
   "scripts": {
