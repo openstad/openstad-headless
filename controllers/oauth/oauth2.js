@@ -162,6 +162,9 @@ exports.authorization = [
   login.ensureLoggedIn(),
   server.authorization((clientID, redirectURI, scope, done) => {
 
+    //console.log('===> clientID', clientID);
+		//console.log('===> redirectURI', redirectURI);
+
     new Client({clientId: clientID})
     .fetch()
     .then((client) => {
@@ -176,12 +179,14 @@ exports.authorization = [
       const allowedDomains = client.allowedDomains ? JSON.parse(client.allowedDomains) : false;
       const redirectUrlHost = new URL(redirectURI).hostname;
 
+      //console.log('===> allowedDomains', allowedDomains, redirectUrlHost);
 
       // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
       if (allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1) {
+				//console.log('===> redirectURI', redirectURI);
         return done(null, client, redirectURI);
       } else {
-        console.log('===> Redirect host doesn\'t match the client host');
+        //console.log('===> Redirect host doesn\'t match the client host');
         throw new Error('Redirect host doesn\'t match the client host');
       }
 
@@ -201,6 +206,7 @@ exports.authorization = [
         if (client != null) {//  && client.trustedClient && client.trustedClient === true) {
           // This is how we short call the decision like the dialog below does
           server.decision({ loadTransaction: false }, (serverReq, callback) => {
+						console.log('ALLOW');
             callback(null, { allow: true });
           })(req, res, next);
         } else {
