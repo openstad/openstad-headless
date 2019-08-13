@@ -79,3 +79,9 @@ Authorize url: APP_URL/dialog/authorize
 Access url: APP_URL/oauth/token
 
 The clientId & secret can be found in the admin panel.
+
+## DEVELOPMENT
+If you are run a dev environment without SSL, turn off secure cookies in .env
+```
+COOKIE_SECURE_OFF=yes
+```
