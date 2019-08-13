@@ -122,8 +122,8 @@ server.exchange(oauth2orize.exchange.clientCredentials((client, scope, done) => 
   const expiration = config.token.calculateExpirationDate();
   // Pass in a null for user id since there is no user when using this grant type
   db.accessTokens.save(token, expiration, null, client.id, scope)
-  .then(() => done(null, token, null, expiresIn))
-  .catch(err => done(err));
+    .then(() => done(null, token, null, expiresIn))
+    .catch(err => done(err));
 }));
 
 /**
