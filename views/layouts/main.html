@@ -13,12 +13,13 @@
 <body>
   {% include 'elements/header.html' %}
   {% include 'elements/navbar.html' %}
-  {% include 'elements/flash.html' %}
 
   <div id="main">
     <div class="container">
       <div class="row">
         <div class="col-xs-12 col-sm-6">
+          {% include 'elements/flash.html' %}
+
           {% block body %}{% endblock %}
         </div>
         <div class="col-xs-12 col-sm-3 pull-right">

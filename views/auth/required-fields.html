@@ -3,13 +3,23 @@
 {% block body %}
 <div>
 		<div class="upper-box card-body">
-			<h1>Registreren</h1>
+			<h1>
+				{% if title %}
+					{{title}}
+				{% else %}
+					Aanvullende gegevens
+				{% endif %}
+			</h1>
 			<p>
-				Voor {{client.name}} zijn de volgende velden nodig:
+				{% if description %}
+					{{description}}
+				{% else %}
+					Om uw voorkeur achter te laten hebben we wat extra gegevens van u nodig.
+				{% endif %}
 			</p>
 			{% include 'elements/error-flash.html' %}
 
-      <form method="POST" action="/auth/required-fields">
+      <form method="POST" action="/auth/required-fields?redirect_uri={{redirect_uri}}" class="validate-form">
         <input type="hidden" name="_csrf" value="{{csrfToken}}" />
         <input type="hidden" name="clientId" value="{{clientId}}" />
         {% for requiredField in requiredFields %}
@@ -23,17 +33,35 @@
           />
 				</div>
         {% endfor %}
+
         <button class="btn btn-primary">
-          Opslaan
+					{% if buttonText %}
+						{{buttonText}}
+					{% else %}
+						Opslaan
+					{% endif %}
         </button>
+
+				<p>
+					<br />
+
+					{% if info %}
+						{{info}}
+					{% else %}
+						Waarom willen we dit van u weten?
+						Omdat we graag zoveel mogelijk inzicht willen krijgen in waar de voorkeur van de Herengracht en omliggende straten ligt.
+					{% endif %}
+				</p>
       </form>
 		</div>
 
+<!--
 		<p>
 			Vragen of feedback?
 			<a href="mailto:info@openstad.nl">
         neem contact met ons op.
       </a>
 		</p>
+		!-->
 </div>
 {% endblock %}

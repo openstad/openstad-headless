@@ -12,6 +12,12 @@ const adminClientController    = require('./controllers/admin/client');
 const adminRoleController      = require('./controllers/admin/role');
 const adminCodeController      = require('./controllers/admin/code');
 
+const adminApiUserController          = require('./controllers/admin/api/user');
+const adminApiClientController        = require('./controllers/admin/api/client');
+const adminApiRoleController          = require('./controllers/admin/api/role');
+const adminApiUniqueCodeController    = require('./controllers/admin/api/uniqueCode');
+
+
 //AUTH CONTROLLERS
 const authChoose	 						 = require('./controllers/auth/choose');
 const authUrl 		 						 = require('./controllers/auth/url');
@@ -34,7 +40,6 @@ const codeMw                   = require('./middleware/code');
 const logMw                    = require('./middleware/log');
 
 
-
 const loginBruteForce = bruteForce.user.getMiddleware({
   key: function(req, res, next) {
       // prevent too many attempts for the same username
@@ -49,12 +54,20 @@ const uniqueCodeBruteForce = bruteForce.user.getMiddleware({
   }
 });
 
+const emailUrlBruteForce = bruteForce.user.getMiddleware({
+  key: function(req, res, next) {
+      // prevent too many attempts for the same username
+      next(req.body.email);
+  }
+});
+
 
 const csurf = require('csurf');
+
 const csrfProtection = csurf({
   cookie: {
     httpOnly: true,
-    secure: true,
+    secure: process.env.COOKIE_SECURE_OFF === 'yes' ? false : true,
     sameSite: true
   }
 });
@@ -111,11 +124,12 @@ module.exports = function(app){
 	app.use('/auth/url', [clientMw.setAuthType('Url'), clientMw.validate, csrfProtection, addCsrfGlobal]);
 
 	// routes
-	app.get('/auth/url/login',         authUrl.login);
-	app.post('/auth/url/login',        authUrl.postLogin);
-	app.get('/auth/url/authenticate',  authUrl.authenticate);
-	app.get('/auth/url/register',      authUrl.register);
-	app.post('/auth/url/register',     authUrl.postRegister);
+	app.get('/auth/url/login',          authUrl.login);
+	app.post('/auth/url/login',         emailUrlBruteForce, authUrl.postLogin);
+  app.get('/auth/url/authenticate',   authUrl.authenticate);
+	app.post('/auth/url/authenticate',   emailUrlBruteForce, authUrl.postAuthenticate);
+	//app.get('/auth/url/register',      authUrl.register);
+	//app.post('/auth/url/register',     authUrl.postRegister);
 
 	/**
 	 * Auth routes for DigiD
@@ -158,7 +172,7 @@ module.exports = function(app){
 
   app.use('/dialog', [bruteForce.global.prevent]);
 
-  app.get('/dialog/authorize',            clientMw.withOne, authMw.check, clientMw.checkRequiredUserFields,  clientMw.checkUniqueCodeAuth((req, res) => { console.log('----<'); return res.redirect('/login?clientId=' + req.query.client_id);}), oauth2Controller.authorization);
+  app.get('/dialog/authorize',            clientMw.withOne, authMw.check, clientMw.checkRequiredUserFields,  clientMw.checkUniqueCodeAuth((req, res) => { return res.redirect('/login?clientId=' + req.query.client_id);}), oauth2Controller.authorization);
   app.post('/dialog/authorize/decision',  clientMw.withOne, clientMw.checkUniqueCodeAuth(), bruteForce.global.prevent, oauth2Controller.decision);
   app.post('/oauth/token',                oauth2Controller.token);
   app.get('/oauth/token',                 oauth2Controller.token);
@@ -190,6 +204,10 @@ module.exports = function(app){
   app.get('/admin/user',          clientMw.withAll, roleMw.withAll, adminUserController.new);
   app.post('/admin/user',         adminUserController.create);
   app.post('/admin/user/:userId', userMw.withOne, adminUserController.update);
+
+
+  require('./routes/adminApi')(app);
+
 
   /**
    * Admin client routes
@@ -230,6 +248,7 @@ module.exports = function(app){
 
   // Handle 500
   app.use(function(err, req, res, next) {
+    console.log('===> err', err);
     res.status(500).render('errors/500');
   });
 }

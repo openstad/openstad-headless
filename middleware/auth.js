@@ -19,7 +19,11 @@ exports.validateLogin = (req, res, next) => {
 
 exports.check = (req, res, next) => {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
-    const url = '/login?clientId=' + req.client.clientId
+    let url = '/login?clientId=' + req.client.clientId;
+
+    if (req.query.redirect_uri) {
+      url =  url + '&redirect_uri=' + req.query.redirect_uri;
+    }
 
     if (req.session) {
       req.session.returnTo = req.originalUrl || req.url;

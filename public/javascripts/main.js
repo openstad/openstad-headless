@@ -4,6 +4,18 @@ $(function() {
   initRemoveErrorLabelOnType();
 });
 
+/*
+
+
+ */
+
+
+ $.validator.addMethod("postcodeNL", function(value, element, val) {
+    var rege = /^[1-9][0-9]{3} ?(?!sa|sd|ss)[a-z]{2}$/i;
+
+     return rege.test(value);
+ }, "Postcode niet correct");
+
 function initFormsValidation () {
   $('.validate-form').each(function () {
     $(this).validate({
@@ -14,6 +26,9 @@ function initFormsValidation () {
         password_confirm : {
           //  minlength : 5,
             equalTo : "#password"
+        },
+        postcode : {
+          postcodeNL: true
         }
       }
     });
@@ -22,7 +37,6 @@ function initFormsValidation () {
 
 
 function initRemoveErrorLabelOnType ( ){
-
   $('.side-error input').on('keydown', function () {
     var $sideError = $(this).closest('.side-error')
     $sideError.find('.error-label').remove();
@@ -36,6 +50,6 @@ function initHideFlash() {
   });
 
   setTimeout(function() {
-    $('.flash-container').remove();
+  //  $('.flash-container').remove();
   }, 5000);
 }

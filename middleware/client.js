@@ -1,5 +1,8 @@
 const Client = require('../models').Client;
 const UniqueCode = require('../models').UniqueCode;
+const hat = require('hat');
+const userFields = require('../config/user').fields;
+const authTypes = require('../config/auth').types;
 
 const authTypesConfig = require('../config').authTypes;
 
@@ -21,6 +24,10 @@ exports.withOne = (req, res, next) => {
     clientId = req.query.client_id;
   }
 
+  if (!clientId) {
+    clientId = req.params.clientId;
+  }
+
   if (clientId) {
     new Client({ clientId: clientId })
     .fetch()
@@ -33,6 +40,13 @@ exports.withOne = (req, res, next) => {
         res.locals.clientProjectUrl = clientConfig.projectUrl;
         res.locals.clientEmail = clientConfig.contactEmail;
         res.locals.clientDisclaimerUrl = clientConfig.clientDisclaimerUrl;
+
+
+        req.client.authTypes            = JSON.parse(req.client.authTypes);
+        req.client.exposedUserFields    = JSON.parse(req.client.exposedUserFields);
+        req.client.requiredUserFields   = JSON.parse(req.client.requiredUserFields);
+        req.client.config               = JSON.parse(req.client.config);
+        req.client.allowedDomains       = JSON.parse(req.client.allowedDomains);
 
         next();
       } else {
@@ -108,7 +122,7 @@ exports.validate = (req, res, next) => {
 exports.checkUniqueCodeAuth = (errorCallback) => {
   //validate code auth type
   return (req, res, next) => {
-      const authTypes = JSON.parse(req.client.authTypes);
+      const authTypes = req.client.authTypes;
 
       if (authTypes.indexOf('UniqueCode') !== -1) {
         new UniqueCode({ clientId: req.client.id, userId: req.user.id })
@@ -121,8 +135,6 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
           }
         })
         .catch((error) => {
-          console.log('error checkRequiredUserFields');
-
           if (errorCallback) {
             try {
               errorCallback(req, res, next);
@@ -140,8 +152,12 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
     }
 }
 
+
+/**
+ * Check if required fields is set
+ */
 exports.checkRequiredUserFields = (req, res, next) => {
-  const requiredFields = JSON.parse(req.client.requiredUserFields);
+  const requiredFields = req.client.requiredUserFields;
   const user = req.user;
   let error;
 
@@ -154,8 +170,69 @@ exports.checkRequiredUserFields = (req, res, next) => {
 
   // if error redirect to register
   if (error) {
-    res.redirect('/auth/required-fields?clientId=' + req.client.clientId || '/account');
+    res.redirect(`/auth/required-fields?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri}`);
   } else {
     next();
   }
+}
+
+exports.create =  (req, res, next) => {
+  const { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes, config, allowedDomains } = req.body;
+  const rack = hat.rack();
+  const clientId = rack();
+  const clientSecret = rack();
+
+  const values = { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes, clientId, clientSecret, allowedDomains, config};
+
+  values.exposedUserFields = JSON.stringify(values.exposedUserFields);
+  values.requiredUserFields = JSON.stringify(values.requiredUserFields);
+  values.authTypes = JSON.stringify(values.authTypes);
+  values.config = JSON.stringify(values.config);
+  values.allowedDomains = JSON.stringify(values.allowedDomains);
+
+
+  new Client(values)
+    .save()
+    .then((client) => {
+      req.clientModel = client;
+      req.client = client.serialize();
+      next();
+    })
+    .catch((err) => { next(err); });
+}
+
+exports.update = (req, res, next) => {
+  const { name, description, exposedUserFields, requiredUserFields, redirectUrl, siteUrl, authTypes, config, allowedDomains } = req.body;
+
+  req.clientModel.set('name', name);
+  req.clientModel.set('description', description);
+  req.clientModel.set('siteUrl', siteUrl);
+  req.clientModel.set('redirectUrl', redirectUrl);
+  req.clientModel.set('exposedUserFields', JSON.stringify(exposedUserFields));
+  req.clientModel.set('requiredUserFields', JSON.stringify(requiredUserFields));
+  req.clientModel.set('authTypes', JSON.stringify(authTypes));
+  req.clientModel.set('config', JSON.stringify(config));
+  req.clientModel.set('allowedDomains', JSON.stringify(allowedDomains));
+
+  req.clientModel
+    .save()
+    .then((client) => {
+      console.log('update success');
+      next();
+    })
+    .catch((err) => {
+      console.log('update err', err);
+      next(err);
+    })
+}
+
+
+
+exports.deleteOne = (req, res, next) => {
+  req.clientModel
+    .destroy()
+    .then((response) => {
+      next();
+    })
+    .catch((err) => { next(err); })
 }

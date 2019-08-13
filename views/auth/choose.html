@@ -11,7 +11,7 @@
 			{% include 'elements/error-flash.html' %}
 
       {% for authType in authTypes %}
-        <a href="{{authType.loginUrl}}?clientId={{clientId}}" class="btn btn-primary">
+        <a href="{{authType.loginUrl}}?clientId={{clientId}}&redirect_uri={{redirect_uri}}" class="btn btn-primary">
           {{authType.label}}
         </a>
 				<hr />
@@ -21,8 +21,8 @@
 
 		<p>
 			Vragen of feedback?
-			<a href="mailto:info@openstad.nl">
-        neem contact met ons op.
+			<a href="mailto:{{clientEmail}}">
+        Neem contact met ons op.
       </a>
 		</p>
 </div>

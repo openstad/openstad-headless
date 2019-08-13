@@ -21,6 +21,7 @@ const timestampFilter             = require('./nunjucks/timestamp');
 const replaceIdeaVariablesFilter  = require('./nunjucks/replaceIdeaVariables');
 const flash                       = require('express-flash');
 const expressValidator            = require('express-validator');
+const FileStore                   = require('session-file-store')(expressSession);
 
 
 const MemoryStore = expressSession.MemoryStore;
@@ -33,10 +34,11 @@ app.set('port', process.env.PORT || 4000);
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cookieParser());
+
 app.use((req, res, next) => {
   req.nunjucksEnv = nunjucksEnv;
   next();
-})
+});
 
 /*
 app.use((req, res, next) => {
@@ -52,14 +54,18 @@ app.use(expressSession({
   saveUninitialized : true,
   resave            : true,
   secret            : config.session.secret,
-  store             : new MemoryStore(),
+//  store             : new MemoryStore(),
+  store             : new FileStore({
+    ttl: 3600 * 24 * 31
+  }),
   key               : 'authorization.sid',
   cookie            : {
     maxAge: config.session.maxAge,
-    secure: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
+    secure: process.env.COOKIE_SECURE_OFF === 'yes' ? false : true,
     httpOnly: true,
-    sameSite: true
+    sameSite: false
   },
+
 }));
 app.use(flash());
 
@@ -68,6 +74,9 @@ app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(expressValidator());
+
+
+
 
 // Passport configuration
 require('./auth');

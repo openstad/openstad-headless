@@ -11,7 +11,7 @@ const emailService      = require('../../services/email');
 const authCodeConfig    = require('../../config/auth').get(authType);
 
 exports.login = (req, res, next) => {
-  const config = req.client.config ? JSON.parse(req.client.config) : {};
+  const config = req.client.config ? req.client.config : {};
   const backUrl = config && config.backUrl ? config.backUrl : req.client.siteUrl;
   const configAuthType = config.authTypes && config.authTypes[authType] ? config.authTypes[authType] : {};
 
@@ -41,9 +41,13 @@ exports.postLogin = (req, res, next) => {
     req.logIn(user, function(err) {
       if (err) { return next(err); }
 
-      // Redirect if it succeeds to authorize screen
-      const authorizeUrl = `/dialog/authorize?redirect_uri=${req.client.redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
-      return res.redirect(authorizeUrl);
+      req.brute.reset(() => {
+        // Redirect if it succeeds to authorize screen
+        const authorizeUrl = `/dialog/authorize?redirect_uri=${req.client.redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+        return res.redirect(authorizeUrl);
+      });
+
+
     });
   })(req, res, next);
 }

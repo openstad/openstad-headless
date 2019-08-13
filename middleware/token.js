@@ -6,11 +6,9 @@ exports.addUser = ((req, res, next) => {
   new LoginToken({token: tokenToQuery, valid: true})
       .query((q) => {
         /**
-         * Only select tokens that are younger then 5 min
+         * Only select tokens that are younger then 60 min
          */
-        const days = 2;
-        const msForADay = 86400000;
-        const minutes = 5;
+        const minutes = 60;
         const msForAMinute = 60000;
         const date = new Date();
         const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));

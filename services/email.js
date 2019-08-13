@@ -40,6 +40,7 @@ exports.send = function ({subject, toName, toEmail, template, variables, fromEma
   /**
    * If from name & e-mail not specified fallback to default in .env
    */
+
   fromEmail = fromEmail ? fromEmail : process.env.FROM_EMAIL;
   fromName = fromName ? fromName : process.env.FROM_NAME;
 

@@ -1,0 +1,28 @@
+{% extends 'layouts/main.html' %}
+
+{% block body %}
+<div>
+		<div class="upper-box card-body">
+			<h1 class="">Inloggen</h1>
+			<p class="intro">
+				Je kunt eenmalig inloggen met deze link.
+				De e-mail vanuit waar je deze link hebt geopend kun je hierna verwijderen.
+				Deze link is 60 minuten geldig.
+	    </p>
+			<form
+				method="post"
+				action=""
+			>
+					<div class="form-group">
+						{% include 'elements/error-flash.html' %}
+					</div>
+					<input type="hidden" name="_csrf" value="{{csrfToken}}">
+					<input type="hidden" name="clientId" value="{{clientId}}">
+					<input type="submit" value="Inloggen" class="btn btn-primary">
+			</form>
+		</div>
+		<br />
+
+
+</div>
+{% endblock %}

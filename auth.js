@@ -14,7 +14,6 @@ const LoginToken                           = require('./models').LoginToken;
 const UniqueCode                           = require('./models').UniqueCode;
 const TokenStrategy                        = require('./token-strategy');
 
-
 /**
  * LocalStrategy
  *
@@ -42,9 +41,9 @@ passport.use(new LocalStrategy(
  */
 passport.use('url', new TokenStrategy({
     failRedirect : "/auth/url/login",
-    varName : "token"
+    varName : "token",
+    session: true
   }, function (token, done) { // put your check logic here
-    console.log('token 1', token);
 
     new LoginToken({
       token: token,
@@ -52,18 +51,12 @@ passport.use('url', new TokenStrategy({
     })
       .query((q) => {
       /**
-       * Only select tokens that are younger then 2 days
-       * created_at is "bigger then" 48 hours ago
+       * Only select tokens that are younger then 60 minutes
        */
-
-      const days = 2;
-      const msForADay = 86400000;
-      const minutes = 5;
+      const minutes = 60;
       const msForAMinute = 60000;
       const date = new Date();
       const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
-
-      console.log('timeAgo', timeAgo);
 
       q.where('createdAt', '>=', timeAgo);
       q.orderBy('createdAt', 'DESC');
@@ -75,8 +68,8 @@ passport.use('url', new TokenStrategy({
         new User({id: token.get('userId')})
           .fetch()
           .then((user) => { return user.serialize(); })
-          .then(user => {console.log('success', user);  return done(null, user) } )
-          .catch((err) => { console.log('err', err); return done(err); });
+          .then(user => { return done(null, user) } )
+          .catch((err) => { return done(err); });
       } else {
         done("Token not found");
       }
@@ -162,6 +155,7 @@ passport.use('uniqueCode', new TokenStrategy({
  */
 
 passport.use(new BasicStrategy((clientId, clientSecret, done) => {
+  console.log('bbbbbbb', clientId, clientSecret);
   Client
     .where({clientId: clientId})
     .fetch()
@@ -178,6 +172,8 @@ passport.use(new BasicStrategy((clientId, clientSecret, done) => {
  * which accepts those credentials and calls done providing a client.
  */
 passport.use(new ClientPasswordStrategy((clientId, clientSecret, done) => {
+  console.log('validate ClientPasswordStrategy', clientId, clientSecret);
+
   Client
     .where({clientId: clientId})
     .fetch()
