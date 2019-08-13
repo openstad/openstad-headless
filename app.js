@@ -54,7 +54,7 @@ app.use(expressSession({
   saveUninitialized : true,
   resave            : true,
   secret            : config.session.secret,
-  store             : new MemoryStore(),
+//  store             : new MemoryStore(),
   store             : new FileStore({
     ttl: 3600 * 24 * 31
   }),
