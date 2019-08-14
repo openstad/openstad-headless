@@ -8,6 +8,7 @@ exports.index = (req, res, next) => {
   })
 
   requiredUserFields = requiredUserFields.filter(field => !req.user[field.key]);
+	// console.log(req.userModel);
 
   const config = req.client.config ? req.client.config : {};
   const configRequiredFields = config && config.requiredFields ? config.requiredFields : {};
@@ -36,6 +37,8 @@ exports.post = (req, res, next) => {
       req.userModel.set(field, req.body[field]);
     }
   });
+
+	// console.log(req.userModel);
 
   req.userModel
     .save()

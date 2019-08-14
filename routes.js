@@ -23,6 +23,7 @@ const authChoose	 						 = require('./controllers/auth/choose');
 const authUrl 		 						 = require('./controllers/auth/url');
 const authForgot							 = require('./controllers/auth/forgot');
 const authDigiD							 	 = require('./controllers/auth/digid');
+const authAnonymous					 	 = require('./controllers/auth/anonymous');
 const authLocal							   = require('./controllers/auth/local');
 const authCode							 	 = require('./controllers/auth/code');
 const authRequiredFields	     = require('./controllers/auth/required');
@@ -138,6 +139,17 @@ module.exports = function(app){
 	app.use('/auth/digid', [clientMw.setAuthType('DigiD'), clientMw.validate, csrfProtection, addCsrfGlobal]);
  	app.get('/auth/digid/login',  clientMw.withOne, authDigiD.login);
   app.post('/auth/digid/login', clientMw.withOne, authDigiD.postLogin);
+
+	/**
+	 * Auth routes for Anonymous login
+	 */
+	 // shared middleware
+	app.use('/auth/anonymous', [clientMw.withOne, clientMw.setAuthType('Anonymous'), clientMw.validate, csrfProtection, addCsrfGlobal]);
+
+	// routes
+	app.get('/auth/anonymous/info',  authAnonymous.info);
+	app.get('/auth/anonymous/login',  authAnonymous.login);
+	app.get('/auth/anonymous/register', authAnonymous.register);
 
 	/**
 	 * Auth routes for UniqueCode

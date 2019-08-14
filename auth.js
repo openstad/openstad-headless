@@ -141,7 +141,6 @@ passport.use('uniqueCode', new TokenStrategy({
     });
 }));
 
-
 /**
  * BasicStrategy & ClientPasswordStrategy
  *

@@ -38,6 +38,15 @@ const types = [
     displayAccountLink:  false,
   },
   {
+    key: 'Anonymous',
+    label: 'Anoniem inloggen',
+    loginUrl: formatLoginUrl('anonymous'),
+    errorMessage: 'Anoniem inloggen is niet gelukt',
+    displayBackbutton: false,
+    displaySidebar: false,
+    displayAccountLink:  false,
+  },
+  {
     key: 'DigiD',
     label: 'Digid code',
     loginUrl: formatLoginUrl('digid'),

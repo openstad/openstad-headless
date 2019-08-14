@@ -101,8 +101,8 @@ validate.clientExists = (client) => {
 validate.token = (token, accessToken) => {
   utils.verifyToken(accessToken);
 
-//  console.log('accccesToken', accessToken);
-  console.log('token', token);
+	// console.log('accccesToken', accessToken);
+  // console.log('token', token);
 
   // token is a user token
   if (token.userID != null) {
@@ -156,8 +156,8 @@ validate.authCode = (code, authCode, client, redirectURI) => {
   if (client.id !== authCode.clientID) {
     validate.logAndThrow('AuthCode clientID does not match client id given');
   }
-  console.log('redirectURI', redirectURI);
-  console.log('authCode', authCode);
+  // console.log('redirectURI', redirectURI);
+  // console.log('authCode', authCode);
 
   if (redirectURI !== authCode.redirectURI) {
 //    validate.logAndThrow('AuthCode redirectURI does not match redirectURI given');
