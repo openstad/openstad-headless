@@ -46,11 +46,16 @@ exports.withOne = (req, res, next) => {
 }
 
 exports.withRoleForClient = (req, res, next) => {
+
   new UserRole({ userId: req.user.id, clientId: req.client.id })
      .fetch()
      .then((userRole) => {
+
        if (userRole) {
          const roleId = userRole.get('roleId');
+
+         console.log('roleId roleId', roleId);
+
          new Role ({id: roleId})
           .fetch()
           .then((role) => {

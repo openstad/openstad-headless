@@ -119,11 +119,41 @@ exports.validate = (req, res, next) => {
   next();
 }
 
+exports.checkIfEmailRequired = (errorCallback) => {
+  return (req, res, next) => {
+      const requiredFields = req.client.requiredUserFields;
+      const authTypes = req.client.authTypes;
+
+      // the Local & email
+      const emailAuthTypesEnabled = authTypes.indexOf('Url') !== -1 ||authTypes.indexOf('Local') !== -1;
+      const emailRequired = requiredFields.indexOf('email') !== -1;
+
+
+      console.log('=>>> emailAuthTypesEnabled', emailAuthTypesEnabled);
+      console.log('=>>> emailRequired', emailRequired);
+
+      // if UniqueCode isset
+      if (
+        (emailAuthTypesEnabled && emailRequired)
+      ) {
+        req.emailRequiredForAuth = true;
+
+        if (req.emailRequiredForAuth && !req.user.email) {
+          res.redirect(`/login?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri}`);
+        }
+      } else {
+        next();
+      }
+    }
+}
+
+
 exports.checkUniqueCodeAuth = (errorCallback) => {
   //validate code auth type
   return (req, res, next) => {
       const authTypes = req.client.authTypes;
 
+      // if UniqueCode isset
       if (authTypes.indexOf('UniqueCode') !== -1) {
         new UniqueCode({ clientId: req.client.id, userId: req.user.id })
         .fetch()

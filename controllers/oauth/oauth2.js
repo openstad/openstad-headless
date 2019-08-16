@@ -38,8 +38,8 @@ const expiresIn = { expires_in : config.token.expiresIn };
 server.grant(oauth2orize.grant.code((client, redirectURI, user, ares, done) => {
   const code = utils.createToken({ sub : user.id, exp : config.codeToken.expiresIn });
   db.authorizationCodes.save(code, client.id, redirectURI, user.id, client.scope)
-  .then(() => done(null, code))
-  .catch(err => done(err));
+    .then(() => done(null, code))
+    .catch(err => done(err));
 }));
 
 /**

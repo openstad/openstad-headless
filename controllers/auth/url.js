@@ -81,27 +81,43 @@ exports.postLogin = (req, res, next) => {
   const redirectUrl =  clientConfig && clientConfig.emailRedirectUrl ? clientConfig.emailRedirectUrl : req.query.redirect_uri;
   req.redirectUrl = redirectUrl;
 
+
   /**
    * Check if user exists
    */
   new User({ email: req.body.email })
     .fetch()
     .then((user) => {
-      if (user) {
-        req.user = user.serialize();
-        handleSending(req, res, next);
-      } else {
-        /**
-         * Create a new user
-         */
-        new User({ email: req.body.email })
-          .save()
-          .then((user) => {
-            req.user = user.serialize();
-            handleSending(req, res, next);
-          })
-          .catch((err) => { next(err) });
-      }
+       if (user) {
+         req.user = user.serialize();
+         handleSending(req, res, next);
+       } else {
+         /**
+          * If active user is already set, the user is already logged in
+          * If email is not set it means they as anonymous user
+          * Add the submitted email to anonymous user
+          * If already a user with that email, ignore the anonymous user and login via existing user
+          */
+         if (req.user && !req.user.email && !user) {
+           req.user
+            .set('email', req.body.email)
+            .save()
+            .then((user) => {
+              req.user = user.serialize();
+              handleSending(req, res, next);
+            })
+            .catch((err) => { next(err); })
+
+         } else {
+           new User({ email: req.body.email })
+             .save()
+             .then((user) => {
+               req.user = user.serialize();
+               handleSending(req, res, next);
+             })
+             .catch((err) => { next(err) });
+         }
+       }
     })
     .catch((err) => {
       console.log('===> err', err);
