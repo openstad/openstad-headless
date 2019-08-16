@@ -133,13 +133,12 @@ exports.checkIfEmailRequired = (errorCallback) => {
       console.log('=>>> emailRequired', emailRequired);
 
       // if UniqueCode isset
-      if (
-        (emailAuthTypesEnabled && emailRequired)
-      ) {
-        req.emailRequiredForAuth = true;
-
-        if (req.emailRequiredForAuth && !req.user.email) {
+      if (emailRequired && !req.user.email) {
+        if (emailAuthTypesEnabled) {
+          req.emailRequiredForAuth = true;
           res.redirect(`/login?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri}`);
+        } else {
+          throw new Error('E-mail is required but no auth type enabled that is able to validate it properly');
         }
       } else {
         next();
