@@ -2,7 +2,6 @@ const UniqueCode = require('../models').UniqueCode;
 const generateCode = require('../utils/generateCode');
 
 exports.withAll = (req, res, next) => {
-
   UniqueCode
     .query(function (qb) {
       if (req.query.clientId) {
@@ -22,8 +21,6 @@ exports.withAll = (req, res, next) => {
 
 exports.withOne = (req, res, next) => {
   const codeId = req.body.codeId ? req.body.codeId : req.params.codeId;
-
-  console.lo
 
   new UniqueCode({ id: codeId })
     .fetch()
@@ -45,7 +42,7 @@ exports.create = (req, res, next) => {
     .then((code) => {
       req.codeModel = code;
       req.code = code.serialize();
-      console.log('req.code ', req.code );
+
       next();
     })
     .catch((err) => { next(err); });

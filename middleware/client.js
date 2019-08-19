@@ -135,30 +135,17 @@ exports.checkIfEmailRequired =  (req, res, next) => {
       // the Local & email
       const emailAuthTypesEnabled = authTypes.indexOf('Url') !== -1 ||authTypes.indexOf('Local') !== -1;
       const emailRequired = requiredFields.indexOf('email') !== -1;
-
-      var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
-      console.log('=>>> fullUrl', fullUrl);
+      const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
 
       // if UniqueCode isset
       if (emailRequired && !req.user.email) {
-        console.log('=>>> 1');
-
         if (emailAuthTypesEnabled) {
-          console.log('=>>> 2');
-
           req.emailRequiredForAuth = true;
           res.redirect(`/login?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri}`);
         } else {
-          console.log('=>>> 3');
-
           throw new Error('E-mail is required but no auth type enabled that is able to validate it properly');
         }
-
-        console.log('=>>> 4');
-
       } else {
-        console.log('=>>> 455');
-
         next();
       }
 }

@@ -6,6 +6,7 @@ const saltRounds        = 10;
 const hat               = require('hat');
 const login             = require('connect-ensure-login');
 const User              = require('../../models').User;
+const UserRole          = require('../../models').UserRole;
 const tokenUrl          = require('../../services/tokenUrl');
 const emailService      = require('../../services/email');
 const authCodeConfig    = require('../../config/auth').get(authType);
@@ -41,13 +42,29 @@ exports.postLogin = (req, res, next) => {
     req.logIn(user, function(err) {
       if (err) { return next(err); }
 
+      const redirectToAuthorize = () => {
+        req.brute.reset(() => {
+          const redirectUrl = req.query.redirect_uri ? req.query.redirect_uri : req.client.redirectUrl;
+          // Redirect if it succeeds to authorize screen
+          const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+          return res.redirect(authorizeUrl);
+        });
+      }
 
-      req.brute.reset(() => {
-        const redirectUrl = req.query.redirect_uri ? req.query.redirect_uri : req.client.redirectUrl;
-        // Redirect if it succeeds to authorize screen
-        const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
-        return res.redirect(authorizeUrl);
-      });
+      if (req.client.config.defaultRoleId) {
+        new UserRole({
+          clientId: req.client.id,
+          roleId: req.client.config.defaultRoleId,
+          userId: user.id
+        })
+          .save()
+          .then(() => {
+            redirectToAuthorize();
+          })
+          .catch((err) => { next(err); });
+      } else {
+        redirectToAuthorize();
+      }
 
     });
   })(req, res, next);
