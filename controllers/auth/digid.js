@@ -1,3 +1,6 @@
+/**
+ * NOT WORKING
+ */
 const passport          = require('passport');
 const bcrypt            = require('bcrypt');
 const saltRounds        = 10;

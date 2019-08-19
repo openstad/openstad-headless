@@ -18,6 +18,7 @@ exports.validateLogin = (req, res, next) => {
 }
 
 exports.check = (req, res, next) => {
+
   if (!req.isAuthenticated || !req.isAuthenticated()) {
     let url = '/login?clientId=' + req.client.clientId;
 
@@ -36,6 +37,9 @@ exports.check = (req, res, next) => {
       .then((user) => {
         req.userModel = user;
         req.user = user.serialize();
+
+
+
         next();
       })
       .catch((err) => {
