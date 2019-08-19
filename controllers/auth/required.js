@@ -44,8 +44,6 @@ exports.post = (req, res, next) => {
     .save()
     .then(() => {
       const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
-      console.log('<<<<<+++ authorizeUrl', authorizeUrl);
-
       res.redirect(authorizeUrl);
     })
     .catch((err) => {

@@ -20,6 +20,7 @@ exports.withAll = (req, res, next) => {
 exports.withOne = (req, res, next) => {
   let clientId = req.body && req.body.clientId ? req.body.clientId : req.query.clientId;
 
+
   if (!clientId) {
     clientId = req.query.client_id;
   }
@@ -27,6 +28,14 @@ exports.withOne = (req, res, next) => {
   if (!clientId) {
     clientId = req.params.clientId;
   }
+
+
+  console.log('req.params', req.params);
+  console.log('req.body', req.body);
+  console.log('req.query', req.query);
+  var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+  console.log('=>>> fullUrl ---', fullUrl);
+  console.log('clientIdclientId', clientId);
 
   if (clientId) {
     new Client({ clientId: clientId })
@@ -119,8 +128,7 @@ exports.validate = (req, res, next) => {
   next();
 }
 
-exports.checkIfEmailRequired = (errorCallback) => {
-  return (req, res, next) => {
+exports.checkIfEmailRequired =  (req, res, next) => {
       const requiredFields = req.client.requiredUserFields;
       const authTypes = req.client.authTypes;
 
@@ -128,22 +136,31 @@ exports.checkIfEmailRequired = (errorCallback) => {
       const emailAuthTypesEnabled = authTypes.indexOf('Url') !== -1 ||authTypes.indexOf('Local') !== -1;
       const emailRequired = requiredFields.indexOf('email') !== -1;
 
-
-      console.log('=>>> emailAuthTypesEnabled', emailAuthTypesEnabled);
-      console.log('=>>> emailRequired', emailRequired);
+      var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+      console.log('=>>> fullUrl', fullUrl);
 
       // if UniqueCode isset
       if (emailRequired && !req.user.email) {
+        console.log('=>>> 1');
+
         if (emailAuthTypesEnabled) {
+          console.log('=>>> 2');
+
           req.emailRequiredForAuth = true;
           res.redirect(`/login?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri}`);
         } else {
+          console.log('=>>> 3');
+
           throw new Error('E-mail is required but no auth type enabled that is able to validate it properly');
         }
+
+        console.log('=>>> 4');
+
       } else {
+        console.log('=>>> 455');
+
         next();
       }
-    }
 }
 
 
