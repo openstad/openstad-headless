@@ -1,6 +1,11 @@
 {% extends 'layouts/main.html' %}
 
 {% block body %}
+{#
+	We need to submit the form with Javascript.
+	We can't login automatically otherwise email scanners visit the page and invalidate the login page.
+	Doing it with Javascript prevents the user from needing to do an extra click
+#}
 <div>
 		<div class="upper-box card-body">
 			<noscript>
@@ -29,7 +34,7 @@
 			</form>
 		</div>
 		<br />
-		
+
 		<div class="show-on-load">
 			<h1 class="">Emailadres controleren </h1>
 			<p class="intro">
