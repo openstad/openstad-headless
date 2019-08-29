@@ -3,11 +3,21 @@
 {% block body %}
 <div>
 		<div class="upper-box card-body">
-			<h1 class="">Registreren of inloggen <br /> per e-mail</h1>
+			<h1 class="">
+				{% if title %}
+				 	{{title}}
+				{% else %}
+					Registreren of inloggen <br /> per e-mail
+				{% endif %}
+			</h1>
 			<p class="intro">
-				Je ontvangt per email een link waarmee je kan inloggen.
-				Hierna ben je gelijk ingelogd voor 6 maanden of totdat je uitlogt. <br />
-	      Je hoeft je hiervoor niet apart te registreren.
+				{% if description %}
+					{{description}}
+				{% else %}
+					Je ontvangt per email een link waarmee je kan inloggen.
+					Hierna ben je gelijk ingelogd voor 6 maanden of totdat je uitlogt. <br />
+					Je hoeft je hiervoor niet apart te registreren.
+				{% endif %}
 	    </p>
 			<form
 				method="post"
@@ -17,7 +27,7 @@
 						{% include 'elements/error-flash.html' %}
 
 						<label>
-							Emailadres:
+							{{ label if label else 'Emailadres:' }}
 						</label>
 
 						<input
@@ -31,14 +41,18 @@
 					<input type="hidden" name="_csrf" value="{{csrfToken}}">
 					<input type="hidden" name="clientId" value="{{clientId}}">
 
-					<input type="submit" value="Stuur link" class="btn btn-primary">
+					<input type="submit" value="{{ buttonText if buttonText else 'Stuur link' }}" class="btn btn-primary">
 			</form>
 		</div>
 		<br />
 		<p>
-			Geen mail gekregen na het versturen van de link?
-			Kijk dan in je spam-folder of
-			<a href="mailto:{{clientEmail}}">neem contact met ons op.</a>
+			{% if helpText %}
+				{{helpText | safe}}
+			{% else %}
+				Geen mail gekregen na het versturen van de link?
+				Kijk dan in je spam-folder of
+				<a href="mailto:{{clientEmail}}">neem contact met ons op.</a>
+			{% endif %}
 		</p>
 
 </div>

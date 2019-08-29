@@ -2,6 +2,8 @@
  * Controller responsible for handling the logic for Url login
  * (login in with a link, for now send by e-mail)
  */
+ const authType = 'Url';
+
 const passport          = require('passport');
 const bcrypt            = require('bcrypt');
 const saltRounds        = 10;
@@ -13,10 +15,18 @@ const emailService      = require('../../services/email');
 const authUrlConfig     = require('../../config/auth').get('Url');
 
 exports.login  = (req, res) => {
+  const config = req.client.config ? req.client.config : {};
+  const configAuthType = config.authTypes && config.authTypes[authType] ? config.authTypes[authType] : {};
+
   res.render('auth/url/login', {
     clientId: req.query.clientId,
     client: req.client,
     redirectUrl: req.query.redirect_uri,
+    title: configAuthType.title ? configAuthType.title : authCodeConfig.title,
+    description: configAuthType.description ?  configAuthType.description : authCodeConfig.description,
+    label: configAuthType.label ?  configAuthType.label : authCodeConfig.label,
+    helpText: configAuthType.helpText ? configAuthType.helpText : authCodeConfig.helpText,
+    buttonText: configAuthType.buttonText ? configAuthType.buttonText : authCodeConfig.buttonText,
   });
 };
 

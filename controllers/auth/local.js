@@ -35,10 +35,18 @@
  * @returns {undefined}
  */
 exports.login = (req, res) => {
+  const config = req.client.config ? req.client.config : {};
+  const configAuthType = config.authTypes && config.authTypes[authType] ? config.authTypes[authType] : {};
+
   res.render('auth/local/login', {
     loginUrl: authLocalConfig.loginUrl,
     clientId: req.client.clientId,
     client: req.client,
+    title: configAuthType.title ? configAuthType.title : authCodeConfig.title,
+    description: configAuthType.description ?  configAuthType.description : authCodeConfig.description,
+    label: configAuthType.label ?  configAuthType.label : authCodeConfig.label,
+    helpText: configAuthType.helpText ? configAuthType.helpText : authCodeConfig.helpText,
+    buttonText: configAuthType.buttonText ? configAuthType.buttonText : authCodeConfig.buttonText,
   });
 };
 
