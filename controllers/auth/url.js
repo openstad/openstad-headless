@@ -22,11 +22,11 @@ exports.login  = (req, res) => {
     clientId: req.query.clientId,
     client: req.client,
     redirectUrl: req.query.redirect_uri,
-    title: configAuthType.title ? configAuthType.title : authCodeConfig.title,
-    description: configAuthType.description ?  configAuthType.description : authCodeConfig.description,
-    label: configAuthType.label ?  configAuthType.label : authCodeConfig.label,
-    helpText: configAuthType.helpText ? configAuthType.helpText : authCodeConfig.helpText,
-    buttonText: configAuthType.buttonText ? configAuthType.buttonText : authCodeConfig.buttonText,
+    title: configAuthType && configAuthType.title ? configAuthType.title : false,
+    description: configAuthType && configAuthType.description ?  configAuthType.description : false,
+    label: configAuthType && configAuthType.label ?  configAuthType.label : false,
+    helpText: configAuthType && configAuthType.helpText ? configAuthType.helpText : false,
+    buttonText: configAuthType && configAuthType.buttonText ? configAuthType.buttonText : false,
   });
 };
 
