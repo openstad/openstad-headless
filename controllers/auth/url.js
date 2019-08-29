@@ -72,8 +72,8 @@ const sendEmail = (tokenUrl, user, client) => {
   const emailTemplateString = authTypeConfig.emailTemplate ? authTypeConfig.emailTemplate : false;
   const emailSubject = authTypeConfig.emailSubject ? authTypeConfig.emailSubject : 'Inloggen bij ' + client.name;
   const emailHeaderImage = authTypeConfig.emailHeaderImage ? authTypeConfig.emailHeaderImage : false;
+  const emailLogo = authTypeConfig.emailLogo ? authTypeConfig.emailLogo : false;
 
-  console.log('emailHeaderImage', emailHeaderImage);
 
   return emailService.send({
     toName: (user.firstName + ' ' + user.lastName).trim(),
@@ -88,7 +88,8 @@ const sendEmail = (tokenUrl, user, client) => {
       firstName: user.firstName,
       clientUrl: client.mainUrl,
       clientName: client.name,
-      headerImage: emailHeaderImage
+      headerImage: emailHeaderImage,
+      logo: emailLogo
     }
   });
 }
