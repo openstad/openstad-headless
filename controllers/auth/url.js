@@ -68,19 +68,27 @@ const handleSending = (req, res, next) => {
  */
 const sendEmail = (tokenUrl, user, client) => {
   const clientConfig = client.config ? client.config : {};
+  const authTypeConfig = clientConfig.authTypes && clientConfig.authTypes.Url  ? clientConfig.authTypes.Url  : {};
+  const emailTemplateString = authTypeConfig.emailTemplate ? authTypeConfig.emailTemplate : false;
+  const emailSubject = authTypeConfig.emailSubject ? authTypeConfig.emailSubject : 'Inloggen bij ' + client.name;
+  const emailHeaderImage = authTypeConfig.emailHeaderImage ? authTypeConfig.emailHeaderImage : false;
+
+  console.log('emailHeaderImage', emailHeaderImage);
 
   return emailService.send({
     toName: (user.firstName + ' ' + user.lastName).trim(),
     toEmail: user.email,
     fromEmail: clientConfig.fromEmail,
     fromName: clientConfig.fromName,
-    subject: 'Inloggen bij ' + client.name,
+    subject: emailSubject,
+    templateString: emailTemplateString,
     template: 'emails/login-url.html',
     variables: {
       tokenUrl: tokenUrl,
       firstName: user.firstName,
       clientUrl: client.mainUrl,
       clientName: client.name,
+      headerImage: emailHeaderImage
     }
   });
 }
@@ -183,8 +191,6 @@ exports.postAuthenticate =  (req, res, next) => {
 
    req.logIn(user, function(err) {
      if (err) { return next(err); }
-
-     console.log('useruseruser', user);
 
      return tokenUrl.invalidateTokensForUser(user.id)
       .then((response) => {
