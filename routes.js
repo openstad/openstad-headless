@@ -62,7 +62,6 @@ const emailUrlBruteForce = bruteForce.user.getMiddleware({
   }
 });
 
-
 const csurf = require('csurf');
 
 const csrfProtection = csurf({
@@ -178,7 +177,7 @@ module.exports = function(app){
   app.post('/password', clientMw.withOne, authMw.check, csrfProtection, addCsrfGlobal, userMw.validatePassword, userController.postAccount);
 
   app.use('/auth/required-fields', [authMw.check, clientMw.withOne]);
-  app.get('/auth/required-fields', authRequiredFields.index);
+  app.get('/auth/required-fields',  clientMw.withOne, clientMw.checkIfEmailRequired, authRequiredFields.index);
   app.post('/auth/required-fields', clientMw.withOne, authRequiredFields.post);
 
 

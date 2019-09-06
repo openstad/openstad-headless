@@ -56,7 +56,7 @@ app.use(expressSession({
   secret            : config.session.secret,
 //  store             : new MemoryStore(),
   store             : new FileStore({
-    ttl: 3600 * 24 * 31
+    ttl:    config.session.maxAge      //3600 * 24 * 31
   }),
   key               : 'authorization.sid',
   cookie            : {

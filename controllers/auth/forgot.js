@@ -80,12 +80,12 @@
      .then((url) => { return sendEmail(url, req.user, req.client); })
      .then(() => {
        req.flash('success', {msg: 'We hebben een e-mail naar je verstuurd'});
-       res.redirect(req.header('Referer') || authLocalConfig.loginUrl + '?clientId=' + req.client.clientId);
+       res.redirect(req.header('Referer') || authLocalConfig.loginUrl + '?clientId=' + req.client.clientId + `&redirect_uri=${req.query.redirect_uri}`);
      })
      .catch((err) => {
        console.log('err');
        req.flash('error', {msg: 'E-mail adres is niet bekend bij ons.'});
-       res.redirect(req.header('Referer') || authLocalConfig.loginUrl + '?clientId=' + req.client.clientId);
+       res.redirect(req.header('Referer') || authLocalConfig.loginUrl + '?clientId=' + req.client.clientId + `&redirect_uri=${req.query.redirect_uri}`);
      });
 
    /**

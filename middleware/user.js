@@ -54,8 +54,6 @@ exports.withRoleForClient = (req, res, next) => {
        if (userRole) {
          const roleId = userRole.get('roleId');
 
-         console.log('roleId roleId', roleId);
-
          new Role ({id: roleId})
           .fetch()
           .then((role) => {
@@ -201,14 +199,12 @@ exports.update = (req, res, next) => {
     })
     .catch((err) => {
       console.log('==> update err', err);
-
       next(err);
     });
 }
 
 exports.saveRoles = (req, res, next) => {
   const roles = req.body.roles;
-  console.log('==> roles', roles);
 
   if (!roles) {
     next();
@@ -219,8 +215,6 @@ exports.saveRoles = (req, res, next) => {
     for (clientId in roles) {
       let roleId = roles[clientId];
       let parsedClientId = parseInt(clientId.replace('\'', ''), 10);
-      console.log('==> parsedClientId', parsedClientId);
-
       saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
     }
 

@@ -24,7 +24,7 @@ exports.login  = (req, res, next) => {
 	// catch users that have cookies turned off
 	req.session.createAnonymousUser = true;
 	res.redirect('/auth/anonymous/register?' + queryString)
-	
+
 };
 
 exports.register  = (req, res, next) => {
@@ -34,7 +34,7 @@ exports.register  = (req, res, next) => {
 	if (!req.session.createAnonymousUser) {
 
 		req.flash('error', {msg: 'Cookies zijn onmisbaar op deze site'});
-		return res.redirect(`/auth/anonymous/info?clientId=${req.client.clientId}`);
+		return res.redirect(`/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri}`);
 
 	} else {
 
@@ -46,7 +46,7 @@ exports.register  = (req, res, next) => {
 
 				if (!user) {
 					req.flash('error', {msg: authAnonymousConfig.errorMessage});
-					return res.redirect(`/auth/anonymous/info?clientId=${req.client.clientId}`);
+					return res.redirect(`/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri}`);
 				}
 
 				req.user = user.serialize();
@@ -69,7 +69,7 @@ exports.register  = (req, res, next) => {
 			});
 
 	}
-		
+
 }
 
 exports.info  = (req, res, next) => {
