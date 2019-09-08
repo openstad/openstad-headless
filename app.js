@@ -61,7 +61,7 @@ const sessionConfig = {
     maxAge: config.session.maxAge,
     secure: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
     httpOnly: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
-    sameSite: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true
+    sameSite: false, //process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true
   },
 
 };
