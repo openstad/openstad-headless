@@ -48,9 +48,7 @@ app.use((req, res, next) => {
 });
 */
 
-
-// Session Configuration
-app.use(expressSession({
+const sessionConfig = {
   saveUninitialized : true,
   resave            : true,
   secret            : config.session.secret,
@@ -66,7 +64,12 @@ app.use(expressSession({
     sameSite: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true
   },
 
-}));
+};
+
+//console.log('=>>> sessionConfig', sessionConfig):
+
+// Session Configuration
+app.use(expressSession(sessionConfig));
 
 app.use(flash());
 

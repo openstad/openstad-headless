@@ -55,7 +55,7 @@ exports.db = {
  */
 exports.session = {
   maxAge : 3600000 * 24, //3600000 * 24 * 7 * 52,
-  secret : process.env.SESSION_SECRET, // TODO: You need to change this secret to something that you choose for your secret
+  secret : process.env.SESSION_SECRET
 };
 
 exports.client = {
