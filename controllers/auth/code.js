@@ -52,7 +52,10 @@ exports.postLogin = (req, res, next) => {
         });
       }
 
-      new UserRole({clientId, userId})
+      new UserRole({
+          clientId: req.client.id,
+          userId: user.id
+        })
         .fetch()
         .then((userRole) => {
           if (userRole) {
