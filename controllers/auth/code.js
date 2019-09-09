@@ -52,21 +52,26 @@ exports.postLogin = (req, res, next) => {
         });
       }
 
-      if (req.client.config.defaultRoleId) {
-        new UserRole({
-          clientId: req.client.id,
-          roleId: req.client.config.defaultRoleId,
-          userId: user.id
-        })
-          .save()
-          .then(() => {
+      new UserRole({clientId, userId})
+        .fetch()
+        .then((userRole) => {
+          if (userRole) {
             redirectToAuthorize();
-          })
-          .catch((err) => { next(err); });
-      } else {
-        redirectToAuthorize();
-      }
-
+          } else if (req.client.config.defaultRoleId) {
+            new UserRole({
+              clientId: req.client.id,
+              roleId: req.client.config.defaultRoleId,
+              userId: user.id
+            })
+              .save()
+              .then(() => {
+                redirectToAuthorize();
+              })
+              .catch((err) => { next(err); });
+          } else {
+            redirectToAuthorize();
+          }
+        });
     });
   })(req, res, next);
 }
