@@ -27,6 +27,7 @@ exports.logAnonymous = (req, res, next) => {
     method: 'post',
     name: 'Anonymous',
     value: '',
+    userId: req.user.id,
     clientId: req.client.id,
     ip: ip
   }

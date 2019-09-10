@@ -1,4 +1,5 @@
 const authType = 'Anonymous';
+const ActionLog = require('../../models').ActionLog;
 
 const passport            = require('passport');
 const bcrypt              = require('bcrypt');
@@ -29,8 +30,6 @@ exports.login  = (req, res, next) => {
 
 exports.register  = (req, res, next) => {
 
-	// console.log('ANONYMOUS: REGISTER');
-
 	if (!req.session.createAnonymousUser) {
 
 		req.flash('error', {msg: 'Cookies zijn onmisbaar op deze site'});
@@ -52,12 +51,39 @@ exports.register  = (req, res, next) => {
 				req.user = user.serialize();
 
 				req.logIn(user, function(err) {
-
 					if (err) { return next(err); }
 
-					// Redirect if it succeeds to authorize screen
+					const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+					const values = {
+						method: 'post',
+						name: 'Anonymous',
+						value: '',
+						userId: user.id,
+						clientId: req.client.id,
+						ip: ip
+					}
+
 					const authorizeUrl = `/dialog/authorize?redirect_uri=${req.query.redirect_uri}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
-					return res.redirect(authorizeUrl);
+
+					try {
+						new ActionLog(values)
+							.save()
+							.then(() => {
+								return res.redirect(authorizeUrl);
+							})
+							.catch((err) => {
+								// Redirect if it succeeds to authorize screen
+								return res.redirect(authorizeUrl);
+						//		next(err);
+							});
+					} catch (e) {
+						// Redirect if it succeeds to authorize screen
+
+						return res.redirect(authorizeUrl);
+					}
+
+
 
 				});
 
