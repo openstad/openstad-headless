@@ -1,4 +1,5 @@
 const authType = 'Anonymous';
+const ActionLog = require('../models').ActionLog;
 
 const passport            = require('passport');
 const bcrypt              = require('bcrypt');
@@ -54,6 +55,31 @@ exports.register  = (req, res, next) => {
 				req.logIn(user, function(err) {
 
 					if (err) { return next(err); }
+
+					const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+					const values = {
+						method: 'post',
+						name: 'Anonymous',
+						value: '',
+						userId: req.user.id,
+						clientId: req.client.id,
+						ip: ip
+					}
+
+					try {
+						new ActionLog(values)
+							.save()
+							.then(() => {
+								next();
+							})
+							.catch((err) => {
+								console.log('==> err ', err);
+								next(err);
+							});
+					} catch (e) {
+						console.log('==> errrr ', e);
+					}
 
 					// Redirect if it succeeds to authorize screen
 					const authorizeUrl = `/dialog/authorize?redirect_uri=${req.query.redirect_uri}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
