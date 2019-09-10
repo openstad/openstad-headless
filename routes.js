@@ -143,7 +143,7 @@ module.exports = function(app){
 	 * Auth routes for Anonymous login
 	 */
 	 // shared middleware
-	app.use('/auth/anonymous', [clientMw.withOne, clientMw.setAuthType('Anonymous'), clientMw.validate, csrfProtection, addCsrfGlobal]);
+	app.use('/auth/anonymous', [clientMw.withOne, clientMw.setAuthType('Anonymous'), clientMw.validate, csrfProtection, addCsrfGlobal, logMw.logAnonymous]);
 
 	// routes
 	app.get('/auth/anonymous/info',  authAnonymous.info);
