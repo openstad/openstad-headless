@@ -30,8 +30,6 @@ exports.login  = (req, res, next) => {
 
 exports.register  = (req, res, next) => {
 
-	// console.log('ANONYMOUS: REGISTER');
-
 	if (!req.session.createAnonymousUser) {
 
 		req.flash('error', {msg: 'Cookies zijn onmisbaar op deze site'});
@@ -53,7 +51,6 @@ exports.register  = (req, res, next) => {
 				req.user = user.serialize();
 
 				req.logIn(user, function(err) {
-
 					if (err) { return next(err); }
 
 					const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -66,13 +63,14 @@ exports.register  = (req, res, next) => {
 						clientId: req.client.id,
 						ip: ip
 					}
+
 					const authorizeUrl = `/dialog/authorize?redirect_uri=${req.query.redirect_uri}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
 					try {
 						new ActionLog(values)
 							.save()
 							.then(() => {
-								next();
+								return res.redirect(authorizeUrl);
 							})
 							.catch((err) => {
 								// Redirect if it succeeds to authorize screen
@@ -81,7 +79,7 @@ exports.register  = (req, res, next) => {
 							});
 					} catch (e) {
 						// Redirect if it succeeds to authorize screen
-						console.log('eee', e);
+
 						return res.redirect(authorizeUrl);
 					}
 
