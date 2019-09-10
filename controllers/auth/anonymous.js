@@ -62,7 +62,7 @@ exports.register  = (req, res, next) => {
 						method: 'post',
 						name: 'Anonymous',
 						value: '',
-						userId: req.user.id,
+						userId: user.id,
 						clientId: req.client.id,
 						ip: ip
 					}
@@ -74,16 +74,18 @@ exports.register  = (req, res, next) => {
 								next();
 							})
 							.catch((err) => {
-								console.log('==> err ', err);
-								next(err);
+								// Redirect if it succeeds to authorize screen
+								const authorizeUrl = `/dialog/authorize?redirect_uri=${req.query.redirect_uri}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+								return res.redirect(authorizeUrl);
+						//		next(err);
 							});
 					} catch (e) {
-						console.log('==> errrr ', e);
+						// Redirect if it succeeds to authorize screen
+						const authorizeUrl = `/dialog/authorize?redirect_uri=${req.query.redirect_uri}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+						return res.redirect(authorizeUrl);
 					}
 
-					// Redirect if it succeeds to authorize screen
-					const authorizeUrl = `/dialog/authorize?redirect_uri=${req.query.redirect_uri}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
-					return res.redirect(authorizeUrl);
+
 
 				});
 
