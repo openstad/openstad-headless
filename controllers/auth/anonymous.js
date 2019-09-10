@@ -66,6 +66,7 @@ exports.register  = (req, res, next) => {
 						clientId: req.client.id,
 						ip: ip
 					}
+					const authorizeUrl = `/dialog/authorize?redirect_uri=${req.query.redirect_uri}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
 					try {
 						new ActionLog(values)
@@ -75,13 +76,12 @@ exports.register  = (req, res, next) => {
 							})
 							.catch((err) => {
 								// Redirect if it succeeds to authorize screen
-								const authorizeUrl = `/dialog/authorize?redirect_uri=${req.query.redirect_uri}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 								return res.redirect(authorizeUrl);
 						//		next(err);
 							});
 					} catch (e) {
 						// Redirect if it succeeds to authorize screen
-						const authorizeUrl = `/dialog/authorize?redirect_uri=${req.query.redirect_uri}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+						console.log('eee', e);
 						return res.redirect(authorizeUrl);
 					}
 
