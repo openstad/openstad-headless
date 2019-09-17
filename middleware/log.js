@@ -20,6 +20,8 @@ exports.logAction = (action) => {
   }
 }
 
+/*
+currently done directly in the controllers
 exports.logAnonymous = (req, res, next) => {
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
@@ -46,6 +48,7 @@ exports.logAnonymous = (req, res, next) => {
     console.log('==> errrr ', e);
   }
 }
+*/
 
 exports.logPostUniqueCode = (req, res, next) => {
       const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -58,6 +61,32 @@ exports.logPostUniqueCode = (req, res, next) => {
         ip: ip
       }
 
+
+      try {
+        new ActionLog(values)
+          .save()
+          .then(() => {
+            next();
+          })
+          .catch((err) => {
+            console.log('==> err ', err);
+            next(err);
+          });
+      } catch (e) {
+        console.log('==> errrr ', e);
+      }
+}
+
+exports.logPostUrlLogin = (req, res, next) => {
+      const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+      const values = {
+        method: 'post',
+        name: 'Url',
+        value: 'login',
+        clientId: req.client.id,
+        ip: ip
+      };
 
       try {
         new ActionLog(values)

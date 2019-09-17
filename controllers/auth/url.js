@@ -10,9 +10,26 @@ const saltRounds        = 10;
 const hat               = require('hat');
 const login             = require('connect-ensure-login');
 const User              = require('../../models').User;
+const ActionLog         = require('../../models').ActionLog;
 const tokenUrl          = require('../../services/tokenUrl');
 const emailService      = require('../../services/email');
 const authUrlConfig     = require('../../config/auth').get('Url');
+
+
+const logSuccessFullLogin = (req) => {
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+  const values = {
+    method: 'post',
+    name: 'Url',
+    value: 'login',
+    clientId: req.client.id,
+    userId: req.user.id,
+    ip: ip
+  };
+
+  return new ActionLog(values).save();
+}
 
 exports.login  = (req, res) => {
   const config = req.client.config ? req.client.config : {};
@@ -147,9 +164,6 @@ exports.postLogin = (req, res, next) => {
     /**
      * Format the URL and the Send it to the user
      */
-
-
-
 }
 
 
@@ -195,13 +209,19 @@ exports.postAuthenticate =  (req, res, next) => {
 
      return tokenUrl.invalidateTokensForUser(user.id)
       .then((response) => {
-        req.brute.reset(() => {
-            // Redirect if it succeeds to authorize screen
-            //check if allowed url will be done by authorize screen
-            const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+        const redirectToAuthorisation = () => {
+          // Redirect if it succeeds to authorize screen
+          //check if allowed url will be done by authorize screen
+          const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+          return res.redirect(authorizeUrl);
+        }
 
-            return res.redirect(authorizeUrl);
-          });
+        req.brute.reset(() => {
+            //log the succesfull login
+            logSuccessFullLogin(req)
+              .then (() => { redirectToAuthorisation(); })
+              .catch (() => { redirectToAuthorisation(); });
+        });
       })
       .catch((err) => {
         next(err);

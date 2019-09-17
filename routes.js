@@ -11,12 +11,10 @@ const adminUserController      = require('./controllers/admin/user');
 const adminClientController    = require('./controllers/admin/client');
 const adminRoleController      = require('./controllers/admin/role');
 const adminCodeController      = require('./controllers/admin/code');
-
 const adminApiUserController          = require('./controllers/admin/api/user');
 const adminApiClientController        = require('./controllers/admin/api/client');
 const adminApiRoleController          = require('./controllers/admin/api/role');
 const adminApiUniqueCodeController    = require('./controllers/admin/api/uniqueCode');
-
 
 //AUTH CONTROLLERS
 const authChoose	 						 = require('./controllers/auth/choose');
@@ -43,21 +41,21 @@ const logMw                    = require('./middleware/log');
 
 const loginBruteForce = bruteForce.user.getMiddleware({
   key: function(req, res, next) {
-      // prevent too many attempts for the same username
+      // prevent too many attempts for the same email
       next(req.body.email);
   }
 });
 
 const uniqueCodeBruteForce = bruteForce.user.getMiddleware({
   key: function(req, res, next) {
-      // prevent too many attempts for the same username
+      // prevent too many attempts for the same unique_code
       next('unique_code');
   }
 });
 
 const emailUrlBruteForce = bruteForce.user.getMiddleware({
   key: function(req, res, next) {
-      // prevent too many attempts for the same username
+      // prevent too many attempts for the same email
       next(req.body.email);
   }
 });
@@ -128,8 +126,6 @@ module.exports = function(app){
 	app.post('/auth/url/login',         emailUrlBruteForce, authUrl.postLogin);
   app.get('/auth/url/authenticate',   authUrl.authenticate);
 	app.post('/auth/url/authenticate',   emailUrlBruteForce, authUrl.postAuthenticate);
-	//app.get('/auth/url/register',      authUrl.register);
-	//app.post('/auth/url/register',     authUrl.postRegister);
 
 	/**
 	 * Auth routes for DigiD
@@ -161,7 +157,6 @@ module.exports = function(app){
 	 * Register extra info;
 	 * In case client specifies required fields
 	 */
-//	app.get('/register/info')
 
 	/**
 	 * Logout (all types :))
@@ -216,9 +211,7 @@ module.exports = function(app){
   app.post('/admin/user',         adminUserController.create);
   app.post('/admin/user/:userId', userMw.withOne, adminUserController.update);
 
-
   require('./routes/adminApi')(app);
-
 
   /**
    * Admin client routes

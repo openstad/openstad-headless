@@ -54,7 +54,7 @@ exports.db = {
  * secret - The session secret that you should change to what you want
  */
 exports.session = {
-  maxAge : 3600000 * 24, //3600000 * 24 * 7 * 52,
+  maxAge : 3600000 * 24 * 7, //3600000 * 24 * 7 * 52,
   secret : process.env.SESSION_SECRET
 };
 
