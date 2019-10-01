@@ -243,7 +243,6 @@ exports.update = (req, res, next) => {
   req.clientModel
     .save()
     .then((client) => {
-      console.log('update success');
       next();
     })
     .catch((err) => {
