@@ -30,13 +30,6 @@ exports.withOne = (req, res, next) => {
   }
 
 
-  console.log('req.params', req.params);
-  console.log('req.body', req.body);
-  console.log('req.query', req.query);
-  var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
-  console.log('=>>> fullUrl ---', fullUrl);
-  console.log('clientIdclientId', clientId);
-
   if (clientId) {
     new Client({ clientId: clientId })
     .fetch()
