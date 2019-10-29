@@ -80,8 +80,6 @@ app.use(passport.session());
 app.use(expressValidator());
 
 
-
-
 // Passport configuration
 require('./auth');
 
