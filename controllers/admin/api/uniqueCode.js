@@ -13,8 +13,10 @@ exports.show = [
   outputUniqueCode
 ];
 
-exports.create = [
-  outputUniqueCode
+exports.created = [
+  (req, res, next) => {
+    res.json({'message': 'Success'})
+  }
 ];
 
 exports.update = [

@@ -54,18 +54,32 @@ exports.withOne = (req, res, next) => {
 
 
 exports.create = (req, res, next) => {
-    new UniqueCode({
-      code: generateCode(),
-      clientId: req.client.id
-    })
-    .save()
-    .then((code) => {
-      req.codeModel = code;
-      req.code = code.serialize();
+  const promises = [];
+  const amountOfCodes = req.query.amount ? req.query.amount : 1;
 
+  // make a promise for every code to be created
+  for (let i = 0; i < amountOfCodes; i++) {
+    promises.push(
+      new UniqueCode({
+        code: generateCode(),
+        clientId: req.client.id
+      })
+      .save()
+    )
+  };
+
+  /**
+   * Execute all promises
+   */
+  Promise.all(promises)
+    .then(function (response) {
+      //req.codeModel = code;
+      //req.code = code.serialize();
       next();
     })
-    .catch((err) => { next(err); });
+    .catch(function (err) {
+      next(err)
+    });
 }
 
 
