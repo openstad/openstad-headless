@@ -182,11 +182,7 @@ module.exports = function(app){
   app.post('/dialog/authorize/decision',  clientMw.withOne, clientMw.checkUniqueCodeAuth(),  bruteForce.global.prevent, oauth2Controller.decision);
   app.post('/oauth/token',                oauth2Controller.token);
   app.get('/oauth/token',                 oauth2Controller.token);
-//   clientMw.withOne,
-//clientMw.withOne, bruteForce.global.prevent,
 
-
-//
   app.get('/api/userinfo', passport.authenticate('bearer', { session: false }), clientMw.withOne, clientMw.checkUniqueCodeAuth(),   userMw.withRoleForClient, userController.info);
   //app.get('/api/clientinfo', client.info);
 

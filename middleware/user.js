@@ -96,9 +96,7 @@ exports.validateUser = (req, res, next) => {
     if (field.required) {
       fields.not().isEmpty();
     }
-
-    console.log('fields', field);
-
+    
     if (field.maxLength) {
       fields.isLength({ maxLength: fields.maxLength });
     }
