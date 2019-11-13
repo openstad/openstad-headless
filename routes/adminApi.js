@@ -28,13 +28,13 @@ module.exports = (app) => {
   app.post('/api/admin/user/:userId',         userMw.withOne, userMw.update, userMw.saveRoles, adminApiUserController.update);
   app.post('/api/admin/user/:userId/delete',  userMw.withOne, userMw.deleteOne, adminApiUserController.delete);
 
-  app.get('/api/admin/clients',               clientMw.withAll, adminApiClientController.all);
-  app.get('/api/admin/client/:clientId',      clientMw.withOne, adminApiClientController.show);
-  app.post('/api/admin/client',               clientMw.create,  adminApiClientController.create);
-  app.post('/api/admin/client/:clientId',     clientMw.withOne, clientMw.update, adminApiClientController.update);
-  app.post('/api/admin/client/:clientId/delete',  clientMw.withOne, clientMw.deleteOne, adminApiClientController.delete);
+  app.get('/api/admin/clients',                     clientMw.withAll, adminApiClientController.all);
+  app.get('/api/admin/client/:clientId',            clientMw.withOne, adminApiClientController.show);
+  app.post('/api/admin/client',                     clientMw.create,  adminApiClientController.create);
+  app.post('/api/admin/client/:clientId',           clientMw.withOne, clientMw.update, adminApiClientController.update);
+  app.post('/api/admin/client/:clientId/delete',    clientMw.withOne, clientMw.deleteOne, adminApiClientController.delete);
 
-  app.get('/api/admin/roles', roleMw.withAll, adminApiRoleController.all);
+  app.get('/api/admin/roles',                       roleMw.withAll, adminApiRoleController.all);
 
   app.get('/api/admin/unique-codes',                clientMw.withOne,     codeMw.withAll,   adminApiUniqueCodeController.all);
   app.get('/api/admin/unique-code/:codeId',         clientMw.withOne,     codeMw.withOne,   adminApiUniqueCodeController.show);
