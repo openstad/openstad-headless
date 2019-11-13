@@ -213,11 +213,17 @@ exports.saveRoles = (req, res, next) => {
 
     console.log('roles', roles)
 
-    for (clientId in roles) {
+
+    Object.keys(roles).forEach((clientId) => {
+      console.log('clientId', clientId)
+
       let roleId = roles[clientId];
       let parsedClientId = parseInt(clientId.replace('\'', ''), 10);
+      console.log('parsedClientId', parsedClientId)
+
       saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
-    }
+    });
+
 
     Promise
       .map(saveRoles, saveRole => saveRole())
