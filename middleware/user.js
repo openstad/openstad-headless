@@ -96,7 +96,7 @@ exports.validateUser = (req, res, next) => {
     if (field.required) {
       fields.not().isEmpty();
     }
-    
+
     if (field.maxLength) {
       fields.isLength({ maxLength: fields.maxLength });
     }
@@ -209,6 +209,9 @@ exports.saveRoles = (req, res, next) => {
   } else {
     const userId = req.userObject.id;
     const saveRoles = [];
+
+
+    console.log('roles', roles)
 
     for (clientId in roles) {
       let roleId = roles[clientId];
