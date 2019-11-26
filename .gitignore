@@ -77,3 +77,6 @@ images
 
 # Serverless directories
 .serverless
+
+# certs
+certs/
