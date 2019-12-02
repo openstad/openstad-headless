@@ -10,13 +10,47 @@ const Promise               = require('bluebird');
 
 
 exports.withAll = (req, res, next) => {
+
+  console.log('withAll')
+
   User
+    .query(function (qb) {
+      const limit = req.query.limit ? parseInt(req.query.limit, 10) : 1000;
+      const offset = req.query.offset ? parseInt(req.query.offset, 10) : 0;
+      const search = req.query.search ? req.query.search : false;
+      
+      if (req.query.clientId) {
+        qb.where('clientId',  req.client.id);
+      }
+
+      if (search) {
+        qb.where('email', 'like', '%' +search+ '%')
+          .orWhere('firstName', 'like', '%' +search+ '%')
+          .orWhere('lastName', 'like', '%' +search+ '%');
+      }
+
+      qb.limit(limit);
+      qb.offset(offset);
+      qb.orderBy('id', 'DESC');
+
+    })
     .fetchAll()
     .then((response) => {
-      req.users = response.serialize();
+      console.log('response', response.length)
+
+       req.usersCollection = response;
+       req.users = response.serialize();
+
+       return User.count("id");
+    })
+    .then((total) => {
+      console.log('totaltotal', total)
+
+      req.totalCodeCount = total;
       next();
     })
     .catch((err) => {
+      console.log('error', err)
       next(err);
     });
 }
