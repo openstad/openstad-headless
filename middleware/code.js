@@ -15,6 +15,7 @@ exports.withAll = (req, res, next) => {
       if (search) {
         qb.where('code', 'like', '%' +search+ '%')
       }
+
       qb.limit(limit);
       qb.offset(offset);
       qb.orderBy('id', 'DESC');
