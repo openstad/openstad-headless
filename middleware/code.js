@@ -83,7 +83,20 @@ exports.create = (req, res, next) => {
     });
 }
 
+exports.reset = (req, res, next) => {
+  const { userId } = req.body;
+  req.codeModel.set('userId', null);
 
+  req.codeModel
+    .save()
+    .then((code) => {
+      next();
+    })
+    .catch((err) => {
+      console.log('update err', err);
+      next(err);
+    })
+}
 
 exports.deleteOne = (req, res, next) => {
   req.codeModel

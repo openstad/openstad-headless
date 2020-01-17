@@ -1,5 +1,5 @@
 const outputUniqueCode = (req, res, next) => {
-  res.json(req.uniqueCode);
+  res.json(req.code);
 };
 
 exports.all = (req, res, next) => {
@@ -20,6 +20,10 @@ exports.created = [
 ];
 
 exports.update = [
+  outputUniqueCode
+];
+
+exports.reset = [
   outputUniqueCode
 ];
 

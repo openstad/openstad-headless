@@ -20,7 +20,6 @@ exports.withAll = (req, res, next) => {
 exports.withOne = (req, res, next) => {
   let clientId = req.body && req.body.clientId ? req.body.clientId : req.query.clientId;
 
-
   if (!clientId) {
     clientId = req.query.client_id;
   }
@@ -28,7 +27,6 @@ exports.withOne = (req, res, next) => {
   if (!clientId) {
     clientId = req.params.clientId;
   }
-
 
   if (clientId) {
     new Client({ clientId: clientId })
