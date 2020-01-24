@@ -19,8 +19,9 @@ exports.login  = (req, res, next) => {
 
 	// console.log('ANONYMOUS: LOGIN');
 
-	let queryString = url.parse(req.url).query;
 
+	let queryString = url.parse(req.url).query;
+  
 	// catch users that have cookies turned off
 	req.session.createAnonymousUser = true;
 	res.redirect('/auth/anonymous/register?' + queryString)
@@ -56,7 +57,7 @@ exports.register  = (req, res, next) => {
 					if (err) { return next(err); }
 
 					// Redirect if it succeeds to authorize screen
-					const authorizeUrl = `/dialog/authorize?redirect_uri=${req.query.redirect_uri}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+					const authorizeUrl = `/dialog/authorize?redirect_uri=${encodeURIComponent(req.query.redirect_uri)}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 					return res.redirect(authorizeUrl);
 
 				});
