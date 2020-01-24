@@ -4,22 +4,34 @@ $(function() {
   initRemoveErrorLabelOnType();
 });
 
-/*
-
-
- */
-
 
  $.validator.addMethod("postcodeNL", function(value, element, val) {
     var rege = /^[1-9][0-9]{3} ?(?!sa|sd|ss)[a-z]{2}$/i;
-
-     return rege.test(value);
+    return rege.test(value);
  }, "Postcode niet correct");
 
 function initFormsValidation () {
   $('.validate-form').each(function () {
     $(this).validate({
       rules : {
+        firstName : {
+          minlength: 1,
+          normalizer: function(value) {
+                // Update the value of the element
+                this.value = $.trim(value);
+                // Use the trimmed value for validation
+                return this.value;
+            }
+        },
+        lastName : {
+          minlength: 1,
+          normalizer: function(value) {
+                // Update the value of the element
+                this.value = $.trim(value);
+                // Use the trimmed value for validation
+                return this.value;
+            }
+        },
         password : {
             minlength : 5
         },

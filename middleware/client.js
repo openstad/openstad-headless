@@ -29,13 +29,6 @@ exports.withOne = (req, res, next) => {
     clientId = req.params.clientId;
   }
 
-  // console.log('req.params', req.params);
-  // console.log('req.body', req.body);
-  // console.log('req.query', req.query);
-  var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
-  // console.log('=>>> fullUrl ---', fullUrl);
-  // console.log('clientIdclientId', clientId);
-
   if (clientId) {
     new Client({ clientId: clientId })
     .fetch()
@@ -249,7 +242,6 @@ exports.update = (req, res, next) => {
   req.clientModel
     .save()
     .then((client) => {
-      console.log('update success');
       next();
     })
     .catch((err) => {

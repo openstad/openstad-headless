@@ -8,6 +8,7 @@ Authorization Server
  - [Node.js and npm](https://nodejs.org/en/)
  - [MySQL](https://www.mysql.com/)
  - [KnexJS](https://knexjs.org)
+ - OpenSSL
 
 ## Installation
 
@@ -48,23 +49,32 @@ FROM_EMAIL=
 npm i
 ```
 
-#### 3. Install KnexJS globally
+#### 3. Generate certificates with openssl (used for signing JSON tokens)
+```
+openssl genrsa -out privatekey.pem 2048
+openssl req -new -key privatekey.pem -out certrequest.csr
+openssl x509 -req -in certrequest.csr -signkey privatekey.pem -out certificate.pem
+```
+
+Put them in a dir called /certs. Code expects certs/privatekey.pem.
+
+#### 4. Install KnexJS globally
 
 ```
 npm i knex -g
 ```
 
-#### 4. Run Knex migrations
+#### 5. Run Knex migrations
 ```
 knex migrate:latest
 ```
 
-#### 5. Run Knex seeds
+#### 6. Run Knex seeds
 ```
 knex seed:run
 ```
 
-#### 6. Login with token
+#### 7. Login with token
 After generating the token the console outputs. If you miss this you can find this in the mysql table: unique_codes (should just be one row). This code will allow you to login with a unique token. After you will be asked. You can change the login options at the client screen.
 
 ## Integration with external sites

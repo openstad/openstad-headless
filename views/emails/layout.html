@@ -370,7 +370,17 @@
                                 <table border="0" align="left" cellpadding="0" cellspacing="0" width="600" id="templateHeader">
                                       <tr>
                                           <td align="left" class="headerContent" style="padding: 10px 50px;">
-                                            <img src="{{emailAssetsUrl}}/logo.png" width="170" height="26" id="headerImage campaign-icon" />
+
+                                            <img
+                                              {% if logo %}
+                                              src="{{logo}}"
+                                              {% else %}
+                                              src="{{emailAssetsUrl}}/logo-small.png"
+                                              {% endif %}
+                                              width="99"
+                                              height="70"
+                                              id="headerImage campaign-icon"
+                                            />
 
                                             <!-- // Begin Module: Standard Header Image \\ -->                                            <!-- // End Module: Standard Header Image \\ -->
 
@@ -390,7 +400,11 @@
 
                                             	<!-- // Begin Module: Standard Header Image \\ -->
                                             	<img
+                                                {% if headerImage %}
+                                                src="{{headerImage}}"
+                                                {% else %}
                                                 src="{{emailAssetsUrl}}/mail-header.jpg"
+                                                {% endif %}
                                                 width="600"
                                                 height="193"
                                                 style="max-width:600px;"

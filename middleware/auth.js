@@ -37,9 +37,6 @@ exports.check = (req, res, next) => {
       .then((user) => {
         req.userModel = user;
         req.user = user.serialize();
-
-
-
         next();
       })
       .catch((err) => {

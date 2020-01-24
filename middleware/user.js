@@ -10,13 +10,47 @@ const Promise               = require('bluebird');
 
 
 exports.withAll = (req, res, next) => {
+
+  console.log('withAll')
+
   User
+    .query(function (qb) {
+      const limit = req.query.limit ? parseInt(req.query.limit, 10) : 1000;
+      const offset = req.query.offset ? parseInt(req.query.offset, 10) : 0;
+      const search = req.query.search ? req.query.search : false;
+      
+      if (req.query.clientId) {
+        qb.where('clientId',  req.client.id);
+      }
+
+      if (search) {
+        qb.where('email', 'like', '%' +search+ '%')
+          .orWhere('firstName', 'like', '%' +search+ '%')
+          .orWhere('lastName', 'like', '%' +search+ '%');
+      }
+
+      qb.limit(limit);
+      qb.offset(offset);
+      qb.orderBy('id', 'DESC');
+
+    })
     .fetchAll()
     .then((response) => {
-      req.users = response.serialize();
+      console.log('response', response.length)
+
+       req.usersCollection = response;
+       req.users = response.serialize();
+
+       return User.count("id");
+    })
+    .then((total) => {
+      console.log('totaltotal', total)
+
+      req.totalCodeCount = total;
       next();
     })
     .catch((err) => {
+      console.log('error', err)
       next(err);
     });
 }
@@ -53,8 +87,6 @@ exports.withRoleForClient = (req, res, next) => {
 
        if (userRole) {
          const roleId = userRole.get('roleId');
-
-         console.log('roleId roleId', roleId);
 
          new Role ({id: roleId})
           .fetch()
@@ -98,8 +130,6 @@ exports.validateUser = (req, res, next) => {
     if (field.required) {
       fields.not().isEmpty();
     }
-
-    console.log('fields', field);
 
     if (field.maxLength) {
       fields.isLength({ maxLength: fields.maxLength });
@@ -201,14 +231,12 @@ exports.update = (req, res, next) => {
     })
     .catch((err) => {
       console.log('==> update err', err);
-
       next(err);
     });
 }
 
 exports.saveRoles = (req, res, next) => {
   const roles = req.body.roles;
-  console.log('==> roles', roles);
 
   if (!roles) {
     next();
@@ -216,13 +244,12 @@ exports.saveRoles = (req, res, next) => {
     const userId = req.userObject.id;
     const saveRoles = [];
 
-    for (clientId in roles) {
+    Object.keys(roles).forEach((clientId) => {
       let roleId = roles[clientId];
       let parsedClientId = parseInt(clientId.replace('\'', ''), 10);
-      console.log('==> parsedClientId', parsedClientId);
-
       saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
-    }
+    });
+
 
     Promise
       .map(saveRoles, saveRole => saveRole())

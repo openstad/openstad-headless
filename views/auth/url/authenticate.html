@@ -1,16 +1,25 @@
 {% extends 'layouts/main.html' %}
 
 {% block body %}
+{#
+	We need to submit the form with Javascript.
+	We can't login automatically otherwise email scanners visit the page and invalidate the login page.
+	Doing it with Javascript prevents the user from needing to do an extra click
+#}
 <div>
 		<div class="upper-box card-body">
-			<h1 class="">Inloggen</h1>
-			<p class="intro">
-				Je kunt eenmalig inloggen met deze link.
-				De e-mail vanuit waar je deze link hebt geopend kun je hierna verwijderen.
-				Deze link is 60 minuten geldig.
-	    </p>
+			<noscript>
+				<h1 class="">Inloggen</h1>
+				<p class="intro">
+					Je kunt eenmalig inloggen met deze link.
+					De e-mail vanuit waar je deze link hebt geopend kun je hierna verwijderen.
+					Deze link is 60 minuten geldig.
+		    </p>
+			</noscript>
+
 			<form
 				method="post"
+				id="auth-form"
 				action=""
 			>
 					<div class="form-group">
@@ -18,11 +27,31 @@
 					</div>
 					<input type="hidden" name="_csrf" value="{{csrfToken}}">
 					<input type="hidden" name="clientId" value="{{clientId}}">
+					<noscript>
 					<input type="submit" value="Inloggen" class="btn btn-primary">
+					</noscript>
+
 			</form>
 		</div>
 		<br />
 
+		<noscript>
+		<div style="display: none">
+		</noscript>
+
+		<div class="show-on-load">
+			<h1 class="">Emailadres controleren </h1>
+			<p class="intro">
+				Een moment geduld, we controleren je emailadres. Je wordt automatisch doorgestuurd naar de website waar je vandaan kwam.
+			</p>
+			<img src="/img/loader.svg" class="loader-spinner" width="50" height="50" />
+		</div>
+		<noscript>
+		</div>
+		</noscript>
+		<script>
+			document.getElementById("auth-form").submit();
+		</script>
 
 </div>
 {% endblock %}

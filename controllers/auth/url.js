@@ -2,21 +2,48 @@
  * Controller responsible for handling the logic for Url login
  * (login in with a link, for now send by e-mail)
  */
+ const authType = 'Url';
+
 const passport          = require('passport');
 const bcrypt            = require('bcrypt');
 const saltRounds        = 10;
 const hat               = require('hat');
 const login             = require('connect-ensure-login');
 const User              = require('../../models').User;
+const ActionLog         = require('../../models').ActionLog;
 const tokenUrl          = require('../../services/tokenUrl');
 const emailService      = require('../../services/email');
 const authUrlConfig     = require('../../config/auth').get('Url');
 
+
+const logSuccessFullLogin = (req) => {
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+  const values = {
+    method: 'post',
+    name: 'Url',
+    value: 'login',
+    clientId: req.client.id,
+    userId: req.user.id,
+    ip: ip
+  };
+
+  return new ActionLog(values).save();
+}
+
 exports.login  = (req, res) => {
+  const config = req.client.config ? req.client.config : {};
+  const configAuthType = config.authTypes && config.authTypes[authType] ? config.authTypes[authType] : {};
+
   res.render('auth/url/login', {
     clientId: req.query.clientId,
     client: req.client,
     redirectUrl: encodeURIComponent(req.query.redirect_uri),
+    title: configAuthType && configAuthType.title ? configAuthType.title : false,
+    description: configAuthType && configAuthType.description ?  configAuthType.description : false,
+    label: configAuthType && configAuthType.label ?  configAuthType.label : false,
+    helpText: configAuthType && configAuthType.helpText ? configAuthType.helpText : false,
+    buttonText: configAuthType && configAuthType.buttonText ? configAuthType.buttonText : false,
   });
 };
 
@@ -58,19 +85,28 @@ const handleSending = (req, res, next) => {
  */
 const sendEmail = (tokenUrl, user, client) => {
   const clientConfig = client.config ? client.config : {};
+  const authTypeConfig = clientConfig.authTypes && clientConfig.authTypes.Url  ? clientConfig.authTypes.Url  : {};
+  const emailTemplateString = authTypeConfig.emailTemplate ? authTypeConfig.emailTemplate : false;
+  const emailSubject = authTypeConfig.emailSubject ? authTypeConfig.emailSubject : 'Inloggen bij ' + client.name;
+  const emailHeaderImage = authTypeConfig.emailHeaderImage ? authTypeConfig.emailHeaderImage : false;
+  const emailLogo = authTypeConfig.emailLogo ? authTypeConfig.emailLogo : false;
+
 
   return emailService.send({
     toName: (user.firstName + ' ' + user.lastName).trim(),
     toEmail: user.email,
     fromEmail: clientConfig.fromEmail,
     fromName: clientConfig.fromName,
-    subject: 'Inloggen bij ' + client.name,
+    subject: emailSubject,
+    templateString: emailTemplateString,
     template: 'emails/login-url.html',
     variables: {
       tokenUrl: tokenUrl,
       firstName: user.firstName,
       clientUrl: client.mainUrl,
       clientName: client.name,
+      headerImage: emailHeaderImage,
+      logo: emailLogo
     }
   });
 }
@@ -128,9 +164,6 @@ exports.postLogin = (req, res, next) => {
     /**
      * Format the URL and the Send it to the user
      */
-
-
-
 }
 
 
@@ -174,17 +207,21 @@ exports.postAuthenticate =  (req, res, next) => {
    req.logIn(user, function(err) {
      if (err) { return next(err); }
 
-     console.log('useruseruser', user);
-
      return tokenUrl.invalidateTokensForUser(user.id)
       .then((response) => {
-        req.brute.reset(() => {
-            // Redirect if it succeeds to authorize screen
-            //check if allowed url will be done by authorize screen
-            const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+        const redirectToAuthorisation = () => {
+          // Redirect if it succeeds to authorize screen
+          //check if allowed url will be done by authorize screen
+          const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+          return res.redirect(authorizeUrl);
+        }
 
-            return res.redirect(authorizeUrl);
-          });
+        req.brute.reset(() => {
+            //log the succesfull login
+            logSuccessFullLogin(req)
+              .then (() => { redirectToAuthorisation(); })
+              .catch (() => { redirectToAuthorisation(); });
+        });
       })
       .catch((err) => {
         next(err);

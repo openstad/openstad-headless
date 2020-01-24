@@ -83,9 +83,13 @@ exports.update = (req, res, next) => {
 
   const saveRoles = [];
 
+
+  console.log('roles', roles)
+
   for (clientId in roles) {
     let roleId = roles[clientId];
     let parsedClientId = parseInt(clientId.replace('\'', ''), 10);
+    console.log('parsedClientId', parsedClientId)
     saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
   }
 

@@ -48,25 +48,28 @@ app.use((req, res, next) => {
 });
 */
 
-
-// Session Configuration
-app.use(expressSession({
+const sessionConfig = {
   saveUninitialized : true,
   resave            : true,
   secret            : config.session.secret,
 //  store             : new MemoryStore(),
   store             : new FileStore({
-    ttl: 3600 * 24 * 31
+    ttl:    config.session.maxAge      //3600 * 24 * 31
   }),
   key               : 'authorization.sid',
   cookie            : {
     maxAge: config.session.maxAge,
     secure: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
     httpOnly: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
-    sameSite: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true
+    sameSite: false, //process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true
   },
 
-}));
+};
+
+//console.log('=>>> sessionConfig', sessionConfig):
+
+// Session Configuration
+app.use(expressSession(sessionConfig));
 
 app.use(flash());
 
@@ -75,8 +78,6 @@ app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(expressValidator());
-
-
 
 
 // Passport configuration
@@ -97,15 +98,6 @@ setInterval(() => {
     .catch(err => console.error('Error trying to remove expired tokens:', err.stack));
 }, config.db.timeToCheckExpiredTokens * 1000);
 
-// TODO: Change these for your own certificates.  This was generated through the commands:
-// openssl genrsa -out privatekey.pem 2048
-// openssl req -new -key privatekey.pem -out certrequest.csr
-// openssl x509 -req -in certrequest.csr -signkey privatekey.pem -out certificate.pem
-const options = {
-  key  : fs.readFileSync(path.join(__dirname, 'certs/privatekey.pem')),
-  cert : fs.readFileSync(path.join(__dirname, 'certs/certificate.pem')),
-};
-
 // Set the ip-address of your trusted reverse proxy server such as
 // haproxy or Apache mod proxy or nginx configured as proxy or others.
 // The proxy server should insert the ip address of the remote client
@@ -114,9 +106,6 @@ const options = {
 // Insertion of the forward header is an option on most proxy software
 app.set('trust proxy', '127.0.0.1');
 
-
-// Create our HTTPS server listening on port 3000.
-//https.createServer(options, app).listen(3000);
 
 // for dev allow http
 app.listen(app.get('port'), function() {

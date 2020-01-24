@@ -3,7 +3,10 @@ const outputUser = (req, res, next) => {
 };
 
 exports.all = (req, res, next) => {
-  res.json(req.users);
+  res.json({
+    total: req.totalCodeCount,
+    data: req.users
+  });
 };
 
 exports.show = [

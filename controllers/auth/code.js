@@ -36,7 +36,8 @@ exports.postLogin = (req, res, next) => {
     // Redirect if it fails to the original auth screen
     if (!user) {
       req.flash('error', {msg: authCodeConfig.errorMessage});
-      return res.redirect(`${authCodeConfig.loginUrl}?clientId=${req.client.clientId}`);
+      const redirectUrl = req.query.redirect_uri ? req.query.redirect_uri : req.client.redirectUrl;
+      return res.redirect(`${authCodeConfig.loginUrl}?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`);
     }
 
     req.logIn(user, function(err) {
@@ -51,21 +52,29 @@ exports.postLogin = (req, res, next) => {
         });
       }
 
-      if (req.client.config.defaultRoleId) {
-        new UserRole({
+      new UserRole({
           clientId: req.client.id,
-          roleId: req.client.config.defaultRoleId,
           userId: user.id
         })
-          .save()
-          .then(() => {
+        .fetch()
+        .then((userRole) => {
+          if (userRole) {
             redirectToAuthorize();
-          })
-          .catch((err) => { next(err); });
-      } else {
-        redirectToAuthorize();
-      }
-
+          } else if (req.client.config.defaultRoleId) {
+            new UserRole({
+              clientId: req.client.id,
+              roleId: req.client.config.defaultRoleId,
+              userId: user.id
+            })
+              .save()
+              .then(() => {
+                redirectToAuthorize();
+              })
+              .catch((err) => { next(err); });
+          } else {
+            redirectToAuthorize();
+          }
+        });
     });
   })(req, res, next);
 }
