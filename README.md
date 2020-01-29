@@ -95,3 +95,21 @@ If you are run a dev environment without SSL, turn off secure cookies in .env
 ```
 COOKIE_SECURE_OFF=yes
 ```
+
+## Custom SMTP configuration per site
+If you want to configure the SMTP server through which e-mails are sent on a site-by-site basis, this is possible through configuration in the database.
+Under the `clients` table in the `config` column you can set the following parameters:
+
+```
+"smtpTransport": {
+    "host": "smtp.gmail.com",
+    "port": 465,
+    "secure": true,
+    "auth": {
+        "user": "username@gmail.com",
+        "pass": "password"
+    }
+}
+```
+
+Any configuration not provided will be fetched from the values set in the .env
