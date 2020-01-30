@@ -38,7 +38,6 @@ const roleMw                   = require('./middleware/role');
 const codeMw                   = require('./middleware/code');
 const logMw                    = require('./middleware/log');
 
-
 const loginBruteForce = bruteForce.user.getMiddleware({
   key: function(req, res, next) {
       // prevent too many attempts for the same email
@@ -82,7 +81,6 @@ module.exports = function(app){
 
   app.get('/', authLocal.index);
 
-
 	/**
 	 * Login routes for clients,
 	 * checks if one or more options of authentications is available
@@ -91,7 +89,7 @@ module.exports = function(app){
 	app.get('/login', clientMw.withOne, authChoose.index);
 
 	/**
-	 * Shared middleware for all auth routes, adding client and per
+	 * Shared middleware for all auth routes, adding client and bruteforce
 	 */
 	app.use('/auth', [clientMw.withOne, bruteForce.global.prevent]);
 

@@ -46,14 +46,14 @@ const types = [
     displaySidebar: false,
     displayAccountLink:  false,
   },
-  {
+/*  {
     key: 'DigiD',
     label: 'Digid code',
     loginUrl: formatLoginUrl('digid'),
     displayBackbutton: true,
     displaySidebar: false,
     displayAccountLink:  false,
-  },
+  },*/
 ];
 
 const get = (key) => {

@@ -3,8 +3,12 @@ const UniqueCode = require('../models').UniqueCode;
 const hat = require('hat');
 const userFields = require('../config/user').fields;
 const authTypes = require('../config/auth').types;
-
 const authTypesConfig = require('../config').authTypes;
+
+const logo = process.env.LOGO_ENV;
+const stylesheet = process.env.STYLESHEET_ENV;
+
+
 
 exports.withAll = (req, res, next) => {
   Client
@@ -40,7 +44,12 @@ exports.withOne = (req, res, next) => {
         res.locals.clientProjectUrl = clientConfig.projectUrl;
         res.locals.clientEmail = clientConfig.contactEmail;
         res.locals.clientDisclaimerUrl = clientConfig.clientDisclaimerUrl;
+        res.locals.logo = logo ? logo : (req.client.config.logo ? req.client.config.logo : false);
 
+        const stylesheets = [];
+        if (stylesheet) { stylesheets.push(stylesheet) };
+        if (req.client.config.stylesheets) { stylesheets.concat(req.client.config.stylesheets) };
+        res.locals.stylesheets = stylesheets;
 
         req.client.authTypes            = JSON.parse(req.client.authTypes);
         req.client.exposedUserFields    = JSON.parse(req.client.exposedUserFields);
