@@ -37,7 +37,7 @@ exports.postLogin = (req, res, next) => {
     if (!user) {
       req.flash('error', {msg: authCodeConfig.errorMessage});
       const redirectUrl = req.query.redirect_uri ? req.query.redirect_uri : req.client.redirectUrl;
-      return res.redirect(`${authCodeConfig.loginUrl}?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`);
+      return res.redirect(`${authCodeConfig.loginUrl}?redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&client_id=${req.client.clientId}&scope=offline`);
     }
 
     req.logIn(user, function(err) {
