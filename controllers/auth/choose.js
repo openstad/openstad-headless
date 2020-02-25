@@ -14,7 +14,7 @@
      let url = availableAuthType.loginUrl + '?clientId=' + req.client.clientId;
      
      if (req.query.redirect_uri) {
-       url =  url + '&redirect_uri=' + req.query.redirect_uri;
+       url =  url + '&redirect_uri=' + encodeURIComponent(req.query.redirect_uri);
      }
 
      res.redirect(url);
@@ -23,7 +23,7 @@
         authTypes: availableAuthTypes,
         clientId: req.client.clientId,
         client: req.client,
-        redirect_uri: req.query.redirect_uri
+        redirect_uri: encodeURIComponent(req.query.redirect_uri)
      })
    }
  };

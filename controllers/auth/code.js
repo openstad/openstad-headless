@@ -26,7 +26,7 @@ exports.login = (req, res, next) => {
     buttonText: configAuthType.buttonText ? configAuthType.buttonText : authCodeConfig.buttonText,
     displaySidebar: configAuthType.displaySidebar ? configAuthType.displaySidebar : authCodeConfig.displaySidebar,
     backUrl: authCodeConfig.displayBackbutton ? backUrl : false,
-    redirect_uri: req.query.redirect_uri
+    redirect_uri: encodeURIComponent(req.query.redirect_uri)
   });
 }
 
@@ -37,7 +37,7 @@ exports.postLogin = (req, res, next) => {
     if (!user) {
       req.flash('error', {msg: authCodeConfig.errorMessage});
       const redirectUrl = req.query.redirect_uri ? req.query.redirect_uri : req.client.redirectUrl;
-      return res.redirect(`${authCodeConfig.loginUrl}?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`);
+      return res.redirect(`${authCodeConfig.loginUrl}?redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&client_id=${req.client.clientId}&scope=offline`);
     }
 
     req.logIn(user, function(err) {
@@ -47,7 +47,7 @@ exports.postLogin = (req, res, next) => {
         req.brute.reset(() => {
           const redirectUrl = req.query.redirect_uri ? req.query.redirect_uri : req.client.redirectUrl;
           // Redirect if it succeeds to authorize screen
-          const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+          const authorizeUrl = `/dialog/authorize?redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
           return res.redirect(authorizeUrl);
         });
       }

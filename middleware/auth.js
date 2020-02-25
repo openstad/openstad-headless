@@ -23,7 +23,7 @@ exports.check = (req, res, next) => {
     let url = '/login?clientId=' + req.client.clientId;
 
     if (req.query.redirect_uri) {
-      url =  url + '&redirect_uri=' + req.query.redirect_uri;
+      url =  url + '&redirect_uri=' + encodeURIComponent(req.query.redirect_uri);
     }
 
     if (req.session) {

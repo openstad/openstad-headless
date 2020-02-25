@@ -194,48 +194,7 @@ module.exports = function(app){
   // https://developers.google.com/identity/protocols/OAuth2WebServer
   app.get('/api/revoke', tokenController.revoke);
 
-  /**
-   * Admin user routes
-   */
-
-  //shared middlware for all admin routes
-  app.use('/admin', [adminMiddleware.addClient, authMw.check, userMw.withRoleForClient, adminMiddleware.ensure]);
-
-  app.get('/admin/users',         userMw.withAll, adminUserController.all);
-  app.get('/admin/user/:userId',  clientMw.withAll, roleMw.withAll, userMw.withOne, adminUserController.edit);
-  app.get('/admin/user',          clientMw.withAll, roleMw.withAll, adminUserController.new);
-  app.post('/admin/user',         adminUserController.create);
-  app.post('/admin/user/:userId', userMw.withOne, adminUserController.update);
-
   require('./routes/adminApi')(app);
-
-  /**
-   * Admin client routes
-   */
-  app.get('/admin/clients',           clientMw.withAll, adminClientController.all);
-  app.get('/admin/client/:clientId',  clientMw.withOneById, adminClientController.edit);
-  app.get('/admin/client',            adminClientController.new);
-  app.post('/admin/client',           adminClientController.create);
-  app.post('/admin/client/:clientId', clientMw.withOneById, adminClientController.update);
-
-  /**
-   * Admin role routes
-   */
-  app.get('/admin/roles',           roleMw.withAll, adminRoleController.all);
-  app.get('/admin/role/:roleId',    roleMw.withOne, adminRoleController.edit);
-  app.get('/admin/role',            adminRoleController.new);
-  app.post('/admin/role',           adminRoleController.create);
-  app.post('/admin/role/:roleId',   roleMw.withOne, adminRoleController.update);
-
-  /**
-   * Admin code routes
-   */
-  app.get('/admin/codes',                   codeMw.withAll, adminCodeController.all);
-  app.get('/admin/code',                    clientMw.withAll, adminCodeController.new);
-  app.get('/admin/code/bulk',               clientMw.withAll, adminCodeController.bulk);
-  app.post('/admin/code/bulk',              upload.single('file'),  adminCodeController.postBulk);
-  app.post('/admin/code',                   adminCodeController.create);
-  app.post('/admin/code/destroy/:codeId',   adminCodeController.destroy);
 
   /**
    * Error routes

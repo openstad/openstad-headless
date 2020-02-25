@@ -28,9 +28,6 @@ MAIL_SERVER_SECURE=true
 MAIL_SERVER_PASSWORD=
 MAIL_SERVER_USER_NAME=
 
-# Set the client ID for admin panel (if generated with seeds, will be 1)
-ADMIN_CLIENT_ID=1
-
 # Set the redirect URL (if generated with seeds, will be put in database)
 ADMIN_REDIRECT_URL=
 
@@ -79,7 +76,7 @@ After generating the token the console outputs. If you miss this you can find th
 
 ## Integration with external sites
 
-#### 1. Create a client in the admin panel.
+#### 1. Create a client in the mysql database.
 Set the site Url en redirectUrl. Give the site a good name, they will see this in different login screens.
 
 #### 2. Use an NodeJS oAuth2 client to integrate
@@ -88,7 +85,7 @@ For instance grant or ...
 Authorize url: APP_URL/dialog/authorize
 Access url: APP_URL/oauth/token
 
-The clientId & secret can be found in the admin panel.
+A rough admin panel was developed, but not being used since we use the openstad admin panel for this, a rough working version with views & routes can be found in the branch feature/rough-admin-panel
 
 ## DEVELOPMENT
 If you are run a dev environment without SSL, turn off secure cookies in .env

@@ -132,7 +132,7 @@ exports.checkIfEmailRequired =  (req, res, next) => {
       if (emailRequired && !req.user.email) {
         if (emailAuthTypesEnabled) {
           req.emailRequiredForAuth = true;
-          res.redirect(`/login?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri}`);
+          res.redirect(`/login?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`);
         } else {
           throw new Error('E-mail is required but no auth type enabled that is able to validate it properly');
         }
@@ -194,7 +194,7 @@ exports.checkRequiredUserFields = (req, res, next) => {
 
   // if error redirect to register
   if (error) {
-    res.redirect(`/auth/required-fields?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri}`);
+    res.redirect(`/auth/required-fields?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`);
   } else {
     next();
   }
