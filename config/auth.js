@@ -19,6 +19,7 @@ const types = [
     displaySidebar: false,
     displayBackbutton: true,
     displayAccountLink:  false,
+    buttonText: 'Controleer stemcode'
   },
   {
     key: 'Local',
