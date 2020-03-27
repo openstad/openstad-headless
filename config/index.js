@@ -7,12 +7,12 @@
 /**
  * Configuration of access tokens.
  *
- * expiresIn               - The time in minutes before the access token expires. 
+ * expiresIn               - The time in seconds before the access token expires.
  * calculateExpirationDate - A simple function to calculate the absolute time that the token is
  *                           going to expire in.
  */
 exports.token = {
-  expiresIn               : 60 * 60 * 6,
+  expiresIn               : 60 * 60 * 24,
   calculateExpirationDate : () => new Date(Date.now() + (this.token.expiresIn * 1000)),
 };
 
