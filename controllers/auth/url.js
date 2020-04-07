@@ -47,6 +47,18 @@ exports.login  = (req, res) => {
   });
 };
 
+exports.confirmation  = (req, res) => {
+  const config = req.client.config ? req.client.config : {};
+  const configAuthType = config.authTypes && config.authTypes[authType] ? config.authTypes[authType] : {};
+
+  res.render('auth/url/confirmation', {
+    clientId: req.query.clientId,
+    client: req.client,
+    title: configAuthType && configAuthType.confirmedTitle ? configAuthType.confirmedTitle : false,
+    description: configAuthType && configAuthType.confirmedDescription ?  configAuthType.confirmedDescription : false,
+  });
+};
+
 exports.authenticate  = (req, res) => {
   res.render('auth/url/authenticate', {
     clientId: req.query.clientId,
@@ -71,12 +83,12 @@ const handleSending = (req, res, next) => {
     .then((tokenUrl) => { return sendEmail(tokenUrl, req.user, req.client); })
     .then((result) => {
       req.flash('success', {msg: 'De e-mail is verstuurd naar: ' + req.user.email});
-      res.redirect(req.header('Referer') || '/login-with-email-url');
+      res.redirect('/auth/url/confirmation?clientId=' +  req.client.clientId || '/login?clientId=' +  req.client.clientId );
     })
     .catch((err) => {
       console.log('e0mail error', err);
       req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
-      res.redirect(req.header('Referer') || '/login-with-email-url');
+      res.redirect(req.header('Referer') || '/login?clientId=' +  req.client.clientId);
     });
 }
 
