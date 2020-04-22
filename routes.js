@@ -123,11 +123,12 @@ module.exports = function(app){
 
 	// routes
 	app.get('/auth/url/login',          authUrl.login);
+  app.get('/auth/url/confirmation',   authUrl.confirmation);
 	app.post('/auth/url/login',         emailUrlBruteForce, authUrl.postLogin);
   app.get('/auth/url/authenticate',   authUrl.authenticate);
 	app.post('/auth/url/authenticate',   emailUrlBruteForce, authUrl.postAuthenticate);
 
-	/**
+	/** 
 	 * Auth routes for DigiD
 	 * @TODO: available routes
 	 */
