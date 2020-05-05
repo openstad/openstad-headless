@@ -1,6 +1,8 @@
 // Update with your config settings.
 require('dotenv').config();
 
+console.log('process.env', process.env)
+
 module.exports = {
   development: {
     client: 'mysql',

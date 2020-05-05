@@ -3,7 +3,7 @@ exports.seed = function(knex, Promise) {
   // Deletes ALL existing entries
   return knex('user_roles').del()
     .then(function () {
-      // Inserts seed entries
+      // Inserts seed entries, not very smart!!!!
       return knex('user_roles').insert([{
         id: 1,
         roleId: 1,
