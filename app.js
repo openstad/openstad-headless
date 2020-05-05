@@ -52,8 +52,7 @@ const sessionConfig = {
   saveUninitialized : true,
   resave            : true,
   secret            : config.session.secret,
-//  store             : new MemoryStore(),
-  store             : new FileStore({
+  store             : process.env.COOKIE_SECURE_OFF ===  'yes' ? new MemoryStore() : new FileStore({
     ttl: config.session.maxAge      //3600 * 24 * 31
   }),
   key               : 'authorization.sid',
@@ -64,6 +63,8 @@ const sessionConfig = {
     sameSite: false, //process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true
   },
 };
+
+console.log('process.env', process.env);
 
 //console.log('=>>> sessionConfig', sessionConfig):
 

@@ -9,11 +9,8 @@ exports.seed = function(knex, Promise) {
       const clientSecret = process.env.AUTH_FIRST_CLIENT_SECRET ? process.env.AUTH_FIRST_CLIENT_SECRET : rack();
       const siteUrl = process.env.AUTH_FIRST_CLIENT_URL ? process.env.AUTH_FIRST_CLIENT_URL :  process.env.APP_URL;
 
-
-      AUTH_FIRST_CLIENT_LOGIN_CODE
       console.log('Admin Client ID: ', clientId);
       console.log('Admin Client Secret: ', clientSecret);
-      console.log('Login url is found here: ', 'YOUR_APP_URL/admin/clients');
 
       // Inserts seed entries
       return knex('clients').insert([{
@@ -25,7 +22,9 @@ exports.seed = function(knex, Promise) {
         clientId: clientId,
         clientSecret: clientSecret,
         authTypes: JSON.stringify(['UniqueCode']),
-        requiredUserFields: JSON.stringify(['email', 'firstName', 'lastName']),
+        requiredUserFields: JSON.stringify(['firstName', 'lastName']),
+        allowedDomains: JSON.stringify(['localhost']),
+        config: JSON.stringify({}),
       },
     ]);
   });
