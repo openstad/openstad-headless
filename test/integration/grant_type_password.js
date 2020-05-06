@@ -12,7 +12,7 @@ const validate = require('./common').validate;
  * https://github.com/FrankHassanabad/Oauth2orizeRecipes/wiki/OAuth2orize-Authorization-Server-Tests
  */
 describe('Grant Type Password', () => {
-  it('should work with asking for an access token and refresh token', () =>
+  test('should work with asking for an access token and refresh token', () =>
     helper.postOAuthPassword('offline_access')
     .then(([response, body]) => {
       validate.accessRefreshToken(response, body);
@@ -31,7 +31,7 @@ describe('Grant Type Password', () => {
       return Promise.all([userInfo, refreshToken, refreshToken2]);
     }));
 
-  it('should work just an access token and a scope of undefined', () =>
+  test('should work just an access token and a scope of undefined', () =>
     helper.postOAuthPassword(undefined)
     .then(([response, body]) => {
       validate.accessToken(response, body);

@@ -9,7 +9,7 @@ const validate = require('./common').validate;
  * https://github.com/FrankHassanabad/Oauth2orizeRecipes/wiki/OAuth2orize-Authorization-Server-Tests
  */
 describe('Grant Type Client', () => {
-  it('should work with asking for an access token', () =>
+  test('should work with asking for an access token', () =>
     helper.postOAuthClient({})
     .then(([response, body]) => {
       validate.accessToken(response, body);
@@ -18,7 +18,7 @@ describe('Grant Type Client', () => {
     .then(tokens => helper.getClientInfo(tokens.access_token))
     .then(([response, body]) => validate.clientJson(response, body)));
 
-  it('should work with a scope of undefined', () =>
+  test('should work with a scope of undefined', () =>
     helper.postOAuthClient(undefined)
     .then(([response, body]) => {
       validate.accessToken(response, body);
