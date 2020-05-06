@@ -69,6 +69,7 @@
     "eslint-plugin-import": "^2.2.x",
     "eslint-plugin-jsx-a11y": "^2.2.x",
     "eslint-plugin-react": "^6.7.x",
+    "jest": "^26.0.1",
     "mocha": "^5.2.0",
     "request": "^2.48.x",
     "sinon": "^1.17.6",
