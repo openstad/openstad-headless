@@ -1,0 +1,83 @@
+#
+# Docker Compose file for MijnOpenstad
+#
+# Extra notes:
+# - You can run MijnOpenstad by running `docker-compose up -d`.
+# This will create the MySQL Database and web server.
+#
+# Afterwards migrate the database by running the following commands:
+# - `docker-compose exec web knex migrate:latest --env production`
+# - `docker-compose exec web knex seed:run --env production`
+#
+
+---
+version: '3'
+services:
+  web:
+    build:
+      context: .
+    environment:
+      ENVIRONMENT: "production"
+      DB_HOST: "${DB_HOST:-mysql}"
+      DB_USER: "${DB_USER:-openstad}"
+      DB_PASSWORD: "${DB_PASSWORD:-openstad}"
+      DB_NAME: "${DB_NAME:-openstad}"
+      MAIL_SERVER_URL: "smtp.gmail.com"
+      MAIL_SERVER_PORT: "465"
+      MAIL_SERVER_SECURE: "true"
+      MAIL_SERVER_PASSWORD: "${MAIL_PASSWORD:-openstad}"
+      MAIL_SERVER_USER_NAME: "${MAIL_USER:-openstad}"
+
+      # Set the client ID for admin panel (if generated with seeds, will be 1)
+      ADMIN_CLIENT_ID: 1
+
+      # Set the redirect URL (if generated with seeds, will be put in database)
+      ADMIN_REDIRECT_URL: "http://${DOMAIN:-localhost:}${PORT:-4000}/admin/"
+
+      # Set the APP url ()
+      APP_URL: "http://${DOMAIN:-localhost:}${PORT:-4000}/app/"
+      EMAIL_ASSETS_URL: "http://${DOMAIN:-localhost:}${PORT:-4000}/static/email/"
+
+      # Set the from name and email from which emails will be send (for example: password forgot & login url)
+      FROM_NAME: "Openstad"
+      FROM_EMAIL: "${FROM_EMAIL:-no-reply@localhost}"
+    ports:
+      - "${PORT:-2000:2000}"
+      - "${PORT:-4000:4000}"
+    restart: unless-stopped
+    networks:
+      - database
+    depends_on:
+      - "mysql"
+
+  mysql:
+    image: "mysql:5"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD:-openstad}"
+      MYSQL_DATABASE: "${DB_NAME:-openstad}"
+      MYSQL_USER: "${DB_USER:-openstad}"
+      MYSQL_PASSWORD: "${DB_PASSWORD:-openstad}"
+    expose:
+      - "3306:"
+      - "33060"
+    restart: unless-stopped
+    volumes:
+      - database:/var/lib/mysql
+    networks:
+      - database
+
+#
+# Volumes section
+# Volumes:
+# - database: A volume that contains everything that is stored in the MySQL database.
+#
+volumes:
+  database:
+
+#
+# Networks section
+# Networks:
+# - database, represents the isolated network between the server and the database.
+networks:
+  database:
+...
