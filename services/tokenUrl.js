@@ -11,7 +11,12 @@ const getUrl = (user, client, token, redirectUrl) => {
   return `${appUrl}/${slug}?token=${token}&clientId=${client.clientId}&redirect_uri=${redirectUrl}`;
 }
 
-exports.format = (client, user, redirectUrl) => {
+const getAdminUrl = (user, client, token, redirectUrl) => {
+  const slug = 'auth/admin/authenticate';
+  return `${appUrl}/${slug}?token=${token}&clientId=${client.clientId}&redirect_uri=${redirectUrl}`;
+}
+
+exports.format = (client, user, redirectUrl, admin) => {
   return new Promise((resolve, reject) =>  {
     const token = hat();
 
@@ -21,7 +26,7 @@ exports.format = (client, user, redirectUrl) => {
     })
     .save()
     .then((loginToken) => {
-      const url = getUrl(user, client, token, redirectUrl);
+      const url = admin ? getAdminUrl(user, client, token, redirectUrl) : getUrl(user, client, token, redirectUrl);
       resolve(url);
     })
     .catch((err) => {

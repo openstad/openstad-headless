@@ -1,24 +1,14 @@
-const multer                   = require('multer');
-//const upload                   = multer({ dest: 'uploads/' });
-const upload                   = multer();
 const passport                 = require('passport');
 
 //CONTROLERS
 const oauth2Controller 				 = require('./controllers/oauth/oauth2');
 const tokenController          = require('./controllers/oauth/token');
 const userController           = require('./controllers/user/user');
-const adminUserController      = require('./controllers/admin/user');
-const adminClientController    = require('./controllers/admin/client');
-const adminRoleController      = require('./controllers/admin/role');
-const adminCodeController      = require('./controllers/admin/code');
-const adminApiUserController          = require('./controllers/admin/api/user');
-const adminApiClientController        = require('./controllers/admin/api/client');
-const adminApiRoleController          = require('./controllers/admin/api/role');
-const adminApiUniqueCodeController    = require('./controllers/admin/api/uniqueCode');
 
 //AUTH CONTROLLERS
 const authChoose	 						 = require('./controllers/auth/choose');
 const authUrl 		 						 = require('./controllers/auth/url');
+const authAdminUrl 		 				 = require('./controllers/auth/adminUrl');
 const authForgot							 = require('./controllers/auth/forgot');
 const authDigiD							 	 = require('./controllers/auth/digid');
 const authAnonymous					 	 = require('./controllers/auth/anonymous');
@@ -27,15 +17,11 @@ const authCode							 	 = require('./controllers/auth/code');
 const authRequiredFields	     = require('./controllers/auth/required');
 
 //MIDDLEWARE
-const adminMiddleware          = require('./middleware/admin');
 const clientMw      				   = require('./middleware/client');
 const userMw           				 = require('./middleware/user');
-const tokenMw                  = require('./middleware/token');
 const bruteForce 							 = require('./middleware/bruteForce');
 const authMw                   = require('./middleware/auth');
 const passwordResetMw          = require('./middleware/passwordReset');
-const roleMw                   = require('./middleware/role');
-const codeMw                   = require('./middleware/code');
 const logMw                    = require('./middleware/log');
 
 
@@ -128,7 +114,17 @@ module.exports = function(app){
   app.get('/auth/url/authenticate',   authUrl.authenticate);
 	app.post('/auth/url/authenticate',   emailUrlBruteForce, authUrl.postAuthenticate);
 
-	/** 
+
+	// Admin login routes
+  app.use('/auth/admin', [csrfProtection, addCsrfGlobal]);
+
+  app.get('/auth/admin/login', authUrl.login);
+  app.get('/auth/admin/confirmation', authUrl.confirmation);
+  app.post('/auth/admin/login', emailUrlBruteForce, authAdminUrl.postLogin);
+  app.get('/auth/admin/authenticate', authUrl.authenticate);
+  app.post('/auth/admin/authenticate', emailUrlBruteForce, authAdminUrl.postAuthenticate);
+
+	/**
 	 * Auth routes for DigiD
 	 * @TODO: available routes
 	 */
