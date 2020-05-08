@@ -6,7 +6,6 @@
 
 const passport          = require('passport');
 const User              = require('../../models').User;
-const ActionLog         = require('../../models').ActionLog;
 const tokenUrl          = require('../../services/tokenUrl');
 const authService          = require('../../services/authService');
 const verificationService      = require('../../services/verificationService');
@@ -35,6 +34,7 @@ exports.confirmation  = (req, res) => {
   res.render('auth/url/confirmation', {
     clientId: req.query.clientId,
     client: req.client,
+    redirectUrl: encodeURIComponent(req.query.redirect_uri),
     title: configAuthType && configAuthType.confirmedTitle ? configAuthType.confirmedTitle : false,
     description: configAuthType && configAuthType.confirmedDescription ?  configAuthType.confirmedDescription : false,
   });
