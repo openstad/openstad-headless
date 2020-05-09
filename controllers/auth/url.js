@@ -54,6 +54,7 @@ exports.confirmation  = (req, res) => {
   res.render('auth/url/confirmation', {
     clientId: req.query.clientId,
     client: req.client,
+    redirectUrl: encodeURIComponent(req.query.redirect_uri),
     title: configAuthType && configAuthType.confirmedTitle ? configAuthType.confirmedTitle : false,
     description: configAuthType && configAuthType.confirmedDescription ?  configAuthType.confirmedDescription : false,
   });
@@ -83,7 +84,7 @@ const handleSending = (req, res, next) => {
     .then((tokenUrl) => { return sendEmail(tokenUrl, req.user, req.client); })
     .then((result) => {
       req.flash('success', {msg: 'De e-mail is verstuurd naar: ' + req.user.email});
-      res.redirect('/auth/url/confirmation?clientId=' +  req.client.clientId || '/login?clientId=' +  req.client.clientId );
+      res.redirect('/auth/url/confirmation?clientId=' +  req.client.clientId + '&redirect_uri=' + req.redirectUrl || '/login?clientId=' +  req.client.clientId + '&redirect_uri=' + req.redirectUrl );
     })
     .catch((err) => {
       console.log('e0mail error', err);
