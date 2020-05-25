@@ -149,18 +149,35 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
 
       // if UniqueCode authentication is used, other methods are blocked to enforce users can never authorize with email
       if (authTypes.indexOf('UniqueCode') !== -1) {
+        console.log();
+
         new UniqueCode({ clientId: req.client.id, userId: req.user.id })
         .fetch()
         .then((codeResponse) => {
-          const userHasPrivilegedRole = req.user.related('roles').some(role => privilegedRoles.indexOf(role.get('name')) > -1);
+
+          console.log('req.user.related(\'roles\')', req.user.related('roles'));
+          console.log('privilegedRoles', privilegedRoles);
+
+          const userHasPrivilegedRole = req.user.related('roles').some((role) => {
+            console.log('in check loop role', role);
+            console.log('in check loop boolean', privilegedRoles.indexOf(role.get('name')) > -1));
+
+            return privilegedRoles.indexOf(role.get('name')) > -1;
+          });
+
+          console.log('userHasPrivilegedRole', userHasPrivilegedRole);
+
           // if uniquecode exists or user has priviliged role
           if (codeResponse || userHasPrivilegedRole) {
+
             next();
           } else {
             throw new Error('Not validated with Unique Code');
           }
         })
         .catch((error) => {
+          console.log('error',error);
+
           if (errorCallback) {
             try {
               errorCallback(req, res, next);
