@@ -11,7 +11,17 @@ const authService          = require('../../services/authService');
 const verificationService      = require('../../services/verificationService');
 const authUrlConfig     = require('../../config/auth').get('Url');
 
-exports.login  = (req, res) => {
+
+const setNoCachHeadersMw = (req, res, next) => {
+  res.setHeader('Surrogate-Control', 'no-store');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+}
+
+// set no cache headers, so on return with back button no csrf issues
+exports.login  = [setNoCachHeadersMw, (req, res) => {
   const config = req.client.config ? req.client.config : {};
   const configAuthType = config.authTypes && config.authTypes[authType] ? config.authTypes[authType] : {};
 
@@ -25,7 +35,7 @@ exports.login  = (req, res) => {
     helpText: configAuthType && configAuthType.helpText ? configAuthType.helpText : false,
     buttonText: configAuthType && configAuthType.buttonText ? configAuthType.buttonText : false,
   });
-};
+}];
 
 exports.confirmation  = (req, res) => {
   const config = req.client.config ? req.client.config : {};
