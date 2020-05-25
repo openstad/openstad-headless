@@ -154,15 +154,8 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
         new UniqueCode({ clientId: req.client.id, userId: req.user.id })
         .fetch()
         .then((codeResponse) => {
-
-          console.log('req.user.related(\'roles\')', req.userModel.related('roles'));
-          console.log('privilegedRoles', privilegedRoles);
-          console.log('  req.user.role',   req.user.role);
-
-
           const userHasPrivilegedRole = privilegedRoles.indexOf(req.user.role) > -1;
-          console.log('userHasPrivilegedRole', userHasPrivilegedRole);
-
+          
           // if uniquecode exists or user has priviliged role
           if (codeResponse || userHasPrivilegedRole) {
             next();
