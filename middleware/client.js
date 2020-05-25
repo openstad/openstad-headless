@@ -157,19 +157,14 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
 
           console.log('req.user.related(\'roles\')', req.userModel.related('roles'));
           console.log('privilegedRoles', privilegedRoles);
+          console.log('  req.user.role',   req.user.role);
 
-          const userHasPrivilegedRole = req.userModel.related('roles').some((role) => {
-            console.log('in check loop role', role);
-            console.log('in check loop boolean', privilegedRoles.indexOf(role.get('name')) > -1);
 
-            return privilegedRoles.indexOf(role.get('name')) > -1;
-          });
-
+          const userHasPrivilegedRole = privilegedRoles.indexOf(req.user.role) > -1;
           console.log('userHasPrivilegedRole', userHasPrivilegedRole);
 
           // if uniquecode exists or user has priviliged role
           if (codeResponse || userHasPrivilegedRole) {
-
             next();
           } else {
             throw new Error('Not validated with Unique Code');
