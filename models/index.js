@@ -41,6 +41,7 @@ const Role = bookshelf.Model.extend({
 const UserRole = bookshelf.Model.extend({
   tableName: 'user_roles',
   hasTimestamps: true,
+  hasTimestamps: ['createdAt', 'updatedAt']
 });
 
 const PasswordResetToken = bookshelf.Model.extend({
