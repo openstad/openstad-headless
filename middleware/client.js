@@ -155,10 +155,10 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
         .fetch()
         .then((codeResponse) => {
 
-          console.log('req.user.related(\'roles\')', req.user.related('roles'));
+          console.log('req.user.related(\'roles\')', req.userModel.related('roles'));
           console.log('privilegedRoles', privilegedRoles);
 
-          const userHasPrivilegedRole = req.user.related('roles').some((role) => {
+          const userHasPrivilegedRole = req.userModel.related('roles').some((role) => {
             console.log('in check loop role', role);
             console.log('in check loop boolean', privilegedRoles.indexOf(role.get('name')) > -1);
 
