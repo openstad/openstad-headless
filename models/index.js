@@ -53,6 +53,7 @@ const PasswordResetToken = bookshelf.Model.extend({
 const User = bookshelf.Model.extend({
   tableName: 'users',
   hasTimestamps: true,
+  hasTimestamps: ['createdAt', 'updatedAt'],
   roles() {
     return this.belongsToMany(Role, 'user_roles', 'userId', 'roleId');
   },
