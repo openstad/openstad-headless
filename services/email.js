@@ -8,6 +8,18 @@ const limitTo           = require('../nunjucks/limitTo');
 const jsonFilter        = require('../nunjucks/json');
 const timestampFilter   = require('../nunjucks/timestamp');
 
+const formatTransporter = function ({ host, port, secure, auth }) {
+  return {
+    host:   host ? host : process.env.MAIL_SERVER_URL,
+    port:   port ? port : process.env.MAIL_SERVER_PORT,
+    secure: secure ? secure : process.env.MAIL_SERVER_SECURE,
+    auth:   {
+      user: (auth && auth.user) ? auth.user : process.env.MAIL_SERVER_USER_NAME,
+      pass: (auth && auth.pass) ? auth.pass : process.env.MAIL_SERVER_PASSWORD,
+    },
+  };
+};
+
 exports.send = function ({subject, toName, toEmail, templateString, template, variables, fromEmail, fromName, replyTo, transporterConfig}) {
 
   /**
@@ -58,9 +70,10 @@ exports.send = function ({subject, toName, toEmail, templateString, template, va
   }
 
   /**
-   * Create instance of SMTP transporter
+   * Create instance of MAIL transporter
    */
-  const transporter = nodemailer.createTransport(transporterConfig);
+  transporterConfig = transporterConfig ? transporterConfig : {};
+  const transporter = nodemailer.createTransport(formatTransporter(transporterConfig));
 
   return new Promise(function(resolve, reject) {
     // send mail with defined transport object
@@ -77,15 +90,3 @@ exports.send = function ({subject, toName, toEmail, templateString, template, va
     })
   });
 }
-
-exports.createTransporter = function ({ host, port, secure, auth }) {
-  return {
-    host:   host ? host : process.env.MAIL_SERVER_URL,
-    port:   port ? port : process.env.MAIL_SERVER_PORT,
-    secure: secure ? secure : process.env.MAIL_SERVER_SECURE,
-    auth:   {
-      user: (auth && auth.user) ? auth.user : process.env.MAIL_SERVER_USER_NAME,
-      pass: (auth && auth.pass) ? auth.pass : process.env.MAIL_SERVER_PASSWORD,
-    },
-  };
-};
