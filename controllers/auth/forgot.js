@@ -94,8 +94,7 @@
     */
    const sendEmail = (resetUrl, user, client) => {
      const clientConfig = client.config ? client.config : {};
-     const smtpTransportConfig = clientConfig.smtpTransport ? clientConfig.smtpTransport : {};
-     const transporterConfig = emailService.createTransporter(smtpTransportConfig);
+     const transporterConfig = clientConfig.smtpTransport ? clientConfig.smtpTransport : {};
 
      return emailService.send({
        toName: (user.firstName + ' ' + user.lastName).trim(),
