@@ -13,6 +13,8 @@ exports.sendVerification = async (user, client, redirectUrl) => {
   const emailHeaderImage = authTypeConfig.emailHeaderImage ? authTypeConfig.emailHeaderImage : false;
   const emailLogo = authTypeConfig.emailLogo ? authTypeConfig.emailLogo : false;
 
+  const transporterConfig = clientConfig.smtpTransport ? clientConfig.smtpTransport : {};
+
   return emailProvider.send({
     toName: (user.firstName + ' ' + user.lastName).trim(),
     toEmail: user.email,
@@ -29,6 +31,7 @@ exports.sendVerification = async (user, client, redirectUrl) => {
       headerImage: emailHeaderImage,
       logo: emailLogo,
     },
+    transporterConfig
   });
 };
 
