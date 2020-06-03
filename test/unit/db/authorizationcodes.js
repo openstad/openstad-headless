@@ -1,8 +1,8 @@
 'use strict';
 
-const { authorizationCodes } = require('../../db');
+const { authorizationCodes } = require('../../../db');
 const jwt                    = require('jsonwebtoken');
-const utils                  = require('../../utils');
+const utils                  = require('../../../utils');
 
 describe('authorizationCodes', () => {
   beforeEach(() => authorizationCodes.removeAll());

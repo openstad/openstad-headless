@@ -20,6 +20,8 @@ const request   = require('request').defaults({ jar : true, strictSSL : false })
 const get  = promisify(request.get, { multiArgs : true });
 const post = promisify(request.post, { multiArgs : true });
 
+
+
 /**
  * These are all request helpers to help with testing
  */

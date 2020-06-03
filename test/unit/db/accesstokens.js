@@ -1,8 +1,8 @@
 'use strict';
 
-const { accessTokens } = require('../../db');
+const { accessTokens } = require('../../../db');
 const jwt              = require('jsonwebtoken');
-const utils            = require('../../utils');
+const utils            = require('../../../utils');
 
 describe('accesstokens', () => {
   beforeEach(() => accessTokens.removeAll());

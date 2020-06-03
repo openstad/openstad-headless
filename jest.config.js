@@ -9,16 +9,12 @@ module.exports = {
 
   projects: [
     {
-      displayName: 'db',
-      testMatch: ['<rootDir>/test/db/**/*.js'],
+      displayName: 'unit',
+      testMatch: ['<rootDir>/test/unit/**/*.js'],
     },
     {
       displayName: 'integration',
-      testMatch: ['<rootDir>/test/integration/**/*.js'],
-    },
-    {
-      displayName: 'config',
-      testMatch: ['<rootDir>/test/config/**/*.js'],
+      testMatch: ['<rootDir>/test/integration/**/*.test.js'],
     },
   ],
 

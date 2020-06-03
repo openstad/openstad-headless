@@ -2,29 +2,56 @@
 
 require('process').env.OAUTHRECIPES_SURPRESS_TRACE = true;
 
-const utils     = require('../utils');
-const validate  = require('../validate');
+const utils     = require('../../utils');
+const validate  = require('../../validate');
+
+const knex = require('../../knex/knex.js');
+const mockKnex = require('mock-knex');
+
+const tracker = require('mock-knex').getTracker();
 
 describe('validate', () => {
+
+  beforeEach((done) => {
+    tracker.install();
+    done();
+  });
+
+  afterEach((done) => {
+    tracker.uninstall();
+    done();
+  });
+
+  beforeAll((done) => {
+    mockKnex.mock(knex);
+    done();
+  });
+
+  afterAll((done) => {
+    mockKnex.unmock(knex);
+    done();
+  });
+
+
   describe('#logAndThrow', () => {
     test('should throw a given mesage', () => {
-      expect(() => validate.logAndThrow('some message')).to.throw('some message');
+      expect(() => validate.logAndThrow('some message')).toThrow('some message');
     });
   });
 
   describe('#user', () => {
     test('show throw if user is undefined', () => {
-      expect(() => validate.user(undefined, 'pass')).to.throw('User does not exist');
+      expect(() => validate.user(undefined, 'pass')).toThrow('User does not exist');
     });
 
     test('show throw if user is null', () => {
-      expect(() => validate.user(null, 'pass')).to.throw('User does not exist');
+      expect(() => validate.user(null, 'pass')).toThrow('User does not exist');
     });
 
     test('show throw if password does not match', () => {
       expect(() =>
         validate.user({ password : 'password' }, 'otherpassword'))
-        .to.throw('User password does not match');
+        .toThrow('User password does not match');
     });
 
     test('show return user if password matches', () => {
@@ -40,11 +67,11 @@ describe('validate', () => {
 
   describe('#userExists', () => {
     test('show throw if user is undefined', () => {
-      expect(() => validate.userExists(undefined)).to.throw('User does not exist');
+      expect(() => validate.userExists(undefined)).toThrow('User does not exist');
     });
 
     test('show throw if user is null', () => {
-      expect(() => validate.userExists(null)).to.throw('User does not exist');
+      expect(() => validate.userExists(null)).toThrow('User does not exist');
     });
 
     test('show return user if it exists', () => {
@@ -55,17 +82,17 @@ describe('validate', () => {
 
   describe('#client', () => {
     test('show throw if client is undefined', () => {
-      expect(() => validate.client(undefined, 'pass')).to.throw('Client does not exist');
+      expect(() => validate.client(undefined, 'pass')).toThrow('Client does not exist');
     });
 
     test('show throw if client is null', () => {
-      expect(() => validate.client(null, 'pass')).to.throw('Client does not exist');
+      expect(() => validate.client(null, 'pass')).toThrow('Client does not exist');
     });
 
     test('show throw if client secret does not match', () => {
       expect(() =>
         validate.client({ clientSecret : 'password' }, 'otherpassword'))
-        .to.throw('Client secret does not match');
+        .toThrow('Client secret does not match');
     });
 
     test('show return client if client secret matches', () => {
@@ -81,11 +108,11 @@ describe('validate', () => {
 
   describe('#clientExists', () => {
     test('show throw if client is undefined', () => {
-      expect(() => validate.clientExists(undefined)).to.throw('Client does not exist');
+      expect(() => validate.clientExists(undefined)).toThrow('Client does not exist');
     });
 
     test('show throw if client is null', () => {
-      expect(() => validate.clientExists(null)).to.throw('Client does not exist');
+      expect(() => validate.clientExists(null)).toThrow('Client does not exist');
     });
 
     test('show return user if it exists', () => {
@@ -98,45 +125,69 @@ describe('validate', () => {
     test('should throw with undefined code', () => {
       expect(() =>
         validate.token({ userID : '1' }, undefined))
-          .to.throw('JsonWebTokenError: jwt must be provided');
+          .toThrow('jwt must be provided');
     });
 
     test('should throw with null code', () => {
       expect(() =>
         validate.token({ userID : '1' }, null))
-          .to.throw('JsonWebTokenError: jwt must be provided');
+          .toThrow('jwt must be provided');
     });
 
     test('should throw with invalid userID', () => {
       const token = utils.createToken();
+      tracker.on('query', (query) => {
+        query.response();
+      });
       return validate.token({ userID : '-1' }, token)
       .catch(err => expect(err.message).toEqual('User does not exist'));
     });
 
     test('should throw with invalid clientID', () => {
       const token = utils.createToken();
+      tracker.on('query', (query) => {
+        query.response();
+      });
       return validate.token({ clientID: '-1' }, token)
       .catch(err => expect(err.message).toEqual('Client does not exist'));
     });
 
     test('should throw with invalid userID and invalid clientID', () => {
       const token = utils.createToken();
+      tracker.on('query', (query) => {
+        query.response();
+      });
+
       return validate.token({ userID : '-1', clientID: '-1' }, token)
       .catch(err => expect(err.message).toEqual('User does not exist'));
     });
 
     test('should return user with valid user', () => {
       const token = utils.createToken();
-      const user  = { userID   : '1' };
+
+      tracker.on('query', (query) => {
+        query.response({id: 1});
+      });
+
+      const user  = { userID   : 1 };
       return validate.token(user, token)
-      .then(returnedUser => expect(returnedUser.id).eql(user.userID));
+      .then(returnedUser => {
+        return expect(returnedUser.id).toBe(user.userID);
+      });
     });
 
     test('should return client with valid client', () => {
       const token = utils.createToken();
-      const client  = { clientID   : '1' };
+      const client  = { clientID   : '2' };
+
+      tracker.on('query', (query) => {
+        query.response({id: '1', clientId: '2'});
+      });
+
       return validate.token(client, token)
-      .then(returnedClient => expect(returnedClient.id).eql(client.clientID));
+      .then(returnedClient => {
+        return expect(returnedClient.clientId).toBe(client.clientID)
+      });
     });
   });
 
@@ -147,7 +198,7 @@ describe('validate', () => {
           clientID : '1',
         }, undefined, {
           id : '1',
-        })).to.throw('JsonWebTokenError: jwt must be provided');
+        })).toThrow('jwt must be provided');
     });
 
     test('should throw with null code', () => {
@@ -156,7 +207,7 @@ describe('validate', () => {
           clientID : '1',
         }, null, {
           id : '1',
-        })).to.throw('JsonWebTokenError: jwt must be provided');
+        })).toThrow('jwt must be provided');
     });
 
     test('should throw with invalid client ID', () => {
@@ -166,7 +217,7 @@ describe('validate', () => {
           clientID : '1',
         }, token, {
           id : '2',
-        })).to.throw('RefreshToken clientID does not match client id given');
+        })).toThrow('RefreshToken clientID does not match client id given');
     });
 
     test('should return refreshToken with everything valid', () => {
@@ -183,7 +234,7 @@ describe('validate', () => {
           redirectURI : 'a',
         }, {
           id : '1',
-        }, 'a')).to.throw('JsonWebTokenError: jwt must be provided');
+        }, 'a')).toThrow('jwt must be provided');
     });
 
     test('should throw with null code', () => {
@@ -193,7 +244,7 @@ describe('validate', () => {
           redirectURI : 'a',
         }, {
           id : '1',
-        }, 'a')).to.throw('JsonWebTokenError: jwt must be provided');
+        }, 'a')).toThrow('jwt must be provided');
     });
 
     test('should throw with invalid client ID', () => {
@@ -204,7 +255,7 @@ describe('validate', () => {
           redirectURI : 'a',
         }, {
           id : '2',
-        }, 'a')).to.throw('AuthCode clientID does not match client id given');
+        }, 'a')).toThrow('AuthCode clientID does not match client id given');
     });
 
     test('should throw with invalid redirectURI', () => {
@@ -215,7 +266,7 @@ describe('validate', () => {
           redirectURI : 'a',
         }, {
           id : '1',
-        }, 'b')).to.throw('AuthCode redirectURI does not match redirectURI given');
+        }, 'b')).toThrow('AuthCode redirectURI does not match redirectURI given');
     });
 
     test('should return authCode with everything valid', () => {
@@ -265,7 +316,7 @@ describe('validate', () => {
         validate.generateTokens({ userID : '1', clientID : '1', scope : '*' })
         .then(([accessToken, refreshToken]) => {
           utils.verifyToken(accessToken);
-          expect(refreshToken).to.be.eql(undefined);
+          expect(refreshToken).toEqual(undefined);
         })
     );
   });
@@ -300,16 +351,16 @@ describe('validate', () => {
     });
 
     test('should reject undefined client', () => {
-      expect(() => validate.clientExistsForHttp()).to.throw('invalid_token');
+      expect(() => validate.clientExistsForHttp()).toThrow('invalid_token');
     });
 
     test('should reject null client`', () => {
-      expect(() => validate.clientExistsForHttp(null)).to.throw('invalid_token');
+      expect(() => validate.clientExistsForHttp(null)).toThrow('invalid_token');
     });
 
     test('should return a non null client', () => {
       const client = validate.clientExistsForHttp({ client: 123 });
-      expect(client).eql({ client: 123 });
+      expect(client).toEqual({ client: 123 });
     });
   });
 });

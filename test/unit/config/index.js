@@ -1,6 +1,6 @@
 'use strict';
 process.env.SESSION_SECRET = '123secret';
-const config    = require('../../config');
+const config    = require('../../../config');
 
 describe('config', () => {
   test('should calculate expiration date correctly', () => {
