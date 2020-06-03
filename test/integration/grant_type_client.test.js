@@ -9,6 +9,8 @@ const {
 } = require('./common/properties.js');
 
 const supertest = require('supertest');
+const config = require('../../knexfile.js')['test'];
+const db = require('knex')(config);
 
 const app = require('../../app-init');
 
@@ -21,12 +23,12 @@ let agent;
  */
 describe('Grant Type Client', () => {
 
-  beforeAll((done) => {
+  beforeAll(async () => {
 
     agent = supertest.agent(app);
-
-    done();
+    await db.migrate.latest();
   });
+
 
   it('should get an 401 when asking for an access token', (done) => {
     const basicAuth = new Buffer(`${clientId}:${clientSecret}`).toString('base64');

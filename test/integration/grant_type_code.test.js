@@ -5,11 +5,9 @@ const {
   redirect,
 } = require('./common/properties.js');
 
-
 const properties = require('./common').properties;
-
+const db = require('../../knex/knex');
 const supertest = require('supertest');
-
 const app = require('../../app-init');
 
 let agent;
@@ -19,11 +17,10 @@ let agent;
  * https://github.com/FrankHassanabad/Oauth2orizeRecipes/wiki/OAuth2orize-Authorization-Server-Tests
  */
 describe('Grant Type Authorization Code', () => {
-  beforeAll((done) => {
+  beforeAll(async () => {
 
     agent = supertest.agent(app);
-
-    done();
+    await db.migrate.latest();
   });
 
   it(
