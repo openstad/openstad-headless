@@ -5,9 +5,7 @@ const configAuthTypes = require('../config/auth.js').types;
 bookshelf.plugin(jsonColumns);
 
 const Client = bookshelf.Model.extend({
-
   tableName: 'clients',
-  hasTimestamps: true,
   hasTimestamps: ['createdAt', 'updatedAt'],
   jsonColumns: ['authTypes', 'requiredFields'],
   getAuthTypes: (model) => {
@@ -22,37 +20,31 @@ const Client = bookshelf.Model.extend({
 
 const LoginToken = bookshelf.Model.extend({
   tableName: 'login_tokens',
-  hasTimestamps: true,
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
 const UniqueCode = bookshelf.Model.extend({
   tableName: 'unique_codes',
-  hasTimestamps: true,
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
 const Role = bookshelf.Model.extend({
   tableName: 'roles',
-  hasTimestamps: true,
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
 const UserRole = bookshelf.Model.extend({
   tableName: 'user_roles',
-  hasTimestamps: true,
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
 const PasswordResetToken = bookshelf.Model.extend({
   tableName: 'password_reset_tokens',
-  hasTimestamps: true,
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
 const User = bookshelf.Model.extend({
   tableName: 'users',
-  hasTimestamps: true,
   hasTimestamps: ['createdAt', 'updatedAt'],
   roles() {
     return this.belongsToMany(Role, 'user_roles', 'userId', 'roleId');
@@ -61,7 +53,6 @@ const User = bookshelf.Model.extend({
 
 const ActionLog = bookshelf.Model.extend({
   tableName: 'action_log',
-  hasTimestamps: true,
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
