@@ -17,6 +17,17 @@ module.exports = {
       directory: __dirname + '/knex/seeds'
     }
   },
+  test: {
+    client: 'sqlite3',
+    connection: ':memory:',
+    useNullAsDefault: true,
+    migrations: {
+      directory: __dirname + '/knex/migrations',
+    },
+    seeds: {
+      directory: __dirname + '/knex/seeds'
+    }
+  },
 
   production: {
     client: 'mysql',

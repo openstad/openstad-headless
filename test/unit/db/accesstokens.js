@@ -1,35 +1,30 @@
 'use strict';
 
-const chai             = require('chai');
-const { accessTokens } = require('../../db');
+const { accessTokens } = require('../../../db');
 const jwt              = require('jsonwebtoken');
-const sinonChai        = require('sinon-chai');
-const utils            = require('../../utils');
-
-chai.use(sinonChai);
-const expect = chai.expect;
+const utils            = require('../../../utils');
 
 describe('accesstokens', () => {
   beforeEach(() => accessTokens.removeAll());
 
   describe('#find', () => {
-    it('should return empty access tokens with invalid token request', () =>
+    test('should return empty access tokens with invalid token request', () =>
       accessTokens.find('abc')
-      .then(token => expect(token).to.be.undefined));
+      .then(token => expect(token).toBeUndefined));
 
-    it('should return empty access tokens with null', () =>
+    test('should return empty access tokens with null', () =>
       accessTokens.find(null)
-      .then(token => expect(token).to.be.undefined));
+      .then(token => expect(token).toBeUndefined));
 
-    it('should return empty access tokens with undefined', () =>
+    test('should return empty access tokens with undefined', () =>
       accessTokens.find(undefined)
-      .then(token => expect(token).to.be.undefined));
+      .then(token => expect(token).toBeUndefined));
 
-    it('should find a token saved', () => {
+    test('should find a token saved', () => {
       const token = utils.createToken();
       return accessTokens.save(token, new Date(0), '1', '1', '*')
       .then(() => accessTokens.find(token))
-      .then(foundToken => expect(foundToken).to.eql({
+      .then(foundToken => expect(foundToken).toEqual({
         clientID       : '1',
         expirationDate : new Date(0),
         userID         : '1',
@@ -39,17 +34,17 @@ describe('accesstokens', () => {
   });
 
   describe('#save', () => {
-    it('should save an access token correctly and return that token', () => {
+    test('should save an access token correctly and return that token', () => {
       const token = utils.createToken();
       return accessTokens.save(token, new Date(0), '1', '1', '*')
-      .then(saved => expect(saved).to.eql({
+      .then(saved => expect(saved).toEqual({
         clientID       : '1',
         expirationDate : new Date(0),
         userID         : '1',
         scope          : '*',
       }))
       .then(() => accessTokens.find(token))
-      .then(foundToken => expect(foundToken).to.eql({
+      .then(foundToken => expect(foundToken).toEqual({
         clientID       : '1',
         expirationDate : new Date(0),
         userID         : '1',
@@ -59,35 +54,35 @@ describe('accesstokens', () => {
   });
 
   describe('#delete', () => {
-    it('should return empty access tokens with invalid token request', () =>
+    test('should return empty access tokens with invalid token request', () =>
       accessTokens.delete('abc')
-      .then(token => expect(token).to.be.undefined));
+      .then(token => expect(token).toBeUndefined));
 
-    it('should return empty access tokens with null', () =>
+    test('should return empty access tokens with null', () =>
       accessTokens.delete(null)
-      .then(token => expect(token).to.be.undefined));
+      .then(token => expect(token).toBeUndefined));
 
-    it('should return empty access tokens with undefined', () =>
+    test('should return empty access tokens with undefined', () =>
       accessTokens.delete(undefined)
-      .then(token => expect(token).to.be.undefined));
+      .then(token => expect(token).toBeUndefined));
 
-    it('should delete an access token and return it', () => {
+    test('should delete an access token and return it', () => {
       const token = utils.createToken();
       return accessTokens.save(token, new Date(0), '1', '1', '*')
       .then(() => accessTokens.delete(token))
-      .then(deletedToken => expect(deletedToken).to.eql({
+      .then(deletedToken => expect(deletedToken).toEqual({
         clientID       : '1',
         expirationDate : new Date(0),
         userID         : '1',
         scope          : '*',
       }))
       .then(() => accessTokens.find(token))
-      .then(foundToken => expect(foundToken).to.eql(undefined));
+      .then(foundToken => expect(foundToken).toEqual(undefined));
     });
   });
 
   describe('#removeExpired', () => {
-    it('should remove expired tokens', () => {
+    test('should remove expired tokens', () => {
       const token1   = utils.createToken();
       const token2   = utils.createToken();
       const tokenId1 = jwt.decode(token1).jti;
@@ -96,13 +91,13 @@ describe('accesstokens', () => {
       .then(() => accessTokens.save(token2, new Date(0), '2', '2', '*'))
       .then(() => accessTokens.removeExpired())
       .then((expiredTokens) => {
-        expect(expiredTokens[tokenId1]).to.eql({
+        expect(expiredTokens[tokenId1]).toEqual({
           clientID       : '1',
           expirationDate : new Date(0),
           userID         : '1',
           scope          : '*',
         });
-        expect(expiredTokens[tokenId2]).to.eql({
+        expect(expiredTokens[tokenId2]).toEqual({
           clientID       : '2',
           expirationDate : new Date(0),
           userID         : '2',
@@ -110,14 +105,14 @@ describe('accesstokens', () => {
         });
       })
       .then(() => accessTokens.find(token1))
-      .then(foundToken => expect(foundToken).to.eql(undefined))
+      .then(foundToken => expect(foundToken).toEqual(undefined))
       .then(() => accessTokens.find(token2))
-      .then(foundToken => expect(foundToken).to.eql(undefined));
+      .then(foundToken => expect(foundToken).toEqual(undefined));
     });
   });
 
   describe('#removeAll', () => {
-    it('should remove all tokens', () => {
+    test('should remove all tokens', () => {
       const token1   = utils.createToken();
       const token2   = utils.createToken();
       const tokenId1 = jwt.decode(token1).jti;
@@ -126,13 +121,13 @@ describe('accesstokens', () => {
       .then(() => accessTokens.save(token2, new Date(0), '2', '2', '*'))
       .then(() => accessTokens.removeAll())
       .then((expiredTokens) => {
-        expect(expiredTokens[tokenId1]).to.eql({
+        expect(expiredTokens[tokenId1]).toEqual({
           clientID       : '1',
           expirationDate : new Date(0),
           userID         : '1',
           scope          : '*',
         });
-        expect(expiredTokens[tokenId2]).to.eql({
+        expect(expiredTokens[tokenId2]).toEqual({
           clientID       : '2',
           expirationDate : new Date(0),
           userID         : '2',
@@ -140,9 +135,9 @@ describe('accesstokens', () => {
         });
       })
       .then(() => accessTokens.find(token1))
-      .then(foundToken => expect(foundToken).to.eql(undefined))
+      .then(foundToken => expect(foundToken).toEqual(undefined))
       .then(() => accessTokens.find(token2))
-      .then(foundToken => expect(foundToken).to.eql(undefined));
+      .then(foundToken => expect(foundToken).toEqual(undefined));
     });
   });
 });
