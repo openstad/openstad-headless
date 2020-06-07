@@ -22,13 +22,13 @@ exports.index = (req, res, next) => {
     description: configRequiredFields.description,
     title: configRequiredFields.title,
     buttonText: configRequiredFields.buttonText,
-    redirect_uri: req.query.redirect_uri
+    redirect_uri: encodeURIComponent(req.query.redirect_uri)
   });
 }
 
 exports.post = (req, res, next) => {
   const clientRequiredUserFields = req.client.requiredUserFields;
-  const redirectUrl = req.query.redirect_uri ? req.query.redirect_uri : req.client.redirectUrl;
+  const redirectUrl = req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : req.client.redirectUrl;
 
   clientRequiredUserFields.forEach((field) => {
     if (field === 'email' && !!req.user.email)  {

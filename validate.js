@@ -54,7 +54,7 @@ validate.user = (user, password) => {
  * @returns {Object} The user if valid
  */
 validate.userExists = (user) => {
-  if (user === null) {
+  if (user === null || user === undefined) {
     validate.logAndThrow('User does not exist');
   }
   return user;
@@ -101,24 +101,18 @@ validate.clientExists = (client) => {
 validate.token = (token, accessToken) => {
   utils.verifyToken(accessToken);
 
-	// console.log('accccesToken', accessToken);
-  // console.log('token', token);
-
   // token is a user token
   if (token.userID != null) {
     return new User({id: token.userID})
             .fetch()
+            .then(client => validate.userExists(client))
             .then((client) => { return client.serialize(); });
   }
 
   return new Client({clientId: token.clientID})
-    .fetch()
+    .fetch({debug: true})
+    .then(client => validate.clientExists(client))
     .then((client) => { return client.serialize(); });
-
-  // token is a client token
-  return db.clients.find(token.clientID)
-  .then(client => validate.clientExists(client))
-  .then(client => client);
 };
 
 /**
@@ -159,6 +153,7 @@ validate.authCode = (code, authCode, client, redirectURI) => {
   // console.log('redirectURI', redirectURI);
   // console.log('authCode', authCode);
 
+  // Fixme: why is this disabled?
   if (redirectURI !== authCode.redirectURI) {
 //    validate.logAndThrow('AuthCode redirectURI does not match redirectURI given');
   }

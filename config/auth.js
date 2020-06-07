@@ -19,6 +19,7 @@ const types = [
     displaySidebar: false,
     displayBackbutton: true,
     displayAccountLink:  false,
+    buttonText: 'Controleer stemcode'
   },
   {
     key: 'Local',
@@ -46,14 +47,16 @@ const types = [
     displaySidebar: false,
     displayAccountLink:  false,
   },
-/*  {
+  /*
+  {
     key: 'DigiD',
     label: 'Digid code',
     loginUrl: formatLoginUrl('digid'),
     displayBackbutton: true,
     displaySidebar: false,
     displayAccountLink:  false,
-  },*/
+  },
+  */
 ];
 
 const get = (key) => {
