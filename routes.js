@@ -61,7 +61,15 @@ const addCsrfGlobal = (req, res, next) => {
 };
 
 module.exports = function(app){
+
   app.use(function(req, res, next) {
+    // load env sheets that have been set for complete Environment, not specific for just one client
+    if (process.env.STYLESHEETS) {
+      const sheets = process.env.STYLESHEETS.split(',');
+      //make sure we
+      res.locals.envStyleSheets = sheets;
+    }
+
     next();
   });
 
@@ -179,7 +187,6 @@ module.exports = function(app){
   app.get('/oauth/token',                 oauth2Controller.token);
 
   app.get('/api/userinfo', passport.authenticate('bearer', { session: false }), clientMw.withOne, userMw.withRoleForClient, clientMw.checkUniqueCodeAuth(), userController.info);
-  //app.get('/api/clientinfo', client.info);
 
   // Mimicking google's token info endpoint from
   // https://developers.google.com/accounts/docs/OAuth2UserAgent#validatetoken
@@ -190,10 +197,6 @@ module.exports = function(app){
   app.get('/api/revoke', tokenController.revoke);
 
   require('./routes/adminApi')(app);
-
-  /**
-   * Error routes
-   */
 
   // Handle 404
   app.use(function(req, res) {

@@ -37,16 +37,19 @@ exports.withOne = (req, res, next) => {
         req.client = client.serialize();
 
         const clientConfig = JSON.parse(req.client.config);
+
         res.locals.clientProjectUrl = clientConfig.projectUrl;
         res.locals.clientEmail = clientConfig.contactEmail;
         res.locals.clientDisclaimerUrl = clientConfig.clientDisclaimerUrl;
-
+        res.locals.clientStylesheets = clientConfig.clientStylesheets;
 
         req.client.authTypes            = JSON.parse(req.client.authTypes);
         req.client.exposedUserFields    = JSON.parse(req.client.exposedUserFields);
         req.client.requiredUserFields   = JSON.parse(req.client.requiredUserFields);
         req.client.config               = JSON.parse(req.client.config);
         req.client.allowedDomains       = JSON.parse(req.client.allowedDomains);
+
+
 
         next();
       } else {
@@ -155,7 +158,7 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
         .fetch()
         .then((codeResponse) => {
           const userHasPrivilegedRole = privilegedRoles.indexOf(req.user.role) > -1;
-          
+
           // if uniquecode exists or user has priviliged role
           if (codeResponse || userHasPrivilegedRole) {
             next();
