@@ -1,5 +1,45 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
+@import (reference) "less/_variables";
+@import (reference) "less/_mixins";
+
+@import "less/_Thin";
+@import "less/_ThinItalic";
+@import "less/_Light";
+@import "less/_LightItalic";
+@import "less/_Regular";
+@import "less/_Italic";
+@import "less/_Medium";
+@import "less/_MediumItalic";
+@import "less/_Bold";
+@import "less/_BoldItalic";
+@import "less/_Black";
+@import "less/_BlackItalic";
+
+/* BEGIN Regular */
+@font-face {
+	font-family: Roboto;
+	.fontdef-woff(@FontPath, @FontName, @FontVersion, "Regular");
+	font-weight: 400;
+	font-style: normal;
+}
+@font-face {
+	font-family: Roboto;
+	.fontdef-woff(@FontPath, @FontName, @FontVersion, "Regular");
+	font-weight: normal;
+	font-style: normal;
+}
+/* END Regular */
+
+/* BEGIN Medium */
+@font-face {
+	font-family: Roboto;
+	.fontdef-woff(@FontPath, @FontName, @FontVersion, "Medium");
+	font-weight: 500;
+	font-style: normal;
+}
+/* END Medium */
+
 body {
   font-family: 'Roboto', sans-serif;
 

@@ -1,28 +1,16 @@
-{% if logo %}
-  {% if logo === 'amsterdam-logo.html' %}
-  {% include 'elements/amsterdam-logo.html' %}
-  {% else %}
-  <a class="mainlogo" href="#">
+<a class="mainlogo " href="#">
+  {% if logo %}
+    {% if logo === 'amsterdam-logo.html' %}
+    {% include 'elements/amsterdam-logo.html' %}
+    {% else %}
     <img src="{{logo}}" />
-  </a>
+    {% endif %}
+  {% else %}
+    <img src="/img/logo-openstad.png" />
   {% endif %}
-{% else %}
-<h1 class="sitelogo">
-  <a class="mainlogo " href="#">
-    <span class="logoset">
-      <!--
-        <img src="/img/logos/andreas.svg" class="screen-logo" alt="Gemeente Amsterdam">
-      !-->
-    </span>
-    <span class="logotexts">
-      <span class="logotext red">OPENSTAD</span>
-      <span class="logotext red"></span>
-    </span>
+</a>
+<span class="subsitetitle">
+  <a href="#">
+    {{client.name}}
   </a>
-  <span class="subsitetitle">
-    <a href="#">
-      {{client.name}}
-    </a>
-  </span>
-</h1>
-{% endif %}
+</span>

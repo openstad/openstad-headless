@@ -43,6 +43,11 @@ exports.withOne = (req, res, next) => {
         res.locals.clientDisclaimerUrl = clientConfig.clientDisclaimerUrl;
         res.locals.clientStylesheets = clientConfig.clientStylesheets;
 
+        //if logo isset in config overwrite the .env logo
+        if (clientConfig.logo) {
+          res.locals.logo = clientConfig.logo;
+        }
+
         req.client.authTypes            = JSON.parse(req.client.authTypes);
         req.client.exposedUserFields    = JSON.parse(req.client.exposedUserFields);
         req.client.requiredUserFields   = JSON.parse(req.client.requiredUserFields);

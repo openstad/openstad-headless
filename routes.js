@@ -70,6 +70,11 @@ module.exports = function(app){
       res.locals.envStyleSheets = sheets;
     }
 
+    // load env sheets that have been set for complete Environment, not specific for just one client
+    if (process.env.LOGO) {
+      res.locals.logo = process.env.LOGO;
+    }
+
     next();
   });
 
