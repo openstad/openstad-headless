@@ -48,6 +48,10 @@ exports.withOne = (req, res, next) => {
           res.locals.logo = clientConfig.logo;
         }
 
+        if (clientConfig.displayClientName || (clientConfig.displayClientName === 'undefined' && process.env.DISPLAY_CLIENT_NAME=== 'yes')) {
+          res.locals.displayClientName = true;
+        }
+
         req.client.authTypes            = JSON.parse(req.client.authTypes);
         req.client.exposedUserFields    = JSON.parse(req.client.exposedUserFields);
         req.client.requiredUserFields   = JSON.parse(req.client.requiredUserFields);
