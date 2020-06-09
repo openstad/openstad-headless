@@ -7175,9 +7175,9 @@ footer ul li a:hover {
 }
 header {
   box-sizing: border-box;
-  height: 110px;
-  margin: 0 0;
-  padding: 0 15px;
+  height: auto;
+  margin: 0;
+  padding: 25px 0;
   position: relative;
   width: 100%;
 }
@@ -7188,13 +7188,9 @@ header {
 }
 @media screen and (max-width: 768px) {
   header {
-    height: 63px;
+    height: auto;
     width: 100%;
-  }
-}
-@media screen and (max-width: 768px) {
-  header {
-    padding: 0;
+    padding: 18px 0;
   }
 }
 @media screen and (max-width: 341px) {
@@ -7317,28 +7313,19 @@ header {
 .main-logo-container {
   float: left;
   display: block;
-  margin-top: 37px;
-}
-@media screen and (max-width: 768px) {
-  .main-logo-container {
-    margin-top: 17px;
-  }
 }
 .subsitetitle-default.subsitetitle {
   float: left;
   display: block;
   margin-left: 50px;
-  margin-top: 37px;
 }
 @media screen and (max-width: 768px) {
   .subsitetitle-default.subsitetitle {
     margin-left: 7px;
-    margin-top: 23px;
   }
 }
 .default-logo {
   width: 150px;
-  margin: 4px 0 0;
   height: auto;
 }
 /***
@@ -7444,6 +7431,7 @@ header {
   color: #000;
   text-decoration: none;
   font-weight: 700;
+  display: block;
 }
 @media screen and (max-width: 993px) {
   .subsitetitle a {
@@ -7740,8 +7728,7 @@ header {
 }
 .btn {
   border-radius: 0;
-  height: 46px;
-  line-height: 47px;
+  line-height: 1;
   width: auto;
   font-size: 16px;
   font-weight: 600;
@@ -7751,7 +7738,7 @@ header {
   text-align: center;
   color: #ffffff;
   position: inline;
-  padding: 0px 11px;
+  padding: 14px 11px;
   text-decoration: none;
   display: inline-block;
 }
