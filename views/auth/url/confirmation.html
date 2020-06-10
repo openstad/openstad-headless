@@ -3,10 +3,6 @@
 {% block body %}
 <div>
 		<div class="upper-box card-body">
-      {#<a href="{{ '/login?clientId='+clientId }}" class="backlink">
-        Log opnieuw in
-      </a>#}
-
 			<h1 class="">
 				{% if title %}
 				 	{{title}}
@@ -22,7 +18,7 @@
           Het kan enkele minuten duren voor de e-mail verschijnt.
           <br /> <br />
           Geen mail gekregen na het versturen van de link?
-          Kijk dan in uw spam-folder of <a href="/login?&clientId={{clientId}}&redirect_uri={{redirectUrl}}">probeer het opnieuw</a>.
+          Kijk dan in uw spam-folder of <a href="{{loginUrl}}?&clientId={{clientId}}&redirect_uri={{redirectUrl}}">probeer het opnieuw</a>.
           <br /> <br />
           Lukt het alsnog niet?
           <a href="mailto:{{clientEmail}}">Neem contact met ons op.</a>

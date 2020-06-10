@@ -44,6 +44,7 @@ exports.confirmation  = (req, res) => {
   res.render('auth/url/confirmation', {
     clientId: req.query.clientId,
     client: req.client,
+    loginUrl: '/login',
     redirectUrl: encodeURIComponent(req.query.redirect_uri),
     title: configAuthType && configAuthType.confirmedTitle ? configAuthType.confirmedTitle : false,
     description: configAuthType && configAuthType.confirmedDescription ?  configAuthType.confirmedDescription : false,
