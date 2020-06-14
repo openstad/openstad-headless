@@ -1,3 +1,4 @@
+const authType = 'Url';
 const passport = require('passport');
 const tokenUrl = require('../../services/tokenUrl');
 const authService = require('../../services/authService');

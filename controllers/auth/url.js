@@ -2,7 +2,7 @@
  * Controller responsible for handling the logic for Url login
  * (login in with a link, for now send by e-mail)
  */
- const authType = 'Url';
+const authType = 'Url';
 
 const passport          = require('passport');
 const User              = require('../../models').User;
