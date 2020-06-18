@@ -149,13 +149,11 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
 
       // if UniqueCode authentication is used, other methods are blocked to enforce users can never authorize with email
       if (authTypes.indexOf('UniqueCode') !== -1) {
-        console.log();
-
         new UniqueCode({ clientId: req.client.id, userId: req.user.id })
         .fetch()
         .then((codeResponse) => {
           const userHasPrivilegedRole = privilegedRoles.indexOf(req.user.role) > -1;
-          
+
           // if uniquecode exists or user has priviliged role
           if (codeResponse || userHasPrivilegedRole) {
             next();
