@@ -5,7 +5,7 @@
 {% else %}
 <a class="{{'mainlogo' if logo === 'amsterdam-logo.html' else 'main-logo-container' }}" href="#">
   {% if logo %}
-    <img src="{{logo}}" />
+    <img id="logo-image" src="{{logo}}" />
   {% else %}
     <img class="default-logo" src="/img/logo-openstad.png" />
   {% endif %}

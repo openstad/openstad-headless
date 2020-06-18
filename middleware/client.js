@@ -37,6 +37,7 @@ exports.withOne = (req, res, next) => {
         req.client = client.serialize();
 
         const clientConfig = JSON.parse(req.client.config);
+        const clientConfigStyling = clientConfig.styling ?  clientConfig.styling : {};
 
         res.locals.clientProjectUrl = clientConfig.projectUrl;
         res.locals.clientEmail = clientConfig.contactEmail;
@@ -44,8 +45,11 @@ exports.withOne = (req, res, next) => {
         res.locals.clientStylesheets = clientConfig.clientStylesheets;
 
         //if logo isset in config overwrite the .env logo
-        if (clientConfig.logo) {
-          res.locals.logo = clientConfig.logo;
+        if (clientConfigStyling && clientConfigStyling.logo) {
+          res.locals.logo = clientConfigStyling.logo;
+        }
+        if (clientConfigStyling && clientConfigStyling.inlineCSS) {
+          res.locals.inlineCSS = clientConfigStyling.inlineCSS;
         }
 
         if (clientConfig.displayClientName || (clientConfig.displayClientName === 'undefined' && process.env.DISPLAY_CLIENT_NAME=== 'yes')) {
