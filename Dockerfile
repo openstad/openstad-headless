@@ -38,6 +38,9 @@ WORKDIR /home/app
 COPY . /home/app
 
 
+#
+RUN npm config set unsafe-perm true
+
 # This packages must be installed seperatly to prevent crash
 # @since node 10.16
 RUN npm install -g node-gyp
@@ -55,7 +58,7 @@ RUN apk del openssl g++ make && rm -rf /var/cache/apk/*
 
 # The place where the certificates should be:
 # certificate.pem  certrequest.csr  privatekey.pem
-RUN mkdir /home/app/certs
+RUN mkdir -p /home/app/certs
 VOLUME ["/home/app/certs"]
 
 # Owner rights for node user
