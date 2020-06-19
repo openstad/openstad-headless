@@ -3,7 +3,7 @@ const UniqueCode = require('../models').UniqueCode;
 const hat = require('hat');
 const userFields = require('../config/user').fields;
 const authTypes = require('../config/auth').types;
-
+const privilegedRoles =  require('../config/roles').privilegedRoles;
 const authTypesConfig = require('../config').authTypes;
 
 exports.withAll = (req, res, next) => {
@@ -37,16 +37,32 @@ exports.withOne = (req, res, next) => {
         req.client = client.serialize();
 
         const clientConfig = JSON.parse(req.client.config);
+        const clientConfigStyling = clientConfig.styling ?  clientConfig.styling : {};
+
         res.locals.clientProjectUrl = clientConfig.projectUrl;
         res.locals.clientEmail = clientConfig.contactEmail;
         res.locals.clientDisclaimerUrl = clientConfig.clientDisclaimerUrl;
+        res.locals.clientStylesheets = clientConfig.clientStylesheets;
 
+        //if logo isset in config overwrite the .env logo
+        if (clientConfigStyling && clientConfigStyling.logo) {
+          res.locals.logo = clientConfigStyling.logo;
+        }
+        if (clientConfigStyling && clientConfigStyling.inlineCSS) {
+          res.locals.inlineCSS = clientConfigStyling.inlineCSS;
+        }
+
+        if (clientConfig.displayClientName || (clientConfig.displayClientName === 'undefined' && process.env.DISPLAY_CLIENT_NAME=== 'yes')) {
+          res.locals.displayClientName = true;
+        }
 
         req.client.authTypes            = JSON.parse(req.client.authTypes);
         req.client.exposedUserFields    = JSON.parse(req.client.exposedUserFields);
         req.client.requiredUserFields   = JSON.parse(req.client.requiredUserFields);
         req.client.config               = JSON.parse(req.client.config);
         req.client.allowedDomains       = JSON.parse(req.client.allowedDomains);
+
+
 
         next();
       } else {
@@ -147,18 +163,25 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
   return (req, res, next) => {
       const authTypes = req.client.authTypes;
 
-      // if UniqueCode isset
+      // if UniqueCode authentication is used, other methods are blocked to enforce users can never authorize with email
       if (authTypes.indexOf('UniqueCode') !== -1) {
+        console.log();
+
         new UniqueCode({ clientId: req.client.id, userId: req.user.id })
         .fetch()
         .then((codeResponse) => {
-          if (!!codeResponse) {
+          const userHasPrivilegedRole = privilegedRoles.indexOf(req.user.role) > -1;
+
+          // if uniquecode exists or user has priviliged role
+          if (codeResponse || userHasPrivilegedRole) {
             next();
           } else {
             throw new Error('Not validated with Unique Code');
           }
         })
         .catch((error) => {
+          console.log('error',error);
+
           if (errorCallback) {
             try {
               errorCallback(req, res, next);

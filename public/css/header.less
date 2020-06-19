@@ -1,8 +1,8 @@
 header {
 	box-sizing: border-box;
-	height: 110px;
-	margin: 0 0;
-	padding: 0 15px;
+	height: auto;
+	margin: 0;
+	padding: 25px 0;
 	position: relative;
 	width: 100%;
 
@@ -11,13 +11,11 @@ header {
 	}
 
 	@media screen and (max-width: @screen-sm) {
-		height: 63px;
+		height: auto;
 		width: 100%;
+		padding: 18px 0;
 	}
 
-	@media screen and (max-width: @screen-sm) {
-		padding: 0;
-	}
 
 	h2 {
 		@media screen and (max-width: 341px) {
@@ -35,9 +33,7 @@ header {
 			display: none;
 		}
 	}
-
 }
-
 
 .logo-container {
 	position: absolute;
@@ -54,7 +50,6 @@ header {
 
 	#amsterdam {
 		color: #ec0000;
-		font-family: 'Avenir_Custom';
 		top: 15px;
 		left: 10px;
 		font-size: 15px;

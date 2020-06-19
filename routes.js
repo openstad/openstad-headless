@@ -1,24 +1,14 @@
-const multer                   = require('multer');
-//const upload                   = multer({ dest: 'uploads/' });
-const upload                   = multer();
 const passport                 = require('passport');
 
 //CONTROLERS
 const oauth2Controller 				 = require('./controllers/oauth/oauth2');
 const tokenController          = require('./controllers/oauth/token');
 const userController           = require('./controllers/user/user');
-const adminUserController      = require('./controllers/admin/user');
-const adminClientController    = require('./controllers/admin/client');
-const adminRoleController      = require('./controllers/admin/role');
-const adminCodeController      = require('./controllers/admin/code');
-const adminApiUserController          = require('./controllers/admin/api/user');
-const adminApiClientController        = require('./controllers/admin/api/client');
-const adminApiRoleController          = require('./controllers/admin/api/role');
-const adminApiUniqueCodeController    = require('./controllers/admin/api/uniqueCode');
 
 //AUTH CONTROLLERS
 const authChoose	 						 = require('./controllers/auth/choose');
 const authUrl 		 						 = require('./controllers/auth/url');
+const authAdminUrl 		 				 = require('./controllers/auth/adminUrl');
 const authForgot							 = require('./controllers/auth/forgot');
 const authDigiD							 	 = require('./controllers/auth/digid');
 const authAnonymous					 	 = require('./controllers/auth/anonymous');
@@ -27,17 +17,12 @@ const authCode							 	 = require('./controllers/auth/code');
 const authRequiredFields	     = require('./controllers/auth/required');
 
 //MIDDLEWARE
-const adminMiddleware          = require('./middleware/admin');
 const clientMw      				   = require('./middleware/client');
 const userMw           				 = require('./middleware/user');
-const tokenMw                  = require('./middleware/token');
 const bruteForce 							 = require('./middleware/bruteForce');
 const authMw                   = require('./middleware/auth');
 const passwordResetMw          = require('./middleware/passwordReset');
-const roleMw                   = require('./middleware/role');
-const codeMw                   = require('./middleware/code');
 const logMw                    = require('./middleware/log');
-
 
 const loginBruteForce = bruteForce.user.getMiddleware({
   key: function(req, res, next) {
@@ -76,12 +61,24 @@ const addCsrfGlobal = (req, res, next) => {
 };
 
 module.exports = function(app){
+
   app.use(function(req, res, next) {
+    // load env sheets that have been set for complete Environment, not specific for just one client
+    if (process.env.STYLESHEETS) {
+      const sheets = process.env.STYLESHEETS.split(',');
+      //make sure we
+      res.locals.envStyleSheets = sheets;
+    }
+
+    // load env sheets that have been set for complete Environment, not specific for just one client
+    if (process.env.LOGO) {
+      res.locals.logo = process.env.LOGO;
+    }
+
     next();
   });
 
   app.get('/', authLocal.index);
-
 
 	/**
 	 * Login routes for clients,
@@ -91,7 +88,7 @@ module.exports = function(app){
 	app.get('/login', clientMw.withOne, authChoose.index);
 
 	/**
-	 * Shared middleware for all auth routes, adding client and per
+	 * Shared middleware for all auth routes, adding client and bruteforce
 	 */
 	app.use('/auth', [clientMw.withOne, bruteForce.global.prevent]);
 
@@ -128,7 +125,17 @@ module.exports = function(app){
   app.get('/auth/url/authenticate',   authUrl.authenticate);
 	app.post('/auth/url/authenticate',   emailUrlBruteForce, authUrl.postAuthenticate);
 
-	/** 
+
+	// Admin login routes
+  app.use('/auth/admin', [csrfProtection, addCsrfGlobal]);
+
+  app.get('/auth/admin/login', authUrl.login);
+  app.get('/auth/admin/confirmation', authAdminUrl.confirmation);
+  app.post('/auth/admin/login', emailUrlBruteForce, authAdminUrl.postLogin);
+  app.get('/auth/admin/authenticate', authUrl.authenticate);
+  app.post('/auth/admin/authenticate', emailUrlBruteForce, authAdminUrl.postAuthenticate);
+
+	/**
 	 * Auth routes for DigiD
 	 * @TODO: available routes
 	 */
@@ -179,13 +186,12 @@ module.exports = function(app){
 
   app.use('/dialog', [bruteForce.global.prevent]);
 
-  app.get('/dialog/authorize',            clientMw.withOne, authMw.check, userMw.withRoleForClient,  clientMw.checkRequiredUserFields,  clientMw.checkUniqueCodeAuth((req, res) => { return res.redirect('/login?clientId=' + req.query.client_id);}),   oauth2Controller.authorization);
-  app.post('/dialog/authorize/decision',  clientMw.withOne, clientMw.checkUniqueCodeAuth(),  bruteForce.global.prevent, oauth2Controller.decision);
+  app.get('/dialog/authorize',            clientMw.withOne, authMw.check, userMw.withRoleForClient, clientMw.checkRequiredUserFields,  clientMw.checkUniqueCodeAuth((req, res) => { return res.redirect('/login?clientId=' + req.query.client_id);}),   oauth2Controller.authorization);
+  app.post('/dialog/authorize/decision',  clientMw.withOne, userMw.withRoleForClient, clientMw.checkUniqueCodeAuth(),  bruteForce.global.prevent, oauth2Controller.decision);
   app.post('/oauth/token',                oauth2Controller.token);
   app.get('/oauth/token',                 oauth2Controller.token);
 
-  app.get('/api/userinfo', passport.authenticate('bearer', { session: false }), clientMw.withOne, clientMw.checkUniqueCodeAuth(),   userMw.withRoleForClient, userController.info);
-  //app.get('/api/clientinfo', client.info);
+  app.get('/api/userinfo', passport.authenticate('bearer', { session: false }), clientMw.withOne, userMw.withRoleForClient, clientMw.checkUniqueCodeAuth(), userController.info);
 
   // Mimicking google's token info endpoint from
   // https://developers.google.com/accounts/docs/OAuth2UserAgent#validatetoken
@@ -196,10 +202,6 @@ module.exports = function(app){
   app.get('/api/revoke', tokenController.revoke);
 
   require('./routes/adminApi')(app);
-
-  /**
-   * Error routes
-   */
 
   // Handle 404
   app.use(function(req, res) {

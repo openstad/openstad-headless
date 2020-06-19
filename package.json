@@ -49,9 +49,10 @@
   "scripts": {
     "lint": "eslint *.js config db test",
     "start": "node app.js",
-    "test": "mocha test test/db test/config",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "jest unit",
+    "test:e2e": "jest integration",
     "test:watch": "npm run test -- --watch",
-    "test:integration": "mocha test/integration",
     "dev": "nodemon server.js",
     "watch": "npm-run-all --parallel watch:*",
     "watch:css": "nodemon -e less -w public/css -x npm run build:css",
@@ -62,17 +63,17 @@
     "npm": ">=3.10.0"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
     "es6-promisify": "^5.0.x",
     "eslint": "^3.10.x",
     "eslint-config-airbnb": "^13.0.x",
     "eslint-plugin-import": "^2.2.x",
     "eslint-plugin-jsx-a11y": "^2.2.x",
     "eslint-plugin-react": "^6.7.x",
-    "mocha": "^5.2.0",
+    "jest": "^26.0.1",
+    "mock-knex": "^0.4.9",
     "request": "^2.48.x",
-    "sinon": "^1.17.6",
-    "sinon-chai": "^2.8.0"
+    "sqlite3": "^4.2.0",
+    "supertest": "^4.0.2"
   },
   "keywords": [
     "authentication",

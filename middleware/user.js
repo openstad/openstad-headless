@@ -11,14 +11,12 @@ const Promise               = require('bluebird');
 
 exports.withAll = (req, res, next) => {
 
-  console.log('withAll')
-
   User
     .query(function (qb) {
       const limit = req.query.limit ? parseInt(req.query.limit, 10) : 1000;
       const offset = req.query.offset ? parseInt(req.query.offset, 10) : 0;
       const search = req.query.search ? req.query.search : false;
-      
+
       if (req.query.clientId) {
         qb.where('clientId',  req.client.id);
       }

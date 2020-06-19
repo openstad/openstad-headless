@@ -1,0 +1,17 @@
+language: minimal
+
+services:
+  - docker
+
+before_install:
+  - docker build -t openstad/auth:dev .
+
+script:
+  - docker run -e CI=true openstad/auth:dev env SESSION_SECRET=test npm run test -- --coverage
+
+deploy:
+  provider: script
+  script: bash docker_push
+  on:
+    all_branches: true
+    condition: $TRAVIS_BRANCH =~ ^(feature/travis-ci|staging|release|master)$

@@ -5,6 +5,24 @@
   <!-- Needed for mobile sites to work -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css" href="/css/main.css">
+
+  {% if envStyleSheets %}
+  {% for sheet in envStyleSheets %}
+  <link rel="stylesheet" type="text/css" href="{{sheet}}">
+  {% endfor %}
+  {% endif %}
+
+  {% if clientStylesheets %}
+  {% for sheet in clientStylesheets %}
+  <link rel="stylesheet" type="text/css" href="{{sheet.url}}">
+  {% endfor %}
+  {% endif %}
+
+  {% if inlineCSS %}
+  <style>{{inlineCSS}} </style>
+  {% endif %}
+
+
   <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
   <script type="text/javascript" src="/javascripts/jquery.validate.min.js"></script>
   <script type="text/javascript" src="/javascripts/jquery.validate.nl.js"></script>
