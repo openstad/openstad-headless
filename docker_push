@@ -1,4 +1,0 @@
-#!/bin/bash
-echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
-docker push openstad/auth:dev
-kubectl set image deployment/containername portal=$DOCKER_IMAGE --record -n namespace

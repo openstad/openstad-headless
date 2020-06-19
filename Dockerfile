@@ -54,7 +54,7 @@ RUN npm install knex -g
 # ----------------------------------------------
 
 # Remove unused packages only used for building.
-RUN apk del openssl g++ make && rm -rf /var/cache/apk/*
+RUN apk del g++ make && rm -rf /var/cache/apk/*
 
 # The place where the certificates should be:
 # certificate.pem  certrequest.csr  privatekey.pem
