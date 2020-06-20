@@ -27,9 +27,15 @@ deploy:
     script: bash docker_deploy
     on:
       all_branches: true
-      condition: $TRAVIS_BRANCH =~ ^(feature/docker-travis|development)$
+      # @TODO:
+      # Add an autodeploy setup of the release branche
+      # Either Create different config in travis to deploy to different cluster
+      # Or add a different namespace for ACC
+      # condition: $TRAVIS_BRANCH =~ ^(development|release)$
+      condition: $TRAVIS_BRANCH =~ ^(development)$
   # master automatically pushes new docker container with latest tag to docker
   - provider: script
+    #script not yet tested
     script: bash docker_publish
     on:
       branch: master
