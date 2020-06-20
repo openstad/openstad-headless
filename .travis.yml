@@ -21,7 +21,7 @@ deploy:
   # what branches to deploy automatically
   - provider: script
     script:
-      - docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
+      - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
       - docker push ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_BUILD_ID}
       - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
       - chmod +x ./kubectl
