@@ -24,17 +24,16 @@ script:
 deploy:
   # what branches to deploy automatically
   - provider: script
-    script:
-      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin;
-      - docker push ${DOCKER_PUBLIC_USERNAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_BUILD_ID}
-      - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-      - chmod +x ./kubectl
-      - sudo mv ./kubectl /usr/local/bin/kubectl
-      - mkdir ${HOME}/.kube
-      - echo "$KUBE_CONFIG" | base64 --decode > ${HOME}/.kube/config
-      - kubectl set image deployment/${K8S_DEPLOYMENT_NAME} ${K8S_DEPLOYMENT_NAME}=${DOCKER_PUBLIC_USERNAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_BUILD_ID} --record -n ${K8S_NAMESPACE}
-      - echo ${DOCKER_PUBLIC_USERNAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_BUILD_ID}
+    script: bash docker_deploy
     on:
       all_branches: true
       condition: $TRAVIS_BRANCH =~ ^(feature/docker-travis|development|release)$
   # master automatically pushes new docker container with latest tag to docker
+  - provider: script
+    script:
+      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin;
+      - docker push ${DOCKER_PUBLIC_USERNAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_BUILD_ID}
+      - docker tag ${DOCKER_PUBLIC_USERNAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_BUILD_ID} ${DOCKER_PUBLIC_USERNAME}/${DOCKER_IMAGE_NAME}:latest
+      - docker push ${DOCKER_PUBLIC_USERNAME}/${DOCKER_IMAGE_NAME}:latest
+    on:
+      branch: master
