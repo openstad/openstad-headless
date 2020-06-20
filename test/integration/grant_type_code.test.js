@@ -18,7 +18,6 @@ let agent;
  */
 describe('Grant Type Authorization Code', () => {
   beforeAll(async () => {
-
     agent = supertest.agent(app);
     await db.migrate.latest();
   });
