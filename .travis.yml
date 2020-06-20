@@ -3,10 +3,10 @@ language: minimal
 # easy way to get your local config: cat ${HOME}/.kube/config | base64 | pbcopy
 env:
   global:
-    - DOCKER_USERNAME="openstad"
-    - DOCKER_IMAGE_NAME="auth"
-    - K8S_DEPLOYMENT_NAME="auth"
-    - K8S_NAMESPACE="openstad"
+    - DOCKER_USERNAME=openstad
+    - DOCKER_IMAGE_NAME=auth
+    - K8S_DEPLOYMENT_NAME=auth
+    - K8S_NAMESPACE=openstad
 
 services:
   - docker
