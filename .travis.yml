@@ -30,7 +30,7 @@ deploy:
   # what branches to deploy automatically
   - provider: script
     script:
-      - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin;
       - docker push ${DOCKER_PUBLIC_USERNAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_BUILD_ID}
       - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
       - chmod +x ./kubectl
@@ -45,7 +45,7 @@ deploy:
   # master automatically pushes new docker container with latest tag to docker
   - provider: script
     script:
-      - docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
+      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin;
       - docker push ${DOCKER_PUBLIC_USERNAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_BUILD_ID}
       - docker tag ${DOCKER_PUBLIC_USERNAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_BUILD_ID} ${DOCKER_PUBLIC_USERNAME}/${DOCKER_IMAGE_NAME}:latest
       - docker push ${DOCKER_PUBLIC_USERNAME}/${DOCKER_IMAGE_NAME}:latest
