@@ -50,7 +50,7 @@
     "lint": "eslint *.js config db test",
     "start": "node app.js",
     "test": "npm run test:unit && npm run test:e2e",
-    "test-cert": "env TEST_CERTS=1 npm run test:unit && env TEST_CERTS=1 npm run test:e2e",
+    "test-cert": "env TEST_CERTS=1 npm run test:unit",
     "test:unit": "jest unit",
     "test:e2e": "jest integration",
     "test:watch": "npm run test -- --watch",
