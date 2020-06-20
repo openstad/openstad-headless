@@ -39,11 +39,3 @@ deploy:
       all_branches: true
       condition: $TRAVIS_BRANCH =~ ^(feature/docker-travis|development|release)$
   # master automatically pushes new docker container with latest tag to docker
-  - provider: script
-    script:
-      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin;
-      - docker push ${DOCKER_PUBLIC_USERNAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_BUILD_ID}
-      - docker tag ${DOCKER_PUBLIC_USERNAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_BUILD_ID} ${DOCKER_PUBLIC_USERNAME}/${DOCKER_IMAGE_NAME}:latest
-      - docker push ${DOCKER_PUBLIC_USERNAME}/${DOCKER_IMAGE_NAME}:latest
-    on:
-      branch: master
