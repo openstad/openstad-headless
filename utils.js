@@ -6,10 +6,10 @@ const uuid = require('uuid/v4');
 const jwt  = require('jsonwebtoken');
 
 /** Private certificate used for signing JSON WebTokens */
-const privateKey = fs.readFileSync(path.join(__dirname, 'certs/privatekey.pem'));
+const privateKey = process.env.PRIVATE_KEY ? process.env.PRIVATE_KEY :  fs.readFileSync(path.join(__dirname, 'certs/privatekey.pem'));
 
 /** Public certificate used for verification.  Note: you could also use the private key */
-const publicKey = fs.readFileSync(path.join(__dirname, 'certs/certificate.pem'));
+const publicKey = process.env.PUBLIC_KEY ? process.env.PUBLIC_KEY : fs.readFileSync(path.join(__dirname, 'certs/certificate.pem'));
 
 /**
  * Creates a signed JSON WebToken and returns it.  Utilizes the private certificate to create

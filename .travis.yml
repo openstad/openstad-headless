@@ -15,7 +15,6 @@ before_install:
   - docker build -t ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_BUILD_ID} .
 
 script:
-  - docker run -e CI=true ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_BUILD_ID} sudo openssl genrsa -out ./certs/privatekey.pem 2048 &&  sudo openssl req -new -key ./certs/privatekey.pem -out ./certs/certrequest.csr -subj "/C=NL/ST=All/L=Amsterdam/O=openstad/CN=www.openstad.org" &&   sudo  openssl x509 -req -in ./certs/certrequest.csr -signkey ./certs/privatekey.pem -days 3650 -out ./certs/certificate.pem;    
   - docker run -e CI=true ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_BUILD_ID} env SESSION_SECRET=test npm run test -- --coverage
 
 deploy:
