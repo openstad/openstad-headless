@@ -12,6 +12,15 @@ services:
   - docker
 
 before_install:
+  - echo ${DOCKER_PASSWORD} | docker login --username ${DOCKER_USERNAME} --password-stdin
+  - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+  - chmod +x ./kubectl
+  - sudo mv ./kubectl /usr/local/bin/kubectl
+  - mkdir ${HOME}/.kube
+#     - echo "$KUBE_CONFIG_$TRAVIS_BRANCH" | base64 --decode > ${HOME}/.kube/config
+  - echo "$KUBE_CONFIG" | base64 --decode > ${HOME}/.kube/config
+  - kubectl set image deployment/${K8S_DEPLOYMENT_NAME} ${K8S_DEPLOYMENT_NAME}=${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:test --record -n ${K8S_NAMESPACE}
+
   - docker build -t ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_BUILD_ID} .
 
 script:
