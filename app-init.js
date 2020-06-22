@@ -20,10 +20,37 @@ const timestampFilter             = require('./nunjucks/timestamp');
 const replaceIdeaVariablesFilter  = require('./nunjucks/replaceIdeaVariables');
 const flash                       = require('express-flash');
 const expressValidator            = require('express-validator');
-const FileStore                   = require('session-file-store')(expressSession);
+const MongoStore                  = require('connect-mongo')(expressSession);
+
+//const FileStore                   = require('session-file-store')(expressSession);
+//const MemoryStore = expressSession.MemoryStore;
+
+/*const MySQLStore                  = require('express-mysql-session')(expressSession);
+var options = ;
+
+const sessionStore = new MySQLStore({
+    port:     3306,
+    host:     process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    user:     process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_SESSIONS,
+});*/
 
 
-const MemoryStore = expressSession.MemoryStore;
+const mongoCredentials = {
+  host: process.env.MONGO_DB_HOST || 'localhost',
+  port: process.env.MONGO_DB_PORT || 27017,
+}
+
+const url = 'mongodb://'+ mongoCredentials.host +':'+mongoCredentials.port+'/sessions';
+
+console.log('mongo url', url);
+
+const sessionStore =  new MongoStore({
+    url: url,
+    ttl: 14 * 24 * 60 * 60 // = 14 days. Default
+})
 
 // Express configuration
 const app = express();
@@ -47,11 +74,15 @@ app.use((req, res, next) => {
 });
 */
 
+
+
+
 const sessionConfig = {
   saveUninitialized : true,
   resave            : true,
   secret            : config.session.secret,
-  store             : new MemoryStore(),
+  store             : sessionStore,
+  //store             : new MemoryStore(),
 /*  store             : new FileStore({
     ttl:    config.session.maxAge      //3600 * 24 * 31
   }),*/
