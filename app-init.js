@@ -74,7 +74,7 @@ app.use((req, res, next) => {
 });
 */
 
-
+app.set('trust proxy', '127.0.0.1');
 
 
 const sessionConfig = {
