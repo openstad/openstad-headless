@@ -76,6 +76,8 @@ const handleSending = async (req, res, next) => {
     await verificationService.sendVerification(req.user, req.client, req.redirectUrl);
 
     req.flash('success', {msg: 'De e-mail is verstuurd naar: ' + req.user.email});
+    console.log('req req', req.session);
+
     res.redirect('/auth/url/confirmation?clientId=' +  req.client.clientId + '&redirect_uri=' + req.redirectUrl || '/login?clientId=' +  req.client.clientId + '&redirect_uri=' + req.redirectUrl );
   } catch(err) {
     console.log('e0mail error', err);
@@ -103,7 +105,7 @@ exports.postLogin = async (req, res, next) => {
   try {
     const clientConfig = req.client.config ? req.client.config : {};
     req.redirectUrl = clientConfig && clientConfig.emailRedirectUrl ? clientConfig.emailRedirectUrl : encodeURIComponent(req.query.redirect_uri);
-    console.log('=>>> req.session post  redirectUrl', redirectUrl);
+    console.log('=>>> req.session post  redirectUrl', req.redirectUrl);
 
     let user = await getUser(req.body.email);
 
