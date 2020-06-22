@@ -25,6 +25,9 @@ exports.login  = [setNoCachHeadersMw, (req, res) => {
   const config = req.client.config ? req.client.config : {};
   const configAuthType = config.authTypes && config.authTypes[authType] ? config.authTypes[authType] : {};
 
+  console.log('=>>> req.session url get ', req.session);
+
+
   res.render('auth/url/login', {
     clientId: req.query.clientId,
     client: req.client,
@@ -100,6 +103,7 @@ exports.postLogin = async (req, res, next) => {
   try {
     const clientConfig = req.client.config ? req.client.config : {};
     req.redirectUrl = clientConfig && clientConfig.emailRedirectUrl ? clientConfig.emailRedirectUrl : encodeURIComponent(req.query.redirect_uri);
+    console.log('=>>> req.session post  redirectUrl', redirectUrl);
 
     let user = await getUser(req.body.email);
 
@@ -163,6 +167,8 @@ exports.postAuthenticate =  (req, res, next) => {
    if (err) { return next(err); }
    const redirectUrl = req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : req.client.redirectUrl;
 
+   console.log('=>>> postAuthenticate', redirectUrl);
+
 
    // Redirect if it fails to the original e-mail screen
    if (!user) {
@@ -181,8 +187,10 @@ exports.postAuthenticate =  (req, res, next) => {
           const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
           return res.redirect(authorizeUrl);
         }
+        console.log('=>>> user1', redirectToAuthorisation);
 
         req.brute.reset(() => {
+
             //log the succesfull login
             authService.logSuccessFullLogin(req)
               .then (() => { redirectToAuthorisation(); })
@@ -190,6 +198,8 @@ exports.postAuthenticate =  (req, res, next) => {
         });
       })
       .catch((err) => {
+        console.log('=>>> user err', err);
+
         next(err);
       });
    });

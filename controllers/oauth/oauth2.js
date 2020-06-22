@@ -183,10 +183,10 @@ exports.authorization = [
 
       // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
       if (allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1) {
-				//console.log('===> redirectURI', redirectURI);
+				console.log('===> redirectURI allowedDomains', redirectURI);
         return done(null, client, redirectURI);
       } else {
-        //console.log('===> Redirect host doesn\'t match the client host');
+        console.log('===> Redirect host doesn\'t match the client host');
         throw new Error('Redirect host doesn\'t match the client host');
       }
 
