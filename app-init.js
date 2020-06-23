@@ -76,24 +76,28 @@ app.use((req, res, next) => {
 
 app.set('trust proxy', '127.0.0.1');
 
+let sessionCookieConfig;
+
+
+// add complete config for debug purposes
+if (process.env.SESSION_COOKIES_CONFIG) {
+  sessionCookieConfig = JSON.parse(process.env.SESSION_COOKIES_CONFIG);
+} else {
+   sessionCookieConfig = {
+    maxAge: config.session.maxAge,
+    secure: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
+    httpOnly: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
+    sameSite: false, //process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true
+  }
+}
 
 const sessionConfig = {
   saveUninitialized : true,
   resave            : true,
   secret            : config.session.secret,
   store             : sessionStore,
-  //store             : new MemoryStore(),
-/*  store             : new FileStore({
-    ttl:    config.session.maxAge      //3600 * 24 * 31
-  }),*/
   key               : 'authorization.sid',
-  cookie            : {
-    maxAge: config.session.maxAge,
-    secure: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
-    httpOnly: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
-    sameSite: false, //process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true
-  },
-
+  cookie            : sessionCookieConfig,
 };
 
 console.log('=>>> sessionConfig', sessionConfig);
