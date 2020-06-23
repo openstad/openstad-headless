@@ -66,7 +66,7 @@ exports.withOne = (req, res, next) => {
 
         next();
       } else {
-        throw new Error('No Client found for clientID');
+        throw new Error('No Client found for clientID', clientId, req.body);
       }
     })
     .catch((err) => { next(err); });
@@ -88,7 +88,7 @@ exports.withOneById = (req, res, next) => {
         req.client = client.serialize();
         next();
       } else {
-        throw new Error('No Client found for clientID');
+        throw new Error('No Client found for clientID', clientId);
       }
     })
     .catch((err) => { next(err); });
