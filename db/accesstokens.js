@@ -22,6 +22,7 @@ exports.find = (token) => {
     const id = jwt.decode(token).jti;
     return Promise.resolve(tokens[id]);
   } catch (error) {
+    console.log('error token not found', token);
     return Promise.resolve(undefined);
   }
 };
