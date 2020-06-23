@@ -55,7 +55,7 @@ exports.send = function ({subject, toName, toEmail, templateString, template, va
     }
   }
 
-  .
+
   /**
    * Render email template
    */
