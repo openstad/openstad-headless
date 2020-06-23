@@ -45,7 +45,6 @@ const mongoCredentials = {
 
 const url = 'mongodb://'+ mongoCredentials.host +':'+mongoCredentials.port+'/sessions';
 
-console.log('mongo url', url);
 
 const sessionStore =  new MongoStore({
     url: url,
@@ -62,6 +61,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 
 app.use((req, res, next) => {
+  console.log('req object', req)
   req.nunjucksEnv = nunjucksEnv;
   next();
 });
@@ -88,6 +88,9 @@ if (process.env.SESSION_COOKIES_CONFIG) {
     sameSite: false, //process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true
   }
 }
+
+console.log('sessionCookieConfig ', sessionCookieConfig);
+
 
 const sessionConfig = {
   saveUninitialized : true,
