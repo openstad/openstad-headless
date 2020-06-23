@@ -61,7 +61,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 
 app.use((req, res, next) => {
-  console.log('req object', req)
   req.nunjucksEnv = nunjucksEnv;
   next();
 });
@@ -139,6 +138,7 @@ require('./routes')(app);
 // // through request header 'X-Forwarded-For' as
 // // 'X-Forwarded-For: some.client.ip.address'
 // // Insertion of the forward header is an option on most proxy software
+//
 // app.set('trust proxy', '127.0.0.1');
 
 module.exports = app;
