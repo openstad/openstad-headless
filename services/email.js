@@ -49,9 +49,9 @@ exports.send = function ({subject, toName, toEmail, templateString, template, va
     if (templateString.includes("{% extends 'emails/layout.html' %}")) {
       templateString  = nunjucks.renderString(templateString, variables)
     } else {
-      templateString = nunjucks.render('emails/blanco.html', {
+      templateString = nunjucks.render('emails/blanco.html', Object.assign(variables, {
         message: nunjucks.renderString(templateString, variables)
-      });
+      }));
     }
   }
 

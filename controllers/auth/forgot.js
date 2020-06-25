@@ -95,6 +95,16 @@
    const sendEmail = (resetUrl, user, client) => {
      const clientConfig = client.config ? client.config : {};
      const transporterConfig = clientConfig.smtpTransport ? clientConfig.smtpTransport : {};
+     let emailLogo;
+
+     // load env sheets that have been set for complete Environment, not specific for just one client
+     if (process.env.LOGO) {
+       emailLogo = process.env.LOGO;
+     }
+
+     if (clientConfigStyling && clientConfigStyling.logo) {
+       emailLogo = clientConfigStyling.logo;
+     }
 
      return emailService.send({
        toName: (user.firstName + ' ' + user.lastName).trim(),
@@ -108,6 +118,7 @@
          firstName: user.firstName,
          clientUrl: client.mainUrl,
          clientName: client.name,
+         logo: emailLogo
        },
        transporterConfig
      });

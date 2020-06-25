@@ -8,7 +8,6 @@ const hat                 = require('hat');
 const login               = require('connect-ensure-login');
 const User                = require('../../models').User;
 const tokenUrl            = require('../../services/tokenUrl');
-const emailService        = require('../../services/email');
 const authAnonymousConfig = require('../../config/auth').get(authType);
 const url                 = require('url');
 
@@ -22,7 +21,7 @@ exports.login  = (req, res, next) => {
 
 
 	let queryString = url.parse(req.url).query;
-  
+
 	// catch users that have cookies turned off
 	req.session.createAnonymousUser = true;
 	res.redirect('/auth/anonymous/register?' + queryString)

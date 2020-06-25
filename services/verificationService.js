@@ -7,11 +7,22 @@ exports.sendVerification = async (user, client, redirectUrl) => {
   const generatedTokenUrl = await tokenUrl.format(client, user, redirectUrl, true);
 
   const clientConfig = client.config ? client.config : {};
+  const clientConfigStyling = clientConfig.styling ?  clientConfig.styling : {};
   const authTypeConfig = clientConfig.authTypes && clientConfig.authTypes.Url ? clientConfig.authTypes.Url : {};
   const emailTemplateString = authTypeConfig.emailTemplate ? authTypeConfig.emailTemplate : false;
   const emailSubject = authTypeConfig.emailSubject ? authTypeConfig.emailSubject : 'Inloggen bij ' + client.name;
   const emailHeaderImage = authTypeConfig.emailHeaderImage ? authTypeConfig.emailHeaderImage : false;
-  const emailLogo = authTypeConfig.emailLogo ? authTypeConfig.emailLogo : false;
+
+  let emailLogo;
+
+  // load env sheets that have been set for complete Environment, not specific for just one client
+  if (process.env.LOGO) {
+    emailLogo = process.env.LOGO;
+  }
+
+  if (clientConfigStyling && clientConfigStyling.logo) {
+    emailLogo = clientConfigStyling.logo;
+  }
 
   const transporterConfig = clientConfig.smtpTransport ? clientConfig.smtpTransport : {};
 
@@ -34,5 +45,3 @@ exports.sendVerification = async (user, client, redirectUrl) => {
     transporterConfig
   });
 };
-
-
