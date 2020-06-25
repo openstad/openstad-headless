@@ -7,6 +7,23 @@ exports.seed = function(knex, Promise) {
       return knex('roles').insert([{
         id: 1,
         name: 'admin'
-      }]);
-    });
+      },
+      {
+        id: 2,
+        name: 'member'
+      },
+      {
+        id: 3,
+        name: 'anonymous'
+      },
+      {
+        id: 4,
+        name: 'moderator'
+      },
+      {
+        id: 5,
+        name: 'editor'
+      }
+    ]);
+  });
 };

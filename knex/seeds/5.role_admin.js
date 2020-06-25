@@ -5,9 +5,13 @@ exports.seed = function(knex, Promise) {
     .then(function () {
       // Inserts seed entries, not very smart!!!!
       return knex('user_roles').insert([{
-        id: 1,
         roleId: 1,
         clientId: 1,
+        userId: 1
+      },
+      {
+        roleId: 1,
+        clientId: 2,
         userId: 1
       }]);
     });
