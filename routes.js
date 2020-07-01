@@ -8,6 +8,7 @@ const userController           = require('./controllers/user/user');
 //AUTH CONTROLLERS
 const authChoose	 						 = require('./controllers/auth/choose');
 const authUrl 		 						 = require('./controllers/auth/url');
+const authPhonenumber 		 		 = require('./controllers/auth/phonenumber');
 const authAdminUrl 		 				 = require('./controllers/auth/adminUrl');
 const authForgot							 = require('./controllers/auth/forgot');
 const authDigiD							 	 = require('./controllers/auth/digid');
@@ -35,6 +36,20 @@ const uniqueCodeBruteForce = bruteForce.user.getMiddleware({
   key: function(req, res, next) {
       // prevent too many attempts for the same unique_code
       next('unique_code');
+  }
+});
+
+const phonenumberBruteForce = bruteForce.userVeryRestricted.getMiddleware({
+  key: function(req, res, next) {
+      // prevent too many attempts for the same phonenumber
+    next('phonenumber');
+  }
+});
+
+const smsCodeBruteForce = bruteForce.user.getMiddleware({
+  key: function(req, res, next) {
+      // prevent too many attempts for the same phonenumber
+    next('phonenumber');
   }
 });
 
@@ -153,6 +168,18 @@ module.exports = function(app){
 	app.get('/auth/anonymous/info',  authAnonymous.info);
 	app.get('/auth/anonymous/login',  authAnonymous.login);
 	app.get('/auth/anonymous/register', authAnonymous.register);
+
+	/**
+	 * Auth routes for phone/sms login
+	 */
+	// shared middleware
+	app.use('/auth/phonenumber', [clientMw.withOne, clientMw.setAuthType('Phonenumber'), clientMw.validate, csrfProtection, addCsrfGlobal]);
+
+	// routes
+	app.get('/auth/phonenumber/login',          authPhonenumber.login);
+	app.post('/auth/phonenumber/login',         phonenumberBruteForce, authPhonenumber.postLogin);
+	app.get('/auth/phonenumber/sms-code',       authPhonenumber.smsCode);
+	app.post('/auth/phonenumber/sms-code',			smsCodeBruteForce, authPhonenumber.postSmsCode);
 
 	/**
 	 * Auth routes for UniqueCode

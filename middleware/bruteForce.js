@@ -25,6 +25,15 @@ exports.user = new ExpressBrute(new ExpressBrute.MemoryStore(), {
 });
 
 //CONFIGURE BRUTE FORCE PROTECT
+exports.userVeryRestricted = new ExpressBrute(new ExpressBrute.MemoryStore(), {
+	freeRetries: 2,
+	minWait: 5*60*1000, // 5 minutes
+	maxWait: 60*30*1000, // 0.5 hour,
+	failCallback: failCallback,
+	handleStoreError: handleStoreError
+});
+
+//CONFIGURE BRUTE FORCE PROTECT
 exports.global = new ExpressBrute(new ExpressBrute.MemoryStore(), {
 	freeRetries: 1000,
 	attachResetToRequest: false,
