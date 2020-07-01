@@ -76,7 +76,6 @@ passport.use('url', new TokenStrategy({
     });
 }));
 
-
 passport.use('uniqueCode', new TokenStrategy({
   //   failRedirect : "/auth/code/login",
     varName : "unique_code"
@@ -135,6 +134,41 @@ passport.use('uniqueCode', new TokenStrategy({
             .then(user => done(null, user))
             .catch((err) => { done(err); });
           }
+      } else {
+        done("Token not found");
+      }
+    });
+}));
+
+passport.use('phonenumber', new TokenStrategy({
+  failRedirect : "/auth/phonenumber/login",
+  varName : "token",
+}, function (token, done) { // put your check logic here
+
+  new LoginToken({
+    token: token,
+    valid: true
+  })
+    .query((q) => {
+      /**
+       * Only select tokens that are younger then 60 minutes
+       */
+      const minutes = 60;
+      const msForAMinute = 60000;
+      const date = new Date();
+      const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
+
+      q.where('createdAt', '>=', timeAgo);
+      q.orderBy('createdAt', 'DESC');
+    })
+    .fetch()
+    .then((token) => {
+      if (token) {
+        new User({id: token.get('userId')})
+          .fetch()
+          .then((user) => { return user.serialize(); })
+          .then(user => { return done(null, user) } )
+          .catch((err) => { return done(err); });
       } else {
         done("Token not found");
       }

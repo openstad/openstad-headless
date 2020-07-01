@@ -6,6 +6,10 @@ const formatRegisterUrl = (slug) => {
   return `/auth/${slug}/register`;
 }
 
+const formatSMSCodeUrl = (slug) => {
+  return `/auth/${slug}/sms-code`;
+}
+
 const types = [
   {
     key: 'UniqueCode',
@@ -26,6 +30,21 @@ const types = [
     label: 'Inlog via Wachtwoord',
     loginUrl: formatLoginUrl('local'),
     registerUrl: formatRegisterUrl('local'),
+    backbutton: true,
+    displaySidebar: true,
+    displayAccountLink:  false,
+  },
+  {
+    key: 'Phonenumber',
+    title: 'Inloggen met SMS',
+    loginLabel: 'Voer je telefoonnummer in',
+    loginUrl: formatLoginUrl('phonenumber'),
+    loginButtonText: 'Stuur SMS',
+    loginErrorMessage: 'Het is niet gelukt een sms te versturen',
+    smsCodeErrorMessage: 'Dat is niet de code die je toegestuurd had gekregen. Probeer het nog eens.',
+    smsCodeLabel: 'Voer de code in',
+    smsCodeUrl: formatSMSCodeUrl('phonenumber'),
+    smsCodeButtonText: 'Login',
     backbutton: true,
     displaySidebar: true,
     displayAccountLink:  false,
