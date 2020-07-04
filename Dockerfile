@@ -29,7 +29,7 @@ ENV FROM_EMAIL=""
 
 
 # Install all base dependencies.
-RUN apk add --no-cache --update openssl g++ make python musl-dev
+RUN apk add --no-cache --update openssl g++ make python musl-dev bash
 
 # Set the working directory to the root of the container
 WORKDIR /home/app
