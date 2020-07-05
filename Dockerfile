@@ -53,16 +53,22 @@ RUN npm install
 RUN npm install knex -g
 # ----------------------------------------------
 
+RUN npm install -g nodemon
+
+
 # Remove unused packages only used for building.
 RUN apk del g++ make && rm -rf /var/cache/apk/*
 
 # The place where the certificates should be:
 # certificate.pem  certrequest.csr  privatekey.pem
-RUN mkdir -p /home/app/certs
+RUN mkdir -p /home/app/certs && chown node:node /home/app/certs
+RUN mkdir -p /home/app/certs4 && chown node:node /home/app/certs4
 VOLUME ["/home/app/certs"]
+VOLUME ["/home/app/certs4"]
 
 # Owner rights for node user
 RUN chown -R node:node /home/app
+RUN chown -R node:node /home/app/certs
 
 USER node
 
