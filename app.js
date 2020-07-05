@@ -21,7 +21,6 @@ setInterval(() => {
 // Insertion of the forward header is an option on most proxy software
 app.set('trust proxy', true);
 
-
 // for dev allow http
 app.listen(app.get('port'), function() {
   console.log('OAuth 2.0 Authorization Server started on port ' +  app.get('port'));

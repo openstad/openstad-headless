@@ -14,6 +14,9 @@ const validate = {};
 /** Suppress tracing for things like unit testing */
 const displayTrace = process.env.DISPLAY_TRACE === 'true';
 
+
+
+
 /**
  * Log the message and throw it as an Error
  * @param   {String} msg - Message to log and throw
