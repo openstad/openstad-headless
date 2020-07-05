@@ -32,6 +32,8 @@ exports.info = (req, res) => {
     firstName: req.user.firstName,
     postcode: req.user.postcode,
     lastName: req.user.lastName,
+    // todo: ik denk dat hier de default role moet komen
+    phoneNumber: req.user.phoneNumber,
     scope: req.authInfo.scope
   });
 }

@@ -24,6 +24,5 @@ exports.seed = function(knex, Promise) {
         id: 5,
         name: 'editor'
       }
-    ]);
-  });
+    });
 };
