@@ -7763,8 +7763,6 @@ header {
 }
 @media screen and (max-width: 768px) {
   .btn {
-    height: 43px;
-    line-height: 43px;
     font-size: 14px;
   }
 }
