@@ -3,7 +3,10 @@ var moment = require('moment-timezone');
 
 const failCallback = function (req, res, next, nextValidRequestDate) {
     req.flash('error', { msg: "U heeft te vaak gepoogd in te loggen, probeer het weer "+moment(nextValidRequestDate).fromNow()});
-    res.redirect('/login?clientId=' + req.client.clientId); // brute force protection triggered, send them back to the login page
+    const clientConfig = req.client.config ? req.client.config : {};
+    const redirectUrl = clientConfig && clientConfig.emailRedirectUrl ? clientConfig.emailRedirectUrl : encodeURIComponent(req.query.redirect_uri);
+
+    res.redirect('/login?clientId=' + req.client.clientId + '&redirect_uri=' + redirectUrl); // brute force protection triggered, send them back to the login page
 };
 
 const handleStoreError = function (error) {
