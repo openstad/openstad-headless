@@ -47,7 +47,7 @@ const types = [
     smsCodeLabel: "Mijn sms-stemcode:",
     smsCodeButtonText: "Controleer de sms-code",
     smsCodeHelpText: "Het kan enkele minuten duren voordat u de sms-code ontvangt. Een sms-code is 60 minuten geldig. Geen sms gekregen na het invoeren van uw telefoonnummer?<br/><a href=\"javascript:history.back()\">Vraag nog een sms-code aan</a> of <a href=\"mailto: placemakingsluisbuurt@amsterdam.nl\">neem contact met ons op.</a>",
-    smsCodeErrorMessage: 'Dat is niet de stemcode die u toegestuurd hebt gekregen. Vraag een een nieuwe code aan.',
+    smsCodeErrorMessage: 'Dat is niet de stemcode die u toegestuurd hebt gekregen. Vraag een een nieuwe code aan. Vul hieronder nogmaals uw telefoonnummer in.',
     smsCodeUrl: formatSMSCodeUrl('phonenumber'),
     smsCodeText: "Dit is je code: [[code]]",
     smsCodeSender: "OpenStad",
