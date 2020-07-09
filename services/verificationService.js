@@ -76,7 +76,14 @@ exports.sendSMS = async (user, client, redirectUrl) => {
         }
       ],
       "sender": sender
-    };
+  };
+
+
+  console.log('https://api-prd.kpn.com/messaging/sms-kpn/v1/send', {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify(body)
+  });
 
   response = await fetch('https://api-prd.kpn.com/messaging/sms-kpn/v1/send', {
     method: 'POST',
@@ -84,10 +91,12 @@ exports.sendSMS = async (user, client, redirectUrl) => {
     body: JSON.stringify(body)
   })
 
-  if (!response.ok) throw new Error('SMS failed')
+  if (!response.ok) {
+    console.log(response);
+    throw new Error('SMS failed')
+  }
 
   return;
 
 };
-
 
