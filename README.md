@@ -1,7 +1,7 @@
 Authorization Server
 ==================
 
-# An OAuth2 Server with Node.js; includes a simple admin panel for managing users and clients
+# An OAuth2 Server with Node.js
 
 ## Prerequisites
  - [Git](https://git-scm.com/)
