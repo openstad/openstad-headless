@@ -2,7 +2,7 @@
  * Controller responsible for handling the logic for Url login
  * (login in with a link, for now send by e-mail)
  */
- const authType = 'Url';
+const authType = 'Url';
 
 const passport          = require('passport');
 const User              = require('../../models').User;
@@ -44,6 +44,7 @@ exports.confirmation  = (req, res) => {
   res.render('auth/url/confirmation', {
     clientId: req.query.clientId,
     client: req.client,
+    loginUrl: '/login',
     redirectUrl: encodeURIComponent(req.query.redirect_uri),
     title: configAuthType && configAuthType.confirmedTitle ? configAuthType.confirmedTitle : false,
     description: configAuthType && configAuthType.confirmedDescription ?  configAuthType.confirmedDescription : false,
@@ -72,12 +73,11 @@ const handleSending = async (req, res, next) => {
     await verificationService.sendVerification(req.user, req.client, req.redirectUrl);
 
     req.flash('success', {msg: 'De e-mail is verstuurd naar: ' + req.user.email});
-    //res.redirect('/auth/url/confirmation?clientId=' +  req.client.clientId || '/login?clientId=' +  req.client.clientId );
     res.redirect('/auth/url/confirmation?clientId=' +  req.client.clientId + '&redirect_uri=' + req.redirectUrl || '/login?clientId=' +  req.client.clientId + '&redirect_uri=' + req.redirectUrl );
   } catch(err) {
     console.log('e0mail error', err);
     req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
-    res.redirect(req.header('Referer') || '/login?clientId=' +  req.client.clientId);
+    res.redirect(req.header('Referer') || '/login?clientId=' +  req.client.clientId + '&redirect_uri=' + req.redirectUrl);
   }
 }
 
