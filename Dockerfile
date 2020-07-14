@@ -1,42 +1,80 @@
-FROM alpine:3.9
+# Nodejs 10.16.0 / alpine 3.9.4
+FROM node:10.16.0-alpine
+
+# Label for tracking
+LABEL nl.openstad.container="auth" nl.openstad.version="0.0.1-beta" nl.openstad.release-date="2020-05-07"
+
+
+# full host url `http://example.com:port`
+ENV APP_URL=""
+
+# Frontend URL variable
+ENV ADMIN_REDIRECT_URL=""
+
+# MySQL database variables
+ENV DB_HOST=""
+ENV DB_USER=""
+ENV DB_PASSWORD=""
+ENV DB_NAME=""
+
+# Mail variables
+ENV MAIL_SERVER_URL=""
+ENV MAIL_SERVER_PORT=""
+ENV MAIL_SERVER_SECURE=""
+ENV MAIL_SERVER_PASSWORD=""
+ENV MAIL_SERVER_USER_NAME=""
+ENV EMAIL_ASSETS_URL=""
+ENV FROM_NAME=""
+ENV FROM_EMAIL=""
+
+
+# Install all base dependencies.
+RUN apk add --no-cache --update openssl g++ make python musl-dev bash
 
 # Set the working directory to the root of the container
-WORKDIR /srv/openstad/
+WORKDIR /home/app
 
-# Set the current user of the image to 'root'.
-USER root
+# Bundle app source
+COPY . /home/app
 
-# Copy all content to the Docker image.
-COPY . .
 
-# ----------------------------------
-# Install all base dependencies.
-# ----------------------------------
-RUN apk add --no-cache --update g++ make python musl-dev nodejs npm openssl
+#
+RUN npm config set unsafe-perm true
 
-# ----------------------------------
-# Build and install all npm packages
-# ----------------------------------
+# This packages must be installed seperatly to prevent crash
+# @since node 10.16
+RUN npm install -g node-gyp
+RUN npm install bcrypt
+
+# Install all npm packages
 RUN npm install
+
+# ----------------------------------------------
 RUN npm install knex -g
+# ----------------------------------------------
 
-# ----------------------------------
-# Generate certificates
-# ----------------------------------
-RUN openssl genrsa -out privatekey.pem 2048
-RUN openssl req -new -key privatekey.pem -out certrequest.csr
-RUN openssl x509 -req -in certrequest.csr -signkey privatekey.pem -out certificate.pem
-RUN mkdir certs
-RUN mv certificate.pem cert
-RUN mv certrequest.csr cert
-RUN mv privatekey.pem cert
+RUN npm install -g nodemon
 
-# -------------------------------------------------
+
 # Remove unused packages only used for building.
-# -------------------------------------------------
-RUN apk del make python g++ && rm -rf /var/cache/apk/*
+RUN apk del g++ make && rm -rf /var/cache/apk/*
 
-# -------------------------------------------------
-# Execute the application.
-# -------------------------------------------------
+# The place where the certificates should be:
+# certificate.pem  certrequest.csr  privatekey.pem
+RUN mkdir -p /home/app/certs && chown node:node /home/app/certs
+RUN mkdir -p /home/app/certs4 && chown node:node /home/app/certs4
+VOLUME ["/home/app/certs"]
+VOLUME ["/home/app/certs4"]
+
+# Owner rights for node user
+RUN chown -R node:node /home/app
+RUN chown -R node:node /home/app/certs
+
+USER node
+
+# Exposed ports for application
+EXPOSE 4000/tcp
+EXPOSE 4000/udp
+
+# Run the application
 CMD [ "npm", "start" ]

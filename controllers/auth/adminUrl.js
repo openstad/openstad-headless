@@ -1,3 +1,4 @@
+const authType = 'Url';
 const passport = require('passport');
 const tokenUrl = require('../../services/tokenUrl');
 const authService = require('../../services/authService');
@@ -16,7 +17,7 @@ exports.postLogin = async (req, res, next) => {
 
       req.flash('success', { msg: 'De e-mail is verstuurd naar: ' + req.user.email });
 
-      return res.redirect('/auth/admin/confirmation?clientId=' + req.client.clientId);
+      return res.redirect('/auth/admin/confirmation?clientId=' + req.client.clientId +'&redirect_uri='+ req.redirectUrl);
     } catch(err) {
       console.log(err)
       req.flash('error', { msg: 'U heeft geen rechten om deze actie uit te voeren.' });
@@ -29,6 +30,20 @@ exports.postLogin = async (req, res, next) => {
 
     return res.redirect(req.header('Referer') || authUrlConfig.loginUrl);
   }
+};
+
+exports.confirmation  = (req, res) => {
+  const config = req.client.config ? req.client.config : {};
+  const configAuthType = config.authTypes && config.authTypes[authType] ? config.authTypes[authType] : {};
+
+  res.render('auth/url/confirmation', {
+    clientId: req.query.clientId,
+    client: req.client,
+    loginUrl: '/auth/admin/login',
+    redirectUrl: encodeURIComponent(req.query.redirect_uri),
+    title: configAuthType && configAuthType.confirmedTitle ? configAuthType.confirmedTitle : false,
+    description: configAuthType && configAuthType.confirmedDescription ?  configAuthType.confirmedDescription : false,
+  });
 };
 
 exports.postAuthenticate = (req, res, next) => {

@@ -37,16 +37,32 @@ exports.withOne = (req, res, next) => {
         req.client = client.serialize();
 
         const clientConfig = JSON.parse(req.client.config);
+        const clientConfigStyling = clientConfig.styling ?  clientConfig.styling : {};
+
         res.locals.clientProjectUrl = clientConfig.projectUrl;
         res.locals.clientEmail = clientConfig.contactEmail;
         res.locals.clientDisclaimerUrl = clientConfig.clientDisclaimerUrl;
+        res.locals.clientStylesheets = clientConfig.clientStylesheets;
 
+        //if logo isset in config overwrite the .env logo
+        if (clientConfigStyling && clientConfigStyling.logo) {
+          res.locals.logo = clientConfigStyling.logo;
+        }
+        if (clientConfigStyling && clientConfigStyling.inlineCSS) {
+          res.locals.inlineCSS = clientConfigStyling.inlineCSS;
+        }
+
+        if (clientConfig.displayClientName || (clientConfig.displayClientName === 'undefined' && process.env.DISPLAY_CLIENT_NAME=== 'yes')) {
+          res.locals.displayClientName = true;
+        }
 
         req.client.authTypes            = JSON.parse(req.client.authTypes);
         req.client.exposedUserFields    = JSON.parse(req.client.exposedUserFields);
         req.client.requiredUserFields   = JSON.parse(req.client.requiredUserFields);
         req.client.config               = JSON.parse(req.client.config);
         req.client.allowedDomains       = JSON.parse(req.client.allowedDomains);
+
+
 
         next();
       } else {

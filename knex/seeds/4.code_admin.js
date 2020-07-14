@@ -5,7 +5,8 @@ exports.seed = function(knex, Promise) {
   return knex('unique_codes').del()
     .then(function () {
       const rack = hat.rack();
-      const uniqueCode = rack();
+      const uniqueCode = process.env.AUTH_FIRST_CLIENT_LOGIN_CODE ? process.env.AUTH_FIRST_CLIENT_LOGIN_CODE : rack();
+
       console.log('Admin login code: ', uniqueCode);
 
       // Inserts seed entries
