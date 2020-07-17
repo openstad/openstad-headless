@@ -37,7 +37,7 @@ exports.new = (req, res) => {
  * @TODO validation
  */
 exports.create = (req, res, next) => {
-  let { firstName, lastName, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, password } = req.body;
+  let { firstName, lastName, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, hashedPhoneNumber, password } = req.body;
 
   password = bcrypt.hashSync(password, saltRounds);
 
@@ -64,7 +64,7 @@ exports.create = (req, res, next) => {
 }
 
 exports.update = (req, res, next) => {
-  const keysToUpdate = ['firstName', 'lastName', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes'];
+  const keysToUpdate = ['firstName', 'lastName', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes'];
 
   keysToUpdate.forEach((key) => {
     if (req.body[key]) {

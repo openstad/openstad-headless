@@ -5,6 +5,7 @@
 'use strict';
 
 const passport          = require('passport');
+const md5               = require('md5');
 const login             = require('connect-ensure-login');
 const User              = require('../../models').User;
 const authService       = require('../../services/authService');
@@ -44,6 +45,7 @@ exports.login = (req, res) => {
     redirectUrl: encodeURIComponent(req.query.redirect_uri),
     client: req.client,
     title: configAuthType.loginTitle || configAuthType.title || authPhonenumberConfig.loginTitle || authPhonenumberConfig.title,
+    subtitle: configAuthType.loginSubtitle || authPhonenumberConfig.loginSubtitle,
     description: configAuthType.loginDescription || configAuthType.description || authPhonenumberConfig.loginDescription || authPhonenumberConfig.description,
     label: configAuthType.loginLabel || configAuthType.label || authPhonenumberConfig.loginLabel || authPhonenumberConfig.label,
     helpText: configAuthType.loginHelpText || configAuthType.helpText || authPhonenumberConfig.loginHelpText || authPhonenumberConfig.helpText,
@@ -57,17 +59,20 @@ exports.login = (req, res) => {
 
 //Todo: move these methods to the user service
 const createUser = async (phoneNumber) => {
-  return new User({ phoneNumber: phoneNumber }).save();
+  let hashedPhoneNumber = md5(phoneNumber)
+  return new User({ hashedPhoneNumber: hashedPhoneNumber }).save();
 }
 
 const updateUser = async (user, phoneNumber) => {
+  let hashedPhoneNumber = md5(phoneNumber)
   return user
-    .set('phoneNumber', phoneNumber)
+    .set('hashedPhoneNumber', hashedPhoneNumber)
     .save();
 }
 
 const getUser = async (phoneNumber) => {
-  return new User({ phoneNumber }).fetch();
+  let hashedPhoneNumber = md5(phoneNumber)
+  return new User({ hashedPhoneNumber }).fetch();
 }
 
 exports.postLogin = async(req, res, next) => {
@@ -87,7 +92,7 @@ exports.postLogin = async(req, res, next) => {
     // find or create user
     let user = await getUser(phoneNumber);
     if (user) {
-      if (!user.phoneNumber) {
+      if (!user.hashedPhoneNumber) {
         user = await updateUser(user, phoneNumber);
       }
     } else {
@@ -100,8 +105,9 @@ exports.postLogin = async(req, res, next) => {
     const authorizeUrl = `/auth/phonenumber/sms-code?redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
     // send sms
+    req.user.phoneNumber = phoneNumber;
     await verificationService.sendSMS(req.user, req.client);
-    req.flash('success', {msg: 'Een SMS met een code is verstuurd naar ' + req.user.phoneNumber});
+    req.flash('success', {msg: 'Een SMS met een code is verstuurd naar ' + phoneNumber});
     return res.redirect(authorizeUrl);
 
 
@@ -131,6 +137,7 @@ exports.smsCode = (req, res) => {
     redirectUrl: encodeURIComponent(req.query.redirect_uri),
     client: req.client,
     title: configAuthType.smsCodeTitle || configAuthType.title || authPhonenumberConfig.smsCodeTitle || authPhonenumberConfig.title,
+    subtitle: configAuthType.smsCodeSubtitle || authPhonenumberConfig.smsCodeSubtitle,
     description: configAuthType.smsCodeDescription || configAuthType.description || authPhonenumberConfig.smsCodeDescription || authPhonenumberConfig.description,
     label: configAuthType.smsCodeLabel || configAuthType.label || authPhonenumberConfig.smsCodeLabel || authPhonenumberConfig.label,
     helpText: configAuthType.smsCodeHelpText || configAuthType.helpText || authPhonenumberConfig.smsCodeHelpText || authPhonenumberConfig.helpText,
