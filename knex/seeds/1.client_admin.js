@@ -10,13 +10,12 @@ exports.seed = function(knex, Promise) {
       const rack = hat.rack();
       const clientId = process.env.AUTH_FIRST_CLIENT_ID ? process.env.AUTH_FIRST_CLIENT_ID : rack();
       const clientSecret = process.env.AUTH_FIRST_CLIENT_SECRET ? process.env.AUTH_FIRST_CLIENT_SECRET : rack();
+      const adminClientId = process.env.AUTH_ADMIN_CLIENT_ID ? process.env.AUTH_ADMIN_CLIENT_ID : rack();
+      const adminClientSecret = process.env.AUTH_ADMIN_CLIENT_SECRET ? process.env.AUTH_ADMIN_CLIENT_SECRET : rack();
+
       const siteUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL :  process.env.APP_URL;
       const adminUrl = process.env.ADMIN_URL ? process.env.ADMIN_URL :  process.env.APP_URL;
 
-//      console.log('Admin Client ID: ', clientId);
-  //    console.log('Admin Client Secret: ', clientSecret);
-
-      //
       const defaultAllowedDomains = process.env.NODE_ENV === 'development' ? ['localhost'] : [];
 
       const allowedDomains = process.env.NODE_ENV === 'development' ? ['localhost'] : [];
@@ -42,8 +41,8 @@ exports.seed = function(knex, Promise) {
         redirectUrl: '',// deprecated
         name: "Admin panel",
         description: 'Client for managing the admin panel',
-        clientId: clientId + '_admin',
-        clientSecret: clientSecret + '_admin',
+        clientId: adminClientId,
+        clientSecret: adminClientSecret,
         authTypes: JSON.stringify(['UniqueCode']),
         requiredUserFields: JSON.stringify(['firstName', 'lastName']),
         allowedDomains: JSON.stringify(allowedDomains),
