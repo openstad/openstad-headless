@@ -95,7 +95,11 @@ exports.send = function ({subject, toName, toEmail, templateString, template, va
   return new Promise(function(resolve, reject) {
     // send mail with defined transport object
     transporter.sendMail(message, (error, info) => {
+
         if (error) {
+          console.log('transporterConfig', transporterConfig);
+          console.log('transporter', transporter);
+
           return reject(error);
         } else {
           console.log('Message sent: %s', info.messageId);
