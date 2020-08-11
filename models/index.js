@@ -1,6 +1,7 @@
 const knex = require('../knex/knex.js');
 const bookshelf = require('bookshelf')(knex);
 const jsonColumns = require('bookshelf-json-columns');
+const sanitize = require('../utils/sanitize')
 const configAuthTypes = require('../config/auth.js').types;
 bookshelf.plugin(jsonColumns);
 
@@ -43,12 +44,23 @@ const PasswordResetToken = bookshelf.Model.extend({
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
+const userKeysToSanitize = ['firstName', 'lastName', 'email', 'phoneNumber', 'extraData', 'streetName', 'houseNumber', 'city', 'suffix', 'postcode', 'password', 'resetPasswordToken']
+
 const User = bookshelf.Model.extend({
   tableName: 'users',
   hasTimestamps: ['createdAt', 'updatedAt'],
   roles() {
     return this.belongsToMany(Role, 'user_roles', 'userId', 'roleId');
   },
+  format(attributes) {
+    userKeysToSanitize.forEach((key) => {
+      if (attributes[key]) {
+        attributes[key] = sanitize.noTags(attributes[key]);
+      }
+    });
+
+    return attributes;
+  }
 });
 
 const ActionLog = bookshelf.Model.extend({
