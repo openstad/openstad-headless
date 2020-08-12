@@ -3,10 +3,10 @@ const fetch = require('node-fetch');
 const tokenUrl = require('./tokenUrl');
 const tokenSMS = require('./tokenSMS');
 
-exports.sendVerification = async (user, client, redirectUrl) => {
+exports.sendVerification = async (user, client, redirectUrl, adminLoginRequest) => {
 
   await tokenUrl.invalidateTokensForUser(user.id);
-  const generatedTokenUrl = await tokenUrl.format(client, user, redirectUrl, true);
+  const generatedTokenUrl = await tokenUrl.format(client, user, redirectUrl, adminLoginRequest);
 
   const clientConfig = client.config ? client.config : {};
   const authTypeConfig = clientConfig.authTypes && clientConfig.authTypes.Url ? clientConfig.authTypes.Url : {};
@@ -63,7 +63,7 @@ exports.sendSMS = async (user, client, redirectUrl) => {
 
   let text = configAuthType.smsCodeText || 'Code: [[code]]';
   text = text.replace('[[code]]', generatedToken)
-  
+
   let sender = configAuthType.smsCodeSender || 'OpenStad';
 
   let headers = { 'Authorization': `Bearer ${accessToken}`, 'Content-type': 'application/json' };
@@ -99,4 +99,3 @@ exports.sendSMS = async (user, client, redirectUrl) => {
   return;
 
 };
-
