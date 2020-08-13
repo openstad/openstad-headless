@@ -34,10 +34,12 @@ exports.withAll = (req, res, next) => {
     })
     .fetchAll()
     .then((response) => {
-      console.log('response', response.length)
-
        req.usersCollection = response;
        req.users = response.serialize();
+       req.users = req.users.map((user) => {
+         user.extraData = user.extraData ? JSON.parse(user.extraData) : {}
+         return user;
+       })
 
        return User.count("id");
     })
@@ -69,6 +71,8 @@ exports.withOne = (req, res, next) => {
           userData.roles = userRoles.serialize();
           req.userObjectModel = userModel;
           req.userObject = userData;
+          req.userObject.extraData = req.userObject.extraData ? JSON.parse(req.userObject.extraData) : {}
+
           next();
         });
     })
@@ -113,6 +117,8 @@ exports.withOneByEmail = (req, res, next) => {
     .then((user) => {
       req.userObjectModel = user;
       req.userObject = user.serialize();
+      req.userObject.extraData = req.userObject.extraData ? JSON.parse(req.userObject.extraData) : {}
+
       next();
     })
     .catch((err) => {
@@ -179,9 +185,11 @@ exports.validateUser = (req, res, next) => {
 }
 
 exports.create =  (req, res, next) => {
-  let { firstName, lastName, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, hashedPhoneNumber, password } = req.body;
+  let { firstName, lastName, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, hashedPhoneNumber, password, extraData } = req.body;
 
   password = bcrypt.hashSync(password, saltRounds);
+  extraData = extraData ? extraData : {};
+  extraData = JSON.stringify(extraData);
 
   new User({
     firstName: firstName,
@@ -193,7 +201,8 @@ exports.create =  (req, res, next) => {
     postcode: postcode,
     city: city,
     phoneNumber: phoneNumber,
-    password: password
+    password: password,
+    extraData: extraData
   })
   .save()
   .then((response) => {
@@ -207,11 +216,17 @@ exports.create =  (req, res, next) => {
 }
 
 exports.update = (req, res, next) => {
-  const keysToUpdate = ['firstName', 'lastName', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes'];
+  const keysToUpdate = ['firstName', 'lastName', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'extraData'];
 
   keysToUpdate.forEach((key) => {
     if (req.body[key]) {
       let value = req.body[key];
+
+      if (key === 'extraData') {
+        value = value ? value : {};
+        value = JSON.stringify(value);
+      }
+
 
       if (key === 'password') {
         value = bcrypt.hashSync(value, saltRounds);

@@ -25,9 +25,6 @@ exports.login  = [setNoCachHeadersMw, (req, res) => {
   const config = req.client.config ? req.client.config : {};
   const configAuthType = config.authTypes && config.authTypes[authType] ? config.authTypes[authType] : {};
 
-  console.log('=>>> req.session url get ', req.session);
-
-
   res.render('auth/url/login', {
     clientId: req.query.clientId,
     client: req.client,

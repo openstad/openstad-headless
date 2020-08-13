@@ -62,8 +62,6 @@ exports.withOne = (req, res, next) => {
         req.client.config               = JSON.parse(req.client.config);
         req.client.allowedDomains       = JSON.parse(req.client.allowedDomains);
 
-
-
         next();
       } else {
         throw new Error('No Client found for clientID', clientId, req.body);

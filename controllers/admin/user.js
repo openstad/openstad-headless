@@ -37,9 +37,12 @@ exports.new = (req, res) => {
  * @TODO validation
  */
 exports.create = (req, res, next) => {
-  let { firstName, lastName, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, hashedPhoneNumber, password } = req.body;
+  let { firstName, lastName, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, hashedPhoneNumber, password, extraData } = req.body;
 
   password = bcrypt.hashSync(password, saltRounds);
+
+  extraData = extraData ? extraData : {};
+  extraData = JSON.stringify(extraData);
 
   new User({
     firstName: firstName,
@@ -64,7 +67,7 @@ exports.create = (req, res, next) => {
 }
 
 exports.update = (req, res, next) => {
-  const keysToUpdate = ['firstName', 'lastName', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes'];
+  const keysToUpdate = ['firstName', 'lastName', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'extraData'];
 
   keysToUpdate.forEach((key) => {
     if (req.body[key]) {
@@ -72,6 +75,11 @@ exports.update = (req, res, next) => {
 
       if (key === 'password') {
         value = bcrypt.hashSync(value, saltRounds);
+      }
+
+      if (key === 'extraData') {
+        value = value ? value : {};
+        value = JSON.stringify(value);
       }
 
       req.userObjectModel.set(key, value);
