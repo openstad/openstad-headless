@@ -52,7 +52,7 @@ const sessionStore =  new MongoStore({
 */
 
 
-const sessionStore = FileStore;
+const sessionStore = new FileStore;
 
 
 // Express configuration
