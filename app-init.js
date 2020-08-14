@@ -22,7 +22,7 @@ const flash                       = require('express-flash');
 const expressValidator            = require('express-validator');
 const MongoStore                  = require('connect-mongo')(expressSession);
 
-//const FileStore                   = require('session-file-store')(expressSession);
+const FileStore                   = require('session-file-store')(expressSession);
 //const MemoryStore = expressSession.MemoryStore;
 
 /*const MySQLStore                  = require('express-mysql-session')(expressSession);
@@ -35,7 +35,7 @@ const sessionStore = new MySQLStore({
     user:     process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_SESSIONS,
-});*/
+});
 
 
 const mongoCredentials = {
@@ -45,11 +45,15 @@ const mongoCredentials = {
 
 const url = 'mongodb://'+ mongoCredentials.host +':'+mongoCredentials.port+'/sessions';
 
-
 const sessionStore =  new MongoStore({
     url: url,
     ttl: 14 * 24 * 60 * 60 // = 14 days. Default
 })
+*/
+
+
+const sessionStore = FileStore;
+
 
 // Express configuration
 const app = express();
