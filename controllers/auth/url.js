@@ -184,6 +184,8 @@ exports.postAuthenticate =  (req, res, next) => {
           // Redirect if it succeeds to authorize screen
           //check if allowed url will be done by authorize screen
           const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+          console.log('redirectToAuthorisation', authorizeUrl);
+
           return res.redirect(authorizeUrl);
         }
         console.log('=>>> user1', redirectToAuthorisation);

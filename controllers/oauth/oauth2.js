@@ -159,7 +159,15 @@ server.exchange(oauth2orize.exchange.refreshToken((client, refreshToken, scope, 
  * first, and rendering the `dialog` view.
  */
 exports.authorization = [
+  (req, res, next) => {
+    console.log('before ensureLoggedIn');
+    next();
+  },
   login.ensureLoggedIn(),
+  (req, res, next) => {
+    console.log('after ensureLoggedIn');
+    next();
+  },
   server.authorization((clientID, redirectURI, scope, done) => {
 
     //console.log('===> clientID', clientID);
@@ -191,7 +199,7 @@ exports.authorization = [
       }
 
     })
-    .catch(err => done(err));
+    .catch((err) => done(err));
   }),
   (req, res, next) => {
     // Render the decision dialog if the client isn't a trusted client
