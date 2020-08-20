@@ -178,7 +178,7 @@ exports.postAuthenticate =  (req, res, next) => {
    req.logIn(user, function(err) {
      if (err) { return next(err); }
 
-     console.log('=>>> logged in user', user);
+     console.log('=>>> logged in user', user, req.session);
 
 
      return tokenUrl.invalidateTokensForUser(user.id)
@@ -194,7 +194,7 @@ exports.postAuthenticate =  (req, res, next) => {
         console.log('=>>> user222', redirectToAuthorisation);
 
         req.brute.reset(() => {
-          console.log('=>>> brute force reset', user);
+          console.log('=>>> brute force reset', user, req.session);
 
             //log the succesfull login
             authService.logSuccessFullLogin(req)
