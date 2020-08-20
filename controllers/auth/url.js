@@ -178,6 +178,9 @@ exports.postAuthenticate =  (req, res, next) => {
    req.logIn(user, function(err) {
      if (err) { return next(err); }
 
+     console.log('=>>> logged in user', user);
+
+
      return tokenUrl.invalidateTokensForUser(user.id)
       .then((response) => {
         const redirectToAuthorisation = () => {
@@ -188,9 +191,10 @@ exports.postAuthenticate =  (req, res, next) => {
 
           return res.redirect(authorizeUrl);
         }
-        console.log('=>>> user1', redirectToAuthorisation);
+        console.log('=>>> user222', redirectToAuthorisation);
 
         req.brute.reset(() => {
+          console.log('=>>> brute force reset', user);
 
             //log the succesfull login
             authService.logSuccessFullLogin(req)
