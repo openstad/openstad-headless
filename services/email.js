@@ -40,9 +40,26 @@ exports.send = function ({subject, toName, toEmail, templateString, template, va
   nunjucksEnv.addFilter('date', dateFilter);
 
   /**
+   * This is for legacy reasons
+   * if extends 'emails/layout.html' then render as a string
+   * if not included then include by rendering the string and then rendering a blanco
+   * the layout by calling the blanco template
+   */
+  if (templateString) {
+    if (templateString.includes("{% extends 'emails/layout.html' %}")) {
+      templateString  = nunjucks.renderString(templateString, variables)
+    } else {
+      templateString = nunjucks.render('emails/blanco.html', Object.assign(variables, {
+        message: nunjucks.renderString(templateString, variables)
+      }));
+    }
+  }
+
+
+  /**
    * Render email template
    */
-  const mail = !!templateString ? nunjucks.renderString(templateString, variables) : nunjucks.render(template, variables);
+  const mail = templateString ? templateString : nunjucks.render(template, variables);
 
   /**
     * Format the to name
@@ -78,7 +95,11 @@ exports.send = function ({subject, toName, toEmail, templateString, template, va
   return new Promise(function(resolve, reject) {
     // send mail with defined transport object
     transporter.sendMail(message, (error, info) => {
+
         if (error) {
+          console.log('transporterConfig', transporterConfig);
+          console.log('transporter', transporter);
+
           return reject(error);
         } else {
           console.log('Message sent: %s', info.messageId);

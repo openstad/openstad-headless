@@ -73,6 +73,8 @@ const handleSending = async (req, res, next) => {
     await verificationService.sendVerification(req.user, req.client, req.redirectUrl);
 
     req.flash('success', {msg: 'De e-mail is verstuurd naar: ' + req.user.email});
+    console.log('req req', req.session);
+
     res.redirect('/auth/url/confirmation?clientId=' +  req.client.clientId + '&redirect_uri=' + req.redirectUrl || '/login?clientId=' +  req.client.clientId + '&redirect_uri=' + req.redirectUrl );
   } catch(err) {
     console.log('e0mail error', err);
@@ -100,6 +102,7 @@ exports.postLogin = async (req, res, next) => {
   try {
     const clientConfig = req.client.config ? req.client.config : {};
     req.redirectUrl = clientConfig && clientConfig.emailRedirectUrl ? clientConfig.emailRedirectUrl : encodeURIComponent(req.query.redirect_uri);
+    console.log('=>>> req.session post  redirectUrl', req.redirectUrl);
 
     let user = await getUser(req.body.email);
 
@@ -163,6 +166,8 @@ exports.postAuthenticate =  (req, res, next) => {
    if (err) { return next(err); }
    const redirectUrl = req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : req.client.redirectUrl;
 
+   console.log('=>>> postAuthenticate', redirectUrl);
+
 
    // Redirect if it fails to the original e-mail screen
    if (!user) {
@@ -173,16 +178,24 @@ exports.postAuthenticate =  (req, res, next) => {
    req.logIn(user, function(err) {
      if (err) { return next(err); }
 
+     console.log('=>>> logged in user', user, req.session);
+
+
      return tokenUrl.invalidateTokensForUser(user.id)
       .then((response) => {
         const redirectToAuthorisation = () => {
           // Redirect if it succeeds to authorize screen
           //check if allowed url will be done by authorize screen
           const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+          console.log('redirectToAuthorisation', authorizeUrl);
+
           return res.redirect(authorizeUrl);
         }
+        console.log('=>>> user222', redirectToAuthorisation);
 
         req.brute.reset(() => {
+          console.log('=>>> brute force reset', user, req.session);
+
             //log the succesfull login
             authService.logSuccessFullLogin(req)
               .then (() => { redirectToAuthorisation(); })
@@ -190,6 +203,8 @@ exports.postAuthenticate =  (req, res, next) => {
         });
       })
       .catch((err) => {
+        console.log('=>>> user err', err);
+
         next(err);
       });
    });

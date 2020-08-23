@@ -62,11 +62,9 @@ exports.withOne = (req, res, next) => {
         req.client.config               = JSON.parse(req.client.config);
         req.client.allowedDomains       = JSON.parse(req.client.allowedDomains);
 
-
-
         next();
       } else {
-        throw new Error('No Client found for clientID');
+        throw new Error('No Client found for clientID', clientId, req.body);
       }
     })
     .catch((err) => { next(err); });
@@ -88,7 +86,7 @@ exports.withOneById = (req, res, next) => {
         req.client = client.serialize();
         next();
       } else {
-        throw new Error('No Client found for clientID');
+        throw new Error('No Client found for clientID', clientId);
       }
     })
     .catch((err) => { next(err); });

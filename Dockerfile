@@ -37,7 +37,6 @@ WORKDIR /home/app
 # Bundle app source
 COPY . /home/app
 
-
 #
 RUN npm config set unsafe-perm true
 
@@ -57,7 +56,7 @@ RUN npm install -g nodemon
 
 
 # Remove unused packages only used for building.
-RUN apk del g++ make && rm -rf /var/cache/apk/*
+RUN rm -rf /var/cache/apk/*
 
 # The place where the certificates should be:
 # certificate.pem  certrequest.csr  privatekey.pem

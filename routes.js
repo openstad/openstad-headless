@@ -150,13 +150,6 @@ module.exports = function(app){
   app.get('/auth/admin/authenticate', authUrl.authenticate);
   app.post('/auth/admin/authenticate', emailUrlBruteForce, authAdminUrl.postAuthenticate);
 
-	/**
-	 * Auth routes for DigiD
-	 * @TODO: available routes
-	 */
-	app.use('/auth/digid', [clientMw.setAuthType('DigiD'), clientMw.validate, csrfProtection, addCsrfGlobal]);
- 	app.get('/auth/digid/login',  clientMw.withOne, authDigiD.login);
-  app.post('/auth/digid/login', clientMw.withOne, authDigiD.postLogin);
 
 	/**
 	 * Auth routes for Anonymous login
@@ -208,7 +201,7 @@ module.exports = function(app){
 
   app.use('/auth/required-fields', [authMw.check, clientMw.withOne]);
   app.get('/auth/required-fields',  clientMw.withOne, clientMw.checkIfEmailRequired, authRequiredFields.index);
-  app.post('/auth/required-fields', clientMw.withOne, authRequiredFields.post);
+  app.post('/auth/required-fields', clientMw.withOne, csrfProtection, addCsrfGlobal, authRequiredFields.post);
 
 
   app.use('/dialog', [bruteForce.global.prevent]);
@@ -219,7 +212,7 @@ module.exports = function(app){
   app.get('/oauth/token',                 oauth2Controller.token);
 
   app.get('/api/userinfo', passport.authenticate('bearer', { session: false }), clientMw.withOne, userMw.withRoleForClient, clientMw.checkUniqueCodeAuth(), userController.info);
-
+ 
   // Mimicking google's token info endpoint from
   // https://developers.google.com/accounts/docs/OAuth2UserAgent#validatetoken
   app.get('/api/tokeninfo', tokenController.info);

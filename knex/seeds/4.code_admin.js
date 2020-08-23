@@ -14,6 +14,10 @@ exports.seed = function(knex, Promise) {
         code: uniqueCode,
         userId: 1,
         clientId: 1
-      },]);
+      },{
+        code: uniqueCode,
+        userId: 1,
+        clientId: 2
+      }]);
     });
 };

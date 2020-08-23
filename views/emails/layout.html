@@ -6,7 +6,7 @@
         <!-- Facebook sharing information tags -->
         <meta property="og:title" content="*|MC:SUBJECT|*" />
 
-        <title>*|MC:SUBJECT|*</title>
+        <title>Inoggen</title>
 		<style type="text/css">
 			/* Client-specific Styles */
 			#outlook a{padding:0;} /* Force Outlook to provide a "view in browser" button. */
@@ -370,20 +370,19 @@
                                 <table border="0" align="left" cellpadding="0" cellspacing="0" width="600" id="templateHeader">
                                       <tr>
                                           <td align="left" class="headerContent" style="padding: 10px 50px;">
-
-                                            <img
-                                              {% if logo %}
-                                              src="{{logo}}"
+                                            {% if logo %}
+                                              {% if logo === 'amsterdam-logo.html' %}
+                                              <img
+                                                src="{{emailAssetsUrl}}/logo-small.png"
+                                                width="99"
+                                                height="70"
+                                              />
                                               {% else %}
-                                              src="{{emailAssetsUrl}}/logo-small.png"
+                                              <img src="{{logo}}" width="150" alt="Logo" align="left" style="border: 0; max-width: 100%; display: block; -webkit-user-select: none; outline:none; text-decoration:none; -ms-interpolation-mode: bicubic; margin-top: 20px;">
                                               {% endif %}
-                                              width="99"
-                                              height="70"
-                                              id="headerImage campaign-icon"
-                                            />
-
-                                            <!-- // Begin Module: Standard Header Image \\ -->                                            <!-- // End Module: Standard Header Image \\ -->
-
+                                            {% else %}
+                                            <img src="{{emailAssetsUrl}}/openstad-logo.png" width="120" alt="Logo" align="left" style="border: 0; max-width: 100%; display: block; -webkit-user-select: none; outline:none; text-decoration:none; -ms-interpolation-mode: bicubic; margin-top: 20px;">
+                                            {% endif %}
                                           </td>
                                       </tr>
                                   </table>

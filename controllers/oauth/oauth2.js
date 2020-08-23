@@ -159,7 +159,15 @@ server.exchange(oauth2orize.exchange.refreshToken((client, refreshToken, scope, 
  * first, and rendering the `dialog` view.
  */
 exports.authorization = [
+  (req, res, next) => {
+    console.log('before ensureLoggedIn');
+    next();
+  },
   login.ensureLoggedIn(),
+  (req, res, next) => {
+    console.log('after ensureLoggedIn');
+    next();
+  },
   server.authorization((clientID, redirectURI, scope, done) => {
 
     //console.log('===> clientID', clientID);
@@ -183,15 +191,15 @@ exports.authorization = [
 
       // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
       if (allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1) {
-				//console.log('===> redirectURI', redirectURI);
+				console.log('===> redirectURI allowedDomains', redirectURI);
         return done(null, client, redirectURI);
       } else {
-        //console.log('===> Redirect host doesn\'t match the client host');
+        console.log('===> Redirect host doesn\'t match the client host');
         throw new Error('Redirect host doesn\'t match the client host');
       }
 
     })
-    .catch(err => done(err));
+    .catch((err) => done(err));
   }),
   (req, res, next) => {
     // Render the decision dialog if the client isn't a trusted client

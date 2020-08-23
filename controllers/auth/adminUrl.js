@@ -11,9 +11,9 @@ exports.postLogin = async (req, res, next) => {
     req.redirectUrl = clientConfig && clientConfig.emailRedirectUrl ? clientConfig.emailRedirectUrl : encodeURIComponent(req.query.redirect_uri);
 
     try {
-      req.user = await authService.validateUser(req.body.email);
+      req.user = await authService.validatePrivilegeUser(req.body.email,  req.client.id);
 
-      await verificationService.sendVerification(req.user, req.client, req.redirectUrl);
+      await verificationService.sendVerification(req.user, req.client, req.redirectUrl, true);
 
       req.flash('success', { msg: 'De e-mail is verstuurd naar: ' + req.user.email });
 

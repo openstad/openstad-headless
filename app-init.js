@@ -20,10 +20,40 @@ const timestampFilter             = require('./nunjucks/timestamp');
 const replaceIdeaVariablesFilter  = require('./nunjucks/replaceIdeaVariables');
 const flash                       = require('express-flash');
 const expressValidator            = require('express-validator');
+const MongoStore                  = require('connect-mongo')(expressSession);
+
 const FileStore                   = require('session-file-store')(expressSession);
+//const MemoryStore = expressSession.MemoryStore;
+
+/*const MySQLStore                  = require('express-mysql-session')(expressSession);
+var options = ;
+
+const sessionStore = new MySQLStore({
+    port:     3306,
+    host:     process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    user:     process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_SESSIONS,
+});
 
 
-const MemoryStore = expressSession.MemoryStore;
+const mongoCredentials = {
+  host: process.env.MONGO_DB_HOST || 'localhost',
+  port: process.env.MONGO_DB_PORT || 27017,
+}
+
+const url = 'mongodb://'+ mongoCredentials.host +':'+mongoCredentials.port+'/sessions';
+
+const sessionStore =  new MongoStore({
+    url: url,
+    ttl: 14 * 24 * 60 * 60 // = 14 days. Default
+})
+*/
+
+
+const sessionStore = new FileStore;
+
 
 // Express configuration
 const app = express();
@@ -47,25 +77,34 @@ app.use((req, res, next) => {
 });
 */
 
-const sessionConfig = {
-  saveUninitialized : true,
-  resave            : true,
-  secret            : config.session.secret,
-//  store             : new MemoryStore(),
-  store             : new FileStore({
-    ttl:    config.session.maxAge      //3600 * 24 * 31
-  }),
-  key               : 'authorization.sid',
-  cookie            : {
+let sessionCookieConfig;
+
+
+// add complete config for debug purposes
+if (process.env.SESSION_COOKIES_CONFIG) {
+  sessionCookieConfig = JSON.parse(process.env.SESSION_COOKIES_CONFIG);
+} else {
+   sessionCookieConfig = {
     maxAge: config.session.maxAge,
     secure: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
     httpOnly: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
     sameSite: false, //process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true
-  },
+  }
+}
 
+console.log('sessionCookieConfig ', sessionCookieConfig);
+
+
+const sessionConfig = {
+  saveUninitialized : true,
+  resave            : true,
+  secret            : config.session.secret,
+  store             : sessionStore,
+  key               : 'authorization.sid',
+  cookie            : sessionCookieConfig,
 };
 
-//console.log('=>>> sessionConfig', sessionConfig):
+console.log('=>>> sessionConfig', sessionConfig);
 
 // Session Configuration
 app.use(expressSession(sessionConfig));
@@ -103,6 +142,7 @@ require('./routes')(app);
 // // through request header 'X-Forwarded-For' as
 // // 'X-Forwarded-For: some.client.ip.address'
 // // Insertion of the forward header is an option on most proxy software
+//
 // app.set('trust proxy', '127.0.0.1');
 
 module.exports = app;
