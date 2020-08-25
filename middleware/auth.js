@@ -26,6 +26,8 @@ exports.check = (req, res, next) => {
       url =  url + '&redirect_uri=' + encodeURIComponent(req.query.redirect_uri);
     }
 
+    console.log('useresrsu not logged in ', req.isAuthenticated, req.user, req.session)
+
     if (req.session) {
       req.session.returnTo = req.originalUrl || req.url;
     }
