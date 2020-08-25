@@ -30,8 +30,6 @@ exports.check = (req, res, next) => {
       req.session.returnTo = req.originalUrl || req.url;
     }
 
-    console.log('=>>> not authenticated session: ', req.session);
-
     return res.redirect(url);
   } else {
     new User({ id: req.user.id })

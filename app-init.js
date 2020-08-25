@@ -52,7 +52,9 @@ const sessionStore =  new MongoStore({
 */
 
 
-const sessionStore = new FileStore;
+const sessionStore = new FileStore({
+    ttl:    config.session.maxAge      //3600 * 24 * 31
+  });
 
 
 // Express configuration
@@ -100,7 +102,7 @@ const sessionConfig = {
   resave            : true,
   secret            : config.session.secret,
   store             : sessionStore,
-  key               : 'authorization.sid',
+  key               : 'openstad-authorization.sid',
   cookie            : sessionCookieConfig,
 };
 
