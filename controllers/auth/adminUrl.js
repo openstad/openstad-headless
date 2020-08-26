@@ -22,7 +22,7 @@ exports.postLogin = async (req, res, next) => {
       console.log(err)
       req.flash('error', { msg: 'U heeft geen rechten om deze actie uit te voeren.' });
 
-      return res.redirect(req.header('Referer') || '/auth/admin/login');
+      return res.redirect('/auth/admin/login?clientId=' + req.client.clientId +'&redirect_uri='+ req.redirectUrl);
     }
   } catch (err) {
     console.log('===> err', err);
