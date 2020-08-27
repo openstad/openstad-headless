@@ -9,13 +9,23 @@ exports.sendVerification = async (user, client, redirectUrl, adminLoginRequest) 
   const generatedTokenUrl = await tokenUrl.format(client, user, redirectUrl, adminLoginRequest);
 
   const clientConfig = client.config ? client.config : {};
+  const clientConfigStyling = clientConfig.styling ?  clientConfig.styling : {};
   const authTypeConfig = clientConfig.authTypes && clientConfig.authTypes.Url ? clientConfig.authTypes.Url : {};
   const emailTemplateString = authTypeConfig.emailTemplate ? authTypeConfig.emailTemplate : false;
   const emailSubject = authTypeConfig.emailSubject ? authTypeConfig.emailSubject : 'Inloggen bij ' + client.name;
   const emailHeaderImage = authTypeConfig.emailHeaderImage ? authTypeConfig.emailHeaderImage : false;
-  const emailLogo = authTypeConfig.emailLogo ? authTypeConfig.emailLogo : false;
-
   const transporterConfig = clientConfig.smtpTransport ? clientConfig.smtpTransport : {};
+
+  let emailLogo;
+
+  // load env sheets that have been set for complete Environment, not specific for just one client
+  if (process.env.LOGO) {
+    emailLogo = process.env.LOGO;
+  }
+
+  if (clientConfigStyling && clientConfigStyling.logo) {
+    emailLogo = clientConfigStyling.logo;
+  }
 
   return emailProvider.send({
     toName: (user.firstName + ' ' + user.lastName).trim(),

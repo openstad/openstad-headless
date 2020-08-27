@@ -48,6 +48,7 @@ exports.withOne = (req, res, next) => {
         if (clientConfigStyling && clientConfigStyling.logo) {
           res.locals.logo = clientConfigStyling.logo;
         }
+        
         if (clientConfigStyling && clientConfigStyling.inlineCSS) {
           res.locals.inlineCSS = clientConfigStyling.inlineCSS;
         }
