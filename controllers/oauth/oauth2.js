@@ -159,15 +159,7 @@ server.exchange(oauth2orize.exchange.refreshToken((client, refreshToken, scope, 
  * first, and rendering the `dialog` view.
  */
 exports.authorization = [
-  (req, res, next) => {
-    console.log('before ensureLoggedIn');
-    next();
-  },
   login.ensureLoggedIn(),
-  (req, res, next) => {
-    console.log('after ensureLoggedIn');
-    next();
-  },
   server.authorization((clientID, redirectURI, scope, done) => {
 
     //console.log('===> clientID', clientID);

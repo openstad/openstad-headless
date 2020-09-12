@@ -17,8 +17,6 @@ exports.login  = (req, res, next) => {
    * create a new anoymous user
    */
 
-	// console.log('ANONYMOUS: LOGIN');
-
 
 	let queryString = url.parse(req.url).query;
 

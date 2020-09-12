@@ -44,8 +44,6 @@ exports.withAll = (req, res, next) => {
        return User.count("id");
     })
     .then((total) => {
-      console.log('totaltotal', total)
-
       req.totalCodeCount = total;
       next();
     })

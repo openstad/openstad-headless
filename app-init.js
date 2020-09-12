@@ -88,9 +88,6 @@ if (process.env.SESSION_COOKIES_CONFIG) {
   }
 }
 
-console.log('sessionCookieConfig ', sessionCookieConfig);
-
-
 const sessionConfig = {
   saveUninitialized : true,
   resave            : true,
@@ -100,18 +97,18 @@ const sessionConfig = {
   cookie            : sessionCookieConfig,
 };
 
-console.log('=>>> sessionConfig', sessionConfig);
 
 // Session Configuration
 app.use(expressSession(sessionConfig));
 
+/*
 app.use((req, res, next) => {
   console.log('=====> REQUEST: ', req.originalUrl);
   console.log('=====> query: ', req.query);
   console.log('=====> session: ', req.session);
-
   next();
 });
+*/
 
 app.use(flash());
 
