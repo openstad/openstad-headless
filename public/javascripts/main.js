@@ -42,11 +42,15 @@ function initFormsValidation () {
         postcode : {
           postcodeNL: true
         }
+      },
+      submitHandler: function(form) {
+        var $submitButtons = $(form).find('input[type="submit"], button[type="submit"]');
+        $submitButtons.attr('disabled', true);
+        form.submit();
       }
     });
   });
 }
-
 
 function initRemoveErrorLabelOnType ( ){
   $('.side-error input').on('keydown', function () {
