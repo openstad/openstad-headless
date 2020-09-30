@@ -28,7 +28,7 @@ exports.sendVerification = async (user, client, redirectUrl, adminLoginRequest) 
   }
 
   return emailProvider.send({
-    toName: (user.firstName + ' ' + user.lastName).trim(),
+    toName: user.firstName ? (user.lastName ? (user.firstName + ' ' + user.lastName).trim() : user.firstName) : false,
     toEmail: user.email,
     fromEmail: clientConfig.fromEmail,
     fromName: clientConfig.fromName,
