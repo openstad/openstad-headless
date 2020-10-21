@@ -1,6 +1,9 @@
 # Changelog
 
 ## UNRELEASED
+* Update NPM modules for security
+
+## v0.8.0-PRERLEASE (2020-17-07)
 * Alter tables with foreign keys to user from delete restrict to delete cascade, meaning they automatically get deleted
 
 ## 0.7.2 (2020-10-08)
