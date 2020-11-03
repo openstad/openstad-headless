@@ -1,6 +1,6 @@
 # Changelog
 
-## UNRELEASED
+##  0.8.0 (2020-11-02)
 * Alter tables with foreign keys to user from delete restrict to delete cascade, meaning they automatically get deleted
 
 ## 0.7.2 (2020-10-08)
