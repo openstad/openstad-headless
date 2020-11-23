@@ -110,3 +110,7 @@ Under the `clients` table in the `config` column you can set the following param
 ```
 
 Any configuration not provided will be fetched from the values set in the .env
+
+## Favicon
+A default favicon can now be set through `DEFAULT_FAVICON` in the .env file.
+This default favicon can be overwritten by setting the `styling.favicon` in the `config` column in the `clients` table.
