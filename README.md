@@ -110,3 +110,15 @@ Under the `clients` table in the `config` column you can set the following param
 ```
 
 Any configuration not provided will be fetched from the values set in the .env
+
+## Set custom labels for required fields
+
+By default the required fields have labels as defined in `config/user.js`. These labels can be overwritten in the `clients` table under the `config` column:
+
+```
+"requiredFields": {
+    "labels": {
+        "firstName": "Naam (alias)"
+    }
+}
+```
