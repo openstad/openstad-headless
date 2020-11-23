@@ -18,6 +18,10 @@
   {% endfor %}
   {% endif %}
 
+  {% if favicon %}
+  <link rel="icon" href="{{ favicon }}">
+  {% endif %}
+
   {% if inlineCSS %}
   <style>{{inlineCSS}} </style>
   {% endif %}
