@@ -2,6 +2,7 @@
 
 ## UNRELEASED
 * Update NPM modules for security
+* Add a favicon that can be overwritten in the client config
 * Add client name to the page title, and client site URL to the logo href
 
 ## v0.8.0-PRERLEASE (2020-17-07)

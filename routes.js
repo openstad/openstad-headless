@@ -89,6 +89,10 @@ module.exports = function(app){
     if (process.env.LOGO) {
       res.locals.logo = process.env.LOGO;
     }
+    
+    if (process.env.DEFAULT_FAVICON) {
+    	res.locals.favicon = process.env.DEFAULT_FAVICON;
+		}
 
     next();
   });

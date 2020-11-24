@@ -48,6 +48,10 @@ exports.withOne = (req, res, next) => {
         if (clientConfigStyling && clientConfigStyling.logo) {
           res.locals.logo = clientConfigStyling.logo;
         }
+        
+        if (clientConfigStyling && clientConfigStyling.favicon) {
+          res.locals.favicon = clientConfigStyling.favicon;
+        }
 
         if (clientConfigStyling && clientConfigStyling.inlineCSS) {
           res.locals.inlineCSS = clientConfigStyling.inlineCSS;
