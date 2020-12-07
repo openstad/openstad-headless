@@ -1,9 +1,11 @@
 # Changelog
 
-## v0.9.0 (UNRELEASED)
-* Update NPM modules for security
-* Add a favicon that can be overwritten in the client config
+## pre-v0.10.0 (UNRELEASED)
 * Add client name to the page title, and client site URL to the logo href
+* Add a favicon that can be overwritten in the client config
+
+## v0.9.0
+* Update NPM modules for security
 
 ## v0.8.0 (2020-17-07)
 
