@@ -3,7 +3,7 @@
 {% if logo and logo === 'amsterdam-logo.html' %}
   {% include 'elements/amsterdam-logo.html' %}
 {% else %}
-<a class="{{'mainlogo' if logo === 'amsterdam-logo.html' else 'main-logo-container' }}" href="#">
+<a class="{{'mainlogo' if logo === 'amsterdam-logo.html' else 'main-logo-container' }}" href="{{ client.siteUrl }}" title="Terug naar {{ client.name }}">
   {% if logo %}
     <img id="logo-image" src="{{logo}}" />
   {% else %}
