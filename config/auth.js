@@ -1,3 +1,6 @@
+const memberRoleId  = process.env.MEMBER_ROLE_ID ? process.env.MEMBER_ROLE_ID : 2;
+const anonymousRoleId = process.env.ANONYMOUS_ROLE_ID ? process.env.ANONYMOUS_ROLE_ID : 3;
+
 const formatLoginUrl = (slug) => {
   return `/auth/${slug}/login`;
 }
@@ -23,7 +26,8 @@ const types = [
     displaySidebar: false,
     displayBackbutton: true,
     displayAccountLink:  false,
-    buttonText: 'Controleer stemcode'
+    buttonText: 'Controleer stemcode',
+    defaultRoleId: memberRoleId,
   },
   {
     key: 'Local',
@@ -33,6 +37,7 @@ const types = [
     backbutton: true,
     displaySidebar: true,
     displayAccountLink:  false,
+    defaultRoleId: memberRoleId,
   },
   {
     key: 'Phonenumber',
@@ -54,6 +59,7 @@ const types = [
     backbutton: true,
     displaySidebar: true,
     displayAccountLink:  false,
+    defaultRoleId: memberRoleId,
   },
   {
     key: 'Url',
@@ -62,6 +68,7 @@ const types = [
     displayBackbutton: true,
     displaySidebar: true,
     displayAccountLink:  false,
+    defaultRoleId: memberRoleId,
   },
   {
     key: 'Anonymous',
@@ -71,6 +78,7 @@ const types = [
     displayBackbutton: false,
     displaySidebar: false,
     displayAccountLink:  false,
+    defaultRoleId: anonymousRoleId,
   },
   /*
   {
