@@ -60,10 +60,12 @@ exports.postLogin = (req, res, next) => {
         .then((userRole) => {
           if (userRole) {
             redirectToAuthorize();
-          } else if (req.client.config.defaultRoleId) {
+          } else {
+            const defaultRoleId  = req.client.config.defaultRoleId ? req.client.config.defaultRoleId : authCodeConfig.defaultRoleId;
+
             new UserRole({
               clientId: req.client.id,
-              roleId: req.client.config.defaultRoleId,
+              roleId: defaultRoleId,
               userId: user.id
             })
               .save()
@@ -71,10 +73,11 @@ exports.postLogin = (req, res, next) => {
                 redirectToAuthorize();
               })
               .catch((err) => { next(err); });
-          } else {
-            redirectToAuthorize();
           }
         });
+
+
+
     });
   })(req, res, next);
 }
