@@ -12,7 +12,16 @@ exports.index = (req, res, next) => {
 
   const config = req.client.config ? req.client.config : {};
   const configRequiredFields = config && config.requiredFields ? config.requiredFields : {};
-
+  
+  // Replace field labels with labels defined in the client config (if provided)
+  if (configRequiredFields && configRequiredFields.labels) {
+    requiredUserFields = requiredUserFields.map((field) => {
+      if (configRequiredFields.labels[field.key]) {
+        field.label = configRequiredFields.labels[field.key];
+      }
+      return field;
+    });
+  }
 
   res.render('auth/required-fields', {
     client: req.client,

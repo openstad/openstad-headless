@@ -3,6 +3,7 @@
 ## v0.10.0 (2020-12-09)
 * Add client name to the page title, and client site URL to the logo href
 * Add a favicon that can be overwritten in the client config
+* Allow labels of required fields to be changed through the client config
 
 ## v0.9.0 
 * Update NPM modules for security
