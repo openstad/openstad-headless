@@ -21,6 +21,10 @@ exports.withAll = (req, res, next) => {
         qb.where('clientId',  req.client.id);
       }
 
+      if (req.query.email) {
+        qb.where('email', req.query.email);
+      }
+
       if (search) {
         qb.where('email', 'like', '%' +search+ '%')
           .orWhere('firstName', 'like', '%' +search+ '%')
