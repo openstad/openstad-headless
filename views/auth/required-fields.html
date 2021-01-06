@@ -12,7 +12,7 @@
 			</h1>
 			<p>
 				{% if description %}
-					{{description}}
+					{{description | safe}}
 				{% else %}
 					Om verder te gaan hebben we nog wat extra gegevens nodig.
 				{% endif %}
@@ -29,7 +29,7 @@
             type="text"
             required
             name="{{requiredField.key}}"
-            class="input-{{requiredField}} input-field"
+            class="input-{{requiredField.key}} input-field"
           />
 				</div>
         {% endfor %}
