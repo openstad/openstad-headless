@@ -89,13 +89,39 @@ module.exports = function(app){
     if (process.env.LOGO) {
       res.locals.logo = process.env.LOGO;
     }
-    
+
     if (process.env.DEFAULT_FAVICON) {
     	res.locals.favicon = process.env.DEFAULT_FAVICON;
 		}
 
     next();
   });
+
+  /**
+   * Log urls
+   */
+  app.use((req, res, next) => {
+    let current_datetime = new Date();
+    let formatted_date =
+      current_datetime.getFullYear() +
+      "-" +
+      (current_datetime.getMonth() + 1) +
+      "-" +
+      current_datetime.getDate() +
+      " " +
+      current_datetime.getHours() +
+      ":" +
+      current_datetime.getMinutes() +
+      ":" +
+      current_datetime.getSeconds();
+    let method = req.method;
+    let url = req.url;
+    let status = res.statusCode;
+    let log = `[${formatted_date}] ${method}:${url} ${status}`;
+    console.log(log);
+    next();
+  });
+
 
   app.get('/', authLocal.index);
 
@@ -216,7 +242,7 @@ module.exports = function(app){
   app.get('/oauth/token',                 oauth2Controller.token);
 
   app.get('/api/userinfo', passport.authenticate('bearer', { session: false }), clientMw.withOne, userMw.withRoleForClient, clientMw.checkUniqueCodeAuth(), userController.info);
- 
+
   // Mimicking google's token info endpoint from
   // https://developers.google.com/accounts/docs/OAuth2UserAgent#validatetoken
   app.get('/api/tokeninfo', tokenController.info);
