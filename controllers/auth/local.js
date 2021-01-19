@@ -13,6 +13,7 @@
  const User              = require('../../models').User;
  const authLocalConfig   = require('../../config/auth').get('Local');
  const URL               = require('url').URL;
+ const authType          = 'Local';
 
  /**
   * Render the index.html or index-with-code.js depending on if query param has code or not
@@ -39,14 +40,14 @@ exports.login = (req, res) => {
   const configAuthType = config.authTypes && config.authTypes[authType] ? config.authTypes[authType] : {};
 
   res.render('auth/local/login', {
-    loginUrl: authLocalConfig.loginUrl,
+    loginUrl: authLocalConfig.loginUrl + `?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`,
     clientId: req.client.clientId,
     client: req.client,
-    title: configAuthType.title ? configAuthType.title : authCodeConfig.title,
-    description: configAuthType.description ?  configAuthType.description : authCodeConfig.description,
-    label: configAuthType.label ?  configAuthType.label : authCodeConfig.label,
-    helpText: configAuthType.helpText ? configAuthType.helpText : authCodeConfig.helpText,
-    buttonText: configAuthType.buttonText ? configAuthType.buttonText : authCodeConfig.buttonText,
+    title: configAuthType.title ? configAuthType.title : authLocalConfig.title,
+    description: configAuthType.description ?  configAuthType.description : authLocalConfig.description,
+    label: configAuthType.label ?  configAuthType.label : authLocalConfig.label,
+    helpText: configAuthType.helpText ? configAuthType.helpText : authLocalConfig.helpText,
+    buttonText: configAuthType.buttonText ? configAuthType.buttonText : authLocalConfig.buttonText,
   });
 };
 
@@ -96,7 +97,10 @@ exports.postLogin = (req, res, next) => {
 
     req.logIn(user, function(err) {
       if (err) { return next(err); }
-      const authorizeUrl = `/dialog/authorize?redirect_uri=${encodeURI(req.client.redirectUrl)}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+      const redirectUrl = req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : req.client.redirectUrl;
+      const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+
+      console.log('authorizeUrl', authorizeUrl)
 
   //    const redirectTo = req.session.returnTo ? req.session.returnTo : req.client.redirectUrl;
 
