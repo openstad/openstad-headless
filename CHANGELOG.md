@@ -1,6 +1,6 @@
 # Changelog
 
-## UNRELEASED
+## PRE-RELEASE v.11.0 (2021-..-..)
 * In case password is not set create a random one
 
 ## v0.10.0 (2020-12-09)
