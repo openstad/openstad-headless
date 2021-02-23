@@ -1,7 +1,12 @@
 # Changelog
 
+## v0.12.0 (2020-01-27)
+* Fallback to roleId for member uniqueCode if none defaultRoleId isset
+* In case password is not set create a random one
+
 ## v0.11.0 (2020-01-27)
 * Fallback to roleId for member uniqueCode if none defaultRoleId isset
+* In case password is not set create a random one
 
 ## v0.10.0 (2020-12-09)
 * Add client name to the page title, and client site URL to the logo href

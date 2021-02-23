@@ -5,6 +5,7 @@ const UserRole              = require('../models').UserRole;
 const Role                  = require('../models').Role;
 const userProfileValidation = require('../config/user').validation.profile;
 const bcrypt                = require('bcrypt');
+const hat                   = require('hat');
 const saltRounds            = 10;
 const Promise               = require('bluebird');
 
@@ -188,7 +189,10 @@ exports.validateUser = (req, res, next) => {
 
 exports.create =  (req, res, next) => {
   let { firstName, lastName, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, hashedPhoneNumber, password, extraData } = req.body;
+  const rack = hat.rack();
 
+  // if empty create a random string
+  password = password ? password : rack();
   password = bcrypt.hashSync(password, saltRounds);
   extraData = extraData ? extraData : {};
   extraData = JSON.stringify(extraData);
