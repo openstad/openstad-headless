@@ -1,7 +1,7 @@
 # Changelog
 
 ## v0.12.0 (2020-02-23)
-* In case password is not set create a random one
+* In case password is not set create a random one when creating a user
 
 ## v0.11.0 (2020-01-27)
 * Fallback to roleId for member uniqueCode if none defaultRoleId isset
