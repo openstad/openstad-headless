@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+* Add allipsis to login url in email
+
 ## v0.12.0 (2020-02-23)
 * In case password is not set create a random one when creating a user
 
