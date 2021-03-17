@@ -1,7 +1,7 @@
 # Changelog
 
-## Unreleased
-* Add allipsis to login url in email
+## v0.13.0 (2020-03-17)
+* Add ellipsis css to login url in email so it will be cut off
 
 ## v0.12.0 (2020-02-23)
 * In case password is not set create a random one when creating a user
