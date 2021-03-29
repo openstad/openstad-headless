@@ -33,8 +33,8 @@ deploy:
       # Either Create different config in travis to deploy to different cluster
       # Or add a different namespace for ACC
       # condition: $TRAVIS_BRANCH =~ ^(development|release)$
-      #condition: $TRAVIS_BRANCH =~ ^(development)$
-      condition: $TRAVIS_BRANCH =~ ^(feature/docker-travis)$
+      condition: $TRAVIS_BRANCH =~ ^(development)$
+      #condition: $TRAVIS_BRANCH =~ ^(feature/docker-travis)$
 
   # master automatically pushes new docker container with latest tag to docker
   - provider: script
