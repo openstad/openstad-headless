@@ -164,7 +164,7 @@ exports.checkIfEmailRequired =  (req, res, next) => {
 exports.checkUniqueCodeAuth = (errorCallback) => {
   //validate code auth type
   return (req, res, next) => {
-      const authTypes = req.client.authTypes;
+    const authTypes = req.client.authTypes;
 
       // if UniqueCode authentication is used, other methods are blocked to enforce users can never authorize with email
       if (authTypes.indexOf('UniqueCode') !== -1) {
@@ -203,8 +203,54 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
 /**
  * Check if 2FA is required and for what roles
  */
-exports.check2FA = () => {
+exports.check2FA = (req, res, next) => {
+  const twoFactorRoles =  req.client.twoFactorRoles;
 
+  if (!req.user.role) {
+    try {
+      throw new Error(`Can't validate a user (userId: ${req.user.id}) without a role...`)
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  /**
+   * In case no 2factor roles are defined all is good and check is passed
+   */
+  if (!twoFactorRoles) {
+    next();
+  }
+
+  /**
+   * In case 2factor roles are defined but the user doesn't fall into the role, all is good and check is passed
+   * This is because in most cases only moderators, admin etc. are asked for 2fa, normal users not
+   * So opposite of most security practices 2FA is trickle up instead of trickle down
+   */
+  if (twoFactorRoles && !twoFactorRoles.includes(req.user.role)) {
+    next();
+  }
+
+  /**
+   * In case 2factor is turned on but user has not activated it yet in their account als continue.
+   * Might be an option here to force users to create a token
+   */
+  if (twoFactorRoles && twoFactorRoles.includes(req.user.role) && !req.user.twoFactorToken) {
+    console.log(`Two factor is required for client with ID: ${req.client.id} but not turned on for user with ID: ${req.user.id}`);
+    next();
+  }
+
+  // check two factor is valid
+  if (twoFactorRoles && twoFactorRoles.includes(req.user.role) && req.validatedTwoFactor) {
+    next();
+  } else {
+    res.redirect('/auth/two-factor');
+  }
+
+  try {
+    throw new Error(`Two factor authentication not handled properly for client with ID: ${req.client.id} but not turned on for user with ID: ${req.user.id}`)
+  } catch (err) {
+    next(err)
+  }
 }
 
 

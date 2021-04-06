@@ -1,29 +1,29 @@
 const passport = require('passport');
 
 //CONTROLERS
-const oauth2Controller = require('./controllers/oauth/oauth2');
-const tokenController = require('./controllers/oauth/token');
-const userController = require('./controllers/user/user');
+const oauth2Controller = require('../controllers/oauth/oauth2');
+const tokenController = require('../controllers/oauth/token');
+const userController = require('../controllers/user/user');
 
 //AUTH CONTROLLERS
-const authChoose = require('./controllers/auth/choose');
-const authUrl = require('./controllers/auth/url');
-const authPhonenumber = require('./controllers/auth/phonenumber');
-const authAdminUrl = require('./controllers/auth/adminUrl');
-const authForgot = require('./controllers/auth/forgot');
-const authDigiD = require('./controllers/auth/digid');
-const authAnonymous = require('./controllers/auth/anonymous');
-const authLocal = require('./controllers/auth/local');
-const authCode = require('./controllers/auth/code');
-const authRequiredFields = require('./controllers/auth/required');
+const authChoose = require('../controllers/auth/choose');
+const authUrl = require('../controllers/auth/url');
+const authPhonenumber = require('../controllers/auth/phonenumber');
+const authAdminUrl = require('../controllers/auth/adminUrl');
+const authForgot = require('../controllers/auth/forgot');
+const authDigiD = require('../controllers/auth/digid');
+const authAnonymous = require('../controllers/auth/anonymous');
+const authLocal = require('../controllers/auth/local');
+const authCode = require('../controllers/auth/code');
+const authRequiredFields = require('../controllers/auth/required');
 
 //MIDDLEWARE
-const clientMw = require('./middleware/client');
-const userMw = require('./middleware/user');
-const bruteForce = require('./middleware/bruteForce');
-const authMw = require('./middleware/auth');
-const passwordResetMw = require('./middleware/passwordReset');
-const logMw = require('./middleware/log');
+const clientMw = require('../middleware/client');
+const userMw = require('../middleware/user');
+const bruteForce = require('../middleware/bruteForce');
+const authMw = require('../middleware/auth');
+const passwordResetMw = require('../middleware/passwordReset');
+const logMw = require('../middleware/log');
 
 const loginBruteForce = bruteForce.user.getMiddleware({
     key: function (req, res, next) {
@@ -241,7 +241,7 @@ module.exports = function (app) {
     app.get('/dialog/authorize', clientMw.withOne, authMw.check, userMw.withRoleForClient, clientMw.checkRequiredUserFields, clientMw.checkUniqueCodeAuth((req, res) => {
         return res.redirect('/login?clientId=' + req.query.client_id);
     }), oauth2Controller.authorization);
-    app.post('/dialog/authorize/decision', clientMw.withOne, userMw.withRoleForClient, clientMw.checkUniqueCodeAuth(),clientMw.check2FA(), bruteForce.global.prevent, oauth2Controller.decision);
+    app.post('/dialog/authorize/decision', clientMw.withOne, userMw.withRoleForClient, clientMw.checkUniqueCodeAuth(),clientMw.check2FA, bruteForce.global.prevent, oauth2Controller.decision);
     app.post('/oauth/token', oauth2Controller.token);
     app.get('/oauth/token', oauth2Controller.token);
 
@@ -255,7 +255,7 @@ module.exports = function (app) {
     // https://developers.google.com/identity/protocols/OAuth2WebServer
     app.get('/api/revoke', tokenController.revoke);
 
-    require('./routes/adminApi')(app);
+    require('./adminApi')(app);
 
     // Handle 404
     app.use(function (req, res) {
