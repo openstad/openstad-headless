@@ -200,6 +200,13 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
     }
 }
 
+/**
+ * Check if 2FA is required and for what roles
+ */
+exports.check2FA = () => {
+
+}
+
 
 /**
  * Check if required fields is set
