@@ -1,0 +1,46 @@
+{% extends 'layouts/main.html' %}
+
+{% block body %}
+<div>
+    <div class="upper-box card-body">
+        <h1 class="">
+            {% if title %}
+            {{title}}
+            {% else %}
+            Configureer je two-factor app
+            {% endif %}
+        </h1>
+        <p class="intro">
+            {% if description %}
+            {{description}}
+            {% else %}
+            Scan de QR code in je authenticator app.
+            Dit kan met  de meeste authenticator apps die het "Time-based One-Time Password" protocol
+            ondersteunen. Dit zijn onder andere: Google Authenticator, Authy and Microsoft Authenticator.
+            {% endif %}
+        </p>
+        <form
+                method="post"
+                action="{{postUrl}}?&clientId={{clientId}}&redirect_uri={{redirectUrl}}"
+                class="validate-form"
+        >
+            <div class="form-group">
+                {% include 'elements/error-flash.html' %}
+
+                <img src="{{twoFactorQrSrc}}" />
+                <label>
+                    {{ label if label else 'Secret:' }}
+                </label>
+                <input type="text" disabled value="{{twoFactorSecret}}"/>
+            </div>
+            <input type="hidden" name="_csrf" value="{{csrfToken}}">
+            <input type="hidden" name="clientId" value="{{clientId}}">
+
+            <input type="submit" value="{{ buttonText if buttonText else 'Bevestig configuratie' }}" class="btn btn-primary">
+        </form>
+    </div>
+    <br />
+
+
+</div>
+{% endblock %}

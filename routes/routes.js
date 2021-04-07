@@ -16,6 +16,9 @@ const authAnonymous = require('../controllers/auth/anonymous');
 const authLocal = require('../controllers/auth/local');
 const authCode = require('../controllers/auth/code');
 const authRequiredFields = require('../controllers/auth/required');
+const authTwoFactor = require('../controllers/auth/twoFactor');
+
+
 
 //MIDDLEWARE
 const clientMw = require('../middleware/client');
@@ -235,10 +238,15 @@ module.exports = function (app) {
     app.get('/auth/required-fields', clientMw.withOne, clientMw.checkIfEmailRequired, authRequiredFields.index);
     app.post('/auth/required-fields', clientMw.withOne, csrfProtection, addCsrfGlobal, authRequiredFields.post);
 
+    app.use('/auth/two-factor', [authMw.check, clientMw.withOne]);
+    app.get('/auth/two-factor', clientMw.withOne, clientMw.checkIfEmailRequired, authTwoFactor.index);
+    app.post('/auth/two-factor', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.post);
+    app.get('/auth/two-factor/configure', clientMw.withOne, clientMw.checkIfEmailRequired, authTwoFactor.configure);
+    app.post('/auth/two-factor/configure', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.configurePost);
 
     app.use('/dialog', [bruteForce.global.prevent]);
 
-    app.get('/dialog/authorize', clientMw.withOne, authMw.check, userMw.withRoleForClient, clientMw.checkRequiredUserFields, clientMw.checkUniqueCodeAuth((req, res) => {
+    app.get('/dialog/authorize', clientMw.withOne, authMw.check, userMw.withRoleForClient, clientMw.checkRequiredUserFields, clientMw.check2FA, clientMw.checkUniqueCodeAuth((req, res) => {
         return res.redirect('/login?clientId=' + req.query.client_id);
     }), oauth2Controller.authorization);
     app.post('/dialog/authorize/decision', clientMw.withOne, userMw.withRoleForClient, clientMw.checkUniqueCodeAuth(),clientMw.check2FA, bruteForce.global.prevent, oauth2Controller.decision);

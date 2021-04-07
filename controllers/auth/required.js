@@ -19,6 +19,7 @@ exports.index = (req, res, next) => {
       if (configRequiredFields.labels[field.key]) {
         field.label = configRequiredFields.labels[field.key];
       }
+
       return field;
     });
   }
