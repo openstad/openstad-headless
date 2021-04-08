@@ -144,7 +144,7 @@ module.exports = function (app) {
      * Login & register with local login
      */
     //shared middleware
-    app.use('/auth/local', [clientMw.setAuthType('Local'), clientMw.valifoautdate, csrfProtection, addCsrfGlobal]);
+    app.use('/auth/local', [clientMw.setAuthType('Local'), clientMw.validate, csrfProtection, addCsrfGlobal]);
 
     //routes
     app.get('/auth/local/login', authLocal.login);
@@ -239,9 +239,9 @@ module.exports = function (app) {
     app.post('/auth/required-fields', clientMw.withOne, csrfProtection, addCsrfGlobal, authRequiredFields.post);
 
     app.use('/auth/two-factor', [authMw.check, clientMw.withOne]);
-    app.get('/auth/two-factor', clientMw.withOne, clientMw.checkIfEmailRequired, authTwoFactor.index);
+    app.get('/auth/two-factor', clientMw.withOne, csrfProtection, addCsrfGlobal, clientMw.checkIfEmailRequired, authTwoFactor.index);
     app.post('/auth/two-factor', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.post);
-    app.get('/auth/two-factor/configure', clientMw.withOne, clientMw.checkIfEmailRequired, authTwoFactor.configure);
+    app.get('/auth/two-factor/configure', clientMw.withOne, csrfProtection, addCsrfGlobal, clientMw.checkIfEmailRequired, authTwoFactor.configure);
     app.post('/auth/two-factor/configure', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.configurePost);
 
     app.use('/dialog', [bruteForce.global.prevent]);

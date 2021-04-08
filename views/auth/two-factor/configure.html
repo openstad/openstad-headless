@@ -14,9 +14,19 @@
             {% if description %}
             {{description}}
             {% else %}
-            Scan de QR code in je authenticator app.
+            Voor het inloggen op deze site is het vereist om met een token te valideren.
+            Dit is nog niet geconfigureerd voor je account. Dit kun je nu eenmalig doen.
+            <br />
+            <br />
+            Om dit te kunnen doen is een authenticator app nodig voor je telefoon.
             Dit kan met  de meeste authenticator apps die het "Time-based One-Time Password" protocol
             ondersteunen. Dit zijn onder andere: Google Authenticator, Authy and Microsoft Authenticator.
+            <br />
+            <br />
+            Vervolgens kun je de QR code scannen in de app.
+            Nadat u dit gedaan heeft click je op bevestig configuratie.
+            Let op: hierna kun je niet meer terugkomen op dit scherm.
+
             {% endif %}
         </p>
         <form
@@ -27,16 +37,13 @@
             <div class="form-group">
                 {% include 'elements/error-flash.html' %}
 
-                <img src="{{twoFactorQrSrc}}" />
-                <label>
-                    {{ label if label else 'Secret:' }}
-                </label>
-                <input type="text" disabled value="{{twoFactorSecret}}"/>
+
+                <input type="text" disabled value="{{twoFactorSecret}}" style="max-width: none"/>
             </div>
             <input type="hidden" name="_csrf" value="{{csrfToken}}">
             <input type="hidden" name="clientId" value="{{clientId}}">
 
-            <input type="submit" value="{{ buttonText if buttonText else 'Bevestig configuratie' }}" class="btn btn-primary">
+            <input type="submit" value="{{ buttonText if buttonText else 'Bevestig configuratie' }}" onclick="confirm('Goed geinstalleerd?')" class="btn btn-primary">
         </form>
     </div>
     <br />

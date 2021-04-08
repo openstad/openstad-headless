@@ -2,11 +2,32 @@ const twofactor = require("node-2fa");
 
 const twoFactorBaseUrl = '/auth/two-factor';
 
-exports.index = () => {
+function isEncoded(uri) {
+    uri = uri || '';
+
+    return uri !== decodeURIComponent(uri);
+}
+
+const formatRedirectUrl = (url, req) => {
+    let redirectUrl = req.query.redirect_uri ? req.query.redirect_uri : req.client.redirectUrl;
+
+    // check if url is encoded otherwise encode
+    redirectUrl  = isEncoded(redirectUrl) ? redirectUrl : encodeURIComponent(redirectUrl);
+
+    return `${url}?clientId=${req.client.clientId}&redirect_uri=${redirectUrl}`;
+}
+
+exports.index = (req, res, next) => {
     const config = req.client.config ? req.client.config : {};
     const configTwoFactor = config && config.twoFactor ? config.twoFactor : {};
 
-    res.render('two-factor/authenticate', {
+    // in case user hasn't configured 2FA yet, redirect them to the configuration screen
+    if (!req.user.twoFactorConfigured) {
+        return res.redirect(formatRedirectUrl(`${twoFactorBaseUrl}/configure`, req));
+    }
+
+
+    res.render('auth/two-factor/authenticate', {
         client: req.client,
         clientId: req.client.clientId,
         postUrl: twoFactorBaseUrl,
@@ -14,7 +35,7 @@ exports.index = () => {
         description: configTwoFactor.description,
         title: configTwoFactor.title,
         buttonText: configTwoFactor.buttonText,
-        redirect_uri: encodeURIComponent(req.query.redirect_uri)
+        redirectUrl: encodeURIComponent(req.query.redirect_uri)
     });
 }
 
@@ -30,7 +51,8 @@ exports.post = async (req, res, next) => {
 
     if (verified) {
         try {
-            await req.session.set('twoFactorValid', true).save();
+            req.session.twoFactorValid = true;
+            await req.session.save();
         } catch (e) {
             next(e);
         }
@@ -40,9 +62,9 @@ exports.post = async (req, res, next) => {
 
         res.redirect(authorizeUrl);
     } else {
-        console.log('Two factor validation failed', err);
+        console.log('Two factor validation failed');
         req.flash('error', {msg: 'Two factor validatie is niet gelukt, probeer het nogmaals.'});
-        res.redirect(req.header('Referer') || '/login?clientId=' +  req.client.clientId + '&redirect_uri=' + req.redirectUrl);
+        res.redirect(req.header('Referer') || formatRedirectUrl(`/login`, req));
     }
 }
 
@@ -55,12 +77,11 @@ exports.post = async (req, res, next) => {
  * @param next
  */
 exports.configure = async (req, res, next) => {
-    if (req.user.twoFactorValidated) {
-        throw new Error("Not allowed to configure two factor token again.")
+    if (req.user.twoFactorConfigured) {
+        return next(new Error("Not allowed to configure two factor token again."));
     } else {
         const config = req.client.config ? req.client.config : {};
         const configTwoFactor = config && config.configureTwoFactor ? config.configureTwoFactor : {};
-
 
         let twoFactorSecret = req.userModel.get('twoFactorToken');
 
@@ -75,7 +96,7 @@ exports.configure = async (req, res, next) => {
              * @type {{secret: string, uri: string, qr: string}}
              */
             const twoFactor = twofactor.generateSecret({name: issuer, account: accountName});
-            console.log('Formatted QR twoFactor', twoFactor);
+            console.log('Generated twoFactor', twoFactor);
 
             try {
                 await req.userModel.set('twoFactorToken', twoFactor.secret).save();
@@ -89,28 +110,25 @@ exports.configure = async (req, res, next) => {
 
         const qrCode = `https://chart.googleapis.com/chart?chs=166x166&chld=L|0&cht=qr&chl=otpauth://totp/=${encodeURIComponent(issuer)}:${encodeURIComponent(accountName)}%3Fsecret=${twoFactorSecret}%26issuer=${encodeURIComponent(issuer)}`;
 
-        console.log('Formatted QR code', qrCode);
-
-        res.render('two-factor/configure', {
+        res.render('auth/two-factor/configure', {
             postUrl: twoFactorBaseUrl + '/configure',
-            twoFactorQrSrc: twoFactorSecret.qr,
-            twoFactorSecret: twoFactor.secret,
+            twoFactorQrSrc: qrCode,
+            twoFactorSecret: twoFactorSecret,
             clientId: req.client.clientId,
             info: configTwoFactor.info,
             description: configTwoFactor.description,
             title: configTwoFactor.title,
             buttonText: configTwoFactor.buttonText,
-            redirect_uri: encodeURIComponent(req.query.redirect_uri)
+            redirectUrl: encodeURIComponent(req.query.redirect_uri)
         });
     }
  }
 
 exports.configurePost = async (req, res, next) => {
-    if (req.user.twoFactorValidated) {
-        throw new Error("Not allowed to configure two factor token again.")
+    if (req.user.twoFactorConfigured) {
+        return next(new Error("Not allowed to configure two factor token again."));
     } else {
-        const redirectUrl = req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : req.client.redirectUrl;
-        const redirectToTwoFactor = `${twoFactorBaseUrl}?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}`;
+        const redirectToTwoFactor = formatRedirectUrl(twoFactorBaseUrl, req);
 
         req.userModel
             .set('twoFactorConfigured', true)

@@ -118,8 +118,11 @@ exports.postLogin = (req, res, next) => {
  * @param   {Object}   res - The response
  * @returns {undefined}
  */
-exports.logout = (req, res) => {
+exports.logout = async (req, res) => {
   req.logout();
+
+  await req.session.destroy();
+
   const config = req.client.config;
   const allowedDomains = req.client.allowedDomains ? req.client.allowedDomains : false;
   let redirectURL = req.query.redirectUrl;

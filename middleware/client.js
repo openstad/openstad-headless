@@ -211,7 +211,7 @@ exports.check2FA = (req, res, next) => {
     try {
       throw new Error(`Can't validate a user (userId: ${req.user.id}) without a role...`)
     } catch (err) {
-      next(err)
+      return next(err)
     }
   }
 
@@ -219,7 +219,7 @@ exports.check2FA = (req, res, next) => {
    * In case no 2factor roles are defined all is good and check is passed
    */
   if (!twoFactorRoles) {
-    next();
+    return next();
   }
 
   /**
@@ -228,24 +228,19 @@ exports.check2FA = (req, res, next) => {
    * So opposite of most security practices 2FA is trickle up instead of trickle down
    */
   if (twoFactorRoles && !twoFactorRoles.includes(req.user.role)) {
-    next();
+    return next();
   }
 
-  /**
-   * In case 2factor is turned on but user has not activated it yet in their account als continue.
-   * Might be an option here to force users to create a token
-   */
-  if (twoFactorRoles && twoFactorRoles.includes(req.user.role) && !req.user.twoFactorToken) {
-    console.log(`Two factor is required for client with ID: ${req.client.id} but not turned on for user with ID: ${req.user.id}`);
-    next();
+  console.log('twoFactorRoles', twoFactorRoles);
+  console.log('twoFactorRoles', twoFactorRoles.includes(req.user.role));
+
+  // check two factor is validated otherwise send to 2factor screen
+  if (twoFactorRoles && twoFactorRoles.includes(req.user.role) && req.session.twoFactorValid) {
+    return next();
+  } else if (twoFactorRoles && twoFactorRoles.includes(req.user.role) && !req.session.twoFactorValid) {
+    return res.redirect(`/auth/two-factor?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`);
   }
 
-  // check two factor is valid
-  if (twoFactorRoles && twoFactorRoles.includes(req.user.role) && req.validatedTwoFactor) {
-    next();
-  } else {
-    res.redirect('/auth/two-factor');
-  }
 
   try {
     throw new Error(`Two factor authentication not handled properly for client with ID: ${req.client.id} but not turned on for user with ID: ${req.user.id}`)

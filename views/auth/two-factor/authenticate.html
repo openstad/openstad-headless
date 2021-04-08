@@ -7,7 +7,7 @@
             {% if title %}
             {{title}}
             {% else %}
-            Vo <br /> per e-mail
+            Valideer two factor token
             {% endif %}
         </h1>
         <p class="intro">
@@ -15,7 +15,6 @@
             {{description}}
             {% else %}
             Vul de token in van je two factor authentication app.
-            Deze is de eerste keer aan je gevraagd om te configuren.
             {% endif %}
         </p>
         <form
@@ -27,11 +26,11 @@
                 {% include 'elements/error-flash.html' %}
 
                 <label>
-                    {{ label if label else 'Token:' }}
+                    {{ label if label else 'Token' }}
                 </label>
 
                 <input
-                    value="text"
+                    type="text"
                     name="twoFactorToken"
                     class="form-input"
                     required
@@ -48,8 +47,8 @@
         {% if helpText %}
         {{helpText | safe}}
         {% else %}
-        Geen toegang meer tot uw two factor app?
-        <a href="mailto:{{clientEmail}}">neem contact met ons op.</a>
+        Geen toegang meer tot je two factor app?
+        <a href="mailto:{{clientEmail}}">neem contact met ons op om uw account te herstellen.</a>
         {% endif %}
     </p>
 </div>
