@@ -66,6 +66,7 @@ exports.withOne = (req, res, next) => {
         req.client.requiredUserFields   = JSON.parse(req.client.requiredUserFields);
         req.client.config               = JSON.parse(req.client.config);
         req.client.allowedDomains       = JSON.parse(req.client.allowedDomains);
+        req.client.twoFactorRoles       = JSON.parse(req.client.twoFactorRoles);
 
         next();
       } else {
@@ -290,6 +291,7 @@ exports.create =  (req, res, next) => {
   values.authTypes = JSON.stringify(values.authTypes);
   values.config = JSON.stringify(values.config);
   values.allowedDomains = JSON.stringify(values.allowedDomains);
+  values.twoFactorRoles = JSON.stringify(values.twoFactorRoles);
 
 
   new Client(values)

@@ -61,21 +61,39 @@ exports.configure = async (req, res, next) => {
         const config = req.client.config ? req.client.config : {};
         const configTwoFactor = config && config.configureTwoFactor ? config.configureTwoFactor : {};
 
-        /**
-         * Get Two factor object:
-         * @type {{secret: string, uri: string, qr: string}}
-         */
-        const twoFactor = twofactor.generateSecret({ name: "Openstad", account: req.user.email });
 
-        try {
-            await req.userModel.set('twoFactorToken', twoFactor.secret).save();
-        } catch(e) {
-            next(e)
+        let twoFactorSecret = req.userModel.get('twoFactorToken');
+
+        // will this cause issuer if used double in different Openstad installations?
+        const issuer = "Openstad";
+        // take email, since this is always present, make sure @ char doesn't cause issues in some cases
+        const accountName = req.userModel.get('email');
+
+        if (!twoFactorSecret) {
+            /**
+             * Get Two factor object:
+             * @type {{secret: string, uri: string, qr: string}}
+             */
+            const twoFactor = twofactor.generateSecret({name: issuer, account: accountName});
+            console.log('Formatted QR twoFactor', twoFactor);
+
+            try {
+                await req.userModel.set('twoFactorToken', twoFactor.secret).save();
+            } catch (e) {
+                next(e)
+            }
+
+            twoFactorSecret = twoFactor.secret;
+
         }
+
+        const qrCode = `https://chart.googleapis.com/chart?chs=166x166&chld=L|0&cht=qr&chl=otpauth://totp/=${encodeURIComponent(issuer)}:${encodeURIComponent(accountName)}%3Fsecret=${twoFactorSecret}%26issuer=${encodeURIComponent(issuer)}`;
+
+        console.log('Formatted QR code', qrCode);
 
         res.render('two-factor/configure', {
             postUrl: twoFactorBaseUrl + '/configure',
-            twoFactorQrSrc: twoFactor.qr,
+            twoFactorQrSrc: twoFactorSecret.qr,
             twoFactorSecret: twoFactor.secret,
             clientId: req.client.clientId,
             info: configTwoFactor.info,
@@ -95,7 +113,7 @@ exports.configurePost = async (req, res, next) => {
         const redirectToTwoFactor = `${twoFactorBaseUrl}?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}`;
 
         req.userModel
-            .set('twoFactorValidated', true)
+            .set('twoFactorConfigured', true)
             .save()
             .then(() => {
                 req.flash('success', {msg: 'Two factor authentication configured!'});
