@@ -26,18 +26,21 @@
             Vervolgens kun je de QR code scannen in de app.
             Nadat u dit gedaan heeft click je op bevestig configuratie.
             Let op: hierna kun je niet meer terugkomen op dit scherm.
-
             {% endif %}
         </p>
         <form
-                method="post"
-                action="{{postUrl}}?&clientId={{clientId}}&redirect_uri={{redirectUrl}}"
-                class="validate-form"
+            method="post"
+            action="{{postUrl}}?&clientId={{clientId}}&redirect_uri={{redirectUrl}}"
+            class="validate-form"
         >
             <div class="form-group">
                 {% include 'elements/error-flash.html' %}
 
-
+                <img src="{{twoFactorQrSrc}}" />
+                <br />
+                <label>
+                    Secret
+                </label>
                 <input type="text" disabled value="{{twoFactorSecret}}" style="max-width: none"/>
             </div>
             <input type="hidden" name="_csrf" value="{{csrfToken}}">

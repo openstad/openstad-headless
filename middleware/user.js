@@ -222,10 +222,10 @@ exports.create =  (req, res, next) => {
 }
 
 exports.update = (req, res, next) => {
-  const keysToUpdate = ['firstName', 'lastName', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'extraData'];
+  const keysToUpdate = ['firstName', 'lastName', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'extraData', 'twoFactorConfigured', 'twoFactorToken'];
 
   keysToUpdate.forEach((key) => {
-    if (req.body[key]) {
+    if (req.body[key] || req.body[key] === 0 || req.body[key] === null  || req.body[key] === false) {
       let value = req.body[key];
 
       if (key === 'extraData') {

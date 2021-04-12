@@ -44,8 +44,8 @@
     </div>
     <br />
     <p>
-        {% if helpText %}
-        {{helpText | safe}}
+        {% if info %}
+        {{info | safe}}
         {% else %}
         Geen toegang meer tot je two factor app?
         <a href="mailto:{{clientEmail}}">neem contact met ons op om uw account te herstellen.</a>

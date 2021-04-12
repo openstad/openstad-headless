@@ -25,8 +25,7 @@ exports.index = (req, res, next) => {
     if (!req.user.twoFactorConfigured) {
         return res.redirect(formatRedirectUrl(`${twoFactorBaseUrl}/configure`, req));
     }
-
-
+    
     res.render('auth/two-factor/authenticate', {
         client: req.client,
         clientId: req.client.clientId,
@@ -38,6 +37,8 @@ exports.index = (req, res, next) => {
         redirectUrl: encodeURIComponent(req.query.redirect_uri)
     });
 }
+
+
 
 /**
  * Handle post of 2FA auth
