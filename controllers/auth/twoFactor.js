@@ -25,7 +25,7 @@ exports.index = (req, res, next) => {
     if (!req.user.twoFactorConfigured) {
         return res.redirect(formatRedirectUrl(`${twoFactorBaseUrl}/configure`, req));
     }
-    
+
     res.render('auth/two-factor/authenticate', {
         client: req.client,
         clientId: req.client.clientId,
@@ -97,7 +97,6 @@ exports.configure = async (req, res, next) => {
              * @type {{secret: string, uri: string, qr: string}}
              */
             const twoFactor = twofactor.generateSecret({name: issuer, account: accountName});
-            console.log('Generated twoFactor', twoFactor);
 
             try {
                 await req.userModel.set('twoFactorToken', twoFactor.secret).save();

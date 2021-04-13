@@ -231,9 +231,6 @@ exports.check2FA = (req, res, next) => {
     return next();
   }
 
-  console.log('twoFactorRoles', twoFactorRoles);
-  console.log('twoFactorRoles', twoFactorRoles.includes(req.user.role));
-
   // check two factor is validated otherwise send to 2factor screen
   if (twoFactorRoles && twoFactorRoles.includes(req.user.role) && req.session.twoFactorValid) {
     return next();
