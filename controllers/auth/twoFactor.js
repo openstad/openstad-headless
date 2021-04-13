@@ -86,7 +86,7 @@ exports.configure = async (req, res, next) => {
 
         let twoFactorSecret = req.userModel.get('twoFactorToken');
 
-        // will this cause issuer if used double in different Openstad installations?
+        // @todo, would be good to take this from ENV or settings somewhere. Currently however no name per installation
         const issuer = "Openstad";
         // take email, since this is always present, make sure @ char doesn't cause issues in some cases
         const accountName = req.userModel.get('email');
