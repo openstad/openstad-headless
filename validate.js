@@ -153,8 +153,6 @@ validate.authCode = (code, authCode, client, redirectURI) => {
   if (client.id !== authCode.clientID) {
     validate.logAndThrow('AuthCode clientID does not match client id given');
   }
-  // console.log('redirectURI', redirectURI);
-  // console.log('authCode', authCode);
 
   // Fixme: why is this disabled?
   if (redirectURI !== authCode.redirectURI) {

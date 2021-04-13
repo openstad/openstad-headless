@@ -124,7 +124,7 @@ require('./auth');
 
 // static resources for stylesheets, images, javascript files
 
-require('./routes')(app);
+require('./routes/routes')(app);
 
 // /**
 //  * From time to time we need to clean up any expired tokens
