@@ -3,3 +3,5 @@ exports.privilegedRoles = [
   'moderator',
   'editor'
 ];
+
+exports.defaultRole = 'member';

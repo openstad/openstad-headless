@@ -4,7 +4,8 @@ const hat = require('hat');
 const userFields = require('../config/user').fields;
 const authTypes = require('../config/auth').types;
 const privilegedRoles =  require('../config/roles').privilegedRoles;
-const authTypesConfig = require('../config').authTypes;
+const authTypesConfig = require('../config').authTypes
+const defaultRole =  require('../config/roles').defaultRole;
 
 exports.withAll = (req, res, next) => {
   Client
@@ -207,13 +208,8 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
 exports.check2FA = (req, res, next) => {
   const twoFactorRoles =  req.client.twoFactorRoles;
 
-  if (!req.user.role) {
-    try {
-      throw new Error(`Can't validate a user (userId: ${req.user.id}) without a role...`)
-    } catch (err) {
-      return next(err)
-    }
-  }
+  // if no role is present, assume default role
+  const userRole = req.user.role ? req.user.role : defaultRole;
 
   /**
    * In case no 2factor roles are defined all is good and check is passed
@@ -227,14 +223,14 @@ exports.check2FA = (req, res, next) => {
    * This is because in most cases only moderators, admin etc. are asked for 2fa, normal users not
    * So opposite of most security practices 2FA is trickle up instead of trickle down
    */
-  if (twoFactorRoles && !twoFactorRoles.includes(req.user.role)) {
+  if (twoFactorRoles && !twoFactorRoles.includes(userRole)) {
     return next();
   }
 
   // check two factor is validated otherwise send to 2factor screen
-  if (twoFactorRoles && twoFactorRoles.includes(req.user.role) && req.session.twoFactorValid) {
+  if (twoFactorRoles && twoFactorRoles.includes(userRole) && req.session.twoFactorValid) {
     return next();
-  } else if (twoFactorRoles && twoFactorRoles.includes(req.user.role) && !req.session.twoFactorValid) {
+  } else if (twoFactorRoles && twoFactorRoles.includes(userRole) && !req.session.twoFactorValid) {
     return res.redirect(`/auth/two-factor?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`);
   }
 

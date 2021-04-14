@@ -1,7 +1,7 @@
 
 exports.up = function(knex) {
     return knex.schema.alterTable('users', function(table) {
-        table.string('twoFactorToken').notNullable();
+        table.string('twoFactorToken').nullable().default(null);
         table.boolean('twoFactorConfigured').default(false);
     });
 };
