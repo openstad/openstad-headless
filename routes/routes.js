@@ -177,14 +177,11 @@ module.exports = function (app) {
     // Admin login routes
     app.use('/auth/admin', [csrfProtection, addCsrfGlobal]);
 
-    /*
-
     app.get('/auth/admin/login', authUrl.login);
     app.get('/auth/admin/confirmation', authAdminUrl.confirmation);
     app.post('/auth/admin/login', emailUrlBruteForce, authAdminUrl.postLogin);
     app.get('/auth/admin/authenticate', authUrl.authenticate);
     app.post('/auth/admin/authenticate', emailUrlBruteForce, authAdminUrl.postAuthenticate);
-*/
 
     /**
      * Auth routes for Anonymous login
