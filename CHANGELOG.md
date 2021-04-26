@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.14.0 (2020-04-26)
+* Add 2 factor auth, configurable per role and client (site)
+
 ## v0.13.0 (2020-03-17)
 * Add ellipsis css to login url in email so it will be cut off
 
