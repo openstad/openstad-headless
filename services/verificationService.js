@@ -27,6 +27,10 @@ exports.sendVerification = async (user, client, redirectUrl, adminLoginRequest) 
     emailLogo = clientConfigStyling.logo;
   }
 
+  if (clientConfig && clientConfig.emailLogo) {
+    emailLogo = clientConfig.emailLogo;
+  }
+
   return emailProvider.send({
     toName: user.firstName ? (user.lastName ? (user.firstName + ' ' + user.lastName).trim() : user.firstName) : false,
     toEmail: user.email,

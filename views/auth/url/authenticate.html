@@ -40,11 +40,25 @@ Doing it with Javascript prevents the user from needing to do an extra click
 	</noscript>
 
 	<div class="show-on-load">
-		<h1 class="">Emailadres controleren </h1>
+		<h1 class="">
+			{% if loaderTitle %}
+			{{loaderTitle}}
+			{% else %}
+			Emailadres controleren
+			{% endif %}
+		</h1>
 		<p class="intro">
+			{% if loaderTitle %}
+			{{loaderDescription}}
+			{% else %}
 			Een moment geduld, we controleren je emailadres. Je wordt automatisch doorgestuurd naar de website waar je vandaan kwam.
+			{% endif %}
 		</p>
+		{% if loaderImage %}
+		<img src="{{loaderImage}}" class="loader-spinner" width="50" height="50" />
+		{% else %}
 		<img src="/img/loader.svg" class="loader-spinner" width="50" height="50" />
+		{% endif %}
 	</div>
 	<noscript>
 </div>
