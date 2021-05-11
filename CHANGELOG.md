@@ -1,5 +1,10 @@
 # Changelog
 
+## UNRELEASED-v0.14.1 (...)
+* Add empty layout option for emails so complete email can be set
+* Add logo specific for email only in config
+* Make loader text fields configurable
+
 ## v0.14.0 (2020-04-26)
 * Add 2 factor auth, configurable per role and client (site)
 
