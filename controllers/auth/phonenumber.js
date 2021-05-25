@@ -86,8 +86,11 @@ exports.postLogin = async(req, res, next) => {
     let phoneNumber = req.body.phoneNumber;
     phoneNumber = phoneNumber.replace(/^\+/, '00');
     phoneNumber = phoneNumber.replace(/[	 \-]/g, '');
-    phoneNumber = phoneNumber.replace(/^06/, '+316'); // default NL
+    phoneNumber = phoneNumber.replace(/^06/, '00316'); // default NL
     if (!phoneNumber.match(/^[0-9]{7,16}$/)) throw new Error('Geen geldig telefoonnummer');
+
+    phoneNumber = phoneNumber.replace(/^00316/, '+316'); // default NL
+
 
     // find or create user
     let user = await getUser(phoneNumber);
