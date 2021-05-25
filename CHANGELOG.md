@@ -1,6 +1,9 @@
 # Changelog
 
-## UNRELEASED-v0.14.1 (...)
+## v0.14.2 (2020-05-26)
+* Change phone number format to +31 for sending SMS
+
+## v0.14.1 (2020-05-15)
 * Add empty layout option for emails so complete email can be set
 * Add logo specific for email only in config
 * Make loader text fields configurable
