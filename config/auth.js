@@ -41,6 +41,7 @@ const types = [
   },
   {
     key: 'Phonenumber',
+    label: 'Inlog via SMS',
     title: "Vraag een sms-stemcode aan",
     loginDescription: "Vul uw telefoonnummer in om een sms-stemcode te ontvangen. In stap 2 voert u de sms-code in. Als dat gelukt is komt u terug op de stemsite waar u uw stem kunt insturen. Een sms-code is 60 minuten geldig.",
     loginLabel: "Telefoonnummer:",
