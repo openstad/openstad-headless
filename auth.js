@@ -14,6 +14,8 @@ const LoginToken                           = require('./models').LoginToken;
 const UniqueCode                           = require('./models').UniqueCode;
 const TokenStrategy                        = require('./token-strategy');
 
+const tokenUrl = require('./services/tokenUrl');
+
 /**
  * LocalStrategy
  *
@@ -51,9 +53,9 @@ passport.use('url', new TokenStrategy({
     })
       .query((q) => {
       /**
-       * Only select tokens that are younger then 60 minutes
+       * Only select tokens that are younger then 30 minutes
        */
-      const minutes = 60;
+      const minutes = 30;
       const msForAMinute = 60000;
       const date = new Date();
       const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
@@ -62,10 +64,12 @@ passport.use('url', new TokenStrategy({
       q.orderBy('createdAt', 'DESC');
     })
     .fetch()
-    .then((token) => {
+    .then(async (token) => {
 
       if (token) {
-        new User({id: token.get('userId')})
+          await tokenUrl.invalidateTokensForUser(token.get('userId'));
+
+          new User({id: token.get('userId')})
           .fetch()
           .then((user) => { return user.serialize(); })
           .then(user => { return done(null, user) } )

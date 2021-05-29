@@ -5,7 +5,14 @@ const tokenSMS = require('./tokenSMS');
 
 exports.sendVerification = async (user, client, redirectUrl, adminLoginRequest) => {
 
-  await tokenUrl.invalidateTokensForUser(user.id);
+  /**
+   * For now we don't invalidate tokens
+   * This causes a lot of UX issues with users.
+   * When they send double, email is late, the enter a loop of not being able to login.
+   * We keep the token shortlived and invalidate all after login
+   */
+//   await tokenUrl.invalidateTokensForUser(user.id);
+
   const generatedTokenUrl = await tokenUrl.format(client, user, redirectUrl, adminLoginRequest);
 
   const clientConfig = client.config ? client.config : {};
