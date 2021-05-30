@@ -1,5 +1,9 @@
 # Changelog
 
+## UNRELEASED
+* Add phone number label
+* Don't invalid login token after making a new request, until login is successful, set to
+
 ## v0.14.2 (2020-05-26)
 * Change phone number format to +31 for sending SMS
 
@@ -18,7 +22,7 @@
 * In case password is not set create a random one when creating a user
 
 ## v0.11.0 (2020-01-27)
-* Fallback to roleId for member uniqueCode if none defaultRoleId isset
+* Fallback to roleId for member uniqueCode if none defaultRoleId is set
 * In case password is not set create a random one
 
 ## v0.10.0 (2020-12-09)
@@ -34,7 +38,7 @@
 * Alter tables with foreign keys to user from delete restrict to delete cascade, meaning they automatically get deleted
 
 ## 0.7.2 (2020-10-08)
-* Update openstad logo
+* Update Openstad logo
 
 ## 0.7.1 (2020-09-15)
 * Sender in email fell back to null null, Add check to make sure firstName / lastName exists in order to prevent casting null to string
