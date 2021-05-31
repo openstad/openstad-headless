@@ -2,7 +2,8 @@
 
 ## UNRELEASED
 * Add phone number label
-* Don't invalid login token after making a new request, until login is successful, set to
+* Don't invalid login token after making a new request, until login is successful
+* A login email link is valid max 10 minutes
 
 ## v0.14.2 (2020-05-26)
 * Change phone number format to +31 for sending SMS
