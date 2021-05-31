@@ -119,7 +119,7 @@ exports.postLogin = (req, res, next) => {
  * @returns {undefined}
  */
 exports.logout = async (req, res) => {
-  req.logout();
+ // req.logout();
 
   await req.session.destroy();
 
