@@ -55,7 +55,7 @@ passport.use('url', new TokenStrategy({
       /**
        * Only select tokens that are younger then 30 minutes
        */
-      const minutes = 30;
+      const minutes = 10;
       const msForAMinute = 60000;
       const date = new Date();
       const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
