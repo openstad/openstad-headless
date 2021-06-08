@@ -1,6 +1,6 @@
 # Changelog
 
-## UNRELEASED
+## v0.15.0 (2020-06-08)
 * Add phone number label
 * Don't invalid login token after making a new request, until login is successful
 * A login email link is valid max 10 minutes
