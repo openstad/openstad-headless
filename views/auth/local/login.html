@@ -6,7 +6,7 @@
   <p class="intro">
     {{description}}
   </p>
-  <form action="{{loginUrl}}" method="POST" class="validate-form">
+  <form action="{{loginUrl}}?&clientId={{clientId}}" method="POST" class="validate-form">
     <input type="hidden" name="_csrf" value="{{csrfToken}}" />
     <input type="hidden" name="clientId" value="{{clientId}}" />
 

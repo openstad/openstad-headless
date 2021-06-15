@@ -85,6 +85,7 @@
        res.redirect(req.header('Referer') || authLocalConfig.loginUrl + '?clientId=' + req.client.clientId + `&redirect_uri=${req.query.redirect_uri}`);
      })
      .catch((err) => {
+         console.log('ererer', err)
        req.flash('error', {msg: 'E-mail adres is niet bekend bij ons.'});
        res.redirect(req.header('Referer') || authLocalConfig.loginUrl + '?clientId=' + req.client.clientId + `&redirect_uri=${req.query.redirect_uri}`);
      });
@@ -94,7 +95,9 @@
     */
    const sendEmail = (resetUrl, user, client) => {
      const clientConfig = client.config ? client.config : {};
-     const transporterConfig = clientConfig.smtpTransport ? clientConfig.smtpTransport : {};
+       const clientConfigStyling = clientConfig.styling ? clientConfig.styling : {};
+
+       const transporterConfig = clientConfig.smtpTransport ? clientConfig.smtpTransport : {};
      let emailLogo;
 
      // load env sheets that have been set for complete Environment, not specific for just one client

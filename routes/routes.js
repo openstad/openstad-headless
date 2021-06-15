@@ -69,7 +69,7 @@ const csrfProtection = csurf({
     cookie: {
         httpOnly: true,
         secure: process.env.COOKIE_SECURE_OFF === 'yes' ? false : true,
-        sameSite: true
+        sameSite: process.env.CSRF_SAME_SITE_OFF === 'yes' ? false : true
     }
 });
 

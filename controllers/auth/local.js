@@ -43,6 +43,7 @@ exports.login = (req, res) => {
     loginUrl: authLocalConfig.loginUrl + `?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`,
     clientId: req.client.clientId,
     client: req.client,
+    redirectUrl: encodeURIComponent(req.query.redirect_uri),
     title: configAuthType.title ? configAuthType.title : authLocalConfig.title,
     description: configAuthType.description ?  configAuthType.description : authLocalConfig.description,
     label: configAuthType.label ?  configAuthType.label : authLocalConfig.label,
@@ -91,8 +92,9 @@ exports.postLogin = (req, res, next) => {
 
     // Redirect if it fails to the original e-mail screen
     if (!user) {
-      req.flash('error', {msg: 'Onjuiste combinatie e-mail/Wachtwoord'});
-      return res.redirect(`${authLocalConfig.loginUrl}?clientId=${req.client.clientId}`);
+      req.flash('error', {msg: 'Incorrect combination email/password'});
+      const redirectUrl = req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : req.client.redirectUrl;
+      return res.redirect(`${authLocalConfig.loginUrl}?clientId=${req.client.clientId}&redirect_uri=${redirectUrl}`);
     }
 
     req.logIn(user, function(err) {

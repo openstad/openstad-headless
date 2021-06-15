@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.15.1 (2020-06-15)
+* Fix password login redirect url on return
+
 ## v0.15.0 (2020-06-08)
 * Add phone number label
 * Don't invalid login token after making a new request, until login is successful
