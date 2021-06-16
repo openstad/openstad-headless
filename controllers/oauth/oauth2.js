@@ -162,8 +162,9 @@ exports.authorization = [
   login.ensureLoggedIn(),
   server.authorization((clientID, redirectURI, scope, done) => {
 
-    //console.log('===> clientID', clientID);
-		//console.log('===> redirectURI', redirectURI);
+    console.log('===> clientID', clientID);
+    console.log('===> redirectURI', redirectURI);
+    console.log('===> done', done);
 
     new Client({clientId: clientID})
     .fetch()

@@ -103,6 +103,7 @@ exports.postLogin = (req, res, next) => {
       const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
       console.log('authorizeUrl', authorizeUrl)
+      console.log('user', user)
 
   //    const redirectTo = req.session.returnTo ? req.session.returnTo : req.client.redirectUrl;
 
