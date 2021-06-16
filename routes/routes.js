@@ -63,6 +63,7 @@ const emailUrlBruteForce = bruteForce.user.getMiddleware({
     }
 });
 
+
 const csurf = require('csurf');
 
 const csrfProtection = csurf({
@@ -72,6 +73,9 @@ const csrfProtection = csurf({
         sameSite: process.env.CSRF_SAME_SITE_OFF === 'yes' ? false : true
     }
 });
+
+
+
 
 const addCsrfGlobal = (req, res, next) => {
     req.nunjucksEnv.addGlobal('csrfToken', req.csrfToken());
@@ -144,13 +148,13 @@ module.exports = function (app) {
      * Login & register with local login
      */
     //shared middleware
-    app.use('/auth/local', [clientMw.setAuthType('Local'), clientMw.validate, csrfProtection, addCsrfGlobal]);
+    app.use('/auth/local', [clientMw.setAuthType('Local'), clientMw.validate]);
 
     //routes
     app.get('/auth/local/login', authLocal.login);
     app.post('/auth/local/login', loginBruteForce, authMw.validateLogin, authLocal.postLogin);
-    app.get('/auth/local/register', authLocal.register);
-    app.post('/auth/local/register', userMw.validateUser, userMw.validateUniqueEmail, authLocal.postRegister);
+    app.get('/auth/local/register',  csrfProtection, addCsrfGlobal, authLocal.register);
+    app.post('/auth/local/register',  csrfProtection, addCsrfGlobal, userMw.validateUser, userMw.validateUniqueEmail, authLocal.postRegister);
 
     /**
      * Deal with forgot password
@@ -164,14 +168,14 @@ module.exports = function (app) {
      * Auth routes for URL login
      */
     // shared middleware
-    app.use('/auth/url', [clientMw.setAuthType('Url'), clientMw.validate, csrfProtection, addCsrfGlobal]);
+    app.use('/auth/url', [clientMw.setAuthType('Url'), clientMw.validate]);
 
     // routes
     app.get('/auth/url/login', authUrl.login);
     app.get('/auth/url/confirmation', authUrl.confirmation);
     app.post('/auth/url/login', emailUrlBruteForce, authUrl.postLogin);
-    app.get('/auth/url/authenticate', authUrl.authenticate);
-    app.post('/auth/url/authenticate', emailUrlBruteForce, authUrl.postAuthenticate);
+    app.get('/auth/url/authenticate', csrfProtection, addCsrfGlobal, authUrl.authenticate);
+    app.post('/auth/url/authenticate', csrfProtection, addCsrfGlobal, emailUrlBruteForce, authUrl.postAuthenticate);
 
 
     // Admin login routes
