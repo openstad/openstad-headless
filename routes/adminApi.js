@@ -29,6 +29,9 @@ module.exports = (app) => {
   app.post('/api/admin/user/:userId',         userMw.withOne, userMw.update, userMw.saveRoles, adminApiUserController.update);
   app.post('/api/admin/user/:userId/delete',  userMw.withOne, userMw.deleteOne, adminApiUserController.delete);
 
+  // add endpoint for fetchin a csrf session token
+  app.post('/api/admin/csrf-session-token',    userMw.withAll, adminApiUserController.csrfSessionToken);
+
 
 
   /**

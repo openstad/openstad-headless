@@ -26,3 +26,9 @@ exports.delete = [
     res.json({'message': 'Deleted!'})
   }
 ]
+
+exports.csrfSessionToken = [
+  (req, res, next) => {
+    res.json({'token': 'xxxxx'})
+  }
+]
