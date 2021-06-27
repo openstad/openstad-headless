@@ -32,8 +32,6 @@ module.exports = (app) => {
   // add endpoint for fetchin a csrf session token
   app.post('/api/admin/csrf-session-token',    userMw.withAll, adminApiUserController.csrfSessionToken);
 
-
-
   /**
    *  Simple CRUD API for clients
    */

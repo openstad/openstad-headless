@@ -18,8 +18,6 @@ const authCode = require('../controllers/auth/code');
 const authRequiredFields = require('../controllers/auth/required');
 const authTwoFactor = require('../controllers/auth/twoFactor');
 
-
-
 //MIDDLEWARE
 const clientMw = require('../middleware/client');
 const userMw = require('../middleware/user');
@@ -27,6 +25,9 @@ const bruteForce = require('../middleware/bruteForce');
 const authMw = require('../middleware/auth');
 const passwordResetMw = require('../middleware/passwordReset');
 const logMw = require('../middleware/log');
+
+//MODELS
+const ExternalCsrfToken = require('../models').ExternalCsrfToken;
 
 const loginBruteForce = bruteForce.user.getMiddleware({
     key: function (req, res, next) {
@@ -66,13 +67,53 @@ const emailUrlBruteForce = bruteForce.user.getMiddleware({
 
 const csurf = require('csurf');
 
-const csrfProtection = csurf({
-    cookie: {
-        httpOnly: true,
-        secure: process.env.COOKIE_SECURE_OFF === 'yes' ? false : true,
-        sameSite: process.env.CSRF_SAME_SITE_OFF === 'yes' ? false : true
+
+/**
+ * In same case we want to directly submit to oAuth api from another url.
+ * In order to allow for this we use one time session Tokens, that the external domain can fetch and
+ * validate their request with, in this case we validatate
+ * Currenlty we don't validate with the user sessions,
+ * there is a very short expiration date.
+ * and invalidate them after use.
+ * We assume this is enough for now.
+ * Theoretically the redirects of the oAuth protocol in this server,
+ * don't allow for redirect back to an unauthorized domain, but in case that fails this is a backup
+ */
+const csrfProtection = async  (req, res, next) => {
+    if (req.body && req.body.externalCSRF) {
+        const csrfToken = await new ExternalCsrfToken({
+            token: req.body.externalCSRF,
+            used: false
+        }).query((q) => {
+            /**
+             * Only select tokens that are younger then 15 minutes
+             */
+            const minutes = 15;
+            const timeAgo = new Date(new Date().setTime(date.getTime() - (minutes * 60000)));
+
+            q.where('createdAt', '>=', timeAgo);
+            q.orderBy('createdAt', 'DESC');
+        }).fetch();
+
+        // in case a valid csrf token is found set to used it and move on.
+        if (csrfToken) {
+            csrfToken.set('used', true)
+            await csrfToken.save();
+            next();
+        } else {
+            throw new Error('Invalid CSRF token', 403);
+        }
+
+    } else {
+        return csurf({
+            cookie: {
+                httpOnly: true,
+                secure: process.env.COOKIE_SECURE_OFF === 'yes' ? false : true,
+                sameSite: process.env.CSRF_SAME_SITE_OFF === 'yes' ? false : true
+            }
+        })(req, res, next);
     }
-});
+}
 
 
 
@@ -152,7 +193,7 @@ module.exports = function (app) {
 
     //routes
     app.get('/auth/local/login', authLocal.login);
-    app.post('/auth/local/login', loginBruteForce, authMw.validateLogin, authLocal.postLogin);
+    app.post('/auth/local/login', csrfProtection, loginBruteForce, authMw.validateLogin, authLocal.postLogin);
     app.get('/auth/local/register',  csrfProtection, addCsrfGlobal, authLocal.register);
     app.post('/auth/local/register',  csrfProtection, addCsrfGlobal, userMw.validateUser, userMw.validateUniqueEmail, authLocal.postRegister);
 
@@ -171,11 +212,11 @@ module.exports = function (app) {
     app.use('/auth/url', [clientMw.setAuthType('Url'), clientMw.validate]);
 
     // routes
-    app.get('/auth/url/login', authUrl.login);
-    app.get('/auth/url/confirmation', authUrl.confirmation);
-    app.post('/auth/url/login', emailUrlBruteForce, authUrl.postLogin);
+    app.get('/auth/url/login', csrfProtection, addCsrfGlobal, authUrl.login);
+    app.get('/auth/url/confirmation', csrfProtection, addCsrfGlobal, authUrl.confirmation);
+    app.post('/auth/url/login', csrfProtection, emailUrlBruteForce, authUrl.postLogin);
     app.get('/auth/url/authenticate', csrfProtection, addCsrfGlobal, authUrl.authenticate);
-    app.post('/auth/url/authenticate', csrfProtection, addCsrfGlobal, emailUrlBruteForce, authUrl.postAuthenticate);
+    app.post('/auth/url/authenticate', csrfProtection, emailUrlBruteForce, authUrl.postAuthenticate);
 
 
     // Admin login routes
@@ -202,20 +243,20 @@ module.exports = function (app) {
      * Auth routes for phone/sms login
      */
     // shared middleware
-    app.use('/auth/phonenumber', [clientMw.withOne, clientMw.setAuthType('Phonenumber'), clientMw.validate, csrfProtection, addCsrfGlobal]);
+    app.use('/auth/phonenumber', [clientMw.withOne, clientMw.setAuthType('Phonenumber'), clientMw.validate]);
 
     // routes
     app.get('/auth/phonenumber/login', authPhonenumber.login);
-    app.post('/auth/phonenumber/login', phonenumberBruteForce, authPhonenumber.postLogin);
-    app.get('/auth/phonenumber/sms-code', authPhonenumber.smsCode);
-    app.post('/auth/phonenumber/sms-code', smsCodeBruteForce, authPhonenumber.postSmsCode);
+    app.post('/auth/phonenumber/login', csrfProtection, phonenumberBruteForce, authPhonenumber.postLogin);
+    app.get('/auth/phonenumber/sms-code', csrfProtection, addCsrfGlobal, authPhonenumber.smsCode);
+    app.post('/auth/phonenumber/sms-code', csrfProtection, smsCodeBruteForce, authPhonenumber.postSmsCode);
 
     /**
      * Auth routes for UniqueCode
      */
-    app.use('/auth/code', [clientMw.withOne, clientMw.setAuthType('UniqueCode'), clientMw.validate, csrfProtection, addCsrfGlobal]);
-    app.get('/auth/code/login', authCode.login);
-    app.post('/auth/code/login', uniqueCodeBruteForce, logMw.logPostUniqueCode, authCode.postLogin);
+    app.use('/auth/code', [clientMw.withOne, clientMw.setAuthType('UniqueCode'), clientMw.validate]);
+    app.get('/auth/code/login', csrfProtection, addCsrfGlobal, authCode.login);
+    app.post('/auth/code/login',  csrfProtection, uniqueCodeBruteForce, logMw.logPostUniqueCode, authCode.postLogin);
 
     /**
      * Register extra info;

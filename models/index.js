@@ -68,6 +68,11 @@ const ActionLog = bookshelf.Model.extend({
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
+const ExternalCsrfToken = bookshelf.Model.extend({
+  tableName: 'external_csrf_tokens',
+  hasTimestamps: ['createdAt', 'updatedAt']
+});
+
 exports.Client = Client;
 exports.User = User;
 exports.LoginToken = LoginToken;
@@ -76,3 +81,4 @@ exports.Role = Role;
 exports.UserRole = UserRole;
 exports.PasswordResetToken = PasswordResetToken;
 exports.ActionLog = ActionLog;
+exports.ExternalCsrfToken = ExternalCsrfToken;

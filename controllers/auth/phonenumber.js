@@ -117,7 +117,8 @@ exports.postLogin = async(req, res, next) => {
   } catch (err) {
     console.log('===> err', err);
     req.flash('error', { msg: authPhonenumberConfig.loginErrorMessage });
-    res.redirect(req.header('Referer') || authPhonenumberConfig.loginUrl);
+    res.redirect(`${authPhonenumberConfig.loginUrl}?redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&client_id=${req.client.clientId}&scope=offline`);
+
   }
 };
 
