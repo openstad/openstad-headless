@@ -37,10 +37,10 @@ exports.csrfSessionToken = [
 
         new ExternalCsrfToken({
             token: token,
+            used: false
         })
         .save()
         .then((response) => {
-            console.log('token', token)
             res.json({'token': token})
         })
         .catch((err) => {

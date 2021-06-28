@@ -81,27 +81,43 @@ const csurf = require('csurf');
  */
 const csrfProtection = async  (req, res, next) => {
     if (req.body && req.body.externalCSRF) {
-        const csrfToken = await new ExternalCsrfToken({
-            token: req.body.externalCSRF,
-            used: false
-        }).query((q) => {
-            /**
-             * Only select tokens that are younger then 15 minutes
-             */
-            const minutes = 15;
-            const timeAgo = new Date(new Date().setTime(date.getTime() - (minutes * 60000)));
+        let csrfToken;
 
-            q.where('createdAt', '>=', timeAgo);
-            q.orderBy('createdAt', 'DESC');
-        }).fetch();
+        try {
+            csrfToken = await new ExternalCsrfToken({
+                token: req.body.externalCSRF,
+                used: false
+            }).query((q) => {
+                /**
+                 * Only select tokens that are younger then 10 minutes
+                 */
+                const minutes = 10;
+                const date = new Date();
+                const timeAgo = new Date(date.setTime(date.getTime() - (minutes * 60000)));
+
+                q.where('createdAt', '>=', timeAgo);
+                q.orderBy('createdAt', 'DESC');
+            })
+                .fetch()
+
+        } catch (e) {
+            next(e)
+        }
+
+
 
         // in case a valid csrf token is found set to used it and move on.
         if (csrfToken) {
             csrfToken.set('used', true)
-            await csrfToken.save();
+            try {
+                await csrfToken.save();
+            } catch (e) {
+                next(e)
+            }
+
             next();
         } else {
-            throw new Error('Invalid CSRF token', 403);
+            next(new Error('Invalid CSRF token', 403));
         }
 
     } else {
