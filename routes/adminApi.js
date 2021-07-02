@@ -17,8 +17,8 @@ const roleMw                   = require('../middleware/role');
 const codeMw                   = require('../middleware/code');
 const logMw                    = require('../middleware/log');
 
-module.exports = (app) => { 
-  app.use('/api/admin', [passport.authenticate(['oauth2-client-password'], { session: false })]);
+module.exports = (app) => {
+  app.use('/api/admin', [passport.authenticate(['basic', 'oauth2-client-password'], { session: false })]);
 
   /**
    *  Simple CRUD API for users

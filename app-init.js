@@ -101,15 +101,6 @@ const sessionConfig = {
 // Session Configuration
 app.use(expressSession(sessionConfig));
 
-/*
-app.use((req, res, next) => {
-  console.log('=====> REQUEST: ', req.originalUrl);
-  console.log('=====> query: ', req.query);
-  console.log('=====> session: ', req.session);
-  next();
-});
-*/
-
 app.use(flash());
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -118,6 +109,15 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(expressValidator());
 
+/*
+app.use((req, res, next) => {
+  console.log('=====> REQUEST: ', req.originalUrl);
+  console.log('=====> query: ', req.query);
+  console.log('=====> body: ', req.body);
+  console.log('=====> session: ', req.session);
+  next();
+});
+*/
 
 // Passport configuration
 require('./auth');
