@@ -205,7 +205,7 @@ module.exports = function (app) {
      * Login & register with local login
      */
     //shared middleware
-    app.use('/auth/local', [clientMw.setAuthType('Local'), clientMw.validate]);
+    app.use('/auth/local', [clientMw.setAuthType('Local'), clientMw.validate, csrfProtection, addCsrfGlobal]);
 
     //routes
     app.get('/auth/local/login', authLocal.login);
