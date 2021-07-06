@@ -97,14 +97,14 @@ const sessionConfig = {
 // Session Configuration
 app.use(expressSession(sessionConfig));
 
-
+/*
 app.use((req, res, next) => {
   console.log('=====> REQUEST: ', req.originalUrl);
   console.log('=====> query: ', req.query);
   console.log('=====> session: ', req.session);
   next();
 });
-
+*/
 
 app.use(flash());
 

@@ -18,11 +18,7 @@ exports.validateLogin = (req, res, next) => {
 }
 
 exports.check = (req, res, next) => {
-
-  console.log('checkcheckcheck', req.isAuthenticated())
-
   if (!req.isAuthenticated || !req.isAuthenticated()) {
-    console.log('not logged in ')
 
     let url = '/login?clientId=' + req.client.clientId;
 
