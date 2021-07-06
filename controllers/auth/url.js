@@ -84,7 +84,7 @@ const handleSending = async (req, res, next) => {
     } catch (err) {
         console.log('e-mail error', err);
         req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
-        res.redirect(req.header('Referer') || '/login?clientId=' + req.client.clientId + '&redirect_uri=' + req.redirectUrl);
+        res.redirect('/auth/url/login?clientId=' + req.client.clientId + '&redirect_uri=' + req.redirectUrl);
     }
 }
 

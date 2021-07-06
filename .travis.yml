@@ -3,8 +3,8 @@ language: minimal
 # easy way to get your local config: cat ${HOME}/.kube/config | base64 | pbcopy
 env:
   global:
-    - DOCKER_PUBLIC_USERNAME=openstad
-    - DOCKER_IMAGE_NAME=auth
+    - DOCKER_PUBLIC_USERNAME=${DOCKER_PUBLIC_USERNAME:-openstad}
+    - DOCKER_IMAGE_NAME=${DOCKER_IMAGE_NAME:-auth}
     - K8S_DEPLOYMENT_NAME=openstad-auth
     - K8S_NAMESPACE=openstad
 

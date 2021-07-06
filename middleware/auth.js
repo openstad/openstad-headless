@@ -18,8 +18,8 @@ exports.validateLogin = (req, res, next) => {
 }
 
 exports.check = (req, res, next) => {
-
   if (!req.isAuthenticated || !req.isAuthenticated()) {
+
     let url = '/login?clientId=' + req.client.clientId;
 
     if (req.query.redirect_uri) {

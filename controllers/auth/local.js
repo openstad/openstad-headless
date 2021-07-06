@@ -102,8 +102,6 @@ exports.postLogin = (req, res, next) => {
       const redirectUrl = req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : req.client.redirectUrl;
       const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
-      console.log('authorizeUrl', authorizeUrl)
-
   //    const redirectTo = req.session.returnTo ? req.session.returnTo : req.client.redirectUrl;
 
       // Redirect if it succeeds to authorize screen

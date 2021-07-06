@@ -161,10 +161,6 @@ server.exchange(oauth2orize.exchange.refreshToken((client, refreshToken, scope, 
 exports.authorization = [
   login.ensureLoggedIn(),
   server.authorization((clientID, redirectURI, scope, done) => {
-
-    //console.log('===> clientID', clientID);
-		//console.log('===> redirectURI', redirectURI);
-
     new Client({clientId: clientID})
     .fetch()
     .then((client) => {

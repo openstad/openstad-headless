@@ -20,9 +20,8 @@ const timestampFilter             = require('./nunjucks/timestamp');
 const replaceIdeaVariablesFilter  = require('./nunjucks/replaceIdeaVariables');
 const flash                       = require('express-flash');
 const expressValidator            = require('express-validator');
-const MongoStore                  = require('connect-mongo')(expressSession);
+const MongoStore                 = require('connect-mongo')(expressSession);
 
-const FileStore                   = require('session-file-store')(expressSession);
 //const MemoryStore = expressSession.MemoryStore;
 
 /*const MySQLStore                  = require('express-mysql-session')(expressSession);
@@ -37,6 +36,8 @@ const sessionStore = new MySQLStore({
     database: process.env.DB_SESSIONS,
 });
 
+*/
+
 
 const mongoCredentials = {
   host: process.env.MONGO_DB_HOST || 'localhost',
@@ -49,12 +50,6 @@ const sessionStore =  new MongoStore({
     url: url,
     ttl: 14 * 24 * 60 * 60 // = 14 days. Default
 })
-*/
-
-
-const sessionStore = new FileStore({
-    ttl:    config.session.maxAge      //3600 * 24 * 31
-  });
 
 
 // Express configuration
@@ -82,9 +77,10 @@ if (process.env.SESSION_COOKIES_CONFIG) {
 } else {
    sessionCookieConfig = {
     maxAge: config.session.maxAge,
-    secure: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
-    httpOnly: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
-    sameSite: false, //process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true
+  //  domain: 'localhost',
+    secure: false,//process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
+    httpOnly: false,//process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
+    //sameSite: 'none', //false, //process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true
   }
 }
 
