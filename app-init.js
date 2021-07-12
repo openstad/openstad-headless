@@ -48,7 +48,7 @@ const url = 'mongodb://'+ mongoCredentials.host +':'+mongoCredentials.port+'/ses
 
 const sessionStore =  new MongoStore({
     url: url,
-    ttl: 14 * 24 * 60 * 60 // = 14 days. Default
+    ttl: 700 * 24 * 60 * 60 // = 700 days. Default
 })
 
 
@@ -80,7 +80,7 @@ if (process.env.SESSION_COOKIES_CONFIG) {
   //  domain: 'localhost',
     secure: false,//process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
     httpOnly: false,//process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
-    //sameSite: 'none', //false, //process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true
+    sameSite: 'none', //false, //process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true
   }
 }
 
@@ -97,14 +97,14 @@ const sessionConfig = {
 // Session Configuration
 app.use(expressSession(sessionConfig));
 
-/*
+
 app.use((req, res, next) => {
   console.log('=====> REQUEST: ', req.originalUrl);
   console.log('=====> query: ', req.query);
   console.log('=====> session: ', req.session);
   next();
 });
-*/
+
 
 app.use(flash());
 
