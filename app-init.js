@@ -78,9 +78,8 @@ if (process.env.SESSION_COOKIES_CONFIG) {
    sessionCookieConfig = {
     maxAge: config.session.maxAge,
   //  domain: 'localhost',
-    secure: false,//process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
-    httpOnly: false,//process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
-    sameSite: 'none', //false, //process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true
+    secure: process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
+    httpOnly:  process.env.COOKIE_SECURE_OFF ===  'yes' ? false : true,
   }
 }
 
