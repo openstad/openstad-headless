@@ -262,7 +262,7 @@ module.exports = function (app) {
     app.use('/auth/phonenumber', [clientMw.withOne, clientMw.setAuthType('Phonenumber'), clientMw.validate]);
 
     // routes
-    app.get('/auth/phonenumber/login', authPhonenumber.login);
+    app.get('/auth/phonenumber/login', csrfProtection, addCsrfGlobal, authPhonenumber.login);
     app.post('/auth/phonenumber/login', csrfProtection, phonenumberBruteForce, authPhonenumber.postLogin);
     app.get('/auth/phonenumber/sms-code', csrfProtection, addCsrfGlobal, authPhonenumber.smsCode);
     app.post('/auth/phonenumber/sms-code', csrfProtection, smsCodeBruteForce, authPhonenumber.postSmsCode);
