@@ -1,20 +1,40 @@
 exports.fields = [
   {
     key: 'firstName',
-    label: 'Voornaam'
+    label: 'First name',
   },
   {
     key: 'lastName',
-    label: 'Achternaam'
-  },
-  {
-    key: 'postcode',
-    label: 'Postcode'
+    label: 'Last name',
   },
   {
     key: 'email',
-    label: 'E-mail'
+    label: 'Email address',
   },
+  {
+    key: 'phoneNumber',
+    label: 'Phone number',
+  },
+  {
+    key: 'streetName',
+    label: 'Street name',
+  },
+  {
+    key: 'houseNumber',
+    label: 'House number',
+  },
+  {
+    key: 'city',
+    label: 'City',
+  },
+  {
+    key: 'suffix',
+    label: 'Suffix',
+  },
+  {
+    key: 'postcode',
+    label: 'Postcode',
+  }
 ];
 
 exports.validation = {
