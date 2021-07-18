@@ -76,21 +76,21 @@ const getUser = async (phoneNumber) => {
 }
 
 exports.postLogin = async(req, res, next) => {
+  const clientConfig = req.client.config ? req.client.config : {};
+
+  req.redirectUrl = clientConfig && clientConfig.emailRedirectUrl ? clientConfig.emailRedirectUrl : encodeURIComponent(req.query.redirect_uri);
+  const redirectUrl = req.query.redirect_uri ? req.query.redirect_uri : req.client.redirectUrl;
 
   try {
-
-    const clientConfig = req.client.config ? req.client.config : {};
-    req.redirectUrl = clientConfig && clientConfig.emailRedirectUrl ? clientConfig.emailRedirectUrl : encodeURIComponent(req.query.redirect_uri);
-
     // phoneNumber
     let phoneNumber = req.body.phoneNumber;
     phoneNumber = phoneNumber.replace(/^\+/, '00');
     phoneNumber = phoneNumber.replace(/[	 \-]/g, '');
     phoneNumber = phoneNumber.replace(/^06/, '00316'); // default NL
+
     if (!phoneNumber.match(/^[0-9]{7,16}$/)) throw new Error('Geen geldig telefoonnummer');
 
     phoneNumber = phoneNumber.replace(/^00316/, '+316'); // default NL
-
 
     // find or create user
     let user = await getUser(phoneNumber);
@@ -103,7 +103,6 @@ exports.postLogin = async(req, res, next) => {
     }
     req.user = user.serialize();
 
-    const redirectUrl = req.query.redirect_uri ? req.query.redirect_uri : req.client.redirectUrl;
     // Redirect if it succeeds to authorize screen
     const authorizeUrl = `/auth/phonenumber/sms-code?redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
@@ -112,8 +111,6 @@ exports.postLogin = async(req, res, next) => {
     await verificationService.sendSMS(req.user, req.client);
     req.flash('success', {msg: 'Een SMS met een code is verstuurd naar ' + phoneNumber});
     return res.redirect(authorizeUrl);
-
-
   } catch (err) {
     console.log('===> err', err);
     req.flash('error', { msg: authPhonenumberConfig.loginErrorMessage });
