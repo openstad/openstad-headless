@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.16.0 (2020-07-20)
+* Add external CSRF token
+
 ## v0.15.1 (2020-06-15)
 * Fix password login redirect url on return
 
