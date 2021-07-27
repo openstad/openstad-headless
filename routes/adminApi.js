@@ -17,16 +17,20 @@ const roleMw                   = require('../middleware/role');
 const codeMw                   = require('../middleware/code');
 const logMw                    = require('../middleware/log');
 
-module.exports = (app) => { 
-  app.use('/api/admin', [passport.authenticate(['oauth2-client-password'], { session: false })]);
+module.exports = (app) => {
+  app.use('/api/admin', [passport.authenticate(['basic', 'oauth2-client-password'], { session: false })]);
 
   /**
    *  Simple CRUD API for users
    */
   app.get('/api/admin/users',                 userMw.withAll, adminApiUserController.all);
   app.get('/api/admin/user/:userId',          clientMw.withAll, roleMw.withAll, userMw.withOne, adminApiUserController.show);
+  // todo: dit maakt een password aan; waarom is dat?
+  // todo: volgens mij doet dit niets met role
   app.post('/api/admin/user',                 userMw.create, userMw.saveRoles, adminApiUserController.create);
+  // todo: waarom is onderstaand geen put of patch?
   app.post('/api/admin/user/:userId',         userMw.withOne, userMw.update, userMw.saveRoles, adminApiUserController.update);
+  // todo: waarom is onderstaand geen delete?
   app.post('/api/admin/user/:userId/delete',  userMw.withOne, userMw.deleteOne, adminApiUserController.delete);
 
   // add endpoint for fetchin a csrf session token
