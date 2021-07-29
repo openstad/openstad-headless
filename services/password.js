@@ -6,11 +6,11 @@ const hat = require('hat');
 /**
  *
  */
-const getUrl = (user, client, token) => {
-  return `${appUrl}/auth/local/reset?token=${token}&clientId=${client.clientId}`;
+const getUrl = (user, client, token, redirectUrl) => {
+  return `${appUrl}/auth/local/reset?token=${token}&clientId=${client.clientId}&redirect_uri=${redirectUrl}`;
 }
 
-exports.formatResetLink = (client, user) => {
+exports.formatResetLink = (client, user, redirectUrl) => {
   return new Promise((resolve, reject) =>  {
     const token = hat();
 
@@ -20,7 +20,7 @@ exports.formatResetLink = (client, user) => {
     })
     .save()
     .then((resetToken) => {
-      const url = getUrl(user, client, resetToken.get('token'));
+      const url = getUrl(user, client, resetToken.get('token'), redirectUrl);
       resolve(url);
     })
     .catch((err) => {

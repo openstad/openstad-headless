@@ -219,7 +219,7 @@ module.exports = function (app) {
     app.get('/auth/local/forgot', authForgot.forgot);
     app.post('/auth/local/forgot', authForgot.postForgot);
     app.get('/auth/local/reset', passwordResetMw.validate, authForgot.reset);
-    app.post('/auth/local/reset', passwordResetMw.validate, authMw.passwordValidate, userMw.withOne, userMw.validatePassword, authForgot.postReset);
+    app.post('/auth/local/reset', passwordResetMw.validate, userMw.validatePassword, authForgot.postReset);
 
     /**
      * Auth routes for URL login
