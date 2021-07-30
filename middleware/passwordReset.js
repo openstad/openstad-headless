@@ -26,7 +26,9 @@ exports.validate = (req, res, next) => {
       if (passwordResetToken) {
         req.passwordResetToken = passwordResetToken.serialize();
         req.body.userId = passwordResetToken.get('userId');
-        next();
+        req.userId = passwordResetToken.get('userId');
+
+          next();
       } else {
         throw new Error('No token found');
       }
