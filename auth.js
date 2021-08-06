@@ -83,7 +83,7 @@ passport.use('url', new TokenStrategy({
 passport.use('uniqueCode', new TokenStrategy({
   //   failRedirect : "/auth/code/login",
     varName : "unique_code"
-  }, function (code, done, client) { // put your check logic here
+}, function (code, done, client) { // put your check logic here
 
     new UniqueCode({
       code: code,
@@ -126,6 +126,7 @@ passport.use('uniqueCode', new TokenStrategy({
            * Client can ask for more information after registration
            * Not connected to existing users because of privacy reasons
            */
+          if (client.config && client.config.users && client.config.users.canCreateNewUsers === false) return done('Cannot create new users')
           new User({})
             .save()
             .then((newUser) => {

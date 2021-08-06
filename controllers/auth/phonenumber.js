@@ -99,7 +99,8 @@ exports.postLogin = async(req, res, next) => {
         user = await updateUser(user, phoneNumber);
       }
     } else {
-      user = await createUser(phoneNumber);
+      if (clientConfig.users && clientConfig.users.canCreateNewUsers === false) throw new Error('Cannot create new users');
+      user = await createUser(phoneNumber, clientConfig);
     }
     req.user = user.serialize();
 
