@@ -28,7 +28,12 @@ exports.login  = (req, res, next) => {
 
 exports.register  = (req, res, next) => {
 
-	if (!req.session.createAnonymousUser) {
+  if (req.client && req.client.config.users && req.client.config.users && req.client.config.users.canCreateNewUsers === false) {
+		req.flash('error', {msg: 'Cannot create new users'});
+		return res.redirect(`/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri}`);
+  }
+
+  if (!req.session.createAnonymousUser) {
 
 		req.flash('error', {msg: 'Cookies zijn onmisbaar op deze site'});
 		return res.redirect(`/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri}`);
