@@ -46,9 +46,11 @@ exports.login = (req, res) => {
     redirectUrl: encodeURIComponent(req.query.redirect_uri),
     title: configAuthType.title ? configAuthType.title : authLocalConfig.title,
     description: configAuthType.description ?  configAuthType.description : authLocalConfig.description,
-    label: configAuthType.label ?  configAuthType.label : authLocalConfig.label,
+    emailLabel: configAuthType.emailLabel ?  configAuthType.emailLabel : authLocalConfig.emailLabel,
+    passwordLabel: configAuthType.passwordLabel ?  configAuthType.passwordLabel : authLocalConfig.passwordLabel,
     helpText: configAuthType.helpText ? configAuthType.helpText : authLocalConfig.helpText,
     buttonText: configAuthType.buttonText ? configAuthType.buttonText : authLocalConfig.buttonText,
+    forgotPasswordText: configAuthType.forgotPasswordText ? configAuthType.forgotPasswordText : authLocalConfig.forgotPasswordText,
   });
 };
 

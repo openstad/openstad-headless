@@ -6,7 +6,7 @@
   <p class="intro">
     {{description}}
   </p>
-  <form action="{{loginUrl}}?&clientId={{clientId}}" method="POST" class="validate-form">
+  <form action="?&clientId={{clientId}}&redirect_uri={{redirectUrl}}" method="POST" class="validate-form">
     <input type="hidden" name="_csrf" value="{{csrfToken}}" />
     <input type="hidden" name="clientId" value="{{clientId}}" />
 
@@ -17,17 +17,13 @@
         <div class="upper-box card-body">
           <!-- Title -->
           <div>
-          <!--  <div class="subtext">
-              Mijn openstad
-            </div> !-->
           </div>
           <div class="form-group">
             <!-- Username label and input -->
             <div class="input-fields">
               {% include 'elements/error-flash.html' %}
-
               <label>
-                E-mail:
+                {{emailLabel if emailLabel else 'E-mail:'}}
               </label>
               <input
                 id="name"
@@ -42,7 +38,7 @@
             <!-- Password label and input -->
             <div class="input-fields">
               <label>
-                Wachtwoord:
+                {{passwordLabel if passwordLabel else 'Wachtwoord:'}}
               </label>
               <input
                 class="form-input"
@@ -64,21 +60,22 @@
               value="Submit"
               class="btn btn-primary"
             >
-              Inloggen
+              {{buttonText if buttonText else 'Inloggen'}}
             </button>
           </div>
         </div>
         <div class="form-group">
-          <a href="/auth/local/forgot?clientId={{clientId}}">Wachtwoord vergeten?</a>
+          <a href="/auth/local/forgot?clientId={{clientId}}&redirect_uri={{redirectUrl}}">{{forgotPasswordText if forgotPasswordText else 'Wachtwoord vergeten?'}}</a>
         </div>
         </div>
       </div>
     </fieldset>
   </form>
 
+<!--
   <p>
     Nog geen account?
     <a href="/auth/local/register?clientId={{clientId}}">Registreren</a>
   </p>
-
+!-->
 {% endblock %}

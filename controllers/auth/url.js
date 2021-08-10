@@ -129,6 +129,7 @@ exports.postLogin = async (req, res, next) => {
             return handleSending(req, res, next);
         }
 
+        if (clientConfig.users && clientConfig.users.canCreateNewUsers === false) throw new Error('Cannot create new users');
         user = await createUser(req.body.email);
 
         req.user = user.serialize();

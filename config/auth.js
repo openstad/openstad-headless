@@ -94,7 +94,9 @@ const types = [
 ];
 
 const get = (key) => {
-  return types.find(type => type.key === key);
+  const config = types.find(type => type.key === key);
+
+  return config ? config : {};
 }
 
 exports.types = types;
