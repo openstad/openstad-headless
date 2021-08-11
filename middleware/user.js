@@ -257,7 +257,9 @@ exports.update = (req, res, next) => {
 exports.saveRoles = (req, res, next) => {
   const roles = req.body.roles;
 
-  if (!roles || !typeof req.body.roles === 'object') {
+  console.log(' typeof req.body.roles',  typeof req.body.roles)
+
+  if (!roles || typeof req.body.roles !== 'object') {
     next();
   } else {
     const userId = req.userObject.id;
@@ -293,12 +295,6 @@ const createOrUpdateUserRole = (clientId, userId, roleId) => {
           userRole.set('roleId', roleId);
           return userRole.save();
         } else {
-
-          console.log('userRole', userRole);
-          console.log('clientId', clientId);
-          console.log('roleId', roleId);
-          console.log('userId', userId);
-
           return new UserRole({ clientId, roleId, userId }).save();
         }
       })
