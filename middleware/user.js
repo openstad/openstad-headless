@@ -257,16 +257,21 @@ exports.update = (req, res, next) => {
 exports.saveRoles = (req, res, next) => {
   const roles = req.body.roles;
 
-  if (!roles) {
+  console.log('req.body.roles', req.body.roles)
+
+  if (!roles && !Array.isArray(roles)) {
     next();
   } else {
     const userId = req.userObject.id;
     const saveRoles = [];
 
     Object.keys(roles).forEach((clientId) => {
-      let roleId = roles[clientId];
-      let parsedClientId = parseInt(clientId.replace('\'', ''), 10);
-      saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
+      let roleId = roles[clientId] ? roles[clientId] : false;
+
+      if (roleId) {
+        let parsedClientId = parseInt(clientId.replace('\'', ''), 10);
+        saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
+      }
     });
 
 
