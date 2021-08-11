@@ -109,7 +109,7 @@ exports.postForgot = (req, res, next) => {
         })
         .then(() => {
             req.flash('success', {msg: 'We hebben een e-mail naar je verstuurd'});
-            res.redirect(authLocalConfig.loginUrl + '?clientId=' + req.client.clientId + `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`);
+            res.redirect('/auth/local/forgot?clientId=' + req.client.clientId + `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`);
         })
         .catch((err) => {
             console.log('ererer', err)
