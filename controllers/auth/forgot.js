@@ -94,7 +94,7 @@ exports.postForgot = (req, res, next) => {
         .then((user) => {
             if (!user) {
                 req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
-                res.redirect(req.header('Referer') || '/auth/local/forgot' + '?clientId=' + req.client.clientId + `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`);
+                res.redirect('/auth/local/forgot' + '?clientId=' + req.client.clientId + `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`);
             }
 
             req.user = user.serialize();
@@ -109,12 +109,12 @@ exports.postForgot = (req, res, next) => {
         })
         .then(() => {
             req.flash('success', {msg: 'We hebben een e-mail naar je verstuurd'});
-            res.redirect(req.header('Referer') || authLocalConfig.loginUrl + '?clientId=' + req.client.clientId + `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`);
+            res.redirect(authLocalConfig.loginUrl + '?clientId=' + req.client.clientId + `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`);
         })
         .catch((err) => {
             console.log('ererer', err)
             req.flash('error', {msg: 'E-mail adres is niet bekend bij ons.'});
-            res.redirect(req.header('Referer') || authLocalConfig.loginUrl + '?clientId=' + req.client.clientId + `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`);
+            res.redirect('/auth/local/forgot?clientId=' + req.client.clientId + `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`);
         });
 
     /**
@@ -161,13 +161,5 @@ exports.postForgot = (req, res, next) => {
             },
             transporterConfig
         });
-
-
-
-
-
-
-
-
     }
 }
