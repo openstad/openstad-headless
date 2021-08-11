@@ -256,8 +256,8 @@ exports.update = (req, res, next) => {
 
 exports.saveRoles = (req, res, next) => {
   const roles = req.body.roles;
-  
-  if (!roles && !typeof req.body.roles === 'object') {
+
+  if (!roles || !typeof req.body.roles === 'object') {
     next();
   } else {
     const userId = req.userObject.id;
