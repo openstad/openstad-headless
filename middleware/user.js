@@ -256,24 +256,23 @@ exports.update = (req, res, next) => {
 
 exports.saveRoles = (req, res, next) => {
   const roles = req.body.roles;
-
-  console.log('req.body.roles', typeof req.body.roles)
-
-  if (!roles && !Array.isArray(roles)) {
+  
+  if (!roles && !typeof req.body.roles === 'object') {
     next();
   } else {
     const userId = req.userObject.id;
     const saveRoles = [];
 
     Object.keys(roles).forEach((clientId) => {
-      let roleId = roles[clientId] ? roles[clientId] : false;
-      console.log('roleId', roleId)
-      if (roleId) {
-        let parsedClientId = parseInt(clientId.replace('\'', ''), 10);
-        saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
+      if (clientId) {
+        let roleId = roles[clientId] ? roles[clientId] : false;
+
+        if (roleId) {
+          let parsedClientId = parseInt(clientId.replace('\'', ''), 10);
+          saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
+        }
       }
     });
-
 
     Promise
       .map(saveRoles, saveRole => saveRole())
