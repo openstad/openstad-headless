@@ -257,7 +257,7 @@ exports.update = (req, res, next) => {
 exports.saveRoles = (req, res, next) => {
   const roles = req.body.roles;
 
-  console.log('req.body.roles', req.body.roles)
+  console.log('req.body.roles', typeof req.body.roles)
 
   if (!roles && !Array.isArray(roles)) {
     next();
