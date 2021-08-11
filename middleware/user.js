@@ -267,7 +267,7 @@ exports.saveRoles = (req, res, next) => {
 
     Object.keys(roles).forEach((clientId) => {
       let roleId = roles[clientId] ? roles[clientId] : false;
-
+      console.log('roleId', roleId)
       if (roleId) {
         let parsedClientId = parseInt(clientId.replace('\'', ''), 10);
         saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
@@ -294,6 +294,12 @@ const createOrUpdateUserRole = (clientId, userId, roleId) => {
           userRole.set('roleId', roleId);
           return userRole.save();
         } else {
+
+          console.log('userRole', userRole);
+          console.log('clientId', clientId);
+          console.log('roleId', roleId);
+          console.log('userId', userId);
+
           return new UserRole({ clientId, roleId, userId }).save();
         }
       })
