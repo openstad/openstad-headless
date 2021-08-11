@@ -268,8 +268,9 @@ exports.saveRoles = (req, res, next) => {
     Object.keys(roles).forEach((clientId) => {
       if (clientId) {
         let roleId = roles[clientId] ? roles[clientId] : false;
+        roleId = parseInt(roleId, 10)
 
-        if (roleId) {
+        if (roleId && Number.isInteger(roleId)){
           let parsedClientId = parseInt(clientId.replace('\'', ''), 10);
           saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
         }
