@@ -85,8 +85,7 @@ const csrfProtection = async  (req, res, next) => {
 
         try {
             csrfToken = await new ExternalCsrfToken({
-                token: req.body.externalCSRF,
-                used: false
+                token: req.body.externalCSRF
             }).query((q) => {
                 /**
                  * Only select tokens that are younger then 10 minutes
@@ -108,7 +107,8 @@ const csrfProtection = async  (req, res, next) => {
 
         // in case a valid csrf token is found set to used it and move on.
         if (csrfToken) {
-            csrfToken.set('used', true)
+            csrfToken.set('used', true);
+
             try {
                 await csrfToken.save();
             } catch (e) {
