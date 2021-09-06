@@ -33,10 +33,10 @@ function initFormsValidation () {
             }
         },
         password : {
-            minlength : 5
+            minlength : 6
         },
         password_confirm : {
-          //  minlength : 5,
+            minlength : 6,
             equalTo : "#password"
         },
         postcode : {
