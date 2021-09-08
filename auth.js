@@ -32,7 +32,7 @@ passport.use(new LocalStrategy(
       .then((user) => { user = user.serialize(); return validate.user(user, password) })
       .then(user => done(null, user))
       .catch(error => done(null, false, { message: 'Onjuiste inlog.' }));
-}));
+  }));
 
 /**
  * UrlStrategy
@@ -42,16 +42,16 @@ passport.use(new LocalStrategy(
  * user clicks url and is automatically logged in
  */
 passport.use('url', new TokenStrategy({
-    failRedirect : "/auth/url/login",
-    varName : "token",
-    session: true
-  }, function (token, done) { // put your check logic here
+  failRedirect : "/auth/url/login",
+  varName : "token",
+  session: true
+}, function (token, done) { // put your check logic here
 
-    new LoginToken({
-      token: token,
-      valid: true
-    })
-      .query((q) => {
+  new LoginToken({
+    token: token,
+    valid: true
+  })
+    .query((q) => {
       /**
        * Only select tokens that are younger then 30 minutes
        */
@@ -67,9 +67,9 @@ passport.use('url', new TokenStrategy({
     .then(async (token) => {
 
       if (token) {
-          await tokenUrl.invalidateTokensForUser(token.get('userId'));
+        await tokenUrl.invalidateTokensForUser(token.get('userId'));
 
-          new User({id: token.get('userId')})
+        new User({id: token.get('userId')})
           .fetch()
           .then((user) => { return user.serialize(); })
           .then(user => { return done(null, user) } )
@@ -82,25 +82,25 @@ passport.use('url', new TokenStrategy({
 
 passport.use('uniqueCode', new TokenStrategy({
   //   failRedirect : "/auth/code/login",
-    varName : "unique_code"
+  varName : "unique_code"
 }, function (code, done, client) { // put your check logic here
 
-    new UniqueCode({
-      code: code,
-      clientId: client.id
-    })
+  new UniqueCode({
+    code: code,
+    clientId: client.id
+  })
     /*.query((q) => {
       /**
        * Only select tokens that are younger then 2 days
        * created_at is "bigger then" 48 hours ago
        */
-       /*
-      const days = 2;
-      const msForADay = 86400000;
-      const timeAgo = new Date(date.setTime(date.getTime() + (days * msForADay)));
-      q.where('createdAt', '>=', timeAgo);
-      q.orderBy('createdAt', 'DESC');
-    }) */
+    /*
+   const days = 2;
+   const msForADay = 86400000;
+   const timeAgo = new Date(date.setTime(date.getTime() + (days * msForADay)));
+   q.where('createdAt', '>=', timeAgo);
+   q.orderBy('createdAt', 'DESC');
+ }) */
     .fetch()
     .then((uniqueCode) => {
       if (uniqueCode) {
@@ -126,7 +126,6 @@ passport.use('uniqueCode', new TokenStrategy({
            * Client can ask for more information after registration
            * Not connected to existing users because of privacy reasons
            */
-          if (client.config && client.config.users && client.config.users.canCreateNewUsers === false) return done('Cannot create new users')
           new User({})
             .save()
             .then((newUser) => {
@@ -138,7 +137,7 @@ passport.use('uniqueCode', new TokenStrategy({
             .then((response) => user.serialize())
             .then(user => done(null, user))
             .catch((err) => { done(err); });
-          }
+        }
       } else {
         done("Token not found");
       }
@@ -234,9 +233,13 @@ passport.use(new BearerStrategy((accessToken, done) => {
   db.accessTokens.find(accessToken)
     .then(token => validate.token(token, accessToken))
     .then((token) => {
+      //console.log('Token token', token);
       return done(null, token, { scope: '*' });
     })
-    .catch(() => done(null, false));
+    .catch((err) => {
+      console.log('Errr in authjs token', err)
+      done(null, false)
+    });
 }));
 
 // Register serialialization and deserialization functions.
