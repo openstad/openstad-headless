@@ -37,6 +37,7 @@ const expiresIn = { expires_in : config.token.expiresIn };
  */
 server.grant(oauth2orize.grant.code((client, redirectURI, user, ares, done) => {
   const code = utils.createToken({ sub : user.id, exp : config.codeToken.expiresIn });
+  console.log('ass grant')
   db.authorizationCodes.save(code, client.id, redirectURI, user.id, client.scope)
     .then(() => done(null, code))
     .catch(err => done(err));
@@ -54,9 +55,11 @@ server.grant(oauth2orize.grant.token((client, user, ares, done) => {
   const token      = utils.createToken({ sub : user.id, exp : config.token.expiresIn });
   const expiration = config.token.calculateExpirationDate();
 
+  console.log('grant save token')
+
   db.accessTokens.save(token, expiration, user.id, client.id, client.scope)
-  .then(() => done(null, token, expiresIn))
-  .catch(err => done(err));
+    .then(() => done(null, token, expiresIn))
+    .catch(err => done(err));
 }));
 
 /**
@@ -68,20 +71,26 @@ server.grant(oauth2orize.grant.token((client, user, ares, done) => {
  * authorized the code.
  */
 server.exchange(oauth2orize.exchange.code((client, code, redirectURI, done) => {
+  console.log('exchange authorization');
+
   db.authorizationCodes.delete(code)
-  .then(authCode => validate.authCode(code, authCode, client, redirectURI))
-  .then(authCode => validate.generateTokens(authCode))
-  .then((tokens) => {
-    console.log('exchange tokens', tokens)
-    if (tokens.length === 1) {
-      return done(null, tokens[0], null, expiresIn);
-    }
-    if (tokens.length === 2) {
-      return done(null, tokens[0], tokens[1], expiresIn);
-    }
-    throw new Error('Error exchanging auth code for tokens');
-  })
-  .catch(() => done(null, false));
+    .then(authCode => validate.authCode(code, authCode, client, redirectURI))
+    .then(authCode => validate.generateTokens(authCode))
+    .then((tokens) => {
+      console.log('exchange authexchange authorizationorization', tokens);
+
+      if (tokens.length === 1) {
+        return done(null, tokens[0], null, expiresIn);
+      }
+      if (tokens.length === 2) {
+        return done(null, tokens[0], tokens[1], expiresIn);
+      }
+      throw new Error('Error exchanging auth code for tokens');
+    })
+    .catch((err) => {
+      console.log('Errrrrr', err);
+      done(null, false)
+    });
 }));
 
 /**
@@ -93,22 +102,22 @@ server.exchange(oauth2orize.exchange.code((client, code, redirectURI, done) => {
  */
 server.exchange(oauth2orize.exchange.password((client, username, password, scope, done) => {
   User({email: username})
-  .fetch
-  .then(user => validate.user(user, password))
-  .then(user => validate.generateTokens({ scope, userID: user.id, clientID: client.id }))
-  .then((tokens) => {
-    if (tokens === false) {
-      return done(null, false);
-    }
-    if (tokens.length === 1) {
-      return done(null, tokens[0], null, expiresIn);
-    }
-    if (tokens.length === 2) {
-      return done(null, tokens[0], tokens[1], expiresIn);
-    }
-    throw new Error('Error exchanging password for tokens');
-  })
-  .catch(() => done(null, false));
+    .fetch
+    .then(user => validate.user(user, password))
+    .then(user => validate.generateTokens({ scope, userID: user.id, clientID: client.id }))
+    .then((tokens) => {
+      if (tokens === false) {
+        return done(null, false);
+      }
+      if (tokens.length === 1) {
+        return done(null, tokens[0], null, expiresIn);
+      }
+      if (tokens.length === 2) {
+        return done(null, tokens[0], tokens[1], expiresIn);
+      }
+      throw new Error('Error exchanging password for tokens');
+    })
+    .catch(() => done(null, false));
 }));
 
 /**
@@ -119,18 +128,15 @@ server.exchange(oauth2orize.exchange.password((client, username, password, scope
  * application issues an access token on behalf of the client who authorized the code.
  */
 server.exchange(oauth2orize.exchange.clientCredentials((client, scope, done) => {
-  console.log('stsstst');
-
   const token      = utils.createToken({ sub : client.id, exp : config.token.expiresIn });
   const expiration = config.token.calculateExpirationDate();
-
   // Pass in a null for user id since there is no user when using this grant type
+
+  console.log('exchangeexchangeexchangeexchangeexchange');
+
   db.accessTokens.save(token, expiration, null, client.id, scope)
     .then(() => done(null, token, null, expiresIn))
-    .catch((err) => {
-      console.log('Errrererer', err);
-      done(err)
-    });
+    .catch(err => done(err));
 }));
 
 /**
@@ -142,10 +148,10 @@ server.exchange(oauth2orize.exchange.clientCredentials((client, scope, done) => 
  */
 server.exchange(oauth2orize.exchange.refreshToken((client, refreshToken, scope, done) => {
   db.refreshTokens.find(refreshToken)
-  .then(foundRefreshToken => validate.refreshToken(foundRefreshToken, refreshToken, client))
-  .then(foundRefreshToken => validate.generateToken(foundRefreshToken))
-  .then(token => done(null, token, null, expiresIn))
-  .catch(() => done(null, false));
+    .then(foundRefreshToken => validate.refreshToken(foundRefreshToken, refreshToken, client))
+    .then(foundRefreshToken => validate.generateToken(foundRefreshToken))
+    .then(token => done(null, token, null, expiresIn))
+    .catch(() => done(null, false));
 }));
 
 /*
@@ -168,33 +174,35 @@ server.exchange(oauth2orize.exchange.refreshToken((client, refreshToken, scope, 
 exports.authorization = [
   login.ensureLoggedIn(),
   server.authorization((clientID, redirectURI, scope, done) => {
+    console.log('Starti authorization');
+
     new Client({clientId: clientID})
-    .fetch()
-    .then((client) => {
-      client = client.serialize();
-      if (client) {
-        client.scope = scope; // eslint-disable-line no-param-reassign
-      }
+      .fetch()
+      .then((client) => {
+        client = client.serialize();
+        if (client) {
+          client.scope = scope; // eslint-disable-line no-param-reassign
+        }
 
-      /**
-       * Check if redirectURI same host as registered
-       */
-      const allowedDomains = client.allowedDomains ? JSON.parse(client.allowedDomains) : false;
-      const redirectUrlHost = new URL(redirectURI).hostname;
+        /**
+         * Check if redirectURI same host as registered
+         */
+        const allowedDomains = client.allowedDomains ? client.allowedDomains : false;
+        const redirectUrlHost = new URL(redirectURI).hostname;
 
-      //console.log('===> allowedDomains', allowedDomains, redirectUrlHost);
+        //console.log('===> allowedDomains', allowedDomains, redirectUrlHost);
 
-      // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
-      if (allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1) {
-				console.log('===> redirectURI allowedDomains', redirectURI);
-        return done(null, client, redirectURI);
-      } else {
-        console.log('===> Redirect host doesn\'t match the client host');
-        throw new Error('Redirect host doesn\'t match the client host');
-      }
+        // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
+        if (allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1) {
+          console.log('===> redirectURI allowedDomains', redirectURI);
+          return done(null, client, redirectURI);
+        } else {
+          console.log('===> Redirect host doesn\'t match the client host');
+          throw new Error('Redirect host doesn\'t match the client host');
+        }
 
-    })
-    .catch((err) => done(err));
+      })
+      .catch((err) => done(err));
   }),
   (req, res, next) => {
     // Render the decision dialog if the client isn't a trusted client
@@ -267,7 +275,7 @@ server.serializeClient((client, done) => done(null, client.id));
 
 server.deserializeClient((id, done) => {
   new Client({id: id})
-  .fetch()
-  .then(client => done(null, client.serialize()))
-  .catch(err => done(err));
+    .fetch()
+    .then(client => done(null, client.serialize()))
+    .catch(err => done(err));
 });
