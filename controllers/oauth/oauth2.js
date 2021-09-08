@@ -37,7 +37,6 @@ const expiresIn = { expires_in : config.token.expiresIn };
  */
 server.grant(oauth2orize.grant.code((client, redirectURI, user, ares, done) => {
   const code = utils.createToken({ sub : user.id, exp : config.codeToken.expiresIn });
-  console.log('ass grant')
   db.authorizationCodes.save(code, client.id, redirectURI, user.id, client.scope)
     .then(() => done(null, code))
     .catch(err => done(err));
@@ -55,8 +54,6 @@ server.grant(oauth2orize.grant.token((client, user, ares, done) => {
   const token      = utils.createToken({ sub : user.id, exp : config.token.expiresIn });
   const expiration = config.token.calculateExpirationDate();
 
-  console.log('grant save token')
-
   db.accessTokens.save(token, expiration, user.id, client.id, client.scope)
     .then(() => done(null, token, expiresIn))
     .catch(err => done(err));
@@ -71,13 +68,11 @@ server.grant(oauth2orize.grant.token((client, user, ares, done) => {
  * authorized the code.
  */
 server.exchange(oauth2orize.exchange.code((client, code, redirectURI, done) => {
-  console.log('exchange authorization');
 
   db.authorizationCodes.delete(code)
     .then(authCode => validate.authCode(code, authCode, client, redirectURI))
     .then(authCode => validate.generateTokens(authCode))
     .then((tokens) => {
-      console.log('exchange authexchange authorizationorization', tokens);
 
       if (tokens.length === 1) {
         return done(null, tokens[0], null, expiresIn);
@@ -132,7 +127,6 @@ server.exchange(oauth2orize.exchange.clientCredentials((client, scope, done) => 
   const expiration = config.token.calculateExpirationDate();
   // Pass in a null for user id since there is no user when using this grant type
 
-  console.log('exchangeexchangeexchangeexchangeexchange');
 
   db.accessTokens.save(token, expiration, null, client.id, scope)
     .then(() => done(null, token, null, expiresIn))
@@ -174,7 +168,6 @@ server.exchange(oauth2orize.exchange.refreshToken((client, refreshToken, scope, 
 exports.authorization = [
   login.ensureLoggedIn(),
   server.authorization((clientID, redirectURI, scope, done) => {
-    console.log('Starti authorization');
 
     new Client({clientId: clientID})
       .fetch()
