@@ -121,23 +121,32 @@ exports.delete = (token) => {
  */
 exports.removeExpired = () => {
   const removeExpiredAction = new Promise((resolve, reject) => {
-    console.log('Finish remove expired...')
 
     new AccessToken()
       .fetchAll()
       .then(async (tokens) => {
-        const tokenData = token.serialize();
+        const deleteActions = [];
+       // tokens = tokens.serialize();
 
-        for (const token in tokens) {
-          const expirationDate = token.expirationDate;
+
+        tokens.forEach((accessToken) => {
+          const expirationDate = accessToken.get('expirationDate');
+
           if (new Date() > expirationDate)  {
-            try {
-              await token.destroy();
-            } catch (e) {
-              console.log('e', e)
-            }
+            deleteActions.push(accessToken.destroy())
           }
-        }
+        });
+
+        Promise.all(deleteActions)
+          .then((success) => {
+            console.log('success', success);
+            resolve();
+          })
+          .catch((e) => {
+            resolve();
+            console.log('e', e)
+          })
+
       })
       .catch((e) => {
         console.warn('Error delete accesstoken: ', e)
