@@ -11,7 +11,7 @@ const Client = bookshelf.Model.extend({
   jsonColumns: ['authTypes', 'requiredFields'],
   getAuthTypes: (model) => {
     const authTypes = JSON.parse(model.get('authTypes'));
-
+    
     return authTypes.map((authType) => {
       let configAuthType = configAuthTypes.find(type => type.key === authType);
       return configAuthType;
@@ -21,6 +21,11 @@ const Client = bookshelf.Model.extend({
 
 const LoginToken = bookshelf.Model.extend({
   tableName: 'login_tokens',
+  hasTimestamps: ['createdAt', 'updatedAt']
+});
+
+const AccessToken = bookshelf.Model.extend({
+  tableName: 'access_tokens',
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
@@ -49,6 +54,7 @@ const userKeysToSanitize = ['firstName', 'lastName', 'email', 'phoneNumber', 'ex
 const User = bookshelf.Model.extend({
   tableName: 'users',
   hasTimestamps: ['createdAt', 'updatedAt'],
+  // jsonColumns: ['extraData'],
   roles() {
     return this.belongsToMany(Role, 'user_roles', 'userId', 'roleId');
   },
@@ -82,3 +88,4 @@ exports.UserRole = UserRole;
 exports.PasswordResetToken = PasswordResetToken;
 exports.ActionLog = ActionLog;
 exports.ExternalCsrfToken = ExternalCsrfToken;
+exports.AccessToken = AccessToken;
