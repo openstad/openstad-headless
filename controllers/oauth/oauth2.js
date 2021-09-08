@@ -72,6 +72,7 @@ server.exchange(oauth2orize.exchange.code((client, code, redirectURI, done) => {
   .then(authCode => validate.authCode(code, authCode, client, redirectURI))
   .then(authCode => validate.generateTokens(authCode))
   .then((tokens) => {
+    console.log('exchange tokens', tokens)
     if (tokens.length === 1) {
       return done(null, tokens[0], null, expiresIn);
     }
@@ -118,12 +119,18 @@ server.exchange(oauth2orize.exchange.password((client, username, password, scope
  * application issues an access token on behalf of the client who authorized the code.
  */
 server.exchange(oauth2orize.exchange.clientCredentials((client, scope, done) => {
+  console.log('stsstst');
+
   const token      = utils.createToken({ sub : client.id, exp : config.token.expiresIn });
   const expiration = config.token.calculateExpirationDate();
+
   // Pass in a null for user id since there is no user when using this grant type
   db.accessTokens.save(token, expiration, null, client.id, scope)
     .then(() => done(null, token, null, expiresIn))
-    .catch(err => done(err));
+    .catch((err) => {
+      console.log('Errrererer', err);
+      done(err)
+    });
 }));
 
 /**
