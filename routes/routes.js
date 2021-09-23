@@ -26,6 +26,7 @@ const authMw = require('../middleware/auth');
 const passwordResetMw = require('../middleware/passwordReset');
 const logMw = require('../middleware/log');
 
+//UTILS
 const getClientIdFromRequest = require('../utils/getClientIdFromRequest');
 
 //MODELS
@@ -65,10 +66,10 @@ const emailUrlBruteForce = bruteForce.userVeryRestricted.getMiddleware({
         const clientId = getClientIdFromRequest(req);
         
         if (clientId) {
-            next(`${clientId}-${req.body.email}`);
-        } else {
-            next(`${req.body.email}`);
+            return next(`${clientId}-${req.body.email}`);
         }
+        
+        return next(`${req.body.email}`);
     }
 });
 
