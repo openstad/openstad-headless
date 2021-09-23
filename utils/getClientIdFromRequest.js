@@ -10,13 +10,17 @@ module.exports = (req) => {
     return false;
   }
   
-  let clientId = req.body && req.body.clientId ? req.body.clientId : req.query.clientId;
+  let clientId = req.body && req.body.clientId;
   
-  if (!clientId) {
+  if (!clientId && req.query && req.query.clientId) {
+    clientId = req.query.clientId;
+  }
+  
+  if (!clientId && req.query && req.query.client_id) {
       clientId = req.query.client_id;
   }
 
-  if (!clientId) {
+  if (!clientId && req.params && req.params.clientId) {
       clientId = req.params.clientId;
   }
   
