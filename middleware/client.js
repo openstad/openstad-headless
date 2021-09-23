@@ -6,6 +6,7 @@ const authTypes = require('../config/auth').types;
 const privilegedRoles =  require('../config/roles').privilegedRoles;
 const authTypesConfig = require('../config').authTypes
 const defaultRole =  require('../config/roles').defaultRole;
+const getClientIdFromRequest = require('../utils/getClientIdFromRequest');
 
 exports.withAll = (req, res, next) => {
   Client
@@ -19,7 +20,7 @@ exports.withAll = (req, res, next) => {
 }
 
 exports.withOne = (req, res, next) => {
-  let clientId = req.body && req.body.clientId ? req.body.clientId : req.query.clientId;
+  const clientId = getClientIdFromRequest(req);
   
   if (!clientId) {
     clientId = req.query.client_id;
