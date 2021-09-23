@@ -1,4 +1,6 @@
 # Changelog
+## Unreleased
+* Make the email url brute force more restrictive
 
 ## v0.16.0 (2020-07-20)
 * Add external CSRF token
