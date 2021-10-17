@@ -120,20 +120,32 @@ exports.setAuthType = (authType) => {
 }
 
 exports.validate = (req, res, next) => {
+  console.log(' req.params',  req.params);
+  console.log(' req.method',  req.method);
+
   let authTypes = req.clientModel.getAuthTypes(req.clientModel);
+
+  // only /admin in the end should work
+  if (req.params.priviligedRoute &&  req.params.priviligedRoute !== 'admin') {
+    throw new Error('Priviliged route is not properly set');
+  }
+
   const allowedType = authTypes && authTypes.length > 0 ? authTypes.find(option => option.key === req.authType) : false;
+
+  const isPriviligedRoute = req.params.priviligedRoute === 'admin';
 
   /**
    * Check if any login options are defined for the client, otherwise error!
    */
-  if (!authTypes) {
+  if ( !authTypes) {
     throw new Error('No auth types selected');
   }
 
   /**
    * Check if auth type is allowed for client
+   * This is only for cosmetics, the safe checks are done in the handling
    */
-  if (!allowedType) {
+  if (!isPriviligedRoute && !allowedType && req.method === 'GET') {
     throw new Error('Auth types not allowed');
   }
 

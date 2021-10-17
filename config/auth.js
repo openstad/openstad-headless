@@ -99,5 +99,13 @@ const get = (key) => {
   return config ? config : {};
 }
 
+// for now admin users can login in with Password (Local) and a Url emailed
+exports.adminTypes = types.filter((type) => ['Local', 'Url'].includes(type.key)).map((type) => {
+  // for admin types we add /admin to the login url
+  type.loginUrl = type.loginUrl + '/admin';
+  return type;
+})
+
+
 exports.types = types;
 exports.get = get;
