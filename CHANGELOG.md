@@ -1,5 +1,8 @@
 # Changelog
 
+## UNRELEASED-v0.17.0 (2020-..)
+* Refactor logic so admin can login with both Password and Login via E-mail
+
 ## v0.16.0 (2020-07-20)
 * Add external CSRF token
 

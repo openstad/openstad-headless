@@ -9,9 +9,7 @@ const userController = require('../controllers/user/user');
 const authChoose = require('../controllers/auth/choose');
 const authUrl = require('../controllers/auth/url');
 const authPhonenumber = require('../controllers/auth/phonenumber');
-const authAdminUrl = require('../controllers/auth/adminUrl');
 const authForgot = require('../controllers/auth/forgot');
-const authDigiD = require('../controllers/auth/digid');
 const authAnonymous = require('../controllers/auth/anonymous');
 const authLocal = require('../controllers/auth/local');
 const authCode = require('../controllers/auth/code');
@@ -194,7 +192,7 @@ module.exports = function (app) {
      * checks if one or more options of authentications is available
      * and either shows choice or redirects if one option
      */
-    app.get('/login', clientMw.withOne, authChoose.index);
+    app.get('/login/:priviligedRoute?', clientMw.withOne, authChoose.index);
 
     /**
      * Shared middleware for all auth routes, adding client and bruteforce
@@ -205,44 +203,42 @@ module.exports = function (app) {
      * Login & register with local login
      */
     //shared middleware
-    app.use('/auth/local', [clientMw.setAuthType('Local'), clientMw.validate, csrfProtection, addCsrfGlobal]);
-
+    const localSharedMW = [clientMw.setAuthType('Local'),  csrfProtection, addCsrfGlobal]
     //routes
-    app.get('/auth/local/login', authLocal.login);
-    app.post('/auth/local/login', csrfProtection, loginBruteForce, authMw.validateLogin, authLocal.postLogin);
-    app.get('/auth/local/register',  csrfProtection, addCsrfGlobal, authLocal.register);
-    app.post('/auth/local/register',  csrfProtection, addCsrfGlobal, userMw.validateUser, userMw.validateUniqueEmail, authLocal.postRegister);
+    app.get('/auth/local/login/:priviligedRoute?', [...localSharedMW], clientMw.validate, authLocal.login);
+    app.post('/auth/local/login/:priviligedRoute?',  [...localSharedMW],  csrfProtection, loginBruteForce, authMw.validateLogin, authLocal.postLogin);
+    app.get('/auth/local/register',  [...localSharedMW],  csrfProtection, addCsrfGlobal, authLocal.register);
+    app.post('/auth/local/register',  [...localSharedMW],  csrfProtection, addCsrfGlobal, userMw.validateUser, userMw.validateUniqueEmail, authLocal.postRegister);
 
     /**
      * Deal with forgot password
      */
-    app.get('/auth/local/forgot', authForgot.forgot);
-    app.post('/auth/local/forgot', authForgot.postForgot);
-    app.get('/auth/local/reset', passwordResetMw.validate, authForgot.reset);
-    app.post('/auth/local/reset', passwordResetMw.validate, userMw.validatePassword, authForgot.postReset);
+    app.get('/auth/local/forgot',  [...localSharedMW], authForgot.forgot);
+    app.post('/auth/local/forgot', [...localSharedMW], authForgot.postForgot);
+    app.get('/auth/local/reset',  [...localSharedMW], passwordResetMw.validate, authForgot.reset);
+    app.post('/auth/local/reset', [...localSharedMW], passwordResetMw.validate, userMw.validatePassword, authForgot.postReset);
 
     /**
      * Auth routes for URL login
      */
     // shared middleware
-    app.use('/auth/url', [clientMw.setAuthType('Url'), clientMw.validate]);
+    ///app.use('/auth/url', );
 
     // routes
-    app.get('/auth/url/login', csrfProtection, addCsrfGlobal, authUrl.login);
-    app.get('/auth/url/confirmation', csrfProtection, addCsrfGlobal, authUrl.confirmation);
-    app.post('/auth/url/login', csrfProtection, emailUrlBruteForce, authUrl.postLogin);
-    app.get('/auth/url/authenticate', csrfProtection, addCsrfGlobal, authUrl.authenticate);
-    app.post('/auth/url/authenticate', csrfProtection, emailUrlBruteForce, authUrl.postAuthenticate);
+    app.get('/auth/url/login/:priviligedRoute?', clientMw.setAuthType('Url'), clientMw.validate, csrfProtection, addCsrfGlobal, authUrl.login);
+    app.get('/auth/url/confirmation', clientMw.setAuthType('Url'),  csrfProtection, addCsrfGlobal, authUrl.confirmation);
+    app.post('/auth/url/login/:priviligedRoute?', clientMw.setAuthType('Url'), csrfProtection, emailUrlBruteForce, authUrl.postLogin);
+    app.get('/auth/url/authenticate', clientMw.setAuthType('Url'),  csrfProtection, addCsrfGlobal, authUrl.authenticate);
+    app.post('/auth/url/authenticate', clientMw.setAuthType('Url'), csrfProtection, emailUrlBruteForce, authUrl.postAuthenticate);
 
 
-    // Admin login routes
-    app.use('/auth/admin', [csrfProtection, addCsrfGlobal]);
+    // admin login routes redirect to normal login but with priviliged params
+    app.get('/auth/admin/login', [csrfProtection, addCsrfGlobal], (req, res, next) => {
+        const queryIndex = req.originalUrl.indexOf('?');
+        const queryString = (queryIndex>=0) ? req.originalUrl.slice(queryIndex) : '';
 
-    app.get('/auth/admin/login', authUrl.login);
-    app.get('/auth/admin/confirmation', authAdminUrl.confirmation);
-    app.post('/auth/admin/login', emailUrlBruteForce, authAdminUrl.postLogin);
-    app.get('/auth/admin/authenticate', authUrl.authenticate);
-    app.post('/auth/admin/authenticate', emailUrlBruteForce, authAdminUrl.postAuthenticate);
+        res.redirect('/login/admin' + queryString);
+    });
 
     /**
      * Auth routes for Anonymous login
