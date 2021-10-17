@@ -120,9 +120,6 @@ exports.setAuthType = (authType) => {
 }
 
 exports.validate = (req, res, next) => {
-  console.log(' req.params',  req.params);
-  console.log(' req.method',  req.method);
-
   let authTypes = req.clientModel.getAuthTypes(req.clientModel);
 
   // only /admin in the end should work
