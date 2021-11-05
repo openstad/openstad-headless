@@ -233,8 +233,7 @@ exports.update = (req, res, next) => {
         value = JSON.stringify(value);
       }
 
-
-      if (key === 'password') {
+      if (key === 'password' && value) {
         value = bcrypt.hashSync(value, saltRounds);
       }
 
