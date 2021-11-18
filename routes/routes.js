@@ -332,12 +332,13 @@ module.exports = function (app) {
           console.log(err); // do log for debugging
           await req.session.destroy();
           let querystring = '?'
-          if (req.query.clientId) querystring += req.query.clientId;
-          if (req.query.client_id) querystring += req.query.client_id;
-          if (req.query.redirectUrl) querystring += encodeURIComponent(req.query.redirect_uri);
-          if (req.query.token) querystring += req.query.token;
-          if (req.query.access_token) querystring += req.query.access_token;
-          return res.redirect('/login'+querystring);
+          if (req.query.clientId) querystring += `&clientId=${req.query.clientId}`;
+          if (req.query.client_id) querystring += `&client_id=${req.query.client_id}`;
+          if (req.query.redirectUrl) querystring += `&redirectUrl=${encodeURIComponent(req.query.redirectUrl)}`;
+          if (req.query.redirect_uri) querystring += `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`;
+          if (req.query.token) querystring += `&token=${req.query.token}`;
+          if (req.query.access_token) querystring += `&access_token=${req.query.access_token}`;
+          return res.redirect('/logout'+querystring);
         }
         res.status(500).render('errors/500');
     });
