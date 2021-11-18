@@ -325,8 +325,21 @@ module.exports = function (app) {
     });
 
     // Handle 500
-    app.use(function (err, req, res, next) {
+    app.use(async function (err, req, res, next) {
         console.log('===> err', err);
+        // een deserialize error betekent een data fout; daar hoef je een gebruiker niet mee te belasten
+        if (err && err.message && err.message.match(/^Error in deserializeUser/)) {
+          console.log(err); // do log for debugging
+          await req.session.destroy();
+          let querystring = '?'
+          if (req.query.clientId) querystring += req.query.clientId;
+          if (req.query.client_id) querystring += req.query.client_id;
+          if (req.query.redirectUrl) querystring += encodeURIComponent(req.query.redirect_uri);
+          if (req.query.token) querystring += req.query.token;
+          if (req.query.access_token) querystring += req.query.access_token;
+          return res.redirect('/login'+querystring);
+        }
         res.status(500).render('errors/500');
     });
+
 }
