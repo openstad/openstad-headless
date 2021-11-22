@@ -211,6 +211,30 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
     }
 }
 
+
+
+exports.checkPhonenumberAuth = (errorCallback) => {
+  //validate code auth type
+  return (req, res, next) => {
+    const authTypes = req.client.authTypes;
+
+    // if UniqueCode authentication is used, other methods are blocked to enforce users can never authorize with email
+    if (authTypes.indexOf('Phonenumber') !== -1) {
+      const userHasPrivilegedRole = privilegedRoles.indexOf(req.user.role) > -1;
+
+      // if uniquecode exists or user has priviliged role
+      if (codeResponse || userHasPrivilegedRole) {
+        next();
+      } else {
+        throw new Error('Not validated with Phone number');
+      }
+
+    } else {
+      next();
+    }
+  }
+}
+
 /**
  * Check if 2FA is required and for what roles
  */
