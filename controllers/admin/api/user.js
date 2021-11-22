@@ -2,7 +2,9 @@ const hat = require('hat');
 const ExternalCsrfToken = require("../../../models").ExternalCsrfToken;
 
 const outputUser = (req, res, next) => {
-    res.json(req.userObject);
+  let result = { ...req.userObject };
+  delete result.password;
+  res.json(result);
 };
 
 exports.all = (req, res, next) => {
