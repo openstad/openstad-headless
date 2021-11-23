@@ -263,6 +263,9 @@ passport.deserializeUser((id, done) => {
   User
     .where({id: id})
     .fetch()
-    .then(user => done(null, user.serialize()))
+    .then(user => {
+      if (!user) throw new Error('Error in deserializeUser for id='+id);
+      done(null, user.serialize())
+    })
     .catch(err => done(err));
 });
