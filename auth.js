@@ -170,7 +170,11 @@ passport.use('phonenumber', new TokenStrategy({
       if (token) {
         new User({id: token.get('userId')})
           .fetch()
-          .then((user) => { return user.serialize(); })
+          .then((user) => {
+            user.set('phoneNumberConfirmed', true);
+            return user.save();
+          })
+          .then(user => { return user.serialize(); } )
           .then(user => { return done(null, user) } )
           .catch((err) => { return done(err); });
       } else {
@@ -208,8 +212,6 @@ passport.use(new BasicStrategy((clientId, clientSecret, done) => {
  * which accepts those credentials and calls done providing a client.
  */
 passport.use(new ClientPasswordStrategy((clientId, clientSecret, done) => {
-  console.log('validate ClientPasswordStrategy', clientId, clientSecret);
-
   Client
     .where({clientId: clientId})
     .fetch()
@@ -233,7 +235,6 @@ passport.use(new BearerStrategy((accessToken, done) => {
   db.accessTokens.find(accessToken)
     .then(token => validate.token(token, accessToken))
     .then((token) => {
-      //console.log('Token token', token);
       return done(null, token, { scope: '*' });
     })
     .catch((err) => {

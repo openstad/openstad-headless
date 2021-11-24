@@ -162,6 +162,8 @@ exports.postSmsCode = (req, res, next) => {
     req.logIn(user, function(err) {
       if (err) { return next(err); }
 
+      // means user has succesfully validated phonenumber (
+
       req.brute.reset(async () => {
 
         return tokenSMS.invalidateTokensForUser(user.id)

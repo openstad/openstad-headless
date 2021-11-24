@@ -1,5 +1,7 @@
 const Client = require('../models').Client;
 const UniqueCode = require('../models').UniqueCode;
+const AccessToken = require('../models').AccessToken;
+
 const hat = require('hat');
 const userFields = require('../config/user').fields;
 const authTypes = require('../config/auth').types;
@@ -172,6 +174,23 @@ exports.checkIfEmailRequired =  (req, res, next) => {
 }
 
 
+exports.checkIfAccessTokenBelongToCurrentClient =  async (req, res, next) => {
+    //+ req.client.id
+   new AccessToken({ clientID: req.client.id , userID: req.user.id })
+     .fetch()
+     .then((accessToken) => {
+       if (accessToken.get('id')) {
+         next();
+       } else {
+         throw Error('No Access token issued for this client, req.client.id: ' + req.client.id +  ' user id: ' + req.user.id)
+       }
+     })
+     .catch((e) => {
+       next(e);
+     });
+}
+
+
 exports.checkUniqueCodeAuth = (errorCallback) => {
   //validate code auth type
   return (req, res, next) => {
@@ -209,6 +228,37 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
         next();
       }
     }
+}
+
+
+
+exports.checkPhonenumberAuth = (errorCallback) => {
+  //validate code auth type
+  return (req, res, next) => {
+    const authTypes = req.client.authTypes;
+
+    // if UniqueCode authentication is used, other methods are blocked to enforce users can never authorize with email
+    if (authTypes.indexOf('Phonenumber') !== -1) {
+      const userHasPrivilegedRole = privilegedRoles.indexOf(req.user.role) > -1;
+
+      // if phonenumber is validated or user has priviliged role
+      // we check for this method if a phone number is validated
+      // this could theoretically mean a user connects an email to their account
+      // and is able to use session login with e-mail from other client to this client
+      // (this is done by going directly to the authorize url, the user then has an active session, and as long as that role isset the user is logged in)
+      // currently all checks are done on requirements of a user: "email exists", "unique code is connected" "phoneNumber is confirmed" etc.
+      // but this is acceptable in current use cas
+
+      if (req.user.phoneNumberConfirmed || userHasPrivilegedRole ) {
+        next();
+      } else {
+        throw new Error('Not validated with Phone number');
+      }
+
+    } else {
+      next();
+    }
+  }
 }
 
 /**
