@@ -1,5 +1,7 @@
 const Client = require('../models').Client;
 const UniqueCode = require('../models').UniqueCode;
+const AccessToken = require('../models').AccessToken;
+
 const hat = require('hat');
 const userFields = require('../config/user').fields;
 const authTypes = require('../config/auth').types;
@@ -172,10 +174,32 @@ exports.checkIfEmailRequired =  (req, res, next) => {
 }
 
 
+exports.checkIfAccessTokenBelongToCurrentClient =  async (req, res, next) => {
+    //+ req.client.id
+   new AccessToken({ clientID: req.client.id , userID: req.user.id })
+     .fetch()
+     .then((accessToken) => {
+       if (accessToken.get('id')) {
+         next();
+       } else {
+         throw Error('No Access token issued for this client, req.client.id: ' + req.client.id +  ' user id: ' + req.user.id)
+       }
+     })
+     .catch((e) => {
+       next(e);
+     });
+}
+
+
 exports.checkUniqueCodeAuth = (errorCallback) => {
   //validate code auth type
   return (req, res, next) => {
+
+
     const authTypes = req.client.authTypes;
+
+    console.log('req.accessTokens', res.accessToken)
+    console.log('req.accessTokens', res)
 
       // if UniqueCode authentication is used, other methods are blocked to enforce users can never authorize with email
       if (authTypes.indexOf('UniqueCode') !== -1) {
