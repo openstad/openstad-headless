@@ -194,12 +194,7 @@ exports.checkIfAccessTokenBelongToCurrentClient =  async (req, res, next) => {
 exports.checkUniqueCodeAuth = (errorCallback) => {
   //validate code auth type
   return (req, res, next) => {
-
-
     const authTypes = req.client.authTypes;
-
-    console.log('req.accessTokens', res.accessToken)
-    console.log('req.accessTokens', res)
 
       // if UniqueCode authentication is used, other methods are blocked to enforce users can never authorize with email
       if (authTypes.indexOf('UniqueCode') !== -1) {
@@ -253,7 +248,7 @@ exports.checkPhonenumberAuth = (errorCallback) => {
       // (this is done by going directly to the authorize url, the user then has an active session, and as long as that role isset the user is logged in)
       // currently all checks are done on requirements of a user: "email exists", "unique code is connected" "phoneNumber is confirmed" etc.
       // but this is acceptable in current use cas
-      
+
       if (req.user.phoneNumberConfirmed || userHasPrivilegedRole ) {
         next();
       } else {

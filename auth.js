@@ -212,8 +212,6 @@ passport.use(new BasicStrategy((clientId, clientSecret, done) => {
  * which accepts those credentials and calls done providing a client.
  */
 passport.use(new ClientPasswordStrategy((clientId, clientSecret, done) => {
-  console.log('validate ClientPasswordStrategy', clientId, clientSecret);
-
   Client
     .where({clientId: clientId})
     .fetch()
