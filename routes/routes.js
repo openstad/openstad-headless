@@ -300,14 +300,15 @@ module.exports = function (app) {
 
     app.use('/dialog', [bruteForce.global.prevent]);
 
-    app.get('/dialog/authorize', clientMw.withOne, authMw.check, userMw.withRoleForClient, clientMw.checkRequiredUserFields, clientMw.check2FA, clientMw.checkUniqueCodeAuth((req, res) => {
+    app.get('/dialog/authorize', clientMw.withOne, authMw.check, userMw.withRoleForClient, clientMw.checkRequiredUserFields, clientMw.check2FA, clientMw.checkPhonenumberAuth(), clientMw.checkUniqueCodeAuth((req, res) => {
         return res.redirect('/login?clientId=' + req.query.client_id);
     }), oauth2Controller.authorization);
-    app.post('/dialog/authorize/decision', clientMw.withOne, userMw.withRoleForClient, clientMw.checkUniqueCodeAuth(),clientMw.check2FA, bruteForce.global.prevent, oauth2Controller.decision);
+
+    app.post('/dialog/authorize/decision', clientMw.withOne, userMw.withRoleForClient, clientMw.checkPhonenumberAuth(), clientMw.checkUniqueCodeAuth(),clientMw.check2FA, bruteForce.global.prevent, oauth2Controller.decision);
     app.post('/oauth/token', oauth2Controller.token);
     app.get('/oauth/token', oauth2Controller.token);
 
-    app.get('/api/userinfo', passport.authenticate('bearer', {session: false}), clientMw.withOne, userMw.withRoleForClient, clientMw.checkIfAccessTokenBelongToCurrentClient, clientMw.checkUniqueCodeAuth(), userController.info);
+    app.get('/api/userinfo', passport.authenticate('bearer', {session: false}), clientMw.withOne, userMw.withRoleForClient, clientMw.checkIfAccessTokenBelongToCurrentClient, clientMw.checkPhonenumberAuth(), clientMw.checkUniqueCodeAuth(), userController.info);
 
     // Mimicking google's token info endpoint from
     // https://developers.google.com/accounts/docs/OAuth2UserAgent#validatetoken

@@ -170,7 +170,11 @@ passport.use('phonenumber', new TokenStrategy({
       if (token) {
         new User({id: token.get('userId')})
           .fetch()
-          .then((user) => { return user.serialize(); })
+          .then((user) => {
+            user.set('phoneNumberConfirmed', true);
+            return user.save();
+          })
+          .then(user => { return user.serialize(); } )
           .then(user => { return done(null, user) } )
           .catch((err) => { return done(err); });
       } else {
