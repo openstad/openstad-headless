@@ -233,7 +233,6 @@ passport.use(new BearerStrategy((accessToken, done) => {
   db.accessTokens.find(accessToken)
     .then(token => validate.token(token, accessToken))
     .then((token) => {
-      //console.log('Token token', token);
       return done(null, token, { scope: '*' });
     })
     .catch((err) => {

@@ -307,7 +307,7 @@ module.exports = function (app) {
     app.post('/oauth/token', oauth2Controller.token);
     app.get('/oauth/token', oauth2Controller.token);
 
-    app.get('/api/userinfo', passport.authenticate('bearer', {session: false}), clientMw.withOne, userMw.withRoleForClient, clientMw.checkUniqueCodeAuth(), userController.info);
+    app.get('/api/userinfo', passport.authenticate('bearer', {session: false}), clientMw.withOne, userMw.withRoleForClient, clientMw.checkIfAccessTokenBelongToCurrentClient, clientMw.checkUniqueCodeAuth(), userController.info);
 
     // Mimicking google's token info endpoint from
     // https://developers.google.com/accounts/docs/OAuth2UserAgent#validatetoken

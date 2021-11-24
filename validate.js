@@ -104,6 +104,8 @@ validate.clientExists = (client) => {
 validate.token = (token, accessToken) => {
   utils.verifyToken(accessToken);
 
+  console.log('Token in validate')
+
   // token is a user token
   if (token.userID != null) {
     return new User({id: token.userID})
