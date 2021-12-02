@@ -1,6 +1,9 @@
 # Changelog
 
-## UNRELEASED-v0.17.0 (2020-..)
+## 0.18.0
+* Remove password from return hashed in GET 
+
+## 0.17.0
 * Refactor logic so admin can login with both Password and Login via E-mail
 
 ## v0.16.0 (2020-07-20)
