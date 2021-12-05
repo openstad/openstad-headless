@@ -1,4 +1,6 @@
 # Changelog
+## Unreleased
+* Make the email url brute force more restrictive
 
 ## 0.18.0
 * Remove password from return hashed in GET 

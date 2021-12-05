@@ -24,6 +24,9 @@ const authMw = require('../middleware/auth');
 const passwordResetMw = require('../middleware/passwordReset');
 const logMw = require('../middleware/log');
 
+//UTILS
+const getClientIdFromRequest = require('../utils/getClientIdFromRequest');
+
 //MODELS
 const ExternalCsrfToken = require('../models').ExternalCsrfToken;
 
@@ -55,10 +58,16 @@ const smsCodeBruteForce = bruteForce.user.getMiddleware({
     }
 });
 
-const emailUrlBruteForce = bruteForce.user.getMiddleware({
+// prevent too many attempts for the same email per clientId (if applicable)
+const emailUrlBruteForce = bruteForce.userVeryRestricted.getMiddleware({
     key: function (req, res, next) {
-        // prevent too many attempts for the same email
-        next(req.body.email);
+        const clientId = getClientIdFromRequest(req);
+        
+        if (clientId) {
+            return next(`${clientId}-${req.body.email}`);
+        }
+        
+        return next(`${req.body.email}`);
     }
 });
 
