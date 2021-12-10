@@ -1,5 +1,6 @@
 const UniqueCode = require('../models').UniqueCode;
 const generateCode = require('../utils/generateCode');
+const Tasks = require('../db/tasks');
 
 exports.withAll = (req, res, next) => {
   UniqueCode
@@ -54,33 +55,46 @@ exports.withOne = (req, res, next) => {
 }
 
 
-exports.create = (req, res, next) => {
+exports.create = async (req, res, next) => {
+
   const promises = [];
   const amountOfCodes = req.query.amount ? req.query.amount : 1;
 
-  // make a promise for every code to be created
+  const amountOfCodesPerSecond = 250; // TODO: configurable
+
+  // use tasks to keep track of the process
+  let task = await Tasks.save(null, { amountOfCodes, generatedCodes: 0 });
+  let taskId = req.taskId = task.taskId;
+
+  // go on with response now; creating codes is done in the background
+  next(null, { taskId });
+
+  // create codes
   for (let i = 0; i < amountOfCodes; i++) {
-    promises.push(
-      new UniqueCode({
-        code: generateCode(),
-        clientId: req.client.id
-      })
-      .save()
-    )
+    await new Promise((resolve, reject) => {
+      setTimeout(function() {
+        return new UniqueCode({
+          code: generateCode(),
+          clientId: req.client.id
+        })
+          .save()
+          .then(result => {
+            task.generatedCodes++;
+            return Tasks.save(taskId, task);
+          })
+          .then(result => resolve() )
+          .catch( async err => {
+            task.error = err;
+            await Tasks.save(taskId, task);
+            reject(err)
+          })
+      }, 1000 / amountOfCodesPerSecond)
+    })
+      .catch(function (err) {
+        throw err;
+      });
   };
 
-  /**
-   * Execute all promises
-   */
-  Promise.all(promises)
-    .then(function (response) {
-      //req.codeModel = code;
-      //req.code = code.serialize();
-      next();
-    })
-    .catch(function (err) {
-      next(err)
-    });
 }
 
 exports.reset = (req, res, next) => {
