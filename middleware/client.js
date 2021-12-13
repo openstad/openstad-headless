@@ -22,7 +22,7 @@ exports.withAll = (req, res, next) => {
 }
 
 exports.withOne = (req, res, next) => {
-  const clientId = getClientIdFromRequest(req);
+  let clientId = getClientIdFromRequest(req);
   
   if (!clientId) {
     clientId = req.query.client_id;

@@ -54,6 +54,7 @@ module.exports = (app) => {
    * Simple CRUD + more api API
    */
   app.get('/api/admin/unique-codes',                  clientMw.withOne,   codeMw.withAll,   adminApiUniqueCodeController.all);
+  app.get('/api/admin/unique-code/generator-status',  clientMw.withOne,   adminApiUniqueCodeController.generatorStatus);
   app.get('/api/admin/unique-code/:codeId',           codeMw.withOne,     adminApiUniqueCodeController.show);
   app.post('/api/admin/unique-code',                  clientMw.withOne,   codeMw.create,    adminApiUniqueCodeController.created);
   app.post('/api/admin/unique-code/:codeId/delete',   codeMw.deleteOne,   adminApiUniqueCodeController.delete);
