@@ -180,7 +180,7 @@ exports.checkIfAccessTokenBelongToCurrentClient =  async (req, res, next) => {
    new AccessToken({ clientID: req.client.id , userID: req.user.id })
      .fetch()
      .then((accessToken) => {
-       if (accessToken.get('id')) {
+       if (accessToken && accessToken.get('id')) {
          next();
        } else {
          throw Error('No Access token issued for this client, req.client.id: ' + req.client.id +  ' user id: ' + req.user.id)
