@@ -19,17 +19,17 @@
 						<div {% if (messages.error) %} class="side-error" {% endif%}>
 						{% if (messages.error)  %}
 							{% for error in messages.error %}
-								<span class="error-label"> {{ error.msg }} </span>
+							<span class="error-label"> {{ error.msg }} </span>
 							{% endfor %}
-						{% endif %}
-
+						  {% endif %}
 							<input
-								type="text"
-								value=""
-								name="unique_code"
-								class="form-input"
-								required
-								autocomplete="off"
+							type="text"
+							value=""
+							name="unique_code"
+							class="form-input"
+							required
+							autocomplete="off"
+              autofocus
 							/>
 						</div>
 					</div>
