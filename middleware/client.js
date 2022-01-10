@@ -175,20 +175,29 @@ exports.checkIfEmailRequired =  (req, res, next) => {
 }
 
 
+// this is an extra check to make sure a users has authenticated with an access token
+// otherwise a user can access with another acces token
+// not mega disaster since role is still checked
+// but this is mainly an issue when members on one site can login with email
+// yet on another site sms is required
+// we still have checks to ensure that, but this is an extra security check on that
+// in future it would be great to add something like "user requirements" to  a site
 exports.checkIfAccessTokenBelongToCurrentClient =  async (req, res, next) => {
-    //+ req.client.id
-   new AccessToken({ clientID: req.client.id , userID: req.user.id })
-     .fetch()
-     .then((accessToken) => {
-       if (accessToken.get('id')) {
-         next();
-       } else {
-         throw Error('No Access token issued for this client, req.client.id: ' + req.client.id +  ' user id: ' + req.user.id)
-       }
-     })
-     .catch((e) => {
-       next(e);
-     });
+  return next();
+  /*
+  //+ req.client.id
+ new AccessToken({ clientID: req.client.id , userID: req.user.id })
+   .fetch()
+   .then((accessToken) => {
+     if (accessToken.get('id')) {
+       next();
+     } else {
+       throw Error('No Access token issued for this client, req.client.id: ' + req.client.id +  ' user id: ' + req.user.id)
+     }
+   })
+   .catch((e) => {
+     next(e);
+   });*/
 }
 
 
