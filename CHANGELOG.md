@@ -1,5 +1,8 @@
 # Changelog
 
+## UNRELASED
+* Add autofocus to login fields
+
 ## 0.19.0
 * Make the email url brute force more restrictive
 
