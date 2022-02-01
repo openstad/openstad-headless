@@ -2,6 +2,7 @@
 
 ## UNRELASED
 * Add autofocus to login fields
+* Move docker builds from travis to github actions
 
 ## 0.19.0
 * Make the email url brute force more restrictive
