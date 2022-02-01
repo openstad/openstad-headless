@@ -22,16 +22,19 @@
       <form method="POST" action="/auth/required-fields?redirect_uri={{redirect_uri}}" class="validate-form">
         <input type="hidden" name="_csrf" value="{{csrfToken}}" />
         <input type="hidden" name="clientId" value="{{clientId}}" />
+        {% set first = true %}
         {% for requiredField in requiredFields %}
 				<div class="form-group">
 					<label> {{requiredField.label}} </label>
           <input
-            type="text"
-            required
-            name="{{requiredField.key}}"
-            class="input-{{requiredField.key}} input-field"
+          type="text"
+          required
+          name="{{requiredField.key}}"
+          class="input-{{requiredField.key}} input-field"
+          {{'autofocus' if first}}
           />
 				</div>
+        {% set first = false %}
         {% endfor %}
 
         <button class="btn btn-primary">
