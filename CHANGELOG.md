@@ -1,8 +1,7 @@
 # Changelog
 
-## UNRELASED
-* Add autofocus to login fields
-* Move docker builds from travis to github actions
+## v0.40.0
+Update version number
 
 ## 0.19.0
 * Make the email url brute force more restrictive

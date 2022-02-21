@@ -1,6 +1,6 @@
 {
-  "name": "openstad-authorization-server",
-  "version": "6.3.4",
+  "name": "openstad-oauth2-server",
+  "version": "0.40.0",
   "author": "Tosh Koevoets",
   "description": "SSO authentication for openstad apps",
   "license": "MIT",
