@@ -7,6 +7,7 @@ bookshelf.plugin(jsonColumns);
 
 const Client = bookshelf.Model.extend({
   tableName: 'clients',
+  requireFetch: false,
   hasTimestamps: ['createdAt', 'updatedAt'],
   jsonColumns: ['authTypes', 'requiredFields'],
   getAuthTypes: (model) => {
@@ -21,31 +22,37 @@ const Client = bookshelf.Model.extend({
 
 const LoginToken = bookshelf.Model.extend({
   tableName: 'login_tokens',
+  requireFetch: false,
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
 const AccessToken = bookshelf.Model.extend({
   tableName: 'access_tokens',
+  requireFetch: false,
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
 const UniqueCode = bookshelf.Model.extend({
   tableName: 'unique_codes',
+  requireFetch: false,
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
 const Role = bookshelf.Model.extend({
   tableName: 'roles',
+  requireFetch: false,
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
 const UserRole = bookshelf.Model.extend({
   tableName: 'user_roles',
+  requireFetch: false,
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
 const PasswordResetToken = bookshelf.Model.extend({
   tableName: 'password_reset_tokens',
+  requireFetch: false,
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
@@ -53,6 +60,7 @@ const userKeysToSanitize = ['firstName', 'lastName', 'email', 'phoneNumber', 'ex
 
 const User = bookshelf.Model.extend({
   tableName: 'users',
+  requireFetch: false,
   hasTimestamps: ['createdAt', 'updatedAt'],
   // jsonColumns: ['extraData'],
   roles() {
@@ -71,11 +79,13 @@ const User = bookshelf.Model.extend({
 
 const ActionLog = bookshelf.Model.extend({
   tableName: 'action_log',
+  requireFetch: false,
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
 const ExternalCsrfToken = bookshelf.Model.extend({
   tableName: 'external_csrf_tokens',
+  requireFetch: false,
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 

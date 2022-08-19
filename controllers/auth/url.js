@@ -106,17 +106,7 @@ const updateUser = async (user, email) => {
 }
 
 const getUser = async (email) => {
-    let user;
-    try {
-      user = await new User({email}).fetch();
-    } catch (err) {
-      console.log('ERROR');
-      if ( !(err.message && err.message == 'EmptyResponse') ) {
-        console.log(err);
-        throw err;
-      }
-    }
-  return user;
+  return new User({email}).fetch();
 }
 
 exports.postLogin = async (req, res, next) => {
