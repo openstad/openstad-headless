@@ -106,7 +106,7 @@ const updateUser = async (user, email) => {
 }
 
 const getUser = async (email) => {
-    return new User({email}).fetch();
+  return new User({email}).fetch();
 }
 
 exports.postLogin = async (req, res, next) => {
