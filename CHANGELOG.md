@@ -1,9 +1,12 @@
 # Changelog
 
-## UNRELEASED
-* Allow connecting to MySQL through SSL by providing a CA certificate
+## 1.0.0
+* Add env MYSQL_CA_CERT for MySQL SSL connection
+* Upgrade to node 16
+* Add env MONGO_DB_CONNECTION_STRING
+* Bugfix: csrf
 
-## v0.40.0
+## 0.40.0
 Update version number
 
 ## 0.19.0
