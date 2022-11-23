@@ -125,3 +125,6 @@ By default the required fields have labels as defined in `config/user.js`. These
     }
 }
 ```
+
+## MySQL with SSL
+When you want to connect to a MySQL server using SSL, a Certificate Authority certificate is required. The contents of this CA certificate can be passed into the `MYSQL_CA_CERT` environment variable.

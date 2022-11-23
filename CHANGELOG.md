@@ -1,6 +1,12 @@
 # Changelog
 
-## v0.40.0
+## 1.0.0
+* Add env MYSQL_CA_CERT for MySQL SSL connection
+* Upgrade to node 16
+* Add env MONGO_DB_CONNECTION_STRING
+* Bugfix: csrf
+
+## 0.40.0
 Update version number
 
 ## 0.19.0

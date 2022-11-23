@@ -1,12 +1,8 @@
 const Client = require('../models').Client;
 const UniqueCode = require('../models').UniqueCode;
-const AccessToken = require('../models').AccessToken;
 
 const hat = require('hat');
-const userFields = require('../config/user').fields;
-const authTypes = require('../config/auth').types;
 const privilegedRoles =  require('../config/roles').privilegedRoles;
-const authTypesConfig = require('../config').authTypes
 const defaultRole =  require('../config/roles').defaultRole;
 const getClientIdFromRequest = require('../utils/getClientIdFromRequest');
 
@@ -31,11 +27,27 @@ exports.withOne = (req, res, next) => {
   if (!clientId) {
     clientId = req.params.clientId;
   }
-
+ 
   if (clientId) {
-    new Client({ clientId: clientId })
-    .fetch()
-    .then((client) => {
+    let client = new Client({ clientId: clientId });
+
+    if(req.query.withUserRoles) {
+      if(req.query.excludingRoles) {
+        client = client.fetch({
+            withRelated: [{'userRoles': function(qb) {
+            qb.join('roles', 'roles.id', 'user_roles.roleId');
+            qb.where('roles.name', 'not in', req.query.excludingRoles.split(','));
+          }
+        }]
+      });
+      } else {
+        client = client.fetch({withRelated:['userRoles']});
+      }  
+    } else {
+      client = client.fetch();
+    }
+    
+    client.then((client) => {
       if (client) {
         req.clientModel = client;
         req.client = client.serialize();

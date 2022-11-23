@@ -10,6 +10,11 @@ const Client = bookshelf.Model.extend({
   requireFetch: false,
   hasTimestamps: ['createdAt', 'updatedAt'],
   jsonColumns: ['authTypes', 'requiredFields'],
+  userRoles: function () {
+    return this.hasMany(UserRole, 'clientId').query(function(builder) {
+      builder.columns("clientId", "userId", "roleId");
+    });
+  },
   getAuthTypes: (model) => {
     const authTypes = JSON.parse(model.get('authTypes'));
     
@@ -38,16 +43,16 @@ const UniqueCode = bookshelf.Model.extend({
   hasTimestamps: ['createdAt', 'updatedAt']
 });
 
-const Role = bookshelf.Model.extend({
-  tableName: 'roles',
-  requireFetch: false,
-  hasTimestamps: ['createdAt', 'updatedAt']
-});
-
 const UserRole = bookshelf.Model.extend({
   tableName: 'user_roles',
   requireFetch: false,
-  hasTimestamps: ['createdAt', 'updatedAt']
+  hasTimestamps: ['createdAt', 'updatedAt'],
+});
+
+const Role = bookshelf.Model.extend({
+  tableName: 'roles',
+  requireFetch: false,
+  hasTimestamps: ['createdAt', 'updatedAt'],
 });
 
 const PasswordResetToken = bookshelf.Model.extend({
@@ -63,7 +68,7 @@ const User = bookshelf.Model.extend({
   requireFetch: false,
   hasTimestamps: ['createdAt', 'updatedAt'],
   // jsonColumns: ['extraData'],
-  roles() {
+  roles: function () {
     return this.belongsToMany(Role, 'user_roles', 'userId', 'roleId');
   },
   format(attributes) {
