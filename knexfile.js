@@ -8,7 +8,7 @@ const connection = {
   password: process.env.DB_PASSWORD,
 };
 
-if (process.env.MYSQL_CA_CERT) {
+if (process.env.MYSQL_CA_CERT && process.env.MYSQL_CA_CERT.trim && process.env.MYSQL_CA_CERT.trim()) {
 	connection.ssl = {
 		rejectUnauthorized: true,
 		ca: [ process.env.MYSQL_CA_CERT ]
