@@ -25,7 +25,7 @@
     "express-validator": "^5.3.0",
     "fast-csv": "^4.3.6",
     "hat": "0.0.3",
-    "jsonwebtoken": "^8.4.0",
+    "jsonwebtoken": "^9.0.0",
     "knex": "^0.21.21",
     "less": "^3.12.2",
     "md5": "^2.2.1",
