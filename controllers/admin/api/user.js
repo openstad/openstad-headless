@@ -1,10 +1,11 @@
+const db = require('../../../db');
 const hat = require('hat');
-const ExternalCsrfToken = require("../../../models").ExternalCsrfToken;
 
 const outputUser = (req, res, next) => {
   let result = { ...req.userObject };
-  delete result.password;
-  res.json(result);
+  delete result.dataValues.password;
+  delete result.dataValues.hashedPhoneNumber;
+  res.json(result.dataValues);
 };
 
 exports.all = (req, res, next) => {
@@ -37,16 +38,16 @@ exports.csrfSessionToken = [
         const rack = hat.rack();
         const token = rack();
 
-        new ExternalCsrfToken({
-            token: token,
-            used: false
-        })
-        .save()
-        .then((response) => {
-            res.json({'token': token})
-        })
-        .catch((err) => {
-            next(err);
-        });
+        db.ExternalCsrfToken
+            .create({
+                token: token,
+                used: false
+            })
+            .then((response) => {
+                res.json({'token': token})
+            })
+            .catch((err) => {
+                next(err);
+            });
     }
 ]

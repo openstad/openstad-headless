@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const hat = require('hat');
 const login = require('connect-ensure-login');
-const User = require('../../models').User;
+const db = require('../../db');
 const tokenUrl = require('../../services/tokenUrl');
 const emailService = require('../../services/email');
 const password = require('../../services/password');
@@ -58,19 +58,17 @@ exports.postReset = (req, res, next) => {
 
     const userId = req.userId;
 
-    new User({id: userId})
-        .fetch()
+    db.User
+    .findOne({ where: {id: userId}})
         .then((user) => {
 
-            if (req.body.email !== user.get('email')) {
+            if (req.body.email !== user.email) {
                 throw new Error('E-mail not the same');
             }
 
-            user.set('password', bcrypt.hashSync(req.body.password, saltRounds));
-
             return password.invalidateTokensForUser(userId)
                 .then(() => {
-                    return user.save();
+                  return user.update({ password: bcrypt.hashSync(req.body.password, saltRounds) });
                 })
                 .then(() => {
                     req.flash('success', {msg: 'Wachtwoord aangepast, je kan nu inloggen!'});
@@ -89,15 +87,15 @@ exports.postForgot = (req, res, next) => {
     /**
      * Check if user exists
      */
-    new User({email: req.body.email})
-        .fetch()
+    db.User
+    .findOne({ where: {email: req.body.email} })
         .then((user) => {
             if (!user) {
                 req.flash('error', {msg: 'Het is niet gelukt om de e-mail te versturen!'});
                 res.redirect('/auth/local/forgot' + '?clientId=' + req.client.clientId + `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`);
             }
 
-            req.user = user.serialize();
+            req.user = user;
             return password.invalidateTokensForUser(req.user.id);
         })
         .then(() => {

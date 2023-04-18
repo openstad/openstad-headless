@@ -7,7 +7,7 @@
 const passport          = require('passport');
 const md5               = require('md5');
 const login             = require('connect-ensure-login');
-const User              = require('../../models').User;
+const db                = require('../../db');
 const authService       = require('../../services/authService');
 const tokenSMS          = require('../../services/tokenSMS');
 const authPhonenumberConfig = require('../../config/auth').get('Phonenumber');
@@ -60,19 +60,18 @@ exports.login = (req, res) => {
 //Todo: move these methods to the user service
 const createUser = async (phoneNumber) => {
   let hashedPhoneNumber = md5(phoneNumber)
-  return new User({ hashedPhoneNumber: hashedPhoneNumber }).save();
+  return db.User.create({ hashedPhoneNumber: hashedPhoneNumber });
 }
 
 const updateUser = async (user, phoneNumber) => {
   let hashedPhoneNumber = md5(phoneNumber)
   return user
-    .set('hashedPhoneNumber', hashedPhoneNumber)
-    .save();
+    .update({ hashedPhoneNumber: hashedPhoneNumber })
 }
 
 const getUser = async (phoneNumber) => {
   let hashedPhoneNumber = md5(phoneNumber)
-  return new User({ hashedPhoneNumber }).fetch();
+  return db.User.findOne({ where: { hashedPhoneNumber } });
 }
 
 exports.postLogin = async(req, res, next) => {
@@ -102,7 +101,7 @@ exports.postLogin = async(req, res, next) => {
       if (clientConfig.users && clientConfig.users.canCreateNewUsers === false) throw new Error('Cannot create new users');
       user = await createUser(phoneNumber, clientConfig);
     }
-    req.user = user.serialize();
+    req.user = user;
 
     // Redirect if it succeeds to authorize screen
     const authorizeUrl = `/auth/phonenumber/sms-code?redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&client_id=${req.client.clientId}&scope=offline`;

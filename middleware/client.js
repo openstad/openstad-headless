@@ -1,127 +1,84 @@
-const Client = require('../models').Client;
-const UniqueCode = require('../models').UniqueCode;
+const db = require('../db');
 
 const hat = require('hat');
 const privilegedRoles =  require('../config/roles').privilegedRoles;
 const defaultRole =  require('../config/roles').defaultRole;
 const getClientIdFromRequest = require('../utils/getClientIdFromRequest');
+const configAuthTypes = require('../config/auth.js').types;
 
 exports.withAll = (req, res, next) => {
-  Client
-    .fetchAll()
+  db.Client
+    .findAll()
     .then((clients) => {
-       req.clientsCollection = clients;
-       req.clients = clients.serialize();
+       req.clients = clients;
        next();
     })
     .catch((err) => { next(err); });
 }
 
-exports.withOne = (req, res, next) => {
+exports.withOne = async (req, res, next) => {
+
   let clientId = getClientIdFromRequest(req);
-  
-  if (!clientId) {
+
+  if (!clientId) { // TODO: why is this not part of getClientIdFromRequest
     clientId = req.query.client_id;
   }
 
-  if (!clientId) {
+  if (!clientId) { // TODO: why is this not part of getClientIdFromRequest
     clientId = req.params.clientId;
   }
  
-  if (clientId) {
-    let client = new Client({ clientId: clientId });
+  if (!clientId) return next('No Client ID is set for login');
 
-    if(req.query.withUserRoles) {
-      if(req.query.excludingRoles) {
-        client = client.fetch({
-            withRelated: [{'userRoles': function(qb) {
-            qb.join('roles', 'roles.id', 'user_roles.roleId');
-            qb.where('roles.name', 'not in', req.query.excludingRoles.split(','));
-          }
-        }]
-      });
-      } else {
-        client = client.fetch({withRelated:['userRoles']});
-      }  
-    } else {
-      client = client.fetch();
-    }
+  let scope = [];
+  let where = { clientId: clientId }
+
+  if(req.query.withUserRoles) {
+    scope.push({ method: ['includeUserRoles', req.query.excludingRoles] })
+  }
+
+  try {
     
-    client.then((client) => {
-      if (client) {
-        req.clientModel = client;
-        req.client = client.serialize();
+    let client = await db.Client.scope(scope).findOne({ where });
 
-        const clientConfig = JSON.parse(req.client.config);
-        const clientConfigStyling = clientConfig.styling ?  clientConfig.styling : {};
+    if (client) {
+      req.client = client;
 
-        res.locals.clientProjectUrl = clientConfig.projectUrl;
-        res.locals.clientEmail = clientConfig.contactEmail;
-        res.locals.clientDisclaimerUrl = clientConfig.clientDisclaimerUrl;
-        res.locals.clientStylesheets = clientConfig.clientStylesheets;
+      const clientConfig = req.client.config;
+      const clientConfigStyling = clientConfig.styling ?  clientConfig.styling : {};
 
-        //if logo isset in config overwrite the .env logo
-        if (clientConfigStyling && clientConfigStyling.logo) {
-          res.locals.logo = clientConfigStyling.logo;
-        }
-        
-        if (clientConfigStyling && clientConfigStyling.favicon) {
-          res.locals.favicon = clientConfigStyling.favicon;
-        }
+      res.locals.clientProjectUrl = clientConfig.projectUrl;
+      res.locals.clientEmail = clientConfig.contactEmail;
+      res.locals.clientDisclaimerUrl = clientConfig.clientDisclaimerUrl;
+      res.locals.clientStylesheets = clientConfig.clientStylesheets;
 
-        if (clientConfigStyling && clientConfigStyling.inlineCSS) {
-          res.locals.inlineCSS = clientConfigStyling.inlineCSS;
-        }
-
-        if (clientConfig.displayClientName || (clientConfig.displayClientName === 'undefined' && process.env.DISPLAY_CLIENT_NAME=== 'yes')) {
-          res.locals.displayClientName = true;
-        }
-
-        req.client.authTypes            = JSON.parse(req.client.authTypes);
-        req.client.exposedUserFields    = JSON.parse(req.client.exposedUserFields);
-        req.client.requiredUserFields   = JSON.parse(req.client.requiredUserFields);
-        req.client.config               = JSON.parse(req.client.config);
-        req.client.allowedDomains       = JSON.parse(req.client.allowedDomains);
-        req.client.twoFactorRoles       = JSON.parse(req.client.twoFactorRoles);
-
-        next();
-      } else {
-        throw new Error('No Client found for clientID', clientId, req.body);
+      //if logo isset in config overwrite the .env logo
+      if (clientConfigStyling && clientConfigStyling.logo) {
+        res.locals.logo = clientConfigStyling.logo;
       }
-    })
-    .catch((err) => { next(err); });
-  } else {
-    throw new Error('No Client ID is set for login');
-  }
-}
-
-
-exports.withOneById = (req, res, next) => {
-  const clientId = req.params.clientId;
-
-  if (clientId) {
-    new Client({ id: clientId })
-    .fetch()
-    .then((client) => {
-      if (client) {
-        req.clientModel = client;
-        req.client = client.serialize();
-        next();
-      } else {
-        throw new Error('No Client found for clientID', clientId);
+      
+      if (clientConfigStyling && clientConfigStyling.favicon) {
+        res.locals.favicon = clientConfigStyling.favicon;
       }
-    })
-    .catch((err) => { next(err); });
-  } else {
-    throw new Error('No Client ID is set for login');
-/*
-    next({
-      name: 'ClientNotFoundError',
-      status: 404,
-      message:
-    });
-*/
+
+      if (clientConfigStyling && clientConfigStyling.inlineCSS) {
+        res.locals.inlineCSS = clientConfigStyling.inlineCSS;
+      }
+
+      if (clientConfig.displayClientName || (clientConfig.displayClientName === 'undefined' && process.env.DISPLAY_CLIENT_NAME=== 'yes')) {
+        res.locals.displayClientName = true;
+      }
+
+      return next();
+
+    } else {
+      return next('No Client found for clientID');
+    }
+
+  } catch(err) {
+    return next(err);
   }
+
 }
 
 /**
@@ -135,7 +92,12 @@ exports.setAuthType = (authType) => {
 }
 
 exports.validate = (req, res, next) => {
-  let authTypes = req.clientModel.getAuthTypes(req.clientModel);
+
+  let authTypes = req.client.authTypes || [];
+  authTypes = authTypes.map((authType) => {
+    let configAuthType = configAuthTypes.find(type => type.key === authType);
+    return configAuthType;
+  });
 
   // only /admin in the end should work
   if (req.params.priviligedRoute &&  req.params.priviligedRoute !== 'admin') {
@@ -196,20 +158,6 @@ exports.checkIfEmailRequired =  (req, res, next) => {
 // in future it would be great to add something like "user requirements" to  a site
 exports.checkIfAccessTokenBelongToCurrentClient =  async (req, res, next) => {
   return next();
-  /*
-  //+ req.client.id
- new AccessToken({ clientID: req.client.id , userID: req.user.id })
-   .fetch()
-   .then((accessToken) => {
-     if (accessToken.get('id')) {
-       next();
-     } else {
-       throw Error('No Access token issued for this client, req.client.id: ' + req.client.id +  ' user id: ' + req.user.id)
-     }
-   })
-   .catch((e) => {
-     next(e);
-   });*/
 }
 
 
@@ -220,8 +168,8 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
 
       // if UniqueCode authentication is used, other methods are blocked to enforce users can never authorize with email
       if (authTypes.indexOf('UniqueCode') !== -1) {
-        new UniqueCode({ clientId: req.client.id, userId: req.user.id })
-        .fetch()
+        db.UniqueCode
+        .findOne({ where: { clientId: req.client.id, userId: req.user.id } })
         .then((codeResponse) => {
           const userHasPrivilegedRole = privilegedRoles.indexOf(req.user.role) > -1;
 
@@ -355,19 +303,10 @@ exports.create =  (req, res, next) => {
 
   const values = { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes, clientId, clientSecret, allowedDomains, config, twoFactorRoles};
 
-  values.exposedUserFields = JSON.stringify(values.exposedUserFields);
-  values.requiredUserFields = JSON.stringify(values.requiredUserFields);
-  values.authTypes = JSON.stringify(values.authTypes);
-  values.config = JSON.stringify(values.config);
-  values.allowedDomains = JSON.stringify(values.allowedDomains);
-  values.twoFactorRoles = JSON.stringify(values.twoFactorRoles);
-
-
-  new Client(values)
-    .save()
+  db.Client
+    .create(values)
     .then((client) => {
-      req.clientModel = client;
-      req.client = client.serialize();
+      req.client = client;
       next();
     })
     .catch((err) => { next(err); });
@@ -376,19 +315,19 @@ exports.create =  (req, res, next) => {
 exports.update = (req, res, next) => {
   const { name, description, exposedUserFields, requiredUserFields, redirectUrl, siteUrl, authTypes, config, allowedDomains, twoFactorRoles } = req.body;
 
-  req.clientModel.set('name', name);
-  req.clientModel.set('description', description);
-  req.clientModel.set('siteUrl', siteUrl);
-  req.clientModel.set('redirectUrl', redirectUrl);
-  req.clientModel.set('exposedUserFields', JSON.stringify(exposedUserFields));
-  req.clientModel.set('requiredUserFields', JSON.stringify(requiredUserFields));
-  req.clientModel.set('authTypes', JSON.stringify(authTypes));
-  req.clientModel.set('config', JSON.stringify(config));
-  req.clientModel.set('allowedDomains', JSON.stringify(allowedDomains));
-  req.clientModel.set('twoFactorRoles', JSON.stringify(twoFactorRoles));
-
-  req.clientModel
-    .save()
+  req.client
+    .update({
+      name,
+      description,
+      siteUrl,
+      redirectUrl,
+      exposedUserFields,
+      requiredUserFields,
+      authTypes,
+      config,
+      allowedDomains,
+      twoFactorRoles,
+    })
     .then((client) => {
       next();
     })
@@ -398,10 +337,8 @@ exports.update = (req, res, next) => {
     })
 }
 
-
-
 exports.deleteOne = (req, res, next) => {
-  req.clientModel
+  req.client
     .destroy()
     .then((response) => {
       next();

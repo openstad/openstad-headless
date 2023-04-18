@@ -1,38 +1,30 @@
-const UniqueCode = require('../models').UniqueCode;
+const db = require('../db');
 const generateCode = require('../utils/generateCode');
-const Tasks = require('../db/tasks');
+const Tasks = require('../memoryStorage/tasks');
 
 exports.withAll = (req, res, next) => {
-  UniqueCode
-    .query(function (qb) {
-      const limit = req.query.limit ? parseInt(req.query.limit, 10) : 1000;
-      const offset = req.query.offset ? parseInt(req.query.offset, 10) : 0;
-      const search = req.query.search ? req.query.search : false;
 
-      if (req.query.clientId) {
-        qb.where('clientId',  req.client.id);
-      }
+  const limit = req.query.limit ? parseInt(req.query.limit, 10) : 1000;
+  const offset = req.query.offset ? parseInt(req.query.offset, 10) : 0;
+  const search = req.query.search ? req.query.search : false;
 
-      if (search) {
-        qb.where('code', 'like', '%' +search+ '%')
-      }
+  let where = {};
 
-      qb.limit(limit);
-      qb.offset(offset);
-      qb.orderBy('id', 'DESC');
+  if (req.query.clientId) {
+    where.clientId = req.client.id;
+  }
 
-    })
-    .fetchAll()
+  if (search) {
+    where.code = { [db.Sequelize.Op.like]: '%' +search+ '%' };
+  }
+  
+  db.UniqueCode
+    .findAll({ where, limit, offset, order: [['id', 'DESC']] })
     .then((codes) => {
-       req.codesCollection = codes;
-       req.codes = codes.serialize();
+       req.codes = codes;
 
-       return UniqueCode
-        .query((qb) => {
-          qb.where('clientId',  req.client.id)
-        })
-        .count("id");
-    //    .first();
+       return db.UniqueCode
+        .count({ where: { clientId: req.client.id }})
     })
     .then((total) => {
       req.totalCodeCount = total;
@@ -44,11 +36,10 @@ exports.withAll = (req, res, next) => {
 exports.withOne = (req, res, next) => {
   const codeId = req.body.codeId ? req.body.codeId : req.params.codeId;
 
-  new UniqueCode({ id: codeId })
-    .fetch()
+  db.UniqueCode
+    .findOne({ where: { id: codeId } })
     .then((code) => {
-      req.codeModel = code;
-      req.code = code.serialize();
+      req.code = code;
       next();
     })
     .catch((err) => { next(err); });
@@ -73,11 +64,11 @@ exports.create = async (req, res, next) => {
   for (let i = 0; i < amountOfCodes; i++) {
     await new Promise((resolve, reject) => {
       setTimeout(function() {
-        return new UniqueCode({
-          code: generateCode(),
-          clientId: req.client.id
-        })
-          .save()
+        return db.UniqueCode
+          .create({
+            code: generateCode(),
+            clientId: req.client.id
+          })
           .then(result => {
             task.generatedCodes++;
             return Tasks.save(taskId, task);
@@ -99,10 +90,9 @@ exports.create = async (req, res, next) => {
 
 exports.reset = (req, res, next) => {
   const { userId } = req.body;
-  req.codeModel.set('userId', null);
 
-  req.codeModel
-    .save()
+  req.code
+    .update({userId: null})
     .then((code) => {
       next();
     })
@@ -113,7 +103,7 @@ exports.reset = (req, res, next) => {
 }
 
 exports.deleteOne = (req, res, next) => {
-  req.codeModel
+  req.code
     .destroy()
     .then(() => {
       next();

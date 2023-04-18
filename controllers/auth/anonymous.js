@@ -1,12 +1,10 @@
 const authType = 'Anonymous';
-const ActionLog = require('../../models').ActionLog;
-
+const db                  = require('../../db');
 const passport            = require('passport');
 const bcrypt              = require('bcrypt');
 const saltRounds          = 10;
 const hat                 = require('hat');
 const login               = require('connect-ensure-login');
-const User                = require('../../models').User;
 const tokenUrl            = require('../../services/tokenUrl');
 const authAnonymousConfig = require('../../config/auth').get(authType);
 const url                 = require('url');
@@ -42,8 +40,8 @@ exports.register  = (req, res, next) => {
 
 		req.session.createAnonymousUser = false;
 
-		new User({ email: req.body.email })
-			.save()
+		db.User
+			.create({ email: req.body.email })
 			.then((user) => {
 
 				if (!user) {
@@ -51,7 +49,7 @@ exports.register  = (req, res, next) => {
 					return res.redirect(`/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri}`);
 				}
 
-				req.user = user.serialize();
+				req.user = user;
 
 				req.logIn(user, function(err) {
 					if (err) { return next(err); }
@@ -70,8 +68,8 @@ exports.register  = (req, res, next) => {
 					const authorizeUrl = `/dialog/authorize?redirect_uri=${encodeURIComponent(req.query.redirect_uri)}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
 					try {
-						new ActionLog(values)
-							.save()
+						db.ActionLog
+							.create(values)
 							.then(() => {
 								return res.redirect(authorizeUrl);
 							})

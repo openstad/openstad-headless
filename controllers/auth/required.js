@@ -8,7 +8,6 @@ exports.index = (req, res, next) => {
   })
 
   requiredUserFields = requiredUserFields.filter(field => !req.user[field.key]);
-	// console.log(req.userModel);
 
   const config = req.client.config ? req.client.config : {};
   const configRequiredFields = config && config.requiredFields ? config.requiredFields : {};
@@ -40,18 +39,17 @@ exports.post = (req, res, next) => {
   const clientRequiredUserFields = req.client.requiredUserFields;
   const redirectUrl = req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : req.client.redirectUrl;
 
+  let data = {};
   clientRequiredUserFields.forEach((field) => {
     if (field === 'email' && !!req.user.email)  {
       //break;
     } else if (req.body[field]) {
-      req.userModel.set(field, req.body[field]);
+      data[field] = req.body[field];
     }
   });
 
-	// console.log(req.userModel);
-
-  req.userModel
-    .save()
+  req.user
+    .update(data)
     .then(() => {
       const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
       res.redirect(authorizeUrl);

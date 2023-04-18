@@ -1,5 +1,5 @@
 const loginFields = require('../config/user').loginFields;
-const User                  = require('../models').User;
+const db = require('../db');
 
 exports.validateLogin = (req, res, next) => {
   req.check(loginFields);
@@ -32,11 +32,10 @@ exports.check = (req, res, next) => {
 
     return res.redirect(url);
   } else {
-    new User({ id: req.user.id })
-      .fetch()
+    db.User
+      .findOne({ where: { id: req.user.id } })
       .then((user) => {
-        req.userModel = user;
-        req.user = user.serialize();
+        req.user = user;
         next();
       })
       .catch((err) => {

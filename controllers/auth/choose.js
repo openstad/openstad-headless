@@ -1,4 +1,6 @@
 const adminAuthTypes = require('../../config/auth').adminTypes;
+const configAuthTypes = require('../../config/auth.js').types;
+
 /**
  * Controller responsible for handling the logic for choosing which login options are availablde
  * (standard login with password & register)
@@ -8,8 +10,18 @@ const adminAuthTypes = require('../../config/auth').adminTypes;
   * If one available auth type is available, redirect otherwise let the user choose
   */
  exports.index = (req, res, next) => {
-   const isPriviligedRoute = req.params.priviligedRoute === 'admin';
-   const availableAuthTypes = isPriviligedRoute ? adminAuthTypes : req.clientModel.getAuthTypes(req.clientModel);
+   let isPriviligedRoute = false;
+   let availableAuthTypes;
+   if (req.params.priviligedRoute) {
+     isPriviligedRoute = true;
+     availableAuthTypes = adminAuthTypes;
+   } else {
+     availableAuthTypes = req.client.authTypes || [];
+     availableAuthTypes = availableAuthTypes.map((authType) => {
+       let configAuthType = configAuthTypes.find(type => type.key === authType);
+       return configAuthType;
+     });
+   }
 
    if (availableAuthTypes.length === 1) {
      let availableAuthType = availableAuthTypes.shift();

@@ -84,12 +84,12 @@ exports.configure = async (req, res, next) => {
         const config = req.client.config ? req.client.config : {};
         const configTwoFactor = config && config.configureTwoFactor ? config.configureTwoFactor : {};
 
-        let twoFactorSecret = req.userModel.get('twoFactorToken');
+        let twoFactorSecret = req.user.twoFactorToken;
 
         // @todo, would be good to take this from ENV or settings somewhere. Currently however no name per installation
         const issuer = "Openstad";
         // take email, since this is always present, make sure @ char doesn't cause issues in some cases
-        const accountName = req.userModel.get('email');
+        const accountName = req.user.email;
 
         if (!twoFactorSecret) {
             /**
@@ -99,7 +99,7 @@ exports.configure = async (req, res, next) => {
             const twoFactor = twofactor.generateSecret({name: issuer, account: accountName});
 
             try {
-                await req.userModel.set('twoFactorToken', twoFactor.secret).save();
+              await req.user.update({ twoFactorToken: twoFactor.secret });
             } catch (e) {
                 next(e)
             }
@@ -130,9 +130,8 @@ exports.configurePost = async (req, res, next) => {
     } else {
         const redirectToTwoFactor = formatRedirectUrl(twoFactorBaseUrl, req);
 
-        req.userModel
-            .set('twoFactorConfigured', true)
-            .save()
+        req.user
+        .update({ twoFactorConfigured: true })
             .then(() => {
                 req.flash('success', {msg: 'Two factor authentication configured!'});
                 res.redirect(redirectToTwoFactor);

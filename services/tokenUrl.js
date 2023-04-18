@@ -1,5 +1,5 @@
 const Promise = require('bluebird');
-const LoginToken = require('../models').LoginToken;
+const db = require('../db');
 const appUrl = process.env.APP_URL;
 const hat = require('hat');
 
@@ -20,11 +20,12 @@ exports.format = (client, user, redirectUrl, admin) => {
   return new Promise((resolve, reject) =>  {
     const token = hat();
 
-    new LoginToken({
+    db.LoginToken
+    .create({
       userId: user.id,
-      token: token
+      token: token,
+      valid: true,
     })
-    .save()
     .then((loginToken) => {
       const url = admin ? getAdminUrl(user, client, token, redirectUrl) : getUrl(user, client, token, redirectUrl);
       resolve(url);
@@ -42,15 +43,11 @@ exports.invalidateTokensForUser = (userId) => {
     if (!userId) {
       resolve();
     } else {
-      LoginToken
-      .where({userId: userId})
-      .save(
-          {valid: false},
-          {method: 'update', patch: true}
-       )
-       .then(() => { resolve(); })
-       .catch(() => { resolve(); })
-     }
+      db.LoginToken
+        .update({ valid: false }, { where: {userId: userId} })
+        .then(() => { resolve(); })
+        .catch(() => { resolve(); })
+    }
   });
 
 }

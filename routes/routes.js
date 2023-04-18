@@ -28,7 +28,7 @@ const logMw = require('../middleware/log');
 const getClientIdFromRequest = require('../utils/getClientIdFromRequest');
 
 //MODELS
-const ExternalCsrfToken = require('../models').ExternalCsrfToken;
+const db = require('../db');
 
 const loginBruteForce = bruteForce.user.getMiddleware({
     key: function (req, res, next) {
@@ -87,59 +87,54 @@ const csurf = require('csurf');
  * don't allow for redirect back to an unauthorized domain, but in case that fails this is a backup
  */
 const csrfProtection = async  (req, res, next) => {
-    if (req.body && req.body.externalCSRF) {
-        let csrfToken;
 
-        try {
-            csrfToken = await new ExternalCsrfToken({
-                token: req.body.externalCSRF
-            }).query((q) => {
-                /**
-                 * Only select tokens that are younger then 10 minutes
-                 */
-                const minutes = 10;
-                const date = new Date();
-                const timeAgo = new Date(date.setTime(date.getTime() - (minutes * 60000)));
+  if (req.body && req.body.externalCSRF) {
 
-                q.where('createdAt', '>=', timeAgo);
-                q.orderBy('createdAt', 'DESC');
-            })
-                .fetch()
+    let csrfToken;
 
-        } catch (e) {
-            next(e)
-        }
+    try {
+      /**
+       * Only select tokens that are younger then 10 minutes
+       */
+      const minutes = 10;
+      const date = new Date();
+      const timeAgo = new Date(date.setTime(date.getTime() - (minutes * 60000)));
 
-
-
-        // in case a valid csrf token is found set to used it and move on.
-        if (csrfToken) {
-            csrfToken.set('used', true);
-
-            try {
-                await csrfToken.save();
-            } catch (e) {
-                next(e)
-            }
-
-            next();
-        } else {
-            next(new Error('Invalid CSRF token', 403));
-        }
-
-    } else {
-        return csurf({
-            cookie: {
-                httpOnly: true,
-                secure: process.env.COOKIE_SECURE_OFF === 'yes' ? false : true,
-                sameSite: process.env.CSRF_SAME_SITE_OFF === 'yes' ? false : true
-            }
-        })(req, res, next);
+      csrfToken = await db.ExternalCsrfToken.findOne({
+        where: {
+          token: req.body.externalCSRF,
+          createdAt: {
+            [db.Sequelize.Op.gte]: timeAgo,
+          },
+        },
+        order: [['createdAt', 'DESC']],
+      });
+    } catch (e) {
+      return next(e)
     }
+
+    // in case a valid csrf token is found set to used it and move on.
+    if (csrfToken) {
+      try {
+        await csrfToken.update({ 'used': true });
+      } catch (e) {
+        return next(e)
+      }
+      return next();
+    } else {
+      return next(new Error('Invalid CSRF token', 403));
+    }
+
+  } else {
+    return csurf({
+      cookie: {
+        httpOnly: true,
+        secure: process.env.COOKIE_SECURE_OFF === 'yes' ? false : true,
+        sameSite: process.env.CSRF_SAME_SITE_OFF === 'yes' ? false : true
+      }
+    })(req, res, next);
+  }
 }
-
-
-
 
 const addCsrfGlobal = (req, res, next) => {
     req.nunjucksEnv.addGlobal('csrfToken', req.csrfToken());

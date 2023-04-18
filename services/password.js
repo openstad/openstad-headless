@@ -1,5 +1,5 @@
 const Promise = require('bluebird');
-const PasswordResetToken = require('../models').PasswordResetToken;
+const db = require('../db');
 const appUrl = process.env.APP_URL;
 const hat = require('hat');
 
@@ -14,13 +14,13 @@ exports.formatResetLink = (client, user, redirectUrl) => {
   return new Promise((resolve, reject) =>  {
     const token = hat();
 
-    new PasswordResetToken({
+    db.PasswordResetToken
+    .create({
       userId: user.id,
       token: token
     })
-    .save()
     .then((resetToken) => {
-      const url = getUrl(user, client, resetToken.get('token'), redirectUrl);
+      const url = getUrl(user, client, resetToken.token, redirectUrl);
       resolve(url);
     })
     .catch((err) => {
@@ -35,14 +35,11 @@ exports.invalidateTokensForUser = (userId) => {
     if (!userId) {
       resolve();
     } else {
-      PasswordResetToken
-      .where({userId: userId})
-      .save(
-          {valid: false},
-          {method: 'update', patch: true}
-       )
-       .then(() => { resolve(); })
-       .catch(() => { resolve(); })
-     }
+      db.PasswordResetToken
+        .finndOne({ where: {userId: userId} })
+        .update({valid: false})
+        .then(() => { resolve(); })
+        .catch(() => { resolve(); })
+    }
   });
 }

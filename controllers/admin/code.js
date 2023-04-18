@@ -1,4 +1,4 @@
-const UniqueCode    = require('../../models').UniqueCode;
+const db = require('../../db');
 
 const fs            = require('fs');
 const csv           = require('fast-csv');
@@ -70,16 +70,16 @@ exports.postBulk = (req, res, next) => {
      * if exists, set to duplicate
      * otherwise set
      */
-    new UniqueCode({code: code, clientId: clientId })
-     .fetch()
+    db.UniqueCode
+      .findOne({ where: {code: code, clientId: clientId } })
      .then((uniqueCode) => {
        // if code exists already, the duplicate
        if (uniqueCode) {
          codeStatus.duplicate = true;
          codeStatus.processed = true;
        } else {
-         new UniqueCode({code: code, clientId: clientId})
-           .save()
+         db.UniqueCode
+           .create({code: code, clientId: clientId})
            .then(() => { codeStatus.processed = true; });
        }
      })
@@ -137,8 +137,8 @@ exports.postBulk = (req, res, next) => {
 exports.create = (req, res, next) => {
   const { code, clientId } = req.body;
 
-  new UniqueCode({ code, clientId })
-    .save()
+  db.UniqueCode
+    .create({ code, clientId })
     .then((response) => {
       req.flash('success', { msg: 'Succesfully created '});
       res.redirect('/admin/codes' || '/');
@@ -147,7 +147,7 @@ exports.create = (req, res, next) => {
 }
 
 exports.destroy = (req, res) => {
-  req.body.codeModel.destroy();
+  req.body.code.destroy();
   req.flash('success', { msg: 'Succesfully removed'});
   res.redirect('/admin/codes');
 }

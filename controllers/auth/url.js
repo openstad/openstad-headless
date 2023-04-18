@@ -5,7 +5,7 @@
 const authType = 'Url';
 
 const passport = require('passport');
-const User = require('../../models').User;
+const db = require('../../db');
 const tokenUrl = require('../../services/tokenUrl');
 const authService = require('../../services/authService');
 const verificationService = require('../../services/verificationService');
@@ -96,17 +96,16 @@ const handleSending = async (req, res, next) => {
 
 //Todo: move these methods to the user service
 const createUser = async (email) => {
-    return new User({email: email}).save();
+    return db.User.create({email: email});
 }
 
 const updateUser = async (user, email) => {
     return user
-        .set('email', email)
-        .save();
+        .update({ email })
 }
 
 const getUser = async (email) => {
-  return new User({email}).fetch();
+  return db.User.findOne({ where: {email }});
 }
 
 exports.postLogin = async (req, res, next) => {
@@ -117,7 +116,7 @@ exports.postLogin = async (req, res, next) => {
         let user = await getUser(req.body.email);
 
         if (user) {
-            req.user = user.serialize();
+            req.user = user;
             return handleSending(req, res, next);
         }
 
@@ -131,14 +130,14 @@ exports.postLogin = async (req, res, next) => {
         if (req.user && !req.user.email) {
             user = await updateUser(req.user, req.body.email);
 
-            req.user = user.serialize();
+            req.user = user;
             return handleSending(req, res, next);
         }
 
         if (clientConfig.users && clientConfig.users.canCreateNewUsers === false) throw new Error('Cannot create new users');
         user = await createUser(req.body.email);
 
-        req.user = user.serialize();
+        req.user = user;
         return handleSending(req, res, next);
     } catch (err) {
         console.log('===> err', err);
@@ -150,22 +149,18 @@ exports.postLogin = async (req, res, next) => {
 
 exports.postRegister = (req, res, next) => {
     const {firstName, lastName, postcode, token} = req.body;
-    const userModel = req.userModel;
+    const user = req.user;
 
     /**
      * Set Values for user; validation is taken care of in middleware
-     */
-    userModel.set('firstName', firstName);
-    userModel.set('lastName', lastName);
-    userModel.set('postcode', postcode);
-
-    /**
      * After succesfull registration redirect to token login url, for automagic login
      */
-    userModel
-        .save()
-        .then((userReponse) => {
-            const user = userReponse.serialize();
+    user.update({
+            firstName,
+            lastName,
+            postcode,
+        })
+        .then((user) => {
             res.redirect(tokenUrl.getUrl(user, req.client, token));
         })
         .catch((err) => {

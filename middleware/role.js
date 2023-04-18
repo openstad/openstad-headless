@@ -1,11 +1,10 @@
-const Role = require('../models').Role;
+const db = require('../db');
 
 exports.withAll = (req, res, next) => {
-  Role
-  .fetchAll()
+  db.Role
+  .findAll()
   .then((roles) => {
-     req.rolesCollection = roles;
-     req.roles = roles.serialize();
+     req.roles = roles;
      next();
   })
   .catch((err) => { next(err); });
@@ -15,13 +14,10 @@ exports.withAll = (req, res, next) => {
 exports.withOne = (req, res, next) => {
   const roleId = req.body.roleId ? req.body.roleId : req.params.roleId;
 
-  new Role({
-    id: roleId
-  })
-    .fetch()
+  db.Role
+    .findOne({ where: { id: roleId } })
     .then((role) => {
-      req.roleModel = role;
-      req.role = role.serialize();
+      req.role = role;
       next();
     })
     .catch((err) => { next(err); });

@@ -1,30 +1,26 @@
-const LoginToken = require('../models').LoginToken;
-const User       = require('../models').User;
+const db = require('../db');
 
 exports.addUser = ((req, res, next) => {
   const tokenToQuery = req.body.token ?  req.body.token : req.query.token;
-  new LoginToken({token: tokenToQuery, valid: true})
-      .query((q) => {
-        /**
-         * Only select tokens that are younger then 60 min
-         */
-        const minutes = 60;
-        const msForAMinute = 60000;
-        const date = new Date();
-        const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
-
-        q.where('createdAt', '>=', timeAgo);
-        q.orderBy('createdAt', 'DESC');
+  const minutes = 60;
+  const msForAMinute = 60000;
+  const date = new Date();
+  const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
+  db.LoginToken
+    .findOne({
+      where: {
+        token: tokenToQuery,
+        valid: true,
+        createdAt: { [db.Sequelize.Op.gte]: timeAgo }
+      },
+      order: [['createdAt', 'DESC']],
     })
-    .fetch()
     .then((token) => {
       if (token) {
-        new User
-          ({id: token.get('userId')})
-          .fetch()
+        db.User
+          .findOne({ where: { id: token.userId }})
           .then((user) => {
-            req.userModel = user;
-            req.user = user.serialize();
+            req.user = user;
             next();
           })
           .catch((err) => {

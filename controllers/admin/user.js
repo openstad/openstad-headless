@@ -1,6 +1,5 @@
 const bcrypt = require('bcrypt');
-const User = require('../../models').User;
-const UserRole = require('../../models').UserRole
+const db = require('../db');
 const saltRounds = 10;
 const Promise = require('bluebird');
 
@@ -44,31 +43,32 @@ exports.create = (req, res, next) => {
   extraData = extraData ? extraData : {};
   extraData = JSON.stringify(extraData);
 
-  new User({
-    firstName: firstName,
-    lastName: lastName,
-    email: email,
-    streetName: streetName,
-    houseNumber: houseNumber,
-    suffix: suffix,
-    postcode: postcode,
-    city: city,
-    phoneNumber: phoneNumber,
-    password: password
-  })
-  .save()
-  .then((response) => {
-    req.flash('success', { msg: 'Succesfully created '});
-    res.redirect('/admin/user/' + response.id );
-  })
-  .catch((err) => {
-    next(err);
-  });
+  db.User
+    .create({
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      streetName: streetName,
+      houseNumber: houseNumber,
+      suffix: suffix,
+      postcode: postcode,
+      city: city,
+      phoneNumber: phoneNumber,
+      password: password
+    })
+    .then((response) => {
+      req.flash('success', { msg: 'Succesfully created '});
+      res.redirect('/admin/user/' + response.id );
+    })
+    .catch((err) => {
+      next(err);
+    });
 }
 
 exports.update = (req, res, next) => {
   const keysToUpdate = ['firstName', 'lastName', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'extraData'];
 
+  let data = {};
   keysToUpdate.forEach((key) => {
     if (req.body[key]) {
       let value = req.body[key];
@@ -82,7 +82,7 @@ exports.update = (req, res, next) => {
         value = JSON.stringify(value);
       }
 
-      req.userObjectModel.set(key, value);
+      data[key] = value;
     }
   });
 
@@ -91,7 +91,7 @@ exports.update = (req, res, next) => {
 
   const saveRoles = [];
 
-  for (clientId in roles) {
+  for (let clientId in roles) {
     let roleId = roles[clientId];
     let parsedClientId = parseInt(clientId.replace('\'', ''), 10);
     saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
@@ -101,7 +101,7 @@ exports.update = (req, res, next) => {
     return saveRole();
   })
   .then(() => {
-    return req.userObjectModel.save();
+    return req.userObject.update(data);
   })
   .then(() => {
     req.flash('success', { msg: 'Updated user!' });
@@ -116,14 +116,13 @@ exports.update = (req, res, next) => {
 
 const createOrUpdateUserRole = (clientId, userId, roleId) => {
   return new Promise ((resolve, reject) => {
-    new UserRole({clientId, userId})
-      .fetch()
+    db.UserRole
+      .findOne({ where: {clientId, userId} })
       .then((userRole) => {
         if (userRole) {
-          userRole.set('roleId', roleId);
-          return userRole.save();
+          return userRole.update({ roleId });
         } else {
-          return new UserRole({ clientId, roleId, userId }).save();
+          return db.UserRole.create({ clientId, roleId, userId });
         }
       })
       .then(()=> {

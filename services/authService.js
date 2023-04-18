@@ -1,4 +1,4 @@
-const ActionLog = require('../models/index').ActionLog;
+const db = require('../db');
 const userRepository = require('../repositories/userRepository');
 const privilegedRoles =  require('../config/roles').privilegedRoles;
 
@@ -25,5 +25,5 @@ exports.logSuccessFullLogin = (req) => {
     ip: ip
   };
 
-  return new ActionLog(values).save();
+  return db.ActionLog.create(values);
 };

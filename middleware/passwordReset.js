@@ -1,32 +1,31 @@
-const PasswordResetToken = require('../models').PasswordResetToken;
-const User = require('../models').User;
+const db = require('../db');
 
 exports.validate = (req, res, next) => {
   const queryToken = req.query.token ? req.query.token : req.body.token;
 
-  new PasswordResetToken({
-    token: queryToken,
-    valid: true
-  })
-      .query((q) => {
-        /**
-         * Only select tokens that are younger then 60 min
-         */
-        const minutes = 60;
-        const msForAMinute = 60000;
-        const date = new Date();
-        const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
+  /**
+   * Only select tokens that are younger then 60 min
+   */
+  const minutes = 60;
+  const msForAMinute = 60000;
+  const date = new Date();
+  const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
 
-        q.where('createdAt', '>=', timeAgo);
-        q.orderBy('createdAt', 'DESC');
+  db.PasswordResetToken
+    .findOne({
+      where: {
+        token: queryToken,
+        valid: true,
+        'createdAt': { [db.Sequelize.Op.gte]: timeAgo }
+      },
+      order: [[ 'createdAt', 'DESC' ]]
     })
-    .fetch()
     .then((passwordResetToken) => {
       // if token found validate, otherwise throw error
       if (passwordResetToken) {
-        req.passwordResetToken = passwordResetToken.serialize();
-        req.body.userId = passwordResetToken.get('userId');
-        req.userId = passwordResetToken.get('userId');
+        req.passwordResetToken = passwordResetToken;
+        req.body.userId = passwordResetToken.userId;
+        req.userId = passwordResetToken.userId;
 
           next();
       } else {

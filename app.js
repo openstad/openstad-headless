@@ -1,5 +1,6 @@
 const app = require('./app-init');
 const config = require('./config');
+const memoryStorage = require('./memoryStorage');
 const db = require('./db');
 
 /**
@@ -7,7 +8,7 @@ const db = require('./db');
  * in the database
  */
 setInterval(() => {
-  db
+  memoryStorage
     .accessTokens
     .removeExpired()
     .catch(err => console.error('Error trying to remove expired tokens:', err.stack));

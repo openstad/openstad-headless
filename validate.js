@@ -1,11 +1,10 @@
 'use strict';
 const process = require('process');
 const bcrypt = require('bcrypt');
-const config  = require('./config');
-const db      = require('./db');
-const utils   = require('./utils');
-const Client = require('./models').Client;
-const User = require('./models').User;
+const config = require('./config');
+const memoryStorage = require('./memoryStorage');
+const utils = require('./utils');
+const db = require('./db');
 const saltRounds = 10;
 
 /** Validate object to attach all functions to  */
@@ -106,16 +105,16 @@ validate.token = (token, accessToken) => {
 
   // token is a user token
   if (token.userID != null) {
-    return new User({id: token.userID})
-            .fetch()
-            .then(client => validate.userExists(client))
-            .then((client) => { return client.serialize(); });
+    return db.User
+      .findOne({where: {id: token.userID} })
+      .then(client => validate.userExists(client))
+      .then((client) => { return client; });
   }
 
-  return new Client({clientId: token.clientID})
-    .fetch({debug: true})
+  return db.Client()
+    .findOne({where: {clientId: token.clientID} })
     .then(client => validate.clientExists(client))
-    .then((client) => { return client.serialize(); });
+    .then((client) => { return client; });
 };
 
 /**
@@ -177,7 +176,7 @@ validate.isRefreshToken = ({ scope }) => scope != null && scope.indexOf('offline
  */
 validate.generateRefreshToken = ({ userId, clientID, scope }) => {
   const refreshToken = utils.createToken({ sub : userId, exp : config.refreshToken.expiresIn });
-  return db.refreshTokens.save(refreshToken, userId, clientID, scope)
+  return memoryStorage.refreshTokens.save(refreshToken, userId, clientID, scope)
   .then(() => refreshToken);
 };
 
@@ -191,7 +190,7 @@ validate.generateRefreshToken = ({ userId, clientID, scope }) => {
 validate.generateToken = ({ userID, clientID, scope }) => {
   const token      = utils.createToken({ sub : userID, exp : config.token.expiresIn });
   const expiration = config.token.calculateExpirationDate();
-  return db.accessTokens.save(token, expiration, userID, clientID, scope)
+  return memoryStorage.accessTokens.save(token, expiration, userID, clientID, scope)
   .then(() => token);
 };
 

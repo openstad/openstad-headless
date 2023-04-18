@@ -1,5 +1,5 @@
 const hat = require('hat');
-const Role = require('../../models').Role;
+const db = require('../../db');
 
 exports.all = (req, res, next) => {
   res.render('admin/role/all', {
@@ -23,8 +23,8 @@ exports.edit = (req, res, next) => {
 exports.create = (req, res, next) => {
   const { name} = req.body;
 
-  new Role({ name })
-    .save()
+  db.Role()
+    .create({ name })
     .then((response) => {
       req.flash('success', { msg: 'Succesfully created '});
       res.redirect('/admin/roles' || '/');
@@ -32,13 +32,11 @@ exports.create = (req, res, next) => {
     .catch((err) => { next(err); });
 }
 
-exports.update = (req, res) => {
+exports.update = (req, res, next) => {
   const { name } = req.body;
 
-  req.roleModel.set('name', name);
-
-  req.roleModel
-    .save()
+  req.role
+    .update({name})
     .then((response) => {
       req.flash('success', { msg: 'Updated role!'});
       res.redirect('/admin/role/' + response.get('id')  || '/');

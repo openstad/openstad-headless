@@ -10,7 +10,7 @@
  const saltRounds        = 10;
  const hat               = require('hat');
  const login             = require('connect-ensure-login');
- const User              = require('../../models').User;
+ const db                = require('../../db');
  const authLocalConfig   = require('../../config/auth').get('Local');
  const URL               = require('url').URL;
  const authType          = 'Local';
@@ -74,8 +74,8 @@ exports.postRegister = (req, res, next) => {
   if (errors.length === 0) {
     password = bcrypt.hashSync(password, saltRounds);
 
-    new User({ firstName, lastName, email, password })
-      .save()
+    db.User()
+      .create({ firstName, lastName, email, password })
       .then(() => { res.redirect(authLocalConfig.loginUrl+ '?clientId=' + req.client.clientId); })
       .catch((err) => { next(err) });
   } else {

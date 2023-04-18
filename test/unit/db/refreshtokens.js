@@ -1,6 +1,6 @@
 'use strict';
 
-const { refreshTokens } = require('../../../db');
+const { refreshTokens } = require('../../../memoryStorage');
 const jwt               = require('jsonwebtoken');
 const utils             = require('../../../utils');
 

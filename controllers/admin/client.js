@@ -1,5 +1,5 @@
+const db = require('../../db');
 const hat = require('hat');
-const Client = require('../../models').Client;
 const userFields = require('../../config/user').fields;
 const authTypes = require('../../config/auth').types;
 
@@ -71,8 +71,8 @@ exports.create = (req, res, next) => {
 
 
 
-  new Client(values)
-    .save()
+  db.Client
+    .create(values)
     .then((response) => {
       req.flash('success', { msg: 'Succesfully created '});
       res.redirect('/admin/client/' + response.id  || '/');
@@ -83,16 +83,16 @@ exports.create = (req, res, next) => {
 exports.update = (req, res, next) => {
   const { name, description, exposedUserFields, requiredUserFields, redirectUrl, siteUrl, authTypes } = req.body;
 
-  req.clientModel.set('name', name);
-  req.clientModel.set('description', description);
-  req.clientModel.set('siteUrl', siteUrl);
-  req.clientModel.set('redirectUrl', redirectUrl);
-  req.clientModel.set('exposedUserFields', JSON.stringify(exposedUserFields));
-  req.clientModel.set('requiredUserFields', JSON.stringify(requiredUserFields));
-  req.clientModel.set('authTypes', JSON.stringify(authTypes));
-
-  req.clientModel
-    .save()
+  req.client
+    .update({
+      name,
+      description,
+      siteUrl,
+      redirectUrl,
+      exposedUserFields,
+      requiredUserFields,
+      authTypes,
+    })
     .then((response) => {
       req.flash('success', { msg: 'Updated client!'});
       res.redirect('/admin/client/' + response.get('id')  || '/');

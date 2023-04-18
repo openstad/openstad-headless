@@ -1,17 +1,14 @@
 'use strict';
 
-const db                                   = require('./db');
+const memoryStorage                        = require('./memoryStorage');
 const passport                             = require('passport');
 const { Strategy: LocalStrategy }          = require('passport-local');
 const { BasicStrategy }                    = require('passport-http');
 const { Strategy: ClientPasswordStrategy } = require('passport-oauth2-client-password');
 const { Strategy: BearerStrategy }         = require('passport-http-bearer');
 const { Strategy: AuthTokenStrategy }      = require('passport-auth-token');
+const db                                   = require('./db');
 const validate                             = require('./validate');
-const User                                 = require('./models').User;
-const Client                               = require('./models').Client;
-const LoginToken                           = require('./models').LoginToken;
-const UniqueCode                           = require('./models').UniqueCode;
 const TokenStrategy                        = require('./token-strategy');
 
 const tokenUrl = require('./services/tokenUrl');
@@ -26,10 +23,9 @@ const tokenUrl = require('./services/tokenUrl');
 passport.use(new LocalStrategy(
   {usernameField: 'email'},
   (email, password, done) => {
-    User
-      .where({email: email})
-      .fetch()
-      .then((user) => { user = user.serialize(); return validate.user(user, password) })
+    db.User
+      .findOne({ where: {email: email} })
+      .then((user) => { return validate.user(user, password) })
       .then(user => done(null, user))
       .catch(error => done(null, false, { message: 'Onjuiste inlog.' }));
   }));
@@ -47,31 +43,28 @@ passport.use('url', new TokenStrategy({
   session: true
 }, function (token, done) { // put your check logic here
 
-  new LoginToken({
-    token: token,
-    valid: true
-  })
-    .query((q) => {
-      /**
-       * Only select tokens that are younger then 30 minutes
-       */
-      const minutes = 10;
-      const msForAMinute = 60000;
-      const date = new Date();
-      const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
-
-      q.where('createdAt', '>=', timeAgo);
-      q.orderBy('createdAt', 'DESC');
+  const minutes = 10;
+  const msForAMinute = 60000;
+  const date = new Date();
+  const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
+  db.LoginToken
+    .findOne({
+      where: {
+        token: token,
+        valid: true,
+        createdAt: {
+          [db.Sequelize.Op.gte]: timeAgo
+        }
+      },
+      order: [['createdAt', 'DESC']],
     })
-    .fetch()
     .then(async (token) => {
 
       if (token) {
-        await tokenUrl.invalidateTokensForUser(token.get('userId'));
+        await tokenUrl.invalidateTokensForUser(token.userId);
 
-        new User({id: token.get('userId')})
-          .fetch()
-          .then((user) => { return user.serialize(); })
+        db.User
+          .findOne({ where: {id: token.userId} })
           .then(user => { return done(null, user) } )
           .catch((err) => { return done(err); });
       } else {
@@ -85,27 +78,17 @@ passport.use('uniqueCode', new TokenStrategy({
   varName : "unique_code"
 }, function (code, done, client) { // put your check logic here
 
-  new UniqueCode({
-    code: code,
-    clientId: client.id
-  })
-    /*.query((q) => {
-      /**
-       * Only select tokens that are younger then 2 days
-       * created_at is "bigger then" 48 hours ago
-       */
-    /*
-   const days = 2;
-   const msForADay = 86400000;
-   const timeAgo = new Date(date.setTime(date.getTime() + (days * msForADay)));
-   q.where('createdAt', '>=', timeAgo);
-   q.orderBy('createdAt', 'DESC');
- }) */
-    .fetch()
+  db.UniqueCode
+    .findOne({
+      where: {
+        code: code,
+        clientId: client.id
+      }
+    })
     .then((uniqueCode) => {
       if (uniqueCode) {
-        const isUsed = uniqueCode.get('isUsed');
-        const userId = uniqueCode.get('userId');
+        const isUsed = uniqueCode.isUsed;
+        const userId = uniqueCode.userId;
 
         if (isUsed) {
           done("Token has been used");
@@ -113,9 +96,8 @@ passport.use('uniqueCode', new TokenStrategy({
           /**
            * In case of existing user fetch the user
            */
-          new User({id: userId})
-            .fetch()
-            .then((fetchedUser) => { return fetchedUser.serialize(); })
+          db.User
+            .findOne({ where: {id: userId} })
             .then(user => done(null, user))
             .catch((err) => { done(err); });
         } else {
@@ -126,16 +108,15 @@ passport.use('uniqueCode', new TokenStrategy({
            * Client can ask for more information after registration
            * Not connected to existing users because of privacy reasons
            */
-          new User({})
-            .save()
+          
+          db.User
+            .create({})
             .then((newUser) => {
               user = newUser;
               // set userId in uniqueCode to user
-              uniqueCode.set('userId', newUser.get('id'));
-              return uniqueCode.save();
+              return uniqueCode.update({ userId: newUser.id });
             })
-            .then((response) => user.serialize())
-            .then(user => done(null, user))
+            .then(response => done(null, user))
             .catch((err) => { done(err); });
         }
       } else {
@@ -149,32 +130,28 @@ passport.use('phonenumber', new TokenStrategy({
   varName : "token",
 }, function (token, done) { // put your check logic here
 
-  new LoginToken({
-    token: token,
-    valid: true
-  })
-    .query((q) => {
-      /**
-       * Only select tokens that are younger then 60 minutes
-       */
-      const minutes = 60;
-      const msForAMinute = 60000;
-      const date = new Date();
-      const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
-
-      q.where('createdAt', '>=', timeAgo);
-      q.orderBy('createdAt', 'DESC');
+  const minutes = 60;
+  const msForAMinute = 60000;
+  const date = new Date();
+  const timeAgo = new Date(date.setTime(date.getTime() - (minutes * msForAMinute)));
+  return db.LoginToken
+    .findOne({
+      where: {
+        token: token,
+        valid: true,
+        createdAt: {
+          [db.Sequelize.Op.gte]: timeAgo
+        }
+      },
+      order: [['createdAt', 'DESC']],
     })
-    .fetch()
     .then((token) => {
       if (token) {
-        new User({id: token.get('userId')})
-          .fetch()
+        db.User
+          .findOne({ where: {id: token.userId} })
           .then((user) => {
-            user.set('phoneNumberConfirmed', true);
-            return user.save();
+            return user.update({ phoneNumberConfirmed: true });
           })
-          .then(user => { return user.serialize(); } )
           .then(user => { return done(null, user) } )
           .catch((err) => { return done(err); });
       } else {
@@ -196,10 +173,9 @@ passport.use('phonenumber', new TokenStrategy({
  */
 
 passport.use(new BasicStrategy((clientId, clientSecret, done) => {
-  Client
-    .where({clientId: clientId})
-    .fetch()
-    .then(client => validate.client(client.serialize(), clientSecret))
+  db.Client
+    .findOne({ where: { clientId } })
+    .then(client => validate.client(client, clientSecret))
     .then(client => done(null, client))
     .catch(() => done(null, false));
 }));
@@ -212,10 +188,9 @@ passport.use(new BasicStrategy((clientId, clientSecret, done) => {
  * which accepts those credentials and calls done providing a client.
  */
 passport.use(new ClientPasswordStrategy((clientId, clientSecret, done) => {
-  Client
-    .where({clientId: clientId})
-    .fetch()
-    .then(client => validate.client(client.serialize(), clientSecret))
+  db.Client
+    .findOne({ where: { clientId } })
+    .then(client => validate.client(client, clientSecret))
     .then(client => done(null, client))
     .catch(() => done(null, false));
 }));
@@ -232,7 +207,7 @@ passport.use(new ClientPasswordStrategy((clientId, clientSecret, done) => {
  * illustrative purposes
  */
 passport.use(new BearerStrategy((accessToken, done) => {
-  db.accessTokens.find(accessToken)
+  memoryStorage.accessTokens.find(accessToken)
     .then(token => validate.token(token, accessToken))
     .then((token) => {
       return done(null, token, { scope: '*' });
@@ -261,12 +236,11 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser((id, done) => {
-  User
-    .where({id: id})
-    .fetch()
+  db.User
+    .findOne({ where: { id }})
     .then(user => {
       if (!user) throw new Error('Error in deserializeUser for id='+id);
-      done(null, user.serialize())
+      done(null, user)
     })
     .catch(err => done(err));
 });

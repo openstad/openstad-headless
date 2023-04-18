@@ -1,6 +1,6 @@
 'use strict';
 
-const { authorizationCodes } = require('../../../db');
+const { authorizationCodes } = require('../../../memoryStorage');
 const jwt                    = require('jsonwebtoken');
 const utils                  = require('../../../utils');
 

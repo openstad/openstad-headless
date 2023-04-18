@@ -1,11 +1,13 @@
-const User = require('../models/index').User;
+const db = require('../db');
 
-exports.getUserByClientAndRoles = (email, clientId, roles) => User
-  .query()
-  .select('users.*')
-  .join('user_roles', 'user_roles.userId', 'users.id')
-  .join('roles', 'roles.id', 'user_roles.roleId')
-  .where('users.email', '=', email)
-  .where('user_roles.clientId', '=', clientId)
-  .whereIn('roles.name', roles)
-  .first();
+exports.getUserByClientAndRoles = function(email, clientId, roles) {
+
+  return db.User
+    .findOne({where: { email }})
+    .then( user => {
+      return user
+        .getRoleForClient(clientId)
+        .then( userrole => roles.find(role => role.name == userrole.name) ? user : undefined );
+    })
+
+}
