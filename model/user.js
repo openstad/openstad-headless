@@ -54,7 +54,7 @@ module.exports = (db, sequelize, Sequelize) => {
         try {
           value = JSON.parse(value)
         } catch(err) {}
-        value = value || [];
+        value = value || {};
         try {
           value = JSON.stringify(value)
           value = sanitize.noTags(value);

@@ -1,7 +1,6 @@
 const app = require('./app-init');
 const config = require('./config');
 const memoryStorage = require('./memoryStorage');
-const db = require('./db');
 
 /**
  * From time to time we need to clean up any expired tokens
