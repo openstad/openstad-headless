@@ -58,7 +58,8 @@ module.exports = (db, sequelize, Sequelize) => {
     },
 
     exposedUserFields: {
-      type: DataTypes.STRING,
+      type: DataTypes.JSON,
+      defaultValue: [],
       get: function () {
         let value = this.getDataValue('exposedUserFields');
         try {
