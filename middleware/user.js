@@ -160,17 +160,17 @@ exports.create =  (req, res, next) => {
 
   db.User
     .create({
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      streetName: streetName,
-      houseNumber: houseNumber,
-      suffix: suffix,
-      postcode: postcode,
-      city: city,
-      phoneNumber: phoneNumber,
-      password: password,
-      extraData: extraData
+      firstName,
+      lastName,
+      email,
+      streetName,
+      houseNumber,
+      suffix,
+      postcode,
+      city,
+      phoneNumber,
+      password,
+      extraData
     })
     .then(user => {
       req.userObject = user;
