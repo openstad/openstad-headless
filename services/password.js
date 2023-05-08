@@ -36,7 +36,7 @@ exports.invalidateTokensForUser = (userId) => {
       resolve();
     } else {
       db.PasswordResetToken
-        .finndOne({ where: {userId: userId} })
+        .findOne({ where: {userId: userId} })
         .update({valid: false})
         .then(() => { resolve(); })
         .catch(() => { resolve(); })
