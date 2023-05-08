@@ -41,7 +41,7 @@ module.exports = (db, sequelize, Sequelize) => {
 
     extraData: {
       type: DataTypes.JSON,
-      defaultValue: '{}',
+      defaultValue: {},
       allowNull: false,
       get: function () {
         let value = this.getDataValue('extraData');
@@ -162,12 +162,6 @@ module.exports = (db, sequelize, Sequelize) => {
   User.scopes = function scopes() {
 
     return {
-
-      includeMe: {
-        where: [{
-          id: 123,
-        }]
-      },
 
       includeUserRoles: {
         include: 'roles',

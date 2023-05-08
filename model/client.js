@@ -39,7 +39,7 @@ module.exports = (db, sequelize, Sequelize) => {
 
     authTypes: {
       type: DataTypes.JSON,
-      defaultValue: '[]',
+      defaultValue: [],
       allowNull: false,
       get: function () {
         let value = this.getDataValue('authTypes') || [];
@@ -77,6 +77,7 @@ module.exports = (db, sequelize, Sequelize) => {
 
     requiredUserFields: {
       type: DataTypes.JSON,
+      defaultValue: [],
       get: function () {
         let value = this.getDataValue('requiredUserFields');
         try {
@@ -95,6 +96,7 @@ module.exports = (db, sequelize, Sequelize) => {
 
     allowedDomains: {
       type: DataTypes.JSON,
+      defaultValue: [],
       get: function () {
         let value = this.getDataValue('allowedDomains');
         try {
@@ -113,7 +115,7 @@ module.exports = (db, sequelize, Sequelize) => {
 
     config: {
       type: DataTypes.JSON,
-      defaultValue: '{}',
+      defaultValue: {},
       get: function () {
         let value = this.getDataValue('config');
         try {
@@ -132,7 +134,7 @@ module.exports = (db, sequelize, Sequelize) => {
 
     twoFactorRoles: {
       type: DataTypes.JSON,
-      defaultValue: '{}',
+      defaultValue: {},
       get: function () {
         let value = this.getDataValue('twoFactorRoles');
         try {
