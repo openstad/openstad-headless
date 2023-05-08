@@ -45,16 +45,16 @@ exports.create = (req, res, next) => {
 
   db.User
     .create({
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      streetName: streetName,
-      houseNumber: houseNumber,
-      suffix: suffix,
-      postcode: postcode,
-      city: city,
-      phoneNumber: phoneNumber,
-      password: password
+      firstName,
+      lastName,
+      email,
+      streetName,
+      houseNumber,
+      suffix,
+      postcode,
+      city,
+      phoneNumber,
+      password
     })
     .then((response) => {
       req.flash('success', { msg: 'Succesfully created '});
