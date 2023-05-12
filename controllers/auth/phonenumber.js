@@ -162,30 +162,26 @@ exports.postSmsCode = (req, res, next) => {
       if (err) { return next(err); }
 
       // means user has succesfully validated phonenumber (
+      req.brute.resetKey(req.bruteKey);
+      return tokenSMS.invalidateTokensForUser(user.id)
+        .then((response) => {
+          const redirectToAuthorisation = () => {
+            // Redirect if it succeeds to authorize screen
+            //check if allowed url will be done by authorize screen
+            const authorizeUrl = `/dialog/authorize?redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+            return res.redirect(authorizeUrl);
+          }
 
-      req.brute.reset(async () => {
-
-        return tokenSMS.invalidateTokensForUser(user.id)
-          .then((response) => {
-            const redirectToAuthorisation = () => {
-              // Redirect if it succeeds to authorize screen
-              //check if allowed url will be done by authorize screen
-              const authorizeUrl = `/dialog/authorize?redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
-              return res.redirect(authorizeUrl);
-            }
-
-            req.brute.reset(() => {
-              //log the succesfull login
-              authService.logSuccessFullLogin(req)
-                .then (() => { redirectToAuthorisation(); })
-                .catch (() => { redirectToAuthorisation(); });
-            });
-          })
-          .catch((err) => {
-            next(err);
+          req.brute.reset(() => {
+            //log the succesfull login
+            authService.logSuccessFullLogin(req)
+              .then (() => { redirectToAuthorisation(); })
+              .catch (() => { redirectToAuthorisation(); });
           });
-
-      });
+        })
+        .catch((err) => {
+          next(err);
+        });
 
     });
 

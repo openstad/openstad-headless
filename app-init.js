@@ -19,7 +19,6 @@ const jsonFilter                  = require('./nunjucks/json');
 const timestampFilter             = require('./nunjucks/timestamp');
 const replaceIdeaVariablesFilter  = require('./nunjucks/replaceIdeaVariables');
 const flash                       = require('express-flash');
-const expressValidator            = require('express-validator');
 const MongoStore                 = require('connect-mongo')(expressSession);
 
 //const MemoryStore = expressSession.MemoryStore;
@@ -114,7 +113,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(expressValidator());
 
 /*
 app.use((req, res, next) => {

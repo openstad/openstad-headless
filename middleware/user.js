@@ -1,4 +1,4 @@
-const { check }             = require('express-validator/check')
+const { checkSchema, validationResult }  = require('express-validator')
 const db                    = require('../db');
 const userProfileValidation = require('../config/user').validation.profile;
 const bcrypt                = require('bcrypt');
@@ -108,7 +108,7 @@ exports.withOneByEmail = (req, res, next) => {
 }
 
 
-exports.validateUser = (req, res, next) => {
+exports.validateUser = async(req, res, next) => {
 /*  userFields.forEach ((field) => {
     let fields = req.assert(field.key, field.message)
 
@@ -133,15 +133,11 @@ exports.validateUser = (req, res, next) => {
     req.body.email = req.user.email;
   }
 
-  req.check(userProfileValidation);
+  await checkSchema(userProfileValidation).run(req);
+  const result = validationResult(req);
 
-  req.getValidationResult()
-
-//  const errors = req.validationResult();
-  var errors = req.validationErrors();
-
-  if (errors) {
-    req.flash('error', errors);
+  if (result.errors && result.errors.length) {
+    req.flash('error', result.errors);
     res.redirect(req.header('Referer') || '/account');
   } else {
     next();

@@ -30,47 +30,11 @@ const getClientIdFromRequest = require('../utils/getClientIdFromRequest');
 //MODELS
 const db = require('../db');
 
-const loginBruteForce = bruteForce.user.getMiddleware({
-    key: function (req, res, next) {
-        // prevent too many attempts for the same email
-        next(req.body.email);
-    }
-});
-
-const uniqueCodeBruteForce = bruteForce.user.getMiddleware({
-    key: function (req, res, next) {
-        // prevent too many attempts for the same unique_code
-        next('unique_code');
-    }
-});
-
-const phonenumberBruteForce = bruteForce.userVeryRestricted.getMiddleware({
-    key: function (req, res, next) {
-        // prevent too many attempts for the same phonenumber
-        next('phonenumber');
-    }
-});
-
-const smsCodeBruteForce = bruteForce.user.getMiddleware({
-    key: function (req, res, next) {
-        // prevent too many attempts for the same phonenumber
-        next('phonenumber');
-    }
-});
-
-// prevent too many attempts for the same email per clientId (if applicable)
-const emailUrlBruteForce = bruteForce.userVeryRestricted.getMiddleware({
-    key: function (req, res, next) {
-        const clientId = getClientIdFromRequest(req);
-        
-        if (clientId) {
-            return next(`${clientId}-${req.body.email}`);
-        }
-        
-        return next(`${req.body.email}`);
-    }
-});
-
+const loginBruteForce = bruteForce.user;
+const uniqueCodeBruteForce = bruteForce.user;
+const phonenumberBruteForce = bruteForce.userVeryRestricted;
+const smsCodeBruteForce = bruteForce.user;
+const emailUrlBruteForce = bruteForce.userVeryRestricted;
 
 const csurf = require('csurf');
 
@@ -201,7 +165,7 @@ module.exports = function (app) {
     /**
      * Shared middleware for all auth routes, adding client and bruteforce
      */
-    app.use('/auth', [clientMw.withOne, bruteForce.global.prevent]);
+    app.use('/auth', [clientMw.withOne, bruteForce.global]);
 
     /**
      * Login & register with local login
@@ -302,13 +266,13 @@ module.exports = function (app) {
     app.get('/auth/two-factor/configure', clientMw.withOne, csrfProtection, addCsrfGlobal, clientMw.checkIfEmailRequired, authTwoFactor.configure);
     app.post('/auth/two-factor/configure', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.configurePost);
 
-    app.use('/dialog', [bruteForce.global.prevent]);
+    app.use('/dialog', [bruteForce.global]);
 
     app.get('/dialog/authorize', clientMw.withOne, authMw.check, userMw.withRoleForClient, clientMw.checkRequiredUserFields, clientMw.check2FA, clientMw.checkPhonenumberAuth(), clientMw.checkUniqueCodeAuth((req, res) => {
         return res.redirect('/login?clientId=' + req.query.client_id);
     }), oauth2Controller.authorization);
 
-    app.post('/dialog/authorize/decision', clientMw.withOne, userMw.withRoleForClient, clientMw.checkPhonenumberAuth(), clientMw.checkUniqueCodeAuth(),clientMw.check2FA, bruteForce.global.prevent, oauth2Controller.decision);
+    app.post('/dialog/authorize/decision', clientMw.withOne, userMw.withRoleForClient, clientMw.checkPhonenumberAuth(), clientMw.checkUniqueCodeAuth(),clientMw.check2FA, bruteForce.global, oauth2Controller.decision);
     app.post('/oauth/token', oauth2Controller.token);
     app.get('/oauth/token', oauth2Controller.token);
 

@@ -1,16 +1,15 @@
+const { body, validationResult }  = require('express-validator')
 const loginFields = require('../config/user').loginFields;
 const db = require('../db');
 
-exports.validateLogin = (req, res, next) => {
-  req.check(loginFields);
+exports.validateLogin = async(req, res, next) => {
 
-  req.getValidationResult();
+  await body('email').isEmail().run(req);
+  await body('password').isLength({ min: 6 }).run(req);
+  const result = validationResult(req);
 
-  //  const errors = req.validationResult();
-  var errors = req.validationErrors();
-
-  if (errors) {
-    req.flash('error', errors);
+  if (result.errors && result.errors.length) {
+    req.flash('error', result.errors);
     res.redirect(req.header('Referer') || '/account');
   } else {
     next();

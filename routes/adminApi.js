@@ -10,7 +10,6 @@ const adminMiddleware          = require('../middleware/admin');
 const clientMw      				   = require('../middleware/client');
 const userMw           				 = require('../middleware/user');
 const tokenMw                  = require('../middleware/token');
-const bruteForce 							 = require('../middleware/bruteForce');
 const authMw                   = require('../middleware/auth');
 const passwordResetMw          = require('../middleware/passwordReset');
 const roleMw                   = require('../middleware/role');
