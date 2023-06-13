@@ -11,7 +11,7 @@ module.exports = (db, sequelize, Sequelize) => {
       type: DataTypes.STRING,
       set: function (value) {
         value = sanitize.noTags(value);
-        this.setDataValue('firstName', value);
+        this.setDataValue('firstName', value || null);
       },
     },
 
@@ -19,7 +19,7 @@ module.exports = (db, sequelize, Sequelize) => {
       type: DataTypes.STRING,
       set: function (value) {
         value = sanitize.noTags(value);
-        this.setDataValue('lastName', value);
+        this.setDataValue('lastName', value || null);
       },
     },
 
@@ -27,7 +27,7 @@ module.exports = (db, sequelize, Sequelize) => {
       type: DataTypes.STRING,
       set: function (value) {
         value = sanitize.noTags(value);
-        this.setDataValue('email', value);
+        this.setDataValue('email', value || null);
       },
     },
 
@@ -35,7 +35,7 @@ module.exports = (db, sequelize, Sequelize) => {
       type: DataTypes.STRING,
       set: function (value) {
         value = sanitize.noTags(value);
-        this.setDataValue('phoneNumber', value);
+        this.setDataValue('phoneNumber', value || null);
       },
     },
 
@@ -77,7 +77,7 @@ module.exports = (db, sequelize, Sequelize) => {
       type: DataTypes.STRING,
       set: function (value) {
         value = sanitize.noTags(value);
-        this.setDataValue('streetName', value);
+        this.setDataValue('streetName', value || null);
       },
     },
 
@@ -85,7 +85,7 @@ module.exports = (db, sequelize, Sequelize) => {
       type: DataTypes.STRING,
       set: function (value) {
         value = sanitize.noTags(value);
-        this.setDataValue('houseNumber', value);
+        this.setDataValue('houseNumber', value || null);
       },
     },
 
@@ -93,7 +93,7 @@ module.exports = (db, sequelize, Sequelize) => {
       type: DataTypes.STRING,
       set: function (value) {
         value = sanitize.noTags(value);
-        this.setDataValue('city', value);
+        this.setDataValue('city', value || null);
       },
     },
 
@@ -101,7 +101,7 @@ module.exports = (db, sequelize, Sequelize) => {
       type: DataTypes.STRING,
       set: function (value) {
         value = sanitize.noTags(value);
-        this.setDataValue('suffix', value);
+        this.setDataValue('suffix', value || null);
       },
     },
 
@@ -109,24 +109,16 @@ module.exports = (db, sequelize, Sequelize) => {
       type: DataTypes.STRING,
       set: function (value) {
         value = sanitize.noTags(value);
-        this.setDataValue('postcode', value);
+        this.setDataValue('postcode', value || null);
       },
     },
 
     password: {
       type: DataTypes.STRING,
-      set: function (value) {
-        value = sanitize.noTags(value);
-        this.setDataValue('password', value);
-      },
     },
 
     resetPasswordToken: {
       type: DataTypes.STRING,
-      set: function (value) {
-        value = sanitize.noTags(value);
-        this.setDataValue('resetPasswordToken', value);
-      },
     },
 
     twoFactorToken: {
