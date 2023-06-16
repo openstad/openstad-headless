@@ -186,8 +186,10 @@ router
   .get(function (req, res, next) {
     
         let data = {
-            externalUserId: req.userData.user_id,
-            externalAccessToken: req.userAccessToken,
+            idpUser: {
+                identifier: req.userData.user_id,
+                accesstoken: req.userAccessToken,
+            },
             email: req.userData.email || null,
             firstName: req.userData.firstName,
             siteId: req.site.id,
@@ -204,7 +206,7 @@ router
         // rows are duplicate for a user
         let where = {
             where: Sequelize.and(
-                {externalUserId: req.userData.user_id},
+                {idpUser: { identifier: req.userData.user_id }},
                 {siteId: req.site.id},
             )
         }
@@ -295,8 +297,10 @@ router
     .get(function (req, res, next) {
 
         if (req.user && req.user.id > 1) {
+            let idpUser = req.user.idpUser;
+            delete idpUser.accesstoken;
             req.user.update({
-                externalAccessToken: null
+                idpUser
             });
         }
 
@@ -325,7 +329,7 @@ router
         const data = {
             "id": req.user.id,
             "complete": req.user.complete,
-            "externalUserId": req.user.role == 'admin' ? req.user.externalUserId : null,
+            "idpUser": req.user.role == 'admin' ? req.user.idpUser : null,
             "role": req.user.role,
             "email": req.user.email,
             "firstName": req.user.firstName,

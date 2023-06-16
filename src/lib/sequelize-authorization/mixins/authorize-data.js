@@ -47,7 +47,7 @@ module.exports = function authorizeData(data, action, user, self, site) {
       testRole = testRole && testRole.length ? testRole : (self.auth && self.auth[action+'ableBy']);
 
       let ownerId = userId;
-      if (self.toString().match('SequelizeInstance:user') && self.externalUserId && self.externalUserId === user.externalUserId) {
+      if (self.toString().match('SequelizeInstance:user') && self.idpUser.identifier && self.idpUser.identifier === user.idpUser.identifier) {
         // special case: users are owner on their users on other sites
         ownerId = user.id;
       }

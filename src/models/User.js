@@ -21,28 +21,16 @@ module.exports = function (db, sequelize, DataTypes) {
       defaultValue: config.siteId && typeof config.siteId == 'number' ? config.siteId : 0,
     },
 
-    externalUserId: {
-      type: DataTypes.INTEGER,
+    idpUser: {
+      type: DataTypes.JSON,
       auth: {
         listableBy: 'admin',
         viewableBy: 'admin',
         createableBy: 'moderator',
         updateableBy: 'admin',
       },
-      allowNull: true,
-      defaultValue: null
-    },
-
-    externalAccessToken: {
-      type: DataTypes.STRING(2048),
-      auth: {
-        listableBy: 'admin',
-        viewableBy: 'admin',
-        createableBy: 'admin',
-        updateableBy: 'admin',
-      },
-      allowNull: true,
-      defaultValue: null
+      allowNull: false,
+      defaultValue: {},
     },
 
     role: {
@@ -679,8 +667,7 @@ module.exports = function (db, sequelize, DataTypes) {
       }
       
       await self.update({
-        externalUserId: null,
-        externalAccessToken: null,
+        idpUser: null,
         role: 'anonymous',
         passwordHash: null,
         listableByRole: 'editor',
@@ -755,7 +742,7 @@ module.exports = function (db, sequelize, DataTypes) {
       let valid = userHasRole(user, self.auth && self.auth.updateableBy, self.id);
 
       // extra: isOwner through user on different site
-      valid = valid || ( self.externalUserId && self.externalUserId == user.externalUserId );
+      valid = valid || ( self.idpUser.identifier && self.idpUser.identifier == user.idpUser.identifier );
 
       // extra: geen acties op users met meer rechten dan je zelf hebt
       valid = valid && userHasRole(user, self.role);

@@ -988,14 +988,14 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
       if (!self.id) throw Error('Site not found');
       if (!self.config.project.projectHasEnded) throw Error('Cannot anonymize users on an active site - first set the project-has-ended parameter');
 
-      let users = await db.User.findAll({ where: { siteId: self.id, externalUserId: { [Sequelize.Op.ne]: null } } });
+      let users = await db.User.findAll({ where: { siteId: self.id, idpUser: { identifier: { [Sequelize.Op.ne]: null } } } });
 
       // do not anonymize admins
       result.admins = users.filter( user => userHasRole(user, 'admin') );
       result.users  = users.filter( user => !userHasRole(user, 'admin') );
 
       // extract externalUserIds
-      result.externalUserIds = result.users.filter( user => user.externalUserId ).map( user => user.externalUserId );
+      result.externalUserIds = result.users.filter( user => user.idpUser && user.idpUser.identifier ).map( user => user.idpUser.identifier );
     } catch (err) {
       console.log(err);
       throw err;
@@ -1025,7 +1025,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
       }
 
       for (let externalUserId of externalUserIds) {
-        let users = await db.User.findAll({ where: { externalUserId } });
+        let users = await db.User.findAll({ where: { idpUser: { identifier: externalUserId } } });
         if (users.length == 0) {
           // no api users left for this oauth user, so remove the oauth user
           let siteConfig = self && merge({}, self.config, { id: self.id });

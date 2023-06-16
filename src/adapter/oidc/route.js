@@ -1,4 +1,4 @@
 module.exports = function oidcRoute(req, res, next) {
-  console.log('OIDCROUTE');
+  // console.log('OIDCROUTE');
   return next();
 }

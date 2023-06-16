@@ -91,13 +91,13 @@ router.route('/')
         },
       })
       .then(function (user) {
-        if (!user.externalUserId) return next();
+        if (!user.idpUser || !user.idpUser.identifier) return next();
 
         return db.User
           .scope(['includeSite'])
           .findAll({
             where: {
-              externalUserId: user.externalUserId,
+              idpUser: { identifier: user.idpUser.identifier },
               // old users have no siteId, this will break the update
               // skip them
               // probably should clean up these users

@@ -166,8 +166,8 @@ router.route('/')
       ...req.body,
       siteId: req.site.id,
       role: req.oAuthUser.role || 'member',
-      externalUserId: req.oAuthUser.id,
       lastLogin: Date.now(),
+      idpUser: { identifier: req.oAuthUser.id }
     };
     db.User
       .authorizeData(data, 'create', req.user)
@@ -207,7 +207,7 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
       .then(found => {
         if (!found) throw new Error('User not found');
         req.targetUser = found;
-        req.externalUserId= found.externalUserId;
+        req.externalUserId= found.idpUser.identifier;
         next();
         return null;
       })
@@ -216,7 +216,7 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
   .put(function (req, res, next) {
     if (!req.externalUserId) return next();
     // this user on other sites
-    let where = { externalUserId: req.externalUserId, [Op.not]: { id: req.userId } };
+    let where = { idpUser: { identifier: req.externalUserId }, [Op.not]: { id: req.userId } };
     db.User
       .scope(...req.scope)
       .findAll({
@@ -321,7 +321,7 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
   .put(function (req, res, next) {
     if (!req.externalUserId) return next();
     // refresh: this user including other sites
-    let where = { externalUserId: req.externalUserId };
+    let where = { idpUser: { identifier: req.externalUserId } };
     db.User
       .scope(...req.scope)
       .findAll({
@@ -404,7 +404,7 @@ router.route('/:userId(\\d+)')
     if (!(user && user.can && user.can('update'))) return next(new Error('You cannot update this User'));
 
     let userId = parseInt(req.params.userId, 10);
-    let externalUserId = req.results.externalUserId;
+    let externalUserId = req.results.idpUser && req.results.idpUser.identifier;
 
     let userData = merge.recursive(true, req.body);
 
@@ -422,7 +422,7 @@ router.route('/:userId(\\d+)')
           .scope(['includeSite'])
           .findAll({
             where: {
-              externalUserId: mergedUserData.id,
+              idpUser: { identifier: mergedUserData.id },
               // old users have no siteId, this will break the update
               // skip them
               // probably should clean up these users
@@ -512,12 +512,12 @@ router.route('/:userId(\\d+)')
      * In case for this oauth user there is only one site user in the API we also delete the oAuth user
      * Otherwise we keep the oAuth user since it's still needed for the other website
      */
-    const userForAllSites = await db.User.findAll({where: {externalUserId: user.externalUserId}});
+    const userForAllSites = await db.User.findAll({where: {idpUser: { identifier: user.idpUser && user.idpUser.identifier }}});
     
     if (userForAllSites.length <= 1) {
       let which = req.query.useOauth || 'default';
       let siteConfig = req.site && merge({}, req.site.config, { id: req.site.id });
-      let result = await OAuthApi.deleteUser({ siteConfig, which, userData: { id: user.externalUserId }})
+      let result = await OAuthApi.deleteUser({ siteConfig, which, userData: { id: user.idpUser.identifier }})
     }
     
     /**

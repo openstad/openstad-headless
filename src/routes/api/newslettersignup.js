@@ -90,7 +90,7 @@ router.route('/$')
           if (!found.externalUserId && req.user.email == found.email) {
             found
               .update({
-                externalUserId: req.user.externalUserId,
+                externalUserId: req.user.idpUser && req.user.idpUser.identifier,
                 confirmed: true,
                 confirmToken: null,
               })
@@ -128,7 +128,7 @@ router.route('/$')
     }
     data.extraData = req.parsedBody.extraData;
     data.siteId = req.site.id;
-    data.externalUserId = req.user.externalUserId;
+    data.externalUserId = req.user.idpUser && req.user.idpUser.identifier;
     data.signoutToken = generateToken({ length: 256 });
 
     db.NewsletterSignup

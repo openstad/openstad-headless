@@ -88,7 +88,7 @@ function parseJwt(authorizationHeader) {
  * Get user from api database and auth server and combine to one user object.
  * @param user
  * @param siteConfig
- * @returns {Promise<{}|{externalUserId}|*>}
+ * @returns {Promise<{}|*>}
  */
 async function getUserInstance({ siteConfig, authProvider, userId, isFixed, siteId }) {
 
@@ -101,9 +101,13 @@ async function getUserInstance({ siteConfig, authProvider, userId, isFixed, site
 
     dbUser = await db.User.findOne({ where });
 
-    // dit is dus ook plugin werk
-    if (!dbUser || !( dbUser.extraData.oidc && ( !dbUser.externalUserId || !dbUser.externalAccessToken ) )) {
-      return isFixed ? dbUser : {};
+    if (isFixed) {
+      return dbUser;
+    }
+
+    // extradata is tmp want moet in provider
+    if (!dbUser || ( !dbUser.extraData.oidc && ( !dbUser.idpUser || !dbUser.idpUser.accesstoken ) ) ) {
+      return {};
     }
 
   } catch(err) {
@@ -145,7 +149,7 @@ async function getUserInstance({ siteConfig, authProvider, userId, isFixed, site
       if ( authUrl ==  'https://api.snipper.nlsvgtr.nl') { // snipper app van niels
         oauthUser = {};
       } else {
-        oauthUser = await OAuthApi.fetchUser({ siteConfig, authProvider, token: dbUser.externalAccessToken });
+        oauthUser = await OAuthApi.fetchUser({ siteConfig, authProvider, token: dbUser.idpUser.accesstoken });
         if (!oauthUser) return await resetUserToken(dbUser);
       }
 
@@ -169,8 +173,10 @@ async function getUserInstance({ siteConfig, authProvider, userId, isFixed, site
  */
 async function resetUserToken(user) {
   if (!( user && user.update )) return {};
+  let idpUser = user.idpUser;
+  delete idpUser.accesstoken;
   await user.update({
-    externalAccessToken: null
+    idpUser
   });
 
   return {};
