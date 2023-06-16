@@ -30,17 +30,24 @@ const isAllowedRedirectDomain = (url, allowedDomains) => {
 // inloggen 1
 // ----------
 router
-    .route('(/site/:siteId)?/login')
-    .get(function (req, res, next) {
+  .route('(/site/:siteId)?/login')
+  .get(function (req, res, next) {
 
-      let siteConfig = req.site && req.site.config || {};
-      let useAuth = req.query.useAuth || req.query.useOauth || siteConfig.auth.default; // todo: req.query.useOauth is wegens backwards compatible en moet er uiteindelijk uit
-      let authConfig = (siteConfig && siteConfig.auth && siteConfig.auth.providers && siteConfig.auth.providers[useAuth] ) || {};
+    let useAuth = req.query.useAuth;
+    let siteAuthConfig = (req.site && req.site.config && req.site.config.auth && ( req.site.config.auth[useAuth] || req.site.config.auth[ req.site.config.auth.default ] )) || {};
 
-      let authServerUrl = authConfig['auth-server-url'] || config.authorization['auth-server-url'];
-      let authClientId = authConfig['auth-client-id'] || config.authorization['auth-client-id'];
-      let authServerLoginPath = authConfig['auth-server-login-path'] || config.authorization['auth-server-login-path'];
-      let authServerAdminLoginPath = authConfig['auth-server-admin-login-path'] || config.authorization['auth-server-admin-login-path'];
+    let adapter = siteAuthConfig.adapter;
+
+    // vanaf hier hoort het al in de adapter denk ik
+    let authServerUrl = siteAuthConfig['auth-server-url'] || config.authorization['auth-server-url'];
+    let authClientId = siteAuthConfig['auth-client-id'] || config.authorization['auth-client-id'];
+    let authServerLoginPath = siteAuthConfig['auth-server-login-path'] || config.authorization['auth-server-login-path'];
+    let authServerAdminLoginPath = siteAuthConfig['auth-server-admin-login-path'] || config.authorization['auth-server-admin-login-path'];
+
+    return next();
+
+  })
+  .get(function (req, res, next) {
 
       if (authServerUrl == 'https://api.snipper.nlsvgtr.nl') { // snipper app van niels
       } else {
@@ -49,6 +56,7 @@ router
           let backToHereUrl = baseUrl + '/oauth/site/' + req.site.id + '/login?' + (req.query.useOauth ? 'useOauth=' + req.query.useOauth : '') + '&redirectUrl=' + encodeURIComponent(req.query.redirectUrl)
           backToHereUrl = encodeURIComponent(backToHereUrl)
           let url = baseUrl + '/oauth/site/' + req.site.id + '/logout?redirectUrl=' + backToHereUrl;
+
           return res.redirect(url)
         }
       }
@@ -56,7 +64,7 @@ router
       let url = authServerUrl + authServerLoginPath;
       url = url.replace(/\[\[clientId\]\]/, authClientId);
       //url = url.replace(/\[\[redirectUrl\]\]/, config.url + '/oauth/digest-login');
-      url = url.replace(/\[\[redirectUrl\]\]/, encodeURIComponent(config.url + '/oauth/site/' + req.site.id + '/digest-login?useOauth=' + useAuth + '\&returnTo=' + req.query.redirectUrl));
+      url = url.replace(/\[\[redirectUrl\]\]/, encodeURIComponent(config.url + '/oauth/site/' + req.site.id + '/digest-login?useOauth=' + which + '\&returnTo=' + req.query.redirectUrl));
       
       res.redirect(url);
 
@@ -75,16 +83,15 @@ router
         if (!code) throw createError(403, 'Je bent niet ingelogd');
 
         // Todo: Refactor this code, this logic also lives in the user middleware
-        let useAuth = req.query.useAuth || req.query.useOauth; // todo: req.query.useOauth is wegens backwards compatible en moet er uiteindelijk uit
-        let siteConfig = req.site && req.site.config || {};
-        let authConfig = (siteConfig && siteConfig.auth && siteConfig.auth.providers && ( siteConfig.auth.providers[useAuth] || siteConfig.auth.providers[ siteConfig.auth.default ] )) || {};
-   
-        let authServerUrl = authConfig['auth-internal-server-url'] || config.authorization['auth-server-url'];
-        let authServerExchangeCodePath = authConfig['auth-server-exchange-code-path'] || config.authorization['auth-server-exchange-code-path'];
+        let which = req.query.useOauth || 'default';
+        let siteOauthConfig = (req.site && req.site.config && req.site.config.oauth && req.site.config.oauth[which]) || {};
+        ;
+        let authServerUrl = siteOauthConfig['auth-internal-server-url'] || config.authorization['auth-server-url'];
+        let authServerExchangeCodePath = siteOauthConfig['auth-server-exchange-code-path'] || config.authorization['auth-server-exchange-code-path'];
         let url = authServerUrl + authServerExchangeCodePath;
-   
-        let authClientId = authConfig['auth-client-id'] || config.authorization['auth-client-id'];
-        let authClientSecret = authConfig['auth-client-secret'] || config.authorization['auth-client-secret'];
+
+        let authClientId = siteOauthConfig['auth-client-id'] || config.authorization['auth-client-id'];
+        let authClientSecret = siteOauthConfig['auth-client-secret'] || config.authorization['auth-client-secret'];
 
         let postData = {
             client_id: authClientId,
@@ -261,7 +268,7 @@ router
         //check if redirect domain is allowed
         if (isAllowedRedirectDomain(redirectUrl, req.site && req.site.config && req.site.config.allowedDomains)) {
             if (redirectUrl.match('[[jwt]]')) {
-                jwt.sign({userId: req.userData.id, authProvider: which, client: which}, config.auth['jwtSecret'], {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
+                jwt.sign({userId: req.userData.id, idp: which, client: which}, config.authorization['jwtSecret'], {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
                     if (err) return next(err)
                     req.redirectUrl = redirectUrl.replace('[[jwt]]', token);
                     return next();
@@ -405,7 +412,7 @@ router
         if ( Array.isArray(openStadUser) ) openStadUser = openStadUser[0];
 
         // Todo: iss moet gecontroleerd
-        jwt.sign({userId: openStadUser.id, authProvider: 'oidc', iss: req.body.iss}, config.auth['jwtSecret'], {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
+        jwt.sign({userId: openStadUser.id, idp: 'oidc', iss: req.body.iss}, config.authorization['jwt-secret'], {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
           if (err) return next(err)
           return res.json({
             jwt: token

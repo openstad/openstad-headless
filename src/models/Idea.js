@@ -760,6 +760,7 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 
       includeUserVote: function (userId) {
+        console.log('++++', userId);
         //this.hasOne(db.Vote, {as: 'userVote' });
         let result = {
           include: [{

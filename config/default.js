@@ -83,9 +83,15 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
     },
 	},
 
-	"authorization": {
+  auth: {
+    adapter: {
+      oidc: {
+      },
+    },
+		jwtSecret: "xxxxx",
+  },
 
-		"jwt-secret": "xxxxx",
+	"authorization": {
     "auth-server-login-path": "/dialog/authorize?redirect_uri=[[redirectUrl]]&response_type=code&client_id=[[clientId]]&scope=offline",
     "auth-server-admin-login-path":"/auth/admin/login?redirect_uri=[[redirectUrl]]&response_type=code&clientId=[[clientId]]&scope=offline",
     "auth-server-exchange-code-path": "/oauth/token",

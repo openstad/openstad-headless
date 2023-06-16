@@ -1,5 +1,4 @@
-var _            = require('lodash')
-  , config       = require('config')
+var config       = require('config')
   , express      = require('express');
 
 // Misc
@@ -43,7 +42,10 @@ module.exports  = {
       // ... then middleware everyone needs...
       this._initBasicMiddleware();
       this._initSessionMiddleware();
-    
+
+      var authAdapters = require('./adapter');
+      authAdapters.init(this.app);
+
       var middleware = config.express.middleware;
 
       middleware.forEach(( entry ) => {

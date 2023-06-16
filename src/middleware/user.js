@@ -19,16 +19,19 @@ module.exports = async function getUser( req, res, next ) {
       return nextWithEmptyUser(req, res, next);
     }
 
-    const { userId, client } = parseAuthHeader(req.headers['x-authorization']);
-
-    const which = client || req.query.useOauth || 'default';
     let siteConfig = req.site && merge({}, req.site.config, { id: req.site.id });
 
+    let { userId, isFixed, authProvider } = parseAuthHeader(req.headers['x-authorization']);
+    authProvider = authProvider || req.query.useAuth || req.query.useOauth || siteConfig.auth.default; // todo: req.query.useOauth is wegens backwards compatible en moet er uiteindelijk uit
+    let authConfig = (siteConfig && siteConfig.auth && siteConfig.auth.providers && siteConfig.auth.providers[authProvider] ) || {};
+    
     if(userId === null || typeof userId === 'undefined') {
       return nextWithEmptyUser(req, res, next);
     }
 
-    const userEntity = await getUserInstance({ siteConfig, which, userId, siteId: ( req.site && req.site.id ) }) || {};
+    // TODO: params {siteConfig, authProvider} moet {authConfig} worden
+    const userEntity = await getUserInstance({ siteConfig: { [authProvider]: authConfig }, authProvider, userId, isFixed, siteId: ( req.site && req.site.id ) }) || {};
+
     req.user = userEntity
     // Pass user entity to template view.
     res.locals.user = userEntity;
@@ -49,33 +52,22 @@ module.exports = async function getUser( req, res, next ) {
  */
 function nextWithEmptyUser(req, res, next) {
   req.user = {};
-  res.locals.user = {};
-
   return next();
 }
 
-/**
- * UserId constructor function to set the userId and the flag fixed to indicate if this userId is an fixedToken or not.
- * @param id
- * @param fixed
- * @constructor
- */
-function UserId(id, fixed) {
-  this.id = id;
-  this.fixed = fixed;
-}
-
 function parseAuthHeader(authorizationHeader) {
-  const tokens = config && config.authorization && config.authorization['fixed-auth-tokens'];
+
+  const fixedAuthTokens = config && config.auth && config.auth['fixedAuthTokens'];
 
   if (authorizationHeader.match(/^bearer /i)) {
     const jwt = parseJwt(authorizationHeader);
-    return (jwt && jwt.userId) ? { userId: new UserId(jwt.userId, false), client: jwt.client } : null;
+    return (jwt && jwt.userId) ? { userId: jwt.userId, authProvider: jwt.authProvider } : null;
   }
-  if (tokens) {
-    const token = tokens.find(token => token.token === authorizationHeader);
+
+  if (fixedAuthTokens) {
+    const token = fixedAuthTokens.find(token => token.token === authorizationHeader);
     if (token) {
-      return { userId: new UserId(token.userId, true), client: token.client }
+      return { userId: token.userId, isFixed: true, authProvider: token.authProvider }
     }
   }
 
@@ -89,7 +81,7 @@ function parseAuthHeader(authorizationHeader) {
  */
 function parseJwt(authorizationHeader) {
   let token = authorizationHeader.replace(/^bearer /i, '');
-  return jwt.verify(token, config.authorization['jwt-secret']);
+  return jwt.verify(token, config.auth['jwtSecret']);
 }
 
 /**
@@ -98,36 +90,71 @@ function parseJwt(authorizationHeader) {
  * @param siteConfig
  * @returns {Promise<{}|{externalUserId}|*>}
  */
-async function getUserInstance({ siteConfig, which = 'default', userId, siteId }) {
+async function getUserInstance({ siteConfig, authProvider, userId, isFixed, siteId }) {
 
   let dbUser;
   
   try {
 
-    let where = { id: userId.id };
-    if (siteId && !userId.fixed) where.siteId = siteId;
+    let where = { id: userId };
+    if (siteId && !isFixed) where.siteId = siteId;
 
     dbUser = await db.User.findOne({ where });
 
-    if (!dbUser || !dbUser.externalUserId || !dbUser.externalAccessToken) {
-      return userId.fixed ? dbUser : {};
+    // dit is dus ook plugin werk
+    if (!dbUser || !( dbUser.extraData.oidc && ( !dbUser.externalUserId || !dbUser.externalAccessToken ) )) {
+      return isFixed ? dbUser : {};
     }
 
-  } catch(error) {
-    console.log(error);
-    throw error;
+  } catch(err) {
+    console.log(err);
+    throw err;
   }
 
   try {
 
-    let oauthUser = await OAuthApi.fetchUser({ siteConfig, which, token: dbUser.externalAccessToken });
-    if (!oauthUser) return await resetUserToken(dbUser);
+    if (dbUser.extraData.oidc) {
 
-    let mergedUser = merge(dbUser, oauthUser);
-    mergedUser.role = mergedUser.role || ((mergedUser.email || mergedUser.phoneNumber || mergedUser.hashedPhoneNumber) ? 'member' : 'anonymous');
+      // todo: dit moet plugin worden
+      // check oidc login
+      let url = `${dbUser.extraData.oidc.iss}/oidc/me`;
+      let access_token = dbUser.extraData.oidc.access_token;
+      let response = await fetch(url, {
+        headers: { "Authorization": `Bearer ${access_token}` },
+        method: 'GET'
+      });
+      if (!response.ok) {
+        console.log(response);
+        throw new Error('Fetch oidc user failed')
+      }
+      let oidcUser = await response.json();
+
+      if (!oidcUser) {
+        return {};
+      }
+
+      let mergedUser = merge(dbUser, oidcUser);
+      mergedUser.role = ((mergedUser.email || mergedUser.phoneNumber || mergedUser.hashedPhoneNumber) ? 'member' : 'anonymous'); // mergedUser.role || ((mergedUser.email || mergedUser.phoneNumber || mergedUser.hashedPhoneNumber) ? 'member' : 'anonymous');
+      
+      return mergedUser;
+
+    } else {
+      let oauthUser;
+      let authUrl = siteConfig.oauth && siteConfig.oauth.default && siteConfig.oauth.default['auth-server-url'];
+      
+      if ( authUrl ==  'https://api.snipper.nlsvgtr.nl') { // snipper app van niels
+        oauthUser = {};
+      } else {
+        oauthUser = await OAuthApi.fetchUser({ siteConfig, authProvider, token: dbUser.externalAccessToken });
+        if (!oauthUser) return await resetUserToken(dbUser);
+      }
+
+      let mergedUser = merge(dbUser, oauthUser);
+      mergedUser.role = mergedUser.role || ((mergedUser.email || mergedUser.phoneNumber || mergedUser.hashedPhoneNumber) ? 'member' : 'anonymous');
+      return mergedUser;
+
+    }
     
-    return mergedUser;
-
   } catch(error) {
     return await resetUserToken(dbUser);
   }

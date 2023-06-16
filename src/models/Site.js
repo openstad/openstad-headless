@@ -344,33 +344,45 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
         }
       },
       'oauth': {
-        type: 'objectsInObject',
+        // to be removed
+      },
+      'auth': {
+        type: 'object',
         subset: {
-          "auth-server-url": {
-            type: 'string',
+          default: {
+            type: 'string', // todo: add type email/list of emails
+            default: 'openstad',
           },
-          "auth-client-id": {
-            type: 'string',
-          },
-          "auth-client-secret": {
-            type: 'string',
-          },
-          "auth-server-login-path": {
-            type: 'string',
-          },
-          "auth-server-exchange-code-path": {
-            type: 'string',
-          },
-          "auth-server-get-user-path": {
-            type: 'string',
-          },
-          "auth-server-logout-path": {
-            type: 'string',
-          },
-          "after-login-redirect-uri": {
-            type: 'string',
+          providers: {
+            type: 'objectsInObject',
+            subset: {
+              "auth-server-url": {
+                type: 'string',
+              },
+              "auth-client-id": {
+                type: 'string',
+              },
+              "auth-client-secret": {
+                type: 'string',
+              },
+              "auth-server-login-path": {
+                type: 'string',
+              },
+              "auth-server-exchange-code-path": {
+                type: 'string',
+              },
+              "auth-server-get-user-path": {
+                type: 'string',
+              },
+              "auth-server-logout-path": {
+                type: 'string',
+              },
+              "after-login-redirect-uri": {
+                type: 'string',
+              }
+            }
           }
-        }
+        },
       },
       ideas: {
         type: 'object',
@@ -833,9 +845,8 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
 
     let options = Site.configOptions();
 
-
     config = checkValues(config, options)
-
+        
     return config;
 
     function checkValues(value, options) {
@@ -843,10 +854,21 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
       let newValue = {};
       Object.keys(options).forEach(key => {
 
-        // backwards compatibility op oauth settings
+        // backwards compatibility op oauth settings, voordat er een onderscheid in types was
         if (key == 'oauth' && value[key] && !value[key].default && (value[key]['auth-server-url'] || value[key]['auth-client-id'] || value[key]['auth-client-secret'] || value[key]['auth-server-login-path'] || value[key]['auth-server-exchange-code-path'] || value[key]['auth-server-get-user-path'] || value[key]['auth-server-logout-path'] || value[key]['after-login-redirect-uri'])) {
           // dit is een oude
           value[key] = {default: value[key]};
+        }
+
+        // backwards compatibility op auth settings: dat heette oauth en zag er anders uit
+        if (key == 'auth' && !value[key]) {
+          value.auth = {
+            providers: { ...value.oauth },
+          };
+          if (value.auth.providers.default) {
+            value.auth.providers.openstad = value.auth.providers.default;
+            delete value.auth.providers.default;
+          }
         }
 
         // backwards compatibility op notifications settings
