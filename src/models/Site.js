@@ -346,6 +346,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
       'oauth': {
         // to be removed
       },
+
       'auth': {
         type: 'object',
         subset: {
@@ -353,34 +354,34 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
             type: 'string', // todo: add type email/list of emails
             default: 'openstad',
           },
-          providers: {
+          provider: {
             type: 'objectsInObject',
-            subset: {
-              "auth-server-url": {
-                type: 'string',
-              },
-              "auth-client-id": {
-                type: 'string',
-              },
-              "auth-client-secret": {
-                type: 'string',
-              },
-              "auth-server-login-path": {
-                type: 'string',
-              },
-              "auth-server-exchange-code-path": {
-                type: 'string',
-              },
-              "auth-server-get-user-path": {
-                type: 'string',
-              },
-              "auth-server-logout-path": {
-                type: 'string',
-              },
-              "after-login-redirect-uri": {
-                type: 'string',
-              }
-            }
+//            subset: {
+//              "auth-server-url": {
+//                type: 'string',
+//              },
+//              "auth-client-id": {
+//                type: 'string',
+//              },
+//              "auth-client-secret": {
+//                type: 'string',
+//              },
+//              "auth-server-login-path": {
+//                type: 'string',
+//              },
+//              "auth-server-exchange-code-path": {
+//                type: 'string',
+//              },
+//              "auth-server-get-user-path": {
+//                type: 'string',
+//              },
+//              "auth-server-logout-path": {
+//                type: 'string',
+//              },
+//              "after-login-redirect-uri": {
+//                type: 'string',
+//              }
+//            }
           }
         },
       },
@@ -863,11 +864,11 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
         // backwards compatibility op auth settings: dat heette oauth en zag er anders uit
         if (key == 'auth' && !value[key]) {
           value.auth = {
-            providers: { ...value.oauth },
+            provider: { ...value.oauth },
           };
-          if (value.auth.providers.default) {
-            value.auth.providers.openstad = value.auth.providers.default;
-            delete value.auth.providers.default;
+          if (value.auth.provider.default) {
+            value.auth.provider.openstad = value.auth.provider.default;
+            delete value.auth.provider.default;
           }
         }
 

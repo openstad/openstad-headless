@@ -35,7 +35,7 @@ router
 
       let siteConfig = req.site && req.site.config || {};
       let useAuth = req.query.useAuth || req.query.useOauth || siteConfig.auth.default; // todo: req.query.useOauth is wegens backwards compatible en moet er uiteindelijk uit
-      let authConfig = (siteConfig && siteConfig.auth && siteConfig.auth.providers && siteConfig.auth.providers[useAuth] ) || {};
+      let authConfig = (siteConfig && siteConfig.oauth && siteConfig.oauth[useAuth] ) || {};
 
       let authServerUrl = authConfig['auth-server-url'] || config.authorization['auth-server-url'];
       let authClientId = authConfig['auth-client-id'] || config.authorization['auth-client-id'];

@@ -43,9 +43,6 @@ module.exports  = {
       this._initBasicMiddleware();
       this._initSessionMiddleware();
 
-      var authAdapters = require('./adapter');
-      authAdapters.init(this.app);
-
       var middleware = config.express.middleware;
 
       middleware.forEach(( entry ) => {

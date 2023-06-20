@@ -32,6 +32,7 @@ let defaultConfig = {
 		"middleware": [
 			"./middleware/log",
 			{ "route": "/api", "router": "./routes/api" },
+			{ "route": "/auth", "router": "./routes/auth" },
 			{ "route": "/oauth", "router": "./routes/oauth" },
       { "route": "/stats", "router": "./routes/stats" },
 			{ "route": "/", "router": "./routes/doc" }
@@ -84,13 +85,39 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
 	},
 
   auth: {
+
+    jwtSecret: 'REPLACE THIS VALUE!!',
+
     adapter: {
-      oidc: {
+      openstad: {
+        modulePath: './src/adapter/openstad',
+		    serverLoginPath: "/dialog/authorize?redirect_uri=[[redirectUri]]&response_type=code&client_id=[[clientId]]&scope=offline&forceLogin=1",
+		    serverExchangeCodePath: "/oauth/token",
+		    serverGetUserPath: "/api/userinfo?client_id=[[clientId]]",
+		    serverLogoutPath: "/logout?clientId=[[clientId]]",
+		    afterLoginRedirectUri: "/?jwt=[[jwt]]",
       },
+      oidc: {
+        modulePath: './src/adapter/oidc',
+        // in oidc these paths should be discovered
+      }
     },
-		jwtSecret: "xxxxx",
+
+    provider: {
+
+      default: {
+        adapter: 'openstad',
+      },
+
+      anonymous: {
+        adapter: 'openstad',
+      },
+
+    },
+
   },
 
+  // todo: dit is oud
 	"authorization": {
     "auth-server-login-path": "/dialog/authorize?redirect_uri=[[redirectUrl]]&response_type=code&client_id=[[clientId]]&scope=offline",
     "auth-server-admin-login-path":"/auth/admin/login?redirect_uri=[[redirectUrl]]&response_type=code&clientId=[[clientId]]&scope=offline",

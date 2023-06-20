@@ -11,132 +11,115 @@ const OAuthApi = require('../../services/oauth-api');
 
 let router = express.Router({mergeParams: true});
 
-// TODO: gebruik de oauth-api service
+// me: translate bearer jwt to user data
+// -------------------------------------
+router
+  .route('(/site/:siteId)?/me')
+  .get(function (req, res, next) {
+    const data = {
+      "id": req.user.id,
+      "complete": req.user.complete,
+      "idpUser": req.user.role == 'admin' ? req.user.idpUser : null,
+      "role": req.user.role,
+      "email": req.user.email,
+      "firstName": req.user.firstName,
+      "lastName": req.user.lastName,
+      "fullName": req.user.fullName,
+      "nickName": req.user.nickName,
+      "displayName": req.user.displayName,
+      "initials": req.user.initials,
+      "gender": req.user.gender,
+      "extraData": req.user.extraData ? req.user.extraData : {},
+      "phoneNumber": req.user.phoneNumber,
+      "streetName": req.user.streetName,
+      "city": req.user.city,
+      "houseNumber": req.user.houseNumber,
+      "suffix": req.user.suffix,
+      "postcode": req.user.postcode,
+      "zipCode": req.user.zipCode,
+      "signedUpForNewsletter": req.user.signedUpForNewsletter,
+      "createdAt": req.user.createdAt,
+      "updatedAt": req.user.updatedAt,
+      "deletedAt": req.user.deletedAt,
+      'votes': req.user.votes
+    };
+    res.json(data);
+  })
 
-/**
- * Check if redirectURI same host as registered
- */
-const isAllowedRedirectDomain = (url, allowedDomains) => {
-    let redirectUrlHost = '';
-    try {
-        redirectUrlHost = new URL(url).hostname;
-    } catch (err) {
+// other auth routes are delegated to adapters
+// -------------------------------------------
+
+let router1 = express.Router({mergeParams: true});
+router1
+  .route('(/site/:siteId)?/test')
+  .get(function (req, res, next) {
+    res.json({test: 0});
+  });
+router1
+  .route('(/site/:siteId)?/test1')
+  .get(function (req, res, next) {
+    res.json({test: 1});
+  });
+
+let router2 = express.Router({mergeParams: true});
+router2
+  .route('(/site/:siteId)?/test')
+  .get(function (req, res, next) {
+    res.json({test: 0});
+  });
+router2
+  .route('(/site/:siteId)?/test2')
+  .get(function (req, res, next) {
+    res.json({test: 2});
+  });
+
+router
+  .use(async function (req, res, next) {
+    console.log('WTF');
+    let which = req.query.which;
+    if (which == 1) {
+      return router1(req, res, next)
     }
+    if (which == 2) {
+      return router2(req, res, next)
+    }
+    return res.json({not: 'found'})
+    //let adapter = require(req.authConfig.adapter);
+    //return await adapter.route(req, res, next);
+  });
 
-    // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
-    return allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1;
-}
 
-// inloggen 1
-// ----------
+
 router
   .route('(/site/:siteId)?/login')
   .get(function (req, res, next) {
-
-    let useAuth = req.query.useAuth;
-    let siteAuthConfig = (req.site && req.site.config && req.site.config.auth && ( req.site.config.auth[useAuth] || req.site.config.auth[ req.site.config.auth.default ] )) || {};
-
-    let adapter = siteAuthConfig.adapter;
-
-    // vanaf hier hoort het al in de adapter denk ik
-    let authServerUrl = siteAuthConfig['auth-server-url'] || config.authorization['auth-server-url'];
-    let authClientId = siteAuthConfig['auth-client-id'] || config.authorization['auth-client-id'];
-    let authServerLoginPath = siteAuthConfig['auth-server-login-path'] || config.authorization['auth-server-login-path'];
-    let authServerAdminLoginPath = siteAuthConfig['auth-server-admin-login-path'] || config.authorization['auth-server-admin-login-path'];
-
-    return next();
-
+    // logout first?
+    if (!req.query.forceNewLogin) return next();
+    let baseUrl = config.url
+    let backToHereUrl = baseUrl + '/oauth/site/' + req.site.id + '/login?' + (req.query.useOauth ? 'useOauth=' + req.query.useOauth : '') + '&redirectUrl=' + encodeURIComponent(req.query.redirectUrl)
+    backToHereUrl = encodeURIComponent(backToHereUrl)
+    let url = baseUrl + '/oauth/site/' + req.site.id + '/logout?redirectUrl=' + backToHereUrl;
+    return res.redirect(url)
   })
   .get(function (req, res, next) {
-
-      if (authServerUrl == 'https://api.snipper.nlsvgtr.nl') { // snipper app van niels
-      } else {
-        if (req.query.forceNewLogin) {
-          let baseUrl = config.url
-          let backToHereUrl = baseUrl + '/oauth/site/' + req.site.id + '/login?' + (req.query.useOauth ? 'useOauth=' + req.query.useOauth : '') + '&redirectUrl=' + encodeURIComponent(req.query.redirectUrl)
-          backToHereUrl = encodeURIComponent(backToHereUrl)
-          let url = baseUrl + '/oauth/site/' + req.site.id + '/logout?redirectUrl=' + backToHereUrl;
-
-          return res.redirect(url)
-        }
-      }
-
-      let url = authServerUrl + authServerLoginPath;
-      url = url.replace(/\[\[clientId\]\]/, authClientId);
-      //url = url.replace(/\[\[redirectUrl\]\]/, config.url + '/oauth/digest-login');
-      url = url.replace(/\[\[redirectUrl\]\]/, encodeURIComponent(config.url + '/oauth/site/' + req.site.id + '/digest-login?useOauth=' + which + '\&returnTo=' + req.query.redirectUrl));
-      
-      res.redirect(url);
-
-    });
+    // redirect to login server
+    let url = req.authConfig.authServerUrl + req.authConfig.authServerLoginPath;
+    url = url.replace(/\[\[clientId\]\]/, req.authConfig.authClientId); // todo dezde oet denk ik naar authconfig middleware
+    url = url.replace(/\[\[redirectUrl\]\]/, encodeURIComponent(config.url + '/oauth/site/' + req.site.id + '/digest-login?useOauth=' + req.authConfig.useAuth + '\&returnTo=' + req.query.redirectUrl));
+    res.redirect(url);
+  })
 
 // inloggen 2
 // ----------
 router
-    .route('(/site/:siteId)?/digest-login')
-    .get(function (req, res, next) {
+  .route('(/site/:siteId)?/digest-login')
+  .get(async function (req, res, next) {
+    let provider = require(req.authConfig.provider);
+    return await provider.digest(req, res, next)
+  });
 
-        // use the code to get an access token
-        let code = req.query.code;
 
-        // TODO: meer afvangingen en betere response
-        if (!code) throw createError(403, 'Je bent niet ingelogd');
-
-        // Todo: Refactor this code, this logic also lives in the user middleware
-        let which = req.query.useOauth || 'default';
-        let siteOauthConfig = (req.site && req.site.config && req.site.config.oauth && req.site.config.oauth[which]) || {};
-        ;
-        let authServerUrl = siteOauthConfig['auth-internal-server-url'] || config.authorization['auth-server-url'];
-        let authServerExchangeCodePath = siteOauthConfig['auth-server-exchange-code-path'] || config.authorization['auth-server-exchange-code-path'];
-        let url = authServerUrl + authServerExchangeCodePath;
-
-        let authClientId = siteOauthConfig['auth-client-id'] || config.authorization['auth-client-id'];
-        let authClientSecret = siteOauthConfig['auth-client-secret'] || config.authorization['auth-client-secret'];
-
-        let postData = {
-            client_id: authClientId,
-            client_secret: authClientSecret,
-            code: code,
-            grant_type: 'authorization_code'
-        }
-
-        fetch(
-            url, {
-                method: 'post',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                mode: 'cors',
-                body: JSON.stringify(postData)
-            })
-            .then(
-                response => {
-                    if (response.ok) return response.json()
-                    throw createError('Login niet gelukt', response);
-                },
-                error => {
-                    console.log('ERR', error);
-                    throw createError('Login niet gelukt');
-                }
-            )
-            .then(
-                json => {
-
-                    let accessToken = json.access_token;
-                    if (!accessToken) return next(createError(403, 'Inloggen niet gelukt: geen accessToken'));
-
-                    // todo: alleen in de sessie is wel heel simpel
-                    req.userAccessToken = accessToken;
-                    return next();
-                }
-            )
-            .catch(err => {
-                console.log(err);
-                return next(err);
-            });
-
-    })
-    .get(function (req, res, next) {
+  .get(function (req, res, next) {
 
 		  const which = req.query.useOauth || 'default';
       let siteConfig = req.site && merge({}, req.site.config, { id: req.site.id });
@@ -187,8 +170,8 @@ router
     
         let data = {
             idpUser: {
-                identifier: req.userData.user_id,
-                accesstoken: req.userAccessToken,
+              identifier: req.userData.user_id,
+              accesstoken: req.userAccessToken,
             },
             email: req.userData.email || null,
             firstName: req.userData.firstName,
@@ -270,7 +253,7 @@ router
         //check if redirect domain is allowed
         if (isAllowedRedirectDomain(redirectUrl, req.site && req.site.config && req.site.config.allowedDomains)) {
             if (redirectUrl.match('[[jwt]]')) {
-                jwt.sign({userId: req.userData.id, idp: which, client: which}, config.authorization['jwtSecret'], {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
+                jwt.sign({userId: req.userData.id, authProvider: which, client: which}, config.auth['jwtSecret'], {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
                     if (err) return next(err)
                     req.redirectUrl = redirectUrl.replace('[[jwt]]', token);
                     return next();
@@ -321,40 +304,6 @@ router
         res.redirect(url);
     });
 
-// translate jwt to user data
-// --------------------------
-router
-    .route('(/site/:siteId)?/me')
-    .get(function (req, res, next) {
-        const data = {
-            "id": req.user.id,
-            "complete": req.user.complete,
-            "idpUser": req.user.role == 'admin' ? req.user.idpUser : null,
-            "role": req.user.role,
-            "email": req.user.email,
-            "firstName": req.user.firstName,
-            "lastName": req.user.lastName,
-            "fullName": req.user.fullName,
-            "nickName": req.user.nickName,
-            "displayName": req.user.displayName,
-            "initials": req.user.initials,
-            "gender": req.user.gender,
-            "extraData": req.user.extraData ? req.user.extraData : {},
-            "phoneNumber": req.user.phoneNumber,
-            "streetName": req.user.streetName,
-            "city": req.user.city,
-            "houseNumber": req.user.houseNumber,
-            "suffix": req.user.suffix,
-            "postcode": req.user.postcode,
-            "zipCode": req.user.zipCode,
-            "signedUpForNewsletter": req.user.signedUpForNewsletter,
-            "createdAt": req.user.createdAt,
-            "updatedAt": req.user.updatedAt,
-            "deletedAt": req.user.deletedAt,
-            'votes': req.user.votes
-        };
-        res.json(data);
-    })
 
 
 // find or create oidc user
@@ -416,7 +365,7 @@ router
         if ( Array.isArray(openStadUser) ) openStadUser = openStadUser[0];
 
         // Todo: iss moet gecontroleerd
-        jwt.sign({userId: openStadUser.id, idp: 'oidc', iss: req.body.iss}, config.authorization['jwt-secret'], {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
+        jwt.sign({userId: openStadUser.id, authProvider: 'oidc', iss: req.body.iss}, config.auth['jwtSecret'], {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
           if (err) return next(err)
           return res.json({
             jwt: token

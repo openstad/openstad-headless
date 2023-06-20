@@ -23,7 +23,8 @@ module.exports = async function getUser( req, res, next ) {
 
     let { userId, isFixed, authProvider } = parseAuthHeader(req.headers['x-authorization']);
     authProvider = authProvider || req.query.useAuth || req.query.useOauth || siteConfig.auth.default; // todo: req.query.useOauth is wegens backwards compatible en moet er uiteindelijk uit
-    let authConfig = (siteConfig && siteConfig.auth && siteConfig.auth.providers && siteConfig.auth.providers[authProvider] ) || {};
+    // let authConfig = (siteConfig && siteConfig.auth && siteConfig.auth.providers && siteConfig.auth.providers[authProvider] ) || {};
+    let authConfig = (siteConfig && siteConfig.oauth && siteConfig.oauth[authProvider] ) || {};
     
     if(userId === null || typeof userId === 'undefined') {
       return nextWithEmptyUser(req, res, next);
@@ -149,7 +150,9 @@ async function getUserInstance({ siteConfig, authProvider, userId, isFixed, site
       if ( authUrl ==  'https://api.snipper.nlsvgtr.nl') { // snipper app van niels
         oauthUser = {};
       } else {
-        oauthUser = await OAuthApi.fetchUser({ siteConfig, authProvider, token: dbUser.idpUser.accesstoken });
+        // todo: which moet er uit
+        // todo: site config niet als totaal maar als de juiste meesturen
+        oauthUser = await OAuthApi.fetchUser({ siteConfig: { oauth: siteConfig }, which: authProvider, token: dbUser.idpUser.accesstoken });
         if (!oauthUser) return await resetUserToken(dbUser);
       }
 
