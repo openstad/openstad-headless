@@ -149,8 +149,7 @@ router
             req.userData = json.user;
             req.userData.user_id = json.user.id,
             delete req.userData.id;
-            req.userData.firstName = '';
-            req.userData.lastName = req.userData.real_name;
+            req.userData.name = req.userData.real_name;
             return next();
 	        })
 	        .catch((err) => {
@@ -184,12 +183,11 @@ router
               accesstoken: req.userAccessToken,
             },
             email: req.userData.email || null,
-            firstName: req.userData.firstName,
             siteId: req.site.id,
             extraData: req.userData.extraData,
             zipCode: req.userData.postcode ? req.userData.postcode : null,
             postcode: req.userData.postcode ? req.userData.postcode : null,
-            lastName: req.userData.lastName,
+            name: req.userData.firstName + ' ' + req.userData.lastName,
             role: req.userData.role || ((req.userData.email || req.userData.phoneNumber || req.userData.hashedPhoneNumber) ? 'member' : 'anonymous'),
             lastLogin: new Date(),
             isNotifiedAboutAnonymization: null,
@@ -325,9 +323,7 @@ router
             "idpUser": req.user.role == 'admin' ? req.user.idpUser : null,
             "role": req.user.role,
             "email": req.user.email,
-            "firstName": req.user.firstName,
-            "lastName": req.user.lastName,
-            "fullName": req.user.fullName,
+            "name": req.user.name,
             "nickName": req.user.nickName,
             "displayName": req.user.displayName,
             "initials": req.user.initials,

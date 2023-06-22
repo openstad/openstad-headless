@@ -92,18 +92,6 @@ module.exports = function (db, sequelize, DataTypes) {
 				},
 			},
     },
-    // For unknown/anon: Always `false`.
-    // For members: `true` when the user profile is complete. This is set
-    //              to `false` by default, and should be set to `true`
-    //              after the user has completed the registration. Until
-    //              then, the 'complete registration' form should be displayed
-    //              instead of any other content.
-
-    complete: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false
-    },
 
     extraData: getExtraDataConfig(DataTypes.JSON, 'users'),
 
@@ -116,6 +104,7 @@ module.exports = function (db, sequelize, DataTypes) {
         updateableBy: ['editor'],
       },
       allowNull: true,
+      defaultValue: null,
       validate: {
         isEmail: {
           msg: 'Geen geldig emailadres'
@@ -135,6 +124,7 @@ module.exports = function (db, sequelize, DataTypes) {
     nickName: {
       type: DataTypes.STRING(64),
       allowNull: true,
+      defaultValue: null,
       auth: {
         listableBy: ['moderator', 'owner'],
         viewableBy: ['moderator', 'owner'],
@@ -151,7 +141,7 @@ module.exports = function (db, sequelize, DataTypes) {
       }
     },
 
-    firstName: {
+    name: {
       type: DataTypes.STRING(64),
       auth: {
         listableBy: ['moderator', 'owner'],
@@ -160,22 +150,9 @@ module.exports = function (db, sequelize, DataTypes) {
         updateableBy: ['moderator', 'owner'],
       },
       allowNull: true,
+      defaultValue: null,
       set: function (value) {
-        this.setDataValue('firstName', sanitize.noTags(value));
-      }
-    },
-
-    lastName: {
-      type: DataTypes.STRING(64),
-      auth: {
-        listableBy: ['moderator', 'owner'],
-        viewableBy: ['moderator', 'owner'],
-        createableBy: ['moderator', 'owner'],
-        updateableBy: ['moderator', 'owner'],
-      },
-      allowNull: true,
-      set: function (value) {
-        this.setDataValue('lastName', sanitize.noTags(value));
+        this.setDataValue('name', sanitize.noTags(value));
       }
     },
 
@@ -187,6 +164,7 @@ module.exports = function (db, sequelize, DataTypes) {
         updateableBy: ['moderator', 'owner'],
       },
       allowNull: true,
+      defaultValue: null,
     },
 
     detailsViewableByRole: {
@@ -197,6 +175,7 @@ module.exports = function (db, sequelize, DataTypes) {
         updateableBy: ['moderator', 'owner'],
       },
       allowNull: true,
+      defaultValue: null,
     },
 
     phoneNumber: {
@@ -208,6 +187,7 @@ module.exports = function (db, sequelize, DataTypes) {
         updateableBy: ['editor', 'owner'],
       },
       allowNull: true,
+      defaultValue: null,
       set: function (value) {
         this.setDataValue('phoneNumber', sanitize.noTags(value));
       }
@@ -222,6 +202,7 @@ module.exports = function (db, sequelize, DataTypes) {
         updateableBy: ['moderator', 'owner'],
       },
       allowNull: true,
+      defaultValue: null,
       set: function (value) {
         this.setDataValue('streetName', sanitize.noTags(value));
       }
@@ -236,22 +217,9 @@ module.exports = function (db, sequelize, DataTypes) {
         updateableBy: ['moderator', 'owner'],
       },
       allowNull: true,
+      defaultValue: null,
       set: function (value) {
         this.setDataValue('houseNumber', sanitize.noTags(value));
-      }
-    },
-
-    postcode: {
-      type: DataTypes.STRING(64),
-      auth: {
-        listableBy: ['moderator', 'owner'],
-        viewableBy: ['moderator', 'owner'],
-        createableBy: ['moderator', 'owner'],
-        updateableBy: ['moderator', 'owner'],
-      },
-      allowNull: true,
-      set: function (value) {
-        this.setDataValue('postcode', sanitize.noTags(value));
       }
     },
 
@@ -264,6 +232,7 @@ module.exports = function (db, sequelize, DataTypes) {
         updateableBy: ['moderator', 'owner'],
       },
       allowNull: true,
+      defaultValue: null,
       set: function (value) {
         this.setDataValue('city', sanitize.noTags(value));
       }
@@ -278,51 +247,34 @@ module.exports = function (db, sequelize, DataTypes) {
         updateableBy: ['moderator', 'owner'],
       },
       allowNull: true,
+      defaultValue: null,
       set: function (value) {
         this.setDataValue('suffix', sanitize.noTags(value));
       }
     },
 
+    // todo: this is backwards compatibility and should be removed
     fullName: {
       type: DataTypes.VIRTUAL,
       auth: {
         listableBy: ['moderator', 'owner'],
         viewableBy: ['moderator', 'owner'],
       },
-      allowNull: true,
       get: function () {
-        var firstName = this.getDataValue('firstName') || '';
-        var lastName = this.getDataValue('lastName') || '';
-        var space = firstName && lastName ? ' ' : '';
-        return firstName || lastName ? (firstName + space + lastName) : undefined;
-      }
-    },
-
-    initials: {
-      type: DataTypes.VIRTUAL,
-      auth: {
-        listableBy: ['moderator', 'owner'],
-        viewableBy: ['moderator', 'owner'],
-      },
-      allowNull: true,
-      get: function () {
-        var firstName = this.getDataValue('firstName') || '';
-        var lastName = this.getDataValue('lastName') || '';
-        var initials = (firstName ? firstName.substr(0, 1) : '') +
-            (lastName ? lastName.substr(0, 1) : '');
-        return initials.toUpperCase();
+        return this.getDataValue('name') || '';
       }
     },
 
     displayName: {
       type: DataTypes.VIRTUAL,
       allowNull: true,
+      defaultValue: null,
       get: function () {
         // this should use site.config.allowUseOfNicknames but that implies loading the site for every time a user is shown which would be too slow
         // therefore createing nicknames is dependendt on site.config.allowUseOfNicknames; once you have created a nickName it will be shown here no matter what
-        var nickName = this.getDataValue('nickName');
-        var fullName = this.fullName;
-        return nickName || fullName || undefined;
+        let nickName = this.getDataValue('nickName');
+        let name = this.name;
+        return nickName || name || undefined;
       }
     },
 
@@ -336,27 +288,6 @@ module.exports = function (db, sequelize, DataTypes) {
       defaultValue: null,
     },
 
-    zipCode: {
-      type: DataTypes.STRING(10),
-      auth: {
-        listableBy: ['moderator', 'owner'],
-        viewableBy: ['moderator', 'owner'],
-        createableBy: ['moderator', 'owner'],
-        updateableBy: ['moderator', 'owner'],
-      },
-      allowNull: true,
-      validate: {
-        is: {
-          args: [/^\d{4} ?[a-zA-Z]{2}$/],
-          msg: 'Ongeldige postcode'
-        }
-      },
-      set: function (zipCode) {
-        zipCode = zipCode ? String(zipCode).trim() : null;
-        this.setDataValue('zipCode', zipCode);
-      },
-    },
-
     postcode: {
       type: DataTypes.STRING(10),
       auth: {
@@ -366,17 +297,18 @@ module.exports = function (db, sequelize, DataTypes) {
         updateableBy: ['moderator', 'owner'],
       },
       allowNull: true,
+      defaultValue: null,
       validate: {
         is: {
           args: [/^\d{4} ?[a-zA-Z]{2}$/],
           msg: 'Ongeldige postcode'
         }
       },
-      set: function (zipCode) {
-        zipCode = zipCode != null ?
-          String(zipCode).trim() :
+      set: function (postcode) {
+        postcode = postcode != null ?
+          String(postcode).trim() :
           null;
-        this.setDataValue('zipCode', zipCode);
+        this.setDataValue('postcode', postcode);
       },
     },
 
@@ -429,23 +361,6 @@ module.exports = function (db, sequelize, DataTypes) {
         if (this.id !== 1 && this.role === 'unknown') {
           throw new Error('User role \'unknown\' is not allowed');
         }
-      },
-      // isValidAnon: function() {
-      // 	if( this.role === 'unknown' || this.role === 'anonymous' ) {
-      // 		if( this.complete || this.email ) {
-      // 			throw new Error('Anonymous users cannot be complete profiles or have a mail address');
-      // 		}
-      // 	}
-      // },
-      isValidMember: function () {
-        // dit is niet langer relevant; mijnopenstad bepaald wat je default rol is
-        // if( this.role !== 'unknown' && this.role !== 'anonymous' ) {
-        //  	if( !this.email ) {
-        //  		throw new Error('Onjuist email adres');
-        //  	} else if( this.complete && (!this.firstName || !this.lastName) ) {
-        //  		throw new Error('Voor- en achternaam zijn verplichte velden');
-        //  	}
-        // }
       },
       onlyMembersCanLogin: function () {
         if (this.role === 'unknown' || this.role === 'anonymous') {
@@ -560,10 +475,6 @@ module.exports = function (db, sequelize, DataTypes) {
     }
   }
 
-  User.prototype.hasCompletedRegistration = function () {
-    return this.email && this.complete // && this.isMember();
-  }
-
   User.prototype.isUnknown = function () {
     return this.role === 'unknown';
   }
@@ -675,10 +586,8 @@ module.exports = function (db, sequelize, DataTypes) {
         viewableByRole: 'admin',
         email: null,
         nickName: null, 
-        firstName: ( config.users && config.users.anonymize && config.users.anonymize.firstName ) || 'Gebruiker',
-        lastName: ( config.users && config.users.anonymize && config.users.anonymize.lastName ) || 'verwijderd',
+        name: ( config.users && config.users.anonymize && config.users.anonymize.name ) || 'Gebruiker is ganonimiseerd',
         gender: null,
-        zipCode: null,
         postcode: null,
         suffix: null,
         houseNumber: null,

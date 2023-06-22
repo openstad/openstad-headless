@@ -112,8 +112,8 @@ var users = [
     role: 'admin',
     email: 'admin@openstad.org',
     password: randomString(10),
-    firstName: 'Administrator',
-    lastName: '',
+
+    name: 'Administrator',
 	lastLogin: new Date(),
 
 	//Add one dummy Idea for fun

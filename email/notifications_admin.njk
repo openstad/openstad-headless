@@ -101,7 +101,7 @@
 											{% endif %}
 											<br/>
 											<br/>
-											<strong>{{idea.user.firstName}} {{idea.user.lastName}} | {{idea.startDateHumanized}}</strong><br/><br/>
+											<strong>{{idea.user.displayName}} | {{idea.startDateHumanized}}</strong><br/><br/>
 
 											<h2>{{idea.title}}</h2>
 
@@ -151,7 +151,7 @@
 											{% endif %}
 											<br/>
 											<br/>
-											<strong>{{article.user.firstName}} {{article.user.lastName}} | {{article.startDateHumanized}}</strong><br/><br/>
+											<strong>{{article.user.displayName}} | {{article.startDateHumanized}}</strong><br/><br/>
 
 											<h2>{{article.title}}</h2>
 
@@ -194,7 +194,7 @@
 
 										<div style="padding: 15px;">
 
-											<strong>{{arg.user.firstName}} {{arg.user.lastName}} | {{arg.createDateHumanized}}</strong><br/><br/>
+											<strong>{{arg.user.displayName}} | {{arg.createDateHumanized}}</strong><br/><br/>
 
 											{% if arg.sentiment == 'for' %}
 												<strong>Ik ben voor, omdat:</strong><br/><br/>
