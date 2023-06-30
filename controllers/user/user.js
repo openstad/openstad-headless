@@ -25,18 +25,23 @@ exports.info = (req, res) => {
   // and used in access control checks.  For illustrative purposes, this
   // example simply returns the scope in the response.
 
+  // todo: ik denk dat hier de default role moet komen
   res.json({
     user_id: req.user.id,
-    email: req.user.email,
     role: req.user.role,
     firstName: req.user.firstName,
-    postcode: req.user.postcode,
     lastName: req.user.lastName,
-    // todo: ik denk dat hier de default role moet komen
+    email: req.user.email,
     phoneNumber: req.user.phoneNumber,
     hashedPhoneNumber: req.user.hashedPhoneNumber,
+    phoneNumberConfirmed: req.user.phoneNumberConfirmed,
     extraData: req.user.extraData,
-    scope: req.authInfo.scope
+    streetName: req.user.streetName,
+    houseNumber: req.user.houseNumber,
+    suffix: req.user.suffix,
+    postcode: req.user.postcode,
+    city: req.user.city,
+    scope: req.authInfo.scope,
   });
 }
 
