@@ -14,7 +14,7 @@ const OAuthUser = require('../../services/oauth-user');
 
 const filterBody = (req, res, next) => {
   const data = {};
-  const keys = ['firstName', 'lastName', 'nickName', 'email', 'phoneNumber', 'streetName', 'houseNumber', 'city', 'suffix', 'zipcode', 'postcode', 'extraData', 'listableByRole', 'detailsViewableByRole'];
+  const keys = ['name', 'nickName', 'email', 'phoneNumber', 'address', 'city', 'postcode', 'extraData', 'listableByRole', 'detailsViewableByRole'];
 
   keys.forEach((key) => {
     if (typeof req.body[key] != 'undefined') {
@@ -56,7 +56,7 @@ router.route('/')
 
     if (dbQuery.where.q) {
       dbQuery.search = {
-        haystack: ['role', 'firstName', 'lastName'],
+        haystack: ['role', 'name'],
         needle: dbQuery.where.q,
         offset: dbQuery.offset,
         limit: dbQuery.limit,

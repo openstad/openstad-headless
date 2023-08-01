@@ -25,7 +25,7 @@ module.exports = function (db, sequelize, DataTypes) {
       type: DataTypes.JSON,
       auth: {
         listableBy: 'admin',
-        viewableBy: 'admin',
+        viewableBy: [ 'admin', 'owner' ],
         createableBy: 'moderator',
         updateableBy: 'admin',
       },
@@ -193,8 +193,8 @@ module.exports = function (db, sequelize, DataTypes) {
       }
     },
 
-    streetName: {
-      type: DataTypes.STRING(64),
+    address: {
+      type: DataTypes.STRING(256),
       auth: {
         listableBy: ['moderator', 'owner'],
         viewableBy: ['moderator', 'owner'],
@@ -204,22 +204,7 @@ module.exports = function (db, sequelize, DataTypes) {
       allowNull: true,
       defaultValue: null,
       set: function (value) {
-        this.setDataValue('streetName', sanitize.noTags(value));
-      }
-    },
-
-    houseNumber: {
-      type: DataTypes.STRING(64),
-      auth: {
-        listableBy: ['moderator', 'owner'],
-        viewableBy: ['moderator', 'owner'],
-        createableBy: ['moderator', 'owner'],
-        updateableBy: ['moderator', 'owner'],
-      },
-      allowNull: true,
-      defaultValue: null,
-      set: function (value) {
-        this.setDataValue('houseNumber', sanitize.noTags(value));
+        this.setDataValue('address', sanitize.noTags(value));
       }
     },
 
@@ -235,21 +220,6 @@ module.exports = function (db, sequelize, DataTypes) {
       defaultValue: null,
       set: function (value) {
         this.setDataValue('city', sanitize.noTags(value));
-      }
-    },
-
-    suffix: {
-      type: DataTypes.STRING(64),
-      auth: {
-        listableBy: ['moderator', 'owner'],
-        viewableBy: ['moderator', 'owner'],
-        createableBy: ['moderator', 'owner'],
-        updateableBy: ['moderator', 'owner'],
-      },
-      allowNull: true,
-      defaultValue: null,
-      set: function (value) {
-        this.setDataValue('suffix', sanitize.noTags(value));
       }
     },
 
@@ -276,16 +246,6 @@ module.exports = function (db, sequelize, DataTypes) {
         let name = this.name;
         return nickName || name || undefined;
       }
-    },
-
-    gender: {
-      auth: {
-        listableBy: ['moderator', 'owner'],
-        viewableBy: ['moderator', 'owner'],
-      },
-      type: DataTypes.ENUM('male', 'female'),
-      allowNull: true,
-      defaultValue: null,
     },
 
     postcode: {
@@ -587,12 +547,10 @@ module.exports = function (db, sequelize, DataTypes) {
         email: null,
         nickName: null, 
         name: ( config.users && config.users.anonymize && config.users.anonymize.name ) || 'Gebruiker is ganonimiseerd',
-        gender: null,
         postcode: null,
-        suffix: null,
-        houseNumber: null,
         city: null,
-        streetName: null,
+        country: null,
+        address: null,
         phoneNumber: null,
         extraData,
         signedUpForNewsletter: 0,

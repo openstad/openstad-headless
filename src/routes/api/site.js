@@ -7,7 +7,7 @@ const db      				= require('../../db');
 const auth 						= require('../../middleware/sequelize-authorization-middleware');
 const pagination 			= require('../../middleware/pagination');
 const searchResults 	= require('../../middleware/search-results-user');
-const oauthClients 		= require('../../middleware/oauth-clients');
+// TODO-AUTH
 const checkHostStatus = require('../../services/checkHostStatus')
 const OAuthApi        = require('../../services/oauth-api');
 const sitesWithIssues = require('../../services/sites-with-issues');
@@ -24,14 +24,8 @@ const refreshSiteConfigMw = function (req, res, next) {
 		next();
 	}
 
-	//return fetch(cmsUrl + '/modules/openstad-api/refresh')
-	/*
-		@todo The /modules/openstad-api/refresh is cleaner, doesn't require a restart
-		but needs basichAuth headers in case a site is password protected
-	*/
-	return fetch(cmsUrl + '/config-reset')
-		.then(function () { 	next();  })
-		.catch(function (err) { console.log('errrr', err); next();	});
+	return next();
+
 }
 
 router.route('/')
@@ -174,7 +168,6 @@ router.route('/:siteIdOrDomain') //(\\d+)
 // update site
 // -----------
 	.put(auth.useReqUser)
-	.put(oauthClients.withAllForSite)
 	.put(function(req, res, next) {
 		const site = req.results;
     if (!( site && site.can && site.can('update') )) return next( new Error('You cannot update this site') );
@@ -195,9 +188,50 @@ router.route('/:siteIdOrDomain') //(\\d+)
         return null;
 			});
 	})
-
 // update certain parts of config to the oauth client
 // mainly styling settings are synched so in line with the CMS
+	.put(function (req, res, next) {
+
+    req.siteOAuthClients = [];
+    const site          = req.site;
+    const authServerUrl = config.authorization['auth-server-url'];
+
+    const siteConfig = req.site && req.site.config
+    const oauthConfig  = siteConfig.oauth;
+    
+    const fetchActions = [];
+    const fetchClient = (req, which) => {
+      return new Promise((resolve, reject) => {
+        return OAuthApi
+          .fetchClient({ siteConfig, which })
+          .then((client) => {
+            if (client && client.id) req.siteOAuthClients.push(client);
+            resolve();
+          })
+          .catch((err) => {
+            console.log('==>> err oauthClientId', which, err.message);
+            resolve();
+          });
+      })
+    }
+
+    if (oauthConfig && Object.keys(oauthConfig).length > 0) {
+      Object.keys(oauthConfig).forEach((configKey) => {
+        fetchActions.push(fetchClient(req, configKey));
+      })
+    } else {
+      let which = req.query.useOauth || 'default';
+      fetchActions.push(fetchClient(req, which));
+    }
+
+    return Promise
+      .all(fetchActions)
+      .then(() => { next(); })
+      .catch((e) => {
+        console.log('eeee', e)
+        next();
+      });
+	})
 	.put(function (req, res, next) {
 
     // todo: gebruik de oauth-api service

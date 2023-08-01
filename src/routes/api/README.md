@@ -4,40 +4,7 @@ Dit is een JSON API server
 
 ## Login
 
-```GET /oauth/login```
-en 
-```GET /oauth/site/:SITE_ID/login```
-
-Als je een site meestuurt dan haalt hij die site op en gebruikt de oauth config settings daarvan (waar gedefinieerd; zie onder Site) in plaats van de opties in de local.json config.
-
-Hij logt de gebruiker in als gewone, lokale, monolith user, en vanaf daar werkt dat als verwacht. Die user wordt zonodig aangemaakt.
-Voor nu ga ik er vanuit dat de required fields email, firstName, lastName en postcode beschikbaar zijn in mijnopenstad. Een nieuwe user heeft de role 'member'
-
-Hij redirect naar site.config.cms['after-login-redirect-uri'] of req.site.config.oauth['after-login-redirect-uri'] of authorization['after-login-redirect-uri'] uit de local.json
-
-Die redirect url zou `[[JWT]]` moeten bevatten. Op die plak wordt je JWT toegevoegd.
-
-Met die JWT kun je ook API calls doen. Die moet je meesturen als header:
-```X-Authorization: Bearer JWT```
-
-Dat heet `X-Authorization` omdat hij anders botst met de basic authentication
-
-Dat is denk ik hoe buurtbudget het doet? Over een oplossing voor de GET met JWT heb ik wel ideeen, maar moeten we denk ik even bespreken.
-
-```GET /oauth/me```
-en 
-```GET /oauth/site/:SITE_ID/me```
-
-Get the user for this JWT. Site ID wordt niet gebruikt maar de route bestaat wegens consistent.
-
-
-
-#### TODO
-- rollen moeten denk ik naar mijnoopenstad
-- flexibiliteit mbt. tot velden in mijnopenstad versus lokaal
-- per site inloggen; je logt nu in op alles
-- verzin iets beters dan X-Authorization
-
+Zie docs/auth
 
 ## Site
 

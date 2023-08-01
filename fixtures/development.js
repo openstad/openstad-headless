@@ -100,8 +100,8 @@ var sites = [
 ];
 
 console.log(sites);
-console.log(sites[0].config.oauth);
-console.log(sites[1].config.oauth);
+console.log(sites[0].config.auth);
+console.log(sites[1].config.auth);
 
 var users = [
 	//fixed user for SITE and Admin to get admin right

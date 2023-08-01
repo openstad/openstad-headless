@@ -3,7 +3,9 @@ const jwt = require('jsonwebtoken');
 const merge = require('merge');
 const fetch = require('node-fetch');
 const db = require('../db');
-const OAuthApi = require('../services/oauth-api');
+const authconfig = require('../util/auth-config');
+
+let adapters = {};
 
 /**
  * Get user from jwt or fixed token and validate with auth server
@@ -13,31 +15,27 @@ const OAuthApi = require('../services/oauth-api');
  * @returns {Promise<*>}
  */
 module.exports = async function getUser( req, res, next ) {
+
   try {
 
     if (!req.headers['x-authorization']) {
       return nextWithEmptyUser(req, res, next);
     }
 
-    let siteConfig = req.site && merge({}, req.site.config, { id: req.site.id });
-
     let { userId, isFixed, authProvider } = parseAuthHeader(req.headers['x-authorization']);
-    authProvider = authProvider || req.query.useAuth || req.query.useOauth || siteConfig.auth.default; // todo: req.query.useOauth is wegens backwards compatible en moet er uiteindelijk uit
-    // let authConfig = (siteConfig && siteConfig.auth && siteConfig.auth.providers && siteConfig.auth.providers[authProvider] ) || {};
-    let authConfig = (siteConfig && siteConfig.oauth && siteConfig.oauth[authProvider] ) || {};
+    let authConfig = await authconfig({ site: req.site, useAuth: authProvider })
     
     if(userId === null || typeof userId === 'undefined') {
       return nextWithEmptyUser(req, res, next);
     }
 
-    // TODO: params {siteConfig, authProvider} moet {authConfig} worden
-    const userEntity = await getUserInstance({ siteConfig: { [authProvider]: authConfig }, authProvider, userId, isFixed, siteId: ( req.site && req.site.id ) }) || {};
+    const userEntity = await getUserInstance({ authConfig, userId, isFixed, siteId: ( req.site && req.site.id ) }) || {};
 
     req.user = userEntity
-    // Pass user entity to template view.
-    res.locals.user = userEntity;
+    if (req.user.id) req.user.provider = authConfig.provider
     
-    next();
+    return next();
+    
   } catch(error) {
     console.error(error);
     next(error);
@@ -58,6 +56,7 @@ function nextWithEmptyUser(req, res, next) {
 
 function parseAuthHeader(authorizationHeader) {
 
+  // todo: // config moet authConfig zijn
   const fixedAuthTokens = config && config.auth && config.auth['fixedAuthTokens'];
 
   if (authorizationHeader.match(/^bearer /i)) {
@@ -91,7 +90,7 @@ function parseJwt(authorizationHeader) {
  * @param siteConfig
  * @returns {Promise<{}|*>}
  */
-async function getUserInstance({ siteConfig, authProvider, userId, isFixed, siteId }) {
+async function getUserInstance({ authConfig, userId, isFixed, siteId }) {
 
   let dbUser;
   
@@ -99,6 +98,7 @@ async function getUserInstance({ siteConfig, authProvider, userId, isFixed, site
 
     let where = { id: userId };
     if (siteId && !isFixed) where.siteId = siteId;
+    if (!isFixed) where.idpUser = { provider: authConfig.provider };
 
     dbUser = await db.User.findOne({ where });
 
@@ -107,7 +107,7 @@ async function getUserInstance({ siteConfig, authProvider, userId, isFixed, site
     }
 
     // extradata is tmp want moet in provider
-    if (!dbUser || ( !dbUser.extraData.oidc && ( !dbUser.idpUser || !dbUser.idpUser.accesstoken ) ) ) {
+    if (!dbUser || ( !dbUser.idpUser || !dbUser.idpUser.accesstoken ) ) {
       return {};
     }
 
@@ -116,53 +116,31 @@ async function getUserInstance({ siteConfig, authProvider, userId, isFixed, site
     throw err;
   }
 
+  let adapter = authConfig.adapter || 'openstad';
+
+  try {
+    if (!adapters[adapter]) {
+      adapters[adapter] = await require(process.env.NODE_PATH + '/' + authConfig.modulePath);
+    }
+  } catch(err) {
+    console.log(err);
+  }
+
   try {
 
-    if (dbUser.extraData.oidc) {
+    // get userdata from auth server
+    let service = adapters[ adapter ].service;
+    
+    let userData = await service.fetchUserData({
+      authConfig: authConfig,
+      accessToken: dbUser.idpUser.accesstoken,
+    })
 
-      // todo: dit moet plugin worden
-      // check oidc login
-      let url = `${dbUser.extraData.oidc.iss}/oidc/me`;
-      let access_token = dbUser.extraData.oidc.access_token;
-      let response = await fetch(url, {
-        headers: { "Authorization": `Bearer ${access_token}` },
-        method: 'GET'
-      });
-      if (!response.ok) {
-        console.log(response);
-        throw new Error('Fetch oidc user failed')
-      }
-      let oidcUser = await response.json();
-
-      if (!oidcUser) {
-        return {};
-      }
-
-      let mergedUser = merge(dbUser, oidcUser);
-      mergedUser.role = ((mergedUser.email || mergedUser.phoneNumber || mergedUser.hashedPhoneNumber) ? 'member' : 'anonymous'); // mergedUser.role || ((mergedUser.email || mergedUser.phoneNumber || mergedUser.hashedPhoneNumber) ? 'member' : 'anonymous');
-      
-      return mergedUser;
-
-    } else {
-      let oauthUser;
-      let authUrl = siteConfig.oauth && siteConfig.oauth.default && siteConfig.oauth.default['auth-server-url'];
-      
-      if ( authUrl ==  'https://api.snipper.nlsvgtr.nl') { // snipper app van niels
-        oauthUser = {};
-      } else {
-        // todo: which moet er uit
-        // todo: site config niet als totaal maar als de juiste meesturen
-        oauthUser = await OAuthApi.fetchUser({ siteConfig: { oauth: siteConfig }, which: authProvider, token: dbUser.idpUser.accesstoken });
-        if (!oauthUser) return await resetUserToken(dbUser);
-      }
-
-      let mergedUser = merge(dbUser, oauthUser);
-      mergedUser.role = mergedUser.role || ((mergedUser.email || mergedUser.phoneNumber || mergedUser.hashedPhoneNumber) ? 'member' : 'anonymous');
-      return mergedUser;
-
-    }
+    let mergedUser = merge(dbUser, userData);
+    return mergedUser;
     
   } catch(error) {
+    console.log(error);
     return await resetUserToken(dbUser);
   }
 
@@ -176,11 +154,10 @@ async function getUserInstance({ siteConfig, authProvider, userId, isFixed, site
  */
 async function resetUserToken(user) {
   if (!( user && user.update )) return {};
-  let idpUser = user.idpUser;
+  let idpUser = { ...user.idpUser };
   delete idpUser.accesstoken;
   await user.update({
-    idpUser
+    idpUser,
   });
-
   return {};
 }

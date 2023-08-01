@@ -4,7 +4,7 @@ module.exports = {
   up: function() {
     try {
       return db.query(`
-        ALTER TABLE users drop complete;`);
+        ALTER TABLE users drop gender;`);
     } catch(e) {
       return true;
     }

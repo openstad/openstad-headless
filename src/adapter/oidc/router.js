@@ -9,7 +9,69 @@ const service = require('./service');
 
 let router = express.Router({mergeParams: true});
 
-// Todo: dit is 'openstad', dus serverLogin/outPath en zo modgen hier hardcoded in gezet en uit de config gehaald
+// TODO: paths should be auto-configured through server://.well-known/openid-configuration
+
+// ----------------------------------------------------------------------------------------------------
+// connect a user from an external auth server to the api
+
+router
+  .route('(/site/:siteId)?/connect-user')
+    .post(async function (req, res, next) {
+
+      try {
+
+        let iss = req.body.iss;
+        if (iss !== req.authConfig.serverUrl) throw Error('Unknown auth server');
+        
+        let accessToken = req.body.access_token;
+        let mappedUserData = await service.fetchUserData({
+          authConfig: req.authConfig,
+          accessToken: accessToken,
+        })
+
+        let openStadUser = await db.User
+            .findOne({
+              where: {
+                [Sequelize.Op.and]: [
+                  { siteId: req.params.siteId },
+                  {
+                    idpUser: {
+                      identifier: mappedUserData.idpUser.identifier,
+                      provider: mappedUserData.idpUser.provider,
+                    }
+                  }
+                ]
+              }
+            })
+
+        console.log('FOUND: ', openStadUser && openStadUser.id);
+
+        openStadUser = await db.User
+          .upsert({
+            ...mappedUserData,
+            id: openStadUser && openStadUser.id,
+            siteId: req.params.siteId,
+            email: mappedUserData.email,
+            idpUser: mappedUserData.idpUser,
+            lastLogin: new Date(),
+          });
+
+        if ( Array.isArray(openStadUser) ) openStadUser = openStadUser[0];
+
+        // TODO: iss moet gecontroleerd
+        jwt.sign({userId: openStadUser.id, authProvider: req.authConfig.provider}, config.auth['jwtSecret'], {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
+          if (err) return next(err)
+          return res.json({
+            jwt: token
+          })
+        });
+        
+      } catch(err) {
+        console.log(err);
+        return next(err)
+      }
+
+    });
 
 // ----------------------------------------------------------------------------------------------------
 // login
@@ -30,8 +92,13 @@ router
   .get(function (req, res, next) {
 
     // redirect to login server
-    let redirectUri = encodeURIComponent(config.url + '/auth/site/' + req.site.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.redirectUri);
-    let url = `${req.authConfig.serverUrl}/dialog/authorize?redirect_uri=${redirectUri}&response_type=code&client_id=${req.authConfig.clientId}&scope=offline&forceLogin=1`;
+    let url = req.authConfig.serverUrl + req.authConfig.serverLoginPath;
+    url = url.replace(/\[\[clientId\]\]/, req.authConfig.clientId);
+    url = url.replace(/\[\[redirectUri\]\]/, encodeURIComponent(config.url + '/auth/site/' + req.site.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.redirectUri));
+
+    console.log('++++++++++');
+    console.log(url);
+    
     res.redirect(url);
 
   })
@@ -47,22 +114,28 @@ router
     let code = req.query.code;
     if (!code) throw createError(403, 'Je bent niet ingelogd');
 
-    let url = `${req.authConfig.serverUrl}/oauth/token`;
+    let url = req.authConfig.serverUrl + req.authConfig.serverExchangeCodePath;
+
     let data = {
-      client_id: req.authConfig.clientId,
-      client_secret: req.authConfig.clientSecret,
-      code: code,
-      grant_type: 'authorization_code'
+	    client_id: req.authConfig.clientId,
+	    client_secret: req.authConfig.clientSecret,
+	    code: code,
+	    grant_type: 'authorization_code'
     }
+
+    let contentType = req.authConfig.serverExchangeContentType || 'application/json';
+    if (contentType == 'application/x-www-form-urlencoded') data = `client_id=${encodeURIComponent(req.authConfig.clientId)}&client_secret=${encodeURIComponent(req.authConfig.clientSecret)}&code=${encodeURIComponent(code)}&grant_type=authorization_code&redirect_uri=${encodeURIComponent(config.url + '/auth/site/' + req.site.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.returnTo)}`;
 
     fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': contentType,
       },
-      body: JSON.stringify(data)
+      body: data
     })
 	    .then((response) => {
+        console.log(response);
+        
 		    if (!response.ok) throw Error(response)
 		    return response.json();
 	    })
@@ -71,6 +144,9 @@ router
         let accessToken = json.access_token;
         if (!accessToken) return next(createError(403, 'Inloggen niet gelukt: geen accessToken'));
 
+        console.log('----------');
+        console.log(accessToken);
+        
         req.userAccessToken = accessToken;
         return next();
 
@@ -106,7 +182,7 @@ router
     // rows are duplicate for a user
     let where = {
       where: Sequelize.and(
-        {idpUser: { identifier: data.idpUser.identifier, provider: data.idpUser.provider,  }},
+        {idpUser: { identifier: data.idpUser.identifier, provider: data.idpUser.provider }},
         {siteId: data.siteId},
       )
     }
@@ -157,7 +233,7 @@ router
   .get(function (req, res, next) {
 
     let returnTo = req.query.returnTo;
-    returnTo = returnTo || '/?jwt=[[jwt]]';
+    returnTo = returnTo || req.authConfig['afterLoginRedirectUri'];
     let redirectUrl = returnTo ? returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]' : false;
     redirectUrl = redirectUrl || (req.query.returnTo ? req.query.returnTo + (req.query.returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]' : false);
     redirectUrl = redirectUrl || '/';
@@ -221,12 +297,14 @@ router
   .get(function (req, res, next) {
 
     // redirect to logout server
-    let url = req.authConfig.serverUrl + '/logout?clientId=[[clientId]]';
-    url = url.replace(/\[\[clientId\]\]/, req.authConfig.clientId); // todo dezde oet denk ik naar authconfig middleware
-    if (req.query.redirectUri) {
-      url = `${url}&redirectUrl=${encodeURIComponent(req.query.redirectUri)}`;
+    if (req.authConfig.serverLogoutPath) {
+      let url = req.authConfig.serverUrl + req.authConfig.serverLogoutPath;
+      url = url.replace(/\[\[clientId\]\]/, req.authConfig.clientId); // todo dezde oet denk ik naar authconfig middleware
+      if (req.query.redirectUri) {
+        url = `${url}&redirectUrl=${encodeURIComponent(req.query.redirectUri)}`;
+      }
+      return res.redirect(url);
     }
-    return res.redirect(url);
 
     // todo: isallowed
     if (req.query.redirectUri) return res.redirect(req.query.redirectUri);

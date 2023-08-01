@@ -139,22 +139,6 @@ module.exports = function (db, sequelize, DataTypes) {
   });
 
   async function beforeUpdateOrCreate(instance, options) {
-    try {
-
-      // TODO: dit gebeurd nu in de route maar moet denk ik naar hier
-//      // canCreateNewUsers must be updated on the clients
-//      if (instance.config.users && typeof instance.config.users.canCreateNewUsers != 'undefined' ) {
-//        let config = { users: { canCreateNewUsers: instance.config.users.canCreateNewUsers } }
-//        //        for ( let which of Object.keys(instance.config.oauth) ) { // TODO: moet deze loop naar dde OAuthApi?
-//        let which = 'anonymous';
-//          await OAuthApi.updateClient({ siteConfig: instance.config, which, clientData: { config } })
-////        }
-//      }
-
-    } catch (err) {
-      console.log(err);
-      throw err;
-    }
   }
 
   Site.scopes = function scopes() {

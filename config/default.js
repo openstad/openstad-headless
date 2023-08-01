@@ -33,7 +33,7 @@ let defaultConfig = {
 			"./middleware/log",
 			{ "route": "/api", "router": "./routes/api" },
 			{ "route": "/auth", "router": "./routes/auth" },
-			{ "route": "/oauth", "router": "./routes/oauth" },
+//			{ "route": "/oauth", "router": "./routes/oauth" },
       { "route": "/stats", "router": "./routes/stats" },
 			{ "route": "/", "router": "./routes/doc" }
 		]
@@ -91,15 +91,16 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
     adapter: {
       openstad: {
         modulePath: './src/adapter/openstad',
-		    serverLoginPath: "/dialog/authorize?redirect_uri=[[redirectUri]]&response_type=code&client_id=[[clientId]]&scope=offline&forceLogin=1",
-		    serverExchangeCodePath: "/oauth/token",
-		    serverGetUserPath: "/api/userinfo?client_id=[[clientId]]",
-		    serverLogoutPath: "/logout?clientId=[[clientId]]",
-		    afterLoginRedirectUri: "/?jwt=[[jwt]]",
+        userMapping: JSON.stringify({
+          identifier: 'user_id',
+          name: "user => `${user.firstName || ''} ${user.lastName || ''}`.trim() || null",
+          email: "user => user.email == '' ? null : user.email",
+          address: "user => `${user.streetName || ''} ${user.houseNumber || ''} ${user.suffix || ''}`.trim() || null",
+          role: "user => user.role || ((user.email || user.phoneNumber || user.hashedPhoneNumber) ? 'member' : 'anonymous')",
+        }),
       },
       oidc: {
         modulePath: './src/adapter/oidc',
-        // in oidc these paths should be discovered
       }
     },
 

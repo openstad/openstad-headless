@@ -4,7 +4,7 @@ const merge = require('merge');
 let OAuthUser = {};
 
 // these fields exist in the API but not in the oath server
-let apiFieldsInExtraData = [ 'listableByRole', 'detailsViewableByRole', 'nickName', 'gender', 'signedUpForNewsletter' ];
+let apiFieldsInExtraData = [ 'listableByRole', 'detailsViewableByRole', 'nickName', 'signedUpForNewsletter' ];
 
 // todo: config uitbreiden en mergen
 // doc: niet recursief want daar kan ik geen use case voor bedenken
