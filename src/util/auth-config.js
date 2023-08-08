@@ -1,16 +1,16 @@
 const config = require('config');
 const merge = require('merge');
 
-module.exports = async function autconfig({  site, useAuth = 'default' }) {
+module.exports = async function autconfig({  project, useAuth = 'default' }) {
 
   let defaultConfig = config && config.auth || {};
   let temp = { provider: {}, adapter: {} };
   Object.keys(defaultConfig.provider).map( key => temp.provider[key] = {} );  // todo: defaultConfig is non-extensible, that's why this very not robust fix
   let apiAuthConfig = merge.recursive( temp, defaultConfig );
 
-  let siteConfig = site && site.config && site.config.auth || {};
+  let projectConfig = project && project.config && project.config.auth || {};
 
-  apiAuthConfig = merge.recursive( apiAuthConfig, siteConfig )
+  apiAuthConfig = merge.recursive( apiAuthConfig, projectConfig )
 
   if (useAuth == 'default' && apiAuthConfig.default) useAuth = apiAuthConfig.default;
 

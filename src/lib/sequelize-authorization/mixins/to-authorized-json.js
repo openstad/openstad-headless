@@ -58,7 +58,7 @@ module.exports = function toAuthorizedJSON(user) {
     let testRole;
     if (self.rawAttributes[key] && self.rawAttributes[key].auth) {
       if (self.rawAttributes[key].auth.authorizeData) {
-        return self.rawAttributes[key].auth.authorizeData(null, 'view', user, self, self.site);
+        return self.rawAttributes[key].auth.authorizeData(null, 'view', user, self, self.project);
       } else {
 
         // todo: waarom loopt dit niet via authorizeData

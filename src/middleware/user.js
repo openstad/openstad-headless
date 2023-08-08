@@ -23,13 +23,13 @@ module.exports = async function getUser( req, res, next ) {
     }
 
     let { userId, isFixed, authProvider } = parseAuthHeader(req.headers['x-authorization']);
-    let authConfig = await authconfig({ site: req.site, useAuth: authProvider })
+    let authConfig = await authconfig({ project: req.project, useAuth: authProvider })
     
     if(userId === null || typeof userId === 'undefined') {
       return nextWithEmptyUser(req, res, next);
     }
 
-    const userEntity = await getUserInstance({ authConfig, userId, isFixed, siteId: ( req.site && req.site.id ) }) || {};
+    const userEntity = await getUserInstance({ authConfig, userId, isFixed, projectId: ( req.project && req.project.id ) }) || {};
 
     req.user = userEntity
     if (req.user.id) req.user.provider = authConfig.provider
@@ -87,17 +87,17 @@ function parseJwt(authorizationHeader) {
 /**
  * Get user from api database and auth server and combine to one user object.
  * @param user
- * @param siteConfig
+ * @param projectConfig
  * @returns {Promise<{}|*>}
  */
-async function getUserInstance({ authConfig, userId, isFixed, siteId }) {
+async function getUserInstance({ authConfig, userId, isFixed, projectId }) {
 
   let dbUser;
   
   try {
 
     let where = { id: userId };
-    if (siteId && !isFixed) where.siteId = siteId;
+    if (projectId && !isFixed) where.projectId = projectId;
     if (!isFixed) where.idpUser = { provider: authConfig.provider };
 
     dbUser = await db.User.findOne({ where });

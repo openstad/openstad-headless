@@ -18,7 +18,7 @@ const htmlToText = require('html-to-text');
 env.addFilter('date', dateFilter);
 // Global variables.
 env.addGlobal('HOSTNAME', config.get('hostname'));
-env.addGlobal('SITENAME', config.get('siteName'));
+env.addGlobal('PROJECTNAME', config.get('projectName'));
 //env.addGlobal('PAGENAME_POSTFIX', config.get('pageNamePostfix'));
 env.addGlobal('EMAIL', config.get('emailAddress'));
 env.addGlobal('GLOBALS', config.get('express.rendering.globals'));
@@ -28,9 +28,9 @@ const mailTransporter = require('../lib/mailTransporter');
 
 // Default options for a single email.
 
-const sendMail = (options, site) => {
+const sendMail = (options, project) => {
     return Promise((resolve, reject) => {
-        mailTransporter.getTransporter(site).sendMail(
+        mailTransporter.getTransporter(project).sendMail(
             options,
             function (error, info) {
                 if (error) {
@@ -46,7 +46,7 @@ const sendMail = (options, site) => {
 
 module.exports = function (db, sequelize, DataTypes) {
     var Action = sequelize.define('action', {
-        siteId: {
+        projectId: {
             type: DataTypes.INTEGER,
             defaultValue: 0,
         },
@@ -121,9 +121,9 @@ module.exports = function (db, sequelize, DataTypes) {
 
     Action.scopes = function scopes() {
         return {
-            includeSite: {
+            includeProject: {
                 include: [{
-                    model: db.Site,
+                    model: db.Project,
                 }]
             },
         }
@@ -255,7 +255,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
                     if (recipient.type === 'admin') {
                         /**
-                         * Todo fetch admin for all sites
+                         * Todo fetch admin for all projects
                          *
                     }
 
@@ -321,7 +321,7 @@ module.exports = function (db, sequelize, DataTypes) {
                             uppercaseHeadings: false
                         });
 
-                        // TODO: site meesturen in sendmail
+                        // TODO: project meesturen in sendmail
                         const response = await sendMail({
                             // in some cases the resource, like order or account has a different email from the submitted user, default to resource, otherwise send to owner of resource
                             to: recipientEmail, //resource.email ?  resource.email : user.email,
@@ -375,7 +375,7 @@ module.exports = function (db, sequelize, DataTypes) {
          *
          */
         const conditions = action.conditions;
-        const siteId = action.siteId;
+        const projectId = action.projectId;
         const modelName = conditions.model;
         const dateSelection = conditions.dateSelection;
         const filters = conditions.filters;
@@ -431,7 +431,7 @@ module.exports = function (db, sequelize, DataTypes) {
         // add filters to where object
         // so for instance filters can be [{key: 'status', value: 'PUBLISHED'}]
         // currently only = operator, but easy to add more when needed
-        // for most cases a siteId is wanted, so for
+        // for most cases a projectId is wanted, so for
 
         if (filters) {
             filters.forEach((filter) => {
@@ -439,13 +439,13 @@ module.exports = function (db, sequelize, DataTypes) {
             })
         }
 
-        // for some models siteId is not referenced directly, for instance arguments,
+        // for some models projectId is not referenced directly, for instance arguments,
         // so in this case current implementations in not sufficient
-        if (!siteId) {
-            throw new Error(`No siteId defined, action only allowed to run within a site scope for security and data bug prevention`)
+        if (!projectId) {
+            throw new Error(`No projectId defined, action only allowed to run within a project scope for security and data bug prevention`)
         }
 
-        where[modelName === 'Site' ? 'id' : 'siteId'] = siteId;
+        where[modelName === 'Project' ? 'id' : 'projectId'] = projectId;
 
         selection = await db[modelName].findAll({
             where: where

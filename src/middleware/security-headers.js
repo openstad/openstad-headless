@@ -10,7 +10,7 @@ module.exports = function( req, res, next ) {
 		domain = new URL(url).hostname;
 	} catch(err) {	}
 
-	let allowedDomains = (req.site && req.site.config && req.site.config.allowedDomains) || config.allowedDomains;
+	let allowedDomains = (req.project && req.project.config && req.project.config.allowedDomains) || config.allowedDomains;
 	if ( !allowedDomains || allowedDomains.indexOf(domain) === -1) {
 		url = config.url || req.protocol + '://' + req.hostname;
 	}

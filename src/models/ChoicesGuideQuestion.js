@@ -166,10 +166,10 @@ module.exports = function( db, sequelize, DataTypes ) {
                 return questionGroup;
               })
               .then( (questionGroup) => {
-                db.ChoicesGuide.scope('includeSite').findByPk(instance.choicesGuideId)
+                db.ChoicesGuide.scope('includeProject').findByPk(instance.choicesGuideId)
                   .then( (choicesGuide) => {
                     if (!choicesGuide) throw Error('ChoicesGuide niet gevonden');
-                    instance.config = merge.recursive(true, config, choicesGuide.site.config);
+                    instance.config = merge.recursive(true, config, choicesGuide.project.config);
                     return choicesGuide;
                   })
                   .then( (choicesGuide) => {
@@ -198,10 +198,10 @@ module.exports = function( db, sequelize, DataTypes ) {
 
     return {
 
-      forSiteId: function( siteId ) {
+      forProjectId: function( projectId ) {
         return {
           where: {
-            questionGroupId: [sequelize.literal(`select choicesGuideQuestionGroups.id FROM choicesGuideQuestionGroups INNER JOIN choicesGuides ON choicesGuides.id = choicesGuideQuestionGroups.choicesGuideId WHERE siteId = ${siteId}`)]
+            questionGroupId: [sequelize.literal(`select choicesGuideQuestionGroups.id FROM choicesGuideQuestionGroups INNER JOIN choicesGuides ON choicesGuides.id = choicesGuideQuestionGroups.choicesGuideId WHERE projectId = ${projectId}`)]
           }
         };
       },

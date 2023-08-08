@@ -11,25 +11,14 @@ const router = require('express-promise-router')({ mergeParams: true });
 // backwards compatibility
 router.route('/$')
   .get(function(req, res, next) {
-    res.redirect('/api/template/site');
+    res.redirect('/api/template/project');
   })
 
-router.route('/site')
-  // .get(auth.can('ExternalSite', 'list')) // hoort hier wel, maar naamgeving is niet correct
+router.route('/project')
   .get(pagination.init)
   .get(function(req, res, next) {
 
     if (config.templateSource === 'DB' || config.templateSource === 'DATABASE') {
-
-      // this is the old version; in a new setup the database could have a templates table. ExternalSite ha been removed completely
-      // return db.ExternalSite
-      //   .findAndCountAll({offset: req.dbQuery.offset, limit: req.dbQuery.limit})
-      //   .then(function(result) {
-      //     req.results = result.rows || [];
-      //     req.dbQuery.count = result.count;
-      //     return next();
-      //   })
-      //   .catch(next);
 
       req.results = {'Too soon': 'Not yet implemented'};
       next();

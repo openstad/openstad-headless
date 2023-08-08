@@ -16,16 +16,16 @@ module.exports = {
 
     try {
 
-      let sites = await db.Site.findAll({
+      let projects = await db.Project.findAll({
         where: Sequelize.where(Sequelize.fn('JSON_VALUE', Sequelize.col('config'), Sequelize.literal('"$.ideas.automaticallyUpdateStatus.isActive"')), 'true')
       });
 
-      for ( let site of sites ) {
+      for ( let project of projects ) {
 
-        let days = site.config.ideas.automaticallyUpdateStatus.afterXDays || 90;
+        let days = project.config.ideas.automaticallyUpdateStatus.afterXDays || 90;
         let ideas = await db.Idea.findAll({
           where: {
-            siteId: site.id,
+            projectId: project.id,
             startDate: { [Op.lte]: moment().subtract(days, 'days').toDate() },
    			    status: 'OPEN'
           }

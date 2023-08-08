@@ -88,7 +88,7 @@ router.route('/')
     // -----------
     .get((req, res, next) => {
 
-       // let isViewable = req.site && req.site.config && req.site.config.votes && req.site.config.votes.isViewable;
+       // let isViewable = req.project && req.project.config && req.project.config.votes && req.project.config.votes.isViewable;
         const isViewable = (req.user && (req.user.role == 'admin' || req.user.role == 'editor' || req.user.role == 'moderator'))
 
         if (isViewable) {
@@ -103,7 +103,7 @@ router.route('/')
          * List of queries with their description
          *
          * Results are automatically send to browser as JSON
-         * Made for rendering analytics dashboard per site
+         * Made for rendering analytics dashboard per project
          *
          * @type [{
          *      variables: [string],
@@ -118,8 +118,8 @@ router.route('/')
             {
                 key: 'ideaTotal',
                 description: 'Amount of ideas',
-                sql: "SELECT count(ideas.id) AS counted FROM ideas WHERE ideas.deletedAt IS NULL AND ideas.siteId=?",
-                variables: [req.params.siteId],
+                sql: "SELECT count(ideas.id) AS counted FROM ideas WHERE ideas.deletedAt IS NULL AND ideas.projectId=?",
+                variables: [req.params.projectId],
                 resultType: 'count',
                 // will be filled after running the query
             },
@@ -129,39 +129,39 @@ router.route('/')
                 sql: `SELECT count(ideas.id) AS counted, DATE_FORMAT(ideas.createdAt, '%Y-%m-%d') as date
                     FROM ideas 
                     WHERE ideas.deletedAt IS NULL 
-                    AND ideas.deletedAt IS NULL AND ideas.siteId=?
+                    AND ideas.deletedAt IS NULL AND ideas.projectId=?
                     GROUP BY date
                     ORDER BY date ASC`,
-                variables: [req.params.siteId],
+                variables: [req.params.projectId],
                 formatResults: addMissingDays,
             },
             {
                 key: 'userVoteTotal',
                 description: 'Amount of users that voted',
-                sql: "SELECT count(DISTINCT votes.userId) AS counted FROM votes LEFT JOIN ideas ON votes.ideaId = ideas.id WHERE votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND ideas.deletedAt IS NULL AND ideas.siteId=?",
-                variables: [req.params.siteId],
+                sql: "SELECT count(DISTINCT votes.userId) AS counted FROM votes LEFT JOIN ideas ON votes.ideaId = ideas.id WHERE votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND ideas.deletedAt IS NULL AND ideas.projectId=?",
+                variables: [req.params.projectId],
                 resultType: 'count',
                 // will be filled after running the query
             },
             {
                 key: 'ideaVotesCountTotal',
                 description: 'Amount of votes on ideas',
-                sql: "SELECT count(votes.id) AS counted FROM votes LEFT JOIN ideas ON votes.ideaId = ideas.id WHERE votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND ideas.deletedAt IS NULL AND ideas.siteId=?",
-                variables: [req.params.siteId],
+                sql: "SELECT count(votes.id) AS counted FROM votes LEFT JOIN ideas ON votes.ideaId = ideas.id WHERE votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND ideas.deletedAt IS NULL AND ideas.projectId=?",
+                variables: [req.params.projectId],
                 resultType: 'count',
             },
             {
                 key: 'ideaVotesCountForTotal',
                 description: 'Amount of votes for an idea',
-                sql: "SELECT count(votes.id) AS counted FROM votes LEFT JOIN ideas ON votes.ideaId = ideas.id WHERE votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND ideas.deletedAt IS NULL AND ideas.siteId=? AND votes.opinion = 'yes'",
-                variables: [req.params.siteId],
+                sql: "SELECT count(votes.id) AS counted FROM votes LEFT JOIN ideas ON votes.ideaId = ideas.id WHERE votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND ideas.deletedAt IS NULL AND ideas.projectId=? AND votes.opinion = 'yes'",
+                variables: [req.params.projectId],
                 resultType: 'count',
             },
             {
                 key: 'ideaVotesCountAgainstTotal',
                 description: 'Amount of votes against an idea',
-                sql: "SELECT count(votes.id) AS counted FROM votes LEFT JOIN ideas ON votes.ideaId = ideas.id WHERE votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND ideas.deletedAt IS NULL AND ideas.siteId=?  AND votes.opinion = 'no'",
-                variables: [req.params.siteId],
+                sql: "SELECT count(votes.id) AS counted FROM votes LEFT JOIN ideas ON votes.ideaId = ideas.id WHERE votes.deletedAt IS NULL AND (votes.checked IS NULL OR votes.checked = 1) AND ideas.deletedAt IS NULL AND ideas.projectId=?  AND votes.opinion = 'no'",
+                variables: [req.params.projectId],
                 resultType: 'count',
             },
             {
@@ -173,10 +173,10 @@ router.route('/')
                     LEFT JOIN ideas ON votes.ideaId = ideas.id 
                     WHERE votes.deletedAt IS NULL 
                     AND (votes.checked IS NULL OR votes.checked = 1)
-                    AND ideas.deletedAt IS NULL AND ideas.siteId=?
+                    AND ideas.deletedAt IS NULL AND ideas.projectId=?
                     GROUP BY date
                     ORDER BY date ASC`,
-                variables: [req.params.siteId],
+                variables: [req.params.projectId],
                 formatResults: addMissingDays,
             },
             {
@@ -187,35 +187,35 @@ router.route('/')
                     LEFT JOIN ideas ON votes.ideaId = ideas.id 
                     WHERE votes.deletedAt IS NULL 
                     AND (votes.checked IS NULL OR votes.checked = 1)
-                    AND ideas.deletedAt IS NULL AND ideas.siteId=?
+                    AND ideas.deletedAt IS NULL AND ideas.projectId=?
                     GROUP BY date
                     ORDER BY date ASC`,
-                variables: [req.params.siteId],
+                variables: [req.params.projectId],
                 formatResults: addMissingDays,
             },
             {
                 key: 'argumentCountTotal',
                 description: 'Amount of arguments, total count',
-                sql: "SELECT count(arguments.id) AS counted FROM arguments LEFT JOIN ideas ON ideas.id = arguments.ideaId WHERE arguments.deletedAt IS NULL AND ideas.deletedAt IS NULL AND ideas.siteId=?",
-                variables: [req.params.siteId],
+                sql: "SELECT count(arguments.id) AS counted FROM arguments LEFT JOIN ideas ON ideas.id = arguments.ideaId WHERE arguments.deletedAt IS NULL AND ideas.deletedAt IS NULL AND ideas.projectId=?",
+                variables: [req.params.projectId],
             },
             {
                 key: 'argumentForCountTotal',
                 description: 'Amount of arguments for an idea, total count',
-                sql: "SELECT count(arguments.id) AS counted FROM arguments LEFT JOIN ideas ON ideas.id = arguments.ideaId WHERE arguments.deletedAt IS NULL AND ideas.deletedAt IS NULL AND ideas.siteId=? AND arguments.sentiment = 'for'",
-                variables: [req.params.siteId],
+                sql: "SELECT count(arguments.id) AS counted FROM arguments LEFT JOIN ideas ON ideas.id = arguments.ideaId WHERE arguments.deletedAt IS NULL AND ideas.deletedAt IS NULL AND ideas.projectId=? AND arguments.sentiment = 'for'",
+                variables: [req.params.projectId],
             },
             {
                 key: 'argumentAgainstCountTotal',
                 description: 'Amount of arguments against an idea, total count',
-                sql: "SELECT count(arguments.id) AS counted FROM arguments LEFT JOIN ideas ON ideas.id = arguments.ideaId WHERE arguments.deletedAt IS NULL AND ideas.deletedAt IS NULL AND ideas.siteId=? AND arguments.sentiment = 'against'",
-                variables: [req.params.siteId],
+                sql: "SELECT count(arguments.id) AS counted FROM arguments LEFT JOIN ideas ON ideas.id = arguments.ideaId WHERE arguments.deletedAt IS NULL AND ideas.deletedAt IS NULL AND ideas.projectId=? AND arguments.sentiment = 'against'",
+                variables: [req.params.projectId],
             },
             {
                 key: 'choicesguideresultsCountTotal',
                 description: 'Amount of choices guide results',
-                sql: "SELECT count(choicesGuideResults.id) AS counted FROM choicesGuideResults LEFT JOIN choicesGuides ON choicesGuides.id = choicesGuideResults.choicesGuideId WHERE choicesGuideResults.deletedAt IS NULL AND choicesGuides.deletedAt IS NULL AND choicesGuides.siteId=?",
-                variables: [req.params.siteId],
+                sql: "SELECT count(choicesGuideResults.id) AS counted FROM choicesGuideResults LEFT JOIN choicesGuides ON choicesGuides.id = choicesGuideResults.choicesGuideId WHERE choicesGuideResults.deletedAt IS NULL AND choicesGuides.deletedAt IS NULL AND choicesGuides.projectId=?",
+                variables: [req.params.projectId],
             },
         ];
 

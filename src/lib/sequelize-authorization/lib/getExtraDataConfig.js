@@ -4,7 +4,7 @@ const userHasRole = require('./hasRole');
 var sanitize = require('../../../util/sanitize');
 
 
-module.exports = function (dataTypeJSON,  siteConfigKey) {
+module.exports = function (dataTypeJSON,  projectConfigKey) {
   return {
     type: dataTypeJSON,
     allowNull: false,
@@ -68,9 +68,9 @@ module.exports = function (dataTypeJSON,  siteConfigKey) {
     },
     auth: {
       viewableBy: 'all',
-      authorizeData: function(data, action, user, self, site) {
+      authorizeData: function(data, action, user, self, project) {
 
-        if (!site) return; // todo: die kun je ophalen als eea. async is
+        if (!project) return; // todo: die kun je ophalen als eea. async is
         data = data || self.extraData;
         data = typeof data === 'object' ? data : {};
         let result = {};
@@ -83,7 +83,7 @@ module.exports = function (dataTypeJSON,  siteConfigKey) {
         if (data) {
           Object.keys(data).forEach((key) => {
 
-            let testRole = site.config && site.config[siteConfigKey] && site.config[siteConfigKey].extraData && site.config[siteConfigKey].extraData[key] && site.config[siteConfigKey].extraData[key].auth && site.config[siteConfigKey].extraData[key].auth[action+'ableBy'];
+            let testRole = project.config && project.config[projectConfigKey] && project.config[projectConfigKey].extraData && project.config[projectConfigKey].extraData[key] && project.config[projectConfigKey].extraData[key].auth && project.config[projectConfigKey].extraData[key].auth[action+'ableBy'];
             testRole = testRole || self.rawAttributes.extraData.auth[action+'ableBy'];
             testRole = testRole || ( self.auth && self.auth[action+'ableBy'] ) || [];
             if (!Array.isArray(testRole)) testRole = [testRole];

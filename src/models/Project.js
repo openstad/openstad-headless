@@ -7,24 +7,18 @@ const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 
 module.exports = function (db, sequelize, DataTypes) {
 
-  var Site = sequelize.define('site', {
+  var Project = sequelize.define('project', {
 
     name: {
       type: DataTypes.STRING(255),
       allowNull: true,
-      defaultValue: 'Nieuwe site',
+      defaultValue: 'Nieuwe project',
     },
 
     title: {
       type: DataTypes.STRING(255),
       allowNull: true,
-      defaultValue: 'Nieuwe site',
-    },
-
-    domain: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-      defaultValue: 'demo.openstad.nl',
+      defaultValue: 'Nieuwe project',
     },
 
     config: {
@@ -77,7 +71,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
         try {
           // ik zou verwachten dat je dit met _previousDataValues kunt doen, maar die bevat al de nieuwe waarde
-          let current = await db.Site.findOne({ where: { id: instance.id } });
+          let current = await db.Project.findOne({ where: { id: instance.id } });
 
           // on update of projectHasEnded also update isActive of all the parts
           if (current && typeof instance.config.project.projectHasEnded != 'undefined' && current.config.project.projectHasEnded !== instance.config.project.projectHasEnded) {
@@ -120,17 +114,17 @@ module.exports = function (db, sequelize, DataTypes) {
 
       beforeDestroy: async function (instance, options) {
         // project has ended
-        if (!(instance && instance.config && instance.config.project.projectHasEnded)) throw Error('Cannot delete an active site - first set the project-has-ended parameter');
+        if (!(instance && instance.config && instance.config.project.projectHasEnded)) throw Error('Cannot delete an active project - first set the project-has-ended parameter');
         // are all users anonymized
         let found = await db.User
             .findAll({
               where: {
-                siteId: instance.id,
+                projectId: instance.id,
                 role: 'member',
               }
             })
 
-        if (found.length > 0) throw Error('Cannot delete an active site - first anonymize all users');
+        if (found.length > 0) throw Error('Cannot delete an active project - first anonymize all users');
         return 
       },
 
@@ -141,7 +135,7 @@ module.exports = function (db, sequelize, DataTypes) {
   async function beforeUpdateOrCreate(instance, options) {
   }
 
-  Site.scopes = function scopes() {
+  Project.scopes = function scopes() {
     return {
       defaultScope: {},
 
@@ -153,13 +147,13 @@ module.exports = function (db, sequelize, DataTypes) {
     };
   }
 
-  Site.associate = function (models) {
+  Project.associate = function (models) {
     this.hasMany(models.User);
     this.hasMany(models.Idea);
     this.belongsTo(models.Area);
   }
 
-  Site.configOptions = function () {
+  Project.configOptions = function () {
     // definition of possible config values
     // todo: formaat gelijktrekken met sequelize defs
     // todo: je zou ook opties kunnen hebben die wel een default hebbe maar niet editable zijn? apiUrl bijv. Of misschien is die afgeleid
@@ -302,7 +296,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
             type: 'string', // todo: add type email/list of emails
             default: 'EMAIL@NOT.DEFINED',
           },
-          siteadminAddress: {
+          projectadminAddress: {
             type: 'string', // todo: add type email/list of emails
             default: apiConfig.notifications.admin.emailAddress,
           },
@@ -312,7 +306,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
       email: {
         type: 'object',
         subset: {
-          siteaddress: {
+          projectaddress: {
             type: 'string', // todo: add type email/list of emails
             default: 'EMAIL@NOT.DEFINED',
           },
@@ -817,7 +811,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
     }
   }
 
-  Site.prototype.parseConfig = function (config) {
+  Project.prototype.parseConfig = function (config) {
 
 
     try {
@@ -828,7 +822,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
       config = {};
     }
 
-    let options = Site.configOptions();
+    let options = Project.configOptions();
 
     config = checkValues(config, options)
         
@@ -866,8 +860,8 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
             if ( !value[key].projectmanagerAddress || value[key].projectmanagerAddress == options[key].subset.projectmanagerAddress.default ) {
               value[key].projectmanagerAddress = value[key].to || apiConfig.notifications.admin.emailAddress || options[key].subset.projectmanagerAddress.default;
             }
-            if ( !value[key].siteadminAddress || value[key].siteadminAddress == options[key].subset.default ) {
-              value[key].siteadminAddress = apiConfig.notifications.admin.emailAddress || value[key].projectmanagerAddress;
+            if ( !value[key].projectadminAddress || value[key].projectadminAddress == options[key].subset.default ) {
+              value[key].projectadminAddress = apiConfig.notifications.admin.emailAddress || value[key].projectmanagerAddress;
             }
             value[key].to = undefined;
           }
@@ -909,25 +903,25 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
         // TODO: in progress
         if (typeof value[key] != 'undefined' && value[key] != null) {
           if (options[key].type && options[key].type === 'int' && parseInt(value[key]) !== value[key]) {
-            throw new Error(`site.config: ${key} must be an int`);
+            throw new Error(`project.config: ${key} must be an int`);
           }
           if (options[key].type && options[key].type === 'string' && typeof value[key] !== 'string') {
-            throw new Error(`site.config: ${key} must be an string`);
+            throw new Error(`project.config: ${key} must be an string`);
           }
           if (options[key].type && options[key].type === 'boolean' && typeof value[key] !== 'boolean') {
-            throw new Error(`site.config: ${key} must be an boolean ${value[key]}, ${options}, ${typeof value[key]}`);
+            throw new Error(`project.config: ${key} must be an boolean ${value[key]}, ${options}, ${typeof value[key]}`);
           }
           if (options[key].type && options[key].type === 'object' && typeof value[key] !== 'object') {
-            throw new Error(`site.config: ${key} must be an object`);
+            throw new Error(`project.config: ${key} must be an object`);
           }
           if (options[key].type && options[key].type === 'arrayOfStrings' && !(typeof value[key] === 'object' && Array.isArray(value[key]) && !value[key].find(val => typeof val !== 'string'))) {
-            throw new Error(`site.config: ${key} must be an array of strings`);
+            throw new Error(`project.config: ${key} must be an array of strings`);
           }
           if (options[key].type && options[key].type === 'arrayOfObjects' && !(typeof value[key] === 'object' && Array.isArray(value[key]) && !value[key].find(val => typeof val !== 'object'))) {
-            throw new Error(`site.config: ${key} must be an array of objects`);
+            throw new Error(`project.config: ${key} must be an array of objects`);
           }
           if (options[key].type && options[key].type === 'enum' && options[key].values && options[key].values.indexOf(value[key]) == -1) {
-            throw new Error(`site.config: ${key} has an invalid value`);
+            throw new Error(`project.config: ${key} has an invalid value`);
           }
           return newValue[key] = value[key];
         }
@@ -944,7 +938,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
 
         // allowNull?
         if (!newValue[key] && options[key].allowNull === false) {
-          throw new Error(`site.config: $key must be defined`);
+          throw new Error(`project.config: $key must be defined`);
         }
 
         return newValue[key];
@@ -965,15 +959,15 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
 
   }
 
-  Site.prototype.willAnonymizeAllUsers = async function () {
+  Project.prototype.willAnonymizeAllUsers = async function () {
     let self = this;
     let result = {};
 
     try {
-      if (!self.id) throw Error('Site not found');
-      if (!self.config.project.projectHasEnded) throw Error('Cannot anonymize users on an active site - first set the project-has-ended parameter');
+      if (!self.id) throw Error('Project not found');
+      if (!self.config.project.projectHasEnded) throw Error('Cannot anonymize users on an active project - first set the project-has-ended parameter');
 
-      let users = await db.User.findAll({ where: { siteId: self.id, idpUser: { identifier: { [Sequelize.Op.ne]: null } } } });
+      let users = await db.User.findAll({ where: { projectId: self.id, idpUser: { identifier: { [Sequelize.Op.ne]: null } } } });
 
       // do not anonymize admins
       result.admins = users.filter( user => userHasRole(user, 'admin') );
@@ -989,8 +983,8 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
     return result;
   }
 
-  Site.prototype.doAnonymizeAllUsers = async function (usersToAnonymize, externalUserIds, useOauth='default') {
-    // anonymize all users for this site
+  Project.prototype.doAnonymizeAllUsers = async function (usersToAnonymize, externalUserIds, useOauth='default') {
+    // anonymize all users for this project
     let self = this;
     const amountOfUsersPerSecond = 50;
     try {
@@ -998,9 +992,9 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
       for (const user of usersToAnonymize) {
         await new Promise((resolve, reject) => {
           setTimeout(async function() {
-            user.site = self;
+            user.project = self;
             let res = await user.doAnonymize();
-            user.site = null;
+            user.project = null;
           }, 1000 / amountOfUsersPerSecond)
         })       
         .then(result => resolve() )
@@ -1013,8 +1007,8 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
         let users = await db.User.findAll({ where: { idpUser: { identifier: externalUserId } } });
         if (users.length == 0) {
           // no api users left for this oauth user, so remove the oauth user
-          let siteConfig = self && merge({}, self.config, { id: self.id });
-            await OAuthApi.deleteUser({ siteConfig, useOauth, userData: { id: externalUserId }})
+          let projectConfig = self && merge({}, self.config, { id: self.id });
+            await OAuthApi.deleteUser({ projectConfig, useOauth, userData: { id: externalUserId }})
         }
       }
     } catch (err) {
@@ -1023,7 +1017,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
     }
   }
 
-  Site.prototype.isVoteActive = function () {
+  Project.prototype.isVoteActive = function () {
     let self = this;
     let voteIsActive = self.config.votes.isActive;
     if ( ( voteIsActive == null || typeof voteIsActive == 'undefined' ) && self.config.votes.isActiveFrom && self.config.votes.isActiveTo ) {
@@ -1032,7 +1026,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
     return voteIsActive;
   }
 
-  Site.auth = Site.prototype.auth = {
+  Project.auth = Project.prototype.auth = {
     listableBy: 'moderator',
     viewableBy: 'all',
     createableBy: 'admin',
@@ -1048,6 +1042,6 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
 
   }
 
-  return Site;
+  return Project;
 
 };

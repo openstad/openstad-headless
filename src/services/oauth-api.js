@@ -4,36 +4,36 @@ const merge = require('merge');
 const httpBuildQuery = require('../util/httpBuildQuery');
 const OAuthUser = require('./oauth-user');
 
-const formatOAuthApiUrl = (path, siteConfig, which = 'default') => {
-  let siteOauthConfig = (siteConfig && siteConfig.oauth && siteConfig.oauth[which]) || {};
-  let url = siteOauthConfig['auth-server-url'] || config.authorization['auth-server-url'];
+const formatOAuthApiUrl = (path, projectConfig, which = 'default') => {
+  let projectOauthConfig = (projectConfig && projectConfig.oauth && projectConfig.oauth[which]) || {};
+  let url = projectOauthConfig['auth-server-url'] || config.authorization['auth-server-url'];
   url += path;
-  let authClientId = siteOauthConfig['auth-client-id'] || config.authorization['auth-client-id'];
+  let authClientId = projectOauthConfig['auth-client-id'] || config.authorization['auth-client-id'];
   url = url.replace(/\{\{clientId\}\}/, authClientId);
   url += url.match(/\?/) ? '&' : '?';
   url += `client_id=${authClientId}`;
   return url;
 }
 
-const formatOAuthApiCredentials = (siteConfig, which = 'default', token) => {
+const formatOAuthApiCredentials = (projectConfig, which = 'default', token) => {
 
   // use token
   if (token) return `Bearer ${token}`;
 
   // use basic auth with clientId/clientSecret
-  let siteOauthConfig = (siteConfig && siteConfig.oauth && siteConfig.oauth[which]) || {};
-  let authClientId = siteOauthConfig['auth-client-id'] || config.authorization['auth-client-id'];
-  let authClientSecret = siteOauthConfig['auth-client-secret'] || config.authorization['auth-client-secret'];
+  let projectOauthConfig = (projectConfig && projectConfig.oauth && projectConfig.oauth[which]) || {};
+  let authClientId = projectOauthConfig['auth-client-id'] || config.authorization['auth-client-id'];
+  let authClientSecret = projectOauthConfig['auth-client-secret'] || config.authorization['auth-client-secret'];
   return 'Basic ' + new Buffer(`${authClientId}:${authClientSecret}`).toString('base64');
 
 }
 
 let OAuthAPI ={};
 
-OAuthAPI.fetchClient = async function({ siteConfig, which = 'default' }) {
+OAuthAPI.fetchClient = async function({ projectConfig, which = 'default' }) {
 
-  const oauthServerUrl = formatOAuthApiUrl('/api/admin/client/{{clientId}}', siteConfig, which);
-  const oauthServerCredentials = formatOAuthApiCredentials(siteConfig, which);
+  const oauthServerUrl = formatOAuthApiUrl('/api/admin/client/{{clientId}}', projectConfig, which);
+  const oauthServerCredentials = formatOAuthApiCredentials(projectConfig, which);
 
   return fetch(oauthServerUrl, {
 	  headers: { "Authorization": oauthServerCredentials, "Content-type": "application/json" },
@@ -49,17 +49,17 @@ OAuthAPI.fetchClient = async function({ siteConfig, which = 'default' }) {
 
 }
 
-OAuthAPI.updateClient = async function({ siteConfig, which = 'default', clientData = {} }) {
+OAuthAPI.updateClient = async function({ projectConfig, which = 'default', clientData = {} }) {
 
   
-  let orgClientData = await OAuthAPI.fetchClient({ siteConfig, which });
+  let orgClientData = await OAuthAPI.fetchClient({ projectConfig, which });
   let mergedClientData = merge.recursive(true, orgClientData, clientData);
 
   // for now only the config is updateable from here
   mergedClientData = { config: mergedClientData.config };
 
-  const oauthServerUrl = formatOAuthApiUrl(`/api/admin/client/${orgClientData.id}`, siteConfig, which);
-  const oauthServerCredentials = formatOAuthApiCredentials(siteConfig, which);
+  const oauthServerUrl = formatOAuthApiUrl(`/api/admin/client/${orgClientData.id}`, projectConfig, which);
+  const oauthServerCredentials = formatOAuthApiCredentials(projectConfig, which);
 
   return fetch(oauthServerUrl, {
 	  headers: { "Authorization": oauthServerCredentials, "Content-type": "application/json" },
@@ -80,7 +80,7 @@ OAuthAPI.updateClient = async function({ siteConfig, which = 'default', clientDa
 
 }
 
-OAuthAPI.fetchUser = async function({ siteConfig, which = 'default', email, userId, token, raw = false }) {
+OAuthAPI.fetchUser = async function({ projectConfig, which = 'default', email, userId, token, raw = false }) {
 
   let path = '';
   if ( userId ) path = `/api/admin/user/${userId}`;
@@ -89,8 +89,8 @@ OAuthAPI.fetchUser = async function({ siteConfig, which = 'default', email, user
 
   if (!path) throw new Error('no Find By arguments found')
 
-  const oauthServerUrl = formatOAuthApiUrl(path, siteConfig, which);
-  const oauthServerCredentials = formatOAuthApiCredentials(siteConfig, which, token);
+  const oauthServerUrl = formatOAuthApiUrl(path, projectConfig, which);
+  const oauthServerCredentials = formatOAuthApiCredentials(projectConfig, which, token);
 
   return fetch(oauthServerUrl, {
 	  headers: { "Authorization": oauthServerCredentials, "Content-type": "application/json" },
@@ -108,7 +108,7 @@ OAuthAPI.fetchUser = async function({ siteConfig, which = 'default', email, user
       } else if (json.user_id) {
         user = json;
       }
-	    return user && !raw ? OAuthUser.parseDataForSite(siteConfig, user) : user;
+	    return user && !raw ? OAuthUser.parseDataForProject(projectConfig, user) : user;
 	  })
 	  .catch((err) => {
 		  console.log('Niet goed');
@@ -117,10 +117,10 @@ OAuthAPI.fetchUser = async function({ siteConfig, which = 'default', email, user
 
 }
 
-OAuthAPI.createUser = async function({ siteConfig, which = 'default', userData = {} }) {
+OAuthAPI.createUser = async function({ projectConfig, which = 'default', userData = {} }) {
 
-  const oauthServerUrl = formatOAuthApiUrl('/api/admin/user', siteConfig, which);
-  const oauthServerCredentials = formatOAuthApiCredentials(siteConfig, which);
+  const oauthServerUrl = formatOAuthApiUrl('/api/admin/user', projectConfig, which);
+  const oauthServerCredentials = formatOAuthApiCredentials(projectConfig, which);
 
   return fetch(oauthServerUrl, {
 	  headers: { "Authorization": oauthServerCredentials, "Content-type": "application/json" },
@@ -138,17 +138,17 @@ OAuthAPI.createUser = async function({ siteConfig, which = 'default', userData =
 
 }
 
-OAuthAPI.updateUser = async function({ siteConfig, which = 'default', userData = {} }) {
+OAuthAPI.updateUser = async function({ projectConfig, which = 'default', userData = {} }) {
 
   // todo: null zou iets moeten leeggooien
 
   if (!(userData && userData.id)) throw new Error('No user id found')
 
-  let orgUserData = await OAuthAPI.fetchUser({ raw: true, siteConfig, which, userId: userData.id });
-  let mergedUserData = OAuthUser.mergeDataForSite(siteConfig, orgUserData, userData);
+  let orgUserData = await OAuthAPI.fetchUser({ raw: true, projectConfig, which, userId: userData.id });
+  let mergedUserData = OAuthUser.mergeDataForProject(projectConfig, orgUserData, userData);
 
-  const oauthServerUrl = formatOAuthApiUrl(`/api/admin/user/${userData.id}`, siteConfig, which);
-  const oauthServerCredentials = formatOAuthApiCredentials(siteConfig, which);
+  const oauthServerUrl = formatOAuthApiUrl(`/api/admin/user/${userData.id}`, projectConfig, which);
+  const oauthServerCredentials = formatOAuthApiCredentials(projectConfig, which);
 
   return fetch(oauthServerUrl, {
 	  headers: { "Authorization": oauthServerCredentials, "Content-type": "application/json" },
@@ -178,12 +178,12 @@ OAuthAPI.updateUser = async function({ siteConfig, which = 'default', userData =
 
 }
 
-OAuthAPI.deleteUser = async function({ siteConfig, which = 'default', userData = {} }) {
+OAuthAPI.deleteUser = async function({ projectConfig, which = 'default', userData = {} }) {
 
   if (!(userData && userData.id)) throw new Error('No user id found')
 
-  const oauthServerUrl = formatOAuthApiUrl(`/api/admin/user/${userData.id}/delete`, siteConfig, which);
-  const oauthServerCredentials = formatOAuthApiCredentials(siteConfig, which);
+  const oauthServerUrl = formatOAuthApiUrl(`/api/admin/user/${userData.id}/delete`, projectConfig, which);
+  const oauthServerCredentials = formatOAuthApiCredentials(projectConfig, which);
 
   return fetch(oauthServerUrl, {
 	  headers: { "Authorization": oauthServerCredentials, "Content-type": "application/json" },

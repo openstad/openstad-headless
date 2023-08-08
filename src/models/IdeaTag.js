@@ -13,17 +13,17 @@ module.exports = function( db, sequelize, DataTypes ) {
 			defaultScope: {
 			},
 
-      forSiteId: function( siteId ) {
+      forProjectId: function( projectId ) {
         return {
           where: {
-            siteId: siteId,
+            projectId: projectId,
           }
         };
       },
 
-      includeSite: {
+      includeProject: {
         include: [{
-          model: db.Site,
+          model: db.Project,
         }]
       },
 

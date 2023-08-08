@@ -1,9 +1,9 @@
 const hasRole = require('../lib/hasRole');
 
-module.exports = function authorizeData(data, action, user, self, site) {
+module.exports = function authorizeData(data, action, user, self, project) {
 
   self = self || this;
-  site = site || self.site;
+  project = project || self.project;
 
   try {
 
@@ -27,7 +27,7 @@ module.exports = function authorizeData(data, action, user, self, site) {
       let testRole;
       if (self.rawAttributes[key] && self.rawAttributes[key].auth) {
         if (self.rawAttributes[key].auth.authorizeData) {
-          data[key] = self.rawAttributes[key].auth.authorizeData(data[key], action, user, self, site);
+          data[key] = self.rawAttributes[key].auth.authorizeData(data[key], action, user, self, project);
           // todo: ik denk dat hij hier moet return-en; een beetje heftige aanpassing voor even tussendoor
         } else {
 
@@ -48,7 +48,7 @@ module.exports = function authorizeData(data, action, user, self, site) {
 
       let ownerId = userId;
       if (self.toString().match('SequelizeInstance:user') && self.idpUser.identifier && self.idpUser.identifier === user.idpUser.identifier) {
-        // special case: users are owner on their users on other sites
+        // special case: users are owner on their users on other projects
         ownerId = user.id;
       }
 

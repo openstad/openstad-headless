@@ -11,7 +11,7 @@ const router = express.Router({ mergeParams: true });
 router
   .all('*', function(req, res, next) {
 
-    req.scope = [{ method: ['forSiteId', req.site.id] }];
+    req.scope = [{ method: ['forProjectId', req.project.id] }];
 
     if (req.query.includeChoices) {
       req.scope.push('includeChoices');
@@ -47,7 +47,7 @@ router.route('/$')
         return found.map( (entry) => {
           let json = {
             id: entry.id,
-            siteId: entry.siteId,
+            projectId: entry.projectId,
             title: entry.title,
             description: entry.description,
             images: entry.images,
@@ -66,12 +66,12 @@ router.route('/$')
   .post(auth.can('ChoicesGuide', 'create'))
 	.post(auth.useReqUser)
   .post(function(req, res, next) {
-    if (!req.site) return next(createError(404, 'Site niet gevonden'));
+    if (!req.project) return next(createError(404, 'Project niet gevonden'));
     return next();
   })
   .post(function( req, res, next ) {
     let data = {
-      siteId: req.site.id,
+      projectId: req.project.id,
       title: req.body.title,
       description: req.body.description,
       images: req.body.images,
@@ -97,7 +97,7 @@ router.route('/:choicesGuideId(\\d+)$')
     db.ChoicesGuide
       .scope(...req.scope)
       .findOne({
-        where: { id: choicesGuideId, siteId: req.site.id }
+        where: { id: choicesGuideId, projectId: req.project.id }
       })
       .then((found) => {
         if ( !found ) throw createError(404, 'choicesGuide not found');
@@ -110,7 +110,7 @@ router.route('/:choicesGuideId(\\d+)$')
     // parse
     let json = {
       id: req.choicesguide.id,
-      siteId: req.choicesguide.siteId,
+      projectId: req.choicesguide.projectId,
       title: req.choicesguide.title,
       description: req.choicesguide.description,
       images: req.choicesguide.images,
@@ -231,7 +231,7 @@ router.route('/:choicesGuideId(\\d+)$')
 router.route('/:choicesGuideId(\\d+)(/questiongroup/:questionGroupId(\\d+))?/choice$')
   .all(function(req, res, next) {
 
-    req.scope = [{ method: ['forSiteId', req.site.id] }];
+    req.scope = [{ method: ['forProjectId', req.project.id] }];
 
     if (0) {
       req.scope.push();
@@ -245,7 +245,7 @@ router.route('/:choicesGuideId(\\d+)(/questiongroup/:questionGroupId(\\d+))?/cho
     db.ChoicesGuide
       .scope(...req.scope)
       .findOne({
-        where: { id: choicesGuideId, siteId: req.site.id }
+        where: { id: choicesGuideId, projectId: req.project.id }
       })
       .then((found) => {
         if ( !found ) throw createError(404, 'choicesGuide not found');
@@ -350,7 +350,7 @@ router.route('/:choicesGuideId(\\d+)(/questiongroup/:questionGroupId(\\d+))?/cho
 router.route('/:choicesGuideId(\\d+)/questiongroup$')
   .all(function(req, res, next) {
 
-    req.scope = [{ method: ['forSiteId', req.site.id] }];
+    req.scope = [{ method: ['forProjectId', req.project.id] }];
 
     if (0) {
       req.scope.push();
@@ -364,7 +364,7 @@ router.route('/:choicesGuideId(\\d+)/questiongroup$')
     db.ChoicesGuide
       .scope(...req.scope)
       .findOne({
-        where: { id: choicesGuideId, siteId: req.site.id }
+        where: { id: choicesGuideId, projectId: req.project.id }
       })
       .then((found) => {
         if ( !found ) throw createError(404, 'choicesGuide not found');
@@ -461,7 +461,7 @@ router.route('/:choicesGuideId(\\d+)/questiongroup/:questionGroupId(\\d+)$')
 router.route('/:choicesGuideId(\\d+)/questiongroup/:questionGroupId(\\d+)/question$')
   .all(function(req, res, next) {
 
-    req.scope = [{ method: ['forSiteId', req.site.id] }];
+    req.scope = [{ method: ['forProjectId', req.project.id] }];
 
     if (0) {
       req.scope.push();
@@ -475,7 +475,7 @@ router.route('/:choicesGuideId(\\d+)/questiongroup/:questionGroupId(\\d+)/questi
     db.ChoicesGuide
       .scope(...req.scope)
       .findOne({
-        where: { id: choicesGuideId, siteId: req.site.id }
+        where: { id: choicesGuideId, projectId: req.project.id }
       })
       .then((found) => {
         if ( !found ) throw createError(404, 'choicesGuide not found');
@@ -596,7 +596,7 @@ router.route('/:choicesGuideId(\\d+)/questiongroup/:questionGroupId(\\d+)/questi
 
 router.route('/:choicesGuideId(\\d+)(/questiongroup/:questionGroupId(\\d+))?/result$')
   .all(function(req, res, next) {
-    req.scope = [{ method: ['forSiteId', req.site.id] }];
+    req.scope = [{ method: ['forProjectId', req.project.id] }];
     return next();
   })
   .all(function(req, res, next) {
@@ -605,11 +605,11 @@ router.route('/:choicesGuideId(\\d+)(/questiongroup/:questionGroupId(\\d+))?/res
     db.ChoicesGuide
       .scope(...req.scope)
       .findOne({
-        where: { id: choicesGuideId, siteId: req.site.id }
+        where: { id: choicesGuideId, projectId: req.project.id }
       })
       .then((found) => {
         if ( !found ) throw createError(404, 'choicesGuide not found');
-        found.site = req.site
+        found.project = req.project
         req.choicesguide = found;
         next();
       })
@@ -677,7 +677,7 @@ router.route('/:choicesGuideId(\\d+)(/questiongroup/:questionGroupId(\\d+))?/res
 			return next();
 		}
 
-		return next(createError(401, 'Je mag niet insturen op deze site'));
+		return next(createError(401, 'Je mag niet insturen op deze project'));
 	})
 
 
@@ -734,7 +734,7 @@ router.route('/:choicesGuideId(\\d+)(/questiongroup/:questionGroupId(\\d+))?/res
    // replace or create
 		if (req.choicesguide.config && req.choicesguide.config.withExisting == 'replace' && req.existingResult ) {
       req.existingResult
-			.authorizeData(data, 'create', req.user, null, req.site)
+			.authorizeData(data, 'create', req.user, null, req.project)
         .update(data)
         .then((result) => {
           res.json(result);
@@ -742,7 +742,7 @@ router.route('/:choicesGuideId(\\d+)(/questiongroup/:questionGroupId(\\d+))?/res
         .catch(next);
     } else {
       db.ChoicesGuideResult
-			.authorizeData(data, 'create', req.user, null, req.site)
+			.authorizeData(data, 'create', req.user, null, req.project)
         .create(data)
         .then((result) => {
           res.json(result);

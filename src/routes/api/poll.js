@@ -12,7 +12,7 @@ router
 	.all('*', function(req, res, next) {
 
 		req.scope = ['defaultScope', 'withIdea'];
-		req.scope.push({method: ['forSiteId', req.params.siteId]});
+		req.scope.push({method: ['forProjectId', req.params.projectId]});
 
 		if (req.query.withVoteCount) {
       // votes are counted in model.voteCount
@@ -76,7 +76,7 @@ router.route('/')
 		if (!ideaId) return next(createError(404, 'Idea not found'));
 		db.Idea.findByPk(ideaId)
 			.then( idea => {
-				if (!idea || idea.siteId != req.params.siteId) return next(createError(400, 'Idea not found'));
+				if (!idea || idea.projectId != req.params.projectId) return next(createError(400, 'Idea not found'));
 				req.idea = idea;
 				return next();
 			})
@@ -84,7 +84,7 @@ router.route('/')
 	.post(auth.useReqUser)
 	.post(function(req, res, next) {
     // validations
-    if (!req.site.config.polls || req.site.config.polls.canAddPolls != true) return next( createError(400, 'Poll toevoegen is niet toegestaan') );
+    if (!req.project.config.polls || req.project.config.polls.canAddPolls != true) return next( createError(400, 'Poll toevoegen is niet toegestaan') );
     if (!req.idea.auth.canAddPoll(req.user, req.idea)) return next( createError(400, 'Poll toevoegen is niet toegestaan 2') );
 		next();
 	})

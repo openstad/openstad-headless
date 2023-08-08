@@ -9,42 +9,42 @@ let apiFieldsInExtraData = [ 'listableByRole', 'detailsViewableByRole', 'nickNam
 // todo: config uitbreiden en mergen
 // doc: niet recursief want daar kan ik geen use case voor bedenken
 
-let parseConfig = function(siteConfig) {
+let parseConfig = function(projectConfig) {
 
   // default config
   let config = {
-    bio: { sitespecific: true },
-    expertise: { sitespecific: true },
+    bio: { projectspecific: true },
+    expertise: { projectspecific: true },
   };
 
-  // these fields exist in the API but not in the oath server and are therefore site specific
+  // these fields exist in the API but not in the oath server and are therefore project specific
   apiFieldsInExtraData.forEach(key => {
-    config[key] = { sitespecific: true };
+    config[key] = { projectspecific: true };
   });
 
-  // merge with site config
-  if (siteConfig && siteConfig.users && siteConfig.users.extraData) {
-    config = merge.recursive(config, siteConfig.users.extraData)
+  // merge with project config
+  if (projectConfig && projectConfig.users && projectConfig.users.extraData) {
+    config = merge.recursive(config, projectConfig.users.extraData)
   }
 
-  config.id = siteConfig ? siteConfig.id : '';
+  config.id = projectConfig ? projectConfig.id : '';
 
   return config;
   
 }
 
-let parseData = function(siteId, config, value) {
+let parseData = function(projectId, config, value) {
 
   let result;
-  let siteDataFound = false;
+  let projectDataFound = false;
 
   if (Array.isArray(value)) {
 
     value.forEach(elem => {
 
-      if (typeof elem == 'object' && elem != null && typeof elem.value != 'undefined' && elem.siteId) {
-        siteDataFound = true;
-        if (elem.siteId == siteId && config && config.sitespecific ) {
+      if (typeof elem == 'object' && elem != null && typeof elem.value != 'undefined' && elem.projectId) {
+        projectDataFound = true;
+        if (elem.projectId == projectId && config && config.projectspecific ) {
           result = elem.value
         }
       } else {
@@ -56,7 +56,7 @@ let parseData = function(siteId, config, value) {
 
   }
 
-  if (siteDataFound) {
+  if (projectDataFound) {
     return result;
   } else {
     return value; // this is just an arrray
@@ -64,9 +64,9 @@ let parseData = function(siteId, config, value) {
 
 }
 
-OAuthUser.parseDataForSite = function(siteConfig, data) {
+OAuthUser.parseDataForProject = function(projectConfig, data) {
 
-  let config = parseConfig(siteConfig);
+  let config = parseConfig(projectConfig);
 
   // extraData
   let cloned = merge(true, data.extraData) || {};
@@ -87,16 +87,16 @@ OAuthUser.parseDataForSite = function(siteConfig, data) {
 
 }
 
-let mergeData = function(siteId, config, userValue, dataValue) {
+let mergeData = function(projectId, config, userValue, dataValue) {
 
-  if (!(config && config.sitespecific)) return dataValue;
+  if (!(config && config.projectspecific)) return dataValue;
 
   let result = userValue;
 
   if (!Array.isArray(result)) result = [result];
   let found, foundIndex;
   result.forEach(( elem, index ) => {
-    if (typeof elem == 'object' && elem != null && elem.value && elem.siteId && elem.siteId == siteId) {
+    if (typeof elem == 'object' && elem != null && elem.value && elem.projectId && elem.projectId == projectId) {
       found = elem;
       foundIndex = index;
     }
@@ -109,16 +109,16 @@ let mergeData = function(siteId, config, userValue, dataValue) {
       found.value = dataValue;
     }
   } else {
-    result.push({ siteId, value: dataValue })
+    result.push({ projectId, value: dataValue })
   }
 
   return result;
 
 }
 
-OAuthUser.mergeDataForSite = function(siteConfig, user, data) {
+OAuthUser.mergeDataForProject = function(projectConfig, user, data) {
 
-  let config = parseConfig(siteConfig);
+  let config = parseConfig(projectConfig);
 
   // extraData
   let extraData = data.extraData || {};

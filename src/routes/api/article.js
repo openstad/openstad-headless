@@ -19,7 +19,7 @@ const userhasModeratorRights = (user) => {
 router
 	.all('*', function(req, res, next) {
 
-		req.scope = ['api', 'includeSite'];
+		req.scope = ['api', 'includeProject'];
 
 		var sort = (req.query.sort || '').replace(/[^a-z_]+/i, '');
 		if (sort) {
@@ -51,7 +51,7 @@ router.route('/')
 	// add filters
 	.get(function(req, res, next) {
 		let queryConditions = req.queryConditions ? req.queryConditions : {};
-		queryConditions = Object.assign(queryConditions, { siteId: req.params.siteId });
+		queryConditions = Object.assign(queryConditions, { projectId: req.params.projectId });
 
 		let query = { where: queryConditions, offset: req.dbQuery.offset, limit: req.dbQuery.limit };
 
@@ -75,18 +75,18 @@ router.route('/')
 // -----------
 	.post(auth.can('Article', 'create'))
 	.post(function(req, res, next) {
-		if (!req.site) return next(createError(401, 'Site niet gevonden'));
+		if (!req.project) return next(createError(401, 'Project niet gevonden'));
 		return next();
 	})
 	.post(function( req, res, next ) {
-		if (!(req.site.config && req.site.config.articles && req.site.config.articles.canAddNewArticles)) return next(createError(401, 'Inzenden is gesloten'));
+		if (!(req.project.config && req.project.config.articles && req.project.config.articles.canAddNewArticles)) return next(createError(401, 'Inzenden is gesloten'));
 		return next();
 	})
 	.post(function(req, res, next) {
 
 		let data = {
       ...req.body,
-			siteId      : req.params.siteId,
+			projectId      : req.params.projectId,
 			userId      : req.user.id,
 		  startDate:  new Date(),
 		}
@@ -105,7 +105,7 @@ router.route('/')
 
     let responseData;
 		db.Article
-			.authorizeData(data, 'create', req.user, null, req.site)
+			.authorizeData(data, 'create', req.user, null, req.project)
 			.create(data)
 			.then(articleInstance => {
 
@@ -148,7 +148,7 @@ router.route('/')
 			  return db.Article
 				  .scope(...scope)
 				  .findOne({
-					  where: { id: articleInstance.id, siteId: req.params.siteId }
+					  where: { id: articleInstance.id, projectId: req.params.projectId }
 				  })
 				  .then(found => {
 					  if ( !found ) throw new Error('Article not found');
@@ -160,7 +160,7 @@ router.route('/')
 	})
 	.post(function(req, res, next) {
 		res.json(req.results);
-		mail.sendThankYouMail(req.results, 'articles', req.site, req.user) // todo: optional met config?
+		mail.sendThankYouMail(req.results, 'articles', req.project, req.user) // todo: optional met config?
 	})
 
 // one article
@@ -172,7 +172,7 @@ router.route('/:articleId(\\d+)')
 		db.Article
 			.scope(...req.scope)
 			.findOne({
-				where: { id: articleId, siteId: req.params.siteId }
+				where: { id: articleId, projectId: req.params.projectId }
 			})
 			.then(found => {
 				if ( !found ) throw new Error('Article not found');
@@ -240,7 +240,7 @@ router.route('/:articleId(\\d+)')
 		    return db.Article
 			    .scope(...scope)
 			    .findOne({
-				    where: { id: articleInstance.id, siteId: req.params.siteId }
+				    where: { id: articleInstance.id, projectId: req.params.projectId }
 			    })
 			    .then(found => {
 				    if ( !found ) throw new Error('Article not found');

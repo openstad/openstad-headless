@@ -15,9 +15,9 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 	var Article = sequelize.define('article', {
 
-		siteId: {
+		projectId: {
 			type         : DataTypes.INTEGER,
-			defaultValue : config.siteId && typeof config.siteId == 'number' ? config.siteId : 0,
+			defaultValue : config.projectId && typeof config.projectId == 'number' ? config.projectId : 0,
 		},
 
 		userId: {
@@ -185,11 +185,11 @@ module.exports = function( db, sequelize, DataTypes ) {
       beforeDestroy: beforeValidateHook,
 
 			afterCreate: function(instance, options) {
-				notifications.addToQueue({ type: 'article', action: 'create', siteId: instance.siteId, instanceId: instance.id });
+				notifications.addToQueue({ type: 'article', action: 'create', projectId: instance.projectId, instanceId: instance.id });
 			},
 
 			afterUpdate: function(instance, options) {
-				notifications.addToQueue({ type: 'article', action: 'update', siteId: instance.siteId, instanceId: instance.id });
+				notifications.addToQueue({ type: 'article', action: 'update', projectId: instance.projectId, instanceId: instance.id });
 			},
 
 		},
@@ -284,14 +284,14 @@ module.exports = function( db, sequelize, DataTypes ) {
 
             Object.keys(value).forEach((key) => {
               if (typeof validated[key] == 'undefined') {
-                errors.push(`${key} is niet gedefinieerd in site.config`)
+                errors.push(`${key} is niet gedefinieerd in project.config`)
               }
             });
 
 				  } else {
             // extra data not defined in the config
             if (!( self.config && self.config.articles && self.config.articles.extraDataMustBeDefined === false )) {
-              errors.push(`article.extraData is not configured in site.config`)
+              errors.push(`article.extraData is not configured in project.config`)
             }
           }
         }
@@ -320,7 +320,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 			// defaults
       default: {
 				include : [{
-					model: db.Site,
+					model: db.Project,
 				}]
       },
 
@@ -376,9 +376,9 @@ module.exports = function( db, sequelize, DataTypes ) {
 // 				});
 			},
 
-			includeSite: {
+			includeProject: {
 				include : [{
-					model: db.Site,
+					model: db.Project,
 				}]
 			},
 
@@ -447,7 +447,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 	Article.associate = function( models ) {
 		this.belongsTo(models.User);
-		this.belongsTo(models.Site);
+		this.belongsTo(models.Project);
 	}
 
 	Article.getRunning = function( sort, extraScopes ) {
@@ -496,10 +496,10 @@ module.exports = function( db, sequelize, DataTypes ) {
 		);
 
 		// todo: dit kan mooier
-		if (config.siteId && typeof config.siteId == 'number') {
+		if (config.projectId && typeof config.projectId == 'number') {
 			where = {
 				$and: [
-					{ siteId: config.siteId },
+					{ projectId: config.projectId },
 					...where,
 				]
 			}
@@ -577,7 +577,7 @@ module.exports = function( db, sequelize, DataTypes ) {
     if (!userHasRole(user, 'owner', self.userId)) {
       return false;
     }
-    let config = self.site && self.site.config && self.site.config.articles
+    let config = self.project && self.project.config && self.project.config.articles
     let canEditAfterFirstLikeOrArg = config && config.canEditAfterFirstLikeOrArg || false
 		let voteCount = self.no + self.yes;
 		let argCount  = self.argumentsFor && self.argumentsFor.length && self.argumentsAgainst && self.argumentsAgainst.length;
@@ -594,9 +594,9 @@ module.exports = function( db, sequelize, DataTypes ) {
     canDelete: canMutate,
     toAuthorizedJSON: function(user, data) {
 
-      delete data.site;
+      delete data.project;
       delete data.config;
-      // dit zou nu dus gedefinieerd moeten worden op site.config, maar wegens backward compatible voor nu nog even hier:
+      // dit zou nu dus gedefinieerd moeten worden op project.config, maar wegens backward compatible voor nu nog even hier:
 	    if (data.extraData && data.extraData.phone) {
 		    delete data.extraData.phone;
 	    }
@@ -616,13 +616,13 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 		return new Promise((resolve, reject) => {
 
-			if (instance.siteId) {
-				db.Site.findByPk(instance.siteId)
-					.then( site => {
-						instance.config = merge.recursive(true, config, site.config);
-						return site;
+			if (instance.projectId) {
+				db.Project.findByPk(instance.projectId)
+					.then( project => {
+						instance.config = merge.recursive(true, config, project.config);
+						return project;
 					})
-					.then( site => {
+					.then( project => {
 
 						return resolve();
 

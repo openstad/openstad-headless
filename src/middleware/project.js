@@ -1,8 +1,8 @@
 const db = require('../db');
 const createError = require('http-errors');
 
-const getSiteId = (path) => {
-  const match = path.match(/\/site\/(\d+)?\//);
+const getProjectId = (path) => {
+  const match = path.match(/\/project\/(\d+)?\//);
   if (match) {
       return parseInt(match[1]);
   }
@@ -16,21 +16,21 @@ module.exports = function( req, res, next ) {
   // deze paden mogen dit overslaan
   if (req.path.match('^(/doc|/api/repo|/api/template|/api/area|/$)')) return next();
   if (req.path.match('^(/api/lock(/[^/]*)?)$')) return next();
-  if (req.path.match('^(/api/site(/[^/]*)?)$')) return next();
+  if (req.path.match('^(/api/project(/[^/]*)?)$')) return next();
 
-  const siteId = getSiteId(req.path);
-  if (!siteId || typeof siteId !== 'number') return next(new createError('400', 'Site niet gevonden for path: ' + req.path));
+  const projectId = getProjectId(req.path);
+  if (!projectId || typeof projectId !== 'number') return next(new createError('400', 'Project niet gevonden for path: ' + req.path));
 
-  const where = { id: siteId }
+  const where = { id: projectId }
 
-  return db.Site
+  return db.Project
   	.findOne({ where })
   	.then(function( found ) {
       if (!found) {
-        console.log('Site not found for siteId query: ', where);
-        return next(new createError('404', 'Site niet gevonden for siteId: '+ siteId));
+        console.log('Project not found for projectId query: ', where);
+        return next(new createError('404', 'Project niet gevonden for projectId: '+ projectId));
       }
-  		req.site = found;
+  		req.project = found;
   		next();
       return null;
   	})

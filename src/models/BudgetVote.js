@@ -4,9 +4,9 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 	var BudgetVote = sequelize.define('budgetVote', {
 
-		siteId: {
+		projectId: {
 			type         : DataTypes.INTEGER,
-			defaultValue : config.siteId && typeof config.siteId == 'number' ? config.siteId : 0,
+			defaultValue : config.projectId && typeof config.projectId == 'number' ? config.projectId : 0,
 		},
 
 		userId: {
@@ -39,10 +39,10 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 		let scopes = {};
 
-		if (config.siteId && typeof config.siteId == 'number') {
-			scopes.siteScope = {
+		if (config.projectId && typeof config.projectId == 'number') {
+			scopes.projectScope = {
 				where: {
-					siteId: config.siteId,
+					projectId: config.projectId,
 				}
 			}
 		}

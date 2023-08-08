@@ -20,7 +20,7 @@ env.addFilter('date', dateFilter);
 
 // Global variables.
 env.addGlobal('HOSTNAME', config.get('hostname'));
-env.addGlobal('SITENAME', config.get('siteName'));
+env.addGlobal('PROJECTNAME', config.get('projectName'));
 //env.addGlobal('PAGENAME_POSTFIX', config.get('pageNamePostfix'));
 env.addGlobal('EMAIL', config.get('emailAddress'));
 
@@ -36,7 +36,7 @@ let defaultSendMailOptions = {
 };
 
 // generic send mail function
-function sendMail(site, options) {
+function sendMail(project, options) {
 
   if (options.attachments) {
     options.attachments.forEach((entry, index) => {
@@ -47,8 +47,9 @@ function sendMail(site, options) {
       }
     });
   }
+  console.log(merge({}, defaultSendMailOptions, options));
 
-  mailTransporter.getTransporter(site).sendMail(
+  mailTransporter.getTransporter(project).sendMail(
     merge(defaultSendMailOptions, options),
     function (error, info) {
       if (error) {
@@ -60,10 +61,10 @@ function sendMail(site, options) {
   );
 }
 
-function sendNotificationMail(data, site) {
+function sendNotificationMail(data, project) {
 
-  let siteConfig = new MailConfig(site)
-  data.logo = siteConfig.getLogo();
+  let projectConfig = new MailConfig(project)
+  data.logo = projectConfig.getLogo();
 
   let html;
 
@@ -75,48 +76,49 @@ function sendNotificationMail(data, site) {
     html = nunjucks.render('notifications_admin.njk', data)
   }
 
-  sendMail(site, {
+  sendMail(project, {
     to: data.to,
     from: data.from,
     subject: data.subject,
     html: html,
-    text: `Er hebben recent activiteiten plaatsgevonden op ${data.SITENAME} die mogelijk voor jou interessant zijn!`,
-    attachments: siteConfig.getDefaultEmailAttachments(),
+    text: `Er hebben recent activiteiten plaatsgevonden op ${data.PROJECTNAME} die mogelijk voor jou interessant zijn!`,
+    attachments: projectConfig.getDefaultEmailAttachments(),
   });
 };
 
-function sendConceptEmail(resource, resourceType, site, user) {
-  const siteConfig = new MailConfig(site)
+function sendConceptEmail(resource, resourceType, project, user) {
+  const projectConfig = new MailConfig(project)
   if (!resourceType) return console.error('sendConceptMail error: resourceType not provided');
 
-  let resourceConceptEmail = siteConfig.getResourceConceptEmail(resourceType);
+  let resourceConceptEmail = projectConfig.getResourceConceptEmail(resourceType);
   const hasBeenPublished = resource.publishDate;
   if(hasBeenPublished) {
-    resourceConceptEmail = siteConfig.getResourceConceptToPublishedEmail(resourceType);
+    resourceConceptEmail = projectConfig.getResourceConceptToPublishedEmail(resourceType);
   }
 
-  const url = siteConfig.getCmsUrl();
-  const logo = siteConfig.getLogo();
-  const hostname = siteConfig.getCmsHostname();
-  const sitename = siteConfig.getTitle();
-
+  const url = projectConfig.getCmsUrl();
+  const logo = projectConfig.getLogo();
+  const hostname = projectConfig.getCmsHostname();
+  const projectname = projectConfig.getTitle();
   let inzendingPath = resourceConceptEmail.inzendingPath;
-  const inzendingURL = getInzendingURL(inzendingPath, url, resource, resourceType);
+
+  let idRegex = new RegExp(`\\[\\[(?:${resourceType}|idea)?Id\\]\\]`, 'g');
+  inzendingPath = inzendingPath && inzendingPath.replace(idRegex, resource.id).replace(/\[\[resourceType\]\]/, resourceType) || "/";
+  const inzendingURL = url + inzendingPath;
 
   let fromAddress = resourceConceptEmail.from || config.email;
   if (!fromAddress) return console.error('Email error: fromAddress not provided');
   if (fromAddress.match(/^.+<(.+)>$/, '$1')) fromAddress = fromAddress.replace(/^.+<(.+)>$/, '$1');
 
-  const data = prepareEmailData(user, resource, hostname, sitename, inzendingURL, url, fromAddress, logo);
-
+  const data = prepareEmailData(user, resource, hostname, projectname, inzendingURL, url, fromAddress, logo);
 
   const template = resourceConceptEmail.template;
   const html = prepareHtml(template, data);
   const text = convertHtmlToText(html);
-  const attachments = resourceConceptEmail.attachments || siteConfig.getDefaultEmailAttachments();
+  const attachments = resourceConceptEmail.attachments || projectConfig.getDefaultEmailAttachments();
 
   try {
-    sendMail(site, {
+    sendMail(project, {
       to: resource.email ? resource.email : user.email,
       from: fromAddress,
       subject: resourceConceptEmail.subject || 'Bedankt voor je CONCEPT inzending!',
@@ -130,37 +132,39 @@ function sendConceptEmail(resource, resourceType, site, user) {
 }
 
 // send email to user that submitted a resource
-function sendThankYouMail(resource, resourceType, site, user) {
-  const siteConfig = new MailConfig(site)
-  
+=======
+function sendThankYouMail(resource, resourceType, project, user) {
+  const projectConfig = new MailConfig(project)
+
   if (!resourceType) return console.error('sendThankYouMail error: resourceType not provided');
 
-  const url = siteConfig.getCmsUrl();
-  const hostname = siteConfig.getCmsHostname();
-  const sitename = siteConfig.getTitle();
-  let inzendingPath = siteConfig.getFeedbackEmailInzendingPath(resourceType);
-  const inzendingURL = getInzendingURL(inzendingPath, url, resource, resourceType);
-
-  let fromAddress = siteConfig.getFeedbackEmailFrom(resourceType) || config.email;
+  const url = projectConfig.getCmsUrl();
+  const hostname = projectConfig.getCmsHostname();
+  const projectname = projectConfig.getTitle();
+  let fromAddress = projectConfig.getFeedbackEmailFrom(resourceType) || config.email;
   if (!fromAddress) return console.error('Email error: fromAddress not provided');
   if (fromAddress.match(/^.+<(.+)>$/, '$1')) fromAddress = fromAddress.replace(/^.+<(.+)>$/, '$1');
 
+  // todo: als je dan toch met een projectConfig.get werkt, moet deze search-and-replace dan niet ook daar?
+  let idRegex = new RegExp(`\\[\\[(?:${resourceType}|idea)?Id\\]\\]`, 'g'); // 'idea' wegens backward compatible
+  const inzendingPath = (projectConfig.getFeedbackEmailInzendingPath(resourceType) && projectConfig.getFeedbackEmailInzendingPath(resourceType).replace(idRegex, resource.id).replace(/\[\[resourceType\]\]/, resourceType)) || "/";
+  const inzendingURL = url + inzendingPath;
+  const logo = projectConfig.getLogo();
 
-  const logo = siteConfig.getLogo();
-  const data = prepareEmailData(user, resource, hostname, sitename, inzendingURL, url, fromAddress, logo);
+  const data = prepareEmailData(user, resource, hostname, projectname, inzendingURL, url, fromAddress, logo);
   
-  let template = siteConfig.getResourceFeedbackEmailTemplate(resourceType);
+  let template = projectConfig.getResourceFeedbackEmailTemplate(resourceType);
   const html = prepareHtml(template, data);
   const text = convertHtmlToText(html);
-  const attachments = siteConfig.getResourceFeedbackEmailAttachments(resourceType) || siteConfig.getDefaultEmailAttachments();
+  const attachments = projectConfig.getResourceFeedbackEmailAttachments(resourceType) || projectConfig.getDefaultEmailAttachments();
 
 
   try {
-    sendMail(site, {
+    sendMail(project, {
       // in some cases the resource, like order or account has a different email from the submitted user, default to resource, otherwise send to owner of resource
       to: resource.email ? resource.email : user.email,
       from: fromAddress,
-      subject: siteConfig.getResourceFeedbackEmailSubject(resourceType) || 'Bedankt voor je inzending',
+      subject: projectConfig.getResourceFeedbackEmailSubject(resourceType) || 'Bedankt voor je inzending',
       html: html,
       text: text,
       attachments,
@@ -170,14 +174,14 @@ function sendThankYouMail(resource, resourceType, site, user) {
   }
 }
 
-function prepareEmailData(user, resource, hostname, sitename, inzendingURL, url, fromAddress, logo ) {
+function prepareEmailData(user, resource, hostname, projectname, inzendingURL, url, fromAddress, logo ) {
   return {
     date: new Date(),
     user,
     idea: resource,
     article: resource,
     HOSTNAME: hostname,
-    SITENAME: sitename,
+    PROJECTNAME: projectname,
     inzendingURL,
     URL: url,
     EMAIL: fromAddress,
@@ -212,24 +216,24 @@ function convertHtmlToText(html) {
 }
 
 // send email to user that submitted a NewsletterSignup
-function sendNewsletterSignupConfirmationMail(newslettersignup, site, user) {
+function sendNewsletterSignupConfirmationMail(newslettersignup, project, user) {
 
-  let siteConfig = new MailConfig(site)
+  let projectConfig = new MailConfig(project)
 
-  const url = siteConfig.getCmsUrl();
-  const hostname = siteConfig.getCmsHostname();
-  const sitename = siteConfig.getTitle();
-  let fromAddress = siteConfig.getFeedbackEmailFrom() || config.email;
+  const url = projectConfig.getCmsUrl();
+  const hostname = projectConfig.getCmsHostname();
+  const projectname = projectConfig.getTitle();
+  let fromAddress = projectConfig.getFeedbackEmailFrom() || config.email;
   if (fromAddress.match(/^.+<(.+)>$/, '$1')) fromAddress = fromAddress.replace(/^.+<(.+)>$/, '$1');
 
-  const confirmationUrl = siteConfig.getNewsletterSignupConfirmationEmailUrl().replace(/\[\[token\]\]/, newslettersignup.confirmToken)
-  const logo = siteConfig.getLogo();
+  const confirmationUrl = projectConfig.getNewsletterSignupConfirmationEmailUrl().replace(/\[\[token\]\]/, newslettersignup.confirmToken)
+  const logo = projectConfig.getLogo();
 
   const data = {
     date: new Date(),
     user: user,
     HOSTNAME: hostname,
-    SITENAME: sitename,
+    PROJECTNAME: projectname,
     confirmationUrl,
     URL: url,
     EMAIL: fromAddress,
@@ -237,7 +241,7 @@ function sendNewsletterSignupConfirmationMail(newslettersignup, site, user) {
   };
 
   let html;
-  let template = siteConfig.getNewsletterSignupConfirmationEmailTemplate();
+  let template = projectConfig.getNewsletterSignupConfirmationEmailTemplate();
   if (template) {
     html = nunjucks.renderString(template, data);
   } else {
@@ -250,12 +254,12 @@ function sendNewsletterSignupConfirmationMail(newslettersignup, site, user) {
     uppercaseHeadings: false
   });
 
-  const attachments = siteConfig.getNewsletterSignupConfirmationEmailAttachments();
+  const attachments = projectConfig.getNewsletterSignupConfirmationEmailAttachments();
 
-  sendMail(site, {
+  sendMail(project, {
     to: newslettersignup.email,
     from: fromAddress,
-    subject: siteConfig.getNewsletterSignupConfirmationEmailSubject() || 'Bedankt voor je aanmelding',
+    subject: projectConfig.getNewsletterSignupConfirmationEmailSubject() || 'Bedankt voor je aanmelding',
     html: html,
     text: text,
     attachments,
@@ -265,19 +269,19 @@ function sendNewsletterSignupConfirmationMail(newslettersignup, site, user) {
 
 // send email to user that is about to be anonymized
 // todo: this is a copy of sendThankYouMail and has too many code duplications; that should be merged. But since there is a new notification system that should be implemented more widly I am not going to spent time on that now
-function sendInactiveWarningEmail(site, user) {
+function sendInactiveWarningEmail(project, user) {
 
-  let siteConfig = new MailConfig(site)
+  let projectConfig = new MailConfig(project)
 
-  const url = siteConfig.getCmsUrl();
-  const hostname = siteConfig.getCmsHostname();
-  const sitename = siteConfig.getTitle();
-  let fromAddress = site.config.notifications.fromAddress || config.email;
+  const url = projectConfig.getCmsUrl();
+  const hostname = projectConfig.getCmsHostname();
+  const projectname = projectConfig.getTitle();
+  let fromAddress = project.config.notifications.fromAddress || config.email;
   if (!fromAddress) return console.error('Email error: fromAddress not provided');
   if (fromAddress.match(/^.+<(.+)>$/, '$1')) fromAddress = fromAddress.replace(/^.+<(.+)>$/, '$1');
-  const logo = siteConfig.getLogo();
+  const logo = projectConfig.getLogo();
 
-  const XDaysBeforeAnonymization = site.config.anonymize && (site.config.anonymize.anonymizeUsersAfterXDaysOfInactivity - site.config.anonymize.warnUsersAfterXDaysOfInactivity) || 60;
+  const XDaysBeforeAnonymization = project.config.anonymize && (project.config.anonymize.anonymizeUsersAfterXDaysOfInactivity - project.config.anonymize.warnUsersAfterXDaysOfInactivity) || 60;
   let ANONYMIZEDATE = new Date();
   ANONYMIZEDATE = ANONYMIZEDATE.setDate(ANONYMIZEDATE.getDate()+XDaysBeforeAnonymization);
   ANONYMIZEDATE = new Date(ANONYMIZEDATE).toLocaleDateString("nl-NL");
@@ -286,7 +290,7 @@ function sendInactiveWarningEmail(site, user) {
     date: new Date(),
     user: user,
     HOSTNAME: hostname,
-    SITENAME: sitename,
+    PROJECTNAME: projectname,
     URL: url,
     EMAIL: fromAddress,
     logo: logo,
@@ -295,7 +299,7 @@ function sendInactiveWarningEmail(site, user) {
     ANONYMIZEDATE,
   };
 
-  let template = site.config.anonymize.inactiveWarningEmail.template;
+  let template = project.config.anonymize.inactiveWarningEmail.template;
   let html = nunjucks.renderString(template, data);
 
   let text = htmlToText.fromString(html, {
@@ -304,13 +308,13 @@ function sendInactiveWarningEmail(site, user) {
     uppercaseHeadings: false
   });
 
-  let attachments = siteConfig.getResourceFeedbackEmailAttachments('idea') || siteConfig.getDefaultEmailAttachments();
+  let attachments = projectConfig.getResourceFeedbackEmailAttachments('idea') || projectConfig.getDefaultEmailAttachments();
 
   try {
-    sendMail(site, {
+    sendMail(project, {
       to: user.email,
       from: fromAddress,
-      subject: site.config.anonymize.inactiveWarningEmail.subject || 'Je account wordt binnenkort verwijderd',
+      subject: project.config.anonymize.inactiveWarningEmail.subject || 'Je account wordt binnenkort verwijderd',
       html: html,
       text: text,
       attachments,

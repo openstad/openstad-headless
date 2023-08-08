@@ -33,7 +33,7 @@ const router = express.Router({mergeParams: true});
 
 router
   .all('*', function (req, res, next) {
-    req.scope = ['includeSite'];
+    req.scope = ['includeProject'];
     next();
   });
 
@@ -70,10 +70,10 @@ router.route('/')
     }
 
     /**
-     * Add siteId to query conditions
-     * @type {{siteId: *}}
+     * Add projectId to query conditions
+     * @type {{projectId: *}}
      */
-    const queryConditions = Object.assign(dbQuery.where, {siteId: req.params.siteId});
+    const queryConditions = Object.assign(dbQuery.where, {projectId: req.params.projectId});
 
     db.User
       .scope(...req.scope)
@@ -99,11 +99,11 @@ router.route('/')
 // -----------
   .post(auth.can('User', 'create'))
   .post(function (req, res, next) {
-    if (!req.site) return next(createError(401, 'Site niet gevonden'));
+    if (!req.project) return next(createError(401, 'Project niet gevonden'));
     return next();
   })
   .post(function (req, res, next) {
-    if (!(req.site.config && req.site.config.users && req.site.config.users.canCreateNewUsers)) return next(createError(401, 'Gebruikers mogen niet aangemaakt worden'));
+    if (!(req.project.config && req.project.config.users && req.project.config.users.canCreateNewUsers)) return next(createError(401, 'Gebruikers mogen niet aangemaakt worden'));
     return next();
   })
   .post(filterBody)
@@ -112,10 +112,10 @@ router.route('/')
     // TODO: other types of users
     if (!req.body.email) return next(createError(401, 'E-mail is a required field'));
     let which = req.query.useOauth || 'default';
-    let siteConfig = req.site && merge({}, req.site.config, { id: req.site.id });
+    let projectConfig = req.project && merge({}, req.project.config, { id: req.project.id });
     let email = req.body && req.body.email;
     OAuthApi
-      .fetchUser({ siteConfig, which, email })
+      .fetchUser({ projectConfig, which, email })
       .then(json => {
         req.oAuthUser = json;
         next();
@@ -132,10 +132,10 @@ router.route('/')
     } else {
       // in case no oauth user is found with this e-mail create it
       let which = req.query.useOauth || 'default';
-      let siteConfig = req.site && req.site.config;
+      let projectConfig = req.project && req.project.config;
       let userData = Object.assign(req.body);
       OAuthApi
-        .createUser({ siteConfig, which, userData })
+        .createUser({ projectConfig, which, userData })
         .then(json => {
           req.oAuthUser = json;
           next()
@@ -148,7 +148,7 @@ router.route('/')
     db.User
       .scope(...req.scope)
       .findOne({
-        where: {email: req.body.email, siteId: req.params.siteId},
+        where: {email: req.body.email, projectId: req.params.projectId},
       })
       .then(found => {
         if (found) {
@@ -164,7 +164,7 @@ router.route('/')
   .post(function (req, res, next) {
     const data = {
       ...req.body,
-      siteId: req.site.id,
+      projectId: req.project.id,
       role: req.oAuthUser.role || 'member',
       lastLogin: Date.now(),
       idpUser: { identifier: req.oAuthUser.id }
@@ -201,7 +201,7 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
     return db.User
       .scope(...req.scope)
       .findOne({
-        where: {id: req.userId, siteId: req.params.siteId},
+        where: {id: req.userId, projectId: req.params.projectId},
         //where: { id: userId }
       })
       .then(found => {
@@ -215,7 +215,7 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
   })
   .put(function (req, res, next) {
     if (!req.externalUserId) return next();
-    // this user on other sites
+    // this user on other projects
     let where = { idpUser: { identifier: req.externalUserId }, [Op.not]: { id: req.userId } };
     db.User
       .scope(...req.scope)
@@ -244,16 +244,16 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
     return next();
   })
   .put(async function (req, res, next) {
-    // if body contains site ids then anonymize only the users for those sites
+    // if body contains project ids then anonymize only the users for those projects
     try {
-      let ids = req.body && req.body.onlySiteIds;
+      let ids = req.body && req.body.onlyProjectIds;
       if (!ids) return next();
       if (!Array.isArray(ids)) ids = [ids];
       ids = ids.map(id => parseInt(id)).filter(id => typeof id == 'number');
       if (ids.length) {
         let users = [ req.targetUser, ...req.linkedUsers ];
-        let xx = ids.map( siteId => users.find(user => siteId == user.siteId) );
-        let userIds = ids.map( siteId => users.find(user => siteId == user.siteId) ).filter(user => !!user).map( user => user.id );
+        let xx = ids.map( projectId => users.find(user => projectId == user.projectId) );
+        let userIds = ids.map( projectId => users.find(user => projectId == user.projectId) ).filter(user => !!user).map( user => user.id );
         req.onlyUserIds = (req.onlyUserIds || []).concat(userIds);
         req.onlyUserIds = req.onlyUserIds.filter((value, index, self) => self.indexOf(value) === index ); // filter duplication
       }
@@ -272,7 +272,7 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
         "arguments": [],
         "votes": [],
         "users": [],
-        "sites": [],
+        "projects": [],
       }
       return next();
     }
@@ -284,8 +284,8 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
       }
       result.users = [ result.user ];
       delete result.user;
-      result.sites = [ result.site ];
-      delete result.site;
+      result.projects = [ result.project ];
+      delete result.project;
       req.results = result;
     } catch (err) {
       return next(err);
@@ -306,7 +306,7 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
             result = await user.willAnonymize();
           }
           req.results.users.push(result.user);
-          req.results.sites.push(result.site);
+          req.results.projects.push(result.project);
           req.results.ideas = req.results.ideas.concat(result.ideas || []);
           req.results.articles = req.results.articles.concat(result.articles || []);
           req.results.arguments = req.results.arguments.concat(result.arguments || []);
@@ -320,7 +320,7 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
   })
   .put(function (req, res, next) {
     if (!req.externalUserId) return next();
-    // refresh: this user including other sites
+    // refresh: this user including other projects
     let where = { idpUser: { identifier: req.externalUserId } };
     db.User
       .scope(...req.scope)
@@ -341,9 +341,9 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
 
     // no api users left for this oauth user, so remove the oauth user
     let which = req.query.useOauth || 'default';
-    let siteConfig = req.site && merge({}, req.site.config, { id: req.site.id });
+    let projectConfig = req.project && merge({}, req.project.config, { id: req.project.id });
     try {
-      let result = await OAuthApi.deleteUser({ siteConfig, which, userData: { id: req.externalUserId }})
+      let result = await OAuthApi.deleteUser({ projectConfig, which, userData: { id: req.externalUserId }})
     } catch (err) {
       return next(err);
     }
@@ -371,7 +371,7 @@ router.route('/:userId(\\d+)')
     db.User
       .scope(...req.scope)
       .findOne({
-        where: {id: userId, siteId: req.params.siteId},
+        where: {id: userId, projectId: req.params.projectId},
         //where: { id: userId }
       })
       .then(found => {
@@ -392,7 +392,7 @@ router.route('/:userId(\\d+)')
 
 // update user
 // -----------
-// TODO: hier zit de suggestie in dat je al je users op anders sites ook mag updaten. Maar dan toch niet, want dat geeft errors.
+// TODO: hier zit de suggestie in dat je al je users op anders projects ook mag updaten. Maar dan toch niet, want dat geeft errors.
 // Dus neem een besluit, maar dat expliciet, en zorg dan dat het gaat werken.
 // -----------
   .put(auth.useReqUser)
@@ -412,21 +412,21 @@ router.route('/:userId(\\d+)')
      * Update the oauth API first
      */
     let which = req.query.useOauth || 'default';
-    let siteConfig = req.site && merge({}, req.site.config, { id: req.site.id });
+    let projectConfig = req.project && merge({}, req.project.config, { id: req.project.id });
     OAuthApi
-      .updateUser({ siteConfig, which, userData: merge(true, userData, { id: externalUserId }) })
+      .updateUser({ projectConfig, which, userData: merge(true, userData, { id: externalUserId }) })
       .then(json => {
         let mergedUserData = json;
 
         return db.User
-          .scope(['includeSite'])
+          .scope(['includeProject'])
           .findAll({
             where: {
               idpUser: { identifier: mergedUserData.id },
-              // old users have no siteId, this will break the update
+              // old users have no projectId, this will break the update
               // skip them
               // probably should clean up these users
-              siteId: {
+              projectId: {
                 [Op.not]: 0
               }
             }
@@ -434,23 +434,23 @@ router.route('/:userId(\\d+)')
           .then(function (users) {
             const actions = [];
 
-            // dit gaat mis omdat hij het per site doet maar het resultaat al is geparsed voor deze site
+            // dit gaat mis omdat hij het per project doet maar het resultaat al is geparsed voor deze project
             
             if (users) {
               users.forEach((user) => {
-                // only update users with active site (they can be deleteds)
-                if (user.site) {
+                // only update users with active project (they can be deleteds)
+                if (user.project) {
                   actions.push(function () {
                     return new Promise((resolve, reject) => {
 
-                      let userSiteConfig = merge(true, user.site.config, {id: user.site.id});
+                      let userProjectConfig = merge(true, user.project.config, {id: user.project.id});
 
                       let clonedUserData = merge(true, mergedUserData);
-                      let siteUserData = OAuthUser.parseDataForSite(userSiteConfig, clonedUserData);
+                      let projectUserData = OAuthUser.parseDataForProject(userProjectConfig, clonedUserData);
 
                       user
-                        .authorizeData(siteUserData, 'update', req.user)
-                        .update(siteUserData)
+                        .authorizeData(projectUserData, 'update', req.user)
+                        .update(projectUserData)
                         .then((result) => {
                           resolve();
                         })
@@ -481,15 +481,15 @@ router.route('/:userId(\\d+)')
       })
       .then((result) => {
         return db.User
-          .scope(['includeSite']) // TODO: waarom includeSite? Kan dat weg?
+          .scope(['includeProject']) // TODO: waarom includeProject? Kan dat weg?
           .findOne({
-            where: {id: userId, siteId: req.params.siteId}
+            where: {id: userId, projectId: req.params.projectId}
           })
       })
       .then(found => {
         if (!found) throw new Error('User not found');
         let result = found.toJSON();
-        delete result.site;
+        delete result.project;
         res.json(result);
       })
       .catch(err => {
@@ -508,16 +508,16 @@ router.route('/:userId(\\d+)')
     if (!(user && user.can && user.can('delete'))) return next(new Error('You cannot delete this User'));
 
     /**
-     * An oauth user can have multiple users in the api, every site has it's own user and right
-     * In case for this oauth user there is only one site user in the API we also delete the oAuth user
+     * An oauth user can have multiple users in the api, every project has it's own user and right
+     * In case for this oauth user there is only one project user in the API we also delete the oAuth user
      * Otherwise we keep the oAuth user since it's still needed for the other website
      */
-    const userForAllSites = await db.User.findAll({where: {idpUser: { identifier: user.idpUser && user.idpUser.identifier }}});
+    const userForAllProjects = await db.User.findAll({where: {idpUser: { identifier: user.idpUser && user.idpUser.identifier }}});
     
-    if (userForAllSites.length <= 1) {
+    if (userForAllProjects.length <= 1) {
       let which = req.query.useOauth || 'default';
-      let siteConfig = req.site && merge({}, req.site.config, { id: req.site.id });
-      let result = await OAuthApi.deleteUser({ siteConfig, which, userData: { id: user.idpUser.identifier }})
+      let projectConfig = req.project && merge({}, req.project.config, { id: req.project.id });
+      let result = await OAuthApi.deleteUser({ projectConfig, which, userData: { id: user.idpUser.identifier }})
     }
     
     /**

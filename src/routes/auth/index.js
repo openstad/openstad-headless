@@ -17,7 +17,7 @@ router.use( '/', require('./me') );
 router
   .use(async function (req, res, next) { // auth config
     let useAuth = req.query.useAuth || req.user.provider || ( req.user.idpUser && req.user.idpUser.provider );
-    req.authConfig = await authconfig({ site: req.site, useAuth: useAuth })
+    req.authConfig = await authconfig({ project: req.project, useAuth: useAuth })
     return next();
   })
   .use(async function (req, res, next) { // get adapter

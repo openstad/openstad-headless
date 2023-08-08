@@ -12,7 +12,7 @@ const router = express.Router({ mergeParams: true });
 // scopes: for all get requests
 router
   .all('*', function(req, res, next) {
-    req.scope = [{ method: ['forSiteId', req.site.id] }, 'includeSite'];
+    req.scope = [{ method: ['forProjectId', req.project.id] }, 'includeProject'];
 
     return next();
   })
@@ -46,7 +46,7 @@ router.route('/$')
   .get(function(req, res, next) {
     let { dbQuery } = req;
 
-    let where = { siteId: req.site.id };
+    let where = { projectId: req.project.id };
     let confirmed = req.query.confirmed;
     if ( typeof confirmed !== 'undefined' ) where.confirmed = !( confirmed == 'false' || confirmed == '0' );
     db.NewsletterSignup
@@ -71,20 +71,20 @@ router.route('/$')
   .post(auth.can('NewsletterSignup', 'create'))
 	.post(auth.useReqUser)
   .post(function(req, res, next) {
-    if (!req.site) return next(createError(404, 'Site niet gevonden'));
+    if (!req.project) return next(createError(404, 'Project niet gevonden'));
     return next();
   })
   .post(function(req, res, next) {
-    let isActive = req.site && req.site.config && req.site.config.newslettersignup && req.site.config.newslettersignup.isActive;
+    let isActive = req.project && req.project.config && req.project.config.newslettersignup && req.project.config.newslettersignup.isActive;
     if (!isActive) return next(createError(500, 'Nieuwsbrief aanmeldingen zijn momenteel gesloten.'));
-    let confirmationUrl = req.site.config.newslettersignup.confirmationEmail && req.site.config.newslettersignup.confirmationEmail.url;
-    if (!confirmationUrl) return next(createError(500, 'Configuratiefout: confirmationUrl is niet gedefinieerd. Waarschuw de site beheerder.'));
+    let confirmationUrl = req.project.config.newslettersignup.confirmationEmail && req.project.config.newslettersignup.confirmationEmail.url;
+    if (!confirmationUrl) return next(createError(500, 'Configuratiefout: confirmationUrl is niet gedefinieerd. Waarschuw de project beheerder.'));
     if (req.user && req.user.email && req.user.email !== req.parsedBody.email) return next(createError(400, 'Dat is niet het emailadres waarmee je bent ingelogd'));
     return next();
   })
   .post(function( req, res, next ) {
     db.NewsletterSignup
-      .findOne({ where: { siteId: req.site.id, email: req.parsedBody.email } })
+      .findOne({ where: { projectId: req.project.id, email: req.parsedBody.email } })
       .then((found) => {
         if (found) {
           if (!found.externalUserId && req.user.email == found.email) {
@@ -121,13 +121,13 @@ router.route('/$')
       data.email = req.parsedBody.email;
       data.firstName = req.parsedBody.firstName;
       data.lastName = req.parsedBody.lastName;
-      data.confirmed = req.site && req.site.config && req.site.config.newslettersignup && req.site.config.newslettersignup.autoConfirm;
+      data.confirmed = req.project && req.project.config && req.project.config.newslettersignup && req.project.config.newslettersignup.autoConfirm;
       if (!data.confirmed) {
         data.confirmToken = generateToken({ length: 256 });
       }
     }
     data.extraData = req.parsedBody.extraData;
-    data.siteId = req.site.id;
+    data.projectId = req.project.id;
     data.externalUserId = req.user.idpUser && req.user.idpUser.identifier;
     data.signoutToken = generateToken({ length: 256 });
 
@@ -136,7 +136,7 @@ router.route('/$')
       .then((result) => {
         res.json(result);
         if (!result.confirmed) {
-          mail.sendNewsletterSignupConfirmationMail(data, req.site, req.user); // todo: optional met config?
+          mail.sendNewsletterSignupConfirmationMail(data, req.project, req.user); // todo: optional met config?
         }
       })
       .catch(next);
@@ -153,7 +153,7 @@ router.route('/confirm$')
   })
   .post(function(req, res, next) {
     db.NewsletterSignup
-      .findOne({ where: { confirmToken: req.body.confirmToken, siteId: req.site.id } })
+      .findOne({ where: { confirmToken: req.body.confirmToken, projectId: req.project.id } })
       .then((found) => {
         if (!found) return next(createError(404, 'Aanmelding niet gevonden'));
         found
@@ -165,7 +165,7 @@ router.route('/confirm$')
             // TODO: dit kan weg, maar ff checken tegen de auth settings
             let json = {
               id: result.id,
-              siteId: result.siteId,
+              projectId: result.projectId,
               email: result.email,
               firstName: result.firstName,
               lastName: result.lastName,
@@ -189,7 +189,7 @@ router.route('/signout$')
   })
   .post(function(req, res, next) {
     db.NewsletterSignup
-      .findOne({ where: { signoutToken: req.body.signoutToken, siteId: req.site.id } })
+      .findOne({ where: { signoutToken: req.body.signoutToken, projectId: req.project.id } })
       .then((found) => {
         if (!found) return next(createError(404, 'Aanmelding niet gevonden'));
         found
@@ -210,7 +210,7 @@ router.route('/:newslettersignupId(\\d+)')
     db.NewsletterSignup
       .scope(...req.scope)
       .findOne({
-        where: { id: newslettersignupId, siteId: req.site.id }
+        where: { id: newslettersignupId, projectId: req.project.id }
       })
       .then((found) => {
         if ( !found ) throw createError(404, 'Aanmelding niet gevonden');

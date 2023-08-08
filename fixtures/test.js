@@ -4,9 +4,9 @@ const log = require('debug')('app:db');
 
 module.exports = co.wrap(function*( db ) {
 
-	log('Creating sites');
-	yield sites.map(function( siteData ) {
-		return db.Site.create(siteData);
+	log('Creating projects');
+	yield projects.map(function( projectData ) {
+		return db.Project.create(projectData);
 	});
 
 	log('Creating users');
@@ -33,8 +33,8 @@ module.exports = co.wrap(function*( db ) {
 
 var today = moment().endOf('day');
 
-var sites = [
-	{id: 1, name: 'site-one', title: 'OpenStad Development Site', config: {}},
+var projects = [
+	{id: 1, name: 'project-one', title: 'OpenStad Development Project', config: {}},
 ];
 
 var users = [
@@ -42,7 +42,7 @@ var users = [
 	{id: 2, complete: true, role: 'admin', email: 'admin@undefined.nl', password: '123456', name: 'Administrator on develoment', ideas : [
 		{
 			id               : 1,
-			siteId           : 1,
+			projectId        : 1,
 			startDate        : moment(today).subtract(1, 'days'),
 			title            : 'Metro naar stadsdeel West',
 			summary          : 'Een nieuwe metrobuis naar het Bos en Lommerplein om sneller thuis te zijn.',

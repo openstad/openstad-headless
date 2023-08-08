@@ -8,10 +8,10 @@ module.exports = {
    * @param emailData
    * @param recipient
    */
-  notify: async (emailData, recipient, siteId) => {
+  notify: async (emailData, recipient, projectId) => {
     const db = require('../db');
-    const site = await db.Site.findByPk(siteId);
-    const myConfig = Object.assign({}, config, site && site.config);
+    const project = await db.Project.findByPk(projectId);
+    const myConfig = Object.assign({}, config, project && project.config);
 
     const data = {};
     data.to = recipient.email;
@@ -21,10 +21,10 @@ module.exports = {
     data.EMAIL = data.from;
     data.HOSTNAME = ( myConfig.cms && ( myConfig.cms.hostname || myConfig.cms.domain ) ) || myConfig.hostname || myConfig.domain;
     data.URL = ( myConfig.cms && myConfig.cms.url ) || myConfig.url || ( 'https://' + emailData.HOSTNAME );
-    data.SITENAME = ( site && site.title ) || myConfig.siteName;
+    data.PROJECTNAME = ( project && project.title ) || myConfig.projectName;
 
-    emailData.SITENAME = data.SITENAME;
-    emailData.logo = site.config.styling.logo;
+    emailData.PROJECTNAME = data.PROJECTNAME;
+    emailData.logo = project.config.styling.logo;
 
     emailData.text = nunjucks.renderString(emailData.text, emailData);
     data.html = nunjucks.render(emailData.template, emailData);

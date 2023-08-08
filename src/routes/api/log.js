@@ -8,7 +8,7 @@ let router = express.Router({mergeParams: true});
 router
     .all('*', function(req, res, next) {
         req.scope = [];
-        req.scope.push('includeSite');
+        req.scope.push('includeProject');
         next();
     });
 
@@ -22,7 +22,7 @@ router.route('/')
     .get(function(req, res, next) {
         let { dbQuery } = req;
 
-        req.scope.push({method: ['forSiteId', req.params.siteId]});
+        req.scope.push({method: ['forProjectId', req.params.projectId]});
 
         db.Log
             .scope(...req.scope)
@@ -46,7 +46,7 @@ router.route('/')
     .post(function(req, res, next) {
         const data = {
             name   : req.body.name,
-            siteId : req.params.siteId,
+            projectId : req.params.projectId,
         };
 
         db.Log
@@ -67,7 +67,7 @@ router.route('/:logId(\\d+)')
         if (!logId) next('No log id found');
 
         req.scope = ['defaultScope'];
-        req.scope.push({method: ['forSiteId', req.params.siteId]});
+        req.scope.push({method: ['forProjectId', req.params.projectId]});
 
         db.Log
             .scope(...req.scope)

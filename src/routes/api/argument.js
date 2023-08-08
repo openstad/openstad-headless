@@ -10,7 +10,7 @@ const router = require('express-promise-router')({ mergeParams: true });
 router
   .all('*', function(req, res, next) {
     req.scope = ['defaultScope', 'withIdea'];
-    req.scope.push({ method: ['forSiteId', req.params.siteId] });
+    req.scope.push({ method: ['forProjectId', req.params.projectId] });
 
     if (req.query.includeReactionsOnReactions) {
       req.scope.push('includeReactionsOnReactions');
@@ -35,7 +35,7 @@ router
     if (!ideaId) return next();
     db.Idea.findByPk(ideaId)
       .then(idea => {
-        if (!idea || idea.siteId != req.params.siteId) return next(createError(400, 'Idea not found'));
+        if (!idea || idea.projectId != req.params.projectId) return next(createError(400, 'Idea not found'));
         req.idea = idea;
         return next();
       });

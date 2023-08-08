@@ -2,7 +2,7 @@
 
 let defaultConfig = {
 
-	"siteName": "OpenStad API",
+	"projectName": "OpenStad API",
 
 	"url"             : "https://www.amsterdam.nl",
 	"hostname"        : "www.amsterdam.nl",
@@ -22,7 +22,7 @@ let defaultConfig = {
 	"express": {
 		"port": 8082,
 		"rendering": {
-			// Template directories to fall back on when `html/${siteId}/pageName`
+			// Template directories to fall back on when `html/${projectId}/pageName`
 			// does not exist.
 			"templateDirs": ["html/appName"],
 			// Global variables always available in all nunjucks template files.
@@ -62,13 +62,13 @@ let defaultConfig = {
 
 	"notifications": {
 		"admin": {
-			// Special high-frequency email notifications for site administrators.
+			// Special high-frequency email notifications for project administrators.
 			// Should probably not be a personal email account.
 			"emailAddress": null
 		},
     "sendEndDateNotifications": {
       "XDaysBefore": 7,
-      "subject": "Sluitingsdatum website nadert",
+      "subject": "Sluitingsdatum project nadert",
       "template": `De website <a href="{{URL}}">{{URL}}</a> nadert de ingestelde sluitingsdatum. De sluitingsdatum is ingesteld op <strong>{{ENDDATE}}</strong>.<br/>\
 <br/>\
 <strong>Klopt dit nog? Het is belangrijk dat de sluitingsdatum goed is ingesteld.</strong> Daarmee wordt gezorgd dat gebruikers vanaf dat moment hun account kunnen verwijderen, zonder dat stemmen of likes ongeldig gemaakt worden. De sluitingsdatum wordt ook als referentie gebruikt om op een later moment alle gebruikersgegevens te anonimiseren.<br/>\

@@ -4,7 +4,7 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<title>{{SITENAME}}</title>
+		<title>{{PROJECTNAME}}</title>
 
 		<style type="text/css">
 		 #outlook a {padding:0;}
@@ -78,7 +78,7 @@
 			<tr>
 				<td></td>
 				<td width="560">
-					<h1>{{SITENAME}}</h1>
+					<h1>{{PROJECTNAME}}</h1>
 				</td>
 				<td></td>
 			</tr>
@@ -110,7 +110,7 @@
 
 											{% if idea.modBreak %}
 												<div id="modBreak">
-													<b>{{SITENAME}}</b> &nbsp;&nbsp;|&nbsp;&nbsp; {{idea.modBreakDateHumanized}}<br>
+													<b>{{PROJECTNAME}}</b> &nbsp;&nbsp;|&nbsp;&nbsp; {{idea.modBreakDateHumanized}}<br>
 													<p>
 														{{idea.modBreak | safe | nl2br}}
 													</p>
@@ -160,7 +160,7 @@
 
 											{% if article.modBreak %}
 												<div id="modBreak">
-													<b>{{SITENAME}}</b> &nbsp;&nbsp;|&nbsp;&nbsp; {{article.modBreakDateHumanized}}<br>
+													<b>{{PROJECTNAME}}</b> &nbsp;&nbsp;|&nbsp;&nbsp; {{article.modBreakDateHumanized}}<br>
 													<p>
 														{{article.modBreak | safe | nl2br}}
 													</p>

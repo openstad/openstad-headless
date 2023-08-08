@@ -93,16 +93,16 @@ const checkHostStatus = async (conditions) => {
 
   console.log('Server IP should be: ', serverIp, ' IP from env value is: ', process.env.PUBLIC_IP, ' npm thinks it is:', ip.address());
 
-  const sites = await db.Site.findAll({where});
+  const projects = await db.Project.findAll({where});
 
-  const promises = sites.map(async (site) => {
-    // Todo: skip the sites with hostStatus.status === true?
+  const promises = projects.map(async (project) => {
+    // Todo: skip the projects with hostStatus.status === true?
 
-    let hostStatus = site.hostStatus;
+    let hostStatus = project.hostStatus;
     //ensure it's an object so we dont have to worry about checks later
     hostStatus = hostStatus ? hostStatus : {};          //
 
-    const domainIp = getDomainIp(site.domain);
+    const domainIp = getDomainIp(project.domain);
 
     hostStatus.ip = domainIp !== null && domainIp === serverIp ? true : false;
 
@@ -110,37 +110,37 @@ const checkHostStatus = async (conditions) => {
       const k8sApi = getK8sApi();
 
       // get ingress config files
-      const ingress = getIngress(k8sApi, site.name, namespace);
+      const ingress = getIngress(k8sApi, project.name, namespace);
 
       // if ip issset but not ingress try to create one
       if (hostStatus.ip  && !ingress) {
         try {
-          const response = await createIngress(k8sApi, site.name, site.domain, namespace);
+          const response = await createIngress(k8sApi, project.name, project.domain, namespace);
           hostStatus.ingress = true;
         } catch(error) {
           // don't set to false, an error might just be that it already exist and the read check failed
-          console.error('Error updating ingress for ', site.name, ' domain: ', site.domain, ' :', error);
+          console.error('Error updating ingress for ', project.name, ' domain: ', project.domain, ' :', error);
         }
       // else if ip is not set but ingress is set, remove the ingress file
       } else  if (!hostStatus.ip  && ingress) {
         try {
-    //      await k8sApi.deleteNamespacedIngress(site.name, namespace)
+    //      await k8sApi.deleteNamespacedIngress(project.name, namespace)
           hostStatus.ingress = false;
         } catch(error) {
           //@todo how to deal with error here?
           //most likely it doesn't exists anymore if delete doesnt work, but could also be forbidden /
-          console.error('Error deleting ingress for ', site.name, ' domain: ', site.domain, ' :', error);
+          console.error('Error deleting ingress for ', project.name, ' domain: ', project.domain, ' :', error);
         }
       }
     }
 
-    return await site.update({hostStatus});
+    return await project.update({hostStatus});
   });
 
   await Promise.all(promises);
 
   // Todo: some output?
-  console.log('all sites checked');
+  console.log('all projects checked');
 };
 
 module.exports = checkHostStatus;

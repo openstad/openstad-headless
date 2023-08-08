@@ -9,9 +9,9 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 	var NewsletterSignup = sequelize.define('newslettersignup', {
 
-		siteId: {
+		projectId: {
 			type         : DataTypes.INTEGER,
-			defaultValue : config.siteId && typeof config.siteId == 'number' ? config.siteId : 0,
+			defaultValue : config.projectId && typeof config.projectId == 'number' ? config.projectId : 0,
 		},
 
 		email: {
@@ -90,16 +90,16 @@ module.exports = function( db, sequelize, DataTypes ) {
 	NewsletterSignup.scopes = function() {
 
 		return {
-			forSiteId: function( siteId ) {
+			forProjectId: function( projectId ) {
 				return {
 					where: {
-						siteId: siteId,
+						projectId: projectId,
 					}
 				};
 			},
-			includeSite: {
+			includeProject: {
 				include: [{
-					model: db.Site,
+					model: db.Project,
 				}]
 			},
 
@@ -108,7 +108,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 	}
 
 	NewsletterSignup.associate = function( models ) {
-		this.belongsTo(models.Site);
+		this.belongsTo(models.Project);
 	}
 
   // dit is hoe het momenteel werkt; ik denk niet dat dat de bedoeling is, maar ik volg nu

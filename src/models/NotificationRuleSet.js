@@ -5,7 +5,7 @@ module.exports = (db, sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 0,
     },
-    siteId: {
+    projectId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
@@ -61,12 +61,12 @@ module.exports = (db, sequelize, DataTypes) => {
       // defaults
       default: {
         include: [{
-          model: db.Site,
+          model: db.Project,
         }]
       },
-      includeSite: {
+      includeProject: {
         include : [{
-          model: db.Site,
+          model: db.Project,
         }]
       },
       includeTemplate: {

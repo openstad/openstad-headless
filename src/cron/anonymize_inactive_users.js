@@ -20,19 +20,19 @@ module.exports = {
 
       try {
 
-        // for each site
-        let sites = await db.Site.findAll();
-        for (let i=0; i < sites.length; i++) {
-          let site = sites[i];
-          let anonymizeUsersXDaysAfterNotification = site.config.anonymize.anonymizeUsersAfterXDaysOfInactivity - site.config.anonymize.warnUsersAfterXDaysOfInactivity;
+        // for each project
+        let projects = await db.Project.findAll();
+        for (let i=0; i < projects.length; i++) {
+          let project = projects[i];
+          let anonymizeUsersXDaysAfterNotification = project.config.anonymize.anonymizeUsersAfterXDaysOfInactivity - project.config.anonymize.warnUsersAfterXDaysOfInactivity;
 
           // find users that have not logged in for a while
-          let anonymizeUsersAfterXDaysOfInactivity = site.config.anonymize.warnUsersAfterXDaysOfInactivity;
+          let anonymizeUsersAfterXDaysOfInactivity = project.config.anonymize.warnUsersAfterXDaysOfInactivity;
           let targetDate = new Date();
           targetDate.setDate(targetDate.getDate() - anonymizeUsersAfterXDaysOfInactivity);
           let users = await db.User.findAll({
             where: {
-              siteId: site.id,
+              projectId: project.id,
               role: 'member',
               lastLogin: {
                 [Sequelize.Op.lte]: targetDate,
@@ -56,7 +56,7 @@ module.exports = {
                 // send notification
                 if (user.email) {
                   console.log('CRON anonymize-inactive-users: send warning email to user', user.email, user.lastLogin);
-                  mail.sendInactiveWarningEmail(site, user);
+                  mail.sendInactiveWarningEmail(project, user);
                   user.update({ isNotifiedAboutAnonymization: new Date() });
                 }
               }

@@ -87,9 +87,9 @@ module.exports  = {
 		var bodyParser         = require('body-parser');
 		var methodOverride     = require('method-override');
 
-		// Middleware to fill `req.site` with a `Site` instance.
-		const reqSite = require('./middleware/site');
-		this.app.use(reqSite);
+		// Middleware to fill `req.project` with a `Project` instance.
+		const reqProject = require('./middleware/project');
+		this.app.use(reqProject);
 
 		this.app.use(require('./middleware/security-headers'));
 

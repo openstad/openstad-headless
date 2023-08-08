@@ -15,7 +15,7 @@ let router = express.Router({mergeParams: true});
 // connect a user from an external auth server to the api
 
 router
-  .route('(/site/:siteId)?/connect-user')
+  .route('(/project/:projectId)?/connect-user')
     .post(async function (req, res, next) {
 
       try {
@@ -33,7 +33,7 @@ router
             .findOne({
               where: {
                 [Sequelize.Op.and]: [
-                  { siteId: req.params.siteId },
+                  { projectId: req.params.projectId },
                   {
                     idpUser: {
                       identifier: mappedUserData.idpUser.identifier,
@@ -50,7 +50,7 @@ router
           .upsert({
             ...mappedUserData,
             id: openStadUser && openStadUser.id,
-            siteId: req.params.siteId,
+            projectId: req.params.projectId,
             email: mappedUserData.email,
             idpUser: mappedUserData.idpUser,
             lastLogin: new Date(),
@@ -77,15 +77,15 @@ router
 // login
 
 router
-  .route('(/site/:siteId)?/login')
+  .route('(/project/:projectId)?/login')
   .get(function (req, res, next) {
 
     // logout first?
     if (!req.query.forceNewLogin) return next();
     let baseUrl = config.url
-    let backToHereUrl = baseUrl + '/auth/site/' + req.site.id + '/login?useAuth=' + req.authConfig.provider + '&redirectUri=' + encodeURIComponent(req.query.redirectUri)
+    let backToHereUrl = baseUrl + '/auth/project/' + req.project.id + '/login?useAuth=' + req.authConfig.provider + '&redirectUri=' + encodeURIComponent(req.query.redirectUri)
     backToHereUrl = encodeURIComponent(backToHereUrl)
-    let url = baseUrl + '/auth/site/' + req.site.id + '/logout?redirectUri=' + backToHereUrl;
+    let url = baseUrl + '/auth/project/' + req.project.id + '/logout?redirectUri=' + backToHereUrl;
     return res.redirect(url)
 
   })
@@ -94,7 +94,7 @@ router
     // redirect to login server
     let url = req.authConfig.serverUrl + req.authConfig.serverLoginPath;
     url = url.replace(/\[\[clientId\]\]/, req.authConfig.clientId);
-    url = url.replace(/\[\[redirectUri\]\]/, encodeURIComponent(config.url + '/auth/site/' + req.site.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.redirectUri));
+    url = url.replace(/\[\[redirectUri\]\]/, encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.redirectUri));
 
     console.log('++++++++++');
     console.log(url);
@@ -107,7 +107,7 @@ router
 // digest
 
 router
-  .route('(/site/:siteId)?/digest-login')
+  .route('(/project/:projectId)?/digest-login')
   .get(function (req, res, next) {
     
     // get accesstoken for code
@@ -124,7 +124,7 @@ router
     }
 
     let contentType = req.authConfig.serverExchangeContentType || 'application/json';
-    if (contentType == 'application/x-www-form-urlencoded') data = `client_id=${encodeURIComponent(req.authConfig.clientId)}&client_secret=${encodeURIComponent(req.authConfig.clientSecret)}&code=${encodeURIComponent(code)}&grant_type=authorization_code&redirect_uri=${encodeURIComponent(config.url + '/auth/site/' + req.site.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.returnTo)}`;
+    if (contentType == 'application/x-www-form-urlencoded') data = `client_id=${encodeURIComponent(req.authConfig.clientId)}&client_secret=${encodeURIComponent(req.authConfig.clientSecret)}&code=${encodeURIComponent(code)}&grant_type=authorization_code&redirect_uri=${encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.returnTo)}`;
 
     fetch(url, {
       method: 'POST',
@@ -175,15 +175,15 @@ router
   })
   .get(function (req, res, next) {
 
-    req.userData.siteId = req.site.id; // todo: ik weet nog niet waar dit moet
+    req.userData.projectId = req.project.id; // todo: ik weet nog niet waar dit moet
     let data = req.userData;
 
-    // if user has same siteId and userId
+    // if user has same projectId and userId
     // rows are duplicate for a user
     let where = {
       where: Sequelize.and(
         {idpUser: { identifier: data.idpUser.identifier, provider: data.idpUser.provider }},
-        {siteId: data.siteId},
+        {projectId: data.projectId},
       )
     }
 
@@ -211,7 +211,7 @@ router
         } else {
 
           // user not found; create
-          if (!req.site.config.users.canCreateNewUsers) return next(createError('403', 'Users mogen niet aangemaakt worden op deze site'));
+          if (!req.project.config.users.canCreateNewUsers) return next(createError('403', 'Users mogen niet aangemaakt worden op deze project'));
           
           data.complete = true;
 
@@ -251,7 +251,7 @@ router
     }
 
     //check if redirect domain is allowed
-    if (isAllowedRedirectDomain(redirectUrl, req.site && req.site.config && req.site.config.allowedDomains)) {
+    if (isAllowedRedirectDomain(redirectUrl, req.project && req.project.config && req.project.config.allowedDomains)) {
       if (redirectUrl.match('[[jwt]]')) {
         jwt.sign({userId: req.userData.id, authProvider: req.authConfig.provider}, req.authConfig.jwtSecret, {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
           if (err) return next(err)
@@ -277,7 +277,7 @@ router
 // logout
 
 router
-  .route('(/site/:siteId)?/logout')
+  .route('(/project/:projectId)?/logout')
   .get(function (req, res, next) {
     return next();
   })

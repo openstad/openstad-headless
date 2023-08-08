@@ -10,35 +10,21 @@ const searchResults 	= require('../../middleware/search-results-user');
 // TODO-AUTH
 const checkHostStatus = require('../../services/checkHostStatus')
 const OAuthApi        = require('../../services/oauth-api');
-const sitesWithIssues = require('../../services/sites-with-issues');
+const projectsWithIssues = require('../../services/projects-with-issues');
 
 let router = express.Router({mergeParams: true});
 
-const refreshSiteConfigMw = function (req, res, next) {
-	const site = req.results;
-
-	// assume https, wont work for some dev environments
-	const cmsUrl = site.config.cms &&  site.config.cms.url ?  site.config.cms.url : 'https://' + site.domain;
-
-	if (!cmsUrl) {
-		next();
-	}
-
-	return next();
-
-}
-
 router.route('/')
 
-// list sites
+// list projects
 // ----------
-	.get(auth.can('Site', 'list'))
+	.get(auth.can('Project', 'list'))
 	.get(pagination.init)
 	.get(function(req, res, next) {
 
 		const scope = ['withArea'];
 
-		db.Site
+		db.Project
 			.scope(scope)
 			.findAndCountAll({ offset: req.dbQuery.offset, limit: req.dbQuery.limit })
 			.then( result => {
@@ -54,20 +40,20 @@ router.route('/')
 	.get(function(req, res, next) {
     let records = req.results.records || req.results
 		records.forEach((record, i) => {
-      let site = record.toJSON()
+      let project = record.toJSON()
 			if (!( req.user && req.user.role && req.user.role == 'admin' )) {
-        site.config = undefined;
+        project.config = undefined;
 			}
-      records[i] = site;
+      records[i] = project;
     });
 		res.json(req.results);
   })
 
-// create site
+// create project
 // -----------
-	.post(auth.can('Site', 'create'))
+	.post(auth.can('Project', 'create'))
 	.post(function(req, res, next) {
-		db.Site
+		db.Project
 			.create(req.body)
 			.then((result) => {
 				req.results = result;
@@ -77,15 +63,14 @@ router.route('/')
 			.catch(next)
 	})
 	.post(auth.useReqUser)
-	.post(refreshSiteConfigMw)
 	.post(function(req, res, next) {
     return res.json(req.results);
   })
 
-// list sites with issues
+// list projects with issues
 router.route('/issues')
 // -------------------------------
-	.get(auth.can('Site', 'list'))
+	.get(auth.can('Project', 'list'))
 	.get(pagination.init)
 	.get(function(req, res, next) {
     req.results = [];
@@ -94,8 +79,8 @@ router.route('/issues')
   })
 	.get(function(req, res, next) {
 
-    // sites that should be ended but are not
-    sitesWithIssues.shouldHaveEndedButAreNot({ offset: req.dbQuery.offset, limit: req.dbQuery.limit })
+    // projects that should be ended but are not
+    projectsWithIssues.shouldHaveEndedButAreNot({ offset: req.dbQuery.offset, limit: req.dbQuery.limit })
 			.then( result => {
         req.results = req.results.concat( result.rows );
         req.dbQuery.count += result.count;
@@ -106,8 +91,8 @@ router.route('/issues')
 	})
 	.get(function(req, res, next) {
 
-    // sites that have ended but are not anonymized
-    sitesWithIssues.endedButNotAnonymized({ offset: req.dbQuery.offset, limit: req.dbQuery.limit })
+    // projects that have ended but are not anonymized
+    projectsWithIssues.endedButNotAnonymized({ offset: req.dbQuery.offset, limit: req.dbQuery.limit })
 			.then( result => {
         req.results = req.results.concat( result.rows );
         req.dbQuery.count += result.count;
@@ -122,55 +107,48 @@ router.route('/issues')
 	.get(function(req, res, next) {
     let records = req.results.records || req.results
 		records.forEach((record, i) => {
-      let site = record.toJSON()
+      let project = record.toJSON()
 			if (!( req.user && req.user.role && req.user.role == 'admin' )) {
-        site.config = undefined;
+        project.config = undefined;
 			}
-      records[i] = site;
+      records[i] = project;
     });
 		res.json(req.results);
   })
 
-// one site routes: get site
+// one project routes: get project
 // -------------------------
-router.route('/:siteIdOrDomain') //(\\d+)
-	.all(auth.can('Site', 'view'))
+router.route('/:projectId') //(\\d+)
+	.all(auth.can('Project', 'view'))
 	.all(function(req, res, next) {
-		const siteIdOrDomain = req.params.siteIdOrDomain;
-		let query;
-
-		if (isNaN(siteIdOrDomain)) {
-			query = {	where: { domain: siteIdOrDomain } }
-		} else {
-			query = { where: { id: parseInt(siteIdOrDomain) } }
-		}
-
-		db.Site
+		const projectId = req.params.projectId;
+		let query = { where: { id: parseInt(projectId) } }
+		db.Project
 			.scope('withArea')
 			.findOne(query)
 			.then(found => {
-				if ( !found ) throw new Error('Site not found');
+				if ( !found ) throw new Error('Project not found');
 				req.results = found;
-				req.site = req.results; // middleware expects this to exist
+				req.project = req.results; // middleware expects this to exist
 				next();
 			})
 			.catch(next);
 	})
 
-// view site
+// view project
 // ---------
-	.get(auth.can('Site', 'view'))
+	.get(auth.can('Project', 'view'))
 	.get(auth.useReqUser)
 	.get(function(req, res, next) {
 		res.json(req.results);
 	})
 
-// update site
+// update project
 // -----------
 	.put(auth.useReqUser)
 	.put(function(req, res, next) {
-		const site = req.results;
-    if (!( site && site.can && site.can('update') )) return next( new Error('You cannot update this site') );
+		const project = req.results;
+    if (!( project && project.can && project.can('update') )) return next( new Error('You cannot update this project') );
 
 		req.results
 			.authorizeData(req.body, 'update')
@@ -192,20 +170,20 @@ router.route('/:siteIdOrDomain') //(\\d+)
 // mainly styling settings are synched so in line with the CMS
 	.put(function (req, res, next) {
 
-    req.siteOAuthClients = [];
-    const site          = req.site;
+    req.projectOAuthClients = [];
+    const project          = req.project;
     const authServerUrl = config.authorization['auth-server-url'];
 
-    const siteConfig = req.site && req.site.config
-    const oauthConfig  = siteConfig.oauth;
+    const projectConfig = req.project && req.project.config
+    const oauthConfig  = projectConfig.oauth;
     
     const fetchActions = [];
     const fetchClient = (req, which) => {
       return new Promise((resolve, reject) => {
         return OAuthApi
-          .fetchClient({ siteConfig, which })
+          .fetchClient({ projectConfig, which })
           .then((client) => {
-            if (client && client.id) req.siteOAuthClients.push(client);
+            if (client && client.id) req.projectOAuthClients.push(client);
             resolve();
           })
           .catch((err) => {
@@ -238,7 +216,7 @@ router.route('/:siteIdOrDomain') //(\\d+)
 		const authServerUrl = config.authorization['auth-server-url'];
 		const updates = [];
 
-		req.siteOAuthClients.forEach((oauthClient, i) => {
+		req.projectOAuthClients.forEach((oauthClient, i) => {
 			const authUpdateUrl = authServerUrl + '/api/admin/client/' + oauthClient.id;
 			const configKeysToSync = ['users', 'styling', 'ideas'];
 
@@ -249,9 +227,9 @@ router.route('/:siteIdOrDomain') //(\\d+)
 			oauthClient.config = oauthClient.config ? oauthClient.config : {};
 
 			configKeysToSync.forEach(field => {
-				oauthClient.config[field] = req.site.config[field];
+				oauthClient.config[field] = req.project.config[field];
 			});
-      oauthClient.config['users'] = { canCreateNewUsers: req.site.config.users.canCreateNewUsers }
+      oauthClient.config['users'] = { canCreateNewUsers: req.project.config.users.canCreateNewUsers }
 
 
       const apiCredentials = {
@@ -280,54 +258,50 @@ router.route('/:siteIdOrDomain') //(\\d+)
 				next(e)
 			});
 	})
-// call the site, to let the site know a refresh of the siteConfig is needed
+// call the project, to let the project know a refresh of the projectConfig is needed
 	.put(function (req, res, next) {
-		// when succesfull return site JSON
+		// when succesfull return project JSON
 		res.json(req.results);
     next();
 	})
-	.put(refreshSiteConfigMw) // after response; no need to wait for this
-	.put(function (req, res, next) {
-    // the end
-	})
 
-// delete site
+// delete project
 // ---------
-	.delete(auth.can('Site', 'delete'))
+	.delete(auth.can('Project', 'delete'))
 	.delete(function(req, res, next) {
 		req.results
 			.destroy()
 			.then(() => {
-				res.json({ "site": "deleted" });
+				res.json({ "project": "deleted" });
 			})
 			.catch(next);
 	})
 
 // anonymize all users
 // -------------------
-router.route('/:siteId(\\d+)/:willOrDo(will|do)-anonymize-all-users')
-	.put(auth.can('Site', 'anonymizeAllUsers'))
+router.route('/:projectId(\\d+)/:willOrDo(will|do)-anonymize-all-users')
+	.put(auth.can('Project', 'anonymizeAllUsers'))
 	.put(function(req, res, next) {
-    // the site
-		let where = { id: parseInt(req.params.siteId) };
-		db.Site
+    // the project
+		let where = { id: parseInt(req.params.projectId) };
+		db.Project
 			.findOne({ where })
 			.then(found => {
-				if ( !found ) throw new Error('Site not found');
+				if ( !found ) throw new Error('Project not found');
 				req.results = found;
-				req.site = req.results; // middleware expects this to exist
+				req.project = req.results; // middleware expects this to exist
         		next();
 			})
 			.catch(next);
 	})
   .put(async function (req, res, next) {
     try {
-		const result = await req.site.willAnonymizeAllUsers();
+		const result = await req.project.willAnonymizeAllUsers();
 		req.results = result;
       if (req.params.willOrDo == 'do') {
 		result.message = 'Ok';
 
-		req.site.doAnonymizeAllUsers(
+		req.project.doAnonymizeAllUsers(
 			[...result.users], 
 			[...result.externalUserIds],
 			req.query.useOauth

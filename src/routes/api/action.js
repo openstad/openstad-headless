@@ -8,7 +8,7 @@ let router = express.Router({mergeParams: true});
 router
     .all('*', function(req, res, next) {
         req.scope = [];
-        req.scope.push('includeSite');
+        req.scope.push('includeProject');
         next();
     });
 
@@ -23,7 +23,7 @@ router.route('/')
         let { dbQuery } = req;
         dbQuery.where = dbQuery.where ? dbQuery.where : {};
 
-        dbQuery.where.siteId = req.params.siteId;
+        dbQuery.where.projectId = req.params.projectId;
         
         db.Action
          //   .scope(...req.scope)
@@ -47,7 +47,7 @@ router.route('/')
     .post(function(req, res, next) {
         const data = req.body;
 
-        data.siteId = req.params.siteId;
+        data.projectId = req.params.projectId;
 
         db.Action
             .authorizeData(data, 'create', req.user)

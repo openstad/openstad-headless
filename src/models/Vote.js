@@ -56,17 +56,17 @@ module.exports = function( db, sequelize, DataTypes ) {
 	Vote.scopes = function scopes() {
 		return {
 
-			forSiteId: function( siteId ) {
+			forProjectId: function( projectId ) {
 				return {
 					// where: {
-					//  	ideaId: [ sequelize.literal(`select id FROM ideas WHERE siteId = ${siteId}`) ]
+					//  	ideaId: [ sequelize.literal(`select id FROM ideas WHERE projectId = ${projectId}`) ]
 					// }
 					include: [{
 						model      : db.Idea,
-						attributes : ['id', 'siteId'],
+						attributes : ['id', 'projectId'],
 						required: true,
 						where: {
-							siteId: siteId
+							projectId: projectId
 						}
 					}],
 				};
@@ -75,7 +75,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 				return {
 					include: [{
 						model      : db.Idea,
-						attributes : ['id', 'title', 'siteId', 'status', 'viewableByRole']
+						attributes : ['id', 'title', 'projectId', 'status', 'viewableByRole']
 					}]
 				}
 			},

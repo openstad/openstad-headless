@@ -12,7 +12,7 @@ var createError = require('http-errors');
 router
   .all('*', function(req, res, next) {
     req.scope = ['api'];
-    req.scope.push('includeSite');
+    req.scope.push('includeProject');
     return next();
   });
 
@@ -70,7 +70,7 @@ router.route('/:areaId(\\d+)')
 
     db.Area
       .findOne({
-        // where: { id: areaId, siteId: req.params.siteId }
+        // where: { id: areaId, projectId: req.params.projectId }
         where: { id: areaId },
       })
       .then(found => {
@@ -123,7 +123,7 @@ router.route('/:areaId(\\d+)')
     return db.Area
       .findOne({
         where: { id: areaInstance.id },
-        // where: { id: areaInstance.id, siteId: req.params.siteId },
+        // where: { id: areaInstance.id, projectId: req.params.projectId },
       })
       .then(found => {
         if (!found) throw new Error('area not found');

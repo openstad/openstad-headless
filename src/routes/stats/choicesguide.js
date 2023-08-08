@@ -30,10 +30,10 @@ router.route('/total')
         FROM choicesGuideResults
         INNER JOIN choicesGuides ON choicesGuides.id = choicesGuideResults.choicesGuideId
         WHERE choicesGuideResults.deletedAt IS NULL 
-        AND choicesGuides.siteId=?    
+        AND choicesGuides.projectId=?    
         AND choicesGuides.deletedAt IS NULL
     `;
-    const bindvars = [req.params.siteId]
+    const bindvars = [req.params.projectId]
 
     if (req.query.choicesGuideId) {
       query += `AND choicesGuideResults.choicesGuideId=?`;

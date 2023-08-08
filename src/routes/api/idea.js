@@ -24,18 +24,18 @@ router
 
     // in case the votes are archived don't use these queries
     // this means they can be cleaned up from the main table for performance reason
-    if (!req.site.config.archivedVotes) {
-      if (req.query.includeVoteCount && ( (req.site && req.site.config && req.site.config.votes && req.site.config.votes.isViewable) || userhasModeratorRights(req.user) )) {
+    if (!req.project.config.archivedVotes) {
+      if (req.query.includeVoteCount && ( (req.project && req.project.config && req.project.config.votes && req.project.config.votes.isViewable) || userhasModeratorRights(req.user) )) {
         req.scope.push('includeVoteCount');
       }
 
-      if (req.query.includeUserVote && req.site && req.site.config && req.site.config.votes && req.site.config.votes.isViewable && req.user && req.user.id) {
+      if (req.query.includeUserVote && req.project && req.project.config && req.project.config.votes && req.project.config.votes.isViewable && req.user && req.user.id) {
         // ik denk dat je daar niet het hele object wilt?
         req.scope.push({ method: ['includeUserVote', req.user.id] });
       }
     }
     // because includeVoteCount is used in other locations but should only be active if isViewable
-    if ( (req.site && req.site.config && req.site.config.votes && req.site.config.votes.isViewable) || userhasModeratorRights(req.user) ) {
+    if ( (req.project && req.project.config && req.project.config.votes && req.project.config.votes.isViewable) || userhasModeratorRights(req.user) ) {
       req.canIncludeVoteCount = true; // scope.push(undefined) would be easier but creates an error
     }
 
@@ -91,7 +91,7 @@ router
 
     // todo? volgens mij wordt dit niet meer gebruikt
     // if (req.query.highlighted) {
-    //  	query = db.Idea.getHighlighted({ siteId: req.params.siteId })
+    //  	query = db.Idea.getHighlighted({ projectId: req.params.projectId })
     // }
 
     return next();
@@ -109,7 +109,7 @@ router.route('/')
     let { dbQuery } = req;
 
     dbQuery.where = {
-      siteId: req.params.siteId,
+      projectId: req.params.projectId,
       ...req.queryConditions,
       ...dbQuery.where,
     };
@@ -132,7 +132,7 @@ router.route('/')
       .findAndCountAll(dbQuery)
       .then(function(result) {
         result.rows.forEach((idea) => {
-          idea.site = req.site;
+          idea.project = req.project;
           if (req.query.includePoll && idea.poll) idea.poll.countVotes(!req.query.withVotes);
         });
         const { rows } = result;
@@ -155,11 +155,11 @@ router.route('/')
   .post(auth.can('Idea', 'create'))
   .post(publishConcept)
   .post(function(req, res, next) {
-    if (!req.site) return next(createError(401, 'Site niet gevonden'));
+    if (!req.project) return next(createError(401, 'Project niet gevonden'));
     return next();
   })
   .post(function(req, res, next) {
-    if (!(req.site.config && req.site.config.ideas && req.site.config.ideas.canAddNewIdeas)) return next(createError(401, 'Inzenden is gesloten'));
+    if (!(req.project.config && req.project.config.ideas && req.project.config.ideas.canAddNewIdeas)) return next(createError(401, 'Inzenden is gesloten'));
     return next();
   })
   .post(function(req, res, next) {
@@ -178,14 +178,14 @@ router.route('/')
 
     const data = {
       ...req.body,
-      siteId: req.params.siteId,
+      projectId: req.params.projectId,
       userId,
       startDate: new Date(),
     };
 
     let responseData;
     db.Idea
-      .authorizeData(data, 'create', req.user, null, req.site)
+      .authorizeData(data, 'create', req.user, null, req.project)
       .create(data)
       .then(ideaInstance => {
 
@@ -193,7 +193,7 @@ router.route('/')
           .scope(...req.scope)
           .findByPk(ideaInstance.id)
           .then(result => {
-            result.site = req.site;
+            result.project = req.project;
             req.results = result;
             return next();
           });
@@ -224,9 +224,9 @@ router.route('/')
     if (!tags) return next();
 
     const ideaInstance = req.results;
-    const siteId = req.params.siteId;
+    const projectId = req.params.projectId;
 
-    let tagIds = Array.from(await getOrCreateTagIds(siteId, tags, req.user));
+    let tagIds = Array.from(await getOrCreateTagIds(projectId, tags, req.user));
 
     ideaInstance
       .setTags(tagIds)
@@ -237,11 +237,11 @@ router.route('/')
         return db.Idea
           .scope(...scope)
           .findOne({
-            where: { id: ideaInstance.id, siteId: req.params.siteId },
+            where: { id: ideaInstance.id, projectId: req.params.projectId },
           })
           .then(found => {
             if (!found) throw new Error('Idea not found');
-            found.site = req.site;
+            found.project = req.project;
             req.results = found;
             return next();
           })
@@ -251,9 +251,9 @@ router.route('/')
   .post(function(req, res, next) {
     res.json(req.results);
     if (!req.query.nomail && req.body['publishDate']) {
-      mail.sendThankYouMail(req.results, 'ideas', req.site, req.user); 
+      mail.sendThankYouMail(req.results, 'ideas', req.project, req.user); 
     } else if(!req.query.nomail && !req.body['publishDate']) {
-      mail.sendConceptEmail(req.results, 'ideas', req.site, req.user);
+      mail.sendConceptEmail(req.results, 'ideas', req.project, req.user);
     }
   });
 
@@ -269,11 +269,11 @@ router.route('/:ideaId(\\d+)')
     db.Idea
       .scope(...scope)
       .findOne({
-        where: { id: ideaId, siteId: req.params.siteId },
+        where: { id: ideaId, projectId: req.params.projectId },
       })
       .then(found => {
         if (!found) throw new Error('Idea not found');
-        found.site = req.site;
+        found.project = req.project;
         if (req.query.includePoll) { // TODO: naar poll hooks
           if (found.poll) found.poll.countVotes(!req.query.withVotes);
         }
@@ -300,7 +300,7 @@ router.route('/:ideaId(\\d+)')
   .put(auth.useReqUser)
   .put(publishConcept)
   .put(function(req, res, next) {    
-    if (!(req.site.config && req.site.config.ideas && req.site.config.ideas.canAddNewIdeas)) {
+    if (!(req.project.config && req.project.config.ideas && req.project.config.ideas.canAddNewIdeas)) {
       if(!req.results.dataValues.publishDate) {
           return next(createError(401, 'Aanpassen en inzenden van concept plannen is gesloten'));
       }
@@ -353,7 +353,7 @@ router.route('/:ideaId(\\d+)')
       .authorizeData(data, 'update')
       .update(data)
       .then(result => {
-        result.site = req.site;
+        result.project = req.project;
         req.results = result;
         next();
       })
@@ -366,9 +366,9 @@ router.route('/:ideaId(\\d+)')
     if (!tags) return next();
 
     const ideaInstance = req.results;
-    const siteId = req.params.siteId;
+    const projectId = req.params.projectId;
 
-    let tagIds = Array.from(await getOrCreateTagIds(siteId, tags, req.user));
+    let tagIds = Array.from(await getOrCreateTagIds(projectId, tags, req.user));
 
     ideaInstance
       .setTags(tagIds)
@@ -379,7 +379,7 @@ router.route('/:ideaId(\\d+)')
         return db.Idea
           .scope(...scope)
           .findOne({
-            where: { id: ideaInstance.id, siteId: req.params.siteId },
+            where: { id: ideaInstance.id, projectId: req.params.projectId },
           })
           .then(found => {
             if (!found) throw new Error('Idea not found');
@@ -387,7 +387,7 @@ router.route('/:ideaId(\\d+)')
             if (req.query.includePoll) { // TODO: naar poll hooks
               if (found.poll) found.poll.countVotes(!req.query.withVotes);
             }
-            found.site = req.site;
+            found.project = req.project;
             req.results = found;
             next();
           })
@@ -396,7 +396,7 @@ router.route('/:ideaId(\\d+)')
   })
   .put(function(req, res, next) {
     if(req.changedToPublished) {
-      mail.sendConceptEmail(req.results, 'ideas', req.site, req.user);
+      mail.sendConceptEmail(req.results, 'ideas', req.project, req.user);
     }
     next();
   })
@@ -420,10 +420,10 @@ router.route('/:ideaId(\\d+)')
   });
 
 // when adding or updating ideas parse the tags
-async function getOrCreateTagIds(siteId, tags, user) {
+async function getOrCreateTagIds(projectId, tags, user) {
 
   let result = [];
-  let tagsOfSite = await db.Tag.findAll({where: { siteId }});
+  let tagsOfProject = await db.Tag.findAll({where: { projectId }});
 
   for (let i = 0; i < tags.length; i++) {
 
@@ -440,23 +440,23 @@ async function getOrCreateTagIds(siteId, tags, user) {
       tagName = tag;
     }
 
-    // find in site tags by id or name
-    let found = tagsOfSite.find( tag => tag.id == tagId );
-    if (!found) found = tagsOfSite.find( tag => tag.name == tagName );
+    // find in project tags by id or name
+    let found = tagsOfProject.find( tag => tag.id == tagId );
+    if (!found) found = tagsOfProject.find( tag => tag.name == tagName );
     if (found) {
       result.push(found);
     } else {
       
-      // or try to find this tag in another site
+      // or try to find this tag in another project
       if (tagId) {
-        let tagOnOtherSite = await db.Tag.findOne({where: { id: tagId }});
-        if (tagOnOtherSite) tagName = tagOnOtherSite.name; // use name to create a new tag
+        let tagOnOtherProject = await db.Tag.findOne({where: { id: tagId }});
+        if (tagOnOtherProject) tagName = tagOnOtherProject.name; // use name to create a new tag
       }
 
       // create a new tag
       if (tagName && userhasModeratorRights(user)) { // else ignore
         let newTag = await db.Tag.create({
-          siteId, 
+          projectId, 
           name: tagName, 
           extraData: {}
         });

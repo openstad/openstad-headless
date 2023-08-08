@@ -7,7 +7,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 	var Tag = sequelize.define('tag', {
 
-		siteId: {
+		projectId: {
 			type         : DataTypes.INTEGER,
 			allowNull    : false,
 		},
@@ -45,17 +45,17 @@ module.exports = function( db, sequelize, DataTypes ) {
 			defaultScope: {
 			},
 
-      forSiteId: function( siteId ) {
+      forProjectId: function( projectId ) {
         return {
           where: {
-            siteId: siteId,
+            projectId: projectId,
           }
         };
       },
 
-      includeSite: {
+      includeProject: {
         include: [{
-          model: db.Site,
+          model: db.Project,
         }]
       },
 
@@ -64,7 +64,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 	Tag.associate = function( models ) {
 		this.belongsToMany(models.Idea, { through: 'ideaTags',constraints: false});
-		this.belongsTo(models.Site);
+		this.belongsTo(models.Project);
 	}
 
   // dit is hoe het momenteel werkt; ik denk niet dat dat de bedoeling is, maar ik volg nu

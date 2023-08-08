@@ -8,19 +8,19 @@ router.use( bruteForce.globalMiddleware );
 router.post( '*', bruteForce.postMiddleware );
 
 // vote
-router.use( '/site/:siteId(\\d+)/vote', require('./vote') );
+router.use( '/project/:projectId(\\d+)/vote', require('./vote') );
 
 // idea
-router.use( '/site/:siteId(\\d+)/idea', require('./idea') );
+router.use( '/project/:projectId(\\d+)/idea', require('./idea') );
 
 // argument
-router.use( '/site/:siteId(\\d+)/argument', require('./argument') );
+router.use( '/project/:projectId(\\d+)/argument', require('./argument') );
 
 // choicesguide
-router.use( '/site/:siteId(\\d+)/choicesguides', require('./choicesguide') );
+router.use( '/project/:projectId(\\d+)/choicesguides', require('./choicesguide') );
 
 // get overview of stats
-router.use( '/site/:siteId(\\d+)/overview', require('./overview') );
+router.use( '/project/:projectId(\\d+)/overview', require('./overview') );
 
 
 module.exports = router;

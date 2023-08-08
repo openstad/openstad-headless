@@ -6,9 +6,9 @@ const getSequelizeConditionsForFilters = require('./../util/getSequelizeConditio
 module.exports = function (db, sequelize, DataTypes) {
   const Submission = sequelize.define('submission', {
 
-    siteId: {
+    projectId: {
       type: DataTypes.INTEGER,
-      defaultValue: config.siteId && typeof config.siteId == 'number' ? config.siteId : 0,
+      defaultValue: config.projectId && typeof config.projectId == 'number' ? config.projectId : 0,
     },
     userId: {
       type: DataTypes.INTEGER,
@@ -62,7 +62,7 @@ module.exports = function (db, sequelize, DataTypes) {
         instance
       }
       try {
-        eventService.publish(db.NotificationRuleSet, parseInt(instance.siteId), ruleSetData);
+        eventService.publish(db.NotificationRuleSet, parseInt(instance.projectId), ruleSetData);
       } catch (error) {
         console.error(error);
       }
@@ -79,10 +79,10 @@ module.exports = function (db, sequelize, DataTypes) {
 					attributes : ['role', 'displayName', 'nickName', 'name', 'email']
 				}]
 			},
-            forSiteId: function (siteId) {
+            forProjectId: function (projectId) {
                 return {
                     where: {
-                        siteId: siteId,
+                        projectId: projectId,
                     }
                 };
             },

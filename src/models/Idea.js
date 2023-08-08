@@ -36,12 +36,12 @@ function hideEmailsForNormalUsers(args) {
 
 module.exports = function (db, sequelize, DataTypes) {
   var Idea = sequelize.define('idea', {
-    siteId: {
+    projectId: {
       type: DataTypes.INTEGER,
       auth:  {
         updateableBy: 'editor',
       },
-      defaultValue: config.siteId && typeof config.siteId == 'number' ? config.siteId : 0,
+      defaultValue: config.projectId && typeof config.projectId == 'number' ? config.projectId : 0,
     },
 
     userId: {
@@ -78,21 +78,21 @@ module.exports = function (db, sequelize, DataTypes) {
     endDate: {
       type: DataTypes.VIRTUAL(DataTypes.DATE, ['startDate']),
       get: function () {
-        var _config = merge.recursive(true, config, this.site?.config || {});
+        var _config = merge.recursive(true, config, this.project.config);
         var duration =
           (_config &&
             _config.ideas &&
             _config.ideas.duration) ||
           90;
         if (
-          this.site &&
-          this.site.config &&
-          this.site.config.ideas &&
-          this.site.config.ideas.automaticallyUpdateStatus &&
-          this.site.config.ideas.automaticallyUpdateStatus.isActive
+          this.project &&
+          this.project.config &&
+          this.project.config.ideas &&
+          this.project.config.ideas.automaticallyUpdateStatus &&
+          this.project.config.ideas.automaticallyUpdateStatus.isActive
         ) {
           duration =
-            this.site.config.ideas.automaticallyUpdateStatus.afterXDays || 0;
+            this.project.config.ideas.automaticallyUpdateStatus.afterXDays || 0;
         }
         var endDate = moment(this.getDataValue('startDate'))
           .add(duration, 'days')
@@ -116,12 +116,12 @@ module.exports = function (db, sequelize, DataTypes) {
       allowNull: true,
       auth:  {
         updateableBy: 'moderator',
-        authorizeData: function(data, action, user, self, site) {
+        authorizeData: function(data, action, user, self, project) {
           if (!self) return;
-          site = site || self.site;
-          if (!site) return; // todo: die kun je ophalen als eea. async is
+          project = project || self.project;
+          if (!project) return; // todo: die kun je ophalen als eea. async is
           let value = data || self.typeId;
-          let config = site.config.ideas.types;
+          let config = project.config.ideas.types;
           if (!config || !Array.isArray(config) || !config[0] || !config[0].id) return null; // no config; this field is not used
           let defaultValue = config[0].id;
 
@@ -302,7 +302,7 @@ module.exports = function (db, sequelize, DataTypes) {
     progress: {
       type: DataTypes.VIRTUAL,
       get: function () {
-        var minimumYesVotes = (this.site && this.site.config && this.site.config.ideas && this.site.config.ideas.minimumYesVotes) || config.get('ideas.minimumYesVotes');
+        var minimumYesVotes = (this.project && this.project.config && this.project.config.ideas && this.project.config.ideas.minimumYesVotes) || config.get('ideas.minimumYesVotes');
         var yes = this.getDataValue('yes');
         return yes !== undefined ?
           Number((Math.min(1, (yes / minimumYesVotes)) * 100).toFixed(2)) :
@@ -356,7 +356,7 @@ module.exports = function (db, sequelize, DataTypes) {
         notifications.addToQueue({
           type: 'idea',
           action: 'create',
-          siteId: instance.siteId,
+          projectId: instance.projectId,
           instanceId: instance.id
         });
       },
@@ -365,7 +365,7 @@ module.exports = function (db, sequelize, DataTypes) {
         notifications.addToQueue({
           type: 'idea',
           action: 'update',
-          siteId: instance.siteId,
+          projectId: instance.projectId,
           instanceId: instance.id
         });
       },
@@ -472,7 +472,7 @@ module.exports = function (db, sequelize, DataTypes) {
             Object.keys(value).forEach((key) => {
               if (typeof validated[key] == 'undefined') {
                 if (!( self.config && self.config.ideas && self.config.ideas.extraDataMustBeDefined === false )) {
-                  errors.push(`${key} is niet gedefinieerd in site.config`)
+                  errors.push(`${key} is niet gedefinieerd in project.config`)
                 }
               }
             });
@@ -480,7 +480,7 @@ module.exports = function (db, sequelize, DataTypes) {
           } else {
             // extra data not defined in the config
             if (!(self.config && self.config.ideas && self.config.ideas.extraDataMustBeDefined === false)) {
-              errors.push(`idea.extraData is not configured in site.config`)
+              errors.push(`idea.extraData is not configured in project.config`)
             }
           }
         }
@@ -729,9 +729,9 @@ module.exports = function (db, sequelize, DataTypes) {
         // 				});
       },
 
-      includeSite: {
+      includeProject: {
         include: [{
-          model: db.Site,
+          model: db.Project,
         }]
       },
 
@@ -938,7 +938,7 @@ module.exports = function (db, sequelize, DataTypes) {
     this.hasMany(models.Argument, {as: 'argumentsFor'});
     this.hasOne(models.Poll, {as: 'poll', foreignKey: 'ideaId', });
     this.hasOne(models.Vote, {as: 'userVote', foreignKey: 'ideaId'});
-    this.belongsTo(models.Site);
+    this.belongsTo(models.Project);
     this.belongsToMany(models.Tag, {through: 'ideaTags', constraints: false});
   }
 
@@ -996,10 +996,10 @@ module.exports = function (db, sequelize, DataTypes) {
     );
 
     // todo: dit kan mooier
-    if (config.siteId && typeof config.siteId == 'number') {
+    if (config.projectId && typeof config.projectId == 'number') {
       where = {
         $and: [
-          {siteId: config.siteId},
+          {projectId: config.projectId},
           ...where,
         ]
       }
@@ -1202,16 +1202,16 @@ module.exports = function (db, sequelize, DataTypes) {
         return {};
       }
 
-	   /* if (idea.site.config.archivedVotes) {
-		    if (req.query.includeVoteCount && req.site && req.site.config && req.site.config.votes && req.site.config.votes.isViewable) {
+	   /* if (idea.project.config.archivedVotes) {
+		    if (req.query.includeVoteCount && req.project && req.project.config && req.project.config.votes && req.project.config.votes.isViewable) {
 			      result.yes = result.extraData.archivedYes;
 			      result.no = result.extraData.archivedNo;
 		     }
 	    }*/
 
-      delete data.site;
+      delete data.project;
       delete data.config;
-      // dit zou nu dus gedefinieerd moeten worden op site.config, maar wegens backward compatible voor nu nog even hier:
+      // dit zou nu dus gedefinieerd moeten worden op project.config, maar wegens backward compatible voor nu nog even hier:
       //
 
       // wordt dit nog gebruikt en zo ja mag het er uit
@@ -1250,16 +1250,16 @@ module.exports = function (db, sequelize, DataTypes) {
 
   async function beforeValidateHook(instance, options) {
 
-    // add site config
-    let siteConfig = config;
-    if (instance.siteId) {
-      let site = await db.Site.findByPk(instance.siteId);
-      siteConfig = merge.recursive(true, config, site.config);
+    // add project config
+    let projectConfig = config;
+    if (instance.projectId) {
+      let project = await db.Project.findByPk(instance.projectId);
+      projectConfig = merge.recursive(true, config, project.config);
     }
-    instance.config = siteConfig;
+    instance.config = projectConfig;
 
     // count args and votes
-    let canEditAfterFirstLikeOrArg = siteConfig && siteConfig.canEditAfterFirstLikeOrArg || false
+    let canEditAfterFirstLikeOrArg = projectConfig && projectConfig.canEditAfterFirstLikeOrArg || false
     if (!canEditAfterFirstLikeOrArg && !userHasRole(instance.auth && instance.auth.user, 'moderator')) {
       let firstLikeSubmitted = await db.Vote.count({ where: { ideaId: instance.id }});
       let firstArgSubmitted  = await db.Argument.count({ where: { ideaId: instance.id }});

@@ -102,10 +102,10 @@ module.exports = function( db, sequelize, DataTypes ) {
 				return new Promise((resolve, reject) => {
 
 					if (instance.ideaId) {
-						db.Idea.scope('includeSite').findByPk(instance.ideaId)
+						db.Idea.scope('includeProject').findByPk(instance.ideaId)
 							.then( idea => {
 								if (!idea) throw Error('Idea niet gevonden')
-								instance.config = merge.recursive(true, config, idea.site.config);
+								instance.config = merge.recursive(true, config, idea.project.config);
 								return idea;
 							})
 							.then( idea => {
@@ -126,14 +126,14 @@ module.exports = function( db, sequelize, DataTypes ) {
 			afterCreate: function(instance, options) {
 				db.Idea.findByPk(instance.ideaId)
 					.then( idea => {
-						notifications.addToQueue({ type: 'argument', action: 'create', siteId: idea.siteId, instanceId: instance.id });
+						notifications.addToQueue({ type: 'argument', action: 'create', projectId: idea.projectId, instanceId: instance.id });
 					})
 			},
 
 			afterUpdate: function(instance, options) {
 				db.Idea.findByPk(instance.ideaId)
 					.then( idea => {
-						notifications.addToQueue({ type: 'argument', action: 'update', siteId: idea.siteId, instanceId: instance.id });
+						notifications.addToQueue({ type: 'argument', action: 'update', projectId: idea.projectId, instanceId: instance.id });
 					})
 			},
 
@@ -170,10 +170,10 @@ module.exports = function( db, sequelize, DataTypes ) {
 				}]
 			},
 
-			forSiteId: function( siteId ) {
+			forProjectId: function( projectId ) {
 				return {
 					where: {
-						ideaId: [ sequelize.literal(`select id FROM ideas WHERE siteId = ${siteId}`) ]
+						ideaId: [ sequelize.literal(`select id FROM ideas WHERE projectId = ${projectId}`) ]
 					}
 				};
 			},
@@ -204,7 +204,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 				return {
 					include: [{
 						model      : db.Idea,
-						attributes : ['id', 'siteId', 'title', 'status', 'viewableByRole']
+						attributes : ['id', 'projectId', 'title', 'status', 'viewableByRole']
 					}]
 				}
 			},

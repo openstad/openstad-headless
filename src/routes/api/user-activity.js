@@ -10,7 +10,7 @@ const merge = require('merge');
 
 const router = express.Router({mergeParams: true});
 
-const activityKeys = ['ideas', 'articles', 'arguments', 'votes', 'sites'];
+const activityKeys = ['ideas', 'articles', 'arguments', 'votes', 'projects'];
 
 const activityConfig = {
   'ideas' : {
@@ -42,11 +42,11 @@ const activityConfig = {
     }
   },
   /*
-  'sites': {
+  'projects': {
     descriptionKey: '',
     type: {
-      slug: 'site',
-      label: 'Site'
+      slug: 'project',
+      label: 'Project'
     }
   },
 
@@ -55,7 +55,7 @@ const activityConfig = {
 
 router
   .all('*', function (req, res, next) {
-    // req.scope = ['includeSite'];
+    // req.scope = ['includeProject'];
     next();
   });
 
@@ -74,16 +74,16 @@ router.route('/')
     });
     if ( req.activities.length == 0 ) req.activities = activityKeys;
 
-    if (req.query.includeOtherSites == 'false' || req.query.includeOtherSites == '0') req.query.includeOtherSites = false;
-    req.includeOtherSites = typeof req.query.includeOtherSites != 'undefined' ? !!req.query.includeOtherSites : true;
+    if (req.query.includeOtherProjects == 'false' || req.query.includeOtherProjects == '0') req.query.includeOtherProjects = false;
+    req.includeOtherProjects = typeof req.query.includeOtherProjects != 'undefined' ? !!req.query.includeOtherProjects : true;
     req.results = {};
     next();
   })
 
-// this user on other sites
+// this user on other projects
   .get(function(req, res, next) {
     req.userIds = [ parseInt(req.params.userId) ];
-    if (!req.includeOtherSites) return next();
+    if (!req.includeOtherProjects) return next();
     return db.User
       .findOne({
         where: {
@@ -94,14 +94,14 @@ router.route('/')
         if (!user.idpUser || !user.idpUser.identifier) return next();
 
         return db.User
-          .scope(['includeSite'])
+          .scope(['includeProject'])
           .findAll({
             where: {
               idpUser: { identifier: user.idpUser.identifier },
-              // old users have no siteId, this will break the update
+              // old users have no projectId, this will break the update
               // skip them
               // probably should clean up these users
-              siteId: {
+              projectId: {
                 [Op.not]: 0
               }
             }
@@ -117,34 +117,34 @@ router.route('/')
           })
       });
   })
-  // sites
+  // projects
   .get(function(req, res, next) {
     next()
   })
   .get(function(req, res, next) {
 
-    if (!req.activities.includes('sites')) return next();
-    return auth.can('Site', 'list')(req, res, next);
+    if (!req.activities.includes('projects')) return next();
+    return auth.can('Project', 'list')(req, res, next);
   })
   .get(function(req, res, next) {
 
-    if (!req.activities.includes('sites')) return next();
-    const siteIds = req.users.map(user => user.siteId);
-    let where = { id: siteIds };
+    if (!req.activities.includes('projects')) return next();
+    const projectIds = req.users.map(user => user.projectId);
+    let where = { id: projectIds };
 
-    return db.Site
+    return db.Project
       .findAll({ where })
       .then(function(rows) {
-        // sites should only contain non sensitve fields
+        // projects should only contain non sensitve fields
         // config contains keys, the standard library should prevent this
         // in case a bug makes that fails, we only cherry pick the fields to be sure
-        req.results.sites = rows.map(site => {
+        req.results.projects = rows.map(project => {
           return {
-            id: site.id,
-            domain: site.domain,
-            title: site.title,
-            createdAt: site.createdAt,
-            updatedAt: site.updatedAt,
+            id: project.id,
+            url: project.url,
+            title: project.title,
+            createdAt: project.createdAt,
+            updatedAt: project.updatedAt,
           }
         });
         return next();
@@ -159,7 +159,7 @@ router.route('/')
     if (!req.activities.includes('ideas')) return next();
     let where = { userId: req.userIds };
     return db.Idea
-      .scope(['includeSite'])
+      .scope(['includeProject'])
       .findAll({ where })
       .then(function(rows) {
         req.results.ideas = rows;
@@ -234,8 +234,8 @@ router.route('/')
           const config = activityConfig[which];
           const idea = which === 'ideas' ? resource : resource.idea;
 
-          const site =  req.results.sites.find((site) => {
-            return site.id === idea.siteId;
+          const project =  req.results.projects.find((project) => {
+            return project.id === idea.projectId;
           })
 
           return {
@@ -243,7 +243,7 @@ router.route('/')
             description: resource[config.descriptionKey] ? resource[config.descriptionKey].replace(/<[^>]+>/g, '') : '',
             type: config.type,
             idea: idea,
-            site: site ? site : false,
+            project: project ? project : false,
             createdAt: resource.createdAt
           }
         }) : [];

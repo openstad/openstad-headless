@@ -6,17 +6,17 @@ const notificationService = require('./notificationService')
  * This method checks if there is any ruleset available for the published event
  *
  * @param {object} notificationRuleSet
- * @param {int} siteId
+ * @param {int} projectId
  * @param {{resource: string, eventType: string, instance: object}} ruleSetData
  * @returns {Promise<void>}
  */
-const publish = async (notificationRuleSet, siteId, ruleSetData) => {
+const publish = async (notificationRuleSet, projectId, ruleSetData) => {
 
   console.log('Publish event called: ', ruleSetData.resource, ruleSetData.eventType);
 
   const ruleSets = await notificationRuleSet
     .scope('includeTemplate', 'includeRecipients')
-    .findAll({where: { siteId, active: 1}})
+    .findAll({where: { projectId, active: 1}})
 
   ruleSets.forEach((ruleset) => {
     if (jsonLogic.apply(ruleset.body, ruleSetData) === false) {
@@ -55,7 +55,7 @@ const publish = async (notificationRuleSet, siteId, ruleSetData) => {
       .filter(recipient => recipient.email)
       .forEach(recipient => {
         console.log('Notify recipient', recipient.email);
-        notificationService.notify(emailData, recipient, siteId)
+        notificationService.notify(emailData, recipient, projectId)
       });
   });
 }

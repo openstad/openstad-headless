@@ -19,10 +19,10 @@ const userhasModeratorRights = (user) => {
 // ----------------
 router.route('*')
 
-// bestaat de site config
+// bestaat de project config
 	.all(function(req, res, next) {
-		if (!( req.site && req.site.config && req.site.config.votes )) {
-			return next(createError(403, 'Site niet gevonden of niet geconfigureerd'));
+		if (!( req.project && req.project.config && req.project.config.votes )) {
+			return next(createError(403, 'Project niet gevonden of niet geconfigureerd'));
 		}
 		return next();
 	})
@@ -31,7 +31,7 @@ router.route('*')
 
   // mag er gestemd worden
 	.post(function(req, res, next) {
-		if (!req.site.isVoteActive()) return next(createError(403, 'Stemmen is gesloten'));
+		if (!req.project.isVoteActive()) return next(createError(403, 'Stemmen is gesloten'));
 		return next();
 	})
 
@@ -45,26 +45,26 @@ router.route('*')
 			return next(createError(401, 'Geen gebruiker gevonden'));
 		}
 
-		if (req.site.config.votes.requiredUserRole == 'anonymous' && ( req.user.role == 'anonymous' || req.user.role == 'member' || hasModeratorRights )) {
+		if (req.project.config.votes.requiredUserRole == 'anonymous' && ( req.user.role == 'anonymous' || req.user.role == 'member' || hasModeratorRights )) {
 			return next();
 		}
 
-		if (req.site.config.votes.requiredUserRole == 'member' && ( req.user.role == 'member' || hasModeratorRights )) {
+		if (req.project.config.votes.requiredUserRole == 'member' && ( req.user.role == 'member' || hasModeratorRights )) {
 			return next();
 		}
 
-		if (req.site.config.votes.requiredUserRole == 'admin' && ( hasModeratorRights )) {
+		if (req.project.config.votes.requiredUserRole == 'admin' && ( hasModeratorRights )) {
 			return next();
 		}
 
-		return next(createError(401, 'Je mag niet stemmen op deze site'));
+		return next(createError(401, 'Je mag niet stemmen op deze project'));
 	})
 
   // scopes
 	.all(function(req, res, next) {
 
 		req.scope = [
-			{ method: ['forSiteId', req.site.id]}
+			{ method: ['forProjectId', req.project.id]}
     ];
 
     return next();
@@ -79,7 +79,7 @@ router.route('/')
 	.get(function(req, res, next) {
 		let hasModeratorRights = userhasModeratorRights(req.user);
 
-		if (!(req.site.config.votes.isViewable || hasModeratorRights)) {
+		if (!(req.project.config.votes.isViewable || hasModeratorRights)) {
 			return next(createError(403, 'Stemmen zijn niet zichtbaar'));
 		}
 		return next();
@@ -107,7 +107,7 @@ router.route('/')
 		 * In case of no opinion, it's a bug with the likes, dont send them
 		 * @TODO debug in what case this happens.
 		 */
-		if (req.site.config.votes.voteType === 'likes') {
+		if (req.project.config.votes.voteType === 'likes') {
 			where.opinion =  {
       	[Op.ne]: null
     	};
@@ -175,7 +175,7 @@ router.route('/*')
 				.findAll({ where: { userId: req.user.id }, transaction, lock: true })
 			})
 			.then(found => {
-				if (req.site.config.votes.voteType !== 'likes' && req.site.config.votes.withExisting == 'error' && found && found.length ) throw createError(403, 'Je hebt al gestemd');
+				if (req.project.config.votes.voteType !== 'likes' && req.project.config.votes.withExisting == 'error' && found && found.length ) throw createError(403, 'Je hebt al gestemd');
 				req.existingVotes = found.map(entry => entry.toJSON());
 				return next();
 			})
@@ -206,7 +206,7 @@ router.route('/*')
 		});
 
     // merge
-    if (req.site.config.votes.withExisting == 'merge') {
+    if (req.project.config.votes.withExisting == 'merge') {
       // no double votes
       try {
         if (req.existingVotes.find( newVote => votes.find( oldVote => oldVote.ideaId == newVote.ideaId) )) {
@@ -250,7 +250,7 @@ router.route('/*')
 		let ids = req.votes.map( entry => entry.ideaId );
 		let transaction = res.locals.transaction
 		db.Idea
-			.findAll({ where: { id:ids, siteId: req.site.id }, transaction, lock: true })
+			.findAll({ where: { id:ids, projectId: req.project.id }, transaction, lock: true })
 			.then(found => {
 
 				if (req.votes.length != found.length) {
@@ -276,9 +276,9 @@ router.route('/*')
   // validaties voor voteType=likes
 	.post(function(req, res, next) {
 		let transaction = res.locals.transaction
-		if (req.site.config.votes.voteType != 'likes') return next();
+		if (req.project.config.votes.voteType != 'likes') return next();
 
-		if (req.site.config.votes.voteType == 'likes' && req.site.config.votes.requiredUserRole == 'anonymous') {
+		if (req.project.config.votes.voteType == 'likes' && req.project.config.votes.requiredUserRole == 'anonymous') {
 			req.votes.forEach((vote) => {
 				// check if votes exists for same opinion on the same IP within 5 minutes
 				const whereClause = {
@@ -324,8 +324,8 @@ router.route('/*')
   // validaties voor voteType=count
 	.post(function(req, res, next) {
 		let transaction = res.locals.transaction
-		if (req.site.config.votes.voteType != 'count') return next();
-		if (req.votes.length >= req.site.config.votes.minIdeas && req.votes.length <= req.site.config.votes.maxIdeas) {
+		if (req.project.config.votes.voteType != 'count') return next();
+		if (req.votes.length >= req.project.config.votes.minIdeas && req.votes.length <= req.project.config.votes.maxIdeas) {
 			return next();
 		}
 		let err = createError(400, 'Aantal ideeen klopt niet');
@@ -341,17 +341,17 @@ router.route('/*')
   // validaties voor voteType=budgeting
 	.post(function(req, res, next) {
 		let transaction = res.locals.transaction
-		if (req.site.config.votes.voteType != 'budgeting') return next();
+		if (req.project.config.votes.voteType != 'budgeting') return next();
 		let budget = 0;
 		req.votes.forEach((vote) => {
 			let idea = req.ideas.find(idea => idea.id == vote.ideaId);
 			budget += idea.budget;
 		});
 		let err;
-		if (!( budget >= req.site.config.votes.minBudget && budget <= req.site.config.votes.maxBudget )) {
+		if (!( budget >= req.project.config.votes.minBudget && budget <= req.project.config.votes.maxBudget )) {
 		  err = createError(400, 'Budget klopt niet');
 		}
-		if (!( req.votes.length >= req.site.config.votes.minIdeas && req.votes.length <= req.site.config.votes.maxIdeas )) {
+		if (!( req.votes.length >= req.project.config.votes.minIdeas && req.votes.length <= req.project.config.votes.maxIdeas )) {
 		  err = createError(400, 'Aantal ideeen klopt niet');
 		}
 		if (err) {
@@ -370,8 +370,8 @@ router.route('/*')
   // validaties voor voteType=count-per-theme
 	.post(function(req, res, next) {
 		let transaction = res.locals.transaction
-		if (req.site.config.votes.voteType != 'count-per-theme') return next();
-    let themes = req.site.config.votes.themes || [];
+		if (req.project.config.votes.voteType != 'count-per-theme') return next();
+    let themes = req.project.config.votes.themes || [];
     let totalNoOfVotes = 0;
     req.votes.forEach((vote) => {
 			let idea = req.ideas.find(idea => idea.id == vote.ideaId);
@@ -392,7 +392,7 @@ router.route('/*')
 		  }
     });
 
-		if (( req.site.config.votes.minIdeas && totalNoOfVotes < req.site.config.votes.minIdeas ) || ( req.site.config.votes.maxIdeas && totalNoOfVotes > req.site.config.votes.maxIdeas )) {
+		if (( req.project.config.votes.minIdeas && totalNoOfVotes < req.project.config.votes.minIdeas ) || ( req.project.config.votes.maxIdeas && totalNoOfVotes > req.project.config.votes.maxIdeas )) {
       isOk = false;
 		}
 
@@ -413,8 +413,8 @@ router.route('/*')
   // validaties voor voteType=budgeting-per-theme
 	.post(function(req, res, next) {
 		let transaction = res.locals.transaction
-		if (req.site.config.votes.voteType != 'budgeting-per-theme') return next();
-    let themes = req.site.config.votes.themes || [];
+		if (req.project.config.votes.voteType != 'budgeting-per-theme') return next();
+    let themes = req.project.config.votes.themes || [];
 		req.votes.forEach((vote) => {
 			let idea = req.ideas.find(idea => idea.id == vote.ideaId);
       let themename = idea && idea.extraData && idea.extraData.theme;
@@ -449,7 +449,7 @@ router.route('/*')
 		let transaction = res.locals.transaction;
 		
 		let actions = [];
-		switch(req.site.config.votes.voteType) {
+		switch(req.project.config.votes.voteType) {
 
 			case 'likes':
 				req.votes.forEach((vote) => {

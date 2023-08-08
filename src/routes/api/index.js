@@ -15,65 +15,65 @@ router.use(dbQuery);
 router.use(sorting);
 router.use(filtering);
 
-// sites
-router.use( '/site', require('./site') );
+// projects
+router.use( '/project', require('./project') );
 
 // arguments
-router.use( '/site/:siteId(\\d+)(/idea/:ideaId(\\d+))?/argument', require('./argument') );
+router.use( '/project/:projectId(\\d+)(/idea/:ideaId(\\d+))?/argument', require('./argument') );
 
 // ideas
-router.use( '/site/:siteId(\\d+)/idea', require('./idea') );
-//router.use( '/site/:siteId(\\d+)/idea', require('./idea.old') );
+router.use( '/project/:projectId(\\d+)/idea', require('./idea') );
+//router.use( '/project/:projectId(\\d+)/idea', require('./idea.old') );
 
 // articles
-router.use( '/site/:siteId(\\d+)/article', require('./article') );
+router.use( '/project/:projectId(\\d+)/article', require('./article') );
 
 // polls
-router.use( '/site/:siteId(\\d+)(/idea/:ideaId(\\d+))?/poll', require('./poll') );
+router.use( '/project/:projectId(\\d+)(/idea/:ideaId(\\d+))?/poll', require('./poll') );
 
 // tags
-router.use( '/site/:siteId(\\d+)/tag', require('./tag') );
+router.use( '/project/:projectId(\\d+)/tag', require('./tag') );
 
 // users
-router.use( '/site/:siteId(\\d+)/user', require('./user') );
-router.use( '/site/:siteId(\\d+)/user/:userId(\\d+)/activity', require('./user-activity') );
+router.use( '/project/:projectId(\\d+)/user', require('./user') );
+router.use( '/project/:projectId(\\d+)/user/:userId(\\d+)/activity', require('./user-activity') );
 
 // submissions
-router.use( '/site/:siteId(\\d+)/submission', require('./submission') );
+router.use( '/project/:projectId(\\d+)/submission', require('./submission') );
 
 // notification
-router.use( '/site/:siteId(\\d+)/notification', require('./notification') );
+router.use( '/project/:projectId(\\d+)/notification', require('./notification') );
 
 // vote
-router.use( '/site/:siteId(\\d+)/vote', require('./vote') );
+router.use( '/project/:projectId(\\d+)/vote', require('./vote') );
 
 // newslettersignup
-router.use( '/site/:siteId(\\d+)/newslettersignup', require('./newslettersignup') );
+router.use( '/project/:projectId(\\d+)/newslettersignup', require('./newslettersignup') );
 
 // choices-guide
-router.use( '/site/:siteId(\\d+)/choicesguide', require('./choicesguide') );
+router.use( '/project/:projectId(\\d+)/choicesguide', require('./choicesguide') );
 
 // actions
-router.use( '/site/:siteId(\\d+)/action', require('./action') );
+router.use( '/project/:projectId(\\d+)/action', require('./action') );
 
 // locks
 router.use( '/lock', require('./lock') );
 
 // To do test and fix log API
-//router.use( '/site/:siteId(\\d+)/log', require('./log') );
+//router.use( '/project/:projectId(\\d+)/log', require('./log') );
 
 // openstad-map
-router.use( '/site/:siteId(\\d+)/openstad-map', require('./openstad-map') );
+router.use( '/project/:projectId(\\d+)/openstad-map', require('./openstad-map') );
 
-// area on site and no site route, system wide the same
-router.use( '/site/:siteId(\\d+)/area', require('./area') );
+// area on project and no project route, system wide the same
+router.use( '/project/:projectId(\\d+)/area', require('./area') );
 router.use( '/area', require('./area') );
 
 router.use( '/repo', require('./template') ); // backwards conpatibility
 router.use( '/template', require('./template') );
 
 // output error as JSON only use this error handler middleware in "/api" based routes
-router.use("/site", function(err, req, res, next){
+router.use("/project", function(err, req, res, next){
   console.log('->>> err', err);
   // use the error's status or default to 500
   res.status(err.status || 500);

@@ -34,7 +34,7 @@ exports.postMiddleware = function(req, res, next) {
 
   /*
 
-	if ((config.ignoreBruteForce && config.ignoreBruteForce.indexOf(req.ip) != -1) || ( req.site && req.site.config && req.site.config.ignoreBruteForce && req.site.config.ignoreBruteForce.indexOf(req.ip) != -1 )) {
+	if ((config.ignoreBruteForce && config.ignoreBruteForce.indexOf(req.ip) != -1) || ( req.project && req.project.config && req.project.config.ignoreBruteForce && req.project.config.ignoreBruteForce.indexOf(req.ip) != -1 )) {
 		next();
 	} else {
 		postBruteForce.prevent(req, res, next);
@@ -57,7 +57,7 @@ exports.postMiddleware = function(req, res, next) {
 exports.globalMiddleware = function(req, res, next) {
   next();
   /*
-	if ((config.ignoreBruteForce && config.ignoreBruteForce.indexOf(req.ip) != -1) || ( req.site && req.site.config && req.site.config.ignoreBruteForce && req.site.config.ignoreBruteForce.indexOf(req.ip) != -1 )) {
+	if ((config.ignoreBruteForce && config.ignoreBruteForce.indexOf(req.ip) != -1) || ( req.project && req.project.config && req.project.config.ignoreBruteForce && req.project.config.ignoreBruteForce.indexOf(req.ip) != -1 )) {
 		next();
 	} else {
 		globalBruteForce.prevent(req, res, next);

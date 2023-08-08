@@ -38,7 +38,7 @@ module.exports = function( db, sequelize, DataTypes ) {
   });
 
   Area.associate = function( models ) {
-    this.hasMany(models.Site);
+    this.hasMany(models.Project);
   }
 
 

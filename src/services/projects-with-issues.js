@@ -1,15 +1,15 @@
 const Sequelize = require('sequelize');
 const db = require('../db');
 
-let sitesWithIssues = {};
+let projectsWithIssues = {};
 
-sitesWithIssues.shouldHaveEndedButAreNot = function({ offset, limit }) {
-  return db.Site
+projectsWithIssues.shouldHaveEndedButAreNot = function({ offset, limit }) {
+  return db.Project
     .findAndCountAll({
       offset, limit,
       attributes: { 
         include: [
-          [Sequelize.literal('"Site endDate is in the past but projectHasEnded is not set"'), 'issue'],
+          [Sequelize.literal('"Project endDate is in the past but projectHasEnded is not set"'), 'issue'],
         ],
       },
       where: {
@@ -42,8 +42,8 @@ sitesWithIssues.shouldHaveEndedButAreNot = function({ offset, limit }) {
     })
 }
 
-sitesWithIssues.endedButNotAnonymized = function({ offset, limit }) {
-  return db.Site
+projectsWithIssues.endedButNotAnonymized = function({ offset, limit }) {
+  return db.Project
     .findAndCountAll({
       offset, limit,
       attributes: { 
@@ -59,15 +59,15 @@ sitesWithIssues.endedButNotAnonymized = function({ offset, limit }) {
           role: 'member',
         }
       }],
-      group: ['users.siteId'],
+      group: ['users.projectId'],
       where: {
         [Sequelize.Op.and]: [
-          // where site enddate is more then anonymizeUsersXDaysAfterEndDate days ago
-          Sequelize.literal("DATE_ADD(CAST(JSON_UNQUOTE(JSON_EXTRACT(site.config,'$.project.endDate')) as DATETIME), INTERVAL json_extract(site.config, '$.anonymize.anonymizeUsersXDaysAfterEndDate') DAY) < NOW()"),
+          // where project enddate is more then anonymizeUsersXDaysAfterEndDate days ago
+          Sequelize.literal("DATE_ADD(CAST(JSON_UNQUOTE(JSON_EXTRACT(project.config,'$.project.endDate')) as DATETIME), INTERVAL json_extract(project.config, '$.anonymize.anonymizeUsersXDaysAfterEndDate') DAY) < NOW()"),
           { config: { project: { projectHasEnded: true } } },
         ]
       }
     })
 }
 
-module.exports = exports = sitesWithIssues;
+module.exports = exports = projectsWithIssues;

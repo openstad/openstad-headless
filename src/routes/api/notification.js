@@ -20,7 +20,7 @@ router.route('/template')
       }
 
       const templateInstance = await db.NotificationTemplate
-        .authorizeData(data, 'create', req.user, null, req.site)
+        .authorizeData(data, 'create', req.user, null, req.project)
         .create(data);
 
       const result = await db.NotificationTemplate
@@ -50,7 +50,7 @@ router.route('/template')
         .findByPk(req.body.id);
 
       const templateInstance = await template
-        .authorizeData(data, 'update', req.user, null, req.site)
+        .authorizeData(data, 'update', req.user, null, req.project)
         .update(data);
 
       const result = await db.NotificationTemplate
@@ -102,7 +102,7 @@ router.route('/ruleset')
   .get(async (req, res, next) => {
     const query = {
       where: {
-        siteId: parseInt(req.params.siteId),
+        projectId: parseInt(req.params.projectId),
       }
     };
     if (req.query.label) {
@@ -125,13 +125,13 @@ router.route('/ruleset')
     try {
       const data = {
         notificationTemplateId: req.body.notificationTemplateId,
-        siteId: req.params.siteId,
+        projectId: req.params.projectId,
         active: req.body.active,
         label: req.body.label,
         body: req.body.body
       }
       const ruleSetInstance = await db.NotificationRuleSet
-        .authorizeData(data, 'create', req.user, null, req.site)
+        .authorizeData(data, 'create', req.user, null, req.project)
         .create(data);
 
       const result = await db.NotificationRuleSet
@@ -151,7 +151,7 @@ router.route('/ruleset')
     try {
       const data = {
         notificationTemplateId: req.body.notificationTemplateId,
-        siteId: req.params.siteId,
+        projectId: req.params.projectId,
         active: req.body.active,
         label: req.body.label,
         body: req.body.body
@@ -161,7 +161,7 @@ router.route('/ruleset')
         .findByPk(req.body.id);
 
       const ruleSetInstance = await ruleSet
-        .authorizeData(data, 'update', req.user, null, req.site)
+        .authorizeData(data, 'update', req.user, null, req.project)
         .update(data);
 
       const result = await db.NotificationRuleSet
@@ -207,7 +207,7 @@ router.route('/recipient')
       }
 
       const recipientInstance = await db.NotificationRecipient
-        .authorizeData(data, 'create', req.user, null, req.site)
+        .authorizeData(data, 'create', req.user, null, req.project)
         .create(data);
 
       const result = await db.NotificationRecipient
@@ -235,7 +235,7 @@ router.route('/recipient')
         .findByPk(req.body.id);
 
       const recipientInstance = await recipient
-        .authorizeData(data, 'update', req.user, null, req.site)
+        .authorizeData(data, 'update', req.user, null, req.project)
         .update(data);
 
       const result = await db.NotificationRecipient

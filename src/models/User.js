@@ -16,9 +16,9 @@ var emailBlackList = require('../../config/mail_blacklist')
 
 module.exports = function (db, sequelize, DataTypes) {
   var User = sequelize.define('user', {
-    siteId: {
+    projectId: {
       type: DataTypes.INTEGER,
-      defaultValue: config.siteId && typeof config.siteId == 'number' ? config.siteId : 0,
+      defaultValue: config.projectId && typeof config.projectId == 'number' ? config.projectId : 0,
     },
 
     idpUser: {
@@ -54,9 +54,9 @@ module.exports = function (db, sequelize, DataTypes) {
 				 * @param action (c)
 				 * @param user ()
 				 * @param self (user model)
-				 * @param site (site on which model is queried)
+				 * @param project (project on which model is queried)
 				 */
-				authorizeData: function(actionUserRole, action, user, self, site) {
+				authorizeData: function(actionUserRole, action, user, self, project) {
 					if (!self) return;
 
 					const updateAllRoles = ['admin'];
@@ -132,7 +132,7 @@ module.exports = function (db, sequelize, DataTypes) {
         updateableBy: ['moderator', 'owner'],
       },
       set: function (value) {
-        if (this.site && this.site.config && this.site.config.users && this.site.config.users.allowUseOfNicknames) {
+        if (this.project && this.project.config && this.project.config.users && this.project.config.users.allowUseOfNicknames) {
           this.setDataValue('nickName', sanitize.noTags(value));
         } else {
           value = this.getDataValue('nickName');
@@ -240,8 +240,8 @@ module.exports = function (db, sequelize, DataTypes) {
       allowNull: true,
       defaultValue: null,
       get: function () {
-        // this should use site.config.allowUseOfNicknames but that implies loading the site for every time a user is shown which would be too slow
-        // therefore createing nicknames is dependendt on site.config.allowUseOfNicknames; once you have created a nickName it will be shown here no matter what
+        // this should use project.config.allowUseOfNicknames but that implies loading the project for every time a user is shown which would be too slow
+        // therefore createing nicknames is dependendt on project.config.allowUseOfNicknames; once you have created a nickName it will be shown here no matter what
         let nickName = this.getDataValue('nickName');
         let name = this.name;
         return nickName || name || undefined;
@@ -336,9 +336,9 @@ module.exports = function (db, sequelize, DataTypes) {
   User.scopes = function scopes() {
 
     return {
-      includeSite: {
+      includeProject: {
         include: [{
-          model: db.Site,
+          model: db.Project,
         }]
       },
 
@@ -419,7 +419,7 @@ module.exports = function (db, sequelize, DataTypes) {
     this.hasMany(models.Idea);
     this.hasMany(models.Vote);
     this.hasMany(models.Argument);
-    this.belongsTo(models.Site);
+    this.belongsTo(models.Project);
   }
 
   User.prototype.authenticate = function (password) {
@@ -491,20 +491,20 @@ module.exports = function (db, sequelize, DataTypes) {
     
     try {
 
-      if (self.siteId) {
-        self.site = await db.Site.findByPk(self.siteId);
+      if (self.projectId) {
+        self.project = await db.Project.findByPk(self.projectId);
       }
 
-      if (self.site) {
+      if (self.project) {
 
         // wat gaat er allemaal gewijzigd worden
-        result.site = self.site;
+        result.project = self.project;
         result.ideas = await self.getIdeas();
         result.articles = await self.getArticles();
         result.arguments = await self.getArguments();
 
         // TODO: for now the check is on active vote but this is wrong; a new 'vote had ended' param should be created
-        let voteIsActive = self.site.isVoteActive();
+        let voteIsActive = self.project.isVoteActive();
         if (voteIsActive) {
           result.votes = await self.getVotes();
         } else {
@@ -532,9 +532,9 @@ module.exports = function (db, sequelize, DataTypes) {
       // anonymize
 
       let extraData = {};
-      if (!self.site) throw Error('Site not found');
-      if (self.site.config.users && self.site.config.users.extraData) {
-        Object.keys(self.site.config.users.extraData).map( key => extraData[key] = null );
+      if (!self.project) throw Error('Project not found');
+      if (self.project.config.users && self.project.config.users.extraData) {
+        Object.keys(self.project.config.users.extraData).map( key => extraData[key] = null );
       }
       
       await self.update({
@@ -608,7 +608,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
       let valid = userHasRole(user, self.auth && self.auth.updateableBy, self.id);
 
-      // extra: isOwner through user on different site
+      // extra: isOwner through user on different project
       valid = valid || ( self.idpUser.identifier && self.idpUser.identifier == user.idpUser.identifier );
 
       // extra: geen acties op users met meer rechten dan je zelf hebt
@@ -643,13 +643,13 @@ module.exports = function (db, sequelize, DataTypes) {
 
     return new Promise((resolve, reject) => {
 
-      if (instance.siteId && !instance.config) {
-        db.Site.findByPk(instance.siteId)
-          .then(site => {
-            instance.config = merge.recursive(true, config, site.config);
-            return site;
+      if (instance.projectId && !instance.config) {
+        db.Project.findByPk(instance.projectId)
+          .then(project => {
+            instance.config = merge.recursive(true, config, project.config);
+            return project;
           })
-          .then(site => {
+          .then(project => {
             return resolve();
           }).catch(err => {
             throw err;

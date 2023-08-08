@@ -5,12 +5,12 @@ const MailConfig = require('./mail-config');
 
 const transport = config.get('mail.transport');
 
-exports.getTransporter = (site) => {
+exports.getTransporter = (project) => {
 
-  let siteConfig = new MailConfig(site)
+  let projectConfig = new MailConfig(project)
 
-  const method = siteConfig.getMailMethod();
-  const transporterConfig = siteConfig.getMailTransport();
+  const method = projectConfig.getMailMethod();
+  const transporterConfig = projectConfig.getMailTransport();
   
   let transporter;
   

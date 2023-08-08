@@ -37,8 +37,8 @@ router.route('/total')
       query += `AND arguments.sentiment = ? `;
       bindvars.push(sentiment);
     }
-    query += "WHERE ideas.deletedAt IS NULL AND ideas.siteId = ? ";
-    bindvars.push(req.params.siteId);
+    query += "WHERE ideas.deletedAt IS NULL AND ideas.projectId = ? ";
+    bindvars.push(req.params.projectId);
     if (ideaId) {
       query += "AND ideas.id = ? ";
       bindvars.push(ideaId);

@@ -4,7 +4,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 
   let ChoicesGuide = sequelize.define('choicesGuide', {
 
-    siteId: {
+    projectId: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
@@ -94,7 +94,7 @@ module.exports = function( db, sequelize, DataTypes ) {
   });
 
   ChoicesGuide.associate = function( models ) {
-    this.belongsTo(models.Site);
+    this.belongsTo(models.Project);
     this.hasMany(models.ChoicesGuideQuestionGroup);
     this.hasMany(models.ChoicesGuideChoice);
   };
@@ -103,17 +103,17 @@ module.exports = function( db, sequelize, DataTypes ) {
 
     return {
 
-      forSiteId: function( siteId ) {
+      forProjectId: function( projectId ) {
         return {
           where: {
-            siteId: siteId,
+            projectId: projectId,
           }
         };
       },
 
-      includeSite: {
+      includeProject: {
         include: [{
-          model: db.Site,
+          model: db.Project,
         }]
       },
 

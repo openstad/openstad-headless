@@ -43,7 +43,7 @@ router.route('/')
 	.post(function(req, res, next) {
 		const data = {
 			submittedData     : req.body.submittedData,
-			siteId      			: req.params.siteId,
+			projectId      			: req.params.projectId,
 			userId      			: req.user.id,
 		};
 
@@ -66,14 +66,14 @@ router.route('/')
 			var submissionId = parseInt(req.params.submissionId);
 
 			req.scope = ['defaultScope'];
-			req.scope.push({method: ['forSiteId', req.params.siteId]});
+			req.scope.push({method: ['forProjectId', req.params.projectId]});
 
-		//	let where = { siteId }
+		//	let where = { projectId }
 
 			db.Submission
 				.scope(...req.scope)
 				.findOne({
-				    where: {id: submissionId, siteId: req.params.siteId}
+				    where: {id: submissionId, projectId: req.params.projectId}
 				})
 				.then(found => {
 					if ( !found ) throw new Error('Submission not found');

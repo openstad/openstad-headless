@@ -30,10 +30,10 @@ const ensureProtocol = (url) => {
 
 module.exports = co.wrap(function*( db ) {
 
-	log('--> Creating sites');
+	log('--> Creating projects');
 
-	yield sites.map(function( siteData ) {
-		return db.Site.create(siteData);
+	yield projects.map(function( projectData ) {
+		return db.Project.create(projectData);
 	});
 
 	log('Creating users');
@@ -69,8 +69,8 @@ const allowedDomains = process.env.NODE_ENV === 'development' ? ['localhost'] : 
 allowedDomains.push(removeProtocol(process.env.ADMIN_URL));
 allowedDomains.push(removeWww(removeProtocol(process.env.FRONTEND_URL)));
 
-var sites = [
-	{id: 1, name: 'site-one', domain: removeProtocol(process.env.ADMIN_URL), title: 'OpenStad Admin ', config: {
+var projects = [
+	{id: 1, name: 'project-one', domain: removeProtocol(process.env.ADMIN_URL), title: 'OpenStad Admin ', config: {
 		oauth: {
 			default: {
 				'auth-server-url': process.env.AUTH_URL,
@@ -81,7 +81,7 @@ var sites = [
 		},
 		allowedDomains:allowedDomains
 	}},
-	{id: 2, name: 'site-one', domain: removeWww(removeProtocol(process.env.FRONTEND_URL)), title: 'OpenStad Default Site', config: {
+	{id: 2, name: 'project-one', domain: removeWww(removeProtocol(process.env.FRONTEND_URL)), title: 'OpenStad Default Project', config: {
     cms: {
         "url": ensureProtocol(process.env.FRONTEND_URL),
         "dbName": process.env.DEFAULT_DB ? process.env.DEFAULT_DB : "default_db",
@@ -99,15 +99,15 @@ var sites = [
 	}},
 ];
 
-console.log(sites);
-console.log(sites[0].config.auth);
-console.log(sites[1].config.auth);
+console.log(projects);
+console.log(projects[0].config.auth);
+console.log(projects[1].config.auth);
 
 var users = [
-	//fixed user for SITE and Admin to get admin right
+	//fixed user for PROJECT and Admin to get admin right
 	{
     id: process.env.AUTH_FIXED_USER_ID ? process.env.AUTH_FIXED_USER_ID : 2,
-    siteId: 1,
+    projectId: 1,
     complete: true,
     role: 'admin',
     email: 'admin@openstad.org',
@@ -120,7 +120,7 @@ var users = [
 	ideas : [
 		{
 			id               : 2,
-			siteId           : 2,
+			projectId        : 2,
 			startDate        : moment(today).subtract(1, 'days'),
 			title            : 'Metro naar stadsdeel West',
 			summary          : 'Een nieuwe metrobuis naar het Bos en Lommerplein om sneller thuis te zijn.',

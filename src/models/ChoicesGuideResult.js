@@ -71,10 +71,10 @@ module.exports = function( db, sequelize, DataTypes ) {
         return new Promise((resolve, reject) => {
 
           if (instance.choicesGuideId) {
-            db.ChoicesGuide.scope('includeSite').findByPk(instance.choicesGuideId)
+            db.ChoicesGuide.scope('includeProject').findByPk(instance.choicesGuideId)
               .then( (choicesGuide) => {
                 if (!choicesGuide) throw Error('ChoicesGuide niet gevonden');
-                instance.config = merge.recursive(true, config, choicesGuide.site.config);
+                instance.config = merge.recursive(true, config, choicesGuide.project.config);
                 return choicesGuide;
               })
               .then( (choicesGuide) => {
@@ -102,10 +102,10 @@ module.exports = function( db, sequelize, DataTypes ) {
 
     return {
 
-      forSiteId: function( siteId ) {
+      forProjectId: function( projectId ) {
         return {
           where: {
-            choicesGuideId: [sequelize.literal(`select id FROM choicesGuides WHERE siteId = ${siteId}`)]
+            choicesGuideId: [sequelize.literal(`select id FROM choicesGuides WHERE projectId = ${projectId}`)]
           }
         };
       },

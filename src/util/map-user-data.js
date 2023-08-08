@@ -20,7 +20,7 @@ module.exports = function mapUserData({ map = {}, user = {} }) {
       identifier: mapKey('identifier'),
       accesstoken: user.accessToken,
     },
-    // siteId: user.siteId,
+    // projectId: user.projectId,
 
     lastLogin: new Date(),
     isNotifiedAboutAnonymization: null,

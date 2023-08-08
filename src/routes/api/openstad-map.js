@@ -24,9 +24,9 @@ router.route('/idea-marker')
 
 		db.Idea
 			.scope(...req.scope)
-			.findAll({ where: { siteId: req.params.siteId } })
+			.findAll({ where: { projectId: req.params.projectId } })
 			.then( found => {
-				let maxMarkers = ( req.site && req.site.config.openStadMap && req.site.config.openStadMap.maxMarkers ) || ( config.openStadMap && config.openStadMap.maxMarkers ) || 20;
+				let maxMarkers = ( req.project && req.project.config.openStadMap && req.project.config.openStadMap.maxMarkers ) || ( config.openStadMap && config.openStadMap.maxMarkers ) || 20;
 				if (found.length > maxMarkers) found = found.slice(0, maxMarkers)
 				return found.map( entry => createMarker(entry) );
 			})
@@ -46,7 +46,7 @@ router.route('/idea-marker/:ideaId(\\d+)')
 		db.Idea
 			.scope(...req.scope)
 			.findOne({
-				where: { id: ideaId, siteId: req.params.siteId }
+				where: { id: ideaId, projectId: req.params.projectId }
 			})
 			.then(found => {
 				if ( !found ) throw new Error('Idea not found');
@@ -67,16 +67,16 @@ router.route('/idea-marker/:ideaId(\\d+)')
 
 router.route('/polygon')
 
-// the polygon as defined for this site
+// the polygon as defined for this project
 // ------------------------------------
 	.get(auth.can('Idea', 'list'))
 	.get(function(req, res, next) {
 
-		// use from site config
-		let polygon = req.site && req.site.config.openStadMap && req.site.config.openStadMap.polygon;
+		// use from project config
+		let polygon = req.project && req.project.config.openStadMap && req.project.config.openStadMap.polygon;
 
 		// fallback to generic config
-		polygon = polygon || ( config.openStadMap && config.openStadMap.polygons && ( ( config.openStadMap.usePolygon && config.openStadMap.polygons[config.openStadMap.usePolygon] ) || ( config.siteId && config.openStadMap.polygons[config.siteId] ) ) );
+		polygon = polygon || ( config.openStadMap && config.openStadMap.polygons && ( ( config.openStadMap.usePolygon && config.openStadMap.polygons[config.openStadMap.usePolygon] ) || ( config.projectId && config.openStadMap.polygons[config.projectId] ) ) );
 
 		res.json(polygon || null);
 
