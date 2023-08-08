@@ -43,7 +43,7 @@ module.exports = {
         for (let i=0; i < endedButNotAnonymized.length; i++) {
           let project = endedButNotAnonymized[i];
           if (!notificationsToBeSent[ project.id ]) notificationsToBeSent[ project.id ] = { project, messages: [] };
-          notificationsToBeSent[ project.id ].messages.push(`Project ${ project.title } ${ project.url ? ' (' + project.url + ')' : '' }has ended but is not yet anonymized.`);
+          notificationsToBeSent[ project.id ].messages.push(`Project ${ project.title } (${ project.domain }) has ended but is not yet anonymized.`);
         }
 
         // send notifications

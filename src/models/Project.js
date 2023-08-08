@@ -21,6 +21,12 @@ module.exports = function (db, sequelize, DataTypes) {
       defaultValue: 'Nieuwe project',
     },
 
+    url: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      defaultValue: 'demo.openstad.nl',
+    },
+
     config: {
       type: DataTypes.JSON,
       allowNull: false,
