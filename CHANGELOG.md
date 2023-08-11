@@ -4,8 +4,14 @@
 * Change mongoDB S3 backup to read the database dump in chunks and upload it to the S3 bucket using a MultiPart upload setup.
 * Allow s3 backups to be disabled from the cronjobs, but instead be run through a different entrypoint (backup.js) to allow kubernetes cronjobs to be used.
 * Add input, textarea and multiple-choice question types to the choices guide
+* Add auth adapters and auth through third party IDPs - see /doc/auth.md
+* The API is now single source of truth for OpenStad users
+* But always through external login services; create OpenStad user route is removed
+* TODO: Move oauth services to adapters
 * Refactor Site to Project, remove Site.domain functionality, add Project.url
 * Remove refreshProjectConfigMw
+* Remove obsolete models and routes: AccessToken, BudegtVote and Log
+* And more cleanup of old and obsolte code
 
 ## 1.0.0
 * Anonymize site users 
