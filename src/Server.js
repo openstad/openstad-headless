@@ -70,7 +70,6 @@ module.exports  = {
 
 	_initStatics: function() {
 
-
 		var headerOptions = {
 			setHeaders: function( res ) {
 				res.set({
@@ -79,9 +78,6 @@ module.exports  = {
 			}
 		};
 
-    this.app.use(express.static('public'));
-
-	//	this.app.use('/js',  express.static('js', headerOptions));
 	},
 	_initBasicMiddleware: function() {
 		var bodyParser         = require('body-parser');
