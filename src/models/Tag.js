@@ -63,8 +63,8 @@ module.exports = function( db, sequelize, DataTypes ) {
 	}
 
 	Tag.associate = function( models ) {
-		this.belongsToMany(models.Idea, { through: 'ideaTags',constraints: false});
-		this.belongsTo(models.Project);
+		this.belongsToMany(models.Idea, { through: 'idea_tags', constraints: false });
+		this.belongsTo(models.Project, { onDelete: 'CASCADE' });
 	}
 
   // dit is hoe het momenteel werkt; ik denk niet dat dat de bedoeling is, maar ik volg nu

@@ -3,7 +3,7 @@ const merge                 = require('merge');
 const getExtraDataConfig = require('../lib/sequelize-authorization/lib/getExtraDataConfig');
 
 module.exports = function( db, sequelize, DataTypes ) {
-  let ChoicesGuideResult = sequelize.define('choicesGuideResult', {
+  let ChoicesGuideResult = sequelize.define('choices_guide_result', {
 
     choicesGuideId: {
       type: DataTypes.INTEGER,
@@ -131,8 +131,8 @@ module.exports = function( db, sequelize, DataTypes ) {
   };
 
   ChoicesGuideResult.associate = function( models ) {
-    this.belongsTo(models.ChoicesGuide);
-    this.belongsTo(models.User);
+    this.belongsTo(models.ChoicesGuide, { onDelete: 'CASCADE' });
+    this.belongsTo(models.User, { onDelete: 'CASCADE' });
   };
 
   // dit is hoe het momenteel werkt; ik denk niet dat dat de bedoeling is, maar ik volg nu

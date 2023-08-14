@@ -931,15 +931,14 @@ module.exports = function (db, sequelize, DataTypes) {
   }
 
   Idea.associate = function (models) {
-    this.belongsTo(models.User);
-    this.hasMany(models.Vote);
-    this.hasMany(models.Argument, {as: 'argumentsAgainst'});
-    // this.hasOne(models.Vote, {as: 'userVote', });
-    this.hasMany(models.Argument, {as: 'argumentsFor'});
-    this.hasOne(models.Poll, {as: 'poll', foreignKey: 'ideaId', });
-    this.hasOne(models.Vote, {as: 'userVote', foreignKey: 'ideaId'});
-    this.belongsTo(models.Project);
-    this.belongsToMany(models.Tag, {through: 'ideaTags', constraints: false});
+    this.belongsTo(models.User, { onDelete: 'CASCADE' });
+    this.belongsTo(models.Project, { onDelete: 'CASCADE' });
+    this.hasMany(models.Vote, { onDelete: 'CASCADE' });
+    this.hasMany(models.Argument, {as: 'argumentsAgainst', onDelete: 'CASCADE' });
+    this.hasMany(models.Argument, {as: 'argumentsFor', onDelete: 'CASCADE'});
+    this.hasOne(models.Poll, {as: 'poll', foreignKey: 'ideaId', onDelete: 'CASCADE' });
+    this.hasOne(models.Vote, {as: 'userVote', foreignKey: 'ideaId', onDelete: 'CASCADE' });
+    this.belongsToMany(models.Tag, {through: 'ideaTags', constraints: false, onDelete: 'CASCADE' });
   }
 
   Idea.getRunning = function (sort, extraScopes) {

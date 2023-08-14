@@ -3,7 +3,7 @@ const merge = require('merge');
 const sanitize = require('../util/sanitize');
 
 module.exports = function( db, sequelize, DataTypes ) {
-  let ChoicesGuideQuestion = sequelize.define('choicesGuideQuestion', {
+  let ChoicesGuideQuestion = sequelize.define('choices_guide_question', {
 
     questionGroupId: {
       type: DataTypes.INTEGER,
@@ -210,7 +210,7 @@ module.exports = function( db, sequelize, DataTypes ) {
   };
 
   ChoicesGuideQuestion.associate = function( models ) {
-    this.belongsTo(models.ChoicesGuideQuestionGroup, { foreignKey: 'questionGroupId' });
+    this.belongsTo(models.ChoicesGuideQuestionGroup, { foreignKey: 'questionGroupId', onDelete: 'CASCADE' });
   };
 
   // dit is hoe het momenteel werkt; ik denk niet dat dat de bedoeling is, maar ik volg nu

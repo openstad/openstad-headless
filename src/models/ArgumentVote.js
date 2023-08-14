@@ -43,8 +43,8 @@ module.exports = function( db, sequelize, DataTypes ) {
 	});
 
 	ArgumentVote.associate = function( models ) {
-				ArgumentVote.belongsTo(models.Argument);
-				ArgumentVote.belongsTo(models.User);
+				ArgumentVote.belongsTo(models.Argument, { onDelete: 'CASCADE' });
+				ArgumentVote.belongsTo(models.User, { onDelete: 'CASCADE' });
 			}
 
 	ArgumentVote.anonymizeOldVotes = function() {

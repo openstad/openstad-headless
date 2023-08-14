@@ -194,10 +194,12 @@ module.exports = function( db, sequelize, DataTypes ) {
 	}
 
 	Poll.associate = function( models ) {
-		this.belongsTo(models.Idea);
-		this.belongsTo(models.User);
+		this.belongsTo(models.Idea, { onDelete: 'CASCADE' });
+		this.belongsTo(models.User, { onDelete: 'CASCADE' });
 		this.hasMany(models.PollVote, {
-			as: 'votes'
+			as: 'votes',
+      onDelete: 'CASCADE',
+      hooks: true,
 		});
 	}
 

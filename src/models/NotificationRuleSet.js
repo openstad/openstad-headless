@@ -52,7 +52,7 @@ module.exports = (db, sequelize, DataTypes) => {
   }, {});
 
   NotificationRuleSet.associate = function(models) {
-    NotificationRuleSet.belongsTo(models.NotificationTemplate);
+    NotificationRuleSet.belongsTo(models.NotificationTemplate, { onDelete: 'CASCADE' });
     NotificationRuleSet.hasMany(models.NotificationRecipient);
   };
 

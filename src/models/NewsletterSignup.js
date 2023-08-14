@@ -108,7 +108,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 	}
 
 	NewsletterSignup.associate = function( models ) {
-		this.belongsTo(models.Project);
+		this.belongsTo(models.Project, { onDelete: 'CASCADE' });
 	}
 
   // dit is hoe het momenteel werkt; ik denk niet dat dat de bedoeling is, maar ik volg nu

@@ -17,9 +17,7 @@ module.exports = function( db, sequelize, DataTypes ) {
         polygon = polygon ? polygon.map(polygon => {
           return [polygon.lat, polygon.lng];
         }) : [];
-
         const formattedPolygon = {"type": "Polygon", coordinates: [polygon]};
-
         this.setDataValue('polygon',formattedPolygon);
       },
       get: function () {
@@ -40,7 +38,6 @@ module.exports = function( db, sequelize, DataTypes ) {
   Area.associate = function( models ) {
     this.hasMany(models.Project);
   }
-
 
   Area.auth = Area.prototype.auth = {
     listableBy: 'all',

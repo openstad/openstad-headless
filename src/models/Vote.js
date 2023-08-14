@@ -49,8 +49,8 @@ module.exports = function( db, sequelize, DataTypes ) {
 	});
 
 	Vote.associate = function( models ) {
-		Vote.belongsTo(models.Idea);
-		Vote.belongsTo(models.User);
+		Vote.belongsTo(models.Idea, { onDelete: 'CASCADE' });
+		Vote.belongsTo(models.User, { onDelete: 'CASCADE' });
 	}
 
 	Vote.scopes = function scopes() {

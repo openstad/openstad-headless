@@ -18,7 +18,7 @@ module.exports = function (db, sequelize, DataTypes) {
   var User = sequelize.define('user', {
     projectId: {
       type: DataTypes.INTEGER,
-      defaultValue: config.projectId && typeof config.projectId == 'number' ? config.projectId : 0,
+      defaultValue: config.projectId && typeof config.projectId == 'number' ? config.projectId : null,
     },
 
     idpUser: {
@@ -279,7 +279,7 @@ module.exports = function (db, sequelize, DataTypes) {
         viewableBy: ['moderator', 'owner'],
       },
       allowNull: false,
-      defaultValue: sequelize.NOW,
+      defaultValue: sequelize.fn('now'), // sequelize.NOW does not work
     },
 
     isNotifiedAboutAnonymization: {
@@ -415,11 +415,11 @@ module.exports = function (db, sequelize, DataTypes) {
   }
 
   User.associate = function (models) {
-    this.hasMany(models.Article);
-    this.hasMany(models.Idea);
-    this.hasMany(models.Vote);
-    this.hasMany(models.Argument);
-    this.belongsTo(models.Project);
+    this.hasMany(models.Article, { onDelete: 'CASCADE', hooks: true });
+    this.hasMany(models.Idea, { onDelete: 'CASCADE', hooks: true });
+    this.hasMany(models.Vote, { onDelete: 'CASCADE', hooks: true });
+    this.hasMany(models.Argument, { onDelete: 'CASCADE', hooks: true });
+    this.belongsTo(models.Project, { onDelete: 'CASCADE' });
   }
 
   User.prototype.authenticate = function (password) {

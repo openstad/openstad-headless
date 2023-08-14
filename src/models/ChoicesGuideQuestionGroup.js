@@ -3,7 +3,7 @@ const merge = require('merge');
 const sanitize = require('../util/sanitize');
 
 module.exports = function( db, sequelize, DataTypes ) {
-  let ChoicesGuideQuestionGroup = sequelize.define('choicesGuideQuestionGroup', {
+  let ChoicesGuideQuestionGroup = sequelize.define('choices_guide_question_group', {
 
     choicesGuideId: {
       type: DataTypes.INTEGER,
@@ -111,9 +111,9 @@ module.exports = function( db, sequelize, DataTypes ) {
   });
 
   ChoicesGuideQuestionGroup.associate = function( models ) {
-    this.belongsTo(models.ChoicesGuide);
-    this.hasMany(models.ChoicesGuideQuestion, { foreignKey: 'questionGroupId' });
-    this.hasMany(models.ChoicesGuideChoice, { foreignKey: 'questionGroupId' });
+    this.belongsTo(models.ChoicesGuide, { onDelete: 'CASCADE' });
+    this.hasMany(models.ChoicesGuideQuestion, { foreignKey: 'questionGroupId', onDelete: 'CASCADE', hooks: true });
+    this.hasMany(models.ChoicesGuideChoice, { foreignKey: 'questionGroupId', onDelete: 'CASCADE', hooks: true });
   };
 
   ChoicesGuideQuestionGroup.scopes = function scopes() {

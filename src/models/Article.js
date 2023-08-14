@@ -446,8 +446,8 @@ module.exports = function( db, sequelize, DataTypes ) {
 	}
 
 	Article.associate = function( models ) {
-		this.belongsTo(models.User);
-		this.belongsTo(models.Project);
+		this.belongsTo(models.User, { onDelete: 'CASCADE' });
+		this.belongsTo(models.Project, { onDelete: 'CASCADE' });
 	}
 
 	Article.getRunning = function( sort, extraScopes ) {

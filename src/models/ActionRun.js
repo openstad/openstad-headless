@@ -1,5 +1,5 @@
 module.exports = function( db, sequelize, DataTypes ) {
-    var ActionRun = sequelize.define('actionRun', {
+    var ActionRun = sequelize.define('action_run', {
         status: {
             type         : DataTypes.ENUM('running', 'finished', 'errored'),
             defaultValue : 'running',
@@ -13,7 +13,7 @@ module.exports = function( db, sequelize, DataTypes ) {
     });
 
     ActionRun.associate = function( models ) {
-        this.belongsTo(models.User);
+        this.belongsTo(models.User, { onDelete: 'CASCADE' });
     }
 
     ActionRun.auth = ActionRun.prototype.auth = {

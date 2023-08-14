@@ -23,8 +23,8 @@ module.exports = function (db, sequelize, DataTypes) {
 
     url: {
       type: DataTypes.STRING(255),
-      allowNull: false,
-      defaultValue: 'demo.openstad.nl',
+      allowNull: null,
+      defaultValue: null,
     },
 
     config: {
@@ -154,9 +154,10 @@ module.exports = function (db, sequelize, DataTypes) {
   }
 
   Project.associate = function (models) {
-    this.hasMany(models.User);
-    this.hasMany(models.Idea);
-    this.belongsTo(models.Area);
+    this.hasMany(models.User, { onDelete: 'CASCADE', hooks: true });
+    this.hasMany(models.Idea, { onDelete: 'CASCADE', hooks: true });
+    this.hasMany(models.Tag, { onDelete: 'CASCADE', hooks: true });
+    this.belongsTo(models.Area, { onDelete: 'CASCADE' });
   }
 
   Project.configOptions = function () {

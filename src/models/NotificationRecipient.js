@@ -21,7 +21,7 @@ module.exports = (db, sequelize, DataTypes) => {
   }, {});
 
   NotificationRecipient.associate = function(models) {
-    NotificationRecipient.belongsTo(models.NotificationRuleSet);
+    NotificationRecipient.belongsTo(models.NotificationRuleSet, { onDelete: 'CASCADE' });
   };
 
   NotificationRecipient.auth = NotificationRecipient.prototype.auth = {

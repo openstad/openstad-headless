@@ -2,7 +2,7 @@ const sanitize = require('../util/sanitize');
 
 module.exports = function( db, sequelize, DataTypes ) {
 
-  let ChoicesGuide = sequelize.define('choicesGuide', {
+  let ChoicesGuide = sequelize.define('choices_guide', {
 
     projectId: {
       type: DataTypes.INTEGER,
@@ -94,9 +94,9 @@ module.exports = function( db, sequelize, DataTypes ) {
   });
 
   ChoicesGuide.associate = function( models ) {
-    this.belongsTo(models.Project);
-    this.hasMany(models.ChoicesGuideQuestionGroup);
-    this.hasMany(models.ChoicesGuideChoice);
+    this.belongsTo(models.Project, { onDelete: 'CASCADE' });
+    this.hasMany(models.ChoicesGuideQuestionGroup, { onDelete: 'CASCADE', hooks: true });
+    this.hasMany(models.ChoicesGuideChoice, { onDelete: 'CASCADE', hooks: true });
   };
 
   ChoicesGuide.scopes = function() {

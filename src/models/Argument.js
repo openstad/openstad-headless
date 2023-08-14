@@ -260,14 +260,18 @@ module.exports = function( db, sequelize, DataTypes ) {
 	}
 
 	Argument.associate = function( models ) {
-		this.belongsTo(models.Idea);
-		this.belongsTo(models.User);
+		this.belongsTo(models.Idea, { onDelete: 'CASCADE' }); // TODO: defined in the DB as NOT NULL, which is incorrect when parentId is used
+		this.belongsTo(models.User, { onDelete: 'CASCADE' });
 		this.hasMany(models.ArgumentVote, {
-			as: 'votes'
+			as: 'votes',
+      onDelete: 'CASCADE',
+      hooks: true,
 		});
-		this.hasMany(models.Argument, {
+		this.hasMany(models.Argument, { // TODO: cascade does not work here
 			foreignKey : 'parentId',
-			as         : 'reactions'
+			as         : 'reactions',
+      onDelete: 'CASCADE',
+      hooks: true,
 		});
 	}
 
