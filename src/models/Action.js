@@ -439,7 +439,7 @@ module.exports = function (db, sequelize, DataTypes) {
             })
         }
 
-        // for some models projectId is not referenced directly, for instance arguments,
+        // for some models projectId is not referenced directly, for instance comments,
         // so in this case current implementations in not sufficient
         if (!projectId) {
             throw new Error(`No projectId defined, action only allowed to run within a project scope for security and data bug prevention`)

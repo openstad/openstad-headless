@@ -86,7 +86,7 @@ module.exports = function (db, sequelize, DataTypes) {
               config.votes.isActive = false;
               config.ideas.canAddNewIdeas = false;
               config.articles.canAddNewArticles = false;
-              config.arguments.isClosed = true;
+              config.comments.isClosed = true;
               config.polls.canAddPolls = false;
               config.users.canCreateNewUsers = false;
             } else {
@@ -94,7 +94,7 @@ module.exports = function (db, sequelize, DataTypes) {
               // config.votes.isActive = true;
               // config.ideas.canAddNewIdeas = true;
               // config.articles.canAddNewArticles = true;
-              // config.arguments.isClosed = false;
+              // config.comments.isClosed = false;
               // config.polls.canAddPolls = true;
               // config.users.canCreateNewUsers = true;
             }
@@ -410,7 +410,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
             type: 'boolean',
             default: true,
           },
-          canEditAfterFirstLikeOrArg: {
+          canEditAfterFirstLikeOrComment: {
             type: 'boolean',
             default: false,
           },
@@ -535,7 +535,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
           },
         }
       },
-      arguments: {
+      comments: {
         type: 'object',
         subset: {
           new: {
@@ -725,7 +725,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
             type: 'int',
             default: 100,
           },
-          canEditAfterFirstLikeOrArg: {
+          canEditAfterFirstLikeOrComment: {
             type: 'boolean',
             default: false,
           },

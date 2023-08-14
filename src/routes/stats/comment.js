@@ -24,17 +24,17 @@ router
 
 router.route('/total')
 
-// count arguments
+// count comments
 // ---------------
 	.get(function(req, res, next) {
 
     let ideaId = req.query.ideaId;
     let sentiment = req.query.sentiment;
 
-    let query = `SELECT count(arguments.id) AS counted FROM ideas LEFT JOIN arguments ON arguments.ideaId = ideas.id `;
+    let query = `SELECT count(comments.id) AS counted FROM ideas LEFT JOIN comments ON comments.ideaId = ideas.id `;
     let bindvars = []
     if (sentiment) {
-      query += `AND arguments.sentiment = ? `;
+      query += `AND comments.sentiment = ? `;
       bindvars.push(sentiment);
     }
     query += "WHERE ideas.deletedAt IS NULL AND ideas.projectId = ? ";

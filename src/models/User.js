@@ -418,7 +418,7 @@ module.exports = function (db, sequelize, DataTypes) {
     this.hasMany(models.Article, { onDelete: 'CASCADE', hooks: true });
     this.hasMany(models.Idea, { onDelete: 'CASCADE', hooks: true });
     this.hasMany(models.Vote, { onDelete: 'CASCADE', hooks: true });
-    this.hasMany(models.Argument, { onDelete: 'CASCADE', hooks: true });
+    this.hasMany(models.Comment, { onDelete: 'CASCADE', hooks: true });
     this.belongsTo(models.Project, { onDelete: 'CASCADE' });
   }
 
@@ -501,7 +501,7 @@ module.exports = function (db, sequelize, DataTypes) {
         result.project = self.project;
         result.ideas = await self.getIdeas();
         result.articles = await self.getArticles();
-        result.arguments = await self.getArguments();
+        result.comments = await self.getComments();
 
         // TODO: for now the check is on active vote but this is wrong; a new 'vote had ended' param should be created
         let voteIsActive = self.project.isVoteActive();

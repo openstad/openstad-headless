@@ -1,9 +1,9 @@
 var config = require('config');
 
 module.exports = function( db, sequelize, DataTypes ) {
-	var ArgumentVote = sequelize.define('argument_vote', {
+	var CommentVote = sequelize.define('comment_vote', {
 
-		argumentId: {
+		commentId: {
 			type         : DataTypes.INTEGER,
 			allowNull    : false
 		},
@@ -36,22 +36,22 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 	}, {
 		indexes: [{
-			fields : ['argumentId', 'userId'],
+			fields : ['commentId', 'userId'],
 			unique : true
 		}],
 
 	});
 
-	ArgumentVote.associate = function( models ) {
-				ArgumentVote.belongsTo(models.Argument, { onDelete: 'CASCADE' });
-				ArgumentVote.belongsTo(models.User, { onDelete: 'CASCADE' });
+	CommentVote.associate = function( models ) {
+				CommentVote.belongsTo(models.Comment, { onDelete: 'CASCADE' });
+				CommentVote.belongsTo(models.User, { onDelete: 'CASCADE' });
 			}
 
-	ArgumentVote.anonymizeOldVotes = function() {
+	CommentVote.anonymizeOldVotes = function() {
 		var anonymizeThreshold = config.get('ideas.anonymizeThreshold');
 		return sequelize.query(`
 					UPDATE
-						argument_votes v
+						comment_votes v
 					SET
 						v.ip = NULL
 					WHERE
@@ -63,14 +63,14 @@ module.exports = function( db, sequelize, DataTypes ) {
 			});
 	}
 
-	ArgumentVote.prototype.toggle = function() {
+	CommentVote.prototype.toggle = function() {
 		var checked = this.get('checked');
 		return this.update({
 			checked: checked === null ? false : !checked
 		});
 	}
 
-	ArgumentVote.auth = ArgumentVote.prototype.auth = {
+	CommentVote.auth = CommentVote.prototype.auth = {
     listableBy: 'all',
     viewableBy: 'all',
     createableBy: 'member',
@@ -78,6 +78,6 @@ module.exports = function( db, sequelize, DataTypes ) {
     deleteableBy: ['editor','owner'],
   }
 
-	return ArgumentVote;
+	return CommentVote;
 
 };

@@ -245,40 +245,40 @@ module.exports = async function seed(config, db) {
       startDate: db.sequelize.fn('now'),
     });
 
-    console.log('    5 reactions');
+    console.log('    6 comments');
 
-    await db.Argument.create({
+    await db.Comment.create({
       userId: 2,
       ideaId: 1,
       description: 'In id vestibulum leo. Integer a justo quis est porttitor auctor. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Pellentesque porta laoreet scelerisque. Etiam laoreet ultrices est, vitae malesuada magna tempor eu. Donec tempor magna ut erat molestie, sed pulvinar elit pellentesque. Ut efficitur erat lorem, at volutpat dui aliquam eget. Suspendisse bibendum iaculis vehicula.',
     });
 
-    await db.Argument.create({
+    await db.Comment.create({
       userId: 2,
       ideaId: 1,
       parentId: 1,
       description: 'Sed egestas sapien nec tristique cursus. Nunc euismod tempus nisl, sit amet malesuada velit. Vivamus nec nulla eleifend, congue dolor quis, dignissim est. Maecenas rhoncus tellus et augue efficitur tincidunt. Ut euismod libero vel lorem semper ultrices. Ut sed fringilla urna, id tempus nisl. Aliquam erat volutpat. Cras ligula turpis, mollis at velit sit amet, cursus tincidunt ex. Phasellus vehicula convallis nisl nec luctus.',
     });
 
-    await db.Argument.create({
+    await db.Comment.create({
       userId: 2,
       ideaId: 1,
       description: 'Aliquam tincidunt enim et arcu dictum, mollis consequat ligula feugiat. Cras vel imperdiet eros. Nulla finibus sed metus a mattis. Aenean lobortis fringilla felis id congue. Cras lacus justo, imperdiet in tellus vitae, volutpat pretium dolor. Aenean id mi ipsum. Sed hendrerit lacus id nunc elementum luctus. Mauris risus quam, molestie vitae molestie ac, tempor at sapien.',
     });
 
-    await db.Argument.create({
+    await db.Comment.create({
       userId: 2,
       ideaId: 1,
       description: 'Curabitur vestibulum ex sem, in tempor mi ullamcorper vitae. Aenean dui magna, auctor in eleifend nec, elementum quis massa. Etiam quis eros sapien. Mauris ornare mi ut justo pretium, quis mollis sapien pulvinar. Maecenas feugiat sapien purus. Nunc sit amet nibh felis. Aenean porttitor nisi sit amet quam semper, in sagittis nibh lobortis. Maecenas egestas tristique lorem, eu dapibus tortor laoreet quis.',
     });
 
-    await db.Argument.create({
+    await db.Comment.create({
       userId: 2,
       ideaId: 1,
       description: 'Mauris a vestibulum justo, a mattis purus. Phasellus auctor eros vitae augue dictum aliquam. Pellentesque quis pulvinar est, sed congue metus. Morbi volutpat velit libero, ac condimentum justo egestas ac. Integer eu sollicitudin mauris. Curabitur sed condimentum magna. Etiam fringilla arcu ac purus porttitor fringilla. Integer ultrices, erat vitae pretium dictum, dolor diam pulvinar libero.',
     });
 
-    await db.Argument.create({
+    await db.Comment.create({
       userId: 2,
       ideaId: 1,
       description: 'Mauris a vestibulum justo, a mattis purus. Phasellus auctor eros vitae augue dictum aliquam. Pellentesque quis pulvinar est, sed congue metus. Morbi volutpat velit libero, ac condimentum justo egestas ac. Integer eu sollicitudin mauris. Curabitur sed condimentum magna. Etiam fringilla arcu ac purus porttitor fringilla. Integer ultrices, erat vitae pretium dictum, dolor diam pulvinar libero.',

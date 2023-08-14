@@ -11,7 +11,7 @@ var notifications = require('../notifications');
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 
 module.exports = function( db, sequelize, DataTypes ) {
-	var Argument = sequelize.define('argument', {
+	var Comment = sequelize.define('comment', {
 
 		parentId: {
 			type         : DataTypes.INTEGER,
@@ -54,14 +54,14 @@ module.exports = function( db, sequelize, DataTypes ) {
 				// }
 				textLength(value) {
 				 	let len = sanitize.summary(value.trim()).length;
-					let descriptionMinLength = ( this.config && this.config.arguments && this.config.arguments.descriptionMinLength || 30 )
-					let descriptionMaxLength = ( this.config && this.config.arguments && this.config.arguments.descriptionMaxLength || 500 )
+					let descriptionMinLength = ( this.config && this.config.comments && this.config.comments.descriptionMinLength || 30 )
+					let descriptionMaxLength = ( this.config && this.config.comments && this.config.comments.descriptionMaxLength || 500 )
 					if (len < descriptionMinLength || len > descriptionMaxLength)
 					throw new Error(`Beschrijving moet tussen ${descriptionMinLength} en ${descriptionMaxLength} tekens zijn`);
 				}
 			},
 			set          : function( text ) {
-				this.setDataValue('description', sanitize.argument(text));
+				this.setDataValue('description', sanitize.comment(text));
 			}
 		},
 
@@ -126,14 +126,14 @@ module.exports = function( db, sequelize, DataTypes ) {
 			afterCreate: function(instance, options) {
 				db.Idea.findByPk(instance.ideaId)
 					.then( idea => {
-						notifications.addToQueue({ type: 'argument', action: 'create', projectId: idea.projectId, instanceId: instance.id });
+						notifications.addToQueue({ type: 'comment', action: 'create', projectId: idea.projectId, instanceId: instance.id });
 					})
 			},
 
 			afterUpdate: function(instance, options) {
 				db.Idea.findByPk(instance.ideaId)
 					.then( idea => {
-						notifications.addToQueue({ type: 'argument', action: 'update', projectId: idea.projectId, instanceId: instance.id });
+						notifications.addToQueue({ type: 'comment', action: 'update', projectId: idea.projectId, instanceId: instance.id });
 					})
 			},
 
@@ -143,20 +143,20 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 	});
 
-	Argument.scopes = function scopes() {
+	Comment.scopes = function scopes() {
 		// Helper function used in `withVoteCount` scope.
 		function voteCount( tableName, opinion ) {
 			return [sequelize.literal(`
 				(SELECT
 					COUNT(*)
 				FROM
-					argument_votes av
+					comment_votes av
 				WHERE
 					av.deletedAt IS NULL AND (
 						av.checked IS NULL OR
 						av.checked  = 1
 					) AND
-					av.argumentId = ${tableName}.id AND
+					av.commentId = ${tableName}.id AND
 					av.opinion    = "${opinion}")
 			`), opinion];
 		}
@@ -178,11 +178,11 @@ module.exports = function( db, sequelize, DataTypes ) {
 				};
 			},
 
-			includeReactionsOnReactions: function( userId ) {
-				let argVoteThreshold = 5; // todo: configureerbaar
+			includeReactionsOnComments: function( userId ) {
+				let commentVoteThreshold = 5; // todo: configureerbaar
 				return {
 					include: [{
-						model      : db.Argument,
+						model      : db.Comment,
 						as         : 'reactions',
 						required   : false,
             // force attribs because the automatic list is incomplete
@@ -193,7 +193,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 					},
 					// HACK: Inelegant?
 					order: [
-//						sequelize.literal(`GREATEST(0, \`yes\` - ${argVoteThreshold}) DESC`),
+//						sequelize.literal(`GREATEST(0, \`yes\` - ${commentVoteThreshold}) DESC`),
 						sequelize.literal('parentId'),
 						sequelize.literal('createdAt')
 					]
@@ -227,13 +227,13 @@ module.exports = function( db, sequelize, DataTypes ) {
 							(SELECT
 								COUNT(*)
 							FROM
-								argument_votes av
+								comment_votes av
 							WHERE
 								av.deletedAt IS NULL AND (
 									av.checked IS NULL OR
 									av.checked  = 1
 								) AND
-								av.argumentId = ${tableName}.id AND
+								av.commentId = ${tableName}.id AND
 								av.userId     = ${userId})
 						`), 'hasUserVoted']
 					])
@@ -250,7 +250,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 			withReactions: {
 				include: [{
-					model      : db.Argument,
+					model      : db.Comment,
 					as         : 'reactions',
 					required   : false
 				}]
@@ -259,15 +259,15 @@ module.exports = function( db, sequelize, DataTypes ) {
 		}
 	}
 
-	Argument.associate = function( models ) {
+	Comment.associate = function( models ) {
 		this.belongsTo(models.Idea, { onDelete: 'CASCADE' }); // TODO: defined in the DB as NOT NULL, which is incorrect when parentId is used
 		this.belongsTo(models.User, { onDelete: 'CASCADE' });
-		this.hasMany(models.ArgumentVote, {
+		this.hasMany(models.CommentVote, {
 			as: 'votes',
       onDelete: 'CASCADE',
       hooks: true,
 		});
-		this.hasMany(models.Argument, { // TODO: cascade does not work here
+		this.hasMany(models.Comment, { // TODO: cascade does not work here
 			foreignKey : 'parentId',
 			as         : 'reactions',
       onDelete: 'CASCADE',
@@ -275,23 +275,23 @@ module.exports = function( db, sequelize, DataTypes ) {
 		});
 	}
 
-	Argument.prototype.addUserVote = function( user, opinion, ip ) {
+	Comment.prototype.addUserVote = function( user, opinion, ip ) {
 		var data = {
-			argumentId : this.id,
+			commentId : this.id,
 			userId     : user.id,
 			opinion    : opinion,
 			ip         : ip
 		};
 
 		// See `Idea.addUserVote` for an explanation of the logic below.
-		return db.ArgumentVote.findOne({where: data})
+		return db.CommentVote.findOne({where: data})
 			.then(function( vote ) {
 				if( vote ) {
 					return vote.destroy();
 				} else {
 					// HACK: See `Idea.addUserVote`.
 					data.deletedAt = null;
-					return db.ArgumentVote.upsert(data);
+					return db.CommentVote.upsert(data);
 				}
 			})
 			.then(function( result ) {
@@ -299,7 +299,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 			});
 	}
 
-	Argument.auth = Argument.prototype.auth = {
+	Comment.auth = Comment.prototype.auth = {
     listableBy: 'all',
     viewableBy: 'all',
     createableBy: 'member',
@@ -331,6 +331,6 @@ module.exports = function( db, sequelize, DataTypes ) {
     }
   }
 
-	return Argument;
+	return Comment;
 
 }

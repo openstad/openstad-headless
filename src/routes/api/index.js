@@ -18,8 +18,8 @@ router.use(filtering);
 // projects
 router.use( '/project', require('./project') );
 
-// arguments
-router.use( '/project/:projectId(\\d+)(/idea/:ideaId(\\d+))?/argument', require('./argument') );
+// comments
+router.use( '/project/:projectId(\\d+)(/idea/:ideaId(\\d+))?/comment', require('./comment') );
 
 // ideas
 router.use( '/project/:projectId(\\d+)/idea', require('./idea') );

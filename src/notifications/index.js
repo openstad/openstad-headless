@@ -30,8 +30,8 @@ Notifications.processQueue = function(type) {
       if (self.queue[type][projectId] && self.queue[type][projectId].length) {
 
         switch(type) {
-          case 'argument':
-            self.sendNewContentMessage({projectId, type: 'argument', action: 'create', content: self.queue[type][projectId] });
+          case 'comment':
+            self.sendNewContentMessage({projectId, type: 'comment', action: 'create', content: self.queue[type][projectId] });
             break;
 
           case 'idea':
@@ -74,7 +74,7 @@ Notifications.sendNewContentMessage = function({ projectId, type, action, conten
 
       let data = {};
 
-      data.subject = ( type == 'argument' ? 'Nieuwe argumenten geplaatst' : ( action == 'create' ? 'Nieuwe inzending geplaatst' : 'Bestaande inzending bewerkt' ) );
+      data.subject = ( type == 'comment' ? 'Nieuwe comments geplaatst' : ( action == 'create' ? 'Nieuwe inzending geplaatst' : 'Bestaande inzending bewerkt' ) );
       data.PROJECTNAME = ( project && project.title ) || myConfig.projectName;
       data.subject += ' op ' + data.PROJECTNAME;
 

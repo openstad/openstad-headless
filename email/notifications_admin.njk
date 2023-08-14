@@ -186,23 +186,23 @@
 						{% endfor %}
 					{% endif %}
 
-					{% if data.argument %}
-						{% for arg in data.argument %}
+					{% if data.comment %}
+						{% for comm in data.comment %}
 							<table cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="color: #000; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; width:100%; border: solid 3px #f3f3f4; background-color: #f3f3f4;">
 								<tr>
 									<td>
 
 										<div style="padding: 15px;">
 
-											<strong>{{arg.user.displayName}} | {{arg.createDateHumanized}}</strong><br/><br/>
+											<strong>{{comm.user.displayName}} | {{comm.createDateHumanized}}</strong><br/><br/>
 
-											{% if arg.sentiment == 'for' %}
+											{% if comm.sentiment == 'for' %}
 												<strong>Ik ben voor, omdat:</strong><br/><br/>
 											{% endif %}
-											{% if arg.sentiment == 'against' %}
+											{% if comm.sentiment == 'against' %}
 												<strong>Ik ben tegen, omdat:</strong><br/><br/>
 											{% endif %}
-											{{arg.description | nl2br | safe}}
+											{{comm.description | nl2br | safe}}
 										</div>
 
 									</td>
@@ -210,7 +210,7 @@
 								<tr>
 									<td style="background-color: white;">
 										<div style="padding: 6px 15px; font-size: 12px;;">
-											<strong>Inzending:</strong> <a href="{{URL}}/plan/{{arg.ideaId}}" target="_blank" style="color: #EC0000">{{arg.idea.title}}</a>
+											<strong>Inzending:</strong> <a href="{{URL}}/plan/{{comm.ideaId}}" target="_blank" style="color: #EC0000">{{comm.idea.title}}</a>
 										</div>
 									</td>
 								</tr>

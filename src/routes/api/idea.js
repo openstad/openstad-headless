@@ -62,12 +62,12 @@ router
       req.scope.push('selectRunning');
     }
 
-    if (req.query.includeArguments) {
-      req.scope.push({ method: ['includeArguments', req.user.id] });
+    if (req.query.includeComments) {
+      req.scope.push({ method: ['includeComments', req.user.id] });
     }
 
-    if (req.query.includeArgsCount) {
-      req.scope.push('includeArgsCount');
+    if (req.query.includeCommentsCount) {
+      req.scope.push('includeCommentsCount');
     }
 
     if (req.query.includeTags) {

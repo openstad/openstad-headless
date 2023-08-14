@@ -12,25 +12,25 @@ const notifications = require('../notifications');
 
 const merge = require('merge');
 
-const argVoteThreshold = config.ideas && config.ideas.argumentVoteThreshold;
+const commentVoteThreshold = config.ideas && config.ideas.commentVoteThreshold;
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 const roles = require('../lib/sequelize-authorization/lib/roles');
 const getExtraDataConfig = require('../lib/sequelize-authorization/lib/getExtraDataConfig');
 const htmlToText = require('html-to-text');
 
-function hideEmailsForNormalUsers(args) {
-  return args.map((argument) => {
-    delete argument.user.email;
+function hideEmailsForNormalUsers(comments) {
+  return comments.map((comment) => {
+    delete comment.user.email;
 
-    if (argument.reactions) {
-      argument.reactions = argument.reactions.map((reaction) => {
+    if (comment.reactions) {
+      comment.reactions = comment.reactions.map((reaction) => {
         delete reaction.user.email;
 
         return reaction;
       })
     }
 
-    return argument;
+    return comment;
   });
 }
 
@@ -310,7 +310,7 @@ module.exports = function (db, sequelize, DataTypes) {
       }
     },
 
-    argCount: {
+    commentCount: {
       type: DataTypes.VIRTUAL
     },
 
@@ -534,12 +534,12 @@ module.exports = function (db, sequelize, DataTypes) {
       }
     }
 
-    function argCount(fieldName) {
+    function commentCount(fieldName) {
       return [sequelize.literal(`
 				(SELECT
 					COUNT(*)
 				FROM
-					arguments a
+					comments a
 				WHERE
 					a.deletedAt IS NULL AND
 					a.ideaId = idea.id)
@@ -649,29 +649,29 @@ module.exports = function (db, sequelize, DataTypes) {
         )
       },
 
-      includeArguments: function (userId) {
+      includeComments: function (userId) {
         return {
           include: [{
-            model: db.Argument.scope(
+            model: db.Comment.scope(
               'defaultScope',
-              {method: ['withVoteCount', 'argumentsAgainst']},
-              {method: ['withUserVote', 'argumentsAgainst', userId]},
+              {method: ['withVoteCount', 'commentsAgainst']},
+              {method: ['withUserVote', 'commentsAgainst', userId]},
               'withReactions'
             ),
-            as: 'argumentsAgainst',
+            as: 'commentsAgainst',
             required: false,
             where: {
               sentiment: 'against',
               parentId: null
             }
           }, {
-            model: db.Argument.scope(
+            model: db.Comment.scope(
               'defaultScope',
-              {method: ['withVoteCount', 'argumentsFor']},
-              {method: ['withUserVote', 'argumentsFor', userId]},
+              {method: ['withVoteCount', 'commentsFor']},
+              {method: ['withUserVote', 'commentsFor', userId]},
               'withReactions'
             ),
-            as: 'argumentsFor',
+            as: 'commentsFor',
             required: false,
             where: {
               sentiment: 'for',
@@ -680,12 +680,12 @@ module.exports = function (db, sequelize, DataTypes) {
           }],
           // HACK: Inelegant?
           order: [
-            sequelize.literal(`GREATEST(0, \`argumentsAgainst.yes\` - ${argVoteThreshold}) DESC`),
-            sequelize.literal(`GREATEST(0, \`argumentsFor.yes\` - ${argVoteThreshold}) DESC`),
-            sequelize.literal('argumentsAgainst.parentId'),
-            sequelize.literal('argumentsFor.parentId'),
-            sequelize.literal('argumentsAgainst.createdAt'),
-            sequelize.literal('argumentsFor.createdAt')
+            sequelize.literal(`GREATEST(0, \`commentsAgainst.yes\` - ${commentVoteThreshold}) DESC`),
+            sequelize.literal(`GREATEST(0, \`commentsFor.yes\` - ${commentVoteThreshold}) DESC`),
+            sequelize.literal('commentsAgainst.parentId'),
+            sequelize.literal('commentsFor.parentId'),
+            sequelize.literal('commentsAgainst.createdAt'),
+            sequelize.literal('commentsFor.createdAt')
           ]
         };
       },
@@ -744,10 +744,10 @@ module.exports = function (db, sequelize, DataTypes) {
         }
       },
 
-      includeArgsCount: {
+      includeCommentsCount: {
         attributes: {
           include: [
-            argCount('argCount')
+            commentCount('commentCount')
           ]
         }
       },
@@ -849,7 +849,7 @@ module.exports = function (db, sequelize, DataTypes) {
           include: [
             voteCount('yes'),
             voteCount('no'),
-            argCount('argCount')
+            commentCount('commentCount')
           ],
           exclude: ['modBreak']
         }
@@ -876,29 +876,29 @@ module.exports = function (db, sequelize, DataTypes) {
         }],
         order: 'createdAt'
       },
-      withArguments: function (userId) {
+      withComments: function (userId) {
         return {
           include: [{
-            model: db.Argument.scope(
+            model: db.Comment.scope(
               'defaultScope',
-              {method: ['withVoteCount', 'argumentsAgainst']},
-              {method: ['withUserVote', 'argumentsAgainst', userId]},
+              {method: ['withVoteCount', 'commentsAgainst']},
+              {method: ['withUserVote', 'commentsAgainst', userId]},
               'withReactions'
             ),
-            as: 'argumentsAgainst',
+            as: 'commentsAgainst',
             required: false,
             where: {
               sentiment: 'against',
               parentId: null,
             }
           }, {
-            model: db.Argument.scope(
+            model: db.Comment.scope(
               'defaultScope',
-              {method: ['withVoteCount', 'argumentsFor']},
-              {method: ['withUserVote', 'argumentsFor', userId]},
+              {method: ['withVoteCount', 'commentsFor']},
+              {method: ['withUserVote', 'commentsFor', userId]},
               'withReactions'
             ),
-            as: 'argumentsFor',
+            as: 'commentsFor',
             required: false,
             where: {
               sentiment: 'for',
@@ -907,12 +907,12 @@ module.exports = function (db, sequelize, DataTypes) {
           }],
           // HACK: Inelegant?
           order: [
-            sequelize.literal(`GREATEST(0, \`argumentsAgainst.yes\` - ${argVoteThreshold}) DESC`),
-            sequelize.literal(`GREATEST(0, \`argumentsFor.yes\` - ${argVoteThreshold}) DESC`),
-            'argumentsAgainst.parentId',
-            'argumentsFor.parentId',
-            'argumentsAgainst.createdAt',
-            'argumentsFor.createdAt'
+            sequelize.literal(`GREATEST(0, \`commentsAgainst.yes\` - ${commentVoteThreshold}) DESC`),
+            sequelize.literal(`GREATEST(0, \`commentsFor.yes\` - ${commentVoteThreshold}) DESC`),
+            'commentsAgainst.parentId',
+            'commentsFor.parentId',
+            'commentsAgainst.createdAt',
+            'commentsFor.createdAt'
           ]
         };
       },
@@ -934,8 +934,8 @@ module.exports = function (db, sequelize, DataTypes) {
     this.belongsTo(models.User, { onDelete: 'CASCADE' });
     this.belongsTo(models.Project, { onDelete: 'CASCADE' });
     this.hasMany(models.Vote, { onDelete: 'CASCADE' });
-    this.hasMany(models.Argument, {as: 'argumentsAgainst', onDelete: 'CASCADE' });
-    this.hasMany(models.Argument, {as: 'argumentsFor', onDelete: 'CASCADE'});
+    this.hasMany(models.Comment, {as: 'commentsAgainst', onDelete: 'CASCADE' });
+    this.hasMany(models.Comment, {as: 'commentsFor', onDelete: 'CASCADE'});
     this.hasOne(models.Poll, {as: 'poll', foreignKey: 'ideaId', onDelete: 'CASCADE' });
     this.hasOne(models.Vote, {as: 'userVote', foreignKey: 'ideaId', onDelete: 'CASCADE' });
     this.belongsToMany(models.Tag, {through: 'ideaTags', constraints: false, onDelete: 'CASCADE' });
@@ -1171,7 +1171,7 @@ module.exports = function (db, sequelize, DataTypes) {
       return true;
     }
 
-    // canEditAfterFirstLikeOrArg is handled in the validate hook
+    // canEditAfterFirstLikeOrComment is handled in the validate hook
 
   }
 
@@ -1227,12 +1227,12 @@ module.exports = function (db, sequelize, DataTypes) {
 		    delete data.extraData.phone;
 	    }
 
-      if (data.argumentsAgainst) {
-        data.argumentsAgainst = hideEmailsForNormalUsers(data.argumentsAgainst);
+      if (data.commentsAgainst) {
+        data.commentsAgainst = hideEmailsForNormalUsers(data.commentsAgainst);
       }
 
-      if (data.argumentsFor) {
-        data.argumentsFor = hideEmailsForNormalUsers(data.argumentsFor);
+      if (data.commentsFor) {
+        data.commentsFor = hideEmailsForNormalUsers(data.commentsFor);
       }
 
       data.can = {};
@@ -1257,13 +1257,13 @@ module.exports = function (db, sequelize, DataTypes) {
     }
     instance.config = projectConfig;
 
-    // count args and votes
-    let canEditAfterFirstLikeOrArg = projectConfig && projectConfig.canEditAfterFirstLikeOrArg || false
-    if (!canEditAfterFirstLikeOrArg && !userHasRole(instance.auth && instance.auth.user, 'moderator')) {
+    // count comments and votes
+    let canEditAfterFirstLikeOrComment = projectConfig && projectConfig.canEditAfterFirstLikeOrComment || false
+    if (!canEditAfterFirstLikeOrComment && !userHasRole(instance.auth && instance.auth.user, 'moderator')) {
       let firstLikeSubmitted = await db.Vote.count({ where: { ideaId: instance.id }});
-      let firstArgSubmitted  = await db.Argument.count({ where: { ideaId: instance.id }});
-      if (firstLikeSubmitted || firstArgSubmitted) {
-        throw Error('You cannot edit an idea after the first like or argument has been added')
+      let firstCommentSubmitted  = await db.Comment.count({ where: { ideaId: instance.id }});
+      if (firstLikeSubmitted || firstCommentSubmitted) {
+        throw Error('You cannot edit an idea after the first like or comment has been added')
       }
     }
 

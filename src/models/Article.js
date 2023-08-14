@@ -578,10 +578,10 @@ module.exports = function( db, sequelize, DataTypes ) {
       return false;
     }
     let config = self.project && self.project.config && self.project.config.articles
-    let canEditAfterFirstLikeOrArg = config && config.canEditAfterFirstLikeOrArg || false
+    let canEditAfterFirstLikeOrComment = config && config.canEditAfterFirstLikeOrComment || false
 		let voteCount = self.no + self.yes;
-		let argCount  = self.argumentsFor && self.argumentsFor.length && self.argumentsAgainst && self.argumentsAgainst.length;
-		return canEditAfterFirstLikeOrArg || ( !voteCount && !argCount );
+		let commentCount  = self.commentFor && self.commentFor.length && self.commentAgainst && self.commentAgainst.length;
+		return canEditAfterFirstLikeOrComment || ( !voteCount && !commentCount );
   }
 
 	Article.auth = Article.prototype.auth = {

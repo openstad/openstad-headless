@@ -13,6 +13,7 @@
 * Remove obsolete models and routes: AccessToken, BudegtVote and Log
 * And more cleanup of old and obsolte code
 * Refactor init database, merge seeds and fixtures, make table names consitent, and fix relations
+* Refactor Argument to Comment
 
 ## 1.0.0
 * Anonymize site users 

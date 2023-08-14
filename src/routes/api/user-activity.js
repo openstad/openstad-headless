@@ -10,7 +10,7 @@ const merge = require('merge');
 
 const router = express.Router({mergeParams: true});
 
-const activityKeys = ['ideas', 'articles', 'arguments', 'votes', 'projects'];
+const activityKeys = ['ideas', 'articles', 'comments', 'votes', 'projects'];
 
 const activityConfig = {
   'ideas' : {
@@ -27,10 +27,10 @@ const activityConfig = {
       label: 'artikel'
     }
   },
-  'arguments': {
+  'comments': {
     descriptionKey: 'description',
     type: {
-      slug: 'argument',
+      slug: 'comment',
       label: 'reactie'
     }
   },
@@ -59,14 +59,14 @@ router
     next();
   });
 
-// list user ideas, arguments, articles, votes
+// list user ideas, comments, articles, votes
 // -------------------------------------------
 router.route('/')
 
 // what to include
   .get(function (req, res, next) {
     req.activities = [];
-    ['ideas', 'articles', 'arguments', 'votes'].forEach(key => {
+    ['ideas', 'articles', 'comments', 'votes'].forEach(key => {
       let include = 'include' + key.charAt(0).toUpperCase() + key.slice(1);;
       if (req.query[include]) {
         req.activities.push(key)
@@ -183,19 +183,19 @@ router.route('/')
       })
   })
 
-// arguments
+// comments
   .get(function(req, res, next) {
-    if (!req.activities.includes('arguments')) return next();
-    return auth.can('Argument', 'list')(req, res, next);
+    if (!req.activities.includes('comments')) return next();
+    return auth.can('Comment', 'list')(req, res, next);
   })
   .get(function(req, res, next) {
-    if (!req.activities.includes('arguments')) return next();
+    if (!req.activities.includes('comments')) return next();
     let where = { userId: req.userIds };
-    return db.Argument
+    return db.Comment
       .scope(['withIdea'])
       .findAll({ where })
       .then(function(rows) {
-        req.results.arguments = rows.filter(row => !!row.idea);
+        req.results.comments = rows.filter(row => !!row.idea);
         return next();
       })
   })
@@ -270,7 +270,7 @@ router.route('/')
     // console.log({
     //   ideas: req.results.ideas && req.results.ideas.length,
     //   articles: req.results.articles && req.results.articles.length,
-    //   arguments: req.results.arguments && req.results.arguments.length,
+    //   comment: req.results.comment && req.results.comments.length,
     //   votes: req.results.votes && req.results.votes.length,
     // });
 

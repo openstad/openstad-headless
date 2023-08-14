@@ -269,7 +269,7 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
       req.results = {
         "ideas": [],
         "articles": [],
-        "arguments": [],
+        "comments": [],
         "votes": [],
         "users": [],
         "projects": [],
@@ -309,7 +309,7 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
           req.results.projects.push(result.project);
           req.results.ideas = req.results.ideas.concat(result.ideas || []);
           req.results.articles = req.results.articles.concat(result.articles || []);
-          req.results.arguments = req.results.arguments.concat(result.arguments || []);
+          req.results.comments = req.results.comments.concat(result.comments || []);
           req.results.votes = req.results.votes.concat(result.votes || []);
         }
       }
@@ -521,10 +521,10 @@ router.route('/:userId(\\d+)')
     }
     
     /**
-     * Delete all connected arguments, votes and ideas created by the user
+     * Delete all connected comments, votes and ideas created by the user
      */
     await db.Idea.destroy({where: {userId: req.results.id}});
-    await db.Argument.destroy({where: {userId: req.results.id}});
+    await db.Comment.destroy({where: {userId: req.results.id}});
     await db.Vote.destroy({where: {userId: req.results.id}});
     
     /**

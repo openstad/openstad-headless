@@ -12,17 +12,17 @@ router
     req.scope = ['defaultScope', 'withIdea'];
     req.scope.push({ method: ['forProjectId', req.params.projectId] });
 
-    if (req.query.includeReactionsOnReactions) {
-      req.scope.push('includeReactionsOnReactions');
-      req.scope.push({ method: ['includeReactionsOnReactions', req.user.id] });
+    if (req.query.includeReactionsOnComments) {
+      req.scope.push('includeReactionsOnComments');
+      req.scope.push({ method: ['includeReactionsOnComments', req.user.id] });
     }
 
     if (req.query.withVoteCount) {
-      req.scope.push({ method: ['withVoteCount', 'argument'] });
+      req.scope.push({ method: ['withVoteCount', 'comment'] });
     }
 
     if (req.query.withUserVote) {
-      req.scope.push({ method: ['withUserVote', 'argument', req.user.id] });
+      req.scope.push({ method: ['withUserVote', 'comment', req.user.id] });
     }
 
     return next();
@@ -40,27 +40,27 @@ router
         return next();
       });
   })
-  .all('/:argumentId(\\d+)(/vote)?', function(req, res, next) {
+  .all('/:commentId(\\d+)(/vote)?', function(req, res, next) {
 
-    // with one existing argument
+    // with one existing comment
     // --------------------------
 
-    var argumentId = parseInt(req.params.argumentId) || 1;
+    var commentId = parseInt(req.params.commentId) || 1;
 
     let sentiment = req.query.sentiment;
-    let where = { id: argumentId };
+    let where = { id: commentId };
 
     if (sentiment && (sentiment == 'against' || sentiment == 'for' || sentiment == 'no sentiment')) {
       where.sentiment = sentiment;
     }
 
-    db.Argument
+    db.Comment
       .scope(...req.scope)
       .findOne({
         where,
       })
       .then(entry => {
-        if (!entry) throw new Error('Argument not found');
+        if (!entry) throw new Error('Comment not found');
         req.results = entry;
         return next();
       })
@@ -70,9 +70,9 @@ router
 
 router.route('/')
 
-  // list arguments
+  // list comments
   // --------------
-  .get(auth.can('Argument', 'list'))
+  .get(auth.can('Comment', 'list'))
   .get(pagination.init)
   .get(function(req, res, next) {
     let { dbQuery } = req;
@@ -87,7 +87,7 @@ router.route('/')
       where.sentiment = sentiment;
     }
 
-    return db.Argument
+    return db.Comment
       .scope(...req.scope)
       .findAndCountAll(
         {
@@ -110,28 +110,28 @@ router.route('/')
     res.json(req.results);
   })
 
-  // create argument
+  // create comment
   // ---------------
-  .post(auth.can('Argument', 'create'))
+  .post(auth.can('Comment', 'create'))
   .post(auth.useReqUser)
   .post(function(req, res, next) {
 
     if (!req.idea) return next(createError(400, 'Inzending niet gevonden'));
-    if (!req.idea.publishDate) return next(createError(400, 'Kan geen argument toevoegen aan een concept plan'));
+    if (!req.idea.publishDate) return next(createError(400, 'Kan geen comment toevoegen aan een concept plan'));
     // todo: dit moet een can functie worden
     if (req.user.role != 'admin' && req.idea.status != 'OPEN') return next(createError(400, 'Reactie toevoegen is niet mogelijk bij planen met status: ' + req.idea.status));
     next();
   })
   .post(function(req, res, next) {
     if (!req.body.parentId) return next();
-    db.Argument
+    db.Comment
       .scope(
         'defaultScope',
         'withIdea',
       )
       .findByPk(req.body.parentId)
-      .then(function(argument) {
-        if (!(argument && argument.can && argument.can('reply', req.user))) return next(new Error('You cannot reply to this argument'));
+      .then(function(comment) {
+        if (!(comment && comment.can && comment.can('reply', req.user))) return next(new Error('You cannot reply to this comment'));
         return next();
       });
   })
@@ -147,21 +147,21 @@ router.route('/')
     };
 
 
-    db.Argument
+    db.Comment
       .authorizeData(data, 'create', req.user)
       .create(data)
       .then(result => {
 
-        db.Argument
+        db.Comment
           .scope(
             'defaultScope',
             'withIdea',
-            { method: ['withVoteCount', 'argument'] },
-            { method: ['withUserVote', 'argument', req.user.id] },
+            { method: ['withVoteCount', 'comment'] },
+            { method: ['withUserVote', 'comment', req.user.id] },
           )
           .findByPk(result.id)
-          .then(function(argument) {
-            res.json(argument);
+          .then(function(comment) {
+            res.json(comment);
           });
 
       })
@@ -169,23 +169,23 @@ router.route('/')
 
   });
 
-router.route('/:argumentId(\\d+)')
+router.route('/:commentId(\\d+)')
 
-  // view argument
+  // view comment
   // -------------
-  .get(auth.can('Argument', 'view'))
+  .get(auth.can('Comment', 'view'))
   .get(auth.useReqUser)
   .get(function(req, res, next) {
     res.json(req.results);
   })
 
-  // update argument
+  // update comment
   // ---------------
   .put(auth.useReqUser)
   .put(function(req, res, next) {
-    var argument = req.results;
-    if (!(argument && argument.can && argument.can('update'))) return next(new Error('You cannot update this argument'));
-    argument
+    var comment = req.results;
+    if (!(comment && comment.can && comment.can('update'))) return next(new Error('You cannot update this comment'));
+    comment
       .authorizeData(req.body, 'update')
       .update(req.body)
       .then(result => {
@@ -194,47 +194,47 @@ router.route('/:argumentId(\\d+)')
       .catch(next);
   })
 
-  // delete argument
+  // delete comment
   // --------------
   .delete(auth.useReqUser)
   .delete(function(req, res, next) {
-    const argument = req.results;
-    if (!( argument && argument.can && argument.can('delete') )) return next( new Error('You cannot delete this argument') );
+    const comment = req.results;
+    if (!( comment && comment.can && comment.can('delete') )) return next( new Error('You cannot delete this comment') );
 
-    argument
+    comment
       .destroy()
       .then(() => {
-        res.json({ 'argument': 'deleted' });
+        res.json({ 'comment': 'deleted' });
       })
       .catch(next);
   });
 
-router.route('/:argumentId(\\d+)/vote')
+router.route('/:commentId(\\d+)/vote')
 
-  // vote for argument
+  // vote for comment
   // -----------------
 
   .post(auth.useReqUser)
   .post(function(req, res, next) {
     var user = req.user;
-    var argument = req.results;
+    var comment = req.results;
     var opinion = 'yes'; // todo
 
-    if (!(argument && argument.can && argument.can('vote'))) return next(new Error('You cannot vote for this argument'));
+    if (!(comment && comment.can && comment.can('vote'))) return next(new Error('You cannot vote for this comment'));
 
-    argument.addUserVote(user, opinion, req.ip)
+    comment.addUserVote(user, opinion, req.ip)
       .then(function(voteRemoved) {
 
-        db.Argument
+        db.Comment
           .scope(
             'defaultScope',
             'withIdea',
-            { method: ['withVoteCount', 'argument'] },
-            { method: ['withUserVote', 'argument', req.user.id] },
+            { method: ['withVoteCount', 'comment'] },
+            { method: ['withUserVote', 'comment', req.user.id] },
           )
-          .findByPk(argument.id)
-          .then(function(argument) {
-            req.results = argument;
+          .findByPk(comment.id)
+          .then(function(comment) {
+            req.results = comment;
             return next();
           });
 

@@ -13,8 +13,8 @@ router.use( '/project/:projectId(\\d+)/vote', require('./vote') );
 // idea
 router.use( '/project/:projectId(\\d+)/idea', require('./idea') );
 
-// argument
-router.use( '/project/:projectId(\\d+)/argument', require('./argument') );
+// comment
+router.use( '/project/:projectId(\\d+)/comment', require('./comment') );
 
 // choicesguide
 router.use( '/project/:projectId(\\d+)/choicesguides', require('./choicesguide') );

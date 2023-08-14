@@ -12,6 +12,6 @@ module.exports = {
 	cronTime: '0 2 */6 * * *',
 	runOnInit: false,
 	onTick: function() {
-		notifications.processQueue('argument');
+		notifications.processQueue('comment');
 	}
 };

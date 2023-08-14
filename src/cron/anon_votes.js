@@ -13,14 +13,14 @@ module.exports = {
 	onTick: function() {
 		Promise.all([
 			db.Vote.anonymizeOldVotes(),
-			db.ArgumentVote.anonymizeOldVotes()
+			db.CommentVote.anonymizeOldVotes()
 		])
-		.then(function([ voteResult, argVoteResult ]) {
+		.then(function([ voteResult, commentVoteResult ]) {
 			if( voteResult && voteResult.affectedRows ) {
 				log(`anonymized votes: ${voteResult.affectedRows}`);
 			}
-			if( argVoteResult && argVoteResult.affectedRows ) {
-				log(`anonymized argument votes: ${argVoteResult.affectedRows}`);
+			if( commentVoteResult && commentVoteResult.affectedRows ) {
+				log(`anonymized comment votes: ${commentVoteResult.affectedRows}`);
 			}
 		});
 	}

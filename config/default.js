@@ -141,9 +141,9 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
 		// Votes that are earmarked as fraudulous are never anonymized.
 		"anonymizeThreshold": 180,
 		// Minimum number of votes before it influences the date sorting of
-		// and idea's arguments.
+		// and idea's comments.
 
-		"argumentVoteThreshold": 0,
+		"commentVoteThreshold": 0,
     "location": {
 			// Is location a mandatory field
       "isMandatory": false
