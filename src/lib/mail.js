@@ -47,7 +47,6 @@ function sendMail(project, options) {
       }
     });
   }
-  console.log(merge({}, defaultSendMailOptions, options));
 
   mailTransporter.getTransporter(project).sendMail(
     merge(defaultSendMailOptions, options),
@@ -100,17 +99,16 @@ function sendConceptEmail(resource, resourceType, project, user) {
   const logo = projectConfig.getLogo();
   const hostname = projectConfig.getCmsHostname();
   const projectname = projectConfig.getTitle();
-  let inzendingPath = resourceConceptEmail.inzendingPath;
 
-  let idRegex = new RegExp(`\\[\\[(?:${resourceType}|idea)?Id\\]\\]`, 'g');
-  inzendingPath = inzendingPath && inzendingPath.replace(idRegex, resource.id).replace(/\[\[resourceType\]\]/, resourceType) || "/";
-  const inzendingURL = url + inzendingPath;
+  let inzendingPath = resourceConceptEmail.inzendingPath;
+  const inzendingURL = getInzendingURL(inzendingPath, url, resource, resourceType);
 
   let fromAddress = resourceConceptEmail.from || config.email;
   if (!fromAddress) return console.error('Email error: fromAddress not provided');
   if (fromAddress.match(/^.+<(.+)>$/, '$1')) fromAddress = fromAddress.replace(/^.+<(.+)>$/, '$1');
 
   const data = prepareEmailData(user, resource, hostname, projectname, inzendingURL, url, fromAddress, logo);
+
 
   const template = resourceConceptEmail.template;
   const html = prepareHtml(template, data);
@@ -132,25 +130,23 @@ function sendConceptEmail(resource, resourceType, project, user) {
 }
 
 // send email to user that submitted a resource
-=======
 function sendThankYouMail(resource, resourceType, project, user) {
   const projectConfig = new MailConfig(project)
-
+  
   if (!resourceType) return console.error('sendThankYouMail error: resourceType not provided');
 
   const url = projectConfig.getCmsUrl();
   const hostname = projectConfig.getCmsHostname();
   const projectname = projectConfig.getTitle();
+  let inzendingPath = projectConfig.getFeedbackEmailInzendingPath(resourceType);
+  const inzendingURL = getInzendingURL(inzendingPath, url, resource, resourceType);
+
   let fromAddress = projectConfig.getFeedbackEmailFrom(resourceType) || config.email;
   if (!fromAddress) return console.error('Email error: fromAddress not provided');
   if (fromAddress.match(/^.+<(.+)>$/, '$1')) fromAddress = fromAddress.replace(/^.+<(.+)>$/, '$1');
 
-  // todo: als je dan toch met een projectConfig.get werkt, moet deze search-and-replace dan niet ook daar?
-  let idRegex = new RegExp(`\\[\\[(?:${resourceType}|idea)?Id\\]\\]`, 'g'); // 'idea' wegens backward compatible
-  const inzendingPath = (projectConfig.getFeedbackEmailInzendingPath(resourceType) && projectConfig.getFeedbackEmailInzendingPath(resourceType).replace(idRegex, resource.id).replace(/\[\[resourceType\]\]/, resourceType)) || "/";
-  const inzendingURL = url + inzendingPath;
-  const logo = projectConfig.getLogo();
 
+  const logo = projectConfig.getLogo();
   const data = prepareEmailData(user, resource, hostname, projectname, inzendingURL, url, fromAddress, logo);
   
   let template = projectConfig.getResourceFeedbackEmailTemplate(resourceType);
