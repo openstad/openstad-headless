@@ -1,0 +1,19 @@
+{
+  "name": "openstad-headless",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openstad/openstad-headless.git"
+  },
+  "author": "Daan Rosbergen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/openstad/openstad-headless/issues"
+  },
+  "homepage": "https://github.com/openstad/openstad-headless#readme"
+}
