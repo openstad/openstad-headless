@@ -1,0 +1,24 @@
+{
+  "env": {
+    "commonjs": true,
+    "es6": true,
+    "node": true
+  },
+  "extends": ["prettier", "plugin:sonarjs/recommended"],
+  "plugins": ["prettier", "sonarjs"],
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018
+  },
+  "rules": {
+    "prettier/prettier": "warn",
+    "sonarjs/cognitive-complexity": "warn",
+    "sonarjs/no-identical-expressions": "warn",
+    "sonarjs/no-duplicate-string": "warn",
+    "sonarjs/no-identical-functions": "warn",
+    "sonarjs/prefer-immediate-return": "warn"
+  }
+}
