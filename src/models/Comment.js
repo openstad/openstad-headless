@@ -61,7 +61,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 				}
 			},
 			set          : function( text ) {
-				this.setDataValue('description', sanitize.comment(text));
+				this.setDataValue('description', sanitize.argument(text));
 			}
 		},
 

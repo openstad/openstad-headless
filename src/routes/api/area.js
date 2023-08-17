@@ -5,7 +5,8 @@ const searchResults = require('../../middleware/search-results-static');
 const convertDbPolygonToLatLng = require('../../util/convert-db-polygon-to-lat-lng');
 const {formatGeoJsonToPolygon} = require('../../util/geo-json-formatter');
 
-const router = require('express-promise-router')({ mergeParams: true });
+const express = require('express');
+const router = express.Router({ mergeParams: true });
 var createError = require('http-errors');
 
 // scopes: for all get requests

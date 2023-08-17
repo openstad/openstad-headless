@@ -6,7 +6,8 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const searchResults = require('../../middleware/search-results-static');
 
-const router = require('express-promise-router')({ mergeParams: true });
+const express = require('express');
+const router = express.Router({ mergeParams: true });
 
 // backwards compatibility
 router.route('/$')

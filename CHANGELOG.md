@@ -14,6 +14,8 @@
 * And more cleanup of old and obsolte code
 * Refactor init database, merge seeds and fixtures, make table names consitent, and fix relations
 * Refactor Argument to Comment
+* Rename devel branch to development to be consistent with other branches
+* Remove express-promise-router dependency
 
 ## 1.0.0
 * Anonymize site users 
