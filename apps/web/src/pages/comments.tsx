@@ -1,4 +1,4 @@
-import { Comment } from "@openstad/comments";
+import { Comment } from "@openstad/comments/src";
 
 export default function CommentPage() {
   return (
