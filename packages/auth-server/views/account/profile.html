@@ -1,0 +1,79 @@
+{% extends 'layouts/main.html' %}
+
+{% block body %}
+{% include 'elements/error-flash.html' %}
+
+      <h1>Jouw Account</h1>
+      <h3> Persoonlijke gegevens </h3>
+
+      <form method="POST" action="/account" class="validate-form">
+         <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+         <div class="form-group">
+           <label for="first-name">Email</label>
+           <input
+             type="email"
+             id="email"
+             value="{{user.email}}"
+             name="emails"
+             class="form-input"
+             required
+             disabled
+           />
+         </div>
+        <div class="form-group">
+          <label for="first-name">Voornaam</label>
+          <input
+            type="text"
+            name="firstName"
+            id="first-name"
+            value="{{user.firstName}}"
+            class="form-input"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="last-name">Achternaam</label>
+          <input
+            type="text"
+            name="lastName"
+            id="last-name"
+            value="{{user.lastName}}"
+            class="form-input"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary">Bewaar</button>
+        </div>
+        <input type="hidden" name="clientId" value="{{client.clientId}}">
+
+      </form>
+      <br />
+
+      {% if user.password %}
+      <h3 class="margin-l-top margin-m-bottom"> Wachtwoord wijzigen </h3>
+
+      <form method="POST" action="/password" class="validate-forma" >
+         <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+        <div class="form-group">
+            <label for="password">Huidig wachtwoord</label>
+            <input type="password" name="password" id="password" minlength="8" class="form-input">
+        </div>
+        <div class="form-group">
+            <label for="confirm">Nieuw wachtwoord</label>
+            <input type="password" name="password_confirm" id="confirm" minlength="8" class="form-input">
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Bewaar</button>
+        </div>
+        <input type="hidden" name="clientId" value="{{client.clientId}}">
+
+      </form>
+      {% endif %}
+
+      <br />
+      <br />
+      <br />
+
+
+{% endblock %}

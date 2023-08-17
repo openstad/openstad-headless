@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="12px" height="7px" viewBox="0 0 12 7" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Dropdown - Closed</title>
+    <desc>Dropdown Closed SVG for Amsterdam PatternLab</desc>
+    <defs></defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Icoon/Dropdown-geopend" transform="translate(0.000000, -7.000000)" fill="#000000">
+            <polygon id="Fill-3" transform="translate(5.543425, 10.486940) scale(1, -1) rotate(-180.000000) translate(-5.543425, -10.486940) " points="0 8.39051601 5.54594308 13.973879 11.0868499 8.39355872 9.70691127 7.00405694 5.54493583 11.1948754 1.37993862 7"></polygon>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,406 @@
+@import "mixin/amsterdam-vars";
+@import "mixin/sg-vars";
+@import "mixin/fonts";
+@import "mixin/extends";
+@import "mixin/font-faces";
+
+@import "../_patterns/10-atoms/sg-only";
+
+// jquery ui:
+@import "themes/base/core";
+@import "themes/base/theme";
+@import "themes/base/datepicker";
+
+// Start Tekstbrowser functionaliteit
+.visuallyhidden,
+.tekstbrowser {
+  // Hide only visually, but have it available for screenreaders: h5bp.com/v
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+
+  &.focusable:active,
+  &.focusable:focus {
+    @include visually;
+  }
+}
+
+.visually {
+  @include visually;
+}
+
+// Einde Tekstbrowser functionaliteit
+
+body {
+  @include font(16px, 22px);
+  color: $color-mediumdarkgrey;
+  font-family: $screenfont;
+  font-weight: 400;
+  margin: 0;
+
+  * {
+    box-sizing: content-box;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    a {
+      color: $color-black;
+      text-decoration: none;
+    }
+  }
+
+  h2.blok-titel {
+    margin: 20px 0 10px;
+  }
+}
+
+.sg-welcome .grid-pagina {
+  padding-bottom: 5em;
+}
+
+.sg-main {
+  background-color: $color-superlightgrey;
+  margin-top: -1em;
+  padding: 2rem 25px;
+}
+
+.sg-pattern-category > h2 {
+  @include headerfont;
+  font-size: 1em;
+  margin: 18px 0 14px;
+
+  > a {
+    color: $color-black;
+  }
+}
+
+.sg-pattern-title {
+  a.patternLink:focus {
+    background-color: transparent;
+    display: inline-block;
+    margin: 0;
+    outline: 1;
+    padding: 1em 0 .3rem;
+  }
+}
+
+a.sg-pattern-extra-toggle:focus {
+  background-color: transparent;
+  margin: 0;
+  outline: 1;
+  padding: .65em;
+}
+
+#{$pattern-example} {
+  background-color: $color-white;
+  border: 1px solid $color-grey;
+  border-radius: 6px;
+  padding: 5px 8px 15px;
+
+  [id^="templates-"] &,
+  [id^="pages-"] & {
+    background-color: $color-lightgrey;
+  }
+
+  &::after {
+    clear: both;
+    content: "";
+    display: table;
+  }
+}
+
+#{$pattern-example} h3.ingeklapt,
+#{$pattern-example} h3.uitgeklapt {
+  a {
+    @include simple-bg-focus;
+  }
+}
+
+#{$pattern-example} .subsitetitle a {
+  @include no-bg-focus;
+}
+
+.sg-colors {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+
+  li {
+    border: 1px solid $color-mediumgrey;
+    border-radius: 2px;
+    flex: auto;
+    margin: 0 .5em .5em 0;
+    max-width: 14em;
+    min-width: 5em;
+    padding: .3em;
+  }
+}
+
+.sg-swatch {
+  border-radius: 2px;
+  display: block;
+  height: 4em;
+  margin-bottom: .3em;
+}
+
+.sg-label {
+  font-size: 90%;
+  line-height: 1;
+}
+
+.sg-grid-explained {
+  .grid-container {
+    background-color: $color-mediumgrey;
+  }
+
+  .grid-zone {
+    background-color: $color-grey;
+  }
+
+  .grid-blok {
+    background-color: $color-text-mediumgrey;
+  }
+
+  .grid-edge {
+    background-color: $color-text-darkgrey;
+  }
+}
+
+.sg-tabs-list {
+  li {
+    margin-bottom: 0;
+  }
+}
+
+.grid-blok {
+  &.hasbgcolor {
+    .grid-element {
+      .grid-edge {
+        float: left;
+
+        .grid-inside {
+          margin: 0 10px;
+
+          h2 {
+            margin: 18px 0 14px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Superlinks
+////
+.z-superlinks,
+.z-grote-knop {
+  padding-bottom: 20px;
+  padding-top: 20px;
+}
+
+.loketlink {
+  .grid-edge {
+    .holder h2 {
+      &.afbeelding.bestuur {
+        background-image: url("#{$core-svg-path}superlink-loket-sprite.png");
+      }
+    }
+
+    &:hover {
+      .holder h2 {
+        &.afbeelding.bestuur {
+          background-image: url("#{$core-svg-path}superlink-loket-sprite-active.png");
+        }
+      }
+    }
+  }
+}
+
+// Select-bar
+////
+.doorkijk {
+  width: calc(100% - 20px) !important;
+}
+
+// Crease
+////
+.hascrease {
+  margin-bottom: 10px;
+  margin-right: 10px;
+}
+
+// Contents-wrapper
+////
+.contents-wrapper {
+  .grid-blok {
+    margin-bottom: 20px;
+  }
+
+  .grid-title {
+    h2 {
+      margin: 18px 0 14px;
+    }
+  }
+}
+
+// Photoblock
+////
+.grid-blok.grid-foto {
+  margin-bottom: 20px;
+}
+
+// Galerij
+////
+.galerij {
+  margin-bottom: 20px;
+
+  .resultaat {
+    h2,
+    h3 {
+      a {
+        max-height: 60px; // Line-height * 3
+      }
+    }
+  }
+
+  &.has-date {
+    .resultaat {
+      &:hover {
+        h2,
+        h3 {
+          a {
+            max-height: auto;
+            overflow: visible;
+          }
+        }
+      }
+
+      h2,
+      h3 {
+        a {
+          max-height: 40px;
+          overflow: hidden;
+        }
+      }
+    }
+  }
+}
+
+// List Entry
+////
+#organisms-list-entry,
+#organisms-list-entry-with-image {
+  .resultaat {
+    margin-bottom: 30px;
+  }
+}
+
+.hasbgcolor {
+  ul.links {
+    margin: 10px 0;
+  }
+}
+
+ul {
+  li {
+    span.links a {
+      background-color: $color-white;
+    }
+  }
+}
+
+// Tile
+////
+.grid-blok.grid-tegel {
+  margin-bottom: 20px;
+}
+
+// Footer
+////
+.grid-below-footer {
+  background-color: $color-white;
+}
+
+// Columns
+////
+.z-columns {
+  border-bottom: 1px solid $color-darkgrey;
+  margin-bottom: 20px;
+}
+
+// Datepicker
+////
+.ui-datepicker {
+  display: block;
+}
+
+// Filter
+////
+.formulier-section + .formulier-section {
+  margin-top: 30px;
+}
+
+// Notification
+////
+.appear-example {
+  border-bottom: 1px solid $color-grey;
+  color: $color-darkgrey;
+  font-family: HelveticaNeue, Helvetica, Arial, sans-serif;
+  font-size: .875em;
+  font-weight: 700;
+  padding: 6px 0;
+  text-align: center;
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  + .notification-appear.appear {
+    @extend %appear-base;
+  }
+
+  &:hover {
+    + .notification-appear.appear {
+      @extend %appearing;
+    }
+  }
+
+  + .notification-disappear.disappear {
+    @extend %disappear-base;
+  }
+
+  &:hover {
+    + .notification-disappear.disappear {
+      @extend %disappearing;
+    }
+  }
+}
+
+// Brochure nav
+////
+.brochure-nav {
+  &.next {
+    float: right;
+  }
+}
+
+
+// List Entry Data Card
+////
+#organisms-list-entry-data-card {
+  .sg-pattern-example {
+    background-color: #eee;
+  }
+}

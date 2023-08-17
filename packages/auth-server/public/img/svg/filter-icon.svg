@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 45.2 (43514) - http://www.bohemiancoding.com/sketch -->
+    <title>filter-icon</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Lijsten-/-Indexen_Filter-op-mobiel-(3)" transform="translate(-686.000000, -712.000000)" fill-rule="nonzero" fill="#000000">
+            <g id="Group" transform="translate(630.000000, 706.000000)">
+                <g id="Layer_2" transform="translate(54.000000, 4.000000)">
+                    <g id="filter-icon" transform="translate(2.000000, 2.000000)">
+                        <path d="M3.28,2.8 L3.28,0.4 L2.32,0.4 L2.32,2.8 L0.4,2.8 L0.4,7.6 L2.32,7.6 L2.32,19.6 L3.28,19.6 L3.28,7.6 L5.2,7.6 L5.2,2.8 L3.28,2.8 Z M4.24,6.688 L1.36,6.688 L1.36,3.808 L4.24,3.808 L4.24,6.688 Z" id="Shape"></path>
+                        <path d="M10.48,11.92 L10.48,0.4 L9.52,0.4 L9.52,11.92 L7.6,11.92 L7.6,16.72 L9.52,16.72 L9.52,19.6 L10.48,19.6 L10.48,16.72 L12.4,16.72 L12.4,11.92 L10.48,11.92 Z M11.44,15.808 L8.56,15.808 L8.56,12.928 L11.44,12.928 L11.44,15.808 Z" id="Shape"></path>
+                        <path d="M17.68,6.64 L17.68,0.4 L16.72,0.4 L16.72,6.64 L14.8,6.64 L14.8,11.44 L16.72,11.44 L16.72,19.6 L17.68,19.6 L17.68,11.44 L19.6,11.44 L19.6,6.64 L17.68,6.64 Z M18.64,10.528 L15.76,10.528 L15.76,7.648 L18.64,7.648 L18.64,10.528 Z" id="Shape"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

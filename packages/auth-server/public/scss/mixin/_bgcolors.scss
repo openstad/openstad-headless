@@ -1,0 +1,25 @@
+@each $name, $color in $colors {
+  %bgcolor-#{$name} {
+    background-color: $color;
+  }
+}
+
+@each $name, $color in $colors {
+  .grid-zone.bgcolor_#{$name},
+  .zone-wrapper.bgcolor_#{$name} {
+    @extend %bgcolor-#{$name};
+  }
+}
+
+@each $name, $color in $colors {
+  .grid-blok.bgcolor_#{$name} .grid-edge {
+    @extend %bgcolor-#{$name};
+  }
+}
+
+@each $name, $color in $colors {
+  .grid-zone.bgcolor_#{$name},
+  .grid-blok.bgcolor_#{$name} .grid-edge {
+    @include colors-on-bg($color);
+  }
+}

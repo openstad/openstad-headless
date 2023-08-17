@@ -1,0 +1,42 @@
+{% extends 'emails/layout.html' %}
+
+{% block body %}
+<h2 style="margin-bottom: 4px; font-size: 25px;">Inloglink aangevraagd</h2>
+
+{% if firstName %}
+<br />
+<b> Beste {{firstName}}, </b>
+<br />
+{% endif %}
+<br />
+
+Voor {{clientName}}
+is een inloglink aangevraagd voor dit emailadres.
+Klik op de knop hieronder om automatisch in te loggen.
+<br />
+De knop is 10 minuten geldig.
+<br />
+<br />
+<p align="middle" style="margin: 10px 0;">
+	<a
+    href="{{tokenUrl}}"
+    style="background-color: #ec0000; color:#fff; font-size: 15px; padding:15px 50px; text-decoration:none"
+    target="_blank"
+  >
+		<b>Log in</b>
+	</a>
+</p>
+
+<br />
+<p style="font-size:0.7em;font-style:italic;margin-bottom:5em; max-width:600px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" align="center">
+  Of gebruik deze link in je browser:
+	<br />
+  <a
+    href="{{tokenUrl}}"
+    style="color:#ec0000 xxx"
+    target="_blank"
+  >
+    {{tokenUrl}}
+  </a>
+</p>
+{% endblock %}

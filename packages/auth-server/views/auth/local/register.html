@@ -1,0 +1,62 @@
+{% extends 'layouts/main.html' %}
+
+{% block body %}
+
+<div class="card">
+  <div class="upper-box card-body">
+
+    <form method="POST" action="/auth/local/register" class="validate-form">
+      {% include 'elements/error-flash.html' %}
+
+
+      <h1>Registreren</h1>
+      <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+      <input type="hidden" name="clientId" value="{{clientId}}" />
+
+      <div class="form-group">
+        <label>
+          E-mail:
+        </label>
+        <input type="email" name="email" id="email" placeholder="E-mail" class="form-input" autofocus required>
+      </div>
+      <div class="form-group">
+        <label>
+          Voornaam:
+        </label>
+        <input type="text" name="firstName" id="first_name" placeholder="Voornaam" class="form-input" autofocus required >
+      </div>
+      <div class="form-group">
+        <label>
+          Achternaam:
+        </label>
+        <input type="text" name="lastName" id="last_name" placeholder="Achternaam" class="form-input" autofocus required>
+      </div>
+      <br />
+      <div class="form-group">
+        <label>
+          Wachtwoord:
+        </label>
+        <input type="password" autocomplete="off" minlength="8" name="password" id="password" placeholder="Wachtwoord" class="form-input" required>
+      </div>
+      <div class="form-group">
+        <label>
+          Herhaal wachtwoord:
+        </label>
+        <input type="password" autocomplete="off" minlength="8" name="password_repeat" id="password_repeat" placeholder="Herhaal wachtwoord" class="form-input" required>
+      </div>
+      <!--
+      <div class="form-group">
+        <small class="text-muted">By signing up, you agree to the <a href="/">Terms of Service</a>.</small>
+      </div>
+      !-->
+
+      <button type="submit" class="btn btn-primary">Account aanmaken</button>
+    </form>
+  </div>
+</div>
+<br />
+
+<p>
+  Heb je al een account? <a href="/auth/local/login?clientId={{clientId}}">Log hier in</a>
+</p>
+{% endblock %}

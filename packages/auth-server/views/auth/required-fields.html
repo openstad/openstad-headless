@@ -1,0 +1,69 @@
+{% extends 'layouts/main.html' %}
+
+{% block body %}
+<div>
+		<div class="upper-box card-body">
+			<h1>
+				{% if title %}
+					{{title}}
+				{% else %}
+					Aanvullende gegevens
+				{% endif %}
+			</h1>
+			<p>
+				{% if description %}
+					{{description | safe}}
+				{% else %}
+					Om verder te gaan hebben we nog wat extra gegevens nodig.
+				{% endif %}
+			</p>
+			{% include 'elements/error-flash.html' %}
+
+      <form method="POST" action="/auth/required-fields?redirect_uri={{redirect_uri}}" class="validate-form">
+        <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+        <input type="hidden" name="clientId" value="{{clientId}}" />
+        {% set first = true %}
+        {% for requiredField in requiredFields %}
+				<div class="form-group">
+					<label> {{requiredField.label}} </label>
+          <input
+          type="text"
+          required
+          name="{{requiredField.key}}"
+          class="input-{{requiredField.key}} input-field"
+          {{'autofocus' if first}}
+          />
+				</div>
+        {% set first = false %}
+        {% endfor %}
+
+        <button class="btn btn-primary">
+					{% if buttonText %}
+						{{buttonText}}
+					{% else %}
+						Opslaan
+					{% endif %}
+        </button>
+
+				<p>
+					<br />
+
+					{% if info %}
+						{{info}}
+					{% else %}
+						Waarom willen we dit weten? Omdat we graag inzicht krijgen in waar de actieve gebruikers van deze site vandaan komen.
+					{% endif %}
+				</p>
+      </form>
+		</div>
+
+<!--
+		<p>
+			Vragen of feedback?
+			<a href="mailto:info@openstad.nl">
+        neem contact met ons op.
+      </a>
+		</p>
+		!-->
+</div>
+{% endblock %}

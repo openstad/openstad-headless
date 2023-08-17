@@ -1,0 +1,114 @@
+@if $media-type == "print" {
+  h1 {
+    font-size: 22pt !important;
+    line-height: 27.5pt !important;
+  }
+
+  h2 {
+    font-size: 16pt !important;
+    line-height: 20pt !important;
+  }
+
+  #{$rich-content-class} {
+    * {
+      @include textfont;
+      font-size: 10.5pt !important;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      &:not(:first-child) {
+        margin-top: 10pt;
+      }
+    }
+
+    h3 {
+      font-size: 12pt !important;
+      line-height: 16.8pt !important;
+    }
+
+    h4 {
+      font-size: 10.5pt !important;
+    }
+
+    a {
+      &,
+      &:visited {
+        color: #000 !important;
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+@else {
+  h1,
+  h2,
+  h3,
+  h4,
+  #{$rich-content-class} h2,
+  #{$rich-content-class} h3,
+  #{$rich-content-class} h4 {
+    @include headerfont;
+  }
+
+  h1 {
+    @include font(32px, 40px);
+  }
+
+  h2 {
+    @include font(24px, 30px);
+  }
+
+  h3 {
+    @include font(20px, 28px);
+  }
+
+  h4 {
+    @include font(18px, 28px);
+  }
+
+  #{$rich-content-class} h2,
+  #{$rich-content-class} h3,
+  #{$rich-content-class} h4 {
+    a {
+      @include inline-link-focus;
+    }
+  }
+
+  a {
+    color: $color-text-darkgrey;
+
+    &:active,
+    &:hover {
+      color: $color-red;
+    }
+  }
+
+  #{$rich-content-class} p a:not([class*="alltoaction"]) {
+    @include inline-link-focus;
+  }
+
+  select,
+  input,
+  textarea,
+  button {
+    font-family: $screenfont;
+  }
+
+  .formulier {
+    @include font-size(16px);
+  }
+
+  @each $name, $color in $colors {
+    .grid-zone.bgcolor_#{$name} {
+      @include richcontent-on-bg($color);
+    }
+
+    .grid-blok.bgcolor_#{$name} .grid-edge {
+      @include richcontent-on-bg($color);
+    }
+  }
+}

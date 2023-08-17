@@ -1,0 +1,95 @@
+@import "vendor/bootstrap/bootstrap";
+@import "variables";
+
+html {
+  background: #efefef;
+}
+
+body {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.container {
+  max-width: 940px;
+}
+
+#main {
+  min-height: 650px;
+
+  @media screen and (max-width: @screen-sm) {
+    min-height: 0;
+    margin-bottom: 50px;
+  }
+}
+
+.side-error {
+    padding-left: 15px;
+    color: #ea1d25;
+    border-left: 2px solid #ea1d25;
+}
+
+.error-label {
+  margin: 10px 0;
+  display: block;
+}
+.row img {
+  max-width: 100%;
+}
+
+.relative {
+  position: relative;
+}
+
+.intro {
+  margin: 27px 0;
+}
+
+label {
+  font-size: 18px;
+ font-weight: 600;
+}
+
+a {
+  color: #2b9ad6;
+  text-decoration: underline;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.backlink {
+  text-decoration: none !important;
+  padding-left: 18px !important;
+  color: #666666 !important;
+  position: relative;
+
+  &:before {
+    background: url(../img/svg/caret-left-darkgrey.svg);
+    content: " ";
+    position: absolute;
+    top: 16px;
+    left: 0;
+    height: 14px;
+    width: 10px;
+    background-repeat: no-repeat;
+  }
+
+  &:hover {
+    color: #666666 !important;
+  }
+}
+
+
+
+@import 'typography';
+
+@import 'footer';
+@import 'header';
+@import 'logo';
+@import 'navbar';
+@import 'buttons';
+@import 'form';
+@import 'flash';
+@import 'loader';

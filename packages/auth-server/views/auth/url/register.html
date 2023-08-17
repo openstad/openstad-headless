@@ -1,0 +1,33 @@
+{% extends 'layouts/main.html' %}
+
+{% block body %}
+<div id="register">
+	<div class="card">
+		<div class="upper-box card-body">
+			<h1 class="title">Rond de registratie af</h1>
+			<p class="intro">
+				Voor {{client.name}} zijn
+        de volgende velden nodig om de registratie af te ronden.
+			</p>
+			<form
+				method="post"
+				action="{{registerUrl}}"
+			>
+          <div class="form-group">
+            <input type="text" name="firstName" id="first_name" placeholder="Voornaam" class="form-input" autofocus required >
+          </div>
+          <div class="form-group">
+            <input type="text" name="lastName" id="last_name" placeholder="Achternaam" class="form-input" autofocus required>
+          </div>
+          <div class="form-group">
+            <input type="text" name="postcode" id="postcode" placeholder="Postcode" class="form-input" autofocus required>
+          </div>
+					<input type="hidden" name="_csrf" value="{{csrfToken}}">
+					<input type="hidden" name="clientId" value="{{client.clientId}}">
+          <input type="hidden" name="token" value="{{token}}">
+					<input type="submit" value="Registreren" class="btn btn-primary">
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock %}

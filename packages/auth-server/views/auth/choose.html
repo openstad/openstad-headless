@@ -1,0 +1,29 @@
+{% extends 'layouts/main.html' %}
+
+{% block body %}
+<div>
+		<div class="upper-box card-body">
+			<h1>Hoe wil je inloggen?</h1>
+			<p>
+				Voor {{client.name}} kan je kiezen hoe je wilt inloggen uit
+        de volgende opties:
+			</p>
+			{% include 'elements/error-flash.html' %}
+
+      {% for authType in authTypes %}
+        <a href="{{authType.loginUrl}}?clientId={{clientId}}&redirect_uri={{redirect_uri}}" class="btn btn-primary">
+          {{authType.label}}
+        </a>
+				<hr />
+
+      {% endfor %}
+		</div>
+
+		<p>
+			Vragen of feedback?
+			<a href="mailto:{{clientEmail}}">
+        Neem contact met ons op.
+      </a>
+		</p>
+</div>
+{% endblock %}

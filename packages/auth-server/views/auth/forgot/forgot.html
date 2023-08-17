@@ -1,0 +1,36 @@
+{% extends 'layouts/main.html' %}
+
+{% block body %}
+
+<div class="card">
+  <div class="upper-box card-body">
+      <form method="POST" action="?&clientId={{clientId}}&redirect_uri={{redirectUrl}}">
+         <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+        <h1>
+            {{title if title else 'Wachtwoord vergeten'}}
+        </h1>
+        {% include 'elements/error-flash.html' %}
+
+        <div class="form-group">
+          <p class="intro">
+              {{description if description else 'Laat je e-mail achter en we mailen je instructies voor het resetten van je wachtwoord.'}}
+          </p>
+          <label> {{label if label else 'E-mail:'}} </label>
+          <input type="email" name="email" id="email" placeholder="Email" class="form-input" required autofocus>
+        </div>
+        <button type="submit" class="btn btn-primary">
+            {{buttonText if buttonText else 'Stuur e-mail'}}
+        </button>
+      </form>
+  </div>
+</div>
+
+<br />
+
+<p>
+   <a href="/auth/local/login?clientId={{clientId}}&redirect_uri={{redirectUrl}}">
+       {{backToLoginText if backToLoginText else 'Terug naar inloggen'}}
+   </a>
+</p>
+
+{% endblock %}

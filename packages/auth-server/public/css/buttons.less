@@ -1,0 +1,42 @@
+.btn{
+  border-radius: 0;
+  line-height: 1;
+  width: auto;
+  font-size: 16px;
+  font-weight: 600;
+  font-style: normal;
+  font-stretch: normal;
+  letter-spacing: normal;
+  text-align: center;
+  color: #ffffff;
+  position: inline;
+  padding: 14px 11px;
+  text-decoration: none;
+  display: inline-block;
+
+  &-primary {
+    background-color: #164995;
+    border-color: #164995;
+    color: #ffffff;
+
+    &:hover {
+      background-color: #041e44;
+      border-color: #041e44;
+    }
+  }
+
+  &--icon {
+    height: 40px;
+    width: 40px;
+    display: inline-block;
+    text-align: center;
+    padding: 0;
+
+    .glyphicon {
+      margin: 0;
+    }
+  }
+  @media screen and (max-width: @screen-sm) {
+    font-size: 14px;
+  }
+}

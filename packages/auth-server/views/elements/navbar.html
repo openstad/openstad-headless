@@ -1,0 +1,29 @@
+<nav id="navbar" class="navbar navbar-static-top">
+  <div class="container">
+    <ul class="nav navbar-nav navbar-left">
+        {% if backUrl %}
+        <li class="nav-link">
+          <a href="{{backUrl}}" class="backlink">
+             Terug
+          </a>
+        </li>
+        {% endif %}
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+        {% if displayAccountLink %}
+        <li class="nav-link">
+          <a href="/account">
+            <span class="glyphicon glyphicon-user"></span> Account
+          </a>
+        </li>
+        {% endif %}
+        {% if (displayLogout) and (user) and (client) %}
+        <li class="nav-link">
+          <a href="/logout?clientId={{client.clientId}}">
+            <span class="glyphicon glyphicon-log-out"></span> Uitloggen
+          </a>
+        </li>
+        {% endif %}
+    </ul>
+  </div>
+</nav>

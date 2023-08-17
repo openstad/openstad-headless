@@ -1,0 +1,132 @@
+$sg-patterns: false;
+
+@import "functions";
+@import "mixins";
+
+$media-type: all;
+
+$browser-context: 16;
+
+$color-black: #000;
+$color-darkblue: #004699;
+$color-darkgreen: #00a03c;
+$color-darkgrey: #666;
+$color-text-darkgrey: #767676;
+$color-text-mediumgrey: #999;
+$color-green: #bed200;
+$color-mediumgrey: #ddd;
+$color-grey: #bebebe;
+$color-lightblue: #009de6;
+$color-lightgrey: #e8e8e8;
+$color-magenta: #e50082;
+$color-orange: #ff9100;
+$color-deeppurple: #609;
+$color-purple: #a00078;
+$color-red: #ec0000;
+$color-mediumdarkgrey: #434343;
+$color-superdarkgrey: #333;
+$color-superlightgrey: #f3f3f3;
+$color-white: #fff;
+$color-lightyellow: #ff9;
+$color-yellow: #ffe600;
+$color-highlight: #ffc90e;
+
+$print-andreas-color: rgb(255, 0, 0);
+
+$print-color-black: rgb(0, 0, 0);
+$print-color-darkblue: rgb(0, 51, 255);
+$print-color-darkgreen: rgb(26, 255, 0);
+$print-color-darkgrey: rgb(87, 87, 87);
+$print-color-green: rgb(153, 255, 0);
+$print-color-grey: rgb(171, 171, 171);
+$print-color-lightblue: #009de6;
+$print-color-lightgrey: rgb(227, 227, 227);
+$print-color-lightyellow: #ff9;
+$print-color-magenta: rgb(255, 0, 255);
+$print-color-mediumdarkgrey: #434343;
+$print-color-mediumgrey: #ddd;
+$print-color-orange: rgb(255, 128, 0);
+$print-color-purple: rgb(128, 0, 255);
+$print-color-red: rgb(255, 0, 0);
+$print-color-superdarkgrey: #333;
+$print-color-superlightgrey: #f3f3f3;
+$print-color-text-darkgrey: #767676;
+$print-color-text-mediumgrey: #999;
+$print-color-white: #fff;
+$print-color-yellow: rgb(255, 242, 0);
+
+$colors: (
+  "black": $color-black,
+  "darkblue": $color-darkblue,
+  "darkgreen": $color-darkgreen,
+  "darkgrey": $color-darkgrey,
+  "text-darkgrey": $color-text-darkgrey,
+  "text-mediumgrey": $color-text-mediumgrey,
+  "green": $color-green,
+  "mediumgrey": $color-mediumgrey,
+  "grey": $color-grey,
+  "lightblue": $color-lightblue,
+  "lightgrey": $color-lightgrey,
+  "magenta": $color-magenta,
+  "orange": $color-orange,
+  "deeppurple": $color-deeppurple,
+  "purple": $color-purple,
+  "red": $color-red,
+  "mediumdarkgrey": $color-mediumdarkgrey,
+  "superdarkgrey": $color-superdarkgrey,
+  "superlightgrey": $color-superlightgrey,
+  "white": $color-white,
+  "lightyellow": $color-lightyellow,
+  "yellow": $color-yellow
+);
+
+$print-colors: (
+  "black": $print-color-black,
+  "darkblue": $print-color-darkblue,
+  "darkgreen": $print-color-darkgreen,
+  "darkgrey": $print-color-darkgrey,
+  "text-darkgrey": $print-color-text-darkgrey,
+  "text-mediumgrey": $print-color-text-mediumgrey,
+  "green": $print-color-green,
+  "mediumgrey": $print-color-mediumgrey,
+  "grey": $print-color-grey,
+  "lightblue": $print-color-lightblue,
+  "lightgrey": $print-color-lightgrey,
+  "magenta": $print-color-magenta,
+  "orange": $print-color-orange,
+  "purple": $print-color-purple,
+  "red": $print-color-red,
+  "mediumdarkgrey": $print-color-mediumdarkgrey,
+  "superdarkgrey": $print-color-superdarkgrey,
+  "superlightgrey": $print-color-superlightgrey,
+  "white": $print-color-white,
+  "lightyellow": $print-color-lightyellow,
+  "yellow": $print-color-yellow
+);
+
+$bodybg-grey: #e5e5e5;
+$buttonbg-tertiair-hover: $color-white;
+
+$screenfont: "Avenir Next W01", verdana, sans-serif;
+$printfont-text: "Avenir W01", verdana, sans-serif;
+$printfont-heading: "Avenir W01", arial, sans-serif;
+
+$rowheight: 44px;
+$button-lineheight: 1em;
+
+// Filter
+$filter-button-height: 32px;
+$filter-button-border-size: 1px;
+
+// breakpoints waarmee het grid rekent
+$grid-bp-small: 320px;
+$grid-bp-medium: 480px;
+$grid-bp-large: 960px;
+$grid-bp-xlarge: 1400px;
+
+// breakpoints waarmee de css werkt
+$grid-mq-small: 539px;
+$grid-mq-medium: 1023px;
+$grid-mq-large: 1399px;
+
+$hero-img-height: 415px;

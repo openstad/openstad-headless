@@ -1,0 +1,259 @@
+#navbar {
+  box-sizing: border-box;
+  color: #434343;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.125rem;
+  background-color: #F3F3F3;
+  height: 46px;
+  border: none;
+  margin-bottom: 40px;
+
+  @media screen and (max-width: @screen-sm) {
+    margin-bottom: 0;
+  }
+}
+
+.glyphicon-user {
+  //margin-right: 5px;
+  &:hover {
+    color: red;
+  }
+}
+
+.navbar-right {
+  margin-right: 0;
+}
+
+#navbar .button_padding {
+  padding-top: 0;
+  padding-right: 15px;
+}
+
+.navbar {
+  min-height: 46px;
+}
+
+#navbar .nav-link {
+  a {
+    display: inline-block;
+    padding-top: 11px;
+    padding-right: 0;
+    padding-left: 0;
+    margin-right: 10px;
+    margin-left: 10px;
+    padding-bottom: 0;
+    font-weight: 400;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: center;
+    color: #434343;
+
+    &:hover {
+      border-bottom: 2px solid #EC0000;
+      color: @amsterdam-red;
+      background: none;
+    }
+
+    &.active {
+      border-bottom: 2px solid #EC0000;
+    }
+
+    &.account {
+      margin: 0;
+    }
+
+    @media screen and (max-width: @screen-md) {
+      font-size: 14px;
+      padding-top: 15px;
+    }
+
+    @media screen and (max-width: @screen-sm) {
+      margin-left: 0;
+      padding-top: 9px;
+    }
+  }
+
+  &.active a{
+    border-bottom: 2px solid #EC0000;
+    color: @amsterdam-red;
+    background: none;
+  }
+}
+
+#navbar .nav-link {
+  &:first-child a {
+    margin-left: 0;
+  }
+
+  &:last-child a {
+    margin-right: 0;
+
+  }
+}
+
+.float-right {
+  float: right;
+}
+
+.btn-primary:hover, {
+  background-color: @amsterdam-red;
+  border-color: @amsterdam-red;
+}
+
+.main-section  {
+  padding-top: 30px;
+  padding-bottom: 30px;
+
+  @media screen and (max-width: @screen-sm) {
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+}
+
+.bg-grey {
+  background: #f3f3f3;
+}
+
+
+#navbar .dropdown {
+  padding-top: 0;
+  .dropdown-toggle {
+    background-color: #f3f3f3;
+    border: none;
+    width: auto;
+    &:hover {
+      border-bottom: 2px solid #EC0000;
+      color: @amsterdam-red;
+    }
+  }
+}
+
+.navbar-toggle .icon-bar {
+    display: block;
+    width: 21px;
+    height: 2px;
+    border-radius: 0;
+    background: #020202;
+}
+
+.navbar-toggle {
+  position: absolute;
+  top: 0;
+  left: 10px;
+  z-index: 10;
+  padding: 4px;
+}
+
+.account-menu-toggle {
+  position: absolute;
+  top: 0;
+  right: 7px;
+  z-index: 10;
+  padding: 14px;
+  color: #434343;
+  display: none;
+
+  @media screen and (max-width: @screen-sm) {
+    display: block;
+    padding-right: 0;
+  }
+}
+
+#navbar {
+  @media screen and (max-width: @screen-sm) {
+    .navbar-menu {
+      background: #f3f3f3;
+      width: 270px;
+      position: absolute;
+      top: 46px;
+      margin: 0;
+      left: 0;
+      padding: 0px;
+      display: none;
+
+      .navbar-nav {
+        margin: 0;
+      }
+
+      .nav-link {
+        position: relative;
+        border-bottom: 1px solid #d6d6d6;
+        padding: 10px 20px;
+
+        a {
+          border-bottom: 2px solid transparent;
+        }
+      }
+
+      .button_padding {
+        padding: 15px;
+        text-align: center;
+      }
+    }
+  }
+}
+@media screen and (max-width: @screen-sm) {
+  .submenu {
+    position: absolute;
+    right: 0;
+    z-index: 1;
+    width: 223px;
+    top: 150px;
+    color: white;
+    display: none;
+
+    .container {
+      padding: 0;
+    }
+
+    &-intro {
+      font-size: 16px;
+      padding: 9px;
+    }
+
+    a {
+      font-size: 16px;
+      color: white;
+      margin-right: 0;
+      border-top: 1px solid #ffffff;
+      display: block;
+      width: 100%;
+      padding: 9px;
+      border-bottom: none;
+
+      &.active, &:hover {
+        border-bottom: none;
+      }
+    }
+
+    .user-login {
+      border-top: none;
+    }
+  }
+}
+
+.body-background {
+  opacity: 0.8;
+  background: #000;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+//@media screen and (max-width: @screen-md) {
+	#navbar .nav-link a {
+		margin-left: 0;
+    padding-top: 11px;
+    font-size: 18px;
+    text-decoration: none;
+	}
+
+  .navbar-nav {
+    margin: 0;
+  }
+//}
