@@ -21,6 +21,7 @@
     "@kubernetes/client-node": "^0.18.1",
     "aws-sdk": "^2.1373.0",
     "bcrypt": "^5.0.1",
+    "body-parser": "^1.20.2",
     "co": "^4.6.0",
     "compression": "^1.7.4",
     "config": "^3.3.7",

@@ -1,0 +1,366 @@
+@import 'images';
+
+// Onderstaand moet nog opgesplitst
+// Onderstaand moet helemaal omgebouwd naaar functions zoals nu previous/next, zodat je hem alleen als reference kunt inladen en niet alles mee wordt gecompileerd
+
+.osc-align-right-container() {
+  text-align: right;
+}
+
+.osc-align-right-container {
+  .osc-align-right-container()
+}
+
+.osc-margin-right() {
+  margin-right: 15px;
+}
+
+.osc-margin-right {
+  .osc-margin-right();
+}
+
+.osc-opacity-25 {
+  opacity: .25;
+}
+
+.osc-opacity-50 {
+  opacity: .50;
+}
+
+.osc-opacity-65 {
+  opacity: .65;
+}
+
+.osc-hidden {
+  display: none;
+}
+
+.osc-button-basics() {
+  position: relative;
+  display: inline-block;
+  padding: 10px 13px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 20px;
+  border: 1px solid black;
+  cursor: pointer;
+
+  &:active, &:focus {
+    outline: 0;
+  }
+
+  &.osc-disabled {
+    opacity: 0.3;
+  }
+
+}
+
+.osc-button() {
+
+  .osc-button-basics;
+  border-color: #c4c4c4;
+  background-color: #c4c4c4;
+
+  &:hover {
+    text-decoration: underline;
+    border-color: #aaa;
+    background-color: #aaa;
+  }
+
+}
+
+.osc-button {
+  .osc-button();
+}
+
+.osc-button-white() {
+
+  .osc-button-basics;
+  color: #164995;
+  border-color: #164995;
+  background-color: white;
+
+  &:hover {
+    text-decoration: underline;
+    color: #003066;
+    border-color: #003066;
+    background-color: white;
+  }
+
+}
+
+.osc-button-blue() {
+
+  .osc-button-basics;
+  color: white;
+  border-color: #164995;
+  background-color: #164995;
+
+  &:hover {
+    text-decoration: underline;
+    border-color: #003066;
+    background-color: #003066;
+  }
+
+}
+
+.osc-close-button-black {
+  .osc-close-button-black-background;
+  position: absolute;
+  top: 20px;
+  right: 15px;
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+  border: 0 none;
+  cursor: pointer;
+  z-index: 20;
+
+  &:active, &:focus {
+    outline: 0;
+  }
+  
+}
+
+.osc-previous-button() {
+
+  position: relative;
+  padding-left: 18px;
+  font-weight: 600;
+  line-height: 44px;
+  color: #004699;
+  cursor: pointer;
+
+  &:before {
+    position: absolute;
+    top: 13px;
+    left: 0;
+    width: 8px;
+    height: 14px;
+    content: '';
+    background-size: 8px 14px;
+    background-repeat: no-repeat;
+    background-image: @osc-arrow-left-blue-image;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+}
+
+.osc-next-button() {
+
+  position: relative;
+  margin-right: 17px;
+  padding: 11px 8px 11px 15px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  color:white;
+  background-color: #164995;
+  cursor: pointer;
+
+  &:before {
+    position: absolute;
+    border-left: 17px solid #164995;
+    border-top: 22px solid transparent;
+    border-bottom: 22px solid transparent;
+    border-right: 0;
+    top: 0px;
+    right: -17px;
+    width: 0px;
+    height: 0px;
+    content: '';
+
+  }
+
+  &:hover {
+    background-color: #003066;
+
+    &:before {
+      border-left: 17px solid #003066;
+    }
+
+  }
+
+}
+
+.osc-elipsis() {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.osc-gray-text {
+  color: #9a9a9a;
+}
+
+.osc-gray-block {
+  padding: 30px;
+  background-color: #f6f7f7;
+}
+
+.osc-not-logged-in-button {
+
+  .osc-inloggen-background;
+  padding-left: 40px;
+}
+
+.osc-default-select() {
+  .osc-arrow-down-black-background;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  height: 44px;
+  padding: 0 20px;
+  padding-right: 40px;
+  border: solid 1px #434343;
+  outline: none;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 44px;
+  text-align: left;
+  background-color: white;
+}
+
+.osc-default-select {
+  .osc-default-select();
+}
+
+.osc-default-input() {
+	appearance: none;
+	height: 44px;
+	padding: 0 20px;
+	padding-right: 40px;
+	border: solid 1px #434343;
+	outline: none;
+	font-size: 16px;
+	font-weight: 400;
+	line-height: 44px;
+	text-align: left;
+	background-color: white;
+}
+
+.osc-default-input {
+  .osc-default-input();
+}
+
+.osc-clear-both {
+  clear: both;
+}
+
+.osc-number-button {
+
+	display: block;
+	width: 250px;
+	font-size: 0px;
+	font-weight: 600;
+	text-decoration: none;
+	height: 43px;
+	margin-right: 2px;
+	
+	.osc-number-plates {
+	  padding: 7px 6px 7px 10px;
+		font-size: 0px;
+		margin-right: 0px;
+    float: left;
+	}
+	
+	.osc-number-plate {
+		margin-right: 4px;
+		display: inline-block;
+		font-size: 18px;
+		background: #e8e8e8;
+		background: linear-gradient(#e8e8e8 50%, #ffffff 50%);
+		padding: 0;
+		display: inline-block;
+		height: 29px;
+		line-height: 31px;
+		width: 20px;
+		text-align: center;
+		color: black;
+		border-radius: 3px;
+		font-weight: 800;
+		vertical-align: middle;
+	}
+
+	.osc-number-button-text {
+    .osc-button-basics;
+    display: block;
+    float: left;
+    width: 118px;
+    height: 43px;
+    margin-left: 2px;
+	  font-size: 18px;
+    line-height: 20px;
+
+    &:hover {
+      text-decoration: underline;
+    }
+	}
+
+}
+
+.osc-editbutton,
+.osc-idea-details-editbutton {
+  display: block;
+  position: relative;
+  appearance: none;
+  width: 100%;
+  height: 46px;
+  margin-top: 20px;
+  margin-left: 0;
+  padding-left: 46px;
+  padding-right: 3px;
+  font-size: 16px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  text-align: center;
+  line-height: 44px;
+  border-radius: 0;
+  border-right: 2px solid #e8e8e8;
+  border-bottom: 2px solid #e8e8e8;
+  background-color: whitesmoke;
+  background-position: 5px 5px;
+  background-repeat: no-repeat;
+  background-size: 36px 36px;
+  color: black;
+  overflow: hidden;
+  cursor: pointer;
+
+  &:after {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 34px;
+    height: 34px;
+    background-color: black;
+    content: '';
+  }
+
+  &.osc-delete:after {
+    background-image: @osc-delete-button-image;
+  }
+
+  &.osc-edit:after {
+    background-image: @osc-edit-button-image;
+  }
+
+}
+
+
+
+.osc-alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+}
+
+.osc-alert-warning {
+    color: #8a6d3b;
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+}

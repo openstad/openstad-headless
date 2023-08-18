@@ -1,0 +1,39 @@
+@import 'images';
+@import 'colors';
+@import 'elements';
+
+@import 'columns';
+
+@import 'accordeon';
+@import 'sharebuttons';
+@import 'tabs';
+
+@phone: ~'only screen and (max-width: 700px)';
+
+.osc-component {
+
+	box-sizing: border-box;
+
+	font-size: 16px;
+	font-weight: normal;
+	line-height: 20px;
+
+  h3 {
+    font-size: 24px;
+    font-weight: 600;
+    font-style: normal;
+    line-height: 1.25;
+  }
+
+  a {
+    color: @amsterdam-navyblue;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+  }
+
+}
+

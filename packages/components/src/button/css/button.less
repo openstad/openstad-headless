@@ -1,0 +1,76 @@
+.osc-button-component {
+
+  display: flex;
+  flex-flow: row nowrap;
+
+  .osc-button-label {
+
+    flex-grow: 100;
+    
+	  position: relative;
+    display: inline-block;
+
+    height: 43px;
+    padding: 2px 7px 1px 10px;
+
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 40px;
+
+    color: white;
+    text-decoration: none;
+
+    background-color: @amsterdam-navyblue;
+
+  }
+
+  .osc-icon {
+    flex-grow: 1;
+    
+	  position: relative;
+    display: inline-block;
+
+    min-width: 10px;
+    height: 43px;
+
+    padding-left: 2px;
+    padding-right: 3px;
+
+    background-color: @amsterdam-navyblue;
+
+  }
+
+  .osc-elipsis {
+    .osc-elipsis();
+  }
+
+  &.osc-icon-button {
+    .osc-button-label {
+      padding-left: 4px;
+    }
+  }
+  
+  &.osc-numberplate-button {
+    .osc-button-label {
+      padding-left: 4px;
+    }
+    &.osc-icon-button {
+      .osc-icon {
+        margin-left: -4px;
+        padding-right: 3px;
+      }
+    }
+  }
+
+  &.osc-button-clickable {
+    cursor: pointer;
+
+    &:hover {
+      .osc-button-label {
+        background-color: @amsterdam-navyblue-hover;
+      }
+    }
+
+  }
+  
+}
