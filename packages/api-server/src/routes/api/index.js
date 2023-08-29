@@ -72,17 +72,4 @@ router.use( '/area', require('./area') );
 router.use( '/repo', require('./template') ); // backwards conpatibility
 router.use( '/template', require('./template') );
 
-// output error as JSON only use this error handler middleware in "/api" based routes
-router.use("/project", function(err, req, res, next){
-  console.log('->>> err', err);
-  // use the error's status or default to 500
-  res.status(err.status || 500);
-
-  // send back json data
-  res.send({
-    error:  err.message,
-    message: err.message
-  })
-});
-
 module.exports = router;

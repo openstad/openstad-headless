@@ -16,13 +16,14 @@ module.exports = function( app ) {
 	});
 
 	app.use(function handleError( err, req, res, next ) {
+    
 		var env            = app.get('env');
-		var status         = err.status || 500;
+		var status         = err.status || ( err.name && err.name == 'SequelizeValidationError' && 400 ) || 500;
 		var userIsAdmin    = req.user && req.user.role && req.user.role == 'admin';
 		var showDebug      = status == 500 && (env === 'development' || userIsAdmin);
 		var friendlyStatus = statuses[status]
 		var stack          = err.stack || err.toString();
-		var message        = err.message;
+		var message        = err.message || err.error;
 		var errorStack     = showDebug ? stack : '';
 
 		if( env !== 'test' && status == 500 ) {
@@ -30,16 +31,12 @@ module.exports = function( app ) {
 		}
 
 		res.status(status);
-		if( res.out ) {
-			res.out('error', true, {
-				status         : status,
-				friendlyStatus : friendlyStatus,
-				message        : message,
-				errorStack     : errorStack.replace(/\x20{2}/g, ' &nbsp;'),
-				error          : err
-			});
-		} else {
-			res.send(`<h1>${friendlyStatus}</h1><p>${message}</p>`);
-		}
+		res.json({
+			status         : status,
+			friendlyStatus : friendlyStatus,
+			message        : message,
+			errorStack     : errorStack.replace(/\x20{2}/g, ' &nbsp;'),
+			error          : message || err
+		});
 	});
 };
