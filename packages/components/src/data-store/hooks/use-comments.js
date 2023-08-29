@@ -6,12 +6,11 @@ export default function useIdea(props) {
 
   const projectId = props.projectId || props.config.projectId;
   const ideaId = props.ideaId || props.config.ideaId;
+  // todo: dit moet door allees heen filteren: je hebt dit in deze instantie al eens opgegeven en dus zou het altijd goed moeten staan
   const sentiment = props.sentiment || props.config.sentiment || null;
-  const { data, error, isLoading } = self.useSWR({ projectId, ideaId, sentiment }, 'comments.fetch'); // todo: je kunt swr hier dus verbergen; wil je dat?
+  const { data, error, isLoading } = self.useSWR({ projectId, ideaId, sentiment }, 'comments.fetch');
   
   async function setComments(newData) {
-
-    console.log('UPDATE COMMENTS', newData);
 
     if (Array.isArray(newData)) {
 
@@ -35,24 +34,27 @@ export default function useIdea(props) {
 
     } else {
 
-      console.log(newData);
-      newData = Object.fromEntries(newData.entries());
       if (newData.id) {
         console.log('++ UPDATE');
         self.mutate({ projectId, ideaId, sentiment }, 'comments.update', newData);
       } else {
         console.log('++ CREATE');
-        // todo: maak een api.create
-        self.mutate({ projectId, ideaId, sentiment }, 'comments.update', newData);
+        self.mutate({ projectId, ideaId, sentiment }, 'comments.create', newData);
       }
       
     }
     
-
-    
   }
+
+  // add functionality
+  let comments = data || [];
+  comments.map( async comment => comment.submitLike = function() {
+    // self.api.comments.submitLike({ projectId, ideaId }, comment)
+    self.mutate({ projectId, ideaId, sentiment }, 'comments.submitLike', comment);
+
+  })
   
-  return [ data || [], setComments, error, isLoading ];
+  return [ comments, setComments, error, isLoading ];
 
 }
 

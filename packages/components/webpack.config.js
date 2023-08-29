@@ -92,7 +92,7 @@ module.exports = {
 	},
 
   resolve: {
-    extensions: [".*", ".js", ".jsx"],
+    extensions: [".*", ".js", ".jsx", ".css", ".less"],
   },
 
   module: {
@@ -149,15 +149,11 @@ module.exports = {
  
 			{ // other images
 				test: /\.(png|jpe?g|gif|svg)$/i,
-				use: [
-					{
-						loader: 'file-loader',
-						options: {
-							name: 'images/[name].[ext]',
-							publicPath: '../'
-						},
-					},
-				],
+        type: 'asset/resource',
+       generator: {
+         filename: 'images/[name].[ext]'
+
+       },
 			},
 
     ],

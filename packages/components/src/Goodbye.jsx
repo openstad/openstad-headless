@@ -6,15 +6,13 @@ const Goodbye = function(props) {
 
   const datastore = new DataStore(props);
 
-  const [ user, setUser, userError, userIsLoading ] = datastore.useUser({ ...props });
+  // const [ user, setUser, userError, userIsLoading ] = datastore.useUser({ ...props });
   const [ idea, setIdea ] = datastore.useIdea({ ...props, ideaId: 3 });
 
   function handleClick(e) {
 	  let event = new window.CustomEvent('klik', { detail: { inhoud: 'van het event' } });
 	  window.dispatchEvent(event);
   }
-
-  let name = user.name || 'unknown user';
 
 	useEffect(() => {
 		setTimeout(function() {
@@ -26,7 +24,7 @@ const Goodbye = function(props) {
   return (
     <>
       <h1>Goodbye component!</h1>
-      Goodbye {name}<br/>
+      Goodbye<br/>
       {JSON.stringify(props.config, null, 2)}<br/>
       <button onClick={e => handleClick(e)}>Klik hier</button>
       {idea && idea.title}

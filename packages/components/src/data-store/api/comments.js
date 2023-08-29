@@ -1,52 +1,56 @@
 export default {
 
-  fetch: async function({ projectId, ideaId, sentiment }, key) {
+  fetch: async function({ projectId, ideaId, sentiment }) {
+
     let url = `/api/project/${projectId}/idea/${ideaId}/comment?sentiment=${sentiment}&withUser=1&withUserVote=1&withVoteCount=1&includeCommentsOnComments=1`;
-    let headers = { 'Content-Type': 'application/json' };
-    // if (requestcache.users && requestcache.users[projectId]) headers['X-Authorization'] = `Bearer ${requestcache.users[projectId].jwt}`;
-    return this.fetch(url, { headers });
+    return this.fetch(url);
+
+  },
+
+  create: async function({ projectId, ideaId }, data) {
+
+    let url = `/api/project/${projectId}/idea/${ideaId}/comment`;
+    let method = 'post';
+    delete data.id;
+    let body = JSON.stringify(data);
+
+    let newData = await this.fetch(url, { method, body })
+    return { created: newData };
+
   },
 
   update: async function({ projectId, ideaId }, data) {
 
-
-    let url = `/api/project/${projectId}/idea/${ideaId}/comment`;
-    let method = 'post';
-    let headers = {
-      'Content-Type': 'application/json'
-    };
-
-    let myurl = url;
-    method = 'post'
-    if (data.id) {
-      myurl += '/' + data.id
-      method = 'put';
-    } else {
-      delete data.id
-    }
+    let url = `/api/project/${projectId}/idea/${ideaId}/comment/${data.id}`;
+    let method = 'put';
+    let body = JSON.stringify(data);
       
-    let formDataJsonString = JSON.stringify(data);
-    let newData = await this.fetch(myurl, { headers, method, body: formDataJsonString })
-
-    return method == 'post' ? { created: newData } : { updated: newData };
+    let newData = await this.fetch(url, { method, body })
+    return { updated: newData };
 
   },
 
   delete: async function({ projectId, ideaId }, data) {
 
 
-    let url = `/api/project/${projectId}/idea/${ideaId}/comment`;
+    let url = `/api/project/${projectId}/idea/${ideaId}/comment/${data.id}`;
     let method = 'delete';
-    let headers = {
-      'Content-Type': 'application/json'
-    };
 
-    let myurl = url + '/' + data.id
-    let newData = await this.fetch(myurl, { headers, method })
-
+    let newData = await this.fetch(url, { method })
     return { deleted: { id: data.id } };
 
     
+  },
+
+  submitLike: async function({ projectId, ideaId }, data) {
+
+    let url = `/api/project/${projectId}/idea/${ideaId}/comment/${data.id}/vote`;
+    let method = 'post';
+    let body = JSON.stringify({});
+
+    let newData = await this.fetch(url, { method })
+    return { updated: newData };
+
   },
 
 }

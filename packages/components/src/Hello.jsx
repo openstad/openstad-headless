@@ -5,6 +5,9 @@ import HelloChild from './HelloChild';
 
 const Hello = function(props) {
 
+  console.log('==========');
+  console.log(props);
+
   let [xxx, setxxx] = useState([1]);
 
   setTimeout(function() {

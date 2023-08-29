@@ -1,83 +1,59 @@
 import fetch from './fetch';
-import SessionStorage from '../../lib/session-storage.js';
 
 export default {
 
-  fetch: async function({ projectId }) {
+  fetch: async function({ projectId, userId }) {
 
-    let self = this;
-    return {};
+    let url = `/api/project/${projectId}/user/${userId}`;
+    let headers = {
+      'Content-Type': 'application/json'
+    };
+
+    return this.fetch(url, { headers });
+
+  },
+
+  fetchMe: async function({ projectId }) {
+
+    // console.log('FETCH ME');
     
-    console.log('++++++++++', self.currentUser ? self.currentUser.id : '-');
+    let url = `/auth/project/${projectId}/me`;
+    let headers = {
+      'Content-Type': 'application/json'
+    };
 
-    const session = new SessionStorage(self.props)
+    let json = await this.fetch(url, { headers });
 
-    const cmsUser = self.props.cmsUser || self.props.config.cmsUser || {};
-    // const projectId = self.props.projectId || self.props.config.projectId;
-    
-    // get user from self.props
-    let initialUser = self.props.openStadUser || self.props.config.openStadUser || {};
-    if (initialUser && initialUser.id && initialUser.projectId == projectId) {
-      // self.setCurrentUserId( initialUser.id );
-      return initialUser;
-    }
-    
-    // get cmsUser from session data - this is a fix for badly written cms logouts
-    let sessionCmsUser = session.get('cmsUser') || {};
-    if (sessionCmsUser && cmsUser) {
-      // compare with current cmsUser
-      if (sessionCmsUser.access_token != cmsUser.access_token) {
-        // delete exising session cache
-        session.remove('cmsUser');
-        session.remove('openStadUser');
-      }
-    }
-    session.set('cmsUser', cmsUser);
+    let openStadUser = json;
+    if (openStadUser && openStadUser.id) openStadUser = { ...openStadUser, jwt: self.currentUserJWT };
 
-    // get user from session data
-    let sessionUser = session.get('openStadUser') || {};
+    return openStadUser;
 
-    // existing jwt
-    let jwt = initialUser.jwt || sessionUser.jwt;
+  },
 
-    // get jwt for cmsUser
-    if (!jwt && cmsUser && cmsUser.access_token && cmsUser.iss) {
+  connectUser: async function({ projectId, cmsUser }) {
 
-      let data = {
-        access_token: cmsUser.access_token,
-        iss: `${cmsUser.iss}`,
-      }
+    // console.log('CONNECT-USER');
 
-      let json = await fetch(`${self.apiUrl}/auth/project/${projectId}/connect-user?useAuth=oidc`, {
-        headers: { 'Content-Type': 'application/json' },
-        method: 'POST',
-        body: JSON.stringify(data)
-      });
-      jwt = json.jwt;
+    let url = `/auth/project/${projectId}/connect-user?useAuth=oidc`;
+    let headers = {
+      'Content-Type': 'application/json'
+    };
 
+    let data = {
+      access_token: cmsUser.access_token,
+      iss: `${cmsUser.iss}`,
     }
 
-    if (jwt) {
-
-      let url = `${self.apiUrl}/auth/project/${projectId}/me`;
-      let headers = { 'X-Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' };
-
-      let json = await fetch(url, { headers })
-
-      let openStadUser = json;
-      if (openStadUser && openStadUser.id) openStadUser = { ...openStadUser, jwt };
-      session.set('openStadUser', openStadUser);
-
-      console.log('????', openStadUser && openStadUser.id);
+    let json = await this.fetch(url, {
+      headers,
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
       
-      // self.setCurrentUserId( openStadUser && openStadUser.id );
-      return openStadUser;
+    return json.jwt;
 
-    } else {
-      // self.setCurrentUserId( null );
-      return {};
-    }
-
-  }
+  },
+  
 
 }

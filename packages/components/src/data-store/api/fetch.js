@@ -5,13 +5,19 @@ export default async function doFetch(url = '', options = {}) {
   console.log('DO FETCH', url);
   try {
 
+    options.headers = options.headers || {};
+    options.headers['Content-Type'] = options.headers['Content-Type'] || 'application/json';
+
     if (self.currentUserJWT) {
-      options.headers = options.headers || {};
       options.headers['X-Authorization'] = 'Bearer ' + self.currentUserJWT;
     }
 
     let response = await fetch(this.apiUrl + url, options)
-    if (!response.ok) throw new Error('Fetch idea failed')
+    if (!response.ok) {
+      let body = await response.json();
+      throw new Error( body.error || body.message || response.statusText );
+    }
+
     let json = await response.json();
     return json || {};
 
