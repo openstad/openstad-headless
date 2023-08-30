@@ -13,9 +13,9 @@ router
     req.scope = ['defaultScope', 'withIdea'];
     req.scope.push({ method: ['forProjectId', req.params.projectId] });
 
-    if (req.query.includeReactionsOnComments) {
-      req.scope.push('includeReactionsOnComments');
-      req.scope.push({ method: ['includeReactionsOnComments', req.user.id] });
+    if (req.query.includeRepliesOnComments) {
+      req.scope.push('includeRepliesOnComments');
+      req.scope.push({ method: ['includeRepliesOnComments', req.user.id] });
     }
 
     if (req.query.withVoteCount) {
@@ -243,7 +243,12 @@ router.route('/:commentId(\\d+)/vote')
       .catch(next);
   })
   .post(function(req, res, next) {
-    res.json(req.results);
+
+    setTimeout(function() {
+      res.json(req.results);
+    }, 1000)
+
+
   });
 
 module.exports = router;

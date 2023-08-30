@@ -7,12 +7,20 @@ export default function useIdea(props) {
   const projectId = props.projectId || props.config.projectId;
   const ideaId = props.ideaId || props.config.ideaId;
   const { data, error, isLoading } = self.useSWR({ projectId, ideaId }, 'idea.fetch');
-  
-  async function setIdea(newData) {
-    self.mutate({ projectId, ideaId }, 'idea.update', newData);
-  }
 
-  return [ data || {}, setIdea, error, isLoading ];
+  // add functionality
+  let idea = data || {};
+    idea.update = function(newData) {
+      self.mutate({ projectId, ideaId }, 'idea.update', newData, { action: 'update' });
+    }
+    idea.delete = function(newData) {
+      self.mutate({ projectId, ideaId }, 'idea.delete', idea, { action: 'delete' });
+    }
+    idea.submitLike = function() {
+      self.mutate({ projectId, ideaId }, 'idea.submitLike', idea, { action: 'update' });
+    }
+
+  return [ idea, error, isLoading ];
 
 }
 

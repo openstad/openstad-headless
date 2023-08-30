@@ -1,3 +1,4 @@
+import mergeData from './merge-data';
 import { useEffect } from "react"
 import { useSWRConfig } from "swr"
 import useSWR from 'swr';
@@ -6,7 +7,7 @@ import useIdea from './hooks/use-idea.js';
 import useComments from './hooks/use-comments.js';
 import useUser from './hooks/use-user.js';
 
-window.OpenStadSWRKeys = window.OpenStadSWRKeys || {}; // keys used, for forced updates
+window.OpenStadSWR = window.OpenStadSWR || {}; // keys used, for forced updates
 
 export default function DataStore(props = { config: {} }) {
   
@@ -20,7 +21,7 @@ export default function DataStore(props = { config: {} }) {
   self.useUser = useUser.bind(self);
 
   // current user
-  const [ user, setuser, commentsError, commentsIsLoading ] = self.useUser({ ...props, projectId: self.projectId });
+  const [ user, userError, userIsLoading ] = self.useUser({ ...props, projectId: self.projectId });
   self.currentUser = user;
 
   // swr
@@ -31,74 +32,55 @@ export default function DataStore(props = { config: {} }) {
   }
 
   self.useSWR = function(props, fetcherAsString) {
+
     let fetcher = eval(`self.api.${fetcherAsString}`);
     let key = self.createKey(props, fetcherAsString);
 
-    window.OpenStadSWRKeys[ JSON.stringify(key, null, 2) ] = true;
-    
-    return useSWR(key, fetcher);
+    window.OpenStadSWR[ JSON.stringify(key, null, 2) ] = true;
+
+    return useSWR(key, fetcher, {
+      keepPreviousData: true,
+    });
+
   }
 
   const { mutate } = useSWRConfig();
-  self.mutate = function(props, fetcherAsString, newData, options) { // TODO: meesturen mutate options
+  self.mutate = async function(props, fetcherAsString, newData, options) { // TODO: meesturen mutate options
 
     let fetcher = eval(`self.api.${fetcherAsString}`);
     let key = self.createKey(props, fetcherAsString);
 
     let defaultOptions = {
-      optimisticData: currentData => currentData, // todo: merge newData; dat moet net asls in populate
-      populateCache: (newData, oldData) => {
-
-        console.log('POPULATE', newData, oldData);
-
-        if (Array.isArray(oldData)) { // dit is nogal ruk geschreven en moet ovendien, zoals hierboven gemeld, in de use-comments
-
-          console.log(newData);
-
-          if (newData.created) {
-            let result = [ ...oldData ];
-            result.push(newData.created);
-            return result
-          }
-
-          if (newData.deleted) {
-            let index = oldData.findIndex( elem => elem.id == newData.deleted.id );
-            let result = [ ...oldData ];
-            if (index != -1) result.splice(index,1)
-            console.log('===', index, result);
-            return result;
-          }
-
-          if (newData.updated) {
-            let index = oldData.findIndex( elem => elem.id == newData.updated.id );
-            let result = [ ...oldData ];
-            if (index != -1) result[index] = newData.updated
-            return result
-          }
-          
-        } else {
-          // todo: crud zoals hierboven
-          return { ...oldData, ...newData }; // gebruik merge?
-        }
-      },
+      optimisticData: currentData => mergeData(currentData, newData, options.action),
+      populateCache: (newData, currentData) => mergeData(currentData, newData, options.action),
       revalidate: false,
       rollbackOnError: true,
     }
-    
-    mutate(key, fetcher(key, newData), { ...defaultOptions, ...options });
+
+    await mutate(key, fetcher(key, newData), { ...defaultOptions, ...options });
+
+    return mutate( // mutate other caches; idea taken from https://koba04.medium.com/organize-swr-cache-with-tag-33d5b1aac3bd
+      cacheKey => cacheKey != key && cacheKey.type == key.type,
+      currentData => mergeData(currentData, newData),
+      { revalidate: false } // meybe true? or option?
+    );
+
 
   }
 
   self.refresh = function() {
     mutate(
-      key => Object.keys(window.OpenStadSWRKeys).indexOf( JSON.stringify(key, null, 2) ) != -1,
-      async data => data, // optimistic ui as fetcher
+      cacheKey => Object.keys(window.OpenStadSWR).indexOf( JSON.stringify(cacheKey, null, 2) ) != -1,
+      async currentData => currentData, // optimistic ui as fetcher
       {
         revalidate: true,
         rollbackOnError: true,
-      })
+      }
+    );
   }
   
 
 }
+
+
 

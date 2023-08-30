@@ -1,5 +1,3 @@
-// ik denk dat er wat asyncs weg kunnen: hij retrund promises en dat is ok
-
 import fetchx from './fetch';
 import idea from './idea';
 import comments from './comments';

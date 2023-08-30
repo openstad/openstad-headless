@@ -178,12 +178,12 @@ module.exports = function( db, sequelize, DataTypes ) {
 				};
 			},
 
-			includeReactionsOnComments: function( userId ) {
+			includeRepliesOnComments: function( userId ) {
 				let commentVoteThreshold = 5; // todo: configureerbaar
 				return {
 					include: [{
 						model      : db.Comment,
-						as         : 'reactions',
+						as         : 'replies',
 						required   : false,
             // force attribs because the automatic list is incomplete
 					  attributes : ['id', 'parentId', 'ideaId', 'userId', 'sentiment', 'description', 'label', 'createdAt', 'updatedAt', 'createDateHumanized']
@@ -248,14 +248,6 @@ module.exports = function( db, sequelize, DataTypes ) {
 				}]
 			},
 
-			withReactions: {
-				include: [{
-					model      : db.Comment,
-					as         : 'reactions',
-					required   : false
-				}]
-			},
-
 		}
 	}
 
@@ -269,7 +261,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 		});
 		this.hasMany(models.Comment, { // TODO: cascade does not work here
 			foreignKey : 'parentId',
-			as         : 'reactions',
+			as         : 'replies',
       onDelete: 'CASCADE',
       hooks: true,
 		});

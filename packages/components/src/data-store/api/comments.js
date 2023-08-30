@@ -2,7 +2,7 @@ export default {
 
   fetch: async function({ projectId, ideaId, sentiment }) {
 
-    let url = `/api/project/${projectId}/idea/${ideaId}/comment?sentiment=${sentiment}&withUser=1&withUserVote=1&withVoteCount=1&includeCommentsOnComments=1`;
+    let url = `/api/project/${projectId}/idea/${ideaId}/comment?sentiment=${sentiment}&withUser=1&withUserVote=1&withVoteCount=1&includeRepliesOnComments=1`;
     return this.fetch(url);
 
   },
@@ -15,7 +15,7 @@ export default {
     let body = JSON.stringify(data);
 
     let newData = await this.fetch(url, { method, body })
-    return { created: newData };
+    return newData;
 
   },
 
@@ -26,7 +26,7 @@ export default {
     let body = JSON.stringify(data);
       
     let newData = await this.fetch(url, { method, body })
-    return { updated: newData };
+    return newData;
 
   },
 
@@ -37,7 +37,7 @@ export default {
     let method = 'delete';
 
     let newData = await this.fetch(url, { method })
-    return { deleted: { id: data.id } };
+    return { id: data.id };
 
     
   },
@@ -49,7 +49,7 @@ export default {
     let body = JSON.stringify({});
 
     let newData = await this.fetch(url, { method })
-    return { updated: newData };
+    return newData;
 
   },
 

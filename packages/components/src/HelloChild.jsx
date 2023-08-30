@@ -8,8 +8,7 @@ const HelloChild = function(props) {
   const [statusText, setStatusText] = useState('-');
   const [statusCount, setStatusCount] = useState(0);
 
-  // const [ user, setUser, userError, userIsLoading ] = datastore.useUser({ ...props });
-  const [ idea, setIdea, error, isLoading ] = datastore.useIdea({ ...props, ideaId: 3 });
+  const [ idea, error, isLoading ] = datastore.useIdea({ ...props, ideaId: 3 });
 
   const handleKlik = useCallback(async event => {
     let detail = event.detail;

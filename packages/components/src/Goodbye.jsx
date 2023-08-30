@@ -6,8 +6,7 @@ const Goodbye = function(props) {
 
   const datastore = new DataStore(props);
 
-  // const [ user, setUser, userError, userIsLoading ] = datastore.useUser({ ...props });
-  const [ idea, setIdea ] = datastore.useIdea({ ...props, ideaId: 3 });
+  const [ idea ] = datastore.useIdea({ ...props, ideaId: 3 });
 
   function handleClick(e) {
 	  let event = new window.CustomEvent('klik', { detail: { inhoud: 'van het event' } });
@@ -17,7 +16,7 @@ const Goodbye = function(props) {
 	useEffect(() => {
 		setTimeout(function() {
 			// console.log('GOODBYE TIMER');
-			setIdea({ title: 'Vivamus convallis ultricies ipsum ' + parseInt(10 + 90 * Math.random() ) });
+			idea.update({ title: 'Vivamus convallis ultricies ipsum ' + parseInt(10 + 90 * Math.random() ) });
 		}, 1500)
 	}, []);
 

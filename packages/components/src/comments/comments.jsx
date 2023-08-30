@@ -48,10 +48,12 @@ const Comments = function(props) {
 
   const datastore = new DataStore(props);
 
-  const [ currentUser, setCurrentUser, currentUserError, currentUserIsLoading ] = datastore.useUser({ ...props });
-  const [ comments, setComments, commentsError, commentsIsLoading ] = datastore.useComments({ ...props });
+  const [ currentUser, currentUserError, currentUserIsLoading ] = datastore.useUser({ ...props });
+  const [ comments, commentsError, commentsIsLoading ] = datastore.useComments({ ...props });
 
-  function submitComment(e) {
+  let [ submitError, setSubmitError ] = useState();
+  
+  async function submitComment(e) {
 
     e.preventDefault();
 
@@ -59,16 +61,19 @@ const Comments = function(props) {
     formData = Object.fromEntries(formData.entries());
 
     formData.ideaId = props.ideaId;
-    setComments(formData)
 
-  }
+    try {
+      if ( formData.id ) {
+        let comment = comments.find( c => c.id == formData.id );
+        await comment.update(formData)
+      } else {
+        await comments.create(formData)
+      }
+    } catch(err) {
+      console.log(err);
+      setSubmitError(err)
+    }
 
-  function deleteComment(id) {
-    // todo: kan dit niet anders
-    // ja: zie submit like
-    let index = comments.findIndex( elem => elem.id == id );
-    let newData = index ? comments.slice(0, index).concat( comments.slice(index+1) ) : comments;
-    setComments(newData);
   }
 
   // TODO: dit komt uit de oude; willen we dit zo? 
@@ -90,21 +95,21 @@ const Comments = function(props) {
 
   // TODO: errors moeten nog
   let errorHTML = null;
-  if (commentsError) {
-    console.log('****************************************');
-    console.log(commentsError);
-    errorHTML = <div>Error: {commentsError.message}</div>
+  let error = submitError || commentsError;
+  if (error) {
+    console.log(error);
+    errorHTML = <div className="osc-error-block">{error.message}</div>
   }
 
   let commentsHTML = null;
   if (comments.length) {
     commentsHTML = comments.map( ( comment, index ) => {
-      let attributes = { ...props, ...comment, submitComment, deleteComment, currentUser };
+      let attributes = { ...props, ...comment, currentUser, submitComment };
       // todo: maar er een ul met li van
       return <Comment { ...attributes } key={`osc-comment-${ index }`}/>
     })
   } else{
-    if (commentsIsLoading) {
+    if (commentsIsLoading) { // TODO: i18n
       commentsHTML = <div className="osc-empty-list-text">Loading...</div>
     } else {
       commentsHTML = <div className="osc-empty-list-text">{props.emptyListText}</div>
@@ -114,8 +119,8 @@ const Comments = function(props) {
   
   return (
     <div id={props.config.divId} className={commentVariants({ variant: props.variant, size: props.size, className: props.className })}>
-      {errorHTML}
       {titleHTML}
+      {errorHTML}
       {commentsFormHTML}
       {commentsHTML}
     </div>

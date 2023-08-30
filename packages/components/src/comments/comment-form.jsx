@@ -11,12 +11,17 @@ function CommentForm(props) {
     formIntro: '',
   }, props.config,  props);
 
-
+  let parentIdHTML = null;
+  if (props.parentId) {
+    parentIdHTML = <input type="hidden" defaultValue={props.parentId} name="parentId"/>
+  }
+  
   return (
     <form  onSubmit={props.submitComment} style={{width: 150}}>
       <input type="hidden" defaultValue={props.id} name="id"/>
+      {parentIdHTML}
       <input type="hidden" defaultValue={props.sentiment} name="sentiment"/>
-      <textarea defaultValue={props.description || '123'} name="description" rows={4} cols={40} />
+      <textarea defaultValue={props.description || 'Praesent at accumsan diam. Nullam ac tortor euismod, aliquet mauris a, placerat metus. Vivamus imperdiet urna ut sem dapibus placerat.'} name="description" rows={4} cols={40} />
       <Button type="submit">Verstuur</Button>
     </form>
   );
