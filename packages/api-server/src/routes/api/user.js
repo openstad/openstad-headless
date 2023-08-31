@@ -98,11 +98,18 @@ router.route('/')
 // -----------
   .post(auth.can('User', 'create'))
   .post(function (req, res, next) {
+    // check project
     if (!req.project) return next(createError(401, 'Project niet gevonden'));
     return next();
   })
   .post(function (req, res, next) {
+    // check config
     if (!(req.project.config && req.project.config.users && req.project.config.users.canCreateNewUsers)) return next(createError(401, 'Gebruikers mogen niet aangemaakt worden'));
+    return next();
+  })
+  .post(function (req, res, next) {
+    // check adapter settings
+    
     return next();
   })
   .post(filterBody)
@@ -110,7 +117,7 @@ router.route('/')
     // Look for an Openstad user with this e-mail
     // TODO: other types of users
     if (!req.body.email) return next(createError(401, 'E-mail is a required field'));
-    let which = req.query.useOauth || 'default';
+    let which = req.query.useAuth || 'default';
     let projectConfig = req.project && merge({}, req.project.config, { id: req.project.id });
     let email = req.body && req.body.email;
     OAuthApi
@@ -130,7 +137,7 @@ router.route('/')
       next();
     } else {
       // in case no oauth user is found with this e-mail create it
-      let which = req.query.useOauth || 'default';
+      let which = req.query.useAuth || 'default';
       let projectConfig = req.project && req.project.config;
       let userData = Object.assign(req.body);
       OAuthApi
@@ -339,7 +346,7 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
     if ( !req.remainingUsers || req.remainingUsers.length > 0 ) return next();
 
     // no api users left for this oauth user, so remove the oauth user
-    let which = req.query.useOauth || 'default';
+    let which = req.query.useAuth || 'default';
     let projectConfig = req.project && merge({}, req.project.config, { id: req.project.id });
     try {
       let result = await OAuthApi.deleteUser({ projectConfig, which, userData: { id: req.externalUserId }})
@@ -410,7 +417,7 @@ router.route('/:userId(\\d+)')
     /**
      * Update the oauth API first
      */
-    let which = req.query.useOauth || 'default';
+    let which = req.query.useAuth || 'default';
     let projectConfig = req.project && merge({}, req.project.config, { id: req.project.id });
     OAuthApi
       .updateUser({ projectConfig, which, userData: merge(true, userData, { id: externalUserId }) })
@@ -509,7 +516,7 @@ router.route('/:userId(\\d+)')
     const userForAllProjects = await db.User.findAll({where: {idpUser: { identifier: user.idpUser && user.idpUser.identifier }}});
     
     if (userForAllProjects.length <= 1) {
-      let which = req.query.useOauth || 'default';
+      let which = req.query.useAuth || 'default';
       let projectConfig = req.project && merge({}, req.project.config, { id: req.project.id });
       let result = await OAuthApi.deleteUser({ projectConfig, which, userData: { id: user.idpUser.identifier }})
     }

@@ -17,6 +17,7 @@
 * Rename devel branch to development to be consistent with other branches
 * Remove express-promise-router dependency
 * Remove oauth userdata parsing: the API is now single source of truth
+* Refactor useOauth to useAuth
 
 ### auth server
 * Remove user.extradata: the API is now single source of truth

@@ -198,7 +198,7 @@ router.route('/:projectId') //(\\d+)
         fetchActions.push(fetchClient(req, configKey));
       })
     } else {
-      let which = req.query.useOauth || 'default';
+      let which = req.query.useAuth || 'default';
       fetchActions.push(fetchClient(req, which));
     }
 
@@ -304,7 +304,7 @@ router.route('/:projectId(\\d+)/:willOrDo(will|do)-anonymize-all-users')
 		req.project.doAnonymizeAllUsers(
 			[...result.users], 
 			[...result.externalUserIds],
-			req.query.useOauth
+			req.query.useAuth
 
 		);
       } 

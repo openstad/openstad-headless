@@ -8,8 +8,6 @@ In de jwt heb client hernoemd naar idp. Nu heeft hij nog beide.
 
 Iss is een string die gechecked moet worden!!
 
-useOauth moet useAuth of useIDP worden, maar dat moet ook in de frontend en is daarom nog niet doorgevoerd
-
 'default' als waarde in de projectconfig.auth moet verwijzen naar openstad (of iets anders configureerbaars) zodat ik 'openstad' kan gebruiken als waarde in bijvoorbeeld fisexAuthTokens
 
 

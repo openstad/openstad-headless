@@ -990,7 +990,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
     return result;
   }
 
-  Project.prototype.doAnonymizeAllUsers = async function (usersToAnonymize, externalUserIds, useOauth='default') {
+  Project.prototype.doAnonymizeAllUsers = async function (usersToAnonymize, externalUserIds, useAuth='default') {
     // anonymize all users for this project
     let self = this;
     const amountOfUsersPerSecond = 50;
@@ -1015,7 +1015,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
         if (users.length == 0) {
           // no api users left for this oauth user, so remove the oauth user
           let projectConfig = self && merge({}, self.config, { id: self.id });
-            await OAuthApi.deleteUser({ projectConfig, useOauth, userData: { id: externalUserId }})
+            await OAuthApi.deleteUser({ projectConfig, useAuth, userData: { id: externalUserId }})
         }
       }
     } catch (err) {
