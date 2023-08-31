@@ -1,0 +1,60 @@
+.osc-radios() {
+
+  .osc-radio-container {
+
+    h4 {
+      padding: 0 !important;
+      margin: 0 !important;
+      font-size: 1em !important;
+      line-height: 1em !important;
+      font-weight: bold !important;
+    }
+
+    margin-bottom: 10px;
+    overflow: hidden;
+
+    input[type="radio"] {
+      opacity: 0;
+      width: 24px;
+      height: 24px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .osc-radio-input {
+      position: relative;
+      float: left;
+      width: 24px;
+      height: 24px;
+      margin-right: 12px;
+      border: solid 1px #767676;
+      border-radius: 12px;
+      background-color: white;
+
+
+      &.osc-radio-input-checked {
+
+        &:after {
+          position: absolute;
+          top: 2px;
+          left: 2px;
+          width: 0px;
+          height: 0px;
+          border: solid 9px black;
+          border-radius: 9px;
+          content: '';
+        }
+      }
+
+    }
+
+    .osc-radio-text {
+      float: left;
+      width: calc(100% - 37px);
+      margin-top: 3px;
+      line-height: 1.38;
+    }
+
+  }
+
+}

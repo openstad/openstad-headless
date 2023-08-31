@@ -7,9 +7,6 @@ import CommentForm from './comment-form';
 
 import hasRole from '../lib/user-has-role';
 
-
-import './css/default.less'; // add css to result - TODO: dit moet beter
-
 const Comment = function( props ) {
 
   props = merge.recursive({}, {

@@ -1,11 +1,11 @@
 import loadWidget from '../lib/load-widget';
-import Comments from './comments';
+import Form from './form';
 
 import './css/default.less'; // add css to result - TODO: dit moet beter
 
-Comments.loadWidget = loadWidget;
+Form.loadWidget = loadWidget;
 
 export {
-  Comments as default,
-  Comments,
+  Form as default,
+  Form,
 };

@@ -55,6 +55,7 @@ const Comments = function(props) {
   
   async function submitComment(e) {
 
+    setSubmitError(null)
     e.preventDefault();
 
     let formData = new FormData(e.target);
@@ -85,7 +86,6 @@ const Comments = function(props) {
 
   let commentsFormHTML = <CommentForm {...props} submitComment={e => submitComment(e)}/>
   if (props.isClosed && !hasRole(props.currentUser, 'moderator')) {
-    console.log('===', props);
     if (props.closedText) {
       commentsFormHTML = <div className="osc-closed-text">{props.closedText}</div>
     } else {

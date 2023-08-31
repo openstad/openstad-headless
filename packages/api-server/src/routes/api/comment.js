@@ -243,12 +243,10 @@ router.route('/:commentId(\\d+)/vote')
       .catch(next);
   })
   .post(function(req, res, next) {
-
-    setTimeout(function() {
-      res.json(req.results);
-    }, 1000)
-
-
+    res.json(req.results);
+    // setTimeout(function() {
+    //   res.json(req.results);
+    // }, 1000)
   });
 
 module.exports = router;

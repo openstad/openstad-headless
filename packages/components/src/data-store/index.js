@@ -57,13 +57,13 @@ export default function DataStore(props = { config: {} }) {
       rollbackOnError: true,
     }
 
-    await mutate(key, fetcher(key, newData), { ...defaultOptions, ...options });
+    return await mutate(key, fetcher(key, newData), { ...defaultOptions, ...options });
 
-    return mutate( // mutate other caches; idea taken from https://koba04.medium.com/organize-swr-cache-with-tag-33d5b1aac3bd
-      cacheKey => cacheKey != key && cacheKey.type == key.type,
-      currentData => mergeData(currentData, newData),
-      { revalidate: false } // meybe true? or option?
-    );
+    // return mutate( // mutate other caches; idea taken from https://koba04.medium.com/organize-swr-cache-with-tag-33d5b1aac3bd
+    //   cacheKey => cacheKey != key && cacheKey.type == key.type,
+    //   currentData => mergeData(currentData, newData),
+    //   { revalidate: false } // meybe true? or option?
+    // );
 
 
   }

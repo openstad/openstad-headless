@@ -1,0 +1,55 @@
+@import (reference) '../../css/images';
+
+.osc-htmlarea() {
+
+  .osc-htmlarea-content {
+    border: solid 1px #434343;
+    padding: 15px;
+  }
+
+  .osc-htmlarea-buttons {
+
+    margin-bottom: 5px;
+
+    .osc-htmlarea-button {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      margin-right: 5px;
+      padding: 5px;
+      border: solid 1px #434343;
+      background-color: #eee;
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+
+      &.osc-htmlarea-button-bold {
+        .osc-button-bold-background();
+        background-position: 5px 5px;
+      }
+
+      &.osc-htmlarea-button-italic {
+        .osc-button-italic-background();
+        background-position: 5px 5px;
+      }
+
+      &.osc-htmlarea-button-insertunorderedlist {
+        .osc-button-insertunorderedlist-background();
+        background-position: 5px 5px;
+      }
+
+      &.osc-htmlarea-button-createlink {
+        .osc-button-createlink-background();
+        background-position: 5px 5px;
+      }
+
+    }
+  
+  }
+
+}
+
+.osc-htmlarea {
+  .osc-htmlarea();
+}
+

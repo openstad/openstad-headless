@@ -13,17 +13,17 @@ export default function useComments(props) {
   // add functionality
   let comments = data || [];
   comments.create = function(newData) {
-    self.mutate({ projectId, ideaId, sentiment }, 'comments.create', newData, { action: 'create' });
+    return self.mutate({ projectId, ideaId, sentiment }, 'comments.create', newData, { action: 'create' });
   }
   comments.map( async comment => {
     comment.update = function(newData) {
-      self.mutate({ projectId, ideaId, sentiment }, 'comments.update', newData, { action: 'update' });
+      return self.mutate({ projectId, ideaId, sentiment }, 'comments.update', newData, { action: 'update' });
     }
     comment.delete = function(newData) {
-      self.mutate({ projectId, ideaId, sentiment }, 'comments.delete', comment, { action: 'delete' });
+      return self.mutate({ projectId, ideaId, sentiment }, 'comments.delete', comment, { action: 'delete' });
     }
     comment.submitLike = function() {
-      self.mutate({ projectId, ideaId, sentiment }, 'comments.submitLike', comment, { action: 'update' });
+      return self.mutate({ projectId, ideaId, sentiment }, 'comments.submitLike', comment, { action: 'update' });
     }
   })
 

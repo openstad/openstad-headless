@@ -1,0 +1,55 @@
+@import (reference) '../../css/images';
+
+.osc-input-with-counter() {
+
+  position: relative;
+  margin-bottom: 36px;
+
+  input, textarea {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #767676;
+    border-radius: 0;
+  }
+
+  .osc-form-info,
+  .osc-form-warning,
+  .osc-form-counter {
+    position: relative;
+    margin: -16px 0 10px 0;
+    padding: 0;
+  }
+
+  .osc-form-info {
+    margin-left: 30px;
+  }
+
+  .osc-form-warning,
+  .osc-form-counter {
+    position: absolute;
+    font-size: 14px;
+    bottom: -35px;
+    margin-top: 2px;
+    color: #9a9a9a;
+  }
+
+  .osc-form-warning,
+  .osc-form-error {
+    color: #ea1d25;
+  }
+
+  .osc-form-info::before {
+    .osc-infopin-background;
+	  position: absolute;
+	  top: 0px;
+	  left: -30px;
+	  width: 30px;
+	  height: 30px;
+	  content: "";
+  }
+
+}
+
+.osc-input-with-counter {
+  .osc-input-with-counter();
+}

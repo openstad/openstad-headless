@@ -27,6 +27,15 @@ module.exports = {
       },
     },
 
+    'forms': {
+      import: './src/forms/index.jsx',
+      filename: 'forms.js',
+      library: {
+        name: 'OS20',
+        type: 'assign-properties',
+      },
+    },
+
     'comments': {
       import: './src/comments/index.jsx',
       filename: 'comments.js',

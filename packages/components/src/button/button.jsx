@@ -24,12 +24,9 @@ const commentVariants = cva(
 const Button = function( props ) {
 
   props = merge.recursive({}, {
-    button: props.config?.type || 'button', 
-    number: props.config?.number,
-    icon: props.config?.icon,
-    url: props.config?.url,
-    label: props.config?.label,
-  }, props);
+    button: 'button', 
+    disabled: false,
+  }, props.config,  props);
 
   // todo: dit moet passen op NLDS
   let className = 'osc-button-component' + [ props.className ? ` ${props.className}` : '' ];
@@ -62,15 +59,12 @@ const Button = function( props ) {
   if (onClick) className += ' osc-button-clickable'
 
   let disabled = props.disabled;
-  if (disabled) className += ' osc-disabled';
+  if (disabled) className += ' osc-disabled'; // todo: cva
 
-  // console.log('----------');
-  // console.log(onClick);
-
-  let isClickable = !( props.type == 'button' && !onClick );
+  let isClickable = !disabled && !( props.type == 'button' && !onClick );
 
   return (
-    <button type={props.type} onClick={onClick} id={props.divId} className={commentVariants({ variant: props.variant || isClickable ? 'clickable' : 'default', size: props.size, className: props.className })} role="link" tabIndex="0">
+    <button type={props.type} onClick={onClick} id={props.divId} className={commentVariants({ variant: props.variant || isClickable ? 'clickable' : 'default', size: props.size, className: props.className })} disabled={disabled} role="link" tabIndex="0">
       {numberplatesHTML}
       {iconHTML}
       {labelHTML}
