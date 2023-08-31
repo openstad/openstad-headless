@@ -39,31 +39,6 @@ module.exports = (db, sequelize, Sequelize) => {
       },
     },
 
-    extraData: {
-      type: DataTypes.JSON,
-      defaultValue: {},
-      allowNull: false,
-      get: function () {
-        let value = this.getDataValue('extraData');
-        try {
-          value = JSON.parse(value)
-        } catch(err) {}
-        return value;
-      },
-      set: function (value) {
-        try {
-          value = JSON.parse(value)
-        } catch(err) {}
-        value = value || {};
-        try {
-          value = JSON.stringify(value)
-          value = sanitize.noTags(value);
-          value = JSON.parse(value);
-        } catch(err) {}
-        this.setDataValue('extraData', value);
-      },
-    },
-
     hashedPhoneNumber: {
       type: DataTypes.STRING,
     },

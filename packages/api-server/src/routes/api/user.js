@@ -10,7 +10,6 @@ const searchResults = require('../../middleware/search-results-user');
 const fetch = require('node-fetch');
 const merge = require('merge');
 const OAuthApi = require('../../services/oauth-api');
-const OAuthUser = require('../../services/oauth-user');
 
 const filterBody = (req, res, next) => {
   const data = {};
@@ -442,15 +441,10 @@ router.route('/:userId(\\d+)')
                 if (user.project) {
                   actions.push(function () {
                     return new Promise((resolve, reject) => {
-
-                      let userProjectConfig = merge(true, user.project.config, {id: user.project.id});
-
                       let clonedUserData = merge(true, mergedUserData);
-                      let projectUserData = OAuthUser.parseDataForProject(userProjectConfig, clonedUserData);
-
                       user
-                        .authorizeData(projectUserData, 'update', req.user)
-                        .update(projectUserData)
+                        .authorizeData(clonedUserData, 'update', req.user)
+                        .update(clonedUserData)
                         .then((result) => {
                           resolve();
                         })

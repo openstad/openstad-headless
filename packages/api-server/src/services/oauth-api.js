@@ -2,7 +2,6 @@ const config = require('config');
 const fetch = require('node-fetch');
 const merge = require('merge');
 const httpBuildQuery = require('../util/httpBuildQuery');
-const OAuthUser = require('./oauth-user');
 
 const formatOAuthApiUrl = (path, projectConfig, which = 'default') => {
   let projectOauthConfig = (projectConfig && projectConfig.oauth && projectConfig.oauth[which]) || {};
@@ -108,7 +107,7 @@ OAuthAPI.fetchUser = async function({ projectConfig, which = 'default', email, u
       } else if (json.user_id) {
         user = json;
       }
-	    return user && !raw ? OAuthUser.parseDataForProject(projectConfig, user) : user;
+	    return user;
 	  })
 	  .catch((err) => {
 		  console.log('Niet goed');
@@ -145,7 +144,7 @@ OAuthAPI.updateUser = async function({ projectConfig, which = 'default', userDat
   if (!(userData && userData.id)) throw new Error('No user id found')
 
   let orgUserData = await OAuthAPI.fetchUser({ raw: true, projectConfig, which, userId: userData.id });
-  let mergedUserData = OAuthUser.mergeDataForProject(projectConfig, orgUserData, userData);
+  let mergedUserData = merge.recursive(orgUserData, userData);
 
   const oauthServerUrl = formatOAuthApiUrl(`/api/admin/user/${userData.id}`, projectConfig, which);
   const oauthServerCredentials = formatOAuthApiCredentials(projectConfig, which);

@@ -145,14 +145,12 @@ exports.validateUser = async(req, res, next) => {
 }
 
 exports.create =  (req, res, next) => {
-  let { firstName, lastName, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, hashedPhoneNumber, password, extraData } = req.body;
+  let { firstName, lastName, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, hashedPhoneNumber, password } = req.body;
   const rack = hat.rack();
 
   // if empty create a random string
   password = password ? password : rack();
   password = bcrypt.hashSync(password, saltRounds);
-  extraData = extraData ? extraData : {};
-  extraData = JSON.stringify(extraData);
 
   db.User
     .create({
@@ -166,7 +164,6 @@ exports.create =  (req, res, next) => {
       city,
       phoneNumber,
       password,
-      extraData
     })
     .then(user => {
       req.userObject = user;
@@ -179,17 +176,12 @@ exports.create =  (req, res, next) => {
 }
 
 exports.update = (req, res, next) => {
-  const keysToUpdate = ['firstName', 'lastName', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'extraData', 'twoFactorConfigured', 'twoFactorToken'];
+  const keysToUpdate = ['firstName', 'lastName', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'twoFactorConfigured', 'twoFactorToken'];
 
   let data = {};
   keysToUpdate.forEach((key) => {
     if (req.body[key] || req.body[key] === 0 || req.body[key] === null  || req.body[key] === false) {
       let value = req.body[key];
-
-      if (key === 'extraData') {
-        value = value ? value : {};
-        value = JSON.stringify(value);
-      }
 
       if (key === 'password' && value) {
         value = bcrypt.hashSync(value, saltRounds);

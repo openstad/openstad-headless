@@ -35,7 +35,6 @@ exports.info = (req, res) => {
     phoneNumber: req.user.phoneNumber,
     hashedPhoneNumber: req.user.hashedPhoneNumber,
     phoneNumberConfirmed: req.user.phoneNumberConfirmed,
-    extraData: req.user.extraData,
     streetName: req.user.streetName,
     houseNumber: req.user.houseNumber,
     suffix: req.user.suffix,

@@ -36,12 +36,9 @@ exports.new = (req, res) => {
  * @TODO validation
  */
 exports.create = (req, res, next) => {
-  let { firstName, lastName, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, hashedPhoneNumber, password, extraData } = req.body;
+  let { firstName, lastName, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, hashedPhoneNumber, password } = req.body;
 
   password = bcrypt.hashSync(password, saltRounds);
-
-  extraData = extraData ? extraData : {};
-  extraData = JSON.stringify(extraData);
 
   db.User
     .create({
@@ -66,7 +63,7 @@ exports.create = (req, res, next) => {
 }
 
 exports.update = (req, res, next) => {
-  const keysToUpdate = ['firstName', 'lastName', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'extraData'];
+  const keysToUpdate = ['firstName', 'lastName', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes'];
 
   let data = {};
   keysToUpdate.forEach((key) => {
@@ -75,11 +72,6 @@ exports.update = (req, res, next) => {
 
       if (key === 'password') {
         value = bcrypt.hashSync(value, saltRounds);
-      }
-
-      if (key === 'extraData') {
-        value = value ? value : {};
-        value = JSON.stringify(value);
       }
 
       data[key] = value;
