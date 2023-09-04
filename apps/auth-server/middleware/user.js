@@ -2,10 +2,8 @@ const { checkSchema, validationResult }  = require('express-validator')
 const db                    = require('../db');
 const userProfileValidation = require('../config/user').validation.profile;
 const bcrypt                = require('bcrypt');
-const hat                   = require('hat');
 const saltRounds            = 10;
 const Promise               = require('bluebird');
-
 
 exports.withAll = (req, res, next) => {
 
@@ -146,11 +144,6 @@ exports.validateUser = async(req, res, next) => {
 
 exports.create =  (req, res, next) => {
   let { firstName, lastName, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, hashedPhoneNumber, password } = req.body;
-  const rack = hat.rack();
-
-  // if empty create a random string
-  password = password ? password : rack();
-  password = bcrypt.hashSync(password, saltRounds);
 
   db.User
     .create({
@@ -163,7 +156,7 @@ exports.create =  (req, res, next) => {
       postcode,
       city,
       phoneNumber,
-      password,
+      password: password ? bcrypt.hashSync(password, saltRounds) : null,
     })
     .then(user => {
       req.userObject = user;

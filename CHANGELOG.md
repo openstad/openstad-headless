@@ -18,9 +18,12 @@
 * Remove oauth userdata parsing: the API is now single source of truth
 * Refactor useOauth to useAuth
 
-### auth server
+### Auth server
+* Refactor init database and seeds
 * Remove user.extradata: the API is now single source of truth
+* Bugfix: toJSON of db models used the wrong data
+* Bugfix: new users are now created withoud a random password
 
-### image server
+### Image server
 * Refactor init database, merge seeds and fixtures
 
