@@ -1,26 +1,32 @@
 const config = require('config');
 const merge = require('merge');
 
-let getConfig = async function({  project, useAuth = 'default' }) {
-
+let createProjectConfig = function({ project }) {
+  
   let defaultConfig = config && config.auth || {};
   let temp = { provider: {}, adapter: {} };
   Object.keys(defaultConfig.provider).map( key => temp.provider[key] = {} );  // todo: defaultConfig is non-extensible, that's why this very not robust fix
   let apiAuthConfig = merge.recursive( temp, defaultConfig );
 
-  let projectConfig = project && project.config && project.config.auth || {};
+  let projectSpecificConfig = project && project.config && project.config.auth || {};
 
-  apiAuthConfig = merge.recursive( apiAuthConfig, projectConfig )
+  return merge.recursive( apiAuthConfig, projectSpecificConfig )
 
-  if (useAuth == 'default' && apiAuthConfig.default) useAuth = apiAuthConfig.default;
+}
+
+let getConfig = async function({  project, useAuth = 'default' }) {
+
+  let projectConfig = createProjectConfig({ project })
+
+  if (useAuth == 'default' && projectConfig.default) useAuth = projectConfig.default;
 
   let authConfig = {
     provider: useAuth,
-    jwtSecret: apiAuthConfig.jwtSecret
+    jwtSecret: projectConfig.jwtSecret
   }
 
-  let providerConfig = apiAuthConfig.provider[ useAuth ] || {};
-  let adapterConfig = apiAuthConfig.adapter[ providerConfig.adapter ] || {};
+  let providerConfig = projectConfig.provider[ useAuth ] || {};
+  let adapterConfig = projectConfig.adapter[ providerConfig.adapter ] || {};
   authConfig = merge.recursive( authConfig, adapterConfig );
   authConfig = merge.recursive( authConfig, providerConfig );
 
@@ -35,7 +41,6 @@ let getConfig = async function({  project, useAuth = 'default' }) {
 
 };
 
-
 let getAdapter = async function({  authConfig, project, useAuth = 'default' }){
 
   authConfig = authConfig || await getConfig({  project, useAuth });
@@ -44,12 +49,23 @@ let getAdapter = async function({  authConfig, project, useAuth = 'default' }){
     let adapter = await require(process.env.NODE_PATH + '/' + authConfig.modulePath);
     return adapter;
   } catch(err) {
+    console.log(err);
     throw new Error('Adapter not found');
   }
+
+};
+
+let getProviders = async function({ project }){
+
+  let projectConfig = createProjectConfig({ project })
+  let providers = Object.keys(projectConfig.provider);
+
+  return providers;
 
 };
 
 module.exports = {
   config: getConfig,
   adapter: getAdapter,
+  providers: getProviders,
 }

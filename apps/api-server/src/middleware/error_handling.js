@@ -26,13 +26,8 @@ module.exports = function( app ) {
 		var friendlyStatus = statuses[status]
 		var stack          = err.stack || err.toString();
 		var message        = err.message || err.error;
-    message = message.replace(/Validation error:?\s*/, '');
+    message = message && message.replace(/Validation error:?\s*/, '');
 		var errorStack     = showDebug ? stack : '';
-
-
-		if( env !== 'test' && status == 500 ) {
-			console.error(stack);
-		}
 
 		res.status(status);
 		res.json({

@@ -61,8 +61,10 @@ var sequelize = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.passwor
 
 
 // Define models.
-var db     = {sequelize: sequelize};
-var models = require('./models')(db, sequelize, Sequelize.DataTypes);
+let db = {};
+db.Sequelize = Sequelize;
+db.sequelize = sequelize;
+let models = require('./models')(db, sequelize, Sequelize.DataTypes);
 
 // authentication mixins
 const mixins = require('./lib/sequelize-authorization/mixins');

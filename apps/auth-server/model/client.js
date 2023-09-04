@@ -128,14 +128,14 @@ module.exports = (db, sequelize, Sequelize) => {
         try {
           value = JSON.parse(value)
         } catch(err) {}
-        value = value || [];
+        value = value || {};
         this.setDataValue('config', value);
       },
     },
 
     twoFactorRoles: {
       type: DataTypes.JSON,
-      defaultValue: {},
+      defaultValue: [],
       get: function () {
         let value = this.getDataValue('twoFactorRoles');
         try {

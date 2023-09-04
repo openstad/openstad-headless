@@ -11,6 +11,7 @@ const searchResults 	= require('../../middleware/search-results-user');
 const checkHostStatus = require('../../services/checkHostStatus')
 const OAuthApi        = require('../../services/oauth-api');
 const projectsWithIssues = require('../../services/projects-with-issues');
+const authSettings = require('../../util/auth-settings');
 
 let router = express.Router({mergeParams: true});
 
@@ -154,6 +155,7 @@ router.route('/:projectId') //(\\d+)
 			.authorizeData(req.body, 'update')
 			.update(req.body)
 			.then(result => {
+        req.results = result;
 				return checkHostStatus({id: result.id});
 			})
 			.then(() => {
@@ -161,108 +163,32 @@ router.route('/:projectId') //(\\d+)
         return null;
 			})
 			.catch((err) => {
-				console.log('ERROR',err);
+				console.log('Ignore checkHostStatus error',err);
 				next();
         return null;
 			});
+
 	})
-// update certain parts of config to the oauth client
-// mainly styling settings are synched so in line with the CMS
-	.put(function (req, res, next) {
-
-    req.projectOAuthClients = [];
-    const project          = req.project;
-    const authServerUrl = config.authorization['auth-server-url'];
-
-    const projectConfig = req.project && req.project.config
-    const oauthConfig  = projectConfig.oauth;
-    
-    const fetchActions = [];
-    const fetchClient = (req, which) => {
-      return new Promise((resolve, reject) => {
-        return OAuthApi
-          .fetchClient({ projectConfig, which })
-          .then((client) => {
-            if (client && client.id) req.projectOAuthClients.push(client);
-            resolve();
-          })
-          .catch((err) => {
-            console.log('==>> err oauthClientId', which, err.message);
-            resolve();
-          });
-      })
+	.put(async function (req, res, next) {
+    // update certain parts of config to the oauth client
+    // mainly styling settings are synched so in line with the CMS
+    try {
+      let providers = await authSettings.providers({ project: req.project });
+      for (let provider of providers) {
+        let authConfig = await authSettings.config({ project: req.results, useAuth: provider });
+        let adapter = await authSettings.adapter({ authConfig });
+        if (adapter.service.updateClient) {
+          await adapter.service.updateClient({ authConfig, config: req.results.config });
+        }
+      }
+      return next();
+    } catch(err) {
+      return next(err);
     }
-
-    if (oauthConfig && Object.keys(oauthConfig).length > 0) {
-      Object.keys(oauthConfig).forEach((configKey) => {
-        fetchActions.push(fetchClient(req, configKey));
-      })
-    } else {
-      let which = req.query.useAuth || 'default';
-      fetchActions.push(fetchClient(req, which));
-    }
-
-    return Promise
-      .all(fetchActions)
-      .then(() => { next(); })
-      .catch((e) => {
-        console.log('eeee', e)
-        next();
-      });
 	})
-	.put(function (req, res, next) {
-
-    // todo: gebruik de oauth-api service
-		const authServerUrl = config.authorization['auth-server-url'];
-		const updates = [];
-
-		req.projectOAuthClients.forEach((oauthClient, i) => {
-			const authUpdateUrl = authServerUrl + '/api/admin/client/' + oauthClient.id;
-			const configKeysToSync = ['users', 'styling', 'ideas'];
-
-      // todo: gebruik de oauth-api service
-      // todo: specifieker selecteren van sync velden (user.canCreateNewUsers)
-      // todo: ik denk dat dit in het model moet    
-
-			oauthClient.config = oauthClient.config ? oauthClient.config : {};
-
-			configKeysToSync.forEach(field => {
-				oauthClient.config[field] = req.project.config[field];
-			});
-      oauthClient.config['users'] = { canCreateNewUsers: req.project.config.users.canCreateNewUsers }
-
-
-      const apiCredentials = {
-				client_id: oauthClient.clientId,
-				client_secret: oauthClient.clientSecret,
-			}
-
-			const options = {
-				method: 'post',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				mode: 'cors',
-				body: JSON.stringify(Object.assign(apiCredentials, oauthClient))
-			}
-
-			updates.push(fetch(authUpdateUrl, options));
-		});
-
-		Promise.all(updates)
-			.then(() => {
-				next()
-			})
-			.catch((e) => {
-				console.log('errr oauth', e);
-				next(e)
-			});
-	})
-// call the project, to let the project know a refresh of the projectConfig is needed
 	.put(function (req, res, next) {
 		// when succesfull return project JSON
 		res.json(req.results);
-    next();
 	})
 
 // delete project

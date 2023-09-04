@@ -52,7 +52,7 @@ for (let modelName in sequelize.models) {
   model.prototype.toJSON = function(params) {
     let result = {};
     for (let key in this.dataValues) {
-      let target = this.dataValues[key];
+      let target = this[key];
       if (target && target.toJSON) {
         result[key] = target.toJSON(params);
       } else {
