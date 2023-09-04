@@ -46,7 +46,7 @@ module.exports = function authorizeData(data, action, user, self, project) {
       testRole = testRole && testRole.length ? testRole : (self.auth && self.auth[action+'ableBy']);
 
       let ownerId = userId;
-      if (self.toString().match('SequelizeInstance:user') && self.idpUser.identifier && self.idpUser.identifier === user.idpUser.identifier) {
+      if (self.toString().match('SequelizeInstance:user') && self.idpUser && user.idpUser && self.idpUser.identifier && self.idpUser.identifier === user.idpUser.identifier) {
         // special case: users are owner on their users on other projects
         ownerId = user.id;
       }

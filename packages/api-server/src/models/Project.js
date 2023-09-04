@@ -2,8 +2,8 @@ const Sequelize = require('sequelize');
 const merge = require('merge');
 const moment = require('moment');
 const apiConfig = require('config');
-const OAuthApi = require('../services/oauth-api');
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
+const authSettings = require('../util/auth-settings');
 
 module.exports = function (db, sequelize, DataTypes) {
 
@@ -995,16 +995,19 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
     let self = this;
     const amountOfUsersPerSecond = 50;
     try {
+
       // Anonymize users
+      let providers = {};
       for (const user of usersToAnonymize) {
         await new Promise((resolve, reject) => {
           setTimeout(async function() {
+            providers[ user.idpUser?.identifier ] = user.idpUser?.provider
             user.project = self;
             let res = await user.doAnonymize();
             user.project = null;
           }, 1000 / amountOfUsersPerSecond)
         })       
-        .then(result => resolve() )
+        .then(result => Promise.resolve() )
           .catch(function (err) {
             throw err;
           });
@@ -1013,9 +1016,14 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
       for (let externalUserId of externalUserIds) {
         let users = await db.User.findAll({ where: { idpUser: { identifier: externalUserId } } });
         if (users.length == 0) {
-          // no api users left for this oauth user, so remove the oauth user
-          let projectConfig = self && merge({}, self.config, { id: self.id });
-            await OAuthApi.deleteUser({ projectConfig, useAuth, userData: { id: externalUserId }})
+          // no api users left for this oauth user; let the oauth server know we dont need this user anymore
+          let authConfig = await authSettings.config({ project: self, useAuth: providers[ externalUserId ] })
+          let adapter = await authSettings.adapter({ authConfig });
+          if (adapter && adapter.service && adapter.service.deleteUser) {
+            // TODO: niet getest
+            await adapter.service.deleteUser({ authConfig, userData: { id: externalUserId }})
+          }
+
         }
       }
     } catch (err) {

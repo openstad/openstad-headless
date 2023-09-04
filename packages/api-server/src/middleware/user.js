@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const merge = require('merge');
 const fetch = require('node-fetch');
 const db = require('../db');
-const authconfig = require('../util/auth-config');
+const authSettings = require('../util/auth-settings');
 
 let adapters = {};
 
@@ -23,7 +23,7 @@ module.exports = async function getUser( req, res, next ) {
     }
 
     let { userId, isFixed, authProvider } = parseAuthHeader(req.headers['x-authorization']);
-    let authConfig = await authconfig({ project: req.project, useAuth: authProvider })
+    let authConfig = await authSettings.config({ project: req.project, useAuth: authProvider })
     
     if(userId === null || typeof userId === 'undefined') {
       return nextWithEmptyUser(req, res, next);

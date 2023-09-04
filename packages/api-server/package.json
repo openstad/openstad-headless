@@ -50,7 +50,6 @@
     "sanitize-html": "^2.7.0",
     "sequelize": "^6.19.0",
     "umzug": "^2.3.0",
-    "useragent": "^2.3.0",
     "ws": "^7.5.7"
   },
   "devDependencies": {

@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/openstad/openstad-headless.git"
   },
-  "author": "Daan Rosbergen",
+  "author": "OpenStad",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/openstad/openstad-headless/issues"

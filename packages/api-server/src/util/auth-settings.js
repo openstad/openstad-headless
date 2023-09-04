@@ -1,7 +1,7 @@
 const config = require('config');
 const merge = require('merge');
 
-module.exports = async function autconfig({  project, useAuth = 'default' }) {
+let getConfig = async function({  project, useAuth = 'default' }) {
 
   let defaultConfig = config && config.auth || {};
   let temp = { provider: {}, adapter: {} };
@@ -33,4 +33,23 @@ module.exports = async function autconfig({  project, useAuth = 'default' }) {
 
   return authConfig;
 
+};
+
+
+let getAdapter = async function({  authConfig, project, useAuth = 'default' }){
+
+  authConfig = authConfig || await getConfig({  project, useAuth });
+
+  try {
+    let adapter = await require(process.env.NODE_PATH + '/' + authConfig.modulePath);
+    return adapter;
+  } catch(err) {
+    throw new Error('Adapter not found');
+  }
+
+};
+
+module.exports = {
+  config: getConfig,
+  adapter: getAdapter,
 }

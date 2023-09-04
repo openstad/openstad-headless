@@ -19,7 +19,7 @@ module.exports = function( req, res, next ) {
   if (req.path.match('^(/api/project(/[^/]*)?)$')) return next();
 
   const projectId = getProjectId(req.path);
-  if (!projectId || typeof projectId !== 'number') return next(new createError('400', 'Project niet gevonden for path: ' + req.path));
+  if (!projectId || typeof projectId !== 'number') return next(new createError(400, 'Project niet gevonden for path: ' + req.path));
 
   const where = { id: projectId }
 
@@ -28,7 +28,7 @@ module.exports = function( req, res, next ) {
   	.then(function( found ) {
       if (!found) {
         console.log('Project not found for projectId query: ', where);
-        return next(new createError('404', 'Project niet gevonden for projectId: '+ projectId));
+        return next(new createError(404, 'Project niet gevonden for projectId: '+ projectId));
       }
   		req.project = found;
   		next();

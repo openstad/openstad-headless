@@ -77,7 +77,7 @@ router
 	    })
 	    .catch((err) => {
 		    console.log(err);
-        throw createError('Login niet gelukt');
+        throw createError(401, 'Login niet gelukt');
 	    });
 
   })
@@ -135,7 +135,7 @@ router
         } else {
 
           // user not found; create
-          if (!req.project.config.users.canCreateNewUsers) return next(createError('403', 'Users mogen niet aangemaakt worden op deze project'));
+          if (!req.project.config.users.canCreateNewUsers) return next(createError(403, 'Users mogen niet aangemaakt worden op deze project'));
           
           data.complete = true;
 

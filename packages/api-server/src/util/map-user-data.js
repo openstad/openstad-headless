@@ -1,7 +1,7 @@
 const db = require('../db');
 
 module.exports = function mapUserData({ map = {}, user = {} }) {
-
+  
   if ( typeof map == 'string' ) {
     try {
       map = JSON.parse(map);

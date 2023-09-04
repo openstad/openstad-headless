@@ -1,6 +1,6 @@
 const express = require('express');
 const bruteForce = require('../../middleware/brute-force');
-const authconfig = require('../../util/auth-config');
+const authSettings = require('../../util/auth-settings');
 
 let adapters = {};
 
@@ -17,18 +17,14 @@ router.use( '/', require('./me') );
 router
   .use(async function (req, res, next) { // auth config
     let useAuth = req.query.useAuth || req.user.provider || ( req.user.idpUser && req.user.idpUser.provider );
-    req.authConfig = await authconfig({ project: req.project, useAuth: useAuth })
+    req.authConfig = await authSettings.config({ project: req.project, useAuth: useAuth })
     return next();
   })
   .use(async function (req, res, next) { // get adapter
     let adapter = req.authConfig.adapter || 'openstad';
-    try {
-      if (!adapters[adapter]) {
-        // TODO: zo schrijf je geen dirname....
-        adapters[adapter] = await require(process.env.NODE_PATH + '/' + req.authConfig.modulePath);
-      }
-    } catch(err) {
-      adapters[adapter] = { router: (req, res) => { res.status(400).end('Adapter not found') } }
+    if (!adapters[adapter]) {
+      // TODO: zo schrijf je geen dirname....
+      adapters[adapter] = await authSettings.adapter({ authConfig: req.authConfig })
     }
     return next();
   })

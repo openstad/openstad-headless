@@ -16,7 +16,9 @@ module.exports = function( app ) {
 	});
 
 	app.use(function handleError( err, req, res, next ) {
-    
+
+    console.log(err);
+
 		var env            = app.get('env');
 		var status         = err.status || ( err.name && err.name == 'SequelizeValidationError' && 400 ) || 500;
 		var userIsAdmin    = req.user && req.user.role && req.user.role == 'admin';
@@ -24,7 +26,9 @@ module.exports = function( app ) {
 		var friendlyStatus = statuses[status]
 		var stack          = err.stack || err.toString();
 		var message        = err.message || err.error;
+    message = message.replace(/Validation error:?\s*/, '');
 		var errorStack     = showDebug ? stack : '';
+
 
 		if( env !== 'test' && status == 500 ) {
 			console.error(stack);

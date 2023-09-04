@@ -105,11 +105,11 @@ router
             .then(
                 response => {
                     if (response.ok) return response.json()
-                    throw createError('Login niet gelukt', response);
+                    throw createError(401, 'Login niet gelukt', response);
                 },
                 error => {
                     console.log('ERR', error);
-                    throw createError('Login niet gelukt');
+                    throw createError(401, 'Login niet gelukt');
                 }
             )
             .then(
@@ -227,7 +227,7 @@ router
 
                     // user not found; create
                     // TODO: dit zou al op de oauth server afgevangen moeten worden, ik denk met een 'only existing' oid.
-                    if (!req.site.config.users.canCreateNewUsers) return next(createError('403', 'Users mogen niet aangemaakt worden op deze site'));
+                    if (!req.site.config.users.canCreateNewUsers) return next(createError(403, 'Users mogen niet aangemaakt worden op deze site'));
                   
                     data.complete = true;
 

@@ -9,7 +9,7 @@ const {Op} = require('sequelize');
 const searchResults = require('../../middleware/search-results-user');
 const fetch = require('node-fetch');
 const merge = require('merge');
-const OAuthApi = require('../../services/oauth-api');
+const authSettings = require('../../util/auth-settings');
 
 const filterBody = (req, res, next) => {
   const data = {};
@@ -107,41 +107,37 @@ router.route('/')
     if (!(req.project.config && req.project.config.users && req.project.config.users.canCreateNewUsers)) return next(createError(401, 'Gebruikers mogen niet aangemaakt worden'));
     return next();
   })
-  .post(function (req, res, next) {
-    // check adapter settings
-    
+  .post(filterBody)
+  .post(async function (req, res, next) {
+    // auth server settings
+    req.authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default' });
+    req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
     return next();
   })
-  .post(filterBody)
-  .post(function (req, res, next) {
+  .post(async function (req, res, next) {
     // Look for an Openstad user with this e-mail
     // TODO: other types of users
     if (!req.body.email) return next(createError(401, 'E-mail is a required field'));
-    let which = req.query.useAuth || 'default';
-    let projectConfig = req.project && merge({}, req.project.config, { id: req.project.id });
     let email = req.body && req.body.email;
-    OAuthApi
-      .fetchUser({ projectConfig, which, email })
+    req.adapter.service
+      .fetchUserData({ authConfig: req.authConfig, email })
       .then(json => {
         req.oAuthUser = json;
-        next();
+        return next();
       })
       .catch(next);
   })
 /**
  * In case a user exists for that e-mail in the oAuth api move on, otherwise create it
- * then create it
  */
   .post(function (req, res, next) {
     if (req.oAuthUser) {
       next();
     } else {
       // in case no oauth user is found with this e-mail create it
-      let which = req.query.useAuth || 'default';
-      let projectConfig = req.project && req.project.config;
-      let userData = Object.assign(req.body);
-      OAuthApi
-        .createUser({ projectConfig, which, userData })
+      if (!req.adapter?.service?.createUser) throw createError(400, 'Users can not be created for this provider')
+      req.adapter.service
+        .createUser({ authConfig: req.authConfig, userData: req.body })
         .then(json => {
           req.oAuthUser = json;
           next()
@@ -159,7 +155,6 @@ router.route('/')
       .then(found => {
         if (found) {
           console.log('user already exists', found);
-
           throw new Error('User already exists');
         } else {
           next();
@@ -167,13 +162,14 @@ router.route('/')
       })
       .catch(next);
   })
+  .post(auth.useReqUser)
   .post(function (req, res, next) {
     const data = {
       ...req.body,
+      ...req.oAuthUser,
       projectId: req.project.id,
       role: req.oAuthUser.role || 'member',
       lastLogin: Date.now(),
-      idpUser: { identifier: req.oAuthUser.id }
     };
     db.User
       .authorizeData(data, 'create', req.user)
@@ -203,7 +199,7 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
   .put(function (req, res, next) {
     // this user
     req.userId = parseInt(req.params.userId);
-    if (!req.userId) return next(new createError('404', 'User not found'))
+    if (!req.userId) return next(new createError(404, 'User not found'))
     return db.User
       .scope(...req.scope)
       .findOne({
@@ -211,7 +207,7 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
         //where: { id: userId }
       })
       .then(found => {
-        if (!found) throw new Error('User not found');
+        if (!found) throw new createError(404, 'User not found');
         req.targetUser = found;
         req.externalUserId= found.idpUser.identifier;
         next();
@@ -346,10 +342,12 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
     if ( !req.remainingUsers || req.remainingUsers.length > 0 ) return next();
 
     // no api users left for this oauth user, so remove the oauth user
-    let which = req.query.useAuth || 'default';
-    let projectConfig = req.project && merge({}, req.project.config, { id: req.project.id });
     try {
-      let result = await OAuthApi.deleteUser({ projectConfig, which, userData: { id: req.externalUserId }})
+      let authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default' });
+      let adapter = await authSettings.adapter({ authConfig: req.authConfig });
+      if (adapter.service.deleteUser) {
+        adapter.service.deleteUser({ authConfig, userData: { id: req.externalUserId } })
+      }
     } catch (err) {
       return next(err);
     }
@@ -381,7 +379,7 @@ router.route('/:userId(\\d+)')
         //where: { id: userId }
       })
       .then(found => {
-        if (!found) throw new Error('User not found');
+        if (!found) throw new createError(404, 'User not found');
         req.results = found;
         next();
       })
@@ -404,99 +402,56 @@ router.route('/:userId(\\d+)')
   .put(auth.useReqUser)
   .put(filterBody)
   .put(function (req, res, next) {
+    if (!(req.results && req.results.can && req.results.can('update'))) throw createError(400, 'You cannot update this User');
+    return next()
+  })
+  .put(async function (req, res, next) {
+    // auth server settings
+    req.authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default' });
+    req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
+    return next();
+  })
+  .put(async function (req, res, next) {
 
-    const user = req.results;
-
-    if (!(user && user.can && user.can('update'))) return next(new Error('You cannot update this User'));
-
-    let userId = parseInt(req.params.userId, 10);
-    let externalUserId = req.results.idpUser && req.results.idpUser.identifier;
-
+    let user = req.results;
     let userData = merge.recursive(true, req.body);
 
-    /**
-     * Update the oauth API first
-     */
-    let which = req.query.useAuth || 'default';
-    let projectConfig = req.project && merge({}, req.project.config, { id: req.project.id });
-    OAuthApi
-      .updateUser({ projectConfig, which, userData: merge(true, userData, { id: externalUserId }) })
-      .then(json => {
-        let mergedUserData = json;
+    try {
 
-        return db.User
+      let updatedUserData = merge(true, userData, { id: user.idpUser && user.idpUser.identifier });
+            
+      if (req.adapter.service.updateUser) {
+        updatedUserData = await req.adapter.service.updateUser({ authConfig: req.authConfig, userData: merge(true, userData, { id: user.idpUser && user.idpUser.identifier }) });
+        delete updatedUserData.nickName // TODO: these updates should not be done for fields that can be different per project. For now: nickName
+      }
+
+
+      let apiUsers = await db.User
           .scope(['includeProject'])
           .findAll({
             where: {
-              idpUser: { identifier: mergedUserData.id },
-              // old users have no projectId, this will break the update
-              // skip them
-              // probably should clean up these users
-              projectId: {
-                [Op.not]: 0
-              }
+              idpUser: { identifier: updatedUserData.idpUser.identifier },
+              projectId: { [Op.not]: 0 }
             }
           })
-          .then(function (users) {
-            const actions = [];
+      for (let apiUser of apiUsers) {
+        let result = await apiUser
+            .authorizeData(updatedUserData, 'update', req.user)
+            .update(updatedUserData)
+      };
 
-            // dit gaat mis omdat hij het per project doet maar het resultaat al is geparsed voor deze project
-            
-            if (users) {
-              users.forEach((user) => {
-                // only update users with active project (they can be deleteds)
-                if (user.project) {
-                  actions.push(function () {
-                    return new Promise((resolve, reject) => {
-                      let clonedUserData = merge(true, mergedUserData);
-                      user
-                        .authorizeData(clonedUserData, 'update', req.user)
-                        .update(clonedUserData)
-                        .then((result) => {
-                          resolve();
-                        })
-                        .catch((err) => {
-                          console.log('err', err)
-                          reject(err);
-                        })
-                    })
-                  }())
-                }
+      let result = await db.User
+        .findOne({
+          where: {id: req.params.userId, projectId: req.params.projectId}
+        })
 
-              });
-            }
+      res.json(result);
 
-            return Promise.all(actions)
-            // response has been sent; next has no meaning here
-            // .then(() => { next(); })
-              .catch(err => {
-                console.log(err);
-                throw(err)
-              });
+    } catch(err) {
+      console.log(err);
+      return next( createError(500, 'User update failed') )
+    }
 
-          })
-          .catch(err => {
-            console.log(err);
-            throw(err)
-          });
-      })
-      .then((result) => {
-        return db.User
-          .scope(['includeProject']) // TODO: waarom includeProject? Kan dat weg?
-          .findOne({
-            where: {id: userId, projectId: req.params.projectId}
-          })
-      })
-      .then(found => {
-        if (!found) throw new Error('User not found');
-        let result = found.toJSON();
-        delete result.project;
-        res.json(result);
-      })
-      .catch(err => {
-        console.log(err);
-        return next(err);
-      });
   })
 
 // delete user
@@ -514,15 +469,17 @@ router.route('/:userId(\\d+)')
      * Otherwise we keep the oAuth user since it's still needed for the other website
      */
     const userForAllProjects = await db.User.findAll({where: {idpUser: { identifier: user.idpUser && user.idpUser.identifier }}});
-    
     if (userForAllProjects.length <= 1) {
-      let which = req.query.useAuth || 'default';
-      let projectConfig = req.project && merge({}, req.project.config, { id: req.project.id });
-      let result = await OAuthApi.deleteUser({ projectConfig, which, userData: { id: user.idpUser.identifier }})
+      let authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default' });
+      let adapter = await authSettings.adapter({ authConfig: req.authConfig });
+      if (adapter.service.deleteUser) {
+        adapter.service.deleteUser({ authConfig, userData: { id: user.idpUser.identifier } })
+      }
     }
     
     /**
      * Delete all connected comments, votes and ideas created by the user
+     * TODO: dit is niet meer nodig als we paranoid er uit halen
      */
     await db.Idea.destroy({where: {userId: req.results.id}});
     await db.Comment.destroy({where: {userId: req.results.id}});
