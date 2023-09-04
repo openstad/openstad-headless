@@ -7,19 +7,11 @@ module.exports = (db, sequelize, Sequelize) => {
 
   let User = sequelize.define('user', {
 
-    firstName: {
+    name: {
       type: DataTypes.STRING,
       set: function (value) {
         value = sanitize.noTags(value);
-        this.setDataValue('firstName', value || null);
-      },
-    },
-
-    lastName: {
-      type: DataTypes.STRING,
-      set: function (value) {
-        value = sanitize.noTags(value);
-        this.setDataValue('lastName', value || null);
+        this.setDataValue('name', value || null);
       },
     },
 

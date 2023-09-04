@@ -6,7 +6,8 @@
 ### API server
 * Add auth adapters and auth through third party IDPs - see /doc/auth.md
 * The API is now single source of truth for OpenStad users, but always through external login services
-* Syncing to the OpenSTad auth server is now done through the adapter
+* Syncing to the OpenStad auth server is now done through the adapter
+* Merge first- and lastname to name
 * Refactor Site to Project, remove Site.domain functionality, add Project.url
 * Remove refreshProjectConfigMw
 * Remove obsolete models and routes: AccessToken, BudegtVote and Log
@@ -23,6 +24,7 @@
 * Remove user.extradata: the API is now single source of truth
 * Bugfix: toJSON of db models used the wrong data
 * Bugfix: new users are now created withoud a random password
+* Merge first- and lastname to name
 
 ### Image server
 * Refactor init database, merge seeds and fixtures
