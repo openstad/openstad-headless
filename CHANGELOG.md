@@ -5,9 +5,8 @@
 
 ### API server
 * Add auth adapters and auth through third party IDPs - see /doc/auth.md
-* The API is now single source of truth for OpenStad users
-* But always through external login services; create OpenStad user route is removed
-* TODO: Move oauth services to adapters
+* The API is now single source of truth for OpenStad users, but always through external login services
+* Syncing to the OpenSTad auth server is now done through the adapter
 * Refactor Site to Project, remove Site.domain functionality, add Project.url
 * Remove refreshProjectConfigMw
 * Remove obsolete models and routes: AccessToken, BudegtVote and Log

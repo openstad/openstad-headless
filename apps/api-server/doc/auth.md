@@ -130,7 +130,7 @@ This makes it possible for a user of your CMS to be recognized by the OpenStad A
 
 NOTE: hier mag nog wel een voorbeeld bij denk ik...
 
-#### Writing adapters
+### Writing adapters
 
 Sorry, no documentation (yet). Look at the existing adapters in API/src/adapters.
 To refer to your new adapter use the adapter configuration:
@@ -149,6 +149,16 @@ To refer to your new adapter use the adapter configuration:
 }
 ```
 
+#### Syncing to auth servers
+
+When creating, deleting or updating users on the API these changes should probably be sent to the login provider as well. This can be done in the adapter.
+
+You can use the openstad adapter as an example. Code will be synced if the adapter.serveice has a defined function for that synhronization. Currently the recognized functions are:
+ - __service.createUser__
+ - __service.updateUser__
+ - __service.deleteUser__
+ - __service.updateClient__ - for configuration options that are used during login
+
 ### ToDo
 - A SAML adapter
-- The JWT is created in the adapter, but used in generic API middleware. That means it has to be created in a specific way, and should therefore be available as am API service to the adapter.
+- The JWT is created in the adapter, but used in generic API middleware. That means it has to be created in a specific way, and should therefore be available as an API service to the adapter.
