@@ -9,7 +9,6 @@ const pagination 			= require('../../middleware/pagination');
 const searchResults 	= require('../../middleware/search-results-user');
 // TODO-AUTH
 const checkHostStatus = require('../../services/checkHostStatus')
-const OAuthApi        = require('../../services/oauth-api');
 const projectsWithIssues = require('../../services/projects-with-issues');
 const authSettings = require('../../util/auth-settings');
 

@@ -44,7 +44,7 @@ router
               }
             })
 
-        console.log('FOUND: ', openStadUser && openStadUser.id);
+        // console.log('FOUND: ', openStadUser && openStadUser.id);
 
         openStadUser = await db.User
           .upsert({
