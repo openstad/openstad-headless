@@ -88,7 +88,7 @@ export default class OpenStadComponentUser extends OpenStadComponent {
       let jwt = openStadUser.jwt;
       if (jwt) {
         try {
-          let response = await fetch(`https://api.os20.nlsvgtr.nl/auth/project/${self.config.projectId}/me`, { headers: { 'X-Authorization': 'Bearer ' + jwt } });
+          let response = await fetch(`https://api.os20.nlsvgtr.nl/auth/project/${self.config.projectId}/me`, { headers: { 'Authorization': 'Bearer ' + jwt } });
           openStadUser = merge.recursive( openStadUser, await response.json(), { jwt } );
 		      let customEvent = new CustomEvent('osc-openstad-user-updated', { detail: openStadUser });
 		      document.dispatchEvent(customEvent);

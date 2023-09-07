@@ -11,7 +11,7 @@ The API keeps track of users. These users are created and updated in the login p
 
 An API user is usually connected to a specific site, and is authorized only on that site. Authorization is [role based](#roles).
 
-The result of the login process should ba a JWT. Any subsequent call should contain that JWT in a header: `X-Authorization: Bearer JWT`.
+The result of the login process should ba a JWT. Any subsequent call should contain that JWT in a header: `Authorization: Bearer JWT`.
 
 A call to the `/auth/site/ID/me` endpoint will return the API user defined in the JWT.
 

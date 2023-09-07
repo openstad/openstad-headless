@@ -18,11 +18,11 @@ module.exports = async function getUser( req, res, next ) {
 
   try {
 
-    if (!req.headers['x-authorization']) {
+    if (!req.headers['authorization']) {
       return nextWithEmptyUser(req, res, next);
     }
 
-    let { userId, isFixed, authProvider } = parseAuthHeader(req.headers['x-authorization']);
+    let { userId, isFixed, authProvider } = parseAuthHeader(req.headers['authorization']);
     let authConfig = await authSettings.config({ project: req.project, useAuth: authProvider })
     
     if(userId === null || typeof userId === 'undefined') {
