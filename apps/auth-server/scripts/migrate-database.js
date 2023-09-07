@@ -1,5 +1,5 @@
 require('dotenv').config();
-const db = require('./db');
+const db = require('../db');
 const { Umzug, SequelizeStorage } = require('umzug');
 
 const umzug = new Umzug({

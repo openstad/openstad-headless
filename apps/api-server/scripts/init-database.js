@@ -18,11 +18,26 @@ const db = require('../src/db');
       console.log(err);
     }
 
-    datafile = process.env.NODE_ENV;
+		datafile = process.env.NODE_ENV;
+		try {
+			await require(`../seeds/${datafile}`)(config, db);
+		} catch(err) {
+      if (err && err.message && err.message.match(/Cannot find module/)) {
+        console.log(`  no ${datafile} data seeds found`);
+      } else {
+        console.log(err.message);
+      }
+		}
+
+    datafile = 'local';
     try {
       await require(`../seeds/${datafile}`)(config, db);
     } catch(err) {
-      console.log(err);
+      if (err && err.message && err.message.match(/Cannot find module/)) {
+        console.log('  no local data seeds found');
+      } else {
+        console.log(err.message);
+      }
     }
 
   } catch (err) {

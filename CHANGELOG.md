@@ -3,6 +3,8 @@
 ## All
 * Move API, auth and image servers, and the poc components, to one repo
 * Refactor: use normal Authorization header instead of X-Authorization to connect to the API
+* Add local seed data option to init-database
+* Move migrations script to npm run migrate-database
 
 ### API server
 * Add auth adapters and auth through third party IDPs - see /doc/auth.md

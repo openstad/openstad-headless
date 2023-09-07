@@ -16,7 +16,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "init-database": "node ./scripts/init-database.js"
+    "init-database": "node ./scripts/init-database.js",
+    "migrate-database": "node ./scripts/migrate-database.js"
   },
   "dependencies": {
     "aws-sdk": "^2.1003.0",
@@ -36,6 +37,7 @@
     "passport": "^0.6.0",
     "passport-http-bearer": "^1.0.1",
     "sequelize": "^6.28.0",
+    "umzug": "^3.2.1",
     "yargs": "^17.5.1"
   },
   "author": "Gemeente Amsterdam",

@@ -15,7 +15,8 @@
     "test:unit:watch": "jest --watch --no-cache",
     "test:e2e": "jest --no-cache --config jest-e2e.config.js --forceExit",
     "test:e2e:debug": "jest --no-cache --config jest-e2e.config.js --verbose --forceExit",
-    "init-database": "node ./scripts/init-database.js"
+    "init-database": "node ./scripts/init-database.js",
+    "migrate-database": "node ./scripts/migrate-database.js"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.18.1",
@@ -49,7 +50,7 @@
     "pmx": "^1.6.7",
     "sanitize-html": "^2.7.0",
     "sequelize": "^6.19.0",
-    "umzug": "^2.3.0",
+    "umzug": "^3.2.1",
     "ws": "^7.5.7"
   },
   "devDependencies": {
