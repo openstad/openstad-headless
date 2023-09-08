@@ -21,6 +21,7 @@
 * Remove express-promise-router dependency
 * Remove oauth userdata parsing: the API is now single source of truth
 * Refactor useOauth to useAuth
+* Refactor X-Authorisation to Authorisation
 
 ### Auth server
 * Refactor init database and seeds
