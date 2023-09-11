@@ -22,6 +22,8 @@
 * Remove oauth userdata parsing: the API is now single source of truth
 * Refactor useOauth to useAuth
 * Refactor X-Authorisation to Authorisation
+* Remove CommentVote.opinion; it is not used
+* Remove anonymize votes - anonymization is now done through users
 
 ### Auth server
 * Refactor init database and seeds
