@@ -145,7 +145,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 	Comment.scopes = function scopes() {
 		// Helper function used in `withVoteCount` scope.
-		function voteCount( tableName, opinion ) {
+		function voteCount( tableName ) {
 			return [sequelize.literal(`
 				(SELECT
 					COUNT(*)
@@ -156,9 +156,8 @@ module.exports = function( db, sequelize, DataTypes ) {
 						av.checked IS NULL OR
 						av.checked  = 1
 					) AND
-					av.commentId = ${tableName}.id AND
-					av.opinion    = "${opinion}")
-			`), opinion];
+					av.commentId = ${tableName}.id)
+			`), 'yes'];
 		}
 
 		return {
@@ -267,11 +266,10 @@ module.exports = function( db, sequelize, DataTypes ) {
 		});
 	}
 
-	Comment.prototype.addUserVote = function( user, opinion, ip ) {
+	Comment.prototype.addUserVote = function( user, ip ) {
 		var data = {
 			commentId : this.id,
 			userId     : user.id,
-			opinion    : opinion,
 			ip         : ip
 		};
 

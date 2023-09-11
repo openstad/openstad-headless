@@ -22,11 +22,6 @@ module.exports = function( db, sequelize, DataTypes ) {
 			}
 		},
 
-		opinion: {
-			type         : DataTypes.ENUM('no','yes'),
-			allowNull    : false
-		},
-
 		// This will be true if the vote validation CRON determined this
 		// vote is valid.
 		checked : {
