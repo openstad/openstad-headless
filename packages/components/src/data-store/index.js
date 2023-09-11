@@ -5,7 +5,7 @@ import useSWR from 'swr';
 import API from './api';
 import useIdea from './hooks/use-idea.js';
 import useComments from './hooks/use-comments.js';
-import useUser from './hooks/use-user.js';
+import useCurrentUser from './hooks/use-current-user.js';
 
 window.OpenStadSWR = window.OpenStadSWR || {}; // keys used, for forced updates
 
@@ -18,11 +18,11 @@ export default function DataStore(props = { config: {} }) {
   // hooks
   self.useIdea = useIdea.bind(self);
   self.useComments = useComments.bind(self);
-  self.useUser = useUser.bind(self);
+  self.useCurrentUser = useCurrentUser.bind(self);
 
   // current user
-  const [ user, userError, userIsLoading ] = self.useUser({ ...props, projectId: self.projectId });
-  self.currentUser = user;
+  const [ currentUser, currentUserError, currentUserIsLoading ] = self.useCurrentUser({ ...props, projectId: self.projectId });
+  self.currentUser = currentUser;
 
   // swr
   self.createKey = function(props, fetcherAsString) {

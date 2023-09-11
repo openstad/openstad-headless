@@ -2,7 +2,7 @@ import SessionStorage from '../../lib/session-storage.js';
 import useSWR from 'swr';
 import { useState } from 'react';
 
-export default function useUser(props) {
+export default function useCurrentUser(props) {
 
   let self = this;
 
@@ -12,22 +12,31 @@ export default function useUser(props) {
 
   async function getCurrentUser() {
 
-    console.log('GETCURRENTUSER', self.currentUser);
+    // console.log('GETCURRENTUSER', self.currentUser);
     if (self.currentUser && self.currentUser.id) { // just once TODO: ik denk dat het jkan met useSWRmutaion,: als ik het goedlees update die alleen met de hand
       return self.currentUser;
     }
     
-    const session = new SessionStorage(props);
-
     // get user from props
     let initialUser = props.openStadUser || props.config?.openStadUser || {};
     if (initialUser.id && initialUser.projectId == self.projectId) {
-      console.log(3, initialUser);
       return initialUser;
     }
-    
-    const cmsUser = props.cmsUser || props.config.cmsUser || {};
 
+    const session = new SessionStorage(props);
+
+    // jwt in url: use and remove from url
+    const params = new URLSearchParams(window.location.search);
+    let jwt;
+    if (params.has('jwt')) {
+      jwt = params.get('jwt');
+      session.set('openStadUser', { jwt });
+      let url = window.location.href;
+      url = url.replace(new RegExp(`[?&]jwt=${jwt}`), '');
+      history.replaceState(null, '', url);
+    }
+
+    const cmsUser = props.cmsUser || props.config.cmsUser || {};
     // get cmsUser from session data - this is a fix for badly written cms logouts
     let sessionCmsUser = session.get('cmsUser') || {};
     if (sessionCmsUser && cmsUser) {
@@ -42,9 +51,9 @@ export default function useUser(props) {
 
     // get openStad user from session data
     let sessionUser = session.get('openStadUser') || {};
-    
-    // use existing jwt
-    let jwt = initialUser.jwt || sessionUser.jwt;
+
+    // or use existing jwt
+    jwt = jwt || initialUser.jwt || sessionUser.jwt;
 
     // or get jwt for cmsUser
     if (!jwt && cmsUser && cmsUser.access_token && cmsUser.iss) {
@@ -60,8 +69,9 @@ export default function useUser(props) {
       self.refresh()
 
       // TODO: delete jwt on error
-      let openStadUser = self.api.user.fetchMe({ projectId: self.projectId })
-      session.set('openStadUser', openStadUser);
+      let openStadUser = await self.api.user.fetchMe({ projectId: self.projectId });
+      session.set('openStadUser', { ...openStadUser, jwt });
+      console.log('ME', openStadUser);
       return openStadUser;
 
     } else {
@@ -73,4 +83,3 @@ export default function useUser(props) {
   return [ data, () => console.log('setUser not (yet) implemented'), error, isLoading ];
 
 }
-

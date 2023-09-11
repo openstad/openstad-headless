@@ -164,6 +164,9 @@ router
 
     // todo: deze afvanging moet veel eerder!!!
     const isAllowedRedirectDomain = (url, allowedDomains) => {
+
+      console.log('----------', url, allowedDomains);
+      
       let redirectUrlHost = '';
       try {
         redirectUrlHost = new URL(url).hostname;
@@ -219,14 +222,6 @@ router
 
   })
   .get(function (req, res, next) {
-
-    // redirect to logout server
-    let url = req.authConfig.serverUrl + '/logout?clientId=[[clientId]]';
-    url = url.replace(/\[\[clientId\]\]/, req.authConfig.clientId); // todo dezde oet denk ik naar authconfig middleware
-    if (req.query.redirectUri) {
-      url = `${url}&redirectUrl=${encodeURIComponent(req.query.redirectUri)}`;
-    }
-    return res.redirect(url);
 
     // todo: isallowed
     if (req.query.redirectUri) return res.redirect(req.query.redirectUri);

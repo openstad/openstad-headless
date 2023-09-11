@@ -48,7 +48,7 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
     if (raw) return userData;
 
     if (!userData) return;
-
+    
     let mappedUserData = mapUserData({ map: authConfig.userMapping, user: { ...userData, accessToken } })
     mappedUserData.idpUser.provider = authConfig.provider;
     return mappedUserData;
