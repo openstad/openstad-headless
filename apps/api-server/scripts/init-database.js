@@ -18,7 +18,7 @@ const db = require('../src/db');
       console.log(err);
     }
 
-		datafile = process.env.NODE_ENV;
+		datafile = process.env.NODE_ENV || 'development';
 		try {
 			await require(`../seeds/${datafile}`)(config, db);
 		} catch(err) {

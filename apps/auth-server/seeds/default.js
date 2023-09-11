@@ -35,7 +35,7 @@ module.exports = async function seed(db) {
       clientId: adminClientId,
       clientSecret: adminClientSecret,
       authTypes: JSON.stringify(['UniqueCode']),
-      requiredUserFields: JSON.stringify(['firstName', 'lastName']),
+      requiredUserFields: JSON.stringify(['name']),
       allowedDomains: JSON.stringify(allowedDomains),
       config: JSON.stringify({}),
     });
@@ -52,7 +52,7 @@ module.exports = async function seed(db) {
       clientId: clientId,
       clientSecret: clientSecret,
       authTypes: JSON.stringify(['UniqueCode']),
-      requiredUserFields: JSON.stringify(['firstName', 'lastName']),
+      requiredUserFields: JSON.stringify(['name']),
       allowedDomains: JSON.stringify(allowedDomains),
       config: JSON.stringify({}),
     });
