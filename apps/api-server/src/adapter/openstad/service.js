@@ -37,6 +37,7 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
 
     let userData;
     let json = await response.json();
+
     if (json && json.data && json.data.length > 0) {
       userData = json.data[0];
     } else if (json.id) {
@@ -48,7 +49,7 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
     if (raw) return userData;
 
     if (!userData) return;
-    
+
     let mappedUserData = mapUserData({ map: authConfig.userMapping, user: { ...userData, accessToken } })
     mappedUserData.idpUser.provider = authConfig.provider;
     return mappedUserData;
@@ -88,7 +89,6 @@ service.createUser = async function({ authConfig, userData = {} }) {
 
     let mappedUserData = mapUserData({ map: authConfig.userMapping, user: { ...userData } })
     mappedUserData.idpUser.provider = authConfig.provider;
-    console.log(mappedUserData);
     return mappedUserData;
 
   } catch(err) {

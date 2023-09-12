@@ -29,7 +29,7 @@ router
   })
   .get(function (req, res, next) {
 
-    // redirect to login server
+    // redirect to idp server
     let redirectUri = encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.redirectUri);
     let url = `${req.authConfig.serverUrl}/dialog/authorize?redirect_uri=${redirectUri}&response_type=code&client_id=${req.authConfig.clientId}&scope=offline&forceLogin=1`;
     res.redirect(url);
@@ -127,7 +127,6 @@ router
               return next();
             })
             .catch((e) => {
-              console.log('update e', e)
               req.userData.id = user.id;
               return next();
             })
@@ -147,7 +146,6 @@ router
             })
             .catch(err => {
               //console.log('OAUTH DIGEST - CREATE USER ERROR');
-              console.log('create e', err);
               next(err);
             })
         }
@@ -165,8 +163,6 @@ router
     // todo: deze afvanging moet veel eerder!!!
     const isAllowedRedirectDomain = (url, allowedDomains) => {
 
-      console.log('----------', url, allowedDomains);
-      
       let redirectUrlHost = '';
       try {
         redirectUrlHost = new URL(url).hostname;
@@ -209,9 +205,9 @@ router
     return next();
   })
   .get(async function (req, res, next) {
-
     // api user
     if (req.user && req.user.id > 1) {
+      // note: it is unlikely that you get here; most logout requests will not send Auth headers
       let idpUser = req.user.idpUser;
       delete idpUser.accesstoken;
       await req.user.update({
@@ -219,14 +215,22 @@ router
       });
     }
     return next();
-
+  })
+  .get(function (req, res, next) {
+    if (!req.query.ipdlogout) {
+      // redirect to idp server
+      let redirectUri = encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/logout?ipdlogout=done&useAuth=' + req.query.useAuth + '&redirectUri=' + req.query.redirectUri);
+      let url = `${req.authConfig.serverUrl}/logout?redirectUrl=${redirectUri}&client_id=${req.authConfig.clientId}`;
+      return res.redirect(url);
+    }
+    return next();
   })
   .get(function (req, res, next) {
 
     // todo: isallowed
     if (req.query.redirectUri) return res.redirect(req.query.redirectUri);
 
-    return res.end('Uitgelogd')
+    return res.json({ logout: 'success' })
 
   });
 
