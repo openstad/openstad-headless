@@ -93,7 +93,7 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
         modulePath: './src/adapter/openstad',
         userMapping: JSON.stringify({
           identifier: 'user_id',
-          name: "user => `${user.firstName || ''} ${user.lastName || ''}`.trim() || null",
+          name: "user => `${user.name || ''}`.trim() || null",
           email: "user => user.email == '' ? null : user.email",
           address: "user => `${user.streetName || ''} ${user.houseNumber || ''} ${user.suffix || ''}`.trim() || null",
           role: "user => user.role || ((user.email || user.phoneNumber || user.hashedPhoneNumber) ? 'member' : 'anonymous')",

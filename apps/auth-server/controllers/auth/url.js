@@ -148,7 +148,7 @@ exports.postLogin = async (req, res, next) => {
 
 
 exports.postRegister = (req, res, next) => {
-    const {firstName, lastName, postcode, token} = req.body;
+    const {name, postcode, token} = req.body;
     const user = req.user;
 
     /**
@@ -156,8 +156,7 @@ exports.postRegister = (req, res, next) => {
      * After succesfull registration redirect to token login url, for automagic login
      */
     user.update({
-            firstName,
-            lastName,
+            name,
             postcode,
         })
         .then((user) => {

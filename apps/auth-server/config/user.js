@@ -1,11 +1,7 @@
 exports.fields = [
   {
-    key: 'firstName',
-    label: 'First name',
-  },
-  {
-    key: 'lastName',
-    label: 'Last name',
+    key: 'name',
+    label: 'Name',
   },
   {
     key: 'email',
@@ -39,14 +35,8 @@ exports.fields = [
 
 exports.validation = {
   profile : {
-    firstName : {
-      errorMessage: 'Voornaam moet ingevuld zijn',
-      isLength: {
-        options:{ min: 1, maxLength: 155 }
-      }
-    },
-    lastName: {
-      errorMessage: 'Achternaam moet ingevuld zijn',
+    name : {
+      errorMessage: 'Naam moet ingevuld zijn',
       isLength: {
         options:{ min: 1, maxLength: 155 }
       }

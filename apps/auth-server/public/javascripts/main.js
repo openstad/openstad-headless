@@ -14,16 +14,7 @@ function initFormsValidation () {
   $('.validate-form').each(function () {
     $(this).validate({
       rules : {
-        firstName : {
-          minlength: 1,
-          normalizer: function(value) {
-                // Update the value of the element
-                this.value = $.trim(value);
-                // Use the trimmed value for validation
-                return this.value;
-            }
-        },
-        lastName : {
+        name : {
           minlength: 1,
           normalizer: function(value) {
                 // Update the value of the element
