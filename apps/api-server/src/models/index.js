@@ -7,7 +7,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 		if( models[fileName] ) {
 			throw Error('Model with duplicate name: '+fileName);
 		}
-		models[fileName] = modelDef(db, sequelize, DataTypes);
+    if (typeof modelDef == 'function') models[fileName] = modelDef(db, sequelize, DataTypes);
 	}, this);
 
 	return models;

@@ -143,9 +143,16 @@ module.exports = function (db, sequelize, DataTypes) {
 
   Project.scopes = function scopes() {
     return {
-      defaultScope: {},
 
-      withArea: {
+      excludeConfig: {
+        attributes: {exclude: ['config']},
+      },
+
+      includeConfig: {
+        attributes: {},
+      },
+
+      includeAreas: {
         include: [{
           model: db.Area
         }]
