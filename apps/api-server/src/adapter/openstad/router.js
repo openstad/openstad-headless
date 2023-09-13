@@ -9,7 +9,69 @@ const service = require('./service');
 
 let router = express.Router({mergeParams: true});
 
-// Todo: dit is 'openstad', dus serverLogin/outPath en zo modgen hier hardcoded in gezet en uit de config gehaald
+// Todo: dit is 'openstad', dus veel configuratie mag hier hardcoded en uit de config gehaald
+
+// ----------------------------------------------------------------------------------------------------
+// connect a user from the openstad auth server to the api
+
+router
+  .route('(/project/:projectId)?/connect-user')
+    .post(async function (req, res, next) {
+
+      try {
+
+        let iss = req.body.iss;
+        if (iss !== req.authConfig.serverUrl) throw Error('Unknown auth server');
+
+        let accessToken = req.body.access_token;
+        let mappedUserData = await service.fetchUserData({
+          authConfig: req.authConfig,
+          accessToken: accessToken,
+        })
+
+        let openStadUser = await db.User
+            .findOne({
+              where: {
+                [Sequelize.Op.and]: [
+                  { projectId: req.params.projectId },
+                  {
+                    idpUser: {
+                      identifier: mappedUserData.idpUser.identifier,
+                      provider: mappedUserData.idpUser.provider,
+                    }
+                  }
+                ]
+              }
+            })
+
+        // console.log('FOUND: ', openStadUser && openStadUser.id);
+
+        openStadUser = await db.User
+          .upsert({
+            ...mappedUserData,
+            id: openStadUser && openStadUser.id,
+            projectId: req.params.projectId,
+            email: mappedUserData.email,
+            idpUser: mappedUserData.idpUser,
+            lastLogin: new Date(),
+          });
+
+        if ( Array.isArray(openStadUser) ) openStadUser = openStadUser[0];
+
+        // TODO: iss moet gecontroleerd
+        jwt.sign({userId: openStadUser.id, authProvider: req.authConfig.provider}, config.auth['jwtSecret'], {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
+          if (err) return next(err)
+          return res.json({
+            jwt: token
+          })
+        });
+
+      } catch(err) {
+        console.log(err);
+        return next(err)
+      }
+
+    });
 
 // ----------------------------------------------------------------------------------------------------
 // login
