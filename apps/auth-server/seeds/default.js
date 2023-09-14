@@ -81,23 +81,6 @@ module.exports = async function seed(db) {
       allowedDomains: JSON.stringify(allowedDomains),
       config: JSON.stringify({}),
     });
-
-    console.log("    - headless portal");
-    console.log("      clientId:", headlessClientId);
-    console.log("      clientSecret:", headlessClientSecret);
-    await db.Client.create({
-      id: 3,
-      siteUrl: headlessUrl,
-      redirectUrl: "", // deprecated
-      name: "Headless portal",
-      description: "Client for managing the openstad headless widgets",
-      clientId: headlessClientId,
-      clientSecret: headlessClientSecret,
-      authTypes: JSON.stringify(["UniqueCode"]),
-      requiredUserFields: JSON.stringify(["name"]),
-      allowedDomains: JSON.stringify([...allowedDomains, "localhost:3000"]),
-      config: JSON.stringify({}),
-    });
   } catch (err) {
     console.log(err);
   }
@@ -181,16 +164,6 @@ module.exports = async function seed(db) {
       code: uniqueCode,
       userId: 1,
       clientId: 2,
-    });
-  } catch (err) {
-    console.log(err);
-  }
-
-  try {
-    await db.UniqueCode.create({
-      code: uniqueCode,
-      userId: 1,
-      clientId: 3,
     });
   } catch (err) {
     console.log(err);
