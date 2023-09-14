@@ -11,9 +11,6 @@ import { List, Settings, User } from 'lucide-react'
 export function Sidenav({ className }: { className?: string }) {
   const router = useRouter();
   const [location, setLocation] = useState('');
-  const isSuperUser = true;
-  const canManageProjects = true;
-  const canManageUsers = true;
 
   useEffect(() => {
     setLocation(router.pathname);
@@ -22,15 +19,14 @@ export function Sidenav({ className }: { className?: string }) {
   return (
     <nav
       className={cn(
-        'fixed -translate-x-72 min-w-[18rem] w-72 max-w-[18rem] border-r border-border min-h-full max-h-screen md:sticky md:-translate-x-0 z-50 bg-background top-0 flex flex-col',
+        'fixed -translate-x-72 min-w-[12rem] w-48 max-w-[12rem] border-r border-border min-h-full max-h-screen md:sticky md:-translate-x-0 z-50 bg-background top-0 flex flex-col',
         className
       )}>
       <div className="px-4 py-4 flex flex-col flex-grow gap-2">
         <Separator className="my-2" />
-        {isSuperUser && (
           <Button
             variant={
-                location.startsWith('/projects') ? 'default' : 'ghost'
+                location.startsWith('/projects') ? 'sidebar' : 'ghost'
             }
             size="default"
             className="w-full flex justify-start"
@@ -40,10 +36,8 @@ export function Sidenav({ className }: { className?: string }) {
                 Projecten
               </Link>
           </Button>
-        )}
-        {canManageProjects && (
           <Button
-            variant={location.includes('/users') ? 'default' : 'ghost'}
+            variant={location.includes('/users') ? 'sidebar' : 'ghost'}
             size={'default'}
             className="w-full flex justify-start"
             onClick={(e) => {
@@ -54,10 +48,8 @@ export function Sidenav({ className }: { className?: string }) {
                 Gebruikers
               </Link>
           </Button>
-        )}
-        {canManageUsers && (
           <Button
-            variant={location.includes('/settings') ? 'default' : 'ghost'}
+            variant={location.includes('/settings') ? 'sidebar' : 'ghost'}
             size={'default'}
             className="w-full flex justify-start"
             onClick={(e) => {
@@ -68,9 +60,8 @@ export function Sidenav({ className }: { className?: string }) {
                 Instellingen
               </Link>
           </Button>
-        )}
         <div className="flex-grow"></div>
       </div>
-      </nav>
+    </nav>
   );
 }
