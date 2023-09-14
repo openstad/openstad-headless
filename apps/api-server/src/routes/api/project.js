@@ -14,6 +14,25 @@ const authSettings = require('../../util/auth-settings');
 
 let router = express.Router({mergeParams: true});
 
+// scopes
+// ------
+router
+  .all('*', function(req, res, next) {
+
+    req.scope = [];
+
+    if (!req.query.includeConfig) {
+      req.scope.push('excludeConfig');
+    }
+
+    if (req.query.includeAreas) {
+      req.scope.push('includeAreas');
+    }
+
+    return next();
+
+  });
+
 router.route('/')
 
 // list projects
@@ -22,10 +41,8 @@ router.route('/')
 	.get(pagination.init)
 	.get(function(req, res, next) {
 
-		const scope = ['withArea'];
-
 		db.Project
-			.scope(scope)
+			.scope(req.scope)
 			.findAndCountAll({ offset: req.dbQuery.offset, limit: req.dbQuery.limit })
 			.then( result => {
         req.results = result.rows;
@@ -40,6 +57,7 @@ router.route('/')
 	.get(function(req, res, next) {
     let records = req.results.records || req.results
 		records.forEach((record, i) => {
+      // todo: waarom is dit? dat zou door het auth systeem moeten worden afgevangen
       let project = record.toJSON()
 			if (!( req.user && req.user.role && req.user.role == 'admin' )) {
         project.config = undefined;
@@ -124,7 +142,7 @@ router.route('/:projectId') //(\\d+)
 		const projectId = req.params.projectId;
 		let query = { where: { id: parseInt(projectId) } }
 		db.Project
-			.scope('withArea')
+			.scope(req.scope)
 			.findOne(query)
 			.then(found => {
 				if ( !found ) throw new Error('Project not found');

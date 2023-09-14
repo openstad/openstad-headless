@@ -29,8 +29,7 @@ exports.info = (req, res) => {
   res.json({
     user_id: req.user.id,
     role: req.user.role,
-    firstName: req.user.firstName,
-    lastName: req.user.lastName,
+    name: req.user.name,
     email: req.user.email,
     phoneNumber: req.user.phoneNumber,
     hashedPhoneNumber: req.user.hashedPhoneNumber,
@@ -63,7 +62,7 @@ exports.info = (req, res) => {
 
  exports.postAccount = [
    (req, res) => {
-     const keysToUpdate = ['firstName', 'lastName', 'street_name', 'house_number', 'suffix', 'postcode', 'city', 'phone']
+     const keysToUpdate = ['name', 'street_name', 'house_number', 'suffix', 'postcode', 'city', 'phone']
 
      db.User()
        .findOne({ where: { id: req.user.id } })

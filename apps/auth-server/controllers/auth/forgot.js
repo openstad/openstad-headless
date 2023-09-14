@@ -137,7 +137,7 @@ exports.postForgot = (req, res, next) => {
         }
 
         return emailService.send({
-            toName: (user.firstName + ' ' + user.lastName).trim(),
+            toName: user.name.trim(),
             toEmail: user.email,
             fromEmail: clientConfig.fromEmail,
             fromName: clientConfig.fromName,
@@ -145,7 +145,7 @@ exports.postForgot = (req, res, next) => {
             template:  'emails/password-reset.html',
             variables: {
                 resetUrl: resetUrl,
-                firstName: user.firstName,
+                name: user.name,
                 clientUrl: client.mainUrl,
                 clientName: client.name,
                 logo: emailLogo,

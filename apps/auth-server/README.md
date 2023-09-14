@@ -121,7 +121,7 @@ By default the required fields have labels as defined in `config/user.js`. These
 ```
 "requiredFields": {
     "labels": {
-        "firstName": "Naam (alias)"
+        "name": "Naam (alias)"
     }
 }
 ```

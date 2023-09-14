@@ -39,7 +39,7 @@ exports.sendVerification = async (user, client, redirectUrl, adminLoginRequest) 
   }
 
   return emailProvider.send({
-    toName: user.firstName ? (user.lastName ? (user.firstName + ' ' + user.lastName).trim() : user.firstName) : false,
+    toName: user.name || false,
     toEmail: user.email,
     fromEmail: clientConfig.fromEmail,
     fromName: clientConfig.fromName,
@@ -48,7 +48,7 @@ exports.sendVerification = async (user, client, redirectUrl, adminLoginRequest) 
     template: 'emails/login-url.html',
     variables: {
       tokenUrl: generatedTokenUrl,
-      firstName: user.firstName,
+      name: user.name,
       clientUrl: client.mainUrl,
       clientName: client.name,
       headerImage: emailHeaderImage,

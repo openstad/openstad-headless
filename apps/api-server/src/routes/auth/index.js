@@ -22,7 +22,6 @@ router
   })
   .use(async function (req, res, next) { // get adapter
     try {
-      console.log(req.authConfig);
       let adapter = req.authConfig.adapter || 'openstad';
       if (!adapters[adapter]) {
         // TODO: zo schrijf je geen dirname....
