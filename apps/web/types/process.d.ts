@@ -21,5 +21,9 @@ declare namespace NodeJS {
      * The URL of the Openstad OAuth server. In development this is often http://localhost:4000.
      */
     OAUTH_URL: string;
+    /**
+     * The URL of the Openstad API server. In development this is often http://localhost:8111.
+     */
+    API_URL: string;
   }
 }

@@ -17,23 +17,34 @@ export const authOptions: NextAuthOptions = {
       }
       return true;
     },
-    async session({ session, token }) {
-      if (token.accessToken) {
-        session.accessToken = token.accessToken;
-      }
-      return session;
-    },
-    async jwt({ token, account }) {
+    async jwt({ token, account, profile }) {
       if (account?.provider === "openstad" && account?.access_token) {
         /**
-         * @todo: Fetch a jwt token from the api with the account.access_token,
-         * store the token in the session so it can be used later for api calls.
-         *
-         * For now this is not possible since the api only creates jwt tokens
-         * when oauth request flow through the api.
-         *
-         * Maybe this was done for security purposes.
+         * Fetch a jwt token from the api with the account.access_token,
+         * store the token in the token payload so it can be used later for api calls.
          */
+        try {
+          // @todo: make project id and useAuth dynamic
+          const tokenResponse = await fetch(
+            `${process.env.API_URL}/auth/project/1/connect-user?useAuth=uniquecode`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                access_token: account.access_token,
+                iss: process.env.OAUTH_URL,
+              }),
+            }
+          );
+          if (tokenResponse.ok) {
+            const tokenData = (await tokenResponse.json()) as { jwt: string };
+            token.accessToken = tokenData.jwt;
+          }
+        } catch (error) {
+          console.error(error);
+        }
       }
       return token;
     },
