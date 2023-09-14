@@ -29,15 +29,16 @@ export default function DemoPage() {
           name: 'Projecten',
           url: '/projects',
         },
-      ]}>
-      <div className="container mx-auto py-10">
+      ]}
+      action={
         <Button variant="create" className="float-right">
           <Link href="/projects/create">
             + Nieuw
           </Link>
-        </Button>
-        <br/>
-        <br/>
+        </Button>  
+      }
+      >
+      <div className="container mx-auto py-10">
         <DataTable columns={columns} data={data} />
       </div>
       </PageLayout>
