@@ -1,0 +1,44 @@
+version: "3.4"
+services:
+  mysql:
+    image: mysql:8.0.26
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_PASSWORD:-openstad}"
+      MYSQL_DATABASE: "${MYSQL_DB:-openstad}"
+      MYSQL_USER: "${MYSQL_USER:-openstad}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD:-openstad}"
+      AUTH_DB_NAME: "${AUTH_DB_NAME:-openstad_auth}"
+      API_DATABASE: "${API_DATABASE:-openstad_api}"
+      IMAGE_DB_NAME: "${IMAGE_DB_NAME:-openstad_image}"
+    command:
+      - mysqld
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - 3306:3306
+    volumes:
+      # - ./export.sql:/docker-entrypoint-initdb.d/99-export.sql
+      - openstad-db-data:/var/lib/mysql
+    entrypoint: |
+      bash -c "
+        echo \"CREATE DATABASE IF NOT EXISTS $$AUTH_DB_NAME; CREATE DATABASE IF NOT EXISTS $$IMAGE_DB_NAME; CREATE DATABASE IF NOT EXISTS $$API_DATABASE; FLUSH PRIVILEGES; GRANT ALL ON *.* TO '$$MYSQL_USER'@'%'; FLUSH PRIVILEGES;\" > /docker-entrypoint-initdb.d/init.sql;
+        /usr/local/bin/docker-entrypoint.sh $0 $@
+      "
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui
+
+  mongo:
+    image: mongo:6
+    ports:
+      - 27017:27017
+    volumes:
+      - openstad-mongo-data:/data/db
+
+volumes:
+  openstad-db-data: {}
+  openstad-mongo-data: {}
