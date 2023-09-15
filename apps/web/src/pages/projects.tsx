@@ -1,3 +1,4 @@
+import useSWR from 'swr';
 import { PageLayout } from "@/components/ui/page-layout"
 import { columns } from "./table/columns"
 import { DataTable } from "./table/data-table"
@@ -5,20 +6,9 @@ import { Button } from "@/components/ui/button"
 import Link from 'next/link';
 
 export default function DemoPage() {
-  const data = [
-    {
-      id: "728ed52f",
-      projectName: "Project",
-      data: "Data",
-      issues: "Issues",
-      status: "Status",
-      react: "Reageren",
-      like: "Liken",
-      submitter: "Toevoeger",
-      resources: "Resources",
-    },
-    // ...
-  ]
+  const { data, isLoading } = useSWR('/api/openstad/api/project');
+
+  if (!data) return null
 
   return (
     <div>
