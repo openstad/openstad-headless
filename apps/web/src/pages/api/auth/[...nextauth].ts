@@ -9,6 +9,9 @@ export const authOptions: NextAuthOptions = {
       issuer: process.env.OAUTH_URL,
     }),
   ],
+  pages: {
+    signIn: "/auth/signin",
+  },
   callbacks: {
     async signIn({ account, profile }) {
       if (account?.provider === "openstad" && profile?.role !== "admin") {
