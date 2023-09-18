@@ -1,16 +1,17 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
-import { Separator } from '@/components/ui/separator';
-import { List, Settings, User } from 'lucide-react'
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/router";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
+import { FolderOpen, Settings, User, Users } from "lucide-react";
+import { Logo } from "./logo";
 
 export function Sidenav({ className }: { className?: string }) {
   const router = useRouter();
-  const [location, setLocation] = useState('');
+  const [location, setLocation] = useState("");
 
   useEffect(() => {
     setLocation(router.pathname);
@@ -19,49 +20,64 @@ export function Sidenav({ className }: { className?: string }) {
   return (
     <nav
       className={cn(
-        'fixed -translate-x-72 min-w-[12rem] w-48 max-w-[12rem] border-r border-border min-h-full max-h-screen md:sticky md:-translate-x-0 z-50 bg-background top-0 flex flex-col',
+        "fixed -translate-x-72 min-w-[16rem] w-48 max-w-[12rem] border-r border-border min-h-full max-h-screen md:sticky md:-translate-x-0 z-50 bg-background top-0 flex flex-col",
         className
-      )}>
-      <div className="px-4 py-4 flex flex-col flex-grow gap-2">
-        <Separator className="my-2" />
-          <Button
-            variant={
-                location.startsWith('/projects') ? 'sidebar' : 'ghost'
-            }
-            size="default"
-            className="w-full flex justify-start"
-            asChild>
-              <Link href="/projects">
-                <List />
-                Projecten
-              </Link>
-          </Button>
-          <Button
-            variant={location.includes('/users') ? 'sidebar' : 'ghost'}
-            size={'default'}
-            className="w-full flex justify-start"
-            onClick={(e) => {
-            }}
-            asChild>
-              <Link href={`/users`}>
-                <User />
-                Gebruikers
-              </Link>
-          </Button>
-          <Button
-            variant={location.includes('/settings') ? 'sidebar' : 'ghost'}
-            size={'default'}
-            className="w-full flex justify-start"
-            onClick={(e) => {
-            }}
-            asChild>
-              <Link href={`/settings`}>
-                <Settings />
-                Instellingen
-              </Link>
-          </Button>
-        <div className="flex-grow"></div>
+      )}
+    >
+      <div className="flex flex-col items-center justify-center h-28 border-b border-border">
+        <Logo />
       </div>
+      <div className="p-4 flex flex-col gap-2">
+        <Link href="/projects">
+          <Button
+            variant={location.startsWith("/projects") ? "secondary" : "ghost"}
+            className="w-full flex flex-row justify-start"
+          >
+            <FolderOpen
+              size="20"
+              className={
+                location.startsWith("/projects")
+                  ? "text-brand"
+                  : "text-foreground"
+              }
+            />
+            Projecten
+          </Button>
+        </Link>
+        <Link href="/users">
+          <Button
+            variant={location.includes("/users") ? "secondary" : "ghost"}
+            className="w-full flex flex-row justify-start"
+            onClick={(e) => {}}
+          >
+            <Users
+              size="20"
+              className={
+                location.startsWith("/users") ? "text-brand" : "text-foreground"
+              }
+            />
+            Gebruikers
+          </Button>
+        </Link>
+        <Link href="settings">
+          <Button
+            variant={location.includes("/settings") ? "secondary" : "ghost"}
+            className="w-full flex flex-row justify-start"
+            onClick={(e) => {}}
+          >
+            <Settings
+              size="20"
+              className={
+                location.startsWith("/settings")
+                  ? "text-brand"
+                  : "text-foreground"
+              }
+            />
+            Instellingen
+          </Button>
+        </Link>
+      </div>
+      <div className="flex-grow"></div>
     </nav>
   );
 }
