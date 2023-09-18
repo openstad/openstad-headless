@@ -103,7 +103,7 @@ router
 
 router
   .route('(/project/:projectId)?/digest-login')
-  .get(function (req, res, next) {
+  .get(async function (req, res, next) {
     
     // get accesstoken for code
     let code = req.query.code;
@@ -117,30 +117,31 @@ router
       grant_type: 'authorization_code'
     }
 
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
-	    .then((response) => {
-		    if (!response.ok) throw Error(response)
-		    return response.json();
-	    })
-	    .then( json => {
+    try {
 
-        let accessToken = json.access_token;
-        if (!accessToken) return next(createError(403, 'Inloggen niet gelukt: geen accessToken'));
+      let response = await fetch(url, {
+        headers: { 'Content-type': 'application/json' },
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
 
-        req.userAccessToken = accessToken;
-        return next();
+      if (!response.ok) {
+        console.log(response);
+        throw new Error('Fetch failed')
+      }
 
-	    })
-	    .catch((err) => {
-		    console.log(err);
-        throw createError(401, 'Login niet gelukt');
-	    });
+      let json = await response.json();
+
+      let accessToken = json.access_token;
+      if (!accessToken) return next(createError(403, 'Inloggen niet gelukt: geen accessToken'));
+
+      req.userAccessToken = accessToken;
+      return next();
+
+    } catch(err) {
+		  console.log(err);
+      return next(createError(401, 'Login niet gelukt'));
+	  }
 
   })
   .get(async function (req, res, next) {
@@ -154,7 +155,7 @@ router
       })
 
     } catch(err) {
-      throw createError(err);
+      return next(createError(err));
     }
     return next();
 

@@ -273,7 +273,7 @@ module.exports = function (app) {
     }), oauth2Controller.authorization);
 
     app.post('/dialog/authorize/decision', clientMw.withOne, userMw.withRoleForClient, clientMw.checkPhonenumberAuth(), clientMw.checkUniqueCodeAuth(),clientMw.check2FA, bruteForce.global, oauth2Controller.decision);
-    app.post('/oauth/token', oauth2Controller.token);
+  app.post('/oauth/token', function(req, res, next) { console.log('++++++++++0'); next() }, oauth2Controller.token);
     app.get('/oauth/token', oauth2Controller.token);
 
     app.get('/api/userinfo', passport.authenticate('bearer', {session: false}), clientMw.withOne, userMw.withRoleForClient, clientMw.checkIfAccessTokenBelongToCurrentClient, clientMw.checkPhonenumberAuth(), clientMw.checkUniqueCodeAuth(), userController.info);

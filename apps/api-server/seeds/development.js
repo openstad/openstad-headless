@@ -1,14 +1,38 @@
 const fs = require('fs').promises;
 
+const removeProtocol = (url) => {
+  return url ? url.replace('http://', '').replace('https://', '').replace(/\/$/, "") : '';
+}
+
 module.exports = async function seed(config, db) {
 
   try {
+
+    let allowedDomains = process.env.NODE_ENV === 'development' ? ['localhost', ] : [];
+    let apiDomain = process.env.API_DOMAIN || removeProtocol(process.env.API_URL) || '';
+    allowedDomains.push(apiDomain);
 
     console.log('  creating development data');
     console.log('    rename default project to Plannen insturen');
     let project = await db.Project.update({
       name: 'Plannen insturen',
       config: {
+        allowedDomains,
+        "auth": {
+          "default": "openstad",
+          "provider": {
+            "openstad": {
+              "adapter": "openstad",
+              "clientId": "uniquecode",
+              "clientSecret": "uniquecode123"
+            },
+            "anonymous": {
+              "adapter": "openstad",
+              "clientId": "anonymous",
+              "clientSecret": "anonymous123"
+            },
+          }
+        },
         votes: {
           isViewable: true
         }
@@ -24,13 +48,14 @@ module.exports = async function seed(config, db) {
       id: 2,
       name: 'Begroten',
       config: {
+        allowedDomains,
         "auth": {
           "default": "openstad",
           "provider": {
             "openstad": {
               "adapter": "openstad",
-              "clientId": "uniekecodes",
-              "clientSecret": "uniekecodes123"
+              "clientId": "uniquecode",
+              "clientSecret": "uniquecode123"
             },
             "anonymous": {
               "adapter": "openstad",
@@ -47,13 +72,14 @@ module.exports = async function seed(config, db) {
       id: 3,
       name: 'Keuzewijzer',
       config: {
+        allowedDomains,
         "auth": {
           "default": "openstad",
           "provider": {
             "openstad": {
               "adapter": "openstad",
-              "clientId": "uniekecodes",
-              "clientSecret": "uniekecodes123"
+              "clientId": "uniquecode",
+              "clientSecret": "uniquecode123"
             },
             "anonymous": {
               "adapter": "openstad",

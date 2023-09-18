@@ -1,0 +1,50 @@
+# ----------------------------------------------------------------------------------------------------
+# API
+
+server {
+  listen 80;
+  server_name api.os20-headless-setup.nlsvgtr.nl;
+ 
+  client_max_body_size 20M;
+
+  location / {
+    proxy_redirect off;
+    proxy_set_header Host $host;
+    proxy_pass http://localhost:40010;
+  }
+ 
+}
+
+# ----------------------------------------------------------------------------------------------------
+# auth
+
+server {
+  listen 80;
+  server_name auth.os20-headless-setup.nlsvgtr.nl;
+
+  client_max_body_size 20M;
+
+  location / {
+    proxy_redirect off;
+    proxy_set_header Host $host;
+    proxy_pass http://localhost:40030;
+  }
+ 
+}
+
+# ----------------------------------------------------------------------------------------------------
+# image server
+
+server {
+  listen 80;
+  server_name image.os20-headless-setup.nlsvgtr.nl;
+
+  client_max_body_size 20M;
+
+  location / {
+    proxy_redirect off;
+    proxy_set_header Host $host;
+    proxy_pass http://localhost:40050;
+  }
+ 
+}

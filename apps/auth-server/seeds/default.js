@@ -18,8 +18,8 @@ module.exports = async function seed(db) {
   let allowedDomains = process.env.NODE_ENV === 'development' ? ['localhost'] : [];
   allowedDomains.push(removeProtocol(process.env.API_URL));
 
-  rack = hat.rack();
-  let uniqueCode = process.env.AUTH_FIRST_CLIENT_LOGIN_CODE ? process.env.AUTH_FIRST_CLIENT_LOGIN_CODE : rack();
+  process.env.AUTH_LOGIN_CODE = process.env.AUTH_LOGIN_CODE || rack() 
+  let uniqueCode = process.env.AUTH_LOGIN_CODE;
 
   console.log('  creating initial clients');
   console.log('    - admin site');
