@@ -73,7 +73,7 @@ export default function ProjectSettingsNewsletter() {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" variant={"save"}>Opslaan</Button>
+                        <Button type="submit" variant={"default"}>Opslaan</Button>
                     </form>
                     <br/>
                 </Form>

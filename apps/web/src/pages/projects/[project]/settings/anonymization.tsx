@@ -14,6 +14,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { PageLayout } from '@/components/ui/page-layout'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 const formSchema = z.object({
     daysAfterProjectEnd: z.number(),
@@ -104,12 +107,36 @@ export default function ProjectSettingsAnonymization() {
                             </FormItem>
                         )}
                         />
-                        <Button type="submit" variant={"save"}>Opslaan</Button>
+                        <Button type="submit" variant={"default"}>Opslaan</Button>
                     </form>
                     <br/>
                 </Form>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>
+                            Stel hier een email in voor gebruikers wiens account binnenkort verlopen.
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <form>
+                            <div>
+                                <div>
+                                    <Label>Onderwerp:</Label>
+                                    <Input id="subject" placeholder='Onderwerp van de mail' />
+                                </div>
+                                <div>
+                                    <Label>Mail-template:</Label>
+                                    <Textarea id="template" placeholder='Inhoud van de mail' />
+                                </div>
+                            </div>
+                        </form>
+                    </CardContent>
+                    <CardFooter className="flex justify-between">
+                        <Button variant={"default"}>Opslaan</Button>
+                    </CardFooter>
+                </Card>
             </div>
             </PageLayout>
-            </div>
+        </div>
     )
 }

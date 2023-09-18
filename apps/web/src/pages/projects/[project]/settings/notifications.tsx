@@ -93,12 +93,12 @@ export default function ProjectSettingsNotifications() {
                             </FormItem>
                         )}
                         />
-                        <Button type="submit" variant={"save"}>Opslaan</Button>
+                        <Button type="submit" variant={"default"}>Opslaan</Button>
                     </form>
                     <br/>
                 </Form>
-            </div>
+                </div>
             </PageLayout>
-            </div>
+        </div>
     )
 }

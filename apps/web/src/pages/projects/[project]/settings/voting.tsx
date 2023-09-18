@@ -229,7 +229,7 @@ export default function ProjectSettingsVoting() {
                             </FormItem>
                         )}
                         />
-                        <Button type="submit" variant={"save"}>Opslaan</Button>
+                        <Button type="submit" variant={"default"}>Opslaan</Button>
                     </form>
                     <br/>
                 </Form>
