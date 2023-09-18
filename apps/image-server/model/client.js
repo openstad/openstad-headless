@@ -6,12 +6,6 @@ module.exports = (db, sequelize, Sequelize) => {
 
   let Client = sequelize.define('client', {
 
-    testmigration: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      field: 'testmigration',
-    },
-
     clientName: {
       type: DataTypes.STRING,
       allowNull: false,

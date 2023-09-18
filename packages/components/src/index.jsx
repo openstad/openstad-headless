@@ -1,5 +1,6 @@
 import React from "react";
 
+import About from './about/index.jsx';
 import Button from './button/index.jsx';
 import Comments from './comments/index.jsx';
 import User from './user/index.jsx';
@@ -17,6 +18,7 @@ import Goodbye from './Goodbye.jsx';
 // let Goodbye = lazy(() => import('./Goodbye.jsx'));
 
 export {
+  About,
   Button,
   Comments,
   User,

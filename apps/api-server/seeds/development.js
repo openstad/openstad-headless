@@ -5,34 +5,92 @@ module.exports = async function seed(config, db) {
   try {
 
     console.log('  creating development data');
-
-    console.log('    2 users');
-    await db.User.create({
-      role: 'member',
-      name: 'Niels Vegter',
-    });
-
-    await db.User.create({
-      role: 'member',
-      name: 'Prins Bernard',
-    });
-
-    console.log('    a project');
-    let project = await db.Project.create({
-      name: 'Send in ideas',
+    console.log('    rename default project to Plannen insturen');
+    let project = await db.Project.update({
+      name: 'Plannen insturen',
       config: {
-        ideas: {
-          descriptionMinLength: 102,
-          extraData: {
-            images: {
-              type: 'arrayOfStrings',
-              default: [],
-            }
-          }
+        votes: {
+          isViewable: true
         }
       }
+    },{
+      where: { 
+        id: 1
+      },
     });
-    
+
+    console.log('    add begroot project');
+    project = await db.Project.create({
+      id: 2,
+      name: 'Begroten',
+      config: {
+        "auth": {
+          "default": "openstad",
+          "provider": {
+            "openstad": {
+              "adapter": "openstad",
+              "clientId": "uniekecodes",
+              "clientSecret": "uniekecodes123"
+            },
+            "anonymous": {
+              "adapter": "openstad",
+              "clientId": "anonymous",
+              "clientSecret": "anonymous123"
+            },
+          }
+        },
+      },
+    });
+
+    console.log('    add keuzewijzer project');
+    project = await db.Project.create({
+      id: 3,
+      name: 'Keuzewijzer',
+      config: {
+        "auth": {
+          "default": "openstad",
+          "provider": {
+            "openstad": {
+              "adapter": "openstad",
+              "clientId": "uniekecodes",
+              "clientSecret": "uniekecodes123"
+            },
+            "anonymous": {
+              "adapter": "openstad",
+              "clientId": "anonymous",
+              "clientSecret": "anonymous123"
+            },
+          }
+        },
+      },
+    });
+
+    console.log('    add 4 member users');
+    await db.User.create({
+      projectId: 1,
+      role: 'admin',
+      name: 'User one',
+    });
+
+    await db.User.create({
+      projectId: 1,
+      role: 'member',
+      name: 'User two',
+    });
+
+    await db.User.create({
+      projectId: 2,
+      role: 'admin',
+      name: 'User one',
+    });
+
+    await db.User.create({
+      projectId: 2,
+      role: 'member',
+      name: 'User two',
+    });
+
+
     console.log('    10 ideas');
     await db.Idea.create({
       userId: 2,
@@ -53,6 +111,7 @@ module.exports = async function seed(config, db) {
         ]
       },
       startDate: db.sequelize.fn('now'),
+      publishDate: db.sequelize.fn('now'),
     });
 
     await db.Idea.create({
@@ -74,6 +133,7 @@ module.exports = async function seed(config, db) {
         ]
       },
       startDate: db.sequelize.fn('now'),
+      publishDate: db.sequelize.fn('now'),
     });
 
     await db.Idea.create({
@@ -95,6 +155,7 @@ module.exports = async function seed(config, db) {
         ]
       },
       startDate: db.sequelize.fn('now'),
+      publishDate: db.sequelize.fn('now'),
     });
 
     await db.Idea.create({
@@ -116,6 +177,7 @@ module.exports = async function seed(config, db) {
         ]
       },
       startDate: db.sequelize.fn('now'),
+      publishDate: db.sequelize.fn('now'),
     });
 
     await db.Idea.create({
@@ -137,11 +199,12 @@ module.exports = async function seed(config, db) {
         ]
       },
       startDate: db.sequelize.fn('now'),
+      publishDate: db.sequelize.fn('now'),
     });
 
     await db.Idea.create({
       userId: 2,
-      projectId: 1,
+      projectId: 2,
       title: 'Vestibulum ante ipsum',
       summary: 'Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Fusce ornare.',
       description: 'Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Fusce ornare felis id lacinia sodales. Vivamus augue ligula, ullamcorper ac volutpat non, scelerisque at neque. Nulla laoreet, sapien ac iaculis sodales, massa lacus auctor felis, consequat gravida lorem erat sed metus. Fusce lacus mauris, cursus id magna ullamcorper, lacinia eleifend mauris. Etiam scelerisque molestie dui congue eleifend. Phasellus a tortor nibh. Ut vestibulum ut risus at finibus.',
@@ -158,11 +221,12 @@ module.exports = async function seed(config, db) {
         ]
       },
       startDate: db.sequelize.fn('now'),
+      publishDate: db.sequelize.fn('now'),
     });
 
     await db.Idea.create({
       userId: 2,
-      projectId: 1,
+      projectId: 2,
       title: 'Nulla laoreet pretium',
       summary: 'Nulla laoreet pretium tortor at placerat. Sed in est vulputate, ullamcorper nisi id, elementum enim.',
       description: 'Nulla laoreet pretium tortor at placerat. Sed in est vulputate, ullamcorper nisi id, elementum enim. Nulla ac nisl id nibh auctor ullamcorper. In suscipit porttitor mi at sodales. Pellentesque diam elit, ornare in aliquam eget, dictum a libero. Donec sagittis dictum elit sit amet varius. Maecenas eget mauris ultricies, ullamcorper nibh sit amet, luctus ex. Cras rhoncus dolor dolor, at porta ligula bibendum sit amet. Proin hendrerit efficitur tortor eget consectetur. Curabitur vitae dictum velit. Praesent scelerisque, dui quis elementum sodales, nisi erat porttitor quam, quis feugiat erat augue vehicula dui. Praesent ultrices suscipit tellus, sit amet consectetur enim accumsan ac. Suspendisse ac porta velit.',
@@ -179,12 +243,13 @@ module.exports = async function seed(config, db) {
         ]
       },
       startDate: db.sequelize.fn('now'),
+      publishDate: db.sequelize.fn('now'),
     });
 
 
     await db.Idea.create({
       userId: 2,
-      projectId: 1,
+      projectId: 2,
       title: 'Aliquam ut magna',
       summary: 'Aliquam ut magna eget ante tempor consectetur non nec nibh. Etiam id tellus eget turpis.',
       description: 'Aliquam ut magna eget ante tempor consectetur non nec nibh. Etiam id tellus eget turpis porta egestas. Sed maximus sed nisi vel ornare. Aliquam erat volutpat. Phasellus lobortis nibh in convallis eleifend. Morbi nunc nisi, consequat nec odio a, efficitur congue ipsum. Donec nec leo id urna scelerisque rutrum. Donec pulvinar nunc nisl, at dignissim purus dapibus at. Phasellus pellentesque sem turpis, et facilisis nisl tempus at.',
@@ -201,11 +266,12 @@ module.exports = async function seed(config, db) {
         ]
       },
       startDate: db.sequelize.fn('now'),
+      publishDate: db.sequelize.fn('now'),
     });
 
     await db.Idea.create({
       userId: 2,
-      projectId: 1,
+      projectId: 2,
       title: 'Etiam ultricies dui',
       summary: 'Etiam ultricies dui non justo laoreet convallis. Aenean odio erat, molestie et odio in, imperdiet.',
       description: 'Etiam ultricies dui non justo laoreet convallis. Aenean odio erat, molestie et odio in, imperdiet consectetur mauris. Pellentesque lobortis lacus sodales, volutpat turpis vel, posuere purus. Aliquam non elementum dolor. Ut vel dolor nec purus hendrerit molestie. Sed tortor erat, facilisis vitae orci sit amet, maximus viverra diam. Ut non sem mollis, facilisis libero id, sollicitudin felis. Donec at orci fermentum, pretium nunc a, dictum mauris. In tristique quis sapien sed faucibus. Quisque posuere purus tortor, quis gravida mauris cursus ac. Integer semper turpis quis magna consectetur, blandit placerat tellus lobortis. Morbi commodo sem iaculis nunc ornare, vel lobortis enim lacinia. Sed vitae lacus ex.',
@@ -222,11 +288,12 @@ module.exports = async function seed(config, db) {
         ]
       },
       startDate: db.sequelize.fn('now'),
+      publishDate: db.sequelize.fn('now'),
     });
 
     await db.Idea.create({
       userId: 2,
-      projectId: 1,
+      projectId: 2,
       title: 'Nullam dignissim tincidunt',
       summary: 'Nullam dignissim tincidunt urna, non vehicula enim convallis vitae. Nulla enim nibh, semper et metus.',
       description: 'Nullam dignissim tincidunt urna, non vehicula enim convallis vitae. Nulla enim nibh, semper et metus quis, venenatis eleifend nisi. Phasellus sed erat est. Donec ac lobortis turpis. Nulla facilisi. Pellentesque sit amet nisi id ante maximus consequat non sit amet nisl. Sed diam metus, malesuada ac aliquet in, pulvinar ac elit. Sed feugiat a dui sit amet luctus. Morbi sit amet dignissim neque, eget blandit lorem. Suspendisse ultrices mauris felis, in fermentum metus vestibulum a. Integer congue pharetra risus a interdum. Vivamus fringilla justo ac elementum tempor. Quisque ultrices fringilla lobortis. Aliquam ullamcorper ligula eu ipsum imperdiet vestibulum. Maecenas pretium, mi eget blandit tincidunt, justo lorem ornare lorem, in vulputate diam quam mollis ligula. Etiam viverra, nisl et laoreet tristique, dui sapien volutpat leo, in euismod diam dui nec orci. ',
@@ -243,6 +310,32 @@ module.exports = async function seed(config, db) {
         ]
       },
       startDate: db.sequelize.fn('now'),
+      publishDate: db.sequelize.fn('now'),
+    });
+
+    console.log('      with 4 likes');
+    await db.Vote.create({
+      userId: 2,
+      ideaId: 1,
+      opinion: 'yes',
+    });
+ 	  
+    await db.Vote.create({
+      userId: 3,
+      ideaId: 1,
+      opinion: 'yes',
+    });
+ 	  
+    await db.Vote.create({
+      userId: 2,
+      ideaId: 2,
+      opinion: 'yes',
+    });
+
+    await db.Vote.create({
+      userId: 3,
+      ideaId: 2,
+      opinion: 'no',
     });
 
     console.log('    6 comments');
@@ -250,68 +343,69 @@ module.exports = async function seed(config, db) {
     await db.Comment.create({
       userId: 2,
       ideaId: 1,
-      description: 'In id vestibulum leo. Integer a justo quis est porttitor auctor. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Pellentesque porta laoreet scelerisque. Etiam laoreet ultrices est, vitae malesuada magna tempor eu. Donec tempor magna ut erat molestie, sed pulvinar elit pellentesque. Ut efficitur erat lorem, at volutpat dui aliquam eget. Suspendisse bibendum iaculis vehicula.',
+      description: 'In id vestibulum leo. Integer a justo quis est porttitor auctor. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Pellentesque porta laoreet scelerisque. Etiam laoreet ultrices est, vitae malesuada magna tempor eu.',
+      sentiment: 'for',
     });
 
     await db.Comment.create({
       userId: 2,
       ideaId: 1,
       parentId: 1,
-      description: 'Sed egestas sapien nec tristique cursus. Nunc euismod tempus nisl, sit amet malesuada velit. Vivamus nec nulla eleifend, congue dolor quis, dignissim est. Maecenas rhoncus tellus et augue efficitur tincidunt. Ut euismod libero vel lorem semper ultrices. Ut sed fringilla urna, id tempus nisl. Aliquam erat volutpat. Cras ligula turpis, mollis at velit sit amet, cursus tincidunt ex. Phasellus vehicula convallis nisl nec luctus.',
+      sentiment: 'for',
+      description: 'Sed egestas sapien nec tristique cursus. Nunc euismod tempus nisl, sit amet malesuada velit. Vivamus nec nulla eleifend, congue dolor quis, dignissim est. Maecenas rhoncus tellus et augue efficitur tincidunt. Ut euismod libero vel lorem semper.',
     });
 
     await db.Comment.create({
-      userId: 2,
-      ideaId: 1,
-      description: 'Aliquam tincidunt enim et arcu dictum, mollis consequat ligula feugiat. Cras vel imperdiet eros. Nulla finibus sed metus a mattis. Aenean lobortis fringilla felis id congue. Cras lacus justo, imperdiet in tellus vitae, volutpat pretium dolor. Aenean id mi ipsum. Sed hendrerit lacus id nunc elementum luctus. Mauris risus quam, molestie vitae molestie ac, tempor at sapien.',
-    });
-
-    await db.Comment.create({
-      userId: 2,
-      ideaId: 1,
-      description: 'Curabitur vestibulum ex sem, in tempor mi ullamcorper vitae. Aenean dui magna, auctor in eleifend nec, elementum quis massa. Etiam quis eros sapien. Mauris ornare mi ut justo pretium, quis mollis sapien pulvinar. Maecenas feugiat sapien purus. Nunc sit amet nibh felis. Aenean porttitor nisi sit amet quam semper, in sagittis nibh lobortis. Maecenas egestas tristique lorem, eu dapibus tortor laoreet quis.',
-    });
-
-    await db.Comment.create({
-      userId: 2,
-      ideaId: 1,
-      description: 'Mauris a vestibulum justo, a mattis purus. Phasellus auctor eros vitae augue dictum aliquam. Pellentesque quis pulvinar est, sed congue metus. Morbi volutpat velit libero, ac condimentum justo egestas ac. Integer eu sollicitudin mauris. Curabitur sed condimentum magna. Etiam fringilla arcu ac purus porttitor fringilla. Integer ultrices, erat vitae pretium dictum, dolor diam pulvinar libero.',
-    });
-
-    await db.Comment.create({
-      userId: 2,
-      ideaId: 1,
-      description: 'Mauris a vestibulum justo, a mattis purus. Phasellus auctor eros vitae augue dictum aliquam. Pellentesque quis pulvinar est, sed congue metus. Morbi volutpat velit libero, ac condimentum justo egestas ac. Integer eu sollicitudin mauris. Curabitur sed condimentum magna. Etiam fringilla arcu ac purus porttitor fringilla. Integer ultrices, erat vitae pretium dictum, dolor diam pulvinar libero.',
-    });
-
-    console.log('    4 likes');
-    await db.Vote.create({
-      userId: 2,
-      ideaId: 1,
-      sentiment: 'yes',
-    });
- 	  
-    await db.Vote.create({
       userId: 3,
       ideaId: 1,
-      sentiment: 'yes',
-    });
- 	  
-    await db.Vote.create({
-      userId: 2,
-      ideaId: 2,
-      sentiment: 'yes',
+      description: 'Aliquam tincidunt enim et arcu dictum, mollis consequat ligula feugiat. Cras vel imperdiet eros. Nulla finibus sed metus a mattis. Aenean lobortis fringilla felis id congue. Cras lacus justo, imperdiet in tellus vitae, volutpat pretium dolor.',
+      sentiment: 'for',
     });
 
-    await db.Vote.create({
+    await db.Comment.create({
       userId: 3,
+      ideaId: 1,
+      description: 'Curabitur vestibulum ex sem, in tempor mi ullamcorper vitae. Aenean dui magna, auctor in eleifend nec, elementum quis massa. Etiam quis eros sapien. Mauris ornare mi ut justo pretium, quis mollis sapien pulvinar. Maecenas feugiat sapien.',
+      sentiment: 'for',
+    });
+
+    await db.Comment.create({
+      userId: 2,
       ideaId: 2,
-      sentiment: 'no',
+      description: 'Mauris a vestibulum justo, a mattis purus. Phasellus auctor eros vitae augue dictum aliquam. Pellentesque quis pulvinar est, sed congue metus. Morbi volutpat velit libero, ac condimentum justo egestas ac. Integer eu sollicitudin mauris. Curabitur sed.',
+      sentiment: 'for',
+    });
+
+    await db.Comment.create({
+      userId: 2,
+      ideaId: 1,
+      description: 'Mauris a vestibulum justo, a mattis purus. Phasellus auctor eros vitae augue dictum aliquam. Pellentesque quis pulvinar est, sed congue metus. Morbi volutpat velit libero, ac condimentum justo egestas ac. Integer eu sollicitudin mauris. Curabitur sed.',
+      sentiment: 'against',
+    });
+
+    console.log('      with 3 likes');
+
+    await db.CommentVote.create({
+      userId: 2,
+      commentId: 3,
+      opinion: 'yes',
+    });
+
+    await db.CommentVote.create({
+      userId: 1,
+      commentId: 4,
+      opinion: 'yes',
+    });
+
+    await db.CommentVote.create({
+      userId: 3,
+      commentId: 3,
+      opinion: 'yes',
     });
 
     console.log('    a choices-guide');
     await db.ChoicesGuide.create({
-      projectId: 1,
+      projectId: 3,
       title: 'Niels\' zn test keuzes',
       description: 'Basis keuzewijzer voor het testen van van alles',
       config: '{"isActive":true,"submissionType":"form","requiredUserRole":"member","withExisting":"error"}',

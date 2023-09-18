@@ -12,7 +12,7 @@ const Forms = function(props) {
   props = merge.recursive({}, {
   }, props.config,  props);
 
-  const [ currentUser, currentUserError, currentUserIsLoading ] = datastore.useUser({ ...props });
+  const [ currentUser, currentUserError, currentUserIsLoading ] = datastore.useCurrentUser({ ...props });
 
   return (
     <div id={props.config.divId} className={formVariants({ variant: props.variant, size: props.size, className: props.className })}>

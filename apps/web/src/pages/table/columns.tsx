@@ -1,19 +1,18 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "@/components/ui/checkbox"
 
-
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Project = {
-  id: string
-  projectName: string
-  data: string
-  issues: string
-  status: string
-  react: string
-  like: string
-  submitter: string
-  resources: string
+  areaId: number | null,
+  id: number
+  createdAt: string,
+  deletedAt: string | null,
+  hostStatus: Record<string, unknown>,
+  name: string,
+  title: string,
+  updatedAt: string,
+  url: string | null,
 }
 
 export const columns: ColumnDef<Project>[] = [
@@ -37,33 +36,15 @@ export const columns: ColumnDef<Project>[] = [
         enableHiding: false,
       },
   {
-    accessorKey: "projectName",
-    header: "Project Naam"
+    accessorKey: "id",
+    header: "ID"
   },
   {
-    accessorKey: "data",
-    header: "Data"
+    accessorKey: "title",
+    header: "Titel"
   },
   {
-    accessorKey: "issues",
-    header: "Issues"
-  },
-  {
-    accessorKey: "status",
-    header: "Status"
-  },
-  {
-    accessorKey: "react",
-    header: "Reageren"
-  },{
-    accessorKey: "like",
-    header: "Liken"
-  },{
-    accessorKey: "submitter",
-    header: "Toevoeger"
-  },
-  {
-    accessorKey: "resources",
-    header: "Resources"
+    accessorKey: "name",
+    header: "Naam"
   },
 ]

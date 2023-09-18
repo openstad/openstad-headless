@@ -219,11 +219,10 @@ router.route('/:commentId(\\d+)/vote')
   .post(function(req, res, next) {
     var user = req.user;
     var comment = req.results;
-    var opinion = 'yes'; // todo
 
     if (!(comment && comment.can && comment.can('vote'))) return next(new Error('You cannot vote for this comment'));
 
-    comment.addUserVote(user, opinion, req.ip)
+    comment.addUserVote(user, req.ip)
       .then(function(voteRemoved) {
 
         db.Comment

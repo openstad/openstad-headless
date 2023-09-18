@@ -9,7 +9,69 @@ const service = require('./service');
 
 let router = express.Router({mergeParams: true});
 
-// Todo: dit is 'openstad', dus serverLogin/outPath en zo modgen hier hardcoded in gezet en uit de config gehaald
+// Todo: dit is 'openstad', dus veel configuratie mag hier hardcoded en uit de config gehaald
+
+// ----------------------------------------------------------------------------------------------------
+// connect a user from the openstad auth server to the api
+
+router
+  .route('(/project/:projectId)?/connect-user')
+    .post(async function (req, res, next) {
+
+      try {
+
+        let iss = req.body.iss;
+        if (iss !== req.authConfig.serverUrl) throw Error('Unknown auth server');
+
+        let accessToken = req.body.access_token;
+        let mappedUserData = await service.fetchUserData({
+          authConfig: req.authConfig,
+          accessToken: accessToken,
+        })
+
+        let openStadUser = await db.User
+            .findOne({
+              where: {
+                [Sequelize.Op.and]: [
+                  { projectId: req.params.projectId },
+                  {
+                    idpUser: {
+                      identifier: mappedUserData.idpUser.identifier,
+                      provider: mappedUserData.idpUser.provider,
+                    }
+                  }
+                ]
+              }
+            })
+
+        // console.log('FOUND: ', openStadUser && openStadUser.id);
+
+        openStadUser = await db.User
+          .upsert({
+            ...mappedUserData,
+            id: openStadUser && openStadUser.id,
+            projectId: req.params.projectId,
+            email: mappedUserData.email,
+            idpUser: mappedUserData.idpUser,
+            lastLogin: new Date(),
+          });
+
+        if ( Array.isArray(openStadUser) ) openStadUser = openStadUser[0];
+
+        // TODO: iss moet gecontroleerd
+        jwt.sign({userId: openStadUser.id, authProvider: req.authConfig.provider}, config.auth['jwtSecret'], {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
+          if (err) return next(err)
+          return res.json({
+            jwt: token
+          })
+        });
+
+      } catch(err) {
+        console.log(err);
+        return next(err)
+      }
+
+    });
 
 // ----------------------------------------------------------------------------------------------------
 // login
@@ -29,7 +91,7 @@ router
   })
   .get(function (req, res, next) {
 
-    // redirect to login server
+    // redirect to idp server
     let redirectUri = encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.redirectUri);
     let url = `${req.authConfig.serverUrl}/dialog/authorize?redirect_uri=${redirectUri}&response_type=code&client_id=${req.authConfig.clientId}&scope=offline&forceLogin=1`;
     res.redirect(url);
@@ -127,7 +189,6 @@ router
               return next();
             })
             .catch((e) => {
-              console.log('update e', e)
               req.userData.id = user.id;
               return next();
             })
@@ -147,7 +208,6 @@ router
             })
             .catch(err => {
               //console.log('OAUTH DIGEST - CREATE USER ERROR');
-              console.log('create e', err);
               next(err);
             })
         }
@@ -164,6 +224,7 @@ router
 
     // todo: deze afvanging moet veel eerder!!!
     const isAllowedRedirectDomain = (url, allowedDomains) => {
+
       let redirectUrlHost = '';
       try {
         redirectUrlHost = new URL(url).hostname;
@@ -206,9 +267,9 @@ router
     return next();
   })
   .get(async function (req, res, next) {
-
     // api user
     if (req.user && req.user.id > 1) {
+      // note: it is unlikely that you get here; most logout requests will not send Auth headers
       let idpUser = req.user.idpUser;
       delete idpUser.accesstoken;
       await req.user.update({
@@ -216,22 +277,22 @@ router
       });
     }
     return next();
-
   })
   .get(function (req, res, next) {
-
-    // redirect to logout server
-    let url = req.authConfig.serverUrl + '/logout?clientId=[[clientId]]';
-    url = url.replace(/\[\[clientId\]\]/, req.authConfig.clientId); // todo dezde oet denk ik naar authconfig middleware
-    if (req.query.redirectUri) {
-      url = `${url}&redirectUrl=${encodeURIComponent(req.query.redirectUri)}`;
+    if (!req.query.ipdlogout) {
+      // redirect to idp server
+      let redirectUri = encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/logout?ipdlogout=done&useAuth=' + req.query.useAuth + '&redirectUri=' + req.query.redirectUri);
+      let url = `${req.authConfig.serverUrl}/logout?redirectUrl=${redirectUri}&client_id=${req.authConfig.clientId}`;
+      return res.redirect(url);
     }
-    return res.redirect(url);
+    return next();
+  })
+  .get(function (req, res, next) {
 
     // todo: isallowed
     if (req.query.redirectUri) return res.redirect(req.query.redirectUri);
 
-    return res.end('Uitgelogd')
+    return res.json({ logout: 'success' })
 
   });
 

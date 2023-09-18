@@ -48,7 +48,7 @@ const Comments = function(props) {
 
   const datastore = new DataStore(props);
 
-  const [ currentUser, currentUserError, currentUserIsLoading ] = datastore.useUser({ ...props });
+  const [ currentUser, currentUserError, currentUserIsLoading ] = datastore.useCurrentUser({ ...props });
   const [ comments, commentsError, commentsIsLoading ] = datastore.useComments({ ...props });
 
   let [ submitError, setSubmitError ] = useState();

@@ -25,6 +25,7 @@ router
     // in case the votes are archived don't use these queries
     // this means they can be cleaned up from the main table for performance reason
     if (!req.project.config.archivedVotes) {
+      console.log();
       if (req.query.includeVoteCount && ( (req.project && req.project.config && req.project.config.votes && req.project.config.votes.isViewable) || userhasModeratorRights(req.user) )) {
         req.scope.push('includeVoteCount');
       }
@@ -126,7 +127,7 @@ router.route('/')
         return sortingQuery;
       });
     }
-
+    
     db.Idea
       .scope(...req.scope)
       .findAndCountAll(dbQuery)

@@ -14,6 +14,37 @@ module.exports = async function seed(config, db) {
       console.log(err);
     }
 
+    console.log('  creating default project');
+    let project = await db.Project.create({
+      id: 1,
+      name: 'Default project',
+      config: {
+        ideas: {
+          extraData: {
+            images: {
+              type: 'arrayOfStrings',
+              default: [],
+            }
+          }
+        },
+        "auth": {
+          "default": "openstad",
+          "provider": {
+            "openstad": {
+              "adapter": "openstad",
+              "clientId": "uniekecodes",
+              "clientSecret": "uniekecodes123"
+            },
+            "anonymous": {
+              "adapter": "openstad",
+              "clientId": "anonymous",
+              "clientSecret": "anonymous123"
+            },
+          }
+        },
+      },
+    });
+
     // map polygons
     console.log('  creating map polygons');
     const polygons = require('./polygons');

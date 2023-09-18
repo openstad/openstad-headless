@@ -18,6 +18,15 @@ module.exports = {
       },
     },
 
+    'about': {
+      import: './src/about/index.jsx',
+      filename: 'about.js',
+      library: {
+        name: 'OS20',
+        type: 'assign-properties',
+      },
+    },
+
     'button': {
       import: './src/button/index.jsx',
       filename: 'button.js',

@@ -21,12 +21,16 @@ router
     return next();
   })
   .use(async function (req, res, next) { // get adapter
-    let adapter = req.authConfig.adapter || 'openstad';
-    if (!adapters[adapter]) {
-      // TODO: zo schrijf je geen dirname....
-      adapters[adapter] = await authSettings.adapter({ authConfig: req.authConfig })
+    try {
+      let adapter = req.authConfig.adapter || 'openstad';
+      if (!adapters[adapter]) {
+        // TODO: zo schrijf je geen dirname....
+        adapters[adapter] = await authSettings.adapter({ authConfig: req.authConfig })
+      }
+      return next();
+    } catch(err) {
+      return next(err);
     }
-    return next();
   })
   .use(async function (req, res, next) { // use adapter
     let adapter = req.authConfig.adapter || 'openstad';

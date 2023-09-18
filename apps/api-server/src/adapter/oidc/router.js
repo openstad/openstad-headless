@@ -95,10 +95,6 @@ router
     let url = req.authConfig.serverUrl + req.authConfig.serverLoginPath;
     url = url.replace(/\[\[clientId\]\]/, req.authConfig.clientId);
     url = url.replace(/\[\[redirectUri\]\]/, encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.redirectUri));
-
-    console.log('++++++++++');
-    console.log(url);
-    
     res.redirect(url);
 
   })
@@ -134,8 +130,6 @@ router
       body: data
     })
 	    .then((response) => {
-        console.log(response);
-        
 		    if (!response.ok) throw Error(response)
 		    return response.json();
 	    })
@@ -143,10 +137,7 @@ router
 
         let accessToken = json.access_token;
         if (!accessToken) return next(createError(403, 'Inloggen niet gelukt: geen accessToken'));
-
-        console.log('----------');
-        console.log(accessToken);
-        
+      
         req.userAccessToken = accessToken;
         return next();
 
@@ -203,7 +194,6 @@ router
               return next();
             })
             .catch((e) => {
-              console.log('update e', e)
               req.userData.id = user.id;
               return next();
             })
@@ -223,7 +213,6 @@ router
             })
             .catch(err => {
               //console.log('OAUTH DIGEST - CREATE USER ERROR');
-              console.log('create e', err);
               next(err);
             })
         }
@@ -309,7 +298,7 @@ router
     // todo: isallowed
     if (req.query.redirectUri) return res.redirect(req.query.redirectUri);
 
-    return res.end('Uitgelogd')
+    return res.json({ logout: 'success' })
 
   });
 

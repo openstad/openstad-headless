@@ -68,14 +68,14 @@ exports.register = (req, res) => {
 
 exports.postRegister = (req, res, next) => {
   const errors = [];
-  const { firstName, lastName, email } = req.body;
+  const { name, email } = req.body;
   let {password} = req.body;
 
   if (errors.length === 0) {
     password = bcrypt.hashSync(password, saltRounds);
 
     db.User()
-      .create({ firstName, lastName, email, password })
+      .create({ name, email, password })
       .then(() => { res.redirect(authLocalConfig.loginUrl+ '?clientId=' + req.client.clientId); })
       .catch((err) => { next(err) });
   } else {
@@ -120,7 +120,8 @@ exports.postLogin = (req, res, next) => {
  * @returns {undefined}
  */
 exports.logout = async (req, res) => {
- // req.logout();
+
+  // req.logout();
 
   await req.session.destroy();
 
@@ -135,4 +136,5 @@ exports.logout = async (req, res) => {
   }
 
   res.redirect(redirectURL);
+
 };

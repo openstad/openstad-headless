@@ -88,22 +88,6 @@ module.exports = function( db, sequelize, DataTypes ) {
 		}
 	}
 
-	Vote.anonymizeOldVotes = function() {
-		var anonymizeThreshold = config.get('ideas.anonymizeThreshold');
-		return sequelize.query(`
-					UPDATE
-						votes v
-					SET
-						v.ip = NULL
-					WHERE
-						DATEDIFF(NOW(), v.updatedAt) > ${anonymizeThreshold} AND
-						checked != 0
-				`)
-			.then(function([ result, metaData ]) {
-				return metaData;
-			});
-	}
-
 	Vote.prototype.toggle = function() {
 		var checked = this.get('checked');
 		return this.update({

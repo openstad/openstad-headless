@@ -503,6 +503,7 @@ module.exports = function (db, sequelize, DataTypes) {
     // Helper function used in `withVoteCount` scope.
     function voteCount(opinion) {
       if (config.votes && config.votes.confirmationRequired) {
+        console.log('VOTECOUNT');
         return [sequelize.literal(`
 				(SELECT
 					COUNT(*)

@@ -17,8 +17,7 @@ exports.withAll = (req, res, next) => {
     where = {
       [db.Sequelize.Op.or]: [
         { email: { [db.Sequelize.Op.like]: '%' +search+ '%' } },
-        { firstName: { [db.Sequelize.Op.like]: '%' +search+ '%' } },
-        { lastName: { [db.Sequelize.Op.like]: '%' +search+ '%' } },
+        { name: { [db.Sequelize.Op.like]: '%' +search+ '%' } },
       ],
     }
   }
@@ -143,12 +142,11 @@ exports.validateUser = async(req, res, next) => {
 }
 
 exports.create =  (req, res, next) => {
-  let { firstName, lastName, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, hashedPhoneNumber, password } = req.body;
+  let { name, email, streetName, houseNumber, suffix, postcode, city, phoneNumber, hashedPhoneNumber, password } = req.body;
 
   db.User
     .create({
-      firstName,
-      lastName,
+      name,
       email,
       streetName,
       houseNumber,
@@ -169,7 +167,7 @@ exports.create =  (req, res, next) => {
 }
 
 exports.update = (req, res, next) => {
-  const keysToUpdate = ['firstName', 'lastName', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'twoFactorConfigured', 'twoFactorToken'];
+  const keysToUpdate = ['name', 'email', 'streetName', 'houseNumber', 'suffix', 'postcode', 'city', 'phoneNumber', 'hashedPhoneNumber', 'password', 'requiredFields', 'exposedFields', 'authTypes', 'twoFactorConfigured', 'twoFactorToken'];
 
   let data = {};
   keysToUpdate.forEach((key) => {

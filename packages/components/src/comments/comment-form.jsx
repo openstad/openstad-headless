@@ -16,7 +16,7 @@ function CommentForm(props) {
   }, props.config,  props);
 
   const datastore = new DataStore(props);
-  const [ currentUser, currentUserError, currentUserIsLoading ] = datastore.useUser({ ...props });
+  const [ currentUser, currentUserError, currentUserIsLoading ] = datastore.useCurrentUser({ ...props });
 
   function canSubmit() {
     return hasRole(currentUser, props.requiredUserRole)
