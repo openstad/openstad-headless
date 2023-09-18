@@ -60,6 +60,31 @@ export function SidenavProject({ className }: { className?: string }) {
                       Stemmen
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href={"/projects/1/settings/protection"}>
+                      Wachtwoord protectie
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href={"/projects/1/settings/anonymization"}>
+                      Anonimizeren gebruikers
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href={"/projects/1/settings/themes"}>
+                      Themas en gebieden
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href={"/projects/1/settings/notifications"}>
+                      Admin notificaties
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href={"/projects/1/settings/newsletter"}>
+                      Nieuwsbrief
+                    </Link>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
           </Button>

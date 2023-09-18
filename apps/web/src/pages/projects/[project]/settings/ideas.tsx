@@ -15,6 +15,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { PageLayout } from '@/components/ui/page-layout'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 const formSchema = z.object({
     ideasAllowed: z.boolean(),
@@ -183,6 +186,47 @@ export default function ProjectSettingsIdeas() {
                     </form>
                     <br/>
                 </Form>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>
+                            Stel hier een email in.
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <form>
+                            <div>
+                                <div>
+                                    <Label>Type mail:</Label>
+                                    <Select>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecteer" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="thanks">Bedank-mail</SelectItem>
+                                            <SelectItem value="submit">Opleveren van concept-plan</SelectItem>
+                                            <SelectItem value="publish">Uitbrengen van concept-plan</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div>
+                                    <Label>Vanaf adres:</Label>
+                                    <Input id="mail" placeholder='email@example.com' />
+                                </div>
+                                <div>
+                                    <Label>Onderwerp:</Label>
+                                    <Input id="subject" placeholder='Onderwerp van de mail' />
+                                </div>
+                                <div>
+                                    <Label>Mail-template:</Label>
+                                    <Textarea id="template" placeholder='Inhoud van de mail' />
+                                </div>
+                            </div>
+                        </form>
+                    </CardContent>
+                    <CardFooter className="flex justify-between">
+                        <Button variant="save">Opslaan</Button>
+                    </CardFooter>
+                </Card>
             </div>
             </PageLayout>
             </div>
