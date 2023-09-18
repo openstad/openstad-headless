@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
-import { List, Settings, User } from 'lucide-react'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './dropdown-menu';
 
 export function SidenavProject({ className }: { className?: string }) {
   const router = useRouter();
@@ -42,9 +42,26 @@ export function SidenavProject({ className }: { className?: string }) {
             onClick={(e) => {
             }}
             asChild>
-              <Link href={`/projects/1/settings`}>
-                Instellingen
-              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger>Instellingen</DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem>
+                    <Link href={"/projects/1/settings"}>
+                      General
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href={"/projects/1/settings/ideas"}>
+                      Ideeën
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href={"/projects/1/settings/voting"}>
+                      Stemmen
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
           </Button>
           <Button
             variant={location.includes('/entries') ? 'sidebar' : 'ghost'}
