@@ -72,9 +72,6 @@ export default function CreateProject() {
                                 <FormControl>
                                     <Input placeholder='Naam' {...field} />
                                 </FormControl>
-                                <FormDescription>
-                                    Naam van het project.
-                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -116,9 +113,6 @@ export default function CreateProject() {
                                 />
                               </PopoverContent>
                             </Popover>
-                            <FormDescription>
-                                Een einddatum waarop dit project afloopt. (Optioneel)
-                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}>
@@ -132,9 +126,6 @@ export default function CreateProject() {
                                 <FormControl>
                                     <Input placeholder='E-mail' {...field} />
                                 </FormControl>
-                                <FormDescription>
-                                    E-mail van de gebruiker aan wie dit project toebehoort.
-                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -148,14 +139,12 @@ export default function CreateProject() {
                                 <FormControl>
                                     <Input placeholder='Naam' {...field} />
                                 </FormControl>
-                                <FormDescription>
-                                    Eigenaar van het voorgaande e-mailadres.
-                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
                         />
-                        <Button type="submit">Submit</Button>
+                        <Button variant="create" type="submit" className='float-right'>Aanmaken</Button>
+                        <Button className='float-right'>Annuleren</Button>
                     </form>
                 </Form>
             </div>

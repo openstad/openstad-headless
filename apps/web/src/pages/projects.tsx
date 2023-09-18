@@ -3,6 +3,7 @@ import { columns } from "./table/columns"
 import { DataTable } from "./table/data-table"
 import { Button } from "@/components/ui/button"
 import Link from 'next/link';
+import { Plus } from "lucide-react";
 
 export default function DemoPage() {
   const data = [
@@ -32,10 +33,10 @@ export default function DemoPage() {
       ]}
       action={
         <Button variant="create" className="float-right">
-          <Link href="/projects/create">
-            + Nieuw
+          <Link href="/projects/create" className="flex">
+            <Plus/> Nieuw
           </Link>
-        </Button>  
+        </Button>
       }
       >
       <div className="container mx-auto py-10">

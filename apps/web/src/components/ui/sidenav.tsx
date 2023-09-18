@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
-import { List, Settings, User } from 'lucide-react'
+import { FolderOpen, Settings, Users } from 'lucide-react'
 
 export function Sidenav({ className }: { className?: string }) {
   const router = useRouter();
@@ -25,31 +25,29 @@ export function Sidenav({ className }: { className?: string }) {
       <div className="px-4 py-4 flex flex-col flex-grow gap-2">
         <Separator className="my-2" />
           <Button
-            variant={
-                location.startsWith('/projects') ? 'sidebar' : 'ghost'
-            }
+            variant={location.startsWith('/projects') ? 'sidebar' : 'ghost'}
             size="default"
             className="w-full flex justify-start"
             asChild>
               <Link href="/projects">
-                <List />
+                <FolderOpen />
                 Projecten
               </Link>
           </Button>
           <Button
-            variant={location.includes('/users') ? 'sidebar' : 'ghost'}
+            variant={location.startsWith('/users') ? 'sidebar' : 'ghost'}
             size={'default'}
             className="w-full flex justify-start"
             onClick={(e) => {
             }}
             asChild>
               <Link href={`/users`}>
-                <User />
+                <Users />
                 Gebruikers
               </Link>
           </Button>
           <Button
-            variant={location.includes('/settings') ? 'sidebar' : 'ghost'}
+            variant={location.startsWith('/settings') ? 'sidebar' : 'ghost'}
             size={'default'}
             className="w-full flex justify-start"
             onClick={(e) => {
