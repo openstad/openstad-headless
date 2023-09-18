@@ -1,7 +1,7 @@
 import useSWR from "swr";
 import { PageLayout } from "@/components/ui/page-layout";
-import { columns } from "./table/columns";
-import { DataTable } from "./table/data-table";
+import { columns } from "../table/columns";
+import { DataTable } from "../table/data-table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
