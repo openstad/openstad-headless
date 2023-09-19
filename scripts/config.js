@@ -7,12 +7,12 @@ let BASIC_AUTH_PASSWORD = process.env.BASIC_AUTH_PASSWORD || 'openstad';
 let COOKIE_SECURE_OFF = process.env.FORCE_HTTP ? 'yes' : '';
 
 let API_DOMAIN = process.env.API_DOMAIN || 'api.' + process.env.BASE_DOMAIN;
-let API_URL = process.env.API_URL || 'http://' + API_DOMAIN;
+let API_URL = process.env.API_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + API_DOMAIN;
 let API_PORT = process.env.API_PORT || BASE_PORT + 10;
 let API_FIXED_AUTH_KEY = process.env.API_FIXED_AUTH_KEY || process.env.AUTH_LOGIN_CODE || generateRandomToken({ length: 2048 });
 
 let AUTH_DOMAIN = process.env.AUTH_DOMAIN || 'auth.' + process.env.BASE_DOMAIN;
-let AUTH_URL = process.env.AUTH_URL || 'http://' + AUTH_DOMAIN;
+let AUTH_URL = process.env.AUTH_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + AUTH_DOMAIN;
 let AUTH_PORT = process.env.AUTH_PORT || BASE_PORT + 30;
 let AUTH_JWT_SECRET = generateRandomToken({ length: 64 });
 let AUTH_FIRST_CLIENT_ID = process.env.AUTH_FIRST_CLIENT_ID || 'default-client';
@@ -21,7 +21,7 @@ let AUTH_ADMIN_CLIENT_ID = process.env.AUTH_ADMIN_CLIENT_ID || 'admin-client';
 let AUTH_ADMIN_CLIENT_SECRET = process.env.AUTH_ADMIN_CLIENT_SECRET || generateRandomToken({ length: 64 });
 
 let IMAGE_DOMAIN = process.env.IMAGE_DOMAIN || 'image.' + process.env.BASE_DOMAIN;
-let IMAGE_APP_URL = process.env.IMAGE_APP_URL || 'http://' + IMAGE_DOMAIN;
+let IMAGE_APP_URL = process.env.IMAGE_APP_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + IMAGE_DOMAIN;
 let IMAGE_PORT_API = process.env.IMAGE_PORT_API || BASE_PORT + 50;
 let IMAGE_PORT_IMAGE_SERVER = process.env.IMAGE_PORT_IMAGE_SERVER || IMAGE_PORT_API + 1;
 let IMAGE_CLIENT_TOKEN = process.env.IMAGE_CLIENT_TOKEN || generateRandomToken({ length: 255 });
@@ -62,7 +62,7 @@ process.env.AUTH_DOMAIN = AUTH_DOMAIN;
 process.env.AUTH_DB_HOST = process.env.AUTH_DB_HOST || process.env.DB_HOST;
 process.env.AUTH_DB_USERNAME = process.env.AUTH_DB_USERNAME || process.env.DB_USERNAME;
 process.env.AUTH_DB_PASSWORD = process.env.AUTH_DB_PASSWORD || process.env.DB_PASSWORD;
-process.env.AUTH_DB_NAME = process.env.AUTH_DB_NAME || ( process.env.DB_BASE_NAME ? process.env.DB_BASE_NAME + '-auth-server' :  'auth-server' );
+process.env.AUTH_DB_NAME = process.env.AUTH_DB_NAME || ( process.env.DB_BASE_NAME ? process.env.DB_BASE_NAME + '-auth' :  'auth' );
 
 // TODO: moet weg
 process.env.AUTH_MONGO_HOST = process.env.AUTH_MONGO_HOST || process.env.MONGO_HOST || 'localhost';
@@ -95,7 +95,7 @@ process.env.IMAGE_PORT_IMAGE_SERVER = IMAGE_PORT_IMAGE_SERVER;
 process.env.IMAGE_DB_HOST = process.env.IMAGE_DB_HOST || process.env.DB_HOST;
 process.env.IMAGE_DB_USERNAME = process.env.IMAGE_DB_USERNAME || process.env.DB_USERNAME;
 process.env.IMAGE_DB_PASSWORD = process.env.IMAGE_DB_PASSWORD || process.env.DB_PASSWORD;
-process.env.IMAGE_DB_NAME = process.env.IMAGE_DB_NAME || ( process.env.DB_BASE_NAME ? process.env.DB_BASE_NAME + '-image-server' :  'image-server' );
+process.env.IMAGE_DB_NAME = process.env.IMAGE_DB_NAME || ( process.env.DB_BASE_NAME ? process.env.DB_BASE_NAME + '-image' :  'image' );
 
 process.env.IMAGE_IMAGES_DIR = process.env.IMAGE_IMAGES_DIR || '';
 process.env.IMAGE_THROTTLE = process.env.IMAGE_THROTTLE || true;
