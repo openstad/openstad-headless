@@ -22,11 +22,11 @@ function hideEmailsForNormalUsers(comments) {
   return comments.map((comment) => {
     delete comment.user.email;
 
-    if (comment.reactions) {
-      comment.reactions = comment.reactions.map((reaction) => {
-        delete reaction.user.email;
+    if (comment.replies) {
+      comment.replies = comment.replies.map((reply) => {
+        delete reply.user.email;
 
-        return reaction;
+        return reply;
       })
     }
 
@@ -655,9 +655,9 @@ module.exports = function (db, sequelize, DataTypes) {
           include: [{
             model: db.Comment.scope(
               'defaultScope',
-              {method: ['withVoteCount', 'commentsAgainst']},
-              {method: ['withUserVote', 'commentsAgainst', userId]},
-              'withReactions'
+              {method: ['includeVoteCount', 'commentsAgainst']},
+              {method: ['includeUserVote', 'commentsAgainst', userId]},
+              'includeRepliesOnComments'
             ),
             as: 'commentsAgainst',
             required: false,
@@ -668,9 +668,9 @@ module.exports = function (db, sequelize, DataTypes) {
           }, {
             model: db.Comment.scope(
               'defaultScope',
-              {method: ['withVoteCount', 'commentsFor']},
-              {method: ['withUserVote', 'commentsFor', userId]},
-              'withReactions'
+              {method: ['includeVoteCount', 'commentsFor']},
+              {method: ['includeUserVote', 'commentsFor', userId]},
+              'includeRepliesOnComments'
             ),
             as: 'commentsFor',
             required: false,
@@ -882,9 +882,9 @@ module.exports = function (db, sequelize, DataTypes) {
           include: [{
             model: db.Comment.scope(
               'defaultScope',
-              {method: ['withVoteCount', 'commentsAgainst']},
-              {method: ['withUserVote', 'commentsAgainst', userId]},
-              'withReactions'
+              {method: ['includeVoteCount', 'commentsAgainst']},
+              {method: ['includeUserVote', 'commentsAgainst', userId]},
+              'includeRepliesOnComments'
             ),
             as: 'commentsAgainst',
             required: false,
@@ -895,9 +895,9 @@ module.exports = function (db, sequelize, DataTypes) {
           }, {
             model: db.Comment.scope(
               'defaultScope',
-              {method: ['withVoteCount', 'commentsFor']},
-              {method: ['withUserVote', 'commentsFor', userId]},
-              'withReactions'
+              {method: ['includeVoteCount', 'commentsFor']},
+              {method: ['includeUserVote', 'commentsFor', userId]},
+              'includeRepliesOnComments'
             ),
             as: 'commentsFor',
             required: false,

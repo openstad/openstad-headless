@@ -10,7 +10,7 @@ const router = express.Router({ mergeParams: true });
 // scopes: for all get requests
 router
   .all('*', function(req, res, next) {
-    req.scope = ['defaultScope', 'withIdea'];
+    req.scope = ['defaultScope', 'includeIdea'];
     req.scope.push({ method: ['forProjectId', req.params.projectId] });
 
     if (req.query.includeRepliesOnComments) {
@@ -18,12 +18,12 @@ router
       req.scope.push({ method: ['includeRepliesOnComments', req.user.id] });
     }
 
-    if (req.query.withVoteCount) {
-      req.scope.push({ method: ['withVoteCount', 'comment'] });
+    if (req.query.includeVoteCount) {
+      req.scope.push({ method: ['includeVoteCount', 'comment'] });
     }
 
-    if (req.query.withUserVote) {
-      req.scope.push({ method: ['withUserVote', 'comment', req.user.id] });
+    if (req.query.includeUserVote) {
+      req.scope.push({ method: ['includeUserVote', 'comment', req.user.id] });
     }
 
     return next();
@@ -43,7 +43,7 @@ router
   })
   .all('/:commentId(\\d+)(/vote)?', function(req, res, next) {
 
-    // with one existing comment
+    // include one existing comment
     // --------------------------
 
     var commentId = parseInt(req.params.commentId) || 1;
@@ -73,7 +73,7 @@ router.route('/')
 
   // list comments
   // --------------
-  .get(auth.can('Comment', 'list'))
+.get(auth.can('Comment', 'list'))
   .get(pagination.init)
   .get(function(req, res, next) {
     let { dbQuery } = req;
@@ -128,7 +128,7 @@ router.route('/')
     db.Comment
       .scope(
         'defaultScope',
-        'withIdea',
+        'includeIdea',
       )
       .findByPk(req.body.parentId)
       .then(function(comment) {
@@ -157,8 +157,8 @@ router.route('/')
           .scope(
             'defaultScope',
             'withIdea',
-            { method: ['withVoteCount', 'comment'] },
-            { method: ['withUserVote', 'comment', req.user.id] },
+            { method: ['includeVoteCount', 'comment'] },
+            { method: ['includeUserVote', 'comment', req.user.id] },
           )
           .findByPk(result.id)
           .then(function(comment) {
@@ -228,9 +228,9 @@ router.route('/:commentId(\\d+)/vote')
         db.Comment
           .scope(
             'defaultScope',
-            'withIdea',
-            { method: ['withVoteCount', 'comment'] },
-            { method: ['withUserVote', 'comment', req.user.id] },
+            'includeIdea',
+            { method: ['includeVoteCount', 'comment'] },
+            { method: ['includeUserVote', 'comment', req.user.id] },
           )
           .findByPk(comment.id)
           .then(function(comment) {
