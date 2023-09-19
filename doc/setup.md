@@ -78,17 +78,17 @@ You could try and use the servers with the description below, but preferably you
 
 You can use your favorite http client to test the servers.
 ```
-GET https://api.BASE_DOMAIN/api/project
+GET http://api.BASE_DOMAIN/api/project
 Authorization: AUTH_LOGIN_CODE
 ```
 should give you an overview of existing projects.
 
 ```
-GET https://api.BASE_DOMAIN/auth/project/1/login
+GET http://api.BASE_DOMAIN/auth/project/1/login
 ```
 should redirect to the auth server, and
 ```
-GET https://auth.os20-headless-setup.nlsvgtr.nl/auth/code/login?clientId=uniquecode
+GET http://auth.os20-headless-setup.nlsvgtr.nl/auth/code/login?clientId=uniquecode
 ```
 should return a HTML page with a login form
 
@@ -103,7 +103,7 @@ If you the ran npm run setup command above a file nginx.config.example was creat
 
 You will probably need an entry in your /etc/hosts file:  
 ```
-127.0.0.1 openstad-api.openstad.local openstad-oauth.openstad.local openstad-image.openstad.local openstad-cms.openstad.local .openstad-cms.openstad.local openstad-admin.openstad.local
+127.0.0.1 api.openstad.local auth.openstad.local image.openstad.local
 ```
 Use the admin panel to create a new user and make that user administrator on the new site.
 

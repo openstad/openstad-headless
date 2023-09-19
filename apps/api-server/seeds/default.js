@@ -33,8 +33,8 @@ module.exports = async function seed(config, db) {
           "provider": {
             "openstad": {
               "adapter": "openstad",
-              "clientId": "uniekecodes",
-              "clientSecret": "uniekecodes123"
+              "clientId": "uniquecode",
+              "clientSecret": "uniquecode123"
             },
             "anonymous": {
               "adapter": "openstad",
