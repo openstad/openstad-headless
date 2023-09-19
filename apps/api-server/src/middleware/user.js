@@ -32,7 +32,6 @@ module.exports = async function getUser( req, res, next ) {
     const userEntity = await getUserInstance({ authConfig, authProvider, userId, isFixed, projectId: ( req.project && req.project.id ) }) || {};
 
     req.user = userEntity
-    if (req.user.id) req.user.provider = authConfig.provider
     
     return next();
     
@@ -117,10 +116,10 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
   }
 
   if (dbUser.projectId != projectId) {
-    let project = await db.Project.findOne({ where: { idauthProvider: dbUser.projectId } });
+    let project = await db.Project.findOne({ where: { id: dbUser.projectId } });
     authConfig = await authSettings.config({ project, useAuth: authProvider })
   }    
-
+  
   let adapter = authConfig.adapter || 'openstad';
   try {
     if (!adapters[adapter]) {
