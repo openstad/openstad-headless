@@ -17,13 +17,13 @@ async function start() {
   
   try {
     
-    console.log('Start auth-server');
+    console.log('Start auth server');
     execute(command, ['app.js'], { cwd: './apps/auth-server' });
 
-    console.log('Start image-server');
+    console.log('Start image server');
     execute(command, ['server.js'], { cwd: './apps/image-server' });
 
-    console.log('Start API');
+    console.log('Start API server');
     execute(command, ['server.js'], { cwd: './apps/api-server' });
 
   } catch (err) {

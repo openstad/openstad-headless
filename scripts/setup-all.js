@@ -1,8 +1,8 @@
 require('dotenv').config();
 const config = require('./config');
 const initApi = require('./setup-api');
-const initImageServer = require('./setup-image-server');
-const initAuthServer = require('./setup-auth-server');
+const initImageServer = require('./setup-image');
+const initAuthServer = require('./setup-auth');
 const createNginxConfigExample = require('./create-nginx-config-example');
 
 let modules = [

@@ -117,6 +117,10 @@ router
       grant_type: 'authorization_code'
     }
 
+    console.log('===');
+    console.log(url);
+    console.log(data);
+
     try {
 
       let response = await fetch(url, {
