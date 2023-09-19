@@ -1,3 +1,4 @@
+const path = require('node:path');
 const config = require('config');
 const merge = require('merge');
 
@@ -30,7 +31,7 @@ let getConfig = async function({  project, useAuth = 'default' }) {
   authConfig = merge.recursive( authConfig, adapterConfig );
   authConfig = merge.recursive( authConfig, providerConfig );
 
-  if (authConfig.jwtSecret == 'REPLACE THIS VALUE!!') { // todo: move this to a place where is called once, not every request
+  if (!authConfig.jwtSecret || authConfig.jwtSecret == 'REPLACE THIS VALUE!!') { // todo: move this to a place where is called once, not every request
     console.log('===========================');
     console.log('jwtSecret is not configured');
     console.log('¡¡ this should be fixed !!!');
@@ -46,7 +47,7 @@ let getAdapter = async function({  authConfig, project, useAuth = 'default' }){
   authConfig = authConfig || await getConfig({  project, useAuth });
 
   try {
-    let adapter = await require(process.env.NODE_PATH + '/' + authConfig.modulePath);
+    let adapter = await require(path.normalize(__dirname + '/../..') + '/' + authConfig.modulePath);
     return adapter;
   } catch(err) {
     console.log(err);

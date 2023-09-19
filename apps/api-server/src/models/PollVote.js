@@ -1,7 +1,7 @@
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 
 module.exports = function( db, sequelize, DataTypes ) {
-	let PollVote = sequelize.define('pollVote', {
+	let PollVote = sequelize.define('poll_vote', {
 
 		pollId: {
 			type         : DataTypes.INTEGER,
