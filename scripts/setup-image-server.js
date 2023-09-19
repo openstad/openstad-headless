@@ -73,7 +73,7 @@ THROTTLE_CC_REQUESTS=${process.env.IMAGE_THROTTLE_CC_REQUESTS}
     // npm i
     console.log('------------------------------');
     console.log('Execute `npm i`');
-    // await execute('npm', ['i'], { cwd: './apps/image-server' });
+    await execute('npm', ['i'], { cwd: './apps/image-server' });
 
     // init db
     if (1 || doCreateDBTables) { // TODO: hij update voor nu altijd

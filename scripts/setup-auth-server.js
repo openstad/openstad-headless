@@ -85,7 +85,7 @@ SESSION_SECRET=${process.env.AUTH_SESSION_SECRET}
     // npm i
     console.log('------------------------------');
     console.log('Execute `npm i`');
-    // await execute('npm', ['i'], { cwd: './apps/auth-server' });
+    await execute('npm', ['i'], { cwd: './apps/auth-server' });
  
     // certs
     console.log('------------------------------');

@@ -92,7 +92,7 @@ module.exports = async function setupApi() {
       auth: {
 		    adapter: {
 			    openstad: {
-            serverUrl: 'https://' + process.env.AUTH_DOMAIN,
+            serverUrl: process.env.AUTH_APP_URL,
 			    },
 		    },
   	    jwtSecret: process.env.API_JWT_SECRET,
@@ -122,7 +122,7 @@ module.exports = async function setupApi() {
     // npm i
     console.log('------------------------------');
     console.log('Execute `npm i`');
-    // await execute('npm', ['i'], { cwd: './apps/api-server' });
+    await execute('npm', ['i'], { cwd: './apps/api-server' });
 
     // init db
     if (1 || doCreateDBTables) { // TODO: hij update voor nu altijd

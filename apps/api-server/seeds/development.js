@@ -16,6 +16,7 @@ module.exports = async function seed(config, db) {
     console.log('    rename default project to Plannen insturen');
     let project = await db.Project.update({
       name: 'Plannen insturen',
+      title: 'Plannen insturen',
       config: {
         allowedDomains,
         "auth": {
@@ -23,8 +24,8 @@ module.exports = async function seed(config, db) {
           "provider": {
             "openstad": {
               "adapter": "openstad",
-              "clientId": "uniquecode",
-              "clientSecret": "uniquecode123"
+              "clientId": "uniekecodes",
+              "clientSecret": "uniekecodes123"
             },
             "anonymous": {
               "adapter": "openstad",
@@ -47,6 +48,7 @@ module.exports = async function seed(config, db) {
     project = await db.Project.create({
       id: 2,
       name: 'Begroten',
+      title: 'Begroten',
       config: {
         allowedDomains,
         "auth": {
@@ -54,8 +56,8 @@ module.exports = async function seed(config, db) {
           "provider": {
             "openstad": {
               "adapter": "openstad",
-              "clientId": "uniquecode",
-              "clientSecret": "uniquecode123"
+              "clientId": "uniekecodes",
+              "clientSecret": "uniekecodes123"
             },
             "anonymous": {
               "adapter": "openstad",
@@ -71,6 +73,7 @@ module.exports = async function seed(config, db) {
     project = await db.Project.create({
       id: 3,
       name: 'Keuzewijzer',
+      title: 'Keuzewijzer',
       config: {
         allowedDomains,
         "auth": {
@@ -78,8 +81,8 @@ module.exports = async function seed(config, db) {
           "provider": {
             "openstad": {
               "adapter": "openstad",
-              "clientId": "uniquecode",
-              "clientSecret": "uniquecode123"
+              "clientId": "uniekecodes",
+              "clientSecret": "uniekecodes123"
             },
             "anonymous": {
               "adapter": "openstad",

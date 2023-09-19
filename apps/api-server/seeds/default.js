@@ -18,6 +18,7 @@ module.exports = async function seed(config, db) {
     let project = await db.Project.create({
       id: 1,
       name: 'Default project',
+      title: 'Default project',
       config: {
         ideas: {
           extraData: {

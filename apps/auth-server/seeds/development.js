@@ -12,9 +12,9 @@ module.exports = async function seed(db) {
   let apiDomain = process.env.API_DOMAIN || removeProtocol(process.env.API_URL) || '';
   allowedDomains.push(apiDomain);
 
-  let uniqueCode = process.env.AUTH_LOGIN_CODE;
-
   console.log('  creating development data');
+
+
   try {
 
     console.log('    - generic uniquecode client');
@@ -49,19 +49,6 @@ module.exports = async function seed(db) {
       requiredUserFields: JSON.stringify(['name']),
       allowedDomains: JSON.stringify(allowedDomains),
       config: JSON.stringify({}),
-    });
-
-  console.log('  adding unique code for user id=1');
-  console.log('    use this for your first login:', uniqueCode);
-    await db.UniqueCode.create({
-      code: uniqueCode,
-      userId: 1,
-      clientId: 3
-    });
-    await db.UniqueCode.create({
-      code: uniqueCode,
-      userId: 1,
-      clientId: 4
     });
 
     console.log('    - generic admin user');
