@@ -29,10 +29,9 @@ module.exports = async function getUser( req, res, next ) {
       return nextWithEmptyUser(req, res, next);
     }
 
-    const userEntity = await getUserInstance({ authConfig, userId, isFixed, projectId: ( req.project && req.project.id ) }) || {};
+    const userEntity = await getUserInstance({ authConfig, authProvider, userId, isFixed, projectId: ( req.project && req.project.id ) }) || {};
 
     req.user = userEntity
-    if (req.user.id) req.user.provider = authConfig.provider
     
     return next();
     
@@ -90,7 +89,7 @@ function parseJwt(authorizationHeader) {
  * @param projectConfig
  * @returns {Promise<{}|*>}
  */
-async function getUserInstance({ authConfig, userId, isFixed, projectId }) {
+async function getUserInstance({ authConfig, authProvider, userId, isFixed, projectId }) {
 
   let dbUser;
   
@@ -116,11 +115,15 @@ async function getUserInstance({ authConfig, userId, isFixed, projectId }) {
     throw err;
   }
 
+  if (dbUser.projectId != projectId) {
+    let project = await db.Project.findOne({ where: { id: dbUser.projectId } });
+    authConfig = await authSettings.config({ project, useAuth: authProvider })
+  }    
+  
   let adapter = authConfig.adapter || 'openstad';
-
   try {
     if (!adapters[adapter]) {
-      adapters[adapter] = await require(process.env.NODE_PATH + '/' + authConfig.modulePath);
+      adapters[adapter] = await authSettings.adapter({ authConfig });
     }
   } catch(err) {
     console.log(err);

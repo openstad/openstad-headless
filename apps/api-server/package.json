@@ -45,7 +45,7 @@
     "mysqldump": "^3.2.0",
     "node-fetch": "^2.6.7",
     "nodemailer": "^6.7.3",
-    "nodemon": "^2.0.15",
+    "nodemon": "^3.0.1",
     "nunjucks": "^3.2.3",
     "pmx": "^1.6.7",
     "sanitize-html": "^2.7.0",

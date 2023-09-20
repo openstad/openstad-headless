@@ -164,11 +164,13 @@ router.route('/:projectId') //(\\d+)
 // update project
 // -----------
 	.put(auth.useReqUser)
-	.put(function(req, res, next) {
-		const project = req.results;
+	.put(async function(req, res, next) {
+
+		const project = await db.Project.findOne({ where: { id: req.results.id} });
+    
     if (!( project && project.can && project.can('update') )) return next( new Error('You cannot update this project') );
 
-		req.results
+		project
 			.authorizeData(req.body, 'update')
 			.update(req.body)
 			.then(result => {
@@ -190,7 +192,7 @@ router.route('/:projectId') //(\\d+)
     // update certain parts of config to the oauth client
     // mainly styling settings are synched so in line with the CMS
     try {
-      let providers = await authSettings.providers({ project: req.project });
+      let providers = await authSettings.providers({ project: req.results });
       for (let provider of providers) {
         let authConfig = await authSettings.config({ project: req.results, useAuth: provider });
         let adapter = await authSettings.adapter({ authConfig });

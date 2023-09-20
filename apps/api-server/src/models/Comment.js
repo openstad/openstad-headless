@@ -69,7 +69,6 @@ module.exports = function( db, sequelize, DataTypes ) {
 			type         : DataTypes.STRING,
 			allowNull    : true
 		},
-		// Counts set in `withVoteCount` scope.
 
 		yes: {
 			type         : DataTypes.VIRTUAL
@@ -144,7 +143,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 	});
 
 	Comment.scopes = function scopes() {
-		// Helper function used in `withVoteCount` scope.
+		// Helper function used in `includeVoteCount` scope.
 		function voteCount( tableName ) {
 			return [sequelize.literal(`
 				(SELECT
@@ -199,7 +198,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 				};
 			},
 
-			withIdea: function() {
+			includeIdea: function() {
 				return {
 					include: [{
 						model      : db.Idea,
@@ -208,7 +207,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 				}
 			},
 
-			withVoteCount: function( tableName ) {
+			includeVoteCount: function( tableName ) {
 				return {
 					attributes: Object.keys(this.rawAttributes).concat([
 						voteCount(tableName, 'yes')
@@ -216,7 +215,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 				};
 			},
 
-			withUserVote: function( tableName, userId ) {
+			includeUserVote: function( tableName, userId ) {
 				userId = Number(userId);
 				if( !userId ) return {};
 
@@ -239,7 +238,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 				};
 			},
 
-			withUser: {
+			includeUser: {
 				include: [{
 					model      : db.User,
 					as         : 'user',
