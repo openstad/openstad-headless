@@ -57,7 +57,7 @@ export default function ProjectSettingsNewsletter() {
                             name="isActive"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Is het beveiligen via een wachtwoord actief?</FormLabel>
+                                    <FormLabel>Worden er nieuwsbriefen verstuurd?</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>

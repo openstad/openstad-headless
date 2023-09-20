@@ -147,7 +147,80 @@ export function SidenavProject({ className }: { className?: string }) {
             </Link>
           </>
         ) : null}
-
+        <Link href={"/projects/1/authentication"}>
+          <Button
+            variant={location.includes("/authentication") ? "secondary" : "ghost"}
+            size="default"
+            className="w-full flex justify-between"
+          >
+            <span className="truncate">Authenticatie</span>
+            <ChevronDown
+              size={16}
+              className={
+                location.includes("/authentication")
+                  ? "rotate-180 duration-200"
+                  : null
+              }
+            />
+          </Button>
+        </Link>
+        {location.includes("/authentication") ? (
+          <>
+            <Link href={"/projects/1/authentication"}>
+              <Button
+                variant={location.endsWith("/authentication") ? "secondary" : "ghost"}
+                size="default"
+                className="w-full flex justify-start pl-8"
+              >
+                <span className="truncate">Algemeen</span>
+              </Button>
+            </Link>
+            <Link href={"/projects/1/authentication/requiredfield"}>
+              <Button
+                variant={
+                  location.includes("/authentication/requiredfield") ? "secondary" : "ghost"
+                }
+                size="default"
+                className="w-full flex justify-start pl-8"
+              >
+                <span className="truncate">Verplichte velden</span>
+              </Button>
+            </Link>
+            <Link href={"/projects/1/authentication/uniquecode"}>
+              <Button
+                variant={
+                  location.includes("/authentication/uniquecode") ? "secondary" : "ghost"
+                }
+                size="default"
+                className="w-full flex justify-start pl-8"
+              >
+                <span className="truncate">Unieke codes</span>
+              </Button>
+            </Link>
+            <Link href={"/projects/1/authentication/loginmail"}>
+              <Button
+                variant={
+                  location.includes("/authentication/loginmail") ? "secondary" : "ghost"
+                }
+                size="default"
+                className="w-full flex justify-start pl-8"
+              >
+                <span className="truncate">Login mail</span>
+              </Button>
+            </Link>
+            <Link href={"/projects/1/authentication/smsverification"}>
+              <Button
+                variant={
+                  location.includes("/authentication/smsverification") ? "secondary" : "ghost"
+                }
+                size="default"
+                className="w-full flex justify-start pl-8"
+              >
+                <span className="truncate">SMS verificatie</span>
+              </Button>
+            </Link>
+          </>
+        ) : null}
         <Link href={`/projects/1/entries`}>
           <Button
             variant={location.includes("/entries") ? "secondary" : "ghost"}
@@ -164,17 +237,6 @@ export function SidenavProject({ className }: { className?: string }) {
             onClick={(e) => {}}
           >
             <span className="truncate">E-mail</span>
-          </Button>
-        </Link>
-        <Link href={`/projects/1/authentication`}>
-          <Button
-            variant={
-              location.includes("/authentication") ? "secondary" : "ghost"
-            }
-            className="w-full flex justify-start"
-            onClick={(e) => {}}
-          >
-            <span className="truncate">Authenticatie</span>
           </Button>
         </Link>
         <Link href={`/projects/1/anonimization`}>
