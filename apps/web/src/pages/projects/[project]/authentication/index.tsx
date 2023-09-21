@@ -137,7 +137,9 @@ export default function ProjectAuthentication() {
                     url: '/projects/1/authentication'
                 }
             ]}>
-                <div className="container mx-auto py-10 w-1/2 float-left divide-y">
+                <div className="container mx-auto py-10 w-1/2 float-left ">
+                    <p className='text-3xl'>Authenticatie</p>
+                    <br />
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
                             <FormField

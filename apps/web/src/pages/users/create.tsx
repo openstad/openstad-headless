@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
 
-import { Button } from "@/components/ui/button"
+import { Button } from "../../components/ui/button"
 import {
     Form,
     FormControl,
@@ -11,25 +11,29 @@ import {
     FormItem,
     FormLabel,
     FormMessage
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { PageLayout } from '@/components/ui/page-layout'
+} from "../../components/ui/form"
+import { Input } from "../../components/ui/input"
+import { PageLayout } from '../../components/ui/page-layout'
 
 const formSchema = z.object({
-    title: z.string(),
-    description: z.string(),
-    label: z.string(),
-    buttonText: z.string(),
-    helpText: z.string(),
-    mailSubject: z.string(),
-    mailTemplate: z.string()
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    email: z.string(),
+    streetName: z.string().optional(),
+    houseNumber: z.string().optional(),
+    houseSuffix: z.string().optional(),
+    zipcode: z.string().optional(),
+    city: z.string().optional(),
+    phoneNumber: z.string().optional(),
+    roles: z.string().optional(),
+    password: z.string()
 })
 
-export default function ProjectAuthenticationLoginMail() {
+export default function CreateProject() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
+            
         }
     })
 
@@ -43,31 +47,25 @@ export default function ProjectAuthenticationLoginMail() {
             pageHeader="Projecten"
             breadcrumbs={[
                 {
-                    name: 'Projecten',
-                    url: '/projects',
+                name: 'Gebruikers',
+                url: '/users',
                 },
                 {
-                    name: 'Authenticatie',
-                    url: '/projects/1/authentication'
-                },
-                {
-                    name: 'Login E-mail',
-                    url: '/projects/1/authentication/loginmail'
+                    name: 'Gebruiker toevoegen',
+                    url: '/users/create'
                 }
             ]}>
             <div className="container mx-auto py-10 w-1/2 float-left">
-                <p className='text-3xl'>Opzetten inhoud inlogmails</p>
-                <br />
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
                         <FormField
                         control={form.control}
-                        name="title"
+                        name="firstName"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Titel</FormLabel>
+                                <FormLabel>Voornaam</FormLabel>
                                 <FormControl>
-                                    <Input placeholder='' {...field} />
+                                    <Input {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -75,12 +73,12 @@ export default function ProjectAuthenticationLoginMail() {
                         />
                         <FormField
                         control={form.control}
-                        name="description"
+                        name="lastName"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Descriptie</FormLabel>
+                                <FormLabel>Achternaam</FormLabel>
                                 <FormControl>
-                                    <Textarea placeholder='' {...field} />
+                                    <Input {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -88,12 +86,12 @@ export default function ProjectAuthenticationLoginMail() {
                         />
                         <FormField
                         control={form.control}
-                        name="label"
+                        name="email"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Label</FormLabel>
+                                <FormLabel>E-mail (verplicht)</FormLabel>
                                 <FormControl>
-                                    <Input placeholder='' {...field} />
+                                    <Input {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -101,12 +99,12 @@ export default function ProjectAuthenticationLoginMail() {
                         />
                         <FormField
                         control={form.control}
-                        name="buttonText"
+                        name="streetName"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Button Text</FormLabel>
+                                <FormLabel>Straatnaam</FormLabel>
                                 <FormControl>
-                                    <Input placeholder='' {...field} />
+                                    <Input {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -114,12 +112,12 @@ export default function ProjectAuthenticationLoginMail() {
                         />
                         <FormField
                         control={form.control}
-                        name="helpText"
+                        name="houseNumber"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Hulptext</FormLabel>
+                                <FormLabel>Huisnummer</FormLabel>
                                 <FormControl>
-                                    <Textarea placeholder='' {...field} />
+                                    <Input {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -127,12 +125,12 @@ export default function ProjectAuthenticationLoginMail() {
                         />
                         <FormField
                         control={form.control}
-                        name="mailSubject"
+                        name="houseSuffix"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Mail onderwerp</FormLabel>
+                                <FormLabel>Toevoeging</FormLabel>
                                 <FormControl>
-                                    <Input placeholder='' {...field} />
+                                    <Input {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -140,20 +138,58 @@ export default function ProjectAuthenticationLoginMail() {
                         />
                         <FormField
                         control={form.control}
-                        name="mailTemplate"
+                        name="zipcode"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Mail template</FormLabel>
+                                <FormLabel>Postcode</FormLabel>
                                 <FormControl>
-                                    <Textarea placeholder='' {...field} />
+                                    <Input {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                         />
-                        <Button type="submit" variant={"default"}>Opslaan</Button>
+                        <FormField
+                        control={form.control}
+                        name="city"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Stad</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={form.control}
+                        name="phoneNumber"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Telefoonnummer</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Wachtwoord</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <Button type='submit' variant='default'>Aanmaken</Button>
                     </form>
-                    <br/>
                 </Form>
             </div>
             </PageLayout>

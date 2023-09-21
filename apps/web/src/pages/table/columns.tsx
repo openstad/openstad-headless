@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 // You can use a Zod schema here if you want.
 export type Project = {
   areaId: number | null,
-  id: number
+  id: number,
   createdAt: string,
   deletedAt: string | null,
   hostStatus: Record<string, unknown>,

@@ -61,7 +61,9 @@ export default function ProjectAuthenticationSmsVerification() {
                     url: '/projects/1/authentication/smsverification'
                 }
             ]}>
-            <div className="container mx-auto py-10 w-1/2 float-left divide-y">
+            <div className="container mx-auto py-10 w-1/2 float-left">
+                <p className='text-3xl'>Instellen inhoud SMS-verificatie berichten</p>
+                <br />
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
                         <FormField

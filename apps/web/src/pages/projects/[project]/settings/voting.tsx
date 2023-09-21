@@ -78,12 +78,12 @@ export default function ProjectSettingsVoting() {
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="No" />
+                                                <SelectValue placeholder="Nee" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value={true}>Yes</SelectItem>
-                                            <SelectItem value={false}>No</SelectItem>
+                                            <SelectItem value={true}>Ja</SelectItem>
+                                            <SelectItem value={false}>Nee</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -99,12 +99,12 @@ export default function ProjectSettingsVoting() {
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="No" />
+                                                <SelectValue placeholder="Nee" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value={true}>Yes</SelectItem>
-                                            <SelectItem value={false}>No</SelectItem>
+                                            <SelectItem value={true}>Ja</SelectItem>
+                                            <SelectItem value={false}>Nee</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />

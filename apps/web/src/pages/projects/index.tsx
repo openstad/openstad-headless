@@ -5,8 +5,9 @@ import { DataTable } from "../table/data-table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import React from "react";
 
-export default function DemoPage() {
+export default function Projects() {
   const { data, isLoading } = useSWR("/api/openstad/api/project");
 
   if (!data) return null;

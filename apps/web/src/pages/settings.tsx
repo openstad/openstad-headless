@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { PageLayout } from "@/components/ui/page-layout";
+import { PageLayout } from "../components/ui/page-layout";
+import React from "react";
 
 export default function Settings() {
     return (
@@ -9,13 +9,10 @@ export default function Settings() {
           breadcrumbs={[
             {
               name: 'Instellingen',
-              url: '/settings',
+              url: '/instellingen',
             },
           ]}>
           <div className="container mx-auto py-10">
-            <Button variant="create" className="float-right">
-                New +
-            </Button>
           </div>
           </PageLayout>
         </div>

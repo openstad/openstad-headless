@@ -52,7 +52,6 @@ export default function ProjectSettingsNotifications() {
             ]}>
             <div className="container mx-auto py-10 w-1/2 float-left divide-y">
                 <Form {...form}>
-                    <br/>
                     <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
                         <FormField
                         control={form.control}
