@@ -13,10 +13,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
  
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 215 87% 51%;
     --primary-foreground: 210 40% 98%;
  
-    --secondary: 210 40% 96.1%;
+    --secondary: 210 36% 96%;
     --secondary-foreground: 222.2 47.4% 11.2%;
  
     --muted: 210 40% 96.1%;
@@ -33,6 +33,7 @@
     --ring: 222.2 84% 4.9%;
  
     --radius: 0.5rem;
+    --brand: 162 82% 40%;
   }
  
   .dark {
