@@ -110,6 +110,10 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
         adapter: 'openstad',
       },
 
+      openstad: {
+        adapter: 'openstad',
+      },
+
       anonymous: {
         adapter: 'openstad',
       },

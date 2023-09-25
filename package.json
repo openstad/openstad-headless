@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "setup": "node ./scripts/setup-all.js",
+    "start": "node ./scripts/start-all.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,5 +22,8 @@
     "apps/*",
     "packages/*"
   ],
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "promise-mysql": "^5.2.0"
+  }
 }

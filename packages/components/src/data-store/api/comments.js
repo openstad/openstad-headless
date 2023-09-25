@@ -2,7 +2,7 @@ export default {
 
   fetch: async function({ projectId, ideaId, sentiment }) {
 
-    let url = `/api/project/${projectId}/idea/${ideaId}/comment?sentiment=${sentiment}&withUser=1&withUserVote=1&withVoteCount=1&includeRepliesOnComments=1`;
+    let url = `/api/project/${projectId}/idea/${ideaId}/comment?sentiment=${sentiment}&includeUser=1&includeUserVote=1&includeVoteCount=1&includeRepliesOnComments=1`;
     return this.fetch(url);
 
   },
