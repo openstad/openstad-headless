@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
@@ -23,7 +24,7 @@ export function SidenavProject({ className }: { className?: string }) {
       )}
     >
       <div className="flex flex-col items-start justify-center h-24">
-        <Link href="/">
+        <Link href="/projects">
           <div className="m-4 p-3 bg-secondary rounded">
             <ArrowLeft size={20} />
           </div>
@@ -87,6 +88,61 @@ export function SidenavProject({ className }: { className?: string }) {
                 className="w-full flex justify-start pl-8"
               >
                 <span className="truncate">Stemmen</span>
+              </Button>
+            </Link>
+            <Link href={"/projects/1/settings/protection"}>
+              <Button
+                variant={
+                  location.includes("/settings/protection") ? "secondary" : "ghost"
+                }
+                size="default"
+                className="w-full flex justify-start pl-8"
+              >
+                <span className="truncate">Wachtwoord protectie</span>
+              </Button>
+            </Link>
+            <Link href={"/projects/1/settings/anonymization"}>
+              <Button
+                variant={
+                  location.includes("/settings/anonymization") ? "secondary" : "ghost"
+                }
+                size="default"
+                className="w-full flex justify-start pl-8"
+              >
+                <span className="truncate">Anonimiseer gebruikers</span>
+              </Button>
+            </Link>
+            <Link href={"/projects/1/settings/themes"}>
+              <Button
+                variant={
+                  location.includes("/settings/themes") ? "secondary" : "ghost"
+                }
+                size="default"
+                className="w-full flex justify-start pl-8"
+              >
+                <span className="truncate">Themas en gebieden</span>
+              </Button>
+            </Link>
+            <Link href={"/projects/1/settings/notifications"}>
+              <Button
+                variant={
+                  location.includes("/settings/notifications") ? "secondary" : "ghost"
+                }
+                size="default"
+                className="w-full flex justify-start pl-8"
+              >
+                <span className="truncate">Administrator notificaties</span>
+              </Button>
+            </Link>
+            <Link href={"/projects/1/settings/newsletter"}>
+              <Button
+                variant={
+                  location.includes("/settings/newsletter") ? "secondary" : "ghost"
+                }
+                size="default"
+                className="w-full flex justify-start pl-8"
+              >
+                <span className="truncate">Nieuwsbrief</span>
               </Button>
             </Link>
           </>

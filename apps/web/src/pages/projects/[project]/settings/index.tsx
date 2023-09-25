@@ -146,8 +146,8 @@ export default function ProjectSettings() {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value={true}>Yes</SelectItem>
-                                            <SelectItem value={false}>No</SelectItem>
+                                            <SelectItem value={true}>Ja</SelectItem>
+                                            <SelectItem value={false}>Nee</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -167,15 +167,15 @@ export default function ProjectSettings() {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value={true}>Yes</SelectItem>
-                                            <SelectItem value={false}>No</SelectItem>
+                                            <SelectItem value={true}>Ja</SelectItem>
+                                            <SelectItem value={false}>Nee</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" variant={"save"}>Opslaan</Button>
+                        <Button type="submit" variant={"default"}>Opslaan</Button>
                     </form>
                     <br/>
                 </Form>
