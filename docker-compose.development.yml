@@ -1,0 +1,192 @@
+version: "3.4"
+services:
+  openstad-mysql:
+    image: mysql:8.0.26
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-openstad-no-db}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - AUTH_DB_NAME=${AUTH_DB_NAME}
+      - API_DB_NAME=${API_DB_NAME}
+      - IMAGE_DB_NAME=${IMAGE_DB_NAME}
+    command:
+      - mysqld
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - 3306:3306
+    volumes:
+      # - ./export.sql:/docker-entrypoint-initdb.d/99-export.sql
+      - openstad-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    entrypoint: |
+      bash -c "
+        echo \"CREATE DATABASE IF NOT EXISTS \`$$AUTH_DB_NAME\`; CREATE DATABASE IF NOT EXISTS \`$$IMAGE_DB_NAME\`; CREATE DATABASE IF NOT EXISTS \`$$API_DB_NAME\`; FLUSH PRIVILEGES; GRANT ALL ON *.* TO '$$MYSQL_USER'@'%'; FLUSH PRIVILEGES;\" > /docker-entrypoint-initdb.d/init.sql;
+        /usr/local/bin/docker-entrypoint.sh $$0 $$@
+      "
+ 
+  openstad-mailhog:
+    image: mailhog/mailhog
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui
+ 
+  openstad-mongo:
+    image: mongo:6
+    ports:
+      - 27017:27017
+    volumes:
+      - openstad-mongo-data:/data/db
+
+  openstad-api-server:
+    build:
+      context: apps/api-server
+      dockerfile: Dockerfile
+    # TODO: dit moet conditional: alleen als we deze db gebruiken
+    depends_on:
+      openstad-mysql:
+        condition: service_healthy
+    container_name: openstad-api-server
+    restart: unless-stopped
+    environment:
+      - API_URL=${API_URL}
+      - API_HOSTNAME=${API_HOSTNAME}
+      - API_DATABASE_USER=${API_DATABASE_USER}
+      - API_DATABASE_PASSWORD=${API_DATABASE_PASSWORD}
+      - API_DATABASE_DATABASE=${API_DATABASE_DATABASE}
+      - API_DATABASE_HOST=${API_DATABASE_HOST}
+      - API_EMAILADDRESS=${API_EMAILADDRESS}
+      - API_EXPRESS_PORT=${API_EXPRESS_PORT}
+      - API_MAIL_FROM=${API_MAIL_FROM}
+      - API_MAIL_TRANSPORT_SMTP_PORT=${API_MAIL_TRANSPORT_SMTP_PORT}
+      - API_MAIL_TRANSPORT_SMTP_HOST=${API_MAIL_TRANSPORT_SMTP_HOST}
+      - API_MAIL_TRANSPORT_SMTP_REQUIRESSL=${API_MAIL_TRANSPORT_SMTP_REQUIRESSL}
+      - API_MAIL_TRANSPORT_SMTP_AUTH_USER=${API_MAIL_TRANSPORT_SMTP_AUTH_USER}
+      - API_MAIL_TRANSPORT_SMTP_AUTH_PASS=${API_MAIL_TRANSPORT_SMTP_AUTH_PASS}
+      - API_NOTIFICATIONS_ADMIN_EMAILADDRESS=${API_NOTIFICATIONS_ADMIN_EMAILADDRESS}
+      - API_AUTHORIZATION_JWTSECRET=${API_AUTHORIZATION_JWTSECRET}
+      - API_AUTHORIZATION_FIXEDAUTHTOKENS=${API_AUTHORIZATION_FIXEDAUTHTOKENS}
+      - AUTH_API_URL=${AUTH_API_URL}
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    volumes:
+      - ./apps/api-server:/opt/api-server
+      - openstad-api-server-node_modules:/opt/api-server/node_modules
+      - openstad-api-server-init:/opt/api-server/init
+    entrypoint: |
+      bash -c "
+        # todo: dit kan ook wel wat intelligenter...
+        if [ ! -f "/opt/api-server/init/done" ]; then
+          cd /opt/api-server
+          npm run init-database && touch /opt/api-server/init/done;
+        fi
+        nodemon server.js
+      "
+
+  openstad-auth-server:
+    build:
+      context: apps/auth-server
+      dockerfile: Dockerfile
+    # TODO: dit moet conditional: alleen als we deze db gebruiken
+    depends_on:
+      openstad-mysql:
+        condition: service_healthy
+    container_name: openstad-auth-server
+    restart: unless-stopped
+    environment:
+      - APP_URL=${AUTH_APP_URL}
+      - PORT=${AUTH_PORT}
+      # - ADMIN_REDIRECT_URL=${AUTH_ADMIN_REDIRECT_URL}
+      - DB_HOST=${AUTH_DB_HOST}
+      - DB_USER=${AUTH_DB_USER}
+      - DB_PASSWORD=${AUTH_DB_PASSWORD}
+      - DB_NAME=${AUTH_DB_NAME}
+      - MONGO_DB_HOST=${AUTH_MONGO_HOST}
+      - MONGO_DB_PORT=${AUTH_MONGO_PORT}
+      - MAIL_SERVER_URL=${AUTH_MAIL_SERVER_URL}
+      - MAIL_SERVER_PORT=${AUTH_MAIL_SERVER_PORT}
+      - MAIL_SERVER_SECURE=${AUTH_MAIL_SERVER_SECURE}
+      - MAIL_SERVER_PASSWORD=${AUTH_MAIL_SERVER_PASSWORD}
+      - MAIL_SERVER_USER_NAME=${AUTH_MAIL_SERVER_USER_NAME}
+      - EMAIL_ASSETS_URL=${AUTH_EMAIL_ASSETS_URL}
+      - FROM_NAME=${AUTH_FROM_NAME}
+      - FROM_EMAIL=${AUTH_FROM_EMAIL}
+    ports:
+      - "${AUTH_PORT}:${AUTH_PORT}"
+    volumes:
+      - ./apps/auth-server:/opt/auth-server
+      - openstad-auth-server-node_modules:/opt/auth-server/node_modules
+      - openstad-auth-server-certs:/opt/auth-server/certs
+      - openstad-auth-server-init:/opt/auth-server/init
+    entrypoint: |
+      bash -c "
+        # todo: dit kan ook wel wat intelligenter...
+        if [ ! -f "/opt/auth-server/init/done" ]; then
+          # create certificates');
+          cd /opt/auth-server/certs
+          /usr/bin/openssl genrsa -out privatekey.pem 2048
+          /usr/bin/openssl req -new -key privatekey.pem -out certrequest.csr -subj '/C=NL/ST=NA/L=NA/O=OpenStad/OU=OpenStad/CN=openstad.${AUTH_DOMAIN}'
+          /usr/bin/openssl x509 -req -in certrequest.csr -signkey privatekey.pem -out certificate.pem
+          cd /opt/auth-server
+          npm run init-database && touch /opt/auth-server/init/done;
+        fi
+        nodemon server.js
+      "
+
+  openstad-image-server:
+    build:
+      context: apps/image-server
+      dockerfile: Dockerfile
+    # TODO: dit moet conditional: alleen als we deze db gebruiken
+    depends_on:
+      openstad-mysql:
+        condition: service_healthy
+    container_name: openstad-image-server
+    restart: unless-stopped
+    environment:
+      - APP_URL=${IMAGE_APP_URL}
+      - PORT_API=${IMAGE_PORT_API}
+      - PORT_IMAGE_SERVER=${IMAGE_PORT_IMAGE_SERVER}
+      - DB_HOST=${IMAGE_DB_HOST}
+      - DB_USER=${IMAGE_DB_USER}
+      - DB_PASSWORD=${IMAGE_DB_PASSWORD}
+      - DB_NAME=${IMAGE_DB_NAME}
+      - IMAGES_DIR=${IMAGE_IMAGES_DIR}
+      - THROTTLE=${IMAGE_THROTTLE}
+      - THROTTLE_CC_PROCESSORS=${IMAGE_THROTTLE_CC_PROCESSORS}
+      - THROTTLE_CC_PREFETCHER=${IMAGE_THROTTLE_CC_PREFETCHER}
+      - THROTTLE_CC_REQUESTS=${IMAGE_THROTTLE_CC_REQUESTS}
+    ports:
+      - "${IMAGE_PORT_API}:${IMAGE_PORT_API}"
+    volumes:
+      - ./apps/image-server:/opt/image-server
+      - openstad-image-server-node_modules:/opt/image-server/node_modules
+      - openstad-image-server-images:/opt/image-server/images
+      - openstad-image-server-init:/opt/image-server/init
+    entrypoint: |
+      bash -c "
+        # todo: dit kan ook wel wat intelligenter...
+        if [ ! -f "/opt/image-server/init/done" ]; then
+          cd /opt/image-server
+          npm run init-database && touch /opt/image-server/init/done;
+        fi
+        nodemon app.js
+      "
+
+volumes:
+  openstad-mysql-data: {}
+  openstad-mongo-data: {}
+  openstad-api-server-node_modules: {}
+  openstad-api-server-init: {}
+  openstad-auth-server-node_modules: {}
+  openstad-auth-server-certs: {}
+  openstad-auth-server-init: {}
+  openstad-image-server-node_modules: {}
+  openstad-image-server-images: {}
+  openstad-image-server-init: {}
+  

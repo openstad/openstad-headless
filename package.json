@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "create-docker-config": "node ./scripts/create-docker-config.js",
     "setup": "node ./scripts/setup-all.js",
     "start": "node ./scripts/start-all.js",
     "test": "echo \"Error: no test specified\" && exit 1"

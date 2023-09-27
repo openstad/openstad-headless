@@ -88,7 +88,7 @@ GET http://api.BASE_DOMAIN/auth/project/1/login
 ```
 should redirect to the auth server, and
 ```
-GET http://auth.os20-headless-setup.nlsvgtr.nl/auth/code/login?clientId=uniquecode
+GET http://auth.BASE_DOMAIN/auth/code/login?clientId=uniquecode
 ```
 should return a HTML page with a login form
 

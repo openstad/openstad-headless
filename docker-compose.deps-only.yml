@@ -19,11 +19,17 @@ services:
       - 3306:3306
     volumes:
       # - ./export.sql:/docker-entrypoint-initdb.d/99-export.sql
-      - openstad-db-data:/var/lib/mysql
+      - openstad-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
     entrypoint: |
       bash -c "
-        echo \"CREATE DATABASE IF NOT EXISTS $$AUTH_DB_NAME; CREATE DATABASE IF NOT EXISTS $$IMAGE_DB_NAME; CREATE DATABASE IF NOT EXISTS $$API_DATABASE; FLUSH PRIVILEGES; GRANT ALL ON *.* TO '$$MYSQL_USER'@'%'; FLUSH PRIVILEGES;\" > /docker-entrypoint-initdb.d/init.sql;
-        /usr/local/bin/docker-entrypoint.sh $0 $@
+        echo ========== PASSWORD $$MYSQL_USER $$MYSQL_ROOT_PASSWORD $$MYSQL_PASSWORD
+        echo \"CREATE DATABASE IF NOT EXISTS \`$$AUTH_DB_NAME\`; CREATE DATABASE IF NOT EXISTS \`$$IMAGE_DB_NAME\`; CREATE DATABASE IF NOT EXISTS \`$$API_DATABASE\`; FLUSH PRIVILEGES; GRANT ALL ON *.* TO '$$MYSQL_USER'@'%'; FLUSH PRIVILEGES;\"
+        echo \"CREATE DATABASE IF NOT EXISTS \`$$AUTH_DB_NAME\`; CREATE DATABASE IF NOT EXISTS \`$$IMAGE_DB_NAME\`; CREATE DATABASE IF NOT EXISTS \`$$API_DATABASE\`; FLUSH PRIVILEGES; GRANT ALL ON *.* TO '$$MYSQL_USER'@'%'; FLUSH PRIVILEGES;\" > /docker-entrypoint-initdb.d/init.sql;
+        /usr/local/bin/docker-entrypoint.sh $$0 $$@
       "
 
   mailhog:
@@ -40,5 +46,5 @@ services:
       - openstad-mongo-data:/data/db
 
 volumes:
-  openstad-db-data: {}
+  openstad-mysql-data: {}
   openstad-mongo-data: {}
