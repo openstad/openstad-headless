@@ -13,10 +13,6 @@ module.exports = async function seed(config, db) {
     allowedDomains.push(apiDomain);
     let apiDomainWithoutPortnumber = apiDomain.replace(/:\d+/, '');
     if (apiDomain != apiDomainWithoutPortnumber) allowedDomains.push(apiDomainWithoutPortnumber);
-    let adminDomain = process.env.ADMIN_DOMAIN || removeProtocol(process.env.ADMIN_URL) || '';
-    allowedDomains.push(adminDomain);
-    let adminDomainWithoutPortnumber = adminDomain.replace(/:\d+/, '');
-    if (adminDomain != adminDomainWithoutPortnumber) allowedDomains.push(adminDomainWithoutPortnumber);
 
     console.log('  creating development data');
     console.log('    rename default project to Plannen insturen');
