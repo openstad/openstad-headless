@@ -1,10 +1,11 @@
 require('dotenv').config();
+if (typeof process.env.FORCE_HTTP == 'undefined') process.env.FORCE_HTTP = 'yes';
 const config = require('./config');
 const fs = require('fs').promises;
 
 (async function() {
   try {
-    await fs.writeFile('./.env.docker', `
+    let configfile = `
 MYSQL_ROOT_PASSWORD=${ process.env.DB_PASSWORD }
 MYSQL_USER=${ process.env.DB_USERNAME }
 MYSQL_PASSWORD=${ process.env.DB_PASSWORD }
@@ -49,6 +50,11 @@ AUTH_MAIL_SERVER_USER_NAME=${ process.env.AUTH_MAIL_SERVER_USER_NAME }
 AUTH_EMAIL_ASSETS_URL=${ process.env.AUTH_EMAIL_ASSETS_URL }
 AUTH_FROM_NAME=${ process.env.AUTH_FROM_NAME }
 AUTH_FROM_EMAIL=${ process.env.AUTH_FROM_EMAIL }
+AUTH_ADMIN_CLIENT_ID=${ process.env.AUTH_ADMIN_CLIENT_ID }
+AUTH_ADMIN_CLIENT_SECRET=${ process.env.AUTH_ADMIN_CLIENT_SECRET }
+AUTH_FIRST_CLIENT_ID=${ process.env.AUTH_FIRST_CLIENT_ID }
+AUTH_FIRST_CLIENT_SECRET=${ process.env.AUTH_FIRST_CLIENT_SECRET }
+AUTH_FIRST_LOGIN_CODE=${ process.env.AUTH_FIRST_LOGIN_CODE }
 
 IMAGE_APP_URL=${ process.env.IMAGE_APP_URL }
 IMAGE_PORT_API=${ process.env.IMAGE_PORT_API }
@@ -62,7 +68,30 @@ IMAGE_THROTTLE=${ process.env.IMAGE_THROTTLE }
 IMAGE_THROTTLE_CC_PROCESSORS=${ process.env.IMAGE_THROTTLE_CC_PROCESSORS }
 IMAGE_THROTTLE_CC_PREFETCHER=${ process.env.IMAGE_THROTTLE_CC_PREFETCHER }
 IMAGE_THROTTLE_CC_REQUESTS=${ process.env.IMAGE_THROTTLE_CC_REQUESTS }
+`
+
+    const ip = require("ip");
+    let localIP = ip.address();
+    configfile = configfile.replace(/localhost/g, localIP);
+    
+    await fs.writeFile('./.env.docker', configfile);
+
+    console.log(`
+Config is created.
+You can now build and run a docker environment using the command.
+docker-compose -f docker-compose.development.yml --env-file .env.docker up --build
+   
+Once that is running you can visit the servers on these urls:
+List ideas: ${ process.env.API_URL }/api/project/1/idea
+Login: ${ process.env.API_URL }/auth/project/1/login
+Which should redirect you to the login form: ${ process.env.AUTH_APP_URL }/auth/code/login?clientId=uniquecode
+Show an image: ${ process.env.IMAGE_APP_URL }/image/forum.romanum.06.webp
+
+On the login form at: ${ process.env.AUTH_APP_URL }/auth/code/login?clientId=${ process.env.AUTH_ADMIN_CLIENT_ID }
+You can login using the code ${ process.env.AUTH_FIRST_LOGIN_CODE }
+
 `);
+
   } catch(err) {
     console.log(err);
   }

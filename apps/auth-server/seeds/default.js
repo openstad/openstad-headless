@@ -37,12 +37,14 @@ module.exports = async function seed(db) {
     ? process.env.HEADLESS_URL
     : "http://localhost:3000";
 
-  let allowedDomains =
-    process.env.NODE_ENV === "development" ? ["localhost"] : [];
-  allowedDomains.push(removeProtocol(process.env.API_URL));
+  let allowedDomains = process.env.NODE_ENV === "development" ? ["localhost"] : [];
+  let apiDomain = process.env.API_DOMAIN || removeProtocol(process.env.API_URL) || '';
+  allowedDomains.push(apiDomain);
+  let apiDomainWithoutPortnumber = apiDomain.replace(/:\d+/, '');
+  if (apiDomain != apiDomainWithoutPortnumber) allowedDomains.push(apiDomainWithoutPortnumber);
 
-  process.env.AUTH_LOGIN_CODE = process.env.AUTH_LOGIN_CODE || rack() 
-  let uniqueCode = process.env.AUTH_LOGIN_CODE;
+  process.env.AUTH_FIRST_LOGIN_CODE = process.env.AUTH_FIRST_LOGIN_CODE || rack() 
+  let uniqueCode = process.env.AUTH_FIRST_LOGIN_CODE;
 
   console.log('  creating initial clients');
   console.log('    - admin site');

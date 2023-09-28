@@ -6,28 +6,28 @@ let BASIC_AUTH_PASSWORD = process.env.BASIC_AUTH_PASSWORD || 'openstad';
 
 let COOKIE_SECURE_OFF = process.env.FORCE_HTTP ? 'yes' : '';
 
-process.env.BASE_DOMAIN = process.env.BASE_DOMAIN || 'openstad.local'
+process.env.BASE_DOMAIN = process.env.BASE_DOMAIN || 'localhost'
 
 process.env.DB_USERNAME = process.env.DB_USERNAME || 'openstad';
 process.env.DB_PASSWORD = process.env.DB_PASSWORD || generateRandomToken({ length: 32 });
 
-let API_DOMAIN = process.env.API_DOMAIN || 'api.' + process.env.BASE_DOMAIN;
-let API_URL = process.env.API_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + API_DOMAIN;
 let API_PORT = process.env.API_PORT || BASE_PORT + 10;
-let API_FIXED_AUTH_KEY = process.env.API_FIXED_AUTH_KEY || process.env.AUTH_LOGIN_CODE || generateRandomToken({ length: 2048 });
+let API_DOMAIN = process.env.API_DOMAIN || ( process.env.BASE_DOMAIN == 'localhost' ? 'localhost:' + API_PORT : 'api.' + process.env.BASE_DOMAIN );
+let API_URL = process.env.API_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + API_DOMAIN;
+let API_FIXED_AUTH_KEY = process.env.API_FIXED_AUTH_KEY || process.env.AUTH_FIRST_LOGIN_CODE || generateRandomToken({ length: 2048 });
 
-let AUTH_DOMAIN = process.env.AUTH_DOMAIN || 'auth.' + process.env.BASE_DOMAIN;
-let AUTH_URL = process.env.AUTH_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + AUTH_DOMAIN;
 let AUTH_PORT = process.env.AUTH_PORT || BASE_PORT + 30;
+let AUTH_DOMAIN = process.env.AUTH_DOMAIN || ( process.env.BASE_DOMAIN == 'localhost' ? 'localhost:' + AUTH_PORT : 'auth.' + process.env.BASE_DOMAIN )
+let AUTH_URL = process.env.AUTH_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + AUTH_DOMAIN;
 let AUTH_JWT_SECRET = generateRandomToken({ length: 64 });
-let AUTH_FIRST_CLIENT_ID = process.env.AUTH_FIRST_CLIENT_ID || 'default-client';
-let AUTH_FIRST_CLIENT_SECRET = process.env.AUTH_FIRST_CLIENT_SECRET || generateRandomToken({ length: 64 });
-let AUTH_ADMIN_CLIENT_ID = process.env.AUTH_ADMIN_CLIENT_ID || 'admin-client';
+let AUTH_ADMIN_CLIENT_ID = process.env.AUTH_ADMIN_CLIENT_ID || generateRandomToken({ length: 64 });
 let AUTH_ADMIN_CLIENT_SECRET = process.env.AUTH_ADMIN_CLIENT_SECRET || generateRandomToken({ length: 64 });
+let AUTH_FIRST_CLIENT_ID = process.env.AUTH_FIRST_CLIENT_ID || generateRandomToken({ length: 64 });
+let AUTH_FIRST_CLIENT_SECRET = process.env.AUTH_FIRST_CLIENT_SECRET || generateRandomToken({ length: 64 });
 
-let IMAGE_DOMAIN = process.env.IMAGE_DOMAIN || 'image.' + process.env.BASE_DOMAIN;
-let IMAGE_APP_URL = process.env.IMAGE_APP_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + IMAGE_DOMAIN;
 let IMAGE_PORT_API = process.env.IMAGE_PORT_API || BASE_PORT + 50;
+let IMAGE_DOMAIN = process.env.IMAGE_DOMAIN || ( process.env.BASE_DOMAIN == 'localhost' ? 'localhost:' + IMAGE_PORT_API : 'image.' + process.env.BASE_DOMAIN );
+let IMAGE_APP_URL = process.env.IMAGE_APP_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + IMAGE_DOMAIN;
 let IMAGE_PORT_IMAGE_SERVER = process.env.IMAGE_PORT_IMAGE_SERVER || IMAGE_PORT_API + 1;
 let IMAGE_CLIENT_TOKEN = process.env.IMAGE_CLIENT_TOKEN || generateRandomToken({ length: 255 });
 
@@ -52,11 +52,6 @@ process.env.API_SMTP_PASSWORD = process.env.API_SMTP_PASSWORD || process.env.SMT
 process.env.API_COOKIE_SECRET = process.env.API_COOKIE_SECRET || generateRandomToken({ length: 32 });
 process.env.API_COOKIE_ONLY_SECURE = process.env.API_COOKIE_ONLY_SECURE || process.env.API_COOKIE_ONLY_SECURE != 'false' ? true : false;
 process.env.API_JWT_SECRET = process.env.API_JWT_SECRET || generateRandomToken({ length: 64 });
-
-// API_AUTH_URL: process.env.API_AUTH_URL || AUTH_URL,
-// API_AUTH_JWT_SECRET: process.env.API_AUTH_JWT_SECRET || AUTH_JWT_SECRET,
-// API_AUTH_DEFAULT_CLIENT_ID: process.env.API_AUTH_DEFAULT_CLIENT_ID || AUTH_FIRST_CLIENT_ID,
-// API_AUTH_CLIENT_PASSWORD: process.env.API_AUTH_CLIENT_PASSWORD || AUTH_FIRST_CLIENT_SECRET,
 
 process.env.API_FIXED_AUTH_KEY = API_FIXED_AUTH_KEY;
 
@@ -88,6 +83,13 @@ process.env.AUTH_EMAIL_ASSETS_URL = process.env.AUTH_APP_URL || AUTH_URL;
 process.env.AUTH_SESSION_SECRET = process.env.AUTH_SESSION_SECRET || generateRandomToken({ length: 32 });
 // TODO: dev vs prod
 process.env.AUTH_COOKIE_SECURE_OFF = typeof process.env.AUTH_COOKIE_SECURE_OFF != 'undefined' ? process.env.AUTH_COOKIE_SECURE_OFF : 'yes', // TODO: COOKIE_SECURE_OFF;
+
+process.env.AUTH_ADMIN_CLIENT_ID = AUTH_ADMIN_CLIENT_ID;
+process.env.AUTH_ADMIN_CLIENT_SECRET = AUTH_ADMIN_CLIENT_SECRET;
+process.env.AUTH_FIRST_CLIENT_ID = AUTH_FIRST_CLIENT_ID;
+process.env.AUTH_FIRST_CLIENT_SECRET = AUTH_FIRST_CLIENT_SECRET;
+process.env.AUTH_FIRST_LOGIN_CODE = process.env.AUTH_FIRST_LOGIN_CODE || generateRandomToken({ length: 32 });
+
 
 // KPN_CLIENT_ID=
 // KPN_CLIENT_SECRET=
