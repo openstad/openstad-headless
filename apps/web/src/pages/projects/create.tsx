@@ -142,8 +142,8 @@ export default function CreateProject() {
                             </FormItem>
                         )}
                         />
-                        <Button variant="create" type="submit" className='float-right'>Aanmaken</Button>
-                        <Button className='float-right'>Annuleren</Button>
+                        <Button variant="default" type="submit" className='float-right'>Aanmaken</Button>
+                        <Button variant="ghost" className='float-right'>Annuleren</Button>
                     </form>
                 </Form>
             </div>

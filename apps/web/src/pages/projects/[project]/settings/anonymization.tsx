@@ -65,6 +65,7 @@ export default function ProjectSettingsAnonymization() {
                     <br/>
                     <Button variant={"destructive"}>Gebruikersgegevens anonimiseren</Button>
                 </div>
+                <br/>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
                         <FormField

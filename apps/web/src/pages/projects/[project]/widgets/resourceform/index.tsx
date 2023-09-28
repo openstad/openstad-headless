@@ -1,0 +1,99 @@
+import React from 'react'
+import { PageLayout } from "../../../../../components/ui/page-layout"
+import { Button } from '../../../../../components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../../components/ui/tabs";
+import WidgetResourceFormGeneral from './general';
+import WidgetResourceFormTitle from './title';
+import WidgetResourceFormSummary from './summary';
+import WidgetResourceFormDescription from './description';
+import WidgetResourceFormImages from './images';
+import WidgetResourceFormThemes from './themes';
+import WidgetResourceFormAreas from './areas';
+import WidgetResourceFormLocation from './location';
+import WidgetResourceFormCosts from './costs';
+import WidgetResourceFormRole from './role';
+
+export default function WidgetResourceForm() {
+    return(
+        <div>
+            <PageLayout
+            pageHeader='Project naam'
+            breadcrumbs={[
+                {
+                    name: "Projecten",
+                    url: "/projects"
+                },
+                {
+                    name: "Widgets",
+                    url: "/projects/1/widgets"
+                },
+                {
+                    name: "Resource Form",
+                    url: "/projects/1/widgets/resourceform"
+                }
+            ]}
+            >
+                <div>
+                    <Tabs defaultValue="general">
+                        <TabsList>
+                            <TabsTrigger value="general">Algemeen</TabsTrigger>
+                            <TabsTrigger value="title">Titel</TabsTrigger>
+                            <TabsTrigger value="summary">Samenvatting</TabsTrigger>
+                            <TabsTrigger value="description">Beschrijving</TabsTrigger>
+                            <TabsTrigger value="images">Uploaden afbeeldingen</TabsTrigger>
+                            <TabsTrigger value="themes">Themas</TabsTrigger>
+                            <TabsTrigger value="areas">Gebieden</TabsTrigger>
+                            <TabsTrigger value="location">Locatie</TabsTrigger>
+                            <TabsTrigger value="costs">Geschatte kosten</TabsTrigger>
+                            <TabsTrigger value="role">Rol</TabsTrigger>
+                            <TabsTrigger value="phone">Telefoonnummer</TabsTrigger>
+                            <TabsTrigger value="tip">Tips</TabsTrigger>
+                            <TabsTrigger value="submit">Opleveren</TabsTrigger>
+                            <TabsTrigger value="budget">Budget</TabsTrigger>
+                            <TabsTrigger value="confirmation">Confirmatie</TabsTrigger>
+                            <TabsTrigger value="info">Titel</TabsTrigger>
+                        </TabsList>
+                        <Button variant={"default"} className='float-right'>
+                            Opslaan
+                        </Button>
+                        <TabsContent value="general" className="w-1/2">
+                            <WidgetResourceFormGeneral />
+                        </TabsContent>
+                        <TabsContent value="title" className="w-1/2">
+                            <WidgetResourceFormTitle />
+                        </TabsContent>
+                        <TabsContent value="summary" className="w-1/2">
+                            <WidgetResourceFormSummary />
+                        </TabsContent>
+                        <TabsContent value="description" className="w-1/2">
+                            <WidgetResourceFormDescription />
+                        </TabsContent>
+                        <TabsContent value="images" className="w-1/2">
+                            <WidgetResourceFormImages />
+                        </TabsContent>
+                        <TabsContent value="themes" className="w-1/2">
+                            <WidgetResourceFormThemes />
+                        </TabsContent>
+                        <TabsContent value="areas" className="w-1/2">
+                            <WidgetResourceFormAreas />
+                        </TabsContent>
+                        <TabsContent value="location" className="w-1/2">
+                            <WidgetResourceFormLocation />
+                        </TabsContent>
+                        <TabsContent value="costs" className="w-1/2">
+                            <WidgetResourceFormCosts />
+                        </TabsContent>
+                        <TabsContent value="role" className="w-1/2">
+                            <WidgetResourceFormRole />
+                        </TabsContent>
+                    </Tabs>
+                    <div className="w-1/2">
+                        <Button variant={"default"} className="float-right">
+                            Opslaan
+                        </Button>
+                    </div>
+                </div>
+            </PageLayout>
+        </div>
+    )
+}

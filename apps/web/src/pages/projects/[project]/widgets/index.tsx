@@ -20,7 +20,7 @@ export default function ProjectWidgets() {
           ]}
           action={
             <Button variant="default" className="float-right">
-              <Link href="/projects/create">
+              <Link href="/projects/1/widgets/create">
                 + Nieuwe widget
               </Link>
             </Button>  
@@ -29,14 +29,33 @@ export default function ProjectWidgets() {
             <Table>
             <TableHeader>
                 <TableRow>
-                <TableHead className='w-[300px]'>Widget naam</TableHead>
-                <TableHead>Info</TableHead>
+                <TableHead className='w-[300px]'>Widget lijst</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
                 <TableRow>
-                <TableCell>Begrootmodule</TableCell>
-                <TableCell>Widget info</TableCell>
+                <TableCell><Link href="/projects/1/widgets/begrootmodule">Begrootmodule</Link></TableCell>
+                </TableRow>
+                <TableRow>
+                <TableCell><Link href="/projects/1/widgets/arguments">Argumenten</Link></TableCell>
+                </TableRow>
+                <TableRow>
+                <TableCell><Link href="/projects/1/widgets/ideasmap">Ideeën map</Link></TableCell>
+                </TableRow>
+                <TableRow>
+                <TableCell><Link href="/projects/1/widgets/keuzewijzer">Keuzewijzer</Link></TableCell>
+                </TableRow>
+                <TableRow>
+                <TableCell><Link href="/projects/1/widgets/like">Likes module</Link></TableCell>
+                </TableRow>
+                <TableRow>
+                <TableCell><Link href="/projects/1/widgets/map">Map module</Link></TableCell>
+                </TableRow>
+                <TableRow>
+                <TableCell><Link href="/projects/1/widgets/resourceform">Resource formulier</Link></TableCell>
+                </TableRow>
+                <TableRow>
+                <TableCell><Link href="/projects/1/widgets/resourceoverview">Resource overview</Link></TableCell>
                 </TableRow>
             </TableBody>  
             </Table>
