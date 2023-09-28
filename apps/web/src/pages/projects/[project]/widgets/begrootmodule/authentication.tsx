@@ -41,7 +41,7 @@ export default function BegrootmoduleAuthentication() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Authencatie formulier embedden
+                  Authenticatie formulier embedden
                 </FormLabel>
                 <Select
                   onValueChange={field.onChange}
