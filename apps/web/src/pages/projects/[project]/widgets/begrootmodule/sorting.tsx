@@ -19,11 +19,11 @@ const sorting = [
         label: "Willekeurig"
     },
     {
-        id: "liked",
+        id: "mostLikes",
         label: "Meeste likes"
     },
     {
-        id: "unliked",
+        id: "leastLikes",
         label: "Minste likes"
     },
     {
@@ -31,11 +31,11 @@ const sorting = [
         label: "Ranglijst"
     },
     {
-        id: "expensive",
+        id: "highestCost",
         label: "Hoogste bedrag"
     },
     {
-        id: "cheap",
+        id: "lowestCost",
         label: "Laagste bedrag"
     }
 ]
@@ -44,14 +44,15 @@ const formSchema = z.object({
     sorting: z.array(z.string()).refine((value) => value.some((item) => item), {
         message: "You have to select at least one item."
     }),
-    minimumBudget: z.enum(["random"])
+    defaultSorting: z.enum(['newest', 'oldest', 'random', 'mostLikes', 'leastLikes', 'ranked', 'highestCost', 'lowestCost'])
   });
 
 export default function BegrootmoduleSorting() {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
-        sorting: ["random", "expensive", "cheap"]
+        sorting: [],
+        defaultSorting: 'newest'
       },
     });
   
@@ -112,16 +113,23 @@ export default function BegrootmoduleSorting() {
             />
             <FormField
             control={form.control}
-            name="minimumBudget"
+            name="defaultSorting"
             render={({ field }) => (
                 <FormItem>
                     <FormLabel>Minimum budget dat geselecteerd moet worden</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <SelectTrigger>
-                            <SelectValue placeholder="Willekeurig" />
+                            <SelectValue placeholder="Nieuwste eerst" />
                         </SelectTrigger>
                         <SelectContent>
+                            <SelectItem value="newest">Nieuwste eerst</SelectItem>
+                            <SelectItem value="oldest">Oudste eerst</SelectItem>
                             <SelectItem value="random">Willekeurig</SelectItem>
+                            <SelectItem value="mostLikes">Meeste likes</SelectItem>
+                            <SelectItem value="leastLikes">Minste likes</SelectItem>
+                            <SelectItem value="ranked">Ranglijst</SelectItem>
+                            <SelectItem value="highestCost">Hoogste bedrag</SelectItem>
+                            <SelectItem value="lowestCost">Laagste bedrag</SelectItem>
                         </SelectContent>
                     </Select>
                 </FormItem>

@@ -18,6 +18,7 @@ export default function BegrootmoduleDisplay() {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
+        unavailableButton: "Geen ruimte"
       },
     });
   
@@ -38,7 +39,7 @@ export default function BegrootmoduleDisplay() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Display ranking
+                    Weergeef de ranking
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}
@@ -64,7 +65,7 @@ export default function BegrootmoduleDisplay() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Display price label
+                    Weergeef de prijslabel
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}
@@ -90,7 +91,7 @@ export default function BegrootmoduleDisplay() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Show vote count
+                    Weergeef de hoeveelheid stemmen
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}
@@ -117,7 +118,7 @@ export default function BegrootmoduleDisplay() {
                 <FormItem>
                   <FormLabel>Onbeschikbare buttons</FormLabel>
                   <FormControl>
-                    <Input placeholder="Geen budget" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

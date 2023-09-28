@@ -12,6 +12,11 @@ import WidgetResourceFormAreas from './areas';
 import WidgetResourceFormLocation from './location';
 import WidgetResourceFormCosts from './costs';
 import WidgetResourceFormRole from './role';
+import WidgetResourceFormPhone from './phone';
+import WidgetResourceFormTip from './tip';
+import WidgetResourceFormSubmit from './submit';
+import WidgetResourceFormBudget from './budget';
+import WidgetResourceFormInfo from './info';
 
 export default function WidgetResourceForm() {
     return(
@@ -85,6 +90,21 @@ export default function WidgetResourceForm() {
                         </TabsContent>
                         <TabsContent value="role" className="w-1/2">
                             <WidgetResourceFormRole />
+                        </TabsContent>
+                        <TabsContent value="phone" className="w-1/2">
+                            <WidgetResourceFormPhone />
+                        </TabsContent>
+                        <TabsContent value="tip" className="w-1/2">
+                            <WidgetResourceFormTip />
+                        </TabsContent>
+                        <TabsContent value="submit" className="w-1/2">
+                            <WidgetResourceFormSubmit />
+                        </TabsContent>
+                        <TabsContent value="budget" className="w-1/2">
+                            <WidgetResourceFormBudget />
+                        </TabsContent>
+                        <TabsContent value="info" className="w-1/2">
+                            <WidgetResourceFormInfo />
                         </TabsContent>
                     </Tabs>
                     <div className="w-1/2">

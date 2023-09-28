@@ -45,7 +45,7 @@ export default function WidgetMapFilter() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="ideasAndAdresses">Zoek in ideeën en adressen</SelectItem>
+                      <SelectItem value="ideasAndAddresses">Zoek in ideeën en adressen</SelectItem>
                       <SelectItem value="ideas">Zoek in ideeën</SelectItem>
                       <SelectItem value="addresses">Zoek in adressen</SelectItem>
                       <SelectItem value="none">Geen zoekveld</SelectItem>

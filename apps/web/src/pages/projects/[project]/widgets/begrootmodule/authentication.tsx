@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import * as z from 'zod'
 
 const formSchema = z.object({
-    authEmbedded: z.boolean(),
+    authEmbedded: z.enum(['no', 'email', 'code', 'sms']),
     scrollBack: z.boolean(),
   });
 
@@ -13,6 +13,7 @@ export default function BegrootmoduleAuthentication() {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
+        authEmbedded: 'no'
       },
     });
   
@@ -41,12 +42,14 @@ export default function BegrootmoduleAuthentication() {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="No" />
+                      <SelectValue placeholder="Nee" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Yes">Yes</SelectItem>
-                    <SelectItem value="No">No</SelectItem>
+                    <SelectItem value="no">Nee</SelectItem>
+                    <SelectItem value="email">Email login URL</SelectItem>
+                    <SelectItem value="code">Stemcode</SelectItem>
+                    <SelectItem value="sms">SMS</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -67,12 +70,12 @@ export default function BegrootmoduleAuthentication() {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Yes" />
+                      <SelectValue placeholder="Ja" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Yes">Yes</SelectItem>
-                    <SelectItem value="No">No</SelectItem>
+                    <SelectItem value="Yes">Ja</SelectItem>
+                    <SelectItem value="No">Nee</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

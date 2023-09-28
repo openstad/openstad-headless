@@ -7,9 +7,9 @@ import * as z from 'zod'
 
 const formSchema = z.object({
     voting: z.boolean(),
-    votingType: z.enum(["budgeting"]),
+    votingType: z.enum(['budgeting', 'budgetingPerTheme', 'count', 'countPerTheme']),
     maximumSelectableIdeas: z.number().gt(0),
-    minimumSelectableIdeas: z.number().gt(0),
+    minimumSelectableIdeas: z.number().gte(0),
     budget: z.number().gt(0),
     minimumBudget: z.number().gt(0),
   });
@@ -19,10 +19,8 @@ export default function BegrootmoduleVoting() {
       resolver: zodResolver(formSchema),
       defaultValues: {
         votingType: "budgeting",
-        maximumSelectableIdeas: 10000,
-        minimumSelectableIdeas: 1,
-        budget: 300000,
-        minimumBudget: 1,
+        maximumSelectableIdeas: 1000,
+        minimumSelectableIdeas: 0,
       },
     });
   
@@ -43,7 +41,7 @@ export default function BegrootmoduleVoting() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Enable voting (currently only works with Gridder)
+                    Sta stemmen toe (werkt op het moment alleen met Gridder)
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}
@@ -51,12 +49,12 @@ export default function BegrootmoduleVoting() {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Yes" />
+                        <SelectValue placeholder="Nee" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Yes</SelectItem>
-                      <SelectItem value="No">No</SelectItem>
+                      <SelectItem value="Yes">Ja</SelectItem>
+                      <SelectItem value="No">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -84,6 +82,15 @@ export default function BegrootmoduleVoting() {
                       <SelectItem value="budgeting">
                         Budgeting
                       </SelectItem>
+                      <SelectItem value="budgetingPerTheme">
+                        Budgeting per thema
+                      </SelectItem>
+                      <SelectItem value="count">
+                        Hoeveelheid
+                      </SelectItem>
+                      <SelectItem value="countPerTheme">
+                        Hoeveelheid per thema
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -95,9 +102,9 @@ export default function BegrootmoduleVoting() {
               name="minimumSelectableIdeas"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Minimum selectable ideas</FormLabel>
+                  <FormLabel>Minimum hoeveelheid selecteerbare ideeën</FormLabel>
                   <FormControl>
-                    <Input placeholder="Min 1" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -108,9 +115,9 @@ export default function BegrootmoduleVoting() {
               name="maximumSelectableIdeas"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Maximum selectable ideas</FormLabel>
+                  <FormLabel>Maximum hoeveelheid selecteerbare ideeën</FormLabel>
                   <FormControl>
-                    <Input placeholder="Max 10000" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -122,10 +129,10 @@ export default function BegrootmoduleVoting() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Minimum budget that has to be selected
+                    Minimum budget om te selecteren
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Min 1" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -136,9 +143,9 @@ export default function BegrootmoduleVoting() {
               name="budget"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Available Budget</FormLabel>
+                  <FormLabel>Beschikbaar budget</FormLabel>
                   <FormControl>
-                    <Input placeholder="300000" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
