@@ -1,13 +1,18 @@
 import React from "react";
 import { Button } from "../../../../../components/ui/button";
 import { PageLayout } from "../../../../../components/ui/page-layout";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../../components/ui/tabs";
-import BegrootmoduleVoting from './voting'
-import BegrootmoduleDisplay from './display'
-import BegrootmoduleSorting from './sorting'
-import BegrootmoduleExplanation from './explanation'
-import BegrootmoduleAuthentication from './authentication'
-import BegrootmoduleLabels from './label'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../../../../components/ui/tabs";
+import BegrootmoduleVoting from "./voting";
+import BegrootmoduleDisplay from "./display";
+import BegrootmoduleSorting from "./sorting";
+import BegrootmoduleExplanation from "./explanation";
+import BegrootmoduleAuthentication from "./authentication";
+import BegrootmoduleLabels from "./label";
 
 export default function WidgetBegrootmodule() {
   return (
