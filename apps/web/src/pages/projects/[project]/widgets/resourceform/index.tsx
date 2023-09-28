@@ -17,6 +17,7 @@ import WidgetResourceFormTip from './tip';
 import WidgetResourceFormSubmit from './submit';
 import WidgetResourceFormBudget from './budget';
 import WidgetResourceFormInfo from './info';
+import WidgetResourceFormConfirmation from './confirmation';
 
 export default function WidgetResourceForm() {
     return(
@@ -58,9 +59,6 @@ export default function WidgetResourceForm() {
                             <TabsTrigger value="confirmation">Confirmatie</TabsTrigger>
                             <TabsTrigger value="info">Titel</TabsTrigger>
                         </TabsList>
-                        <Button variant={"default"} className='float-right'>
-                            Opslaan
-                        </Button>
                         <TabsContent value="general" className="w-1/2">
                             <WidgetResourceFormGeneral />
                         </TabsContent>
@@ -103,15 +101,13 @@ export default function WidgetResourceForm() {
                         <TabsContent value="budget" className="w-1/2">
                             <WidgetResourceFormBudget />
                         </TabsContent>
+                        <TabsContent value="confirmation" className="w-1/2">
+                            <WidgetResourceFormConfirmation />
+                        </TabsContent>
                         <TabsContent value="info" className="w-1/2">
                             <WidgetResourceFormInfo />
                         </TabsContent>
                     </Tabs>
-                    <div className="w-1/2">
-                        <Button variant={"default"} className="float-right">
-                            Opslaan
-                        </Button>
-                    </div>
                 </div>
             </PageLayout>
         </div>

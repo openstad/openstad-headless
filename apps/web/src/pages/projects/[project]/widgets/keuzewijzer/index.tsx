@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
+import { Heading } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
     keuzewijzer: z.string(),
@@ -58,6 +60,10 @@ export default function WidgetKeuzewijzer() {
                 <div>
                     <div className='p-4 w-1/2'>
                         <Form {...form}>
+                            <Heading size="xl" className="mb-4">
+                                Keuzewijzer • Instellingen
+                            </Heading>
+                            <Separator className="mb-4" />
                             <form
                             onSubmit={form.handleSubmit(onSubmit)}
                             className='space-y-8'
@@ -235,8 +241,8 @@ export default function WidgetKeuzewijzer() {
                             </form>
                         </Form>
                     </div>
-                    <div className="w-1/2">
-                        <Button variant={"default"} className="float-right">
+                    <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
+                        <Button className="self-end" type="submit">
                             Opslaan
                         </Button>
                     </div>

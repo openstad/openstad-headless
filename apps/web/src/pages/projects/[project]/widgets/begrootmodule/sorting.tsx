@@ -4,6 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
+import { Heading } from "@/components/ui/typography";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 
 const sorting = [
     {
@@ -63,9 +66,13 @@ export default function BegrootmoduleSorting() {
     return (
         <div>
         <Form {...form}>
+          <Heading size="xl" className="mb-4">
+            Begrootmodule • Sorteer opties
+          </Heading>  
+          <Separator className="mb-4" />
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8"
+            className="space-y-4"
           >
             <FormField
             control={form.control}
@@ -135,6 +142,11 @@ export default function BegrootmoduleSorting() {
                 </FormItem>
             )}
             />
+            <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
+              <Button className="self-end" type="submit">
+                Opslaan
+              </Button>
+            </div>
           </form>
         </Form>
       </div>

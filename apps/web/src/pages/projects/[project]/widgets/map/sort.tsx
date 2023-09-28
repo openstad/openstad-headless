@@ -1,6 +1,9 @@
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Heading } from "@/components/ui/typography";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
@@ -67,9 +70,13 @@ export default function WidgetMapSort() {
     return (
       <div>
         <Form {...form}>
+          <Heading size="xl" className="mb-4">
+            Map • Sorteren
+          </Heading>
+          <Separator className="mb-4" />
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8"
+            className="space-y-4"
           >
             <FormField
             control={form.control}
@@ -148,6 +155,11 @@ export default function WidgetMapSort() {
                 </FormItem>
               )}
             />
+            <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
+              <Button className="self-end" type="submit">
+                Opslaan
+              </Button>
+            </div>
           </form>
         </Form>
       </div>

@@ -15,6 +15,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { PageLayout } from '@/components/ui/page-layout'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Heading } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
     isActive: z.boolean(),
@@ -56,6 +58,10 @@ export default function ProjectSettingsProtection() {
             ]}>
             <div className="container mx-auto py-10 w-1/2 float-left divide-y">
                 <Form {...form}>
+                    <Heading size="xl" className="mb-4">
+                        Instellingen • Wachtwoord protectie
+                    </Heading>
+                    <Separator className="mb-4" />
                     <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
                         <FormField
                             control={form.control}

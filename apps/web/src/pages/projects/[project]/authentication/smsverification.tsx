@@ -15,6 +15,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { PageLayout } from '@/components/ui/page-layout'
+import { Heading } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
     firstTitle: z.string(),
@@ -62,9 +64,11 @@ export default function ProjectAuthenticationSmsVerification() {
                 }
             ]}>
             <div className="container mx-auto py-10 w-1/2 float-left">
-                <p className='text-3xl'>Instellen inhoud SMS-verificatie berichten</p>
-                <br />
                 <Form {...form}>
+                    <Heading size="xl" className="mb-4">
+                        Authenticatie • SMS verificatie
+                    </Heading>
+                    <Separator className="mb-4" />
                     <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
                         <FormField
                         control={form.control}
@@ -133,7 +137,7 @@ export default function ProjectAuthenticationSmsVerification() {
                         />
                         <FormField
                         control={form.control}
-                        name="firstHelpText"
+                        name="firstHelptext"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Hulptext voor het eerste scherm</FormLabel>
@@ -198,7 +202,7 @@ export default function ProjectAuthenticationSmsVerification() {
                         />
                         <FormField
                         control={form.control}
-                        name="secondHelpText"
+                        name="secondHelptext"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Hulptext voor het eerste scherm</FormLabel>

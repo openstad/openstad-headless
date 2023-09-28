@@ -1,5 +1,8 @@
+import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Heading } from "@/components/ui/typography";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
@@ -27,9 +30,13 @@ export default function WidgetResourceOverviewLabel() {
     return (
       <div>
         <Form {...form}>
+          <Heading size="xl" className="mb-4">
+            Resource Overview • Labels
+          </Heading>  
+          <Separator className="mb-4" />
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8"
+            className="space-y-4"
           >
             <FormField
             control={form.control}
@@ -109,6 +116,11 @@ export default function WidgetResourceOverviewLabel() {
                 </FormItem>
             )}
             />
+            <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
+              <Button className="self-end" type="submit">
+                Opslaan
+              </Button>
+            </div>
           </form>
         </Form>
       </div>

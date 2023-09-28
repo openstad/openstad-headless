@@ -63,11 +63,6 @@ export default function WidgetBegrootmodule() {
               <BegrootmoduleLabels />
             </TabsContent>
           </Tabs>
-          <div className="w-1/2">
-            <Button variant={"default"} className="float-right">
-              Opslaan
-            </Button>
-          </div>
         </div>
       </PageLayout>
     </div>

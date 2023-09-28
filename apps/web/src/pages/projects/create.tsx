@@ -19,6 +19,8 @@ import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
+import { Heading } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
     projectName: z.string().min(6, {
@@ -61,6 +63,10 @@ export default function CreateProject() {
             ]}>
             <div className="container mx-auto py-10 w-1/2 float-left">
                 <Form {...form}>
+                <Heading size="xl" className="mb-4">
+                    Project toevoegen
+                </Heading>
+                <Separator className="mb-4" />
                     <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
                         <FormField
                         control={form.control}
