@@ -71,8 +71,8 @@ IMAGE_THROTTLE_CC_REQUESTS=${ process.env.IMAGE_THROTTLE_CC_REQUESTS }
 
 ADMIN_URL=${ process.env.ADMIN_URL }
 ADMIN_DOMAIN=${ process.env.ADMIN_DOMAIN }
-ADMIN_SECRET=${ process.env.ADMIN_SECRET }
 ADMIN_PORT=${ process.env.ADMIN_PORT }
+ADMIN_SECRET=${ process.env.ADMIN_SECRET }
 `
 
     const ip = require("ip");
@@ -87,12 +87,12 @@ You can now build and run a docker environment using the command.
 docker-compose -f docker-compose.development.yml --env-file .env.docker up --build
    
 Once that is running you can visit the servers on these urls:
-List ideas: ${ process.env.API_URL }/api/project/1/idea
-Login: ${ process.env.API_URL }/auth/project/1/login
-Which should redirect you to the login form: ${ process.env.AUTH_APP_URL }/auth/code/login?clientId=uniquecode
-Show an image: ${ process.env.IMAGE_APP_URL }/image/forum.romanum.06.webp
+List ideas: ${ process.env.API_URL.replace(/localhost/g, localIP) }/api/project/1/idea
+Login: ${ process.env.API_URL.replace(/localhost/g, localIP) }/auth/project/1/login
+Which should redirect you to the login form: ${ process.env.AUTH_APP_URL.replace(/localhost/g, localIP) }/auth/code/login?clientId=uniquecode
+Show an image: ${ process.env.IMAGE_APP_URL.replace(/localhost/g, localIP) }/image/forum.romanum.06.webp
+Admin server: ${ process.env.ADMIN_URL.replace(/localhost/g, localIP) }/
 
-On the login form at: ${ process.env.AUTH_APP_URL }/auth/code/login?clientId=${ process.env.AUTH_ADMIN_CLIENT_ID }
 You can login using the code ${ process.env.AUTH_FIRST_LOGIN_CODE }
 
 `);

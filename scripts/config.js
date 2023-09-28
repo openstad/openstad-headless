@@ -123,6 +123,7 @@ process.env.IMAGE_THROTTLE_CC_REQUESTS = process.env.IMAGE_THROTTLE_CC_REQUESTS 
 // admin server
 process.env.ADMIN_URL = ADMIN_URL;
 process.env.ADMIN_DOMAIN = ADMIN_DOMAIN;
+process.env.ADMIN_PORT = ADMIN_PORT;
 process.env.ADMIN_SECRET = ADMIN_SECRET;
 process.env.ADMIN_PORT = ADMIN_PORT;
 
