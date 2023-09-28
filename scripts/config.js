@@ -31,6 +31,11 @@ let IMAGE_APP_URL = process.env.IMAGE_APP_URL || ( process.env.FORCE_HTTP ? 'htt
 let IMAGE_PORT_IMAGE_SERVER = process.env.IMAGE_PORT_IMAGE_SERVER || IMAGE_PORT_API + 1;
 let IMAGE_CLIENT_TOKEN = process.env.IMAGE_CLIENT_TOKEN || generateRandomToken({ length: 255 });
 
+let ADMIN_PORT = process.env.ADMIN_PORT || BASE_PORT + 70;
+let ADMIN_DOMAIN = process.env.ADMIN_DOMAIN || ( process.env.BASE_DOMAIN == 'localhost' ? 'localhost:' + ADMIN_PORT : 'admin.' + process.env.BASE_DOMAIN );
+let ADMIN_URL = process.env.ADMIN_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + ADMIN_DOMAIN;
+let ADMIN_SECRET = process.env.ADMIN_SECRET || generateRandomToken({ length: 64 });
+
 // api server
 process.env.API_URL = API_URL;
 process.env.API_DOMAIN = API_DOMAIN;
@@ -114,6 +119,12 @@ process.env.IMAGE_THROTTLE_CC_REQUESTS = process.env.IMAGE_THROTTLE_CC_REQUESTS 
 // IMAGE_CLIENT_NAME: process.env.IMAGE_CLIENT_NAME || 'default-client',
 // IMAGE_CLIENT_TOKEN: IMAGE_CLIENT_TOKEN,
 // IMAGE_CLIENT_DISPLAY_NAME: process.env.IMAGE_CLIENT_DISPLAY_NAME || 'Default image server client',
+
+// admin server
+process.env.ADMIN_URL = ADMIN_URL;
+process.env.ADMIN_DOMAIN = ADMIN_DOMAIN;
+process.env.ADMIN_SECRET = ADMIN_SECRET;
+process.env.ADMIN_PORT = ADMIN_PORT;
 
 function generateRandomToken(params) {
 

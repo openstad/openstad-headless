@@ -184,6 +184,36 @@ services:
         nodemon app.js
       "
 
+  openstad-admin-server:
+    build:
+      context: apps/web
+      dockerfile: Dockerfile
+    container_name: openstad-admin-server
+    restart: unless-stopped
+    environment:
+      - NEXTAUTH_URL=${ADMIN_URL}
+      - NEXTAUTH_SECRET=${ADMIN_SECRET}
+      - CLIENT_ID=${AUTH_ADMIN_CLIENT_ID}
+      - CLIENT_SECRET=${AUTH_ADMIN_CLIENT_SECRET}
+      - OAUTH_URL=${AUTH_APP_URL}
+      - API_URL=${API_URL}
+    ports:
+      - "${ADMIN_PORT}:${ADMIN_PORT}"
+    volumes:
+      - ./apps/web:/opt/admin-server
+      - openstad-admin-server-node_modules:/opt/admin-server/node_modules
+      - openstad-admin-server-admins:/opt/admin-server/admins
+      - openstad-admin-server-init:/opt/admin-server/init
+    entrypoint: |
+      bash -c "
+        # todo: dit kan ook wel wat intelligenter...
+        if [ ! -f "/opt/admin-server/init/done" ]; then
+          cd /opt/admin-server
+          npm run init-database && touch /opt/admin-server/init/done;
+        fi
+        nodemon app.js
+      "
+
 volumes:
   openstad-mysql-data: {}
   openstad-mongo-data: {}

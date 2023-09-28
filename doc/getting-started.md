@@ -31,13 +31,18 @@ docker-compose -f docker-compose.development.yml --env-file .env.docker up --bui
 
 ### 4. What to expect
 
-You now have three servers, running on localhost:31410, 31430 en 31450. These urls should work:
+You now have four servers, running on localhost:31410, 31430, 31450 and 31470. These urls should work:
 
 [http://localhost:31410/api/project/1/idea](http://localhost:31410/api/project/1/idea)  
 [http://localhost:31430/auth/code/login?clientId=uniquecode](http://localhost:31430/auth/code/login?clientId=uniquecode)  
 [http://localhost:31450/image/forum.romanum.06.webp](http://localhost:31450/image/forum.romanum.06.webp)  
+[http://localhost:31470](http://localhost:31470)  
 
 You are now done. Everything below this line is extra information for the incurably curious.
+
+### Code
+
+The code is mounted from the `/apps` dirs in the repo, and run using `nodemon`. That means that changes in the code will immediately be available.
 
 ### Docker containers
 
@@ -48,6 +53,7 @@ Six docker containers have been created:
 - openstad-api-server
 - openstad-auth-server
 - openstad-image-serve
+- openstad-admin-serve
 
 
 ### Initial data
@@ -91,7 +97,6 @@ IMAGE_DB_NAME=
 
 - Mailen doet ie nog helemaal niet. Er is wel een mailhog server, dus dat is vermoedelijk vrij simpel
 - Configuratie opties zijn nu nog beperkt (gerelateerd: API config/local.js moet er uit)
-- De admin sever in apps/web moet nog toegevoegd
 - Ik wil er eigenlijk nog een nginx server voor zetten
 - De db's zijn nu een kopie van docker-compose.deps-only.yml; die zou je willen hergebruiken ipv kopieren
 - Ik heb de Dockerfiles in de apps wat opgeschoond, maar er moet natuurlijk gechecked of die nou nog goed werken
