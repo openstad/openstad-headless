@@ -52,7 +52,7 @@ export default function ProjectSettingsNotifications() {
                     url: '/projects/1/settings/notifications'
                 }
             ]}>
-            <div className="container mx-auto py-10 w-1/2 float-left divide-y">
+            <div className="container mx-auto py-10 w-1/2 float-left">
                 <Form {...form}>
                     <Heading size="xl" className="mb-4">
                         Instellingen • Administrator notificaties

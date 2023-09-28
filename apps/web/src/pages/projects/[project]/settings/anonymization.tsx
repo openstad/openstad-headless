@@ -18,7 +18,6 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Heading } from '@/components/ui/typography'
-import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
     daysAfterProjectEnd: z.number(),
@@ -70,7 +69,6 @@ export default function ProjectSettingsAnonymization() {
                     <Heading size="xl" className="mb-4 mt-4">
                         Instellingen • Anonimisatie
                     </Heading>
-                    <Separator className="mb-4" />
                     <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
                         <FormField
                         control={form.control}

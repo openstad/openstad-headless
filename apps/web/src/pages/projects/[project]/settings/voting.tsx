@@ -68,7 +68,7 @@ export default function ProjectSettingsVoting() {
                     url: '/projects/1/settings/voting'
                 }
             ]}>
-            <div className="container mx-auto py-10 w-1/2 float-left divide-y">
+            <div className="container mx-auto py-10 w-1/2 float-left">
                 <Form {...form}>
                     <Heading size="xl" className="mb-4">
                         Instellingen • Stemmen

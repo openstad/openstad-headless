@@ -57,7 +57,7 @@ export default function WidgetResourceForm() {
                             <TabsTrigger value="submit">Opleveren</TabsTrigger>
                             <TabsTrigger value="budget">Budget</TabsTrigger>
                             <TabsTrigger value="confirmation">Confirmatie</TabsTrigger>
-                            <TabsTrigger value="info">Titel</TabsTrigger>
+                            <TabsTrigger value="info">Info</TabsTrigger>
                         </TabsList>
                         <TabsContent value="general" className="w-1/2">
                             <WidgetResourceFormGeneral />

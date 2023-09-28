@@ -51,7 +51,7 @@ export default function ProjectSettingsThemes() {
                     url: '/projects/1/settings/themes'
                 }
             ]}>
-            <div className="container mx-auto py-10 w-1/2 float-left divide-y">
+            <div className="container mx-auto py-10 w-1/2 float-left">
                 <Form {...form}>
                     <Heading size="xl" className="mb-4">
                         Instellingen • Themas en gebieden
