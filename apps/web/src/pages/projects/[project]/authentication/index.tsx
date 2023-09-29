@@ -15,6 +15,8 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
+import { Heading } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
 
 const availableAuthentication = [
     {
@@ -137,9 +139,13 @@ export default function ProjectAuthentication() {
                     url: '/projects/1/authentication'
                 }
             ]}>
-                <div className="container mx-auto py-10 w-1/2 float-left divide-y">
+                <div className="container mx-auto py-10 w-1/2 float-left ">
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+                        <Heading size="xl" className="mb-4">
+                            Authenticatie • Algemeen
+                        </Heading>
+                        <Separator className="mb-4" />
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                             <FormField
                             control={form.control}
                             name="name"
@@ -175,7 +181,7 @@ export default function ProjectAuthentication() {
                                                     <FormControl>
                                                         <Checkbox
                                                         checked={field.value?.includes(item.id)}
-                                                        onCheckedChange={(checked) => {
+                                                        onCheckedChange={(checked: any) => {
                                                             return checked
                                                             ? field.onChange([...field.value, item.id])
                                                             : field.onChange(
@@ -219,7 +225,7 @@ export default function ProjectAuthentication() {
                                                     <FormControl>
                                                         <Checkbox
                                                         checked={field.value?.includes(item.id)}
-                                                        onCheckedChange={(checked) => {
+                                                        onCheckedChange={(checked: any) => {
                                                             return checked
                                                             ? field.onChange([...field.value, item.id])
                                                             : field.onChange(
@@ -263,7 +269,7 @@ export default function ProjectAuthentication() {
                                                     <FormControl>
                                                         <Checkbox
                                                         checked={field.value?.includes(item.id)}
-                                                        onCheckedChange={(checked) => {
+                                                        onCheckedChange={(checked: any) => {
                                                             return checked
                                                             ? field.onChange([...field.value, item.id])
                                                             : field.onChange(

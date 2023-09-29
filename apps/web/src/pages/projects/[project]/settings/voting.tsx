@@ -15,6 +15,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { PageLayout } from '@/components/ui/page-layout'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Heading } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
     votingPubliclyAvailable: z.boolean(),
@@ -66,9 +68,13 @@ export default function ProjectSettingsVoting() {
                     url: '/projects/1/settings/voting'
                 }
             ]}>
-            <div className="container mx-auto py-10 w-1/2 float-left divide-y">
+            <div className="container mx-auto py-10 w-1/2 float-left">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+                    <Heading size="xl" className="mb-4">
+                        Instellingen • Stemmen
+                    </Heading>
+                    <Separator className="mb-4" />
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                             control={form.control}
                             name="votingPubliclyAvailable"
@@ -78,12 +84,12 @@ export default function ProjectSettingsVoting() {
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="No" />
+                                                <SelectValue placeholder="Nee" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value={true}>Yes</SelectItem>
-                                            <SelectItem value={false}>No</SelectItem>
+                                            <SelectItem value={true}>Ja</SelectItem>
+                                            <SelectItem value={false}>Nee</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -99,12 +105,12 @@ export default function ProjectSettingsVoting() {
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="No" />
+                                                <SelectValue placeholder="Nee" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value={true}>Yes</SelectItem>
-                                            <SelectItem value={false}>No</SelectItem>
+                                            <SelectItem value={true}>Ja</SelectItem>
+                                            <SelectItem value={false}>Nee</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />

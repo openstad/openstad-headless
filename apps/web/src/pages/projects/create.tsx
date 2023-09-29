@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -20,6 +19,8 @@ import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
+import { Heading } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
     projectName: z.string().min(6, {
@@ -62,7 +63,11 @@ export default function CreateProject() {
             ]}>
             <div className="container mx-auto py-10 w-1/2 float-left">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+                <Heading size="xl" className="mb-4">
+                    Project toevoegen
+                </Heading>
+                <Separator className="mb-4" />
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                         control={form.control}
                         name="projectName"
@@ -143,8 +148,8 @@ export default function CreateProject() {
                             </FormItem>
                         )}
                         />
-                        <Button variant="create" type="submit" className='float-right'>Aanmaken</Button>
-                        <Button className='float-right'>Annuleren</Button>
+                        <Button variant="default" type="submit" className='float-right'>Aanmaken</Button>
+                        <Button variant="ghost" className='float-right'>Annuleren</Button>
                     </form>
                 </Form>
             </div>

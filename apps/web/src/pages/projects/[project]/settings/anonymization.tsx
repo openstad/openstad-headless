@@ -17,6 +17,7 @@ import { PageLayout } from '@/components/ui/page-layout'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Heading } from '@/components/ui/typography'
 
 const formSchema = z.object({
     daysAfterProjectEnd: z.number(),
@@ -58,15 +59,17 @@ export default function ProjectSettingsAnonymization() {
             ]}>
             <div className="container mx-auto py-10 w-1/2 float-left divide-y">
                 <div>
-                    <br/>
                     <p>Anonimiseer gebruikers direct</p>
                     <p>Let op! Deze actie is definitief en kan niet ongedaan gemaakt worden.</p>
                     <p>Het project moet eerst aangemerkt staan als 'beëindigd' voordat deze actie uitgevoerd kan worden.</p>
-                    <br/>
-                    <Button variant={"destructive"}>Gebruikersgegevens anonimiseren</Button>
+                    <Button variant={"destructive"} className='mt-4'>Gebruikersgegevens anonimiseren</Button>
                 </div>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+                  <br/>  
+                  <Form {...form}>
+                    <Heading size="xl" className="mb-4 mt-4">
+                        Instellingen • Anonimisatie
+                    </Heading>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                         control={form.control}
                         name="daysAfterProjectEnd"

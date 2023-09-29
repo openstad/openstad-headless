@@ -15,6 +15,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { PageLayout } from '@/components/ui/page-layout'
+import { Heading } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
     title: z.string(),
@@ -52,9 +54,13 @@ export default function ProjectAuthenticationRequiredFields() {
                     url: '/projects/1/authentication/requiredfield'
                 }
             ]}>
-            <div className="container mx-auto py-10 w-1/2 float-left divide-y">
+            <div className="container mx-auto py-10 w-1/2 float-left">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+                    <Heading size="xl" className="mb-4">
+                        Authenticatie • Verplichte velden
+                    </Heading>
+                    <Separator className="mb-4" />
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                         control={form.control}
                         name="title"

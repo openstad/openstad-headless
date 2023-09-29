@@ -18,6 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Heading } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
     ideasAllowed: z.boolean(),
@@ -67,9 +69,13 @@ export default function ProjectSettingsIdeas() {
                     url: '/projects/1/settings/ideas'
                 }
             ]}>
-            <div className="container mx-auto py-10 w-1/2 float-left divide-y">
+            <div className="container mx-auto py-10 w-1/2 float-left">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+                    <Heading size="xl" className="mb-4">
+                        Instellingen • Ideeën
+                    </Heading>
+                    <Separator className="mb-4" />
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                             control={form.control}
                             name="ideasAllowed"

@@ -20,6 +20,8 @@ import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Heading } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
     projectName: z.string().min(1, {
@@ -63,9 +65,13 @@ export default function ProjectSettings() {
                     url: '/projects/1/settings'
                 },
             ]}>
-            <div className="container mx-auto py-10 w-1/2 float-left divide-y">
+            <div className="container mx-auto py-10 w-1/2 float-left">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+                    <Heading size="xl" className="mb-4">
+                        Instellingen • Algemeen
+                    </Heading>
+                    <Separator className="mb-4" />
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                         control={form.control}
                         name="projectName"

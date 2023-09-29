@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "./button";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -221,33 +221,13 @@ export function SidenavProject({ className }: { className?: string }) {
             </Link>
           </>
         ) : null}
-        <Link href={`/projects/1/entries`}>
+        <Link href={`/projects/1/ideas`}>
           <Button
-            variant={location.includes("/entries") ? "secondary" : "ghost"}
+            variant={location.includes("/ideas") ? "secondary" : "ghost"}
             className="w-full flex justify-start"
             onClick={(e) => {}}
           >
-            <span className="truncate">Inzendingen (plannen)</span>
-          </Button>
-        </Link>
-        <Link href={`/projects/1/email`}>
-          <Button
-            variant={location.includes("/email") ? "secondary" : "ghost"}
-            className="w-full flex justify-start"
-            onClick={(e) => {}}
-          >
-            <span className="truncate">E-mail</span>
-          </Button>
-        </Link>
-        <Link href={`/projects/1/anonimization`}>
-          <Button
-            variant={
-              location.includes("/anonimization") ? "secondary" : "ghost"
-            }
-            className="w-full flex justify-start"
-            onClick={(e) => {}}
-          >
-            <span className="truncate">Anonimiseren</span>
+            <span className="truncate">Ideeën</span>
           </Button>
         </Link>
         <Link href={`/projects/1/codes`}>
@@ -259,13 +239,31 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Stemcodes</span>
           </Button>
         </Link>
-        <Link href={`/projects/1/maps`}>
+        <Link href={`/projects/1/votes`}>
           <Button
-            variant={location.includes("/maps") ? "secondary" : "ghost"}
+            variant={location.includes("/votes") ? "secondary" : "ghost"}
             className="w-full flex justify-start"
             onClick={(e) => {}}
           >
-            <span className="truncate">Kaarten</span>
+            <span className="truncate">Stemmen</span>
+          </Button>
+        </Link>
+        <Link href={`/projects/1/subscribers`}>
+          <Button
+            variant={location.includes("/subscribers") ? "secondary" : "ghost"}
+            className="w-full flex justify-start"
+            onClick={(e) => {}}
+          >
+            <span className="truncate">Subscribers</span>
+          </Button>
+        </Link>
+        <Link href={`/projects/1/export`}>
+          <Button
+            variant={location.includes("/export") ? "secondary" : "ghost"}
+            className="w-full flex justify-start"
+            onClick={(e) => {}}
+          >
+            <span className="truncate">Exporteren</span>
           </Button>
         </Link>
       </div>

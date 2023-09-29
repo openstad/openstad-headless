@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { PageLayout } from '@/components/ui/page-layout'
+import { Heading } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
     themes: z.string(),
@@ -49,10 +51,13 @@ export default function ProjectSettingsThemes() {
                     url: '/projects/1/settings/themes'
                 }
             ]}>
-            <div className="container mx-auto py-10 w-1/2 float-left divide-y">
+            <div className="container mx-auto py-10 w-1/2 float-left">
                 <Form {...form}>
-                    <br/>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+                    <Heading size="xl" className="mb-4">
+                        Instellingen • Themas en gebieden
+                    </Heading>
+                    <Separator className="mb-4" />
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                         control={form.control}
                         name="themes"
