@@ -79,13 +79,13 @@ export default function WidgetLikes() {
                                     </FormItem>
                                 )}
                                 />
+                                <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
+                                    <Button className="self-end" type="submit">
+                                        Opslaan
+                                    </Button>
+                                </div>
                             </form>
                         </Form>
-                        <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-                            <Button className="self-end" type="submit">
-                                Opslaan
-                            </Button>
-                        </div>
                     </div>
                 </div>
             </PageLayout>
