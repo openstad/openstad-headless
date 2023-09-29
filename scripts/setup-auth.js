@@ -59,7 +59,7 @@ DB_USER=${process.env.AUTH_DB_USERNAME}
 DB_PASSWORD=${process.env.AUTH_DB_PASSWORD}
 DB_NAME=${process.env.AUTH_DB_NAME}
 
-MONGO_DB_HOST=${process.env.AUTH_MONGO_HOST}
+MONGO_DB_HOST=${process.env.AUTH_MONGO_HOST || 'localhost'}
 MONGO_DB_PORT=${process.env.AUTH_MONGO_PORT}
 ${process.env.ADMIN_MONGO_DB_USER && 'MONGO_DB_USER='+process.env.ADMIN_MONGO_DB_USER || ''}
 ${process.env.ADMIN_MONGO_DB_PASSWORD && 'MONGO_DB_PASSWORD='+process.env.ADMIN_MONGO_DB_PASSWORD || ''}

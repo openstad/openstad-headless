@@ -1,9 +1,35 @@
-# Nodejs 8.0.0 alpine 3.6.0
+# Image used for building dependencies
+FROM node:16.16.0-alpine as builder
+
+# Create app directory
+WORKDIR /opt/api-server
+
+# Install all base dependencies.# add perl for shell scripts
+RUN apk add --no-cache --update g++ make python3 musl-dev bash perl perl-dbd-mysql perl-posix-strftime-compiler
+
+RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.6/main' >> /etc/apk/repositories
+RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.6/community' >> /etc/apk/repositories
+RUN apk update
+RUN apk add mongodb=3.4.4-r0
+RUN apk add mongodb-tools
+
+# Install app dependencies
+COPY --chown=node:node package*.json .
+RUN npm install
+RUN npm install -g nodemon
+
+# Remove unused packages only used for building.
+RUN apk del g++ make python3 && rm -rf /var/cache/apk/*
+
+# Release image 
 FROM node:16.16.0-alpine
 
 # Label for tracking
-LABEL nl.openstad.container="api_container" nl.openstad.version="0.0.1-beta" nl.openstad.release-date="2020-05-07"
+LABEL nl.openstad.container="api" nl.openstad.version="0.0.1" nl.openstad.release-date="2023-09-25"
 
+WORKDIR /opt/api-server
+
+# Environment variables
 ENV API_URL=""
 ENV API_HOSTNAME=""
 ENV API_DATABASE_USER=""
@@ -23,48 +49,13 @@ ENV API_AUTHORIZATION_JWTSECRET=""
 ENV API_AUTHORIZATION_FIXEDAUTHTOKENS=""
 ENV AUTH_API_URL=""
 
-
-# Install all base dependencies.# add perl for shell scripts
-RUN apk add --no-cache --update g++ make python3 musl-dev bash perl perl-dbd-mysql perl-posix-strftime-compiler
-
-RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.6/main' >> /etc/apk/repositories
-RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.6/community' >> /etc/apk/repositories
-RUN apk update
-RUN apk add mongodb=3.4.4-r0
-RUN apk add mongodb-tools
-
-# Set the working directory to the root of the container
-WORKDIR /home/app
-
-# Bundle app source
-COPY . /home/app
-
-# Install node dependencies
-RUN npm install
-
-RUN npm install -g nodemon
-
-# Remove unused packages only used for building.
-RUN apk del g++ make python3 && rm -rf /var/cache/apk/*
-
-# Set node ownership to /home/app
-RUN chown -R node:node /home/app
+# copy files
+COPY --chown=node:node --from=builder . /
+COPY --chown=node:node . /opt/api-server
 USER node
 
-
-# ----------------------------------------------
-# Already present in dockerfile:
-
-# # Must execute on run instead of build
-#create database
-#script forcing wait for mysql needs to be set
-# RUN node reset.js
-
-
-# Already present in dockerfile:
-# Mount persistent storage
-# ----------------------------------------------
-
+# Set node ownership to /home/app
+RUN chown -R node:node /opt/api-server
 
 # Exposed ports for application
 EXPOSE 8111/tcp

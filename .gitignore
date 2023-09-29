@@ -1,3 +1,5 @@
 .env
+.env.docker
 node_modules/
 .DS_Store
+nginx.config.example

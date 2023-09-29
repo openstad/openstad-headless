@@ -11,9 +11,13 @@ module.exports = async function seed(db) {
   let allowedDomains = process.env.NODE_ENV === 'development' ? ['localhost', ] : [];
   let apiDomain = process.env.API_DOMAIN || removeProtocol(process.env.API_URL) || '';
   allowedDomains.push(apiDomain);
+  let apiDomainWithoutPortnumber = apiDomain.replace(/:\d+/, '');
+  if (apiDomain != apiDomainWithoutPortnumber) allowedDomains.push(apiDomainWithoutPortnumber);
+
+  process.env.AUTH_FIRST_LOGIN_CODE = process.env.AUTH_FIRST_LOGIN_CODE || rack() 
+  let uniqueCode = process.env.AUTH_FIRST_LOGIN_CODE;
 
   console.log('  creating development data');
-
 
   try {
 
@@ -51,6 +55,28 @@ module.exports = async function seed(db) {
       config: JSON.stringify({}),
     });
 
+    console.log('      uniquecodes for the initial admin user');
+    await db.UserRole.create({
+      roleId: 1,
+      clientId: 3,
+      userId: 1
+    });
+    await db.UniqueCode.create({
+      code: uniqueCode,
+      userId: 1,
+      clientId: 3
+    });
+    await db.UserRole.create({
+      roleId: 1,
+      clientId: 4,
+      userId: 1
+    });
+    await db.UniqueCode.create({
+      code: uniqueCode,
+      userId: 1,
+      clientId: 4
+    });
+    
     console.log('    - generic admin user');
     console.log('      uniquecode: 123');
     await db.User.create({
