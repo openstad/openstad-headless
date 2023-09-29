@@ -11,6 +11,8 @@ module.exports = async function seed(config, db) {
     let allowedDomains = process.env.NODE_ENV === 'development' ? ['localhost', ] : [];
     let apiDomain = process.env.API_DOMAIN || removeProtocol(process.env.API_URL) || '';
     allowedDomains.push(apiDomain);
+    let apiDomainWithoutPortnumber = apiDomain.replace(/:\d+/, '');
+    if (apiDomain != apiDomainWithoutPortnumber) allowedDomains.push(apiDomainWithoutPortnumber);
 
     console.log('  creating development data');
     console.log('    rename default project to Plannen insturen');
@@ -135,8 +137,8 @@ module.exports = async function seed(config, db) {
       location: {
         type: 'Point',
         coordinates: [
-          52.3710476 + ( Math.random * .03 - .015 ),
-          4.9005494 + ( Math.random * .03 - .015 )
+          52.3710476 + ( Math.random() * .03 - .015 ),
+                         4.9005494 + ( Math.random() * .03 - .015 )
         ]
       },
       startDate: db.sequelize.fn('now'),
@@ -157,8 +159,8 @@ module.exports = async function seed(config, db) {
       location: {
         type: 'Point',
         coordinates: [
-          52.3710476 + ( Math.random * .03 - .015 ),
-          4.9005494 + ( Math.random * .03 - .015 )
+          52.3710476 + ( Math.random() * .03 - .015 ),
+          4.9005494 + ( Math.random() * .03 - .015 )
         ]
       },
       startDate: db.sequelize.fn('now'),
@@ -179,8 +181,8 @@ module.exports = async function seed(config, db) {
       location: {
         type: 'Point',
         coordinates: [
-          52.3710476 + ( Math.random * .03 - .015 ),
-          4.9005494 + ( Math.random * .03 - .015 )
+          52.3710476 + ( Math.random() * .03 - .015 ),
+          4.9005494 + ( Math.random() * .03 - .015 )
         ]
       },
       startDate: db.sequelize.fn('now'),
@@ -201,8 +203,8 @@ module.exports = async function seed(config, db) {
       location: {
         type: 'Point',
         coordinates: [
-          52.3710476 + ( Math.random * .03 - .015 ),
-          4.9005494 + ( Math.random * .03 - .015 )
+          52.3710476 + ( Math.random() * .03 - .015 ),
+          4.9005494 + ( Math.random() * .03 - .015 )
         ]
       },
       startDate: db.sequelize.fn('now'),
@@ -223,8 +225,8 @@ module.exports = async function seed(config, db) {
       location: {
         type: 'Point',
         coordinates: [
-          52.3710476 + ( Math.random * .03 - .015 ),
-          4.9005494 + ( Math.random * .03 - .015 )
+          52.3710476 + ( Math.random() * .03 - .015 ),
+          4.9005494 + ( Math.random() * .03 - .015 )
         ]
       },
       startDate: db.sequelize.fn('now'),
@@ -245,8 +247,8 @@ module.exports = async function seed(config, db) {
       location: {
         type: 'Point',
         coordinates: [
-          52.3710476 + ( Math.random * .03 - .015 ),
-          4.9005494 + ( Math.random * .03 - .015 )
+          52.3710476 + ( Math.random() * .03 - .015 ),
+          4.9005494 + ( Math.random() * .03 - .015 )
         ]
       },
       startDate: db.sequelize.fn('now'),
@@ -267,8 +269,8 @@ module.exports = async function seed(config, db) {
       location: {
         type: 'Point',
         coordinates: [
-          52.3710476 + ( Math.random * .03 - .015 ),
-          4.9005494 + ( Math.random * .03 - 015 )
+          52.3710476 + ( Math.random() * .03 - .015 ),
+          4.9005494 + ( Math.random() * .03 - 015 )
         ]
       },
       startDate: db.sequelize.fn('now'),
@@ -289,8 +291,8 @@ module.exports = async function seed(config, db) {
       location: {        
         type: "Point",
         coordinates: [
-          52.3710476 + ( Math.random * .03 - .015 ),
-          4.9005494 + ( Math.random * .03 - 015 )
+          52.3710476 + ( Math.random() * .03 - .015 ),
+          4.9005494 + ( Math.random() * .03 - 015 )
         ]
       },
       startDate: db.sequelize.fn('now'),
@@ -311,8 +313,8 @@ module.exports = async function seed(config, db) {
       location: {        
         type: "Point",
         coordinates: [
-          52.3710476 + ( Math.random * .03 - .015 ),
-          4.9005494 + ( Math.random * .03 - 015 )
+          52.3710476 + ( Math.random() * .03 - .015 ),
+          4.9005494 + ( Math.random() * .03 - 015 )
         ]
       },
       startDate: db.sequelize.fn('now'),
@@ -333,8 +335,8 @@ module.exports = async function seed(config, db) {
       location: {        
         type: "Point",
         coordinates: [
-          52.3710476 + ( Math.random * .03 - .015 ),
-          4.9005494 + ( Math.random * .03 - .015 )
+          52.3710476 + ( Math.random() * .03 - .015 ),
+          4.9005494 + ( Math.random() * .03 - .015 )
         ]
       },
       startDate: db.sequelize.fn('now'),

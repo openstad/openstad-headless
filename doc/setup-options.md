@@ -2,7 +2,7 @@
 
 The setup scripts (see the [setup doc](./setup.md)) create configurations for the different servers based on a very simple set of environment variables. Create an .env file with the following contents:
 ```
-AUTH_LOGIN_CODE=CREATEACODE
+AUTH_FIRST_LOGIN_CODE=CREATEACODE
 
 BASE_DOMAIN=openstad.local
 

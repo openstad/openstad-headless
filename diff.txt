@@ -1,0 +1,1236 @@
+diff --git a/apps/api-server/package.json b/apps/api-server/package.json
+index 0a466753..e913a248 100755
+--- a/apps/api-server/package.json
++++ b/apps/api-server/package.json
+@@ -49,7 +49,7 @@
+     "nunjucks": "^3.2.3",
+     "pmx": "^1.6.7",
+     "sanitize-html": "^2.7.0",
+-    "sequelize": "^6.19.0",
++    "sequelize": "^6.28.0",
+     "umzug": "^3.2.1",
+     "ws": "^7.5.7"
+   },
+diff --git a/apps/api-server/scripts/lint.js b/apps/api-server/scripts/lint.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/scripts/prettier.js b/apps/api-server/scripts/prettier.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/seeds/development.js b/apps/api-server/seeds/development.js
+index c03d9f72..f9c3b269 100755
+--- a/apps/api-server/seeds/development.js
++++ b/apps/api-server/seeds/development.js
+@@ -135,8 +135,8 @@ module.exports = async function seed(config, db) {
+       location: {
+         type: 'Point',
+         coordinates: [
+-          52.3710476 + ( Math.random * .03 - .015 ),
+-          4.9005494 + ( Math.random * .03 - .015 )
++          52.3710476 + ( Math.random() * .03 - .015 ),
++                         4.9005494 + ( Math.random() * .03 - .015 )
+         ]
+       },
+       startDate: db.sequelize.fn('now'),
+@@ -157,8 +157,8 @@ module.exports = async function seed(config, db) {
+       location: {
+         type: 'Point',
+         coordinates: [
+-          52.3710476 + ( Math.random * .03 - .015 ),
+-          4.9005494 + ( Math.random * .03 - .015 )
++          52.3710476 + ( Math.random() * .03 - .015 ),
++          4.9005494 + ( Math.random() * .03 - .015 )
+         ]
+       },
+       startDate: db.sequelize.fn('now'),
+@@ -179,8 +179,8 @@ module.exports = async function seed(config, db) {
+       location: {
+         type: 'Point',
+         coordinates: [
+-          52.3710476 + ( Math.random * .03 - .015 ),
+-          4.9005494 + ( Math.random * .03 - .015 )
++          52.3710476 + ( Math.random() * .03 - .015 ),
++          4.9005494 + ( Math.random() * .03 - .015 )
+         ]
+       },
+       startDate: db.sequelize.fn('now'),
+@@ -201,8 +201,8 @@ module.exports = async function seed(config, db) {
+       location: {
+         type: 'Point',
+         coordinates: [
+-          52.3710476 + ( Math.random * .03 - .015 ),
+-          4.9005494 + ( Math.random * .03 - .015 )
++          52.3710476 + ( Math.random() * .03 - .015 ),
++          4.9005494 + ( Math.random() * .03 - .015 )
+         ]
+       },
+       startDate: db.sequelize.fn('now'),
+@@ -223,8 +223,8 @@ module.exports = async function seed(config, db) {
+       location: {
+         type: 'Point',
+         coordinates: [
+-          52.3710476 + ( Math.random * .03 - .015 ),
+-          4.9005494 + ( Math.random * .03 - .015 )
++          52.3710476 + ( Math.random() * .03 - .015 ),
++          4.9005494 + ( Math.random() * .03 - .015 )
+         ]
+       },
+       startDate: db.sequelize.fn('now'),
+@@ -245,8 +245,8 @@ module.exports = async function seed(config, db) {
+       location: {
+         type: 'Point',
+         coordinates: [
+-          52.3710476 + ( Math.random * .03 - .015 ),
+-          4.9005494 + ( Math.random * .03 - .015 )
++          52.3710476 + ( Math.random() * .03 - .015 ),
++          4.9005494 + ( Math.random() * .03 - .015 )
+         ]
+       },
+       startDate: db.sequelize.fn('now'),
+@@ -267,8 +267,8 @@ module.exports = async function seed(config, db) {
+       location: {
+         type: 'Point',
+         coordinates: [
+-          52.3710476 + ( Math.random * .03 - .015 ),
+-          4.9005494 + ( Math.random * .03 - 015 )
++          52.3710476 + ( Math.random() * .03 - .015 ),
++          4.9005494 + ( Math.random() * .03 - 015 )
+         ]
+       },
+       startDate: db.sequelize.fn('now'),
+@@ -289,8 +289,8 @@ module.exports = async function seed(config, db) {
+       location: {        
+         type: "Point",
+         coordinates: [
+-          52.3710476 + ( Math.random * .03 - .015 ),
+-          4.9005494 + ( Math.random * .03 - 015 )
++          52.3710476 + ( Math.random() * .03 - .015 ),
++          4.9005494 + ( Math.random() * .03 - 015 )
+         ]
+       },
+       startDate: db.sequelize.fn('now'),
+@@ -311,8 +311,8 @@ module.exports = async function seed(config, db) {
+       location: {        
+         type: "Point",
+         coordinates: [
+-          52.3710476 + ( Math.random * .03 - .015 ),
+-          4.9005494 + ( Math.random * .03 - 015 )
++          52.3710476 + ( Math.random() * .03 - .015 ),
++          4.9005494 + ( Math.random() * .03 - 015 )
+         ]
+       },
+       startDate: db.sequelize.fn('now'),
+@@ -333,8 +333,8 @@ module.exports = async function seed(config, db) {
+       location: {        
+         type: "Point",
+         coordinates: [
+-          52.3710476 + ( Math.random * .03 - .015 ),
+-          4.9005494 + ( Math.random * .03 - .015 )
++          52.3710476 + ( Math.random() * .03 - .015 ),
++          4.9005494 + ( Math.random() * .03 - .015 )
+         ]
+       },
+       startDate: db.sequelize.fn('now'),
+diff --git a/apps/api-server/src/adapter/index.js b/apps/api-server/src/adapter/index.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/adapter/openstad/index.js b/apps/api-server/src/adapter/openstad/index.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/adapter/openstad/service.js b/apps/api-server/src/adapter/openstad/service.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/cron/actions.js b/apps/api-server/src/cron/actions.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/cron/mongodb_backups.js b/apps/api-server/src/cron/mongodb_backups.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/cron/mongodb_s3_backups.js b/apps/api-server/src/cron/mongodb_s3_backups.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/cron/mysql_backups.js b/apps/api-server/src/cron/mysql_backups.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/cron/mysql_s3_backups.js b/apps/api-server/src/cron/mysql_s3_backups.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/cron/project_host_status.js b/apps/api-server/src/cron/project_host_status.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/db.js b/apps/api-server/src/db.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/lib/defaultProjectConfig.js b/apps/api-server/src/lib/defaultProjectConfig.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/lib/mail-config.js b/apps/api-server/src/lib/mail-config.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/lib/mailTransporter.js b/apps/api-server/src/lib/mailTransporter.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/lib/sequelize-authorization/index.js b/apps/api-server/src/lib/sequelize-authorization/index.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/lib/sequelize-authorization/lib/fotorama.png b/apps/api-server/src/lib/sequelize-authorization/lib/fotorama.png
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/lib/sequelize-authorization/lib/getExtraDataConfig.js b/apps/api-server/src/lib/sequelize-authorization/lib/getExtraDataConfig.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/lib/sequelize-authorization/middleware/to-authorized-json.js b/apps/api-server/src/lib/sequelize-authorization/middleware/to-authorized-json.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/lib/sequelize-authorization/mixins/to-authorized-json.js b/apps/api-server/src/lib/sequelize-authorization/mixins/to-authorized-json.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/lib/use-lock.js b/apps/api-server/src/lib/use-lock.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/middleware/dbQuery.js b/apps/api-server/src/middleware/dbQuery.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/middleware/filtering.js b/apps/api-server/src/middleware/filtering.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/middleware/publish-concept.js b/apps/api-server/src/middleware/publish-concept.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/middleware/search-results-static.js b/apps/api-server/src/middleware/search-results-static.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/middleware/sorting.js b/apps/api-server/src/middleware/sorting.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/models/Action.js b/apps/api-server/src/models/Action.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/models/ActionRun.js b/apps/api-server/src/models/ActionRun.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/models/Area.js b/apps/api-server/src/models/Area.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/models/Comment.js b/apps/api-server/src/models/Comment.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/models/CommentVote.js b/apps/api-server/src/models/CommentVote.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/models/Idea.js b/apps/api-server/src/models/Idea.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/models/Notification.js b/apps/api-server/src/models/Notification.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/models/NotificationRecipient.js b/apps/api-server/src/models/NotificationRecipient.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/models/NotificationRuleSet.js b/apps/api-server/src/models/NotificationRuleSet.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/models/NotificationTemplate.js b/apps/api-server/src/models/NotificationTemplate.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/models/Submission.js b/apps/api-server/src/models/Submission.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/models/User.js b/apps/api-server/src/models/User.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/models/Vote.js b/apps/api-server/src/models/Vote.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/models/index.js b/apps/api-server/src/models/index.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/models/lib/project-config.js b/apps/api-server/src/models/lib/project-config.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/notifications/index.js b/apps/api-server/src/notifications/index.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/routes/api/action.js b/apps/api-server/src/routes/api/action.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/routes/api/area.js b/apps/api-server/src/routes/api/area.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/routes/api/notification.js b/apps/api-server/src/routes/api/notification.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/routes/api/template.js b/apps/api-server/src/routes/api/template.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/routes/api/user.js b/apps/api-server/src/routes/api/user.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/routes/stats/choicesguide.js b/apps/api-server/src/routes/stats/choicesguide.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/routes/stats/overview.js b/apps/api-server/src/routes/stats/overview.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/services/awsS3.js b/apps/api-server/src/services/awsS3.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/services/checkHostStatus.js b/apps/api-server/src/services/checkHostStatus.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/services/eventService.js b/apps/api-server/src/services/eventService.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/services/mongo.js b/apps/api-server/src/services/mongo.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/services/notificationService.js b/apps/api-server/src/services/notificationService.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/services/projects-with-issues.js b/apps/api-server/src/services/projects-with-issues.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/util/auth-settings.js b/apps/api-server/src/util/auth-settings.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/util/budgeting-count-result.js b/apps/api-server/src/util/budgeting-count-result.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/util/convert-db-polygon-to-lat-lng.js b/apps/api-server/src/util/convert-db-polygon-to-lat-lng.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/util/fractal.js b/apps/api-server/src/util/fractal.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/util/generate-token.js b/apps/api-server/src/util/generate-token.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/util/geo-json-formatter.js b/apps/api-server/src/util/geo-json-formatter.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/util/getSequelizeConditionsForFilters.js b/apps/api-server/src/util/getSequelizeConditionsForFilters.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/util/httpBuildQuery.js b/apps/api-server/src/util/httpBuildQuery.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/util/index.js b/apps/api-server/src/util/index.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/util/isJson.js b/apps/api-server/src/util/isJson.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/util/map-user-data.js b/apps/api-server/src/util/map-user-data.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/util/sanitize.js b/apps/api-server/src/util/sanitize.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/src/util/sequelize-validation.js b/apps/api-server/src/util/sequelize-validation.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/test/e2e/site.e2e-test.js b/apps/api-server/test/e2e/site.e2e-test.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/test/setup-e2e.js b/apps/api-server/test/setup-e2e.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/test/setup.js b/apps/api-server/test/setup.js
+old mode 100644
+new mode 100755
+diff --git a/apps/api-server/test/unit/middleware/site.test.js b/apps/api-server/test/unit/middleware/site.test.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/.gitignore b/apps/auth-server/.gitignore
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/.travis.yml b/apps/auth-server/.travis.yml
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/LICENSE.md b/apps/auth-server/LICENSE.md
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/README.md b/apps/auth-server/README.md
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/app-init.js b/apps/auth-server/app-init.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/app.js b/apps/auth-server/app.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/auth.js b/apps/auth-server/auth.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/client.js b/apps/auth-server/client.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/config/auth.js b/apps/auth-server/config/auth.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/config/authValidation.js b/apps/auth-server/config/authValidation.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/config/index.js b/apps/auth-server/config/index.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/config/roles.js b/apps/auth-server/config/roles.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/config/user.js b/apps/auth-server/config/user.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/admin/api/client.js b/apps/auth-server/controllers/admin/api/client.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/admin/api/role.js b/apps/auth-server/controllers/admin/api/role.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/admin/api/uniqueCode.js b/apps/auth-server/controllers/admin/api/uniqueCode.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/admin/api/user.js b/apps/auth-server/controllers/admin/api/user.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/admin/client.js b/apps/auth-server/controllers/admin/client.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/admin/code.js b/apps/auth-server/controllers/admin/code.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/admin/role.js b/apps/auth-server/controllers/admin/role.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/admin/user.js b/apps/auth-server/controllers/admin/user.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/auth/choose.js b/apps/auth-server/controllers/auth/choose.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/auth/code.js b/apps/auth-server/controllers/auth/code.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/auth/forgot.js b/apps/auth-server/controllers/auth/forgot.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/auth/local.js b/apps/auth-server/controllers/auth/local.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/auth/required.js b/apps/auth-server/controllers/auth/required.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/auth/twoFactor.js b/apps/auth-server/controllers/auth/twoFactor.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/auth/url.js b/apps/auth-server/controllers/auth/url.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/oauth/oauth2.js b/apps/auth-server/controllers/oauth/oauth2.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/oauth/token.js b/apps/auth-server/controllers/oauth/token.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/controllers/user/user.js b/apps/auth-server/controllers/user/user.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/curl/README.md b/apps/auth-server/curl/README.md
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/docker-compose.yml b/apps/auth-server/docker-compose.yml
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/docker_deploy b/apps/auth-server/docker_deploy
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/docker_publish_latest b/apps/auth-server/docker_publish_latest
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/docker_publish_tag b/apps/auth-server/docker_publish_tag
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/generate-cert.js b/apps/auth-server/generate-cert.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/jest.config.js b/apps/auth-server/jest.config.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/memoryStorage/accesstokens.js b/apps/auth-server/memoryStorage/accesstokens.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/memoryStorage/authorizationcodes.js b/apps/auth-server/memoryStorage/authorizationcodes.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/memoryStorage/index.js b/apps/auth-server/memoryStorage/index.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/memoryStorage/refreshtokens.js b/apps/auth-server/memoryStorage/refreshtokens.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/middleware/admin.js b/apps/auth-server/middleware/admin.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/middleware/auth.js b/apps/auth-server/middleware/auth.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/middleware/bruteForce.js b/apps/auth-server/middleware/bruteForce.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/middleware/client.js b/apps/auth-server/middleware/client.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/middleware/code.js b/apps/auth-server/middleware/code.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/middleware/log.js b/apps/auth-server/middleware/log.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/middleware/passwordReset.js b/apps/auth-server/middleware/passwordReset.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/middleware/role.js b/apps/auth-server/middleware/role.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/middleware/token.js b/apps/auth-server/middleware/token.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/middleware/user.js b/apps/auth-server/middleware/user.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/model/access-token.js b/apps/auth-server/model/access-token.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/model/action-log.js b/apps/auth-server/model/action-log.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/model/client.js b/apps/auth-server/model/client.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/model/external-csrf-token.js b/apps/auth-server/model/external-csrf-token.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/model/login-token.js b/apps/auth-server/model/login-token.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/model/password-reset-token.js b/apps/auth-server/model/password-reset-token.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/model/role.js b/apps/auth-server/model/role.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/model/unique~code.js b/apps/auth-server/model/unique~code.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/model/user.js b/apps/auth-server/model/user.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/nunjucks/currency.js b/apps/auth-server/nunjucks/currency.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/nunjucks/dateFilter.js b/apps/auth-server/nunjucks/dateFilter.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/nunjucks/duration.js b/apps/auth-server/nunjucks/duration.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/nunjucks/json.js b/apps/auth-server/nunjucks/json.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/nunjucks/limitTo.js b/apps/auth-server/nunjucks/limitTo.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/nunjucks/replaceIdeaVariables.js b/apps/auth-server/nunjucks/replaceIdeaVariables.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/nunjucks/timestamp.js b/apps/auth-server/nunjucks/timestamp.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/package.json b/apps/auth-server/package.json
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/buttons.less b/apps/auth-server/public/css/buttons.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/flash.less b/apps/auth-server/public/css/flash.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/footer.less b/apps/auth-server/public/css/footer.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/form.less b/apps/auth-server/public/css/form.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/header.less b/apps/auth-server/public/css/header.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/loader.less b/apps/auth-server/public/css/loader.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/logo.less b/apps/auth-server/public/css/logo.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/main.css b/apps/auth-server/public/css/main.css
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/main.less b/apps/auth-server/public/css/main.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/navbar.less b/apps/auth-server/public/css/navbar.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/typography.less b/apps/auth-server/public/css/typography.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/variables.less b/apps/auth-server/public/css/variables.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/amsterdam.css b/apps/auth-server/public/css/vendor/amsterdam.css
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/avenir.css b/apps/auth-server/public/css/vendor/avenir.css
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/alerts.less b/apps/auth-server/public/css/vendor/bootstrap/alerts.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/badges.less b/apps/auth-server/public/css/vendor/bootstrap/badges.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/bootstrap.less b/apps/auth-server/public/css/vendor/bootstrap/bootstrap.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/breadcrumbs.less b/apps/auth-server/public/css/vendor/bootstrap/breadcrumbs.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/button-groups.less b/apps/auth-server/public/css/vendor/bootstrap/button-groups.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/buttons.less b/apps/auth-server/public/css/vendor/bootstrap/buttons.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/carousel.less b/apps/auth-server/public/css/vendor/bootstrap/carousel.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/close.less b/apps/auth-server/public/css/vendor/bootstrap/close.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/code.less b/apps/auth-server/public/css/vendor/bootstrap/code.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/component-animations.less b/apps/auth-server/public/css/vendor/bootstrap/component-animations.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/dropdowns.less b/apps/auth-server/public/css/vendor/bootstrap/dropdowns.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/forms.less b/apps/auth-server/public/css/vendor/bootstrap/forms.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/glyphicons.less b/apps/auth-server/public/css/vendor/bootstrap/glyphicons.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/grid.less b/apps/auth-server/public/css/vendor/bootstrap/grid.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/input-groups.less b/apps/auth-server/public/css/vendor/bootstrap/input-groups.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/jumbotron.less b/apps/auth-server/public/css/vendor/bootstrap/jumbotron.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/labels.less b/apps/auth-server/public/css/vendor/bootstrap/labels.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/list-group.less b/apps/auth-server/public/css/vendor/bootstrap/list-group.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/media.less b/apps/auth-server/public/css/vendor/bootstrap/media.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins.less b/apps/auth-server/public/css/vendor/bootstrap/mixins.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/alerts.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/alerts.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/background-variant.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/background-variant.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/border-radius.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/border-radius.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/buttons.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/buttons.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/center-block.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/center-block.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/clearfix.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/clearfix.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/forms.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/forms.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/gradients.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/gradients.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/grid-framework.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/grid-framework.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/grid.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/grid.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/hide-text.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/hide-text.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/image.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/image.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/labels.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/labels.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/list-group.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/list-group.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/nav-divider.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/nav-divider.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/nav-vertical-align.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/nav-vertical-align.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/opacity.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/opacity.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/pagination.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/pagination.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/panels.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/panels.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/progress-bar.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/progress-bar.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/reset-filter.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/reset-filter.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/reset-text.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/reset-text.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/resize.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/resize.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/responsive-visibility.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/responsive-visibility.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/size.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/size.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/tab-focus.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/tab-focus.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/table-row.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/table-row.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/text-emphasis.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/text-emphasis.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/text-overflow.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/text-overflow.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/mixins/vendor-prefixes.less b/apps/auth-server/public/css/vendor/bootstrap/mixins/vendor-prefixes.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/modals.less b/apps/auth-server/public/css/vendor/bootstrap/modals.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/navbar.less b/apps/auth-server/public/css/vendor/bootstrap/navbar.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/navs.less b/apps/auth-server/public/css/vendor/bootstrap/navs.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/normalize.less b/apps/auth-server/public/css/vendor/bootstrap/normalize.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/pager.less b/apps/auth-server/public/css/vendor/bootstrap/pager.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/pagination.less b/apps/auth-server/public/css/vendor/bootstrap/pagination.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/panels.less b/apps/auth-server/public/css/vendor/bootstrap/panels.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/popovers.less b/apps/auth-server/public/css/vendor/bootstrap/popovers.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/print.less b/apps/auth-server/public/css/vendor/bootstrap/print.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/progress-bars.less b/apps/auth-server/public/css/vendor/bootstrap/progress-bars.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/responsive-embed.less b/apps/auth-server/public/css/vendor/bootstrap/responsive-embed.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/responsive-utilities.less b/apps/auth-server/public/css/vendor/bootstrap/responsive-utilities.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/scaffolding.less b/apps/auth-server/public/css/vendor/bootstrap/scaffolding.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/tables.less b/apps/auth-server/public/css/vendor/bootstrap/tables.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/theme.less b/apps/auth-server/public/css/vendor/bootstrap/theme.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/thumbnails.less b/apps/auth-server/public/css/vendor/bootstrap/thumbnails.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/tooltip.less b/apps/auth-server/public/css/vendor/bootstrap/tooltip.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/type.less b/apps/auth-server/public/css/vendor/bootstrap/type.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/utilities.less b/apps/auth-server/public/css/vendor/bootstrap/utilities.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/variables.less b/apps/auth-server/public/css/vendor/bootstrap/variables.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/css/vendor/bootstrap/wells.less b/apps/auth-server/public/css/vendor/bootstrap/wells.less
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/email/how.png b/apps/auth-server/public/email/how.png
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/email/logo-openstad.png b/apps/auth-server/public/email/logo-openstad.png
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/email/logo-small.png b/apps/auth-server/public/email/logo-small.png
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/email/logo.png b/apps/auth-server/public/email/logo.png
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/email/mail-header.jpg b/apps/auth-server/public/email/mail-header.jpg
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/email/mail-header2.jpg b/apps/auth-server/public/email/mail-header2.jpg
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/email/openstad-logo.png b/apps/auth-server/public/email/openstad-logo.png
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-Bold.eot b/apps/auth-server/public/fonts/AmsterdamSans-Bold.eot
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-Bold.woff b/apps/auth-server/public/fonts/AmsterdamSans-Bold.woff
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-Bold.woff2 b/apps/auth-server/public/fonts/AmsterdamSans-Bold.woff2
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-BoldItalic.eot b/apps/auth-server/public/fonts/AmsterdamSans-BoldItalic.eot
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-BoldItalic.woff b/apps/auth-server/public/fonts/AmsterdamSans-BoldItalic.woff
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-BoldItalic.woff2 b/apps/auth-server/public/fonts/AmsterdamSans-BoldItalic.woff2
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-ExtraBold.eot b/apps/auth-server/public/fonts/AmsterdamSans-ExtraBold.eot
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-ExtraBold.woff b/apps/auth-server/public/fonts/AmsterdamSans-ExtraBold.woff
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-ExtraBold.woff2 b/apps/auth-server/public/fonts/AmsterdamSans-ExtraBold.woff2
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-Italic.eot b/apps/auth-server/public/fonts/AmsterdamSans-Italic.eot
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-Italic.woff b/apps/auth-server/public/fonts/AmsterdamSans-Italic.woff
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-Italic.woff2 b/apps/auth-server/public/fonts/AmsterdamSans-Italic.woff2
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-Light.eot b/apps/auth-server/public/fonts/AmsterdamSans-Light.eot
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-Light.woff b/apps/auth-server/public/fonts/AmsterdamSans-Light.woff
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-Light.woff2 b/apps/auth-server/public/fonts/AmsterdamSans-Light.woff2
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-Regular.eot b/apps/auth-server/public/fonts/AmsterdamSans-Regular.eot
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-Regular.woff b/apps/auth-server/public/fonts/AmsterdamSans-Regular.woff
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/fonts/AmsterdamSans-Regular.woff2 b/apps/auth-server/public/fonts/AmsterdamSans-Regular.woff2
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/img/andreas.svg b/apps/auth-server/public/img/andreas.svg
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/img/loader.svg b/apps/auth-server/public/img/loader.svg
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/img/logo-openstad.png b/apps/auth-server/public/img/logo-openstad.png
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/img/logo-openstad.svg b/apps/auth-server/public/img/logo-openstad.svg
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/img/logo-small.svg b/apps/auth-server/public/img/logo-small.svg
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/img/logo.png b/apps/auth-server/public/img/logo.png
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/img/openstad-logo.png b/apps/auth-server/public/img/openstad-logo.png
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/img/openstad-logo.svg b/apps/auth-server/public/img/openstad-logo.svg
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/img/photo-1513135467880-6c41603bbb5b.jpeg b/apps/auth-server/public/img/photo-1513135467880-6c41603bbb5b.jpeg
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/img/svg/arrow-right-white.svg b/apps/auth-server/public/img/svg/arrow-right-white.svg
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/javascripts/jquery.js b/apps/auth-server/public/javascripts/jquery.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/javascripts/jquery.min.js b/apps/auth-server/public/javascripts/jquery.min.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/javascripts/jquery.validate.min.js b/apps/auth-server/public/javascripts/jquery.validate.min.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/javascripts/jquery.validate.nl.js b/apps/auth-server/public/javascripts/jquery.validate.nl.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/javascripts/main.js b/apps/auth-server/public/javascripts/main.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/scss/output.css b/apps/auth-server/public/scss/output.css
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/scss/output.css.map b/apps/auth-server/public/scss/output.css.map
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/stylesheets/base.css b/apps/auth-server/public/stylesheets/base.css
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/stylesheets/dialog-modules.css b/apps/auth-server/public/stylesheets/dialog-modules.css
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/stylesheets/index-modules.css b/apps/auth-server/public/stylesheets/index-modules.css
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/stylesheets/pure-min.css b/apps/auth-server/public/stylesheets/pure-min.css
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/stylesheets/sign-in-modules.css b/apps/auth-server/public/stylesheets/sign-in-modules.css
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/stylesheets/spectre-icons.min.css b/apps/auth-server/public/stylesheets/spectre-icons.min.css
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/public/stylesheets/spectre.min.css b/apps/auth-server/public/stylesheets/spectre.min.css
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/repositories/userRepository.js b/apps/auth-server/repositories/userRepository.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/routes/adminApi.js b/apps/auth-server/routes/adminApi.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/routes/routes.js b/apps/auth-server/routes/routes.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/seeds/default.js b/apps/auth-server/seeds/default.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/services/authService.js b/apps/auth-server/services/authService.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/services/email.js b/apps/auth-server/services/email.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/services/password.js b/apps/auth-server/services/password.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/services/tokenUrl.js b/apps/auth-server/services/tokenUrl.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/services/user.js b/apps/auth-server/services/user.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/services/verificationService.js b/apps/auth-server/services/verificationService.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test.js b/apps/auth-server/test.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test/integration/admin.test.js b/apps/auth-server/test/integration/admin.test.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test/integration/common/helper.js b/apps/auth-server/test/integration/common/helper.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test/integration/common/index.js b/apps/auth-server/test/integration/common/index.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test/integration/common/properties.js b/apps/auth-server/test/integration/common/properties.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test/integration/common/validate.js b/apps/auth-server/test/integration/common/validate.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test/integration/grant_type_client.test.js b/apps/auth-server/test/integration/grant_type_client.test.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test/integration/grant_type_code.test.js b/apps/auth-server/test/integration/grant_type_code.test.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test/test-certs/certificate.pem b/apps/auth-server/test/test-certs/certificate.pem
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test/test-certs/certrequest.csr b/apps/auth-server/test/test-certs/certrequest.csr
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test/test-certs/privatekey.pem b/apps/auth-server/test/test-certs/privatekey.pem
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test/unit/authService.js b/apps/auth-server/test/unit/authService.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test/unit/config/index.js b/apps/auth-server/test/unit/config/index.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test/unit/db/accesstokens.js b/apps/auth-server/test/unit/db/accesstokens.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test/unit/db/authorizationcodes.js b/apps/auth-server/test/unit/db/authorizationcodes.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test/unit/db/refreshtokens.js b/apps/auth-server/test/unit/db/refreshtokens.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/test/unit/validate.js b/apps/auth-server/test/unit/validate.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/token-strategy.js b/apps/auth-server/token-strategy.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/utils.js b/apps/auth-server/utils.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/utils/generateCode.js b/apps/auth-server/utils/generateCode.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/utils/getClientIdFromRequest.js b/apps/auth-server/utils/getClientIdFromRequest.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/utils/sanitize.js b/apps/auth-server/utils/sanitize.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/validate.js b/apps/auth-server/validate.js
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/account/profile.html b/apps/auth-server/views/account/profile.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/account/two-factor.html b/apps/auth-server/views/account/two-factor.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/auth/choose.html b/apps/auth-server/views/auth/choose.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/auth/code/login.html b/apps/auth-server/views/auth/code/login.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/auth/digid/login.html b/apps/auth-server/views/auth/digid/login.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/auth/forgot/forgot.html b/apps/auth-server/views/auth/forgot/forgot.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/auth/forgot/reset.html b/apps/auth-server/views/auth/forgot/reset.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/auth/local/login.html b/apps/auth-server/views/auth/local/login.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/auth/local/register.html b/apps/auth-server/views/auth/local/register.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/auth/required-fields.html b/apps/auth-server/views/auth/required-fields.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/auth/two-factor/authenticate.html b/apps/auth-server/views/auth/two-factor/authenticate.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/auth/two-factor/configure.html b/apps/auth-server/views/auth/two-factor/configure.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/auth/url/authenticate.html b/apps/auth-server/views/auth/url/authenticate.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/auth/url/confirmation.html b/apps/auth-server/views/auth/url/confirmation.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/auth/url/login.html b/apps/auth-server/views/auth/url/login.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/auth/url/register.html b/apps/auth-server/views/auth/url/register.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/elements/amsterdam-logo.html b/apps/auth-server/views/elements/amsterdam-logo.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/elements/error-flash.html b/apps/auth-server/views/elements/error-flash.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/elements/flash.html b/apps/auth-server/views/elements/flash.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/elements/footer.html b/apps/auth-server/views/elements/footer.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/elements/header.html b/apps/auth-server/views/elements/header.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/elements/logo.html b/apps/auth-server/views/elements/logo.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/elements/navbar.html b/apps/auth-server/views/elements/navbar.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/elements/sidebar.html b/apps/auth-server/views/elements/sidebar.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/emails/blanco.html b/apps/auth-server/views/emails/blanco.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/emails/layout-empty.html b/apps/auth-server/views/emails/layout-empty.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/emails/layout.html b/apps/auth-server/views/emails/layout.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/emails/login-url.html b/apps/auth-server/views/emails/login-url.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/emails/password-reset.html b/apps/auth-server/views/emails/password-reset.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/errors/404.html b/apps/auth-server/views/errors/404.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/errors/500.html b/apps/auth-server/views/errors/500.html
+old mode 100644
+new mode 100755
+diff --git a/apps/auth-server/views/layouts/main.html b/apps/auth-server/views/layouts/main.html
+old mode 100644
+new mode 100755
+diff --git a/apps/image-server/.travis.yml b/apps/image-server/.travis.yml
+old mode 100644
+new mode 100755
+diff --git a/apps/image-server/Dockerfile b/apps/image-server/Dockerfile
+old mode 100644
+new mode 100755
+diff --git a/apps/image-server/docker_deploy b/apps/image-server/docker_deploy
+old mode 100644
+new mode 100755
+diff --git a/apps/image-server/docker_publish_latest b/apps/image-server/docker_publish_latest
+old mode 100644
+new mode 100755
+diff --git a/apps/image-server/docker_publish_tag b/apps/image-server/docker_publish_tag
+old mode 100644
+new mode 100755
+diff --git a/apps/image-server/seeds/.gitignore b/apps/image-server/seeds/.gitignore
+old mode 100644
+new mode 100755
+diff --git a/apps/image-server/server.js b/apps/image-server/server.js
+old mode 100644
+new mode 100755
+index dd6ae497..efdf6a07
+--- a/apps/image-server/server.js
++++ b/apps/image-server/server.js
+@@ -3,8 +3,8 @@ const express = require('express');
+ const app = express();
+ const imgSteam = require('image-steam');
+ const multer = require('multer');
+-const AWS = require('aws-sdk')
+-const multerS3 = require('multer-s3')
++//const AWS = require('aws-sdk')
++//const multerS3 = require('multer-s3')
+ const passport = require('passport');
+ const Strategy = require('passport-http-bearer').Strategy;
+ const db = require('./db');
+@@ -84,7 +84,7 @@ if (process.env.S3_ENDPOINT) {
+       "secretKey": process.env.S3_SECRET
+   };
+ } else {
+-  multerConfig.dest = 'images/';
++  multerConfig.dest = process.env.IMAGES_DIR || 'images/';
+ }
+ 
+ const upload = multer(multerConfig);
+diff --git a/docker-compose.deps-only.yml b/docker-compose.deps-only.yml
+index f020021a..e663942d 100644
+--- a/docker-compose.deps-only.yml
++++ b/docker-compose.deps-only.yml
+@@ -20,10 +20,16 @@ services:
+     volumes:
+       # - ./export.sql:/docker-entrypoint-initdb.d/99-export.sql
+       - openstad-db-data:/var/lib/mysql
++    healthcheck:
++      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
++      timeout: 20s
++      retries: 10
+     entrypoint: |
+       bash -c "
+-        echo \"CREATE DATABASE IF NOT EXISTS $$AUTH_DB_NAME; CREATE DATABASE IF NOT EXISTS $$IMAGE_DB_NAME; CREATE DATABASE IF NOT EXISTS $$API_DATABASE; FLUSH PRIVILEGES; GRANT ALL ON *.* TO '$$MYSQL_USER'@'%'; FLUSH PRIVILEGES;\" > /docker-entrypoint-initdb.d/init.sql;
+-        /usr/local/bin/docker-entrypoint.sh $0 $@
++        echo ========== PASSWORD $$AUTH_DB_NAME
++        echo \"CREATE DATABASE IF NOT EXISTS \`$$AUTH_DB_NAME\`; CREATE DATABASE IF NOT EXISTS \`$$IMAGE_DB_NAME\`; CREATE DATABASE IF NOT EXISTS \`$$API_DATABASE\`; FLUSH PRIVILEGES; GRANT ALL ON *.* TO '$$MYSQL_USER'@'%'; FLUSH PRIVILEGES;\"
++        echo \"CREATE DATABASE IF NOT EXISTS \`$$AUTH_DB_NAME\`; CREATE DATABASE IF NOT EXISTS \`$$IMAGE_DB_NAME\`; CREATE DATABASE IF NOT EXISTS \`$$API_DATABASE\`; FLUSH PRIVILEGES; GRANT ALL ON *.* TO '$$MYSQL_USER'@'%'; FLUSH PRIVILEGES;\" > /docker-entrypoint-initdb.d/init.sql;
++        /usr/local/bin/docker-entrypoint.sh $$0 $$@
+       "
+ 
+   mailhog:
+diff --git a/package-lock.json b/package-lock.json
+index de994fa5..cda317a7 100755
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -51,7 +51,7 @@
+         "nunjucks": "^3.2.3",
+         "pmx": "^1.6.7",
+         "sanitize-html": "^2.7.0",
+-        "sequelize": "^6.19.0",
++        "sequelize": "^6.28.0",
+         "umzug": "^3.2.1",
+         "ws": "^7.5.7"
+       },
+@@ -35864,7 +35864,7 @@
+         "pmx": "^1.6.7",
+         "prettier": "^2.6.2",
+         "sanitize-html": "^2.7.0",
+-        "sequelize": "^6.19.0",
++        "sequelize": "^6.28.0",
+         "sequelize-mock": "^0.10.2",
+         "supertest": "^4.0.2",
+         "umzug": "^3.2.1",

@@ -2,52 +2,56 @@
 FROM node:16.16-slim as builder
 
 # Create app directory
-WORKDIR /app
+WORKDIR /opt/image-server
 
 # Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-COPY --chown=node:node package*.json ./
-
-RUN   apt-get update \
-&&    apt-get install -y python3 make cmake git bash g++ \
-&&    npm config set unsafe-perm true \
-&&    npm install --no-optional --legacy-peer-deps
+COPY --chown=node:node package*.json .
+RUN apt-get update
+RUN apt-get install -y python3 make cmake git bash g++
+RUN npm config set unsafe-perm true
+RUN npm install --no-optional --legacy-peer-deps
+RUN npm install -g nodemon
 
 # Release image 
 FROM node:16.16-slim
 
 # Label for tracking
-LABEL nl.openstad.container="image" nl.openstad.version="1.1.1" nl.openstad.release-date="2020-05-07"
+LABEL nl.openstad.container="image" nl.openstad.version="0.0.1" nl.openstad.release-date="2023-09-25"
+
+WORKDIR /opt/image-server
 
 # Environment variables
-ENV DB_NAME=""
-ENV DB_USER=""
-ENV DB_PASSWORD="abc"
-ENV DB_HOST=""
-ENV PORT_IMAGE_SERVER=3000
-ENV IMAGES_DIR=/app/images
+ENV APP_URL=http://openstad-image-server
+ENV PORT_API=20050
+ENV PORT_IMAGE_SERVER=20051
+ENV DB_HOST=
+ENV DB_USER=
+ENV DB_PASSWORD=
+ENV DB_NAME=
+ENV IMAGES_DIR=/opt/image-server/images
 ENV THROTTLE=true
 ENV THROTTLE_CC_PROCESSORS=4
 ENV THROTTLE_CC_PREFETCHER=20
 ENV THROTTLE_CC_REQUESTS=100
-ENV APP_URL=""
-ENV S3_ENDPOINT=""
-ENV S3_KEY=""
-ENV S3_SECRET=""
-ENV S3_BUCKET=""
-#CAN WE DEFINE THIS AUTOMATICALLY??
+ENV S3_ENDPOINT=
+ENV S3_KEY=
+ENV S3_SECRET=
+ENV S3_BUCKET=
 
-# Create app directory
-WORKDIR /app
+# images dir
+RUN mkdir -p /opt/image-server/images
+RUN chown node:node /opt/image-server/images
 
-# Set node ownership to/home/app
-RUN mkdir -p images
-
-COPY --chown=node:node --from=builder /app .
-COPY --chown=node:node . .
+# copy files
+COPY --chown=node:node --from=builder . /
+COPY --chown=node:node . /opt/image-server
 USER node
 
-VOLUME /app/images
+VOLUME /opt/image-server/images
 
+# Run the application
 CMD [ "npm", "start" ]
+
+
+
+

@@ -365,6 +365,8 @@ defaultConfig.authorization['auth-server-url'] = process.env.AUTH_API_URL || def
 defaultConfig.authorization["auth-client-id"] = process.env.AUTH_FIRST_CLIENT_ID || defaultConfig.authorization["auth-client-id"];
 defaultConfig.authorization["auth-client-secret"] = process.env.AUTH_FIRST_CLIENT_SECRET || defaultConfig.authorization["auth-client-secret"];
 defaultConfig.templateSource = process.env.TEMPLATE_SOURCE || 'https://cdn.jsdelivr.net/gh/Amsterdam/openstad-ecosystem-templates/site/index.json';
+defaultConfig.auth.adapter.openstad.serverUrl = process.env.AUTH_API_URL || defaultConfig.auth.adapter.openstad.serverUrl;
+defaultConfig.auth.jwtSecret = process.env.API_AUTHORIZATION_JWTSECRET || defaultConfig.auth.jwtSecret;
 
 try {
   defaultConfig.authorization['fixed-auth-tokens'] = JSON.parse(process.env.API_AUTHORIZATION_FIXEDAUTHTOKENS) || defaultConfig.authorization['fixed-auth-tokens'];

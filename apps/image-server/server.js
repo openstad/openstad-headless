@@ -3,8 +3,8 @@ const express = require('express');
 const app = express();
 const imgSteam = require('image-steam');
 const multer = require('multer');
-const AWS = require('aws-sdk')
-const multerS3 = require('multer-s3')
+//const AWS = require('aws-sdk')
+//const multerS3 = require('multer-s3')
 const passport = require('passport');
 const Strategy = require('passport-http-bearer').Strategy;
 const db = require('./db');
@@ -84,7 +84,7 @@ if (process.env.S3_ENDPOINT) {
       "secretKey": process.env.S3_SECRET
   };
 } else {
-  multerConfig.dest = 'images/';
+  multerConfig.dest = process.env.IMAGES_DIR || 'images/';
 }
 
 const upload = multer(multerConfig);

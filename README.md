@@ -6,8 +6,10 @@ This is the monorepo for the OpenStad headless project. OpenStad headless will b
 
 Currently the following elements have been documented:
 
+
 __All__
-- [Getting started / setup](doc/setup.md)
+- [Getting started (dockerized)](doc/getting-started.md)
+- [Setup](doc/setup.md)
 - [About databases](doc/databases.md)
 
 __API__
