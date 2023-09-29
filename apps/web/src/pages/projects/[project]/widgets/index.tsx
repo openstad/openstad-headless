@@ -19,7 +19,7 @@ export default function ProjectWidgets() {
             }
           ]}
           action={
-            <Button variant="create" className="float-right">
+            <Button variant="default" className="float-right">
               <Link href="/projects/create">
                 + Nieuwe widget
               </Link>
