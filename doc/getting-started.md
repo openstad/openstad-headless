@@ -99,8 +99,6 @@ Try deleting tour existing containers and volumes:
 docker rm -f $(docker ps -a -q); docker volume rm $(docker volume ls -q)
 ```
 
-
-
 ### ToDo's
 
 - Mailen doet ie nog helemaal niet. Er is wel een mailhog server, dus dat is vermoedelijk vrij simpel
