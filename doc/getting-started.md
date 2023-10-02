@@ -48,7 +48,6 @@ The code is mounted from the `/apps` dirs in the repo, and run using `nodemon`. 
 
 Six docker containers have been created:
 - openstad-mysql
-- openstad-mongo
 - openstad-mailhog
 - openstad-api-server
 - openstad-auth-server

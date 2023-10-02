@@ -70,12 +70,6 @@ process.env.AUTH_DB_USERNAME = process.env.AUTH_DB_USERNAME || process.env.DB_US
 process.env.AUTH_DB_PASSWORD = process.env.AUTH_DB_PASSWORD || process.env.DB_PASSWORD || '';
 process.env.AUTH_DB_NAME = process.env.AUTH_DB_NAME || ( process.env.DB_BASE_NAME ? process.env.DB_BASE_NAME + '-auth' :  'openstad-auth' );
 
-// TODO: moet weg
-process.env.AUTH_MONGO_HOST = process.env.AUTH_MONGO_HOST || process.env.MONGO_HOST || '';
-process.env.AUTH_MONGO_PORT = process.env.AUTH_MONGO_PORT || process.env.MONGO_PORT || 27017;
-process.env.AUTH_MONGO_USER = process.env.AUTH_MONGO_USER || process.env.MONGO_USER || '';
-process.env.AUTH_MONGO_PASSWORD = process.env.AUTH_MONGO_PASSWORD || process.env.MONGO_PASSWORD || '';
-
 process.env.AUTH_MAIL_SERVER_URL = process.env.AUTH_MAIL_SERVER_URL || process.env.SMTP_HOST;
 process.env.AUTH_MAIL_SERVER_PORT = process.env.AUTH_MAIL_SERVER_PORT || process.env.SMTP_PORT;
 process.env.AUTH_MAIL_SERVER_SECURE = true;

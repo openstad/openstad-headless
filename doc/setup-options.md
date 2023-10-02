@@ -11,8 +11,6 @@ DB_USERNAME=USERNAME
 DB_PASSWORD=PASSWORD
 DB_BASE_NAME=openstad
 
-MONGO_HOST=database-server
-
 BASIC_AUTH_USER=openstad
 BASIC_AUTH_PASSWORD=openstad
 
@@ -68,11 +66,6 @@ AUTH_DB_HOST = process.env.DB_HOST
 AUTH_DB_USERNAME = process.env.DB_USERNAME
 AUTH_DB_PASSWORD = process.env.DB_PASSWORD
 AUTH_DB_NAME = ( process.env.DB_BASE_NAME ? process.env.DB_BASE_NAME + '-auth-server' :  'auth-server' )
-
-AUTH_MONGO_HOST: process.env.AUTH_MONGO_HOST || process.env.MONGO_HOST || 'localhost',
-AUTH_MONGO_PORT: process.env.AUTH_MONGO_PORT || process.env.MONGO_PORT || 27017,
-AUTH_MONGO_USER: process.env.AUTH_MONGO_USER || process.env.MONGO_USER || '',
-AUTH_MONGO_PASSWORD: process.env.AUTH_MONGO_PASSWORD || process.env.MONGO_PASSWORD || '',
 
 AUTH_MAIL_SERVER_URL = process.env.SMTP_HOST
 AUTH_MAIL_SERVER_PORT = process.env.SMTP_PORT

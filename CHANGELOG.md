@@ -24,6 +24,9 @@
 * Refactor X-Authorisation to Authorisation
 * Remove CommentVote.opinion; it is not used
 * Remove anonymize votes - anonymization is now done through users
+* Remove backup scripts - this should not be done in the API
+* Remove mongo dependency
+* Remove S3 connections - no longer required
 
 ### Auth server
 * Refactor init database and seeds
@@ -31,6 +34,7 @@
 * Bugfix: toJSON of db models used the wrong data
 * Bugfix: new users are now created withoud a random password
 * Merge first- and lastname to name
+* Remove mongo dependency
 
 ### Image server
 * Refactor init database, merge seeds and fixtures

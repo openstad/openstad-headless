@@ -38,13 +38,6 @@ services:
       - 1025:1025 # smtp server
       - 8025:8025 # web ui
 
-  mongo:
-    image: mongo:6
-    ports:
-      - 27017:27017
-    volumes:
-      - openstad-mongo-data:/data/db
-
 volumes:
   openstad-mysql-data: {}
   openstad-mongo-data: {}

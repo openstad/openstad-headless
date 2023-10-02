@@ -22,7 +22,6 @@ export default function ProjectExport() {
             >
                 <div className='container mx-auto py-10 w-1/2 float-left'>
                     <p>De volgende gegevens worden altijd geëxporteerd.</p>
-                    <p>- Mongo database</p>
                     <p>- Oauth gegevens</p>
                     <br />
                     <p>Selecteer extra elementen die je zou willen toevoegen aan de geëxporteerde waarden.</p>

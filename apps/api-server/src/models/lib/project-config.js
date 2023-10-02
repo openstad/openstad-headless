@@ -116,10 +116,6 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
     cms: {
       type: 'object',
       subset: {
-        dbName: {
-          type: 'string',
-          default: 'default_db', //the mongodb database
-        },
         url: {
           type: 'string',
           default: 'https://openstad-api.amsterdam.nl',

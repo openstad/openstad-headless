@@ -8,7 +8,6 @@ The are 3 different node servers working together. More elements will follow and
 Prerequisites:
 - NodeJS 16+
 - Access to a Mysql server
-- Access to a MongoDB server (TODO: dat ga ik er uit slopen)
 
 ### 1. Checkout openstad-app git repo
 
