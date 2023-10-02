@@ -10,8 +10,6 @@ RUN apk add --no-cache --update g++ make python3 musl-dev bash perl perl-dbd-mys
 RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.6/main' >> /etc/apk/repositories
 RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.6/community' >> /etc/apk/repositories
 RUN apk update
-RUN apk add mongodb=3.4.4-r0
-RUN apk add mongodb-tools
 
 # Install app dependencies
 COPY --chown=node:node package*.json .
