@@ -207,6 +207,12 @@ module.exports = function (db, sequelize, DataTypes) {
       }
     },
 
+    images: {
+      type: DataTypes.JSON,
+      allowNull: null,
+      defaultValue: [],
+    },
+    
     budget: {
       type: DataTypes.INTEGER,
       auth:  {
