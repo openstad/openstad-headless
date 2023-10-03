@@ -99,8 +99,6 @@ services:
       - DB_USER=${AUTH_DB_USER}
       - DB_PASSWORD=${AUTH_DB_PASSWORD}
       - DB_NAME=${AUTH_DB_NAME}
-      - MONGO_DB_HOST=${AUTH_MONGO_HOST}
-      - MONGO_DB_PORT=${AUTH_MONGO_PORT}
       - MAIL_SERVER_URL=${AUTH_MAIL_SERVER_URL}
       - MAIL_SERVER_PORT=${AUTH_MAIL_SERVER_PORT}
       - MAIL_SERVER_SECURE=${AUTH_MAIL_SERVER_SECURE}
@@ -114,6 +112,8 @@ services:
       - AUTH_FIRST_CLIENT_ID=${AUTH_FIRST_CLIENT_ID}
       - AUTH_FIRST_CLIENT_SECRET=${AUTH_FIRST_CLIENT_SECRET}
       - AUTH_FIRST_LOGIN_CODE=${AUTH_FIRST_LOGIN_CODE}
+      - SESSION_SECRET=${AUTH_SESSION_SECRET}
+      - COOKIE_SECURE_OFF=${AUTH_COOKIE_SECURE_OFF}
       - API_URL=${API_URL}
       - ADMIN_URL=${ADMIN_URL}
     ports:
@@ -207,7 +207,6 @@ services:
 
 volumes:
   openstad-mysql-data: {}
-  openstad-mongo-data: {}
   openstad-api-server-node_modules: {}
   openstad-api-server-init: {}
   openstad-auth-server-node_modules: {}
