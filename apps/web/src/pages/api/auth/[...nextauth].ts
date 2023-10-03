@@ -38,7 +38,7 @@ export const authOptions: NextAuthOptions = {
           );
           // @todo: make project id and useAuth dynamic
           const tokenResponse = await fetch(
-            `${process.env.API_URL}/auth/project/1/connect-user?useAuth=uniquecode`,
+            `${process.env.API_URL}/auth/project/1/connect-user`,
             {
               method: "POST",
               headers: {
