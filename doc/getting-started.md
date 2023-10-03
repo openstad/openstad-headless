@@ -22,6 +22,8 @@ npm run create-docker-config
 ```
 You may want to note the login code that is shown for later use.
 
+You can re-run this command, but you may want to read the [notes](#Notes) first.
+
 
 ### 3. Docker compose
 
@@ -98,8 +100,13 @@ Try deleting tour existing containers and volumes:
 docker rm -f $(docker ps -a -q); docker volume rm $(docker volume ls -q)
 ```
 
+### Notes
+
+- Creating the config creates a mysql password. Composing the containers will create a mysql container that will re-use previously created data-volumes if they exist. That previously created volume will use an earlier mysql password. In other words: if you re-run the config command you need to delete existing volumes before you rebuild the containers.
+
 ### ToDo's
 
+- Verzin een oplossing voor het issue onder notes
 - Mailen doet ie nog helemaal niet. Er is wel een mailhog server, dus dat is vermoedelijk vrij simpel
 - Configuratie opties zijn nu nog beperkt (gerelateerd: API config/local.js moet er uit)
 - Ik wil er eigenlijk nog een nginx server voor zetten
