@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import {
   ColumnDef,
   ColumnFiltersState,
+  Row,
   SortingState,
   flexRender,
   getCoreRowModel,
@@ -25,12 +26,14 @@ import {
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  data: TData[],
+  onRowClick?: (data: Row<TData>) => void; 
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  onRowClick
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -56,9 +59,9 @@ export function DataTable<TData, TValue>({
       <div className="flex items-center py-4">
         <Input
           placeholder="Zoek project"
-          value={(table.getColumn("projectName")?.getFilterValue() as string) ?? ""}
+          value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("projectName")?.setFilterValue(event.target.value)
+            table.getColumn("title")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
@@ -89,6 +92,7 @@ export function DataTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                onClick={() => onRowClick && onRowClick(row)}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
@@ -100,7 +104,7 @@ export function DataTable<TData, TValue>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+                Geen resultaten.
               </TableCell>
             </TableRow>
           )}
@@ -108,8 +112,12 @@ export function DataTable<TData, TValue>({
       </Table>
       </div>
       <div className="flex-1 text-sm text-muted-foreground">
-  {     table.getFilteredSelectedRowModel().rows.length} of{" "}
-        {table.getFilteredRowModel().rows.length} row(s) selected.
+        <br/>
+        <p>
+          {
+            `${table.getFilteredSelectedRowModel().rows.length} van de ${table.getFilteredRowModel().rows.length} rijen geselecteerd`
+          }
+        </p>
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button
@@ -118,7 +126,7 @@ export function DataTable<TData, TValue>({
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          Previous
+          Vorige
         </Button>
         <Button
           variant="outline"
@@ -126,7 +134,7 @@ export function DataTable<TData, TValue>({
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
-          Next
+          Volgende
         </Button>
       </div>
     </div>

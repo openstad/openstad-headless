@@ -1,5 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/button"
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -22,14 +23,15 @@ export const columns: ColumnDef<Project>[] = [
           <Checkbox
             checked={table.getIsAllPageRowsSelected()}
             onCheckedChange={(value: any) => table.toggleAllPageRowsSelected(!!value)}
-            aria-label="Select all"
+            aria-label="Selecteer alles"
           />
         ),
         cell: ({ row }) => (
           <Checkbox
             checked={row.getIsSelected()}
+            onClick={(e:any)=> e.stopPropagation()}
             onCheckedChange={(value: any) => row.toggleSelected(!!value)}
-            aria-label="Select row"
+            aria-label="Selecteer rij"
           />
         ),
         enableSorting: false,
@@ -44,7 +46,11 @@ export const columns: ColumnDef<Project>[] = [
     header: "Titel"
   },
   {
-    accessorKey: "name",
-    header: "Naam"
+    accessorKey: "url",
+    header: "Domein"
   },
+  {
+    accessorKey: "createdAt",
+    header: "Aangemaakt op"
+  }
 ]
