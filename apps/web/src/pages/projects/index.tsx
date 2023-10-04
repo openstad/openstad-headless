@@ -9,9 +9,9 @@ import React from "react";
 import { useRouter } from "next/router";
 
 export default function Projects() {
-  const { data, isLoading } = useSWR("/api/openstad/api/project");
+  const { data, isLoading } = useSWR(`/api/openstad/api/project?includeConfig=1`);
+
   const router = useRouter();
-  
   if (!data) return null;
 
   return (

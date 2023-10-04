@@ -4,6 +4,7 @@ import logger from "@/lib/logger";
 
 export default withAuth(
   function middleware(req) {
+
     if (req.nextUrl.pathname.startsWith("/api/openstad")) {
       if (!req.nextauth.token?.accessToken) {
         logger.error("No access token in JWT");
@@ -13,13 +14,17 @@ export default withAuth(
         { Authorization: "Bearer " + req.nextauth.token?.accessToken },
         "Rewrite with access token"
       );
+
+      const searchParams = req.nextUrl?.searchParams?.toString();
+      const rewrittenUrl =  `${process.env.API_URL}${req.nextUrl.pathname.replace("/api/openstad", "")}${searchParams?'?'+searchParams:''}`;
+
       return NextResponse.rewrite(
-        process.env.API_URL + req.nextUrl.pathname.replace("/api/openstad", ""),
+        rewrittenUrl,
         {
           headers: {
             Authorization: "Bearer " + req.nextauth.token?.accessToken,
           },
-        }
+        },
       );
     }
   },
