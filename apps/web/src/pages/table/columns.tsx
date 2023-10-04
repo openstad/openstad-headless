@@ -46,10 +46,6 @@ export const columns: ColumnDef<Project>[] = [
     header: "Titel"
   },
   {
-    accessorKey: "url",
-    header: "Domein"
-  },
-  {
     accessorKey: "createdAt",
     header: "Aangemaakt op"
   }
