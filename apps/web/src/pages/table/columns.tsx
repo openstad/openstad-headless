@@ -1,5 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/button"
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -13,6 +14,7 @@ export type Project = {
   title: string,
   updatedAt: string,
   url: string | null,
+  config: string
 }
 
 export const columns: ColumnDef<Project>[] = [
@@ -22,14 +24,15 @@ export const columns: ColumnDef<Project>[] = [
           <Checkbox
             checked={table.getIsAllPageRowsSelected()}
             onCheckedChange={(value: any) => table.toggleAllPageRowsSelected(!!value)}
-            aria-label="Select all"
+            aria-label="Selecteer alles"
           />
         ),
         cell: ({ row }) => (
           <Checkbox
             checked={row.getIsSelected()}
+            onClick={(e:any)=> e.stopPropagation()}
             onCheckedChange={(value: any) => row.toggleSelected(!!value)}
-            aria-label="Select row"
+            aria-label="Selecteer rij"
           />
         ),
         enableSorting: false,
@@ -44,7 +47,45 @@ export const columns: ColumnDef<Project>[] = [
     header: "Titel"
   },
   {
-    accessorKey: "name",
-    header: "Naam"
+    accessorKey: "createdAt",
+    header: "Aangemaakt op"
+  },
+  {
+    accessorKey: "config",
+    header: ({ table }) => (
+      null
+    ),
+    cell: ({ row }) => {
+      const config: any = row.getValue("config");
+      const project = config?.project;
+      const ideas = config?.ideas;
+      const votes = config?.votes;
+      const basicAuth = config?.basicAuth;
+
+      return (
+      <div>
+        <p>
+          {project?.projectHasEnded?'Project is beeindigd':'Project is nog niet beeindigd'}
+        </p>
+
+        <p>
+          {project?.endDate ? `Eind-datum: ${project.endDate}`:'Geen einddatum gezet'}
+        </p>
+
+        <p>
+          {ideas?.canAddNewIdeas?'Plannen kunnen toegevoegd worden':'Plannen kunnen niet meer toegevoegd worden'}
+        </p>
+
+        <p>
+          {votes?.isActive?'Er kan gestemd worden':'Er kan niet gestemd worden'}
+        </p>
+
+        <p>
+          {basicAuth?.active ?'Wachtwoord':'Geen wachtwoord'}
+        </p>
+      </div>);
+    },
+    enableSorting: false,
+    enableHiding: false,
   },
 ]

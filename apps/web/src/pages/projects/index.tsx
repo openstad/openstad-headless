@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import React from "react";
+import { useRouter } from "next/router";
 
 export default function Projects() {
-  const { data, isLoading } = useSWR("/api/openstad/api/project");
+  const { data, isLoading } = useSWR(`/api/openstad/api/project?includeConfig=1`);
 
+  const router = useRouter();
   if (!data) return null;
 
   return (
@@ -32,7 +34,9 @@ export default function Projects() {
         }
       >
         <div className="container">
-          <DataTable columns={columns} data={data} />
+          <DataTable columns={columns} data={data} onRowClick={(d) =>{
+            router.push(`${router.asPath}/${d.original.id}/widgets`)}
+            }/>
         </div>
       </PageLayout>
     </div>
