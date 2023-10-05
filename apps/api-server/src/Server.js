@@ -6,8 +6,6 @@ var util         = require('./util');
 var log          = require('debug')('app:http');
 const morgan     = require('morgan')
 
-var reportErrors = config.sentry && config.sentry.active;
-
 module.exports  = {
 	app: undefined,
 
@@ -28,9 +26,6 @@ module.exports  = {
         this.app.use(morgan('dev'));
       }
 
-      if( reportErrors ) {
-          // this.app.use(Raven.requestHandler());
-      }
       this.app.use(compression());
 
   //  this
@@ -54,10 +49,6 @@ module.exports  = {
               require(entry)(this.app);
           }
       });
-
-      if( reportErrors ) {
-          // this.app.use(Raven.errorHandler());
-      }
 
       require('./middleware/error_handling')(this.app);
 	},
