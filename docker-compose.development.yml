@@ -203,8 +203,6 @@ services:
       - openstad-admin-server-init:/opt/admin-server/init
     entrypoint: |
       bash -c "
-        echo '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-        echo $$CLIENT_ID $$CLIENT_SECRET
         npm run dev
       "
 
