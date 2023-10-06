@@ -15,9 +15,11 @@ module.exports = function( req, res, next ) {
 		url = config.url || req.protocol + '://' + req.hostname;
 	}
 
-	if (config.dev && config.dev['Header-Access-Control-Allow-Origin']) {
+	if (config.dev && config.dev['Header-Access-Control-Allow-Origin'] && process.env.NODE_ENV == 'development') {
+console.log('==1');
     res.header('Access-Control-Allow-Origin', config.dev['Header-Access-Control-Allow-Origin'] );
   } else {
+    console.log('==2', config.dev, process.env.NODE_ENV);
     res.header('Access-Control-Allow-Origin', url );
   }
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');

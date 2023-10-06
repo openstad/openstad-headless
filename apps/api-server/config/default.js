@@ -45,7 +45,7 @@ let defaultConfig = {
   },
 
 	express: {
-		port: process.env.PORT || process.env.API_PORT || 8082,
+		port: process.env.PORT || process.env.API_PORT || process.env.API_EXPRESS_PORT || 8082,
 		rendering: {
 			"templateDirs": ["html/appName"],
 			"globals" : {}
@@ -106,6 +106,7 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
       openstad: AUTH_ADAPTER_OPENSTAD || {
         modulePath: process.env.AUTH_ADAPTER_OPENSTAD_MODULEPATH || './src/adapter/openstad',
         serverUrl: process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL ||  process.env.AUTH_API_URL || null,
+        redirectUrl: process.env.AUTH_ADAPTER_OPENSTAD_REDIRECTURL ||  process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL ||  process.env.AUTH_API_URL || null,
         userMapping: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING || JSON.stringify({
           identifier: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING_IDENTIFIER || 'user_id',
           name: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING_NAME || "user => `${user.name || ''}`.trim() || null",
