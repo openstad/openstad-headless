@@ -29,7 +29,7 @@ export default function ProjectWidgets() {
           },
           {
             name: "Widgets",
-            url: "/projects/1/widgets",
+            url: `/projects/${project}/widgets`,
           },
         ]}
       >
@@ -43,7 +43,7 @@ export default function ProjectWidgets() {
           <ul>
           {widgets?.map((widget: any) => (
               <Link
-                href={`/projects/${project}/widgets/${widget.id}/${widget.widgetType.technicalName}`}>
+                href={`/projects/${project}/widgets/${widget.widgetType.technicalName}/${widget.id}`}>
                 <li className="grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                   <div className="col-span-3">
                   <strong className="">
