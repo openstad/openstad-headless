@@ -1,9 +1,25 @@
 require('dotenv').config();
 if (typeof process.env.FORCE_HTTP == 'undefined') process.env.FORCE_HTTP = 'yes';
-const config = require('./config');
 const fs = require('fs').promises;
 
 (async function() {
+
+  // re-use mysql password
+  if (!process.env.DB_PASSWORD) {
+    try {
+      let current = await fs.readFile('./.env.docker');
+      current = current.toString();
+      let match = current.match(/MYSQL_ROOT_PASSWORD=([^\r\n]+)/);
+      if (match) {
+        process.env.DB_PASSWORD = match[1];
+      }
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
+  const config = require('./config');
+
   try {
     let configfile = `
 MYSQL_ROOT_PASSWORD=${ process.env.DB_PASSWORD }
