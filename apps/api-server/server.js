@@ -1,8 +1,6 @@
 require('dotenv').config();
 const config = require('config');
 
-console.log(process.env);
-
 // Env variable used by npm's `debug` package.
 process.env.DEBUG = config.logging;
 
