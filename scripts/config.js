@@ -58,7 +58,7 @@ process.env.API_COOKIE_SECRET = process.env.API_COOKIE_SECRET || generateRandomT
 process.env.API_COOKIE_ONLY_SECURE = process.env.API_COOKIE_ONLY_SECURE || process.env.API_COOKIE_ONLY_SECURE != 'false' ? true : false;
 process.env.API_JWT_SECRET = process.env.API_JWT_SECRET || generateRandomToken({ length: 64 });
 
-process.env.API_FIXED_AUTH_KEY = API_FIXED_AUTH_KEY;
+process.env.API_FIXED_AUTH_KEY = JSON.stringify([{ "token": API_FIXED_AUTH_KEY, "userId": "1", "authProvider": "openstad" }]);
 
 // auth server
 process.env.AUTH_APP_URL = process.env.AUTH_APP_URL || AUTH_URL || '';
