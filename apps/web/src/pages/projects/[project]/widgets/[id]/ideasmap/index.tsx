@@ -1,7 +1,7 @@
 import React from 'react'
-import { PageLayout } from "../../../../../components/ui/page-layout"
-import { Button } from '../../../../../components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../../components/ui/tabs";
+import { PageLayout } from "../../../../../../components/ui/page-layout"
+import { Button } from '../../../../../../components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../../../components/ui/tabs";
 import WidgetIdeasMapMaps from './maps';
 import WidgetIdeasMapButton from './button';
 import WidgetIdeasMapCounter from './counter';

@@ -1,7 +1,6 @@
 import React from 'react'
-import { PageLayout } from "../../../../../components/ui/page-layout"
-import { Button } from '../../../../../components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../../components/ui/tabs";
+import { PageLayout } from "../../../../../../components/ui/page-layout"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../../../components/ui/tabs";
 import WidgetResourceOverviewGeneral from './general';
 import WidgetResourceOverviewImage from './image';
 import WidgetResourceOverviewDisplay from './display';

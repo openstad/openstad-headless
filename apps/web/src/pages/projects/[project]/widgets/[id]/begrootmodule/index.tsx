@@ -1,12 +1,12 @@
 import React from "react";
-import { Button } from "../../../../../components/ui/button";
-import { PageLayout } from "../../../../../components/ui/page-layout";
+import { Button } from "../../../../../../components/ui/button";
+import { PageLayout } from "../../../../../../components/ui/page-layout";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "../../../../../components/ui/tabs";
+} from "../../../../../../components/ui/tabs";
 import BegrootmoduleVoting from "./voting";
 import BegrootmoduleDisplay from "./display";
 import BegrootmoduleSorting from "./sorting";

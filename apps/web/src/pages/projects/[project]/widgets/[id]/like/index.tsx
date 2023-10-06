@@ -1,8 +1,8 @@
 import React from 'react'
-import { PageLayout } from "../../../../../components/ui/page-layout"
-import { Button } from '../../../../../components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormLabel } from "../../../../../components/ui/form"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../../components/ui/select";
+import { PageLayout } from "../../../../../../components/ui/page-layout"
+import { Button } from '../../../../../../components/ui/button'
+import { Form, FormControl, FormField, FormItem, FormLabel } from "../../../../../../components/ui/form"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../../../components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
@@ -73,7 +73,7 @@ export default function WidgetLikes() {
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="claps">Claps</SelectItem>
+                                                <SelectItem value="claps">Claps</SelectItem>../
                                             </SelectContent>
                                         </Select>
                                     </FormItem>
