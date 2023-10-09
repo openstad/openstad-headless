@@ -192,10 +192,9 @@ services:
       - NEXTAUTH_SECRET=${AUTH_ADMIN_CLIENT_SECRET}
       - CLIENT_ID=${AUTH_ADMIN_CLIENT_ID}
       - CLIENT_SECRET=${AUTH_ADMIN_CLIENT_SECRET}
-      - OAUTH_URL=http://openstad-auth-server:${AUTH_PORT}
-      - OAUTH_URL_INTERNAL=${AUTH_APP_URL}
+      - OAUTH_URL=${AUTH_APP_URL}
+      - OAUTH_URL_INTERNAL=http://openstad-auth-server:${AUTH_PORT}
       - API_URL=http://openstad-api-server:${API_PORT}
-      - API_URL_INTERNAL=${API_URL}
       - PORT=${ADMIN_PORT}
     ports:
       - "${ADMIN_PORT}:${ADMIN_PORT}"
@@ -212,7 +211,6 @@ services:
         echo OAUTH_URL $${OAUTH_URL}
         echo OAUTH_URL_INTERNAL $${OAUTH_URL_INTERNAL}
         echo API_URL $${API_URL}
-        echo API_URL_INTERNAL $${API_URL_INTERNAL}
         echo PORT $${PORT}
         npm run dev
       "
