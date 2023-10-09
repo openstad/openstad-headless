@@ -4,8 +4,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../../../comp
 import ArgumentsGeneral from './general'
 import ArgumentsList from './list'
 import ArgumentsForm from './form'
+import { useRouter } from 'next/router';
+import useSWR from "swr";
 
 export default function WidgetArguments() {
+    const router = useRouter();
+    const id = router.query.id;
+    const projectId = router.query.project;
+
+    const { data: widget, isLoading: isLoadingWidget } = useSWR(
+        projectId && id
+        ? `/api/openstad/api/project/${projectId}/widgets/${id}?includeType=1`
+        : null
+    );
+
+    if(isLoadingWidget || !widget) {
+        return null;
+    }
+
     return(
         <div>
             <PageLayout
@@ -21,7 +37,7 @@ export default function WidgetArguments() {
                 },
                 {
                     name: "Arguments",
-                    url: "/projects/1/widgets/arguments"
+                    url: `/projects/1/widgets/arguments/${id}`
                 }
             ]}
             >
@@ -33,13 +49,13 @@ export default function WidgetArguments() {
                             <TabsTrigger value="form">Formulier</TabsTrigger>
                         </TabsList>
                         <TabsContent value="general" className="w-1/2">
-                            <ArgumentsGeneral />
+                            <ArgumentsGeneral config={widget.config}  />
                         </TabsContent> 
                         <TabsContent value="list" className="w-1/2">
-                            <ArgumentsList />
+                            <ArgumentsList config={widget.config} />
                         </TabsContent> 
                         <TabsContent value="form" className="w-1/2">
-                            <ArgumentsForm />
+                            <ArgumentsForm config={widget.config} />
                         </TabsContent> 
                     </Tabs>
                 </div>

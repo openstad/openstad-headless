@@ -8,16 +8,20 @@ import { useForm } from "react-hook-form";
 import * as z from 'zod'
 
 const formSchema = z.object({
-    title: z.string(),
-    placeholder: z.string()
-  });
+  title: z.string(),
+  placeholder: z.string()
+});
 
-export default function ArgumentsList() {
+type Props = {
+  config?: any
+}
+  
+export default function ArgumentsList({config}: Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
-        title: "Argumenten",
-        placeholder: "Nog geen reacties geplaatst."
+        title: config?.list?.title || "Argumenten",
+        placeholder: config?.list?.placeholder || "Nog geen reacties geplaatst."
       },
     });
   

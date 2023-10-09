@@ -58,6 +58,7 @@ router.use( '/project/:projectId(\\d+)/action', require('./action') );
 
 //widgets
 router.use('/project/:projectId(\\d+)/widgets', require('./widget') );
+router.use('/project/:projectId(\\d+)/widgets/:id(\\d+)', require('./widget') );
 
 //widget types
 router.use('/widget-types', require('./widget-type'));

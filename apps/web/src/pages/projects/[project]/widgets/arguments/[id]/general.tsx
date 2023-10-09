@@ -13,11 +13,17 @@ const formSchema = z.object({
     voteReactions: z.boolean()
   });
 
-export default function ArgumentsGeneral() {
+type Props = {
+  config?: any
+}
+
+export default function ArgumentsGeneral({config}:Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
-        sentiment: "for"
+        sentiment: config?.general?.sentiment || "for",
+        replyReactions: config?.general?.replyReactions || false,
+        voteReactions: config?.general?.voteReactions || false
       },
     });
   
@@ -34,8 +40,7 @@ export default function ArgumentsGeneral() {
           <Separator className="mb-4" />
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4"
-          >
+            className="space-y-4">
             <FormField
             control={form.control}
             name="sentiment"
@@ -46,8 +51,7 @@ export default function ArgumentsGeneral() {
                 </FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                  defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Voor" />
@@ -72,17 +76,16 @@ export default function ArgumentsGeneral() {
                     Is het toegestaan om te reageren op reacties?
                 </FormLabel>
                 <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                  onValueChange={(e:string) => field.onChange(e === 'true')}
+                  defaultValue={field.value ? "true":"false"}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Ja" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Yes">Ja</SelectItem>
-                    <SelectItem value="No">Nee</SelectItem>
+                    <SelectItem value='true'>Ja</SelectItem>
+                    <SelectItem value='false'>Nee</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -98,17 +101,17 @@ export default function ArgumentsGeneral() {
                     Is het mogelijk om te stemmen op reacties?
                 </FormLabel>
                 <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                  onValueChange={(e:string) => field.onChange(e === 'true')}
+                  defaultValue={field.value ? "true":"false"}>
+
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Ja" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Yes">Ja</SelectItem>
-                    <SelectItem value="No">Nee</SelectItem>
+                  <SelectItem value='true'>Ja</SelectItem>
+                    <SelectItem value='false'>Nee</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

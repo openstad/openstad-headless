@@ -4,8 +4,6 @@ const auth        = require('../../middleware/sequelize-authorization-middleware
 const db          = require('../../db');
 
 
-
-
 router.all('*', function(req, res, next) {
     req.scope = [];
 
@@ -15,31 +13,58 @@ router.all('*', function(req, res, next) {
     return next();
   });
 
-    // list widgets
-    // --------------
-    router.route('/')
-	.get(auth.useReqUser)
+// list widgets
+// --------------
+router.route('/')
+.get(auth.useReqUser)
 
-    .get(function(req, res, next) {
+.get(function(req, res, next) {
 
-        let { dbQuery } = req;
+    let { dbQuery } = req;
+    dbQuery.where = {
+    projectId: req.params.projectId,
+    ...req.queryConditions,
+    }
+
+    db.Widget
+    .scope(...req.scope)
+    .findAndCountAll(dbQuery)
+    .then(function(result) {
+        const { rows } = result;
+        req.results = rows;    
+        return next();
+    })
+    .catch(next);
+})
+.get(function(req, res, next) {
+    res.json(req.results);
+});
+
+// one project routes: get project
+// -------------------------
+router.route('/:id') //(\\d+)
+    .get(auth.useReqUser)
+	.get(function(req, res, next) {
+		const id = req.params.id;
+
+        const { dbQuery } = req;
         dbQuery.where = {
-          projectId: req.params.projectId,
-          ...req.queryConditions,
+         id,
+        ...req.queryConditions,
         }
-
+    
         db.Widget
         .scope(...req.scope)
         .findAndCountAll(dbQuery)
-          .then(function(result) {
+        .then(function(result) {
             const { rows } = result;
-            req.results = rows;    
+            req.results = rows[0];    
             return next();
-          })
-          .catch(next);
-      })
-      .get(function(req, res, next) {
+        })
+        .catch(next);
+	})
+    .get(function(req, res, next) {
         res.json(req.results);
-      });
+    });
     
 module.exports = router;

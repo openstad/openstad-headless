@@ -12,11 +12,16 @@ const formSchema = z.object({
     placeholder: z.string()
   });
 
-export default function ArgumentsForm() {
+type Props = {
+  config?: any
+}
+  
+export default function ArgumentsForm({config}: Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
-        placeholder: "Type hier uw reactie."
+        intro: config?.form?.intro || "Type hier de intro tekst",
+        placeholder: config?.form?.placeholder || "Type hier uw reactie."
       },
     });
   
@@ -45,7 +50,7 @@ export default function ArgumentsForm() {
                         <Input {...field} />
                     </FormControl>
                 </FormItem>
-            )}
+              )}
             />
             <FormField
             control={form.control}
