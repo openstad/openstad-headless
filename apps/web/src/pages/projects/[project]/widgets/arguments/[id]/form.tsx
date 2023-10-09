@@ -13,10 +13,11 @@ const formSchema = z.object({
   });
 
 type Props = {
-  config?: any
+  config?: any;
+  handleSubmit?: (config:any) => void;
 }
   
-export default function ArgumentsForm({config}: Props) {
+export default function ArgumentsForm({config, handleSubmit}: Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
@@ -26,7 +27,7 @@ export default function ArgumentsForm({config}: Props) {
     });
   
     function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+      handleSubmit && handleSubmit({form: values});
     }
   
     return (

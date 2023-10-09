@@ -4,7 +4,7 @@ import logger from "@/lib/logger";
 
 export default withAuth(
   function middleware(req) {
-
+    
     if (req.nextUrl.pathname.startsWith("/api/openstad")) {
       if (!req.nextauth.token?.accessToken) {
         logger.error("No access token in JWT");

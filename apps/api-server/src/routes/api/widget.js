@@ -17,7 +17,6 @@ router.all('*', function(req, res, next) {
 // --------------
 router.route('/')
 .get(auth.useReqUser)
-
 .get(function(req, res, next) {
 
     let { dbQuery } = req;
@@ -40,31 +39,40 @@ router.route('/')
     res.json(req.results);
 });
 
-// one project routes: get project
+// one widget routes: get widget
 // -------------------------
 router.route('/:id') //(\\d+)
+    .all(function(req, res, next) {
+        const id = req.params.id;
+        let query = { where: { id } }
+
+        db.Widget
+            .scope(...req.scope)            
+            .findOne(query)
+            .then(found => {
+                if ( !found ) throw new Error('Widget not found');
+                req.results = found;
+                req.widget = req.results; // middleware expects this to exist
+                next();
+            })
+        .catch(next);
+    })
+
     .get(auth.useReqUser)
 	.get(function(req, res, next) {
-		const id = req.params.id;
-
-        const { dbQuery } = req;
-        dbQuery.where = {
-         id,
-        ...req.queryConditions,
-        }
-    
-        db.Widget
-        .scope(...req.scope)
-        .findAndCountAll(dbQuery)
-        .then(function(result) {
-            const { rows } = result;
-            req.results = rows[0];    
-            return next();
-        })
-        .catch(next);
+        const widget = req.widget;
+        res.json(widget);
 	})
-    .get(function(req, res, next) {
-        res.json(req.results);
-    });
+    
+    // Update widget
+    .put(auth.useReqUser)
+	.put(async function(req, res, next) {
+		const widget = req.widget;
+        const config = {...widget.config, ...(req.body?.config || {})}; 
+
+        if(config) {
+            widget.update({config}).then(result => res.json(result))
+        }
+	});
     
 module.exports = router;
