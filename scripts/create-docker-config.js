@@ -13,6 +13,22 @@ const fs = require('fs').promises;
       if (match) {
         process.env.DB_PASSWORD = match[1];
       }
+      match = current.match(/AUTH_ADMIN_CLIENT_ID=([^\r\n]+)/);
+      if (match) {
+        process.env.AUTH_ADMIN_CLIENT_ID = match[1];
+      }
+      match = current.match(/AUTH_ADMIN_CLIENT_SECRET=([^\r\n]+)/);
+      if (match) {
+        process.env.AUTH_ADMIN_CLIENT_SECRET = match[1];
+      }
+      match = current.match(/AUTH_FIRST_CLIENT_ID=([^\r\n]+)/);
+      if (match) {
+        process.env.AUTH_FIRST_CLIENT_ID = match[1];
+      }
+      match = current.match(/AUTH_FIRST_CLIENT_SECRET=([^\r\n]+)/);
+      if (match) {
+        process.env.AUTH_FIRST_CLIENT_SECRET = match[1];
+      }
     } catch(err) {
       console.log(err);
     }
