@@ -12,16 +12,24 @@ const formSchema = z.object({
     scrollBack: z.boolean(),
   });
 
-export default function BegrootmoduleAuthentication() {
+  type Props = {
+    config?: any;
+    handleSubmit?: (config:any) => void
+  }
+  
+
+export default function BegrootmoduleAuthentication({config, handleSubmit}: Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
-        authEmbedded: 'no'
+        authEmbedded: config?.authentication?.authEmbedded || 'no',
+        scrollBack: config?.authentication?.scrollBack || false
       },
     });
   
+
     function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+      handleSubmit && handleSubmit({authentication: values});
     }
   
     return (
@@ -72,17 +80,16 @@ export default function BegrootmoduleAuthentication() {
                   Is het mogelijk om terug naar het budgetblok te scrollen wanneer iemand terugkeert van het gebruiken van zijn/haar stemcode in oAuth?
                 </FormLabel>
                 <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                  onValueChange={(e:string) => field.onChange(e === 'true')}
+                  defaultValue={field.value ? "true":"false"}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Ja" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Yes">Ja</SelectItem>
-                    <SelectItem value="No">Nee</SelectItem>
+                    <SelectItem value='true'>Ja</SelectItem>
+                    <SelectItem value='false'>Nee</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

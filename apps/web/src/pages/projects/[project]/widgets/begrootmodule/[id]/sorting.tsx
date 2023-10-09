@@ -50,17 +50,27 @@ const formSchema = z.object({
     defaultSorting: z.enum(['newest', 'oldest', 'random', 'mostLikes', 'leastLikes', 'ranked', 'highestCost', 'lowestCost'])
   });
 
-export default function BegrootmoduleSorting() {
+
+type Props = {
+    config?: any;
+    handleSubmit?: (config:any) => void
+}
+
+
+export default function BegrootmoduleSorting({config, handleSubmit}: Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
-        sorting: [],
-        defaultSorting: 'newest'
+        sorting: config?.sorting?.options || [],
+        defaultSorting: config?.sorting?.defaultSorting || 'newest'
       },
     });
   
     function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+        handleSubmit && handleSubmit({sorting: {
+            options: values.sorting, 
+            defaultSorting: values.defaultSorting
+        }});
     }
   
     return (

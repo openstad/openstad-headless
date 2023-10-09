@@ -22,31 +22,39 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 const formSchema = z.object({
-  voting: z.boolean(),
+  allowVoting: z.boolean(),
   votingType: z.enum([
     "budgeting",
     "budgetingPerTheme",
     "count",
     "countPerTheme",
   ]),
-  maximumSelectableIdeas: z.number().gt(0),
-  minimumSelectableIdeas: z.number().gte(0),
-  budget: z.number().gt(0),
-  minimumBudget: z.number().gt(0),
+  maximumSelectableIdeas: z.coerce.number().gt(0, "Nummer moet groter zijn dan 0"),
+  minimumSelectableIdeas: z.coerce.number().gte(0, "Nummer moet groter of gelijk zijn aan 0"),
+  budget: z.coerce.number().gt(0, "Nummer moet groter zijn dan 0"),
+  minimumBudget: z.coerce.number().gt(0, "Nummer moet groter zijn dan 0"),
 });
 
-export default function BegrootmoduleVoting() {
+type Props = {
+  config?: any;
+  handleSubmit?: (config:any) => void
+}
+
+export default function BegrootmoduleVoting({config, handleSubmit}: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      votingType: "budgeting",
-      maximumSelectableIdeas: 1000,
-      minimumSelectableIdeas: 0,
+      allowVoting: config?.voting?.allowVoting || false,
+      votingType: config?.voting?.votingType || "budgeting",
+      maximumSelectableIdeas: config?.voting?.maximumSelectableIdeas || 1000,
+      minimumSelectableIdeas: config?.voting?.minimumSelectableIdeas || 0,
+      minimumBudget: config?.voting?.minimumBudget || 0,
+      budget: config?.voting?.budget || 0,
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    handleSubmit && handleSubmit({voting: values});
   }
 
   return (
@@ -58,21 +66,23 @@ export default function BegrootmoduleVoting() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="voting"
+          name="allowVoting"
           render={({ field }) => (
             <FormItem>
               <FormLabel>
                 Sta stemmen toe (werkt op het moment alleen met Gridder)
               </FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select  
+                onValueChange={(e:string) => field.onChange(e === 'true')}
+                defaultValue={field.value ? "true":"false"}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Nee" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Yes">Ja</SelectItem>
-                  <SelectItem value="No">Nee</SelectItem>
+                  <SelectItem value='true'>Ja</SelectItem>
+                  <SelectItem value='false'>Nee</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />

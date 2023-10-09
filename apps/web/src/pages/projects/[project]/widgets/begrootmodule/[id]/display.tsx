@@ -17,16 +17,26 @@ const formSchema = z.object({
     originalIdeaUrl: z.string().url(),
   });
 
-export default function BegrootmoduleDisplay() {
+  type Props = {
+    config?: any;
+    handleSubmit?: (config:any) => void
+  }
+
+export default function BegrootmoduleDisplay({config, handleSubmit}:Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
-        unavailableButton: "Geen ruimte"
+        displayRanking: config?.display?.displayRanking || false,
+        displayPriceLabel: config?.display?.displayPriceLabel || false,
+        showVoteCount: config?.display?.showVoteCount || false,
+        unavailableButton: config?.display?.unavailableButton || "Geen ruimte",
+        originalIdea: config?.display?.originalIdea || false,
+        originalIdeaUrl: config?.display?.originalIdeaUrl || '',
       },
     });
   
     function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+      handleSubmit && handleSubmit({display: values});
     }
   
     return (
@@ -38,8 +48,7 @@ export default function BegrootmoduleDisplay() {
           <Separator className="mb-4" />
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4"
-          >
+            className="space-y-4">
             <FormField
               control={form.control}
               name="displayRanking"
@@ -49,17 +58,16 @@ export default function BegrootmoduleDisplay() {
                     Weergeef de ranking
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                    onValueChange={(e:string) => field.onChange(e === 'true')}
+                    defaultValue={field.value ? "true": "false"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Nee" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -75,17 +83,16 @@ export default function BegrootmoduleDisplay() {
                     Weergeef de prijslabel
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                     onValueChange={(e:string) => field.onChange(e === 'true')}
+                     defaultValue={field.value ? "true":"false"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Ja" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -101,17 +108,16 @@ export default function BegrootmoduleDisplay() {
                     Weergeef de hoeveelheid stemmen
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                     onValueChange={(e:string) => field.onChange(e === 'true')}
+                     defaultValue={field.value ? "true":"false"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Nee" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -140,17 +146,16 @@ export default function BegrootmoduleDisplay() {
                     Display de URL van het originele idee
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                    onValueChange={(e:string) => field.onChange(e === 'true')}
+                    defaultValue={field.value ? "true":"false"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Ja" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

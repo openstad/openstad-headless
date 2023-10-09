@@ -13,8 +13,50 @@ import BegrootmoduleSorting from "./sorting";
 import BegrootmoduleExplanation from "./explanation";
 import BegrootmoduleAuthentication from "./authentication";
 import BegrootmoduleLabels from "./label";
+import useSWRMutation from "swr/mutation";
+import { useRouter } from "next/router";
+import useSWR from "swr";
 
 export default function WidgetBegrootmodule() {
+  const router = useRouter();
+  const id = router.query.id;
+  const projectId = router.query.project;
+
+  const { data: widget, isLoading: isLoadingWidget } = useSWR(
+      projectId && id
+      ? `/api/openstad/api/project/${projectId}/widgets/${id}?includeType=1`
+      : null
+  );
+
+  // Todo Can this be hoisted above widgets so it can be shared? Now it must be placed in every index of a widget
+  async function updateConfig(url:string, config:any) {
+    await fetch(url, {
+      method: 'PUT',
+      headers:{
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({config: config.arg})
+    })
+}
+
+
+const { trigger } = useSWRMutation(`/api/openstad/api/project/${projectId}/widgets/${id}?includeType=1`, updateConfig, {
+    onSuccess(data, key, config) {
+        console.log({success: data});
+    },
+    onError(err, key, config) {
+        console.log({err});
+    },
+});
+
+const onSubmitHandler = (config: any) =>  {
+  trigger(config);
+}
+
+if(isLoadingWidget || !widget) {
+  return null;
+}
+
   return (
     <div>
       <PageLayout
@@ -45,22 +87,32 @@ export default function WidgetBegrootmodule() {
               <TabsTrigger value="labels">Labels</TabsTrigger>
             </TabsList>
             <TabsContent value="voting" className="w-1/2">
-              <BegrootmoduleVoting />
+              <BegrootmoduleVoting 
+                config={widget.config} 
+                handleSubmit={onSubmitHandler} />
             </TabsContent>
             <TabsContent value="display" className="w-1/2">
-              <BegrootmoduleDisplay />
+              <BegrootmoduleDisplay 
+                config={widget.config} 
+                handleSubmit={onSubmitHandler} />
             </TabsContent>
             <TabsContent value="sorting" className="w-1/2">
-              <BegrootmoduleSorting />
+              <BegrootmoduleSorting 
+                config={widget.config} 
+                handleSubmit={onSubmitHandler} />
             </TabsContent>
             <TabsContent value="explanation" className="w-1/2">
-              <BegrootmoduleExplanation />
+              <BegrootmoduleExplanation  
+                config={widget.config} 
+                handleSubmit={onSubmitHandler} />
             </TabsContent>
             <TabsContent value="authentication" className="w-1/2">
-              <BegrootmoduleAuthentication />
+              <BegrootmoduleAuthentication  
+                config={widget.config} handleSubmit={onSubmitHandler}/>
             </TabsContent>
             <TabsContent value="labels" className="w-1/2">
-              <BegrootmoduleLabels />
+              <BegrootmoduleLabels  
+              config={widget.config} handleSubmit={onSubmitHandler}/>
             </TabsContent>
           </Tabs>
         </div>

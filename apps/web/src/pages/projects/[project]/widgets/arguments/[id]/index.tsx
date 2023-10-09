@@ -22,7 +22,6 @@ export default function WidgetArguments() {
 
 
     async function updateConfig(url:string, config:any) {
-        console.log({config});
         await fetch(url, {
           method: 'PUT',
           headers:{

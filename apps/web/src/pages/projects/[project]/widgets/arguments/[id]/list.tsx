@@ -39,8 +39,7 @@ export default function ArgumentsList({config, handleSubmit}: Props) {
           <Separator className="mb-4" />
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4"
-          >
+            className="space-y-4">
             <FormField
             control={form.control}
             name="title"
