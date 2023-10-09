@@ -1,28 +1,22 @@
 # Image used for building dependencies
-FROM node:16.16.0-alpine as builder
+FROM node:18-slim as builder
 
 # Create app directory
 WORKDIR /opt/auth-server
 
-# Install all base dependencies.
-RUN apk add --no-cache --update openssl g++ make python3 musl-dev bash
-
-# Symlink python to python3
-RUN ln -s /usr/bin/python3 /usr/bin/python && \
-    ln -s /usr/bin/pip3 /usr/bin/pip
+# Install all base dependencies.# add perl for shell scripts
+RUN apt-get update
+RUN apt-get install -y python3 make cmake git bash g++
 
 # Install app dependencies
 COPY --chown=node:node package*.json .
-RUN npm config set unsafe-perm true
-RUN npm install -g node-gyp
-RUN npm install bcrypt --legacy-peer-deps
-RUN npm install --legacy-peer-deps
+RUN npm install
 RUN npm install -g nodemon
 
 RUN rm -rf /var/cache/apk/*
 
 # Release image 
-FROM node:16.16.0-alpine
+FROM node:18-slim
 
 # Label for tracking
 LABEL nl.openstad.container="auth" nl.openstad.version="0.0.1" nl.openstad.release-date="2023-09-25"

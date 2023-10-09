@@ -32,7 +32,7 @@ IMAGE_DB_NAME=${ process.env.IMAGE_DB_NAME }
 API_URL=${ process.env.API_URL }
 API_PORT=${ process.env.API_PORT }
 API_HOSTNAME=${ process.env.API_DOMAIN }
-API_EXPRESS_PORT=${ process.env.API_PORT }
+API_PORT=${ process.env.API_PORT }
 API_DATABASE_USER=${ process.env.API_DB_USERNAME }
 API_DATABASE_PASSWORD=${ process.env.API_DB_PASSWORD }
 API_DATABASE_DATABASE=${ process.env.API_DB_NAME }
@@ -89,10 +89,6 @@ ADMIN_PORT=${ process.env.ADMIN_PORT }
 ADMIN_SECRET=${ process.env.ADMIN_SECRET }
 `
 
-    const ip = require("ip");
-    let localIP = ip.address();
-    configfile = configfile.replace(/localhost/g, localIP);
-    
     await fs.writeFile('./.env.docker', configfile);
 
     console.log(`
@@ -101,11 +97,11 @@ You can now build and run a docker environment using the command.
 docker-compose -f docker-compose.development.yml --env-file .env.docker up --build
    
 Once that is running you can visit the servers on these urls:
-List ideas: ${ process.env.API_URL.replace(/localhost/g, localIP) }/api/project/1/idea
-Login: ${ process.env.API_URL.replace(/localhost/g, localIP) }/auth/project/1/login
-Which should redirect you to the login form: ${ process.env.AUTH_APP_URL.replace(/localhost/g, localIP) }/auth/code/login?clientId=uniquecode
-Show an image: ${ process.env.IMAGE_APP_URL.replace(/localhost/g, localIP) }/image/forum.romanum.06.webp
-Admin server: ${ process.env.ADMIN_URL.replace(/localhost/g, localIP) }/
+List ideas: ${ process.env.API_URL }/api/project/1/idea
+Login: ${ process.env.API_URL }/auth/project/1/login
+Which should redirect you to the login form: ${ process.env.AUTH_APP_URL }/auth/code/login?clientId=uniquecode
+Show an image: ${ process.env.IMAGE_APP_URL }/image/forum.romanum.06.webp
+Admin server: ${ process.env.ADMIN_URL }/
 
 You can login using the code ${ process.env.AUTH_FIRST_LOGIN_CODE }
 
