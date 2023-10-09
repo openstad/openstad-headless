@@ -16,15 +16,26 @@ const formSchema = z.object({
     labelDone: z.string(),
   });
 
-export default function BegrootmoduleLabels() {
+type Props = {
+  config?: any;
+  handleSubmit?: (config:any) => void
+}
+
+export default function BegrootmoduleLabels({config, handleSubmit} : Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
+        labelOpen: config?.labels?.labelOpen || '',
+        labelClosed: config?.labels?.labelClosed || '',
+        labelAccepted: config?.labels?.labelAccepted || '',
+        labelDenied: config?.labels?.labelDenied || '',
+        labelBusy: config?.labels?.labelBusy || '',
+        labelDone: config?.labels?.labelDone || '',
       },
     });
   
     function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+      handleSubmit && handleSubmit({labels: values});
     }
   
     return (
