@@ -77,26 +77,6 @@ export function Sidenav({
             {narrow ? "" : "Gebruikers"}
           </Button>
         </Link>
-        <Link href="settings">
-          <Button
-            variant={location.startsWith("/settings") ? "secondary" : "ghost"}
-            className={cn(
-              "w-full flex flex-row justify-start",
-              narrow ? "p-0 h-10 w-10 justify-center" : null
-            )}
-            onClick={(e) => {}}
-          >
-            <Settings
-              size="20"
-              className={
-                location.startsWith("/settings")
-                  ? "text-brand"
-                  : "text-foreground"
-              }
-            />
-            {narrow ? "" : "Instellingen"}
-          </Button>
-        </Link>
       </div>
       <div className="flex-grow"></div>
       <div
