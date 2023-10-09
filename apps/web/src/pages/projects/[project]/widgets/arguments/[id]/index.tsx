@@ -34,7 +34,7 @@ export default function WidgetArguments() {
     
     const { trigger } = useSWRMutation(`/api/openstad/api/project/${projectId}/widgets/${id}?includeType=1`, updateConfig, {
         onSuccess(data, key, config) {
-            console.log({success: data});
+            location.reload();
         },
         onError(err, key, config) {
             console.log({err});

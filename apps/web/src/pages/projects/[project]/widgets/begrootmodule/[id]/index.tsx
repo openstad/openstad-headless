@@ -1,5 +1,4 @@
 import React from "react";
-import { Button } from "../../../../../../components/ui/button";
 import { PageLayout } from "../../../../../../components/ui/page-layout";
 import {
   Tabs,
@@ -39,10 +38,9 @@ export default function WidgetBegrootmodule() {
     })
 }
 
-
 const { trigger } = useSWRMutation(`/api/openstad/api/project/${projectId}/widgets/${id}?includeType=1`, updateConfig, {
     onSuccess(data, key, config) {
-        console.log({success: data});
+      location.reload();
     },
     onError(err, key, config) {
         console.log({err});
