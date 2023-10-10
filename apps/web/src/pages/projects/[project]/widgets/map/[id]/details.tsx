@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
 
-const displayButtons = [
+const selectableOptions = [
     {
         id: "facebook",
         label: "Facebook"
@@ -32,21 +32,28 @@ const displayButtons = [
 const formSchema = z.object({
     template: z.string(),
     link: z.string().url(),
-    displayShare: z.string(),
-    displayButtons: z.string().array()
+    displayShare: z.boolean(),
+    selectableOptions: z.string().array()
 })
 
-export default function WidgetMapDetails() {
+type Props = {
+  config?: any;
+  handleSubmit?: (config:any) => void
+}
+
+export default function WidgetMapDetails({config, handleSubmit}: Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
-        template: '<span class="ocs-gray-text">Door </span>{username} <span class="ocs-gray-text"> op </span>{createDate} <span class="ocs-gray-text">&nbsp;&nbsp;|&nbsp;&nbsp;</span> <span class="ocs-gray-text">Thema: </span>{theme}',
-        displayButtons: []
+        template: config?.details?.template || '<span class="ocs-gray-text">Door </span>{username} <span class="ocs-gray-text"> op </span>{createDate} <span class="ocs-gray-text">&nbsp;&nbsp;|&nbsp;&nbsp;</span> <span class="ocs-gray-text">Thema: </span>{theme}',
+        link: config?.details?.link || '',
+        displayShare: config?.details?.displayShare || false,
+        selectableOptions: config?.details?.selectableOptions || []
       },
     });
   
     function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+      handleSubmit && handleSubmit({details: values});
     }
   
     return (
@@ -95,17 +102,16 @@ export default function WidgetMapDetails() {
                     Worden de share buttons weergegeven?
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                   onValueChange={(e:string) => field.onChange(e === 'true')}
+                   defaultValue={field.value ? "true": "false"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Ja" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -114,17 +120,17 @@ export default function WidgetMapDetails() {
             />
             <FormField
             control={form.control}
-            name="displayButtons"
+            name="selectableOptions"
             render={() => (
                 <FormItem>
                     <div>
                         <FormLabel>Selecteer uw gewenste sorteeropties</FormLabel>
                     </div>
-                    {displayButtons.map((item) => (
+                    {selectableOptions.map((item) => (
                         <FormField
                         key={item.id}
                         control={form.control}
-                        name="displayButtons"
+                        name="selectableOptions"
                         render={({ field }) => {
                             return (
                                 <FormItem

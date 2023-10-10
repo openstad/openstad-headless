@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,15 +20,29 @@ const formSchema = z.object({
     mobilePreviewNotLoggedInHTML: z.string(),
 })
 
-export default function WidgetMapContent() {
+type Props = {
+  config?: any;
+  handleSubmit?: (config:any) => void
+}
+
+export default function WidgetMapContent({config, handleSubmit}: Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
+        noSelectionLoggedInHTML: config?.content?.noSelectionLoggedInHTML || '',
+        noSelectionNotLoggedInHTML: config?.content?.noSelectionNotLoggedInHTML || '',
+        showNoSelectionBlock: config?.content?.showNoSelectionBlock || false,
+        selectionActiveLoggedInHTML: config?.content?.selectionActiveLoggedInHTML || '',
+        selectionInactiveLoggedInHTML: config?.content?.selectionInactiveLoggedInHTML || '',
+        mobilePreviewLoggedInHTML: config?.content?.mobilePreviewLoggedInHTML || '',
+        selectionActiveNotLoggedInHTML: config?.content?.selectionActiveNotLoggedInHTML || '',
+        selectionInactiveNotLoggedInHTML: config?.content?.selectionInactiveNotLoggedInHTML || '',
+        mobilePreviewNotLoggedInHTML: config?.content?.mobilePreviewNotLoggedInHTML || '',
       },
     });
   
     function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+      handleSubmit && handleSubmit({content: values});
     }
   
     return (
@@ -78,17 +91,16 @@ export default function WidgetMapContent() {
                     Weergave
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                    onValueChange={(e:string) => field.onChange(e === 'true')}
+                    defaultValue={field.value ? "true": "false"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Nee" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

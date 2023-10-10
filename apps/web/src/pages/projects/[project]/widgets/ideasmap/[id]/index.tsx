@@ -60,7 +60,7 @@ export default function WidgetIdeasMap() {
                 },
                 {
                     name: "Widgets",
-                    url: `projects/${projectId}/widgets`
+                    url: `/projects/${projectId}/widgets`
                 },
                 {
                     name: "Ideeën Map",

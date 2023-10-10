@@ -14,16 +14,23 @@ const formSchema = z.object({
     defaultImage: z.string()
 })
 
-export default function WidgetMapImage() {
+
+type Props = {
+  config?: any;
+  handleSubmit?: (config:any) => void
+}
+export default function WidgetMapImage({config, handleSubmit}: Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
-        aspectRatio: '16:9'
+        multipleImages: config?.image?.multipleImages || false,
+        aspectRatio: config?.image?.aspectRatio || '16:9',
+        defaultImage: config?.image?.defaultImage || '',
       },
     });
   
     function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+      handleSubmit && handleSubmit({image: values});
     }
   
     return (
@@ -46,17 +53,16 @@ export default function WidgetMapImage() {
                     Meerdere afbeeldingen bij één idee?
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                     onValueChange={(e:string) => field.onChange(e === 'true')}
+                     defaultValue={field.value ? "true": "false"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Nee" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

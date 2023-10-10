@@ -13,24 +13,31 @@ const formSchema = z.object({
     zoom: z.enum(['none', 'markers', 'area']),
     defaultLocation: z.string(),
     clustering: z.boolean(),
-    clusteringSensitivity: z.number(),
+    clusteringSensitivity: z.coerce.number(),
     clickingChoosesLocation: z.boolean(),
     mapIcon: z.enum(['select', 'details'])
 })
 
-export default function WidgetMapMap() {
+type Props = {
+  config?: any;
+  handleSubmit?: (config:any) => void
+}
+export default function WidgetMapMap({config, handleSubmit}: Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
-        variant: 'NLMaps',
-        zoom: 'none',
-        clusteringSensitivity: 40,
-        mapIcon: 'select'
+        variant: config?.map?.variant || 'NLMaps',
+        zoom: config?.map?.zoom || 'none',
+        defaultLocation: config?.map?.defaultLocation || '',
+        clustering: config?.map?.clustering || false,
+        clusteringSensitivity: config?.map?.clusteringSensitivity || 40,
+        clickingChoosesLocation: config?.map?.clickingChoosesLocation || false,
+        mapIcon:config?.map?.mapIcon || 'select'
       },
     });
   
     function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+      handleSubmit && handleSubmit({map: values});
     }
   
     return (
@@ -91,7 +98,7 @@ export default function WidgetMapMap() {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">Niet</SelectItem>
-                      <SelectItem value="marker">Op markers</SelectItem>
+                      <SelectItem value="markers">Op markers</SelectItem>
                       <SelectItem value="area">Op gebied</SelectItem>
                     </SelectContent>
                   </Select>
@@ -121,17 +128,16 @@ export default function WidgetMapMap() {
                     Clustering actief?
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                      onValueChange={(e:string) => field.onChange(e === 'true')}
+                      defaultValue={field.value ? "true": "false"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Ja" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -160,17 +166,16 @@ export default function WidgetMapMap() {
                     Op de kaart klikken selecteert een locatie?
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                      onValueChange={(e:string) => field.onChange(e === 'true')}
+                      defaultValue={field.value ? "true": "false"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Ja" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

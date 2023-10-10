@@ -11,16 +11,20 @@ const formSchema = z.object({
     searchLocations: z.enum(['ideasAndAddresses', 'ideas', 'addresses', 'none'])
 })
 
-export default function WidgetMapFilter() {
+type Props = {
+  config?: any;
+  handleSubmit?: (config:any) => void
+}
+export default function WidgetMapFilter({config, handleSubmit}: Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
-        searchLocations: 'ideasAndAddresses'
+        searchLocations: config?.filter?.searchLocations || 'ideasAndAddresses'
       },
     });
   
     function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+      handleSubmit && handleSubmit({filter: values});
     }
   
     return (

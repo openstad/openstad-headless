@@ -16,19 +16,24 @@ const formSchema = z.object({
     mobileCase: z.boolean()
 })
 
-export default function WidgetMapGeneral() {
+type Props = {
+  config?: any;
+  handleSubmit?: (config:any) => void
+}
+
+export default function WidgetMapGeneral({config, handleSubmit}: Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
-        display: 'full',
-        name: 'Inzending',
-        submissionField: 'theme',
-        filterLabel: "Alle thema's"
+        display: config?.general?.display || 'full',
+        name: config?.general?.name || 'Inzending',
+        submissionField: config?.general?.submissionField ||'theme',
+        filterLabel: config?.general?.filterLabel || "Alle thema's"
       },
     });
   
     function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+      handleSubmit && handleSubmit({general: values});
     }
   
     return (

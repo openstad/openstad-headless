@@ -17,16 +17,26 @@ const formSchema = z.object({
     reactionsAvailable: z.enum(['open', 'closed', 'limited'])
 })
 
-export default function WidgetMapReaction() {
+type Props = {
+  config?: any;
+  handleSubmit?: (config:any) => void
+}
+
+export default function WidgetMapReaction({config, handleSubmit}: Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
-        reactionsAvailable: 'open'
+        reactionsAvailable: config?.reaction?.reactionsAvailable || 'open',
+        displayReactions: config?.reaction?.displayReactions || false,
+        title: config?.reaction?.title || '',
+        textEmptyInput: config?.reaction?.textEmptyInput || '',
+        textAboveInput: config?.reaction?.textAboveInput || '',
+        idNonActiveReactions: config?.reaction?.idNonActiveReactions || '',
       },
     });
   
     function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+      handleSubmit && handleSubmit({reaction: values});
     }
   
     return (
@@ -49,17 +59,16 @@ export default function WidgetMapReaction() {
                     Weergave
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                    onValueChange={(e:string) => field.onChange(e === 'true')}
+                    defaultValue={field.value ? "true": "false"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Ja" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

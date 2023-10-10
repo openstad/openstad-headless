@@ -54,17 +54,21 @@ const formSchema = z.object({
     defaultSorting: z.enum(['newest', 'oldest', 'title', 'random', 'mostLikes', 'leastLikes', 'mostReactions', 'leastReactions', 'ranked'])
 })
 
-export default function WidgetMapSort() {
+type Props = {
+  config?: any;
+  handleSubmit?: (config:any) => void
+}
+export default function WidgetMapSort({config, handleSubmit}:Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
-        sorting: [],
-        defaultSorting: 'newest'
+        sorting: config?.sort?.sorting || [],
+        defaultSorting: config?.sort?.defaultSorting || 'newest'
       },
     });
   
     function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+      handleSubmit && handleSubmit({sort: values});
     }
   
     return (
