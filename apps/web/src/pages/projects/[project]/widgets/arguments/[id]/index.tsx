@@ -60,11 +60,11 @@ export default function WidgetArguments() {
                 },
                 {
                     name: "Widgets",
-                    url: "/projects/1/widgets"
+                    url: `/projects/${projectId}/widgets`
                 },
                 {
                     name: "Arguments",
-                    url: `/projects/1/widgets/arguments/${id}`
+                    url: `/projects/${projectId}/widgets/arguments/${id}`
                 }
             ]}
             >

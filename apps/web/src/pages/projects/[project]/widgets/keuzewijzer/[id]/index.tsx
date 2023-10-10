@@ -54,11 +54,10 @@ export default function WidgetKeuzewijzer() {
                     },
                     {
                         name: "Widgets",
-                        url: "/projects/1/widgets"
-                    },
-                    {
+                        url: `/projects/${projectId}/widgets`
+                    }, {
                         name: "Keuzewijzer",
-                        url: "/projects/1/widgets/keuzewijzer"
+                        url: `/projects/${projectId}/widgets/keuzewijzer/${id}`
                     }
                 ]}>
                     <div>

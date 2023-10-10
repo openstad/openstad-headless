@@ -63,15 +63,13 @@ if(isLoadingWidget || !widget) {
           {
             name: "Projecten",
             url: "/projects",
-          },
-          {
+          }, {
             name: "Widgets",
-            url: "/projects/1/widgets",
-          },
-          {
-            name: "Begrootmodule",
-            url: "/projects/1/widgets/begrootmodule",
-          },
+            url: `/projects/${projectId}/widgets`
+          }, {
+              name: "Begrootmodule",
+              url: `/projects/${projectId}/widgets/begrootmodule/${id}`
+          }
         ]}
       >
         <div>
