@@ -3,7 +3,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/typography";
+import { useConfig } from "@/hooks/useConfigHook";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
 
@@ -11,22 +13,38 @@ const formSchema = z.object({
     searchLocations: z.enum(['ideasAndAddresses', 'ideas', 'addresses', 'none'])
 })
 
-type Props = {
-  config?: any;
-  handleSubmit?: (config:any) => void
-}
-export default function WidgetMapFilter({config, handleSubmit}: Props) {
-    const form = useForm<z.infer<typeof formSchema>>({
-      resolver: zodResolver(formSchema),
-      defaultValues: {
-        searchLocations: config?.filter?.searchLocations || 'ideasAndAddresses'
-      },
-    });
-  
-    function onSubmit(values: z.infer<typeof formSchema>) {
-      handleSubmit && handleSubmit({filter: values});
+type FormData = z.infer<typeof formSchema>;
+
+export default function WidgetMapFilter() {
+  const category = "filter";
+
+  const {
+    data: widget,
+    isLoading: isLoadingWidget,
+    updateConfig,
+  } = useConfig();
+
+  const defaults = () => ({
+    searchLocations: widget?.config?.[category]?.searchLocations || 'ideasAndAddresses'
+  });
+
+  async function onSubmit(values: FormData) {
+    try {
+      await updateConfig({ [category]: values });
+    } catch (error) {
+      console.error("could not update", error);
     }
-  
+  }
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: defaults(),
+  });
+
+  useEffect(() => {
+    form.reset(defaults());
+  }, [widget]);
+
     return (
       <div>
         <Form {...form}>
@@ -48,7 +66,7 @@ export default function WidgetMapFilter({config, handleSubmit}: Props) {
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>

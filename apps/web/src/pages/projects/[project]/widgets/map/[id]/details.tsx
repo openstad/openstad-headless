@@ -6,7 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Heading } from "@/components/ui/typography";
+import { useConfig } from "@/hooks/useConfigHook";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
 
@@ -36,25 +38,41 @@ const formSchema = z.object({
     selectableOptions: z.string().array()
 })
 
-type Props = {
-  config?: any;
-  handleSubmit?: (config:any) => void
-}
+type FormData = z.infer<typeof formSchema>;
 
-export default function WidgetMapDetails({config, handleSubmit}: Props) {
-    const form = useForm<z.infer<typeof formSchema>>({
-      resolver: zodResolver(formSchema),
-      defaultValues: {
-        template: config?.details?.template || '<span class="ocs-gray-text">Door </span>{username} <span class="ocs-gray-text"> op </span>{createDate} <span class="ocs-gray-text">&nbsp;&nbsp;|&nbsp;&nbsp;</span> <span class="ocs-gray-text">Thema: </span>{theme}',
-        link: config?.details?.link || '',
-        displayShare: config?.details?.displayShare || false,
-        selectableOptions: config?.details?.selectableOptions || []
-      },
-    });
-  
-    function onSubmit(values: z.infer<typeof formSchema>) {
-      handleSubmit && handleSubmit({details: values});
+export default function WidgetMapDetails() {
+  const category = "details";
+
+  const {
+    data: widget,
+    isLoading: isLoadingWidget,
+    updateConfig,
+  } = useConfig();
+
+  const defaults = () => ({
+    template: widget?.config?.[category]?.template || '<span class="ocs-gray-text">Door </span>{username} <span class="ocs-gray-text"> op </span>{createDate} <span class="ocs-gray-text">&nbsp;&nbsp;|&nbsp;&nbsp;</span> <span class="ocs-gray-text">Thema: </span>{theme}',
+        link: widget?.config?.[category]?.link || '',
+        displayShare: widget?.config?.[category]?.displayShare || false,
+        selectableOptions: widget?.config?.[category]?.selectableOptions || []
+  });
+
+  async function onSubmit(values: FormData) {
+    try {
+      await updateConfig({ [category]: values });
+    } catch (error) {
+      console.error("could not update", error);
     }
+  }
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: defaults(),
+  });
+
+  useEffect(() => {
+    form.reset(defaults());
+  }, [widget]);
+
   
     return (
       <div>
@@ -103,7 +121,7 @@ export default function WidgetMapDetails({config, handleSubmit}: Props) {
                   </FormLabel>
                   <Select
                    onValueChange={(e:string) => field.onChange(e === 'true')}
-                   defaultValue={field.value ? "true": "false"}>
+                   value={field.value ? "true": "false"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Ja" />

@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/typography";
+import { useConfig } from "@/hooks/useConfigHook";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
 
@@ -14,28 +16,44 @@ const formSchema = z.object({
     submissionField: z.enum(['ideaType', 'theme']),
     filterLabel: z.string(),
     mobileCase: z.boolean()
-})
+});
 
-type Props = {
-  config?: any;
-  handleSubmit?: (config:any) => void
-}
+type FormData = z.infer<typeof formSchema>;
 
-export default function WidgetMapGeneral({config, handleSubmit}: Props) {
-    const form = useForm<z.infer<typeof formSchema>>({
-      resolver: zodResolver(formSchema),
-      defaultValues: {
-        display: config?.general?.display || 'full',
-        name: config?.general?.name || 'Inzending',
-        submissionField: config?.general?.submissionField ||'theme',
-        filterLabel: config?.general?.filterLabel || "Alle thema's"
-      },
-    });
-  
-    function onSubmit(values: z.infer<typeof formSchema>) {
-      handleSubmit && handleSubmit({general: values});
+export default function WidgetMapGeneral() {
+  const category = "general";
+
+  const {
+    data: widget,
+    isLoading: isLoadingWidget,
+    updateConfig,
+  } = useConfig();
+
+  const defaults = () => ({
+    display: widget?.config?.[category]?.display || 'full',
+    name: widget?.config?.[category]?.name || 'Inzending',
+    submissionField: widget?.config?.[category]?.submissionField ||'theme',
+    filterLabel: widget?.config?.[category]?.filterLabel || "Alle thema's"
+  });
+
+  async function onSubmit(values: FormData) {
+    try {
+      await updateConfig({ [category]: values });
+    } catch (error) {
+      console.error("could not update", error);
     }
-  
+  }
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: defaults(),
+  });
+
+  useEffect(() => {
+    form.reset(defaults());
+  }, [widget]);
+
+
     return (
       <div>
         <Form {...form}>
@@ -57,7 +75,7 @@ export default function WidgetMapGeneral({config, handleSubmit}: Props) {
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -96,7 +114,7 @@ export default function WidgetMapGeneral({config, handleSubmit}: Props) {
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -135,7 +153,7 @@ export default function WidgetMapGeneral({config, handleSubmit}: Props) {
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
