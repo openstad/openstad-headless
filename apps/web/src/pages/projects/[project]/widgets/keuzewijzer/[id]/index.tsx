@@ -16,7 +16,6 @@ export default function WidgetKeuzewijzer() {
         ? `/api/openstad/api/project/${projectId}/widgets/${id}?includeType=1`
         : null
     );
-        console.log({widget: widget?.config})
     async function updateConfig(url:string, config:any) {
         await fetch(url, {
           method: 'PUT',
