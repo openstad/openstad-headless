@@ -27,12 +27,9 @@ const formSchema = z.object({
   autoCenter: z.boolean(),
 });
 
-type Props = {
-  config?: any;
-  handleSubmit?: (config: any) => void;
-};
+export default function WidgetIdeasMapMaps() {
+  const category = 'map';
 
-export default function WidgetIdeasMapMaps({ config, handleSubmit }: Props) {
   const {
     data: widget,
     isLoading: isLoadingWidget,
@@ -40,8 +37,8 @@ export default function WidgetIdeasMapMaps({ config, handleSubmit }: Props) {
   } = useConfig();
 
   const defaults = () => ({
-    link: widget?.config?.ideasmap?.link || false,
-    autoCenter: widget?.config?.ideasmap?.autoCenter || false,
+    link: widget?.config?.[category]?.link || false,
+    autoCenter: widget?.config?.[category]?.autoCenter || false,
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,7 +51,7 @@ export default function WidgetIdeasMapMaps({ config, handleSubmit }: Props) {
   }, [widget]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ ideasmap: values });
+    updateConfig({ [category]: values });
   }
 
   return (

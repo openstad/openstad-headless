@@ -30,6 +30,8 @@ const formSchema = z.object({
 });
 
 export default function WidgetIdeasMapButton() {
+  const category = 'button';
+
   const {
     data: widget,
     isLoading: isLoadingWidget,
@@ -37,9 +39,9 @@ export default function WidgetIdeasMapButton() {
   } = useConfig();
 
   const defaults = () => ({
-    displayButton: widget?.config?.button?.displayButton || false,
-    ctaUrl: widget?.config?.button?.ctaUrl || "",
-    ctaText: widget?.config?.button?.ctaText || "",
+    displayButton: widget?.config?.[category]?.displayButton || false,
+    ctaUrl: widget?.config?.[category]?.ctaUrl || "",
+    ctaText: widget?.config?.[category]?.ctaText || "",
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -52,7 +54,7 @@ export default function WidgetIdeasMapButton() {
   }, [widget]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ button: values });
+    updateConfig({ [category]: values });
   }
 
   return (

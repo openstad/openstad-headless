@@ -16,13 +16,15 @@ const formSchema = z.object({
 
   
 export default function ArgumentsForm() {
+  const category = 'form';
+  
   const { data: widget, isLoading: isLoadingWidget, updateConfig } = useConfig();
     const defaults = () =>({  
-      intro: widget?.config?.form?.intro || "Type hier de intro tekst",
-      placeholder: widget?.config?.form?.placeholder || "Type hier uw reactie."
+      intro: widget?.config?.[category]?.intro || "Type hier de intro tekst",
+      placeholder: widget?.config?.[category]?.placeholder || "Type hier uw reactie."
     });
 
-    
+
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: defaults(),
@@ -36,7 +38,7 @@ export default function ArgumentsForm() {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
-            await updateConfig({ form: values});
+            await updateConfig({ [category]: values});
         } catch (error) {
          console.error('could not update', error)   
         }

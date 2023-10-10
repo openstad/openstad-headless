@@ -75,6 +75,8 @@ const formSchema = z.object({
 });
 
 export default function BegrootmoduleSorting() {
+  const category = "sorting";
+
   const {
     data: widget,
     isLoading: isLoadingWidget,
@@ -82,8 +84,8 @@ export default function BegrootmoduleSorting() {
   } = useConfig();
 
   const defaults = () => ({
-    sorting: widget?.config?.sorting?.options || [],
-    defaultSorting: widget?.config?.sorting?.defaultSorting || "newest",
+    sorting: widget?.config?.[category]?.options || [],
+    defaultSorting: widget?.config?.[category]?.defaultSorting || "newest",
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -96,7 +98,7 @@ export default function BegrootmoduleSorting() {
   }, [widget]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ sorting: values });
+    updateConfig({ [category]: values });
   }
 
   return (
@@ -159,10 +161,7 @@ export default function BegrootmoduleSorting() {
                 <FormLabel>
                   Minimum budget dat geselecteerd moet worden
                 </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger>
                     <SelectValue placeholder="Nieuwste eerst" />
                   </SelectTrigger>

@@ -17,10 +17,12 @@ const formSchema = z.object({
 
   
 export default function ArgumentsList() {
+  const category = 'list';
+
   const { data: widget, isLoading: isLoadingWidget, updateConfig } = useConfig();
     const defaults = () =>({  
-      title: widget?.config?.list?.title || "Argumenten",
-      placeholder: widget?.config?.list?.placeholder || "Nog geen reacties geplaatst."
+      title: widget?.config?.[category]?.title || "Argumenten",
+      placeholder: widget?.config?.[category]?.placeholder || "Nog geen reacties geplaatst."
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -34,7 +36,7 @@ export default function ArgumentsList() {
 
     
     function onSubmit(values: z.infer<typeof formSchema>) {
-      updateConfig({list: values});
+      updateConfig({[category]: values});
     }
 
     return (

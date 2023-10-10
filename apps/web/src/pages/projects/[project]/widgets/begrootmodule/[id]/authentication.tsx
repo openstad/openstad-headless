@@ -28,14 +28,17 @@ const formSchema = z.object({
 });
 
 export default function BegrootmoduleAuthentication() {
+  const category = 'authentication';
+
+  
   const {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
   } = useConfig();
   const defaults = () => ({
-    authEmbedded: widget?.config?.authentication?.authEmbedded || "no",
-    scrollBack: widget?.config?.authentication?.scrollBack || false,
+    authEmbedded: widget?.config?.[category]?.authEmbedded || "no",
+    scrollBack: widget?.config?.[category]?.scrollBack || false,
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -48,7 +51,7 @@ export default function BegrootmoduleAuthentication() {
   }, [widget]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ authentication: values });
+    updateConfig({ [category]: values });
   }
 
   return (

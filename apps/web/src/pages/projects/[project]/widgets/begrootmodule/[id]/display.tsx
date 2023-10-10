@@ -33,19 +33,21 @@ const formSchema = z.object({
 });
 
 export default function BegrootmoduleDisplay() {
+  const category = 'display';
+
   const {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
   } = useConfig();
   const defaults = () => ({
-    displayRanking: widget?.config?.display?.displayRanking || false,
-    displayPriceLabel: widget?.config?.display?.displayPriceLabel || false,
-    showVoteCount: widget?.config?.display?.showVoteCount || false,
+    displayRanking: widget?.config?.[category]?.displayRanking || false,
+    displayPriceLabel: widget?.config?.[category]?.displayPriceLabel || false,
+    showVoteCount: widget?.config?.[category]?.showVoteCount || false,
     unavailableButton:
-      widget?.config?.display?.unavailableButton || "Geen ruimte",
-    originalIdea: widget?.config?.display?.originalIdea || false,
-    originalIdeaUrl: widget?.config?.display?.originalIdeaUrl || "",
+      widget?.config?.[category]?.unavailableButton || "Geen ruimte",
+    originalIdea: widget?.config?.[category]?.originalIdea || false,
+    originalIdeaUrl: widget?.config?.[category]?.originalIdeaUrl || "",
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -58,7 +60,7 @@ export default function BegrootmoduleDisplay() {
   }, [widget]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ display: values });
+    updateConfig({ [category]: values });
   }
 
   return (

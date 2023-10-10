@@ -30,6 +30,8 @@ const formSchema = z.object({
 });
 
 export default function WidgetIdeasMapCounter() {
+  const category = 'counter';
+
   const {
     data: widget,
     isLoading: isLoadingWidget,
@@ -37,9 +39,9 @@ export default function WidgetIdeasMapCounter() {
   } = useConfig();
 
   const defaults = () => ({
-    displayCounter: widget?.config?.counter?.displayCounter || false,
-    counterText: widget?.config?.counter?.counterText || "",
-    counterUrl: widget?.config?.counter?.counterUrl || "",
+    displayCounter: widget?.config?.[category]?.displayCounter || false,
+    counterText: widget?.config?.[category]?.counterText || "",
+    counterUrl: widget?.config?.[category]?.counterUrl || "",
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -52,7 +54,7 @@ export default function WidgetIdeasMapCounter() {
   }, [widget]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ counter: values });
+    updateConfig({ [category]: values });
   }
 
   return (

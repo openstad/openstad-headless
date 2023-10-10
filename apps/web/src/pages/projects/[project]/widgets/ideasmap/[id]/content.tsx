@@ -24,6 +24,8 @@ const formSchema = z.object({
 
 
 export default function WidgetIdeasMapContent() {
+  const category = 'content';
+
   const {
     data: widget,
     isLoading: isLoadingWidget,
@@ -31,9 +33,9 @@ export default function WidgetIdeasMapContent() {
   } = useConfig();
 
   const defaults = () => ({
-    showIdeas: widget?.config?.content?.showIdeas || "",
-    excludeIdeas: widget?.config?.content?.excludeIdeas || "",
-    showIdeasFromTheme: widget?.config?.content?.showIdeasFromTheme || "",
+    showIdeas: widget?.config?.[category]?.showIdeas || "",
+    excludeIdeas: widget?.config?.[category]?.excludeIdeas || "",
+    showIdeasFromTheme: widget?.config?.[category]?.showIdeasFromTheme || "",
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -46,7 +48,7 @@ export default function WidgetIdeasMapContent() {
   }, [widget]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ content: values });
+    updateConfig({ [category]: values });
   }
 
   return (

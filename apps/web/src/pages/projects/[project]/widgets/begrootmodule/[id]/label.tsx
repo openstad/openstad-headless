@@ -26,6 +26,8 @@ const formSchema = z.object({
 });
 
 export default function BegrootmoduleLabels() {
+  const category = 'labels';
+
   const {
     data: widget,
     isLoading: isLoadingWidget,
@@ -33,12 +35,12 @@ export default function BegrootmoduleLabels() {
   } = useConfig();
 
   const defaults = () => ({
-    labelOpen: widget?.config?.labels?.labelOpen || "",
-    labelClosed: widget?.config?.labels?.labelClosed || "",
-    labelAccepted: widget?.config?.labels?.labelAccepted || "",
-    labelDenied: widget?.config?.labels?.labelDenied || "",
-    labelBusy: widget?.config?.labels?.labelBusy || "",
-    labelDone: widget?.config?.labels?.labelDone || "",
+    labelOpen: widget?.config?.[category]?.labelOpen || "",
+    labelClosed: widget?.config?.[category]?.labelClosed || "",
+    labelAccepted: widget?.config?.[category]?.labelAccepted || "",
+    labelDenied: widget?.config?.[category]?.labelDenied || "",
+    labelBusy: widget?.config?.[category]?.labelBusy || "",
+    labelDone: widget?.config?.[category]?.labelDone || "",
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -51,7 +53,7 @@ export default function BegrootmoduleLabels() {
   }, [widget]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ labels: values });
+    updateConfig({ [category]: values });
   }
 
   return (

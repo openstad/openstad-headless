@@ -21,12 +21,14 @@ type Props = {
 }
 
 export default function ArgumentsGeneral() {
+  const category = 'general';
+  
   const { data: widget, isLoading: isLoadingWidget, updateConfig } = useConfig();
   
     const defaults = () =>({  
-      sentiment: widget?.config?.general?.sentiment || "for",
-      replyReactions: widget?.config?.general?.replyReactions || false,
-      voteReactions: widget?.config?.general?.voteReactions || false
+      sentiment: widget?.config?.[category]?.sentiment || "for",
+      replyReactions: widget?.config?.[category]?.replyReactions || false,
+      voteReactions: widget?.config?.[category]?.voteReactions || false
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -40,7 +42,7 @@ export default function ArgumentsGeneral() {
 
     
     function onSubmit(values: z.infer<typeof formSchema>) {
-      updateConfig({general: values});
+      updateConfig({[category]: values});
     }
   
     return (

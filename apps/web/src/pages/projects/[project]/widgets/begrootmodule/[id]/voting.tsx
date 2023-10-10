@@ -42,6 +42,8 @@ const formSchema = z.object({
 });
 
 export default function BegrootmoduleVoting() {
+  const category = 'voting';
+
   const {
     data: widget,
     isLoading: isLoadingWidget,
@@ -49,13 +51,13 @@ export default function BegrootmoduleVoting() {
   } = useConfig();
 
   const defaults = () => ({
-    allowVoting: widget?.config?.voting?.allowVoting || false,
-    votingType: widget?.config?.voting?.votingType || "budgeting",
+    allowVoting: widget?.config?.[category]?.allowVoting || false,
+    votingType: widget?.config?.[category]?.votingType || "budgeting",
     maximumSelectableIdeas:
-      widget?.config?.voting?.maximumSelectableIdeas || 1000,
-    minimumSelectableIdeas: widget?.config?.voting?.minimumSelectableIdeas || 0,
-    minimumBudget: widget?.config?.voting?.minimumBudget || 0,
-    budget: widget?.config?.voting?.budget || 0,
+      widget?.config?.[category]?.maximumSelectableIdeas || 1000,
+    minimumSelectableIdeas: widget?.config?.[category]?.minimumSelectableIdeas || 0,
+    minimumBudget: widget?.config?.[category]?.minimumBudget || 0,
+    budget: widget?.config?.[category]?.budget || 0,
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -68,7 +70,7 @@ export default function BegrootmoduleVoting() {
   }, [widget]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ voting: values });
+    updateConfig({ [category]: values });
   }
 
   return (
