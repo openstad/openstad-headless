@@ -47,7 +47,35 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
       },
       projectadminAddress: {
         type: 'string', // todo: add type email/list of emails
-        // default: apiConfig.notifications.admin.emailAddress,
+        default: apiConfig.notifications.admin.emailAddress,
+      },
+      sendEndDateNotifications: {
+        type: 'object',
+        subset: {
+          XDaysBefore: {
+            type: 'int',
+            default: 7,
+          },
+          subject: {
+            type: 'string',
+            default: 'Sluitingsdatum project nadert',
+          },
+          template:  {
+            type: 'string',
+            default: `De website <a href="{{URL}}">{{URL}}</a> nadert de ingestelde sluitingsdatum. De sluitingsdatum is ingesteld op <strong>{{ENDDATE}}</strong>.<br/>\
+<br/>\
+<strong>Klopt dit nog? Het is belangrijk dat de sluitingsdatum goed is ingesteld.</strong> Daarmee wordt gezorgd dat gebruikers vanaf dat moment hun account kunnen verwijderen, zonder dat stemmen of likes ongeldig gemaakt worden. De sluitingsdatum wordt ook als referentie gebruikt om op een later moment alle gebruikersgegevens te anonimiseren.<br/>\
+<br/>\
+De webmaster zorgt ervoor dat de website gesloten wordt, handmatig of automatisch. Neem contact op om af te spreken wanneer dit precies moet gebeuren, als je dat nog niet gedaan hebt: <a href="mailto:{{WEBMASTER_EMAIL}}">{{WEBMASTER_EMAIL}}</a>.<br/>\
+<br/>\
+Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoeken, maar afhankelijk van het project kunnen er geen nieuwe plannen ingediend worden, geen reacties meer worden geplaatst, geen nieuwe stemmen of likes uitgebracht worden, en kunnen er geen nieuwe gebruikers zich aanmelden.<br/>\
+<br/>\
+<br/>\
+<br/>\
+<em>Dit is een geautomatiseerde email.</em><br/>\
+`
+          },
+        },
       },
     },
   },
@@ -62,7 +90,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
         },
         subject: {
           type: 'string',
-          default: undefined,
+          default: 'Bedankt voor je inzending',
         },
         inzendingPath: {
           type: 'string',
@@ -70,7 +98,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
         },
         template: {
           type: 'string',
-          default: undefined,
+          default: `NO TEMPLATE DEFINED`,
         },
         attachments: {
           type: 'arrayOfStrings',
@@ -92,7 +120,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
         },
         template: {
           type: 'string',
-          default: undefined,
+          default: `NO TEMPLATE DEFINED`,
         },
         attachments: {
           type: 'arrayOfStrings',
@@ -114,7 +142,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
         },
         template: {
           type: 'string',
-          default: undefined,
+          default: `NO TEMPLATE DEFINED`,
         },
         attachments: {
           type: 'arrayOfStrings',
@@ -142,7 +170,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
         },
         template: {
           type: 'string',
-          default: undefined,
+          default: `NO TEMPLATE DEFINED`,
         },
         attachments: {
           type: 'arrayOfStrings',
@@ -179,7 +207,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
           },
           template: {
             type: 'string',
-            default: undefined,
+          default: `NO TEMPLATE DEFINED`,
           },
           attachments: {
             type: 'arrayOfStrings',
@@ -191,4 +219,3 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
   },
 
 }
-
