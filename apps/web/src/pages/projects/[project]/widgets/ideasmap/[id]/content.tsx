@@ -11,17 +11,25 @@ const formSchema = z.object({
     showIdeas: z.string(),
     excludeIdeas: z.string(),
     showIdeasFromTheme: z.string()
-})
+});
 
-export default function WidgetIdeasMapContent() {
+type Props = {
+  config?: any;
+  handleSubmit?: (config:any) => void
+}
+
+export default function WidgetIdeasMapContent({config, handleSubmit} :Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
+        showIdeas: config?.content?.showIdeas || '',
+        excludeIdeas: config?.content?.excludeIdeas || '',
+        showIdeasFromTheme: config?.content?.showIdeasFromTheme || ''
       },
     });
   
     function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+      handleSubmit && handleSubmit({content: values});
     }
   
     return (

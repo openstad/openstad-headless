@@ -14,15 +14,23 @@ const formSchema = z.object({
     counterUrl: z.string().url()
 })
 
-export default function WidgetIdeasMapCounter() {
+type Props = {
+  config?: any;
+  handleSubmit?: (config:any) => void
+}
+
+export default function WidgetIdeasMapCounter({config, handleSubmit}: Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
+        displayCounter: config?.counter?.displayCounter || false,
+        counterText: config?.counter?.counterText || '',
+        counterUrl: config?.counter?.counterUrl || '',
       },
     });
   
     function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+      handleSubmit && handleSubmit({counter: values});
     }
   
     return (
@@ -45,17 +53,16 @@ export default function WidgetIdeasMapCounter() {
                     Wordt de teller weergegeven?
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                     onValueChange={(e:string) => field.onChange(e === 'true')}
+                     defaultValue={field.value ? "true": "false"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Ja" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

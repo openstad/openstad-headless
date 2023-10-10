@@ -14,15 +14,23 @@ const formSchema = z.object({
     ctaText: z.string()
   });
 
-export default function WidgetIdeasMapButton() {
+  type Props = {
+    config?: any;
+    handleSubmit?: (config:any) => void
+  }
+
+export default function WidgetIdeasMapButton({config, handleSubmit}: Props) {
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
+        displayButton: config?.button?.displayButton || false,
+        ctaUrl: config?.button?.ctaUrl || '',
+        ctaText: config?.button?.ctaText || '',
       },
     });
   
     function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+      handleSubmit && handleSubmit({button: values});
     }
   
     return (
@@ -45,17 +53,17 @@ export default function WidgetIdeasMapButton() {
                     Wordt de Call-To-Action knop weergegeven?
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                       onValueChange={(e:string) => field.onChange(e === 'true')}
+                       defaultValue={field.value ? "true": "false"}>
+                  
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Ja" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
