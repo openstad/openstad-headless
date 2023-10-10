@@ -181,7 +181,6 @@ function prepareEmailData(user, resource, hostname, projectname, inzendingURL, u
     date: new Date(),
     user,
     idea: resource,
-    article: resource,
     HOSTNAME: hostname,
     PROJECTNAME: projectname,
     inzendingURL,

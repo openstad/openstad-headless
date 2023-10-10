@@ -28,6 +28,7 @@
 * Remove mongo dependency
 * Remove S3 connections - no longer required
 * Move email config from project.config to project.emailConfig and hide them unless specifically asked for
+* Remove articles
 
 ### Auth server
 * Refactor init database and seeds

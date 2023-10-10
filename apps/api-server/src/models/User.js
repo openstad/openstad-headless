@@ -415,7 +415,6 @@ module.exports = function (db, sequelize, DataTypes) {
   }
 
   User.associate = function (models) {
-    this.hasMany(models.Article, { onDelete: 'CASCADE', hooks: true });
     this.hasMany(models.Idea, { onDelete: 'CASCADE', hooks: true });
     this.hasMany(models.Vote, { onDelete: 'CASCADE', hooks: true });
     this.hasMany(models.Comment, { onDelete: 'CASCADE', hooks: true });
@@ -500,7 +499,6 @@ module.exports = function (db, sequelize, DataTypes) {
         // wat gaat er allemaal gewijzigd worden
         result.project = self.project;
         result.ideas = await self.getIdeas();
-        result.articles = await self.getArticles();
         result.comments = await self.getComments();
 
         // TODO: for now the check is on active vote but this is wrong; a new 'vote had ended' param should be created

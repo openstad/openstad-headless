@@ -152,41 +152,6 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
     },
   },
   
-  articles: {
-    type: 'object',
-    subset: {
-      feedbackEmail: {
-        from: {
-          type: 'string', // todo: add type email/list of emails
-          default: 'EMAIL@NOT.DEFINED',
-        },
-        subject: {
-          type: 'string',
-          default: 'Bedankt voor je artikel',
-        },
-        inzendingPath: {
-          type: 'string',
-          default: "/PATH/TO/ARTICLE/[[articleId]]",
-        },
-        template: {
-          type: 'string',
-          default: `NO TEMPLATE DEFINED`,
-        },
-        attachments: {
-          type: 'arrayOfStrings',
-          default: []
-        },
-      },
-      extraDataMustBeDefined: {
-        type: 'boolean',
-        default: false,
-      },
-      extraData: {
-        type: 'object',
-      }
-    }
-  },
-
   newslettersignup: {
     type: 'object',
     subset: {

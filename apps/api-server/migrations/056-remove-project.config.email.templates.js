@@ -6,7 +6,6 @@ module.exports = {
       return db.query(`
         UPDATE projects SET
           config = IF(JSON_CONTAINS_PATH(config, 'all', '$.anonymize.inactiveWarningEmail'),JSON_REMOVE(config, '$.anonymize.inactiveWarningEmail'), config ),
-          config = IF(JSON_CONTAINS_PATH(config, 'all', '$.articles.feedbackEmail'),JSON_REMOVE(config, '$.articles.feedbackEmail'), config ),
           config = IF(JSON_CONTAINS_PATH(config, 'all', '$.ideas.feedbackEmail'),JSON_REMOVE(config, '$.ideas.feedbackEmail'), config ),
           config = IF(JSON_CONTAINS_PATH(config, 'all', '$.ideas.conceptEmail'),JSON_REMOVE(config, '$.ideas.conceptEmail'), config ),
           config = IF(JSON_CONTAINS_PATH(config, 'all', '$.ideas.conceptToPublishedEmail'),JSON_REMOVE(config, '$.ideas.conceptToPublishedEmail'), config ),

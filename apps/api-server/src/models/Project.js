@@ -109,7 +109,6 @@ module.exports = function (db, sequelize, DataTypes) {
             if (instance.config.project.projectHasEnded) {
               config.votes.isActive = false;
               config.ideas.canAddNewIdeas = false;
-              config.articles.canAddNewArticles = false;
               config.comments.isClosed = true;
               config.polls.canAddPolls = false;
               config.users.canCreateNewUsers = false;
@@ -117,7 +116,6 @@ module.exports = function (db, sequelize, DataTypes) {
               // commented: do not update these params on unsetting
               // config.votes.isActive = true;
               // config.ideas.canAddNewIdeas = true;
-              // config.articles.canAddNewArticles = true;
               // config.comments.isClosed = false;
               // config.polls.canAddPolls = true;
               // config.users.canCreateNewUsers = true;
