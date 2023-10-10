@@ -3,7 +3,7 @@ module.exports = {
   allowedDomains: {
     type: 'arrayOfStrings',
     default: [
-      'openstad-api.amsterdam.nl'
+      'api.openstad.org'
     ]
   },
 
@@ -43,98 +43,20 @@ module.exports = {
     },
   },
 
-  basicAuth: {
-    type: 'object',
-    subset: {
-      active: {
-        type: 'boolean',
-        default: false,
-      },
-      user: {
-        type: 'string',
-        default: 'openstad',
-      },
-      password: {
-        type: 'string',
-        default: 'LqKNcKC7',
-      },
-    }
-  },
-
-  cms: {
-    type: 'object',
-    subset: {
-      url: {
-        type: 'string',
-        default: 'https://openstad-api.amsterdam.nl',
-      },
-      hostname: {
-        type: 'string',
-        default: 'openstad-api.amsterdam.nl',
-      },
-      'after-login-redirect-uri': {
-        type: 'string',
-        default: '/oauth/login?jwt=[[jwt]]',
-      },
-      "redirectURI": {
-        type: 'string',
-        default: undefined,
-      },
-      "widgetDisplaySettings": {
-        "type": "object",
-        "subset": {
-          "beta": {
-            "type": "boolean",
-            "default": false
-          },
-          "deprecated": {
-            "type": "boolean",
-            "default": false
-          },
-          "visibleWidgets": {
-            "type": "arrayOfStrings",
-            "default": []
-          }
-        }
-      }
-    }
-  },
-
-  'auth': {
+  auth: {
     type: 'object',
     subset: {
       default: {
         type: 'string',
         default: 'openstad',
       },
+      adapter: {
+        type: 'object',
+        default: {},
+      },
       provider: {
-        type: 'objectsInObject',
-        //            subset: {
-        //              "auth-server-url": {
-        //                type: 'string',
-        //              },
-        //              "auth-client-id": {
-        //                type: 'string',
-        //              },
-        //              "auth-client-secret": {
-        //                type: 'string',
-        //              },
-        //              "auth-server-login-path": {
-        //                type: 'string',
-        //              },
-        //              "auth-server-exchange-code-path": {
-        //                type: 'string',
-        //              },
-        //              "auth-server-get-user-path": {
-        //                type: 'string',
-        //              },
-        //              "auth-server-logout-path": {
-        //                type: 'string',
-        //              },
-        //              "after-login-redirect-uri": {
-        //                type: 'string',
-        //              }
-        //            }
+        type: 'object',
+        default: {},
       }
     },
   },
@@ -313,49 +235,40 @@ module.exports = {
   votes: {
     type: 'object',
     subset: {
-
       isViewable: {
         type: 'boolean',
         default: false,
       },
-
       isActive: {
         type: 'boolean',
         default: null,
       },
-
       isActiveFrom: {
         type: 'string',
         default: undefined,
       },
-
       isActiveTo: {
         type: 'string',
         default: undefined,
       },
-
       requiredUserRole: {
         type: 'string',
         default: 'member',
       },
-
       mustConfirm: {
         type: 'boolean',
         default: false,
       },
-
       withExisting: {
         type: 'enum',
         values: ['error', 'replace', 'merge'],
         default: 'error',
       },
-
       voteType: {
         type: 'enum',
         values: ['likes', 'count', 'budgeting', 'count-per-theme', 'budgeting-per-theme'],
         default: 'likes',
       },
-
       voteValues: {
         type: 'arrayOfObjects',
         default: [
@@ -369,27 +282,22 @@ module.exports = {
           },
         ],
       },
-
       maxIdeas: {
         type: 'int',
         default: 100,
       },
-
       minIdeas: {
         type: 'int',
         default: 1,
       },
-
       minBudget: {
         type: 'int',
         default: undefined,
       },
-
       maxBudget: {
         type: 'int',
         default: undefined,
       },
-
       themes: {
         type: 'objectList',
         elementSubset: {
@@ -403,7 +311,6 @@ module.exports = {
           },
         }
       },
-
     },
   },
 
@@ -484,6 +391,24 @@ module.exports = {
     },
   },
 
+  widgets: {
+    type: "object",
+    subset: {
+      beta: {
+        type: "boolean",
+        default: false
+      },
+      deprecated: {
+        type: "boolean",
+        default: false
+      },
+      visibleWidgets: {
+        type: "arrayOfStrings",
+        default: []
+      }
+    }
+  },
+  
   host: {
     status: null,
   },
@@ -492,15 +417,5 @@ module.exports = {
     type: 'arrayOfStrings',
     default: []
   },
-
-  styling: {
-    type: 'object',
-    subset: {
-      logo: {
-        type: 'string',
-        default: '',
-      },
-    },
-  }
 
 };

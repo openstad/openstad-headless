@@ -218,4 +218,14 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
     },
   },
 
+  styling: { // used by emails
+    type: 'object',
+    subset: {
+      logo: {
+        type: 'string',
+        default: '',
+      },
+    },
+  }
+
 }
