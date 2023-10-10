@@ -106,7 +106,7 @@ Notifications.sendNewContentMessage = function({ projectId, type, action, conten
 
 }
 
-Notifications.sendMessage = function({ project, data }) {
+Notifications.sendMessage = async function({ project, data }) {
 
   let self = this;
   let myConfig = Object.assign({}, config, project && project.config);

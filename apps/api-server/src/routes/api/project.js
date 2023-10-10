@@ -19,10 +19,14 @@ let router = express.Router({mergeParams: true});
 router
   .all('*', function(req, res, next) {
 
-    req.scope = [];
+    req.scope = ['excludeEmailConfig'];
 
     if (!req.query.includeConfig) {
       req.scope.push('excludeConfig');
+    }
+
+    if (req.query.includeEmailConfig) {
+      req.scope.push('includeEmailConfig');
     }
 
     if (req.query.includeAreas) {

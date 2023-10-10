@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const merge = require('merge');
 const moment = require('moment');
-const apiConfig = require('config');
+const configField = require('./lib/config-field');
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 const authSettings = require('../util/auth-settings');
 
@@ -27,7 +27,45 @@ module.exports = function (db, sequelize, DataTypes) {
       defaultValue: null,
     },
 
-    config: require('./lib/project-config'),
+    config: {
+      type: Sequelize.DataTypes.JSON,
+      allowNull: false,
+      defaultValue: {},
+      get: function () {
+        let value = this.getDataValue('config');
+        return configField.parseConfig('projectConfig', value);
+      },
+      set: function (value) {
+        var currentconfig = this.getDataValue('config');
+        value = value || {};
+        value = merge.recursive(true, currentconfig, value);
+        this.setDataValue('config', configField.parseConfig('projectConfig', value));
+      },
+      auth: {
+        viewableBy: 'editor',
+        updateableBy: 'editor',
+      },
+    },
+
+    emailConfig: {
+      type: Sequelize.DataTypes.JSON,
+      allowNull: false,
+      defaultValue: {},
+      get: function () {
+        let value = this.getDataValue('emailConfig');
+        return configField.parseConfig('projectEmailConfig', value);
+      },
+      set: function (value) {
+        var currentconfig = this.getDataValue('emailConfig');
+        value = value || {};
+        value = merge.recursive(true, currentconfig, value);
+        this.setDataValue('emailConfig', configField.parseConfig('projectEmailConfig', value));
+      },
+      auth: {
+        viewableBy: 'editor',
+        updateableBy: 'editor',
+      },
+    },
 
     /*
       HostStatus is used for tracking domain status
@@ -52,6 +90,10 @@ module.exports = function (db, sequelize, DataTypes) {
     }
 
   }, {
+
+    defaultScope: {
+      attributes: { exclude: ['emailConfig'] }
+    },
 
     hooks: {
 
@@ -132,6 +174,14 @@ module.exports = function (db, sequelize, DataTypes) {
 
       includeConfig: {
         attributes: {},
+      },
+
+      excludeEmailConfig: {
+        attributes: {exclude: ['emailConfig']},
+      },
+
+      includeEmailConfig: {
+        attributes: {include: ['emailConfig']},
       },
 
       includeAreas: {
