@@ -1,10 +1,12 @@
+import { useConfig } from "@/hooks/WidgetConfigHoc";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/typography";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { useForm} from "react-hook-form";
 import * as z from 'zod'
 
 const formSchema = z.object({
@@ -12,22 +14,32 @@ const formSchema = z.object({
     placeholder: z.string()
   });
 
-type Props = {
-  config?: any;
-  handleSubmit?: (config:any) => void;
-}
   
-export default function ArgumentsForm({config, handleSubmit}: Props) {
+export default function ArgumentsForm() {
+  const { data: widget, isLoading: isLoadingWidget, updateConfig } = useConfig();
+    const defaults = () =>({  
+      intro: widget?.config?.form?.intro || "Type hier de intro tekst",
+      placeholder: widget?.config?.form?.placeholder || "Type hier uw reactie."
+    });
+
+    
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
-      defaultValues: {
-        intro: config?.form?.intro || "Type hier de intro tekst",
-        placeholder: config?.form?.placeholder || "Type hier uw reactie."
-      },
+      defaultValues: defaults(),
     });
+
+
+    useEffect(() => {
+      form.reset(defaults());
+    }, [widget])
   
-    function onSubmit(values: z.infer<typeof formSchema>) {
-      handleSubmit && handleSubmit({form: values});
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        try {
+            await updateConfig({ form: values});
+        } catch (error) {
+         console.error('could not update', error)   
+        }
     }
   
     return (

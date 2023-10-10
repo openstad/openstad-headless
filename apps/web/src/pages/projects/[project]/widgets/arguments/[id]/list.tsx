@@ -3,7 +3,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/typography";
+import { useConfig } from "@/hooks/useConfigHook";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
 
@@ -12,24 +14,29 @@ const formSchema = z.object({
   placeholder: z.string()
 });
 
-type Props = {
-  config?: any;
-  handleSubmit?: (config:any) => void;
-}
+
   
-export default function ArgumentsList({config, handleSubmit}: Props) {
+export default function ArgumentsList() {
+  const { data: widget, isLoading: isLoadingWidget, updateConfig } = useConfig();
+    const defaults = () =>({  
+      title: widget?.config?.list?.title || "Argumenten",
+      placeholder: widget?.config?.list?.placeholder || "Nog geen reacties geplaatst."
+    });
+
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
-      defaultValues: {
-        title: config?.list?.title || "Argumenten",
-        placeholder: config?.list?.placeholder || "Nog geen reacties geplaatst."
-      },
+      defaultValues: defaults()
     });
-  
+
+    useEffect(() => {     
+        form.reset(defaults());
+    }, [widget])
+
+    
     function onSubmit(values: z.infer<typeof formSchema>) {
-      handleSubmit && handleSubmit({list: values});
+      updateConfig({list: values});
     }
-  
+
     return (
         <div>
         <Form {...form}>

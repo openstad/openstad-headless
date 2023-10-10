@@ -11,51 +11,29 @@ import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
+import { useConfig } from '@/hooks/useConfigHook';
 
 const formSchema = z.object({
     display: z.enum(["claps"])
 })
+type FormData = z.infer<typeof formSchema>
 
 export default function WidgetLikes() {
     const router = useRouter();
     const id = router.query.id;
     const projectId = router.query.project;
 
-    const { data: widget, isLoading: isLoadingWidget } = useSWR(
-        projectId && id
-        ? `/api/openstad/api/project/${projectId}/widgets/${id}?includeType=1`
-        : null
-    );
-    async function updateConfig(url:string, config:any) {
-        await fetch(url, {
-          method: 'PUT',
-          headers:{
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({config: config.arg})
-        })
+    const { data: widget, isLoading: isLoadingWidget, updateConfig } = useConfig();
+
+    async function onSubmit(values: FormData) {
+        try {
+            await updateConfig({ like: values});
+        } catch (error) {
+         console.error('could not update', error)   
+        }
     }
 
-    
-    const { trigger } = useSWRMutation(`/api/openstad/api/project/${projectId}/widgets/${id}?includeType=1`, updateConfig, {
-        onSuccess(data, key, config) {
-            location.reload();
-        },
-        onError(err, key, config) {
-            console.log({err});
-        },
-    });
-    
-    const onSubmitHandler = (config: any) =>  {
-        trigger(config);
-    }
-
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        onSubmitHandler({like: values});
-    }
-    
-
-    const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             display: widget?.config?.like?.display || "claps"

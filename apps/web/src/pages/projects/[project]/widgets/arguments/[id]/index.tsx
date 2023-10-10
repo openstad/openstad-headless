@@ -5,49 +5,11 @@ import ArgumentsGeneral from './general'
 import ArgumentsList from './list'
 import ArgumentsForm from './form'
 import { useRouter } from 'next/router';
-import useSWR from "swr";
-import useSWRMutation from 'swr/mutation';
-
 
 export default function WidgetArguments() {
     const router = useRouter();
     const id = router.query.id;
     const projectId = router.query.project;
-
-    const { data: widget, isLoading: isLoadingWidget } = useSWR(
-        projectId && id
-        ? `/api/openstad/api/project/${projectId}/widgets/${id}?includeType=1`
-        : null
-    );
-
-
-    async function updateConfig(url:string, config:any) {
-        await fetch(url, {
-          method: 'PUT',
-          headers:{
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({config: config.arg})
-        })
-    }
-
-    
-    const { trigger } = useSWRMutation(`/api/openstad/api/project/${projectId}/widgets/${id}?includeType=1`, updateConfig, {
-        onSuccess(data, key, config) {
-            location.reload();
-        },
-        onError(err, key, config) {
-            console.log({err});
-        },
-    });
-    
-    const onSubmitHandler = (config: any) =>  {
-        trigger(config);
-    }
-
-    if(isLoadingWidget || !widget) {
-        return null;
-    }
 
     return(
         <div>
@@ -76,13 +38,13 @@ export default function WidgetArguments() {
                             <TabsTrigger value="form">Formulier</TabsTrigger>
                         </TabsList>
                         <TabsContent value="general" className="w-1/2">
-                            <ArgumentsGeneral config={widget.config} handleSubmit={onSubmitHandler} />
+                            <ArgumentsGeneral />
                         </TabsContent> 
                         <TabsContent value="list" className="w-1/2">
-                            <ArgumentsList config={widget.config} handleSubmit={onSubmitHandler} />
+                            <ArgumentsList />
                         </TabsContent> 
                         <TabsContent value="form" className="w-1/2">
-                            <ArgumentsForm config={widget.config} handleSubmit={onSubmitHandler} />
+                            <ArgumentsForm />
                         </TabsContent> 
                     </Tabs>
                 </div>

@@ -17,7 +17,9 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/typography";
+import { useConfig } from "@/hooks/useConfigHook";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -29,32 +31,44 @@ const formSchema = z.object({
     "count",
     "countPerTheme",
   ]),
-  maximumSelectableIdeas: z.coerce.number().gt(0, "Nummer moet groter zijn dan 0"),
-  minimumSelectableIdeas: z.coerce.number().gte(0, "Nummer moet groter of gelijk zijn aan 0"),
+  maximumSelectableIdeas: z.coerce
+    .number()
+    .gt(0, "Nummer moet groter zijn dan 0"),
+  minimumSelectableIdeas: z.coerce
+    .number()
+    .gte(0, "Nummer moet groter of gelijk zijn aan 0"),
   budget: z.coerce.number().gt(0, "Nummer moet groter zijn dan 0"),
   minimumBudget: z.coerce.number().gt(0, "Nummer moet groter zijn dan 0"),
 });
 
-type Props = {
-  config?: any;
-  handleSubmit?: (config:any) => void
-}
+export default function BegrootmoduleVoting() {
+  const {
+    data: widget,
+    isLoading: isLoadingWidget,
+    updateConfig,
+  } = useConfig();
 
-export default function BegrootmoduleVoting({config, handleSubmit}: Props) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      allowVoting: config?.voting?.allowVoting || false,
-      votingType: config?.voting?.votingType || "budgeting",
-      maximumSelectableIdeas: config?.voting?.maximumSelectableIdeas || 1000,
-      minimumSelectableIdeas: config?.voting?.minimumSelectableIdeas || 0,
-      minimumBudget: config?.voting?.minimumBudget || 0,
-      budget: config?.voting?.budget || 0,
-    },
+  const defaults = () => ({
+    allowVoting: widget?.config?.voting?.allowVoting || false,
+    votingType: widget?.config?.voting?.votingType || "budgeting",
+    maximumSelectableIdeas:
+      widget?.config?.voting?.maximumSelectableIdeas || 1000,
+    minimumSelectableIdeas: widget?.config?.voting?.minimumSelectableIdeas || 0,
+    minimumBudget: widget?.config?.voting?.minimumBudget || 0,
+    budget: widget?.config?.voting?.budget || 0,
   });
 
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: defaults(),
+  });
+
+  useEffect(() => {
+    form.reset(defaults());
+  }, [widget]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    handleSubmit && handleSubmit({voting: values});
+    updateConfig({ voting: values });
   }
 
   return (
@@ -72,17 +86,18 @@ export default function BegrootmoduleVoting({config, handleSubmit}: Props) {
               <FormLabel>
                 Sta stemmen toe (werkt op het moment alleen met Gridder)
               </FormLabel>
-              <Select  
-                onValueChange={(e:string) => field.onChange(e === 'true')}
-                defaultValue={field.value ? "true":"false"}>
+              <Select
+                onValueChange={(e: string) => field.onChange(e === "true")}
+                value={field.value ? "true" : "false"}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Nee" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value='true'>Ja</SelectItem>
-                  <SelectItem value='false'>Nee</SelectItem>
+                  <SelectItem value="true">Ja</SelectItem>
+                  <SelectItem value="false">Nee</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -95,7 +110,7 @@ export default function BegrootmoduleVoting({config, handleSubmit}: Props) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Voting types</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Budgeting" />

@@ -3,7 +3,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/typography";
+import { useConfig } from "@/hooks/useConfigHook";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
 
@@ -18,27 +20,42 @@ type Props = {
   handleSubmit?: (config:any) => void
 }
 
-export default function ArgumentsGeneral({config, handleSubmit}:Props) {
+export default function ArgumentsGeneral() {
+  const { data: widget, isLoading: isLoadingWidget, updateConfig } = useConfig();
+  
+    const defaults = () =>({  
+      sentiment: widget?.config?.general?.sentiment || "for",
+      replyReactions: widget?.config?.general?.replyReactions || false,
+      voteReactions: widget?.config?.general?.voteReactions || false
+    });
+
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
-      defaultValues: {
-        sentiment: config?.general?.sentiment || "for",
-        replyReactions: config?.general?.replyReactions || false,
-        voteReactions: config?.general?.voteReactions || false
-      },
+      defaultValues: defaults()
     });
-  
+
+    useEffect(() => {     
+        form.reset(defaults());
+    }, [widget])
+
+    
     function onSubmit(values: z.infer<typeof formSchema>) {
-      handleSubmit && handleSubmit({general: values});
+      updateConfig({general: values});
     }
   
     return (
         <div>
+
+          <pre>
+        { JSON.stringify(form.getValues()) }
+
+          </pre>
         <Form {...form}>
           <Heading size="xl" className="mb-4">
             Argumenten • Algemeen
           </Heading>
           <Separator className="mb-4" />
+          
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4">
@@ -52,7 +69,7 @@ export default function ArgumentsGeneral({config, handleSubmit}:Props) {
                 </FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}>
+                  value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Voor" />
@@ -78,7 +95,7 @@ export default function ArgumentsGeneral({config, handleSubmit}:Props) {
                 </FormLabel>
                 <Select
                   onValueChange={(e:string) => field.onChange(e === 'true')}
-                  defaultValue={field.value ? "true":"false"}>
+                  value={field.value ? "true":"false"}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Ja" />
@@ -103,7 +120,7 @@ export default function ArgumentsGeneral({config, handleSubmit}:Props) {
                 </FormLabel>
                 <Select
                   onValueChange={(e:string) => field.onChange(e === 'true')}
-                  defaultValue={field.value ? "true":"false"}>
+                  value={field.value ? "true":"false"}>
 
                   <FormControl>
                     <SelectTrigger>
