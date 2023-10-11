@@ -17,8 +17,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { PageLayout} from "@/components/ui/page-layout"
 import { Heading } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
-import Link from 'next/link'
-import useSWR from 'swr'
+import { useRouter } from 'next/router'
 
 const formSchema = z.object({
     name: z.string(),
@@ -26,7 +25,8 @@ const formSchema = z.object({
 })
 
 export default function ProjectAreaCreate() {
-
+    const router = useRouter();
+    const projectId = router.query.project;
     const exampleText = '[{"lat":52.08526843203928,"lng":4.273874759674072},{"lat":52.086283702713075,"lng":4.276385307312012}, ...]'
     
     const form = useForm<z.infer<typeof formSchema>>({
@@ -36,7 +36,7 @@ export default function ProjectAreaCreate() {
     })
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        createArea('/api/openstad/api/project/1/area',
+        createArea(`/api/openstad/api/project/${projectId}/area`,
         values
         )
     }
@@ -64,11 +64,11 @@ export default function ProjectAreaCreate() {
                     },
                     {
                         name: "Gebieden",
-                        url: "/projects/1/areas"
+                        url: `/projects/${projectId}/areas`
                     },
                     {
                         name: "Gebied aanmaken",
-                        url: "/projects/1/areas/create"
+                        url: `/projects/${projectId}/areas/create`
                     }
                 ]}
             >

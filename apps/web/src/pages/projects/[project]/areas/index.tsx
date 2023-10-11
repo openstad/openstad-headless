@@ -2,13 +2,12 @@ import { PageLayout} from "../../../../components/ui/page-layout"
 import { Button } from "../../../../components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import useSWR from "swr"
 import React from "react";
+import { useRouter } from 'next/router';
 
 export default function ProjectAreas() {
-    const { data, isLoading } = useSWR("/api/openstad/api/project");
-
-    if (!data) return null;
+    const router = useRouter();
+    const projectId = router.query.project;
 
     return (
         <div>
@@ -21,11 +20,11 @@ export default function ProjectAreas() {
                     },
                     {
                         name: "Gebieden",
-                        url: "/projects/1/areas"
+                        url: `/projects/${projectId}/areas`
                     }
                 ]}
                 action={
-                    <Link href="/projects/1/areas/create">
+                    <Link href={`/projects/${projectId}/areas/create`}>
                         <Button variant="default">
                             <Plus size="20" />
                             Maak een gebied aan
