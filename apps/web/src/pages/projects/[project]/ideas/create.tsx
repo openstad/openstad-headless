@@ -31,7 +31,7 @@ const formSchema = z.object({
 
 export default function ProjectIdeaCreate() {
     const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+        resolver: zodResolver<any>(formSchema),
         defaultValues: {
         }
     })
