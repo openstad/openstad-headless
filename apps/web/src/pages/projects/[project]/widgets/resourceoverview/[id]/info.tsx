@@ -104,7 +104,7 @@ export default function WidgetResourceOverviewInfo() {
   }
 
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver<any>(formSchema),
     defaultValues: defaults(),
   });
 

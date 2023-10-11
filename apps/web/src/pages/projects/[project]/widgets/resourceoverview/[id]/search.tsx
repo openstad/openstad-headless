@@ -39,7 +39,7 @@ export default function WidgetResourceOverviewSearch() {
   }
 
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver<any>(formSchema),
     defaultValues: defaults(),
   });
 

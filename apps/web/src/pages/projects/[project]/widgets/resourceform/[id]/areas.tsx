@@ -42,7 +42,7 @@ export default function WidgetResourceFormAreas() {
   }
 
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver<any>(formSchema),
     defaultValues: defaults(),
   });
 

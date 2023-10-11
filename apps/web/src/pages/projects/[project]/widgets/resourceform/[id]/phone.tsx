@@ -48,7 +48,7 @@ export default function WidgetResourceFormPhone() {
   }
 
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver<any>(formSchema),
     defaultValues: defaults(),
   });
 

@@ -17,7 +17,7 @@ const formSchema = z.object({
   
 export default function ArgumentsForm() {
   const category = 'form';
-  
+
   const { data: widget, isLoading: isLoadingWidget, updateConfig } = useConfig();
     const defaults = () =>({  
       intro: widget?.config?.[category]?.intro || "Type hier de intro tekst",
@@ -26,7 +26,7 @@ export default function ArgumentsForm() {
 
 
     const form = useForm<z.infer<typeof formSchema>>({
-      resolver: zodResolver(formSchema),
+      resolver: zodResolver<any>(formSchema),
       defaultValues: defaults(),
     });
 

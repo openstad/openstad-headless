@@ -26,7 +26,7 @@ export default function ArgumentsList() {
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
-      resolver: zodResolver(formSchema),
+      resolver: zodResolver<any>(formSchema),
       defaultValues: defaults()
     });
 

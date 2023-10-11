@@ -23,7 +23,7 @@ const formSchema = z.object({
 
 export default function ProjectSettingsNewsletter() {
     const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+        resolver: zodResolver<any>(formSchema),
         defaultValues: {
             isActive: false
         }

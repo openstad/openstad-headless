@@ -61,7 +61,7 @@ export default function WidgetResourceFormTip() {
   }
 
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver<any>(formSchema),
     defaultValues: defaults(),
   });
 
