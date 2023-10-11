@@ -7,11 +7,15 @@ import React from "react";
 import { ListHeading, Paragraph } from "@/components/ui/typography";
 import usePagination from "@/hooks/pagination";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/router";
 
 export default function Projects() {
   const { data, isLoading } = useSWR("/api/openstad/api/project?includeConfig=1");
+  const router = useRouter();
 
   if (!data) return null;
+
+  const headers = ['Projectnaam', 'Data', 'Issues', 'Status', 'Reacties', 'Likes', 'Indiener', 'Resources', 'Stemmen', 'Einddatum']
 
   const {
     page,
@@ -53,41 +57,16 @@ export default function Projects() {
           >
             <div className="container mx-auto py-10">
               <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-2 px-2 border-b border-border overflow-x-scroll">
-                <ListHeading className="hidden md:flex">
-                  Projectnaam
-                </ListHeading>
-                <ListHeading className="hidden md:flex">
-                  Data
-                </ListHeading>
-                <ListHeading className="hidden md:flex">
-                  Issues
-                </ListHeading>
-                <ListHeading className="hidden md:flex">
-                  Status
-                </ListHeading>
-                <ListHeading className="hidden md:flex">
-                  Reacties
-                </ListHeading>
-                <ListHeading className="hidden md:flex">
-                  Likes
-                </ListHeading>
-                <ListHeading className="hidden md:flex">
-                  Indiener
-                </ListHeading>
-                <ListHeading className="hidden md:flex">
-                  Resources
-                </ListHeading>
-                <ListHeading className="hidden md:flex">
-                  Stemmen
-                </ListHeading>
-                <ListHeading className="hidden md:flex">
-                  Einddatum
-                </ListHeading>
+                {headers.map(header =>   <ListHeading className="hidden md:flex">
+                  {header}
+                </ListHeading>)}
               </div>
               <ul>
                 {data.map((project: any) => {
                   return (
-                    <li className='grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2'>
+                    <li className='grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2' onClick={(d) =>{
+                      router.push(`${router.asPath}/${project.id}/widgets`)}
+                      }>
                       <Paragraph className='hidden md:flex'>
                         {project.name}
                       </Paragraph>
