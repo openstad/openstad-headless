@@ -18,6 +18,7 @@ import { PageLayout} from "@/components/ui/page-layout"
 import { Heading } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
+import useSWR from 'swr'
 
 const formSchema = z.object({
     name: z.string(),
@@ -25,6 +26,7 @@ const formSchema = z.object({
 })
 
 export default function ProjectAreaCreate() {
+    
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -32,7 +34,21 @@ export default function ProjectAreaCreate() {
     })
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+        createArea('/api/openstad/api/project/1/area',
+        values
+        )
+    }
+
+    async function createArea(url, schema) {
+        await fetch(url, {
+            method: 'POST',
+            headers:{
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({name: schema.name, 
+                
+                polygon: JSON.parse(schema.polygon)})
+        })
     }
 
     return (
@@ -62,8 +78,8 @@ export default function ProjectAreaCreate() {
                         <Separator className="mb-4" />
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                             <p>Je kan hier een polygoon aanmaken om een gebied op te geven waar je kaarten op zullen focussen.</p>
-                            <p>Het polygoon veld verwacht een lijst met coördinaten die samen een gesloten polygoon vormen in geoJSON formaat. Als het polygoon niet juist sluit, dan zal er een error terug worden gegeven. De meeste steden hebben de data hiervoor openlijk staan, zoals bijvoorbeeld <Link href="https://maps.amsterdam.nl/open_geodata/" className="text-blue-500">Amsterdam</Link>. Het is ook mogelijk om uw eigen polygoon aan te maken via deze link: <Link href="https://geojson.io/" className="text-blue-500">geojson.io</Link></p>
-                            <p>Je kunt de aangemaakte geoJSON waarde die hieruit is gekomen, of die je ergens anders vandaan hebt gehaald, hieronder plakken. Hou er wel rekening mee dat er niet met meer dan één polygoon wordt toegelaten per gebied.</p>
+                            <p>Het polygoon veld verwacht een lijst met coördinaten die samen een gesloten polygoon vormen. Als het polygoon niet juist sluit, dan zal er een error terug worden gegeven. Het invullen van de polygoon verwacht voor nu een array met het volgende formaat (deze wordt hieronder meegegeven als voorbeeld):</p>
+                            <p>Insert voorbeeld template hier:</p>
                             <FormField
                             control={form.control}
                             name="name"
