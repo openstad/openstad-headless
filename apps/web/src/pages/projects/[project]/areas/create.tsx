@@ -26,9 +26,11 @@ const formSchema = z.object({
 })
 
 export default function ProjectAreaCreate() {
+
+    const exampleText = '[{"lat":52.08526843203928,"lng":4.273874759674072},{"lat":52.086283702713075,"lng":4.276385307312012}, ...]'
     
     const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+        resolver: zodResolver<any>(formSchema),
         defaultValues: {
         }
     })
@@ -79,7 +81,7 @@ export default function ProjectAreaCreate() {
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                             <p>Je kan hier een polygoon aanmaken om een gebied op te geven waar je kaarten op zullen focussen.</p>
                             <p>Het polygoon veld verwacht een lijst met coördinaten die samen een gesloten polygoon vormen. Als het polygoon niet juist sluit, dan zal er een error terug worden gegeven. Het invullen van de polygoon verwacht voor nu een array met het volgende formaat (deze wordt hieronder meegegeven als voorbeeld):</p>
-                            <p>Insert voorbeeld template hier:</p>
+                            <p><code>{exampleText}</code></p>
                             <FormField
                             control={form.control}
                             name="name"
