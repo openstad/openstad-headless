@@ -15,14 +15,9 @@ const formSchema = z.object({
     voteReactions: z.boolean()
   });
 
-type Props = {
-  config?: any;
-  handleSubmit?: (config:any) => void
-}
-
 export default function ArgumentsGeneral() {
   const category = 'general';
-  
+
   const { data: widget, isLoading: isLoadingWidget, updateConfig } = useConfig();
   
     const defaults = () =>({  

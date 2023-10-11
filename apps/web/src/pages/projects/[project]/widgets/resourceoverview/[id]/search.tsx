@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/typography";
+import { useConfig } from "@/hooks/useConfigHook";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
 
@@ -14,17 +16,37 @@ const formSchema = z.object({
   });
 
 export default function WidgetResourceOverviewSearch() {
-    const form = useForm<z.infer<typeof formSchema>>({
-      resolver: zodResolver(formSchema),
-      defaultValues: {
-        textActiveSearch: 'Je ziet hier zoekresultaten voor [zoekterm]'
-      },
-    });
-  
-    function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+  type FormData = z.infer<typeof formSchema>;
+  const category = "search";
+
+  const {
+    data: widget,
+    isLoading: isLoadingWidget,
+    updateConfig,
+  } = useConfig();
+
+  const defaults = () => ({
+    displaySearch: widget?.config?.[category]?.displaySearch || false,
+    textActiveSearch: widget?.config?.[category]?.textActiveSearch ||  'Je ziet hier zoekresultaten voor [zoekterm]',
+  });
+
+  async function onSubmit(values: FormData) {
+    try {
+      await updateConfig({ [category]: values });
+    } catch (error) {
+      console.error("could falset update", error);
     }
-  
+  }
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: defaults(),
+  });
+
+  useEffect(() => {
+    form.reset(defaults());
+  }, [widget]);
+
     return (
         <div>
         <Form {...form}>
@@ -45,8 +67,8 @@ export default function WidgetResourceOverviewSearch() {
                     Toestaan van stemmen
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    onValueChange={(e: string) => field.onChange(e === "true")}
+                    value={field.value ? "true" : "false"}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -54,8 +76,8 @@ export default function WidgetResourceOverviewSearch() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

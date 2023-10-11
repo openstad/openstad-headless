@@ -44,7 +44,6 @@ const WithWidgetConfig = (
     )
 
     async function updateConfig(config:any) {
-        console.log({config});
         const res = await fetch(`/api/openstad/api/project/${projectId}/widgets/${id}?includeType=1`, {
           method: 'PUT',
           headers:{

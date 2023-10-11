@@ -3,7 +3,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/typography";
+import { useConfig } from "@/hooks/useConfigHook";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
 
@@ -13,17 +15,37 @@ const formSchema = z.object({
   });
 
 export default function WidgetResourceOverviewImage() {
-    const form = useForm<z.infer<typeof formSchema>>({
-      resolver: zodResolver(formSchema),
-      defaultValues: {
-        aspectRatio: '1:1'
-      },
-    });
-  
-    function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+  type FormData = z.infer<typeof formSchema>;
+  const category = "image";
+
+  const {
+    data: widget,
+    isLoading: isLoadingWidget,
+    updateConfig,
+  } = useConfig();
+
+  const defaults = () => ({
+    defaultImage: widget?.config?.[category]?.defaultImage || "",
+    aspectRatio: widget?.config?.[category]?.aspectRatio || "1:1",
+  });
+
+  async function onSubmit(values: FormData) {
+    try {
+      await updateConfig({ [category]: values });
+    } catch (error) {
+      console.error("could falset update", error);
     }
-  
+  }
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: defaults(),
+  });
+
+  useEffect(() => {
+    form.reset(defaults());
+  }, [widget]);
+
     return (
         <div>
         <Form {...form}>
