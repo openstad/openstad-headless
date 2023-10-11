@@ -17,8 +17,13 @@ import WidgetResourceFormSubmit from './submit';
 import WidgetResourceFormBudget from './budget';
 import WidgetResourceFormInfo from './info';
 import WidgetResourceFormConfirmation from './confirmation';
+import { useRouter } from 'next/router';
 
 export default function WidgetResourceForm() {
+    const router = useRouter();
+    const id = router.query.id;
+    const projectId = router.query.project;
+
     return(
         <div>
             <PageLayout
@@ -30,11 +35,11 @@ export default function WidgetResourceForm() {
                 },
                 {
                     name: "Widgets",
-                    url: "/projects/1/widgets"
+                    url: `/projects/${projectId}/widgets`
                 },
                 {
                     name: "Resource Form",
-                    url: "/projects/1/widgets/resourceform"
+                    url: `/projects/${projectId}/widgets/resourceform/${id}`
                 }
             ]}
             >
@@ -59,6 +64,7 @@ export default function WidgetResourceForm() {
                             <TabsTrigger value="info">Info</TabsTrigger>
                         </TabsList>
                         <TabsContent value="general" className="w-1/2">
+                            
                             <WidgetResourceFormGeneral />
                         </TabsContent>
                         <TabsContent value="title" className="w-1/2">

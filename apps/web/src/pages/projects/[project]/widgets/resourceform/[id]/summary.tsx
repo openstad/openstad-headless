@@ -5,7 +5,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Heading } from "@/components/ui/typography";
+import { useConfig } from "@/hooks/useConfigHook";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
 
@@ -17,16 +19,38 @@ const formSchema = z.object({
   });
 
 export default function WidgetResourceFormSummary() {
-    const form = useForm<z.infer<typeof formSchema>>({
-      resolver: zodResolver(formSchema),
-      defaultValues: {
-        summaryField: "textbar"
-      },
-    });
-  
-    function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+  type FormData = z.infer<typeof formSchema>;
+  const category = "summary";
+
+  const {
+    data: widget,
+    isLoading: isLoadingWidget,
+    updateConfig,
+  } = useConfig();
+
+  const defaults = () => ({
+    summaryLabel: widget?.config?.[category]?.summaryLabel || '',
+    summaryInfo: widget?.config?.[category]?.summaryInfo || '',
+    summaryRequired: widget?.config?.[category]?.summaryRequired || false,
+    summaryField: widget?.config?.[category]?.summaryField || 'textbar',
+  });
+
+  async function onSubmit(values: FormData) {
+    try {
+      await updateConfig({ [category]: values });
+    } catch (error) {
+      console.error("could not update", error);
     }
+  }
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: defaults(),
+  });
+
+  useEffect(() => {
+    form.reset(defaults());
+  }, [widget]);
   
     return (
         <div>
@@ -74,17 +98,16 @@ export default function WidgetResourceFormSummary() {
                     Is dit veld verplicht?
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                    onValueChange={(e:string) => field.onChange(e === 'true')}
+                    value={field.value ? "true":"false"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Nee" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

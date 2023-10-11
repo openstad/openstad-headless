@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Heading } from "@/components/ui/typography";
+import { useConfig } from "@/hooks/useConfigHook";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
 
@@ -15,15 +17,37 @@ const formSchema = z.object({
   });
 
 export default function WidgetResourceFormSubmit() {
-    const form = useForm<z.infer<typeof formSchema>>({
-      resolver: zodResolver(formSchema),
-      defaultValues: {
-      },
-    });
-  
-    function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+  type FormData = z.infer<typeof formSchema>;
+  const category = "submit";
+
+  const {
+    data: widget,
+    isLoading: isLoadingWidget,
+    updateConfig,
+  } = useConfig();
+
+  const defaults = () => ({
+    submitButton: widget?.config?.[category]?.submitButton || "",
+    saveButton: widget?.config?.[category]?.saveButton || "",
+    saveConceptButton: widget?.config?.[category]?.saveConceptButton || "",
+  });
+
+  async function onSubmit(values: FormData) {
+    try {
+      await updateConfig({ [category]: values });
+    } catch (error) {
+      console.error("could not update", error);
     }
+  }
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: defaults(),
+  });
+
+  useEffect(() => {
+    form.reset(defaults());
+  }, [widget]);
   
     return (
         <div>

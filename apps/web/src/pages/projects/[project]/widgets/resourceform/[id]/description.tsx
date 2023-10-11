@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/typography";
+import { useConfig } from "@/hooks/useConfigHook";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
 
@@ -15,16 +17,39 @@ const formSchema = z.object({
     descriptionRequired: z.boolean(),
   });
 
+type FormData = z.infer<typeof formSchema>;
 export default function WidgetResourceFormDescription() {
-    const form = useForm<z.infer<typeof formSchema>>({
-      resolver: zodResolver(formSchema),
-      defaultValues: {
-      },
-    });
-  
-    function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+  const category = "description";
+
+  const {
+    data: widget,
+    isLoading: isLoadingWidget,
+    updateConfig,
+  } = useConfig();
+
+  const defaults = () => ({
+    descriptionLabel: widget?.config?.[category]?.descriptionLabel || '',
+    descriptionInfo: widget?.config?.[category]?.descriptionInfo || '',
+    descriptionEditor: widget?.config?.[category]?.descriptionEditor || false,
+    descriptionRequired: widget?.config?.[category]?.descriptionRequired || false,
+  });
+
+  async function onSubmit(values: FormData) {
+    try {
+      await updateConfig({ [category]: values });
+    } catch (error) {
+      console.error("could not update", error);
     }
+  }
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: defaults(),
+  });
+
+  useEffect(() => {
+    form.reset(defaults());
+  }, [widget]);
   
     return (
         <div>
@@ -72,8 +97,8 @@ export default function WidgetResourceFormDescription() {
                     Kan er gebruik gemaakt worden van een text editor?
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
+                     onValueChange={(e: string) => field.onChange(e === "true")}
+                     value={field.value ? "true" : "false"}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -81,8 +106,8 @@ export default function WidgetResourceFormDescription() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -98,8 +123,8 @@ export default function WidgetResourceFormDescription() {
                     Is dit veld verplicht?
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
+                     onValueChange={(e: string) => field.onChange(e === "true")}
+                     value={field.value ? "true" : "false"}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -107,8 +132,8 @@ export default function WidgetResourceFormDescription() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

@@ -3,24 +3,46 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/typography";
+import { useConfig } from "@/hooks/useConfigHook";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from 'zod'
 
 const formSchema = z.object({
-    displayBudget: z.boolean()
+    displayBudget: z.coerce.boolean()
   });
 
 export default function WidgetResourceFormBudget() {
-    const form = useForm<z.infer<typeof formSchema>>({
-      resolver: zodResolver(formSchema),
-      defaultValues: {
-      },
+  type FormData = z.infer<typeof formSchema>;
+    const category = "budget";
+  
+    const {
+      data: widget,
+      isLoading: isLoadingWidget,
+      updateConfig,
+    } = useConfig();
+  
+    const defaults = () => ({
+      displayBudget: widget?.config?.[category]?.displayBudget || false,
     });
   
-    function onSubmit(values: z.infer<typeof formSchema>) {
-      console.log(values);
+    async function onSubmit(values: FormData) {
+      try {
+        await updateConfig({ [category]: values });
+      } catch (error) {
+        console.error("could not update", error);
+      }
     }
+  
+    const form = useForm<FormData>({
+      resolver: zodResolver(formSchema),
+      defaultValues: defaults(),
+    });
+  
+    useEffect(() => {
+      form.reset(defaults());
+    }, [widget]);
   
     return (
         <div>
@@ -42,17 +64,16 @@ export default function WidgetResourceFormBudget() {
                     Wordt het budget weergegeven aan moderators?
                   </FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                    onValueChange={(e: string) => field.onChange(e === "true")}
+                    value={field.value ? "true" : "false"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Nee" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Yes">Ja</SelectItem>
-                      <SelectItem value="No">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                      <SelectItem value="false">Nee</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
