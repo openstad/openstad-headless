@@ -105,18 +105,5 @@ router.route('/:id') //(\\d+)
             widget.update({config}).then(result => res.json(result))
         }
 	})
-    // delete widget
-    .delete(auth.useReqUser)
-    .put(async function(req, res, next) {
-		const widget = req.widget;
-        const config = {...widget.config, ...(req.body?.config || {})}; 
-    })
-    .delete(async function(req, res, next) {
-        const widget = req.widget;
-            
-        if(config) {
-            widget.update({config}).then(result => res.json(result))
-        }
-    });
     
 module.exports = router;
