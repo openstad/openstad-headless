@@ -165,7 +165,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
         },
         projectadminAddress: {
           type: 'string', // todo: add type email/list of emails
-          default: apiConfig.notifications.admin.emailAddress,
+          default: apiConfig.notifications.admin.toEmailAddress,
         },
       },
     },
@@ -670,7 +670,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
       status: null,
     },
 
-    "ignoreBruteForce": {
+    "ignoreBruteForceIPs": {
       type: 'arrayOfStrings',
       default: []
     },
@@ -725,10 +725,10 @@ function parseConfig(config) {
         }
         if (value[key].to) {
           if ( !value[key].projectmanagerAddress || value[key].projectmanagerAddress == options[key].subset.projectmanagerAddress.default ) {
-            value[key].projectmanagerAddress = value[key].to || apiConfig.notifications.admin.emailAddress || options[key].subset.projectmanagerAddress.default;
+            value[key].projectmanagerAddress = value[key].to || apiConfig.notifications.admin.toEmailAddress || options[key].subset.projectmanagerAddress.default;
           }
           if ( !value[key].projectadminAddress || value[key].projectadminAddress == options[key].subset.default ) {
-            value[key].projectadminAddress = apiConfig.notifications.admin.emailAddress || value[key].projectmanagerAddress;
+            value[key].projectadminAddress = apiConfig.notifications.admin.toEmailAddress || value[key].projectmanagerAddress;
           }
           value[key].to = undefined;
         }

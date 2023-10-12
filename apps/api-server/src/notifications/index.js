@@ -115,7 +115,7 @@ Notifications.sendMessage = function({ project, data }) {
   data.to = data.to || ( myConfig.notifications && myConfig.notifications.projectmanagerAddress );
 
   data.EMAIL = data.EMAIL || data.from;
-  data.HOSTNAME = data.HOSTNAME || ( myConfig.cms && ( myConfig.cms.hostname || myConfig.cms.domain ) ) || myConfig.hostname || myConfig.domain;
+  data.HOSTNAME = data.HOSTNAME || ( myConfig.cms && ( myConfig.cms.hostname || myConfig.cms.domain ) ) || myConfig.domain;
   data.URL = data.URL || ( myConfig.cms && myConfig.cms.url ) || myConfig.url || ( 'https://' + data.HOSTNAME );
   data.PROJECTNAME = data.PROJECTNAME || ( project && project.title ) || myConfig.projectName;
   data.ENDDATE = data.endDate || '';

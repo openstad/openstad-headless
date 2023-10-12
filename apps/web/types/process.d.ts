@@ -18,7 +18,11 @@ declare namespace NodeJS {
      */
     CLIENT_SECRET: string;
     /**
-     * The URL of the Openstad OAuth server. In development this is often http://localhost:4000.
+     * Internal URL of the Openstad OAuth server. In development this is often http://localhost:4000.
+     */
+    OAUTH_URL_INTERNAL: string;
+    /**
+     * Public URL of the Openstad OAuth server. In development this is often http://localhost:4000.
      */
     OAUTH_URL: string;
     /**

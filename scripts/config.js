@@ -48,7 +48,7 @@ process.env.API_DB_NAME = process.env.API_DB_NAME || ( process.env.DB_BASE_NAME 
 process.env.API_DB_DIALECT = process.env.API_DB_DIALECT || process.env.DB_DIALECT || 'mariadb';
 
 process.env.API_FROM_EMAIL_ADDRESS = process.env.API_FROM_EMAIL_ADDRESS || process.env.FROM_EMAIL_ADDRESS;
-process.env.API_SMTP_SSL = process.env.API_SMTP_SSL || process.env.SMTP_SSL;
+process.env.API_SMTP_REQUIRESSL = process.env.API_SMTP_REQUIRESSL || process.env.SMTP_REQUIRESSL;
 process.env.API_SMTP_PORT = process.env.API_SMTP_PORT || process.env.SMTP_PORT;
 process.env.API_SMTP_HOST = process.env.API_SMTP_HOST || process.env.SMTP_HOST;
 process.env.API_SMTP_USERNAME = process.env.API_SMTP_USERNAME || process.env.SMTP_USERNAME;
