@@ -156,7 +156,7 @@ router.route('/')
         db.Comment
           .scope(
             'defaultScope',
-            'withIdea',
+            'includeIdea',
             { method: ['includeVoteCount', 'comment'] },
             { method: ['includeUserVote', 'comment', req.user.id] },
           )
