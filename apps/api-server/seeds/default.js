@@ -56,6 +56,27 @@ module.exports = async function seed(config, db) {
       });
     }
 
+    // widget types
+    const widgetTypes = [
+      ['Argumenten', 'arguments'], 
+      ['Begroten', 'begrootmodule'], 
+      ['Ideeen map', 'ideasmap'], 
+      ['Keuzewijzer', 'keuzewijzer'], 
+      ['Like', 'like'], 
+      ['Map', 'map'], 
+      ['Resource form', 'resourceform'], 
+      ['Resource overview', 'resourceoverview']
+    ];
+
+    for(let widgetType of widgetTypes) {
+      await db.WidgetType.create({
+        visibleName: widgetType[0],
+        technicalName: widgetType[1],
+      });
+    }
+
+
+
   } catch (err) {
     console.log(err);
   }

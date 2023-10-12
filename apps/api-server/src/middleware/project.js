@@ -14,7 +14,7 @@ module.exports = function( req, res, next ) {
 
   // @todo: inverse this middleware; Only apply it on routes that need it, instead of applying this middleware to every route and then creating exceptions for routes that don't need it
   // deze paden mogen dit overslaan
-  if (req.path.match('^(/doc|/api/repo|/api/template|/api/area|/$)')) return next();
+  if (req.path.match('^(/doc|/api/repo|/api/template|/api/area|/api/widget|/api/widget-type|/$)')) return next();
   if (req.path.match('^(/api/lock(/[^/]*)?)$')) return next();
   if (req.path.match('^(/api/project(/[^/]*)?)$')) return next();
 
