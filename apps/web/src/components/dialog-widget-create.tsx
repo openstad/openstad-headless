@@ -32,7 +32,7 @@ import {
 } from "./ui/select";
 import { Input } from "./ui/input";
 import { useState } from "react";
-import { useWidgetsHook } from "@/hooks/useWidgetsHook";
+import { useWidgetsHook } from "@/hooks/use-widgets-hook";
 
 type Props = {
   projectId?: string;

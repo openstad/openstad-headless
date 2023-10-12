@@ -1,7 +1,7 @@
 import { CreateWidgetDialog } from "@/components/dialog-widget-create";
 import { PageLayout } from "@/components/ui/page-layout";
 import { ListHeading, Paragraph } from "@/components/ui/typography";
-import { useWidgetsHook } from "@/hooks/useWidgetsHook";
+import { useWidgetsHook } from "@/hooks/use-widgets-hook";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import useSWR from "swr";
