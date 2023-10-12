@@ -2,14 +2,15 @@ import { CreateWidgetDialog } from "@/components/dialog-widget-create";
 import { PageLayout } from "@/components/ui/page-layout";
 import { ListHeading, Paragraph } from "@/components/ui/typography";
 import { useWidgetsHook } from "@/hooks/use-widgets-hook";
+import { WidgetDefinitions } from "@/lib/widget-definitions";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import useSWR from "swr";
 
 
 export default function ProjectWidgets() {
   const router = useRouter();
   const { project } = router.query;
+  const types = WidgetDefinitions;
 
   const { data: widgets, isLoading:isLoadingWidgets } = useWidgetsHook(project as string);
   
@@ -42,11 +43,11 @@ export default function ProjectWidgets() {
           {widgets?.map((widget: any) => (
               <Link
                 key={widget.id}
-                href={`/projects/${project}/widgets/${widget.widgetType.technicalName}/${widget.id}`}>
+                href={`/projects/${project}/widgets/${widget.type}/${widget.id}`}>
                 <li className="grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                   <div className="col-span-3">
                   <strong className="">
-                    {widget.widgetType.visibleName}
+                    {WidgetDefinitions[widget.type]}
                   </strong>
                   <Paragraph>
                       {widget.description}

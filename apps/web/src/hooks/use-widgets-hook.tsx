@@ -1,7 +1,7 @@
 import useSWR from "swr";
 
   export function useWidgetsHook (projectId?: string) {
-    let url = `/api/openstad/api/project/${projectId}/widgets?includeType=1`;
+    let url = `/api/openstad/api/project/${projectId}/widgets`;
 
     const widgetsSwr = useSWR(
         projectId ? url : null
@@ -16,9 +16,9 @@ import useSWR from "swr";
             body: JSON.stringify({type:typeId, description})
         })
         const data = await res.json();
-        widgetsSwr.mutate();
+        widgetsSwr.mutate([...widgetsSwr.data, data]);
+        return data;
     }
-
 
     return {...widgetsSwr, createWidget};
   }

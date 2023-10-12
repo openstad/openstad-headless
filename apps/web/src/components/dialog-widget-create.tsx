@@ -33,6 +33,9 @@ import {
 import { Input } from "./ui/input";
 import { useState } from "react";
 import { useWidgetsHook } from "@/hooks/use-widgets-hook";
+import { WidgetDefinitions } from "@/lib/widget-definitions";
+import { useRouter } from "next/router";
+import toast from 'react-hot-toast';
 
 type Props = {
   projectId?: string;
@@ -42,7 +45,7 @@ const minDescription = 4;
 const maxDescription = 255;
 
 const formSchema = z.object({
-    description: z
+  description: z
     .string()
     .min(
       minDescription,
@@ -58,29 +61,29 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 export function CreateWidgetDialog({ projectId }: Props) {
   const [open, setOpen] = useState<boolean>(false);
-
-  const { data: widgetTypes, isLoading } = useSWR(
-    `/api/openstad/api/widget-types`
-  );
-
+  const router = useRouter();
+  const widgetTypes = Object.entries(WidgetDefinitions);
   const { createWidget } = useWidgetsHook(projectId);
 
-
   async function onSubmit(values: FormData) {
-        if(!projectId) return;
-        try {
-              await createWidget(values.type, values.description);
-              setOpen(false);
-          } catch (error) {
-              console.error("could not create widget", error);
-          }
+    if (!projectId) return;
+    try {
+      const widget = await createWidget(values.type, values.description);
+      setOpen(false);
+      if(widget) {
+        toast.success("Widget aangemaakt!");
+        router.push(router.asPath + `/${widget.type}/${widget.id}`);
+      }
+    } catch (error) {
+      toast.error("Widget kon niet worden aangemaakt!");
+    }
   }
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-    description: "",
-      type: "1",
+      description: "",
+      type: widgetTypes[0][0],
     },
   });
 
@@ -107,23 +110,18 @@ export function CreateWidgetDialog({ projectId }: Props) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Widget type:</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={Number.parseInt(field.value)}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecteer een type widget" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {widgetTypes?.map((type: any) => {
-                          return (
-                            <SelectItem key={type.id} value={type.id}>
-                              {type.visibleName}
-                            </SelectItem>
-                          );
-                        })}
+                        {widgetTypes.map((type) => (
+                          <SelectItem key={type[0]} value={type[0]}>
+                            {type[1]}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -149,7 +147,9 @@ export function CreateWidgetDialog({ projectId }: Props) {
               <div className="sticky bottom-0 py-4 bg-background flex flex-col"></div>
             </DialogHeader>
             <DialogFooter>
-              <Button disabled={!form.formState.isValid} type="submit">Aanmaken</Button>
+              <Button disabled={!form.formState.isValid} type="submit">
+                Aanmaken
+              </Button>
             </DialogFooter>
           </form>
         </Form>

@@ -6,15 +6,8 @@ const db          = require('../../db');
 
 router.all('*', function(req, res, next) {
     req.scope = [];
-
-    if (req.query.includeType) {
-      req.scope.push('includeType');
-    }
     return next();
-  })
-  .all(function(req, res, next) {
-    if(!req.params.projectId) return res.status(400).send("projectId is required")
-  });
+});
 
 // list widgets
 // --------------
@@ -44,31 +37,19 @@ router.route('/')
 
     // Create widget
     .post(auth.useReqUser)
-    .post(function(req, res, next) {
+    .post(async function(req, res, next) {
         const widget = req.body;
-        if(!widget.type) return res.status(400).send("Widget type is required");
-        if(!widget.description) return res.status(400).send("Widget description is required");
-        next();
-    })
-.post(async function(req, res, next) {
-    const widget = req.body;
-    const projectId = req.params.projectId;
-    const query = {where:{id: widget.type}}
+        const projectId = req.params.projectId;
+        
+        const createdWidget = await db.Widget.create({
+            projectId,
+            description: widget.description,
+            type: widget.type,
+            config: {}
+        });
 
-    const result = await db.WidgetType.findOne(query);
-    if(!result) {
-        return res.status(404).send("The given widget type does not exist");
-    }
-    
-    const createdWidget = await db.Widget.create({
-        projectId,
-        description: widget.description,
-        widgetTypeId: widget.type,
-        config: {}
+        return res.json(createdWidget);
     });
-
-    return res.json(createdWidget);
-});
 
 // one widget routes: get widget
 // -------------------------
