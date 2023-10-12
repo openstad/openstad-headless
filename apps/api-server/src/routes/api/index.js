@@ -25,9 +25,6 @@ router.use( '/project/:projectId(\\d+)(/idea/:ideaId(\\d+))?/comment', require('
 router.use( '/project/:projectId(\\d+)/idea', require('./idea') );
 //router.use( '/project/:projectId(\\d+)/idea', require('./idea.old') );
 
-// articles
-router.use( '/project/:projectId(\\d+)/article', require('./article') );
-
 // polls
 router.use( '/project/:projectId(\\d+)(/idea/:ideaId(\\d+))?/poll', require('./poll') );
 

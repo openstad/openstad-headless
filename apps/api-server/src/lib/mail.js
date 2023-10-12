@@ -48,21 +48,25 @@ function sendMail(project, options) {
     });
   }
 
-  mailTransporter.getTransporter(project).sendMail(
-    merge(defaultSendMailOptions, options),
-    function (error, info) {
-      if (error) {
-        logError(error.message);
-      } else {
-        log(info.response);
-      }
-    }
-  );
+  mailTransporter.getTransporter(project)
+    .then(
+      transporter => {
+        transporter.sendMail(
+          merge(defaultSendMailOptions, options),
+          function (error, info) {
+            if (error) {
+              logError(error.message);
+            } else {
+              log(info.response);
+            }
+          }
+        )
+      })
 }
 
-function sendNotificationMail(data, project) {
+async function sendNotificationMail(data, project) {
 
-  let projectConfig = new MailConfig(project)
+  let projectConfig = await new MailConfig(project)
   data.logo = projectConfig.getLogo();
 
   let html;
@@ -85,8 +89,9 @@ function sendNotificationMail(data, project) {
   });
 };
 
-function sendConceptEmail(resource, resourceType, project, user) {
-  const projectConfig = new MailConfig(project)
+async function sendConceptEmail(resource, resourceType, project, user) {
+
+  let projectConfig = await new MailConfig(project)
   if (!resourceType) return console.error('sendConceptMail error: resourceType not provided');
 
   let resourceConceptEmail = projectConfig.getResourceConceptEmail(resourceType);
@@ -130,8 +135,9 @@ function sendConceptEmail(resource, resourceType, project, user) {
 }
 
 // send email to user that submitted a resource
-function sendThankYouMail(resource, resourceType, project, user) {
-  const projectConfig = new MailConfig(project)
+async function sendThankYouMail(resource, resourceType, project, user) {
+
+  let projectConfig = await new MailConfig(project)
   
   if (!resourceType) return console.error('sendThankYouMail error: resourceType not provided');
 
@@ -175,7 +181,6 @@ function prepareEmailData(user, resource, hostname, projectname, inzendingURL, u
     date: new Date(),
     user,
     idea: resource,
-    article: resource,
     HOSTNAME: hostname,
     PROJECTNAME: projectname,
     inzendingURL,
@@ -212,9 +217,9 @@ function convertHtmlToText(html) {
 }
 
 // send email to user that submitted a NewsletterSignup
-function sendNewsletterSignupConfirmationMail(newslettersignup, project, user) {
+async function sendNewsletterSignupConfirmationMail(newslettersignup, project, user) {
 
-  let projectConfig = new MailConfig(project)
+  let projectConfig = await new MailConfig(project)
 
   const url = projectConfig.getCmsUrl();
   const hostname = projectConfig.getCmsHostname();
@@ -265,9 +270,9 @@ function sendNewsletterSignupConfirmationMail(newslettersignup, project, user) {
 
 // send email to user that is about to be anonymized
 // todo: this is a copy of sendThankYouMail and has too many code duplications; that should be merged. But since there is a new notification system that should be implemented more widly I am not going to spent time on that now
-function sendInactiveWarningEmail(project, user) {
+async function sendInactiveWarningEmail(project, user) {
 
-  let projectConfig = new MailConfig(project)
+ let projectConfig = await new MailConfig(project)
 
   const url = projectConfig.getCmsUrl();
   const hostname = projectConfig.getCmsHostname();

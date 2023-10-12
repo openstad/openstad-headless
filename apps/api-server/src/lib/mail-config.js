@@ -1,27 +1,41 @@
-const merge             = require('merge');
-const config            = require('config');
-const defaultProjectConfig = require('./defaultProjectConfig');
+const merge = require('merge');
+const config = require('config');
+const configField = require('../models/lib/config-field');
 
 class MailConfig {
 
   constructor(project) {
 
     let self = this;
-    self.config = merge.recursive(true, defaultProjectConfig, config || {});
-    
-    // Exceptions from local config because field names don't match
-    self.config.cms.url = self.config.url || self.config.title;
-    self.config.cms.hostname = self.config.hostname || self.config.domain || self.config.title;
-    self.config.title = self.config.projectName || self.config.title;
-    self.config.newslettersignup.confirmationEmail.attachments = (self.config.ideas && self.config.ideas.feedbackEmail && self.config.ideas.feedbackEmail.attachments) || self.config.newslettersignup.confirmationEmail.attachments;
-    self.config.newslettersignup.confirmationEmail.subject = (self.config.ideas && self.config.ideas.feedbackEmail && self.config.ideas.feedbackEmail.subject) || self.config.newslettersignup.confirmationEmail.subject;
-    
-    self.config = merge.recursive(self.config, project.config || {});
-    
-    // Put the title in the config as well
-    self.config.title = project.title || self.config.title;
 
-    return self;
+    let defaultProjectConfig = configField.parseConfig('projectConfig', {});
+    defaultProjectConfig = merge.recursive(defaultProjectConfig, configField.parseConfig('projectEmailConfig', {}));
+
+    return Promise.resolve('force async constructor')
+       .then(async noop => {
+
+         const db = require('../db');
+         project = await db.Project.scope('defaultScope', 'includeEmailConfig').findByPk(project.id);
+
+         self.config = merge.recursive(true, defaultProjectConfig, config || {});
+
+         // Exceptions from local config because field names don't match
+         self.config.cms.url = self.config.url || self.config.title;
+         self.config.cms.hostname = self.config.hostname || self.config.title;
+         self.config.title = self.config.projectName || self.config.title;
+         self.config.newslettersignup.confirmationEmail.attachments = (self.config.ideas && self.config.ideas.feedbackEmail && self.config.ideas.feedbackEmail.attachments) || self.config.newslettersignup.confirmationEmail.attachments;
+         self.config.newslettersignup.confirmationEmail.subject = (self.config.ideas && self.config.ideas.feedbackEmail && self.config.ideas.feedbackEmail.subject) || self.config.newslettersignup.confirmationEmail.subject;
+         
+         self.config = merge.recursive(self.config, project.config || {});
+
+         // email templates have been moved to project.emailConfig
+         self.config = merge.recursive(self.config, project.emailConfig || {});
+
+         // Put the title in the config as well
+         self.config.title = project.title || self.config.title;
+         
+         return self; 
+       });
 
   }
   
@@ -55,7 +69,7 @@ class MailConfig {
 
   getFeedbackEmailFrom(resourceType) {
     resourceType = resourceType || 'ideas'
-    return this.getResourceFeedbackEmail(resourceType).from;
+    return this.getResourceFeedbackEmail(resourceType).from || config.mail.from;
   }
   
   getFeedbackEmailInzendingPath(resourceType) {
@@ -63,7 +77,7 @@ class MailConfig {
   }
   
   getResourceFeedbackEmailTemplate(resourceType) {
-    return this.getResourceFeedbackEmail(resourceType).template;
+    return this.getResourceFeedbackEmail(resourceType).template || 'No template';
   }
   
   getResourceFeedbackEmailAttachments(resourceType) {
@@ -75,7 +89,7 @@ class MailConfig {
   }
   
   getMailMethod() {
-    return this.config.mail.method;
+    return this.config.mail.method || 'smtp';
   }
   
   getMailTransport() {
@@ -87,7 +101,7 @@ class MailConfig {
   }
   
   getNewsletterSignupConfirmationEmailTemplate() {
-    return this.config.newslettersignup.confirmationEmail.template;
+    return this.config.newslettersignup.confirmationEmail.template || 'No template';
   }
   
   getNewsletterSignupConfirmationEmailAttachments() {

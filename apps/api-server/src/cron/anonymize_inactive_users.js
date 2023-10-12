@@ -56,7 +56,7 @@ module.exports = {
                 // send notification
                 if (user.email) {
                   console.log('CRON anonymize-inactive-users: send warning email to user', user.email, user.lastLogin);
-                  mail.sendInactiveWarningEmail(project, user);
+                  await mail.sendInactiveWarningEmail(project, user);
                   user.update({ isNotifiedAboutAnonymization: new Date() });
                 }
               }

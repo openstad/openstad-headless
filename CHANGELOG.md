@@ -27,6 +27,8 @@
 * Remove backup scripts - this should not be done in the API
 * Remove mongo dependency
 * Remove S3 connections - no longer required
+* Move email config from project.config to project.emailConfig and hide them unless specifically asked for
+* Remove articles
 * Fix half implemented tags functionality
 * Add seqnrs to tags
 

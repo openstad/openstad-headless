@@ -83,7 +83,7 @@ module.exports = {
               webmasterEmail: project.config.notifications.projectadminAddress, 
             };
             console.log('CRON send-enddate-notifications: send email to projectmanager');
-            Notifications.sendMessage({ project, data });
+            await Notifications.sendMessage({ project, data });
             project.update({ config: { project: { endDateNotificationSent: true } } });
 
           }
