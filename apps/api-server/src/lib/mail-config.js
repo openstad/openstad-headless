@@ -11,7 +11,7 @@ class MailConfig {
     
     // Exceptions from local config because field names don't match
     self.config.cms.url = self.config.url || self.config.title;
-    self.config.cms.hostname = self.config.hostname || self.config.title;
+    self.config.cms.hostname = self.config.hostname || self.config.domain || self.config.title;
     self.config.title = self.config.projectName || self.config.title;
     self.config.newslettersignup.confirmationEmail.attachments = (self.config.ideas && self.config.ideas.feedbackEmail && self.config.ideas.feedbackEmail.attachments) || self.config.newslettersignup.confirmationEmail.attachments;
     self.config.newslettersignup.confirmationEmail.subject = (self.config.ideas && self.config.ideas.feedbackEmail && self.config.ideas.feedbackEmail.subject) || self.config.newslettersignup.confirmationEmail.subject;

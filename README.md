@@ -13,6 +13,7 @@ __All__
 - [About databases](doc/databases.md)
 
 __API__
-- [Authentication and authorization](/apps/api-server/doc/auth.md)
+- [API configuration](./apps/api-server/doc/config.md)
+- [Authentication and authorization](./apps/api-server/doc/auth.md)
 
 

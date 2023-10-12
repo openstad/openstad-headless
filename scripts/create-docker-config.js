@@ -1,9 +1,41 @@
 require('dotenv').config();
 if (typeof process.env.FORCE_HTTP == 'undefined') process.env.FORCE_HTTP = 'yes';
-const config = require('./config');
 const fs = require('fs').promises;
 
 (async function() {
+
+  // re-use mysql password
+  if (!process.env.DB_PASSWORD) {
+    try {
+      let current = await fs.readFile('./.env.docker');
+      current = current.toString();
+      let match = current.match(/MYSQL_ROOT_PASSWORD=([^\r\n]+)/);
+      if (match) {
+        process.env.DB_PASSWORD = match[1];
+      }
+      match = current.match(/AUTH_ADMIN_CLIENT_ID=([^\r\n]+)/);
+      if (match) {
+        process.env.AUTH_ADMIN_CLIENT_ID = match[1];
+      }
+      match = current.match(/AUTH_ADMIN_CLIENT_SECRET=([^\r\n]+)/);
+      if (match) {
+        process.env.AUTH_ADMIN_CLIENT_SECRET = match[1];
+      }
+      match = current.match(/AUTH_FIRST_CLIENT_ID=([^\r\n]+)/);
+      if (match) {
+        process.env.AUTH_FIRST_CLIENT_ID = match[1];
+      }
+      match = current.match(/AUTH_FIRST_CLIENT_SECRET=([^\r\n]+)/);
+      if (match) {
+        process.env.AUTH_FIRST_CLIENT_SECRET = match[1];
+      }
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
+  const config = require('./config');
+
   try {
     let configfile = `
 MYSQL_ROOT_PASSWORD=${ process.env.DB_PASSWORD }
@@ -16,7 +48,7 @@ IMAGE_DB_NAME=${ process.env.IMAGE_DB_NAME }
 API_URL=${ process.env.API_URL }
 API_PORT=${ process.env.API_PORT }
 API_HOSTNAME=${ process.env.API_DOMAIN }
-API_EXPRESS_PORT=${ process.env.API_PORT }
+API_PORT=${ process.env.API_PORT }
 API_DATABASE_USER=${ process.env.API_DB_USERNAME }
 API_DATABASE_PASSWORD=${ process.env.API_DB_PASSWORD }
 API_DATABASE_DATABASE=${ process.env.API_DB_NAME }
@@ -29,8 +61,8 @@ API_MAIL_TRANSPORT_SMTP_REQUIRESSL=${ process.env.API_SMTP_SSL }
 API_MAIL_TRANSPORT_SMTP_AUTH_USER=${ process.env.API_SMTP_USERNAME }
 API_MAIL_TRANSPORT_SMTP_AUTH_PASS=${ process.env.API_SMTP_PASSWORD }
 #API_NOTIFICATIONS_ADMIN_EMAILADDRESS=${ process.env.API_NOTIFICATIONS_ADMIN_EMAILADDRESS }
-API_AUTHORIZATION_JWTSECRET=${ process.env.API_JWT_SECRET }
-API_AUTHORIZATION_FIXEDAUTHTOKENS=${ process.env.API_FIXED_AUTH_KEY }
+API_AUTH_JWTSECRET=${ process.env.API_JWT_SECRET }
+API_AUTH_FIXEDAUTHTOKENS=${ process.env.API_FIXED_AUTH_KEY }
 AUTH_API_URL=${ process.env.AUTH_APP_URL }
 
 AUTH_APP_URL=${ process.env.AUTH_APP_URL }
@@ -73,10 +105,6 @@ ADMIN_PORT=${ process.env.ADMIN_PORT }
 ADMIN_SECRET=${ process.env.ADMIN_SECRET }
 `
 
-    const ip = require("ip");
-    let localIP = ip.address();
-    configfile = configfile.replace(/localhost/g, localIP);
-    
     await fs.writeFile('./.env.docker', configfile);
 
     console.log(`
@@ -85,11 +113,11 @@ You can now build and run a docker environment using the command.
 docker-compose -f docker-compose.development.yml --env-file .env.docker up --build
    
 Once that is running you can visit the servers on these urls:
-List ideas: ${ process.env.API_URL.replace(/localhost/g, localIP) }/api/project/1/idea
-Login: ${ process.env.API_URL.replace(/localhost/g, localIP) }/auth/project/1/login
-Which should redirect you to the login form: ${ process.env.AUTH_APP_URL.replace(/localhost/g, localIP) }/auth/code/login?clientId=uniquecode
-Show an image: ${ process.env.IMAGE_APP_URL.replace(/localhost/g, localIP) }/image/forum.romanum.06.webp
-Admin server: ${ process.env.ADMIN_URL.replace(/localhost/g, localIP) }/
+List ideas: ${ process.env.API_URL }/api/project/1/idea
+Login: ${ process.env.API_URL }/auth/project/1/login
+Which should redirect you to the login form: ${ process.env.AUTH_APP_URL }/auth/code/login?clientId=uniquecode
+Show an image: ${ process.env.IMAGE_APP_URL }/image/forum.romanum.06.webp
+Admin server: ${ process.env.ADMIN_URL }/
 
 You can login using the code ${ process.env.AUTH_FIRST_LOGIN_CODE }
 

@@ -109,17 +109,13 @@ router
     let code = req.query.code;
     if (!code) throw createError(403, 'Je bent niet ingelogd');
 
-    let url = `${req.authConfig.serverUrl}/oauth/token`;
+    let url = `${req.authConfig.serverUrlInternal}/oauth/token`;
     let data = {
       client_id: req.authConfig.clientId,
       client_secret: req.authConfig.clientSecret,
       code: code,
       grant_type: 'authorization_code'
     }
-
-    console.log('===');
-    console.log(url);
-    console.log(data);
 
     try {
 

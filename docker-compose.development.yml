@@ -49,24 +49,25 @@ services:
     container_name: openstad-api-server
     restart: unless-stopped
     environment:
-      - API_URL=${API_URL}
-      - API_HOSTNAME=${API_HOSTNAME}
-      - API_DATABASE_USER=${API_DATABASE_USER}
-      - API_DATABASE_PASSWORD=${API_DATABASE_PASSWORD}
-      - API_DATABASE_DATABASE=${API_DATABASE_DATABASE}
-      - API_DATABASE_HOST=${API_DATABASE_HOST}
-      - API_EMAILADDRESS=${API_EMAILADDRESS}
-      - API_EXPRESS_PORT=${API_EXPRESS_PORT}
-      - API_MAIL_FROM=${API_MAIL_FROM}
-      - API_MAIL_TRANSPORT_SMTP_PORT=${API_MAIL_TRANSPORT_SMTP_PORT}
-      - API_MAIL_TRANSPORT_SMTP_HOST=${API_MAIL_TRANSPORT_SMTP_HOST}
-      - API_MAIL_TRANSPORT_SMTP_REQUIRESSL=${API_MAIL_TRANSPORT_SMTP_REQUIRESSL}
-      - API_MAIL_TRANSPORT_SMTP_AUTH_USER=${API_MAIL_TRANSPORT_SMTP_AUTH_USER}
-      - API_MAIL_TRANSPORT_SMTP_AUTH_PASS=${API_MAIL_TRANSPORT_SMTP_AUTH_PASS}
-      - API_NOTIFICATIONS_ADMIN_EMAILADDRESS=${API_NOTIFICATIONS_ADMIN_EMAILADDRESS}
-      - API_AUTHORIZATION_JWTSECRET=${API_AUTHORIZATION_JWTSECRET}
-      - API_AUTHORIZATION_FIXEDAUTHTOKENS=${API_AUTHORIZATION_FIXEDAUTHTOKENS}
-      - AUTH_API_URL=${AUTH_APP_URL}
+      - URL=${API_URL}
+      - HOSTNAME=${API_HOSTNAME}
+      - DB_USERNAME=${API_DATABASE_USER}
+      - DB_PASSWORD=${API_DATABASE_PASSWORD}
+      - DB_NAME=${API_DATABASE_DATABASE}
+      - DB_HOST=${API_DATABASE_HOST}
+      - EMAILADDRESS=${API_EMAILADDRESS}
+      - PORT=${API_PORT}
+      - MAIL_FROM=${API_MAIL_FROM}
+      - MAIL_TRANSPORT_SMTP_PORT=${API_MAIL_TRANSPORT_SMTP_PORT}
+      - MAIL_TRANSPORT_SMTP_HOST=${API_MAIL_TRANSPORT_SMTP_HOST}
+      - MAIL_TRANSPORT_SMTP_REQUIRESSL=${API_MAIL_TRANSPORT_SMTP_REQUIRESSL}
+      - MAIL_TRANSPORT_SMTP_AUTH_USER=${API_MAIL_TRANSPORT_SMTP_AUTH_USER}
+      - MAIL_TRANSPORT_SMTP_AUTH_PASS=${API_MAIL_TRANSPORT_SMTP_AUTH_PASS}
+      - NOTIFICATIONS_ADMIN_EMAILADDRESS=${API_NOTIFICATIONS_ADMIN_EMAILADDRESS}
+      - AUTH_JWTSECRET=${API_AUTH_JWTSECRET}
+      - AUTH_FIXEDAUTHTOKENS=${API_AUTH_FIXEDAUTHTOKENS}
+      - AUTH_ADAPTER_OPENSTAD_SERVERURL=${AUTH_APP_URL}
+      - AUTH_ADAPTER_OPENSTAD_SERVERURL_INTERNAL=http://openstad-auth-server:${AUTH_PORT}
     ports:
       - "${API_PORT}:${API_PORT}"
     volumes:
@@ -80,7 +81,7 @@ services:
           cd /opt/api-server
           npm run init-database && touch /opt/api-server/init/done;
         fi
-        nodemon server.js
+        NODE_ENV=development nodemon server.js
       "
 
   openstad-auth-server:
@@ -137,7 +138,7 @@ services:
           cd /opt/auth-server
           npm run init-database && touch /opt/auth-server/init/done;
         fi
-        nodemon server.js
+        NODE_ENV=development nodemon server.js
       "
 
   openstad-image-server:
@@ -177,7 +178,7 @@ services:
           cd /opt/image-server
           npm run init-database && touch /opt/image-server/init/done;
         fi
-        nodemon app.js
+        NODE_ENV=development nodemon app.js
       "
 
   openstad-admin-server:
@@ -192,7 +193,8 @@ services:
       - CLIENT_ID=${AUTH_ADMIN_CLIENT_ID}
       - CLIENT_SECRET=${AUTH_ADMIN_CLIENT_SECRET}
       - OAUTH_URL=${AUTH_APP_URL}
-      - API_URL=${API_URL}
+      - OAUTH_URL_INTERNAL=http://openstad-auth-server:${AUTH_PORT}
+      - API_URL=http://openstad-api-server:${API_PORT}
       - PORT=${ADMIN_PORT}
     ports:
       - "${ADMIN_PORT}:${ADMIN_PORT}"
@@ -202,8 +204,14 @@ services:
       - openstad-admin-server-init:/opt/admin-server/init
     entrypoint: |
       bash -c "
-        echo '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-        echo $$CLIENT_ID $$CLIENT_SECRET
+        echo NEXTAUTH_URL $${NEXTAUTH_URL}
+        echo NEXTAUTH_SECRET $${NEXTAUTH_SECRET}
+        echo CLIENT_ID $${CLIENT_ID}
+        echo CLIENT_SECRET $${CLIENT_SECRET}
+        echo OAUTH_URL $${OAUTH_URL}
+        echo OAUTH_URL_INTERNAL $${OAUTH_URL_INTERNAL}
+        echo API_URL $${API_URL}
+        echo PORT $${PORT}
         npm run dev
       "
 

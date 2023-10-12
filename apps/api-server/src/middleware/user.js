@@ -105,7 +105,6 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
       return dbUser;
     }
 
-    // extradata is tmp want moet in provider
     if (!dbUser || ( !dbUser.idpUser || !dbUser.idpUser.accesstoken ) ) {
       return {};
     }
