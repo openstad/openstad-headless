@@ -3,7 +3,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/typography";
-import { useConfig } from "@/hooks/useConfigHook";
+import { useWidgetConfig } from "@/hooks/use-widget-config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -19,7 +19,7 @@ const formSchema = z.object({
 export default function ArgumentsList() {
   const category = 'list';
 
-  const { data: widget, isLoading: isLoadingWidget, updateConfig } = useConfig();
+  const { data: widget, isLoading: isLoadingWidget, updateConfig } = useWidgetConfig();
     const defaults = () =>({  
       title: widget?.config?.[category]?.title || "Argumenten",
       placeholder: widget?.config?.[category]?.placeholder || "Nog geen reacties geplaatst."

@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/typography";
-import { useConfig } from "@/hooks/useConfigHook";
+import { useWidgetConfig } from "@/hooks/use-widget-config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -42,7 +42,7 @@ export default function WidgetMapMap() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useConfig();
+  } = useWidgetConfig();
 
   const defaults = () => ({
     variant: widget?.config?.[category]?.variant || "NLMaps",
