@@ -30,7 +30,7 @@ import {
 } from "./ui/select";
 import { Input } from "./ui/input";
 import { useState } from "react";
-import { useWidgetsHook } from "@/hooks/use-widgets-hook";
+import { useWidgetsHook } from "@/hooks/use-widgets";
 import { WidgetDefinitions } from "@/lib/widget-definitions";
 import { useRouter } from "next/router";
 import toast from 'react-hot-toast';
