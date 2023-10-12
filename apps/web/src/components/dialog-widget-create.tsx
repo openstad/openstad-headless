@@ -10,8 +10,6 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 
-import useSWR from "swr";
-import { useProject } from "@/hooks/useProjectHook";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
