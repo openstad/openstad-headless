@@ -22,13 +22,11 @@ import { Calendar } from '@/components/ui/calendar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Heading } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
+import { useRouter } from 'next/router'
 
 const formSchema = z.object({
     projectName: z.string().min(1, {
-        message: "De naam mag niet leeg zijn!"
-    }),
-    url: z.string().url({
-        message: "Dit is geen juiste URL!"
+        message: "De naam van een project mag niet leeg zijn!"
     }),
     endDate: z.date().min(new Date(), {
         message: "De datum moet nog niet geweest zijn!"
@@ -38,6 +36,9 @@ const formSchema = z.object({
 })
 
 export default function ProjectSettings() {
+    const router = useRouter();
+    const { project } = router.query;
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver<any>(formSchema),
         defaultValues: {
@@ -62,7 +63,7 @@ export default function ProjectSettings() {
                 },
                 {
                     name: 'Instellingen',
-                    url: '/projects/1/settings'
+                    url: `/projects/${project}/settings`
                 },
             ]}>
             <div className="container mx-auto py-10 w-1/2 float-left">
@@ -77,22 +78,9 @@ export default function ProjectSettings() {
                         name="projectName"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Title</FormLabel>
+                                <FormLabel>Projectnaam</FormLabel>
                                 <FormControl>
                                     <Input placeholder='Naam' {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="url"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>URL</FormLabel>
-                                <FormControl>
-                                    <Input placeholder='URL' {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

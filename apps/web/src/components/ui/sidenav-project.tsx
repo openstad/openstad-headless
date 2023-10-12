@@ -10,6 +10,7 @@ import { ArrowLeft, ChevronDown } from "lucide-react";
 
 export function SidenavProject({ className }: { className?: string }) {
   const router = useRouter();
+  const { project } = router.query;
   const [location, setLocation] = useState("");
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export function SidenavProject({ className }: { className?: string }) {
         </Link>
       </div>
       <div className="p-4 flex flex-col gap-2">
-        <Link href={"/projects/1/widgets"}>
+        <Link href={`/projects/${project}/widgets`}>
           <Button
             variant={location.endsWith("/widgets") ? "secondary" : "ghost"}
             size="default"
@@ -40,7 +41,7 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Widgets</span>
           </Button>
         </Link>
-        <Link href={"/projects/1/settings"}>
+        <Link href={`/projects/${project}/settings`}>
           <Button
             variant={location.includes("/settings") ? "secondary" : "ghost"}
             size="default"
@@ -59,7 +60,7 @@ export function SidenavProject({ className }: { className?: string }) {
         </Link>
         {location.includes("/settings") ? (
           <>
-            <Link href={"/projects/1/settings"}>
+            <Link href={`/projects/${project}/settings`}>
               <Button
                 variant={location.endsWith("/settings") ? "secondary" : "ghost"}
                 size="default"
@@ -68,7 +69,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Algemeen</span>
               </Button>
             </Link>
-            <Link href={"/projects/1/settings/ideas"}>
+            <Link href={`/projects/${project}/settings/ideas`}>
               <Button
                 variant={
                   location.includes("/settings/ideas") ? "secondary" : "ghost"
@@ -79,7 +80,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Ideeën</span>
               </Button>
             </Link>
-            <Link href={"/projects/1/settings/voting"}>
+            <Link href={`/projects/${project}/settings/voting`}>
               <Button
                 variant={
                   location.includes("/settings/voting") ? "secondary" : "ghost"
@@ -90,7 +91,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Stemmen</span>
               </Button>
             </Link>
-            <Link href={"/projects/1/settings/protection"}>
+            <Link href={`/projects/${project}/settings/protection`}>
               <Button
                 variant={
                   location.includes("/settings/protection") ? "secondary" : "ghost"
@@ -101,7 +102,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Wachtwoord protectie</span>
               </Button>
             </Link>
-            <Link href={"/projects/1/settings/anonymization"}>
+            <Link href={`/projects/${project}/settings/anonymization`}>
               <Button
                 variant={
                   location.includes("/settings/anonymization") ? "secondary" : "ghost"
@@ -112,7 +113,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Anonimiseer gebruikers</span>
               </Button>
             </Link>
-            <Link href={"/projects/1/settings/themes"}>
+            <Link href={`/projects/${project}/settings/themes`}>
               <Button
                 variant={
                   location.includes("/settings/themes") ? "secondary" : "ghost"
@@ -123,7 +124,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Themas en gebieden</span>
               </Button>
             </Link>
-            <Link href={"/projects/1/settings/notifications"}>
+            <Link href={`/projects/${project}/settings/notifications`}>
               <Button
                 variant={
                   location.includes("/settings/notifications") ? "secondary" : "ghost"
@@ -134,7 +135,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Administrator notificaties</span>
               </Button>
             </Link>
-            <Link href={"/projects/1/settings/newsletter"}>
+            <Link href={`/projects/${project}/settings/newsletter`}>
               <Button
                 variant={
                   location.includes("/settings/newsletter") ? "secondary" : "ghost"
@@ -147,7 +148,7 @@ export function SidenavProject({ className }: { className?: string }) {
             </Link>
           </>
         ) : null}
-        <Link href={"/projects/1/authentication"}>
+        <Link href={`/projects/${project}/authentication`}>
           <Button
             variant={location.includes("/authentication") ? "secondary" : "ghost"}
             size="default"
@@ -166,7 +167,7 @@ export function SidenavProject({ className }: { className?: string }) {
         </Link>
         {location.includes("/authentication") ? (
           <>
-            <Link href={"/projects/1/authentication"}>
+            <Link href={`/projects/${project}/authentication`}>
               <Button
                 variant={location.endsWith("/authentication") ? "secondary" : "ghost"}
                 size="default"
@@ -175,7 +176,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Algemeen</span>
               </Button>
             </Link>
-            <Link href={"/projects/1/authentication/requiredfield"}>
+            <Link href={`/projects/${project}/authentication/requiredfield`}>
               <Button
                 variant={
                   location.includes("/authentication/requiredfield") ? "secondary" : "ghost"
@@ -186,7 +187,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Verplichte velden</span>
               </Button>
             </Link>
-            <Link href={"/projects/1/authentication/uniquecode"}>
+            <Link href={`/projects/${project}/authentication/uniquecode`}>
               <Button
                 variant={
                   location.includes("/authentication/uniquecode") ? "secondary" : "ghost"
@@ -197,7 +198,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Unieke codes</span>
               </Button>
             </Link>
-            <Link href={"/projects/1/authentication/loginmail"}>
+            <Link href={`/projects/${project}/authentication/loginmail`}>
               <Button
                 variant={
                   location.includes("/authentication/loginmail") ? "secondary" : "ghost"
@@ -208,7 +209,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Login mail</span>
               </Button>
             </Link>
-            <Link href={"/projects/1/authentication/smsverification"}>
+            <Link href={`/projects/${project}/authentication/smsverification`}>
               <Button
                 variant={
                   location.includes("/authentication/smsverification") ? "secondary" : "ghost"
@@ -221,7 +222,7 @@ export function SidenavProject({ className }: { className?: string }) {
             </Link>
           </>
         ) : null}
-        <Link href={`/projects/1/ideas`}>
+        <Link href={`/projects/${project}/ideas`}>
           <Button
             variant={location.includes("/ideas") ? "secondary" : "ghost"}
             className="w-full flex justify-start"
@@ -230,7 +231,7 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Ideeën</span>
           </Button>
         </Link>
-        <Link href={`/projects/1/codes`}>
+        <Link href={`/projects/${project}/codes`}>
           <Button
             variant={location.includes("/codes") ? "secondary" : "ghost"}
             className="w-full flex justify-start"
@@ -239,7 +240,7 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Stemcodes</span>
           </Button>
         </Link>
-        <Link href={`/projects/1/votes`}>
+        <Link href={`/projects/${project}/votes`}>
           <Button
             variant={location.includes("/votes") ? "secondary" : "ghost"}
             className="w-full flex justify-start"
@@ -248,7 +249,7 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Stemmen</span>
           </Button>
         </Link>
-        <Link href={`/projects/1/subscribers`}>
+        <Link href={`/projects/${project}/subscribers`}>
           <Button
             variant={location.includes("/subscribers") ? "secondary" : "ghost"}
             className="w-full flex justify-start"
@@ -257,7 +258,7 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Subscribers</span>
           </Button>
         </Link>
-        <Link href={`/projects/1/areas`}>
+        <Link href={`/projects/${project}/areas`}>
           <Button
             variant={location.includes("/areas") ? "secondary" : "ghost"}
             className="w-full flex justify-start"
@@ -266,7 +267,7 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Gebieden</span>
           </Button>
         </Link>
-        <Link href={`/projects/1/export`}>
+        <Link href={`/projects/${project}/export`}>
           <Button
             variant={location.includes("/export") ? "secondary" : "ghost"}
             className="w-full flex justify-start"
