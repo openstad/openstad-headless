@@ -5,12 +5,14 @@ const MailConfig = require('./mail-config');
 
 const transport = config.get('mail.transport');
 
-exports.getTransporter = (project) => {
+exports.getTransporter = async project => {
 
-  let projectConfig = new MailConfig(project)
+  let projectConfig = await new MailConfig(project)
 
   const method = projectConfig.getMailMethod();
   const transporterConfig = projectConfig.getMailTransport();
+
+  delete transporterConfig.requireSSL
   
   let transporter;
   
