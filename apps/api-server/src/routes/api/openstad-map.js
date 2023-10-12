@@ -26,7 +26,7 @@ router.route('/idea-marker')
 			.scope(...req.scope)
 			.findAll({ where: { projectId: req.params.projectId } })
 			.then( found => {
-				let maxMarkers = ( req.project && req.project.config.openStadMap && req.project.config.openStadMap.maxMarkers ) || ( config.openStadMap && config.openStadMap.maxMarkers ) || 20;
+				let maxMarkers = ( req.project && req.project.config.openStadMap && req.project.config.openStadMap.maxMarkers ) || 20;
 				if (found.length > maxMarkers) found = found.slice(0, maxMarkers)
 				return found.map( entry => createMarker(entry) );
 			})
@@ -74,9 +74,6 @@ router.route('/polygon')
 
 		// use from project config
 		let polygon = req.project && req.project.config.openStadMap && req.project.config.openStadMap.polygon;
-
-		// fallback to generic config
-		polygon = polygon || ( config.openStadMap && config.openStadMap.polygons && ( ( config.openStadMap.usePolygon && config.openStadMap.polygons[config.openStadMap.usePolygon] ) || ( config.projectId && config.openStadMap.polygons[config.projectId] ) ) );
 
 		res.json(polygon || null);
 

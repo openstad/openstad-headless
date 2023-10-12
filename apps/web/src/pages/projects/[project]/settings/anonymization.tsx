@@ -27,7 +27,7 @@ const formSchema = z.object({
 
 export default function ProjectSettingsAnonymization() {
     const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+        resolver: zodResolver<any>(formSchema),
         defaultValues: {
             daysAfterProjectEnd: 60,
             daysUntilWarning: 180,

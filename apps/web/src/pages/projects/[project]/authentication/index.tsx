@@ -113,7 +113,7 @@ const formSchema = z.object({
 
 export default function ProjectAuthentication() {
     const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+        resolver: zodResolver<any>(formSchema),
         defaultValues: {
             availableAuthentication: ["code"],
             twoFactorRoles: ["admin", "member"],

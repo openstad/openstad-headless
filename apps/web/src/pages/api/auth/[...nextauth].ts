@@ -7,7 +7,8 @@ export const authOptions: NextAuthOptions = {
     Openstad({
       clientId: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      issuer: process.env.OAUTH_URL,
+      issuer: process.env.OAUTH_URL_INTERNAL,
+      issuerExternalUrl: process.env.OAUTH_URL,
     }),
   ],
   pages: {
@@ -63,14 +64,14 @@ export const authOptions: NextAuthOptions = {
             return {
               ...token,
               error: "TokenFetchError",
-            }
+            };
           }
         } catch (error) {
-          logger.error(error, 'Error fetching jwt token from api');
+          logger.error(error, "Error fetching jwt token from api");
           return {
             ...token,
             error: "TokenFetchError",
-          }
+          };
         }
       }
       return token;

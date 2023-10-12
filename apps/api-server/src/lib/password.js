@@ -4,7 +4,7 @@ var config = require('config');
 module.exports = {
 	bcrypt: {
 		hash: function( input ) {
-			var cost = config.get('security.passwordHashing.methods.bcrypt.cost');
+			var cost = 10;
 			var salt = bcrypt.genSaltSync(cost);
 			var hash = bcrypt.hashSync(input, salt);
 			return {

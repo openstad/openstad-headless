@@ -39,7 +39,7 @@ const formSchema = z.object({
 
 export default function ProjectSettings() {
     const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+        resolver: zodResolver<any>(formSchema),
         defaultValues: {
             projectName: "",
             betaWidgets: false,

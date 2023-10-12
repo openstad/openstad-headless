@@ -123,7 +123,7 @@ module.exports = async function seed(config, db) {
 
 
     console.log('    10 ideas');
-    await db.Idea.create({
+    let idea1 = await db.Idea.create({
       userId: 2,
       projectId: 1,
       title: 'Lorem ipsum dolor',
@@ -141,7 +141,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    await db.Idea.create({
+    let idea2 = await db.Idea.create({
       userId: 2,
       projectId: 1,
       title: 'Etiam euismod odio',
@@ -159,7 +159,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    await db.Idea.create({
+    let idea3 = await db.Idea.create({
       userId: 2,
       projectId: 1,
       title: 'Quisque et viverra',
@@ -177,7 +177,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    await db.Idea.create({
+    let idea4 = await db.Idea.create({
       userId: 2,
       projectId: 1,
       title: 'Ut eu porttitor',
@@ -195,7 +195,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    await db.Idea.create({
+    let idea5 = await db.Idea.create({
       userId: 2,
       projectId: 1,
       title: 'Pellentesque consectetur eros',
@@ -303,6 +303,61 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
+    console.log('      belonging to one of three themes');
+    let theme1 = await db.Tag.create({
+      projectId: 1,
+      name: 'Theme 1',
+      type: 'theme',
+      seqnr: 10,
+    });
+
+    let theme2 = await db.Tag.create({
+      projectId: 1,
+      name: 'Theme 2',
+      type: 'theme',
+      seqnr: 20,
+    });
+
+    let theme3 = await db.Tag.create({
+      projectId: 1,
+      name: 'Theme 3',
+      type: 'theme',
+      seqnr: 30,
+    });
+
+    let area1 = await db.Tag.create({
+      projectId: 1,
+      name: 'Area 1',
+      type: 'area',
+      seqnr: 10,
+    });
+
+    let area2 = await db.Tag.create({
+      projectId: 1,
+      name: 'Area 2',
+      type: 'area',
+      seqnr: 20,
+    });
+
+    let area3 = await db.Tag.create({
+      projectId: 1,
+      name: 'Area 3',
+      type: 'area',
+      seqnr: 30,
+    });
+
+    idea1.addTag(theme1);
+    idea2.addTag(theme1);
+    idea3.addTag(theme2);
+    idea4.addTag(theme2);
+    idea5.addTag(theme3);
+
+    idea1.addTag(area2);
+    idea2.addTag(area3);
+    idea3.addTag(area3);
+    idea4.addTag(area1);
+    idea5.addTag(area1);
+    
     console.log('      with 4 likes');
     await db.Vote.create({
       userId: 2,

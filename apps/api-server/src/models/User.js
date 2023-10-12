@@ -422,7 +422,7 @@ module.exports = function (db, sequelize, DataTypes) {
   }
 
   User.prototype.authenticate = function (password) {
-    var method = config.get('security.passwordHashing.currentMethod');
+    var method = 'bcrypt';
     if (!this.passwordHash) {
       log('user %d has no passwordHash', this.id);
       return false;

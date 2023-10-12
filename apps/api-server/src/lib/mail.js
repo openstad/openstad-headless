@@ -19,10 +19,10 @@ dateFilter.setDefaultFormat('DD-MM-YYYY HH:mm');
 env.addFilter('date', dateFilter);
 
 // Global variables.
-env.addGlobal('HOSTNAME', config.get('hostname'));
+env.addGlobal('HOSTNAME', config.get('domain'));
 env.addGlobal('PROJECTNAME', config.get('projectName'));
 //env.addGlobal('PAGENAME_POSTFIX', config.get('pageNamePostfix'));
-env.addGlobal('EMAIL', config.get('emailAddress'));
+env.addGlobal('EMAIL', config.get('mail.from'));
 
 env.addGlobal('GLOBALS', config.get('express.rendering.globals'));
 
