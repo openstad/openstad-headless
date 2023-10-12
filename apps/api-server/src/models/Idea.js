@@ -704,8 +704,6 @@ module.exports = function (db, sequelize, DataTypes) {
         }]
       },
 
-
-
       selectTags: function (tags) {
         return {
           include: [{
@@ -945,7 +943,7 @@ module.exports = function (db, sequelize, DataTypes) {
     this.hasMany(models.Comment, {as: 'commentsFor', onDelete: 'CASCADE'});
     this.hasOne(models.Poll, {as: 'poll', foreignKey: 'ideaId', onDelete: 'CASCADE' });
     this.hasOne(models.Vote, {as: 'userVote', foreignKey: 'ideaId', onDelete: 'CASCADE' });
-    this.belongsToMany(models.Tag, {through: 'ideaTags', constraints: false, onDelete: 'CASCADE' });
+    this.belongsToMany(models.Tag, {through: 'idea_tags', constraints: false, onDelete: 'CASCADE' });
   }
 
   Idea.getRunning = function (sort, extraScopes) {

@@ -27,6 +27,8 @@
 * Remove backup scripts - this should not be done in the API
 * Remove mongo dependency
 * Remove S3 connections - no longer required
+* Fix half implemented tags functionality
+* Add seqnrs to tags
 
 ### Auth server
 * Refactor init database and seeds
