@@ -3,7 +3,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/typography";
-import { useConfig } from "@/hooks/useConfigHook";
+import { useWidgetConfig } from "@/hooks/use-widget-config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -26,7 +26,7 @@ export default function WidgetResourceOverviewLabel() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useConfig();
+  } = useWidgetConfig();
 
   const defaults = () => ({
     labelOpen:widget?.config?.[category]?.labelOpen || "",

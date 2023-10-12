@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/typography";
-import { useConfig } from "@/hooks/useConfigHook";
+import { useWidgetConfig } from "@/hooks/use-widget-config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -27,7 +27,7 @@ export default function WidgetMapGeneral() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useConfig();
+  } = useWidgetConfig();
 
   const defaults = () => ({
     display: widget?.config?.[category]?.display || 'full',

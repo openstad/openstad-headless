@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import useSWR from "swr";
 
-  export function useConfig () {
+  export function useWidgetConfig () {
     const router = useRouter();
     const id = router.query.id;
     const projectId = router.query.project;
