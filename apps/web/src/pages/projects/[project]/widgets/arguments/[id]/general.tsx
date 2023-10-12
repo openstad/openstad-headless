@@ -42,11 +42,6 @@ export default function ArgumentsGeneral() {
   
     return (
         <div>
-
-          <pre>
-        { JSON.stringify(form.getValues()) }
-
-          </pre>
         <Form {...form}>
           <Heading size="xl" className="mb-4">
             Argumenten • Algemeen

@@ -69,7 +69,7 @@ export function CreateWidgetDialog({ projectId }: Props) {
   async function onSubmit(values: FormData) {
         if(!projectId) return;
         try {
-          const widget = await createWidget(values.type, values.description);
+              await createWidget(values.type, values.description);
               setOpen(false);
           } catch (error) {
               console.error("could not create widget", error);

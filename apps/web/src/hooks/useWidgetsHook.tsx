@@ -16,7 +16,7 @@ import useSWR from "swr";
             body: JSON.stringify({type:typeId, description})
         })
         const data = await res.json();
-        widgetsSwr.mutate(data);
+        widgetsSwr.mutate();
     }
 
 
