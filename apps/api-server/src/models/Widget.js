@@ -5,7 +5,10 @@ module.exports = function( db, sequelize, DataTypes ) {
     const Widget = sequelize.define('widgets', {
         type: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
         },
         description: {
             type: DataTypes.STRING,
