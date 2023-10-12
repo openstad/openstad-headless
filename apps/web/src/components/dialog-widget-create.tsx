@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import { Button } from "./button";
+import { Button } from "./ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./dialog";
+} from "./ui/dialog";
 
 import useSWR from "swr";
 import { useProject } from "@/hooks/useProjectHook";
@@ -22,15 +22,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "./form";
+} from "./ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./select";
-import { Input } from "./input";
+} from "./ui/select";
+import { Input } from "./ui/input";
 import { useState } from "react";
 import { useWidgetsHook } from "@/hooks/useWidgetsHook";
 
