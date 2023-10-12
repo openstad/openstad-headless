@@ -13,6 +13,7 @@ __All__
 - [About databases](doc/databases.md)
 
 __API__
-- [Authentication and authorization](/apps/api-server/doc/auth.md)
+- [Authentication and authorization](apps/api-server/doc/auth.md)
+- [Tags: thema's, areas and more](apps/api-server/doc//tags.md)
 
 
