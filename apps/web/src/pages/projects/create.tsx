@@ -48,7 +48,151 @@ export default function CreateProject() {
     })
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+        createProject(
+            `/api/openstad/api/project`,
+            values
+        )
+    }
+
+    async function createProject(url, schema) {
+        await fetch(url, {
+            method: 'POST',
+            headers:{
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({name: schema.projectName,
+                config: {
+                    "allowedDomains": ["10.10.20.228:31410", "10.10.20.228"],
+                    "project": {
+                        "endDate": schema.endDate,
+                        "endDateNotificationSent": false,
+                        "projectHasEnded": false
+                    },
+                    "anonymize": {
+                        "anonymizeUsersXDaysAfterEndDate": 60,
+                        "warnUsersAfterXDaysOfInactivity": 770,
+                        "anonymizeUsersAfterXDaysOfInactivity": 860,
+                        "inactiveWarningEmail": {
+                            "subject": "We gaan je account verwijderen",
+                            "template": "Beste {{DISPLAYNAME}},<br/><br/>Je bent al een tijd niet actief geweest op de website <a href=\"{{URL}}\">{{URL}}</a>. We willen niet onnodig je gegevens blijven bewaren, en gaan die daarom verwijderen.<br/><br/>Dat betekent dat een eventuele bijdrage die je hebt geleverd op de website, bijvoorbeeld inzendingen en/of reacties, geanonimiseerd worden.<br/><br/>Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website om je account actief te houden. Doe dit wel voor {{ANONYMIZEDATE}}, want anders gaan we op die dag je gegevens verwijderen.<br/><br/><br/><em>Dit is een geautomatiseerde email.</em>"
+                        }
+                    },
+                    "basicAuth": {
+                        "active": false,
+                        "user": "openstad",
+                        "password": "LqKNcKC7"
+                    },
+                    "cms": {
+                        "url": "https://openstad-api.amsterdam.nl",
+                        "hostname": "openstad-api.amsterdam.nl",
+                        "after-login-redirect-uri": "/oauth/login?jwt=[[jwt]]",
+                        "widgetDisplaySettings": {
+                            "beta": false,
+                            "deprecated": false,
+                            "visibleWidgets": []
+                        }
+                    },
+                    "notifications": {
+                        "fromAddress": schema.email,
+                        "projectmanagerAddress": "EMAIL@NOT.DEFINED",
+                        "projectadminAddress": schema.emailName
+                    },
+                    "email": {
+                        "projectaddress": "EMAIL@NOT.DEFINED",
+                        "thankyoumail": {
+                            "from": "EMAIL@NOT.DEFINED"
+                        }
+                    },
+                    "auth": {
+                        "default": "openstad",
+                        "provider": {
+                            "openstad": {
+                                "adapter": "openstad",
+                                "clientId": "uniquecode",
+                                "clientSecret": "uniquecode123"
+                            },
+                            "anonymous": {
+                                "adapter": "openstad",
+                                "clientId": "anonymous",
+                                "clientSecret": "anonymous123"
+                            }
+                        }
+                    },
+                    "ideas": {
+                        "canAddNewIdeas": true,
+                        "titleMinLength": 10,
+                        "titleMaxLength": 50,
+                        "summaryMinLength": 20,
+                        "summaryMaxLength": 140,
+                        "descriptionMinLength": 140,
+                        "descriptionMaxLength": 5000,
+                        "minimumYesVotes": 100,
+                        "showVoteButtons": true,
+                        "canEditAfterFirstLikeOrComment": false,
+                        "extraDataMustBeDefined": false,
+                        "types": []
+                    },
+                    "comments": {
+                        "new": {
+                            "anonymous": {
+                                "redirect": null,
+                                "notAllowedMessage": null
+                            },
+                            "showFields": ["zipCode", "displayName"]
+                        },
+                        "isClosed": false,
+                        "closedText": "De reactiemogelijkheid is gesloten, u kunt niet meer reageren"
+                    },
+                    "users": {
+                        "extraDataMustBeDefined": false,
+                        "canCreateNewUsers": true,
+                        "allowUseOfNicknames": false
+                    },
+                    "votes": {
+                        "isViewable": true,
+                        "isActive": null,
+                        "requiredUserRole": "member",
+                        "mustConfirm": false,
+                        "withExisting": "error",
+                        "voteType": "likes",
+                        "voteValues": [{
+                            "label": "voor",
+                            "value": "yes"
+                        }, {
+                            "label": "tegen",
+                            "value": "no"
+                        }],
+                        "maxIdeas": 100,
+                        "minIdeas": 1
+                    },
+                    "articles": {
+                        "canAddNewArticles": true,
+                        "titleMinLength": 10,
+                        "titleMaxLength": 50,
+                        "summaryMinLength": 20,
+                        "summaryMaxLength": 140,
+                        "descriptionMinLength": 140,
+                        "descriptionMaxLength": 5000,
+                        "minimumYesVotes": 100,
+                        "canEditAfterFirstLikeOrComment": false,
+                        "extraDataMustBeDefined": false
+                    },
+                    "polls": {
+                        "canAddPolls": false,
+                        "requiredUserRole": "anonymous"
+                    },
+                    "newslettersignup": {
+                        "isActive": false,
+                        "autoConfirm": false,
+                        "confirmationEmail": {
+                            "from": "EMAIL@NOT.DEFINED",
+                            "url": "/PATH/TO/CONFIRMATION/[[token]]"
+                        }
+                    },
+                    "ignoreBruteForce": []
+                }
+            })
+        })
     }
 
     return(

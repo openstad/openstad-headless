@@ -46,7 +46,7 @@ export default function CreateProject() {
     return(
         <div>
             <PageLayout
-            pageHeader="Projecten"
+            pageHeader="Gebruikers"
             breadcrumbs={[
                 {
                 name: 'Gebruikers',
@@ -60,7 +60,7 @@ export default function CreateProject() {
             <div className="container mx-auto py-10 w-1/2 float-left">
                 <Form {...form}>
                     <Heading size="xl" className="mb-4">
-                        Project • Aanmaken
+                        Gebruiker • Aanmaken
                     </Heading>
                     <Separator className="mb-4" />
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
