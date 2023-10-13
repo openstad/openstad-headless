@@ -6,38 +6,50 @@ const db          = require('../../db');
 
 router.all('*', function(req, res, next) {
     req.scope = [];
-
-    if (req.query.includeType) {
-      req.scope.push('includeType');
-    }
     return next();
-  });
+});
 
 // list widgets
 // --------------
 router.route('/')
-.get(auth.useReqUser)
-.get(function(req, res, next) {
-
-    let { dbQuery } = req;
-    dbQuery.where = {
-    projectId: req.params.projectId,
-    ...req.queryConditions,
-    }
-
-    db.Widget
-    .scope(...req.scope)
-    .findAndCountAll(dbQuery)
-    .then(function(result) {
-        const { rows } = result;
-        req.results = rows;    
-        return next();
+    .all(function(req, res, next) {
+        let { dbQuery } = req;
+        dbQuery.where = {
+            projectId: req.params.projectId,
+             ...req.queryConditions,
+        }
+        db.Widget
+        .scope(...req.scope)
+        .findAndCountAll(dbQuery)
+        .then(function(result) {
+            const { rows } = result;
+            req.results = rows;    
+            return next();
+        })
+        .catch(next);
     })
-    .catch(next);
-})
-.get(function(req, res, next) {
-    res.json(req.results);
-});
+    
+    // list
+    .get(auth.useReqUser)
+    .get(function(req, res, next) {
+        return res.json(req.results);
+    })
+
+    // Create widget
+    .post(auth.useReqUser)
+    .post(async function(req, res, next) {
+        const widget = req.body;
+        const projectId = req.params.projectId;
+        
+        const createdWidget = await db.Widget.create({
+            projectId,
+            description: widget.description,
+            type: widget.type,
+            config: {}
+        });
+
+        return res.json(createdWidget);
+    });
 
 // one widget routes: get widget
 // -------------------------
@@ -73,6 +85,6 @@ router.route('/:id') //(\\d+)
         if(config) {
             widget.update({config}).then(result => res.json(result))
         }
-	});
+	})
     
 module.exports = router;

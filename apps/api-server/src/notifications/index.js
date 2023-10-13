@@ -39,12 +39,6 @@ Notifications.processQueue = function(type) {
               self.sendNewContentMessage({projectId, type: 'idea', action: entry.action, content: [entry] });
             });
             break;
-
-          case 'article':
-            self.queue[type][projectId].forEach((entry) => {
-              self.sendNewContentMessage({projectId, type: 'article', action: entry.action, content: [entry] });
-            });
-            break;
             
           default: 
         }
@@ -83,7 +77,7 @@ Notifications.sendNewContentMessage = function({ projectId, type, action, conten
       let instanceIds = content.map( entry => entry.instanceId );
       let model = type.charAt(0).toUpperCase() + type.slice(1);
 
-      let scope = type == 'idea' || type == 'article' ? ['withUser', 'includeProject'] : ['withUser', 'withIdea'];
+      let scope = type == 'idea' ? ['withUser', 'includeProject'] : ['withUser', 'withIdea'];
       db[model].scope(scope).findAll({ where: { id: instanceIds }})
         .then( found => {
           data.data = {};
@@ -91,10 +85,6 @@ Notifications.sendNewContentMessage = function({ projectId, type, action, conten
             let json = entry.toJSON();
             if ( type == 'idea' ) {
               let inzendingPath = ( myConfig.ideas && myConfig.ideas.feedbackEmail && myConfig.ideas.feedbackEmail.inzendingPath && myConfig.ideas.feedbackEmail.inzendingPath.replace(/\[\[ideaId\]\]/, entry.id) ) || "/";
-              json.inzendingURL = data.URL + inzendingPath;
-            }
-            if ( type == 'article' ) {
-              let inzendingPath = ( myConfig.articles && myConfig.articles.feedbackEmail && myConfig.articles.feedbackEmail.inzendingPath && myConfig.articles.feedbackEmail.inzendingPath.replace(/\[\[articleId\]\]/, entry.id) ) || "/";
               json.inzendingURL = data.URL + inzendingPath;
             }
             return json;
@@ -106,7 +96,7 @@ Notifications.sendNewContentMessage = function({ projectId, type, action, conten
 
 }
 
-Notifications.sendMessage = function({ project, data }) {
+Notifications.sendMessage = async function({ project, data }) {
 
   let self = this;
   let myConfig = Object.assign({}, config, project && project.config);
@@ -115,7 +105,7 @@ Notifications.sendMessage = function({ project, data }) {
   data.to = data.to || ( myConfig.notifications && myConfig.notifications.projectmanagerAddress );
 
   data.EMAIL = data.EMAIL || data.from;
-  data.HOSTNAME = data.HOSTNAME || ( myConfig.cms && ( myConfig.cms.hostname || myConfig.cms.domain ) ) || myConfig.hostname || myConfig.domain;
+  data.HOSTNAME = data.HOSTNAME || ( myConfig.cms && ( myConfig.cms.hostname || myConfig.cms.domain ) ) || myConfig.domain;
   data.URL = data.URL || ( myConfig.cms && myConfig.cms.url ) || myConfig.url || ( 'https://' + data.HOSTNAME );
   data.PROJECTNAME = data.PROJECTNAME || ( project && project.title ) || myConfig.projectName;
   data.ENDDATE = data.endDate || '';

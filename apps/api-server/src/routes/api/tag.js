@@ -7,8 +7,20 @@ let router = express.Router({mergeParams: true});
 
 router
 	.all('*', function(req, res, next) {
+
 		req.scope = [];
-		req.scope.push('includeProject');
+    req.scope.push('defaultScope');
+    req.scope.push({ method: ['forProjectId', req.project.id] });
+
+    if (req.query.includeProject) {
+      req.scope.push('includeProject');
+    }
+
+    if (req.query.type) {
+      let type = req.query.type;
+      req.scope.push({ method: ['selectType', type] });
+    }
+
 		next();
 	});
 
@@ -45,8 +57,10 @@ router.route('/')
   .post(auth.can('Tag', 'create'))
 	.post(function(req, res, next) {
 		const data = {
-			name   : req.body.name,
-			projectId : req.params.projectId,
+			name: req.body.name,
+      type:  req.body.type,
+      seqnr:  req.body.seqnr,
+			projectId: req.params.projectId,
 		};
 
 		db.Tag

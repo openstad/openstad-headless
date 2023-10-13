@@ -17,13 +17,15 @@ export interface OpenstadProfile extends Record<string, any> {
 }
 
 export default function Openstad<P extends OpenstadProfile>(
-  options: OAuthUserConfig<P>
+  options: {
+    issuerExternalUrl: string;
+  } & OAuthUserConfig<P>
 ): OAuthConfig<P> {
   return {
     id: "openstad",
     name: "Openstad",
     type: "oauth",
-    authorization: `${options.issuer}/dialog/authorize`,
+    authorization: `${options.issuerExternalUrl}/dialog/authorize`,
     token: `${options.issuer}/oauth/token`,
     userinfo: {
       url: `${options.issuer}/api/userinfo`,

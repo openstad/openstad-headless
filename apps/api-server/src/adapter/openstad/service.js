@@ -23,7 +23,7 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
 	  headers = { Authorization: `Bearer ${accessToken}` };
   }
 
-  let url = `${authConfig.serverUrl}${path}`;
+  let url = `${authConfig.serverUrlInternal}${path}`;
 
   try {
 

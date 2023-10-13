@@ -1,0 +1,6 @@
+.env
+.env.docker
+node_modules/
+nginx.config.example
+build/
+coverage/

@@ -1,4 +1,4 @@
-import { useConfig } from "@/hooks/useConfigHook";
+import { useWidgetConfig } from "@/hooks/use-widget-config";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,7 @@ const formSchema = z.object({
 export default function ArgumentsForm() {
   const category = 'form';
 
-  const { data: widget, isLoading: isLoadingWidget, updateConfig } = useConfig();
+  const { data: widget, isLoading: isLoadingWidget, updateConfig } = useWidgetConfig();
     const defaults = () =>({  
       intro: widget?.config?.[category]?.intro || "Type hier de intro tekst",
       placeholder: widget?.config?.[category]?.placeholder || "Type hier uw reactie."

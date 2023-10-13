@@ -21,7 +21,7 @@ import * as z from "zod";
 import { Heading } from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/router";
-import { useConfig } from "@/hooks/useConfigHook";
+import { useWidgetConfig } from "@/hooks/use-widget-config";
 
 const formSchema = z.object({
   display: z.enum(["claps"]),
@@ -38,7 +38,7 @@ export default function WidgetLikes() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useConfig();
+  } = useWidgetConfig();
 
 
   const defaults = () => ({

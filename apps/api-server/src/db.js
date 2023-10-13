@@ -7,7 +7,7 @@ var dbConfig  = config.get('database');
 
 // newer versions of mysql (8+) have changed GeomFromText to ST_GeomFromText
 // this is a fix for sequalize
-if (dbConfig.mysqlSTGeoMode || process.env.MYSQL_ST_GEO_MODE === 'on') {
+if (dbConfig.mysqlSTGeoMode == 'on') {
 	const wkx = require('wkx')
 	Sequelize.GEOMETRY.prototype._stringify = function _stringify(value, options) {
 	  return `ST_GeomFromText(${options.escape(wkx.Geometry.parseGeoJSON(value).toWkt())})`;
@@ -29,10 +29,10 @@ const dialectOptions = {
 	socketPath         : dbConfig.socketPath
 }
 
-if (process.env.MYSQL_CA_CERT && process.env.MYSQL_CA_CERT.trim && process.env.MYSQL_CA_CERT.trim()) {
+if (dbConfig.MYSQL_CA_CERT && dbConfig.MYSQL_CA_CERT.trim && dbConfig.MYSQL_CA_CERT.trim()) {
 	dialectOptions.ssl = {
 		rejectUnauthorized: true,
-		ca: [ process.env.MYSQL_CA_CERT ]
+		ca: [ dbConfig.MYSQL_CA_CERT ]
 	}
 }
 

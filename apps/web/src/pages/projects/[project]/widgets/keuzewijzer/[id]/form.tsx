@@ -21,7 +21,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Heading } from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
-import { useConfig } from "@/hooks/useConfigHook";
+import { useWidgetConfig } from "@/hooks/use-widget-config";
 
 const formSchema = z.object({
   keuzewijzer: z.string(),
@@ -42,7 +42,7 @@ export default function ChoicesSelectorForm() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useConfig();
+  } = useWidgetConfig();
 
   const defaults = () => ({
     questionsOnPage: widget?.config?.selectionGuide?.questionsOnPage || 100,

@@ -1,19 +1,20 @@
 # Image used for building dependencies
-FROM node:16.16-slim as builder
+FROM node:18-slim as builder
 
 # Create app directory
 WORKDIR /opt/image-server
 
-# Install app dependencies
-COPY --chown=node:node package*.json .
+# Install all base dependencies.# add perl for shell scripts
 RUN apt-get update
 RUN apt-get install -y python3 make cmake git bash g++
-RUN npm config set unsafe-perm true
-RUN npm install --no-optional --legacy-peer-deps
+
+# Install app dependencies
+COPY --chown=node:node package*.json .
+RUN npm install
 RUN npm install -g nodemon
 
 # Release image 
-FROM node:16.16-slim
+FROM node:18-slim
 
 # Label for tracking
 LABEL nl.openstad.container="image" nl.openstad.version="0.0.1" nl.openstad.release-date="2023-09-25"
