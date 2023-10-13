@@ -48,7 +48,34 @@ export default function CreateProject() {
     })
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+        createProject(
+            `/api/openstad/api/project`,
+            values
+        )
+    }
+
+    async function createProject(url, schema) {
+        await fetch(url, {
+            method: 'POST',
+            headers:{
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({name: schema.projectName,
+                config: {
+                    "auth": {"adapter": {}, "default": "openstad", "provider": {"openstad": {"adapter": "openstad", "clientId": "uniquecode", "clientSecret": "uniquecode123"}, 
+                    "anonymous": {"adapter": "openstad", "clientId": "anonymous", "clientSecret": "anonymous123"}}}, 
+                    "ideas": {"types": [], "canAddNewIdeas": true, "titleMaxLength": 50, "titleMinLength": 10, "minimumYesVotes": 100, "showVoteButtons": true, "summaryMaxLength": 140, "summaryMinLength": 20, "descriptionMaxLength": 5000, "descriptionMinLength": 140, "extraDataMustBeDefined": false, "canEditAfterFirstLikeOrComment": false}, 
+                    "polls": {"canAddPolls": false, "requiredUserRole": "anonymous"},
+                    "users": {"canCreateNewUsers": true, "allowUseOfNicknames": false, "extraDataMustBeDefined": false}, 
+                    "votes": {"isActive": null, "maxIdeas": 100, "minIdeas": 1, "voteType": "likes", "isViewable": true, "voteValues": [{"label": "voor", "value": "yes"}, {"label": "tegen", "value": "no"}], "mustConfirm": false, "withExisting": "error", "requiredUserRole": "member"}, 
+                    "project": {"endDate": schema.endDate, "projectHasEnded": false, "endDateNotificationSent": false}, 
+                    "widgets": {"beta": false, "deprecated": false, "visibleWidgets": []}, 
+                    "comments": {"new": {"anonymous": {"redirect": null, "notAllowedMessage": null}, "showFields": ["zipCode", "displayName"]}, "isClosed": false, "closedText": "De reactiemogelijkheid is gesloten, u kunt niet meer reageren"}, 
+                    "anonymize": {"anonymizeUsersXDaysAfterEndDate": 60, "warnUsersAfterXDaysOfInactivity": 770, "anonymizeUsersAfterXDaysOfInactivity": 860}, 
+                    "allowedDomains": [""], 
+                    "ignoreBruteForce": []}
+            })
+        })
     }
 
     return(

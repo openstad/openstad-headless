@@ -4,7 +4,6 @@ import { Heading } from "./typography";
 import { Breadcrumbs } from "./breadcrumbs";
 import { Sidenav } from "./sidenav";
 import { SidenavProject } from "./sidenav-project";
-import { Button } from "./button";
 import { useRouter } from "next/router";
 
 export function PageLayout({
