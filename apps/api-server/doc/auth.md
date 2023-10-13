@@ -33,9 +33,14 @@ The provider used is determined first by the query param `useAuth`. If that is n
 
 #### Configuring providers
 
-Configuration is done in the `auth` block in `config/local.js` and/or `Site.config`.
+Configuration is done in the `auth` block in environment vars and/or `Project.config`.
 
-The minimal configuration in `config/local.js` defines the url of the auth server and a jwt secret.
+The minimal configuration in defines the url of the auth server and a jwt secret.
+```
+AUTH_JWTSECRET=
+AUTH_ADAPTER_OPENSTAD_SERVERURL=
+```
+or 
 ```
 "auth": {
   "adapter": {

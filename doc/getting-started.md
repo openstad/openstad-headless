@@ -112,10 +112,6 @@ Try deleting your existing containers and volumes:
 docker-compose -f docker-compose.development.yml down -v
 ```
 
-### Notes
-
-- Creating the config creates a mysql password. Composing the containers will create a mysql container that will re-use previously created data-volumes if they exist. That previously created volume will use an earlier mysql password. In other words: if you re-run the config command you need to delete existing volumes before you rebuild the containers.
-
 ### ToDo's
 
 - Verzin een oplossing voor het issue onder notes

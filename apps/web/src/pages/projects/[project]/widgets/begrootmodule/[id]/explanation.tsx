@@ -21,7 +21,7 @@ import {
 import { Heading } from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { useConfig } from "@/hooks/useConfigHook";
+import { useWidgetConfig } from "@/hooks/use-widget-config";
 import { useEffect } from "react";
 
 const formSchema = z.object({
@@ -41,7 +41,7 @@ export default function BegrootmoduleExplanation() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useConfig();
+  } = useWidgetConfig();
 
   const defaults = () => ({
     step1:

@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Heading } from "@/components/ui/typography";
-import { useConfig } from "@/hooks/useConfigHook";
+import { useWidgetConfig } from "@/hooks/use-widget-config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -24,7 +24,7 @@ export default function WidgetResourceFormSubmit() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useConfig();
+  } = useWidgetConfig();
 
   const defaults = () => ({
     submitButton: widget?.config?.[category]?.submitButton || "",

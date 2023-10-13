@@ -3,6 +3,13 @@ const sanitize = require('../util/sanitize');
 module.exports = function( db, sequelize, DataTypes ) {
     
     const Widget = sequelize.define('widgets', {
+        type: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
         description: {
             type: DataTypes.STRING,
             allowNull: false
@@ -21,13 +28,6 @@ module.exports = function( db, sequelize, DataTypes ) {
             },
             onDelete: 'cascade',
         });
-
-        this.belongsTo(models.WidgetType, { 
-            foreignKey: {
-                allowNull: false
-            },
-            onDelete: 'RESTRICT',
-        });
     }
 
     Widget.auth = Widget.prototype.auth = {
@@ -40,13 +40,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 
     Widget.scopes = function scopes() {
-    return {
-            includeType: {
-            include: [{
-                model: db.WidgetType
-            }]
-            }
-        };
+        return {};
     }
     return Widget;
 }

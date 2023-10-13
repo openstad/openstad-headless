@@ -2,10 +2,11 @@ const sanitize = require('../util/sanitize');
 const config = require('config');
 const getExtraDataConfig = require('../lib/sequelize-authorization/lib/getExtraDataConfig');
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
+const seqnr = require('./lib/seqnr');
 
 module.exports = function( db, sequelize, DataTypes ) {
 
-	var Tag = sequelize.define('tag', {
+	let Tag = sequelize.define('tag', {
 
 		projectId: {
 			type         : DataTypes.INTEGER,
@@ -28,10 +29,29 @@ module.exports = function( db, sequelize, DataTypes ) {
 			}
 		},
 
+		seqnr: {
+			type         : DataTypes.INTEGER,
+			allowNull    : false,
+      default: 10,
+		},
+
 		extraData: getExtraDataConfig(DataTypes.JSON, 'tags')
 	}, {
 
+		defaultScope: {
+      order: ['seqnr'],
+		},
+
 		hooks: {
+
+      afterCreate: function (instance, options) {
+        seqnr.renumber({ model: db.Tag, where: { type: instance.type } });
+      },
+
+      afterUpdate: function (instance, options) {
+        seqnr.renumber({ model: db.Tag, where: { type: instance.type } });
+      },
+
 		},
 
 		individualHooks: true,
@@ -41,9 +61,6 @@ module.exports = function( db, sequelize, DataTypes ) {
 	Tag.scopes = function scopes() {
 
 		return {
-
-			defaultScope: {
-			},
 
       forProjectId: function( projectId ) {
         return {
@@ -57,6 +74,14 @@ module.exports = function( db, sequelize, DataTypes ) {
         include: [{
           model: db.Project,
         }]
+      },
+
+      selectType: function (type) {
+        return {
+          where: {
+            type: type,
+          }
+        }
       },
 
 		}

@@ -5,7 +5,6 @@ module.exports = {
     try {
       return db.query(`
         RENAME TABLE sites TO projects;
-        ALTER TABLE articles CHANGE siteId projectId INT(11) NOT NULL DEFAULT '0'; 
         ALTER TABLE choicesGuides CHANGE siteId projectId INT(11) NOT NULL DEFAULT '0'; 
         ALTER TABLE ideas CHANGE siteId projectId INT(11) NOT NULL DEFAULT '0'; 
         ALTER TABLE newslettersignups CHANGE siteId projectId INT(11) NOT NULL DEFAULT '0'; 

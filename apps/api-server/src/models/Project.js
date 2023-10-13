@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const merge = require('merge');
 const moment = require('moment');
-const apiConfig = require('config');
+const configField = require('./lib/config-field');
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 const authSettings = require('../util/auth-settings');
 
@@ -27,7 +27,45 @@ module.exports = function (db, sequelize, DataTypes) {
       defaultValue: null,
     },
 
-    config: require('./lib/project-config'),
+    config: {
+      type: Sequelize.DataTypes.JSON,
+      allowNull: false,
+      defaultValue: {},
+      get: function () {
+        let value = this.getDataValue('config');
+        return configField.parseConfig('projectConfig', value);
+      },
+      set: function (value) {
+        var currentconfig = this.getDataValue('config');
+        value = value || {};
+        value = merge.recursive(true, currentconfig, value);
+        this.setDataValue('config', configField.parseConfig('projectConfig', value));
+      },
+      auth: {
+        viewableBy: 'editor',
+        updateableBy: 'editor',
+      },
+    },
+
+    emailConfig: {
+      type: Sequelize.DataTypes.JSON,
+      allowNull: false,
+      defaultValue: {},
+      get: function () {
+        let value = this.getDataValue('emailConfig');
+        return configField.parseConfig('projectEmailConfig', value);
+      },
+      set: function (value) {
+        var currentconfig = this.getDataValue('emailConfig');
+        value = value || {};
+        value = merge.recursive(true, currentconfig, value);
+        this.setDataValue('emailConfig', configField.parseConfig('projectEmailConfig', value));
+      },
+      auth: {
+        viewableBy: 'editor',
+        updateableBy: 'editor',
+      },
+    },
 
     /*
       HostStatus is used for tracking domain status
@@ -53,6 +91,10 @@ module.exports = function (db, sequelize, DataTypes) {
 
   }, {
 
+    defaultScope: {
+      attributes: { exclude: ['emailConfig'] }
+    },
+
     hooks: {
 
       beforeValidate: async function (instance, options) {
@@ -67,7 +109,6 @@ module.exports = function (db, sequelize, DataTypes) {
             if (instance.config.project.projectHasEnded) {
               config.votes.isActive = false;
               config.ideas.canAddNewIdeas = false;
-              config.articles.canAddNewArticles = false;
               config.comments.isClosed = true;
               config.polls.canAddPolls = false;
               config.users.canCreateNewUsers = false;
@@ -75,7 +116,6 @@ module.exports = function (db, sequelize, DataTypes) {
               // commented: do not update these params on unsetting
               // config.votes.isActive = true;
               // config.ideas.canAddNewIdeas = true;
-              // config.articles.canAddNewArticles = true;
               // config.comments.isClosed = false;
               // config.polls.canAddPolls = true;
               // config.users.canCreateNewUsers = true;
@@ -132,6 +172,14 @@ module.exports = function (db, sequelize, DataTypes) {
 
       includeConfig: {
         attributes: {},
+      },
+
+      excludeEmailConfig: {
+        attributes: {exclude: ['emailConfig']},
+      },
+
+      includeEmailConfig: {
+        attributes: {include: ['emailConfig']},
       },
 
       includeAreas: {

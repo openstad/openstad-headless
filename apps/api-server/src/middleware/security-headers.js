@@ -15,7 +15,7 @@ module.exports = function( req, res, next ) {
 		url = config.url || req.protocol + '://' + req.hostname;
 	}
 
-	if (config.dev && config.dev['Header-Access-Control-Allow-Origin']) {
+	if (config.dev && config.dev['Header-Access-Control-Allow-Origin'] && process.env.NODE_ENV == 'development') {
     res.header('Access-Control-Allow-Origin', config.dev['Header-Access-Control-Allow-Origin'] );
   } else {
     res.header('Access-Control-Allow-Origin', url );

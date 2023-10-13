@@ -1,26 +1,20 @@
 # Image used for building dependencies
-FROM node:16.16.0-alpine as builder
+FROM node:18-slim as builder
 
 # Create app directory
 WORKDIR /opt/api-server
 
 # Install all base dependencies.# add perl for shell scripts
-RUN apk add --no-cache --update g++ make python3 musl-dev bash perl perl-dbd-mysql perl-posix-strftime-compiler
-
-RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.6/main' >> /etc/apk/repositories
-RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.6/community' >> /etc/apk/repositories
-RUN apk update
+RUN apt-get update
+RUN apt-get install -y python3 make cmake git bash g++
 
 # Install app dependencies
 COPY --chown=node:node package*.json .
 RUN npm install
 RUN npm install -g nodemon
 
-# Remove unused packages only used for building.
-RUN apk del g++ make python3 && rm -rf /var/cache/apk/*
-
 # Release image 
-FROM node:16.16.0-alpine
+FROM node:18-slim
 
 # Label for tracking
 LABEL nl.openstad.container="api" nl.openstad.version="0.0.1" nl.openstad.release-date="2023-09-25"
@@ -35,7 +29,7 @@ ENV API_DATABASE_PASSWORD=""
 ENV API_DATABASE_DATABASE=""
 ENV API_DATABASE_HOST=""
 ENV API_EMAILADDRESS=""
-ENV API_EXPRESS_PORT=""
+ENV API_PORT=""
 ENV API_MAIL_FROM=""
 ENV API_MAIL_TRANSPORT_SMTP_PORT=""
 ENV API_MAIL_TRANSPORT_SMTP_HOST=""

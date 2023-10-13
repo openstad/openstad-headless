@@ -1,6 +1,9 @@
 require('dotenv').config();
 const config = require('config');
 
+console.log(config.auth.adapter.openstad);
+
+
 // Env variable used by npm's `debug` package.
 process.env.DEBUG = config.logging;
 
