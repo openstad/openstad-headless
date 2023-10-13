@@ -18,6 +18,7 @@ import { PageLayout} from "@/components/ui/page-layout"
 import { Heading } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
 import { useRouter } from 'next/router'
+import useArea from '@/hooks/use-area'
 
 const formSchema = z.object({
     name: z.string(),
@@ -28,6 +29,7 @@ export default function ProjectAreaCreate() {
     const router = useRouter();
     const projectId = router.query.project;
     const exampleText = '[{"lat":52.08526843203928,"lng":4.273874759674072},{"lat":52.086283702713075,"lng":4.276385307312012}, ...]'
+    const { createArea } = useArea()
     
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver<any>(formSchema),
@@ -36,21 +38,7 @@ export default function ProjectAreaCreate() {
     })
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        createArea(`/api/openstad/api/project/${projectId}/area`,
-        values
-        )
-    }
-
-    async function createArea(url, schema) {
-        await fetch(url, {
-            method: 'POST',
-            headers:{
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({name: schema.name, 
-                
-                polygon: JSON.parse(schema.polygon)})
-        })
+        createArea(values.name, values.polygon)
     }
 
     return (

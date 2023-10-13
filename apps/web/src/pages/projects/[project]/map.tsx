@@ -13,8 +13,6 @@ export default function Map (){
         ssr: false
       })
 
-    console.log(data)
-
     return (
         <Map projectId={data.id} areaId={data.areaId} style={{height: "400px"}}/>
     )

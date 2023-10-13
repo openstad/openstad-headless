@@ -1,4 +1,3 @@
-import useSWR from "swr";
 import { PageLayout } from "@/components/ui/page-layout";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -8,12 +7,14 @@ import { ListHeading, Paragraph } from "@/components/ui/typography";
 import usePagination from "@/hooks/pagination";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/router";
+import projectListSwr from '../../hooks/use-project-list'
 
 export default function Projects() {
-  const { data, isLoading } = useSWR("/api/openstad/api/project?includeConfig=1");
+  const { data, isLoading } = projectListSwr();
   const router = useRouter();
 
   if (!data) return null;
+  console.log(data)
 
   const headers = ['Projectnaam', 'Data', 'Issues', 'Status', 'Reacties', 'Likes', 'Indiener', 'Resources', 'Stemmen', 'Einddatum']
 
@@ -95,7 +96,7 @@ export default function Projects() {
                         Stemmen
                       </Paragraph>
                       <Paragraph className='hidden md:flex'>
-                        {project.config.project.endDate}
+                        {project?.config?.project?.endDate}
                       </Paragraph>
                     </li>
                   )

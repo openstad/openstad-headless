@@ -7,7 +7,6 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import useSWR from "swr";
 
 export default function BaseMap({projectId, areaId}) {
-  console.log()
   const { data, isLoading } = useSWR(`/api/openstad/api/project/${projectId}/area/${areaId}`);
 
   if (!data) return null;

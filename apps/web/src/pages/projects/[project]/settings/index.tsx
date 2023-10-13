@@ -19,10 +19,10 @@ import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Heading } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
 import { useRouter } from 'next/router'
+import projectSwr from '../../../../hooks/use-project'
 
 const formSchema = z.object({
     projectName: z.string().min(1, {
@@ -31,20 +31,17 @@ const formSchema = z.object({
     endDate: z.date().min(new Date(), {
         message: "De datum moet nog niet geweest zijn!"
     }),
-    betaWidgets: z.boolean(),
-    deprecatedWidgets: z.boolean(),
 })
 
 export default function ProjectSettings() {
     const router = useRouter();
     const { project } = router.query;
+    const { data, isLoading } = projectSwr(project);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver<any>(formSchema),
         defaultValues: {
             projectName: "",
-            betaWidgets: false,
-            deprecatedWidgets: false
         }
     })
 
@@ -127,48 +124,6 @@ export default function ProjectSettings() {
                           </FormItem>
                         )}>
                         </FormField>
-                        <FormField
-                            control={form.control}
-                            name="betaWidgets"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Display beta widgets?</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="No" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value={true}>Ja</SelectItem>
-                                            <SelectItem value={false}>Nee</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="deprecatedWidgets"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Display deprecated widgets?</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="False" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value={true}>Ja</SelectItem>
-                                            <SelectItem value={false}>Nee</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
                         <Button type="submit" variant={"default"}>Opslaan</Button>
                     </form>
                     <br/>
