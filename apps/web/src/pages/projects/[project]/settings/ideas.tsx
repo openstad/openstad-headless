@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
@@ -20,35 +21,62 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Heading } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
+import { useRouter } from 'next/router'
+import { useProject } from '../../../../hooks/use-project'
 
 const formSchema = z.object({
-    ideasAllowed: z.boolean(),
-    minimumVotes: z.number(),
-    minimumTitleLength: z.number(),
-    maximumTitleLength: z.number(),
-    minimumSummaryLength: z.number(),
-    maximumSummaryLength: z.number(),
-    minimumDescriptionLength: z.number(),
-    maximumDescriptionLength: z.number(),
+    canAddNewIdeas: z.boolean(),
+    minimumYesVotes: z.coerce.number(),
+    titleMinLength: z.coerce.number(),
+    titleMaxLength: z.coerce.number(),
+    summaryMinLength: z.coerce.number(),
+    summaryMaxLength: z.coerce.number(),
+    descriptionMinLength: z.coerce.number(),
+    descriptionMaxLength: z.coerce.number(),
 })
 
 export default function ProjectSettingsIdeas() {
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver<any>(formSchema),
-        defaultValues: {
-            ideasAllowed: true,
-            minimumVotes: 100,
-            minimumTitleLength: 10,
-            maximumTitleLength: 50,
-            minimumSummaryLength: 20,
-            maximumSummaryLength: 140,
-            minimumDescriptionLength: 140,
-            maximumDescriptionLength: 5000
-        }
+    const category = 'ideas';
+
+    const router = useRouter();
+    const { project } = router.query;
+    const { data, isLoading, updateProject } = useProject();
+    const defaults = () => ({
+        canAddNewIdeas: data?.config?.[category]?.canAddNewIdeas || null,
+        minimumYesVotes: data?.config?.[category]?.minimumYesVotes || null,
+        titleMinLength: data?.config?.[category]?.titleMinLength || null,
+        titleMaxLength: data?.config?.[category]?.titleMaxLength || null,
+        summaryMinLength: data?.config?.[category]?.summaryMinLength || null,
+        summaryMaxLength: data?.config?.[category]?.summaryMaxLength || null,
+        descriptionMinLength: data?.config?.[category]?.descriptionMinLength || null,
+        descriptionMaxLength: data?.config?.[category]?.descriptionMaxLength || null,
     })
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver<any>(formSchema),
+        defaultValues: defaults()
+    })
+
+    useEffect(() => {
+        form.reset(defaults())
+    }, [data?.config])
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        try {
+            await updateProject({ 
+                [category]: {
+                    canAddNewIdeas: values.canAddNewIdeas,
+                    minimumYesVotes: values.minimumYesVotes,
+                    titleMinLength: values.titleMinLength,
+                    titleMaxLength: values.titleMaxLength,
+                    summaryMinLength: values.summaryMinLength,
+                    summaryMaxLength: values.summaryMaxLength,
+                    descriptionMinLength: values.descriptionMinLength,
+                    descriptionMaxLength: values.descriptionMaxLength
+            }});
+        } catch (error) {
+         console.error('could not update', error)   
+        }
     }
 
     return(
@@ -62,11 +90,11 @@ export default function ProjectSettingsIdeas() {
                 },
                 {
                     name: 'Instellingen',
-                    url: '/projects/1/settings'
+                    url: `/projects/${project}/settings`
                 },
                 {
                     name: 'Ideeën',
-                    url: '/projects/1/settings/ideas'
+                    url: `/projects/${project}/settings/ideas`
                 }
             ]}>
             <div className="container mx-auto py-10 w-1/2 float-left">
@@ -78,19 +106,19 @@ export default function ProjectSettingsIdeas() {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                             control={form.control}
-                            name="ideasAllowed"
+                            name="canAddNewIdeas"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Is het mogelijk om een idee in te sturen?</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <Select onValueChange={(e:string) => field.onChange(e === 'true')} value={field.value ? "true":"false"}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Ja" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value={true}>Ja</SelectItem>
-                                            <SelectItem value={false}>Nee</SelectItem>
+                                            <SelectItem value='true'>Ja</SelectItem>
+                                            <SelectItem value='false'>Nee</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -99,7 +127,7 @@ export default function ProjectSettingsIdeas() {
                         />
                         <FormField
                         control={form.control}
-                        name="minimumVotes"
+                        name="minimumYesVotes"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Minimum benodigde stemmen voor een idee?</FormLabel>
@@ -112,7 +140,7 @@ export default function ProjectSettingsIdeas() {
                         />
                         <FormField
                         control={form.control}
-                        name="minimumTitleLength"
+                        name="titleMinLength"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Minimum lengte van titel</FormLabel>
@@ -125,7 +153,7 @@ export default function ProjectSettingsIdeas() {
                         />
                         <FormField
                         control={form.control}
-                        name="maximumTitleLength"
+                        name="titleMaxLength"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Maximum lengte van titel</FormLabel>
@@ -138,7 +166,7 @@ export default function ProjectSettingsIdeas() {
                         />
                         <FormField
                         control={form.control}
-                        name="minimumSummaryLength"
+                        name="summaryMinLength"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Minimum lengte van samenvatting</FormLabel>
@@ -151,7 +179,7 @@ export default function ProjectSettingsIdeas() {
                         />
                         <FormField
                         control={form.control}
-                        name="maximumSummaryLength"
+                        name="summaryMaxLength"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Maximum lengte van samenvatting</FormLabel>
@@ -164,7 +192,7 @@ export default function ProjectSettingsIdeas() {
                         />
                         <FormField
                         control={form.control}
-                        name="minimumDescriptionLength"
+                        name="descriptionMinLength"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Minimum lengte van descriptie</FormLabel>
@@ -177,7 +205,7 @@ export default function ProjectSettingsIdeas() {
                         />
                         <FormField
                         control={form.control}
-                        name="maximumDescriptionLength"
+                        name="descriptionMaxLength"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Maximum lengte van descriptie</FormLabel>

@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
@@ -22,10 +23,10 @@ import { Calendar } from '@/components/ui/calendar'
 import { Heading } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
 import { useRouter } from 'next/router'
-import projectSwr from '../../../../hooks/use-project'
+import { useProject } from '../../../../hooks/use-project'
 
 const formSchema = z.object({
-    projectName: z.string().min(1, {
+    name: z.string().min(1, {
         message: "De naam van een project mag niet leeg zijn!"
     }),
     endDate: z.date().min(new Date(), {
@@ -34,19 +35,35 @@ const formSchema = z.object({
 })
 
 export default function ProjectSettings() {
+    const category = 'project';
+
     const router = useRouter();
     const { project } = router.query;
-    const { data, isLoading } = projectSwr(project);
+    const { data, isLoading, updateProject } = useProject();
+    const defaults = () => ({
+        name: data?.name || null,
+        // endDate: data?.config?.[category]?.endDate || null
+    })
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver<any>(formSchema),
-        defaultValues: {
-            projectName: "",
-        }
+        defaultValues: defaults()
     })
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+    useEffect(() => {
+        form.reset(defaults())
+    }, [data?.config])
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        const name = values.name
+        try {
+            await updateProject({ 
+                [category]: {
+                    endDate: values.endDate
+            }}, name);
+        } catch (error) {
+         console.error('could not update', error)   
+        }
     }
 
     return(
@@ -72,7 +89,7 @@ export default function ProjectSettings() {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                         control={form.control}
-                        name="projectName"
+                        name="name"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Projectnaam</FormLabel>
@@ -137,6 +154,6 @@ export default function ProjectSettings() {
                 </div>
             </div>
             </PageLayout>
-            </div>
+        </div>
     )
 }
