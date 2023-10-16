@@ -13,7 +13,7 @@ export default function Projects() {
   const { data, isLoading, error } = projectListSwr();
   const router = useRouter();
 
-  if (!data) return null;
+  if (!data || error) return null;
 
   const headers = ['Projectnaam', 'Data', 'Issues', 'Status', 'Reacties', 'Likes', 'Indiener', 'Resources', 'Stemmen', 'Einddatum']
   const {
