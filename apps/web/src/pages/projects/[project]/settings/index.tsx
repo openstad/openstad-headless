@@ -42,7 +42,7 @@ export default function ProjectSettings() {
     const { data, isLoading, updateProject } = useProject();
     const defaults = () => ({
         name: data?.name || null,
-        // endDate: data?.config?.[category]?.endDate || null
+        endDate: data?.config?.[category]?.endDate? new Date(data?.config?.[category]?.endDate): new Date()
     })
 
     const form = useForm<z.infer<typeof formSchema>>({

@@ -60,7 +60,8 @@ export default function ProjectSettingsAnonymization() {
     })
 
     useEffect(() => {
-        form.reset(defaults())
+        form.reset(defaults()),
+        emailForm.reset(emailDefaults())
     }, [data])
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
