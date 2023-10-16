@@ -15,7 +15,18 @@ export default function App({
           fetcher: (
             resource: RequestInfo | URL,
             init: RequestInit | undefined
-          ) => fetch(resource, init).then((res) => res.json()),
+          ) => fetch(resource, init).then(async (res) => {
+            if(res.ok) {
+              return res.json();
+            } else {
+              const rejectedReason = await res.json();
+              const error = new Error();
+              error.message = JSON.stringify(rejectedReason);
+              error.name = 'Something went wrong';
+              error.cause = resource.toString();
+              throw error;
+            }
+          }),
         }}
       >
         <Component {...pageProps} />
