@@ -53,7 +53,11 @@ export const SimpleCalendar: React.FC<{
                 <Calendar
                   mode="single"
                   selected={field.value}
-                  onSelect={field.onChange}
+                  onSelect={(value) =>
+                    value
+                      ? field.onChange(new Date(value.toDateString()))
+                      : field.onChange(value)
+                  }
                   disabled={(date) => date < new Date()}
                   initialFocus
                 />

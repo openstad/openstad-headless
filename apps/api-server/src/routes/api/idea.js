@@ -217,7 +217,7 @@ router
       ...req.body,
       projectId: req.params.projectId,
       userId,
-      startDate: new Date(),
+      startDate: req.body.startDate || new Date(),
     };
 
     let responseData;

@@ -66,18 +66,19 @@ export default function ProjectIdeaCreate() {
       summary: '',
       description: '',
       location: '',
-      startDate: new Date(),
+      startDate: new Date(new Date().toDateString()),
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    create(values)
-      .then(() => {
-        toast.success('Plan successvol aangemaakt');
-      })
-      .catch((e) => {
-        toast.error('Plan kon niet aangemaakt worden');
-      });
+    console.log({ values });
+    // create(values)
+    //   .then(() => {
+    //     toast.success('Plan successvol aangemaakt');
+    //   })
+    //   .catch((e) => {
+    //     toast.error('Plan kon niet aangemaakt worden');
+    //   });
   }
 
   return (
