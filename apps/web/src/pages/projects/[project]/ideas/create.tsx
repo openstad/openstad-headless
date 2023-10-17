@@ -71,14 +71,13 @@ export default function ProjectIdeaCreate() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log({ values });
-    // create(values)
-    //   .then(() => {
-    //     toast.success('Plan successvol aangemaakt');
-    //   })
-    //   .catch((e) => {
-    //     toast.error('Plan kon niet aangemaakt worden');
-    //   });
+    create(values)
+      .then(() => {
+        toast.success('Plan successvol aangemaakt');
+      })
+      .catch((e) => {
+        toast.error('Plan kon niet aangemaakt worden');
+      });
   }
 
   return (
