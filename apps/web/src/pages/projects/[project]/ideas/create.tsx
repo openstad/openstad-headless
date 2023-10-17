@@ -26,9 +26,18 @@ const formSchema = z.object({
   ideaID: z.coerce.number().optional(),
   userId: z.string().optional(),
 
-  title: z.string().min(10).max(50),
-  summary: z.string().min(20).max(140),
-  description: z.string().min(140).max(5000),
+  title: z
+    .string()
+    .min(10, 'Titel moet minimaal 10 karakters bevatten')
+    .max(50, 'Titel mag maximaal 50 karakters bevatten'),
+  summary: z
+    .string()
+    .min(20, 'Samenvatting moet minimaal 20 karakters bevatten')
+    .max(140, 'Samenvatting mag maximaal 140 karakters bevatten'),
+  description: z
+    .string()
+    .min(140, 'Omschrijving moet minimaal 140 karakters bevatten')
+    .max(5000, 'Omschrijving mag maximaal 5000 karakters bevatten'),
 
   budgetMin: z.coerce.number().optional(),
   budgetMax: z.coerce.number().optional(),

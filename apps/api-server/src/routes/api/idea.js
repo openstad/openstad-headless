@@ -9,7 +9,6 @@ const mail = require('../../lib/mail');
 const pagination = require('../../middleware/pagination');
 const searchResults = require('../../middleware/search-results-static');
 const isJson = require('../../util/isJson');
-const publishConcept = require('../../middleware/publish-concept');
 const c = require('config');
 
 const router = express.Router({ mergeParams: true });
@@ -181,7 +180,6 @@ router
   // create idea
   // -----------
   .post(auth.can('Idea', 'create'))
-  .post(publishConcept)
   .post(function (req, res, next) {
     if (!req.project) return next(createError(401, 'Project niet gevonden'));
     return next();
@@ -336,7 +334,6 @@ router
   // update idea
   // -----------
   .put(auth.useReqUser)
-  .put(publishConcept)
   .put(function (req, res, next) {
     if (
       !(
