@@ -10,7 +10,7 @@ const merge = require('merge');
 
 const router = express.Router({mergeParams: true});
 
-const activityKeys = ['ideas', 'articles', 'comments', 'votes', 'projects'];
+const activityKeys = ['ideas', 'comments', 'votes', 'projects'];
 
 const activityConfig = {
   'ideas' : {
@@ -19,13 +19,6 @@ const activityConfig = {
         slug: 'idea',
         label: 'inzending'
       }
-  },
-  'articles': {
-    descriptionKey: 'description',
-    type: {
-      slug: 'article',
-      label: 'artikel'
-    }
   },
   'comments': {
     descriptionKey: 'description',
@@ -59,14 +52,14 @@ router
     next();
   });
 
-// list user ideas, comments, articles, votes
+// list user ideas, comments, votes
 // -------------------------------------------
 router.route('/')
 
 // what to include
   .get(function (req, res, next) {
     req.activities = [];
-    ['ideas', 'articles', 'comments', 'votes'].forEach(key => {
+    ['ideas', 'comments', 'votes'].forEach(key => {
       let include = 'include' + key.charAt(0).toUpperCase() + key.slice(1);;
       if (req.query[include]) {
         req.activities.push(key)
@@ -167,22 +160,6 @@ router.route('/')
       })
   })
 
-// articles
-  .get(function(req, res, next) {
-    if (!req.activities.includes('articles')) return next();
-    return auth.can('Article', 'list')(req, res, next);
-  })
-  .get(function(req, res, next) {
-    if (!req.activities.includes('articles')) return next();
-    let where = { userId: req.userIds };
-    return db.Article
-      .findAll({ where })
-      .then(function(rows) {
-        req.results.articles = rows;
-        return next();
-      })
-  })
-
 // comments
   .get(function(req, res, next) {
     if (!req.activities.includes('comments')) return next();
@@ -269,7 +246,6 @@ router.route('/')
   .get(function (req, res, next) {
     // console.log({
     //   ideas: req.results.ideas && req.results.ideas.length,
-    //   articles: req.results.articles && req.results.articles.length,
     //   comment: req.results.comment && req.results.comments.length,
     //   votes: req.results.votes && req.results.votes.length,
     // });

@@ -23,13 +23,13 @@ import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
     ideasAllowed: z.boolean(),
-    minimumVotes: z.number().gt(0),
-    minimumTitleLength: z.number().gt(0),
-    maximumTitleLength: z.number().lt(201),
-    minimumSummaryLength: z.number().gt(0),
-    maximumSummaryLength: z.number().lt(1001),
-    minimumDescriptionLength: z.number().gt(0),
-    maximumDescriptionLength: z.number().lt(5001),
+    minimumVotes: z.number(),
+    minimumTitleLength: z.number(),
+    maximumTitleLength: z.number(),
+    minimumSummaryLength: z.number(),
+    maximumSummaryLength: z.number(),
+    minimumDescriptionLength: z.number(),
+    maximumDescriptionLength: z.number(),
 })
 
 export default function ProjectSettingsIdeas() {
@@ -37,12 +37,12 @@ export default function ProjectSettingsIdeas() {
         resolver: zodResolver<any>(formSchema),
         defaultValues: {
             ideasAllowed: true,
-            minimumVotes: 50,
-            minimumTitleLength: 1,
-            maximumTitleLength: 150,
-            minimumSummaryLength: 1,
-            maximumSummaryLength: 1000,
-            minimumDescriptionLength: 1,
+            minimumVotes: 100,
+            minimumTitleLength: 10,
+            maximumTitleLength: 50,
+            minimumSummaryLength: 20,
+            maximumSummaryLength: 140,
+            minimumDescriptionLength: 140,
             maximumDescriptionLength: 5000
         }
     })
@@ -104,7 +104,7 @@ export default function ProjectSettingsIdeas() {
                             <FormItem>
                                 <FormLabel>Minimum benodigde stemmen voor een idee?</FormLabel>
                                 <FormControl>
-                                    <Input placeholder='50' {...field} />
+                                    <Input placeholder='100' {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -117,7 +117,7 @@ export default function ProjectSettingsIdeas() {
                             <FormItem>
                                 <FormLabel>Minimum lengte van titel</FormLabel>
                                 <FormControl>
-                                    <Input placeholder='1' {...field} />
+                                    <Input placeholder='10' {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -130,7 +130,7 @@ export default function ProjectSettingsIdeas() {
                             <FormItem>
                                 <FormLabel>Maximum lengte van titel</FormLabel>
                                 <FormControl>
-                                    <Input placeholder='150' {...field} />
+                                    <Input placeholder='50' {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -143,7 +143,7 @@ export default function ProjectSettingsIdeas() {
                             <FormItem>
                                 <FormLabel>Minimum lengte van samenvatting</FormLabel>
                                 <FormControl>
-                                    <Input placeholder='1' {...field} />
+                                    <Input placeholder='20' {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -154,9 +154,9 @@ export default function ProjectSettingsIdeas() {
                         name="maximumSummaryLength"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Minimum lengte van titel</FormLabel>
+                                <FormLabel>Maximum lengte van samenvatting</FormLabel>
                                 <FormControl>
-                                    <Input placeholder='1000' {...field} />
+                                    <Input placeholder='140' {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -167,9 +167,9 @@ export default function ProjectSettingsIdeas() {
                         name="minimumDescriptionLength"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Minimum lengte van titel</FormLabel>
+                                <FormLabel>Minimum lengte van descriptie</FormLabel>
                                 <FormControl>
-                                    <Input placeholder='1' {...field} />
+                                    <Input placeholder='140' {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -180,7 +180,7 @@ export default function ProjectSettingsIdeas() {
                         name="maximumDescriptionLength"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Minimum lengte van titel</FormLabel>
+                                <FormLabel>Maximum lengte van descriptie</FormLabel>
                                 <FormControl>
                                     <Input placeholder='5000' {...field} />
                                 </FormControl>

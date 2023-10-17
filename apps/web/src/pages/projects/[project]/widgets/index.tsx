@@ -1,23 +1,19 @@
+import { CreateWidgetDialog } from "@/components/dialog-widget-create";
 import { PageLayout } from "@/components/ui/page-layout";
-import { Heading, ListHeading, Paragraph } from "@/components/ui/typography";
+import { ListHeading, Paragraph } from "@/components/ui/typography";
+import { useWidgetsHook } from "@/hooks/use-widgets";
+import { WidgetDefinitions } from "@/lib/widget-definitions";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import useSWR from "swr";
+
 
 export default function ProjectWidgets() {
   const router = useRouter();
   const { project } = router.query;
+  const types = WidgetDefinitions;
 
-  const { data: widgetTypes, isLoading } = useSWR(
-    `/api/openstad/api/widget-types`
-  );
-
-  const { data: widgets, isLoading: isLoadingWidgets } = useSWR(
-    project
-      ? `/api/openstad/api/project/${project}/widgets?includeType=1`
-      : null
-  );
-
+  const { data: widgets, isLoading:isLoadingWidgets } = useWidgetsHook(project as string);
+  
   return (
     <div>
       <PageLayout
@@ -32,6 +28,9 @@ export default function ProjectWidgets() {
             url: `/projects/${project}/widgets`,
           },
         ]}
+        action={
+          <CreateWidgetDialog projectId={project as string}/>
+        }
       >
         <div className="container mx-auto py-10">
           <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-2 px-2 border-b border-border">
@@ -43,11 +42,12 @@ export default function ProjectWidgets() {
           <ul>
           {widgets?.map((widget: any) => (
               <Link
-                href={`/projects/${project}/widgets/${widget.widgetType.technicalName}/${widget.id}`}>
+                key={widget.id}
+                href={`/projects/${project}/widgets/${widget.type}/${widget.id}`}>
                 <li className="grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                   <div className="col-span-3">
                   <strong className="">
-                    {widget.widgetType.visibleName}
+                    {WidgetDefinitions[widget.type]}
                   </strong>
                   <Paragraph>
                       {widget.description}

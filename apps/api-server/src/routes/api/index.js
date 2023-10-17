@@ -25,9 +25,6 @@ router.use( '/project/:projectId(\\d+)(/idea/:ideaId(\\d+))?/comment', require('
 router.use( '/project/:projectId(\\d+)/idea', require('./idea') );
 //router.use( '/project/:projectId(\\d+)/idea', require('./idea.old') );
 
-// articles
-router.use( '/project/:projectId(\\d+)/article', require('./article') );
-
 // polls
 router.use( '/project/:projectId(\\d+)(/idea/:ideaId(\\d+))?/poll', require('./poll') );
 
@@ -59,9 +56,6 @@ router.use( '/project/:projectId(\\d+)/action', require('./action') );
 //widgets
 router.use('/project/:projectId(\\d+)/widgets', require('./widget') );
 router.use('/project/:projectId(\\d+)/widgets/:id(\\d+)', require('./widget') );
-
-//widget types
-router.use('/widget-types', require('./widget-type'));
 
 // locks
 router.use( '/lock', require('./lock') );

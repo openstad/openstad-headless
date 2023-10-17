@@ -270,7 +270,6 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
     if (req.onlyUserIds && !req.onlyUserIds.includes(req.targetUser.id)) {
       req.results = {
         "ideas": [],
-        "articles": [],
         "comments": [],
         "votes": [],
         "users": [],
@@ -310,7 +309,6 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
           req.results.users.push(result.user);
           req.results.projects.push(result.project);
           req.results.ideas = req.results.ideas.concat(result.ideas || []);
-          req.results.articles = req.results.articles.concat(result.articles || []);
           req.results.comments = req.results.comments.concat(result.comments || []);
           req.results.votes = req.results.votes.concat(result.votes || []);
         }

@@ -13,8 +13,13 @@ import WidgetResourceOverviewTags from './tags';
 import WidgetResourceOverviewInclude from './include';
 import WidgetResourceOverviewLabel from './label';
 import WidgetResourceOverviewInfo from './info';
+import { useRouter } from 'next/router';
 
 export default function WidgetResourceOverview() {
+    const router = useRouter();
+    const id = router.query.id;
+    const projectId = router.query.project;
+    
     return(
         <div>
             <PageLayout
@@ -26,11 +31,11 @@ export default function WidgetResourceOverview() {
                 },
                 {
                     name: "Widgets",
-                    url: "/projects/1/widgets"
+                    url: `/projects/${projectId}/widgets`
                 },
                 {
                     name: "Resource Overview",
-                    url: "/projects/1/widgets/resourceoverview"
+                    url: `/projects/${projectId}/widgets/resourceoverview/${id}`
                 }
             ]}
             >

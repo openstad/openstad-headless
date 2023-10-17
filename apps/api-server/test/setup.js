@@ -3,11 +3,6 @@ require('iconv-lite').encodingExists('cesu8');
 
 
 // Mock sequelize models by default
-jest.mock('../src/models/Article', () => () => {
-    const SequelizeMock = require("sequelize-mock");
-    return new SequelizeMock();
-});
-
 jest.mock('../src/models/ChoicesGuide', () => () => {
     const SequelizeMock = require("sequelize-mock");
     return new SequelizeMock();
