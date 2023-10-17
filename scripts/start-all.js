@@ -26,6 +26,9 @@ async function start() {
     console.log('Start API server');
     execute(command, ['server.js'], { cwd: './apps/api-server' });
 
+    console.log('Start admin server');
+    execute('npm', ['run', 'dev'], { cwd: './apps/web' });
+
   } catch (err) {
     console.log('ERROR');
     console.log(err);

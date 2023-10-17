@@ -74,7 +74,6 @@ let defaultConfig = {
           pass: process.env.SMTP_PASSWORD || process.env.API_MAIL_TRANSPORT_SMTP_AUTH_PASS || null,
 				}
 			}
-
 		}
 	},
 
@@ -105,7 +104,7 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
     adapter: AUTH_ADAPTER || {
       openstad: AUTH_ADAPTER_OPENSTAD || {
         modulePath: process.env.AUTH_ADAPTER_OPENSTAD_MODULEPATH || './src/adapter/openstad',
-        serverUrl: process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL ||  process.env.AUTH_API_URL || null,
+        serverUrl: process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL ||  process.env.AUTH_APP_URL ||  process.env.AUTH_API_URL || null,
         serverUrlInternal: process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL_INTERNAL ||  process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL ||  process.env.AUTH_API_URL || null,
         userMapping: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING || JSON.stringify({
           identifier: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING_IDENTIFIER || 'user_id',

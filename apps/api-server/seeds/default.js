@@ -17,8 +17,8 @@ module.exports = async function seed(config, db) {
     console.log('  creating default project');
     let project = await db.Project.create({
       id: 1,
-      name: 'Default project',
-      title: 'Default project',
+      name: 'Admin',
+      title: 'Admin',
       config: {
         ideas: {
           extraData: {
@@ -33,13 +33,8 @@ module.exports = async function seed(config, db) {
           "provider": {
             "openstad": {
               "adapter": "openstad",
-              "clientId": "uniquecode",
-              "clientSecret": "uniquecode123"
-            },
-            "anonymous": {
-              "adapter": "openstad",
-              "clientId": "anonymous",
-              "clientSecret": "anonymous123"
+              "clientId": process.env.AUTH_ADMIN_CLIENT_ID || "uniquecode",
+              "clientSecret": process.env.AUTH_ADMIN_CLIENT_SECRET || "uniquecode123",
             },
           }
         },

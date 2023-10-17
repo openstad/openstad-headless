@@ -3,12 +3,14 @@ const config = require('./config');
 const initApi = require('./setup-api');
 const initImageServer = require('./setup-image');
 const initAuthServer = require('./setup-auth');
+const initAdminServer = require('./setup-admin');
 const createNginxConfigExample = require('./create-nginx-config-example');
 
 let modules = [
   initApi,
   initImageServer,
   initAuthServer,
+  initAdminServer,
   createNginxConfigExample,
   function() {
     return new Promise((resolve, reject) => {
