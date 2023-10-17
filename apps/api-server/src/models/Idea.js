@@ -1,7 +1,6 @@
 const Sequelize = require('sequelize');
 const { Op } = require("sequelize");
 
-const getSequelizeConditionsForFilters = require('./../util/getSequelizeConditionsForFilters');
 const co = require('co')
 , config = require('config')
 , moment = require('moment-timezone')
@@ -616,31 +615,6 @@ module.exports = function (db, sequelize, DataTypes) {
             sequelize.literal(`DATEDIFF(NOW(), idea.updatedAt) <= 90`)
           )
         )
-      },
-
-      filter: function (filtersInclude, filtersExclude) {
-        const filterKeys = [
-          {
-            'key': 'id'
-          },
-          {
-            'key': 'title'
-          },
-          {
-            'key': 'theme',
-            'extraData': true
-          },
-          {
-            'key': 'area',
-            'extraData': true
-          },
-          {
-            'key': 'vimeoId',
-            'extraData': true
-          },
-        ];
-        
-        return getSequelizeConditionsForFilters(filterKeys, filtersInclude, sequelize, filtersExclude);
       },
 
       // vergelijk getRunning()

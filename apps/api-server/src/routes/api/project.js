@@ -6,7 +6,7 @@ const Sequelize       = require('sequelize');
 const db      				= require('../../db');
 const auth 						= require('../../middleware/sequelize-authorization-middleware');
 const pagination 			= require('../../middleware/pagination');
-const searchResults 	= require('../../middleware/search-results-user');
+const searchInResults = require('../../middleware/search-in-results');
 // TODO-AUTH
 const checkHostStatus = require('../../services/checkHostStatus')
 const projectsWithIssues = require('../../services/projects-with-issues');
@@ -55,7 +55,7 @@ router.route('/')
 			})
 			.catch(next);
 	})
-	.get(searchResults)
+  .get(searchInResults({ searchfields: ['name', 'title'] }))
 	.get(auth.useReqUser)
 	.get(pagination.paginateResults)
 	.get(function(req, res, next) {
@@ -123,7 +123,7 @@ router.route('/issues')
 			.catch(next);
 
 	})
-	.get(searchResults)
+  .get(searchInResults({ searchfields: ['name', 'title'] }))
 	.get(auth.useReqUser)
 	.get(pagination.paginateResults)
 	.get(function(req, res, next) {

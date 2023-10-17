@@ -7,7 +7,6 @@ const merge       = require('merge');
 const bruteForce = require('../../middleware/brute-force');
 const {Op} = require('sequelize');
 const pagination = require('../../middleware/pagination');
-const searchResults = require('../../middleware/search-results-static');
 
 const router = express.Router({mergeParams: true});
 
@@ -135,7 +134,6 @@ router.route('/')
 			})
 			.catch(next);
 	})
-	.get(searchResults)
 	.get(pagination.paginateResults)
 	.get(function(req, res, next) {
     let records = req.results.records || req.results
