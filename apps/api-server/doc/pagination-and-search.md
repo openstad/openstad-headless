@@ -46,30 +46,23 @@ Which means that a search could make the previosly very fast query quite expensi
 Search requests are sent as query parameter `search`, build as an object in the url:
 
 ```
-?search[criteria][text]=openstad&search[criteria][title]=goed&search[options][andOr]=and"
+?search[description]=openstad&search[title]=goed%20idee
 ```
 
 A npm module like `ns` can translate nested objects automatically to such an url.
 
 ```
-{
-  "criteria": [
-    {
-      "text": "openstad"
-    },
-    {
-      "title": "goed idee"
-    }
-  ],
-  "options": {
-    "andOr": "and"
+[
+  {
+    "text": "openstad"
+  },
+  {
+    "title": "goed idee"
   }
-}
+],
 ```
 
 Search is done in textfields of the object. That would e.g. be `title`, `summary` and `description` in ideas. `text` will search in all available fields.
-
-`andOr` should be self explanatory.
 
 Searching is done using the [fuzzysort](https://github.com/farzher/fuzzysort) module. This will add scores; the results are ordered by that score.
 
