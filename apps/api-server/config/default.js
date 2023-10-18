@@ -55,7 +55,6 @@ let defaultConfig = {
 			{ "route": "/api", "router": "./routes/api" },
 			{ "route": "/auth", "router": "./routes/auth" },
       { "route": "/stats", "router": "./routes/stats" },
-			{ "route": "/", "router": "./routes/doc" }
 		]
 	},
 
