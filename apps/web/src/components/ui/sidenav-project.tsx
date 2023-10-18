@@ -91,17 +91,6 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Stemmen</span>
               </Button>
             </Link>
-            <Link href={`/projects/${project}/settings/protection`}>
-              <Button
-                variant={
-                  location.includes("/settings/protection") ? "secondary" : "ghost"
-                }
-                size="default"
-                className="w-full flex justify-start pl-8"
-              >
-                <span className="truncate">Wachtwoord protectie</span>
-              </Button>
-            </Link>
             <Link href={`/projects/${project}/settings/anonymization`}>
               <Button
                 variant={
@@ -133,17 +122,6 @@ export function SidenavProject({ className }: { className?: string }) {
                 className="w-full flex justify-start pl-8"
               >
                 <span className="truncate">Administrator notificaties</span>
-              </Button>
-            </Link>
-            <Link href={`/projects/${project}/settings/newsletter`}>
-              <Button
-                variant={
-                  location.includes("/settings/newsletter") ? "secondary" : "ghost"
-                }
-                size="default"
-                className="w-full flex justify-start pl-8"
-              >
-                <span className="truncate">Nieuwsbrief</span>
               </Button>
             </Link>
           </>
