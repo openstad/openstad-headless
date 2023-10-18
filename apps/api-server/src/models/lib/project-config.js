@@ -326,14 +326,19 @@ module.exports = {
         default: 'anonymous',
       },
     },
+  },
 
-    host: {
-      status: null,
-    },
-
-    "ignoreBruteForceIPs": {
-      type: 'arrayOfStrings',
-      default: []
+  newslettersignup: {
+    type: 'object',
+    subset: {
+      isActive: {
+        type: 'boolean',
+        default: false,
+      },
+      autoConfirm: {
+        type: 'boolean',
+        default: false,
+      },
     },
   },
 

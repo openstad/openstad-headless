@@ -65,7 +65,7 @@ service.createUser = async function({ authConfig, userData = {} }) {
 
   // TODO: unmap userData
 
-  let url = `${authConfig.serverUrl}/api/admin/user?client_id=${authConfig.clientId}`;
+  let url = `${authConfig.serverUrlInternal}/api/admin/user?client_id=${authConfig.clientId}`;
   let body = JSON.stringify(userData)
 
   try {
@@ -104,7 +104,7 @@ service.updateUser = async function({ authConfig, userData = {} }) {
 
   if (!(userData && userData.id)) throw new Error('No user id found')
 
-  let url = `${authConfig.serverUrl}/api/admin/user/${userData.id}?client_id=${authConfig.clientId}`;
+  let url = `${authConfig.serverUrlInternal}/api/admin/user/${userData.id}?client_id=${authConfig.clientId}`;
   let body = JSON.stringify(userData)
 
   try {
@@ -143,7 +143,7 @@ service.deleteUser = async function({ authConfig, userData = {} }) {
 
   if (!(userData && userData.id)) throw new Error('No user id found')
 
-  let url = `${authConfig.serverUrl}/api/admin/user/${userData.id}/delete?client_id=${authConfig.clientId}`;
+  let url = `${authConfig.serverUrlInternal}/api/admin/user/${userData.id}/delete?client_id=${authConfig.clientId}`;
 
   try {
 
@@ -220,7 +220,7 @@ service.updateClient = async function({ authConfig, config }) {
   try {
 
     // fetch client
-    let url = `${authConfig.serverUrl}/api/admin/client/${clientId}`;
+    let url = `${authConfig.serverUrlInternal}/api/admin/client/${clientId}`;
     let response = await fetch(url, {
 	    headers: {
         Authorization: `Basic ${new Buffer(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
