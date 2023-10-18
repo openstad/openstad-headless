@@ -45,5 +45,25 @@ export default function useIdeas(projectId?: string) {
       throw new Error('Could not update the plan');
     }
   }
-  return { ...ideasListSwr, create, update };
+
+  async function remove(id: number) {
+    const deleteUrl = `/api/openstad/api/project/${projectId}/idea/${id}?includeUserVote=1`;
+
+    const res = await fetch(deleteUrl, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (res.ok) {
+      const existingData = [...ideasListSwr.data];
+      const updatedList = existingData.filter((ed) => ed.id !== id);
+      ideasListSwr.mutate(updatedList);
+      return updatedList;
+    } else {
+      throw new Error('Could not remove the plan');
+    }
+  }
+  return { ...ideasListSwr, create, update, remove };
 }
