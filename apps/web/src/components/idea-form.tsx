@@ -17,35 +17,54 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
-import { toast } from 'react-hot-toast';
 import { SimpleCalendar } from '@/components/simple-calender-popup';
 import useIdea from '@/hooks/use-idea';
+import toast from 'react-hot-toast';
+
+const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
+const minError = (field: string, nr: number) =>
+  `${field} moet minimaal ${nr} karakters bevatten`;
+const maxError = (field: string, nr: number) =>
+  `${field} mag maximaal ${nr} karakters bevatten`;
 
 const formSchema = z.object({
-  userId: z.string().optional(),
+  userId: z.coerce
+    .number({ invalid_type_error: onlyNumbersMessage })
+    .optional(),
 
   title: z
     .string()
-    .min(10, 'Titel moet minimaal 10 karakters bevatten')
-    .max(50, 'Titel mag maximaal 50 karakters bevatten'),
+    .min(10, minError('Titel', 10))
+    .max(50, maxError('Titel', 50))
+    .default(''),
   summary: z
     .string()
-    .min(20, 'Samenvatting moet minimaal 20 karakters bevatten')
-    .max(140, 'Samenvatting mag maximaal 140 karakters bevatten'),
+    .min(20, minError('Samenvatting', 20))
+    .max(140, maxError('Samenvatting', 140))
+    .default(''),
   description: z
     .string()
-    .min(140, 'Omschrijving moet minimaal 140 karakters bevatten')
-    .max(5000, 'Omschrijving mag maximaal 5000 karakters bevatten'),
+    .min(140, minError('Beschrijving', 140))
+    .max(5000, maxError('Beschrijving', 5000))
+    .default(''),
 
-  budgetMin: z.coerce.number().optional(),
-  budgetMax: z.coerce.number().optional(),
-  budgetInterval: z.coerce.number().optional(),
+  budgetMin: z.coerce
+    .number({ invalid_type_error: onlyNumbersMessage })
+    .optional(),
+  budgetMax: z.coerce
+    .number({ invalid_type_error: onlyNumbersMessage })
+    .optional(),
+  budgetInterval: z.coerce
+    .number({ invalid_type_error: onlyNumbersMessage })
+    .optional(),
 
   startDate: z.date(),
   publishDate: z.date().optional(),
 
-  modBreak: z.string().optional(),
-  modBreakUserId: z.coerce.number().optional(),
+  modBreak: z.coerce.string().optional(),
+  modBreakUserId: z.coerce
+    .number({ invalid_type_error: onlyNumbersMessage })
+    .optional(),
   modBreakDate: z.date().optional(),
 
   location: z.string(),
@@ -53,7 +72,9 @@ const formSchema = z.object({
 
   extraData: z
     .object({
-      originalId: z.coerce.number().optional(),
+      originalId: z.coerce
+        .number({ invalid_type_error: onlyNumbersMessage })
+        .optional(),
     })
     .default({}),
 });
@@ -88,7 +109,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
       ? new Date(existingData?.startDate)
       : new Date(),
     publishDate: existingData?.publishDate
-      ? new Date(existingData?.publishDate)
+      ? new Date(existingData.publishDate)
       : undefined,
 
     modBreak: existingData?.modBreak || '',
@@ -110,6 +131,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
   });
 
   function onSubmit(values: FormType) {
+    console.log({ values });
     onFormSubmit(values)
       .then(() => {
         toast.success(`Plan successvol ${id ? 'aangepast' : 'aangemaakt'}`);
@@ -216,7 +238,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
               <FormItem>
                 <FormLabel>Minimum budget (optioneel)</FormLabel>
                 <FormControl>
-                  <Input type="number" min={0} placeholder="" {...field} />
+                  <Input placeholder="" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -286,7 +308,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
               <FormItem>
                 <FormLabel>ModBreak user id (optioneel)</FormLabel>
                 <FormControl>
-                  <Input type="number" min={0} placeholder="" {...field} />
+                  <Input placeholder="" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

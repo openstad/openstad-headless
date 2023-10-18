@@ -53,11 +53,11 @@ export const SimpleCalendar: React.FC<{
                 <Calendar
                   mode="single"
                   selected={field.value}
-                  onSelect={(value) =>
-                    value
+                  onSelect={(value) => {
+                    return value
                       ? field.onChange(new Date(value.toDateString()))
-                      : field.onChange(value)
-                  }
+                      : field.onChange(value);
+                  }}
                   disabled={(date) => date < new Date()}
                   initialFocus
                 />
@@ -66,7 +66,7 @@ export const SimpleCalendar: React.FC<{
 
             {withReset ? (
               <Button
-                onClick={() => form.resetField(fieldName)}
+                onClick={() => form.setValue(field.name, undefined)}
                 type="button"
                 variant={'outline'}
                 className={cn('font-normal')}>
