@@ -14,7 +14,6 @@ export default function Projects() {
   const router = useRouter();
 
   if (!data) return null;
-  console.log(data)
 
   const headers = ['Projectnaam', 'Data', 'Issues', 'Status', 'Reacties', 'Likes', 'Indiener', 'Resources', 'Stemmen', 'Einddatum']
 
