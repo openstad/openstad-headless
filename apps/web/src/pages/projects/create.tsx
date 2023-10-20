@@ -38,8 +38,6 @@ export default function CreateProject() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver<any>(formSchema),
         defaultValues: {
-            projectName: "",
-            email: "",
         }
     })
 
