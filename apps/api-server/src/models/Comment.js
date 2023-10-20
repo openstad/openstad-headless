@@ -1,5 +1,4 @@
 var sanitize = require('../util/sanitize');
-var moment = require('moment-timezone');
 var config = require('config')
 const merge = require('merge');
 
@@ -83,9 +82,8 @@ module.exports = function( db, sequelize, DataTypes ) {
 			get          : function() {
 				var date = this.getDataValue('createdAt');
 				try {
-					if( !date )
-						return 'Onbekende datum';
-					return  moment(date).format('LLL');
+					if( !date ) return 'Onbekende datum';
+          return new Intl.DateTimeFormat(...config.datetime.format).format(date)
 				} catch( error ) {
 					return (error.message || 'dateFilter error').toString()
 				}

@@ -4,18 +4,14 @@ const config = require('config')
 const Sequelize = require('sequelize')
 const {Op} = require('sequelize')
 const _ = require('lodash');
-const moment = require('moment')
 
 const Url = require('url');
-
-var dateFilter = require('../lib/nunjucks-date-filter');
 
 var sanitize = require('../util/sanitize');
 var nunjucks = require('nunjucks');
 var env = nunjucks.configure('email');
 const htmlToText = require('html-to-text');
 
-env.addFilter('date', dateFilter);
 // Global variables.
 env.addGlobal('HOSTNAME', config.get('domain'));
 env.addGlobal('PROJECTNAME', config.get('projectName'));
@@ -465,8 +461,8 @@ module.exports = function (db, sequelize, DataTypes) {
                 order: [['createdAt', 'DESC']],
             });
 
-            const afterCreationDate = lastRun ? moment(lastRun.createdAt).add(30, "minutes") : moment().add(-30, "minutes");
-            const reasonableTimeAfterCreation = moment().isAfter(afterCreationDate);
+            const afterCreationDate = lastRun ? new Date(lastRun.createdAt).getTime() + 30 * 60 * 60 : new Date().getTime() - 30 * 60 * 60
+            const reasonableTimeAfterCreation = Date.now() > afterCreationDate;
 
             // if in some case a status running gets stuck make sure after certain time the actions
             // the reasons why it's blocking is because we want to prevent double action execution

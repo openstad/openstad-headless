@@ -9,7 +9,6 @@ process.env.DEBUG = config.logging;
 
 // Order is relevant.
 require('./config/promises');
-require('./config/moment');
 require('./config/debug');
 
 // Start HTTP server.

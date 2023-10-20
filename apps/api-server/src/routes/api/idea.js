@@ -1,6 +1,5 @@
 const Sequelize = require('sequelize');
 const express = require('express');
-const moment = require('moment');
 const createError = require('http-errors');
 const config = require('config');
 const db = require('../../db');

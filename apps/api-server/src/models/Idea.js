@@ -2,10 +2,9 @@ const Sequelize = require('sequelize');
 const { Op } = require("sequelize");
 
 const getSequelizeConditionsForFilters = require('./../util/getSequelizeConditionsForFilters');
-const co = require('co')
-, config = require('config')
-, moment = require('moment-timezone')
-, pick = require('lodash/pick');
+const co = require('co');
+const config = require('config');
+const pick = require('lodash/pick');
 
 const sanitize = require('../util/sanitize');
 const notifications = require('../notifications');
@@ -66,9 +65,8 @@ module.exports = function (db, sequelize, DataTypes) {
       get: function () {
         var date = this.getDataValue('startDate');
         try {
-          if (!date)
-            return 'Onbekende datum';
-          return moment(date).format('LLL');
+          if (!date) return 'Onbekende datum';
+          return new Intl.DateTimeFormat(...config.datetime.format).format(date);
         } catch (error) {
           return (error.message || 'dateFilter error').toString()
         }
@@ -94,10 +92,9 @@ module.exports = function (db, sequelize, DataTypes) {
           duration =
             this.project.config.ideas.automaticallyUpdateStatus.afterXDays || 0;
         }
-        var endDate = moment(this.getDataValue('startDate'))
-          .add(duration, 'days')
-          .toDate();
-
+        let endDate = this.getDataValue('startDate');
+        endDate = new Date( endDate.setDate( endDate.getDate() + duration ) );
+        
         return endDate
       },
     },
@@ -287,9 +284,8 @@ module.exports = function (db, sequelize, DataTypes) {
       get: function () {
         var date = this.getDataValue('modBreakDate');
         try {
-          if (!date)
-            return undefined;
-          return moment(date).format('LLL');
+          if (!date) return undefined;
+          return new Intl.DateTimeFormat(...config.datetime.format).format(date);
         } catch (error) {
           return (error.message || 'dateFilter error').toString()
         }
@@ -325,9 +321,8 @@ module.exports = function (db, sequelize, DataTypes) {
       get: function () {
         var date = this.getDataValue('createdAt');
         try {
-          if (!date)
-            return 'Onbekende datum';
-          return moment(date).format('LLL');
+          if (!date) return 'Onbekende datum';
+          return new Intl.DateTimeFormat(...config.datetime.format).format(date);
         } catch (error) {
           return (error.message || 'dateFilter error').toString()
         }
@@ -342,9 +337,8 @@ module.exports = function (db, sequelize, DataTypes) {
       get: function () {
         const date = this.getDataValue('publishDate');
         try {
-          if (!date)
-            return 'Onbekende datum';
-          return moment(date).format('LLL');
+          if (!date) return 'Onbekende datum';
+          return new Intl.DateTimeFormat(...config.datetime.format).format(date);
         } catch (error) {
           return (error.message || 'dateFilter error').toString()
         }
@@ -1222,9 +1216,6 @@ module.exports = function (db, sequelize, DataTypes) {
       if (!data.user) data.user = {};
 
     //  data.user.isAdmin = !!userHasRole(user, 'editor');
-
-      // er is ook al een createDateHumanized veld; waarom is dit er dan ook nog?
-	    data.createdAtText = moment(data.createdAt).format('LLL');
 
       // if user is not allowed to edit idea then remove phone key, otherwise publically available
       // needs to move to definition per key

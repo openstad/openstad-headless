@@ -11,7 +11,7 @@ module.exports = {
 		util.invokeDir('./cron', function( jobDef, fileName ) {
 			try {
 				var job = new CronJob(extend({}, jobDef, {
-					timeZone : config.get('timeZone'),
+					timeZone : config.get('datetime.timeZone'),
 					start    : true
 				}));
 				jobs.set(fileName, job);

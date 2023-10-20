@@ -1,34 +1,16 @@
-var moment = require('moment-timezone');
-var nlib   = require('nunjucks/src/lib');
-var slice  = Array.prototype.slice;
+const config = require('config');
 
-// Is set via `setDefaultFormat`.
-var defaultFormat = 'Do MMMM, YYYY';
-
-moment.locale('nl');
-
-
-// Examples:
-// {{ var | date }}
-// {{ var | date('YYYY-MM-DD') }}
-function dateFilter( date, format ) {
+function dateFilter( date ) {
 	try {
 		if( !date ) {
 			throw Error('Onbekende datum');
+		} else if( date === 'now' || date === 'today' ) {
+			date = new Date();
 		}
-		// Timezone is set in `config/moment.js`.
-		var mom = moment(date);
-		return nlib.isFunction(mom[format]) ?
-		       mom[format].apply(mom, slice.call(arguments, 2)) :
-		       mom.format(format || defaultFormat);
+		return new Intl.DateTimeFormat(...config.datetime.format).format(date);
 	} catch( error ) {
 		return (error.message || 'dateFilter error').toString()
 	}
 }
-
-// Set default format for date.
-dateFilter.setDefaultFormat = function( format ) {
-	defaultFormat = format;
-};
 
 module.exports = dateFilter;

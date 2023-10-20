@@ -41,7 +41,7 @@ var sequelize = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.passwor
 	host           : dbConfig.host,
 	port					 : dbConfig.port || 3306,
 	dialectOptions,
-	timeZone       : config.timeZone,
+	timeZone       : config.datetime.timeZone,
 	logging        : require('debug')('app:db:query'),
  	//logging				 : console.log,
 	typeValidation : true,

@@ -1,6 +1,5 @@
 const Sequelize = require('sequelize');
 const merge = require('merge');
-const moment = require('moment');
 const configField = require('./lib/config-field');
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 const authSettings = require('../util/auth-settings');
@@ -267,7 +266,10 @@ module.exports = function (db, sequelize, DataTypes) {
     let self = this;
     let voteIsActive = self.config.votes.isActive;
     if ( ( voteIsActive == null || typeof voteIsActive == 'undefined' ) && self.config.votes.isActiveFrom && self.config.votes.isActiveTo ) {
-      voteIsActive = moment().isAfter(self.config.votes.isActiveFrom) && moment().isBefore(self.config.votes.isActiveTo)
+      let isActiveFromTimestamp = new Date( self.config.votes.isActiveFrom ).getTime();
+      let isActiveToTimestamp = new Date( self.config.votes.isActiveTo ).getTime();
+      let nowTimestamp = new Date().getTime;
+      voteIsActive = isActiveFromTimestamp < nowTimestamp && isActiveToTimestamp > nowTimestamp;
     }
     return voteIsActive;
   }

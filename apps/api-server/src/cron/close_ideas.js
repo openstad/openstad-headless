@@ -1,4 +1,3 @@
-const moment = require('moment');
 const { Sequelize, Op } = require('sequelize');
 const log = require('debug')('app:cron');
 const db	= require('../db');
@@ -23,10 +22,12 @@ module.exports = {
       for ( let project of projects ) {
 
         let days = project.config.ideas.automaticallyUpdateStatus.afterXDays || 90;
+        let startDate = new Date();
+        startDate = new Date( startDate.setDate( startDate.getDate() - days ) );
         let ideas = await db.Idea.findAll({
           where: {
             projectId: project.id,
-            startDate: { [Op.lte]: moment().subtract(days, 'days').toDate() },
+            startDate,
    			    status: 'OPEN'
           }
         });
