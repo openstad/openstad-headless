@@ -11,6 +11,10 @@ module.exports = function({ searchfields = ['title', 'summary', 'description'] }
     if (!search) return next();
 
     let list = req.results;
+
+    // if results is not defined something weird happened
+    if (typeof list === 'undefined') return next('No reaults defined to search in');
+
     let results = [];
 
     if ( !Array.isArray(search) ) search = [ search ];
