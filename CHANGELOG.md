@@ -31,6 +31,7 @@
 * Remove articles
 * Fix half implemented tags functionality
 * Add seqnrs to tags
+* Remove doc routes
 
 ### Auth server
 * Refactor init database and seeds
