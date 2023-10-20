@@ -292,7 +292,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             name="modBreak"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>modBreak (optioneel)</FormLabel>
+                <FormLabel>ModBreak (optioneel)</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
                 </FormControl>
@@ -326,7 +326,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
           <SimpleCalendar
             form={form}
             fieldName="startDate"
-            label="start datum van het plan"
+            label="Startdatum van het plan"
           />
 
           <SimpleCalendar
