@@ -100,7 +100,6 @@ const requiredFields = [
 ]
 
 const formSchema = z.object({
-    name: z.string(),
     availableAuthentication: z.string().array().optional(),
     twoFactorRoles: z.string().array().optional(),
     requiredFields: z.string().array().optional(),
@@ -146,19 +145,6 @@ export default function ProjectAuthentication() {
                         </Heading>
                         <Separator className="mb-4" />
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                            <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Projectnaam</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder='' {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                            />
                             <FormField
                             control={form.control}
                             name="availableAuthentication"

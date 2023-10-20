@@ -16,22 +16,45 @@ import { Input } from "@/components/ui/input"
 import { PageLayout } from '@/components/ui/page-layout'
 import { Heading } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
+import { useEffect } from 'react'
+import { useRouter } from 'next/router'
+import { useProject } from '../../../../hooks/use-project'
 
 const formSchema = z.object({
-    senderEmail: z.string().email(),
-    managerEmail: z.string().email(),
-    adminEmail: z.string().email()
+    fromAddress: z.string().email(),
+    projectmanagerAddress: z.string().email(),
 })
 
 export default function ProjectSettingsNotifications() {
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver<any>(formSchema),
-        defaultValues: {
-        }
+    const category = 'notifications';
+
+    const router = useRouter();
+    const { project } = router.query;
+    const { data, isLoading, updateProjectEmails } = useProject();
+    const defaults = () => ({
+        fromAddress: data?.emailConfig?.[category]?.fromAddress || null,
+        projectmanagerAddress: data?.emailConfig?.[category]?.projectmanagerAddress || null,
     })
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver<any>(formSchema),
+        defaultValues: defaults()
+    })
+
+    useEffect(() => {
+        form.reset(defaults())
+    }, [data])
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        try {
+            await updateProjectEmails({ 
+                [category]: {
+                    fromAddress: values.fromAddress,
+                    projectmanagerAddress: values.projectmanagerAddress
+                }});
+        } catch (error) {
+         console.error('could not update', error)   
+        }
     }
 
     return(
@@ -45,11 +68,11 @@ export default function ProjectSettingsNotifications() {
                 },
                 {
                     name: 'Instellingen',
-                    url: '/projects/1/settings'
+                    url: `/projects/${project}/settings`
                 },
                 {
                     name: 'Administrator notificaties',
-                    url: '/projects/1/settings/notifications'
+                    url: `'/projects/${project}/settings/notifications'`
                 }
             ]}>
             <div className="container mx-auto py-10 w-1/2 float-left">
@@ -61,7 +84,7 @@ export default function ProjectSettingsNotifications() {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                         control={form.control}
-                        name="senderEmail"
+                        name="fromAddress"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Emailadres verstuurder</FormLabel>
@@ -74,23 +97,10 @@ export default function ProjectSettingsNotifications() {
                         />
                         <FormField
                         control={form.control}
-                        name="managerEmail"
+                        name="projectmanagerAddress"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Emailadres project manager</FormLabel>
-                                <FormControl>
-                                    <Input placeholder='' {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="adminEmail"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Emailadres siteadministrator</FormLabel>
                                 <FormControl>
                                     <Input placeholder='' {...field} />
                                 </FormControl>
