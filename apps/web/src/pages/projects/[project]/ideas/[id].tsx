@@ -2,14 +2,16 @@ import React from 'react';
 import { PageLayout } from '@/components/ui/page-layout';
 import useIdeas from '@/hooks/use-ideas';
 import { useRouter } from 'next/router';
+
 import IdeaForm from '@/components/idea-form';
 
 export default function ProjectIdeaCreate() {
   const router = useRouter();
   const { project } = router.query;
-  const { create } = useIdeas(project as string);
+  const { id } = router.query;
+  const { update } = useIdeas(project as string);
 
-  return (
+  return id ? (
     <div>
       <PageLayout
         pageHeader="Ideeën"
@@ -23,12 +25,16 @@ export default function ProjectIdeaCreate() {
             url: `/projects/${project}/ideas`,
           },
           {
-            name: 'Idee aanmaken',
-            url: `/projects/${project}/ideas/create`,
+            name: 'Ideeën aanpassen',
+            url: `/projects/${project}/ideas/${id}`,
           },
         ]}>
-        <IdeaForm onFormSubmit={(body) => create(body)} />
+        <IdeaForm
+          onFormSubmit={(values) =>
+            update(Number.parseInt(id as string), values)
+          }
+        />
       </PageLayout>
     </div>
-  );
+  ) : null;
 }

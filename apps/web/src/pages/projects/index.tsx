@@ -10,13 +10,12 @@ import { useRouter } from "next/router";
 import projectListSwr from '../../hooks/use-project-list'
 
 export default function Projects() {
-  const { data, isLoading } = projectListSwr();
+  const { data, isLoading, error } = projectListSwr();
   const router = useRouter();
 
-  if (!data) return null;
+  if (!data || error) return null;
 
   const headers = ['Projectnaam', 'Data', 'Issues', 'Status', 'Reacties', 'Likes', 'Indiener', 'Resources', 'Stemmen', 'Einddatum']
-
   const {
     page,
     next,
