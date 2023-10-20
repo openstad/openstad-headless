@@ -15,15 +15,11 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { PageLayout } from '@/components/ui/page-layout'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
-import { format } from 'date-fns'
-import { CalendarIcon } from 'lucide-react'
-import { Calendar } from '@/components/ui/calendar'
 import { Heading } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
 import { useRouter } from 'next/router'
 import { useProject } from '../../../../hooks/use-project'
+import { SimpleCalendar } from '@/components/simple-calender-popup'
 
 const formSchema = z.object({
     name: z.string().min(1, {
@@ -100,47 +96,11 @@ export default function ProjectSettings() {
                             </FormItem>
                         )}
                         />
-                        <FormField
-                        control={form.control}
-                        name="endDate"
-                        render={({ field }) => (
-                          <FormItem className='flex flex-col'>
-                            <FormLabel>Einddatum</FormLabel>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-[240px] pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                  >
-                                    {field.value ? (
-                                        format(field.value, "PPP")
-                                    ) : (
-                                        <span>Kies een datum</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                disabled={(date) => 
-                                  date < new Date()
-                                }
-                                initialFocus
-                                />
-                              </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                          </FormItem>
-                        )}>
-                        </FormField>
+                        <SimpleCalendar
+                            form={form}
+                            fieldName="endDate"
+                            label="Einddatum"
+                        />
                         <Button type="submit" variant={"default"}>Opslaan</Button>
                     </form>
                     <br/>

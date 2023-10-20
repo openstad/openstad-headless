@@ -1,13 +1,37 @@
 import { PageLayout} from "@/components/ui/page-layout"
 import React from "react";
 import Link from "next/link";
+import * as z from 'zod'
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useRouter } from "next/router";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Heading } from "@/components/ui/typography";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Separator } from "@/components/ui/separator";
+import useCodes from "@/hooks/use-codes";
+
+const formSchema = z.object({
+    numberOfCodes: z.coerce.number(),
+})
 
 export default function ProjectCodeCreate() {
+    const router = useRouter();
+    const { project } = router.query;
+    const { create } = useCodes()
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver<any>(formSchema),
+        defaultValues: {
+        }
+    })
+
+    function onSubmit(values: z.infer<typeof formSchema>) {
+        create(values)
+    }
+    
     return (
         <div>
             <PageLayout
@@ -19,11 +43,11 @@ export default function ProjectCodeCreate() {
                     },
                     {
                         name: "Stem codes",
-                        url: "/projects/1/codes"
+                        url: `/projects/${project}/codes`
                     },
                     {
                         name: "Creëer nieuwe codes",
-                        url: "projects/1/codes/create"
+                        url: `projects/${project}/codes/create`
                     }
                 ]}
                 action={
@@ -36,25 +60,31 @@ export default function ProjectCodeCreate() {
                     </div>
                 }
             >
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Creëer unieke codes</CardTitle>
-                        <CardDescription>Let op: de stemcodes worden op de achtergrond gegenereerd. Zie de statusmelding boven het overzicht om te controleren of alle codes gegenereerd zijn, voordat je deze exporteerd.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form>
-                            <div>
-                                <div>
-                                    <Label>Hoeveelheid codes</Label>
-                                    <Input className="w-1/4"/>
-                                </div>
-                            </div>
-                        </form>
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                        <Button variant="default">Creëer</Button>
-                    </CardFooter>
-                </Card>
+            <div className="container mx-auto py-10 w-1/2 float-left">
+                <Form {...form}>
+                    <Heading size="xl" className="mb-4">
+                        Unieke codes • Aanmaken
+                    </Heading>
+                    <Separator className="mb-4" />
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                        control={form.control}
+                        name="numberOfCodes"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Hoeveelheid nieuwe codes om aan te maken:</FormLabel>
+                                <FormControl>
+                                    <Input placeholder='' {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <Button type="submit" variant={"default"}>Aanmaken</Button>
+                    </form>
+                    <br/>
+                </Form>
+            </div>
             </PageLayout>
         </div>
     )
