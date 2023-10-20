@@ -90,6 +90,6 @@ export default function ProjectSettingsThemes() {
                 </Form>
             </div>
             </PageLayout>
-            </div>
+        </div>
     )
 }

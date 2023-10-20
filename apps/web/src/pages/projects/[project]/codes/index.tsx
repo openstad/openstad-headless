@@ -2,12 +2,14 @@ import { PageLayout} from "@/components/ui/page-layout"
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { DataTable } from "../../../../components/tables/ideas/data-table";
-import { columns } from "../../../../components/tables/ideas/columns";
 import useSWR from "swr"
 import React from "react";
+import { useRouter } from "next/router";
+import { ListHeading } from "@/components/ui/typography";
 
 export default function ProjectCodes() {
+    const router = useRouter();
+    const { project } = router.query;
     const { data, isLoading } = useSWR("/api/openstad/api/project");
 
     if (!data) return null;
@@ -23,7 +25,7 @@ export default function ProjectCodes() {
                     },
                     {
                         name: "Stem codes",
-                        url: "/projects/1/codes"
+                        url: `/projects/${project}/codes`
                     }
                 ]}
                 action={
@@ -42,8 +44,18 @@ export default function ProjectCodes() {
                     </div>
                 }
             >
-                <div className="container">
-                    <DataTable columns={columns} data={data} />
+                <div className="container mx-auto py-10">
+                    <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 py-2 px-2 border-b border-border">
+                        <ListHeading className="hidden md:flex md:col-span-3">
+                        ID
+                        </ListHeading>
+                        <ListHeading className="hidden md:flex md:col-span-2">
+                        Code
+                        </ListHeading>
+                        <ListHeading className="hidden md:flex md:col-span-2">
+                        Al gebruikt
+                        </ListHeading>
+                    </div>
                 </div>
             </PageLayout>
         </div>

@@ -30,7 +30,7 @@ export default function WidgetMap() {
                     url: `/projects/${projectId}/widgets`
                 },
                 {
-                    name: "Ideeën Map",
+                    name: "Map",
                     url: `/projects/${projectId}/widgets/map/${id}`
                 }
             ]}
