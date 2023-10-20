@@ -7,7 +7,7 @@ export const authOptions: NextAuthOptions = {
     Openstad({
       clientId: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      issuer: process.env.OAUTH_URL_INTERNAL,
+      issuer: process.env.OAUTH_URL_INTERNAL || process.env.OAUTH_URL,
       issuerExternalUrl: process.env.OAUTH_URL,
     }),
   ],

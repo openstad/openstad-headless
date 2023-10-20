@@ -1,7 +1,5 @@
 const config = require('config');
 const eventService = require('../services/eventService');
-const getSequelizeConditionsForFilters = require('./../util/getSequelizeConditionsForFilters');
-
 
 module.exports = function (db, sequelize, DataTypes) {
   const Submission = sequelize.define('submission', {
@@ -85,21 +83,6 @@ module.exports = function (db, sequelize, DataTypes) {
                         projectId: projectId,
                     }
                 };
-            },
-            filter:    function (filtersInclude, filtersExclude) {
-                const filterKeys = [
-                    {
-                        'key': 'id'
-                    },
-                    {
-                        'key': 'status'
-                    },
-                    {
-                        'key': 'formId'
-                    },
-                ];
-
-                return getSequelizeConditionsForFilters(filterKeys, filtersInclude, sequelize, filtersExclude);
             },
 		};
 	}

@@ -4,7 +4,6 @@ const config = require('config');
 const db = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
-const searchResults = require('../../middleware/search-results-static');
 
 const express = require('express');
 const router = express.Router({ mergeParams: true });
@@ -44,7 +43,6 @@ router.route('/project')
 
     }
   })
-  .get(searchResults)
   .get(pagination.paginateResults)
   .get(function(req, res, next) {
     res.json(req.results);

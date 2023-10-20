@@ -7,7 +7,7 @@ const db = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const mail = require('../../lib/mail');
 const pagination = require('../../middleware/pagination');
-const searchResults = require('../../middleware/search-results-static');
+const searchInResults = require('../../middleware/search-in-results');
 const isJson = require('../../util/isJson');
 const c = require('config');
 
@@ -79,12 +79,6 @@ router.all('*', function (req, res, next) {
     req.scope.push('mapMarkers');
   }
 
-  if (req.query.filters || req.query.exclude) {
-    req.scope.push({
-      method: ['filter', req.query.filters, req.query.exclude],
-    });
-  }
-
   if (req.query.running) {
     req.scope.push('selectRunning');
   }
@@ -131,8 +125,7 @@ router
   // ----------
   .get(auth.can('Idea', 'list'))
   .get(pagination.init)
-  // add filters
-  .get(function (req, res, next) {
+  .get(function(req, res, next) {
     let { dbQuery } = req;
 
     dbQuery.where = {
@@ -171,7 +164,7 @@ router
       .catch(next);
   })
   .get(auth.useReqUser)
-  .get(searchResults)
+  .get(searchInResults({}))
   .get(pagination.paginateResults)
   .get(function (req, res, next) {
     res.json(req.results);

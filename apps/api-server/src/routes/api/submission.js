@@ -2,7 +2,7 @@ const express = require('express');
 const db      = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
-const searchResults = require('../../middleware/search-results-static');
+const searchInResults = require('../../middleware/search-in-results');
 
 let router = express.Router({mergeParams: true});
 
@@ -31,7 +31,7 @@ router.route('/')
 			.catch(next);
 	})
 	.get(auth.useReqUser)
-	.get(searchResults)
+  .get(searchInResults({}))
 	.get(pagination.paginateResults)
 	.get(function(req, res, next) {
 		res.json(req.results);

@@ -2,7 +2,7 @@ const createError = require('http-errors')
 const db          = require('../../db');
 const auth        = require('../../middleware/sequelize-authorization-middleware');
 const pagination  = require('../../middleware/pagination');
-const searchResults = require('../../middleware/search-results-static');
+const searchInResults = require('../../middleware/search-in-results');
 
 const express = require('express');
 const router = express.Router({mergeParams: true});
@@ -62,7 +62,7 @@ router.route('/')
 
 	})
 	.get(auth.useReqUser)
-	.get(searchResults)
+  .get(searchInResults({ searchfields: ['question', 'choices'] }))
 	.get(pagination.paginateResults)
 	.get(function(req, res, next) {
 		res.json(req.results);

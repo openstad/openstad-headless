@@ -31,6 +31,7 @@
 * Remove articles
 * Fix half implemented tags functionality
 * Add seqnrs to tags
+* Merge one existing filter and two existing search systems
 * Remove doc routes
 
 ### Auth server

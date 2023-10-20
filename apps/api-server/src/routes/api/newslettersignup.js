@@ -5,7 +5,7 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const mail = require('../../lib/mail');
 const generateToken = require('../../util/generate-token');
 const pagination = require('../../middleware/pagination');
-const searchResults = require('../../middleware/search-results-static');
+const searchInResults = require('../../middleware/search-in-results');
 
 const router = express.Router({ mergeParams: true });
 
@@ -60,7 +60,7 @@ router.route('/$')
       .catch(next);
   })
   .get(auth.useReqUser)
-	.get(searchResults)
+  .get(searchInResults({}))
 	.get(pagination.paginateResults)
 	.get(function(req, res, next) {
 		res.json(req.results);
