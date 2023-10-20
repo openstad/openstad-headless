@@ -11,12 +11,7 @@ const logError = debug('app:mail:error');
 
 // nunjucks is used when sending emails
 var nunjucks = require('nunjucks');
-var moment = require('moment-timezone');
 var env = nunjucks.configure('email');
-
-var dateFilter = require('../lib/nunjucks-date-filter');
-dateFilter.setDefaultFormat('DD-MM-YYYY HH:mm');
-env.addFilter('date', dateFilter);
 
 // Global variables.
 env.addGlobal('HOSTNAME', config.get('domain'));

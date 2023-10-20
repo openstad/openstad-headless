@@ -133,13 +133,6 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
     fixedAuthTokens: AUTH_FIXEDAUTHTOKENS || [],
   },
 
-	debug: process.env.DEBUG || process.env.API_DEBUG || false,
-	locale: process.env.LOCALE || process.env.API_LOCALE || 'nl',
-	logging: process.env.LOGGING || process.env.API_LOGGING || 'app:*,-app:db:query',
-	timeZone : process.env.TIMEZONE ||process.env.API_TIMEZONE || 'Europe/Amsterdam',
-  templateSource: process.env.TEMPLATE_SOURCE || 'https://cdn.jsdelivr.net/gh/Amsterdam/openstad-ecosystem-templates/site/index.json',
-  ignoreBruteForceIPs: process.env.IGNORE_BRUTE_FORCE_IPS || ( process.env.IGNORE_BRUTE_FORCE_IP ? [process.env.IGNORE_BRUTE_FORCE_IP] : [] ),
-  
 	ideas: {
 		descriptionMinLength: process.env.IDEAS_DESCRIPTION_MIN_LENGTH || 140,
 		descriptionMaxength: process.env.IDEAS_DESCRIPTION_MAXENGTH || 5000,
@@ -152,6 +145,27 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
       isMandatory: process.env.IDEAS_LOCATION_IS_MANDATORY || false,
     },
 	},
+
+	debug: process.env.DEBUG || process.env.API_DEBUG || false,
+	locale: process.env.LOCALE || process.env.API_LOCALE || 'nl',
+	logging: process.env.LOGGING || process.env.API_LOGGING || 'app:*,-app:db:query',
+  templateSource: process.env.TEMPLATE_SOURCE || 'https://cdn.jsdelivr.net/gh/Amsterdam/openstad-ecosystem-templates/site/index.json',
+  ignoreBruteForceIPs: process.env.IGNORE_BRUTE_FORCE_IPS || ( process.env.IGNORE_BRUTE_FORCE_IP ? [process.env.IGNORE_BRUTE_FORCE_IP] : [] ),
+
+  datetime: {
+    format: [
+      'nl-NL',
+      {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+      }
+    ],
+	  timeZone : process.env.TIMEZONE ||process.env.API_TIMEZONE || 'Europe/Amsterdam',
+  },
 
   dev: {
     'Header-Access-Control-Allow-Origin': '*'

@@ -61,3 +61,19 @@ exports.client = {
   defaultEmail: '',
   defaultProjectUrl: ''
 }
+
+// use the same setup as the API
+exports.datetime = {
+    format: [
+      'nl-NL',
+      {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+      }
+    ],
+	  timeZone : process.env.TIMEZONE ||process.env.API_TIMEZONE || 'Europe/Amsterdam',
+};

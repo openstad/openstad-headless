@@ -8,6 +8,7 @@
 // const config = require('config');
 
 // const failCallback = function (req, res, next, nextValidRequestDate) {
+// TODO: moment bestaat niet meer
 //   next(createError(429, "Te veel verzoeken, probeer het weer " + moment(nextValidRequestDate).fromNow()));
 // };
 
