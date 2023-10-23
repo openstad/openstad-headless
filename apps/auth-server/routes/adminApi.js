@@ -26,9 +26,9 @@ module.exports = (app) => {
   app.get('/api/admin/user/:userId',          clientMw.withAll, roleMw.withAll, userMw.withOne, adminApiUserController.show);
   // todo: dit maakt een password aan; waarom is dat?
   // todo: volgens mij doet dit niets met role
-  app.post('/api/admin/user',                 userMw.create, userMw.saveRoles, adminApiUserController.create);
+  app.post('/api/admin/user',                 clientMw.withAll, roleMw.withAll, userMw.create, userMw.saveRoles, adminApiUserController.create);
   // todo: waarom is onderstaand geen put of patch?
-  app.post('/api/admin/user/:userId',         userMw.withOne, userMw.update, userMw.saveRoles, adminApiUserController.update);
+  app.post('/api/admin/user/:userId',         clientMw.withAll, roleMw.withAll, userMw.withOne, userMw.update, userMw.saveRoles, adminApiUserController.update);
   // todo: waarom is onderstaand geen delete?
   app.post('/api/admin/user/:userId/delete',  userMw.withOne, userMw.deleteOne, adminApiUserController.delete);
 
