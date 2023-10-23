@@ -52,6 +52,23 @@ server {
   }
  
 }
+
+# ----------------------------------------------------------------------------------------------------
+# admin server
+
+server {
+  listen 80;
+  server_name ${process.env.ADMIN_DOMAIN};
+
+  client_max_body_size 20M;
+
+  location / {
+    proxy_redirect off;
+    proxy_set_header Host $host;
+    proxy_pass http://localhost:${process.env.ADMIN_PORT};
+  }
+ 
+}
 `;
 
   try {

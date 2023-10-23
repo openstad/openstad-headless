@@ -19,7 +19,7 @@ module.exports = async function setupApi() {
       password : process.env.API_DB_PASSWORD,
       dialect  : process.env.API_DB_DIALECT,
     });
-
+    
     await connection.query(`USE \`${process.env.API_DB_NAME}\`;`);
 
   } catch(err) {
@@ -50,74 +50,34 @@ module.exports = async function setupApi() {
     }
 
     // create local config
-    let apiConfig = {
+    let apiConfig = `
+URL=${process.env.API_URL}
+DOMAIN=${process.env.API_DOMAIN}
+PORT=${process.env.API_PORT}
 
-      url: process.env.API_URL,
-      hostname: process.env.API_DOMAIN,
+DB_HOST=${process.env.API_DB_HOST}
+DB_USERNAME=${process.env.API_DB_USERNAME}
+DB_PASSWORD=${process.env.API_DB_PASSWORD}
+DB_NAME=${process.env.API_DB_NAME}
+DB_PORT=${process.env.API_DB_PORT}
+DB_DIALECT=${process.env.API_DB_DIALECT}
 
-      database: {
-        host     : process.env.API_DB_HOST,
-        user     : process.env.API_DB_USERNAME,
-        password : process.env.API_DB_PASSWORD,
-        database : process.env.API_DB_NAME,
-        dialect  : process.env.API_DB_DIALECT,
-        multipleStatements: true
-      },
+FROM_EMAIL_ADDRESS=${process.env.API_FROM_EMAIL_ADDRESS}
+SMTP_HOST=${process.env.API_SMTP_HOST}
+SMTP_PORT=${process.env.API_SMTP_PORT}
+SMTP_USERNAME=${process.env.API_SMTP_USERNAME}
+SMTP_PASSWORD=${process.env.API_SMTP_PASSWORD}
 
-      express: {
-        port: process.env.API_PORT,
-      },
+AUTH_JWTSECRET=$process.env.{API_JWT_SECRET}
+AUTH_ADAPTER_OPENSTAD_SERVERURL=${process.env.AUTH_APP_URL}
+AUTH_FIXEDAUTHTOKENS='[{"token":"${process.env.API_FIXED_AUTH_KEY}","userId":"1","authProvider":"openstad"}]'
 
-      mail: {
-        from: process.env.API_FROM_EMAIL_ADDRESS,
-        transport: {
-          smtp: {
-            port: process.env.API_SMTP_PORT,
-            host: process.env.API_SMTP_HOST,
-            auth: {
-              user: process.env.API_SMTP_USERNAME,
-              pass: process.env.API_SMTP_PASSWORD,
-            }
-          }
-        }
-      },
-
-      security: {
-        sessions: {
-          secret: process.env.API_COOKIE_SECRET,
-          onlySecure: process.env.API_API_COOKIE_ONLY_SECURE,
-        }
-      },
-
-      auth: {
-		    adapter: {
-			    openstad: {
-            serverUrl: process.env.AUTH_APP_URL,
-			    },
-		    },
-  	    jwtSecret: process.env.API_JWT_SECRET,
-		    fixedAuthTokens: [
-			    {
-				    token: process.env.API_FIXED_AUTH_KEY,
-				    userId: '1',
-				    authProvider: 'openstad',
-			    },
-		    ]
-      },
-
-
-      // TODO: tmp !!
-      dev: {
-        "Header-Access-Control-Allow-Origin": "*"
-      },
-
-      
-    }
-
+IMAGE_APP_URL=process.env.IMAGE_APP_URL
+`
     console.log('------------------------------');
     console.log('Create config file');
     console.log('API_FIXED_AUTH_KEY:', process.env.API_FIXED_AUTH_KEY);
-    await fs.writeFileSync('./apps/api-server/config/local.js', 'module.exports = ' + JSON.stringify(apiConfig, null, 2) );
+    await fs.writeFileSync('./apps/api-server/.env', apiConfig);
 
     // npm i
     console.log('------------------------------');
