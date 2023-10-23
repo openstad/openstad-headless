@@ -107,7 +107,7 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
         serverUrl: process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL ||  process.env.AUTH_API_URL || null,
         serverUrlInternal: process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL_INTERNAL ||  process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL ||  process.env.AUTH_API_URL || null,
         userMapping: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING || JSON.stringify({
-          identifier: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING_IDENTIFIER || 'user_id',
+          identifier: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING_IDENTIFIER || 'user => user.id',
           name: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING_NAME || "user => `${user.name || ''}`.trim() || null",
           email: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING_EMAIL || "user => user.email == '' ? null : user.email",
           address: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING_ADDRESS || "user => `${user.streetName || ''} ${user.houseNumber || ''} ${user.suffix || ''}`.trim() || null",

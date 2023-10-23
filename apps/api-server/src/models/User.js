@@ -587,7 +587,7 @@ module.exports = function (db, sequelize, DataTypes) {
       if (!user) user = self.auth && self.auth.user;
       if (!user || !user.role) user = { role: 'all' };
 
-      let valid = userHasRole(user, self.auth && self.auth.updateableBy, self.id);
+      let valid = userHasRole(user, self.auth && self.auth.createableBy, self.id);
 
       // extra: geen acties op users met meer rechten dan je zelf hebt
       valid = valid && (!self.role || userHasRole(user, self.role));
@@ -605,6 +605,9 @@ module.exports = function (db, sequelize, DataTypes) {
       if (!user || !user.role) user = { role: 'all' };
 
       let valid = userHasRole(user, self.auth && self.auth.updateableBy, self.id);
+
+      // extra: admin on different project
+      valid = valid && userHasRole(user, 'admin');
 
       // extra: isOwner through user on different project
       valid = valid || ( self.idpUser.identifier && self.idpUser.identifier == user.idpUser.identifier );
@@ -625,6 +628,9 @@ module.exports = function (db, sequelize, DataTypes) {
       if (!user || !user.role) user = { role: 'all' };
 
       let valid = userHasRole(user, self.auth && self.auth.updateableBy, self.id);
+
+      // extra: admin on different project
+      valid = valid && userHasRole(user, 'admin');
 
       // extra: geen acties op users met meer rechten dan je zelf hebt
       valid = valid && userHasRole(user, self.role);

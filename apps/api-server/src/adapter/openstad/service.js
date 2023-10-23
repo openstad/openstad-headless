@@ -86,7 +86,7 @@ service.createUser = async function({ authConfig, userData = {} }) {
     let userData = await response.json();
 
     if (!userData) return;
-
+    
     let mappedUserData = mapUserData({ map: authConfig.userMapping, user: { ...userData } })
     mappedUserData.idpUser.provider = authConfig.provider;
     return mappedUserData;
