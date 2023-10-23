@@ -25,7 +25,7 @@ const formSchema = z.object({
     isViewable: z.boolean(),
     isActive: z.boolean(),
     withExisting: z.enum(["error", "replace"]),
-    requiredUserRole: z.enum(["anon", "member"]),
+    requiredUserRole: z.enum(["anonymous", "member"]),
     voteType: z.enum(["likes", "count", "budgeting", "countPerTheme", "budgetingPerTheme"]),
     minIdeas: z.coerce.number().gt(0),
     maxIdeas: z.coerce.number(),
@@ -174,7 +174,7 @@ export default function ProjectSettingsVoting() {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="anon">Anonieme gebruikers</SelectItem>
+                                            <SelectItem value="anonymous">Anonieme gebruikers</SelectItem>
                                             <SelectItem value="member">Geregistreerde gebruikers</SelectItem>
                                         </SelectContent>
                                     </Select>

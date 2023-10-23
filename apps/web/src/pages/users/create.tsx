@@ -14,26 +14,29 @@ import {
 } from "../../components/ui/form"
 import { Input } from "../../components/ui/input"
 import { PageLayout } from '../../components/ui/page-layout'
-import { Heading } from '@/components/ui/typography'
+import { Heading, ListHeading, Paragraph } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
 import useUser from '@/hooks/use-user'
 import projectListSwr from '@/hooks/use-project-list'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
+import DropdownList from '@/components/dropdown-list'
 
 const formSchema = z.object({
     email: z.string().email(),
-    // nickName: z.string().optional(),
+    nickName: z.string().optional(),
     name: z.string().optional(),
     phoneNumber: z.string().optional(),
     address: z.string().optional(),
     city: z.string().optional(),
     postcode: z.string().optional(),
-    // role: z.enum(["admin", "editor", "moderator", "member", "anonymous"]),
-    // extraData: z.number().array()
+    role: z.enum(["admin", "editor", "moderator", "member", "anonymous"]),
+    // projectId: z.number()
 })
 
+const roles = ["admin", "editor", "moderator", "member", "anonymous"]
+
 export default function CreateUser() {
+    const testArray: any = []
     const { data, isLoading } = projectListSwr();
     const { createUser } = useUser()
 
@@ -44,10 +47,12 @@ export default function CreateUser() {
     })
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        createUser(values.email, values.name, values.phoneNumber, values.address, values.city, values.postcode)
+        //createUser(values.email, values.role, 1, values.name, values.phoneNumber, values.address, values.city, values.postcode)
+        console.log(testArray)
     }
 
     if (!data) return null;
+    console.log(data)
 
     return(
         <div>
@@ -83,7 +88,7 @@ export default function CreateUser() {
                             </FormItem>
                         )}
                         />
-                        {/* <FormField
+                        <FormField
                         control={form.control}
                         name="nickName"
                         render={({ field }) => (
@@ -95,7 +100,7 @@ export default function CreateUser() {
                                 <FormMessage />
                             </FormItem>
                         )}
-                        /> */}
+                        />
                         <FormField
                         control={form.control}
                         name="name"
@@ -161,74 +166,30 @@ export default function CreateUser() {
                             </FormItem>
                         )}
                         />
-                        {/* <FormField
-                            control={form.control}
-                            name="role"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Rol van gebruiker</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={"member"}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Normale gebruiker" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="admin">Administrator</SelectItem>
-                                            <SelectItem value="editor">Editor</SelectItem>
-                                            <SelectItem value="moderator">Moderator</SelectItem>
-                                            <SelectItem value="member">Normale gebruiker</SelectItem>
-                                            <SelectItem value="anonymous">Anonieme gebruiker</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="extraData"
-                            render={() => (
-                                <FormItem>
-                                    <div>
-                                        <FormLabel>Selecteer welke projecten deze gebruiker aan toe wordt gevoegd.</FormLabel>
-                                    </div>
-                                    {data.map((item: any) => (
-                                        <FormField
-                                        key={item.id}
-                                        control={form.control}
-                                        name="extraData"
-                                        render={({ field }) => {
-                                            return (
-                                                <FormItem
-                                                key={item.id}
-                                                className="flex flex-row items-start space-x-3 space-y-0"
-                                                >
-                                                    <FormControl>
-                                                        <Checkbox
-                                                        checked={field.value?.includes(item.id)}
-                                                        onCheckedChange={(checked: any) => {
-                                                            return checked
-                                                            ? field.onChange([...(field?.value || []), item.id])
-                                                            : field.onChange(
-                                                                field.value?.filter(
-                                                                    (value) => value !== item.id
-                                                                )
-                                                            )
-                                                        }}
-                                                        />
-                                                    </FormControl>
-                                                    <FormLabel className="font-normal">
-                                                        {item.name}
-                                                    </FormLabel>
-                                                </FormItem>
-                                            )
-                                        }}
-                                        />
-                                    ))}
-                                </FormItem>
-                            )}
-                        /> */}
+                        <div className="container mx-auto">
+                            <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-2 border-b border-border">
+                                <ListHeading className="hidden md:flex md:col-span-2">
+                                Projectnaam
+                                </ListHeading>
+                                <ListHeading className="hidden md:flex md:col-span-2">
+                                Rol
+                                </ListHeading>
+                            </div>
+                            <ul>
+                                {data.map((project: any) => {
+                                    return (
+                                        <li className='grid grid-cols-2 md:grid-cols-12 items-center py-3 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2'>
+                                            <Paragraph className='hidden md:flex'>
+                                                {project.name}
+                                            </Paragraph>
+                                            <Paragraph className='hidden md:flex'>
+                                                
+                                            </Paragraph>
+                                        </li>
+                                    )
+                                })}
+                            </ul>
+                        </div>   
                         <Button type='submit' variant='default'>Aanmaken</Button>
                     </form>
                 </Form>
