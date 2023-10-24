@@ -149,8 +149,6 @@ router.route('/')
       role: req.oAuthUser.role || 'member',
       lastLogin: Date.now(),
     };
-
-    console.log(data);
     
     db.User
       .authorizeData(data, 'create', req.user)

@@ -101,9 +101,24 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, isSu
   try {
 
     let where = { id: userId };
-    if (projectId && !isFixed && !isSuperUserFunc ) where.projectId = projectId;
-    if (isSuperUserFunc) where.role = 'admin';
-    if (!isFixed) where.idpUser = { provider: authConfig.provider };
+    if (projectId && !isSuperUserFunc && !isFixed ) where.projectId = projectId;
+    if (isSuperUserFunc && !isFixed) {
+      // superuserfunc: admins mogen over projecten heen, mindere goden alleen binnen hun eigen project
+      if (projectId) {
+        where = Object.assign(where, {
+          [db.Sequelize.Op.or]: [
+            {
+              role: 'admin'
+            }, {
+              projectId: projectId
+            }
+          ]});
+      } else {
+        where.role = 'admin'
+      }
+    }
+
+    if (!isSuperUserFunc && !isFixed) where.idpUser = { provider: authConfig.provider };
 
     dbUser = await db.User.findOne({ where });
 
