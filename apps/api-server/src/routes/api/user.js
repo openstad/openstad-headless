@@ -75,18 +75,6 @@ router.route('/')
 // create user
 // -----------
   .post(auth.can('User', 'create'))
-  .post(async function (req, res, next) {
-    // check project
-    if (!req.project && req.user.role == 'admin') {
-      let projectId = req.body.projectId;
-      try {
-        req.project = await db.Project.findOne({ where: { id: projectId } })
-      } catch(err) {
-        return next(new createError(404, 'Project niet gevonden for projectId: '+ projectId));
-      }
-    }
-    return next();
-  })
   .post(function (req, res, next) {
     // check project
     if (!req.project) return next(createError(401, 'Project niet gevonden'));

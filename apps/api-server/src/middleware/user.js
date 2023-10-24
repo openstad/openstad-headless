@@ -32,7 +32,7 @@ module.exports = async function getUser( req, res, next ) {
     let projectId = req.project && req.project.id;
 
     let isSuperUserFunc = false;
-    if ((req.path.match('^(/api/user)$') && req.method == 'POST') || ( req.path.match('^(/api/project/\\d+/user/\\d+$)') && ( req.method == 'PUT' || req.method == 'DELETE' ))) isSuperUserFunc = true;
+    if (req.path.match('^(/api/project/\\d+/user(?:/\\d+)?$)') && ( req.method == 'POST' || req.method == 'PUT' || req.method == 'DELETE' )) isSuperUserFunc = true;
     
     const userEntity = await getUserInstance({ authConfig, authProvider, userId, isFixed, isSuperUserFunc, projectId }) || {};
 
