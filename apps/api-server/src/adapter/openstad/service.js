@@ -65,6 +65,14 @@ service.createUser = async function({ authConfig, userData = {} }) {
 
   // TODO: unmap userData
 
+  if (userData.role) {
+    // translate to what the auth server expects
+    userData.roles = {
+      [authConfig.clientId]: userData.role
+    };
+    delete userData.role;
+  }
+
   let url = `${authConfig.serverUrlInternal}/api/admin/user?client_id=${authConfig.clientId}`;
   let body = JSON.stringify(userData)
 
