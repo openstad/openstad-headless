@@ -13,7 +13,7 @@ export default {
 
     }
 
-    let url = `/api/project/${projectId}/idea?includeUser=1&includeUserVote=1&includeVoteCount=1&includeTags${filterString}`;
+    let url = `/api/project/${projectId}/idea?includeUser=1&includeUserVote=1&includeVoteCount=1&includeTags=1${filterString}`;
     return this.fetch(url);
 
   },
