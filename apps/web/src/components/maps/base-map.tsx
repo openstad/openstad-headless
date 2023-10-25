@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { MapContainer, TileLayer, FeatureGroup, Polygon } from 'react-leaflet';
-import { EditControl } from "react-leaflet-draw"
+// import { EditControl } from "react-leaflet-draw"
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -14,7 +14,7 @@ export default function BaseMap({projectId, areaId}: {projectId:string, areaId: 
   return (
     <MapContainer style={{ height: '400px', width: '100%'}} center={{ lat: 52.129507, lng: 4.670647 }} zoom={10} scrollWheelZoom={false}>
         <FeatureGroup>
-            <EditControl
+            {/* <EditControl
             position="topright"
             draw={{
                 marker: false,
@@ -23,7 +23,7 @@ export default function BaseMap({projectId, areaId}: {projectId:string, areaId: 
                 rectangle: false,
                 circle: false
             }}
-            />
+            /> */}
       </FeatureGroup>
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
