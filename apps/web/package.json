@@ -56,6 +56,7 @@
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.6",
+    "@types/leaflet-draw": "^1.0.9",
     "pino-pretty": "^10.2.0"
   }
 }
