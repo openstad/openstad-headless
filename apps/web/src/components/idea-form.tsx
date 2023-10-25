@@ -131,10 +131,10 @@ export default function IdeaForm({ onFormSubmit }: Props) {
   });
 
   function onSubmit(values: FormType) {
-    console.log({ values });
     onFormSubmit(values)
       .then(() => {
         toast.success(`Plan successvol ${id ? 'aangepast' : 'aangemaakt'}`);
+        router.push(`/projects/${project}/ideas`);
       })
       .catch((e) => {
         toast.error(`Plan kon niet ${id ? 'aangepast' : 'aangemaakt'} worden`);
