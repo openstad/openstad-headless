@@ -1,7 +1,7 @@
 import type { OAuthConfig, OAuthUserConfig } from "next-auth/providers/oauth";
 
 export interface OpenstadProfile extends Record<string, any> {
-  user_id: string;
+  user_id: string | number;
   role: string | null;
   name: string | null;
   email: string | null;
@@ -39,7 +39,7 @@ export default function Openstad<P extends OpenstadProfile>(
     },
     profile(profile) {
       return {
-        id: profile.user_id,
+        id: typeof profile.user_id === 'number'? profile.user_id.toString() : profile.user_id,
         name: profile.name,
         email: profile.email,
         role: profile.role,
