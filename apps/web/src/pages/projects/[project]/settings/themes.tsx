@@ -63,7 +63,7 @@ export default function ProjectSettingsThemes() {
                         name="themes"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Thema's (Onderscheiden door kommas)</FormLabel>
+                                <FormLabel>{`Thema's (Onderscheiden door kommas)`}</FormLabel>
                                 <FormControl>
                                     <Input placeholder='' {...field} />
                                 </FormControl>

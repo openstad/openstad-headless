@@ -8,3 +8,5 @@ export const WidgetDefinitions = {
     resourceform: "Resource form",
     resourceoverview: "Resource overview",
 }
+
+export type WidgetDefinition = keyof typeof WidgetDefinitions;
