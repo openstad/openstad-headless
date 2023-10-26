@@ -1,11 +1,11 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
-const DropdownList = ({ addProject }) => {
+const DropdownList = ({ project, addProject }) => {
 
     return(
             <Select>
                 <SelectTrigger>
-                    <SelectValue placeholder="Geen deelname" onChange={addProject}/>
+                    <SelectValue placeholder="Geen deelname" onChange={addProject(project)}/>
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="">Geen deelname</SelectItem>

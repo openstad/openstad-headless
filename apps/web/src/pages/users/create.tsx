@@ -18,7 +18,6 @@ import { Heading, ListHeading, Paragraph } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
 import useUser from '@/hooks/use-user'
 import projectListSwr from '@/hooks/use-project-list'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import DropdownList from '@/components/dropdown-list'
 
 const formSchema = z.object({
@@ -29,7 +28,6 @@ const formSchema = z.object({
     address: z.string().optional(),
     city: z.string().optional(),
     postcode: z.string().optional(),
-    role: z.enum(["admin", "editor", "moderator", "member", "anonymous"]),
     // projectId: z.number()
 })
 
@@ -37,7 +35,7 @@ const roles = ["admin", "editor", "moderator", "member", "anonymous"]
 
 export default function CreateUser() {
     const testArray: any = []
-    const { data, isLoading } = projectListSwr();
+    const { data, isLoading } = projectListSwr()
     const { createUser } = useUser()
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -46,13 +44,15 @@ export default function CreateUser() {
         }
     })
 
+    const addProject = (projectId, roleId) => {
+        testArray.push({projectId: projectId, roleId: roleId})
+    }
+
     function onSubmit(values: z.infer<typeof formSchema>) {
-        //createUser(values.email, values.role, 1, values.name, values.phoneNumber, values.address, values.city, values.postcode)
-        console.log(testArray)
+        createUser(values.email, 'admin', 1, values.name, values.phoneNumber, values.address, values.city, values.postcode)
     }
 
     if (!data) return null;
-    console.log(data)
 
     return(
         <div>
@@ -183,7 +183,7 @@ export default function CreateUser() {
                                                 {project.name}
                                             </Paragraph>
                                             <Paragraph className='hidden md:flex'>
-                                                
+                                                <DropdownList addProject={addProject} project={project.id} />
                                             </Paragraph>
                                         </li>
                                     )
