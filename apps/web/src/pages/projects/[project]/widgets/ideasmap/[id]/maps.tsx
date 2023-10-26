@@ -94,8 +94,8 @@ export default function WidgetIdeasMapMaps() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Wordt het automatisch centreren van de map op de gebruiker's
-                  locatie toegelaten?
+                  {`Wordt het automatisch centreren van de map op de gebruiker's
+                  locatie toegelaten?`}
                 </FormLabel>
                 <Select
                   onValueChange={(e: string) => field.onChange(e === "true")}

@@ -1,4 +1,4 @@
-import Openstad from "@/lib/auth/openstad-provider";
+import Openstad, { OpenstadProfile } from "@/lib/auth/openstad-provider";
 import NextAuth, { NextAuthOptions } from "next-auth";
 import logger from "@/lib/logger";
 
@@ -16,7 +16,7 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ account, profile }) {
-      if (account?.provider === "openstad" && profile?.role !== "admin") {
+      if (account?.provider === "openstad" && (profile as OpenstadProfile)?.role !== "admin") {
         logger.debug({ account, profile }, "RoleUnauthorized");
         // Only allow admins to sign in
         return "/api/auth/signin?error=RoleUnauthorized";

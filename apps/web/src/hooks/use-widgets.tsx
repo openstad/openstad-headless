@@ -1,3 +1,4 @@
+import { WidgetDefinition } from "@/lib/widget-definitions";
 import useSWR from "swr";
 
   export function useWidgetsHook (projectId?: string) {
@@ -7,6 +8,8 @@ import useSWR from "swr";
         projectId ? url : null
     );
     
+    
+
     async function createWidget(typeId:string, description: string) {
         const res = await fetch(url, {
             method: 'POST',
@@ -21,6 +24,19 @@ import useSWR from "swr";
     }
 
     return {...widgetsSwr, createWidget};
+  }
+
+  export type Widget = {
+    id: number;
+    projectId: number;
+    description: string;
+
+  config: object;
+  type: WidgetDefinition;
+
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
   }
 
 
