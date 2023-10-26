@@ -109,7 +109,7 @@ export default function ProjectSettingsAnonymization() {
                 <div>
                     <p>Anonimiseer gebruikers direct</p>
                     <p>Let op! Deze actie is definitief en kan niet ongedaan gemaakt worden.</p>
-                    <p>Het project moet eerst aangemerkt staan als 'beëindigd' voordat deze actie uitgevoerd kan worden.</p>
+                    <p>{`Het project moet eerst aangemerkt staan als 'beëindigd' voordat deze actie uitgevoerd kan worden.`}</p>
                     <Button variant={"destructive"} className='mt-4'>Gebruikersgegevens anonimiseren</Button>
                 </div>
                   <br/>  

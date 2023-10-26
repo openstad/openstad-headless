@@ -108,7 +108,7 @@ export default function ProjectSettings() {
                 <div>
                     <br/>
                     <p>Let op! Deze actie is definitief en kan niet ongedaan gemaakt worden.</p>
-                    <p>Het project moet eerst aangemerkt staan als 'beëindigd' voordat deze actie uitgevoerd kan worden.</p>
+                    <p>{`Het project moet eerst aangemerkt staan als 'beëindigd' voordat deze actie uitgevoerd kan worden.`}</p>
                     <br/>
                     <Button variant={"destructive"}>Project archiveren</Button>
                 </div>

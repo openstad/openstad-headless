@@ -91,7 +91,7 @@ export default function WidgetResourceFormSubmit() {
               name="saveConceptButton"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tekst voor de 'opslaan als concept'-knop</FormLabel>
+                  <FormLabel>{`Tekst voor de 'opslaan als concept'-knop`}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
