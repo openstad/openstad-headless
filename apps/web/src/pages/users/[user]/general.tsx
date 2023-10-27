@@ -2,28 +2,14 @@ import * as React from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
-
-import { Button } from "../../components/ui/button"
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage
-} from "../../components/ui/form"
-import { Input } from "../../components/ui/input"
-import { PageLayout } from '../../components/ui/page-layout'
+import projectListSwr from '@/hooks/use-project-list'
+import useUser from '@/hooks/use-user'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Heading, ListHeading, Paragraph } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
-import useUser from '@/hooks/use-user'
-import projectListSwr from '@/hooks/use-project-list'
+import { Input } from '@/components/ui/input'
 import DropdownList from '@/components/dropdown-list'
-
-const projectRole = z.object({
-    projectId: z.string(),
-    roleId: z.string()
-})
+import { Button } from '@/components/ui/button'
 
 const formSchema = z.object({
     email: z.string().email(),
@@ -35,12 +21,7 @@ const formSchema = z.object({
     postcode: z.string().optional(),
 })
 
-type ProjectRole = {
-    projectId: string, roleId: string
-}
-export default function CreateUser() {
-    let projectRoles: Array<ProjectRole> = []
-    const { data, isLoading } = projectListSwr()
+export default function CreateUserGeneral() {
     const { createUser } = useUser()
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -49,49 +30,15 @@ export default function CreateUser() {
         }
     })
 
-    const addProject = (projectId: string, roleId: string) => {
-        if(projectRoles.find(e => e.projectId === projectId)) {
-            if(roleId === "0") {
-                projectRoles = projectRoles.filter(function(project) {
-                    return project.projectId !== projectId;
-                })
-            } else {
-                let role = projectRoles.findIndex((obj => obj.projectId == projectId))
-                projectRoles[role].roleId = roleId
-            }
-        } else {
-            if (roleId !== "0") {
-                projectRoles.push({projectId: projectId, roleId: roleId})
-            }
-        }
-    }
-
     function onSubmit(values: z.infer<typeof formSchema>) {
-        for (let i = 0; i < projectRoles.length; i++) {
-            createUser(values.email, projectRoles[i].projectId, projectRoles[i].roleId, values.nickName, values.name, values.phoneNumber, values.address, values.city, values.postcode)
-        }
+        createUser(values.email, values.nickName, values.name, values.phoneNumber, values.address, values.city, values.postcode)
     }
 
-    if (!data) return null;
-
-    return(
-        <div>
-            <PageLayout
-            pageHeader="Gebruikers"
-            breadcrumbs={[
-                {
-                name: 'Gebruikers',
-                url: '/users',
-                },
-                {
-                    name: 'Gebruiker toevoegen',
-                    url: '/users/create'
-                }
-            ]}>
-            <div className="container mx-auto py-10 w-1/2 float-left">
+    return (
+            <div>
                 <Form {...form}>
                     <Heading size="xl" className="mb-4">
-                        Gebruiker • Aanmaken
+                        Gebruiker • Algemene instellingen
                     </Heading>
                     <Separator className="mb-4" />
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -186,38 +133,10 @@ export default function CreateUser() {
                             </FormItem>
                         )}
                         />
-                        <div className="container mx-auto">
-                            <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-2 border-b border-border">
-                                <ListHeading className="hidden md:flex md:col-span-2">
-                                Projectnaam
-                                </ListHeading>
-                                <ListHeading className="hidden md:flex md:col-span-2">
-                                Rol
-                                </ListHeading>
-                            </div>
-                            <ul>
-                                {data.map((project: any) => {
-                                    return (
-                                        <li className='grid grid-cols-2 md:grid-cols-12 items-center py-3 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2'>
-                                            <Paragraph className='hidden md:flex'>
-                                                {project.name}
-                                            </Paragraph>
-                                            <Paragraph className='hidden md:flex'>
-                                                <DropdownList roleId='0' addProject={(roleId) => {
-                                                    addProject(project.id, roleId )
-                                                }}
-                                                    />
-                                            </Paragraph>
-                                        </li>
-                                    )
-                                })}
-                            </ul>
-                        </div>   
                         <Button type='submit' variant='default'>Aanmaken</Button>
                     </form>
                 </Form>
             </div>
-            </PageLayout>
-        </div>
     )
 }
+
