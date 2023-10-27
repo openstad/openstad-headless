@@ -10,6 +10,7 @@ const searchInResults = require('../../middleware/search-in-results');
 const fetch = require('node-fetch');
 const merge = require('merge');
 const authSettings = require('../../util/auth-settings');
+const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const filterBody = (req, res, next) => {
   const data = {};
@@ -22,6 +23,11 @@ const filterBody = (req, res, next) => {
       data[key] = value;
     }
   });
+
+  // role is a special case: only if you have at least that role
+  if (req.body.role && hasRole( req.user, req.body.role )) {
+    data.role = req.body.role
+  }
 
   req.body = data;
 
@@ -372,9 +378,6 @@ router.route('/:userId(\\d+)')
 
 // update user
 // -----------
-// TODO: hier zit de suggestie in dat je al je users op anders projects ook mag updaten. Maar dan toch niet, want dat geeft errors.
-// Dus neem een besluit, maar dat expliciet, en zorg dan dat het gaat werken.
-// -----------
   .put(auth.useReqUser)
   .put(filterBody)
   .put(function (req, res, next) {
@@ -400,7 +403,6 @@ router.route('/:userId(\\d+)')
         updatedUserData = await req.adapter.service.updateUser({ authConfig: req.authConfig, userData: merge(true, userData, { id: user.idpUser && user.idpUser.identifier }) });
         delete updatedUserData.nickName // TODO: these updates should not be done for fields that can be different per project. For now: nickName
       }
-
 
       let apiUsers = await db.User
           .scope(['includeProject'])
