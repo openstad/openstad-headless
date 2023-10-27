@@ -131,10 +131,10 @@ export default function IdeaForm({ onFormSubmit }: Props) {
   });
 
   function onSubmit(values: FormType) {
-    console.log({ values });
     onFormSubmit(values)
       .then(() => {
         toast.success(`Plan successvol ${id ? 'aangepast' : 'aangemaakt'}`);
+        router.push(`/projects/${project}/ideas`);
       })
       .catch((e) => {
         toast.error(`Plan kon niet ${id ? 'aangepast' : 'aangemaakt'} worden`);
@@ -292,7 +292,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             name="modBreak"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>modBreak (optioneel)</FormLabel>
+                <FormLabel>ModBreak (optioneel)</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
                 </FormControl>
@@ -326,7 +326,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
           <SimpleCalendar
             form={form}
             fieldName="startDate"
-            label="start datum van het plan"
+            label="Startdatum van het plan"
           />
 
           <SimpleCalendar

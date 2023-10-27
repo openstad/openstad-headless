@@ -1,7 +1,7 @@
 import { PageLayout } from '../../../../components/ui/page-layout';
 import { Button } from '../../../../components/ui/button';
 import Link from 'next/link';
-import { Delete, Plus, Trash } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import React from 'react';
 import useIdeas from '@/hooks/use-ideas';
 import { useRouter } from 'next/router';
@@ -53,7 +53,7 @@ export default function ProjectIdeas() {
               Datum aangemaakt
             </ListHeading>
             <ListHeading className="hidden md:flex md:col-span-2">
-              Datum aangemaakt
+              Plan verwijderen
             </ListHeading>
           </div>
 
@@ -84,7 +84,7 @@ export default function ProjectIdeas() {
                       onDeleteAccepted={() =>
                         remove(idea.id)
                           .then(() =>
-                            toast.success('Plan successvoll verwijderd')
+                            toast.success('Plan successvol verwijderd')
                           )
                           .catch((e) =>
                             toast.error('Plan kon niet worden verwijderd')

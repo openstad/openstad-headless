@@ -607,7 +607,7 @@ module.exports = function (db, sequelize, DataTypes) {
       let valid = userHasRole(user, self.auth && self.auth.updateableBy, self.id);
 
       // extra: isOwner through user on different project
-      valid = valid || ( self.idpUser.identifier && self.idpUser.identifier == user.idpUser.identifier );
+      valid = valid || ( self.idpUser && user.idpUser && self.idpUser.identifier && self.idpUser.identifier == user.idpUser.identifier );
 
       // extra: geen acties op users met meer rechten dan je zelf hebt
       valid = valid && userHasRole(user, self.role);

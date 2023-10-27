@@ -45,7 +45,7 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
     } else if (json.user_id) {
       userData = json;
     }
-    
+
     if (raw) return userData;
 
     if (!userData) return;
@@ -64,6 +64,14 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
 service.createUser = async function({ authConfig, userData = {} }) {
 
   // TODO: unmap userData
+
+  if (userData.role) {
+    // translate to what the auth server expects
+    userData.roles = {
+      [authConfig.clientId]: userData.role
+    };
+    delete userData.role;
+  }
 
   let url = `${authConfig.serverUrlInternal}/api/admin/user?client_id=${authConfig.clientId}`;
   let body = JSON.stringify(userData)
@@ -86,9 +94,8 @@ service.createUser = async function({ authConfig, userData = {} }) {
     let userData = await response.json();
 
     if (!userData) return;
-    
-    let mappedUserData = mapUserData({ map: authConfig.userMapping, user: { ...userData } })
-    mappedUserData.idpUser.provider = authConfig.provider;
+
+    let mappedUserData = service.fetchUserData({ authConfig, userId: userData.id });
     return mappedUserData;
 
   } catch(err) {
@@ -103,6 +110,14 @@ service.updateUser = async function({ authConfig, userData = {} }) {
   // TODO: unmap userData
 
   if (!(userData && userData.id)) throw new Error('No user id found')
+
+  if (userData.role) {
+    // translate to what the auth server expects
+    userData.roles = {
+      [authConfig.clientId]: userData.role
+    };
+    delete userData.role;
+  }
 
   let url = `${authConfig.serverUrlInternal}/api/admin/user/${userData.id}?client_id=${authConfig.clientId}`;
   let body = JSON.stringify(userData)
@@ -123,11 +138,9 @@ service.updateUser = async function({ authConfig, userData = {} }) {
     }
 
     let userData = await response.json();
-
     if (!userData) return;
 
-    let mappedUserData = mapUserData({ map: authConfig.userMapping, user: { ...userData } })
-    mappedUserData.idpUser.provider = authConfig.provider;
+    let mappedUserData = service.fetchUserData({ authConfig, userId: userData.id });
     return mappedUserData;
 
   } catch(err) {

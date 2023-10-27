@@ -1,8 +1,8 @@
 import { CreateWidgetDialog } from "@/components/dialog-widget-create";
 import { PageLayout } from "@/components/ui/page-layout";
 import { ListHeading, Paragraph } from "@/components/ui/typography";
-import { useWidgetsHook } from "@/hooks/use-widgets";
-import { WidgetDefinitions } from "@/lib/widget-definitions";
+import { Widget, useWidgetsHook } from "@/hooks/use-widgets";
+import { WidgetDefinition, WidgetDefinitions } from "@/lib/widget-definitions";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -13,6 +13,8 @@ export default function ProjectWidgets() {
   const types = WidgetDefinitions;
 
   const { data: widgets, isLoading:isLoadingWidgets } = useWidgetsHook(project as string);
+
+  console.log(widgets)
   
   return (
     <div>
@@ -40,7 +42,7 @@ export default function ProjectWidgets() {
           </div>
 
           <ul>
-          {widgets?.map((widget: any) => (
+          {(widgets as Widget[])?.map((widget) => (
               <Link
                 key={widget.id}
                 href={`/projects/${project}/widgets/${widget.type}/${widget.id}`}>

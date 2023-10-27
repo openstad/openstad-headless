@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { PageLayout } from '@/components/ui/page-layout'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Heading } from '@/components/ui/typography'
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
@@ -109,7 +109,7 @@ export default function ProjectSettingsAnonymization() {
                 <div>
                     <p>Anonimiseer gebruikers direct</p>
                     <p>Let op! Deze actie is definitief en kan niet ongedaan gemaakt worden.</p>
-                    <p>Het project moet eerst aangemerkt staan als 'beëindigd' voordat deze actie uitgevoerd kan worden.</p>
+                    <p>{`Het project moet eerst aangemerkt staan als 'beëindigd' voordat deze actie uitgevoerd kan worden.`}</p>
                     <Button variant={"destructive"} className='mt-4'>Gebruikersgegevens anonimiseren</Button>
                 </div>
                   <br/>  

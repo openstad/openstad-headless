@@ -1,6 +1,8 @@
 import fetchx from './fetch';
 import idea from './idea';
 import comments from './comments';
+import ideas from './ideas';
+import tags from './tags';
 import user from './user';
 
 window.OpenStadAPI = null;
@@ -16,11 +18,6 @@ function API(props = { config: {} }) {
   self.projectId = props.projectId || props.config.projectId || 0;
 
   self.fetch = fetchx.bind(self);
-    
-  self.idea = {
-    fetch: idea.fetch.bind(self),
-    update: idea.update.bind(self),
-  }
 
   self.comments = {
     fetch: comments.fetch.bind(self),
@@ -28,6 +25,22 @@ function API(props = { config: {} }) {
     update: comments.update.bind(self),
     delete: comments.delete.bind(self),
     submitLike: comments.submitLike.bind(self),
+  }
+    
+  self.idea = {
+    fetch: idea.fetch.bind(self),
+    update: idea.update.bind(self),
+  }
+
+  self.ideas = {
+    fetch: ideas.fetch.bind(self),
+  }
+
+  self.tags = {
+    fetch: tags.fetch.bind(self),
+    create: tags.create.bind(self),
+    update: tags.update.bind(self),
+    delete: tags.delete.bind(self),
   }
 
   self.user = {

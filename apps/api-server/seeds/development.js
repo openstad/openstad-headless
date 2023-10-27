@@ -14,10 +14,10 @@ module.exports = async function seed(config, db) {
     let apiDomainWithoutPortnumber = apiDomain.replace(/:\d+/, '');
     if (apiDomain != apiDomainWithoutPortnumber) allowedDomains.push(apiDomainWithoutPortnumber);
 
-    console.log('  creating development data');
-    console.log('    rename default project to Plannen insturen');
-    let project = await db.Project.update({
-      name: 'Plannen insturen',
+    console.log('    add plannen insturen project');
+    project = await db.Project.create({
+      id: 2,
+      name: 'Plannen',
       title: 'Plannen insturen',
       config: {
         allowedDomains,
@@ -36,19 +36,12 @@ module.exports = async function seed(config, db) {
             },
           }
         },
-        votes: {
-          isViewable: true
-        }
-      }
-    },{
-      where: { 
-        id: 1
       },
     });
 
     console.log('    add begroot project');
     project = await db.Project.create({
-      id: 2,
+      id: 3,
       name: 'Begroten',
       title: 'Begroten',
       config: {
@@ -73,7 +66,7 @@ module.exports = async function seed(config, db) {
 
     console.log('    add keuzewijzer project');
     project = await db.Project.create({
-      id: 3,
+      id: 4,
       name: 'Keuzewijzer',
       title: 'Keuzewijzer',
       config: {
@@ -98,25 +91,25 @@ module.exports = async function seed(config, db) {
 
     console.log('    add 4 member users');
     await db.User.create({
-      projectId: 1,
+      projectId: 2,
       role: 'admin',
       name: 'User one',
     });
 
     await db.User.create({
-      projectId: 1,
+      projectId: 2,
       role: 'member',
       name: 'User two',
     });
 
     await db.User.create({
-      projectId: 2,
+      projectId: 3,
       role: 'admin',
       name: 'User one',
     });
 
     await db.User.create({
-      projectId: 2,
+      projectId: 3,
       role: 'member',
       name: 'User two',
     });
@@ -125,7 +118,7 @@ module.exports = async function seed(config, db) {
     console.log('    10 ideas');
     let idea1 = await db.Idea.create({
       userId: 2,
-      projectId: 1,
+      projectId: 2,
       title: 'Lorem ipsum dolor',
       summary: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque a sollicitudin velit, ac vehicula nibh.',
       description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque a sollicitudin velit, ac vehicula nibh. Sed nec est convallis, interdum ex id, tempus mauris. Nulla facilisi. Quisque placerat condimentum est. Sed condimentum ex a orci dignissim ultrices. Nulla aliquam placerat ornare. Nulla condimentum, risus id commodo finibus, leo mauris tincidunt purus, non viverra augue ligula et sapien. Nunc pulvinar, eros at feugiat facilisis, quam tellus elementum metus, a sodales neque nibh non magna. Integer iaculis, nisl aliquet tempor hendrerit, lacus quam sollicitudin lectus, sed consectetur eros turpis sit amet nunc. Aenean eu neque at libero eleifend fringilla. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Donec quis posuere lacus, vitae eleifend magna. Nunc egestas sollicitudin ipsum, maximus tincidunt leo facilisis at. In rhoncus eget libero sit amet aliquam.',
@@ -143,7 +136,7 @@ module.exports = async function seed(config, db) {
 
     let idea2 = await db.Idea.create({
       userId: 2,
-      projectId: 1,
+      projectId: 2,
       title: 'Etiam euismod odio',
       summary: 'Etiam euismod odio ac augue blandit, quis ultricies ipsum ultrices. Nulla ornare odio et nisi.',
       description: 'Etiam euismod odio ac augue blandit, quis ultricies ipsum ultrices. Nulla ornare odio et nisi tempor rhoncus. Maecenas et venenatis arcu. Proin efficitur neque sit amet enim suscipit laoreet. Mauris vehicula tristique lorem, eu imperdiet erat ornare eget. Quisque consectetur interdum tincidunt. Vestibulum ultricies arcu eleifend pharetra finibus. Fusce nec justo magna. Aliquam erat volutpat. Vivamus sollicitudin a sapien a auctor. Aenean id augue quis ex laoreet sodales.',
@@ -161,7 +154,7 @@ module.exports = async function seed(config, db) {
 
     let idea3 = await db.Idea.create({
       userId: 2,
-      projectId: 1,
+      projectId: 2,
       title: 'Quisque et viverra',
       summary: 'Quisque et viverra nisi. Nullam augue sapien, feugiat finibus erat a, varius congue dolor. Integer.',
       description: 'Quisque et viverra nisi. Nullam augue sapien, feugiat finibus erat a, varius congue dolor. Integer arcu urna, porta eget lacus a, imperdiet mattis ex. Curabitur eu urna eu nisl blandit scelerisque sed nec diam. Maecenas et sapien risus. Duis eget iaculis massa, et tempor tellus. Ut diam est, euismod in enim in, commodo rhoncus sapien.',
@@ -179,7 +172,7 @@ module.exports = async function seed(config, db) {
 
     let idea4 = await db.Idea.create({
       userId: 2,
-      projectId: 1,
+      projectId: 2,
       title: 'Ut eu porttitor',
       summary: 'Ut eu porttitor odio. Aliquam nec volutpat diam. Etiam eget tempor lacus, sed aliquet lectus.',
       description: 'Ut eu porttitor odio. Aliquam nec volutpat diam. Etiam eget tempor lacus, sed aliquet lectus. Nullam sollicitudin urna ex, eget tempor leo ullamcorper non. Nullam dapibus et libero consequat euismod. Donec dui est, tempor ut lobortis ac, euismod quis nibh. In hac habitasse platea dictumst. Quisque malesuada ex mauris, ut aliquam lectus tristique id. Sed a ultrices arcu. Cras velit enim, euismod vel dictum eu, sodales eu tellus. In sit amet tristique purus, ac mollis turpis. Aliquam erat volutpat. Integer sit amet nisi tempus, maximus arcu a, venenatis urna.',
@@ -197,7 +190,7 @@ module.exports = async function seed(config, db) {
 
     let idea5 = await db.Idea.create({
       userId: 2,
-      projectId: 1,
+      projectId: 2,
       title: 'Pellentesque consectetur eros',
       summary: 'Pellentesque consectetur eros at tempus viverra. In hac habitasse platea dictumst. Aenean egestas urna sapien.',
       description: 'Pellentesque consectetur eros at tempus viverra. In hac habitasse platea dictumst. Aenean egestas urna sapien, porttitor pretium ante pharetra ut. Curabitur gravida ex sed felis vestibulum imperdiet. Pellentesque rutrum posuere tortor non placerat. Aliquam ornare massa id lacus vulputate, a rutrum sapien mattis. Proin purus nisl, lacinia in porttitor a, vulputate at diam. Sed fermentum augue in ipsum interdum, nec molestie diam placerat.',
@@ -215,7 +208,7 @@ module.exports = async function seed(config, db) {
 
     await db.Idea.create({
       userId: 2,
-      projectId: 2,
+      projectId: 3,
       title: 'Vestibulum ante ipsum',
       summary: 'Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Fusce ornare.',
       description: 'Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Fusce ornare felis id lacinia sodales. Vivamus augue ligula, ullamcorper ac volutpat non, scelerisque at neque. Nulla laoreet, sapien ac iaculis sodales, massa lacus auctor felis, consequat gravida lorem erat sed metus. Fusce lacus mauris, cursus id magna ullamcorper, lacinia eleifend mauris. Etiam scelerisque molestie dui congue eleifend. Phasellus a tortor nibh. Ut vestibulum ut risus at finibus.',
@@ -233,7 +226,7 @@ module.exports = async function seed(config, db) {
 
     await db.Idea.create({
       userId: 2,
-      projectId: 2,
+      projectId: 3,
       title: 'Nulla laoreet pretium',
       summary: 'Nulla laoreet pretium tortor at placerat. Sed in est vulputate, ullamcorper nisi id, elementum enim.',
       description: 'Nulla laoreet pretium tortor at placerat. Sed in est vulputate, ullamcorper nisi id, elementum enim. Nulla ac nisl id nibh auctor ullamcorper. In suscipit porttitor mi at sodales. Pellentesque diam elit, ornare in aliquam eget, dictum a libero. Donec sagittis dictum elit sit amet varius. Maecenas eget mauris ultricies, ullamcorper nibh sit amet, luctus ex. Cras rhoncus dolor dolor, at porta ligula bibendum sit amet. Proin hendrerit efficitur tortor eget consectetur. Curabitur vitae dictum velit. Praesent scelerisque, dui quis elementum sodales, nisi erat porttitor quam, quis feugiat erat augue vehicula dui. Praesent ultrices suscipit tellus, sit amet consectetur enim accumsan ac. Suspendisse ac porta velit.',
@@ -251,7 +244,7 @@ module.exports = async function seed(config, db) {
 
     await db.Idea.create({
       userId: 2,
-      projectId: 2,
+      projectId: 3,
       title: 'Aliquam ut magna',
       summary: 'Aliquam ut magna eget ante tempor consectetur non nec nibh. Etiam id tellus eget turpis.',
       description: 'Aliquam ut magna eget ante tempor consectetur non nec nibh. Etiam id tellus eget turpis porta egestas. Sed maximus sed nisi vel ornare. Aliquam erat volutpat. Phasellus lobortis nibh in convallis eleifend. Morbi nunc nisi, consequat nec odio a, efficitur congue ipsum. Donec nec leo id urna scelerisque rutrum. Donec pulvinar nunc nisl, at dignissim purus dapibus at. Phasellus pellentesque sem turpis, et facilisis nisl tempus at.',
@@ -269,7 +262,7 @@ module.exports = async function seed(config, db) {
 
     await db.Idea.create({
       userId: 2,
-      projectId: 2,
+      projectId: 3,
       title: 'Etiam ultricies dui',
       summary: 'Etiam ultricies dui non justo laoreet convallis. Aenean odio erat, molestie et odio in, imperdiet.',
       description: 'Etiam ultricies dui non justo laoreet convallis. Aenean odio erat, molestie et odio in, imperdiet consectetur mauris. Pellentesque lobortis lacus sodales, volutpat turpis vel, posuere purus. Aliquam non elementum dolor. Ut vel dolor nec purus hendrerit molestie. Sed tortor erat, facilisis vitae orci sit amet, maximus viverra diam. Ut non sem mollis, facilisis libero id, sollicitudin felis. Donec at orci fermentum, pretium nunc a, dictum mauris. In tristique quis sapien sed faucibus. Quisque posuere purus tortor, quis gravida mauris cursus ac. Integer semper turpis quis magna consectetur, blandit placerat tellus lobortis. Morbi commodo sem iaculis nunc ornare, vel lobortis enim lacinia. Sed vitae lacus ex.',
@@ -287,7 +280,7 @@ module.exports = async function seed(config, db) {
 
     await db.Idea.create({
       userId: 2,
-      projectId: 2,
+      projectId: 3,
       title: 'Nullam dignissim tincidunt',
       summary: 'Nullam dignissim tincidunt urna, non vehicula enim convallis vitae. Nulla enim nibh, semper et metus.',
       description: 'Nullam dignissim tincidunt urna, non vehicula enim convallis vitae. Nulla enim nibh, semper et metus quis, venenatis eleifend nisi. Phasellus sed erat est. Donec ac lobortis turpis. Nulla facilisi. Pellentesque sit amet nisi id ante maximus consequat non sit amet nisl. Sed diam metus, malesuada ac aliquet in, pulvinar ac elit. Sed feugiat a dui sit amet luctus. Morbi sit amet dignissim neque, eget blandit lorem. Suspendisse ultrices mauris felis, in fermentum metus vestibulum a. Integer congue pharetra risus a interdum. Vivamus fringilla justo ac elementum tempor. Quisque ultrices fringilla lobortis. Aliquam ullamcorper ligula eu ipsum imperdiet vestibulum. Maecenas pretium, mi eget blandit tincidunt, justo lorem ornare lorem, in vulputate diam quam mollis ligula. Etiam viverra, nisl et laoreet tristique, dui sapien volutpat leo, in euismod diam dui nec orci. ',
@@ -305,42 +298,42 @@ module.exports = async function seed(config, db) {
 
     console.log('      belonging to one of three themes');
     let theme1 = await db.Tag.create({
-      projectId: 1,
+      projectId: 2,
       name: 'Theme 1',
       type: 'theme',
       seqnr: 10,
     });
 
     let theme2 = await db.Tag.create({
-      projectId: 1,
+      projectId: 2,
       name: 'Theme 2',
       type: 'theme',
       seqnr: 20,
     });
 
     let theme3 = await db.Tag.create({
-      projectId: 1,
+      projectId: 2,
       name: 'Theme 3',
       type: 'theme',
       seqnr: 30,
     });
 
     let area1 = await db.Tag.create({
-      projectId: 1,
+      projectId: 2,
       name: 'Area 1',
       type: 'area',
       seqnr: 10,
     });
 
     let area2 = await db.Tag.create({
-      projectId: 1,
+      projectId: 2,
       name: 'Area 2',
       type: 'area',
       seqnr: 20,
     });
 
     let area3 = await db.Tag.create({
-      projectId: 1,
+      projectId: 2,
       name: 'Area 3',
       type: 'area',
       seqnr: 30,
@@ -450,7 +443,7 @@ module.exports = async function seed(config, db) {
 
     console.log('    a choices-guide');
     await db.ChoicesGuide.create({
-      projectId: 3,
+      projectId: 4,
       title: 'Niels\' zn test keuzes',
       description: 'Basis keuzewijzer voor het testen van van alles',
       config: '{"isActive":true,"submissionType":"form","requiredUserRole":"member","withExisting":"error"}',
