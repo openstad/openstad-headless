@@ -20,6 +20,11 @@ import useUser from '@/hooks/use-user'
 import projectListSwr from '@/hooks/use-project-list'
 import DropdownList from '@/components/dropdown-list'
 
+const projectRole = z.object({
+    projectId: z.string(),
+    roleId: z.string()
+})
+
 const formSchema = z.object({
     email: z.string().email(),
     nickName: z.string().optional(),
@@ -28,13 +33,13 @@ const formSchema = z.object({
     address: z.string().optional(),
     city: z.string().optional(),
     postcode: z.string().optional(),
-    // projectId: z.number()
 })
 
-const roles = ["admin", "editor", "moderator", "member", "anonymous"]
-
+type ProjectRole = {
+    projectId: string, roleId: string
+}
 export default function CreateUser() {
-    const testArray: any = []
+    let projectRoles: Array<ProjectRole> = []
     const { data, isLoading } = projectListSwr()
     const { createUser } = useUser()
 
@@ -44,12 +49,25 @@ export default function CreateUser() {
         }
     })
 
-    const addProject = (projectId, roleId) => {
-        testArray.push({projectId: projectId, roleId: roleId})
+    const addProject = (projectId: string, roleId: string) => {
+        if(projectRoles.find(e => e.projectId === projectId)) {
+            if(roleId === "0") {
+                projectRoles = projectRoles.filter(function(project) {
+                    return project.projectId !== projectId;
+                })
+            } else {
+                let role = projectRoles.findIndex((obj => obj.projectId == projectId))
+                projectRoles[role].roleId = roleId
+            }
+        } else {
+            if (roleId !== "0") {
+                projectRoles.push({projectId: projectId, roleId: roleId})
+            }
+        }
     }
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        createUser(values.email, 'admin', 1, values.name, values.phoneNumber, values.address, values.city, values.postcode)
+        createUser(values.email, projectRoles, values.nickName, values.name, values.phoneNumber, values.address, values.city, values.postcode)
     }
 
     if (!data) return null;
@@ -183,7 +201,10 @@ export default function CreateUser() {
                                                 {project.name}
                                             </Paragraph>
                                             <Paragraph className='hidden md:flex'>
-                                                <DropdownList addProject={addProject} project={project.id} />
+                                                <DropdownList roleId='0' addProject={(roleId) => {
+                                                    addProject(project.id, roleId )
+                                                }}
+                                                    />
                                             </Paragraph>
                                         </li>
                                     )

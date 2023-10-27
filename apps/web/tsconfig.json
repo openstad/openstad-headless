@@ -16,7 +16,10 @@
     "paths": {
       "@/*": ["./src/*"],
       "@openstad/*": ["../../packages/*"]
-    }
+    },
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "next-env.d.ts",
