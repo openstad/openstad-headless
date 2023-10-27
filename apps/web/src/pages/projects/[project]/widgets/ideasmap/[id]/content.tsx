@@ -65,8 +65,10 @@ export default function WidgetIdeasMapContent() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Laat alleen de volgende ideeën zien (Vul hier de IDs van
+                  {`
+                   Laat alleen de volgende ideeën zien (Vul hier de IDs van
                   ideeën in, gescheiden met komma's):
+                  `}
                 </FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -81,8 +83,10 @@ export default function WidgetIdeasMapContent() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Laat geen ideeën zien van de volgende themas (Vul hier de
-                  namen van themas in, gescheiden met komma's):
+                  {`
+                   Laat geen ideeën zien van de volgende themas (Vul hier de
+                   namen van themas in, gescheiden met komma's):
+                  `}
                 </FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -97,8 +101,10 @@ export default function WidgetIdeasMapContent() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Laat alleen ideeën zien van de volgende themas (Vul hier de
-                  namen van themas in, gescheiden met komma's):
+                  {`
+                   Laat alleen ideeën zien van de volgende themas (Vul hier de
+                    namen van themas in, gescheiden met komma's):
+                  `}
                 </FormLabel>
                 <FormControl>
                   <Input {...field} />

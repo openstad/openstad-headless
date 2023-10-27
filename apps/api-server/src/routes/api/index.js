@@ -2,7 +2,6 @@ const express = require('express');
 const bruteForce = require('../../middleware/brute-force');
 const dbQuery = require('../../middleware/dbQuery');
 const sorting = require('../../middleware/sorting');
-const filtering = require('../../middleware/filtering');
 
 const router = express.Router({mergeParams: true});
 
@@ -13,7 +12,6 @@ const router = express.Router({mergeParams: true});
 // dbQuery middleware
 router.use(dbQuery);
 router.use(sorting);
-router.use(filtering);
 
 // projects
 router.use( '/project', require('./project') );

@@ -66,7 +66,7 @@ export default function WidgetResourceFormThemes() {
               name="themesLabel"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Label voor de thema's.</FormLabel>
+                  <FormLabel>Label voor de themas.</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -79,7 +79,7 @@ export default function WidgetResourceFormThemes() {
               name="themesInfo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Informatie over de thema's.</FormLabel>
+                  <FormLabel>Informatie over de themas.</FormLabel>
                   <FormControl>
                     <Textarea {...field} />
                   </FormControl>

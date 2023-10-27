@@ -54,6 +54,24 @@ module.exports = {
       },
     },
 
+    'ideas-filter': {
+      import: './src/ideas-filter/index.jsx',
+      filename: 'ideas-filter.js',
+      library: {
+        name: 'OS20',
+        type: 'assign-properties',
+      },
+    },
+
+    'ideas-overview': {
+      import: './src/ideas-overview/index.jsx',
+      filename: 'ideas-overview.js',
+      library: {
+        name: 'OS20',
+        type: 'assign-properties',
+      },
+    },
+
     'hello': {
       import: './src/Hello.jsx',
       filename: 'hello.js',

@@ -3,6 +3,7 @@ import React from "react";
 import About from './about/index.jsx';
 import Button from './button/index.jsx';
 import Comments from './comments/index.jsx';
+import IdeasOverview from './ideas-overview/index.jsx';
 import User from './user/index.jsx';
 
 import Hello from './Hello.jsx';
@@ -21,6 +22,7 @@ export {
   About,
   Button,
   Comments,
+  IdeasOverview,
   User,
 
   Hello,

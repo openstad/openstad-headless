@@ -44,7 +44,7 @@ export default function CreateProject() {
         )
     }
 
-    async function createProject(url, schema) {
+    async function createProject(url: string, schema: any) {
         await fetch(url, {
             method: 'POST',
             headers:{

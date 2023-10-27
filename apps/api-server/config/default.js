@@ -55,7 +55,6 @@ let defaultConfig = {
 			{ "route": "/api", "router": "./routes/api" },
 			{ "route": "/auth", "router": "./routes/auth" },
       { "route": "/stats", "router": "./routes/stats" },
-			{ "route": "/", "router": "./routes/doc" }
 		]
 	},
 
@@ -74,7 +73,6 @@ let defaultConfig = {
           pass: process.env.SMTP_PASSWORD || process.env.API_MAIL_TRANSPORT_SMTP_AUTH_PASS || null,
 				}
 			}
-
 		}
 	},
 
@@ -105,14 +103,14 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
     adapter: AUTH_ADAPTER || {
       openstad: AUTH_ADAPTER_OPENSTAD || {
         modulePath: process.env.AUTH_ADAPTER_OPENSTAD_MODULEPATH || './src/adapter/openstad',
-        serverUrl: process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL ||  process.env.AUTH_API_URL || null,
+        serverUrl: process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL ||  process.env.AUTH_APP_URL ||  process.env.AUTH_API_URL || null,
         serverUrlInternal: process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL_INTERNAL ||  process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL ||  process.env.AUTH_API_URL || null,
         userMapping: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING || JSON.stringify({
-          identifier: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING_IDENTIFIER || 'user_id',
+          identifier: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING_IDENTIFIER || 'user => user.user_id || user.id',
           name: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING_NAME || "user => `${user.name || ''}`.trim() || null",
           email: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING_EMAIL || "user => user.email == '' ? null : user.email",
           address: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING_ADDRESS || "user => `${user.streetName || ''} ${user.houseNumber || ''} ${user.suffix || ''}`.trim() || null",
-          role: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING_ROLE || "user => user.role || ((user.email || user.phoneNumber || user.hashedPhoneNumber) ? 'member' : 'anonymous')",
+          role: process.env.AUTH_ADAPTER_OPENSTAD_USERMAPPING_ROLE || "user => user.role || ( user.roles && user.roles[0] && user.roles[0] && user.roles[0].role && user.roles[0].role.name ) || ((user.email || user.phoneNumber || user.hashedPhoneNumber) ? 'member' : 'anonymous')",
         }),
       },
       oidc: AUTH_ADAPTER_OIDC || {

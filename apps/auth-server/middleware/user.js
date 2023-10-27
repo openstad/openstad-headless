@@ -206,11 +206,19 @@ exports.saveRoles = (req, res, next) => {
 
     Object.keys(roles).forEach((clientId) => {
       if (clientId) {
-        let roleId = roles[clientId] ? roles[clientId] : false;
-        roleId = parseInt(roleId, 10)
+        let role = roles[clientId] ? roles[clientId] : false;
+        let roleId = parseInt(role, 10)
+        if ( !( roleId && Number.isInteger(roleId)  )) {
+          let found = req.roles.find(availableRole => availableRole.name == role);
+          roleId = found && found.id;
+        }
 
-        if (roleId && Number.isInteger(roleId)){
+        if (roleId){
           let parsedClientId = parseInt(clientId.replace('\'', ''), 10);
+          if ( !( parsedClientId && Number.isInteger(parsedClientId)  )) {
+            let found = req.clients.find(availableClient => availableClient.clientId == clientId);
+            parsedClientId = found && found.id;
+          }
           saveRoles.push(() => { return createOrUpdateUserRole(parsedClientId, userId, roleId)});
         }
       }

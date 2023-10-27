@@ -103,9 +103,9 @@ const requiredFields = [
 ]
 
 const formSchema = z.object({
-    availableAuthentication: z.string().array().optional(),
-    twoFactorRoles: z.string().array().optional(),
-    requiredFields: z.string().array().optional(),
+    availableAuthentication: z.string().array().default([]),
+    twoFactorRoles: z.string().array().default([]),
+    requiredFields: z.string().array().default([]),
     emailAddressOutgoing: z.string().email(),
     emailAddressOutgoingUser: z.string(),
     contactEmail: z.string().email(),
