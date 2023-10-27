@@ -8,11 +8,11 @@ const UserRoleDropdownList = ({ roleId, addProject }:{roleId?:string, addProject
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value={"0"}>Geen deelname</SelectItem>
-                    <SelectItem value={"1"}>Administrator</SelectItem>
-                    <SelectItem value={"2"}>Normale gebruiker</SelectItem>
-                    <SelectItem value={"3"}>Anonieme gebruiker</SelectItem>
-                    <SelectItem value={"4"}>Editor</SelectItem>
-                    <SelectItem value={"5"}>Moderator</SelectItem>
+                    <SelectItem value={"admin"}>Administrator</SelectItem>
+                    <SelectItem value={"member"}>Normale gebruiker</SelectItem>
+                    <SelectItem value={"anonymous"}>Anonieme gebruiker</SelectItem>
+                    <SelectItem value={"editor"}>Editor</SelectItem>
+                    <SelectItem value={"moderator"}>Moderator</SelectItem>
                 </SelectContent>
             </Select>
     )

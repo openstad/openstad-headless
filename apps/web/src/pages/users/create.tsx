@@ -67,7 +67,9 @@ export default function CreateUser() {
     }
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        createUser(values.email, projectRoles, values.nickName, values.name, values.phoneNumber, values.address, values.city, values.postcode)
+        for (let i = 0; i < projectRoles.length; i++) {
+            createUser(values.email, projectRoles[i].projectId, projectRoles[i].roleId, values.nickName, values.name, values.phoneNumber, values.address, values.city, values.postcode)
+        }
     }
 
     if (!data) return null;
