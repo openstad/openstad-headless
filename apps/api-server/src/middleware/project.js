@@ -12,13 +12,14 @@ const getProjectId = (path) => {
 
 module.exports = function( req, res, next ) {
 
-  // @todo: inverse this middleware; Only apply it on routes that need it, instead of applying this middleware to every route and then creating exceptions for routes that don't need it
   // deze paden mogen dit overslaan
-  if (req.path.match('^(/doc|/api/repo|/api/template|/api/area|/api/widget|/api/widget-type|/$)')) return next();
+  if (req.path.match('^(/api/repo|/api/template|/api/area|/api/widget|/api/widget-type|/$)')) return next();
   if (req.path.match('^(/api/lock(/[^/]*)?)$')) return next();
   if (req.path.match('^(/api/project(/[^/]*)?)$')) return next();
+  if ((req.path.match('^(/api/user$)') && req.method == 'POST')) return next();
 
   const projectId = getProjectId(req.path);
+
   if (!projectId || typeof projectId !== 'number') return next(new createError(400, 'Project niet gevonden for path: ' + req.path));
 
   const where = { id: projectId }

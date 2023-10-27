@@ -134,7 +134,7 @@ router.route('/')
     db.User
       .scope(...req.scope)
       .findOne({
-        where: {email: req.body.email, projectId: req.params.projectId},
+        where: {email: req.body.email, projectId: req.project.id},
       })
       .then(found => {
         if (found) {
@@ -155,6 +155,7 @@ router.route('/')
       role: req.oAuthUser.role || 'member',
       lastLogin: Date.now(),
     };
+    
     db.User
       .authorizeData(data, 'create', req.user)
       .create(data)
