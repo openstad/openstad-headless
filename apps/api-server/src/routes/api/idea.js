@@ -37,7 +37,7 @@ router.all('*', function (req, res, next) {
         req.project.config.votes.isViewable) ||
         userhasModeratorRights(req.user))
     ) {
-      req.scope.push('includeVoteCount');
+      req.scope.push({ method: ['includeVoteCount', req.project.config.votes] });
     }
 
     if (
@@ -70,7 +70,7 @@ router.all('*', function (req, res, next) {
   let sort = (req.query.sort || '').replace(/[^a-z_]+/i, '');
   if (sort) {
     if (sort == 'votes_desc' || sort == 'votes_asc') {
-      if (req.canIncludeVoteCount) req.scope.push('includeVoteCount'); // het werkt niet als je dat in de sort scope functie doet...
+      if (req.canIncludeVoteCount) req.scope.push({ method: ['includeVoteCount', req.project.config.votes] }); // het werkt niet als je dat in de sort scope functie doet...
     }
     req.scope.push({ method: ['sort', req.query.sort] });
   }
