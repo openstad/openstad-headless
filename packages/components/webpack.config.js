@@ -89,24 +89,6 @@ module.exports = {
         type: 'assign-properties',
       },
     },
-
-    'hello': {
-      import: './src/Hello.jsx',
-      filename: 'hello.js',
-      library: {
-        name: 'OS20',
-        type: 'assign-properties',
-      },
-    },
-
-    'goodbye': {
-      import: './src/Goodbye.jsx',
-      filename: 'goodbye.js',
-      library: {
-        name: 'OS20',
-        type: 'assign-properties',
-      },
-    },
     
   },
 
