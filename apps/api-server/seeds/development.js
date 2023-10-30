@@ -38,9 +38,23 @@ module.exports = async function seed(config, db) {
         },
         votes: {
           isActive: true,
-          requiredUserRole: 'anonymous',
+          requiredUserRole: "anonymous",
           isViewable: true,
-        }
+          voteValues: [
+            {
+              label: "I like",
+              value: "yes"
+            },
+            {
+              label: "Don't know",
+              value: "mayby"
+            },
+            {
+              label: "I do not like",
+              value: "no"
+            }
+          ]
+        },
       },
     });
     project = await project.update({
