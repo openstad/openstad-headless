@@ -21,7 +21,7 @@ This will create the tables and relations.
 
 It will also create initial data from the seeds `directory`. This is split up in default and enviroment data. A file `local.js` here will be run, if available.
 
-Since databases are connected (e.g. the API needs to know clients info on the auth server) these scripts are also acvailable from the headless root directory:
+Since databases are connected (e.g. the API needs to know clients info on the auth server) these scripts are also available from the headless root directory:
 ```
 NODE_ENV=development npm run init-databases
 ```
