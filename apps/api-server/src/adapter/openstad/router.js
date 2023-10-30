@@ -267,9 +267,6 @@ router
 
 router
   .route('(/project/:projectId)?/logout')
-  .get(function (req, res, next) {
-    return next();
-  })
   .get(async function (req, res, next) {
     // api user
     if (req.user && req.user.id > 1) {
@@ -285,7 +282,7 @@ router
   .get(function (req, res, next) {
     if (!req.query.ipdlogout) {
       // redirect to idp server
-      let redirectUri = encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/logout?ipdlogout=done&useAuth=' + req.query.useAuth + '&redirectUri=' + req.query.redirectUri);
+      let redirectUri = encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/logout?ipdlogout=done&useAuth=' + req.query.useAuth + '&redirectUri=' + encodeURIComponent(req.query.redirectUri));
       let url = `${req.authConfig.serverUrl}/logout?redirectUrl=${redirectUri}&client_id=${req.authConfig.clientId}`;
       return res.redirect(url);
     }
