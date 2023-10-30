@@ -32,6 +32,7 @@ router.use( '/project/:projectId(\\d+)/tag', require('./tag') );
 // users
 router.use( '/project/:projectId(\\d+)/user', require('./user') );
 router.use( '/project/:projectId(\\d+)/user/:userId(\\d+)/activity', require('./user-activity') );
+router.use( '/user', require('./user') );
 
 // submissions
 router.use( '/project/:projectId(\\d+)/submission', require('./submission') );

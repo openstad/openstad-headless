@@ -1,3 +1,5 @@
+// oud, voor referentie
+
 'use strict';
 
 import OpenStadComponent from '../../component/index.jsx';

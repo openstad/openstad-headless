@@ -72,6 +72,15 @@ module.exports = {
       },
     },
 
+    'user': {
+      import: './src/user/index.jsx',
+      filename: 'user.js',
+      library: {
+        name: 'OS20',
+        type: 'assign-properties',
+      },
+    },
+
     'hello': {
       import: './src/Hello.jsx',
       filename: 'hello.js',
@@ -90,8 +99,6 @@ module.exports = {
       },
     },
     
-    'user': './src/user/index.jsx',
-
   },
 
 	output: {
