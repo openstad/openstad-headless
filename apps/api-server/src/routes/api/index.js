@@ -43,9 +43,6 @@ router.use( '/project/:projectId(\\d+)/notification', require('./notification') 
 // vote
 router.use( '/project/:projectId(\\d+)/vote', require('./vote') );
 
-// newslettersignup
-router.use( '/project/:projectId(\\d+)/newslettersignup', require('./newslettersignup') );
-
 // choices-guide
 router.use( '/project/:projectId(\\d+)/choicesguide', require('./choicesguide') );
 

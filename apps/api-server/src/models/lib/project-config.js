@@ -328,20 +328,6 @@ module.exports = {
     },
   },
 
-  newslettersignup: {
-    type: 'object',
-    subset: {
-      isActive: {
-        type: 'boolean',
-        default: false,
-      },
-      autoConfirm: {
-        type: 'boolean',
-        default: false,
-      },
-    },
-  },
-
   widgets: {
     type: "object",
     subset: {

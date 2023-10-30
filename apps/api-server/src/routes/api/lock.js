@@ -59,7 +59,7 @@ router.route('/:lockId(\\d+)')
       .catch(next);
   })
 
-// delete newslettersignup
+// delete lock
 // -----------------------
   .delete(auth.can('Lock', 'delete'))
   .delete(function(req, res, next) {
