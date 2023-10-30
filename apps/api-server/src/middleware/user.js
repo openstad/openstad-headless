@@ -33,6 +33,7 @@ module.exports = async function getUser( req, res, next ) {
 
     let isSuperUserFunc = false;
     if (req.path.match('^(/api/project/\\d+/user(?:/\\d+)?$)') && ( req.method == 'POST' || req.method == 'PUT' || req.method == 'DELETE' )) isSuperUserFunc = true;
+    if (req.path.match('^(/api/user$)') && req.method == 'GET' ) isSuperUserFunc = true;
     
     const userEntity = await getUserInstance({ authConfig, authProvider, userId, isFixed, isSuperUserFunc, projectId }) || {};
 
