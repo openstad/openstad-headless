@@ -241,7 +241,7 @@ module.exports = {
       },
       isActive: {
         type: 'boolean',
-        default: null,
+        default: false,
       },
       isActiveFrom: {
         type: 'string',
