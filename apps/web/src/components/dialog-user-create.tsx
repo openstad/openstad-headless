@@ -23,7 +23,7 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { useState } from "react";
-import useUser from '../hooks/use-user'
+import useUsers from '../hooks/use-users'
 import { useRouter } from "next/router";
 import projectListSwr from '@/hooks/use-project-list'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
@@ -39,7 +39,7 @@ export function CreateUserDialog() {
   const [open, setOpen] = useState<boolean>(false);
   const router = useRouter();
   const { data, isLoading } = projectListSwr()
-  const { createUser } = useUser()
+  const { createUser } = useUsers()
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
@@ -88,20 +88,20 @@ export function CreateUserDialog() {
               />
               <FormField
                 control={form.control}
-                name="email"
+                name="projectId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Basisproject (Een gebruiker moet altijd één project hebben.)</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a verified email to display" />
+                          <SelectValue placeholder="Selecteer een project." />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {data.map((project: any) => {
-                          <SelectItem value={project.id}>{project.name}</SelectItem>
-                        })}
+                        {data?.map((project: any) => (
+                          <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

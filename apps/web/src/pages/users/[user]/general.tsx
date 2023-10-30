@@ -2,12 +2,12 @@ import * as React from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
-import useUser from '@/hooks/use-user'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Heading } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import useUser from '@/hooks/use-user'
 
 const formSchema = z.object({
     email: z.string().email(),
@@ -20,17 +20,29 @@ const formSchema = z.object({
 })
 
 export default function CreateUserGeneral() {
-    const { createUser } = useUser()
+    const { data, isLoading, updateUser } = useUser()
+
+    const defaults = () => ({
+        email: data?.email,
+        nickName: data?.nickName || null,
+        name: data?.name || null,
+        phoneNumber: data?.phoneNumber || null,
+        address: data?.address || null,
+        city: data?.city || null,
+        postcode: data?.postcode || null,
+    })
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver<any>(formSchema),
-        defaultValues: {
-        }
+        defaultValues: defaults()
     })
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        createUser(values.email, values.nickName, values.name, values.phoneNumber, values.address, values.city, values.postcode)
+        updateUser(values)
     }
+
+    if(!data) return null;
+    console.log(data)
 
     return (
             <div>

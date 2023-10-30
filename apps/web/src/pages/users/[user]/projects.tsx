@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
 import projectListSwr from '@/hooks/use-project-list'
-import useUser from '@/hooks/use-user'
+import useUsers from '@/hooks/use-users'
 import { Form } from '@/components/ui/form'
 import { Heading, ListHeading, Paragraph } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
@@ -21,7 +21,7 @@ type ProjectRole = {
 export default function CreateUserProjects() {
     let projectRoles: Array<ProjectRole> = []
     const { data, isLoading } = projectListSwr()
-    const { createUser } = useUser()
+    const { createUser } = useUsers()
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver<any>(formSchema),

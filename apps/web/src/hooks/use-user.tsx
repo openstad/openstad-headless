@@ -1,28 +1,25 @@
-export default function useUser () { 
+import { useRouter } from 'next/router'
+import useSWR from 'swr';
 
-  async function createUser(email: string, projectId?: string, role?: string, nickName?: string, name?: string, phoneNumber?: string, address?: string, city?: string, postcode?: string) {
-    
-    
-    let url = `/api/openstad/api/project/1/user`  
+export default function useUser() {
+  const router = useRouter();
+  const userId = router.query.user;
+  const url = `/api/openstad/api/project/1/user/${userId}`;
 
+  const userSwr = useSWR(userId ? url : null);
+
+  async function updateUser(body: any) {
     const res = await fetch(url, {
-        method: 'POST',
+        method: 'PUT',
         headers: {
-            "Content-Type": "application/json"
+            'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          email: email,
-          role: role,
-          nickName: nickName,
-          name: name,
-          phoneNumber: phoneNumber,
-          address: address,
-          city: city,
-          postcode: postcode,
-        })
+        body: JSON.stringify({ ...body })
     })
+    const data = await res.json();
+
+    userSwr.mutate(data);
   }
 
-
-  return {createUser};
+  return { ...userSwr, updateUser };
 }
