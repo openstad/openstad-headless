@@ -268,70 +268,6 @@ function convertHtmlToText(html) {
   });
 }
 
-// send email to user that submitted a NewsletterSignup
-async function sendNewsletterSignupConfirmationMail(
-  newslettersignup,
-  project,
-  user
-) {
-  try {
-    let projectConfig = await new MailConfig(project);
-
-    const url = projectConfig.getCmsUrl();
-    const hostname = projectConfig.getCmsHostname();
-    const projectname = projectConfig.getTitle();
-    let fromAddress = projectConfig.getFeedbackEmailFrom() || config.email;
-    if (fromAddress.match(/^.+<(.+)>$/, '$1'))
-      fromAddress = fromAddress.replace(/^.+<(.+)>$/, '$1');
-
-    const confirmationUrl = projectConfig
-      .getNewsletterSignupConfirmationEmailUrl()
-      .replace(/\[\[token\]\]/, newslettersignup.confirmToken);
-    const logo = projectConfig.getLogo();
-
-    const data = {
-      date: new Date(),
-      user: user,
-      HOSTNAME: hostname,
-      PROJECTNAME: projectname,
-      confirmationUrl,
-      URL: url,
-      EMAIL: fromAddress,
-      logo: logo,
-    };
-
-    let html;
-    let template = projectConfig.getNewsletterSignupConfirmationEmailTemplate();
-    if (template) {
-      html = nunjucks.renderString(template, data);
-    } else {
-      html = nunjucks.render('confirm_newsletter_signup.njk', data);
-    }
-
-    const text = htmlToText.fromString(html, {
-      ignoreImage: true,
-      hideLinkHrefIfSameAsText: true,
-      uppercaseHeadings: false,
-    });
-
-    const attachments =
-      projectConfig.getNewsletterSignupConfirmationEmailAttachments();
-
-    sendMail(project, {
-      to: newslettersignup.email,
-      from: fromAddress,
-      subject:
-        projectConfig.getNewsletterSignupConfirmationEmailSubject() ||
-        'Bedankt voor je aanmelding',
-      html: html,
-      text: text,
-      attachments,
-    });
-  } catch (err) {
-    console.error(err);
-  }
-}
-
 // send email to user that is about to be anonymized
 // todo: this is a copy of sendThankYouMail and has too many code duplications; that should be merged. But since there is a new notification system that should be implemented more widly I am not going to spent time on that now
 async function sendInactiveWarningEmail(project, user) {
@@ -419,6 +355,5 @@ module.exports = {
   sendNotificationMail,
   sendThankYouMail,
   sendConceptEmail,
-  sendNewsletterSignupConfirmationMail,
   sendInactiveWarningEmail,
 };

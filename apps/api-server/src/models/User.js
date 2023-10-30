@@ -292,12 +292,6 @@ module.exports = function (db, sequelize, DataTypes) {
       defaultValue: null,
     },
 
-    // signedUpForNewsletter: {
-    //  	type         : DataTypes.BOOLEAN,
-    //  	allowNull    : false,
-    //  	defaultValue : false
-    // },
-
   }, {
     charset: 'utf8',
 
@@ -552,7 +546,6 @@ module.exports = function (db, sequelize, DataTypes) {
         address: null,
         phoneNumber: null,
         extraData,
-        signedUpForNewsletter: 0,
         lastLogin: '1970-01-01T00:00:00.000Z',
         isNotifiedAboutAnonymization: null,
       })

@@ -151,37 +151,6 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
       },
     },
   },
-  
-  newslettersignup: {
-    type: 'object',
-    subset: {
-      "confirmationEmail": {
-        type: 'object',
-        subset: {
-          from: {
-            type: 'string', // todo: add type email/list of emails
-            default: 'EMAIL@NOT.DEFINED',
-          },
-          subject: {
-            type: 'string',
-            default: undefined,
-          },
-          url: {
-            type: 'string',
-            default: "/PATH/TO/CONFIRMATION/[[token]]",
-          },
-          template: {
-            type: 'string',
-          default: `NO TEMPLATE DEFINED`,
-          },
-          attachments: {
-            type: 'arrayOfStrings',
-            default: []
-          },
-        },
-      },
-    },
-  },
 
   styling: { // used by emails
     type: 'object',
