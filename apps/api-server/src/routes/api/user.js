@@ -38,10 +38,30 @@ const router = express.Router({mergeParams: true});
 
 router
   .all('*', function (req, res, next) {
-    req.scope = ['includeProject'];
-    next();
+
+    req.scope = [];
+
+    if (req.query.includeProject) {
+      req.scope.push('includeProject');
+    }
+
+    return next();
+
   });
 
+router
+// /user is only available for admins
+  .all('*', function (req, res, next) {
+    if (req.project) {
+      return next();
+    } else {
+      if (req.method == 'GET' && hasRole(req.user, 'admin')) {
+        return next();
+      }
+    }
+    return next( new Error('Project not found') );
+
+  });
 
 router.route('/')
 // list users

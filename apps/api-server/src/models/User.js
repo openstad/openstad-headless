@@ -336,6 +336,7 @@ module.exports = function (db, sequelize, DataTypes) {
   User.scopes = function scopes() {
 
     return {
+
       includeProject: {
         include: [{
           model: db.Project,
