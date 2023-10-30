@@ -16,7 +16,10 @@ export default async function doFetch(url = '', options = {}) {
   
   if (!response.ok) {
     let body = await response.json();
-    throw new Error( body.error || body.message || response.statusText );
+    let error = new Error( body.error || body.message || response.statusText );
+	  let event = new window.CustomEvent('osc-error', { detail: error });
+	  document.dispatchEvent(event);
+    throw error;
   }
 
   let json = await response.json();

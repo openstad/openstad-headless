@@ -16,8 +16,8 @@ export default function useIdea(props) {
     idea.delete = function(newData) {
       self.mutate({ projectId, ideaId }, 'idea.delete', idea, { action: 'delete' });
     }
-    idea.submitLike = function() {
-      self.mutate({ projectId, ideaId }, 'idea.submitLike', idea, { action: 'update' });
+    idea.submitLike = function(vote) {
+      self.mutate({ projectId, ideaId }, 'idea.submitLike', vote, { action: 'submitLike', revalidate: true });
     }
 
   return [ idea, error, isLoading ];

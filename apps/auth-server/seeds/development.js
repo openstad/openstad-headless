@@ -50,7 +50,7 @@ module.exports = async function seed(db) {
       clientId: 'anonymous',
       clientSecret: 'anonymous123',
       authTypes: JSON.stringify(['Anonymous']),
-      requiredUserFields: JSON.stringify(['name']),
+      requiredUserFields: JSON.stringify(['postcode']),
       allowedDomains: JSON.stringify(allowedDomains),
       config: JSON.stringify({}),
     });

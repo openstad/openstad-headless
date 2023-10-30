@@ -1,4 +1,12 @@
-const roles = require('./roles');
+const roles = {
+  admin: ['admin', 'editor', 'moderator', 'member', 'anonymous', 'all'],
+  editor: ['editor', 'moderator', 'member', 'anonymous', 'all'],
+  moderator: ['moderator', 'member', 'anonymous', 'all'],
+  member: ['member', 'anonymous', 'all'],
+  anonymous: ['anonymous', 'all'],
+  all: ['all'],   // special
+  owner: null, // special
+}
 
 module.exports = function hasRole(user, minRoles, ownerId) {
 

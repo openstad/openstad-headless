@@ -30,6 +30,7 @@ function API(props = { config: {} }) {
   self.idea = {
     fetch: idea.fetch.bind(self),
     update: idea.update.bind(self),
+    submitLike: idea.submitLike.bind(self),
   }
 
   self.ideas = {
