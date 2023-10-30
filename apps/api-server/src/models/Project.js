@@ -268,7 +268,7 @@ module.exports = function (db, sequelize, DataTypes) {
     if ( ( voteIsActive == null || typeof voteIsActive == 'undefined' ) && self.config.votes.isActiveFrom && self.config.votes.isActiveTo ) {
       let isActiveFromTimestamp = new Date( self.config.votes.isActiveFrom ).getTime();
       let isActiveToTimestamp = new Date( self.config.votes.isActiveTo ).getTime();
-      let nowTimestamp = new Date().getTime;
+      let nowTimestamp = new Date().getTime();
       voteIsActive = isActiveFromTimestamp < nowTimestamp && isActiveToTimestamp > nowTimestamp;
     }
     return voteIsActive;

@@ -164,7 +164,7 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
         minute: '2-digit',
       }
     ],
-	  timeZone : process.env.TIMEZONE ||process.env.API_TIMEZONE || 'Europe/Amsterdam',
+	  timeZone : process.env.TZ || process.env.TIMEZONE || process.env.API_TIMEZONE || 'Europe/Amsterdam',
   },
 
   dev: {

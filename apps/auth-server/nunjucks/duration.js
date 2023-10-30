@@ -36,8 +36,6 @@ function duration( ms ) {
   durationObject.seconds = parseInt( ms / oneSecond );
   ms = ms - durationObject.seconds * oneSecond;
 
-  console.log(durationObject);
-
   return i18nNames
     .filter(entry => durationObject[ entry[0] ] && durationObject[ entry[0] ] !== 0)
     .map(entry => `${durationObject[ entry[0] ]} ${ durationObject[ entry[0] ] ==1 ? entry[1] : entry[2] }`)
