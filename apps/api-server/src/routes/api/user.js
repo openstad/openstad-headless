@@ -38,10 +38,30 @@ const router = express.Router({mergeParams: true});
 
 router
   .all('*', function (req, res, next) {
-    req.scope = ['includeProject'];
-    next();
+
+    req.scope = [];
+
+    if (req.query.includeProject) {
+      req.scope.push('includeProject');
+    }
+
+    return next();
+
   });
 
+router
+// /user is only available for admins
+  .all('*', function (req, res, next) {
+    if (req.project) {
+      return next();
+    } else {
+      if (req.method == 'GET' && hasRole(req.user, 'admin')) {
+        return next();
+      }
+    }
+    return next( new Error('Project not found') );
+
+  });
 
 router.route('/')
 // list users
@@ -49,17 +69,20 @@ router.route('/')
 // .get(auth.can('User', 'list')) -> now handled by onlyListable
   .get(function (req, res, next) {
     req.scope.push({method: ['onlyListable', req.user.id, req.user.role]});
-    next();
+    return next();
+  })
+  .get(function (req, res, next) {
+    return next();
   })
   .get(pagination.init)
   .get(function (req, res, next) {
 
     let { dbQuery } = req;
     dbQuery.where = {
-      projectId: req.params.projectId,
       ...req.queryConditions,
       ...dbQuery.where,
     };
+    if (req.params.projectId) dbQuery.where.projectId = req.params.projectId;
 
     db.User
       .scope(...req.scope)

@@ -16,7 +16,7 @@ module.exports = function( req, res, next ) {
   if (req.path.match('^(/api/repo|/api/template|/api/area|/api/widget|/api/widget-type|/$)')) return next();
   if (req.path.match('^(/api/lock(/[^/]*)?)$')) return next();
   if (req.path.match('^(/api/project(/[^/]*)?)$')) return next();
-  if ((req.path.match('^(/api/user$)') && req.method == 'POST')) return next();
+  if ((req.path.match('^(/api/user$)') && ( req.method == 'GET' || req.method == 'POST' ))) return next();
 
   const projectId = getProjectId(req.path);
 
