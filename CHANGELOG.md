@@ -41,6 +41,7 @@
 * Bugfix: new users are now created withoud a random password
 * Merge first- and lastname to name
 * Remove mongo dependency
+* Delete access tokens on logout
 
 ### Image server
 * Refactor init database, merge seeds and fixtures
