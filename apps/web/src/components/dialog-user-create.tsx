@@ -25,9 +25,12 @@ import { Input } from "./ui/input";
 import { useState } from "react";
 import useUser from '../hooks/use-user'
 import { useRouter } from "next/router";
+import projectListSwr from '@/hooks/use-project-list'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 const formSchema = z.object({
-  email: z.string().email()
+  email: z.string().email(),
+  projectId: z.string()
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -35,6 +38,7 @@ type FormData = z.infer<typeof formSchema>;
 export function CreateUserDialog() {
   const [open, setOpen] = useState<boolean>(false);
   const router = useRouter();
+  const { data, isLoading } = projectListSwr()
   const { createUser } = useUser()
 
   const form = useForm<FormData>({
@@ -44,8 +48,10 @@ export function CreateUserDialog() {
     },
   });
 
+  if(!data) return null;
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    createUser(values.email)
+    createUser(values.email, values.projectId)
   }
 
   return (
@@ -76,6 +82,28 @@ export function CreateUserDialog() {
                         placeholder="E-mail van de gebruiker"
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Basisproject (Een gebruiker moet altijd één project hebben.)</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a verified email to display" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {data.map((project: any) => {
+                          <SelectItem value={project.id}>{project.name}</SelectItem>
+                        })}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

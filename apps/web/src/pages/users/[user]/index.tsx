@@ -1,23 +1,5 @@
 import * as React from 'react'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import { useForm } from 'react-hook-form'
-
-import { Button } from "../../../components/ui/button"
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage
-} from "../../../components/ui/form"
-import { Input } from "../../../components/ui/input"
 import { PageLayout } from '../../../components/ui/page-layout'
-import { Heading, ListHeading, Paragraph } from '@/components/ui/typography'
-import { Separator } from '@/components/ui/separator'
-import projectListSwr from '@/hooks/use-project-list'
-import DropdownList from '@/components/dropdown-list'
 import { useRouter } from 'next/router'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import CreateUserGeneral from './general'

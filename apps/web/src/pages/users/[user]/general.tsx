@@ -2,13 +2,11 @@ import * as React from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
-import projectListSwr from '@/hooks/use-project-list'
 import useUser from '@/hooks/use-user'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Heading, ListHeading, Paragraph } from '@/components/ui/typography'
+import { Heading } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
 import { Input } from '@/components/ui/input'
-import DropdownList from '@/components/dropdown-list'
 import { Button } from '@/components/ui/button'
 
 const formSchema = z.object({
@@ -133,7 +131,7 @@ export default function CreateUserGeneral() {
                             </FormItem>
                         )}
                         />
-                        <Button type='submit' variant='default'>Aanmaken</Button>
+                        <Button type='submit' variant='default'>Aanpassen</Button>
                     </form>
                 </Form>
             </div>

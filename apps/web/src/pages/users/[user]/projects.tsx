@@ -4,10 +4,9 @@ import * as z from 'zod'
 import { useForm } from 'react-hook-form'
 import projectListSwr from '@/hooks/use-project-list'
 import useUser from '@/hooks/use-user'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form } from '@/components/ui/form'
 import { Heading, ListHeading, Paragraph } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
-import { Input } from '@/components/ui/input'
 import DropdownList from '@/components/dropdown-list'
 import { Button } from '@/components/ui/button'
 
@@ -56,44 +55,44 @@ export default function CreateUserProjects() {
     if (!data) return null;
 
     return (
-            <div>
-                <Form {...form}>
-                    <Heading size="xl" className="mb-4">
-                        Gebruiker • Projectsrechten
-                    </Heading>
-                    <Separator className="mb-4" />
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <div className="container mx-auto">
-                            <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-2 border-b border-border">
-                                <ListHeading className="hidden md:flex md:col-span-2">
-                                Projectnaam
-                                </ListHeading>
-                                <ListHeading className="hidden md:flex md:col-span-2">
-                                Rol
-                                </ListHeading>
-                            </div>
-                            <ul>
-                                {data.map((project: any) => {
-                                    return (
-                                        <li className='grid grid-cols-2 md:grid-cols-12 items-center py-3 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2'>
-                                            <Paragraph className='hidden md:flex'>
-                                                {project.name}
-                                            </Paragraph>
-                                            <Paragraph className='hidden md:flex'>
-                                                <DropdownList roleId='0' addProject={(roleId) => {
-                                                    addProject(project.id, roleId )
-                                                }}
-                                                    />
-                                            </Paragraph>
-                                        </li>
-                                    )
-                                })}
-                            </ul>
-                        </div>   
-                        <Button type='submit' variant='default'>Aanmaken</Button>
-                    </form>
-                </Form>
-            </div>
+        <div>
+            <Form {...form}>
+                <Heading size="xl" className="mb-4">
+                    Gebruiker • Projectsrechten
+                </Heading>
+                <Separator className="mb-4" />
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <div className="container mx-auto">
+                        <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-2 border-b border-border">
+                            <ListHeading className="hidden md:flex md:col-span-2">
+                            Projectnaam
+                            </ListHeading>
+                            <ListHeading className="hidden md:flex md:col-span-2">
+                            Rol
+                            </ListHeading>
+                        </div>
+                        <ul>
+                            {data.map((project: any) => {
+                                return (
+                                    <li className='grid grid-cols-2 md:grid-cols-12 items-center py-3 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2'>
+                                        <Paragraph className='hidden md:flex'>
+                                            {project.name}
+                                        </Paragraph>
+                                        <Paragraph className='hidden md:flex'>
+                                            <DropdownList roleId='0' addProject={(roleId) => {
+                                                addProject(project.id, roleId )
+                                            }}
+                                                />
+                                        </Paragraph>
+                                    </li>
+                                )
+                            })}
+                        </ul>
+                    </div>
+                    <Button type='submit' variant='default'>Aanpassen</Button>
+                </form>
+            </Form>
+        </div>
     )
 }
 
