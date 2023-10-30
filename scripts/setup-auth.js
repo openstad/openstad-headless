@@ -109,31 +109,6 @@ SESSION_SECRET=${process.env.AUTH_SESSION_SECRET}
       console.log('------------------------------');
       console.log('Auth database already initialized');
     }
-
-    // init db oud
-    // if (doCreateDBTables) {
-    //  
-    //   console.log('------------------------------');
-    //   console.log('Create database tables');
-    //   await execute('../node_modules/knex/bin/cli.js', ['migrate:latest'], { cwd: './apps/auth-server', env: { ...process.env } });
-    //   await execute ('../node_modules/knex/bin/cli.js', ['seed:run'], { cwd: './apps/auth-server', env: { ...process.env,  AUTH_FIRST_CLIENT_ID: config.AUTH_FIRST_CLIENT_ID, AUTH_FIRST_CLIENT_SECRET: config.AUTH_FIRST_CLIENT_SECRET, AUTH_ADMIN_CLIENT_ID: config.AUTH_ADMIN_CLIENT_ID, AUTH_ADMIN_CLIENT_SECRET: config.AUTH_ADMIN_CLIENT_SECRET, FRONTEND_URL: config.FRONTEND_APP_URL, ADMIN_URL: config.ADMIN_APP_URL, API_URL: config.API_URL, } } );
-    //   
-    // } else {
-    //  
-    //   console.log('------------------------------');
-    //   console.log('Database tables already exist - update records');
-    //  
-    //   const siteUrl = config.FRONTEND_APP_URL;
-    //   const adminUrl = config.ADMIN_APP_URL;
-    //  
-    //   let allowedDomains = process.env.NODE_ENV === 'development' ? ['localhost'] : [];
-    //   allowedDomains.push((config.API_URL || '').replace('http://', '').replace('https://', '').replace(/\/$/, ""));
-    //   allowedDomains = JSON.stringify(allowedDomains);
-    //  
-    //   await connection.query('UPDATE clients SET siteUrl = ?, clientId = ?, clientSecret = ?, allowedDomains = ? WHERE id = 1;', [siteUrl,  config.AUTH_FIRST_CLIENT_ID, config.AUTH_FIRST_CLIENT_SECRET, allowedDomains]);
-    //   await connection.query('UPDATE clients SET siteUrl = ?, clientId = ?, clientSecret = ?, allowedDomains = ? WHERE id = 2;', [adminUrl, config.AUTH_ADMIN_CLIENT_ID, config.AUTH_ADMIN_CLIENT_SECRET, allowedDomains]);
-    //  
-    // }
     
   } catch(err) {
     console.log('------------------------------');
