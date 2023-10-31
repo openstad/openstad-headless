@@ -41,7 +41,6 @@ function App(props: Props) {
 
   useEffect(() => {
     if (data) {
-      console.log({ data });
       setYesVotes(data?.yes || 0);
       setNoVotes(data?.no || 0);
     }
