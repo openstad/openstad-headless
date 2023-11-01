@@ -1,10 +1,10 @@
-$widgetContainerBg: #E9ECEF;
+@use '../../index' as colors;
+
 $backgroundItemColor: #FFFFFF;
 $titleTextColor: #000000;
 $textColor: #667085;
 
 $progressBarColor: #e0e0de;
-$progressTrackerColor: #12B886;
 $progressTextColor: #000000;
 
 
@@ -18,7 +18,7 @@ $progressTextColor: #000000;
   flex-direction: column;
   gap: 8px;
   padding: 24px;
-  background-color: $widgetContainerBg;
+  background-color: colors.$background;
 }
 
 .like-widget-title {
@@ -73,7 +73,7 @@ p {margin: 0;}
   
   .progressbar-tracker {
     height: 100%;
-    background-color: $progressTrackerColor;
+    background-color: colors.$primary;
     border-radius: inherit;
   }
 
