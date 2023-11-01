@@ -1,15 +1,13 @@
 const webpack = require('webpack');
-const path = require("path");
+const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
+  mode: 'production',
 
-	mode: 'production',
-
-	entry: {
-
-    'all': {
+  entry: {
+    all: {
       import: './src/index.jsx',
       filename: 'index.js',
       library: {
@@ -18,7 +16,7 @@ module.exports = {
       },
     },
 
-    'about': {
+    about: {
       import: './src/about/index.jsx',
       filename: 'about.js',
       library: {
@@ -27,7 +25,7 @@ module.exports = {
       },
     },
 
-    'button': {
+    button: {
       import: './src/button/index.jsx',
       filename: 'button.js',
       library: {
@@ -36,7 +34,7 @@ module.exports = {
       },
     },
 
-    'forms': {
+    forms: {
       import: './src/forms/index.jsx',
       filename: 'forms.js',
       library: {
@@ -45,7 +43,7 @@ module.exports = {
       },
     },
 
-    'comments': {
+    comments: {
       import: './src/comments/index.jsx',
       filename: 'comments.js',
       library: {
@@ -81,7 +79,7 @@ module.exports = {
       },
     },
 
-    'user': {
+    user: {
       import: './src/user/index.jsx',
       filename: 'user.js',
       library: {
@@ -89,108 +87,109 @@ module.exports = {
         type: 'assign-properties',
       },
     },
-    
   },
 
-	output: {
+  output: {
     devtoolNamespace: 'mycomponents',
-		path: path.resolve(__dirname + '/dist'),
-		filename: '[name].js',
+    path: path.resolve(__dirname + '/dist'),
+    filename: '[name].js',
     library: ['OpenStad', '[name]'],
     libraryTarget: 'window',
-	},
+  },
 
-	externals: {
-    'react': 'React',
+  externals: {
+    react: 'React',
     'react-dom': 'ReactDOM',
-	},
+  },
 
   devtool: false,
 
   plugins: [
-		new webpack.SourceMapDevToolPlugin({
-			 filename: '[file].map',
-		}),
-		new MiniCssExtractPlugin({
-			filename: 'css/[name].css',
-			ignoreOrder: false,
-		}),
-//    new webpack.ProvidePlugin({
-//      Promise: 'es6-promise-promise',
-//    }),
+    new webpack.SourceMapDevToolPlugin({
+      filename: '[file].map',
+    }),
+    new MiniCssExtractPlugin({
+      filename: 'css/[name].css',
+      ignoreOrder: false,
+    }),
+    //    new webpack.ProvidePlugin({
+    //      Promise: 'es6-promise-promise',
+    //    }),
   ],
 
-	optimization: {
-		minimize: true,
-		minimizer: [new TerserPlugin()],
-	},
+  optimization: {
+    minimize: true,
+    minimizer: [new TerserPlugin()],
+  },
 
   resolve: {
-    extensions: [".*", ".js", ".jsx", ".css", ".less"],
+    extensions: ['.*', '.js', '.jsx', 'ts', 'tsx', '.css', '.less'],
   },
 
   module: {
     rules: [
-
+      {
+        test: /\.(ts|tsx)$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
       // js and react
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        use: ["babel-loader"],
+        use: ['babel-loader'],
       },
 
-			{
-				test: /\.less$/,
-				use: [
-					{
-						loader: MiniCssExtractPlugin.loader,
-						options: {
-//							hmr: process.env.NODE_ENV === 'development',
-						},
-					},
-					'css-loader',
-					'less-loader',
-				],
-			},
- 
-			{
-				test: /\.css$/,
-				use: [
-					{
-						loader: MiniCssExtractPlugin.loader, 
-						options: {
-							publicPath: '../'
-						}
-					},
-					'css-loader',
-					{
-						loader: 'postcss-loader',
-						options: {
-							postcssOptions: {
-								plugins: [
-									[
-										'postcss-preset-env',
-										{
-											// Options
-										},
-									],
-								],
-							},
-						},
-					},
-				]
-			},
- 
-			{ // other images
-				test: /\.(png|jpe?g|gif|svg)$/i,
+      {
+        test: /\.less$/,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              //							hmr: process.env.NODE_ENV === 'development',
+            },
+          },
+          'css-loader',
+          'less-loader',
+        ],
+      },
+
+      {
+        test: /\.css$/,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              publicPath: '../',
+            },
+          },
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [
+                  [
+                    'postcss-preset-env',
+                    {
+                      // Options
+                    },
+                  ],
+                ],
+              },
+            },
+          },
+        ],
+      },
+
+      {
+        // other images
+        test: /\.(png|jpe?g|gif|svg)$/i,
         type: 'asset/resource',
-       generator: {
-         filename: 'images/[name].[ext]'
-
-       },
-			},
-
+        generator: {
+          filename: 'images/[name].[ext]',
+        },
+      },
     ],
   },
-
 };
