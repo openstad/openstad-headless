@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>OpenStad Headless Demo</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <link rel="stylesheet" href="css/all.css"/>
+    <script src="/index.js"></script>
+    <script>
+      let config = {
+        "api": {
+          "url": "http://localhost:31410"
+        },
+        "login": {
+          "url": "http://localhost:31410/auth/project/2/login?useAuth=anonymous&redirectUri=http://localhost:3333/idea-details"
+        },
+        "projectId": 2,
+        "cmsUser": null,
+        "openStadUser": null,
+        "ideaId": 1,
+        "votes": {
+          "isViewable": true,
+          "isActive": true,
+          "requiredUserRole": "anonymous",
+          "voteType": "likes",
+        }
+
+      }
+	    window.addEventListener('load', function(e) {
+        OS20['IdeaDetails'].loadWidget('component-container', { config: { ...config,  } } );
+      })
+    </script>
+  </head>
+  <body style="font-family: sans; background-color: #eee;">
+
+    <div class="page" style="width: 500px; min-height: 600px; padding 20px;; margin: 0 auto; background-color: white;">
+      
+      <div class="header">
+        <h2>OpenStad Headless Demo</h2>
+      </div>
+
+      <div id="components">
+        <div id="component-container">
+        </div>
+      </div>
+
+    </div>
+    
+  </body>
+</html>

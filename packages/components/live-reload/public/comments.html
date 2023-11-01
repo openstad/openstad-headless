@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>OpenStad Headless Demo</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <link rel="stylesheet" href="css/all.css"/>
+    <script src="/index.js"></script>
+    <script>
+      let config = {
+        "api": {
+          "url": "http://localhost:31410"
+        },
+        "login": {
+          "url": "http://localhost:31410/auth/project/2/login?useAuth=default&forceNewLogin=1&redirectUri=http://localhost:3333/comments"
+        },
+        "projectId": 2,
+        "cmsUser": null,
+        "openStadUser": null,
+        "ideaId": "1",
+        "title": "[[nr]] reacties voor",
+        "isClosed": false,
+        "closedText": "Het inzenden van reacties is niet langer mogelijk",
+        "isVotingEnabled": true,
+        "isReplyingEnabled": false,
+        "descriptionMinLength": "2",
+        "descriptionMaxLength": "3141",
+        "placeholder": "Type wat leuks",
+        "formIntro": ""
+      }
+	    window.addEventListener('load', function(e) {
+        OS20['Comments'].loadWidget('component-container', { config: { ...config, sentiment: 'for' } } );
+      })
+    </script>
+  </head>
+  <body style="font-family: sans; background-color: #eee;">
+
+    <div class="page" style="width: 500px; min-height: 600px; padding 20px;; margin: 0 auto; background-color: white;">
+      
+      <div class="header">
+        <h2>OpenStad Headless Demo</h2>
+      </div>
+
+      <div id="components">
+        <div id="component-container">
+        </div>
+      </div>
+
+    </div>
+    
+  </body>
+</html>
