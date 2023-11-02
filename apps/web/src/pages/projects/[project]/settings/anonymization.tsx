@@ -37,7 +37,7 @@ export default function ProjectSettingsAnonymization() {
 
     const router = useRouter();
     const { project } = router.query;
-    const { data, isLoading, updateProject, updateProjectEmails } = useProject();
+    const { data, isLoading, updateProject, updateProjectEmails, anonymizeUsersOfProject } = useProject();
     const defaults = () => ({
         anonymizeUsersXDaysAfterEndDate: data?.config?.[category]?.anonymizeUsersXDaysAfterEndDate || null,
         warnUsersAfterXDaysOfInactivity: data?.config?.[category]?.warnUsersAfterXDaysOfInactivity || null,
@@ -69,7 +69,7 @@ export default function ProjectSettingsAnonymization() {
             await updateProject({ 
                 [category]: values})
         } catch (error) {
-         console.error('could not update', error)   
+         console.error('Could not update', error)   
         }
     }
 
@@ -83,7 +83,16 @@ export default function ProjectSettingsAnonymization() {
                     }
                 }});
         } catch (error) {
-         console.error('could not update', error)   
+         console.error('Could not update', error)   
+        }
+    }
+
+    async function anonymizeAllUsers() {
+        console.log('a')
+        try {
+            await anonymizeUsersOfProject();
+        } catch (error) {
+            console.error('Could not anonymize the users', error)
         }
     }
 
@@ -110,7 +119,7 @@ export default function ProjectSettingsAnonymization() {
                     <p>Anonimiseer gebruikers direct</p>
                     <p>Let op! Deze actie is definitief en kan niet ongedaan gemaakt worden.</p>
                     <p>{`Het project moet eerst aangemerkt staan als 'beëindigd' voordat deze actie uitgevoerd kan worden.`}</p>
-                    <Button variant={"destructive"} className='mt-4'>Gebruikersgegevens anonimiseren</Button>
+                    <Button variant={"destructive"} className='mt-4' onClick={() => {anonymizeAllUsers()}}>Gebruikersgegevens anonimiseren</Button>
                 </div>
                   <br/>  
                   <Form {...form}>

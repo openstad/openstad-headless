@@ -14,7 +14,7 @@ import useSWR from "swr";
       if (name) {
         const res = await fetch(`/api/openstad/api/project/${projectId}`, {
           method: 'PUT',
-          headers:{
+          headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({config, name})
@@ -25,7 +25,7 @@ import useSWR from "swr";
       } else {
         const res = await fetch(`/api/openstad/api/project/${projectId}`, {
           method: 'PUT',
-          headers:{
+          headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({config})
@@ -40,7 +40,7 @@ import useSWR from "swr";
 
       const res = await fetch(`/api/openstad/api/project/${projectId}`, {
         method: 'PUT',
-        headers:{
+        headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({emailConfig})
@@ -50,5 +50,17 @@ import useSWR from "swr";
       projectSwr.mutate(data);
     }
 
-    return {...projectSwr, updateProject, updateProjectEmails};
+    async function anonymizeUsersOfProject() {
+      const res = await fetch(`/api/openstad/api/project/${projectId}/do-anonymize-all-users`, {
+        method: 'PUT',
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      const data = await res.json();
+
+      console.log(data);
+    }
+
+    return {...projectSwr, updateProject, updateProjectEmails, anonymizeUsersOfProject};
   }
