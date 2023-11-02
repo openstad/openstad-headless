@@ -2,7 +2,7 @@ import 'remixicon/fonts/remixicon.css';
 import ProgressBar from '../../progressbar';
 import useSWR from 'swr';
 import { useEffect, useState } from 'react';
-import './index.scss';
+import './index.css';
 
 type Props = {
   projectId?: string;

@@ -1,5 +1,7 @@
 import 'remixicon/fonts/remixicon.css';
 import Likes from './widgets/like';
+import Arguments from './widgets/arguments';
+import './index.css';
 
 function App() {
   return (
@@ -10,6 +12,9 @@ function App() {
         apiUrl="http://localhost:31410"
         config={{}}
       />
+
+      <br />
+      <Arguments />
     </>
   );
 }

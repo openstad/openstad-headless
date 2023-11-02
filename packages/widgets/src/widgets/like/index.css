@@ -1,29 +1,18 @@
-@use '../../index' as colors;
-
-$backgroundItemColor: #FFFFFF;
-$titleTextColor: #000000;
-$textColor: #667085;
-
-$progressBarColor: #e0e0de;
-$progressTextColor: #000000;
-
-
-
 #like-widget-container {
   font-family: 'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
 
   display: grid;
-  color: $textColor;
+  color: var(--muted);
   margin: 0px;
   flex-direction: column;
   gap: 8px;
   padding: 24px;
-  background-color: colors.$background;
+  background-color: var(--card);
 }
 
 .like-widget-title {
   margin: 0;
-  color:$titleTextColor;
+  color: var(--foreground);
 }
 
 .like-option {
@@ -39,12 +28,12 @@ $progressTextColor: #000000;
   gap: 8px;
   padding: 8px;
   align-items: center;
-  background-color: $backgroundItemColor;
+  background-color: var(--input);
 }
 
 .like-counter {
   padding: 8px 16px;
-  background-color: $backgroundItemColor;
+  background-color: var(--input);
 }
 
 p {margin: 0;}
@@ -55,9 +44,7 @@ p {margin: 0;}
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-  gap: 8px;
-  color: $progressTextColor;
-  
+  gap: 8px;  
   p {
     font-size: 14px;
   }
@@ -66,18 +53,19 @@ p {margin: 0;}
 .progressbar {
     height: 8px;
     width: 100%;
-    background-color: $progressBarColor;
+    background-color: var(--border);
     border-radius: 50px;
     overflow-x: hidden;
   }
   
   .progressbar-tracker {
     height: 100%;
-    background-color: colors.$primary;
+    background-color: var(--primary);
     border-radius: inherit;
   }
 
   .progressbar-counter {
     font-weight: 600;
     text-align: center;
+    color: var(--foreground)
   }
