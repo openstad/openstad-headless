@@ -24,10 +24,10 @@ export default function CreateUserGeneral() {
 
     const defaults = () => ({
         email: data?.email,
-        nickName: data?.nickName || null,
+        nickName: data?.nickName,
         name: data?.name || null,
         phoneNumber: data?.phoneNumber || null,
-        address: data?.address || null,
+        address: data?.address,
         city: data?.city || null,
         postcode: data?.postcode || null,
     })
@@ -70,7 +70,7 @@ export default function CreateUserGeneral() {
                         name="nickName"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Gebruikersnaam</FormLabel>
+                                <FormLabel>Gebruikersnaam (Alleen gebruikt als 'nicknames in projecten' aan staat.)</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>

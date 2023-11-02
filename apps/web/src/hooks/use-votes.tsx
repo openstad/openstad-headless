@@ -1,10 +1,9 @@
 import useSWR from "swr";
 
+export default function useVotes (projectId?: string) { 
+  const url = `/api/openstad/api/project/${projectId}/vote`;
 
-export default function useVotes () { 
+  const votesSwr = useSWR(projectId ? url : null)
 
-  const votesSwr = useSWR('/api/openstad/api/votes');
-
-
-  return {...votesSwr};
+  return { ...votesSwr };
 }
