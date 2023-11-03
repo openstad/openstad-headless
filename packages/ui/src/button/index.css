@@ -7,12 +7,13 @@ button {
     border-radius: 0.375rem;
     gap: .5rem;
     background-color: var(--primary);
-    color: var(--primary-foreground,red);
+    color: var(--primary-foreground);
 }
 
 button.ghost {
+    padding: 0;
     display: inline-flex;
-    align-items: end;
+    align-items: center;
     gap: .5rem;
     border: none;
     background-color: var(--background);
@@ -25,8 +26,4 @@ button > i {
 
 button.ghost:hover {
     color: var(--muted);
-}
-
-button.ghost.active {
-    /* color: var(--primary); */
 }

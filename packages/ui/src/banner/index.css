@@ -1,10 +1,14 @@
 .banner {
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     background-color: var(--card);
     padding:.5rem
 }
 
 .banner > p {
+
     color: var(--card-foreground);
 }
 
