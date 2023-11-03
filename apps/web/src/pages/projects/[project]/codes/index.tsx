@@ -12,6 +12,13 @@ export default function ProjectCodes() {
     const { project } = router.query;
     const { data, isLoading } = useSWR("/api/openstad/api/project");
 
+    const download = () => {
+        const dummyData = "a,b,c\n";
+        const csvContent = `data:text/csv;charset=utf-8,${dummyData}`;
+        const encodedURI = encodeURI(csvContent);
+        window.open(encodedURI);
+    };
+
     if (!data) return null;
 
     return (
@@ -36,11 +43,9 @@ export default function ProjectCodes() {
                                 Creëer unieke codes
                             </Button>
                         </Link>
-                        <Link href="/projects/1/codes/export" className="pl-6">
-                            <Button variant="default">
-                                Exporteer unieke codes
-                            </Button>
-                        </Link>
+                        <Button variant="default" onClick={download} className="ml-6">
+                            Exporteer unieke codes
+                        </Button>
                     </div>
                 }
             >

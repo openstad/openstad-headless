@@ -12,10 +12,7 @@ export default function ProjectWidgets() {
   const { project } = router.query;
   const types = WidgetDefinitions;
 
-  const { data: widgets, isLoading:isLoadingWidgets } = useWidgetsHook(project as string);
-
-  console.log(widgets)
-  
+  const { data: widgets, isLoading:isLoadingWidgets } = useWidgetsHook(project as string);  
   return (
     <div>
       <PageLayout

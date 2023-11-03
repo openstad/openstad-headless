@@ -60,31 +60,31 @@ export default function ProjectCodeCreate() {
                     </div>
                 }
             >
-            <div className="container mx-auto py-10 w-1/2 float-left">
-                <Form {...form}>
-                    <Heading size="xl" className="mb-4">
-                        Unieke codes • Aanmaken
-                    </Heading>
-                    <Separator className="mb-4" />
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                        control={form.control}
-                        name="numberOfCodes"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Hoeveelheid nieuwe codes om aan te maken:</FormLabel>
-                                <FormControl>
-                                    <Input placeholder='' {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <Button type="submit" variant={"default"}>Aanmaken</Button>
-                    </form>
-                    <br/>
-                </Form>
-            </div>
+                <div className="container mx-auto py-10 w-1/2 float-left">
+                    <Form {...form}>
+                        <Heading size="xl" className="mb-4">
+                            Unieke codes • Aanmaken
+                        </Heading>
+                        <Separator className="mb-4" />
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                            <FormField
+                            control={form.control}
+                            name="numberOfCodes"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Hoeveelheid nieuwe codes om aan te maken:</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder='' {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                            <Button type="submit" variant={"default"}>Aanmaken</Button>
+                        </form>
+                        <br/>
+                    </Form>
+                </div>
             </PageLayout>
         </div>
     )
