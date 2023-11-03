@@ -3,10 +3,10 @@
 
   display: grid;
   color: var(--muted);
-  margin: 0px;
+  margin: 0;
   flex-direction: column;
-  gap: 8px;
-  padding: 24px;
+  gap: .5rem;
+  padding: 1.5rem;
   background-color: var(--card);
 }
 
@@ -18,21 +18,21 @@
 .like-option {
   display: grid;
   grid-template-columns: 1fr 4rem;
-  gap: 2px;
+  gap: .125rem;
   font-weight: 600;
 }
 
 .like-kind {
   display: flex;
   flex-grow: 1;
-  gap: 8px;
-  padding: 8px;
+  gap: .5rem;
+  padding: .5rem;
   align-items: center;
   background-color: var(--input);
 }
 
 .like-counter {
-  padding: 8px 16px;
+  padding: .5rem 1rem;
   background-color: var(--input);
 }
 
@@ -44,14 +44,14 @@ p {margin: 0;}
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-  gap: 8px;  
+  gap: .5rem;  
   p {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 }
 
 .progressbar {
-    height: 8px;
+    height: .5rem;
     width: 100%;
     background-color: var(--border);
     border-radius: 50px;

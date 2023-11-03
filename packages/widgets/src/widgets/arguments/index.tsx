@@ -21,17 +21,25 @@ type Props = {
 function Arguments(props: Props) {
   const reactions: Array<Reaction> = [
     {
-      name: 'name',
+      name: 'Name',
       description:
         'Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit. Exercitation veniam consequat sunt nostrud amet.',
       date: new Date(),
-      reactionsOnArgument: [],
+      reactionsOnArgument: [
+        {
+          name: 'Name',
+          description:
+            'Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit. Exercitation veniam consequat sunt nostrud amet.',
+          date: new Date(),
+          reactionsOnArgument: [],
+        },
+      ],
     },
   ];
 
   return (
     <>
-      <h2 className="arguments-title">Argumenten</h2>
+      <h3 className="arguments-title">Argumenten</h3>
       <hr />
 
       <div className="arguments-container">
