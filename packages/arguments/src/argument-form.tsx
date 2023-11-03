@@ -3,9 +3,9 @@ import { Formik } from 'formik';
 import './index.css';
 import { Reaction } from './types';
 import { Fragment } from 'react';
-import { Input } from '../../components/input';
-import { Button, GhostButton } from '../../components/button';
-import { Banner } from '../../components/banner';
+import { GhostButton, Button } from '@openstad-headless/ui/src';
+import { Banner } from '@openstad-headless/ui/src';
+import { Input } from '@openstad-headless/ui/src';
 
 type Props = {
   title: string;
