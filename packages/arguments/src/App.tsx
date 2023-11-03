@@ -1,7 +1,7 @@
 import 'remixicon/fonts/remixicon.css';
 
 import './index.css';
-import ArgumentsForm from './argument-form';
+import ArgumentsForm from './parts/argument-form';
 import { Reaction } from './types';
 
 type Props = {

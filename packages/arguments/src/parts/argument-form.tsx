@@ -1,7 +1,7 @@
 import { Formik } from 'formik';
 
 import './index.css';
-import { Reaction } from './types';
+import { Reaction } from '../types';
 import { Fragment } from 'react';
 import { GhostButton, Button } from '@openstad-headless/ui/src';
 import { Banner } from '@openstad-headless/ui/src';
