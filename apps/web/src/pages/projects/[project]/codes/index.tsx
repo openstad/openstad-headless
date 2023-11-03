@@ -6,17 +6,18 @@ import useSWR from "swr"
 import React from "react";
 import { useRouter } from "next/router";
 import { ListHeading } from "@/components/ui/typography";
+import * as XLSX from 'xlsx';
 
 export default function ProjectCodes() {
     const router = useRouter();
     const { project } = router.query;
     const { data, isLoading } = useSWR("/api/openstad/api/project");
 
-    const download = () => {
-        const dummyData = "a,b,c\n";
-        const csvContent = `data:text/csv;charset=utf-8,${dummyData}`;
-        const encodedURI = encodeURI(csvContent);
-        window.open(encodedURI);
+    const downloadExcel = (data: any) => {
+        const worksheet = XLSX.utils.json_to_sheet([data]);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+        XLSX.writeFile(workbook, "DataSheet.xlsx");
     };
 
     if (!data) return null;
@@ -43,7 +44,7 @@ export default function ProjectCodes() {
                                 Creëer unieke codes
                             </Button>
                         </Link>
-                        <Button variant="default" onClick={download} className="ml-6">
+                        <Button variant="default" className="ml-6">
                             Exporteer unieke codes
                         </Button>
                     </div>
