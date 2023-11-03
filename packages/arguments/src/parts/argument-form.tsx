@@ -1,9 +1,9 @@
 import { Formik } from 'formik';
 
-import './index.css';
+import '../index.css';
 import { Reaction } from '../types';
 import { Fragment } from 'react';
-import { GhostButton, Button } from '@openstad-headless/ui/src';
+import { GhostButton, Button, Spacer } from '@openstad-headless/ui/src';
 import { Banner } from '@openstad-headless/ui/src';
 import { Input } from '@openstad-headless/ui/src';
 
@@ -49,13 +49,15 @@ function ArgumentsForm(props: Props) {
 
                 {errors.reaction && touched.reaction && errors.reaction}
 
+                <Spacer size={1} />
+
                 <Banner>
                   <p>
                     De reactiemogelijkheid is gesloten, u kunt niet meer
                     reageren
                   </p>
                 </Banner>
-                <p>test</p>
+                <Spacer size={1} />
                 <Banner big>
                   <p>
                     De reactiemogelijkheid is gesloten, u kunt niet meer
@@ -63,7 +65,7 @@ function ArgumentsForm(props: Props) {
                   </p>
                 </Banner>
 
-                <p>test</p>
+                <Spacer size={1} />
                 <Banner big>
                   <Button>Inloggen</Button>
                 </Banner>

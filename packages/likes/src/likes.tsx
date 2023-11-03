@@ -1,8 +1,8 @@
 import 'remixicon/fonts/remixicon.css';
-import ProgressBar from '../../progressbar';
+import { ProgressBar } from '@openstad-headless/ui/src';
 import useSWR from 'swr';
 import { useEffect, useState } from 'react';
-import './index.css';
+import './likes.css';
 
 type Props = {
   projectId?: string;
