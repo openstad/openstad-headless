@@ -1,5 +1,7 @@
+import React from 'react';
+
 import './index.css';
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   icon?: string;
   iconBack?: boolean;
 };
