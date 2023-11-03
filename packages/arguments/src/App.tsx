@@ -18,7 +18,7 @@ type Props = {
   // };
 };
 
-function Arguments(props: Props) {
+function App(props: Props) {
   const reactions: Array<Reaction> = [
     {
       name: 'Name',
@@ -50,4 +50,4 @@ function Arguments(props: Props) {
   );
 }
 
-export default Arguments;
+export default App;
