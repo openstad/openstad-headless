@@ -29,8 +29,6 @@ router
       .catch(next);
   })
   .get((req, res) => {
-    console.log(req.headers, req.origin, req.originalUrl);
-
     const widgetId = req.params.widgetId;
     const randomId = Math.floor(Math.random() * 1000000);
     const widget = req.widget;
