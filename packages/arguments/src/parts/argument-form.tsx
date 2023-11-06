@@ -2,7 +2,7 @@ import { Formik } from 'formik';
 
 import '../index.css';
 import { Reaction } from '../types';
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import { GhostButton, Button, Spacer } from '@openstad-headless/ui/src';
 import { Banner } from '@openstad-headless/ui/src';
 import { Input } from '@openstad-headless/ui/src';
@@ -13,6 +13,9 @@ type Props = {
 };
 
 function ArgumentsForm(props: Props) {
+  const [reactionOpen, setReactionOpen] = useState<boolean>(false);
+  const [loggedIn, setLoggedIn] = useState<boolean>(false);
+
   return (
     <>
       <section>
@@ -33,46 +36,50 @@ function ArgumentsForm(props: Props) {
             /* and other goodies */
           }) => (
             <form onSubmit={handleSubmit}>
-              <div className="input-container">
-                <Input
-                  name="reaction"
-                  placeholder="Type hier uw reactie"
-                  onChange={handleChange}
-                  onKeyUp={(e) => {
-                    if (e.key === 'Enter' || e.code === 'Enter') {
-                      handleSubmit();
-                    }
-                  }}
-                  onBlur={handleBlur}
-                  value={values.reaction}
-                />
+              {!reactionOpen && !loggedIn ? (
+                <Banner big>
+                  <p>
+                    De reactiemogelijkheid is gesloten, u kunt niet meer
+                    reageren
+                  </p>
+                  <Button>Inloggen</Button>
+                </Banner>
+              ) : null}
 
-                {errors.reaction && touched.reaction && errors.reaction}
-
-                <Spacer size={1} />
-
+              {!reactionOpen && loggedIn ? (
                 <Banner>
                   <p>
                     De reactiemogelijkheid is gesloten, u kunt niet meer
                     reageren
                   </p>
                 </Banner>
-                <Spacer size={1} />
-                <Banner big>
-                  <p>
-                    De reactiemogelijkheid is gesloten, u kunt niet meer
-                    reageren
-                  </p>
-                </Banner>
+              ) : null}
 
-                <Spacer size={1} />
-                <Banner big>
-                  <Button>Inloggen</Button>
-                </Banner>
-              </div>
+              {reactionOpen && loggedIn ? (
+                <div className="input-container">
+                  <Input
+                    name="reaction"
+                    placeholder="Type hier uw reactie"
+                    onChange={handleChange}
+                    onKeyUp={(e) => {
+                      if (e.key === 'Enter' || e.code === 'Enter') {
+                        handleSubmit();
+                      }
+                    }}
+                    onBlur={handleBlur}
+                    value={values.reaction}
+                  />
+
+                  {errors.reaction && touched.reaction && errors.reaction}
+
+                  <Spacer size={1} />
+                </div>
+              ) : null}
             </form>
           )}
         </Formik>
+
+        <Spacer size={1} />
 
         {(props.arguments || []).map((argument, index) => (
           <Fragment key={index}>

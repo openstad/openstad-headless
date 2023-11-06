@@ -34,3 +34,7 @@
    padding-left: 1rem;
    border-left: 1px solid var(--border);
  }
+
+ hr {
+  border-top: 1px solid var(--border);
+ }
