@@ -1,3 +1,11 @@
+FROM node:18-slim as components-builder
+
+WORKDIR /opt/components
+
+COPY --chown=node:node /packages/components .
+
+RUN npm install && npm run build
+
 # Image used for building dependencies
 FROM node:18-slim as builder
 
@@ -9,11 +17,14 @@ RUN apt-get update
 RUN apt-get install -y python3 make cmake git bash g++
 
 # Install app dependencies
-COPY --chown=node:node package*.json .
-RUN npm install
-RUN npm install -g nodemon
+COPY --chown=node:node ./apps/api-server/package*.json .
 
-# Release image 
+RUN npm install
+
+# copy built components to node_modules of api-server
+COPY --chown=node:node --from=components-builder /opt/components/ /opt/api-server/node_modules/@openstad/components
+
+# Release image
 FROM node:18-slim
 
 # Label for tracking
@@ -41,10 +52,18 @@ ENV API_AUTHORIZATION_JWTSECRET=""
 ENV API_AUTHORIZATION_FIXEDAUTHTOKENS=""
 ENV AUTH_API_URL=""
 
+WORKDIR /opt/api-server
+
+RUN npm install -g nodemon
+
 # copy files
-COPY --chown=node:node --from=builder . /
-COPY --chown=node:node . /opt/api-server
-USER node
+COPY --chown=node:node ./apps/api-server /opt/api-server
+
+RUN rm -rf /opt/api-server/node_modules
+
+COPY --chown=node:node --from=builder /opt/api-server/node_modules /opt/api-server/node_modules
+
+RUN ls -la /opt/api-server/node_modules | grep "react"
 
 # Set node ownership to /home/app
 RUN chown -R node:node /opt/api-server

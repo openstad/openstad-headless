@@ -1,5 +1,5 @@
 {
-  "name": "openstad-api",
+  "name": "@openstad/api",
   "version": "1.0.0",
   "description": "OpenStad API server",
   "main": "server.js",
@@ -25,6 +25,7 @@
     "co": "^4.6.0",
     "compression": "^1.7.4",
     "config": "^3.3.7",
+    "cors": "^2.8.5",
     "cron": "^1.8.2",
     "dotenv": "^8.6.0",
     "express": "^4.17.3",

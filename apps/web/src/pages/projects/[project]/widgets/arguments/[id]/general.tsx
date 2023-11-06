@@ -11,19 +11,19 @@ import * as z from 'zod'
 
 const formSchema = z.object({
     sentiment: z.enum(["for", "against", "none"]),
-    replyReactions: z.boolean(),
-    voteReactions: z.boolean()
+    isReplyingEnabled: z.boolean(),
+    isVotingEnabled: z.boolean()
   });
 
 export default function ArgumentsGeneral() {
   const category = 'general';
 
   const { data: widget, isLoading: isLoadingWidget, updateConfig } = useWidgetConfig();
-  
-    const defaults = () =>({  
+
+    const defaults = () =>({
       sentiment: widget?.config?.[category]?.sentiment || "for",
-      replyReactions: widget?.config?.[category]?.replyReactions || false,
-      voteReactions: widget?.config?.[category]?.voteReactions || false
+      isReplyingEnabled: widget?.config?.[category]?.isReplyingEnabled || false,
+      isVotingEnabled: widget?.config?.[category]?.isVotingEnabled || false
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -31,15 +31,15 @@ export default function ArgumentsGeneral() {
       defaultValues: defaults()
     });
 
-    useEffect(() => {     
+    useEffect(() => {
         form.reset(defaults());
     }, [widget])
 
-    
+
     function onSubmit(values: z.infer<typeof formSchema>) {
       updateConfig({[category]: values});
     }
-  
+
     return (
         <div>
         <Form {...form}>
@@ -47,7 +47,7 @@ export default function ArgumentsGeneral() {
             Argumenten • Algemeen
           </Heading>
           <Separator className="mb-4" />
-          
+
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4">
@@ -79,7 +79,7 @@ export default function ArgumentsGeneral() {
             />
             <FormField
             control={form.control}
-            name="replyReactions"
+            name="isReplyingEnabled"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
@@ -104,7 +104,7 @@ export default function ArgumentsGeneral() {
             />
             <FormField
             control={form.control}
-            name="voteReactions"
+            name="isVotingEnabled"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>

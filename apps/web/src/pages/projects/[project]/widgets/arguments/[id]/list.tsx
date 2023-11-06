@@ -11,18 +11,18 @@ import * as z from 'zod'
 
 const formSchema = z.object({
   title: z.string(),
-  placeholder: z.string()
+  emptyListText: z.string()
 });
 
 
-  
+
 export default function ArgumentsList() {
   const category = 'list';
 
   const { data: widget, isLoading: isLoadingWidget, updateConfig } = useWidgetConfig();
-    const defaults = () =>({  
+    const defaults = () =>({
       title: widget?.config?.[category]?.title || "Argumenten",
-      placeholder: widget?.config?.[category]?.placeholder || "Nog geen reacties geplaatst."
+      emptyListText: widget?.config?.[category]?.emptyListText || "Nog geen reacties geplaatst."
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -30,11 +30,11 @@ export default function ArgumentsList() {
       defaultValues: defaults()
     });
 
-    useEffect(() => {     
+    useEffect(() => {
         form.reset(defaults());
     }, [widget])
 
-    
+
     function onSubmit(values: z.infer<typeof formSchema>) {
       updateConfig({[category]: values});
     }
@@ -63,7 +63,7 @@ export default function ArgumentsList() {
             />
             <FormField
             control={form.control}
-            name="placeholder"
+            name="emptyListText"
             render={({ field }) => (
                 <FormItem>
                     <FormLabel>Placeholder</FormLabel>

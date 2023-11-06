@@ -10,17 +10,17 @@ import { useForm} from "react-hook-form";
 import * as z from 'zod'
 
 const formSchema = z.object({
-    intro: z.string(),
+    formIntro: z.string(),
     placeholder: z.string()
   });
 
-  
+
 export default function ArgumentsForm() {
   const category = 'form';
 
   const { data: widget, isLoading: isLoadingWidget, updateConfig } = useWidgetConfig();
-    const defaults = () =>({  
-      intro: widget?.config?.[category]?.intro || "Type hier de intro tekst",
+    const defaults = () =>({
+      formIntro: widget?.config?.[category]?.formIntro || "Type hier de intro tekst",
       placeholder: widget?.config?.[category]?.placeholder || "Type hier uw reactie."
     });
 
@@ -34,16 +34,16 @@ export default function ArgumentsForm() {
     useEffect(() => {
       form.reset(defaults());
     }, [widget])
-  
+
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
             await updateConfig({ [category]: values});
         } catch (error) {
-         console.error('could not update', error)   
+         console.error('could not update', error)
         }
     }
-  
+
     return (
       <div>
         <Form {...form}>
@@ -57,10 +57,10 @@ export default function ArgumentsForm() {
           >
             <FormField
             control={form.control}
-            name="intro"
+            name="formIntro"
             render={({ field }) => (
                 <FormItem>
-                    <FormLabel>Formulier intro</FormLabel>
+                    <FormLabel>Formulier formIntro</FormLabel>
                     <FormControl>
                         <Input {...field} />
                     </FormControl>
