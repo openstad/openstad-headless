@@ -10,7 +10,7 @@ export default function useCodes(projectId?: string) {
           'Content-Type': 'application/json',
           'Authorization': "Basic "
         },
-        body: JSON.stringify({ code: 'a1a1a1a1', clientId: 1 }),
+        body: JSON.stringify({ amount: 3 }),
       });
   
       let json = await res.json()
