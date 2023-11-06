@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect } from "react";
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
@@ -20,14 +20,14 @@ const formSchema = z.object({
 })
 
 export default function CreateUserGeneral() {
-    const { data, isLoading, updateUser } = useUser()
+    const { data, isLoading, updateUser } = useUser();
 
     const defaults = () => ({
         email: data?.email,
-        nickName: data?.nickName,
+        nickName: data?.nickName || '',
         name: data?.name || null,
         phoneNumber: data?.phoneNumber || null,
-        address: data?.address,
+        address: data?.address || '',
         city: data?.city || null,
         postcode: data?.postcode || null,
     })
@@ -36,6 +36,10 @@ export default function CreateUserGeneral() {
         resolver: zodResolver<any>(formSchema),
         defaultValues: defaults()
     })
+
+    useEffect(() => {     
+        form.reset(defaults());
+    }, [data])
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         updateUser(values)
