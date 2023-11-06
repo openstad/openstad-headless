@@ -17,6 +17,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Heading } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
+import { useEffect } from 'react'
+import { useRouter } from 'next/router'
+import { useProject } from '../../../../hooks/use-project'
 
 const availableAuthentication = [
     {
@@ -107,21 +110,51 @@ const formSchema = z.object({
     emailAddressOutgoingUser: z.string(),
     contactEmail: z.string().email(),
     defaultRole: z.enum(["member", "anon"]),
-    emailHeader: z.string()
+    // emailHeader: z.string().optional()
 })
 
 export default function ProjectAuthentication() {
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver<any>(formSchema),
-        defaultValues: {
-            availableAuthentication: ["code"],
-            twoFactorRoles: ["admin", "member"],
-            requiredFields: []
-        }
+    const category = 'auth';
+
+    const router = useRouter();
+    const { project } = router.query;
+    const { data, isLoading, updateProject } = useProject();
+    const defaults = () => ({
+        availableAuthentication: data?.config?.[category]?.availableAuthentication || ["code"],
+        twoFactorRoles: data?.config?.[category]?.twoFactorRoles || ["admin", "member"],
+        requiredFields: data?.config?.[category]?.requiredFields || [],
+        emailAddressOutgoing: data?.config?.[category]?.emailAddressOutgoing || null,
+        emailAddressOutgoingUser: data?.config?.[category]?.emailAddressOutgoingUser || null,
+        contactEmail: data?.config?.[category]?.contactEmail || null,
+        defaultRole: data?.config?.[category]?.defaultRole || null,
+        // emailHeader: data?.config?.[category]?.emailHeader || null,
     })
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver<any>(formSchema),
+        defaultValues: defaults()
+    })
+
+    useEffect(() => {
+        form.reset(defaults())
+    }, [data?.config])
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        try {
+            await updateProject({ 
+                [category]: {
+                    availableAuthentication: values.availableAuthentication,
+                    twoFactorRoles: values.twoFactorRoles,
+                    requiredFields: values.requiredFields,
+                    emailAddressOutgoing: values.emailAddressOutgoing,
+                    emailAddressOutgoingUser: values.emailAddressOutgoingUser,
+                    contactEmail: values.contactEmail,
+                    defaultRole: values.defaultRole,
+                    // emailHeader: values.emailHeader
+            }});
+        } catch (error) {
+         console.error('could not update', error)   
+        }
     }
     
     return(
@@ -135,7 +168,7 @@ export default function ProjectAuthentication() {
                 },
                 {
                     name: 'Authenticatie',
-                    url: '/projects/1/authentication'
+                    url: `/projects/${project}/authentication`
                 }
             ]}>
                 <div className="container mx-auto py-10 w-1/2 float-left ">
@@ -308,7 +341,7 @@ export default function ProjectAuthentication() {
                             name="contactEmail"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Emailadres voor contacten</FormLabel>
+                                    <FormLabel>Mailadres verstuurde emails</FormLabel>
                                     <FormControl>
                                         <Input placeholder='' {...field} />
                                     </FormControl>
@@ -322,7 +355,7 @@ export default function ProjectAuthentication() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Welke rol krijgt een nieuwe gebruiker toegewezen?</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Standaard gebruiker" />
@@ -337,7 +370,7 @@ export default function ProjectAuthentication() {
                                 </FormItem>
                             )}
                             />
-                            <FormField
+                            {/* <FormField
                             control={form.control}
                             name="contactEmail"
                             render={({ field }) => (
@@ -349,7 +382,7 @@ export default function ProjectAuthentication() {
                                     <FormMessage />
                                 </FormItem>
                             )}
-                            />
+                            /> */}
                             <Button type="submit" variant={"default"}>Opslaan</Button>
                         </form>
                         <br/>

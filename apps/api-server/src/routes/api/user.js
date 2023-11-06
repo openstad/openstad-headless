@@ -381,8 +381,8 @@ router.route('/:userId(\\d+)')
     db.User
       .scope(...req.scope)
       .findOne({
-        where: {id: userId, projectId: req.params.projectId},
-        //where: { id: userId }
+        //where: {id: userId, projectId: req.params.projectId},
+        where: { id: userId }
       })
       .then(found => {
         if (!found) throw new createError(404, 'User not found');

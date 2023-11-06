@@ -13,8 +13,6 @@ export default function ProjectWidgets() {
   const types = WidgetDefinitions;
 
   const { data: widgets, isLoading:isLoadingWidgets } = useWidgetsHook(project as string);
-
-  console.log(widgets)
   
   return (
     <div>
