@@ -238,9 +238,11 @@ export default function ProjectAuthenticationSmsVerification() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" variant={'default'}>
-                Opslaan
-              </Button>
+              <div className="py-4 bg-background border-t border-border flex flex-col">
+                <Button className="self-end" type="submit">
+                  Opslaan
+                </Button>
+              </div>
             </form>
             <br />
           </Form>
