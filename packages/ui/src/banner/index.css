@@ -15,4 +15,7 @@
 .banner.big {
     justify-content: center;
     padding: 3rem 2rem;
+
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
 }

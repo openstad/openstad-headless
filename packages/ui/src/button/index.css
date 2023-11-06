@@ -1,6 +1,5 @@
 button {
     display: inline-flex;
-    height: Fixed (3rem);
     padding: 0.625rem 3rem 0.625rem 3rem;
 
     border: none;
@@ -24,6 +23,11 @@ button > i {
     font-size: 1.5rem;
 }
 
+button:hover {
+    background-color: var(--primary-hover);
+} 
+
 button.ghost:hover {
     color: var(--muted);
+    background-color: var(--background);
 }
