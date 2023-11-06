@@ -8,7 +8,7 @@ export default function useCodes(projectId?: string) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': "Basic dW5pcXVlY29kZTp1bmlxdWVjb2RlMTIz"
+          'Authorization': "Basic "
         },
         body: JSON.stringify({ code: 'a1a1a1a1', clientId: 1 }),
       });
