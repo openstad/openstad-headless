@@ -15,8 +15,10 @@ const passwordResetMw          = require('../middleware/passwordReset');
 const roleMw                   = require('../middleware/role');
 const codeMw                   = require('../middleware/code');
 const logMw                    = require('../middleware/log');
+const securityHeadersMw        = require('../middleware/security-headers');
 
 module.exports = (app) => {
+  app.use('/api/admin', securityHeadersMw);
   app.use('/api/admin', [passport.authenticate(['basic', 'oauth2-client-password'], { session: false })]);
 
   /**
