@@ -250,37 +250,35 @@ export default function ProjectSettingsIdeas() {
               <CardTitle>Stel hier een email op.</CardTitle>
             </CardHeader>
             <CardContent>
-              <form>
-                <div>
-                  <div>
-                    <Label>Type mail:</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecteer" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="thanks">Bedank-mail</SelectItem>
-                        <SelectItem value="submit">
-                          Opleveren van concept-plan
-                        </SelectItem>
-                        <SelectItem value="publish">
-                          Uitbrengen van concept-plan
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Vanaf adres:</Label>
-                    <Input id="mail" placeholder="email@example.com" />
-                  </div>
-                  <div>
-                    <Label>Onderwerp:</Label>
-                    <Input id="subject" placeholder="Onderwerp van de mail" />
-                  </div>
-                  <div>
-                    <Label>Mail-template:</Label>
-                    <Textarea id="template" placeholder="Inhoud van de mail" />
-                  </div>
+              <form className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Type mail:</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecteer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="thanks">Bedank-mail</SelectItem>
+                      <SelectItem value="submit">
+                        Opleveren van concept-plan
+                      </SelectItem>
+                      <SelectItem value="publish">
+                        Uitbrengen van concept-plan
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Vanaf adres:</Label>
+                  <Input id="mail" placeholder="email@example.com" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Onderwerp:</Label>
+                  <Input id="subject" placeholder="Onderwerp van de mail" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Mail-template:</Label>
+                  <Textarea id="template" placeholder="Inhoud van de mail" />
                 </div>
               </form>
             </CardContent>
