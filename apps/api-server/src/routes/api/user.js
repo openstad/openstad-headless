@@ -45,6 +45,10 @@ router
       req.scope.push('includeProject');
     }
 
+    if(req.query.fromIdpUser) {
+      req.scope.push({ method:['fromIdpUser'] })
+    }
+
     return next();
 
   });

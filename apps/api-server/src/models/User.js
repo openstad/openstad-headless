@@ -405,6 +405,24 @@ module.exports = function (db, sequelize, DataTypes) {
         }
       },
 
+      fromIpdUser: function (idpUser) {
+        let where = {
+          [Op.and]: [
+            {
+              idpUser: {
+                identifier: idpUser.identifier
+              }
+            }, {
+              idpUser: {
+                provider: idpUser.provider
+              }
+            }
+          ],
+        }
+        let attributes = [ 'projectId', 'role' ];
+        return {where, attributes};
+      },
+
     }
 
   }
