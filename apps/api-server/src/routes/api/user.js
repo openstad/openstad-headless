@@ -10,6 +10,7 @@ const searchInResults = require('../../middleware/search-in-results');
 const fetch = require('node-fetch');
 const merge = require('merge');
 const authSettings = require('../../util/auth-settings');
+const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const filterBody = (req, res, next) => {
   const data = {};
@@ -23,6 +24,11 @@ const filterBody = (req, res, next) => {
     }
   });
 
+  // role is a special case: only if you have at least that role
+  if (req.body.role && hasRole( req.user, req.body.role )) {
+    data.role = req.body.role
+  }
+
   req.body = data;
 
   next();
@@ -32,10 +38,30 @@ const router = express.Router({mergeParams: true});
 
 router
   .all('*', function (req, res, next) {
-    req.scope = ['includeProject'];
-    next();
+
+    req.scope = [];
+
+    if (req.query.includeProject) {
+      req.scope.push('includeProject');
+    }
+
+    return next();
+
   });
 
+router
+// /user is only available for admins
+  .all('*', function (req, res, next) {
+    if (req.project) {
+      return next();
+    } else {
+      if (req.method == 'GET' && hasRole(req.user, 'admin')) {
+        return next();
+      }
+    }
+    return next( new Error('Project not found') );
+
+  });
 
 router.route('/')
 // list users
@@ -43,17 +69,20 @@ router.route('/')
 // .get(auth.can('User', 'list')) -> now handled by onlyListable
   .get(function (req, res, next) {
     req.scope.push({method: ['onlyListable', req.user.id, req.user.role]});
-    next();
+    return next();
+  })
+  .get(function (req, res, next) {
+    return next();
   })
   .get(pagination.init)
   .get(function (req, res, next) {
 
     let { dbQuery } = req;
     dbQuery.where = {
-      projectId: req.params.projectId,
       ...req.queryConditions,
       ...dbQuery.where,
     };
+    if (req.params.projectId) dbQuery.where.projectId = req.params.projectId;
 
     db.User
       .scope(...req.scope)
@@ -128,7 +157,7 @@ router.route('/')
     db.User
       .scope(...req.scope)
       .findOne({
-        where: {email: req.body.email, projectId: req.params.projectId},
+        where: {email: req.body.email, projectId: req.project.id},
       })
       .then(found => {
         if (found) {
@@ -149,6 +178,7 @@ router.route('/')
       role: req.oAuthUser.role || 'member',
       lastLogin: Date.now(),
     };
+    
     db.User
       .authorizeData(data, 'create', req.user)
       .create(data)
@@ -351,8 +381,8 @@ router.route('/:userId(\\d+)')
     db.User
       .scope(...req.scope)
       .findOne({
-        where: {id: userId, projectId: req.params.projectId},
-        //where: { id: userId }
+        //where: {id: userId, projectId: req.params.projectId},
+        where: { id: userId }
       })
       .then(found => {
         if (!found) throw new createError(404, 'User not found');
@@ -371,9 +401,6 @@ router.route('/:userId(\\d+)')
   })
 
 // update user
-// -----------
-// TODO: hier zit de suggestie in dat je al je users op anders projects ook mag updaten. Maar dan toch niet, want dat geeft errors.
-// Dus neem een besluit, maar dat expliciet, en zorg dan dat het gaat werken.
 // -----------
   .put(auth.useReqUser)
   .put(filterBody)
@@ -400,7 +427,6 @@ router.route('/:userId(\\d+)')
         updatedUserData = await req.adapter.service.updateUser({ authConfig: req.authConfig, userData: merge(true, userData, { id: user.idpUser && user.idpUser.identifier }) });
         delete updatedUserData.nickName // TODO: these updates should not be done for fields that can be different per project. For now: nickName
       }
-
 
       let apiUsers = await db.User
           .scope(['includeProject'])

@@ -358,7 +358,7 @@ module.exports = function (db, sequelize, DataTypes) {
         /**
          * Example:
          * {
-         *     model: 'NewsletterSignup',
+         *     model: 'Comment',
          *     event: 'create'
          * },
          * {

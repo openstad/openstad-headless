@@ -27,7 +27,6 @@ router
       postcode: req.user.postcode,
       zipCode: req.user.zipCode,
       votes: req.user.votes,
-      signedUpForNewsletter: req.user.signedUpForNewsletter,
       createdAt: req.user.createdAt,
       updatedAt: req.user.updatedAt,
       deletedAt: req.user.deletedAt,

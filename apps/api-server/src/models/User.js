@@ -292,12 +292,6 @@ module.exports = function (db, sequelize, DataTypes) {
       defaultValue: null,
     },
 
-    // signedUpForNewsletter: {
-    //  	type         : DataTypes.BOOLEAN,
-    //  	allowNull    : false,
-    //  	defaultValue : false
-    // },
-
   }, {
     charset: 'utf8',
 
@@ -336,6 +330,7 @@ module.exports = function (db, sequelize, DataTypes) {
   User.scopes = function scopes() {
 
     return {
+
       includeProject: {
         include: [{
           model: db.Project,
@@ -551,7 +546,6 @@ module.exports = function (db, sequelize, DataTypes) {
         address: null,
         phoneNumber: null,
         extraData,
-        signedUpForNewsletter: 0,
         lastLogin: '1970-01-01T00:00:00.000Z',
         isNotifiedAboutAnonymization: null,
       })
@@ -587,7 +581,7 @@ module.exports = function (db, sequelize, DataTypes) {
       if (!user) user = self.auth && self.auth.user;
       if (!user || !user.role) user = { role: 'all' };
 
-      let valid = userHasRole(user, self.auth && self.auth.updateableBy, self.id);
+      let valid = userHasRole(user, self.auth && self.auth.createableBy, self.id);
 
       // extra: geen acties op users met meer rechten dan je zelf hebt
       valid = valid && (!self.role || userHasRole(user, self.role));
@@ -607,7 +601,7 @@ module.exports = function (db, sequelize, DataTypes) {
       let valid = userHasRole(user, self.auth && self.auth.updateableBy, self.id);
 
       // extra: isOwner through user on different project
-      valid = valid || ( self.idpUser.identifier && self.idpUser.identifier == user.idpUser.identifier );
+      valid = valid || ( self.idpUser && user.idpUser && self.idpUser.identifier && self.idpUser.identifier == user.idpUser.identifier );
 
       // extra: geen acties op users met meer rechten dan je zelf hebt
       valid = valid && userHasRole(user, self.role);
@@ -625,6 +619,9 @@ module.exports = function (db, sequelize, DataTypes) {
       if (!user || !user.role) user = { role: 'all' };
 
       let valid = userHasRole(user, self.auth && self.auth.updateableBy, self.id);
+
+      // extra: admin on different project
+      valid = valid && userHasRole(user, 'admin');
 
       // extra: geen acties op users met meer rechten dan je zelf hebt
       valid = valid && userHasRole(user, self.role);

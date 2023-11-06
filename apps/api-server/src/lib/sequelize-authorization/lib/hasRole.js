@@ -8,13 +8,13 @@ module.exports = function hasRole(user, minRoles, ownerId) {
   let userRole = user && user.role;
 
   let valid = minRoles.find( minRole => {
-    let x = roles[userRole] && roles[userRole].indexOf(minRole) != -1
-    return x;
+    return roles[userRole] && roles[userRole].indexOf(minRole) != -1
   });
 
   if (minRoles.includes('owner') && ownerId) {
     valid = valid || ( user.id == ownerId );
   }
 
-  return valid
+  return valid;
+  
 }

@@ -1,95 +1,60 @@
-import * as React from 'react'
+import { useEffect } from "react";
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
-
-import { Button } from "../../components/ui/button"
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage
-} from "../../components/ui/form"
-import { Input } from "../../components/ui/input"
-import { PageLayout } from '../../components/ui/page-layout'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Heading } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import useUser from '@/hooks/use-user'
 
 const formSchema = z.object({
-    firstName: z.string().optional(),
-    lastName: z.string().optional(),
-    email: z.string(),
-    streetName: z.string().optional(),
-    houseNumber: z.string().optional(),
-    houseSuffix: z.string().optional(),
-    zipcode: z.string().optional(),
-    city: z.string().optional(),
+    email: z.string().email(),
+    nickName: z.string().optional(),
+    name: z.string().optional(),
     phoneNumber: z.string().optional(),
-    roles: z.string().optional(),
-    password: z.string()
+    address: z.string().optional(),
+    city: z.string().optional(),
+    postcode: z.string().optional(),
 })
 
-export default function CreateProject() {
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver<any>(formSchema),
-        defaultValues: {
-            
-        }
+export default function CreateUserGeneral() {
+    const { data, isLoading, updateUser } = useUser();
+
+    const defaults = () => ({
+        email: data?.email,
+        nickName: data?.nickName || '',
+        name: data?.name || null,
+        phoneNumber: data?.phoneNumber || null,
+        address: data?.address || '',
+        city: data?.city || null,
+        postcode: data?.postcode || null,
     })
 
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver<any>(formSchema),
+        defaultValues: defaults()
+    })
+
+    useEffect(() => {     
+        form.reset(defaults());
+    }, [data])
+
     function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+        updateUser(values)
     }
 
-    return(
-        <div>
-            <PageLayout
-            pageHeader="Gebruikers"
-            breadcrumbs={[
-                {
-                name: 'Gebruikers',
-                url: '/users',
-                },
-                {
-                    name: 'Gebruiker toevoegen',
-                    url: '/users/create'
-                }
-            ]}>
-            <div className="container mx-auto py-10 w-1/2 float-left">
+    if(!data) return null;
+
+    return (
+            <div>
                 <Form {...form}>
                     <Heading size="xl" className="mb-4">
-                        Gebruiker • Aanmaken
+                        Gebruiker • Algemene instellingen
                     </Heading>
                     <Separator className="mb-4" />
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                        control={form.control}
-                        name="firstName"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Voornaam</FormLabel>
-                                <FormControl>
-                                    <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="lastName"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Achternaam</FormLabel>
-                                <FormControl>
-                                    <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                        />
                         <FormField
                         control={form.control}
                         name="email"
@@ -105,10 +70,10 @@ export default function CreateProject() {
                         />
                         <FormField
                         control={form.control}
-                        name="streetName"
+                        name="nickName"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Straatnaam</FormLabel>
+                                <FormLabel>Gebruikersnaam (Alleen gebruikt als 'nicknames in projecten' aan staat.)</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -118,49 +83,10 @@ export default function CreateProject() {
                         />
                         <FormField
                         control={form.control}
-                        name="houseNumber"
+                        name="name"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Huisnummer</FormLabel>
-                                <FormControl>
-                                    <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="houseSuffix"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Toevoeging</FormLabel>
-                                <FormControl>
-                                    <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="zipcode"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Postcode</FormLabel>
-                                <FormControl>
-                                    <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="city"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Stad</FormLabel>
+                                <FormLabel>Volledige naam</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -183,10 +109,10 @@ export default function CreateProject() {
                         />
                         <FormField
                         control={form.control}
-                        name="password"
+                        name="address"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Wachtwoord</FormLabel>
+                                <FormLabel>Adres</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -194,11 +120,36 @@ export default function CreateProject() {
                             </FormItem>
                         )}
                         />
-                        <Button type='submit' variant='default'>Aanmaken</Button>
+                        <FormField
+                        control={form.control}
+                        name="city"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Stad</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={form.control}
+                        name="postcode"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Postcode</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <Button type='submit' variant='default'>Aanpassen</Button>
                     </form>
                 </Form>
             </div>
-            </PageLayout>
-            </div>
     )
 }
+

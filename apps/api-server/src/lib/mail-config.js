@@ -24,16 +24,6 @@ class MailConfig {
       // Exceptions from local config because field names don't match
       self.config.cms.hostname = self.config.hostname || self.config.title;
       self.config.title = self.config.projectName || self.config.title;
-      self.config.newslettersignup.confirmationEmail.attachments =
-        (self.config.ideas &&
-          self.config.ideas.feedbackEmail &&
-          self.config.ideas.feedbackEmail.attachments) ||
-        self.config.newslettersignup.confirmationEmail.attachments;
-      self.config.newslettersignup.confirmationEmail.subject =
-        (self.config.ideas &&
-          self.config.ideas.feedbackEmail &&
-          self.config.ideas.feedbackEmail.subject) ||
-        self.config.newslettersignup.confirmationEmail.subject;
 
       self.config = merge.recursive(self.config, project.config || {});
 
@@ -104,27 +94,6 @@ class MailConfig {
 
   getMailTransport() {
     return this.config.mail.transport[this.getMailMethod()];
-  }
-
-  getNewsletterSignupConfirmationEmailUrl() {
-    return this.config.newslettersignup.confirmationEmail.url;
-  }
-
-  getNewsletterSignupConfirmationEmailTemplate() {
-    return (
-      this.config.newslettersignup.confirmationEmail.template || 'No template'
-    );
-  }
-
-  getNewsletterSignupConfirmationEmailAttachments() {
-    return (
-      this.config.newslettersignup.confirmationEmail.attachments ||
-      this.getDefaultEmailAttachments()
-    );
-  }
-
-  getNewsletterSignupConfirmationEmailSubject() {
-    return this.config.newslettersignup.confirmationEmail.subject;
   }
 
   getLogo() {

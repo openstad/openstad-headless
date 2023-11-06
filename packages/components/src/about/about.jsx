@@ -22,23 +22,13 @@ const About = function(props) {
 
   const datastore = new DataStore(props);
 
-  const [ currentUser, currentUserError, currentUserIsLoading ] = datastore.useCurrentUser({ ...props });
-
   let titleHTML = props.title ? props.title : 'About';
 
   let propsHTML = JSON.stringify(props, null, 2);
-
-  let currentUserHTML = 'No current user';
-  if (currentUser) {
-    currentUserHTML =  JSON.stringify(currentUser, null, 2);
-  }
   
   return (
     <div id={props.divId} className={commentVariants({ variant: props.variant, size: props.size, className: props.className })}>
       <h2>{titleHTML}</h2>
-
-      <h4>Current user</h4>
-      <pre>{currentUserHTML}</pre>
 
       <h4>Props</h4>
       <pre>{propsHTML}</pre>

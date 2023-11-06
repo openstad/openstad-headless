@@ -54,6 +54,15 @@ module.exports = {
       },
     },
 
+    'idea-details': {
+      import: './src/idea-details/index.jsx',
+      filename: 'idea-details.js',
+      library: {
+        name: 'OS20',
+        type: 'assign-properties',
+      },
+    },
+
     'ideas-filter': {
       import: './src/ideas-filter/index.jsx',
       filename: 'ideas-filter.js',
@@ -72,26 +81,15 @@ module.exports = {
       },
     },
 
-    'hello': {
-      import: './src/Hello.jsx',
-      filename: 'hello.js',
-      library: {
-        name: 'OS20',
-        type: 'assign-properties',
-      },
-    },
-
-    'goodbye': {
-      import: './src/Goodbye.jsx',
-      filename: 'goodbye.js',
+    'user': {
+      import: './src/user/index.jsx',
+      filename: 'user.js',
       library: {
         name: 'OS20',
         type: 'assign-properties',
       },
     },
     
-    'user': './src/user/index.jsx',
-
   },
 
 	output: {

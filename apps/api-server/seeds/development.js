@@ -15,28 +15,56 @@ module.exports = async function seed(config, db) {
     if (apiDomain != apiDomainWithoutPortnumber) allowedDomains.push(apiDomainWithoutPortnumber);
 
     console.log('    add plannen insturen project');
-    project = await db.Project.create({
+    let project = await db.Project.create({
       id: 2,
       name: 'Plannen',
       title: 'Plannen insturen',
       config: {
         allowedDomains,
-        "auth": {
-          "default": "openstad",
-          "provider": {
-            "openstad": {
-              "adapter": "openstad",
-              "clientId": "uniquecode",
-              "clientSecret": "uniquecode123"
+        auth: {
+          default: 'openstad',
+          provider: {
+            openstad: {
+              adapter: 'openstad',
+              clientId: 'uniquecode',
+              clientSecret: 'uniquecode123'
             },
-            "anonymous": {
-              "adapter": "openstad",
-              "clientId": "anonymous",
-              "clientSecret": "anonymous123"
+            anonymous: {
+              adapter: 'openstad',
+              clientId: 'anonymous',
+              clientSecret: 'anonymous123'
             },
           }
         },
+        votes: {
+          isActive: true,
+          requiredUserRole: "anonymous",
+          isViewable: true,
+          voteValues: [
+            {
+              label: "I like",
+              value: "yes"
+            },
+            {
+              label: "Don't know",
+              value: "mayby"
+            },
+            {
+              label: "I do not like",
+              value: "no"
+            }
+          ]
+        },
       },
+    });
+    project = await project.update({
+      "config": {
+        "votes": {
+          "isActive": true,
+          "requiredUserRole": "anonymous",
+          "isViewable": true
+        }
+      }
     });
 
     console.log('    add begroot project');
@@ -46,21 +74,24 @@ module.exports = async function seed(config, db) {
       title: 'Begroten',
       config: {
         allowedDomains,
-        "auth": {
-          "default": "openstad",
-          "provider": {
-            "openstad": {
-              "adapter": "openstad",
-              "clientId": "uniquecode",
-              "clientSecret": "uniquecode123"
+        auth: {
+          default: 'openstad',
+          provider: {
+            openstad: {
+              adapter: 'openstad',
+              clientId: 'uniquecode',
+              clientSecret: 'uniquecode123'
             },
-            "anonymous": {
-              "adapter": "openstad",
-              "clientId": "anonymous",
-              "clientSecret": "anonymous123"
+            anonymous: {
+              adapter: 'openstad',
+              clientId: 'anonymous',
+              clientSecret: 'anonymous123'
             },
           }
         },
+        votes: {
+          isActive: true,
+        }
       },
     });
 
@@ -71,18 +102,18 @@ module.exports = async function seed(config, db) {
       title: 'Keuzewijzer',
       config: {
         allowedDomains,
-        "auth": {
-          "default": "openstad",
-          "provider": {
-            "openstad": {
-              "adapter": "openstad",
-              "clientId": "uniquecode",
-              "clientSecret": "uniquecode123"
+        auth: {
+          default: 'openstad',
+          provider: {
+            openstad: {
+              adapter: 'openstad',
+              clientId: 'uniquecode',
+              clientSecret: 'uniquecode123'
             },
-            "anonymous": {
-              "adapter": "openstad",
-              "clientId": "anonymous",
-              "clientSecret": "anonymous123"
+            anonymous: {
+              adapter: 'openstad',
+              clientId: 'anonymous',
+              clientSecret: 'anonymous123'
             },
           }
         },
@@ -351,7 +382,13 @@ module.exports = async function seed(config, db) {
     idea4.addTag(area1);
     idea5.addTag(area1);
     
-    console.log('      with 4 likes');
+    console.log('      with 5 likes');
+    await db.Vote.create({
+      userId: 1,
+      ideaId: 1,
+      opinion: 'no',
+    });
+
     await db.Vote.create({
       userId: 2,
       ideaId: 1,

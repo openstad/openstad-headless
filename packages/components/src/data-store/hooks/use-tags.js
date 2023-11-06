@@ -26,6 +26,12 @@ export default function useTags(props) {
     }
   })
 
+  if (error) {
+    let error = new Error(error);
+	  let event = new window.CustomEvent('osc-error', { detail: error });
+	  document.dispatchEvent(event);
+  }
+
   return [ tags, error, isLoading ];
 
 }

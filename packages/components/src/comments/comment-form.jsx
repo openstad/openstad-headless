@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import DataStore from '../data-store';
 import Button from '../button';
 import InputWithCounter from '../forms/input-with-counter';
+import LoginButton from '../user/login-button';
 import hasRole from '../lib/user-has-role';
 
 function CommentForm(props) {
@@ -34,6 +35,11 @@ function CommentForm(props) {
     );
   }
 
+  let submitButtonHTML = <Button type="submit" disabled={!canSubmit()}>Verstuur</Button>
+  if (!currentUser || currentUser.role !=  props.requiredUserRole) { // TODO: hasrole
+    submitButtonHTML = <LoginButton {...props} label="Inloggen"/>
+  }
+
   return (
     <form  onSubmit={props.submitComment}>
       {formIntroHTML}
@@ -42,7 +48,7 @@ function CommentForm(props) {
       <input type="hidden" defaultValue={props.sentiment} name="sentiment"/>
       <InputWithCounter inputType="textarea" minLength={props.descriptionMinLength} maxLength={props.descriptionMaxLength} placeholder={props.placeholder} defaultValue={props.description} name="description"/>
       <div className="osc-align-right-container">
-        <Button type="submit" disabled={!canSubmit()}>Verstuur</Button>
+        {submitButtonHTML}
       </div>
     </form>
   );

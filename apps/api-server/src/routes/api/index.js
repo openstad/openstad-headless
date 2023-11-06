@@ -32,6 +32,7 @@ router.use( '/project/:projectId(\\d+)/tag', require('./tag') );
 // users
 router.use( '/project/:projectId(\\d+)/user', require('./user') );
 router.use( '/project/:projectId(\\d+)/user/:userId(\\d+)/activity', require('./user-activity') );
+router.use( '/user', require('./user') );
 
 // submissions
 router.use( '/project/:projectId(\\d+)/submission', require('./submission') );
@@ -41,9 +42,6 @@ router.use( '/project/:projectId(\\d+)/notification', require('./notification') 
 
 // vote
 router.use( '/project/:projectId(\\d+)/vote', require('./vote') );
-
-// newslettersignup
-router.use( '/project/:projectId(\\d+)/newslettersignup', require('./newslettersignup') );
 
 // choices-guide
 router.use( '/project/:projectId(\\d+)/choicesguide', require('./choicesguide') );

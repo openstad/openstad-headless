@@ -121,7 +121,10 @@ exports.postLogin = (req, res, next) => {
  */
 exports.logout = async (req, res) => {
 
-  // req.logout();
+  let userId = req.user && req.user.id;
+  if (userId) {
+    await db.AccessToken.destroy({ where: { userId } });
+  }
 
   await req.session.destroy();
 

@@ -34,7 +34,9 @@ function hideEmailsForNormalUsers(comments) {
 }
 
 module.exports = function (db, sequelize, DataTypes) {
+
   var Idea = sequelize.define('idea', {
+
     projectId: {
       type: DataTypes.INTEGER,
       auth:  {
@@ -295,15 +297,6 @@ module.exports = function (db, sequelize, DataTypes) {
       }
     },
 
-    // Counts set in `summary`/`withVoteCount` scope.
-    no: {
-      type: DataTypes.VIRTUAL
-    },
-
-    yes: {
-      type: DataTypes.VIRTUAL
-    },
-
     progress: {
       type: DataTypes.VIRTUAL,
       get: function () {
@@ -313,10 +306,6 @@ module.exports = function (db, sequelize, DataTypes) {
           Number((Math.min(1, (yes / minimumYesVotes)) * 100).toFixed(2)) :
           undefined;
       }
-    },
-
-    commentCount: {
-      type: DataTypes.VIRTUAL
     },
 
     createDateHumanized: {
@@ -505,10 +494,9 @@ module.exports = function (db, sequelize, DataTypes) {
   });
 
   Idea.scopes = function scopes() {
-    // Helper function used in `withVoteCount` scope.
+
     function voteCount(opinion) {
       if (config.votes && config.votes.confirmationRequired) {
-        console.log('VOTECOUNT');
         return [sequelize.literal(`
 				(SELECT
 					COUNT(*)
@@ -714,12 +702,11 @@ module.exports = function (db, sequelize, DataTypes) {
         }]
       },
 
-      includeVoteCount: {
-        attributes: {
-          include: [
-            voteCount('yes'),
-            voteCount('no')
-          ]
+      includeVoteCount: function(votesConfig) {
+        return {
+          attributes: {
+            include: votesConfig ? votesConfig.voteValues.map( voteValue => voteCount(voteValue.value) ) : []
+          }
         }
       },
 

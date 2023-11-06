@@ -29,7 +29,13 @@ module.exports = async function getUser( req, res, next ) {
       return nextWithEmptyUser(req, res, next);
     }
 
-    const userEntity = await getUserInstance({ authConfig, authProvider, userId, isFixed, projectId: ( req.project && req.project.id ) }) || {};
+    let projectId = req.project && req.project.id;
+
+    let isSuperUserFunc = false;
+    if (req.path.match('^(/api/project/\\d+/user(?:/\\d+)?$)') && ( req.method == 'POST' || req.method == 'PUT' || req.method == 'DELETE' )) isSuperUserFunc = true;
+    if (req.path.match('^(/api/user$)') && req.method == 'GET' ) isSuperUserFunc = true;
+    
+    const userEntity = await getUserInstance({ authConfig, authProvider, userId, isFixed, isSuperUserFunc, projectId }) || {};
 
     req.user = userEntity
     
@@ -89,15 +95,31 @@ function parseJwt(authorizationHeader) {
  * @param projectConfig
  * @returns {Promise<{}|*>}
  */
-async function getUserInstance({ authConfig, authProvider, userId, isFixed, projectId }) {
+async function getUserInstance({ authConfig, authProvider, userId, isFixed, isSuperUserFunc, projectId }) {
 
   let dbUser;
   
   try {
 
     let where = { id: userId };
-    if (projectId && !isFixed) where.projectId = projectId;
-    if (!isFixed) where.idpUser = { provider: authConfig.provider };
+    if (projectId && !isSuperUserFunc && !isFixed ) where.projectId = projectId;
+    if (isSuperUserFunc && !isFixed) {
+      // superuserfunc: admins mogen over projecten heen, mindere goden alleen binnen hun eigen project
+      if (projectId) {
+        where = Object.assign(where, {
+          [db.Sequelize.Op.or]: [
+            {
+              role: 'admin'
+            }, {
+              projectId: projectId
+            }
+          ]});
+      } else {
+        where.role = 'admin'
+      }
+    }
+
+    if (!isSuperUserFunc && !isFixed) where.idpUser = { provider: authConfig.provider };
 
     dbUser = await db.User.findOne({ where });
 

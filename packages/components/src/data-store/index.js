@@ -59,7 +59,7 @@ export default function DataStore(props = { config: {} }) {
       revalidate: false,
       rollbackOnError: true,
     }
-    if ( options.action != 'fetch' ) {
+    if ( options.action != 'fetch' && options.revalidate != true ) {
       defaultOptions.populateCache = (newData, currentData) => mergeData(currentData, newData, options.action);
     }
 

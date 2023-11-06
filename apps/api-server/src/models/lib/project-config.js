@@ -241,7 +241,7 @@ module.exports = {
       },
       isActive: {
         type: 'boolean',
-        default: null,
+        default: false,
       },
       isActiveFrom: {
         type: 'string',
@@ -324,20 +324,6 @@ module.exports = {
       requiredUserRole: {
         type: 'string',
         default: 'anonymous',
-      },
-    },
-  },
-
-  newslettersignup: {
-    type: 'object',
-    subset: {
-      isActive: {
-        type: 'boolean',
-        default: false,
-      },
-      autoConfirm: {
-        type: 'boolean',
-        default: false,
       },
     },
   },

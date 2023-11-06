@@ -2,8 +2,6 @@ module.exports = async function seed(config, db) {
 
   try {
 
-    // TODO: minstens 1 default user, met een fixed code id en admin rechten
-    // console.log(config && config.auth && config.auth.fixedAuthTokens);
     console.log('  creating initial user - add this user to config fixed tokens');
     try {
       await db.User.create({
