@@ -11,6 +11,7 @@ export default async function doFetch(url = '', options = {}) {
     options.headers['Authorization'] = 'Bearer ' + self.currentUserJWT;
   }
 
+  console.log(1);
   let response;
   response = await fetch(this.apiUrl + url, options)
   
