@@ -140,7 +140,6 @@ export default function ProjectAuthentication() {
     }, [data?.config])
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log("update?")
         try {
             await updateProject({ 
                 [category]: {

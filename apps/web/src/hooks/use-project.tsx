@@ -59,7 +59,6 @@ import useSWR from "swr";
       })
       const data = await res.json();
 
-      console.log(data);
     }
 
     return {...projectSwr, updateProject, updateProjectEmails, anonymizeUsersOfProject};

@@ -46,7 +46,6 @@ export default function CreateUserGeneral() {
     }
 
     if(!data) return null;
-    console.log(data)
 
     return (
             <div>

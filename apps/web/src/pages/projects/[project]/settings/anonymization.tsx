@@ -88,7 +88,6 @@ export default function ProjectSettingsAnonymization() {
     }
 
     async function anonymizeAllUsers() {
-        console.log('a')
         try {
             await anonymizeUsersOfProject();
         } catch (error) {
