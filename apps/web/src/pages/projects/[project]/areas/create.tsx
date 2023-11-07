@@ -55,14 +55,14 @@ export default function ProjectAreaCreate() {
             url: `/projects/${projectId}/areas`,
           },
           {
-            name: 'Gebied aanmaken',
+            name: 'Gebied toevoegen',
             url: `/projects/${projectId}/areas/create`,
           },
         ]}>
         <div className="container mx-auto py-10 w-1/2 float-left">
           <Form {...form}>
             <Heading size="xl" className="mb-4">
-              Gebied • Aanmaken
+              Gebied • Toevoegen
             </Heading>
             <Separator className="mb-4" />
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

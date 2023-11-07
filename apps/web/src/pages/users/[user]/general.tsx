@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import useUser from '@/hooks/use-user'
 
 const formSchema = z.object({
-    email: z.string().email(),
+    email: z.string({invalid_type_error:"*Verplicht"}).email("Geen geldig e-mailadres"),
     nickName: z.string().optional(),
     name: z.string().optional(),
     phoneNumber: z.string().optional(),
@@ -25,11 +25,11 @@ export default function CreateUserGeneral() {
     const defaults = () => ({
         email: data?.email,
         nickName: data?.nickName || '',
-        name: data?.name || null,
-        phoneNumber: data?.phoneNumber || null,
+        name: data?.name || '',
+        phoneNumber: data?.phoneNumber || '',
         address: data?.address || '',
-        city: data?.city || null,
-        postcode: data?.postcode || null,
+        city: data?.city || '',
+        postcode: data?.postcode || '',
     })
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -60,9 +60,9 @@ export default function CreateUserGeneral() {
                         name="email"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>E-mail (verplicht)</FormLabel>
+                                <FormLabel>E-mailadres</FormLabel>
                                 <FormControl>
-                                    <Input {...field} />
+                                    <Input type="email" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -73,7 +73,7 @@ export default function CreateUserGeneral() {
                         name="nickName"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Gebruikersnaam (Alleen gebruikt als 'nicknames in projecten' aan staat.)</FormLabel>
+                                <FormLabel>Gebruikersnaam (optioneel, alleen zichtbaar als 'nicknames' in 'projecten' aan staat)</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -99,9 +99,9 @@ export default function CreateUserGeneral() {
                         name="phoneNumber"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Telefoonnummer</FormLabel>
+                                <FormLabel>Telefoonnummer (optioneel)</FormLabel>
                                 <FormControl>
-                                    <Input {...field} />
+                                    <Input type="tel" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -112,7 +112,7 @@ export default function CreateUserGeneral() {
                         name="address"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Adres</FormLabel>
+                                <FormLabel>Adres (optioneel)</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -125,7 +125,7 @@ export default function CreateUserGeneral() {
                         name="city"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Stad</FormLabel>
+                                <FormLabel>Stad (optioneel)</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -138,7 +138,7 @@ export default function CreateUserGeneral() {
                         name="postcode"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Postcode</FormLabel>
+                                <FormLabel>Postcode (optioneel)</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -146,7 +146,11 @@ export default function CreateUserGeneral() {
                             </FormItem>
                         )}
                         />
-                        <Button type='submit' variant='default'>Aanpassen</Button>
+                        <div className="py-4 bg-background border-t border-border flex flex-col">
+                            <Button className="self-end" type="submit">
+                                Opslaan
+                            </Button>
+                        </div>
                     </form>
                 </Form>
             </div>

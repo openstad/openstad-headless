@@ -63,18 +63,18 @@ export default function CreateUserProjects() {
                 <Separator className="mb-4" />
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <div className="container mx-auto">
-                        <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-2 border-b border-border">
-                            <ListHeading className="hidden md:flex md:col-span-2">
+                        <div className="mt-4 grid grid-cols-2 items-center py-2 border-b border-border">
+                            <ListHeading className="hidden md:flex">
                             Projectnaam
                             </ListHeading>
-                            <ListHeading className="hidden md:flex md:col-span-2">
+                            <ListHeading className="hidden md:flex">
                             Rol
                             </ListHeading>
                         </div>
                         <ul>
                             {data.map((project: any) => {
                                 return (
-                                    <li className='grid grid-cols-2 md:grid-cols-12 items-center py-3 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2'>
+                                    <li className='grid grid-cols-2 items-center py-3 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2'>
                                         <Paragraph className='hidden md:flex'>
                                             {project.name}
                                         </Paragraph>
@@ -89,7 +89,11 @@ export default function CreateUserProjects() {
                             })}
                         </ul>
                     </div>
-                    <Button type='submit' variant='default'>Aanpassen</Button>
+                    <div className="py-4 bg-background border-t border-border flex flex-col">
+                        <Button className="self-end" type="submit">
+                            Opslaan
+                        </Button>
+                    </div>
                 </form>
             </Form>
         </div>

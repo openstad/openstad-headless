@@ -24,7 +24,7 @@ export default function ProjectCodes() {
                         url: "/projects"
                     },
                     {
-                        name: "Stem codes",
+                        name: "Stemcodes",
                         url: `/projects/${project}/codes`
                     }
                 ]}
@@ -33,19 +33,19 @@ export default function ProjectCodes() {
                         <Link href="/projects/1/codes/create">
                             <Button variant="default">
                                 <Plus size="20" />
-                                Creëer unieke codes
+                                    Stemcodes toevoegen
                             </Button>
                         </Link>
                         <Link href="/projects/1/codes/export" className="pl-6">
                             <Button variant="default">
-                                Exporteer unieke codes
+                                Exporteer stemcodes
                             </Button>
                         </Link>
                     </div>
                 }
             >
                 <div className="container mx-auto py-10">
-                    <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 py-2 px-2 border-b border-border">
+                    <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 border-b border-border">
                         <ListHeading className="hidden md:flex md:col-span-3">
                         ID
                         </ListHeading>

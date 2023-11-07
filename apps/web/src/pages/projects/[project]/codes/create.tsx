@@ -42,11 +42,11 @@ export default function ProjectCodeCreate() {
                         url: "/projects"
                     },
                     {
-                        name: "Stem codes",
+                        name: "Stemcodes",
                         url: `/projects/${project}/codes`
                     },
                     {
-                        name: "Creëer nieuwe codes",
+                        name: "Stemcodes toevoegen",
                         url: `projects/${project}/codes/create`
                     }
                 ]}
@@ -54,7 +54,7 @@ export default function ProjectCodeCreate() {
                     <div className="flex">
                         <Link href="/projects/1/codes/export" className="pl-6">
                             <Button variant="default">
-                                Exporteer unieke codes
+                                Exporteer stemcodes
                             </Button>
                         </Link>
                     </div>
@@ -63,7 +63,7 @@ export default function ProjectCodeCreate() {
             <div className="container mx-auto py-10 w-1/2 float-left">
                 <Form {...form}>
                     <Heading size="xl" className="mb-4">
-                        Unieke codes • Aanmaken
+                        Stemcodes • Toevoegen
                     </Heading>
                     <Separator className="mb-4" />
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -74,13 +74,17 @@ export default function ProjectCodeCreate() {
                             <FormItem>
                                 <FormLabel>Hoeveelheid nieuwe codes om aan te maken:</FormLabel>
                                 <FormControl>
-                                    <Input placeholder='' {...field} />
+                                    <Input type='number' placeholder='' {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                         />
-                        <Button type="submit" variant={"default"}>Aanmaken</Button>
+                        <div className="py-4 bg-background border-t border-border flex flex-col">
+                            <Button className="self-end" type="submit">
+                            Opslaan
+                            </Button>
+                        </div>
                     </form>
                     <br/>
                 </Form>

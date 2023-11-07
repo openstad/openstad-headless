@@ -151,7 +151,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
     <div className="container mx-auto py-10 w-1/2 float-left ">
       <Form {...form}>
         <Heading size="xl" className="mb-4">
-          {id ? 'Idee • Aanpassen' : 'Idee • Aanmaken'}
+          {id ? 'Idee • Aanpassen' : 'Idee • Toevoegen'}
         </Heading>
         <Separator className="mb-4" />
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -337,9 +337,11 @@ export default function IdeaForm({ onFormSubmit }: Props) {
           />
 
           <Separator />
-          <Button type="submit" variant={'default'}>
-            Opslaan
-          </Button>
+          <div className="py-4 bg-background border-t border-border flex flex-col">
+            <Button className="self-end" type="submit">
+              Opslaan
+            </Button>
+          </div>
         </form>
         <br />
       </Form>

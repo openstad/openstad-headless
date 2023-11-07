@@ -229,7 +229,6 @@ export default function ProjectSettingsAnonymization() {
                     </Button>
                   </div>
                 </form>
-                <br />
               </Form>
             </CardContent>
           </Card>
