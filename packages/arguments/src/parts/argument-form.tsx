@@ -55,6 +55,7 @@ function ArgumentsForm(props: Props) {
               {reactionOpen && loggedIn ? (
                 <div className="input-container">
                   <Input
+                    disabled
                     name="reaction"
                     placeholder="Type hier uw reactie"
                     onChange={handleChange}
@@ -65,7 +66,6 @@ function ArgumentsForm(props: Props) {
                     }}
                     onBlur={handleBlur}
                     value={values.reaction}
-                    errors={'tes'}
                   />
 
                   {errors.reaction && touched.reaction && errors.reaction}

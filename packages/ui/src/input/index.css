@@ -2,7 +2,6 @@ input.input {
     width: 100%;
     margin :0;
     padding: 1rem .5rem;
-    
     color: var(--muted);
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -18,7 +17,6 @@ input.input::-ms-input-placeholder { /* Edge 12 -18 */
   color: var(--muted);
 }
 
-  
 input.input:focus {
   outline-color: var(--secondary);
 }
@@ -26,4 +24,9 @@ input.input:focus {
 input.input.alert {
   outline-color: var(--destructive);
   border: 1px solid var(--destructive);
+}
+
+input.input:disabled {
+  opacity: .5;
+  cursor: not-allowed;
 }
