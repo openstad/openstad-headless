@@ -8,20 +8,30 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   iconBack?: boolean;
 };
 
-export function Button(props: ButtonProps) {
-  return (
-    <button className={`${props.className}`} {...props}>
-      {props.icon && !props.iconBack ? <i className={props.icon}></i> : null}
-      {props.children}
-      {props.icon && props.iconBack ? <i className={props.icon}></i> : null}
-    </button>
-  );
-}
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (props, ref) => {
+    return (
+      <button ref={ref} className={`${props.className}`} {...props}>
+        {props.icon && !props.iconBack ? <i className={props.icon}></i> : null}
+        {props.children}
+        {props.icon && props.iconBack ? <i className={props.icon}></i> : null}
+      </button>
+    );
+  }
+);
 
-export function SecondaryButton(props: ButtonProps) {
-  return <Button className={`secondary ${props.className}`} {...props} />;
-}
+export const SecondaryButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (props, ref) => {
+    return (
+      <Button ref={ref} className={`secondary ${props.className}`} {...props} />
+    );
+  }
+);
 
-export function GhostButton(props: ButtonProps) {
-  return <Button className={`ghost ${props.className}`} {...props} />;
-}
+export const GhostButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (props, ref) => {
+    return (
+      <Button ref={ref} className={`ghost ${props.className}`} {...props} />
+    );
+  }
+);

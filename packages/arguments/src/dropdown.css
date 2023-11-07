@@ -3,7 +3,6 @@
 
  .DropdownMenuContent,
 .DropdownMenuSubContent {
-  min-width: 220px;
   background-color: white;
   border-radius: 6px;
   padding: 5px;
@@ -42,7 +41,7 @@
   height: 25px;
   padding: 0 5px;
   position: relative;
-  padding-left: 25px;
+  /* padding-left: 25px; */
   user-select: none;
   outline: none;
 }
