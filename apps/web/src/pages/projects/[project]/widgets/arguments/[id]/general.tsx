@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from '@/components/ui/input';
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/typography";
 import { useWidgetConfig } from "@/hooks/use-widget-config";
@@ -10,6 +11,7 @@ import { useForm } from "react-hook-form";
 import * as z from 'zod'
 
 const formSchema = z.object({
+    ideaId: z.coerce.number(),
     sentiment: z.enum(["for", "against", "none"]),
     isReplyingEnabled: z.boolean(),
     isVotingEnabled: z.boolean()
@@ -21,6 +23,7 @@ export default function ArgumentsGeneral() {
   const { data: widget, isLoading: isLoadingWidget, updateConfig } = useWidgetConfig();
 
     const defaults = () =>({
+      ideaId: widget?.config?.[category]?.ideaId || null,
       sentiment: widget?.config?.[category]?.sentiment || "for",
       isReplyingEnabled: widget?.config?.[category]?.isReplyingEnabled || false,
       isVotingEnabled: widget?.config?.[category]?.isVotingEnabled || false
@@ -51,6 +54,21 @@ export default function ArgumentsGeneral() {
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4">
+            <FormField
+            control={form.control}
+            name="ideaId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Plan ID
+                </FormLabel>
+                <FormControl>
+                    <Input placeholder="1" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+            />
             <FormField
             control={form.control}
             name="sentiment"

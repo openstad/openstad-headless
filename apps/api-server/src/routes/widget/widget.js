@@ -41,7 +41,7 @@ router
         css: ['css/comments.css'],
         name: 'Comments',
         defaultConfig: {
-          ideaId: '1',
+          ideaId: null,
           title: '[[nr]] reacties voor',
           isClosed: widget.project?.config?.arguments?.isClosed || true,
           closedText: 'Het inzenden van reacties is niet langer mogelijk',
