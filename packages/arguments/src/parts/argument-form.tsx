@@ -55,7 +55,7 @@ function ArgumentsForm(props: Props) {
               {reactionOpen && loggedIn ? (
                 <div className="input-container">
                   <Input
-                    disabled
+                    label="dsf"
                     name="reaction"
                     placeholder="Type hier uw reactie"
                     onChange={handleChange}

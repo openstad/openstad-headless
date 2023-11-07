@@ -6,10 +6,12 @@ export function Input(
   props: React.InputHTMLAttributes<HTMLInputElement> & {
     errors?: string;
     info?: string;
+    label?: string;
   }
 ) {
   return (
     <>
+      {props.label ? <p className="input-label">{props.label}</p> : null}
       <input
         type="text"
         {...props}

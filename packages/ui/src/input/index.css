@@ -30,3 +30,14 @@ input.input:disabled {
   opacity: .5;
   cursor: not-allowed;
 }
+
+p.input-label {
+  margin: .5rem 0rem;
+
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 19px;
+  letter-spacing: 0px;
+
+  color: var(--foreground);
+}
