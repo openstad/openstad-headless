@@ -108,7 +108,7 @@ export default function CreateProject() {
                 url: '/projects',
                 },
             ]}>
-            <div className="container mx-auto py-10 w-1/2 float-left">
+            <div className='p-6 bg-white rounded-md container m-6'>
                 <Form {...form}>
                 <Heading size="xl" className="mb-4">
                     Project toevoegen

@@ -19,7 +19,7 @@ export default function ProjectExport() {
             url: '/projects/export',
           },
         ]}>
-        <div className="container mx-auto py-10 w-1/2 float-left">
+        <div className='p-6 bg-white rounded-md container m-6'>
           <p>De volgende gegevens worden altijd geëxporteerd.</p>
           <p>- Oauth gegevens</p>
           <br />

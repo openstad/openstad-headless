@@ -32,9 +32,9 @@ export default function ProjectWidgets() {
           <CreateWidgetDialog projectId={project as string}/>
         }
       >
-        <div className="container mx-auto py-10">
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-2 px-2 border-b border-border">
-            <ListHeading className="hidden md:flex md:col-span-2">
+        <div className="p-6 pt-4 bg-white rounded-md container m-6">
+          <div className="grid grid-cols-2 items-center py-2 px-2 border-b border-border">
+            <ListHeading className="hidden md:flex">
               Widget
             </ListHeading>
           </div>

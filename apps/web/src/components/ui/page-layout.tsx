@@ -34,7 +34,7 @@ export function PageLayout({
   }, [router]);
 
   return (
-    <main className="bg-background flex flex-row min-h-screen">
+    <main className="flex flex-row min-h-screen bg-muted">
       <Sidenav
         narrow={hasProjectSidenav}
         className={openSideMenu ? "translate-x-0" : ""}
@@ -42,7 +42,7 @@ export function PageLayout({
       {hasProjectSidenav ? <SidenavProject /> : null}
       <section className="col-span-full w-full">
         <header className="h-24 flex flex-col justify-center border-b border-border sticky top-0 z-10 bg-background">
-          <div className="flex flex-row items-center justify-between max-w-[1400px] p-6">
+          <div className="flex flex-row items-center justify-between container p-6">
             <div
               className={cn(
                 "flex flex-col items-stretch justify-center",

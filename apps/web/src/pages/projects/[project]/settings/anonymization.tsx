@@ -20,7 +20,8 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
 import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@radix-ui/react-select';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const formSchema = z.object({
   anonymizeUsersXDaysAfterEndDate: z.coerce.number(),
@@ -126,140 +127,135 @@ export default function ProjectSettingsAnonymization() {
             url: `/projects/${project}/settings/anonymization`,
           },
         ]}>
-        <div className="container mx-auto py-10 w-1/2 float-left ">
-          <Form {...form}>
-            <Heading size="xl" className="mb-4">
-              Instellingen • Anonimiseer gebruikers
-            </Heading>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="anonymizeUsersXDaysAfterEndDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Anonimiseer gebruikers x dagen na het einde van het
-                      project
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="60" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="warnUsersAfterXDaysOfInactivity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Waarschuw gebruikers na x dagen aan inactiviteit
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="180" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="anonymizeUsersAfterXDaysOfInactivity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Anonimiseer gebruikers na x dagen aan inactiviteit
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="200" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="py-4 bg-background border-t border-border flex flex-col">
-                <Button className="self-end" type="submit">
-                  Opslaan
-                </Button>
+        <div className="container py-6">
+          <Tabs defaultValue="general">
+            <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
+              <TabsTrigger value="general">Algemene instellingen</TabsTrigger>
+              <TabsTrigger value="advanced">
+                Geadvanceerde instellingen
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="general" className="p-0">
+              <div className="p-6 bg-white rounded-md">
+                <Form {...form}>
+                  <Heading size="xl">Anonimiseer gebruikers</Heading>
+                  <Separator className="my-4" />
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-4 lg:w-1/2">
+                    <FormField
+                      control={form.control}
+                      name="anonymizeUsersXDaysAfterEndDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Anonimiseer gebruikers x dagen na het einde van het
+                            project
+                          </FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="60" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="warnUsersAfterXDaysOfInactivity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Na hoeveel dagen aan inactiviteit gebruikers
+                            waarschuwen?
+                          </FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="180" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="anonymizeUsersAfterXDaysOfInactivity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Na hoeveel dagen aan inactiviteit gebruikers
+                            anonimiseren?
+                          </FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="200" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit">Opslaan</Button>
+                  </form>
+                </Form>
               </div>
-            </form>
-            <br />
-          </Form>
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                Email gebruikers waarvan account binnenkort verloopt.
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Form {...emailForm}>
-                <form
-                  onSubmit={emailForm.handleSubmit(onSubmitEmail)}
-                  className="space-y-4">
-                  <FormField
-                    control={emailForm.control}
-                    name="subject"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email onderwerp</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={emailForm.control}
-                    name="template"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email template</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="py-4 bg-background border-t border-border flex flex-col">
-                    <Button className="self-end" type="submit">
-                      Opslaan
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-          <Separator className="my-8" />
-          <Card>
-            <CardHeader>
-              <CardTitle>Anonimiseer alle gebruikers</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+              <div className="p-6 bg-white rounded-md mt-4">
+                <Form {...emailForm}>
+                  <Heading size="xl">Waarschuwings e-mail</Heading>
+                  <Separator className="my-4" />
+                  <form
+                    onSubmit={emailForm.handleSubmit(onSubmitEmail)}
+                    className="space-y-4 lg:w-1/2">
+                    <FormField
+                      control={emailForm.control}
+                      name="subject"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>E-mail template onderwerp</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={emailForm.control}
+                      name="template"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>E-mail template tekst</FormLabel>
+                          <FormControl>
+                            <Textarea rows={12} {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit">Opslaan</Button>
+                  </form>
+                </Form>
+              </div>
+            </TabsContent>
+            <TabsContent value="advanced" className="p-0">
+              <div className="p-6 bg-white rounded-md">
+                <Heading size="xl">Gebruikersgegevens anonimiseren</Heading>
+                <Separator className="my-4" />
                 <div>
                   Let op! Deze actie is <b>definitief</b> en
                   <b> kan niet ongedaan gemaakt worden</b>.
                 </div>
-                <div className="space-y-2">
+                <div className="mt-2">
                   Het project moet eerst aangemerkt staan als 'beëindigd'
                   voordat deze actie uitgevoerd kan worden.
                 </div>
-                <div className="py-4 bg-background border-t border-border flex flex-col">
-                  <Button
-                    variant={'destructive'}
-                    className="mt-4 w-fit self-end"
-                    onClick={() => {
-                      anonymizeAllUsers();
-                    }}>
-                    Gebruikersgegevens anonimiseren
-                  </Button>
-                </div>
+                <Button
+                  variant={'destructive'}
+                  className="mt-4 w-fit"
+                  onClick={() => {
+                    anonymizeAllUsers();
+                  }}>
+                  Gebruikersgegevens anonimiseren
+                </Button>
               </div>
-            </CardContent>
-          </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </PageLayout>
     </div>
