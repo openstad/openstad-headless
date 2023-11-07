@@ -142,7 +142,7 @@ export default function ProjectSettingsAnonymization() {
                       project
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="60" {...field} />
+                      <Input type="number" placeholder="60" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -157,7 +157,7 @@ export default function ProjectSettingsAnonymization() {
                       Waarschuw gebruikers na x dagen aan inactiviteit
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="180" {...field} />
+                      <Input type="number" placeholder="180" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -172,7 +172,7 @@ export default function ProjectSettingsAnonymization() {
                       Anonimiseer gebruikers na x dagen aan inactiviteit
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="200" {...field} />
+                      <Input type="number" placeholder="200" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
