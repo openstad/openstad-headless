@@ -117,7 +117,7 @@ router
         document.querySelector('head').innerHTML += \`<style>${css}</style>\`;
         
         const redirectUri = encodeURI(window.location.href);
-        let config = JSON.parse('${widgetConfig}'.replaceAll("[[REDIRECT_URI]]", redirectUri));
+        const config = JSON.parse('${widgetConfig}'.replaceAll("[[REDIRECT_URI]]", redirectUri));
         
         function renderWidget () {
           ${widgetOutput}
