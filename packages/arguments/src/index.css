@@ -35,6 +35,10 @@
    border-left: 1px solid var(--border);
  }
 
+ .reaction-input-container {
+    text-align: right;
+ }
+
  hr {
   border-top: 1px solid var(--border);
  }

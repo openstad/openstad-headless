@@ -1,7 +1,7 @@
 import 'remixicon/fonts/remixicon.css';
 
 import './index.css';
-import ArgumentsForm from './parts/argument-form';
+import ArgumentsCollection from './parts/argument-collection';
 import { Reaction } from './types';
 
 type Props = {
@@ -21,6 +21,7 @@ type Props = {
 function App(props: Props) {
   const reactions: Array<Reaction> = [
     {
+      id: '1',
       name: 'Name',
       description:
         'Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit. Exercitation veniam consequat sunt nostrud amet.',
@@ -32,8 +33,10 @@ function App(props: Props) {
             'Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit. Exercitation veniam consequat sunt nostrud amet.',
           date: new Date(),
           reactionsOnArgument: [],
+          userId: '2',
         },
       ],
+      userId: '1',
     },
   ];
 
@@ -43,8 +46,20 @@ function App(props: Props) {
       <hr />
 
       <div className="arguments-container">
-        <ArgumentsForm title="Argumenten voor" arguments={reactions} />
-        <ArgumentsForm title="Argumenten tegen" arguments={reactions} />
+        <ArgumentsCollection
+          title="Argumenten voor"
+          arguments={reactions}
+          onReactionAdded={(reaction, existingId) =>
+            console.log({ reaction, existingId })
+          }
+        />
+        <ArgumentsCollection
+          title="Argumenten tegen"
+          arguments={reactions}
+          onReactionAdded={(reaction, existingId) =>
+            console.log({ reaction, existingId })
+          }
+        />
       </div>
     </>
   );

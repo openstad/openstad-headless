@@ -1,7 +1,7 @@
 :root {
     --background:#ffffff;
     --foreground: #010D0A;
-    --muted: #96A6B6;
+    --muted: #768391;
     --muted-foreground:#ffffff;
     --card: #E9ECEF;
     --card-foreground:#010D0A;
@@ -13,6 +13,8 @@
     --primary-hover: #009F6D;
     --primary-foreground: #ffffff;
     --secondary:#1471EF;
+    --secondary-hover: #0058D6;
+
     --secondary-foreground:#ffffff;
     /* accent: */
  /* accent-foreground: */

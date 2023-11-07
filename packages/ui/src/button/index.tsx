@@ -18,6 +18,10 @@ export function Button(props: ButtonProps) {
   );
 }
 
+export function SecondaryButton(props: ButtonProps) {
+  return <Button className={`secondary ${props.className}`} {...props} />;
+}
+
 export function GhostButton(props: ButtonProps) {
   return <Button className={`ghost ${props.className}`} {...props} />;
 }

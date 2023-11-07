@@ -9,6 +9,10 @@ button {
     color: var(--primary-foreground);
 }
 
+button.secondary {
+    background-color: var(--secondary);
+}
+
 button.ghost {
     padding: 0;
     display: inline-flex;
@@ -25,7 +29,11 @@ button > i {
 
 button:hover {
     background-color: var(--primary-hover);
-} 
+}
+
+button.secondary:hover {
+    background-color: var(--secondary-hover);
+}
 
 button.ghost:hover {
     color: var(--muted);
