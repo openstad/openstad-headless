@@ -31,3 +31,8 @@ button.ghost:hover {
     color: var(--muted);
     background-color: var(--background);
 }
+
+button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}

@@ -13,8 +13,8 @@ type Props = {
 };
 
 function ArgumentsForm(props: Props) {
-  const [reactionOpen, setReactionOpen] = useState<boolean>(false);
-  const [loggedIn, setLoggedIn] = useState<boolean>(false);
+  const [reactionOpen, setReactionOpen] = useState<boolean>(true);
+  const [loggedIn, setLoggedIn] = useState<boolean>(true);
 
   return (
     <>
@@ -36,12 +36,9 @@ function ArgumentsForm(props: Props) {
             /* and other goodies */
           }) => (
             <form onSubmit={handleSubmit}>
-              {!reactionOpen && !loggedIn ? (
+              {reactionOpen && !loggedIn ? (
                 <Banner big>
-                  <p>
-                    De reactiemogelijkheid is gesloten, u kunt niet meer
-                    reageren
-                  </p>
+                  <p>Inloggen om deel te nemen aan de discussie</p>
                   <Button>Inloggen</Button>
                 </Banner>
               ) : null}
@@ -68,6 +65,7 @@ function ArgumentsForm(props: Props) {
                     }}
                     onBlur={handleBlur}
                     value={values.reaction}
+                    errors={'tes'}
                   />
 
                   {errors.reaction && touched.reaction && errors.reaction}
