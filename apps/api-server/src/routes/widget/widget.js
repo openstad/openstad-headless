@@ -4,6 +4,7 @@ const db = require('../../db');
 const fs = require('fs');
 const config = require('config');
 const path = require('path');
+const createError = require('http-errors');
 
 let router = express.Router({ mergeParams: true });
 
@@ -14,7 +15,7 @@ router
   .route('/:widgetId([a-zA-Z0-9]+)')
   .all((req, res, next) => {
     if (!req.params?.widgetId) {
-      return next();
+      return next(createError(401, 'No widget id provided'));
     }
 
     db.Widget.findOne({
