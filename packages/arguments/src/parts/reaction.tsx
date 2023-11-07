@@ -3,6 +3,7 @@ import { Fragment, useState } from 'react';
 import { GhostButton } from '@openstad-headless/ui/src';
 import { Reaction } from '../types';
 import ReactionInput from './reaction-input';
+import ReactionDropdownMenu from './reaction-dropdown-menu';
 
 export default function ReactionItem({
   resourceId,
@@ -20,7 +21,9 @@ export default function ReactionItem({
       <section className="argument-item-header">
         <h6 className="reaction-name">{argument.name}</h6>
         {canEdit && canEdit(argument) ? (
-          <GhostButton icon="ri-more-fill"></GhostButton>
+          <ReactionDropdownMenu>
+            <GhostButton icon="ri-more-fill"></GhostButton>
+          </ReactionDropdownMenu>
         ) : null}
       </section>
       <p>{argument.description}</p>

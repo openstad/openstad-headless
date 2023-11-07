@@ -1,6 +1,7 @@
 import 'remixicon/fonts/remixicon.css';
 
 import './index.css';
+import { Toaster } from 'react-hot-toast';
 import ArgumentsCollection from './parts/argument-collection';
 import { Reaction } from './types';
 

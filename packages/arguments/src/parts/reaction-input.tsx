@@ -25,7 +25,7 @@ export default function ({
         <SecondaryButton
           disabled={!value}
           onClick={() => {
-            // Do stuffs here
+            // Do stuffs here update swr caches
             setShowButton(false);
           }}>
           Submit
