@@ -39,4 +39,4 @@ module.exports = `
   } else {
     document.addEventListener('OpenStadReactLoaded', renderWidget);
   }
-/*/!*`;*!/*/
+`;
