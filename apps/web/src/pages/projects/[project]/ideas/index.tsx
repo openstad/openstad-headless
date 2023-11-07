@@ -19,14 +19,14 @@ export default function ProjectIdeas() {
   return (
     <div>
       <PageLayout
-        pageHeader="Plannen"
+        pageHeader="Ideëen"
         breadcrumbs={[
           {
             name: 'Projecten',
             url: '/projects',
           },
           {
-            name: 'Plannen',
+            name: 'Ideëen',
             url: `/projects/${project}/ideas`,
           },
         ]}
@@ -34,14 +34,14 @@ export default function ProjectIdeas() {
           <Link href={`/projects/${project}/ideas/create`}>
             <Button variant="default">
               <Plus size="20" />
-              Maak een idee aan
+              Idee toevoegen
             </Button>
           </Link>
         }>
         <div className="container mx-auto py-10">
           <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 py-2 px-2 border-b border-border">
             <ListHeading className="hidden md:flex md:col-span-3">
-              Plannen
+              Ideëen
             </ListHeading>
             <ListHeading className="hidden md:flex md:col-span-2">
               Ja
@@ -53,7 +53,7 @@ export default function ProjectIdeas() {
               Datum aangemaakt
             </ListHeading>
             <ListHeading className="hidden md:flex md:col-span-2">
-              Plan verwijderen
+              Idee verwijderen
             </ListHeading>
           </div>
 
@@ -79,15 +79,15 @@ export default function ProjectIdeas() {
                     className="hidden md:flex md:col-span-2"
                     onClick={(e) => e.stopPropagation()}>
                     <RemoveResourceDialog
-                      header="Plan verwijderen"
-                      message="Weet je zeker dat je dit plan wilt verwijderen?"
+                      header="Idee verwijderen"
+                      message="Weet je zeker dat je dit idee wilt verwijderen?"
                       onDeleteAccepted={() =>
                         remove(idea.id)
                           .then(() =>
-                            toast.success('Plan successvol verwijderd')
+                            toast.success('Idee successvol verwijderd')
                           )
                           .catch((e) =>
-                            toast.error('Plan kon niet worden verwijderd')
+                            toast.error('Idee kon niet worden verwijderd')
                           )
                       }
                     />

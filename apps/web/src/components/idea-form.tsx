@@ -154,7 +154,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
           {id ? 'Idee • Aanpassen' : 'Idee • Aanmaken'}
         </Heading>
         <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="userId"
@@ -278,7 +278,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             name="location"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Location (optioneel)</FormLabel>
+                <FormLabel>Locatie (optioneel)</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
                 </FormControl>
