@@ -1,10 +1,10 @@
-import { cn } from "@/lib/utils";
-import { ReactNode, useEffect, useState } from "react";
-import { Heading } from "./typography";
-import { Breadcrumbs } from "./breadcrumbs";
-import { Sidenav } from "./sidenav";
-import { SidenavProject } from "./sidenav-project";
-import { useRouter } from "next/router";
+import { cn } from '@/lib/utils';
+import { ReactNode, useEffect, useState } from 'react';
+import { Heading } from './typography';
+import { Breadcrumbs } from './breadcrumbs';
+import { Sidenav } from './sidenav';
+import { SidenavProject } from './sidenav-project';
+import { useRouter } from 'next/router';
 
 export function PageLayout({
   children,
@@ -22,11 +22,11 @@ export function PageLayout({
   const [openSideMenu, setOpenSideMenu] = useState(false);
 
   const router = useRouter();
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState('');
   const [hasProjectSidenav, setHasProjectSidenav] = useState(false);
 
   useEffect(() => {
-    setHasProjectSidenav(location.startsWith("/projects/[project]"));
+    setHasProjectSidenav(location.startsWith('/projects/[project]'));
   });
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export function PageLayout({
     <main className="flex flex-row min-h-screen bg-muted">
       <Sidenav
         narrow={hasProjectSidenav}
-        className={openSideMenu ? "translate-x-0" : ""}
+        className={openSideMenu ? 'translate-x-0' : ''}
       />
       {hasProjectSidenav ? <SidenavProject /> : null}
       <section className="col-span-full w-full">
@@ -45,10 +45,9 @@ export function PageLayout({
           <div className="flex flex-row items-center justify-between container p-6">
             <div
               className={cn(
-                "flex flex-col items-stretch justify-center",
+                'flex flex-col items-stretch justify-center',
                 className
-              )}
-            >
+              )}>
               <Heading size="2xl">{pageHeader}</Heading>
               <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
