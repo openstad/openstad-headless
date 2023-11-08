@@ -1,7 +1,11 @@
 import useSWR from "swr";
 
-export default function useCodes() {
+export default function useCodes(clientId: string) {
+  const params = new URLSearchParams();
+  params.set('clientId', `${clientId}`);
 
-  const codesListSwr = useSWR(`http://localhost:31430/api/admin/unique-codes`);
+  const codesListSwr = useSWR(
+    `/api/oauth/api/admin/unique-codes?` + params.toString(),
+  );
   return { ...codesListSwr };
 }
