@@ -30,7 +30,7 @@ export default function WidgetResourceForm() {
   const projectId = router.query.project;
 
   return (
-    <div>
+    <div className="w-full overflow-hidden">
       <PageLayout
         pageHeader="Project naam"
         breadcrumbs={[
@@ -47,9 +47,9 @@ export default function WidgetResourceForm() {
             url: `/projects/${projectId}/widgets/resourceform/${id}`,
           },
         ]}>
-        <div>
+        <div className="container py-6 overflow-hidden">
           <Tabs defaultValue="general">
-            <TabsList>
+            <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="title">Titel</TabsTrigger>
               <TabsTrigger value="summary">Samenvatting</TabsTrigger>
@@ -64,55 +64,55 @@ export default function WidgetResourceForm() {
               <TabsTrigger value="tip">Tips</TabsTrigger>
               <TabsTrigger value="submit">Opleveren</TabsTrigger>
               <TabsTrigger value="budget">Budget</TabsTrigger>
-              <TabsTrigger value="confirmation">Confirmatie</TabsTrigger>
+              <TabsTrigger value="confirmation">Bevestiging</TabsTrigger>
               <TabsTrigger value="info">Info</TabsTrigger>
             </TabsList>
-            <TabsContent value="general" className="w-1/2">
+            <TabsContent value="general" className="p-0">
               <WidgetResourceFormGeneral />
             </TabsContent>
-            <TabsContent value="title" className="w-1/2">
+            <TabsContent value="title" className="p-0">
               <WidgetResourceFormTitle />
             </TabsContent>
-            <TabsContent value="summary" className="w-1/2">
+            <TabsContent value="summary" className="p-0">
               <WidgetResourceFormSummary />
             </TabsContent>
-            <TabsContent value="description" className="w-1/2">
+            <TabsContent value="description" className="p-0">
               <WidgetResourceFormDescription />
             </TabsContent>
-            <TabsContent value="images" className="w-1/2">
+            <TabsContent value="images" className="p-0">
               <WidgetResourceFormImages />
             </TabsContent>
-            <TabsContent value="themes" className="w-1/2">
+            <TabsContent value="themes" className="p-0">
               <WidgetResourceFormThemes />
             </TabsContent>
-            <TabsContent value="areas" className="w-1/2">
+            <TabsContent value="areas" className="p-0">
               <WidgetResourceFormAreas />
             </TabsContent>
-            <TabsContent value="location" className="w-1/2">
+            <TabsContent value="location" className="p-0">
               <WidgetResourceFormLocation />
             </TabsContent>
-            <TabsContent value="costs" className="w-1/2">
+            <TabsContent value="costs" className="p-0">
               <WidgetResourceFormCosts />
             </TabsContent>
-            <TabsContent value="role" className="w-1/2">
+            <TabsContent value="role" className="p-0">
               <WidgetResourceFormRole />
             </TabsContent>
-            <TabsContent value="phone" className="w-1/2">
+            <TabsContent value="phone" className="p-0">
               <WidgetResourceFormPhone />
             </TabsContent>
-            <TabsContent value="tip" className="w-1/2">
+            <TabsContent value="tip" className="p-0">
               <WidgetResourceFormTip />
             </TabsContent>
-            <TabsContent value="submit" className="w-1/2">
+            <TabsContent value="submit" className="p-0">
               <WidgetResourceFormSubmit />
             </TabsContent>
-            <TabsContent value="budget" className="w-1/2">
+            <TabsContent value="budget" className="p-0">
               <WidgetResourceFormBudget />
             </TabsContent>
-            <TabsContent value="confirmation" className="w-1/2">
+            <TabsContent value="confirmation" className="p-0">
               <WidgetResourceFormConfirmation />
             </TabsContent>
-            <TabsContent value="info" className="w-1/2">
+            <TabsContent value="info" className="p-0">
               <WidgetResourceFormInfo />
             </TabsContent>
           </Tabs>

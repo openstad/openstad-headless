@@ -59,10 +59,10 @@ export default function CreateUserGeneral() {
   return (
     <div>
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
+        <Heading size="xl">
           Gebruiker • Algemene instellingen
         </Heading>
-        <Separator className="mb-4" />
+        <Separator className="my-4" />
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}

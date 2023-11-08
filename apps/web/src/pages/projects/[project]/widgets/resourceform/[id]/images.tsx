@@ -66,13 +66,13 @@ export default function WidgetResourceFormImages() {
   }, [widget]);
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Resource Form • Uploaden afbeeldingen
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Heading size="xl">Uploaden afbeeldingen</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="lg:w-3/4 grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="imageLabel"
@@ -93,7 +93,7 @@ export default function WidgetResourceFormImages() {
               <FormItem>
                 <FormLabel>Informatie over de afbeeldingen.</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea className="h-10 min-h-[40px]" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -147,11 +147,9 @@ export default function WidgetResourceFormImages() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button className="w-fit col-span-full" type="submit">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>

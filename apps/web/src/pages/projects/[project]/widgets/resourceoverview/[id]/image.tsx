@@ -59,7 +59,7 @@ export default function WidgetResourceOverviewImage() {
         <Heading size="xl" className="mb-4">
           Resource Overview • Afbeeldingen
         </Heading>
-        <Separator className="mb-4" />
+        <Separator className="my-4" />
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
@@ -89,11 +89,9 @@ export default function WidgetResourceOverviewImage() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button className="w-fit col-span-full" type="submit">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>
