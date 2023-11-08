@@ -1,5 +1,5 @@
-import { Plus } from "lucide-react";
-import { Button } from "./ui/button";
+import { Plus } from 'lucide-react';
+import { Button } from './ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,11 +8,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
+} from './ui/dialog';
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   Form,
   FormControl,
@@ -20,19 +20,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "./ui/form";
+} from './ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import { Input } from "./ui/input";
-import { useState } from "react";
-import { useWidgetsHook } from "@/hooks/use-widgets";
-import { WidgetDefinitions } from "@/lib/widget-definitions";
-import { useRouter } from "next/router";
+} from './ui/select';
+import { Input } from './ui/input';
+import { useState } from 'react';
+import { useWidgetsHook } from '@/hooks/use-widgets';
+import { WidgetDefinitions } from '@/lib/widget-definitions';
+import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 
 type Props = {
@@ -68,19 +68,19 @@ export function CreateWidgetDialog({ projectId }: Props) {
     try {
       const widget = await createWidget(values.type, values.description);
       setOpen(false);
-      if(widget) {
-        toast.success("Widget aangemaakt!");
+      if (widget) {
+        toast.success('Widget aangemaakt!');
         router.push(router.asPath + `/${widget.type}/${widget.id}`);
       }
     } catch (error) {
-      toast.error("Widget kon niet worden aangemaakt!");
+      toast.error('Widget kon niet worden aangemaakt!');
     }
   }
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      description: "",
+      description: '',
       type: widgetTypes[0][0],
     },
   });

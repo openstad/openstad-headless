@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,23 +6,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   tipLabel: z.string(),
@@ -35,7 +35,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 export default function WidgetResourceFormTip() {
-  const category = "tip";
+  const category = 'tip';
 
   const {
     data: widget,
@@ -44,8 +44,8 @@ export default function WidgetResourceFormTip() {
   } = useWidgetConfig();
 
   const defaults = () => ({
-    tipLabel: widget?.config?.[category]?.tipLabel || "",
-    tipInfo: widget?.config?.[category]?.tipInfo || "",
+    tipLabel: widget?.config?.[category]?.tipLabel || '',
+    tipInfo: widget?.config?.[category]?.tipInfo || '',
     tipDisplayed: widget?.config?.[category]?.tipDisplayed || false,
     tipRequired: widget?.config?.[category]?.tipRequired || false,
     tipMinimumChars: widget?.config?.[category]?.tipMinimumChars || 0,
@@ -56,7 +56,7 @@ export default function WidgetResourceFormTip() {
     try {
       await updateConfig({ [category]: values });
     } catch (error) {
-      console.error("could not update", error);
+      console.error('could not update', error);
     }
   }
 
@@ -110,8 +110,8 @@ export default function WidgetResourceFormTip() {
               <FormItem>
                 <FormLabel>Wordt het advies weergegeven?</FormLabel>
                 <Select
-                    onValueChange={(e: string) => field.onChange(e === "true")}
-                    value={field.value ? "true" : "false"}>
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Nee" />
@@ -133,8 +133,8 @@ export default function WidgetResourceFormTip() {
               <FormItem>
                 <FormLabel>Is dit veld verplicht?</FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === "true")}
-                  value={field.value ? "true" : "false"}>
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Nee" />

@@ -5,77 +5,77 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Heading } from "@/components/ui/typography";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { useEffect } from "react";
+} from '@/components/ui/select';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Heading } from '@/components/ui/typography';
+import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useEffect } from 'react';
 
 const sorting = [
   {
-    id: "newest",
-    label: "Nieuwste eerst",
+    id: 'newest',
+    label: 'Nieuwste eerst',
   },
   {
-    id: "oldest",
-    label: "Oudste eerst",
+    id: 'oldest',
+    label: 'Oudste eerst',
   },
   {
-    id: "random",
-    label: "Willekeurig",
+    id: 'random',
+    label: 'Willekeurig',
   },
   {
-    id: "mostLikes",
-    label: "Meeste likes",
+    id: 'mostLikes',
+    label: 'Meeste likes',
   },
   {
-    id: "leastLikes",
-    label: "Minste likes",
+    id: 'leastLikes',
+    label: 'Minste likes',
   },
   {
-    id: "ranked",
-    label: "Ranglijst",
+    id: 'ranked',
+    label: 'Ranglijst',
   },
   {
-    id: "highestCost",
-    label: "Hoogste bedrag",
+    id: 'highestCost',
+    label: 'Hoogste bedrag',
   },
   {
-    id: "lowestCost",
-    label: "Laagste bedrag",
+    id: 'lowestCost',
+    label: 'Laagste bedrag',
   },
 ];
 
 const formSchema = z.object({
   sorting: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: "You have to select at least one item.",
+    message: 'You have to select at least one item.',
   }),
   defaultSorting: z.enum([
-    "newest",
-    "oldest",
-    "random",
-    "mostLikes",
-    "leastLikes",
-    "ranked",
-    "highestCost",
-    "lowestCost",
+    'newest',
+    'oldest',
+    'random',
+    'mostLikes',
+    'leastLikes',
+    'ranked',
+    'highestCost',
+    'lowestCost',
   ]),
 });
 
 export default function BegrootmoduleSorting() {
-  const category = "sorting";
+  const category = 'sorting';
 
   const {
     data: widget,
@@ -85,7 +85,7 @@ export default function BegrootmoduleSorting() {
 
   const defaults = () => ({
     sorting: widget?.config?.[category]?.options || [],
-    defaultSorting: widget?.config?.[category]?.defaultSorting || "newest",
+    defaultSorting: widget?.config?.[category]?.defaultSorting || 'newest',
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -126,8 +126,7 @@ export default function BegrootmoduleSorting() {
                       return (
                         <FormItem
                           key={item.id}
-                          className="flex flex-row items-start space-x-3 space-y-0"
-                        >
+                          className="flex flex-row items-start space-x-3 space-y-0">
                           <FormControl>
                             <Checkbox
                               checked={field.value?.includes(item.id)}

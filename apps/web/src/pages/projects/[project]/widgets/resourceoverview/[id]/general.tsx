@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,37 +6,37 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   resource: z.enum([
-    "idea",
-    "article",
-    "activeUser",
-    "resourceUser",
-    "submission",
+    'idea',
+    'article',
+    'activeUser',
+    'resourceUser',
+    'submission',
   ]),
   enableVoting: z.boolean(),
-  displayType: z.enum(["cardrow", "cardgrid", "raw"]),
+  displayType: z.enum(['cardrow', 'cardgrid', 'raw']),
 });
 
 export default function WidgetResourceOverviewGeneral() {
   type FormData = z.infer<typeof formSchema>;
-  const category = "general";
+  const category = 'general';
 
   const {
     data: widget,
@@ -45,16 +45,16 @@ export default function WidgetResourceOverviewGeneral() {
   } = useWidgetConfig();
 
   const defaults = () => ({
-    resource: widget?.config?.[category]?.resource || "idea",
+    resource: widget?.config?.[category]?.resource || 'idea',
     enableVoting: widget?.config?.[category]?.enableVoting || false,
-    displayType: widget?.config?.[category]?.displayType || "cardrow",
+    displayType: widget?.config?.[category]?.displayType || 'cardrow',
   });
 
   async function onSubmit(values: FormData) {
     try {
       await updateConfig({ [category]: values });
     } catch (error) {
-      console.error("could falset update", error);
+      console.error('could falset update', error);
     }
   }
 
@@ -81,10 +81,7 @@ export default function WidgetResourceOverviewGeneral() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Resource type</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Idee" />
@@ -113,9 +110,8 @@ export default function WidgetResourceOverviewGeneral() {
               <FormItem>
                 <FormLabel>Toestaan van stemmen</FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === "true")}
-                  value={field.value ? "true" : "false"}
-                >
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Nee" />
@@ -136,10 +132,7 @@ export default function WidgetResourceOverviewGeneral() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Display type</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Cards op een row - Linkt naar items op een andere pagina." />

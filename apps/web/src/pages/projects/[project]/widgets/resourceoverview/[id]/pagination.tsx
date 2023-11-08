@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,15 +6,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   itemsPerPage: z.number(),
@@ -23,7 +23,7 @@ const formSchema = z.object({
 
 export default function WidgetResourceOverviewPagination() {
   type FormData = z.infer<typeof formSchema>;
-  const category = "pagination";
+  const category = 'pagination';
 
   const {
     data: widget,
@@ -33,14 +33,14 @@ export default function WidgetResourceOverviewPagination() {
 
   const defaults = () => ({
     itemsPerPage: widget?.config?.[category]?.itemsPerPage || 24,
-    textResults: widget?.config?.[category]?.textResults || "",
+    textResults: widget?.config?.[category]?.textResults || '',
   });
 
   async function onSubmit(values: FormData) {
     try {
       await updateConfig({ [category]: values });
     } catch (error) {
-      console.error("could falset update", error);
+      console.error('could falset update', error);
     }
   }
 

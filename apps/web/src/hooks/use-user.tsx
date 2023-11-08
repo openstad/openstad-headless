@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/router';
 import useSWR from 'swr';
 
 export default function useUser() {
@@ -10,12 +10,12 @@ export default function useUser() {
 
   async function updateUser(body: any) {
     const res = await fetch(url, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ ...body })
-    })
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ...body }),
+    });
     const data = await res.json();
 
     userSwr.mutate(data);

@@ -1,14 +1,14 @@
-import { useRouter } from "next/router";
+import { useRouter } from 'next/router';
 
 type WithMeta<T> = {
-    data: T;
-    meta: {
-      total: number;
-      size: number;
-      page: number;
-      results: number;
-    };
+  data: T;
+  meta: {
+    total: number;
+    size: number;
+    page: number;
+    results: number;
   };
+};
 
 export default function usePagination() {
   const router = useRouter();
