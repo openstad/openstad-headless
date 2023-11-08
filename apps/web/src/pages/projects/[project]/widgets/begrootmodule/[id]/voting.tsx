@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,39 +6,39 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   allowVoting: z.boolean(),
   votingType: z.enum([
-    "budgeting",
-    "budgetingPerTheme",
-    "count",
-    "countPerTheme",
+    'budgeting',
+    'budgetingPerTheme',
+    'count',
+    'countPerTheme',
   ]),
   maximumSelectableIdeas: z.coerce
     .number()
-    .gt(0, "Nummer moet groter zijn dan 0"),
+    .gt(0, 'Nummer moet groter zijn dan 0'),
   minimumSelectableIdeas: z.coerce
     .number()
-    .gte(0, "Nummer moet groter of gelijk zijn aan 0"),
-  budget: z.coerce.number().gt(0, "Nummer moet groter zijn dan 0"),
-  minimumBudget: z.coerce.number().gt(0, "Nummer moet groter zijn dan 0"),
+    .gte(0, 'Nummer moet groter of gelijk zijn aan 0'),
+  budget: z.coerce.number().gt(0, 'Nummer moet groter zijn dan 0'),
+  minimumBudget: z.coerce.number().gt(0, 'Nummer moet groter zijn dan 0'),
 });
 
 export default function BegrootmoduleVoting() {
@@ -52,10 +52,11 @@ export default function BegrootmoduleVoting() {
 
   const defaults = () => ({
     allowVoting: widget?.config?.[category]?.allowVoting || false,
-    votingType: widget?.config?.[category]?.votingType || "budgeting",
+    votingType: widget?.config?.[category]?.votingType || 'budgeting',
     maximumSelectableIdeas:
       widget?.config?.[category]?.maximumSelectableIdeas || 1000,
-    minimumSelectableIdeas: widget?.config?.[category]?.minimumSelectableIdeas || 0,
+    minimumSelectableIdeas:
+      widget?.config?.[category]?.minimumSelectableIdeas || 0,
     minimumBudget: widget?.config?.[category]?.minimumBudget || 0,
     budget: widget?.config?.[category]?.budget || 0,
   });
@@ -89,9 +90,8 @@ export default function BegrootmoduleVoting() {
                 Sta stemmen toe (werkt op het moment alleen met Gridder)
               </FormLabel>
               <Select
-                onValueChange={(e: string) => field.onChange(e === "true")}
-                value={field.value ? "true" : "false"}
-              >
+                onValueChange={(e: string) => field.onChange(e === 'true')}
+                value={field.value ? 'true' : 'false'}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Nee" />

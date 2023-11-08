@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,40 +6,40 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   resource: z.enum([
-    "idea",
-    "article",
-    "activeUser",
-    "resourceUser",
-    "submission",
+    'idea',
+    'article',
+    'activeUser',
+    'resourceUser',
+    'submission',
   ]),
   formName: z.string(),
   redirectUrl: z.string().url(),
   hideAdmin: z.boolean(),
-  organiseForm: z.enum(["static", "staticAppended", "dynamic"]),
+  organiseForm: z.enum(['static', 'staticAppended', 'dynamic']),
 });
 
 type FormData = z.infer<typeof formSchema>;
 export default function WidgetResourceFormGeneral() {
-  const category = "general";
+  const category = 'general';
 
   const {
     data: widget,
@@ -48,18 +48,18 @@ export default function WidgetResourceFormGeneral() {
   } = useWidgetConfig();
 
   const defaults = () => ({
-    resource: widget?.config?.[category]?.resource || "idea",
-    formName: widget?.config?.[category]?.formName || "",
-    redirectUrl: widget?.config?.[category]?.redirectUrl || "",
+    resource: widget?.config?.[category]?.resource || 'idea',
+    formName: widget?.config?.[category]?.formName || '',
+    redirectUrl: widget?.config?.[category]?.redirectUrl || '',
     hideAdmin: widget?.config?.[category]?.hideAdmin || false,
-    organiseForm: widget?.config?.[category]?.organiseForm || "static",
+    organiseForm: widget?.config?.[category]?.organiseForm || 'static',
   });
 
   async function onSubmit(values: FormData) {
     try {
       await updateConfig({ [category]: values });
     } catch (error) {
-      console.error("could not update", error);
+      console.error('could not update', error);
     }
   }
 
@@ -86,10 +86,7 @@ export default function WidgetResourceFormGeneral() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Resource type (vanuit de config)</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Idee" />
@@ -152,8 +149,8 @@ export default function WidgetResourceFormGeneral() {
                   actie?
                 </FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === "true")}
-                  value={field.value ? "true" : "false"}>
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Ja" />
@@ -176,10 +173,7 @@ export default function WidgetResourceFormGeneral() {
                 <FormLabel>
                   Hoe moeten de velden van het formulier opgesteld worden?
                 </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Statisch (default optie)" />
