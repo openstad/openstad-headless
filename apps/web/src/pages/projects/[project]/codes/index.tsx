@@ -5,8 +5,13 @@ import { Plus } from "lucide-react";
 import React from "react";
 import { useRouter } from "next/router";
 import { ListHeading, Paragraph } from "@/components/ui/typography";
-import * as XLSX from 'xlsx';
 import useCodes from "@/hooks/use-codes";
+import { CSVLink } from "react-csv";
+
+const headers = [
+    {label: "ID", key: "id"},
+    {label: "Code", key: "code"}
+]
 
 export default function ProjectCodes() {
     const router = useRouter();
@@ -14,13 +19,6 @@ export default function ProjectCodes() {
     const { data, isLoading } = useCodes('uniquecode');
 
     if (!data) return null;
-
-    const downloadExcel = (data: any) => {
-        const worksheet = XLSX.utils.json_to_sheet([data.data]);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-        XLSX.writeFile(workbook, "DataSheet.xlsx");
-    };
 
     return (
         <div>
@@ -44,8 +42,11 @@ export default function ProjectCodes() {
                                 Creëer unieke codes
                             </Button>
                         </Link>
-                        <Button variant="default" className="ml-6" onClick={() => downloadExcel(data)}>
-                            Exporteer unieke codes
+                        <Button variant="default" className="ml-6">
+                            <CSVLink data={data.data} headers={headers}>
+                                Exporteer unieke codes
+                            </CSVLink>
+                            
                         </Button>
                     </div>
                 }
