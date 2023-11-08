@@ -172,10 +172,12 @@ export default function ProjectSettingsVoting() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Moet het systeem een error geven wanneer iemand twee keer
-                        stemt, of moet de vorige stem vervangen worden?
+                        Moet het systeem een error geven wanneer iemand twee
+                        keer stemt, of moet de vorige stem vervangen worden?
                       </FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Error" />
@@ -260,8 +262,8 @@ export default function ProjectSettingsVoting() {
                     render={({ field }) => (
                       <FormItem className="col-span-2 lg:col-span-1">
                         <FormLabel>
-                          Wat is de minimum hoeveelheid ideeën waar iemand op kan
-                          stemmen?
+                          Wat is de minimum hoeveelheid ideeën waar iemand op
+                          kan stemmen?
                         </FormLabel>
                         <FormControl>
                           <Input type="number" placeholder="1" {...field} />
@@ -276,8 +278,8 @@ export default function ProjectSettingsVoting() {
                     render={({ field }) => (
                       <FormItem className="col-span-2 lg:col-span-1">
                         <FormLabel>
-                          Wat is de maximum hoeveelheid ideeën waar iemand op kan
-                          stemmen?
+                          Wat is de maximum hoeveelheid ideeën waar iemand op
+                          kan stemmen?
                         </FormLabel>
                         <FormControl>
                           <Input type="number" placeholder="100" {...field} />
