@@ -11,16 +11,18 @@ import { Heading } from "@/components/ui/typography";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Separator } from "@/components/ui/separator";
-import useCodes from "@/hooks/use-codes";
+import useCode from "@/hooks/use-code";
+import { useProject } from "@/hooks/use-project";
 
 const formSchema = z.object({
-    numberOfCodes: z.coerce.number(),
+    numberOfCodes: z.string(),
 })
 
 export default function ProjectCodeCreate() {
     const router = useRouter();
     const { project } = router.query;
-    const { create } = useCodes()
+    const { data, isLoading } = useProject()
+    const { create } = useCode()
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver<any>(formSchema),
@@ -29,7 +31,7 @@ export default function ProjectCodeCreate() {
     })
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        create(values)
+        create(data.config.auth.provider.openstad.clientId, values.numberOfCodes)
     }
     
     return (

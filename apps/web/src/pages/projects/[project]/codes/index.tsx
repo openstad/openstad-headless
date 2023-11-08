@@ -2,25 +2,23 @@ import { PageLayout} from "@/components/ui/page-layout"
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import useSWR from "swr"
 import React from "react";
 import { useRouter } from "next/router";
-import { ListHeading } from "@/components/ui/typography";
+import { ListHeading, Paragraph } from "@/components/ui/typography";
 import * as XLSX from 'xlsx';
+import useCodes from "@/hooks/use-codes";
 
 export default function ProjectCodes() {
     const router = useRouter();
     const { project } = router.query;
-    const { data, isLoading } = useSWR("/api/openstad/api/project");
+    const { data, isLoading } = useCodes();
 
-    const downloadExcel = (data: any) => {
-        const worksheet = XLSX.utils.json_to_sheet([data]);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-        XLSX.writeFile(workbook, "DataSheet.xlsx");
-    };
-
-    if (!data) return null;
+    // const downloadExcel = (data: any) => {
+    //     const worksheet = XLSX.utils.json_to_sheet([data]);
+    //     const workbook = XLSX.utils.book_new();
+    //     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    //     XLSX.writeFile(workbook, "DataSheet.xlsx");
+    // };
 
     return (
         <div>
@@ -62,6 +60,21 @@ export default function ProjectCodes() {
                         Al gebruikt
                         </ListHeading>
                     </div>
+                    <ul className="container mx-auto">
+                    {data?.map((code: any) => (
+                        <li className="grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                            <Paragraph className="hidden md:flex md:col-span-2">
+                                {code.id}
+                            </Paragraph>
+                            <Paragraph className="hidden md:flex md:col-span-2">
+                                {code.code}
+                            </Paragraph>
+                            <Paragraph className="hidden md:flex md:col-span-2">
+                                {code.used}
+                            </Paragraph>
+                        </li>
+                    ))}
+                </ul>
                 </div>
             </PageLayout>
         </div>
