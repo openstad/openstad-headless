@@ -155,7 +155,7 @@ export default function ProjectSettingsIdeas() {
                     </FormItem>
                   )}
                 />
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-y-2 gap-x-4">
                   <FormField
                     control={form.control}
                     name="titleMinLength"
@@ -249,36 +249,36 @@ export default function ProjectSettingsIdeas() {
             </Heading>
             <Separator className="mb-4" />
             <form onSubmit={() => {}} className="space-y-4 lg:w-1/2">
-            <div className="grid grid-cols-2 gap-2 w-full ">
-              <div className="col-span-2 space-y-2">
-                <Label>Type e-mail</Label>
-                <Select className="col-span-1">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecteer" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="thanks">Bedank-mail</SelectItem>
-                    <SelectItem value="submit">
-                      Opleveren van concept-plan
-                    </SelectItem>
-                    <SelectItem value="publish">
-                      Uitbrengen van concept-plan
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="col-span-2 space-y-2">
-                <Label>Vanaf adres</Label>
-                <Input id="mail" placeholder="email@example.com" />
-              </div>
-              <div className="col-span-2 space-y-2">
-                <Label>Onderwerp</Label>
-                <Input id="subject" placeholder="Onderwerp van de mail" />
-              </div>
-              <div className="col-span-2 space-y-2">
-                <Label>E-mail tekst template</Label>
-                <Textarea id="template" placeholder="Inhoud van de mail" />
-              </div>
+              <div className="grid grid-cols-2 gap-y-2 gap-x-4 w-full ">
+                <div className="col-span-2 space-y-2">
+                  <Label>Type e-mail</Label>
+                  <Select className="col-span-1">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecteer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="thanks">Bedank-mail</SelectItem>
+                      <SelectItem value="submit">
+                        Opleveren van concept-plan
+                      </SelectItem>
+                      <SelectItem value="publish">
+                        Uitbrengen van concept-plan
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="col-span-2 space-y-2">
+                  <Label>Vanaf adres</Label>
+                  <Input id="mail" placeholder="email@example.com" />
+                </div>
+                <div className="col-span-2 space-y-2">
+                  <Label>Onderwerp</Label>
+                  <Input id="subject" placeholder="Onderwerp van de mail" />
+                </div>
+                <div className="col-span-2 space-y-2">
+                  <Label>E-mail tekst template</Label>
+                  <Textarea id="template" placeholder="Inhoud van de mail" />
+                </div>
               </div>
               <Button type="button">Opslaan</Button>
             </form>

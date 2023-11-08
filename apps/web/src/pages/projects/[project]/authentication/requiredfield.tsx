@@ -53,73 +53,70 @@ export default function ProjectAuthenticationRequiredFields() {
             url: '/projects/1/authentication/requiredfield',
           },
         ]}>
-        <div className='p-6 bg-white rounded-md container m-6'>
-          <Form {...form}>
-            <Heading size="xl" className="mb-4">
-              Authenticatie • Verplichte velden
-            </Heading>
-            <Separator className="mb-4" />
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Titel</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Beschrijving</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="buttonText"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Knoptekst</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="helpText"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hulptekst</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="py-4 bg-background border-t border-border flex flex-col">
-                <Button className="self-end" type="submit">
-                  Opslaan
-                </Button>
-              </div>
-            </form>
-            <br />
-          </Form>
+        <div className="container py-6">
+          <div className="p-6 bg-white rounded-md">
+            <Form {...form}>
+              <Heading size="xl">Verplichte velden</Heading>
+              <Separator className="my-4" />
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4 lg:w-1/2">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Titel</FormLabel>
+                      <FormControl>
+                        <Input placeholder="" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Beschrijving</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="buttonText"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Knoptekst</FormLabel>
+                      <FormControl>
+                        <Input placeholder="" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="helpText"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Hulptekst</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit">Opslaan</Button>
+              </form>
+            </Form>
+          </div>
         </div>
       </PageLayout>
     </div>

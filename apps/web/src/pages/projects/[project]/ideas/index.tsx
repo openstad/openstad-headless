@@ -38,64 +38,63 @@ export default function ProjectIdeas() {
             </Button>
           </Link>
         }>
-        <div className="container mx-auto py-10">
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 py-2 px-2 border-b border-border">
-            <ListHeading className="hidden md:flex md:col-span-3">
-              Ideeën
-            </ListHeading>
-            <ListHeading className="hidden md:flex md:col-span-2">
-              Ja
-            </ListHeading>
-            <ListHeading className="hidden md:flex md:col-span-2">
-              Nee
-            </ListHeading>
-            <ListHeading className="hidden md:flex md:col-span-3">
-              Datum aangemaakt
-            </ListHeading>
-            <ListHeading className="hidden md:flex md:col-span-2">
-              Idee verwijderen
-            </ListHeading>
+        <div className="container py-6">
+          <div className="p-6 bg-white rounded-md">
+            <div className="grid grid-cols-5 items-center py-2 px-2 border-b border-border">
+              <ListHeading className="hidden md:flex">Ideeën</ListHeading>
+              <ListHeading className="hidden md:flex">
+                Gestemd op ja
+              </ListHeading>
+              <ListHeading className="hidden md:flex">
+                Gestemd op nee
+              </ListHeading>
+              <ListHeading className="hidden md:flex">
+                Datum aangemaakt
+              </ListHeading>
+              <ListHeading className="hidden md:flex ml-auto">
+                Idee verwijderen
+              </ListHeading>
+            </div>
+            <ul>
+              {data?.map((idea: any) => (
+                <Link
+                  href={`/projects/${project}/ideas/${idea.id}`}
+                  key={idea.id}>
+                  <li className="grid grid-cols-5 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                    <div className="my-auto">
+                      <Paragraph>{idea.title}</Paragraph>
+                    </div>
+                    <Paragraph className="hidden md:flex my-auto">
+                      {idea.yes || 0}
+                    </Paragraph>
+                    <Paragraph className="hidden md:flex my-auto">
+                      {idea.no || 0}
+                    </Paragraph>
+                    <Paragraph className="hidden md:flex my-auto">
+                      {idea.createDateHumanized}
+                    </Paragraph>
+                    <div
+                      className="hidden md:flex ml-auto"
+                      onClick={(e) => e.stopPropagation()}>
+                      <RemoveResourceDialog
+                        header="Idee verwijderen"
+                        message="Weet je zeker dat je dit idee wilt verwijderen?"
+                        onDeleteAccepted={() =>
+                          remove(idea.id)
+                            .then(() =>
+                              toast.success('Idee successvol verwijderd')
+                            )
+                            .catch((e) =>
+                              toast.error('Idee kon niet worden verwijderd')
+                            )
+                        }
+                      />
+                    </div>
+                  </li>
+                </Link>
+              ))}
+            </ul>
           </div>
-
-          <ul>
-            {data?.map((idea: any) => (
-              <Link
-                href={`/projects/${project}/ideas/${idea.id}`}
-                key={idea.id}>
-                <li className="grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
-                  <div className="col-span-3">
-                    <Paragraph>{idea.title}</Paragraph>
-                  </div>
-                  <Paragraph className="hidden md:flex md:col-span-2">
-                    {idea.yes || 0}
-                  </Paragraph>
-                  <Paragraph className="hidden md:flex md:col-span-2">
-                    {idea.no || 0}
-                  </Paragraph>
-                  <Paragraph className="hidden md:flex md:col-span-3">
-                    {idea.createDateHumanized}
-                  </Paragraph>
-                  <div
-                    className="hidden md:flex md:col-span-2"
-                    onClick={(e) => e.stopPropagation()}>
-                    <RemoveResourceDialog
-                      header="Idee verwijderen"
-                      message="Weet je zeker dat je dit idee wilt verwijderen?"
-                      onDeleteAccepted={() =>
-                        remove(idea.id)
-                          .then(() =>
-                            toast.success('Idee successvol verwijderd')
-                          )
-                          .catch((e) =>
-                            toast.error('Idee kon niet worden verwijderd')
-                          )
-                      }
-                    />
-                  </div>
-                </li>
-              </Link>
-            ))}
-          </ul>
         </div>
       </PageLayout>
     </div>

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,38 +6,37 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
-  authEmbedded: z.enum(["no", "email", "code", "sms"]),
+  authEmbedded: z.enum(['no', 'email', 'code', 'sms']),
   scrollBack: z.boolean(),
 });
 
 export default function BegrootmoduleAuthentication() {
   const category = 'authentication';
 
-  
   const {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
   } = useWidgetConfig();
   const defaults = () => ({
-    authEmbedded: widget?.config?.[category]?.authEmbedded || "no",
+    authEmbedded: widget?.config?.[category]?.authEmbedded || 'no',
     scrollBack: widget?.config?.[category]?.scrollBack || false,
   });
 
@@ -55,23 +54,20 @@ export default function BegrootmoduleAuthentication() {
   }
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Begrootmodule • Authenticatie
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Heading size="xl">Authenticatie</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
             name="authEmbedded"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Authenticatie formulier embedden</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Nee" />
@@ -99,9 +95,8 @@ export default function BegrootmoduleAuthentication() {
                   stemcode in oAuth?
                 </FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === "true")}
-                  value={field.value ? "true" : "false"}
-                >
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Ja" />
@@ -116,11 +111,7 @@ export default function BegrootmoduleAuthentication() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

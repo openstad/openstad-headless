@@ -1,18 +1,18 @@
-import React from "react";
-import { PageLayout } from "../../../../../../components/ui/page-layout";
+import React from 'react';
+import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "../../../../../../components/ui/tabs";
-import BegrootmoduleVoting from "./voting";
-import BegrootmoduleDisplay from "./display";
-import BegrootmoduleSorting from "./sorting";
-import BegrootmoduleExplanation from "./explanation";
-import BegrootmoduleAuthentication from "./authentication";
-import BegrootmoduleLabels from "./label";
-import { useRouter } from "next/router";
+} from '../../../../../../components/ui/tabs';
+import BegrootmoduleVoting from './voting';
+import BegrootmoduleDisplay from './display';
+import BegrootmoduleSorting from './sorting';
+import BegrootmoduleExplanation from './explanation';
+import BegrootmoduleAuthentication from './authentication';
+import BegrootmoduleLabels from './label';
+import { useRouter } from 'next/router';
 
 export default function WidgetBegrootmodule() {
   const router = useRouter();
@@ -25,44 +25,45 @@ export default function WidgetBegrootmodule() {
         pageHeader="Project naam"
         breadcrumbs={[
           {
-            name: "Projecten",
-            url: "/projects",
-          }, {
-            name: "Widgets",
-            url: `/projects/${projectId}/widgets`
-          }, {
-              name: "Begrootmodule",
-              url: `/projects/${projectId}/widgets/begrootmodule/${id}`
-          }
-        ]}
-      >
-        <div>
+            name: 'Projecten',
+            url: '/projects',
+          },
+          {
+            name: 'Widgets',
+            url: `/projects/${projectId}/widgets`,
+          },
+          {
+            name: 'Begrootmodule',
+            url: `/projects/${projectId}/widgets/begrootmodule/${id}`,
+          },
+        ]}>
+        <div className="container py-6">
           <Tabs defaultValue="voting">
-            <TabsList className="w-full">
+            <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="voting">Stem opties</TabsTrigger>
-              <TabsTrigger value="display">Display opties</TabsTrigger>
+              <TabsTrigger value="display">Weergave opties</TabsTrigger>
               <TabsTrigger value="sorting">Sorteer opties</TabsTrigger>
               <TabsTrigger value="explanation">Uitleg</TabsTrigger>
               <TabsTrigger value="authentication">Authenticatie</TabsTrigger>
               <TabsTrigger value="labels">Labels</TabsTrigger>
             </TabsList>
-            <TabsContent value="voting" className="w-1/2">
-              <BegrootmoduleVoting/>
+            <TabsContent value="voting" className="p-0">
+              <BegrootmoduleVoting />
             </TabsContent>
-            <TabsContent value="display" className="w-1/2">
-              <BegrootmoduleDisplay/>
+            <TabsContent value="display" className="p-0">
+              <BegrootmoduleDisplay />
             </TabsContent>
-            <TabsContent value="sorting" className="w-1/2">
-              <BegrootmoduleSorting/>
+            <TabsContent value="sorting" className="p-0">
+              <BegrootmoduleSorting />
             </TabsContent>
-            <TabsContent value="explanation" className="w-1/2">
-              <BegrootmoduleExplanation/>
+            <TabsContent value="explanation" className="p-0">
+              <BegrootmoduleExplanation />
             </TabsContent>
-            <TabsContent value="authentication" className="w-1/2">
-              <BegrootmoduleAuthentication/>
+            <TabsContent value="authentication" className="p-0">
+              <BegrootmoduleAuthentication />
             </TabsContent>
-            <TabsContent value="labels" className="w-1/2">
-              <BegrootmoduleLabels/>
+            <TabsContent value="labels" className="p-0">
+              <BegrootmoduleLabels />
             </TabsContent>
           </Tabs>
         </div>

@@ -112,7 +112,7 @@ export default function ProjectSettingsVoting() {
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4 w-fit">
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-y-2 gap-x-4">
                   <FormField
                     control={form.control}
                     name="isViewable"
@@ -192,7 +192,7 @@ export default function ProjectSettingsVoting() {
                     </FormItem>
                   )}
                 />
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-y-2 gap-x-4">
                   <FormField
                     control={form.control}
                     name="requiredUserRole"

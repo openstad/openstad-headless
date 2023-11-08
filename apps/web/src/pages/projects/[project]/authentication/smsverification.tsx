@@ -62,190 +62,197 @@ export default function ProjectAuthenticationSmsVerification() {
             url: '/projects/1/authentication/smsverification',
           },
         ]}>
-        <div className='p-6 bg-white rounded-md container m-6'>
-          <Form {...form}>
-            <Heading size="xl" className="mb-4">
-              Authenticatie • SMS verificatie
-            </Heading>
-            <Separator className="mb-4" />
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="firstTitle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Titel voor het eerste scherm</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="firstSubtitle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ondertitel voor het eerste scherm</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="firstDescription"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Beschrijving voor het eerste scherm</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="firstLabel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Label voor het eerste scherm</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="firstButton"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Knoptekst voor het eerste scherm</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="firstHelptext"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hulptekst voor het eerste scherm</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="secondTitle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Titel voor het tweede scherm</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="secondSubtitle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ondertitel voor het tweede scherm</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="secondLabel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Label voor het tweede scherm</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="secondButton"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Knoptekst voor het tweede scherm</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="secondHelptext"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hulptekst voor het eerste scherm</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="smsSender"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Verstuurder van de SMS</FormLabel>
-                    <FormControl>
-                      <Input placeholder="OpenStad" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="smsText"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Inhoud van de SMS</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Code: [[code]]" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="py-4 bg-background border-t border-border flex flex-col">
-                <Button className="self-end" type="submit">
-                  Opslaan
-                </Button>
-              </div>
-            </form>
-            <br />
-          </Form>
+        <div className="container py-6">
+          <div className="p-6 bg-white rounded-md">
+            <Form {...form}>
+              <Heading size="xl">SMS verificatie</Heading>
+              <Separator className="my-4" />
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4 lg:min-w-fit lg:w-3/4">
+                <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                  <FormField
+                    control={form.control}
+                    name="firstTitle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Titel voor het eerste scherm</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="firstSubtitle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ondertitel voor het eerste scherm</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="firstDescription"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>
+                          Beschrijving voor het eerste scherm
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                  <FormField
+                    control={form.control}
+                    name="firstLabel"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Label voor het eerste scherm</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="firstButton"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Knoptekst voor het eerste scherm</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="firstHelptext"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Hulptekst voor het eerste scherm</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                  <FormField
+                    control={form.control}
+                    name="secondTitle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Titel voor het tweede scherm</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="secondSubtitle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ondertitel voor het tweede scherm</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="secondLabel"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Label voor het tweede scherm</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="secondButton"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Knoptekst voor het tweede scherm</FormLabel>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="secondHelptext"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Hulptekst voor het eerste scherm</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                  <FormField
+                    control={form.control}
+                    name="smsSender"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Verstuurder van de SMS</FormLabel>
+                        <FormControl>
+                          <Input placeholder="OpenStad" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="smsText"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Inhoud van de SMS</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Code: [[code]]" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <Button type="submit">Opslaan</Button>
+              </form>
+            </Form>
+          </div>
         </div>
       </PageLayout>
     </div>

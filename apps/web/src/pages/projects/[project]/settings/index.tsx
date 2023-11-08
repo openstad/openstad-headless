@@ -86,46 +86,48 @@ export default function ProjectSettings() {
         <div className="container py-6">
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
-                  <TabsTrigger value="general">Projectinformatie</TabsTrigger>
-                  <TabsTrigger value="advanced">Geadvanceerde instellingen</TabsTrigger>
-              </TabsList>
-              <TabsContent value="general" className="p-0">
-              <div className='p-6 bg-white rounded-md'>
+              <TabsTrigger value="general">Projectinformatie</TabsTrigger>
+              <TabsTrigger value="advanced">
+                Geadvanceerde instellingen
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="general" className="p-0">
+              <div className="p-6 bg-white rounded-md">
                 <Form {...form}>
-                  <Heading size="xl">
-                    Projectinformatie
-                  </Heading>
+                  <Heading size="xl">Projectinformatie</Heading>
                   <Separator className="my-4" />
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <div className='grid grid-cols-2 gap-2'>
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem className='col-span-2 md:col-span-1 flex flex-col'>
-                          <FormLabel>Projectnaam</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Naam" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <SimpleCalendar
-                      form={form}
-                      fieldName="endDate"
-                      label="Einddatum"
-                    />
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-4">
+                    <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem className="col-span-2 md:col-span-1 flex flex-col">
+                            <FormLabel>Projectnaam</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Naam" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <SimpleCalendar
+                        form={form}
+                        fieldName="endDate"
+                        label="Einddatum"
+                      />
                     </div>
                     <Button className="self-end" type="submit">
-                        Opslaan
-                      </Button>
+                      Opslaan
+                    </Button>
                   </form>
                 </Form>
               </div>
-              </TabsContent>
-              <TabsContent value="advanced" className="p-0">
-              <div className='p-6 bg-white rounded-md'>
+            </TabsContent>
+            <TabsContent value="advanced" className="p-0">
+              <div className="p-6 bg-white rounded-md">
                 <Heading size="xl" className="mb-4">
                   Project archiveren
                 </Heading>
@@ -140,14 +142,14 @@ export default function ProjectSettings() {
                     voordat deze actie uitgevoerd kan worden.
                   </div>
                   <Button
-                      variant={'destructive'}
-                      className="mt-4 w-fit self-end"
-                      onClick={() => {}}>
-                      Project archiveren
-                    </Button>
+                    variant={'destructive'}
+                    className="mt-4 w-fit self-end"
+                    onClick={() => {}}>
+                    Project archiveren
+                  </Button>
                 </div>
               </div>
-              </TabsContent>
+            </TabsContent>
           </Tabs>
         </div>
       </PageLayout>
