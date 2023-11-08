@@ -63,10 +63,12 @@ export default function WidgetMapFilter() {
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl" className="mb-4">
-          Map • Filterbalk
+          Filterbalk
         </Heading>
         <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
             name="searchLocations"

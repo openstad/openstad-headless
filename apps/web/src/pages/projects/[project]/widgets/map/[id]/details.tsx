@@ -95,12 +95,14 @@ export default function WidgetMapDetails() {
           Map • Idee details
         </Heading>
         <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid grid-cols-2 gap-4 lg:w-fit">
           <FormField
             control={form.control}
             name="template"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>Metadata regel template</FormLabel>
                 <FormControl>
                   <Textarea {...field} />
@@ -127,7 +129,9 @@ export default function WidgetMapDetails() {
             name="displayShare"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Worden de share buttons weergegeven?</FormLabel>
+                <FormLabel>
+                  Worden de socialmedia deelknoppen weergegeven?
+                </FormLabel>
                 <Select
                   onValueChange={(e: string) => field.onChange(e === 'true')}
                   value={field.value ? 'true' : 'false'}>
@@ -149,9 +153,9 @@ export default function WidgetMapDetails() {
             control={form.control}
             name="selectableOptions"
             render={() => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <div>
-                  <FormLabel>Selecteer uw gewenste sorteeropties</FormLabel>
+                  <FormLabel>Selecteer uw gewenste deelopties</FormLabel>
                 </div>
                 {selectableOptions.map((item) => (
                   <FormField

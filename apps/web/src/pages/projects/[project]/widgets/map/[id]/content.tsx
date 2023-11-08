@@ -89,7 +89,9 @@ export default function WidgetMapContent() {
       <Form {...form}>
         <Heading size="xl">Content</Heading>
         <Separator className="my-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
             name="noSelectionLoggedInHTML"

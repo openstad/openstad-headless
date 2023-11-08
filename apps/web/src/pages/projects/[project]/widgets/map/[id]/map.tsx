@@ -76,11 +76,11 @@ export default function WidgetMapMap() {
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Map • Kaart
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Heading size="xl">Kaart</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid grid-cols-2 gap-4 lg:w-fit">
           <FormField
             control={form.control}
             name="variant"
@@ -132,7 +132,7 @@ export default function WidgetMapMap() {
             control={form.control}
             name="defaultLocation"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>Default Location icon</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -223,7 +223,9 @@ export default function WidgetMapMap() {
               </FormItem>
             )}
           />
-          <Button type="submit">Opslaan</Button>
+          <Button type="submit" className="w-fit col-span-full">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>

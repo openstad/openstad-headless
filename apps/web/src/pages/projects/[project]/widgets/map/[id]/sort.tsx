@@ -115,51 +115,53 @@ export default function WidgetMapSort() {
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Map • Sorteren
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Heading size="xl">Sorteren</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid grid-cols-2 gap-4 lg:w-fit">
           <FormField
             control={form.control}
             name="sorting"
             render={() => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <div>
                   <FormLabel>Selecteer uw gewenste sorteeropties</FormLabel>
                 </div>
-                {sorting.map((item) => (
-                  <FormField
-                    key={item.id}
-                    control={form.control}
-                    name="sorting"
-                    render={({ field }) => {
-                      return (
-                        <FormItem
-                          key={item.id}
-                          className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.includes(item.id)}
-                              onCheckedChange={(checked: any) => {
-                                return checked
-                                  ? field.onChange([...field.value, item.id])
-                                  : field.onChange(
-                                      field.value?.filter(
-                                        (value) => value !== item.id
-                                      )
-                                    );
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className="font-normal">
-                            {item.label}
-                          </FormLabel>
-                        </FormItem>
-                      );
-                    }}
-                  />
-                ))}
+                <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                  {sorting.map((item) => (
+                    <FormField
+                      key={item.id}
+                      control={form.control}
+                      name="sorting"
+                      render={({ field }) => {
+                        return (
+                          <FormItem
+                            key={item.id}
+                            className="flex flex-row items-start space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(item.id)}
+                                onCheckedChange={(checked: any) => {
+                                  return checked
+                                    ? field.onChange([...field.value, item.id])
+                                    : field.onChange(
+                                        field.value?.filter(
+                                          (value) => value !== item.id
+                                        )
+                                      );
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              {item.label}
+                            </FormLabel>
+                          </FormItem>
+                        );
+                      }}
+                    />
+                  ))}
+                </div>
               </FormItem>
             )}
           />
@@ -197,7 +199,9 @@ export default function WidgetMapSort() {
               </FormItem>
             )}
           />
-          <Button type="submit">Opslaan</Button>
+          <Button type="submit" className="w-fit col-span-full">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>

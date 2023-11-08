@@ -184,14 +184,14 @@ export default function ProjectAuthentication() {
             url: `/projects/${project}/authentication`,
           },
         ]}>
-        <div className="container py-6">
-          <div className="p-6 bg-white rounded-md">
+        <div className="container">
+          <div className="p-6 bg-white rounded-md my-6">
             <Form {...form}>
               <Heading size="xl">Algemeen</Heading>
               <Separator className="my-4" />
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4 lg:w-fit grid grid-cols-2 gap-4">
+                className="space-y-4 lg:w-fit grid grid-cols-2 gap-4 lg:w-fit">
                 <FormField
                   control={form.control}
                   name="availableAuthentication"
