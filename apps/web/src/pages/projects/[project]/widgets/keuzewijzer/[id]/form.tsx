@@ -75,16 +75,16 @@ export default function ChoicesSelectorForm() {
 
   return (
     <Form {...form}>
-      <Heading size="xl" className="mb-4">
-        Keuzewijzer • Instellingen
-      </Heading>
-      <Separator className="mb-4" />
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <Heading size="xl">Instellingen</Heading>
+      <Separator className="my-4" />
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="lg:w-fit grid grid-cols-2 gap-4">
         <FormField
           control={form.control}
           name="keuzewijzer"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="col-span-full">
               <FormLabel>Kies de keuzewijzer:</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
@@ -104,7 +104,7 @@ export default function ChoicesSelectorForm() {
             <FormItem>
               <FormLabel>Aantal vragen per pagina:</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input type="number" {...field} />
               </FormControl>
             </FormItem>
           )}
@@ -225,11 +225,9 @@ export default function ChoicesSelectorForm() {
             </FormItem>
           )}
         />
-        <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-          <Button className="self-end" type="submit">
-            Opslaan
-          </Button>
-        </div>
+        <Button type="submit" className="w-fit col-span-full">
+          Opslaan
+        </Button>
       </form>
     </Form>
   );

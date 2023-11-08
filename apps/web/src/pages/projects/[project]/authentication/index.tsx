@@ -191,18 +191,18 @@ export default function ProjectAuthentication() {
               <Separator className="my-4" />
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4 lg:w-fit">
+                className="space-y-4 lg:w-fit grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="availableAuthentication"
                   render={() => (
-                    <FormItem>
+                    <FormItem className="col-span-full">
                       <div>
                         <FormLabel>
                           Toegestaande authenticatie mogelijkheden
                         </FormLabel>
                       </div>
-                      <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                      <div className="grid grid-cols-2 gap-4">
                         {availableAuthentication.map((item) => (
                           <FormField
                             key={item.id}
@@ -246,13 +246,13 @@ export default function ProjectAuthentication() {
                   control={form.control}
                   name="twoFactorRoles"
                   render={() => (
-                    <FormItem>
+                    <FormItem className="col-span-full">
                       <div>
                         <FormLabel>
                           Two Factor authenticatie voor rollen
                         </FormLabel>
                       </div>
-                      <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                      <div className="grid grid-cols-2 gap-4">
                         {twoFactorRoles.map((item) => (
                           <FormField
                             key={item.id}
@@ -297,11 +297,11 @@ export default function ProjectAuthentication() {
                   control={form.control}
                   name="requiredFields"
                   render={() => (
-                    <FormItem>
+                    <FormItem className="col-span-full">
                       <div>
                         <FormLabel>Verplichte velden</FormLabel>
                       </div>
-                      <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                      <div className="grid grid-cols-2 gap-4">
                         {requiredFields.map((item) => (
                           <FormField
                             key={item.id}
@@ -341,43 +341,41 @@ export default function ProjectAuthentication() {
                     </FormItem>
                   )}
                 />
-                <div className="grid grid-cols-2 gap-y-2 gap-x-4">
-                  <FormField
-                    control={form.control}
-                    name="emailAddressOutgoing"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          E-mailadres voor het versturen van e-mails
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="emailAddressOutgoingUser"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Naam afzender voor het versturen van e-mails
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="emailAddressOutgoing"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        E-mailadres voor het versturen van e-mails
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="emailAddressOutgoingUser"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Naam afzender voor het versturen van e-mails
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="contactEmail"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="col-span-full">
                       <FormLabel>E-mailadres voor contact</FormLabel>
                       <FormControl>
                         <Input placeholder="" {...field} />
@@ -390,7 +388,7 @@ export default function ProjectAuthentication() {
                   control={form.control}
                   name="defaultRole"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="col-span-full">
                       <FormLabel>
                         Welke rol krijgt een nieuwe gebruiker toegewezen?
                       </FormLabel>
@@ -427,7 +425,9 @@ export default function ProjectAuthentication() {
                               )}
                               /> */}
 
-                <Button type="submit">Opslaan</Button>
+                <Button type="button" className="w-fit mt-4">
+                  Opslaan
+                </Button>
               </form>
             </Form>
           </div>

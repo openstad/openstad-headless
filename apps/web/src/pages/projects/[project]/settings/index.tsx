@@ -98,28 +98,26 @@ export default function ProjectSettings() {
                   <Separator className="my-4" />
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4">
-                    <div className="grid grid-cols-2 gap-y-2 gap-x-4">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem className="col-span-2 md:col-span-1 flex flex-col">
-                            <FormLabel>Projectnaam</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Naam" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <SimpleCalendar
-                        form={form}
-                        fieldName="endDate"
-                        label="Einddatum"
-                      />
-                    </div>
-                    <Button className="self-end" type="submit">
+                    className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem className="col-span-full md:col-span-1 flex flex-col">
+                          <FormLabel>Projectnaam</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Naam" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <SimpleCalendar
+                      form={form}
+                      fieldName="endDate"
+                      label="Einddatum"
+                    />
+                    <Button className="mt-4 w-fit" type="submit">
                       Opslaan
                     </Button>
                   </form>
@@ -143,7 +141,7 @@ export default function ProjectSettings() {
                   </div>
                   <Button
                     variant={'destructive'}
-                    className="mt-4 w-fit self-end"
+                    className="mt-4 w-fit"
                     onClick={() => {}}>
                     Project archiveren
                   </Button>

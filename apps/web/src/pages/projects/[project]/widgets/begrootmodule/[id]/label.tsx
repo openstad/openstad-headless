@@ -63,88 +63,88 @@ export default function BegrootmoduleLabels() {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 lg:w-1/2">
-          <div className="grid grid-cols-2 gap-y-2 gap-x-4">
-            <FormField
-              control={form.control}
-              name="labelOpen"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Label voor foto: OPEN</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="labelClosed"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Label voor foto: GESLOTEN</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="labelAccepted"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Label voor foto: GEACCEPTEERD</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="labelDenied"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Label voor foto: AFGEWEZEN</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="labelBusy"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Label voor foto: BEZIG</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="labelDone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Label voor foto: AFGEROND</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <Button type="submit">Opslaan</Button>
+          className="lg:w-1/2 grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="labelOpen"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Label voor foto: OPEN</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="labelClosed"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Label voor foto: GESLOTEN</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="labelAccepted"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Label voor foto: GEACCEPTEERD</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="labelDenied"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Label voor foto: AFGEWEZEN</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="labelBusy"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Label voor foto: BEZIG</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="labelDone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Label voor foto: AFGEROND</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="w-fit col-span-full">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>
