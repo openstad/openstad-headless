@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,37 +6,37 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
-  variant: z.enum(["NLMaps", "Amsterdam", "OpenStreetMaps", "advanced"]),
-  zoom: z.enum(["none", "markers", "area"]),
+  variant: z.enum(['NLMaps', 'Amsterdam', 'OpenStreetMaps', 'advanced']),
+  zoom: z.enum(['none', 'markers', 'area']),
   defaultLocation: z.string(),
   clustering: z.boolean(),
   clusteringSensitivity: z.coerce.number(),
   clickingChoosesLocation: z.boolean(),
-  mapIcon: z.enum(["select", "details"]),
+  mapIcon: z.enum(['select', 'details']),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 export default function WidgetMapMap() {
-  const category = "map";
+  const category = 'map';
 
   const {
     data: widget,
@@ -45,22 +45,22 @@ export default function WidgetMapMap() {
   } = useWidgetConfig();
 
   const defaults = () => ({
-    variant: widget?.config?.[category]?.variant || "NLMaps",
-    zoom: widget?.config?.[category]?.zoom || "none",
-    defaultLocation: widget?.config?.[category]?.defaultLocation || "",
+    variant: widget?.config?.[category]?.variant || 'NLMaps',
+    zoom: widget?.config?.[category]?.zoom || 'none',
+    defaultLocation: widget?.config?.[category]?.defaultLocation || '',
     clustering: widget?.config?.[category]?.clustering || false,
     clusteringSensitivity:
       widget?.config?.[category]?.clusteringSensitivity || 40,
     clickingChoosesLocation:
       widget?.config?.[category]?.clickingChoosesLocation || false,
-    mapIcon: widget?.config?.[category]?.mapIcon || "select",
+    mapIcon: widget?.config?.[category]?.mapIcon || 'select',
   });
 
   async function onSubmit(values: FormData) {
     try {
       await updateConfig({ [category]: values });
     } catch (error) {
-      console.error("could not update", error);
+      console.error('could not update', error);
     }
   }
 
@@ -148,9 +148,8 @@ export default function WidgetMapMap() {
               <FormItem>
                 <FormLabel>Clustering actief?</FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === "true")}
-                  value={field.value ? "true" : "false"}
-                >
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Ja" />
@@ -187,9 +186,8 @@ export default function WidgetMapMap() {
                   Op de kaart klikken selecteert een locatie?
                 </FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === "true")}
-                  value={field.value ? "true" : "false"}
-                >
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Ja" />

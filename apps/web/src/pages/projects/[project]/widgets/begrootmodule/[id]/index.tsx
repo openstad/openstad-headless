@@ -1,18 +1,18 @@
-import React from "react";
-import { PageLayout } from "../../../../../../components/ui/page-layout";
+import React from 'react';
+import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "../../../../../../components/ui/tabs";
-import BegrootmoduleVoting from "./voting";
-import BegrootmoduleDisplay from "./display";
-import BegrootmoduleSorting from "./sorting";
-import BegrootmoduleExplanation from "./explanation";
-import BegrootmoduleAuthentication from "./authentication";
-import BegrootmoduleLabels from "./label";
-import { useRouter } from "next/router";
+} from '../../../../../../components/ui/tabs';
+import BegrootmoduleVoting from './voting';
+import BegrootmoduleDisplay from './display';
+import BegrootmoduleSorting from './sorting';
+import BegrootmoduleExplanation from './explanation';
+import BegrootmoduleAuthentication from './authentication';
+import BegrootmoduleLabels from './label';
+import { useRouter } from 'next/router';
 
 export default function WidgetBegrootmodule() {
   const router = useRouter();
@@ -25,17 +25,18 @@ export default function WidgetBegrootmodule() {
         pageHeader="Project naam"
         breadcrumbs={[
           {
-            name: "Projecten",
-            url: "/projects",
-          }, {
-            name: "Widgets",
-            url: `/projects/${projectId}/widgets`
-          }, {
-              name: "Begrootmodule",
-              url: `/projects/${projectId}/widgets/begrootmodule/${id}`
-          }
-        ]}
-      >
+            name: 'Projecten',
+            url: '/projects',
+          },
+          {
+            name: 'Widgets',
+            url: `/projects/${projectId}/widgets`,
+          },
+          {
+            name: 'Begrootmodule',
+            url: `/projects/${projectId}/widgets/begrootmodule/${id}`,
+          },
+        ]}>
         <div>
           <Tabs defaultValue="voting">
             <TabsList className="w-full">
@@ -47,22 +48,22 @@ export default function WidgetBegrootmodule() {
               <TabsTrigger value="labels">Labels</TabsTrigger>
             </TabsList>
             <TabsContent value="voting" className="w-1/2">
-              <BegrootmoduleVoting/>
+              <BegrootmoduleVoting />
             </TabsContent>
             <TabsContent value="display" className="w-1/2">
-              <BegrootmoduleDisplay/>
+              <BegrootmoduleDisplay />
             </TabsContent>
             <TabsContent value="sorting" className="w-1/2">
-              <BegrootmoduleSorting/>
+              <BegrootmoduleSorting />
             </TabsContent>
             <TabsContent value="explanation" className="w-1/2">
-              <BegrootmoduleExplanation/>
+              <BegrootmoduleExplanation />
             </TabsContent>
             <TabsContent value="authentication" className="w-1/2">
-              <BegrootmoduleAuthentication/>
+              <BegrootmoduleAuthentication />
             </TabsContent>
             <TabsContent value="labels" className="w-1/2">
-              <BegrootmoduleLabels/>
+              <BegrootmoduleLabels />
             </TabsContent>
           </Tabs>
         </div>

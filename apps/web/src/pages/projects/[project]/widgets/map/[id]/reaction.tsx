@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,22 +6,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   displayReactions: z.boolean(),
@@ -29,13 +29,13 @@ const formSchema = z.object({
   textEmptyInput: z.string(),
   textAboveInput: z.string(),
   idNonActiveReactions: z.string(),
-  reactionsAvailable: z.enum(["open", "closed", "limited"]),
+  reactionsAvailable: z.enum(['open', 'closed', 'limited']),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 export default function WidgetMapReaction() {
-  const category = "reaction";
+  const category = 'reaction';
 
   const {
     data: widget,
@@ -45,20 +45,20 @@ export default function WidgetMapReaction() {
 
   const defaults = () => ({
     reactionsAvailable:
-      widget?.config?.[category]?.reactionsAvailable || "open",
+      widget?.config?.[category]?.reactionsAvailable || 'open',
     displayReactions: widget?.config?.[category]?.displayReactions || false,
-    title: widget?.config?.[category]?.title || "",
-    textEmptyInput: widget?.config?.[category]?.textEmptyInput || "",
-    textAboveInput: widget?.config?.[category]?.textAboveInput || "",
+    title: widget?.config?.[category]?.title || '',
+    textEmptyInput: widget?.config?.[category]?.textEmptyInput || '',
+    textAboveInput: widget?.config?.[category]?.textAboveInput || '',
     idNonActiveReactions:
-      widget?.config?.[category]?.idNonActiveReactions || "",
+      widget?.config?.[category]?.idNonActiveReactions || '',
   });
 
   async function onSubmit(values: FormData) {
     try {
       await updateConfig({ [category]: values });
     } catch (error) {
-      console.error("could not update", error);
+      console.error('could not update', error);
     }
   }
 
@@ -86,9 +86,8 @@ export default function WidgetMapReaction() {
               <FormItem>
                 <FormLabel>Weergave</FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === "true")}
-                  value={field.value ? "true" : "false"}
-                >
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Ja" />

@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -7,82 +7,82 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const sorting = [
   {
-    id: "newest",
-    label: "Nieuwste eerst",
+    id: 'newest',
+    label: 'Nieuwste eerst',
   },
   {
-    id: "oldest",
-    label: "Oudste eerst",
+    id: 'oldest',
+    label: 'Oudste eerst',
   },
   {
-    id: "title",
-    label: "Titel",
+    id: 'title',
+    label: 'Titel',
   },
   {
-    id: "random",
-    label: "Willekeurig",
+    id: 'random',
+    label: 'Willekeurig',
   },
   {
-    id: "mostLikes",
-    label: "Meeste likes",
+    id: 'mostLikes',
+    label: 'Meeste likes',
   },
   {
-    id: "leastLikes",
-    label: "Minste likes",
+    id: 'leastLikes',
+    label: 'Minste likes',
   },
   {
-    id: "mostReactions",
-    label: "Meeste reacties",
+    id: 'mostReactions',
+    label: 'Meeste reacties',
   },
   {
-    id: "leastReactions",
-    label: "Minste reacties",
+    id: 'leastReactions',
+    label: 'Minste reacties',
   },
   {
-    id: "ranked",
-    label: "Ranglijst",
+    id: 'ranked',
+    label: 'Ranglijst',
   },
 ];
 
 const formSchema = z.object({
   sorting: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: "You have to select at least one item.",
+    message: 'You have to select at least one item.',
   }),
   defaultSorting: z.enum([
-    "newest",
-    "oldest",
-    "title",
-    "random",
-    "mostLikes",
-    "leastLikes",
-    "mostReactions",
-    "leastReactions",
-    "ranked",
+    'newest',
+    'oldest',
+    'title',
+    'random',
+    'mostLikes',
+    'leastLikes',
+    'mostReactions',
+    'leastReactions',
+    'ranked',
   ]),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 export default function WidgetMapSort() {
-  const category = "sort";
+  const category = 'sort';
 
   const {
     data: widget,
@@ -92,14 +92,14 @@ export default function WidgetMapSort() {
 
   const defaults = () => ({
     sorting: widget?.config?.[category]?.sorting || [],
-    defaultSorting: widget?.config?.[category]?.defaultSorting || "newest",
+    defaultSorting: widget?.config?.[category]?.defaultSorting || 'newest',
   });
 
   async function onSubmit(values: FormData) {
     try {
       await updateConfig({ [category]: values });
     } catch (error) {
-      console.error("could not update", error);
+      console.error('could not update', error);
     }
   }
 
@@ -137,8 +137,7 @@ export default function WidgetMapSort() {
                       return (
                         <FormItem
                           key={item.id}
-                          className="flex flex-row items-start space-x-3 space-y-0"
-                        >
+                          className="flex flex-row items-start space-x-3 space-y-0">
                           <FormControl>
                             <Checkbox
                               checked={field.value?.includes(item.id)}
@@ -172,10 +171,7 @@ export default function WidgetMapSort() {
                 <FormLabel>
                   Selecteer de standaard manier van sorteren.
                 </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Nieuwste eerst" />

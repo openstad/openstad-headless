@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,15 +6,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   labelOpen: z.string(),
@@ -35,12 +35,12 @@ export default function BegrootmoduleLabels() {
   } = useWidgetConfig();
 
   const defaults = () => ({
-    labelOpen: widget?.config?.[category]?.labelOpen || "",
-    labelClosed: widget?.config?.[category]?.labelClosed || "",
-    labelAccepted: widget?.config?.[category]?.labelAccepted || "",
-    labelDenied: widget?.config?.[category]?.labelDenied || "",
-    labelBusy: widget?.config?.[category]?.labelBusy || "",
-    labelDone: widget?.config?.[category]?.labelDone || "",
+    labelOpen: widget?.config?.[category]?.labelOpen || '',
+    labelClosed: widget?.config?.[category]?.labelClosed || '',
+    labelAccepted: widget?.config?.[category]?.labelAccepted || '',
+    labelDenied: widget?.config?.[category]?.labelDenied || '',
+    labelBusy: widget?.config?.[category]?.labelBusy || '',
+    labelDone: widget?.config?.[category]?.labelDone || '',
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
