@@ -1,6 +1,6 @@
 import 'remixicon/fonts/remixicon.css';
 import { ProgressBar } from '@openstad-headless/ui/src';
-import useSWR from 'swr';
+import useSWR, { Fetcher } from 'swr';
 import { useEffect, useState } from 'react';
 import './likes.css';
 
@@ -18,32 +18,39 @@ type Props = {
   };
 };
 
-function Likes(props: Props) {
+export function Likes(props: Props) {
   const projectId = props.projectId || props.config?.projectId;
   const ideaId = props.ideaId || props.config?.ideaId;
-  const url = props.apiUrl || props.config.api?.url;
+  const apIurl = props.apiUrl || props.config.api?.url;
   const necessaryVotes = props?.config?.votesNeeded || 50;
 
   const [yesVotes, setYesVotes] = useState<number>(100);
   const [noVotes, setNoVotes] = useState<number>(0);
 
-  const { data } = useSWR(
-    { projectId, ideaId },
-    async ({ projectId, ideaId }) => {
-      let endpoint = `${url}/api/project/${projectId}/idea/${ideaId}?includeVoteCount=1&includeUserVote=1`;
+  const fetcher: Fetcher<{ yes: number; no: number }> = async (url: string) => {
+    if (projectId && ideaId) {
+      const endpoint = `${
+        url || ''
+      }/api/project/${projectId}/idea/${ideaId}?includeVoteCount=1&includeUserVote=1`;
 
-      let headers = {
-        'Content-Type': 'application/json',
-      };
-      const result = await fetch(endpoint, { headers });
-      return await result.json();
+      const result = await fetch(endpoint, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      return result.json();
     }
-  );
+    return undefined;
+  };
+
+  const { data } = useSWR<{ yes: number; no: number }>(apIurl, fetcher);
 
   useEffect(() => {
     if (data) {
-      setYesVotes(data?.yes || 0);
-      setNoVotes(data?.no || 0);
+      const yes = data.yes;
+      const no = data.no;
+      setYesVotes(yes);
+      setNoVotes(no);
     }
   }, [data]);
 
@@ -86,5 +93,3 @@ function Likes(props: Props) {
     </>
   );
 }
-
-export default Likes;
