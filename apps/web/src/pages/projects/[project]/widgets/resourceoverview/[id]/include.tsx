@@ -56,13 +56,13 @@ export default function WidgetResourceOverviewInclude() {
   }, [widget]);
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Resource Overview • Inclusief/exclusief
-        </Heading>
+        <Heading size="xl">Inclusief/Exclusief</Heading>
         <Separator className="my-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="lg:w-1/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="excludeTheme"

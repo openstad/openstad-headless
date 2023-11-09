@@ -54,13 +54,13 @@ export default function WidgetResourceOverviewImage() {
   }, [widget]);
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Resource Overview • Afbeeldingen
-        </Heading>
+        <Heading size="xl">Afbeeldingen</Heading>
         <Separator className="my-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="lg:w-1/2 grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="defaultImage"

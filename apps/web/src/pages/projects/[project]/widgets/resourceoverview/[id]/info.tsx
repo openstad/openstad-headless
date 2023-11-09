@@ -113,23 +113,23 @@ export default function WidgetResourceOverviewInfo() {
   }, [widget]);
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Resource Overview • Info
-        </Heading>
+        <Heading size="xl">Info</Heading>
         <Separator className="my-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="lg:w-1/2 grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="summaryCharLength"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>
                   Hoeveelheid karakters waar de samenvatting uit mag bestaan
                 </FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input type="number" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -142,7 +142,7 @@ export default function WidgetResourceOverviewInfo() {
               <FormItem>
                 <FormLabel>Stap 1: Intro</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea rows={6} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -155,7 +155,7 @@ export default function WidgetResourceOverviewInfo() {
               <FormItem>
                 <FormLabel>Stap 2: Intro</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea rows={6} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -165,7 +165,7 @@ export default function WidgetResourceOverviewInfo() {
             control={form.control}
             name="step2ButtonFeedback"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>Stap 2: Succesvolle feedback op knop</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -178,10 +178,10 @@ export default function WidgetResourceOverviewInfo() {
             control={form.control}
             name="step2Authenticated"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full ">
                 <FormLabel>Stap 2: Succesvolle authenticatie</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea rows={6} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -192,7 +192,7 @@ export default function WidgetResourceOverviewInfo() {
             name="authenticateButtonText"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Text op authenticatie knop</FormLabel>
+                <FormLabel>Tekst op authenticatie knop</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -255,7 +255,7 @@ export default function WidgetResourceOverviewInfo() {
             control={form.control}
             name="successTitle"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>Succes titel</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -268,10 +268,10 @@ export default function WidgetResourceOverviewInfo() {
             control={form.control}
             name="successDescription"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full ">
                 <FormLabel>Succes beschrijving</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Textarea rows={6} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -281,7 +281,7 @@ export default function WidgetResourceOverviewInfo() {
             control={form.control}
             name="siteId"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>Site ID</FormLabel>
                 <FormControl>
                   <Input {...field} />

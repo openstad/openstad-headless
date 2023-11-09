@@ -43,9 +43,9 @@ export default function WidgetResourceOverview() {
             url: `/projects/${projectId}/widgets/resourceoverview/${id}`,
           },
         ]}>
-        <div>
+        <div className="container py-6">
           <Tabs defaultValue="general">
-            <TabsList className="w-full">
+            <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="image">Afbeeldingen</TabsTrigger>
               <TabsTrigger value="display">Display</TabsTrigger>
@@ -59,40 +59,40 @@ export default function WidgetResourceOverview() {
               <TabsTrigger value="labels">Labels</TabsTrigger>
               <TabsTrigger value="info">Info</TabsTrigger>
             </TabsList>
-            <TabsContent value="general" className="w-1/2">
+            <TabsContent value="general" className="p-0">
               <WidgetResourceOverviewGeneral />
             </TabsContent>
-            <TabsContent value="image" className="w-1/2">
+            <TabsContent value="image" className="p-0">
               <WidgetResourceOverviewImage />
             </TabsContent>
-            <TabsContent value="display" className="w-1/2">
+            <TabsContent value="display" className="p-0">
               <WidgetResourceOverviewDisplay />
             </TabsContent>
-            <TabsContent value="button" className="w-1/2">
+            <TabsContent value="button" className="p-0">
               <WidgetResourceOverviewButton />
             </TabsContent>
-            <TabsContent value="sorting" className="w-1/2">
+            <TabsContent value="sorting" className="p-0">
               <WidgetResourceOverviewSorting />
             </TabsContent>
-            <TabsContent value="pagination" className="w-1/2">
+            <TabsContent value="pagination" className="p-0">
               <WidgetResourceOverviewPagination />
             </TabsContent>
-            <TabsContent value="filter" className="w-1/2">
+            <TabsContent value="filter" className="p-0">
               <WidgetResourceOverviewFilter />
             </TabsContent>
-            <TabsContent value="search" className="w-1/2">
+            <TabsContent value="search" className="p-0">
               <WidgetResourceOverviewSearch />
             </TabsContent>
-            <TabsContent value="tags" className="w-1/2">
+            <TabsContent value="tags" className="p-0">
               <WidgetResourceOverviewTags />
             </TabsContent>
-            <TabsContent value="include" className="w-1/2">
+            <TabsContent value="include" className="p-0">
               <WidgetResourceOverviewInclude />
             </TabsContent>
-            <TabsContent value="labels" className="w-1/2">
+            <TabsContent value="labels" className="p-0">
               <WidgetResourceOverviewLabel />
             </TabsContent>
-            <TabsContent value="info" className="w-1/2">
+            <TabsContent value="info" className="p-0">
               <WidgetResourceOverviewInfo />
             </TabsContent>
           </Tabs>
