@@ -18,7 +18,8 @@ import { Heading } from '@/components/ui/typography';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Separator } from '@/components/ui/separator';
-import useCodes from '@/hooks/use-codes';
+import { useProject } from '@/hooks/use-project';
+import useCode from '@/hooks/use-code';
 
 const formSchema = z.object({
   numberOfCodes: z.string(),
@@ -27,8 +28,8 @@ const formSchema = z.object({
 export default function ProjectCodeCreate() {
     const router = useRouter();
     const { project } = router.query;
-    const { data, isLoading } = useProject()
-    const { create } = useCode()
+    const { data, isLoading } = useProject();
+    const { create } = useCode();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),

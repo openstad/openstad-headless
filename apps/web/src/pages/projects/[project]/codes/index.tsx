@@ -18,7 +18,7 @@ export default function ProjectCodes() {
   const router = useRouter();
   const { project } = router.query;
   const [projectData, setProjectData] = useState(false);
-  let value = 'uniquecode';
+  let value = "uniquecode";
   const { data, isLoading } = (projectData ? useCodes(value) : useProject());
 
   useEffect(() => {
