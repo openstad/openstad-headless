@@ -18,6 +18,7 @@ export const DropDownMenu = ({
       <DropdownMenu.Content className="DropdownMenuContent" sideOffset={5}>
         {items.map((item) => (
           <DropdownMenu.Item
+            key={`dialog-option-${item.label}`}
             className="DropdownMenuItem"
             onClick={() => item.onClick()}>
             {item.label}
