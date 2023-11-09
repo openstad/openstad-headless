@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,23 +6,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   imageLabel: z.string(),
@@ -33,7 +33,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 export default function WidgetResourceFormImages() {
-  const category = "image";
+  const category = 'image';
 
   const {
     data: widget,
@@ -42,8 +42,8 @@ export default function WidgetResourceFormImages() {
   } = useWidgetConfig();
 
   const defaults = () => ({
-    imageLabel: widget?.config?.[category]?.imageLabel || "idea",
-    imageInfo: widget?.config?.[category]?.imageInfo || "",
+    imageLabel: widget?.config?.[category]?.imageLabel || 'idea',
+    imageInfo: widget?.config?.[category]?.imageInfo || '',
     imageMultiple: widget?.config?.[category]?.imageMultiple || false,
     imageRequired: widget?.config?.[category]?.imageRequired || false,
   });
@@ -52,7 +52,7 @@ export default function WidgetResourceFormImages() {
     try {
       await updateConfig({ [category]: values });
     } catch (error) {
-      console.error("could not update", error);
+      console.error('could not update', error);
     }
   }
 
@@ -108,9 +108,8 @@ export default function WidgetResourceFormImages() {
                   Mogen er meerdere afbeeldingen tegelijkertijd geüpload worden?
                 </FormLabel>
                 <Select
-                onValueChange={(e: string) => field.onChange(e === "true")}
-                value={field.value ? "true" : "false"}
-                >
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Nee" />
@@ -132,9 +131,8 @@ export default function WidgetResourceFormImages() {
               <FormItem>
                 <FormLabel>Is dit veld verplicht?</FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === "true")}
-                  value={field.value ? "true" : "false"}
-                >
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Nee" />

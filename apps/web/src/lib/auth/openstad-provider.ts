@@ -1,4 +1,4 @@
-import type { OAuthConfig, OAuthUserConfig } from "next-auth/providers/oauth";
+import type { OAuthConfig, OAuthUserConfig } from 'next-auth/providers/oauth';
 
 export interface OpenstadProfile extends Record<string, any> {
   user_id: string | number;
@@ -22,9 +22,9 @@ export default function Openstad<P extends OpenstadProfile>(
   } & OAuthUserConfig<P>
 ): OAuthConfig<P> {
   return {
-    id: "openstad",
-    name: "Openstad",
-    type: "oauth",
+    id: 'openstad',
+    name: 'Openstad',
+    type: 'oauth',
     authorization: `${options.issuerExternalUrl}/dialog/authorize`,
     token: `${options.issuer}/oauth/token`,
     userinfo: {
@@ -39,7 +39,10 @@ export default function Openstad<P extends OpenstadProfile>(
     },
     profile(profile) {
       return {
-        id: typeof profile.user_id === 'number'? profile.user_id.toString() : profile.user_id,
+        id:
+          typeof profile.user_id === 'number'
+            ? profile.user_id.toString()
+            : profile.user_id,
         name: profile.name,
         email: profile.email,
         role: profile.role,

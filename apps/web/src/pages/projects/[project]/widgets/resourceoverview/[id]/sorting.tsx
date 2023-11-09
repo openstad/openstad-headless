@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -7,72 +7,72 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const sorting = [
   {
-    id: "newest",
-    label: "Nieuwste eerst",
+    id: 'newest',
+    label: 'Nieuwste eerst',
   },
   {
-    id: "oldest",
-    label: "Oudste eerst",
+    id: 'oldest',
+    label: 'Oudste eerst',
   },
   {
-    id: "random",
-    label: "Willekeurig",
+    id: 'random',
+    label: 'Willekeurig',
   },
   {
-    id: "mostLikes",
-    label: "Meeste likes",
+    id: 'mostLikes',
+    label: 'Meeste likes',
   },
   {
-    id: "leastLikes",
-    label: "Minste likes",
+    id: 'leastLikes',
+    label: 'Minste likes',
   },
   {
-    id: "highestCost",
-    label: "Meeste reacties",
+    id: 'highestCost',
+    label: 'Meeste reacties',
   },
   {
-    id: "lowestCost",
-    label: "Minste reacties",
+    id: 'lowestCost',
+    label: 'Minste reacties',
   },
 ];
 
 const formSchema = z.object({
   displaySorting: z.boolean(),
   defaultSorting: z.enum([
-    "newest",
-    "oldest",
-    "random",
-    "mostLikes",
-    "leastLikes",
-    "highestCost",
-    "lowestCost",
+    'newest',
+    'oldest',
+    'random',
+    'mostLikes',
+    'leastLikes',
+    'highestCost',
+    'lowestCost',
   ]),
   sorting: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: "You have to select at least one item.",
+    message: 'You have to select at least one item.',
   }),
 });
 
 export default function WidgetResourceOverviewSorting() {
   type FormData = z.infer<typeof formSchema>;
-  const category = "sorting";
+  const category = 'sorting';
 
   const {
     data: widget,
@@ -82,7 +82,7 @@ export default function WidgetResourceOverviewSorting() {
 
   const defaults = () => ({
     displaySorting: widget?.config?.[category]?.displaySorting || false,
-    defaultSorting: widget?.config?.[category]?.defaultSorting || "newest",
+    defaultSorting: widget?.config?.[category]?.defaultSorting || 'newest',
     sorting: widget?.config?.[category]?.sorting || [],
   });
 
@@ -90,7 +90,7 @@ export default function WidgetResourceOverviewSorting() {
     try {
       await updateConfig({ [category]: values });
     } catch (error) {
-      console.error("could falset update", error);
+      console.error('could falset update', error);
     }
   }
 
@@ -118,9 +118,8 @@ export default function WidgetResourceOverviewSorting() {
               <FormItem>
                 <FormLabel>Sorteeropties weergeven</FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === "true")}
-                  value={field.value ? "true" : "false"}
-                >
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Nee" />
@@ -180,8 +179,7 @@ export default function WidgetResourceOverviewSorting() {
                       return (
                         <FormItem
                           key={item.id}
-                          className="flex flex-row items-start space-x-3 space-y-0"
-                        >
+                          className="flex flex-row items-start space-x-3 space-y-0">
                           <FormControl>
                             <Checkbox
                               checked={field.value?.includes(item.id)}

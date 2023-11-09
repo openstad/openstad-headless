@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,22 +6,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   displayCounter: z.boolean(),
@@ -40,8 +40,8 @@ export default function WidgetIdeasMapCounter() {
 
   const defaults = () => ({
     displayCounter: widget?.config?.[category]?.displayCounter || false,
-    counterText: widget?.config?.[category]?.counterText || "",
-    counterUrl: widget?.config?.[category]?.counterUrl || "",
+    counterText: widget?.config?.[category]?.counterText || '',
+    counterUrl: widget?.config?.[category]?.counterUrl || '',
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -72,9 +72,8 @@ export default function WidgetIdeasMapCounter() {
               <FormItem>
                 <FormLabel>Wordt de teller weergegeven?</FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === "true")}
-                  value={field.value ? "true" : "false"}
-                >
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Ja" />

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,22 +6,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   displayRanking: z.boolean(),
@@ -45,9 +45,9 @@ export default function BegrootmoduleDisplay() {
     displayPriceLabel: widget?.config?.[category]?.displayPriceLabel || false,
     showVoteCount: widget?.config?.[category]?.showVoteCount || false,
     unavailableButton:
-      widget?.config?.[category]?.unavailableButton || "Geen ruimte",
+      widget?.config?.[category]?.unavailableButton || 'Geen ruimte',
     originalIdea: widget?.config?.[category]?.originalIdea || false,
-    originalIdeaUrl: widget?.config?.[category]?.originalIdeaUrl || "",
+    originalIdeaUrl: widget?.config?.[category]?.originalIdeaUrl || '',
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -78,9 +78,8 @@ export default function BegrootmoduleDisplay() {
               <FormItem>
                 <FormLabel>Weergeef de ranking</FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === "true")}
-                  value={field.value ? "true" : "false"}
-                >
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Nee" />
@@ -102,9 +101,8 @@ export default function BegrootmoduleDisplay() {
               <FormItem>
                 <FormLabel>Weergeef de prijslabel</FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === "true")}
-                  value={field.value ? "true" : "false"}
-                >
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Ja" />
@@ -126,9 +124,8 @@ export default function BegrootmoduleDisplay() {
               <FormItem>
                 <FormLabel>Weergeef de hoeveelheid stemmen</FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === "true")}
-                  value={field.value ? "true" : "false"}
-                >
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Nee" />
@@ -163,8 +160,8 @@ export default function BegrootmoduleDisplay() {
               <FormItem>
                 <FormLabel>Display de URL van het originele idee</FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === "true")}
-                  value={field.value ? "true" : "false"}>
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Ja" />

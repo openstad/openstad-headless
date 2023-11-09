@@ -119,6 +119,7 @@ services:
       - COOKIE_SECURE_OFF=${AUTH_COOKIE_SECURE_OFF}
       - API_URL=${API_URL}
       - ADMIN_URL=${ADMIN_URL}
+      - ALLOWED_ADMIN_DOMAINS=["${ADMIN_DOMAIN}"]
     ports:
       - "${AUTH_PORT}:${AUTH_PORT}"
     volumes:

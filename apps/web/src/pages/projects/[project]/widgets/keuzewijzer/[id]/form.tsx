@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
-import { Button } from "../../../../../../components/ui/button";
-import { Input } from "../../../../../../components/ui/input";
+import React, { useEffect } from 'react';
+import { Button } from '../../../../../../components/ui/button';
+import { Input } from '../../../../../../components/ui/input';
 import {
   Form,
   FormControl,
@@ -8,27 +8,27 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../../../../../components/ui/form";
+} from '../../../../../../components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../../../../components/ui/select";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Heading } from "@/components/ui/typography";
-import { Separator } from "@/components/ui/separator";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
+} from '../../../../../../components/ui/select';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Heading } from '@/components/ui/typography';
+import { Separator } from '@/components/ui/separator';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
 
 const formSchema = z.object({
   keuzewijzer: z.string(),
   questionsOnPage: z.coerce.number(),
   startHalfway: z.boolean(),
-  preferences: z.enum(["standard", "minToPlus", "field", "none"]),
-  display: z.enum(["16:9", "1:1"]),
+  preferences: z.enum(['standard', 'minToPlus', 'field', 'none']),
+  display: z.enum(['16:9', '1:1']),
   titlePreference: z.string(),
   titleNoPreference: z.string(),
   urlStartPage: z.string().url(),
@@ -36,7 +36,7 @@ const formSchema = z.object({
 });
 
 export default function ChoicesSelectorForm() {
-  const category = "selectionGuide";
+  const category = 'selectionGuide';
 
   const {
     data: widget,
@@ -46,18 +46,18 @@ export default function ChoicesSelectorForm() {
 
   const defaults = () => ({
     questionsOnPage: widget?.config?.selectionGuide?.questionsOnPage || 100,
-    preferences: widget?.config?.[category]?.preferences || "standard",
-    display: widget?.config?.[category]?.display || "16:9",
+    preferences: widget?.config?.[category]?.preferences || 'standard',
+    display: widget?.config?.[category]?.display || '16:9',
     titlePreference:
       widget?.config?.[category]?.titlePreference ||
-      "Jouw voorkeur is {preferredChoice}.",
+      'Jouw voorkeur is {preferredChoice}.',
     titleNoPreference:
       widget?.config?.[category]?.titleNoPreference ||
-      "Je hebt nog geen keuze gemaakt.",
-    keuzewijzer: widget?.config?.[category]?.keuzewijzer || "",
-    startHalfway: widget?.config?.[category]?.startHalfway || "",
-    urlStartPage: widget?.config?.[category]?.urlStartPage || "",
-    urlResultPage: widget?.config?.[category]?.urlResultPage || "",
+      'Je hebt nog geen keuze gemaakt.',
+    keuzewijzer: widget?.config?.[category]?.keuzewijzer || '',
+    startHalfway: widget?.config?.[category]?.startHalfway || '',
+    urlStartPage: widget?.config?.[category]?.urlStartPage || '',
+    urlResultPage: widget?.config?.[category]?.urlResultPage || '',
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -116,9 +116,8 @@ export default function ChoicesSelectorForm() {
             <FormItem>
               <FormLabel>Begin met alle vragen beantwoord op 50%?</FormLabel>
               <Select
-                onValueChange={(e: string) => field.onChange(e === "true")}
-                value={field.value ? "true" : "false"}
-              >
+                onValueChange={(e: string) => field.onChange(e === 'true')}
+                value={field.value ? 'true' : 'false'}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Nee" />
