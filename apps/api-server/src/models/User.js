@@ -12,7 +12,8 @@ const getExtraDataConfig = require('../lib/sequelize-authorization/lib/getExtraD
 const roles = require('../lib/sequelize-authorization/lib/roles');
 
 // For detecting throwaway accounts in the email address validation.
-var emailBlackList = require('../../config/mail_blacklist')
+var emailBlackList = require('../../config/mail_blacklist');
+const { Op } = require('sequelize');
 
 module.exports = function (db, sequelize, DataTypes) {
   var User = sequelize.define('user', {
@@ -405,7 +406,7 @@ module.exports = function (db, sequelize, DataTypes) {
         }
       },
 
-      fromIpdUser: function (idpUser) {
+      fromIdpUser: function (idpUser) {
         let where = {
           [Op.and]: [
             {

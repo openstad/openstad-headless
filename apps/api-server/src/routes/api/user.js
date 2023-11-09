@@ -46,7 +46,10 @@ router
     }
 
     if(req.query.fromIdpUser) {
-      req.scope.push({ method:['fromIdpUser'] })
+      req.scope.push({ method:['fromIdpUser', {
+        identifier: req.query.identifier,
+        provider: req.query.provider
+      }] })
     }
 
     return next();
@@ -87,7 +90,6 @@ router.route('/')
       ...dbQuery.where,
     };
     if (req.params.projectId) dbQuery.where.projectId = req.params.projectId;
-
     db.User
       .scope(...req.scope)
       .findAndCountAll(dbQuery)

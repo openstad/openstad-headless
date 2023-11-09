@@ -1,7 +1,12 @@
 import useSWR from 'swr';
 
 export default function useUsers() {
-  const usersSwr = useSWR('/api/openstad/api/user');
+  const params = new URLSearchParams()
+  params.set('fromIdpUser', '3');
+  params.set('identifier', '1');
+  params.set('provider', 'openstad');
+
+  const usersSwr = useSWR(`/api/openstad/api/user?${params.size ? params.toString() : ''}`);
 
   async function createUser(
     email: string,
