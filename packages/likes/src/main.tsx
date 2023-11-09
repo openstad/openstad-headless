@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { Likes } from './likes.tsx';
+import { Likes } from './likes.js';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
