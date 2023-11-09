@@ -32,8 +32,6 @@ export default withAuth(
       const searchParams = req.nextUrl?.searchParams?.toString();
       const rewrittenUrl =  `${process.env.OAUTH_URL_INTERNAL}${req.nextUrl.pathname.replace("/api/oauth", "")}${searchParams?'?'+searchParams:''}`;
 
-      console.log(process.env.CLIENT_ID);
-
       return NextResponse.rewrite(
         rewrittenUrl,
         {

@@ -2,11 +2,12 @@ import { PageLayout} from "@/components/ui/page-layout"
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { ListHeading, Paragraph } from "@/components/ui/typography";
 import useCodes from "@/hooks/use-codes";
 import { CSVLink } from "react-csv";
+import { useProject } from "@/hooks/use-project";
 
 const headers = [
     {label: "ID", key: "id"},
@@ -16,9 +17,20 @@ const headers = [
 export default function ProjectCodes() {
     const router = useRouter();
     const { project } = router.query;
-    const { data, isLoading } = useCodes('uniquecode');
+    const [projectData, setProjectData] = useState(false);
+    let value = 'uniquecode';
+    const { data, isLoading } = (projectData ? useCodes(value) : useProject());
 
-    if (!data) return null;
+    useEffect(() => {
+        if (data != undefined) {
+            if (!projectData) {
+                value = data.config.auth.provider.openstad.clientId;
+                setProjectData(true)
+            }
+        }
+    }, [data])
+
+    if(!data?.data) return null;
 
     return (
         <div>
@@ -46,7 +58,6 @@ export default function ProjectCodes() {
                             <CSVLink data={data.data} headers={headers}>
                                 Exporteer unieke codes
                             </CSVLink>
-                            
                         </Button>
                     </div>
                 }
