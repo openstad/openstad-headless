@@ -1,2 +1,4 @@
-let cjsConfig = require('../configs/.eslintrc');
-module.exports = cjsConfig;
+module.exports = {
+  root: true,
+  extends: ['custom/library'],
+};

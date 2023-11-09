@@ -27,7 +27,7 @@ function Likes(props: Props) {
   const [yesVotes, setYesVotes] = useState<number>(100);
   const [noVotes, setNoVotes] = useState<number>(0);
 
-  const { data, error, isLoading } = useSWR(
+  const { data } = useSWR(
     { projectId, ideaId },
     async ({ projectId, ideaId }) => {
       let endpoint = `${url}/api/project/${projectId}/idea/${ideaId}?includeVoteCount=1&includeUserVote=1`;
