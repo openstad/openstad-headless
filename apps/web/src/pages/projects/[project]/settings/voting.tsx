@@ -105,192 +105,184 @@ export default function ProjectSettingsVoting() {
           },
         ]}>
         <div className="container py-6">
-          <div className="p-6 bg-white rounded-md">
-            <Form {...form}>
-              <Heading size="xl">Stemmen</Heading>
-              <Separator className="my-4" />
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="isViewable"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1">
-                      <FormLabel>
-                        Is de hoeveelheid stemmen publiek zichtbaar?
-                      </FormLabel>
-                      <Select
-                        onValueChange={(e: string) =>
-                          field.onChange(e === 'true')
-                        }
-                        value={field.value ? 'true' : 'false'}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Ja" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="true">Ja</SelectItem>
-                          <SelectItem value="false">Nee</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="isActive"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1">
-                      <FormLabel>Is het mogelijk om te stemmen?</FormLabel>
-                      <Select
-                        onValueChange={(e: string) =>
-                          field.onChange(e === 'true')
-                        }
-                        value={field.value ? 'true' : 'false'}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Nee" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="true">Ja</SelectItem>
-                          <SelectItem value="false">Nee</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="withExisting"
-                  render={({ field }) => (
-                    <FormItem className="col-span-full">
-                      <FormLabel>
-                        Moet het systeem een error geven wanneer iemand twee
-                        keer stemt, of moet de vorige stem vervangen worden?
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Error" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="error">Error</SelectItem>
-                          <SelectItem value="replace">
-                            Vervang de vorige stem
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="requiredUserRole"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1">
-                      <FormLabel>
-                        Wat voor gebruikers hebben het recht om te stemmen?
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Geregistreerde gebruikers" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="anonymous">
-                            Anonieme gebruikers
-                          </SelectItem>
-                          <SelectItem value="member">
-                            Geregistreerde gebruikers
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="voteType"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1">
-                      <FormLabel>
-                        Wat voor type stemmen wordt er gebruikt?
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Count" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="likes">Likes</SelectItem>
-                          <SelectItem value="count">Count</SelectItem>
-                          <SelectItem value="budgeting">Budgeting</SelectItem>
-                          <SelectItem value="countPerTheme">
-                            Count per theme
-                          </SelectItem>
-                          <SelectItem value="countPerBudgeting">
-                            Count per budgeting
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="minIdeas"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1">
-                      <FormLabel>
-                        Wat is de minimum hoeveelheid ideeën waar iemand op kan
-                        stemmen?
-                      </FormLabel>
+          <Form {...form} className="p-6 bg-white rounded-md">
+            <Heading size="xl">Stemmen</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="isViewable"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>
+                      Is de hoeveelheid stemmen publiek zichtbaar?
+                    </FormLabel>
+                    <Select
+                      onValueChange={(e: string) =>
+                        field.onChange(e === 'true')
+                      }
+                      value={field.value ? 'true' : 'false'}>
                       <FormControl>
-                        <Input type="number" placeholder="1" {...field} />
+                        <SelectTrigger>
+                          <SelectValue placeholder="Ja" />
+                        </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="maxIdeas"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1">
-                      <FormLabel>
-                        Wat is de maximum hoeveelheid ideeën waar iemand op kan
-                        stemmen?
-                      </FormLabel>
+                      <SelectContent>
+                        <SelectItem value="true">Ja</SelectItem>
+                        <SelectItem value="false">Nee</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="isActive"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>Is het mogelijk om te stemmen?</FormLabel>
+                    <Select
+                      onValueChange={(e: string) =>
+                        field.onChange(e === 'true')
+                      }
+                      value={field.value ? 'true' : 'false'}>
                       <FormControl>
-                        <Input type="number" placeholder="100" {...field} />
+                        <SelectTrigger>
+                          <SelectValue placeholder="Nee" />
+                        </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-fit col-span-full">
-                  Opslaan
-                </Button>
-              </form>
-            </Form>
-          </div>
+                      <SelectContent>
+                        <SelectItem value="true">Ja</SelectItem>
+                        <SelectItem value="false">Nee</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="withExisting"
+                render={({ field }) => (
+                  <FormItem className="col-span-full">
+                    <FormLabel>
+                      Moet het systeem een error geven wanneer iemand twee keer
+                      stemt, of moet de vorige stem vervangen worden?
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Error" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="error">Error</SelectItem>
+                        <SelectItem value="replace">
+                          Vervang de vorige stem
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="requiredUserRole"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>
+                      Wat voor gebruikers hebben het recht om te stemmen?
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Geregistreerde gebruikers" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="anonymous">
+                          Anonieme gebruikers
+                        </SelectItem>
+                        <SelectItem value="member">
+                          Geregistreerde gebruikers
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="voteType"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>
+                      Wat voor type stemmen wordt er gebruikt?
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Count" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="likes">Likes</SelectItem>
+                        <SelectItem value="count">Count</SelectItem>
+                        <SelectItem value="budgeting">Budgeting</SelectItem>
+                        <SelectItem value="countPerTheme">
+                          Count per theme
+                        </SelectItem>
+                        <SelectItem value="countPerBudgeting">
+                          Count per budgeting
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="minIdeas"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>
+                      Wat is de minimum hoeveelheid ideeën waar iemand op kan
+                      stemmen?
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="1" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="maxIdeas"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>
+                      Wat is de maximum hoeveelheid ideeën waar iemand op kan
+                      stemmen?
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="100" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-fit col-span-full">
+                Opslaan
+              </Button>
+            </form>
+          </Form>
         </div>
       </PageLayout>
     </div>

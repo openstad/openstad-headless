@@ -51,45 +51,41 @@ export default function ProjectSettingsThemes() {
           },
         ]}>
         <div className="container py-6">
-          <div className="p-6 bg-white rounded-md">
-            <Form {...form}>
-              <Heading size="xl">Thema's en gebieden</Heading>
-              <Separator className="my-4" />
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="lg:w-fit grid grid-cols-1 gap-4">
-                <FormField
-                  control={form.control}
-                  name="themes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Thema's (Onderscheiden door kommas)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="areas"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Gebieden (Onderscheiden door kommas)
-                      </FormLabel>
-                      <FormControl>
-                        <Input placeholder="" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit">Opslaan</Button>
-              </form>
-            </Form>
-          </div>
+          <Form {...form} className="p-6 bg-white rounded-md">
+            <Heading size="xl">Thema's en gebieden</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="lg:w-fit grid grid-cols-1 gap-4">
+              <FormField
+                control={form.control}
+                name="themes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Thema's (Onderscheiden door kommas)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="areas"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Gebieden (Onderscheiden door kommas)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit">Opslaan</Button>
+            </form>
+          </Form>
         </div>
       </PageLayout>
     </div>

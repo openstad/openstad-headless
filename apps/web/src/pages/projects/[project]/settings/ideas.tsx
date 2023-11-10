@@ -106,139 +106,137 @@ export default function ProjectSettingsIdeas() {
           },
         ]}>
         <div className="container py-6">
-          <div className="p-6 bg-white rounded-md">
-            <Form {...form}>
-              <Heading size="xl">Ideeën</Heading>
-              <Separator className="my-4" />
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="canAddNewIdeas"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Is het mogelijk om een idee in te sturen?
-                      </FormLabel>
-                      <Select
-                        onValueChange={(e: string) =>
-                          field.onChange(e === 'true')
-                        }
-                        value={field.value ? 'true' : 'false'}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Ja" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="true">Ja</SelectItem>
-                          <SelectItem value="false">Nee</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="minimumYesVotes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Minimum benodigde stemmen voor een idee?
-                      </FormLabel>
+          <Form {...form} className="p-6 bg-white rounded-md">
+            <Heading size="xl">Ideeën</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="canAddNewIdeas"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Is het mogelijk om een idee in te sturen?
+                    </FormLabel>
+                    <Select
+                      onValueChange={(e: string) =>
+                        field.onChange(e === 'true')
+                      }
+                      value={field.value ? 'true' : 'false'}>
                       <FormControl>
-                        <Input type="number" placeholder="100" {...field} />
+                        <SelectTrigger>
+                          <SelectValue placeholder="Ja" />
+                        </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="titleMinLength"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1">
-                      <FormLabel>Minimum lengte van titel</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="10" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="titleMaxLength"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1">
-                      <FormLabel>Maximum lengte van titel</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="50" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="summaryMinLength"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1">
-                      <FormLabel>Minimum lengte van samenvatting</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="20" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="summaryMaxLength"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1">
-                      <FormLabel>Maximum lengte van samenvatting</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="140" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="descriptionMinLength"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1">
-                      <FormLabel>Minimum lengte van de beschrijving</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="140" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="descriptionMaxLength"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1">
-                      <FormLabel>Maximum lengte van de beschrijving</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="5000" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="button" className="w-fit mt-4">
-                  Opslaan
-                </Button>
-              </form>
-            </Form>
-          </div>
+                      <SelectContent>
+                        <SelectItem value="true">Ja</SelectItem>
+                        <SelectItem value="false">Nee</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="minimumYesVotes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Minimum benodigde stemmen voor een idee?
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="100" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="titleMinLength"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>Minimum lengte van titel</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="10" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="titleMaxLength"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>Maximum lengte van titel</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="50" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="summaryMinLength"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>Minimum lengte van samenvatting</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="20" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="summaryMaxLength"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>Maximum lengte van samenvatting</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="140" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="descriptionMinLength"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>Minimum lengte van de beschrijving</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="140" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="descriptionMaxLength"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>Maximum lengte van de beschrijving</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="5000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="button" className="w-fit mt-4">
+                Opslaan
+              </Button>
+            </form>
+          </Form>
           <div className="p-6 bg-white rounded-md mt-4">
             <Heading size="xl" className="mb-4">
               Mail template

@@ -80,40 +80,36 @@ export default function WidgetLikes() {
           },
         ]}>
         <div className="container py-6">
-          <div className="p-6 bg-white rounded-md">
-            <Form {...form}>
-              <Heading size="xl" className="mb-4">
-                Instellingen
-              </Heading>
-              <Separator className="mb-4" />
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4 lg:w-1/2">
-                <FormField
-                  control={form.control}
-                  name="display"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Weergave type</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Claps" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="claps">Claps</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit">Opslaan</Button>
-              </form>
-            </Form>
-          </div>
+          <Form {...form} className="p-6 bg-white rounded-md">
+            <Heading size="xl" className="mb-4">
+              Instellingen
+            </Heading>
+            <Separator className="mb-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 lg:w-1/2">
+              <FormField
+                control={form.control}
+                name="display"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Weergave type</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Claps" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="claps">Claps</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+              <Button type="submit">Opslaan</Button>
+            </form>
+          </Form>
         </div>
       </PageLayout>
     </div>
