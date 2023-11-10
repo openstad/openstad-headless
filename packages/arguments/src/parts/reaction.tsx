@@ -1,9 +1,9 @@
 import '../index.css';
 import { Fragment, useState } from 'react';
 import { GhostButton } from '@openstad-headless/ui/src';
-import { Reaction } from '../types';
-import ReactionInput from './reaction-input';
-import ReactionDropdownMenu from './reaction-dropdown-menu';
+import { Reaction } from '../types/index.js';
+import ReactionInput from './reaction-input.js';
+import { DropDownMenu } from '@openstad-headless/ui/src';
 
 export default function ReactionItem({
   resourceId,
@@ -21,9 +21,12 @@ export default function ReactionItem({
       <section className="argument-item-header">
         <h6 className="reaction-name">{argument.name}</h6>
         {canEdit && canEdit(argument) ? (
-          <ReactionDropdownMenu>
+          <DropDownMenu
+            items={[
+              { label: 'Verwijderen', onClick: () => console.log('test') },
+            ]}>
             <GhostButton icon="ri-more-fill"></GhostButton>
-          </ReactionDropdownMenu>
+          </DropDownMenu>
         ) : null}
       </section>
       <p>{argument.description}</p>
