@@ -75,122 +75,120 @@ export default function BegrootmoduleVoting() {
   }
 
   return (
-    <div className="p-6 bg-white rounded-md">
-      <Form {...form}>
-        <Heading size="xl">Stem opties</Heading>
-        <Separator className="my-4" />
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="allowVoting"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel>
-                  Sta stemmen toe (werkt momenteel alleen met Gridder)
-                </FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Nee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="votingType"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel>Stem types</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Budgeting" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="budgeting">Budgeting</SelectItem>
-                    <SelectItem value="budgetingPerTheme">
-                      Budgeting per thema
-                    </SelectItem>
-                    <SelectItem value="count">Hoeveelheid</SelectItem>
-                    <SelectItem value="countPerTheme">
-                      Hoeveelheid per thema
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="minimumSelectableIdeas"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel>Minimum hoeveelheid selecteerbare ideeën</FormLabel>
+    <Form {...form} className="p-6 bg-white rounded-md">
+      <Heading size="xl">Stem opties</Heading>
+      <Separator className="my-4" />
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="allowVoting"
+          render={({ field }) => (
+            <FormItem className="col-span-1">
+              <FormLabel>
+                Sta stemmen toe (werkt momenteel alleen met Gridder)
+              </FormLabel>
+              <Select
+                onValueChange={(e: string) => field.onChange(e === 'true')}
+                value={field.value ? 'true' : 'false'}>
                 <FormControl>
-                  <Input type="number" {...field} />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Nee" />
+                  </SelectTrigger>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="maximumSelectableIdeas"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel>Maximum hoeveelheid selecteerbare ideeën</FormLabel>
+                <SelectContent>
+                  <SelectItem value="true">Ja</SelectItem>
+                  <SelectItem value="false">Nee</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="votingType"
+          render={({ field }) => (
+            <FormItem className="col-span-1">
+              <FormLabel>Stem types</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <Input type="number" {...field} />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Budgeting" />
+                  </SelectTrigger>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="minimumBudget"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel>Minimum budget om te selecteren</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="budget"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel>Beschikbaar budget</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" className="w-fit col-span-full">
-            Opslaan
-          </Button>
-        </form>
-      </Form>
-    </div>
+                <SelectContent>
+                  <SelectItem value="budgeting">Budgeting</SelectItem>
+                  <SelectItem value="budgetingPerTheme">
+                    Budgeting per thema
+                  </SelectItem>
+                  <SelectItem value="count">Hoeveelheid</SelectItem>
+                  <SelectItem value="countPerTheme">
+                    Hoeveelheid per thema
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="minimumSelectableIdeas"
+          render={({ field }) => (
+            <FormItem className="col-span-1">
+              <FormLabel>Minimum hoeveelheid selecteerbare ideeën</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="maximumSelectableIdeas"
+          render={({ field }) => (
+            <FormItem className="col-span-1">
+              <FormLabel>Maximum hoeveelheid selecteerbare ideeën</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="minimumBudget"
+          render={({ field }) => (
+            <FormItem className="col-span-1">
+              <FormLabel>Minimum budget om te selecteren</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="budget"
+          render={({ field }) => (
+            <FormItem className="col-span-1">
+              <FormLabel>Beschikbaar budget</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-fit col-span-full">
+          Opslaan
+        </Button>
+      </form>
+    </Form>
   );
 }
