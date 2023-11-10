@@ -55,31 +55,17 @@ export default function ProjectAreaCreate() {
             url: `/projects/${projectId}/areas`,
           },
           {
-            name: 'Gebied aanmaken',
+            name: 'Gebied toevoegen',
             url: `/projects/${projectId}/areas/create`,
           },
         ]}>
-        <div className="container mx-auto py-10 w-1/2 float-left">
+        <div className="p-6 bg-white rounded-md">
           <Form {...form}>
-            <Heading size="xl" className="mb-4">
-              Gebied • Aanmaken
-            </Heading>
-            <Separator className="mb-4" />
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <p>
-                Je kan hier een polygoon aanmaken om een gebied op te geven waar
-                je kaarten op zullen focussen.
-              </p>
-              <p>
-                Het polygoon veld verwacht een lijst met coördinaten die samen
-                een gesloten polygoon vormen. Als het polygoon niet juist sluit,
-                dan zal er een error terug worden gegeven. Het invullen van de
-                polygoon verwacht voor nu een array met het volgende formaat
-                (deze wordt hieronder meegegeven als voorbeeld):
-              </p>
-              <p>
-                <code>{exampleText}</code>
-              </p>
+            <Heading size="xl">Toevoegen</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="lg:w-1/2 grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
                 name="name"
@@ -99,6 +85,21 @@ export default function ProjectAreaCreate() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Polygoon</FormLabel>
+                    <p>
+                      Je kan hier een polygoon aanmaken om een gebied op te
+                      geven waar je kaarten op zullen focussen.
+                    </p>
+                    <p>
+                      Het polygoon veld verwacht een lijst met coördinaten die
+                      samen een gesloten polygoon vormen. Als het polygoon niet
+                      juist sluit, dan zal er een error terug worden gegeven.
+                      Het invullen van de polygoon verwacht voor nu een array
+                      met het volgende formaat (deze wordt hieronder meegegeven
+                      als voorbeeld):
+                    </p>
+                    <p>
+                      <code>{exampleText}</code>
+                    </p>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>
@@ -106,11 +107,10 @@ export default function ProjectAreaCreate() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" variant={'default'}>
+              <Button className="w-fit col-span-full" type="submit">
                 Opslaan
               </Button>
             </form>
-            <br />
           </Form>
         </div>
       </PageLayout>

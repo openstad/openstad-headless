@@ -39,9 +39,9 @@ export default function WidgetMap() {
             url: `/projects/${projectId}/widgets/map/${id}`,
           },
         ]}>
-        <div>
+        <div className="container py-6">
           <Tabs defaultValue="general">
-            <TabsList className="w-full">
+            <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="map">Kaart</TabsTrigger>
               <TabsTrigger value="content">Content</TabsTrigger>
@@ -51,28 +51,28 @@ export default function WidgetMap() {
               <TabsTrigger value="filter">Filterbalk</TabsTrigger>
               <TabsTrigger value="reaction">Reacties</TabsTrigger>
             </TabsList>
-            <TabsContent value="general" className="w-1/2">
+            <TabsContent value="general" className="p-0">
               <WidgetMapGeneral />
             </TabsContent>
-            <TabsContent value="map" className="w-1/2">
+            <TabsContent value="map" className="p-0">
               <WidgetMapMap />
             </TabsContent>
-            <TabsContent value="content" className="w-1/2">
+            <TabsContent value="content" className="p-0">
               <WidgetMapContent />
             </TabsContent>
-            <TabsContent value="sort" className="w-1/2">
+            <TabsContent value="sort" className="p-0">
               <WidgetMapSort />
             </TabsContent>
-            <TabsContent value="images" className="w-1/2">
+            <TabsContent value="images" className="p-0">
               <WidgetMapImage />
             </TabsContent>
-            <TabsContent value="details" className="w-1/2">
+            <TabsContent value="details" className="p-0">
               <WidgetMapDetails />
             </TabsContent>
-            <TabsContent value="filter" className="w-1/2">
+            <TabsContent value="filter" className="p-0">
               <WidgetMapFilter />
             </TabsContent>
-            <TabsContent value="reaction" className="w-1/2">
+            <TabsContent value="reaction" className="p-0">
               <WidgetMapReaction />
             </TabsContent>
           </Tabs>

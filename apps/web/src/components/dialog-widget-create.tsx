@@ -88,8 +88,8 @@ export function CreateWidgetDialog({ projectId }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default">
-          <Plus size="20" />
+        <Button className="flex w-fit">
+          <Plus size="20" className="hidden lg:flex" />
           Widget toevoegen
         </Button>
       </DialogTrigger>
@@ -142,11 +142,10 @@ export function CreateWidgetDialog({ projectId }: Props) {
                   </FormItem>
                 )}
               />
-              <div className="sticky bottom-0 py-4 bg-background flex flex-col"></div>
             </DialogHeader>
             <DialogFooter>
               <Button disabled={!form.formState.isValid} type="submit">
-                Aanmaken
+                Opslaan
               </Button>
             </DialogFooter>
           </form>

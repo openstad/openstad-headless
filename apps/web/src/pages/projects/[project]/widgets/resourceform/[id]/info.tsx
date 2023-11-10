@@ -63,13 +63,13 @@ export default function WidgetResourceFormInfo() {
   }, [widget]);
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Resource Form • Informatie
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Heading size="xl">Information</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="lg:w-fit grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="viewable"
@@ -132,11 +132,9 @@ export default function WidgetResourceFormInfo() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button className="w-fit col-span-full" type="submit">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>

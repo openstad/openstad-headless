@@ -168,13 +168,13 @@ export default function CreateProject() {
             url: '/projects',
           },
         ]}>
-        <div className="container mx-auto py-10 w-1/2 float-left">
+        <div className="p-6 bg-white rounded-md">
           <Form {...form}>
-            <Heading size="xl" className="mb-4">
-              Project toevoegen
-            </Heading>
-            <Separator className="mb-4" />
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <Heading size="xl">Project toevoegen</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="projectName"
@@ -188,11 +188,14 @@ export default function CreateProject() {
                   </FormItem>
                 )}
               />
-              <SimpleCalendar
-                form={form}
-                fieldName="endDate"
-                label="Einddatum"
-              />
+              <div className="mt-auto">
+                <SimpleCalendar
+                  form={form}
+                  fieldName="endDate"
+                  label="Einddatum"
+                />
+              </div>
+
               <FormField
                 control={form.control}
                 name="email"
@@ -206,11 +209,11 @@ export default function CreateProject() {
                   </FormItem>
                 )}
               />
-              <Button variant="default" type="submit" className="float-right">
-                Aanmaken
-              </Button>
-              <Button variant="ghost" className="float-right">
-                Annuleren
+              <Button
+                variant="default"
+                type="submit"
+                className="w-fit col-span-full">
+                Opslaan
               </Button>
             </form>
           </Form>

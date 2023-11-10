@@ -62,13 +62,13 @@ export default function ProjectAuthenticationSmsVerification() {
             url: '/projects/1/authentication/smsverification',
           },
         ]}>
-        <div className="container mx-auto py-10 w-1/2 float-left">
-          <Form {...form}>
-            <Heading size="xl" className="mb-4">
-              Authenticatie • SMS verificatie
-            </Heading>
-            <Separator className="mb-4" />
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="container py-6">
+          <Form {...form} className="p-6 bg-white rounded-md">
+            <Heading size="xl">SMS verificatie</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="lg:min-w-fit lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="firstTitle"
@@ -99,8 +99,8 @@ export default function ProjectAuthenticationSmsVerification() {
                 control={form.control}
                 name="firstDescription"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descriptie voor het eerste scherm</FormLabel>
+                  <FormItem className="col-span-full">
+                    <FormLabel>Beschrijving voor het eerste scherm</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>
@@ -126,7 +126,7 @@ export default function ProjectAuthenticationSmsVerification() {
                 name="firstButton"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Button tekst voor het eerste scherm</FormLabel>
+                    <FormLabel>Knoptekst voor het eerste scherm</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
@@ -138,8 +138,8 @@ export default function ProjectAuthenticationSmsVerification() {
                 control={form.control}
                 name="firstHelptext"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hulptext voor het eerste scherm</FormLabel>
+                  <FormItem className="col-span-full">
+                    <FormLabel>Hulptekst voor het eerste scherm</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>
@@ -191,7 +191,7 @@ export default function ProjectAuthenticationSmsVerification() {
                 name="secondButton"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Button tekst voor het tweede scherm</FormLabel>
+                    <FormLabel>Knoptekst voor het tweede scherm</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
@@ -203,8 +203,8 @@ export default function ProjectAuthenticationSmsVerification() {
                 control={form.control}
                 name="secondHelptext"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hulptext voor het eerste scherm</FormLabel>
+                  <FormItem className="col-span-full">
+                    <FormLabel>Hulptekst voor het eerste scherm</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>
@@ -217,7 +217,7 @@ export default function ProjectAuthenticationSmsVerification() {
                 name="smsSender"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Verstuurder van de SMS.</FormLabel>
+                    <FormLabel>Verstuurder van de SMS</FormLabel>
                     <FormControl>
                       <Input placeholder="OpenStad" {...field} />
                     </FormControl>
@@ -230,7 +230,7 @@ export default function ProjectAuthenticationSmsVerification() {
                 name="smsText"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Inhoud van de SMS.</FormLabel>
+                    <FormLabel>Inhoud van de SMS</FormLabel>
                     <FormControl>
                       <Input placeholder="Code: [[code]]" {...field} />
                     </FormControl>
@@ -238,11 +238,10 @@ export default function ProjectAuthenticationSmsVerification() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" variant={'default'}>
+              <Button type="submit" className="w-fit col-span-full">
                 Opslaan
               </Button>
             </form>
-            <br />
           </Form>
         </div>
       </PageLayout>

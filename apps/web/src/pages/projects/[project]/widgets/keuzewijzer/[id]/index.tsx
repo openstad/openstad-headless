@@ -25,8 +25,8 @@ export default function WidgetKeuzewijzer() {
             url: `/projects/${projectId}/widgets/keuzewijzer/${id}`,
           },
         ]}>
-        <div>
-          <div className="p-4 w-1/2">
+        <div className="container py-6">
+          <div className="p-6 bg-white rounded-md">
             <ChoicesSelectorForm />
           </div>
         </div>
