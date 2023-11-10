@@ -3,6 +3,7 @@ import { ProgressBar } from '@openstad-headless/ui/src';
 import useSWR, { Fetcher } from 'swr';
 import { useEffect, useState } from 'react';
 import './likes.css';
+import loadWidget from '../../lib/load-widget.js';
 
 type Props = {
   projectId?: string;
@@ -18,7 +19,7 @@ type Props = {
   };
 };
 
-export function Likes(props: Props) {
+function Likes(props: Props) {
   const projectId = props.projectId || props.config?.projectId;
   const ideaId = props.ideaId || props.config?.ideaId;
   const apIurl = props.apiUrl || props.config.api?.url;
@@ -93,3 +94,7 @@ export function Likes(props: Props) {
     </>
   );
 }
+
+Likes.loadWidget = loadWidget;
+
+export { Likes as default, Likes };
