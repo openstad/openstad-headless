@@ -55,27 +55,27 @@ export default function ProjectCodes() {
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
             <div className="grid grid-cols-6 items-center py-2 px-2 border-b border-border">
-              <ListHeading className="hidden md:flex md:col-span-2 truncate">
+              <ListHeading className="hidden md:flex">
                 ID
               </ListHeading>
-              <ListHeading className="hidden md:flex md:col-span-1 truncate">
+              <ListHeading className="hidden md:flex">
                 Code
               </ListHeading>
-              <ListHeading className="hidden md:flex md:col-span-1 truncate">
+              <ListHeading className="hidden md:flex">
                 Al gebruikt
               </ListHeading>
             </div>
           </div>
-          <ul className="container mx-auto">
+          <ul>
             {codes?.data.map((code: any) => (
-              <li className="grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
-                <Paragraph className="hidden md:flex md:col-span-2">
+              <li className="grid grid-cols-1 lg:grid-cols-2 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                <Paragraph className="hidden md:flex truncate">
                   {code.id || null}
                 </Paragraph>
-                <Paragraph className="hidden md:flex md:col-span-2">
+                <Paragraph className="hidden md:flex truncate">
                   {code.code || null}
                 </Paragraph>
-                <Paragraph className="hidden md:flex md:col-span-2">
+                <Paragraph className="hidden md:flex truncate">
                   {code.used}
                 </Paragraph>
               </li>
