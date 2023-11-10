@@ -1,0 +1,29 @@
+.progressbar-container {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: .5rem;  
+    p {
+      font-size: 0.875rem;
+    }
+  }
+  
+  .progressbar {
+      height: .5rem;
+      width: 100%;
+      background-color: var(--border);
+      border-radius: 50px;
+      overflow-x: hidden;
+    }
+    
+    .progressbar-tracker {
+      height: 100%;
+      background-color: var(--primary);
+      border-radius: inherit;
+    }
+  
+    .progressbar-counter {
+      font-weight: 600;
+      text-align: center;
+      color: var(--foreground)
+    }
