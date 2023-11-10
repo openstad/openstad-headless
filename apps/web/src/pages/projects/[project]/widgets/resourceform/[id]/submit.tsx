@@ -57,13 +57,13 @@ export default function WidgetResourceFormSubmit() {
   }, [widget]);
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Resource Form • Opleveren
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Heading size="xl">Opleveren</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="lg:w-fit grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="submitButton"
@@ -84,7 +84,7 @@ export default function WidgetResourceFormSubmit() {
               <FormItem>
                 <FormLabel>Tekst voor de opslaan-knop</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Input {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -103,11 +103,9 @@ export default function WidgetResourceFormSubmit() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button className="w-fit col-span-full" type="submit">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>

@@ -64,13 +64,13 @@ export default function WidgetMapImage() {
   }, [widget]);
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Map • Idee afbeeldingen
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Heading size="xl">Idee afbeeldingen</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
           <FormField
             control={form.control}
             name="multipleImages"
@@ -119,7 +119,7 @@ export default function WidgetMapImage() {
             control={form.control}
             name="defaultImage"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>Default afbeelding</FormLabel>
                 <FormControl>
                   <Input type="file" {...field} />
@@ -128,11 +128,9 @@ export default function WidgetMapImage() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button type="submit" className="w-fit col-span-full">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>

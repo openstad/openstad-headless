@@ -23,16 +23,16 @@ export default function CreateUser() {
             url: `/users/${userId}`,
           },
         ]}>
-        <div>
+        <div className="container py-6">
           <Tabs defaultValue="general">
-            <TabsList className="w-full">
+            <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Algemene instellingen</TabsTrigger>
               <TabsTrigger value="projects">Projectsrechten</TabsTrigger>
             </TabsList>
-            <TabsContent value="general" className="w-1/2">
+            <TabsContent value="general" className="p-0">
               <CreateUserGeneral />
             </TabsContent>
-            <TabsContent value="projects" className="w-1/2">
+            <TabsContent value="projects" className="p-0">
               <CreateUserProjects />
             </TabsContent>
           </Tabs>

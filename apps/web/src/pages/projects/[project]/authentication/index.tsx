@@ -184,56 +184,60 @@ export default function ProjectAuthentication() {
             url: `/projects/${project}/authentication`,
           },
         ]}>
-        <div className="container mx-auto py-10 w-1/2 float-left ">
-          <Form {...form}>
-            <Heading size="xl" className="mb-4">
-              Authenticatie • Algemeen
-            </Heading>
-            <Separator className="mb-4" />
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="container">
+          <Form {...form} className="p-6 bg-white rounded-md my-6">
+            <Heading size="xl">Algemeen</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="availableAuthentication"
                 render={() => (
-                  <FormItem>
+                  <FormItem className="col-span-full">
                     <div>
-                      <FormLabel>Available authentication</FormLabel>
+                      <FormLabel>
+                        Toegestaande authenticatie mogelijkheden
+                      </FormLabel>
                     </div>
-                    {availableAuthentication.map((item) => (
-                      <FormField
-                        key={item.id}
-                        control={form.control}
-                        name="availableAuthentication"
-                        render={({ field }) => {
-                          return (
-                            <FormItem
-                              key={item.id}
-                              className="flex flex-row items-start space-x-3 space-y-0">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value?.includes(item.id)}
-                                  onCheckedChange={(checked: any) => {
-                                    return checked
-                                      ? field.onChange([
-                                          ...field.value,
-                                          item.id,
-                                        ])
-                                      : field.onChange(
-                                          field.value?.filter(
-                                            (value) => value !== item.id
-                                          )
-                                        );
-                                  }}
-                                />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                {item.label}
-                              </FormLabel>
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    ))}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {availableAuthentication.map((item) => (
+                        <FormField
+                          key={item.id}
+                          control={form.control}
+                          name="availableAuthentication"
+                          render={({ field }) => {
+                            return (
+                              <FormItem
+                                key={item.id}
+                                className="flex flex-row items-start space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(item.id)}
+                                    onCheckedChange={(checked: any) => {
+                                      return checked
+                                        ? field.onChange([
+                                            ...field.value,
+                                            item.id,
+                                          ])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                              (value) => value !== item.id
+                                            )
+                                          );
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                  {item.label}
+                                </FormLabel>
+                              </FormItem>
+                            );
+                          }}
+                        />
+                      ))}
+                    </div>
                   </FormItem>
                 )}
               />
@@ -241,93 +245,98 @@ export default function ProjectAuthentication() {
                 control={form.control}
                 name="twoFactorRoles"
                 render={() => (
-                  <FormItem>
+                  <FormItem className="col-span-full">
                     <div>
                       <FormLabel>
                         Two Factor authenticatie voor rollen
                       </FormLabel>
                     </div>
-                    {twoFactorRoles.map((item) => (
-                      <FormField
-                        key={item.id}
-                        control={form.control}
-                        name="twoFactorRoles"
-                        render={({ field }) => {
-                          return (
-                            <FormItem
-                              key={item.id}
-                              className="flex flex-row items-start space-x-3 space-y-0">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value?.includes(item.id)}
-                                  onCheckedChange={(checked: any) => {
-                                    return checked
-                                      ? field.onChange([
-                                          ...field.value,
-                                          item.id,
-                                        ])
-                                      : field.onChange(
-                                          field.value?.filter(
-                                            (value) => value !== item.id
-                                          )
-                                        );
-                                  }}
-                                />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                {item.label}
-                              </FormLabel>
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    ))}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {twoFactorRoles.map((item) => (
+                        <FormField
+                          key={item.id}
+                          control={form.control}
+                          name="twoFactorRoles"
+                          render={({ field }) => {
+                            return (
+                              <FormItem
+                                key={item.id}
+                                className="flex flex-row items-start space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(item.id)}
+                                    onCheckedChange={(checked: any) => {
+                                      return checked
+                                        ? field.onChange([
+                                            ...field.value,
+                                            item.id,
+                                          ])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                              (value) => value !== item.id
+                                            )
+                                          );
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                  {item.label}
+                                </FormLabel>
+                              </FormItem>
+                            );
+                          }}
+                        />
+                      ))}
+                    </div>
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="requiredFields"
                 render={() => (
-                  <FormItem>
+                  <FormItem className="col-span-full">
                     <div>
                       <FormLabel>Verplichte velden</FormLabel>
                     </div>
-                    {requiredFields.map((item) => (
-                      <FormField
-                        key={item.id}
-                        control={form.control}
-                        name="requiredFields"
-                        render={({ field }) => {
-                          return (
-                            <FormItem
-                              key={item.id}
-                              className="flex flex-row items-start space-x-3 space-y-0">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value?.includes(item.id)}
-                                  onCheckedChange={(checked: any) => {
-                                    return checked
-                                      ? field.onChange([
-                                          ...field.value,
-                                          item.id,
-                                        ])
-                                      : field.onChange(
-                                          field.value?.filter(
-                                            (value) => value !== item.id
-                                          )
-                                        );
-                                  }}
-                                />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                {item.label}
-                              </FormLabel>
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    ))}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {requiredFields.map((item) => (
+                        <FormField
+                          key={item.id}
+                          control={form.control}
+                          name="requiredFields"
+                          render={({ field }) => {
+                            return (
+                              <FormItem
+                                key={item.id}
+                                className="flex flex-row items-start space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(item.id)}
+                                    onCheckedChange={(checked: any) => {
+                                      return checked
+                                        ? field.onChange([
+                                            ...field.value,
+                                            item.id,
+                                          ])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                              (value) => value !== item.id
+                                            )
+                                          );
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                  {item.label}
+                                </FormLabel>
+                              </FormItem>
+                            );
+                          }}
+                        />
+                      ))}
+                    </div>
                   </FormItem>
                 )}
               />
@@ -336,7 +345,9 @@ export default function ProjectAuthentication() {
                 name="emailAddressOutgoing"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mailadres verstuurde emails</FormLabel>
+                    <FormLabel>
+                      E-mailadres voor het versturen van e-mails
+                    </FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
@@ -350,7 +361,7 @@ export default function ProjectAuthentication() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Eigenaar van mailadres verstuurde emails
+                      Naam afzender voor het versturen van e-mails
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
@@ -363,8 +374,8 @@ export default function ProjectAuthentication() {
                 control={form.control}
                 name="contactEmail"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mailadres verstuurde emails</FormLabel>
+                  <FormItem className="col-span-full">
+                    <FormLabel>E-mailadres voor contact</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
@@ -376,7 +387,7 @@ export default function ProjectAuthentication() {
                 control={form.control}
                 name="defaultRole"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-full">
                     <FormLabel>
                       Welke rol krijgt een nieuwe gebruiker toegewezen?
                     </FormLabel>
@@ -398,23 +409,23 @@ export default function ProjectAuthentication() {
                 )}
               />
               {/* <FormField
-                            control={form.control}
-                            name="contactEmail"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Header afbeelding voor emails</FormLabel>
-                                    <FormControl>
-                                        <Input type="file" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                            /> */}
-              <Button type="submit" variant={'default'}>
+                              control={form.control}
+                              name="contactEmail"
+                              render={({ field }) => (
+                                  <FormItem>
+                                      <FormLabel>Header afbeelding voor emails</FormLabel>
+                                      <FormControl>
+                                          <Input type="file" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                  </FormItem>
+                              )}
+                              /> */}
+
+              <Button type="button" className="w-fit mt-4">
                 Opslaan
               </Button>
             </form>
-            <br />
           </Form>
         </div>
       </PageLayout>

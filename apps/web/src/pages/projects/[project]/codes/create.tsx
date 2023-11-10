@@ -50,30 +50,28 @@ export default function ProjectCodeCreate() {
             url: '/projects'
           },
           {
-            name: 'Stem codes',
+            name: 'Stemcodes',
             url: `/projects/${project}/codes`,
           },
           {
-            name: 'Creëer nieuwe codes',
-            url: `projects/${project}/codes/create`
-          }
+            name: 'Stemcodes toevoegen',
+            url: `projects/${project}/codes/create`,
+          },
         ]}
         action={
           <div className="flex">
-            <Link href="/projects/1/codes/export" className="pl-6">
-              <Button variant="default">
-                Exporteer unieke codes
-              </Button>
+            <Link href="/projects/1/codes/export">
+              <Button variant="default">Exporteer stemcodes</Button>
             </Link>
           </div>
         }>
-        <div className="container mx-auto py-10 w-1/2 float-left">
-          <Form {...form}>
-            <Heading size="xl" className="mb-4">
-              Unieke codes • Aanmaken
-            </Heading>
-            <Separator className="mb-4" />
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="container py-6">
+          <Form {...form} className="p-6 bg-white rounded-md">
+            <Heading size="xl">Toevoegen</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="lg:w-3/4 grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="numberOfCodes"
@@ -89,11 +87,10 @@ export default function ProjectCodeCreate() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" variant={"default"}>
-                Aanmaken
+              <Button className="w-fit col-span-full" type="submit">
+                Opslaan
               </Button>
             </form>
-            <br/>
           </Form>
         </div>
       </PageLayout>

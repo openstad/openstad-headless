@@ -79,21 +79,21 @@ export default function BegrootmoduleExplanation() {
   }
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Begrootmodule • Uitleg
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Heading size="xl">Authenticatie</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="lg:w-1/2 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="step1"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Step 1: Intro</FormLabel>
+                <FormLabel>Stap 1: Intro</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea rows={5} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -104,9 +104,9 @@ export default function BegrootmoduleExplanation() {
             name="step2"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Step 2: Intro</FormLabel>
+                <FormLabel>Stap 2: Intro</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea rows={5} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -117,9 +117,9 @@ export default function BegrootmoduleExplanation() {
             name="step3"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Step 3: Intro</FormLabel>
+                <FormLabel>Stap 3: Intro</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea rows={5} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -130,9 +130,9 @@ export default function BegrootmoduleExplanation() {
             name="step3success"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Step 3: Succesvolle authenticatie</FormLabel>
+                <FormLabel>Succesvolle authenticatie</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea rows={5} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -143,9 +143,7 @@ export default function BegrootmoduleExplanation() {
             name="voteMessage"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  URL waar het idee oorspronkelijk vandaan is gehaald
-                </FormLabel>
+                <FormLabel>Succesvol gestemd bericht</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -160,7 +158,7 @@ export default function BegrootmoduleExplanation() {
               <FormItem>
                 <FormLabel>Bedankt bericht</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea rows={5} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -191,11 +189,7 @@ export default function BegrootmoduleExplanation() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

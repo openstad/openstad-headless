@@ -54,13 +54,13 @@ export default function WidgetResourceOverviewPagination() {
   }, [widget]);
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Resource Overview • Pagination
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Heading size="xl">Pagination</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="lg:w-1/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="itemsPerPage"
@@ -68,7 +68,7 @@ export default function WidgetResourceOverviewPagination() {
               <FormItem>
                 <FormLabel>Hoeveelheid items per pagina</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input type="number" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -87,11 +87,9 @@ export default function WidgetResourceOverviewPagination() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button className="w-fit col-span-full" type="submit">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>

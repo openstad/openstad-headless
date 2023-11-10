@@ -63,9 +63,9 @@ export function CreateUserDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default">
-          <Plus size="20" />
-          Gebruiker aanmaken
+        <Button className="flex w-fit">
+          <Plus size="20" className="hidden lg:flex" />
+          Gebruiker toevoegen
         </Button>
       </DialogTrigger>
       <DialogContent>

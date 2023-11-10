@@ -38,47 +38,63 @@ export default function Projects() {
         ]}
         action={
           <Link href="/projects/create">
-            <Button variant="default">
-              <Plus size="20" />
+            <Button variant="default" className="flex w-fit">
+              <Plus size="20" className="hidden lg:flex" />
               Project toevoegen
             </Button>
           </Link>
         }>
-        <div className="container mx-auto py-10">
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-2 px-2 border-b border-border overflow-x-scroll">
-            {headers.map((header) => (
-              <ListHeading className="hidden md:flex" key={header}>
-                {header}
-              </ListHeading>
-            ))}
+        <div className="container py-6">
+          <div className="p-6 bg-white rounded-md">
+            <div className="grid grid-cols-1 lg:grid-cols-10 items-center py-2 px-2 border-b border-border">
+              {headers.map((header) => (
+                <ListHeading className="hidden lg:flex" key={header}>
+                  {header}
+                </ListHeading>
+              ))}
+            </div>
+            <ul>
+              {data.map((project: any) => {
+                return (
+                  <li
+                    className="grid grid-cols-1 lg:grid-cols-10 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
+                    key={project.id}
+                    onClick={(d) => {
+                      router.push(`${router.asPath}/${project.id}/widgets`);
+                    }}>
+                    <Paragraph className="truncate">{project.name}</Paragraph>
+                    <Paragraph className="hidden lg:flex truncate">
+                      Data
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate">
+                      Issues
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate">
+                      Status
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate">
+                      Reacties
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate">
+                      Likes
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate">
+                      Indiener
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate">
+                      Resources
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate">
+                      Stemmen
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate">
+                      {project?.config?.project?.endDate}
+                    </Paragraph>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-          <ul>
-            {data.map((project: any) => {
-              return (
-                <li
-                  className="grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
-                  key={project.id}
-                  onClick={(d) => {
-                    router.push(`${router.asPath}/${project.id}/widgets`);
-                  }}>
-                  <Paragraph className="hidden md:flex">
-                    {project.name}
-                  </Paragraph>
-                  <Paragraph className="hidden md:flex">Data</Paragraph>
-                  <Paragraph className="hidden md:flex">Issues</Paragraph>
-                  <Paragraph className="hidden md:flex">Status</Paragraph>
-                  <Paragraph className="hidden md:flex">Reacties</Paragraph>
-                  <Paragraph className="hidden md:flex">Likes</Paragraph>
-                  <Paragraph className="hidden md:flex">Indiener</Paragraph>
-                  <Paragraph className="hidden md:flex">Resources</Paragraph>
-                  <Paragraph className="hidden md:flex">Stemmen</Paragraph>
-                  <Paragraph className="hidden md:flex">
-                    {project?.config?.project?.endDate}
-                  </Paragraph>
-                </li>
-              );
-            })}
-          </ul>
         </div>
       </PageLayout>
     </div>

@@ -104,18 +104,18 @@ export default function ProjectSettingsVoting() {
             url: `/projects/${project}/settings/voting`,
           },
         ]}>
-        <div className="container mx-auto py-10 w-1/2 float-left">
-          <Form {...form}>
-            <Heading size="xl" className="mb-4">
-              Instellingen • Stemmen
-            </Heading>
-            <Separator className="mb-4" />
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="container py-6">
+          <Form {...form} className="p-6 bg-white rounded-md">
+            <Heading size="xl">Stemmen</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="isViewable"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-1">
                     <FormLabel>
                       Is de hoeveelheid stemmen publiek zichtbaar?
                     </FormLabel>
@@ -142,7 +142,7 @@ export default function ProjectSettingsVoting() {
                 control={form.control}
                 name="isActive"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-1">
                     <FormLabel>Is het mogelijk om te stemmen?</FormLabel>
                     <Select
                       onValueChange={(e: string) =>
@@ -167,7 +167,7 @@ export default function ProjectSettingsVoting() {
                 control={form.control}
                 name="withExisting"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-full">
                     <FormLabel>
                       Moet het systeem een error geven wanneer iemand twee keer
                       stemt, of moet de vorige stem vervangen worden?
@@ -193,7 +193,7 @@ export default function ProjectSettingsVoting() {
                 control={form.control}
                 name="requiredUserRole"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-1">
                     <FormLabel>
                       Wat voor gebruikers hebben het recht om te stemmen?
                     </FormLabel>
@@ -220,7 +220,7 @@ export default function ProjectSettingsVoting() {
                 control={form.control}
                 name="voteType"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-1">
                     <FormLabel>
                       Wat voor type stemmen wordt er gebruikt?
                     </FormLabel>
@@ -250,13 +250,13 @@ export default function ProjectSettingsVoting() {
                 control={form.control}
                 name="minIdeas"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-1">
                     <FormLabel>
                       Wat is de minimum hoeveelheid ideeën waar iemand op kan
                       stemmen?
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="1" {...field} />
+                      <Input type="number" placeholder="1" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -266,23 +266,22 @@ export default function ProjectSettingsVoting() {
                 control={form.control}
                 name="maxIdeas"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-1">
                     <FormLabel>
                       Wat is de maximum hoeveelheid ideeën waar iemand op kan
                       stemmen?
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="100" {...field} />
+                      <Input type="number" placeholder="100" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" variant={'default'}>
+              <Button type="submit" className="w-fit col-span-full">
                 Opslaan
               </Button>
             </form>
-            <br />
           </Form>
         </div>
       </PageLayout>

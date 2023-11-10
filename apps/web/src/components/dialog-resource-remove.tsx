@@ -35,12 +35,13 @@ export function RemoveResourceDialog({
       <DialogTrigger asChild>
         <Button
           type="button"
+          className='px-3 py-2'
           onClick={(e) => {
             e.preventDefault();
             setOpen(true);
           }}
           variant="destructive">
-          <Trash size="20" />
+          <Trash size="14" />
         </Button>
       </DialogTrigger>
       <DialogContent

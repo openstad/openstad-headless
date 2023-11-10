@@ -59,30 +59,22 @@ export default function CreateUserProjects() {
   if (!data) return null;
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Gebruiker • Projectsrechten
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="container mx-auto">
-            <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-2 border-b border-border">
-              <ListHeading className="hidden md:flex md:col-span-2">
-                Projectnaam
-              </ListHeading>
-              <ListHeading className="hidden md:flex md:col-span-2">
-                Rol
-              </ListHeading>
+        <Heading size="xl">Projectsrechten</Heading>
+        <Separator className="my-4" />
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="ml-1">
+            <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 items-center lg:py-2 lg:border-b border-border gap-4">
+              <ListHeading className="hidden lg:flex">Projectnaam</ListHeading>
+              <ListHeading className="hidden lg:flex">Rol</ListHeading>
             </div>
             <ul>
               {data.map((project: any) => {
                 return (
-                  <li className="grid grid-cols-2 md:grid-cols-12 items-center py-3 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2">
-                    <Paragraph className="hidden md:flex">
-                      {project.name}
-                    </Paragraph>
-                    <Paragraph className="hidden md:flex">
+                  <li className="grid grid-cols-1 lg:grid-cols-2 items-center py-3 h-fit hover:bg-secondary-background hover:cursor-pointer border-b border-border">
+                    <Paragraph className="truncate">{project.name}</Paragraph>
+                    <Paragraph className="truncate">
                       <DropdownList
                         roleId="0"
                         addProject={(roleId) => {
@@ -95,8 +87,8 @@ export default function CreateUserProjects() {
               })}
             </ul>
           </div>
-          <Button type="submit" variant="default">
-            Aanpassen
+          <Button className="col-span-full w-fit mt-4" type="submit">
+            Opslaan
           </Button>
         </form>
       </Form>
