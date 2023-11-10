@@ -175,7 +175,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="extraData.originalId"
             render={({ field }) => (
-              col-span-1 lg:-ml-40">
+              <FormItem className="col-span-1 lg:-ml-40">
                 <FormLabel>
                   Plan id van het originele plan (optioneel)
                 </FormLabel>
@@ -221,7 +221,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="description"
             render={({ field }) => (
-              col-span-1 lg:-ml-40">
+              <FormItem className="col-span-1 lg:-ml-40">
                 <FormLabel>Beschrijving</FormLabel>
                 <FormControl>
                   <Textarea rows={6} {...field} />
@@ -235,7 +235,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="budgetMin"
             render={({ field }) => (
-              col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>Minimum budget (optioneel)</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
@@ -249,7 +249,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="budgetMax"
             render={({ field }) => (
-              col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>Maximum budget (optioneel)</FormLabel>
                 <FormControl>
                   <Input type="number" min={0} placeholder="" {...field} />
@@ -263,7 +263,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="budgetInterval"
             render={({ field }) => (
-              col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>Interval budget (optioneel)</FormLabel>
                 <FormControl>
                   <Input type="number" min={0} placeholder="" {...field} />
@@ -277,7 +277,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="location"
             render={({ field }) => (
-              col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>Locatie (optioneel)</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
@@ -291,7 +291,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="modBreak"
             render={({ field }) => (
-              col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>ModBreak (optioneel)</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
@@ -305,7 +305,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="modBreakUserId"
             render={({ field }) => (
-              col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>ModBreak user id (optioneel)</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />

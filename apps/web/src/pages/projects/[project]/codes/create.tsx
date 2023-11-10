@@ -63,8 +63,8 @@ export default function ProjectCodeCreate() {
             </Link>
           </div>
         }>
-        <div className="p-6 bg-white rounded-md">
-          <Form {...form}>
+        <div className="container py-6">
+          <Form {...form} className="p-6 bg-white rounded-md">
             <Heading size="xl">Toevoegen</Heading>
             <Separator className="my-4" />
             <form

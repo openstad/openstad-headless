@@ -91,10 +91,8 @@ export default function WidgetMapDetails() {
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Map • Idee details
-        </Heading>
-        <Separator className="mb-4" />
+        <Heading size="xl">Idee details</Heading>
+        <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
