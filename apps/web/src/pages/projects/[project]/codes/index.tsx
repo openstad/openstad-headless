@@ -2,12 +2,12 @@ import { PageLayout} from '@/components/ui/page-layout'
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
-import useCodes from '@/hooks/use-codes';
 import { CSVLink } from 'react-csv';
 import { useProject } from '@/hooks/use-project';
+import useSWR from 'swr';
 
 const headers = [
   {label: "ID", key: "id"},
@@ -17,20 +17,11 @@ const headers = [
 export default function ProjectCodes() {
   const router = useRouter();
   const { project } = router.query;
-  const [projectData, setProjectData] = useState(false);
-  let value = "uniquecode";
-  const { data, isLoading } = (projectData ? useCodes(value) : useProject());
 
-  useEffect(() => {
-    if (data != undefined) {
-      if (!projectData) {
-        value = data.config.auth.provider.openstad.clientId;
-        setProjectData(true)
-      }
-    }
-  }, [data])
+  const { data, isLoading } = useProject();
+  const { data:codes, isLoading:loadingCodes } = useSWR(() => '/api/oauth/api/admin/unique-codes?clientId=' + data.config.auth.provider.openstad.clientId);
 
-  if(!data?.data) return null;
+  if(!codes?.data) return null;
 
   return (
     <div>
@@ -55,7 +46,7 @@ export default function ProjectCodes() {
               </Button>
             </Link>
               <Button variant="default" className="ml-6">
-                <CSVLink data={data.data} headers={headers}>
+                <CSVLink data={codes.data} headers={headers}>
                     Exporteer unieke codes
                 </CSVLink>
               </Button>
@@ -74,7 +65,7 @@ export default function ProjectCodes() {
             </ListHeading>
           </div>
           <ul className="container mx-auto">
-            {data?.data.map((code: any) => (
+            {codes?.data.map((code: any) => (
               <li className="grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                 <Paragraph className="hidden md:flex md:col-span-2">
                   {code.id || null}
