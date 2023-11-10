@@ -1,10 +1,10 @@
 import '../index.css';
-import { Reaction } from '../types';
+import { Reaction } from '../types/index.js';
 import { useState } from 'react';
 import { Button, Spacer } from '@openstad-headless/ui/src';
 import { Banner } from '@openstad-headless/ui/src';
-import ReactionItem from './reaction';
-import ReactionInput from './reaction-input';
+import ReactionItem from './reaction.js';
+import ReactionInput from './reaction-input.js';
 
 type Props = {
   title: string;
