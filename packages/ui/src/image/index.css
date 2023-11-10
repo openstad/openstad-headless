@@ -1,0 +1,19 @@
+
+.openstad-image-container {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 4px;
+    background-color: #212529;
+    box-sizing: border-box;
+
+}
+
+.openstad-image-container.selected {
+    border: 4px solid var(--primary);
+}
+
+.openstad-image-container > img {
+    width: 100%;
+    height: 100%;
+}
+

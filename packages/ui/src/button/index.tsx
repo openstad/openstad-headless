@@ -20,6 +20,14 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   }
 );
 
+export const PrimaryButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (props, ref) => {
+    return (
+      <Button ref={ref} className={`primary ${props.className}`} {...props} />
+    );
+  }
+);
+
 export const SecondaryButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (props, ref) => {
     return (

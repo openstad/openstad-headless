@@ -1,0 +1,41 @@
+.voting-module {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--card);
+}
+
+.stepper-section {
+    padding: 0rem .5rem;
+    width: 100%;
+    background-color: var(--background);
+    box-sizing: border-box;
+}
+
+.voting-module-content {
+    padding: 1.5rem 1.5rem;
+    background-color: var(--card);
+}
+
+.voting-module-content > p {
+    margin: 0;
+}
+
+.voting-module-image-container {
+    display: flex;
+    gap: 1rem;
+}
+
+.voting-module-footer {
+    display: flex;
+    justify-content: end;
+    gap: 1rem;
+}
+
+
+/* VERIFY step */
+
+.verify-selected-image {
+    width: 12.5rem;
+}

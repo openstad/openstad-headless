@@ -1,7 +1,7 @@
 import '../index.css';
 import { Reaction } from '../types/index.js';
 import { useState } from 'react';
-import { Button, Spacer } from '@openstad-headless/ui/src';
+import { PrimaryButton, Spacer } from '@openstad-headless/ui/src';
 import { Banner } from '@openstad-headless/ui/src';
 import ReactionItem from './reaction.js';
 import ReactionInput from './reaction-input.js';
@@ -25,7 +25,7 @@ function ArgumentsCollection(props: Props) {
       {reactionOpen && !loggedIn ? (
         <Banner big>
           <p>Inloggen om deel te nemen aan de discussie</p>
-          <Button>Inloggen</Button>
+          <PrimaryButton>Inloggen</PrimaryButton>
         </Banner>
       ) : null}
 
