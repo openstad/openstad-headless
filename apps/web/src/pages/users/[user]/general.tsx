@@ -57,18 +57,18 @@ export default function CreateUserGeneral() {
   if (!data) return null;
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">
-          Gebruiker • Algemene instellingen
-        </Heading>
+        <Heading size="xl">Algemene instellingen</Heading>
         <Separator className="my-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4 auto-rows-auto">
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>E-mailadres</FormLabel>
                 <FormControl>
                   <Input type="email" {...field} />
@@ -97,7 +97,7 @@ export default function CreateUserGeneral() {
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="mt-auto">
                 <FormLabel>Volledige naam</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -158,11 +158,9 @@ export default function CreateUserGeneral() {
               </FormItem>
             )}
           />
-          <div className="py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button className="col-span-full w-fit" type="submit">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>

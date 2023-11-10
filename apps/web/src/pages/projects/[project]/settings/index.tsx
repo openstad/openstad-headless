@@ -126,9 +126,7 @@ export default function ProjectSettings() {
             </TabsContent>
             <TabsContent value="advanced" className="p-0">
               <div className="p-6 bg-white rounded-md">
-                <Heading size="xl" className="mb-4">
-                  Project archiveren
-                </Heading>
+                <Heading size="xl">Project archiveren</Heading>
                 <Separator className="my-4" />
                 <div className="space-y-4">
                   <div>
