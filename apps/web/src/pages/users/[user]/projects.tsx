@@ -9,9 +9,10 @@ import { Heading, ListHeading, Paragraph } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import DropdownList from '@/components/dropdown-list';
 import { Button } from '@/components/ui/button';
+import useIdpUser from '@/hooks/use-idpuser';
 
 const formSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email().optional(),
 });
 
 type ProjectRole = {
@@ -19,10 +20,10 @@ type ProjectRole = {
   roleId: string;
 };
 
-export default function CreateUserProjects() {
+export default function CreateUserProjects(user: any) {
   let projectRoles: Array<ProjectRole> = [];
   const { data, isLoading } = projectListSwr();
-  const { createUser } = useUsers();
+  const { createUser } = useIdpUser("6", "openstad");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -48,11 +49,11 @@ export default function CreateUserProjects() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     for (let i = 0; i < projectRoles.length; i++) {
-      createUser(
-        values.email,
-        projectRoles[i].projectId,
-        projectRoles[i].roleId
-      );
+      // createUser(
+      //   values.email,
+      //   projectRoles[i].projectId,
+      //   projectRoles[i].roleId
+      // );
     }
   }
 
@@ -65,6 +66,9 @@ export default function CreateUserProjects() {
           Gebruiker • Projectsrechten
         </Heading>
         <Separator className="mb-4" />
+
+        <p>{form.formState.errors.email?.message}</p>
+        <p>{form.formState.errors.root?.message}</p>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="container mx-auto">
             <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-2 border-b border-border">

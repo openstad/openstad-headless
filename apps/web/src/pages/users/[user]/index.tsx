@@ -5,9 +5,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CreateUserGeneral from './general';
 import CreateUserProjects from './projects';
 
-export default function CreateUser() {
+export default function User() {
   const router = useRouter();
   const userId = router.query.userId;
+
 
   return (
     <div>

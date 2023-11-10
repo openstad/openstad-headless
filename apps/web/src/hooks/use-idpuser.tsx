@@ -1,12 +1,13 @@
-import useSWR from 'swr';
+import useSWR from 'swr'
 
-export default function useUsers() {
+export default function useIdpUser(identifier: string, provider: string) {
 
-  const usersSwr = useSWR(`/api/openstad/api/user`);
+  const IdpUserSwr = useSWR(`/api/openstad/api/user?fromIdpUser=1&identifier=${identifier}&provider=${provider}`);
 
   async function createUser(
     email: string,
     projectId?: string,
+    role?: string,
   ) {
     let url = `/api/openstad/api/project/${projectId}/user`;
 
@@ -17,9 +18,10 @@ export default function useUsers() {
       },
       body: JSON.stringify({
         email: email,
+        role: role,
       }),
     });
   }
 
-  return { ...usersSwr, createUser };
+  return {... IdpUserSwr, createUser};
 }
