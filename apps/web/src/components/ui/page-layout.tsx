@@ -41,17 +41,17 @@ export function PageLayout({
       />
       {hasProjectSidenav ? <SidenavProject /> : null}
       <section className="col-span-full w-full">
-        <header className="h-24 flex flex-col justify-center border-b border-border sticky top-0 z-10 bg-background">
-          <div className="flex flex-row items-center justify-between container p-6">
+        <header className="h-fit md:h-24 flex flex-col justify-center border-b border-border sticky top-0 z-10 bg-background">
+          <div className="flex flex-col md:flex-row justify-between container p-6">
             <div
               className={cn(
-                'flex flex-col items-stretch justify-center',
+                'flex flex-col items-stretch justify-center mb-4 md:mb-0',
                 className
               )}>
               <Heading size="2xl">{pageHeader}</Heading>
               <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
-            <div className="flex flex-row items-center gap-4">{action}</div>
+            {action}
           </div>
         </header>
         {children}

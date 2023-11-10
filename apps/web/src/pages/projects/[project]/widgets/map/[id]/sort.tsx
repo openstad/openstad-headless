@@ -119,7 +119,7 @@ export default function WidgetMapSort() {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="grid grid-cols-2 gap-4 lg:w-fit">
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
           <FormField
             control={form.control}
             name="sorting"
@@ -128,7 +128,7 @@ export default function WidgetMapSort() {
                 <div>
                   <FormLabel>Selecteer uw gewenste sorteeropties</FormLabel>
                 </div>
-                <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-2 gap-x-4">
                   {sorting.map((item) => (
                     <FormField
                       key={item.id}

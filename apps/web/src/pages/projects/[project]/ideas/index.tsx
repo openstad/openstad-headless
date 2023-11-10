@@ -31,9 +31,11 @@ export default function ProjectIdeas() {
           },
         ]}
         action={
-          <Link href={`/projects/${project}/ideas/create`}>
+          <Link
+            href={`/projects/${project}/ideas/create`}
+            className="flex w-fit">
             <Button variant="default">
-              <Plus size="20" />
+              <Plus size="20" className="hidden lg:flex" />
               Idee toevoegen
             </Button>
           </Link>
@@ -42,16 +44,16 @@ export default function ProjectIdeas() {
           <div className="p-6 bg-white rounded-md">
             <div className="grid grid-cols-5 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden md:flex">Ideeën</ListHeading>
-              <ListHeading className="hidden md:flex">
+              <ListHeading className="hidden md:flex md:col-span-1">
                 Gestemd op ja
               </ListHeading>
-              <ListHeading className="hidden md:flex">
+              <ListHeading className="hidden md:flex md:col-span-1">
                 Gestemd op nee
               </ListHeading>
-              <ListHeading className="hidden md:flex">
+              <ListHeading className="hidden md:flex md:col-span-1">
                 Datum aangemaakt
               </ListHeading>
-              <ListHeading className="hidden md:flex ml-auto">
+              <ListHeading className="hidden md:flex md:col-span-1 ml-auto">
                 Idee verwijderen
               </ListHeading>
             </div>
@@ -64,13 +66,13 @@ export default function ProjectIdeas() {
                     <div className="my-auto">
                       <Paragraph>{idea.title}</Paragraph>
                     </div>
-                    <Paragraph className="hidden md:flex my-auto">
+                    <Paragraph className="hidden md:flex truncate my-auto">
                       {idea.yes || 0}
                     </Paragraph>
-                    <Paragraph className="hidden md:flex my-auto">
+                    <Paragraph className="hidden md:flex truncate my-auto">
                       {idea.no || 0}
                     </Paragraph>
-                    <Paragraph className="hidden md:flex my-auto">
+                    <Paragraph className="hidden md:flex truncate my-auto">
                       {idea.createDateHumanized}
                     </Paragraph>
                     <div

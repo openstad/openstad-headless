@@ -81,12 +81,12 @@ export default function BegrootmoduleVoting() {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-fit grid grid-cols-2 gap-4">
+          className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="allowVoting"
             render={({ field }) => (
-              <FormItem className="col-span-full lg:col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>
                   Sta stemmen toe (werkt momenteel alleen met Gridder)
                 </FormLabel>
@@ -111,7 +111,7 @@ export default function BegrootmoduleVoting() {
             control={form.control}
             name="votingType"
             render={({ field }) => (
-              <FormItem className="col-span-full lg:col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>Stem types</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
@@ -138,7 +138,7 @@ export default function BegrootmoduleVoting() {
             control={form.control}
             name="minimumSelectableIdeas"
             render={({ field }) => (
-              <FormItem className="col-span-full lg:col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>Minimum hoeveelheid selecteerbare ideeën</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} />
@@ -151,7 +151,7 @@ export default function BegrootmoduleVoting() {
             control={form.control}
             name="maximumSelectableIdeas"
             render={({ field }) => (
-              <FormItem className="col-span-full lg:col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>Maximum hoeveelheid selecteerbare ideeën</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} />
@@ -164,7 +164,7 @@ export default function BegrootmoduleVoting() {
             control={form.control}
             name="minimumBudget"
             render={({ field }) => (
-              <FormItem className="col-span-full lg:col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>Minimum budget om te selecteren</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} />
@@ -177,7 +177,7 @@ export default function BegrootmoduleVoting() {
             control={form.control}
             name="budget"
             render={({ field }) => (
-              <FormItem className="col-span-full lg:col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>Beschikbaar budget</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} />

@@ -110,7 +110,7 @@ export default function WidgetResourceOverviewSorting() {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-1/2 grid grid-cols-2 gap-4">
+          className="lg:w-1/2 grid grid-cols-1 lg:grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="displaySorting"
@@ -170,7 +170,7 @@ export default function WidgetResourceOverviewSorting() {
                 <div>
                   <FormLabel>Selecteer uw gewenste sorteeropties</FormLabel>
                 </div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                <div className="grid grid-cols-1 lg:grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
                   {sorting.map((item) => (
                     <FormField
                       key={item.id}

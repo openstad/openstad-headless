@@ -45,7 +45,7 @@ export default function WidgetResourceOverview() {
         ]}>
         <div className="container py-6">
           <Tabs defaultValue="general">
-            <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
+            <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="image">Afbeeldingen</TabsTrigger>
               <TabsTrigger value="display">Display</TabsTrigger>

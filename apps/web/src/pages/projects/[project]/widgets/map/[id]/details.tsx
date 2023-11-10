@@ -97,7 +97,7 @@ export default function WidgetMapDetails() {
         <Separator className="mb-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="grid grid-cols-2 gap-4 lg:w-fit">
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
           <FormField
             control={form.control}
             name="template"
@@ -192,7 +192,9 @@ export default function WidgetMapDetails() {
               </FormItem>
             )}
           />
-          <Button type="submit">Opslaan</Button>
+          <Button type="submit" className="w-fit col-span-full">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>

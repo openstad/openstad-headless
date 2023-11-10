@@ -112,7 +112,7 @@ export default function ProjectSettingsIdeas() {
               <Separator className="my-4" />
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="lg:w-fit grid grid-cols-2 gap-4">
+                className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="canAddNewIdeas"
@@ -159,7 +159,7 @@ export default function ProjectSettingsIdeas() {
                   control={form.control}
                   name="titleMinLength"
                   render={({ field }) => (
-                    <FormItem className="col-span-2 lg:col-span-1">
+                    <FormItem className="col-span-1">
                       <FormLabel>Minimum lengte van titel</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="10" {...field} />
@@ -172,7 +172,7 @@ export default function ProjectSettingsIdeas() {
                   control={form.control}
                   name="titleMaxLength"
                   render={({ field }) => (
-                    <FormItem className="col-span-2 lg:col-span-1">
+                    <FormItem className="col-span-1">
                       <FormLabel>Maximum lengte van titel</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="50" {...field} />
@@ -185,7 +185,7 @@ export default function ProjectSettingsIdeas() {
                   control={form.control}
                   name="summaryMinLength"
                   render={({ field }) => (
-                    <FormItem className="col-span-2 lg:col-span-1">
+                    <FormItem className="col-span-1">
                       <FormLabel>Minimum lengte van samenvatting</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="20" {...field} />
@@ -198,7 +198,7 @@ export default function ProjectSettingsIdeas() {
                   control={form.control}
                   name="summaryMaxLength"
                   render={({ field }) => (
-                    <FormItem className="col-span-2 lg:col-span-1">
+                    <FormItem className="col-span-1">
                       <FormLabel>Maximum lengte van samenvatting</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="140" {...field} />
@@ -211,7 +211,7 @@ export default function ProjectSettingsIdeas() {
                   control={form.control}
                   name="descriptionMinLength"
                   render={({ field }) => (
-                    <FormItem className="col-span-2 lg:col-span-1">
+                    <FormItem className="col-span-1">
                       <FormLabel>Minimum lengte van de beschrijving</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="140" {...field} />
@@ -224,7 +224,7 @@ export default function ProjectSettingsIdeas() {
                   control={form.control}
                   name="descriptionMaxLength"
                   render={({ field }) => (
-                    <FormItem className="col-span-2 lg:col-span-1">
+                    <FormItem className="col-span-1">
                       <FormLabel>Maximum lengte van de beschrijving</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="5000" {...field} />

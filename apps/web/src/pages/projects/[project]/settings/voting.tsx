@@ -111,12 +111,12 @@ export default function ProjectSettingsVoting() {
               <Separator className="my-4" />
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="lg:w-fit grid grid-cols-2 gap-4">
+                className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="isViewable"
                   render={({ field }) => (
-                    <FormItem className="col-span-full lg:col-span-1">
+                    <FormItem className="col-span-1">
                       <FormLabel>
                         Is de hoeveelheid stemmen publiek zichtbaar?
                       </FormLabel>
@@ -143,7 +143,7 @@ export default function ProjectSettingsVoting() {
                   control={form.control}
                   name="isActive"
                   render={({ field }) => (
-                    <FormItem className="col-span-full lg:col-span-1">
+                    <FormItem className="col-span-1">
                       <FormLabel>Is het mogelijk om te stemmen?</FormLabel>
                       <Select
                         onValueChange={(e: string) =>
@@ -196,7 +196,7 @@ export default function ProjectSettingsVoting() {
                   control={form.control}
                   name="requiredUserRole"
                   render={({ field }) => (
-                    <FormItem className="col-span-full lg:col-span-1">
+                    <FormItem className="col-span-1">
                       <FormLabel>
                         Wat voor gebruikers hebben het recht om te stemmen?
                       </FormLabel>
@@ -225,7 +225,7 @@ export default function ProjectSettingsVoting() {
                   control={form.control}
                   name="voteType"
                   render={({ field }) => (
-                    <FormItem className="col-span-full lg:col-span-1">
+                    <FormItem className="col-span-1">
                       <FormLabel>
                         Wat voor type stemmen wordt er gebruikt?
                       </FormLabel>
@@ -257,7 +257,7 @@ export default function ProjectSettingsVoting() {
                   control={form.control}
                   name="minIdeas"
                   render={({ field }) => (
-                    <FormItem className="col-span-full lg:col-span-1">
+                    <FormItem className="col-span-1">
                       <FormLabel>
                         Wat is de minimum hoeveelheid ideeën waar iemand op kan
                         stemmen?
@@ -273,7 +273,7 @@ export default function ProjectSettingsVoting() {
                   control={form.control}
                   name="maxIdeas"
                   render={({ field }) => (
-                    <FormItem className="col-span-full lg:col-span-1">
+                    <FormItem className="col-span-1">
                       <FormLabel>
                         Wat is de maximum hoeveelheid ideeën waar iemand op kan
                         stemmen?

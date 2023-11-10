@@ -81,11 +81,11 @@ export default function BegrootmoduleExplanation() {
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Uitleg</Heading>
+        <Heading size="xl">Authenticatie</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 lg:w-1/2">
+          className="lg:w-1/2 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="step1"

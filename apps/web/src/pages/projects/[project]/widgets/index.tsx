@@ -38,9 +38,6 @@ export default function ProjectWidgets() {
                 Toegevoegd op
               </ListHeading>
               <ListHeading className="hidden md:flex">Gewijzigd op</ListHeading>
-              <ListHeading className="hidden md:flex">
-                Verwijderd op
-              </ListHeading>
             </div>
 
             <ul>
@@ -55,14 +52,11 @@ export default function ProjectWidgets() {
                       </strong>
                       <Paragraph>{widget.description}</Paragraph>
                     </div>
-                    <Paragraph className="hidden md:flex my-auto">
+                    <Paragraph className="hidden md:flex truncate my-auto">
                       {widget.createdAt}
                     </Paragraph>
-                    <Paragraph className="hidden md:flex my-auto">
+                    <Paragraph className="hidden md:flex truncate my-auto">
                       {widget.updatedAt}
-                    </Paragraph>
-                    <Paragraph className="hidden md:flex my-auto">
-                      {widget.deletedAt}
                     </Paragraph>
                   </li>
                 </Link>

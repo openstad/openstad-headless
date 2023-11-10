@@ -78,7 +78,7 @@ export default function WidgetResourceFormRole() {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-3/4 grid grid-cols-2 gap-4">
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-3/4">
           <FormField
             control={form.control}
             name="roleLabel"
@@ -155,7 +155,7 @@ export default function WidgetResourceFormRole() {
             control={form.control}
             name="roleFieldType"
             render={({ field }) => (
-              <FormItem className="col-span-2 lg:w-fit">
+              <FormItem>
                 <FormLabel>
                   Wat voor type veld wordt hiervoor gebruikt?
                 </FormLabel>

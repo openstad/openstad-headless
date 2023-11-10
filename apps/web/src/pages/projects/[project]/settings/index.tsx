@@ -117,7 +117,7 @@ export default function ProjectSettings() {
                       fieldName="endDate"
                       label="Einddatum"
                     />
-                    <Button className="mt-4 w-fit" type="submit">
+                    <Button className="w-fit col-span-full" type="submit">
                       Opslaan
                     </Button>
                   </form>

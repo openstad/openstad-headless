@@ -104,11 +104,11 @@ export default function BegrootmoduleSorting() {
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Sorteer opties</Heading>
+        <Heading size="xl">Sorteer Opties</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 w-fit lg:w-96">
+          className="lg:w-3/4 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="sorting"
@@ -117,7 +117,7 @@ export default function BegrootmoduleSorting() {
                 <div>
                   <FormLabel>Selecteer uw gewenste sorteeropties</FormLabel>
                 </div>
-                <div className="grid grid-cols-2 gap-y-2 gap-x-10">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-2 gap-x-4">
                   {sorting.map((item) => (
                     <FormField
                       key={item.id}

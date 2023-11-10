@@ -148,18 +148,18 @@ export default function IdeaForm({ onFormSubmit }: Props) {
   }, [existingData]);
 
   return (
-    <div className="container mx-auto py-10 w-1/2 float-left ">
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          {id ? 'Idee • Aanpassen' : 'Idee • Toevoegen'}
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Heading size="xl">{id ? 'Aanpassen' : 'Toevoegen'}</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="lg:w-2/3 grid grid-cols-3 gap-4 lg:auto-rows-fit">
           <FormField
             control={form.control}
             name="userId"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full lg:col-span-2 lg:pr-40">
                 <FormLabel>User id van het plan (optioneel)</FormLabel>
                 <FormControl>
                   <Input
@@ -175,7 +175,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="extraData.originalId"
             render={({ field }) => (
-              <FormItem>
+              col-span-1 lg:-ml-40">
                 <FormLabel>
                   Plan id van het originele plan (optioneel)
                 </FormLabel>
@@ -195,7 +195,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="title"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>Titel</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
@@ -208,10 +208,10 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="summary"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full lg:col-span-2 lg:pr-40">
                 <FormLabel>Samenvatting</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="" {...field} />
+                  <Textarea rows={6} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -221,10 +221,10 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="description"
             render={({ field }) => (
-              <FormItem>
+              col-span-1 lg:-ml-40">
                 <FormLabel>Beschrijving</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="" {...field} />
+                  <Textarea rows={6} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -235,7 +235,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="budgetMin"
             render={({ field }) => (
-              <FormItem>
+              col-span-1">
                 <FormLabel>Minimum budget (optioneel)</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
@@ -249,7 +249,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="budgetMax"
             render={({ field }) => (
-              <FormItem>
+              col-span-1">
                 <FormLabel>Maximum budget (optioneel)</FormLabel>
                 <FormControl>
                   <Input type="number" min={0} placeholder="" {...field} />
@@ -263,7 +263,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="budgetInterval"
             render={({ field }) => (
-              <FormItem>
+              col-span-1">
                 <FormLabel>Interval budget (optioneel)</FormLabel>
                 <FormControl>
                   <Input type="number" min={0} placeholder="" {...field} />
@@ -277,7 +277,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="location"
             render={({ field }) => (
-              <FormItem>
+              col-span-1">
                 <FormLabel>Locatie (optioneel)</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
@@ -291,7 +291,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="modBreak"
             render={({ field }) => (
-              <FormItem>
+              col-span-1">
                 <FormLabel>ModBreak (optioneel)</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
@@ -305,7 +305,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
             control={form.control}
             name="modBreakUserId"
             render={({ field }) => (
-              <FormItem>
+              col-span-1">
                 <FormLabel>ModBreak user id (optioneel)</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
@@ -314,36 +314,36 @@ export default function IdeaForm({ onFormSubmit }: Props) {
               </FormItem>
             )}
           />
-
-          <SimpleCalendar
-            form={form}
-            fieldName="modBreakDate"
-            label="ModBreak datum (optioneel)"
-            placeholder="Kies een datum"
-            withReset
-          />
-
-          <SimpleCalendar
-            form={form}
-            fieldName="startDate"
-            label="Startdatum van het plan"
-          />
-
-          <SimpleCalendar
-            form={form}
-            fieldName="publishDate"
-            label="Publiceer datum van het plan (laat leeg voor een concept plan)"
-            withReset
-          />
-
-          <Separator />
-          <div className="py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
+          <div className="mt-auto col-span-full lg:col-span-1">
+            <SimpleCalendar
+              form={form}
+              fieldName="modBreakDate"
+              label="ModBreak datum (optioneel)"
+              placeholder="Kies een datum"
+              withReset
+            />
           </div>
+
+          <div className="mt-auto col-span-full lg:col-span-1">
+            <SimpleCalendar
+              form={form}
+              fieldName="startDate"
+              label="Startdatum van het plan"
+            />
+          </div>
+          <div className="mt-auto col-span-full lg:col-span-1">
+            <SimpleCalendar
+              form={form}
+              fieldName="publishDate"
+              label="Publiceer datum van het plan (laat leeg voor een concept plan)"
+              withReset
+            />
+          </div>
+
+          <Button className="w-fit col-span-full" type="submit">
+            Opslaan
+          </Button>
         </form>
-        <br />
       </Form>
     </div>
   );

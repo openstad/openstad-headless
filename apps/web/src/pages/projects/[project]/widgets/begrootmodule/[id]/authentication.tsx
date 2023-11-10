@@ -60,7 +60,7 @@ export default function BegrootmoduleAuthentication() {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 lg:w-1/2">
+          className="lg:w-1/2 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="authEmbedded"

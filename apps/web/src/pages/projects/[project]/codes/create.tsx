@@ -58,18 +58,18 @@ export default function ProjectCodeCreate() {
         ]}
         action={
           <div className="flex">
-            <Link href="/projects/1/codes/export" className="pl-6">
+            <Link href="/projects/1/codes/export">
               <Button variant="default">Exporteer stemcodes</Button>
             </Link>
           </div>
         }>
-        <div className="p-6 bg-white rounded-md container m-6">
+        <div className="p-6 bg-white rounded-md">
           <Form {...form}>
-            <Heading size="xl" className="mb-4">
-              Stemcodes • Toevoegen
-            </Heading>
-            <Separator className="mb-4" />
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <Heading size="xl">Toevoegen</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="lg:w-3/4 grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="numberOfCodes"
@@ -85,13 +85,10 @@ export default function ProjectCodeCreate() {
                   </FormItem>
                 )}
               />
-              <div className="py-4 bg-background border-t border-border flex flex-col">
-                <Button className="self-end" type="submit">
-                  Opslaan
-                </Button>
-              </div>
+              <Button className="w-fit col-span-full" type="submit">
+                Opslaan
+              </Button>
             </form>
-            <br />
           </Form>
         </div>
       </PageLayout>

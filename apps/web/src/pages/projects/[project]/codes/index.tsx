@@ -29,29 +29,33 @@ export default function ProjectCodes() {
           },
         ]}
         action={
-          <div className="flex">
+          <div className="flex flex-row w-full md:w-auto my-auto">
             <Link href="/projects/1/codes/create">
-              <Button variant="default">
-                <Plus size="20" />
+              <Button variant="default" className="text-xs p-2 w-fit">
+                <Plus size="20" className="hidden md:flex" />
                 Stemcodes toevoegen
               </Button>
             </Link>
-            <Link href="/projects/1/codes/export" className="pl-6">
-              <Button variant="default">Exporteer stemcodes</Button>
+            <Link href="/projects/1/codes/export" className="ml-2">
+              <Button variant="default" className="text-xs p-2 w-fit">
+                Exporteer stemcodes
+              </Button>
             </Link>
           </div>
         }>
-        <div className="container mx-auto py-10">
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 border-b border-border">
-            <ListHeading className="hidden md:flex md:col-span-3">
-              ID
-            </ListHeading>
-            <ListHeading className="hidden md:flex md:col-span-2">
-              Code
-            </ListHeading>
-            <ListHeading className="hidden md:flex md:col-span-2">
-              Al gebruikt
-            </ListHeading>
+        <div className="container py-6">
+          <div className="p-6 bg-white rounded-md">
+            <div className="grid grid-cols-6 items-center py-2 px-2 border-b border-border">
+              <ListHeading className="hidden md:flex md:col-span-2 truncate">
+                ID
+              </ListHeading>
+              <ListHeading className="hidden md:flex md:col-span-1 truncate">
+                Code
+              </ListHeading>
+              <ListHeading className="hidden md:flex md:col-span-1 truncate">
+                Al gebruikt
+              </ListHeading>
+            </div>
           </div>
         </div>
       </PageLayout>

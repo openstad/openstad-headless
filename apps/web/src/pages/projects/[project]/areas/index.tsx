@@ -28,34 +28,31 @@ export default function ProjectAreas() {
         ]}
         action={
           <Link href={`/projects/${project}/areas/create`}>
-            <Button variant="default">
-              <Plus size="20" />
+            <Button variant="default" className="flex w-fit">
+              <Plus size="20" className="hidden lg:flex" />
               Gebied toevoegen
             </Button>
           </Link>
         }>
-        <div className="container mx-auto ">
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-2 px-2 border-b border-border">
-            <ListHeading className="hidden md:flex md:col-span-2">
-              ID
-            </ListHeading>
-            <ListHeading className="hidden md:flex md:col-span-2">
-              Naam
-            </ListHeading>
+        <div className="container py-6">
+          <div className="p-6 bg-white rounded-md">
+            <div className="grid grid-cols-1 lg:grid-cols-2 items-center py-2 px-2 border-b border-border">
+              <ListHeading className="hidden md:flex">ID</ListHeading>
+              <ListHeading className="hidden md:flex">Naam</ListHeading>
+            </div>
+
+            <ul>
+              {data?.map((area: any) => (
+                <li className="grid grid-cols-1 lg:grid-cols-2 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                  <Paragraph className="hidden md:flex truncate">
+                    {area.id}
+                  </Paragraph>
+                  <Paragraph className="flex truncate">{area.name}</Paragraph>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
-        <ul className="container mx-auto">
-          {data?.map((area: any) => (
-            <li className="grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
-              <Paragraph className="hidden md:flex md:col-span-2">
-                {area.id}
-              </Paragraph>
-              <Paragraph className="hidden md:flex md:col-span-2">
-                {area.name}
-              </Paragraph>
-            </li>
-          ))}
-        </ul>
       </PageLayout>
     </div>
   );

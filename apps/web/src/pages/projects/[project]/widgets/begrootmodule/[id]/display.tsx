@@ -70,12 +70,12 @@ export default function BegrootmoduleDisplay() {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="w-fit grid grid-cols-2 gap-4">
+          className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="displayRanking"
             render={({ field }) => (
-              <FormItem className="col-span-full lg:col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>Weergeef de ranking</FormLabel>
                 <Select
                   onValueChange={(e: string) => field.onChange(e === 'true')}
@@ -98,7 +98,7 @@ export default function BegrootmoduleDisplay() {
             control={form.control}
             name="displayPriceLabel"
             render={({ field }) => (
-              <FormItem className="col-span-full lg:col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>Weergeef de prijslabel</FormLabel>
                 <Select
                   onValueChange={(e: string) => field.onChange(e === 'true')}
@@ -121,7 +121,7 @@ export default function BegrootmoduleDisplay() {
             control={form.control}
             name="showVoteCount"
             render={({ field }) => (
-              <FormItem className="col-span-full lg:col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>Weergeef de hoeveelheid stemmen</FormLabel>
                 <Select
                   onValueChange={(e: string) => field.onChange(e === 'true')}
@@ -144,7 +144,7 @@ export default function BegrootmoduleDisplay() {
             control={form.control}
             name="unavailableButton"
             render={({ field }) => (
-              <FormItem className="col-span-full lg:col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>Onbeschikbare buttons</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -157,7 +157,7 @@ export default function BegrootmoduleDisplay() {
             control={form.control}
             name="originalIdea"
             render={({ field }) => (
-              <FormItem className="col-span-full lg:col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>Display de URL van het originele idee</FormLabel>
                 <Select
                   onValueChange={(e: string) => field.onChange(e === 'true')}
@@ -180,7 +180,7 @@ export default function BegrootmoduleDisplay() {
             control={form.control}
             name="originalIdeaUrl"
             render={({ field }) => (
-              <FormItem className="col-span-full lg:col-span-1">
+              <FormItem className="col-span-1">
                 <FormLabel>
                   URL waar het idee oorspronkelijk vandaan is gehaald
                 </FormLabel>

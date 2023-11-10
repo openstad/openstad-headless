@@ -3,6 +3,9 @@ import { PageLayout } from '../../../components/ui/page-layout';
 
 import { Button } from '../../../components/ui/button';
 import { Checkbox } from '../../../components/ui/checkbox';
+import { Heading } from '@/components/ui/typography';
+import { Separator } from '@/components/ui/separator';
+import { Label } from '@/components/ui/label';
 
 export default function ProjectExport() {
   return (
@@ -19,28 +22,33 @@ export default function ProjectExport() {
             url: '/projects/export',
           },
         ]}>
-        <div className='p-6 bg-white rounded-md container m-6'>
-          <p>De volgende gegevens worden altijd geëxporteerd.</p>
-          <p>- Oauth gegevens</p>
-          <br />
-          <p>
-            Selecteer extra elementen die je zou willen toevoegen aan de
-            geëxporteerde waarden.
-          </p>
-          <br />
-          <div className="items-top flex space-x-2">
-            <Checkbox id="CMS" />
-            <div className="grid gap-1.5 leading-none">
-              <label htmlFor="CMS" className="text-sm font-medium leading-none">
-                CMS toevoegingen
-              </label>
+        <div className="container py-6">
+          <div className="p-6 bg-white rounded-md">
+            <Heading size="xl">Exporteren</Heading>
+            <Separator className="my-4" />
+            <div className="grid grid-cols-2 gap-4 w-fit">
+              <div className="col-span-full">
+                <div>
+                  De volgende gegevens worden altijd geëxporteerd.
+                  <ul className="list-disc">
+                    <li className="ml-4">Oauth gegevens</li>
+                  </ul>
+                </div>
+                <div className="mt-4">
+                  Selecteer extra elementen die je zou willen toevoegen aan de
+                  geëxporteerde waarden.
+                </div>
+              </div>
+              <div className="col-span-full flex flex-row">
+                <Checkbox id="CMS" />
+                <Label htmlFor="CMS" className="my-auto ml-2">
+                  CMS toevoegingen
+                </Label>
+              </div>
+              <Button className="w-fit col-span-full mt-4" type="submit">
+                Opslaan
+              </Button>
             </div>
-          </div>
-          <br />
-          <div className="py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Exporteer
-            </Button>
           </div>
         </div>
       </PageLayout>

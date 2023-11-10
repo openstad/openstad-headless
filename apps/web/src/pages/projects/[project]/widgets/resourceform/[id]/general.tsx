@@ -79,7 +79,7 @@ export default function WidgetResourceFormGeneral() {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-3/4 grid grid-cols-2 gap-4">
+          className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="resource"
@@ -169,7 +169,7 @@ export default function WidgetResourceFormGeneral() {
             control={form.control}
             name="organiseForm"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="mt-auto">
                 <FormLabel>
                   Hoe moeten de velden van het formulier opgesteld worden?
                 </FormLabel>

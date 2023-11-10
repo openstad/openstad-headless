@@ -88,8 +88,8 @@ export function CreateWidgetDialog({ projectId }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default">
-          <Plus size="20" />
+        <Button className="flex w-fit">
+          <Plus size="20" className="hidden lg:flex" />
           Widget toevoegen
         </Button>
       </DialogTrigger>

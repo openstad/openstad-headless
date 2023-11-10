@@ -22,28 +22,22 @@ export default function Users() {
         ]}
         action={<CreateUserDialog />}>
         <div className="container mx-auto py-10">
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-2 px-2 border-b border-border">
-            <ListHeading className="hidden md:flex md:col-span-2">
-              ID
-            </ListHeading>
-            <ListHeading className="hidden md:flex md:col-span-2">
-              E-mail
-            </ListHeading>
-            <ListHeading className="hidden md:flex md:col-span-2">
-              Displaynaam
-            </ListHeading>
+          <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 md:grid-cols-12 items-center py-2 px-2 border-b border-border">
+            <ListHeading className="hidden md:flex">ID</ListHeading>
+            <ListHeading className="hidden md:flex">E-mail</ListHeading>
+            <ListHeading className="hidden md:flex">Displaynaam</ListHeading>
           </div>
           <ul>
             {data?.map((user: any) => (
               <Link href={`/users/${user.id}`} key={user.id}>
-                <li className="grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
-                  <Paragraph className="hidden md:flex md:col-span-2">
+                <li className="grid grid-cols-1 lg:grid-cols-2 md:grid-cols-12 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                  <Paragraph className="hidden md:flex truncate">
                     {user.id}
                   </Paragraph>
-                  <Paragraph className="hidden md:flex md:col-span-2">
+                  <Paragraph className="hidden md:flex truncate">
                     {user.email}
                   </Paragraph>
-                  <Paragraph className="hidden md:flex md:col-span-2">
+                  <Paragraph className="hidden md:flex truncate">
                     {user.displayName}
                   </Paragraph>
                 </li>

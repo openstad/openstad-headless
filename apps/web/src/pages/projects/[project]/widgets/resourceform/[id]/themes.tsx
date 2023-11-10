@@ -70,7 +70,7 @@ export default function WidgetResourceFormThemes() {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-3/4 grid grid-cols-2 gap-4">
+          className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="themesLabel"

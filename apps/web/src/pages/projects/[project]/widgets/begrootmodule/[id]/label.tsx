@@ -63,12 +63,12 @@ export default function BegrootmoduleLabels() {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-1/2 grid grid-cols-2 gap-4">
+          className="lg:w-1/2 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="labelOpen"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-1">
                 <FormLabel>Label voor foto: OPEN</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -81,7 +81,7 @@ export default function BegrootmoduleLabels() {
             control={form.control}
             name="labelClosed"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-1">
                 <FormLabel>Label voor foto: GESLOTEN</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -94,7 +94,7 @@ export default function BegrootmoduleLabels() {
             control={form.control}
             name="labelAccepted"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-1">
                 <FormLabel>Label voor foto: GEACCEPTEERD</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -107,7 +107,7 @@ export default function BegrootmoduleLabels() {
             control={form.control}
             name="labelDenied"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-1">
                 <FormLabel>Label voor foto: AFGEWEZEN</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -120,7 +120,7 @@ export default function BegrootmoduleLabels() {
             control={form.control}
             name="labelBusy"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-1">
                 <FormLabel>Label voor foto: BEZIG</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -133,7 +133,7 @@ export default function BegrootmoduleLabels() {
             control={form.control}
             name="labelDone"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-1">
                 <FormLabel>Label voor foto: AFGEROND</FormLabel>
                 <FormControl>
                   <Input {...field} />
