@@ -1,7 +1,7 @@
 import { PageLayout } from '../../../../components/ui/page-layout';
 import { Button } from '../../../../components/ui/button';
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
+import { ChevronRight, Plus } from 'lucide-react';
 import React from 'react';
 import useIdeas from '@/hooks/use-ideas';
 import { useRouter } from 'next/router';
@@ -42,42 +42,41 @@ export default function ProjectIdeas() {
         }>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
-            <div className="grid grid-cols-5 items-center py-2 px-2 border-b border-border">
-              <ListHeading className="hidden md:flex">Ideeën</ListHeading>
-              <ListHeading className="hidden md:flex md:col-span-1">
+            <div className="grid grid-cols-2 lg:grid-cols-6 items-center py-2 px-2 border-b border-border">
+              <ListHeading className="hidden lg:flex">Ideeën</ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1">
                 Gestemd op ja
               </ListHeading>
-              <ListHeading className="hidden md:flex md:col-span-1">
+              <ListHeading className="hidden lg:flex lg:col-span-1">
                 Gestemd op nee
               </ListHeading>
-              <ListHeading className="hidden md:flex md:col-span-1">
+              <ListHeading className="hidden lg:flex lg:col-span-1">
                 Datum aangemaakt
               </ListHeading>
-              <ListHeading className="hidden md:flex md:col-span-1 ml-auto">
-                Idee verwijderen
-              </ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
             </div>
             <ul>
               {data?.map((idea: any) => (
                 <Link
                   href={`/projects/${project}/ideas/${idea.id}`}
                   key={idea.id}>
-                  <li className="grid grid-cols-5 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
-                    <div className="my-auto">
-                      <Paragraph>{idea.title}</Paragraph>
-                    </div>
-                    <Paragraph className="hidden md:flex truncate my-auto">
+                  <li className="grid grid-cols-2 lg:grid-cols-6 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                    <Paragraph className="my-auto -mr-16 lg:mr-0">
+                      {idea.title}
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate my-auto">
                       {idea.yes || 0}
                     </Paragraph>
-                    <Paragraph className="hidden md:flex truncate my-auto">
+                    <Paragraph className="hidden lg:flex truncate my-auto">
                       {idea.no || 0}
                     </Paragraph>
-                    <Paragraph className="hidden md:flex truncate my-auto">
+                    <Paragraph className="hidden lg:flex truncate my-auto lg:-mr-16">
                       {idea.createDateHumanized}
                     </Paragraph>
+
                     <div
-                      className="hidden md:flex ml-auto"
-                      onClick={(e) => e.stopPropagation()}>
+                      className="hidden lg:flex ml-auto"
+                      onClick={(e) => e.preventDefault()}>
                       <RemoveResourceDialog
                         header="Idee verwijderen"
                         message="Weet je zeker dat je dit idee wilt verwijderen?"
@@ -92,6 +91,12 @@ export default function ProjectIdeas() {
                         }
                       />
                     </div>
+                    <Paragraph className="flex">
+                      <ChevronRight
+                        strokeWidth={1.5}
+                        className="w-5 h-5 my-auto ml-auto"
+                      />
+                    </Paragraph>
                   </li>
                 </Link>
               ))}
