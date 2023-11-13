@@ -1,7 +1,6 @@
 import { SecondaryButton } from '@openstad-headless/ui/src/button/index.js';
 import { Image } from '@openstad-headless/ui/src/image/index.js';
 import { Spacer } from '@openstad-headless/ui/src/spacer/index.js';
-import { useState } from 'react';
 
 export function Verify({
   designUrl,

@@ -1,6 +1,10 @@
 import { Spacer } from '@openstad-headless/ui/src/spacer/index.js';
 import { Image } from '@openstad-headless/ui/src/image/index.js';
 import { useState } from 'react';
+import {
+  Button,
+  SecondaryButton,
+} from '@openstad-headless/ui/src/button/index.js';
 
 export function DesignPicker({
   imageSources,
@@ -30,6 +34,12 @@ export function DesignPicker({
                 setSelected(index);
                 onImageSelected && onImageSelected(value);
               }}
+              imageFooter={
+                <>
+                  <Button>Lees meer</Button>
+                  <SecondaryButton>Stem</SecondaryButton>
+                </>
+              }
             />
           ))}
         </div>

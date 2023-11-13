@@ -5,6 +5,7 @@
     border-radius: 4px;
     background-color: #212529;
     box-sizing: border-box;
+    position: relative;
 
 }
 
@@ -17,3 +18,18 @@
     height: 100%;
 }
 
+.openstad-image-container > .openstad-image-footer {
+    display: flex;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    
+    gap: 1rem;
+    box-sizing: border-box;
+    padding: 1rem 1rem;
+
+}
+
+.openstad-image-footer > * {
+    flex-grow: 1;
+}

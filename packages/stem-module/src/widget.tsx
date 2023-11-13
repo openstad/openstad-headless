@@ -10,8 +10,18 @@ function Widget({ config }: { config: {} }) {
   const steps = ['Kies', 'Verificatie', 'Bevestig'];
   const [step, setStep] = useState<number>(0);
   const [chosenDesign, setDesign] = useState<string>();
-
   const [showDone, show] = useState<boolean>(false);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const design = urlParams.get('design');
+  const usedCode = urlParams.get('usedCode');
+  const codeVerified = urlParams.get('codeVerified');
+
+  console.log({ design, usedCode, codeVerified });
+
+  if (design && usedCode && codeVerified && step !== 2) {
+    setStep(2);
+  }
 
   return (
     <>
@@ -51,7 +61,7 @@ function Widget({ config }: { config: {} }) {
             ) : null}
 
             {step === steps.length - 1 ? (
-              <SecondaryButton onClick={() => setStep(step + 1)}>
+              <SecondaryButton onClick={() => window.location.reload()}>
                 Klaar
               </SecondaryButton>
             ) : null}
