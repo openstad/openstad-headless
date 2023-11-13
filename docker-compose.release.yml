@@ -1,0 +1,17 @@
+version: '3.4'
+services:
+  openstad-api-server:
+    build:
+      target: release
+
+  openstad-auth-server:
+    build:
+      target: release
+
+  openstad-image-server:
+    build:
+      target: release
+
+  openstad-admin-server:
+    build:
+      target: release

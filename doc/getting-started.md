@@ -30,7 +30,7 @@ You can re-run this command, but you may want to read the [notes](#Notes) first.
 ### 3. Docker compose
 
 ```
-docker-compose -f docker-compose.development.yml --env-file .env.docker up --build
+docker-compose up --build
 ```
 
 ### 4. What to expect
@@ -75,7 +75,7 @@ To connect directly to the database use
 mysql -h 127.0.0.1 -u root -p
 ```
 
-You can find the password in the `.env.docker` file
+You can find the password in the `.env` file
 
 ### More configuration options
 
@@ -109,7 +109,7 @@ IMAGE_DB_NAME=
 Try deleting your existing containers and volumes:
 
 ```
-docker-compose -f docker-compose.development.yml down -v
+docker-compose down -v
 ```
 
 ### ToDo's
