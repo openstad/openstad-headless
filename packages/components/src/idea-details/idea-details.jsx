@@ -4,7 +4,6 @@ import DataStore from '../data-store';
 import LikeButtons from '../voting/like-buttons';
 import Error from '../error';
 
-
 // TODO: op verzoek van Daan; gaan we dat gebruiken?
 // TODO: dit moet, sort of, passen op NLDS
 import { cva } from "class-variance-authority";
@@ -47,13 +46,6 @@ const IdeaDetails = function(props) {
 
   const [ currentUser, currentUserError, currentUserIsLoading ] = datastore.useCurrentUser({ ...props });
   const [ idea, ideaError, ideaIsLoading ] = datastore.useIdea({ ...props });
-
-  let errorHTML = null;
-  let error = ideaError;
-  if (error) {
-    console.log(error);
-    errorHTML = <div className="osc-error-block">{error.message}</div>
-  }
 
   let ideaHTML = null;
   if (idea) {
