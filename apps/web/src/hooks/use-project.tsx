@@ -11,6 +11,18 @@ export function useProject() {
       : null
   );
 
+  async function createProject(name: string) {
+    await fetch('/api/openstad/api/project', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name,
+      }),
+    });
+  }
+
   async function updateProject(config: any, name?: any) {
     if (name) {
       const res = await fetch(`/api/openstad/api/project/${projectId}`, {
@@ -65,6 +77,7 @@ export function useProject() {
 
   return {
     ...projectSwr,
+    createProject,
     updateProject,
     updateProjectEmails,
     anonymizeUsersOfProject,
