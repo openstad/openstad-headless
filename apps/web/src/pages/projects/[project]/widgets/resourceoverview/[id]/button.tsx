@@ -56,13 +56,13 @@ export default function WidgetResourceOverviewButton() {
   }, [widget]);
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Resource Overview • Knop teksten
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Heading size="xl">Knop teksten</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="lg:w-1/2 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="textHoverImage"
@@ -100,9 +100,7 @@ export default function WidgetResourceOverviewButton() {
             name="fieldUsedForTitle"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Veld dat gebruikt wordt als titel van een idee.
-                </FormLabel>
+                <FormLabel>Titel tekst van een idee</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -110,11 +108,9 @@ export default function WidgetResourceOverviewButton() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button className="w-fit col-span-full" type="submit">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>

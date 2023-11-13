@@ -1,7 +1,12 @@
-import { Trash } from 'lucide-react';
+import { MoreHorizontal, Trash } from 'lucide-react';
 import { Button } from './ui/button';
 import { Heading } from '@/components/ui/typography';
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -33,15 +38,21 @@ export function RemoveResourceDialog({
   return (
     <Dialog open={open} modal={true} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            setOpen(true);
-          }}
-          variant="destructive">
-          <Trash size="20" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="focus:outline-none">
+            <MoreHorizontal clasName="h-5 w-5" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="center">
+            <DropdownMenuItem
+              onClick={(e: Event) => {
+                e.preventDefault();
+                setOpen(true);
+              }}
+              className="text-xs">
+              <Trash className="mr-2 h-4 w-4" /> Verwijder idee
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </DialogTrigger>
       <DialogContent
         onEscapeKeyDown={(e: KeyboardEvent) => {

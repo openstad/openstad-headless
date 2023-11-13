@@ -428,10 +428,16 @@ router.route('/:userId(\\d+)')
     try {
 
       let updatedUserData = merge(true, userData, { id: user.idpUser && user.idpUser.identifier });
-            
+
       if (req.adapter.service.updateUser) {
         updatedUserData = await req.adapter.service.updateUser({ authConfig: req.authConfig, userData: merge(true, userData, { id: user.idpUser && user.idpUser.identifier }) });
-        delete updatedUserData.nickName // TODO: these updates should not be done for fields that can be different per project. For now: nickName
+      }
+
+      // user updates should not be done on certain project specific fields
+      let synchronizedUpdatedUserData = merge.recursive({}, updatedUserData);
+      let userProjectSpecificFields = ['nickName', 'role']; // todo: dit moet natuurlijk niet hier, maar dat is nu minder relevant
+      for (let userProjectSpecificField of userProjectSpecificFields) {
+        delete synchronizedUpdatedUserData[ userProjectSpecificField ];
       }
 
       let apiUsers = await db.User
@@ -443,9 +449,10 @@ router.route('/:userId(\\d+)')
             }
           })
       for (let apiUser of apiUsers) {
+        let data = apiUser.projectId == req.params.projectId ? updatedUserData : synchronizedUpdatedUserData;
         let result = await apiUser
-            .authorizeData(updatedUserData, 'update', req.user)
-            .update(updatedUserData)
+            .authorizeData(data, 'update', req.user)
+            .update(data)
       };
 
       let result = await db.User

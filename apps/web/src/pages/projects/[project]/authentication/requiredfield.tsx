@@ -53,13 +53,13 @@ export default function ProjectAuthenticationRequiredFields() {
             url: '/projects/1/authentication/requiredfield',
           },
         ]}>
-        <div className="container mx-auto py-10 w-1/2 float-left">
-          <Form {...form}>
-            <Heading size="xl" className="mb-4">
-              Authenticatie • Verplichte velden
-            </Heading>
-            <Separator className="mb-4" />
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="container py-6">
+          <Form {...form} className="p-6 bg-white rounded-md">
+            <Heading size="xl">Verplichte velden</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 lg:w-1/2">
               <FormField
                 control={form.control}
                 name="title"
@@ -78,7 +78,7 @@ export default function ProjectAuthenticationRequiredFields() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descriptie</FormLabel>
+                    <FormLabel>Beschrijving</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>
@@ -91,7 +91,7 @@ export default function ProjectAuthenticationRequiredFields() {
                 name="buttonText"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Button Text</FormLabel>
+                    <FormLabel>Knoptekst</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
@@ -104,7 +104,7 @@ export default function ProjectAuthenticationRequiredFields() {
                 name="helpText"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Hulptext</FormLabel>
+                    <FormLabel>Hulptekst</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>
@@ -112,11 +112,8 @@ export default function ProjectAuthenticationRequiredFields() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" variant={'default'}>
-                Opslaan
-              </Button>
+              <Button type="submit">Opslaan</Button>
             </form>
-            <br />
           </Form>
         </div>
       </PageLayout>

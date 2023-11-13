@@ -36,24 +36,24 @@ export default function WidgetIdeasMap() {
             url: `/projects/${projectId}/widgets/ideasmap/${id}`,
           },
         ]}>
-        <div>
+        <div className="container py-6">
           <Tabs defaultValue="map">
-            <TabsList className="w-full">
+            <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="map">Map</TabsTrigger>
               <TabsTrigger value="button">Call-To-Action knop</TabsTrigger>
               <TabsTrigger value="counter">Teller</TabsTrigger>
               <TabsTrigger value="content">Content</TabsTrigger>
             </TabsList>
-            <TabsContent value="map" className="w-1/2">
+            <TabsContent value="map" className="p-0">
               <WidgetIdeasMapMaps />
             </TabsContent>
-            <TabsContent value="button" className="w-1/2">
+            <TabsContent value="button" className="p-0">
               <WidgetIdeasMapButton />
             </TabsContent>
-            <TabsContent value="counter" className="w-1/2">
+            <TabsContent value="counter" className="p-0">
               <WidgetIdeasMapCounter />
             </TabsContent>
-            <TabsContent value="content" className="w-1/2">
+            <TabsContent value="content" className="p-0">
               <WidgetIdeasMapContent />
             </TabsContent>
           </Tabs>

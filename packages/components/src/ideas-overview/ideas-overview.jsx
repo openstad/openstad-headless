@@ -39,6 +39,7 @@ const IdeasOverview = function(props) {
 
   props = merge.recursive({}, {
     title: 'Ideas overview',
+    onIdeaClick: onIdeaClick,
   }, props.config,  props);
 
   const datastore = new DataStore(props);
@@ -46,6 +47,10 @@ const IdeasOverview = function(props) {
   const [ currentUser, currentUserError, currentUserIsLoading ] = datastore.useCurrentUser({ ...props });
   const [ tags, tagsError, tagsIsLoading ] = datastore.useTags({ ...props });
   const [ ideas, ideasError, ideasIsLoading ] = datastore.useIdeas({ ...props });
+
+  function onIdeaClick(e, idea) {
+    console.log('ONIDEACLICK', idea.id);
+  }
 
   let titleHTML = props.title ? <h3>{ props.title }</h3> : null;
 
@@ -63,7 +68,7 @@ const IdeasOverview = function(props) {
       <>
         { ideas.map( ( idea, index ) => {
           return (
-            <div key={`osc-idea-${ index }`}>
+            <div onClick={e => props.onIdeaClick(e, idea)} key={`osc-idea-${ index }`}>
               {idea.title} ({ idea.tags && idea.tags.map( ( tag, jndex ) => tag.name).join(', ') })
             </div>
           );

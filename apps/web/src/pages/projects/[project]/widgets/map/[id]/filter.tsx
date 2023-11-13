@@ -60,13 +60,15 @@ export default function WidgetMapFilter() {
   }, [widget]);
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl" className="mb-4">
-          Map • Filterbalk
+          Filterbalk
         </Heading>
         <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
             name="searchLocations"
@@ -92,11 +94,7 @@ export default function WidgetMapFilter() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useVotes from '@/hooks/use-votes';
+import { ChevronRight } from 'lucide-react';
 
 export default function ProjectIdeas() {
   const router = useRouter();
@@ -26,39 +27,51 @@ export default function ProjectIdeas() {
             url: `/projects/${project}/votes`,
           },
         ]}>
-        <div className="container mx-auto py-10">
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 py-2 px-2 border-b border-border">
-            <ListHeading className="hidden md:flex md:col-span-3">
-              Stem ID
-            </ListHeading>
-            <ListHeading className="hidden md:flex md:col-span-2">
-              Stemdatum
-            </ListHeading>
-            <ListHeading className="hidden md:flex md:col-span-2">
-              Plan ID
-            </ListHeading>
-            <ListHeading className="hidden md:flex md:col-span-2">
-              Gebruiker ID
-            </ListHeading>
+        <div className="container py-6">
+          <div className="p-6 bg-white rounded-md">
+            <div className="grid grid-cols-1 lg:grid-cols-7 items-center py-2 px-2 border-b border-border">
+              <ListHeading className="hidden lg:flex lg:col-span-2">
+                Stem ID
+              </ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-2">
+                Stemdatum
+              </ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1">
+                Plan ID
+              </ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1">
+                Gebruiker ID
+              </ListHeading>
+            </div>
+            <ul>
+              {data?.map((vote: any) => (
+                <li className="grid grid-cols-3 lg:grid-cols-7 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                  <div className="col-span-2 truncate">
+                    <Paragraph>{vote.id}</Paragraph>
+                  </div>
+                  <Paragraph className="hidden lg:flex truncate lg:col-span-2">
+                    {vote.createdAt}
+                  </Paragraph>
+                  <Paragraph className="hidden lg:flex truncate lg:col-span-1">
+                    {vote.ideaId}
+                  </Paragraph>
+                  <Paragraph className="hidden lg:flex truncate lg:col-span-1 -mr-16">
+                    {vote.userId}
+                    <ChevronRight
+                      strokeWidth={1.5}
+                      className="w-5 h-5 my-auto ml-auto"
+                    />
+                  </Paragraph>
+                  <Paragraph className="flex">
+                    <ChevronRight
+                      strokeWidth={1.5}
+                      className="w-5 h-5 my-auto ml-auto"
+                    />
+                  </Paragraph>
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul>
-            {data?.map((vote: any) => (
-              <li className="grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
-                <div className="col-span-3">
-                  <Paragraph>{vote.id}</Paragraph>
-                </div>
-                <Paragraph className="hidden md:flex md:col-span-2">
-                  {vote.createdAt}
-                </Paragraph>
-                <Paragraph className="hidden md:flex md:col-span-2">
-                  {vote.ideaId}
-                </Paragraph>
-                <Paragraph className="hidden md:flex md:col-span-3">
-                  {vote.userId}
-                </Paragraph>
-              </li>
-            ))}
-          </ul>
         </div>
       </PageLayout>
     </div>

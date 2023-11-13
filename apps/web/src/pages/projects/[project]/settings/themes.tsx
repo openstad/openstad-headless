@@ -46,23 +46,23 @@ export default function ProjectSettingsThemes() {
             url: '/projects/1/settings',
           },
           {
-            name: 'Themas en gebieden',
+            name: "Thema's en gebieden",
             url: '/projects/1/settings/themes',
           },
         ]}>
-        <div className="container mx-auto py-10 w-1/2 float-left">
-          <Form {...form}>
-            <Heading size="xl" className="mb-4">
-              Instellingen • Themas en gebieden
-            </Heading>
-            <Separator className="mb-4" />
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="container py-6">
+          <Form {...form} className="p-6 bg-white rounded-md">
+            <Heading size="xl">Thema's en gebieden</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="lg:w-fit grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
                 name="themes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{`Thema's (Onderscheiden door kommas)`}</FormLabel>
+                    <FormLabel>Thema's (Onderscheiden door kommas)</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
@@ -83,11 +83,8 @@ export default function ProjectSettingsThemes() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" variant={'default'}>
-                Opslaan
-              </Button>
+              <Button type="submit">Opslaan</Button>
             </form>
-            <br />
           </Form>
         </div>
       </PageLayout>

@@ -30,24 +30,24 @@ export default function WidgetArguments() {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Arguments',
+            name: 'Argumenten',
             url: `/projects/${projectId}/widgets/arguments/${id}`,
           },
         ]}>
-        <div>
+        <div className="container py-6">
           <Tabs defaultValue="general">
-            <TabsList className="w-full">
+            <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="list">Lijst</TabsTrigger>
               <TabsTrigger value="form">Formulier</TabsTrigger>
             </TabsList>
-            <TabsContent value="general" className="w-1/2">
+            <TabsContent value="general" className="p-0">
               <ArgumentsGeneral />
             </TabsContent>
-            <TabsContent value="list" className="w-1/2">
+            <TabsContent value="list" className="p-0">
               <ArgumentsList />
             </TabsContent>
-            <TabsContent value="form" className="w-1/2">
+            <TabsContent value="form" className="p-0">
               <ArgumentsForm />
             </TabsContent>
           </Tabs>

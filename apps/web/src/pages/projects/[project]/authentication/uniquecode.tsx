@@ -55,13 +55,13 @@ export default function ProjectAuthenticationUniqueCode() {
             url: '/projects/1/authentication/uniquecode',
           },
         ]}>
-        <div className="container mx-auto py-10 w-1/2 float-left">
-          <Form {...form}>
-            <Heading size="xl" className="mb-4">
-              Authenticatie • Unieke codes
-            </Heading>
-            <Separator className="mb-4" />
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="container py-6">
+          <Form {...form} className="p-6 bg-white rounded-md">
+            <Heading size="xl">Unieke codes</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 lg:w-1/2">
               <FormField
                 control={form.control}
                 name="title"
@@ -80,7 +80,7 @@ export default function ProjectAuthenticationUniqueCode() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descriptie</FormLabel>
+                    <FormLabel>Beschrijving</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>
@@ -106,7 +106,7 @@ export default function ProjectAuthenticationUniqueCode() {
                 name="buttonText"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Button Text</FormLabel>
+                    <FormLabel>Knoptekst</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
@@ -119,7 +119,7 @@ export default function ProjectAuthenticationUniqueCode() {
                 name="helpText"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Hulptext</FormLabel>
+                    <FormLabel>Hulptekst</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>
@@ -132,7 +132,7 @@ export default function ProjectAuthenticationUniqueCode() {
                 name="errorMessage"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Error melding</FormLabel>
+                    <FormLabel>Foutmelding</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>
@@ -140,11 +140,8 @@ export default function ProjectAuthenticationUniqueCode() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" variant={'default'}>
-                Opslaan
-              </Button>
+              <Button type="submit">Opslaan</Button>
             </form>
-            <br />
           </Form>
         </div>
       </PageLayout>

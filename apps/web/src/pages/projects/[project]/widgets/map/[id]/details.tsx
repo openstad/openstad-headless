@@ -89,18 +89,18 @@ export default function WidgetMapDetails() {
   }, [widget]);
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Map • Idee details
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Heading size="xl">Idee details</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
           <FormField
             control={form.control}
             name="template"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>Metadata regel template</FormLabel>
                 <FormControl>
                   <Textarea {...field} />
@@ -127,7 +127,9 @@ export default function WidgetMapDetails() {
             name="displayShare"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Worden de share buttons weergegeven?</FormLabel>
+                <FormLabel>
+                  Worden de socialmedia deelknoppen weergegeven?
+                </FormLabel>
                 <Select
                   onValueChange={(e: string) => field.onChange(e === 'true')}
                   value={field.value ? 'true' : 'false'}>
@@ -149,9 +151,9 @@ export default function WidgetMapDetails() {
             control={form.control}
             name="selectableOptions"
             render={() => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <div>
-                  <FormLabel>Selecteer uw gewenste sorteeropties</FormLabel>
+                  <FormLabel>Selecteer uw gewenste deelopties</FormLabel>
                 </div>
                 {selectableOptions.map((item) => (
                   <FormField
@@ -188,11 +190,9 @@ export default function WidgetMapDetails() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button type="submit" className="w-fit col-span-full">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>

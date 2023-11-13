@@ -72,18 +72,20 @@ export default function WidgetMapReaction() {
   }, [widget]);
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl" className="mb-4">
-          Map • Reacties
+          Reacties
         </Heading>
         <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-1/2">
           <FormField
             control={form.control}
             name="displayReactions"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>Weergave</FormLabel>
                 <Select
                   onValueChange={(e: string) => field.onChange(e === 'true')}
@@ -107,7 +109,7 @@ export default function WidgetMapReaction() {
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Title boven de reacties</FormLabel>
+                <FormLabel>Titel boven de reacties</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -145,7 +147,7 @@ export default function WidgetMapReaction() {
             control={form.control}
             name="idNonActiveReactions"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>
                   IDs van ideeën waar reacties niet actief voor zijn.
                 </FormLabel>
@@ -184,11 +186,9 @@ export default function WidgetMapReaction() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button type="submit" className="w-fit col-span-full">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>

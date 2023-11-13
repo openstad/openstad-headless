@@ -1,7 +1,7 @@
 import { PageLayout } from '../../../../components/ui/page-layout';
 import { Button } from '../../../../components/ui/button';
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
+import { ChevronRight, Plus } from 'lucide-react';
 import React from 'react';
 import useIdeas from '@/hooks/use-ideas';
 import { useRouter } from 'next/router';
@@ -19,83 +19,89 @@ export default function ProjectIdeas() {
   return (
     <div>
       <PageLayout
-        pageHeader="Plannen"
+        pageHeader="Ideeën"
         breadcrumbs={[
           {
             name: 'Projecten',
             url: '/projects',
           },
           {
-            name: 'Plannen',
+            name: 'Ideeën',
             url: `/projects/${project}/ideas`,
           },
         ]}
         action={
-          <Link href={`/projects/${project}/ideas/create`}>
+          <Link
+            href={`/projects/${project}/ideas/create`}
+            className="flex w-fit">
             <Button variant="default">
-              <Plus size="20" />
-              Maak een idee aan
+              <Plus size="20" className="hidden lg:flex" />
+              Idee toevoegen
             </Button>
           </Link>
         }>
-        <div className="container mx-auto py-10">
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 py-2 px-2 border-b border-border">
-            <ListHeading className="hidden md:flex md:col-span-3">
-              Plannen
-            </ListHeading>
-            <ListHeading className="hidden md:flex md:col-span-2">
-              Ja
-            </ListHeading>
-            <ListHeading className="hidden md:flex md:col-span-2">
-              Nee
-            </ListHeading>
-            <ListHeading className="hidden md:flex md:col-span-3">
-              Datum aangemaakt
-            </ListHeading>
-            <ListHeading className="hidden md:flex md:col-span-2">
-              Plan verwijderen
-            </ListHeading>
-          </div>
+        <div className="container py-6">
+          <div className="p-6 bg-white rounded-md">
+            <div className="grid grid-cols-2 lg:grid-cols-6 items-center py-2 px-2 border-b border-border">
+              <ListHeading className="hidden lg:flex">Ideeën</ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1">
+                Gestemd op ja
+              </ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1">
+                Gestemd op nee
+              </ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1">
+                Datum aangemaakt
+              </ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
+            </div>
+            <ul>
+              {data?.map((idea: any) => (
+                <Link
+                  href={`/projects/${project}/ideas/${idea.id}`}
+                  key={idea.id}>
+                  <li className="grid grid-cols-2 lg:grid-cols-6 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                    <Paragraph className="my-auto -mr-16 lg:mr-0">
+                      {idea.title}
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate my-auto">
+                      {idea.yes || 0}
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate my-auto">
+                      {idea.no || 0}
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate my-auto lg:-mr-16">
+                      {idea.createDateHumanized}
+                    </Paragraph>
 
-          <ul>
-            {data?.map((idea: any) => (
-              <Link
-                href={`/projects/${project}/ideas/${idea.id}`}
-                key={idea.id}>
-                <li className="grid grid-cols-2 md:grid-cols-12 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
-                  <div className="col-span-3">
-                    <Paragraph>{idea.title}</Paragraph>
-                  </div>
-                  <Paragraph className="hidden md:flex md:col-span-2">
-                    {idea.yes || 0}
-                  </Paragraph>
-                  <Paragraph className="hidden md:flex md:col-span-2">
-                    {idea.no || 0}
-                  </Paragraph>
-                  <Paragraph className="hidden md:flex md:col-span-3">
-                    {idea.createDateHumanized}
-                  </Paragraph>
-                  <div
-                    className="hidden md:flex md:col-span-2"
-                    onClick={(e) => e.stopPropagation()}>
-                    <RemoveResourceDialog
-                      header="Plan verwijderen"
-                      message="Weet je zeker dat je dit plan wilt verwijderen?"
-                      onDeleteAccepted={() =>
-                        remove(idea.id)
-                          .then(() =>
-                            toast.success('Plan successvol verwijderd')
-                          )
-                          .catch((e) =>
-                            toast.error('Plan kon niet worden verwijderd')
-                          )
-                      }
-                    />
-                  </div>
-                </li>
-              </Link>
-            ))}
-          </ul>
+                    <div
+                      className="hidden lg:flex ml-auto"
+                      onClick={(e) => e.preventDefault()}>
+                      <RemoveResourceDialog
+                        header="Idee verwijderen"
+                        message="Weet je zeker dat je dit idee wilt verwijderen?"
+                        onDeleteAccepted={() =>
+                          remove(idea.id)
+                            .then(() =>
+                              toast.success('Idee successvol verwijderd')
+                            )
+                            .catch((e) =>
+                              toast.error('Idee kon niet worden verwijderd')
+                            )
+                        }
+                      />
+                    </div>
+                    <Paragraph className="flex">
+                      <ChevronRight
+                        strokeWidth={1.5}
+                        className="w-5 h-5 my-auto ml-auto"
+                      />
+                    </Paragraph>
+                  </li>
+                </Link>
+              ))}
+            </ul>
+          </div>
         </div>
       </PageLayout>
     </div>

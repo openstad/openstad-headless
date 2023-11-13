@@ -77,13 +77,13 @@ export default function ProjectSettingsNotifications() {
             url: `'/projects/${project}/settings/notifications'`,
           },
         ]}>
-        <div className="container mx-auto py-10 w-1/2 float-left">
-          <Form {...form}>
-            <Heading size="xl" className="mb-4">
-              Instellingen • Administrator notificaties
-            </Heading>
-            <Separator className="mb-4" />
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="container py-6">
+          <Form {...form} className="p-6 bg-white rounded-md">
+            <Heading size="xl">Administrator notificaties</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="lg:w-fit grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
                 name="fromAddress"
@@ -110,11 +110,8 @@ export default function ProjectSettingsNotifications() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" variant={'default'}>
-                Opslaan
-              </Button>
+              <Button type="submit">Opslaan</Button>
             </form>
-            <br />
           </Form>
         </div>
       </PageLayout>

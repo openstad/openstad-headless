@@ -56,13 +56,13 @@ export default function ProjectAuthenticationLoginMail() {
             url: '/projects/1/authentication/loginmail',
           },
         ]}>
-        <div className="container mx-auto py-10 w-1/2 float-left">
-          <Form {...form}>
-            <Heading size="xl" className="mb-4">
-              Authenticatie • Login mail
-            </Heading>
-            <Separator className="mb-4" />
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="container py-6">
+          <Form {...form} className="p-6 bg-white rounded-md">
+            <Heading size="xl">Login e-mail</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 lg:w-1/2">
               <FormField
                 control={form.control}
                 name="title"
@@ -81,7 +81,7 @@ export default function ProjectAuthenticationLoginMail() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descriptie</FormLabel>
+                    <FormLabel>Beschrijving</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>
@@ -107,7 +107,7 @@ export default function ProjectAuthenticationLoginMail() {
                 name="buttonText"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Button Text</FormLabel>
+                    <FormLabel>Knoptekst</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
@@ -120,7 +120,7 @@ export default function ProjectAuthenticationLoginMail() {
                 name="helpText"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Hulptext</FormLabel>
+                    <FormLabel>Hulptekst</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>
@@ -154,11 +154,8 @@ export default function ProjectAuthenticationLoginMail() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" variant={'default'}>
-                Opslaan
-              </Button>
+              <Button type="submit">Opslaan</Button>
             </form>
-            <br />
           </Form>
         </div>
       </PageLayout>

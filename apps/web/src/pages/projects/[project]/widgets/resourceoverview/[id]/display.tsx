@@ -77,13 +77,13 @@ export default function WidgetResourceOverviewDisplay() {
   }, [widget]);
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Resource Overview • Display
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Heading size="xl">Display</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="displayTitle"
@@ -252,7 +252,7 @@ export default function WidgetResourceOverviewDisplay() {
             name="displayShareButtons"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Share kfalseppen weergeven</FormLabel>
+                <FormLabel>Deel knoppen weergeven</FormLabel>
                 <Select
                   onValueChange={(e: string) => field.onChange(e === 'true')}
                   value={field.value ? 'true' : 'false'}>
@@ -293,11 +293,9 @@ export default function WidgetResourceOverviewDisplay() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button className="w-fit col-span-full" type="submit">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>
