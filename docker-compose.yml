@@ -168,7 +168,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - APP=admin-server
+        - APP=web
         - PORT=${ADMIN_PORT}
     image: openstad/headless-admin-server:${RELEASE_VERSION:-latest}
     container_name: openstad-admin-server
@@ -185,8 +185,8 @@ services:
     ports:
       - '${ADMIN_PORT}:${ADMIN_PORT}'
     volumes:
-      - ./apps/admin-server:/opt/openstad-headless/apps/admin-server
-      - openstad-admin-server-node_modules:/opt/openstad-headless/apps/admin-server/node_modules
+      - ./apps/web:/opt/openstad-headless/apps/web
+      - openstad-admin-server-node_modules:/opt/openstad-headless/apps/web/node_modules
 
 volumes:
   openstad-mysql-data: {}
