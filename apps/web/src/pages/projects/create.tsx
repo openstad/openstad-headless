@@ -16,7 +16,6 @@ import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { SimpleCalendar } from '@/components/simple-calender-popup';
 import { useProject } from '@/hooks/use-project';
 
 const formSchema = z.object({
@@ -34,7 +33,6 @@ export default function CreateProject() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log('a')
     createProject(values.projectName)
   }
 
