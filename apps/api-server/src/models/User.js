@@ -420,7 +420,7 @@ module.exports = function (db, sequelize, DataTypes) {
             }
           ],
         }
-        let attributes = [ 'projectId', 'role' ];
+        let attributes = [ 'id', 'projectId', 'role' ];
         return {where, attributes};
       },
 
