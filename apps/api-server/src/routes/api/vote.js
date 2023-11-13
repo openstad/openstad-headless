@@ -7,11 +7,12 @@ const merge       = require('merge');
 const bruteForce = require('../../middleware/brute-force');
 const {Op} = require('sequelize');
 const pagination = require('../../middleware/pagination');
+const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const router = express.Router({mergeParams: true});
 
 const userhasModeratorRights = (user) => {
-	return user && user.role === 'admin';
+  hasRole( user, 'admin' )
 }
 
 // basis validaties
@@ -38,25 +39,15 @@ router.route('*')
 	.all(function(req, res, next) {
 		if (req.method == 'GET') return next(); // nvt
 
-		let hasModeratorRights = userhasModeratorRights(req.user);
-
 		if (!req.user) {
 			return next(createError(401, 'Geen gebruiker gevonden'));
 		}
 
-		if (req.project.config.votes.requiredUserRole == 'anonymous' && ( req.user.role == 'anonymous' || req.user.role == 'member' || hasModeratorRights )) {
-			return next();
-		}
+    if (!hasRole( req.user, req.project.config.votes.requiredUserRole ))
+		  return next(createError(401, 'Je mag niet stemmen op dit project'));
 
-		if (req.project.config.votes.requiredUserRole == 'member' && ( req.user.role == 'member' || hasModeratorRights )) {
-			return next();
-		}
+    return next();
 
-		if (req.project.config.votes.requiredUserRole == 'admin' && ( hasModeratorRights )) {
-			return next();
-		}
-
-		return next(createError(401, 'Je mag niet stemmen op deze project'));
 	})
 
   // scopes
