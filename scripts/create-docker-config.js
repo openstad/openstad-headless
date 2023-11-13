@@ -112,7 +112,7 @@ ADMIN_SECRET=${process.env.ADMIN_SECRET}
     console.log(`
 Config is created.
 You can now build and run a docker environment using the command.
-docker-compose --env-file .env up --build
+docker-compose up --build
    
 Once that is running you can visit the servers on these urls:
 List ideas: ${process.env.API_URL}/api/project/1/idea
