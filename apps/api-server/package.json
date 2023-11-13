@@ -4,7 +4,6 @@
   "description": "OpenStad API server",
   "main": "server.js",
   "scripts": {
-    "build": "echo 'no build script'",
     "start": "node migrate.js && node server.js",
     "predev": "./scripts/predev.sh",
     "dev": "nodemon server.js",
