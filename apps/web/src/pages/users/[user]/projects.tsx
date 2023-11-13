@@ -70,8 +70,7 @@ export default function CreateUserProjects() {
       console.log(rbp)
       //update
       updateUser(
-        "7",
-        user.email,
+        "8",
         rbp.projectId,
         rbp.role
       );

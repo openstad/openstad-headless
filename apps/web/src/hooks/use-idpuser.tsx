@@ -30,7 +30,6 @@ export default function useIdpUser(identifier: string, provider: string) {
 
   async function updateUser(
     id: string,
-    email: string,
     projectId?: string,
     role?: string,
   ) {
@@ -41,10 +40,10 @@ export default function useIdpUser(identifier: string, provider: string) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        email,
         role,
       }),
     });
+
     // const data = await res.json();
 
     // IdpUserSwr.mutate(data);
