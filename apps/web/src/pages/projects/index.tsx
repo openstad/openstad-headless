@@ -1,7 +1,7 @@
 import { PageLayout } from '@/components/ui/page-layout';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
+import { ChevronRight, Plus } from 'lucide-react';
 import React from 'react';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { useRouter } from 'next/router';
@@ -46,7 +46,7 @@ export default function Projects() {
         }>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
-            <div className="grid grid-cols-1 lg:grid-cols-10 items-center py-2 px-2 border-b border-border">
+            <div className="grid grid-cols-1 lg:grid-cols-11 items-center py-2 px-2 border-b border-border">
               {headers.map((header) => (
                 <ListHeading className="hidden lg:flex" key={header}>
                   {header}
@@ -57,7 +57,7 @@ export default function Projects() {
               {data.map((project: any) => {
                 return (
                   <li
-                    className="grid grid-cols-1 lg:grid-cols-10 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
+                    className="grid grid-cols-2 lg:grid-cols-11 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
                     key={project.id}
                     onClick={(d) => {
                       router.push(`${router.asPath}/${project.id}/widgets`);
@@ -87,8 +87,14 @@ export default function Projects() {
                     <Paragraph className="hidden lg:flex truncate">
                       Stemmen
                     </Paragraph>
-                    <Paragraph className="hidden lg:flex truncate">
+                    <Paragraph className="hidden lg:flex truncate -mr-16">
                       {project?.config?.project?.endDate}
+                    </Paragraph>
+                    <Paragraph className="flex">
+                      <ChevronRight
+                        strokeWidth={1.5}
+                        className="w-5 h-5 my-auto ml-auto"
+                      />
                     </Paragraph>
                   </li>
                 );
