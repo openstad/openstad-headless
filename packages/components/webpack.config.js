@@ -81,6 +81,15 @@ module.exports = {
       },
     },
 
+    'participative-budgeting': {
+      import: './src/participative-budgeting/index.jsx',
+      filename: 'participative-budgeting.js',
+      library: {
+        name: 'OS20',
+        type: 'assign-properties',
+      },
+    },
+
     'user': {
       import: './src/user/index.jsx',
       filename: 'user.js',

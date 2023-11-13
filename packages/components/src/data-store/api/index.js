@@ -4,6 +4,7 @@ import comments from './comments';
 import ideas from './ideas';
 import tags from './tags';
 import user from './user';
+import userVote from './user-vote';
 
 window.OpenStadAPI = null;
 export default function singelton(props = { config: {} }) {
@@ -48,6 +49,11 @@ function API(props = { config: {} }) {
     fetch: user.fetch.bind(self),
     fetchMe: user.fetchMe.bind(self),
     connectUser: user.connectUser.bind(self),
+  }
+
+  self.userVote = {
+    fetch: userVote.fetch.bind(self),
+    submitVote: userVote.submitVote.bind(self),
   }
   
 };

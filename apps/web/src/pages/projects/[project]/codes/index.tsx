@@ -1,11 +1,11 @@
 import { PageLayout } from '@/components/ui/page-layout';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
+import { ChevronRight, Plus } from 'lucide-react';
 import useSWR from 'swr';
 import React from 'react';
 import { useRouter } from 'next/router';
-import { ListHeading } from '@/components/ui/typography';
+import { ListHeading, Paragraph } from '@/components/ui/typography';
 
 export default function ProjectCodes() {
   const router = useRouter();
@@ -45,17 +45,26 @@ export default function ProjectCodes() {
         }>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
-            <div className="grid grid-cols-6 items-center py-2 px-2 border-b border-border">
-              <ListHeading className="hidden md:flex md:col-span-2 truncate">
-                ID
-              </ListHeading>
-              <ListHeading className="hidden md:flex md:col-span-1 truncate">
-                Code
-              </ListHeading>
-              <ListHeading className="hidden md:flex md:col-span-1 truncate">
+            <div className="grid grid-cols-1 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
+              <ListHeading className="hidden lg:flex truncate">ID</ListHeading>
+              <ListHeading className="flex truncate">Code</ListHeading>
+              <ListHeading className="hidden lg:flex truncate">
                 Al gebruikt
               </ListHeading>
             </div>
+            <ul>
+              <li className="grid grid-cols-2 lg:grid-cols-4 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                <Paragraph className="hidden lg:flex truncate">{}</Paragraph>
+                <Paragraph className="hidden lg:flex truncate">{}</Paragraph>
+                <Paragraph className="flex truncate -mr-16">{}</Paragraph>
+                <Paragraph className="flex">
+                  <ChevronRight
+                    strokeWidth={1.5}
+                    className="w-5 h-5 my-auto ml-auto"
+                  />
+                </Paragraph>
+              </li>
+            </ul>
           </div>
         </div>
       </PageLayout>

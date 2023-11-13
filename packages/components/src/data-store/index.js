@@ -8,6 +8,7 @@ import useComments from './hooks/use-comments.js';
 import useIdeas from './hooks/use-ideas.js';
 import useTags from './hooks/use-tags.js';
 import useCurrentUser from './hooks/use-current-user.js';
+import useUserVote from './hooks/use-user-vote.js';
 
 window.OpenStadSWR = window.OpenStadSWR || {}; // keys used, for forced updates
 
@@ -23,6 +24,7 @@ export default function DataStore(props = { config: {} }) {
   self.useIdeas = useIdeas.bind(self);
   self.useTags = useTags.bind(self);
   self.useCurrentUser = useCurrentUser.bind(self);
+  self.useUserVote = useUserVote.bind(self);
 
   // current user
   const [ currentUser, currentUserError, currentUserIsLoading ] = self.useCurrentUser({ ...props, projectId: self.projectId });
