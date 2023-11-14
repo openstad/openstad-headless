@@ -1,9 +1,12 @@
 import 'remixicon/fonts/remixicon.css';
 import { ProgressBar } from '@openstad-headless/ui/src';
+import SessionStorage from '../../lib/session-storage.js';
+import DataStore from '@openstad-headless/data-store/src';
 import useSWR, { Fetcher } from 'swr';
 import { useEffect, useState } from 'react';
 import './likes.css';
 import loadWidget from '../../lib/load-widget.js';
+import hasRole from '../../lib/has-role';
 
 type Props = {
   projectId?: string;
@@ -25,39 +28,44 @@ function Likes(props: Props) {
   const apIurl = props.apiUrl || props.config.api?.url;
   const necessaryVotes = props?.config?.votesNeeded || 50;
 
-  const [yesVotes, setYesVotes] = useState<number>(100);
-  const [noVotes, setNoVotes] = useState<number>(0);
+  const datastore = new DataStore(props);
+  const session = new SessionStorage(props);
 
-  const fetcher: Fetcher<{ yes: number; no: number }> = async (url: string) => {
-    if (projectId && ideaId) {
-      const endpoint = `${
-        url || ''
-      }/api/project/${projectId}/idea/${ideaId}?includeVoteCount=1&includeUserVote=1`;
+  const [currentUser, currentUserError, currentUserIsLoading] = datastore.useCurrentUser({ ...props });
+  const [idea, ideaError, ideaIsLoading] = datastore.useIdea({ ...props });
+  const [isBusy, setIsBusy] = useState(false)
 
-      const result = await fetch(endpoint, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      return result.json();
+  async function doVote(e, value) {
+
+    if (e) e.stopPropagation();
+
+    if (isBusy) return;
+    setIsBusy(true);
+
+    if (!props.config.votes.isActive) {
+      return;
     }
-    return undefined;
-  };
 
-  const { data } = useSWR<{ yes: number; no: number }>(apIurl, fetcher);
-
-  useEffect(() => {
-    if (data) {
-      const yes = data.yes;
-      const no = data.no;
-      setYesVotes(yes);
-      setNoVotes(no);
+    if (!currentUser.role || !hasRole(currentUser, props.config.votes.requiredUserRole)) {
+      // login
+      session.set('osc-idea-vote-pending', { [idea.id]: value });
+      return document.location.href = props.config.login.url;
     }
-  }, [data]);
+
+    let change = {};
+    if (idea.userVote) change[idea.userVote.opinion] = -1;
+
+    await idea.submitLike({
+      opinion: value
+    })
+
+    setIsBusy(false);
+
+  }
 
   return (
     <>
-      <div id="like-widget-container">
+      <div id="like-widget-container" onClick={e => doVote(e, 'yes')}>
         <h3 className="like-widget-title">Likes</h3>
         <div className="like-option">
           <section className="like-kind">
@@ -67,11 +75,11 @@ function Likes(props: Props) {
 
           <section className="like-counter">
             <p>
-              {yesVotes < 10 ? yesVotes.toString().padStart(2, '0') : yesVotes}
+              {idea.yes < 10 ? idea.yes.toString().padStart(2, '0') : idea.yes}
             </p>
           </section>
         </div>
-        <div className="like-option">
+        <div className="like-option" onClick={e => doVote(e, 'no')}>
           <section className="like-kind">
             <i className="ri-thumb-down-line"></i>
             <div>Tegen</div>
@@ -79,15 +87,15 @@ function Likes(props: Props) {
 
           <section className="like-counter">
             <p>
-              {noVotes < 10 ? noVotes.toString().padStart(2, '0') : noVotes}
+              {idea.no < 10 ? idea.no.toString().padStart(2, '0') : idea.no}
             </p>
           </section>
         </div>
 
         <div className="progressbar-container">
-          <ProgressBar progress={(yesVotes / necessaryVotes) * 100} />
+          <ProgressBar progress={(idea.yes / necessaryVotes) * 100} />
           <p className="progressbar-counter">
-            {yesVotes} /{necessaryVotes}
+            {idea.yes} /{necessaryVotes}
           </p>
         </div>
       </div>
