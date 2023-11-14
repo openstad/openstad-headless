@@ -1,10 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './widget.js';
-import './index.css';
+import Widget from './widget.js';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <Widget />
   </React.StrictMode>
 );

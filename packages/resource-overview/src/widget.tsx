@@ -1,35 +1,70 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import './widget.css';
+import React from 'react';
+import { Banner } from '@openstad-headless/ui/src';
+import { Spacer } from '@openstad-headless/ui/src';
 
-function App() {
-  const [count, setCount] = useState(0)
+type Props = {
+  title?: string;
+  renderHeader?: (resources?: Array<any>) => React.JSX.Element;
+  renderItem?: (resource: any) => React.JSX.Element;
+  onItemClick?: (resource: any) => void;
+  allowFiltering?: boolean;
+  resources: Array<any>;
+};
 
+//Temp
+const defaultHeaderRenderer = (resources?: any) => {
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Banner>
+        <Spacer size={24} />
+      </Banner>
     </>
-  )
+  );
+};
+
+const defaultItemRenderer = (resource: any) => {
+  return (
+    <>
+      <p>item</p>
+    </>
+  );
+};
+
+const defaultOnItemClick = (resource: any) => {
+  console.log(resource);
+};
+
+function Widget({
+  title = 'Plannen',
+  renderHeader = defaultHeaderRenderer,
+  renderItem = defaultItemRenderer,
+  onItemClick = defaultOnItemClick,
+  allowFiltering,
+  resources = ['', '', '', ''],
+}: Props) {
+  return (
+    <>
+      {renderHeader()}
+      <section className="osc2-resource-overview-title-container">
+        <Spacer size={2} />
+        <h4>{title}</h4>
+      </section>
+
+      <Spacer size={2} />
+
+      <section className="osc2-resource-overview-content">
+        <section className="osc2-resource-overview-filters">
+          <h1>dsf</h1>
+        </section>
+        <section className="osc2-resource-overview-resource-collection">
+          {resources.map((resource) => {
+            return renderItem(resource);
+          })}
+        </section>
+      </section>
+    </>
+  );
 }
 
-export default App
+export default Widget;
