@@ -478,6 +478,14 @@ module.exports = async function seed(config, db) {
       opinion: 'yes',
     });
 
+    console.log('    a widget');
+    await db.Widget.create({
+      projectId: 2,
+      type: 'arguments',
+      description: 'An arguments widget',
+      config: {"general":{"ideaId":1,"sentiment":"for","isReplyingEnabled":true,"isVotingEnabled":true}},
+    });
+
     console.log('    a choices-guide');
     await db.ChoicesGuide.create({
       projectId: 4,
