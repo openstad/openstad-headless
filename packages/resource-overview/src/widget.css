@@ -6,12 +6,15 @@
 }
 
 .osc2-resource-overview-content {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
 }
 
 .osc2-resource-overview-filters {
 }
 
 .osc2-resource-overview-resource-collection {
-  flex-grow: 1;
+  display: grid;
+  grid-column-start: span 2;
+  grid-template-columns: 1fr 1fr;
 }

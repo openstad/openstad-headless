@@ -1,7 +1,8 @@
 import './widget.css';
 import React from 'react';
-import { Banner } from '@openstad-headless/ui/src';
+import { Banner, Icon } from '@openstad-headless/ui/src';
 import { Spacer } from '@openstad-headless/ui/src';
+import { Image } from '@openstad-headless/ui/src';
 
 type Props = {
   title?: string;
@@ -25,9 +26,20 @@ const defaultHeaderRenderer = (resources?: any) => {
 
 const defaultItemRenderer = (resource: any) => {
   return (
-    <>
-      <p>item</p>
-    </>
+    <article>
+      <Image />
+      <div>
+        <Spacer size={1} />
+        <h6>Zwemles voor mannen van 50+ in Aletta Jacobsbuurt</h6>
+        <p>
+          Veel mannen in de Aletta Jacobsbuurt van 50 jaar en ouder kunnen niet
+          zwemmen.
+        </p>
+      </div>
+      <div>
+        <Icon icon="ri-thumb-down-line" text="0" />
+      </div>
+    </article>
   );
 };
 

@@ -1,0 +1,7 @@
+.osc-2-icon {
+    display: flex;
+    flex-direction: column;
+    /* grid-template-columns: 1fr 4rem;
+    gap: .125rem; */
+    font-weight: 600;
+  }

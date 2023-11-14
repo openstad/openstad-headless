@@ -4,6 +4,6 @@ import Widget from './widget.js';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Widget />
+    <Widget resources={['dsaf', 's', 's']} />
   </React.StrictMode>
 );

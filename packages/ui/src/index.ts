@@ -4,3 +4,5 @@ export { Input } from './input';
 export { ProgressBar } from './progressbar';
 export { Spacer } from './spacer';
 export { DropDownMenu } from './dropdown';
+export { Image } from './image';
+export { Icon } from './icon';
