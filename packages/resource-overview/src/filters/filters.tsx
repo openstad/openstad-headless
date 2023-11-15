@@ -17,7 +17,7 @@ export function Filters({
   ideas,
   dataStore,
   tagTypes = [
-    { type: 'theme', placeholder: 'Selecteer een thema' },
+    { type: 'theme', placeholder: 'Selecteer een thema', multiple: true },
     { type: 'area', placeholder: 'Selecteer een gebied' },
   ],
   onUpdateFilter,
@@ -25,7 +25,7 @@ export function Filters({
 }: {
   ideas: any;
   dataStore: DataStore;
-  tagTypes?: Array<{ type: string; placeholder?: string }>;
+  tagTypes?: Array<{ type: string; placeholder?: string; multiple?: boolean }>;
   onUpdateFilter?: (filter: Filter) => void;
 } & BaseConfig) {
   const defaultFilter = { tags: {}, search: { text: '' } };
@@ -41,24 +41,22 @@ export function Filters({
   }
 
   function setTags(type, values) {
-    let newFilter = {
+    updateFilter({
       ...filter,
       tags: {
         ...filter.tags,
         [type]: values,
       },
-    };
-    updateFilter(newFilter);
+    });
   }
 
   function setSearch(value) {
-    let newFilter = {
+    updateFilter({
       ...filter,
       search: {
         text: value,
       },
-    };
-    updateFilter(newFilter);
+    });
   }
 
   return (
@@ -67,6 +65,7 @@ export function Filters({
         {tagTypes.map((tagType) => (
           <TagFilter
             {...props}
+            multiple={tagType.multiple}
             dataStore={dataStore}
             tagType={tagType.type}
             placeholder={tagType.placeholder}
@@ -76,7 +75,9 @@ export function Filters({
           />
         ))}
 
-        <SecondaryButton>Wis alles</SecondaryButton>
+        <SecondaryButton onClick={() => updateFilter(defaultFilter)}>
+          Wis alles
+        </SecondaryButton>
       </div>
     </section>
   );
