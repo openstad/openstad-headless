@@ -1,22 +1,17 @@
 import './widget.css';
 import React from 'react';
-import {
-  Banner,
-  Icon,
-  SecondaryButton,
-  Select,
-} from '@openstad-headless/ui/src';
+import { Banner, Icon } from '@openstad-headless/ui/src';
 import DataStore from '@openstad-headless/data-store/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import { Image } from '@openstad-headless/ui/src';
 import { BaseConfig } from '../../generic-widget-types';
+import { Filters } from './filters/filters';
 
 type Props = {
   title?: string;
   renderHeader?: (resources?: Array<any>) => React.JSX.Element;
   renderItem?: (resource: any) => React.JSX.Element;
   allowFiltering?: boolean;
-  resources: Array<any>;
 } & BaseConfig;
 
 //Temp
@@ -65,17 +60,13 @@ function Widget({
   renderHeader = defaultHeaderRenderer,
   renderItem = defaultItemRenderer,
   allowFiltering = true,
-  resources = ['', '', '', ''],
   ...props
 }: Props) {
-  const projectId = props.projectId || props.config?.projectId;
-  const ideaId = props.ideaId || props.config?.ideaId;
-  const apiUrl = props.apiUrl || props.config.api?.url;
+  // const projectId = props.projectId || props.config?.projectId;
+  // const ideaId = props.ideaId || props.config?.ideaId;
+  // const apiUrl = props.apiUrl || props.config.api?.url;
   const datastore = new DataStore(props);
-
   const [ideas, error, isLoading] = datastore.useIdeas({ ...props });
-
-  console.log({ ideas, error, isLoading });
 
   return (
     <>
@@ -87,68 +78,18 @@ function Widget({
 
       <Spacer size={2} />
 
-      <section className="osc2-resource-overview-content">
-        {allowFiltering ? (
-          <section>
-            <div className="osc2-resource-overview-filters">
-              <Select
-                options={[
-                  {
-                    label: 'Filter op themas',
-                    value: '',
-                  },
-                  {
-                    label: 'optie 1',
-                    value: 'optie 1',
-                  },
-                ]}
-                onValueChange={(resource) => console.log(resource)}
-              />
-
-              <Select
-                options={[
-                  {
-                    label: 'Filter op gebied',
-                    value: '',
-                  },
-                  {
-                    label: 'optie 1',
-                    value: 'optie 1',
-                  },
-                ]}
-                onValueChange={(resource) => console.log(resource)}
-              />
-
-              <Select
-                options={[
-                  {
-                    label: 'Filter op tag',
-                    value: '',
-                  },
-                  {
-                    label: 'optie 1',
-                    value: 'optie 1',
-                  },
-                ]}
-                onValueChange={(resource) => console.log(resource)}
-              />
-
-              <Select
-                options={[
-                  {
-                    label: 'Sorteer op',
-                    value: '',
-                  },
-                  {
-                    label: 'optie 1',
-                    value: 'optie 1',
-                  },
-                ]}
-                onValueChange={(resource) => console.log(resource)}
-              />
-              <SecondaryButton>Wis alles</SecondaryButton>
-            </div>
-          </section>
+      <section
+        className={`osc2-resource-overview-content ${
+          !allowFiltering ? 'full' : ''
+        }`}>
+        {allowFiltering && datastore ? (
+          <Filters
+            projectId={props.projectId}
+            config={props.config}
+            dataStore={datastore}
+            ideas={ideas}
+            onUpdateFilter={ideas.filter}
+          />
         ) : null}
 
         <section className="osc2-resource-overview-resource-collection">

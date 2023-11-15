@@ -16,9 +16,10 @@ export function Select(props: Props) {
       onChange={(e) =>
         props.onValueChange && props.onValueChange(e.target.value)
       }>
+      {props.children}
+
       {selectOptions.map((option) => (
         <>
-          {props.children}
           <option className="ocs-2-select-item" value={option.value}>
             {option.label}
           </option>

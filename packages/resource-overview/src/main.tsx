@@ -12,7 +12,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         projectId: import.meta.env.VITE_PROJECT_ID,
         ideaId: import.meta.env.VITE_IDEA_ID,
       }}
-      resources={['dsaf', 's', 's']}
     />
   </React.StrictMode>
 );

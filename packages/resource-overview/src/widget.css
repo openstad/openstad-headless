@@ -26,6 +26,12 @@
   gap: 2rem;
 }
 
+.osc2-resource-overview-content.full .osc2-resource-overview-resource-collection {  
+  grid-column-start: span 3;
+  grid-template-columns: 1fr 1fr 1fr;
+
+}
+
 .osc2-resource-overview-content-item-status {
   display: inline-block;
   margin: 0;
