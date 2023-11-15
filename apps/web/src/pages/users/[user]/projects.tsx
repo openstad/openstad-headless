@@ -15,26 +15,19 @@ const formSchema = z.object({
   email: z.string().email().optional(),
 });
 
-type ProjectRole = {
+type ProjectRoleTest = {
   projectId: string;
   role: string;
-};
+  id: string;
+}
 
 export default function CreateUserProjects() {
-  let projectRoles: Array<ProjectRole> = [];
+  let projectRolesNewlyAdded: Array<ProjectRoleTest> = [];
+  let projectRolesEdited: Array<ProjectRoleTest> = [];
+
   const { data, isLoading } = projectListSwr();
   const { data:user, isLoading:userLoading } = useUser();
-  //const { data:rolesByProject } =  useSWR(() => `/api/openstad/api/user?fromIdpUser=1&identifier=${user.idpUser.identifier}&provider=${user.idpUser.provider}`);
   const {data: rolesByProject, createUser, updateUser } = useIdpUser(user.idpUser.identifier, user.idpUser.provider);
-
-
-  // console.log({rolesByProject: typeof rolesByProject});
-
-  // if(!!rolesByProject) {
-  //   rolesByProject.forEach(roleByProject => {
-  //     projectRoles.push(roleByProject);
-  //   });
-  // }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -42,40 +35,47 @@ export default function CreateUserProjects() {
   });
 
   const addProject = (projectId: string, role: string) => {
-    const matchingProject = projectRoles.findIndex((obj) => obj.projectId == projectId);
-   
-    if (matchingProject >= 0) {
+    const roleByProject = rolesByProject.find((obj) => obj.projectId == projectId);
+    const existingInEditedProjectIndex = rolesByProject.findIndex((obj) => obj.projectId == projectId);
+    
+
+
+    if (existingInEditedProjectIndex >= 0) {
+      
       if (role === '0') {
-        projectRoles = projectRoles.filter(function (project) {
+        projectRolesEdited = projectRolesEdited.filter(function (project) {
           return project.projectId !== projectId;
         });
       } else {
-        projectRoles[matchingProject].role = role;
+
+        if(!projectRolesEdited[existingInEditedProjectIndex]) {
+          projectRolesEdited.push({id: roleByProject.id, projectId, role });
+        }
+        else {
+          const editIndex = projectRolesEdited.findIndex((obj) => obj.projectId == projectId) 
+          projectRolesEdited[editIndex].role = role;
+        }
       }
     } else {
       if (role !== '0') {
-        console.log("Add")
-        projectRoles.push({ projectId: projectId, role: role });
+        projectRolesNewlyAdded.push({ id: "0", projectId: projectId, role: role });
       }
     }
   };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const newlyAddedProjectRoles = projectRoles.filter(rbp => rolesByProject.findIndex(pr => pr.projectId === rbp.projectId) === -1);
-    const editedProjectRoles = projectRoles.filter(rbp => rolesByProject.findIndex(pr => pr.projectId === rbp.projectId));
-    console.log({editedProjectRoles})
+    console.log({projectRolesNewlyAdded})
 
-    
-    editedProjectRoles.forEach(rbp => {
-      console.log(rbp)
+    projectRolesEdited.forEach(rbp => {
       //update
       updateUser(
-        "8",
+        rbp.id,
         rbp.projectId,
         rbp.role
       );
     });
-    newlyAddedProjectRoles.forEach(rbp => {
+
+    projectRolesNewlyAdded.forEach(rbp => {
       //create
       createUser(
         user.email,
