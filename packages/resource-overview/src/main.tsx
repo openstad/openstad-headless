@@ -5,7 +5,6 @@ import Widget from './widget.js';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Widget
-      projectId="2"
       config={{
         api: {
           url: import.meta.env.VITE_API_URL,
