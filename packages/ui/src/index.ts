@@ -6,3 +6,5 @@ export { Spacer } from './spacer';
 export { DropDownMenu } from './dropdown';
 export { Image } from './image';
 export { Icon } from './icon';
+export { Select } from './select';
+export { MultiSelect } from './multiselect';

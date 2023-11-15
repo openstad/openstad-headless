@@ -8,13 +8,39 @@
 .osc2-resource-overview-content {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
+  gap: 2rem;
 }
 
 .osc2-resource-overview-filters {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: 1rem;
+  background-color: var(--card);
 }
 
 .osc2-resource-overview-resource-collection {
   display: grid;
   grid-column-start: span 2;
   grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.osc2-resource-overview-content-item-status {
+  display: inline-block;
+  margin: 0;
+  padding: .125rem .25rem;
+  border-radius: 2px;
+  background-color: var(--card);
+}
+
+.osc2-resource-overview-content-item-description {
+  max-height: 3rem;;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.osc2-resource-overview-content-item-footer {
+  display: flex;
+  gap: 1rem;
 }
