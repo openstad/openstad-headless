@@ -102,6 +102,14 @@ export function Filters({
           />
         ))}
 
+        <Select
+          options={[
+            { label: 'Datum (nieuw-oud)', value: 'date-desc' },
+            { label: 'Datum (oud-nieuw)', value: 'date-asc' },
+          ]}>
+          <option value={''}>Sorteer op</option>
+        </Select>
+
         <SecondaryButton
           onClick={() => {
             setSelected({});
