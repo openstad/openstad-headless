@@ -3,7 +3,6 @@
     width: 100%;
     aspect-ratio: 16/9;
     border-radius: 4px;
-    background-color: #212529;
     box-sizing: border-box;
     position: relative;
 
@@ -16,6 +15,8 @@
 .openstad-image-container > img {
     width: 100%;
     height: 100%;
+    background: #212529;
+    border-radius: 4px;
 }
 
 .openstad-image-container > .openstad-image-footer {
