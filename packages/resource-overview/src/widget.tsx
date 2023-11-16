@@ -14,7 +14,8 @@ type Props = {
   allowFiltering?: boolean;
 } & BaseConfig;
 
-//Temp
+//Temp: Header can only be made when the map works so for now a banner
+// If you dont want a banner pas <></> into the renderHeader prop
 const defaultHeaderRenderer = (resources?: any) => {
   return (
     <>

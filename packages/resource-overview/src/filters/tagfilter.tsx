@@ -10,13 +10,15 @@ export function TagFilter({
   dataStore,
   tagType,
   onUpdateFilter,
+  selected = [],
   ...props
 }: {
   dataStore: DataStore;
   tagType: string;
   placeholder?: string;
   multiple?: boolean;
-  onUpdateFilter?: (filter: Array<string>) => void;
+  selected?: string[];
+  onUpdateFilter?: (filter: string) => void;
 } & BaseConfig) {
   // The useTags function should not need the  config and such anymore, because it should get that from the datastore object. Perhaps a rewrite of the hooks is needed
   const [tags, tagsError, tagsIsLoading] = dataStore.useTags({
@@ -24,33 +26,25 @@ export function TagFilter({
     type: tagType,
   });
 
-  const [selectedOptions, setSelected] = useState<string[]>([]);
+  // Only for use when multiple is added
 
   return multiple ? (
     <MultiSelect
       label={props.placeholder || ''}
       onItemSelected={(value) => {
-        let selected = [...selectedOptions];
-
-        if (selected.includes(value)) {
-          selected = selected.filter((o) => o != value);
-        } else {
-          selected.push(value);
-        }
-        setSelected(selected);
-        onUpdateFilter && onUpdateFilter(selected);
+        onUpdateFilter && onUpdateFilter(value);
       }}
       options={(tags || []).map((tag) => ({
         value: tag.id,
         label: tag.name,
-        checked: selectedOptions.includes(tag.id),
+        checked: selected.includes(tag.id),
       }))}
     />
   ) : (
     <Select
       options={(tags || []).map((tag) => ({ value: tag.id, label: tag.name }))}
-      onValueChange={(resource) => {
-        onUpdateFilter && onUpdateFilter(resource === '' ? [] : [resource]);
+      onValueChange={(value) => {
+        onUpdateFilter && onUpdateFilter(value);
       }}>
       {props.placeholder ? (
         <option value={''}>{props.placeholder}</option>

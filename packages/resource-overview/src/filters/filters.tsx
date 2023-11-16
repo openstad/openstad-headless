@@ -1,8 +1,9 @@
-import { SecondaryButton, Select } from '@openstad-headless/ui/src';
+import { Input, SecondaryButton, Select } from '@openstad-headless/ui/src';
 import React, { useState } from 'react';
 import DataStore from '../../../components/src/data-store';
 import { BaseConfig } from '../../../generic-widget-types';
 import { TagFilter } from './tagfilter';
+import { useDebounce } from 'rooks';
 
 //Todo correctly type ideas. Will be possible when the datastore is correctly typed
 
@@ -34,6 +35,7 @@ export function Filters({
   });
 
   const [filter, setFilter] = useState(defaultFilter);
+  const [selectedOptions, setSelected] = useState<{}>({});
 
   function updateFilter(newFilter: Filter) {
     setFilter(newFilter);
@@ -50,6 +52,8 @@ export function Filters({
     });
   }
 
+  const search = useDebounce(setSearch, 300);
+
   function setSearch(value) {
     updateFilter({
       ...filter,
@@ -62,20 +66,44 @@ export function Filters({
   return (
     <section>
       <div className="osc2-resource-overview-filters">
+        <Input
+          onChange={(e) => search(e.target.value)}
+          className="osc2-resource-overview-search"
+          placeholder="Zoeken"
+        />
+
         {tagTypes.map((tagType) => (
           <TagFilter
             {...props}
+            selected={selectedOptions[tagType.type] || []}
             multiple={tagType.multiple}
             dataStore={dataStore}
             tagType={tagType.type}
             placeholder={tagType.placeholder}
-            onUpdateFilter={(updatedTags) => {
-              setTags(tagType.type, updatedTags);
+            onUpdateFilter={(updatedTag) => {
+              const existingTags = selectedOptions[tagType.type];
+              let selected = [...(existingTags || [])];
+
+              if (selected.includes(updatedTag)) {
+                selected = selected.filter((o) => o != updatedTag);
+              } else {
+                selected.push(updatedTag);
+              }
+              setSelected({ ...selectedOptions, [tagType.type]: selected });
+              setTags(tagType.type, selected);
             }}
           />
         ))}
 
-        <SecondaryButton onClick={() => updateFilter(defaultFilter)}>
+        <SecondaryButton
+          onClick={() => {
+            setSelected({});
+            updateFilter(defaultFilter);
+            const selects = document.querySelectorAll(
+              ':scope .osc2-resource-overview-filters select'
+            );
+            selects.forEach((select: any) => (select.selectedIndex = '0'));
+          }}>
           Wis alles
         </SecondaryButton>
       </div>
