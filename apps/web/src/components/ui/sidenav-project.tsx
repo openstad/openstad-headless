@@ -242,6 +242,15 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Dupliceren</span>
           </Button>
         </Link>
+        <Link href={`/projects/${project}/export`}>
+          <Button
+            variant={location.includes("/export") ? "secondary" : "ghost"}
+            className="w-full flex justify-start"
+            onClick={(e) => {}}
+          >
+            <span className="truncate">Exporteren</span>
+          </Button>
+        </Link>
       </div>
       <div className="flex-grow"></div>
     </nav>
