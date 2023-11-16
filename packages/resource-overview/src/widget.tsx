@@ -94,6 +94,7 @@ function Widget({
                 multiple: true,
               },
               { type: 'area', placeholder: 'Selecteer een gebied' },
+              { type: 'tag', placeholder: 'Selecteer een tag' },
             ]}
           />
         ) : null}

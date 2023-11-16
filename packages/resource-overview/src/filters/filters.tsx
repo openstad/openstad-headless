@@ -84,11 +84,18 @@ export function Filters({
               const existingTags = selectedOptions[tagType.type];
               let selected = [...(existingTags || [])];
 
-              if (selected.includes(updatedTag)) {
-                selected = selected.filter((o) => o != updatedTag);
+              if (updatedTag === '') {
+                // Only a regular select kan return a "".
+                // Remove the selection from the list
+                selected = [];
               } else {
-                selected.push(updatedTag);
+                if (selected.includes(updatedTag)) {
+                  selected = selected.filter((o) => o != updatedTag);
+                } else {
+                  selected.push(updatedTag);
+                }
               }
+
               setSelected({ ...selectedOptions, [tagType.type]: selected });
               setTags(tagType.type, selected);
             }}
