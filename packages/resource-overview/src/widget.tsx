@@ -11,6 +11,11 @@ type Props = {
   renderHeader?: (resources?: Array<any>) => React.JSX.Element;
   renderItem?: (resource: any) => React.JSX.Element;
   allowFiltering?: boolean;
+  tagTypes?: Array<{
+    type: string;
+    placeholder: string;
+    multiple?: boolean;
+  }>;
 } & BaseConfig;
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -63,6 +68,7 @@ function Widget({
   renderHeader = defaultHeaderRenderer,
   renderItem = defaultItemRenderer,
   allowFiltering = true,
+  tagTypes = [],
   ...props
 }: Props) {
   const datastore = new DataStore(props);
@@ -85,15 +91,7 @@ function Widget({
             dataStore={datastore}
             ideas={ideas}
             onUpdateFilter={ideas.filter}
-            tagTypes={[
-              {
-                type: 'theme',
-                placeholder: 'Selecteer een thema',
-                multiple: true,
-              },
-              { type: 'area', placeholder: 'Selecteer een gebied' },
-              { type: 'tag', placeholder: 'Selecteer een tag' },
-            ]}
+            tagTypes={tagTypes}
           />
         ) : null}
 
