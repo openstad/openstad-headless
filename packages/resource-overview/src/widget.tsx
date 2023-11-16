@@ -8,7 +8,6 @@ import { BaseConfig } from '../../generic-widget-types';
 import { Filters } from './filters/filters';
 
 type Props = {
-  title?: string;
   renderHeader?: (resources?: Array<any>) => React.JSX.Element;
   renderItem?: (resource: any) => React.JSX.Element;
   allowFiltering?: boolean;
@@ -22,6 +21,10 @@ const defaultHeaderRenderer = (resources?: any) => {
       <Banner>
         <Spacer size={12} />
       </Banner>
+      <section className="osc2-resource-overview-title-container">
+        <Spacer size={2} />
+        <h4>Plannen</h4>
+      </section>
     </>
   );
 };
@@ -57,7 +60,6 @@ const defaultItemRenderer = (resource: any) => {
 };
 
 function Widget({
-  title = 'Plannen',
   renderHeader = defaultHeaderRenderer,
   renderItem = defaultItemRenderer,
   allowFiltering = true,
@@ -69,10 +71,6 @@ function Widget({
   return (
     <>
       {renderHeader()}
-      <section className="osc2-resource-overview-title-container">
-        <Spacer size={2} />
-        <h4>{title}</h4>
-      </section>
 
       <Spacer size={2} />
 
