@@ -100,7 +100,11 @@ function Widget({
         <section className="osc2-resource-overview-resource-collection">
           {ideas &&
             ideas.map((resource: any) => {
-              return renderItem(resource);
+              return (
+                <React.Fragment key={`resource-item-${resource.title}`}>
+                  {renderItem(resource)}
+                </React.Fragment>
+              );
             })}
         </section>
       </section>

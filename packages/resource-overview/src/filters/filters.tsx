@@ -74,6 +74,7 @@ export function Filters({
 
         {tagTypes.map((tagType) => (
           <TagFilter
+            key={`tag-select-${tagType.type}`}
             {...props}
             selected={selectedOptions[tagType.type] || []}
             multiple={tagType.multiple}
