@@ -47,9 +47,9 @@ const defaultItemRenderer = (resource: any) => {
         </p>
       </div>
       <div className="osc2-resource-overview-content-item-footer">
-        <Icon icon="ri-thumb-up-line" text={resource.yes} />
-        <Icon icon="ri-thumb-down-line" text={resource.yes} />
-        <Icon icon="ri-message-line" text="0" />
+        <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} />
+        <Icon icon="ri-thumb-down-line" variant="big" text={resource.yes} />
+        <Icon icon="ri-message-line" variant="big" text="0" />
       </div>
     </article>
   );
@@ -62,11 +62,8 @@ function Widget({
   allowFiltering = true,
   ...props
 }: Props) {
-  // const projectId = props.projectId || props.config?.projectId;
-  // const ideaId = props.ideaId || props.config?.ideaId;
-  // const apiUrl = props.apiUrl || props.config.api?.url;
   const datastore = new DataStore(props);
-  const [ideas, error, isLoading] = datastore.useIdeas({ ...props });
+  const [ideas] = datastore.useIdeas({ ...props });
 
   return (
     <>
@@ -89,6 +86,14 @@ function Widget({
             dataStore={datastore}
             ideas={ideas}
             onUpdateFilter={ideas.filter}
+            tagTypes={[
+              {
+                type: 'theme',
+                placeholder: 'Selecteer een thema',
+                multiple: true,
+              },
+              { type: 'area', placeholder: 'Selecteer een gebied' },
+            ]}
           />
         ) : null}
 

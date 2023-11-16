@@ -6,7 +6,19 @@
     font-weight: 600;
   }
 
-  .osc-2-icon > i {
-    color: var(--foreground);
+  .osc-2-icon.no-label {
+    gap: 0rem;
+  }
+
+
+  .osc-2-icon > i.big {
     font-size: 24px;
+  }
+
+  .osc-2-icon > i.regular {
+    font-size: 16px;
+  }
+
+  .osc-2-icon > i.small {
+    font-size: 8px;
   }

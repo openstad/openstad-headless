@@ -1,5 +1,5 @@
 import { MultiSelect, Select } from '@openstad-headless/ui/src';
-import React from 'react';
+import React, { useState } from 'react';
 import DataStore from '../../../components/src/data-store';
 import { BaseConfig } from '../../../generic-widget-types';
 
@@ -24,11 +24,27 @@ export function TagFilter({
     type: tagType,
   });
 
+  const [selectedOptions, setSelected] = useState<string[]>([]);
+
   return multiple ? (
     <MultiSelect
       label={props.placeholder || ''}
-      onItemSelected={() => console.log('ts')}
-      options={(tags || []).map((tag) => ({ value: tag.id, label: tag.name }))}
+      onItemSelected={(value) => {
+        let selected = [...selectedOptions];
+
+        if (selected.includes(value)) {
+          selected = selected.filter((o) => o != value);
+        } else {
+          selected.push(value);
+        }
+        setSelected(selected);
+        onUpdateFilter && onUpdateFilter(selected);
+      }}
+      options={(tags || []).map((tag) => ({
+        value: tag.id,
+        label: tag.name,
+        checked: selectedOptions.includes(tag.id),
+      }))}
     />
   ) : (
     <Select

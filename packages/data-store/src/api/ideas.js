@@ -1,10 +1,16 @@
 export default {
   fetch: async function ({ projectId }, data, options) {
     let filterString = '';
-    if (options?.filter) {
-      for (let type in options.filter.tags) {
-        if (options.filter.tags[type])
-          filterString += `&tags=${options.filter.tags[type]}`;
+    const tags = options?.filter?.tags;
+    if (tags) {
+      for (let type in tags) {
+        const tagValues = tags[type];
+        if (tagValues)
+          if (Array.isArray(tagValues)) {
+            tagValues.forEach((tag) => (filterString += `&tags=${tag}`));
+          } else {
+            filterString += `&tags=${options.filter.tags[type]}`;
+          }
       }
 
       if (options.filter.search?.text)

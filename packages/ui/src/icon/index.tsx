@@ -2,10 +2,18 @@ import React from 'react';
 import 'remixicon/fonts/remixicon.css';
 import './index.css';
 
-export function Icon({ text, icon }: { text?: string; icon: string }) {
+export function Icon({
+  text,
+  icon,
+  variant = 'regular',
+}: {
+  text?: string;
+  icon: string;
+  variant?: 'small' | 'regular' | 'big';
+}) {
   return (
-    <div className="osc-2-icon">
-      <i className={icon}></i>
+    <div className={`osc-2-icon ${text === undefined ? 'no-label' : ''}`}>
+      <i className={`${icon} ${variant}`}></i>
       <p>{text}</p>
     </div>
   );
