@@ -115,10 +115,17 @@ export function Filters({
           onClick={() => {
             setSelected({});
             updateFilter(defaultFilter);
-            const selects = document.querySelectorAll(
-              ':scope .osc2-resource-overview-filters select'
+            const filterContainer = document.querySelector(
+              '.osc2-resource-overview-filters'
             );
+
+            const selects =
+              filterContainer?.querySelectorAll(':scope select') || [];
             selects.forEach((select: any) => (select.selectedIndex = '0'));
+
+            const inputs =
+              filterContainer?.querySelectorAll(':scope input') || [];
+            inputs.forEach((input: any) => (input.value = ''));
           }}>
           Wis alles
         </SecondaryButton>
