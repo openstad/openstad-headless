@@ -52,7 +52,7 @@ export default function ProjectSettingsThemes() {
         ]}>
         <div className="container py-6">
           <Form {...form} className="p-6 bg-white rounded-md">
-            <Heading size="xl">Thema's en gebieden</Heading>
+            <Heading size="xl">{`Thema's en gebieden`}</Heading>
             <Separator className="my-4" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -62,7 +62,7 @@ export default function ProjectSettingsThemes() {
                 name="themes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Thema's (Onderscheiden door kommas)</FormLabel>
+                    <FormLabel>{`Thema's (Onderscheiden door kommas)`}</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>

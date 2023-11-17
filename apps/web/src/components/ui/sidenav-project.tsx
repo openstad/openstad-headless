@@ -47,11 +47,6 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Instellingen</span>
             <ChevronDown
               size={16}
-              className={
-                location.includes('/settings')
-                  ? 'rotate-180 duration-200'
-                  : null
-              }
             />
           </Button>
         </Link>
@@ -131,11 +126,6 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Authenticatie</span>
             <ChevronDown
               size={16}
-              className={
-                location.includes('/authentication')
-                  ? 'rotate-180 duration-200'
-                  : null
-              }
             />
           </Button>
         </Link>

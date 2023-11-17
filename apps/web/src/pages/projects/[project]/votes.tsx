@@ -45,7 +45,7 @@ export default function ProjectIdeas() {
             </div>
             <ul>
               {data?.map((vote: any) => (
-                <li className="grid grid-cols-3 lg:grid-cols-7 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                <li key={vote.id} className="grid grid-cols-3 lg:grid-cols-7 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                   <div className="col-span-2 truncate">
                     <Paragraph>{vote.id}</Paragraph>
                   </div>

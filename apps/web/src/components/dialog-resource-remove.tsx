@@ -40,11 +40,11 @@ export function RemoveResourceDialog({
       <DialogTrigger asChild>
         <DropdownMenu>
           <DropdownMenuTrigger className="focus:outline-none">
-            <MoreHorizontal clasName="h-5 w-5" />
+            <MoreHorizontal className="h-5 w-5" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="center">
             <DropdownMenuItem
-              onClick={(e: Event) => {
+              onClick={(e) => {
                 e.preventDefault();
                 setOpen(true);
               }}

@@ -247,7 +247,7 @@ export default function ProjectSettingsIdeas() {
               className="lg:w-1/2 grid grid-cols-2 gap-4">
               <div className="col-span-full space-y-2">
                 <Label>Type e-mail</Label>
-                <Select className="col-span-1">
+                <Select>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecteer" />
                   </SelectTrigger>
