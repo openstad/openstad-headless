@@ -22,12 +22,13 @@ import useTag from '@/hooks/use-tags';
 const formSchema = z.object({
   name: z.string(),
   type: z.string(),
+  seqnr: z.coerce.number()
 });
 
 export default function ProjectTagCreate() {
   const router = useRouter();
-  const projectId = router.query.project;
-  const { createTag } = useTag();
+  const project = router.query.project;
+  const { createTag } = useTag(project as string);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -35,7 +36,7 @@ export default function ProjectTagCreate() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    createTag(JSON.stringify(projectId), values.name, values.type);
+    createTag(values.name, values.type, values.seqnr);
   }
 
   return (
@@ -49,11 +50,11 @@ export default function ProjectTagCreate() {
           },
           {
             name: 'Tags',
-            url: `/projects/${projectId}/tags`,
+            url: `/projects/${project}/tags`,
           },
           {
             name: 'Tag toevoegen',
-            url: `/projects/${projectId}/tags/create`,
+            url: `/projects/${project}/tags/create`,
           },
         ]}>
         <div className="p-6 bg-white rounded-md">
@@ -84,6 +85,19 @@ export default function ProjectTagCreate() {
                     <FormLabel>Type</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="seqnr"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sequence nummer</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
