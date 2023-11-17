@@ -44,7 +44,7 @@ export function RemoveResourceDialog({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="center">
             <DropdownMenuItem
-              onClick={(e: Event) => {
+              onClick={(e) => {
                 e.preventDefault();
                 setOpen(true);
               }}
