@@ -14,6 +14,6 @@ export default function Map() {
   });
 
   return (
-    <Map projectId={data.id} areaId={data.areaId} style={{ height: '400px' }} />
+    <Map projectId={data.id} areaId={data.areaId} />
   );
 }
