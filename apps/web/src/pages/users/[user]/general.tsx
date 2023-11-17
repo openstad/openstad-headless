@@ -83,8 +83,8 @@ export default function CreateUserGeneral() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Gebruikersnaam (optioneel, alleen zichtbaar als 'nicknames' in
-                  'projecten' aan staat)
+                  Gebruikersnaam (optioneel, alleen zichtbaar als nicknames in
+                  projecten aan staat)
                 </FormLabel>
                 <FormControl>
                   <Input {...field} />
