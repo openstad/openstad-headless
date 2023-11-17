@@ -48,6 +48,9 @@ export function Filters({
   // Standard and dynamic refs used for resetting
   const searchRef = useRef<HTMLInputElement>(null);
   const sortingRef = useRef<HTMLSelectElement>(null);
+
+  // These dynamic refs are only applicable on single item selects <select>
+  // The multiselect is a controlled custom component and is managed by the this component
   const [elRefs, setElRefs] = React.useState<
     React.RefObject<HTMLSelectElement>[]
   >([]);
