@@ -223,6 +223,14 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Gebieden</span>
           </Button>
         </Link>
+        <Link href={`/projects/${project}/tags`}>
+          <Button
+            variant={location.includes('/tags') ? 'secondary' : 'ghost'}
+            className="w-full flex justify-start"
+            onClick={(e) => {}}>
+            <span className="truncate">Tags</span>
+          </Button>
+        </Link>
         <Link href={`/projects/${project}/duplicate`}>
           <Button
             variant={location.includes("/duplicate") ? "secondary" : "ghost"}
