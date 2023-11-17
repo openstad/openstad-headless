@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import Widget from './widget.js';
+import ResourceOverview from './resource-overview.js';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Widget
+    <ResourceOverview
       tagTypes={[
         {
           type: 'theme',

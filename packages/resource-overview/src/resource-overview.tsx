@@ -1,4 +1,4 @@
-import './widget.css';
+import './resource-overview.css';
 import React from 'react';
 import { Banner, Icon } from '@openstad-headless/ui/src';
 import DataStore from '@openstad-headless/data-store/src';
@@ -64,7 +64,7 @@ const defaultItemRenderer = (resource: any) => {
   );
 };
 
-function Widget({
+function ResourceOverview({
   renderHeader = defaultHeaderRenderer,
   renderItem = defaultItemRenderer,
   allowFiltering = true,
@@ -110,4 +110,4 @@ function Widget({
   );
 }
 
-export default Widget;
+export default ResourceOverview;
