@@ -12,7 +12,6 @@ export function MultiSelect({
   label: string;
   options: Array<{ value: string; label: string; checked?: boolean }>;
   defaultOpen?: boolean;
-  allowMultiple?: boolean;
   onItemSelected: (optionValue: string) => void;
 }) {
   const [isOpen, setOpen] = useState<boolean>(defaultOpen || false);
