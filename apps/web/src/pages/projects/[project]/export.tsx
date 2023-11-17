@@ -17,7 +17,7 @@ export default function ProjectExport() {
   const { project } = router.query;    
 
   // Function to export data as a file
-  const exportData = (data: any, fileName: any, type: any) => {
+  const exportData = (data: BlobPart, fileName: string, type: string) => {
     // Create a link and download the file
     const blob = new Blob([data], { type });
     const url = window.URL.createObjectURL(blob);
@@ -28,7 +28,7 @@ export default function ProjectExport() {
     window.URL.revokeObjectURL(url);
   };
 
-  const { data, isLoading } = useProject();
+  const { data: projectData, isLoading } = useProject();
   const { data: projectVotes, isLoading: isLoadingVotes } = useVotes(project as string);
   const { data: projectIdeas, isLoading: isLoadingIdeas } = useIdeas(project as string);
   const { data: projectTags, isLoading: isLoadingTags } = useTags(project as string);
@@ -37,9 +37,9 @@ export default function ProjectExport() {
 
 
   function transform() {
-    const totalData = {data, projectVotes, projectIdeas, projectTags, projectComments, projectPolls};
+    const totalData = {projectData, projectVotes, projectIdeas, projectTags, projectComments, projectPolls};
     const jsonData = JSON.stringify(totalData);
-    exportData(jsonData, "test.json", "application/json");
+    exportData(jsonData, `${projectData.name}.json`, "application/json");
   }
 
   return (
