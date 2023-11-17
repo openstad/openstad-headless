@@ -68,7 +68,7 @@ export default function ProjectDuplicate() {
                 },
                 {
                     name: "Dupliceren",
-                    url: "/projects/duplicate"
+                    url: `/projects/${project}/duplicate`
                 }
             ]}
             >
