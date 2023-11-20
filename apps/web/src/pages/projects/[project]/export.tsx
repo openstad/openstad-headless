@@ -11,6 +11,7 @@ import useIdeas from '@/hooks/use-ideas';
 import useTags from '@/hooks/use-tags';
 import useComments from '@/hooks/use-comments';
 import usePolls from '@/hooks/use-poll';
+import useActions from '@/hooks/use-actions';
 
 export default function ProjectExport() {
   const router = useRouter();
@@ -34,10 +35,11 @@ export default function ProjectExport() {
   const { data: projectTags, isLoading: isLoadingTags } = useTags(project as string);
   const { data: projectComments, isLoading: isLoadingComments } = useComments(project as string);
   const { data: projectPolls, isLoading: isLoadingPolls } = usePolls(project as string);
+  const { data: projectActions, isLoading: isLoadingActions } = useActions(project as string);
 
 
   function transform() {
-    const totalData = {projectData, projectVotes, projectIdeas, projectTags, projectComments, projectPolls};
+    const totalData = {projectData, projectVotes, projectIdeas, projectTags, projectComments, projectPolls, projectActions};
     const jsonData = JSON.stringify(totalData);
     exportData(jsonData, `${projectData.name}.json`, "application/json");
   }
@@ -71,6 +73,7 @@ export default function ProjectExport() {
                     <li className="ml-4">Polls per plan</li>
                     <li className="ml-4">Stemmen per plan</li>
                     <li className="ml-4">Tags</li>
+                    <li className="ml-4">Actions</li>
                   </ul>
                 </div>
               </div>
