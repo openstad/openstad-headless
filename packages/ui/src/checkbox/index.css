@@ -1,0 +1,14 @@
+.osc2-checkbox {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    height: 1.5rem;
+    width: 1.5rem;
+    border: 1px solid var(--secondary);
+    border-radius: .5rem;
+}
+
+.osc2-checkbox.checked {
+   background-color: var(--secondary);
+   color: var(--secondary-foreground);
+}

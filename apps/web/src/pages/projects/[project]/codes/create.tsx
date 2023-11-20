@@ -55,16 +55,9 @@ export default function ProjectCodeCreate() {
           },
           {
             name: 'Stemcodes toevoegen',
-            url: `projects/${project}/codes/create`,
+            url: `/projects/${project}/codes/create`,
           },
-        ]}
-        action={
-          <div className="flex">
-            <Link href="/projects/1/codes/export">
-              <Button variant="default">Exporteer stemcodes</Button>
-            </Link>
-          </div>
-        }>
+        ]}>
         <div className="container py-6">
           <Form {...form} className="p-6 bg-white rounded-md">
             <Heading size="xl">Toevoegen</Heading>
