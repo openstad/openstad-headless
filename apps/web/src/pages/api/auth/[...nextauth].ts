@@ -1,6 +1,6 @@
-import Openstad, { OpenstadProfile } from "@/lib/auth/openstad-provider";
-import NextAuth, { NextAuthOptions } from "next-auth";
-import logger from "@/lib/logger";
+import Openstad, { OpenstadProfile } from '@/lib/auth/openstad-provider';
+import NextAuth, { NextAuthOptions } from 'next-auth';
+import logger from '@/lib/logger';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -12,21 +12,24 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: "/auth/signin",
+    signIn: '/auth/signin',
   },
   callbacks: {
     async signIn({ account, profile }) {
-      if (account?.provider === "openstad" && (profile as OpenstadProfile)?.role !== "admin") {
-        logger.debug({ account, profile }, "RoleUnauthorized");
+      if (
+        account?.provider === 'openstad' &&
+        (profile as OpenstadProfile)?.role !== 'admin'
+      ) {
+        logger.debug({ account, profile }, 'RoleUnauthorized');
         // Only allow admins to sign in
-        return "/api/auth/signin?error=RoleUnauthorized";
+        return '/api/auth/signin?error=RoleUnauthorized';
       }
       return true;
     },
     async jwt({ token, account, profile }) {
-      if (account?.provider === "openstad" && account?.access_token) {
+      if (account?.provider === 'openstad' && account?.access_token) {
         if (token.accessToken) {
-          logger.debug("Next-auth JWT token already has an access token");
+          logger.debug('Next-auth JWT token already has an access token');
           return token;
         }
         /**
@@ -35,15 +38,15 @@ export const authOptions: NextAuthOptions = {
          */
         try {
           logger.debug(
-            "Fetch JWT token from api with access token from provider"
+            'Fetch JWT token from api with access token from provider'
           );
           // @todo: make project id and useAuth dynamic
           const tokenResponse = await fetch(
             `${process.env.API_URL}/auth/project/1/connect-user`,
             {
-              method: "POST",
+              method: 'POST',
               headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
               },
               body: JSON.stringify({
                 access_token: account.access_token,
@@ -54,23 +57,23 @@ export const authOptions: NextAuthOptions = {
           if (tokenResponse.ok) {
             const tokenData = (await tokenResponse.json()) as { jwt: string };
             token.accessToken = tokenData.jwt;
-            logger.debug({ token, tokenData }, "JWT token fetched from api");
+            logger.debug({ token, tokenData }, 'JWT token fetched from api');
           } else {
             const errorData = await tokenResponse.json();
             logger.error(
               { status: tokenResponse.statusText, errorData },
-              "Error fetching jwt token from api"
+              'Error fetching jwt token from api'
             );
             return {
               ...token,
-              error: "TokenFetchError",
+              error: 'TokenFetchError',
             };
           }
         } catch (error) {
-          logger.error(error, "Error fetching jwt token from api");
+          logger.error(error, 'Error fetching jwt token from api');
           return {
             ...token,
-            error: "TokenFetchError",
+            error: 'TokenFetchError',
           };
         }
       }

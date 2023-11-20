@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,22 +6,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   displayReactions: z.boolean(),
@@ -29,13 +29,13 @@ const formSchema = z.object({
   textEmptyInput: z.string(),
   textAboveInput: z.string(),
   idNonActiveReactions: z.string(),
-  reactionsAvailable: z.enum(["open", "closed", "limited"]),
+  reactionsAvailable: z.enum(['open', 'closed', 'limited']),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 export default function WidgetMapReaction() {
-  const category = "reaction";
+  const category = 'reaction';
 
   const {
     data: widget,
@@ -45,20 +45,20 @@ export default function WidgetMapReaction() {
 
   const defaults = () => ({
     reactionsAvailable:
-      widget?.config?.[category]?.reactionsAvailable || "open",
+      widget?.config?.[category]?.reactionsAvailable || 'open',
     displayReactions: widget?.config?.[category]?.displayReactions || false,
-    title: widget?.config?.[category]?.title || "",
-    textEmptyInput: widget?.config?.[category]?.textEmptyInput || "",
-    textAboveInput: widget?.config?.[category]?.textAboveInput || "",
+    title: widget?.config?.[category]?.title || '',
+    textEmptyInput: widget?.config?.[category]?.textEmptyInput || '',
+    textAboveInput: widget?.config?.[category]?.textAboveInput || '',
     idNonActiveReactions:
-      widget?.config?.[category]?.idNonActiveReactions || "",
+      widget?.config?.[category]?.idNonActiveReactions || '',
   });
 
   async function onSubmit(values: FormData) {
     try {
       await updateConfig({ [category]: values });
     } catch (error) {
-      console.error("could not update", error);
+      console.error('could not update', error);
     }
   }
 
@@ -72,23 +72,24 @@ export default function WidgetMapReaction() {
   }, [widget]);
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl" className="mb-4">
-          Map • Reacties
+          Reacties
         </Heading>
         <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-1/2">
           <FormField
             control={form.control}
             name="displayReactions"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>Weergave</FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === "true")}
-                  value={field.value ? "true" : "false"}
-                >
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Ja" />
@@ -108,7 +109,7 @@ export default function WidgetMapReaction() {
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Title boven de reacties</FormLabel>
+                <FormLabel>Titel boven de reacties</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -146,7 +147,7 @@ export default function WidgetMapReaction() {
             control={form.control}
             name="idNonActiveReactions"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>
                   IDs van ideeën waar reacties niet actief voor zijn.
                 </FormLabel>
@@ -185,11 +186,9 @@ export default function WidgetMapReaction() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button type="submit" className="w-fit col-span-full">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>

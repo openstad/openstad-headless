@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, RotateCcw, XCircleIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Delete } from 'lucide-react';
 
@@ -61,18 +61,18 @@ export const SimpleCalendar: React.FC<{
                   disabled={(date) => date < new Date()}
                   initialFocus
                 />
+                {withReset && (
+                  <Button
+                    onClick={() => form.setValue(field.name, undefined)}
+                    type="button"
+                    variant={'ghost'}
+                    className="w-full rounded-none text-xs font-normal">
+                    Reset
+                    <RotateCcw size="12" />
+                  </Button>
+                )}
               </PopoverContent>
             </Popover>
-
-            {withReset ? (
-              <Button
-                onClick={() => form.setValue(field.name, undefined)}
-                type="button"
-                variant={'outline'}
-                className={cn('font-normal')}>
-                <Delete size="16" />
-              </Button>
-            ) : null}
           </div>
 
           <FormMessage />

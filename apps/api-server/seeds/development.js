@@ -237,7 +237,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    await db.Idea.create({
+    let idea6 = await db.Idea.create({
       userId: 2,
       projectId: 3,
       title: 'Vestibulum ante ipsum',
@@ -255,7 +255,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    await db.Idea.create({
+    let idea7 = await db.Idea.create({
       userId: 2,
       projectId: 3,
       title: 'Nulla laoreet pretium',
@@ -273,7 +273,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    await db.Idea.create({
+    let idea8 = await db.Idea.create({
       userId: 2,
       projectId: 3,
       title: 'Aliquam ut magna',
@@ -291,7 +291,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    await db.Idea.create({
+    let idea9 = await db.Idea.create({
       userId: 2,
       projectId: 3,
       title: 'Etiam ultricies dui',
@@ -309,7 +309,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    await db.Idea.create({
+    let idea10 = await db.Idea.create({
       userId: 2,
       projectId: 3,
       title: 'Nullam dignissim tincidunt',
@@ -381,7 +381,34 @@ module.exports = async function seed(config, db) {
     idea3.addTag(area3);
     idea4.addTag(area1);
     idea5.addTag(area1);
-    
+
+    let theme4 = await db.Tag.create({
+      projectId: 3,
+      name: 'Theme 1',
+      type: 'theme',
+      seqnr: 10,
+    });
+
+    let theme5 = await db.Tag.create({
+      projectId: 3,
+      name: 'Theme 2',
+      type: 'theme',
+      seqnr: 20,
+    });
+
+    let theme6 = await db.Tag.create({
+      projectId: 3,
+      name: 'Theme 3',
+      type: 'theme',
+      seqnr: 30,
+    });
+
+    idea6.addTag(theme4);
+    idea7.addTag(theme5);
+    idea8.addTag(theme6);
+    idea9.addTag(theme4);
+    idea10.addTag(theme6);
+
     console.log('      with 5 likes');
     await db.Vote.create({
       userId: 1,

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,22 +6,21 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   showIdeas: z.string(),
   excludeIdeas: z.string(),
   showIdeasFromTheme: z.string(),
 });
-
 
 export default function WidgetIdeasMapContent() {
   const category = 'content';
@@ -33,9 +32,9 @@ export default function WidgetIdeasMapContent() {
   } = useWidgetConfig();
 
   const defaults = () => ({
-    showIdeas: widget?.config?.[category]?.showIdeas || "",
-    excludeIdeas: widget?.config?.[category]?.excludeIdeas || "",
-    showIdeasFromTheme: widget?.config?.[category]?.showIdeasFromTheme || "",
+    showIdeas: widget?.config?.[category]?.showIdeas || '',
+    excludeIdeas: widget?.config?.[category]?.excludeIdeas || '',
+    showIdeasFromTheme: widget?.config?.[category]?.showIdeasFromTheme || '',
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -52,13 +51,13 @@ export default function WidgetIdeasMapContent() {
   }
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Ideeën Map • Content
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Heading size="xl">Content</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
             name="showIdeas"
@@ -113,11 +112,7 @@ export default function WidgetIdeasMapContent() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

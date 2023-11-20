@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,22 +6,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   noSelectionLoggedInHTML: z.string(),
@@ -38,7 +38,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function WidgetMapContent() {
-  const category = "content";
+  const category = 'content';
 
   const {
     data: widget,
@@ -48,30 +48,30 @@ export default function WidgetMapContent() {
 
   const defaults = () => ({
     noSelectionLoggedInHTML:
-      widget?.config?.[category]?.noSelectionLoggedInHTML || "",
+      widget?.config?.[category]?.noSelectionLoggedInHTML || '',
     noSelectionNotLoggedInHTML:
-      widget?.config?.[category]?.noSelectionNotLoggedInHTML || "",
+      widget?.config?.[category]?.noSelectionNotLoggedInHTML || '',
     showNoSelectionBlock:
       widget?.config?.[category]?.showNoSelectionBlock || false,
     selectionActiveLoggedInHTML:
-      widget?.config?.[category]?.selectionActiveLoggedInHTML || "",
+      widget?.config?.[category]?.selectionActiveLoggedInHTML || '',
     selectionInactiveLoggedInHTML:
-      widget?.config?.[category]?.selectionInactiveLoggedInHTML || "",
+      widget?.config?.[category]?.selectionInactiveLoggedInHTML || '',
     mobilePreviewLoggedInHTML:
-      widget?.config?.[category]?.mobilePreviewLoggedInHTML || "",
+      widget?.config?.[category]?.mobilePreviewLoggedInHTML || '',
     selectionActiveNotLoggedInHTML:
-      widget?.config?.[category]?.selectionActiveNotLoggedInHTML || "",
+      widget?.config?.[category]?.selectionActiveNotLoggedInHTML || '',
     selectionInactiveNotLoggedInHTML:
-      widget?.config?.[category]?.selectionInactiveNotLoggedInHTML || "",
+      widget?.config?.[category]?.selectionInactiveNotLoggedInHTML || '',
     mobilePreviewNotLoggedInHTML:
-      widget?.config?.[category]?.mobilePreviewNotLoggedInHTML || "",
+      widget?.config?.[category]?.mobilePreviewNotLoggedInHTML || '',
   });
 
   async function onSubmit(values: FormData) {
     try {
       await updateConfig({ [category]: values });
     } catch (error) {
-      console.error("could not update", error);
+      console.error('could not update', error);
     }
   }
 
@@ -85,13 +85,13 @@ export default function WidgetMapContent() {
   }, [widget]);
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Map • Content
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Heading size="xl">Content</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
             name="noSelectionLoggedInHTML"
@@ -125,9 +125,8 @@ export default function WidgetMapContent() {
               <FormItem>
                 <FormLabel>Weergave</FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === "true")}
-                  value={field.value ? "true" : "false"}
-                >
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Nee" />
@@ -220,11 +219,7 @@ export default function WidgetMapContent() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

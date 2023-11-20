@@ -1,7 +1,7 @@
-import React from "react";
-import { PageLayout } from "../../../../../../components/ui/page-layout";
-import { useRouter } from "next/router";
-import ChoicesSelectorForm from "./form";
+import React from 'react';
+import { PageLayout } from '../../../../../../components/ui/page-layout';
+import { useRouter } from 'next/router';
+import ChoicesSelectorForm from './form';
 
 export default function WidgetKeuzewijzer() {
   const router = useRouter();
@@ -13,21 +13,20 @@ export default function WidgetKeuzewijzer() {
         pageHeader="Project naam"
         breadcrumbs={[
           {
-            name: "Projecten",
-            url: "/projects",
+            name: 'Projecten',
+            url: '/projects',
           },
           {
-            name: "Widgets",
+            name: 'Widgets',
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: "Keuzewijzer",
+            name: 'Keuzewijzer',
             url: `/projects/${projectId}/widgets/keuzewijzer/${id}`,
           },
-        ]}
-      >
-        <div>
-          <div className="p-4 w-1/2">
+        ]}>
+        <div className="container py-6">
+          <div className="p-6 bg-white rounded-md">
             <ChoicesSelectorForm />
           </div>
         </div>

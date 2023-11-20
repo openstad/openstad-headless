@@ -1,5 +1,5 @@
-import { Plus } from "lucide-react";
-import { Button } from "./ui/button";
+import { Plus } from 'lucide-react';
+import { Button } from './ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,11 +8,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
+} from './ui/dialog';
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   Form,
   FormControl,
@@ -20,19 +20,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "./ui/form";
+} from './ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import { Input } from "./ui/input";
-import { useState } from "react";
-import { useWidgetsHook } from "@/hooks/use-widgets";
-import { WidgetDefinitions } from "@/lib/widget-definitions";
-import { useRouter } from "next/router";
+} from './ui/select';
+import { Input } from './ui/input';
+import { useState } from 'react';
+import { useWidgetsHook } from '@/hooks/use-widgets';
+import { WidgetDefinitions } from '@/lib/widget-definitions';
+import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 
 type Props = {
@@ -68,19 +68,19 @@ export function CreateWidgetDialog({ projectId }: Props) {
     try {
       const widget = await createWidget(values.type, values.description);
       setOpen(false);
-      if(widget) {
-        toast.success("Widget aangemaakt!");
+      if (widget) {
+        toast.success('Widget aangemaakt!');
         router.push(router.asPath + `/${widget.type}/${widget.id}`);
       }
     } catch (error) {
-      toast.error("Widget kon niet worden aangemaakt!");
+      toast.error('Widget kon niet worden aangemaakt!');
     }
   }
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      description: "",
+      description: '',
       type: widgetTypes[0][0],
     },
   });
@@ -88,8 +88,8 @@ export function CreateWidgetDialog({ projectId }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default">
-          <Plus size="20" />
+        <Button className="flex w-fit">
+          <Plus size="20" className="hidden lg:flex" />
           Widget toevoegen
         </Button>
       </DialogTrigger>
@@ -142,11 +142,10 @@ export function CreateWidgetDialog({ projectId }: Props) {
                   </FormItem>
                 )}
               />
-              <div className="sticky bottom-0 py-4 bg-background flex flex-col"></div>
             </DialogHeader>
             <DialogFooter>
               <Button disabled={!form.formState.isValid} type="submit">
-                Aanmaken
+                Opslaan
               </Button>
             </DialogFooter>
           </form>

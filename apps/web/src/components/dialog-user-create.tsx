@@ -1,5 +1,5 @@
-import { Plus } from "lucide-react";
-import { Button } from "./ui/button";
+import { Plus } from 'lucide-react';
+import { Button } from './ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,11 +8,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
+} from './ui/dialog';
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   Form,
   FormControl,
@@ -20,17 +20,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "./ui/form";
-import { Input } from "./ui/input";
-import { useState } from "react";
-import useUsers from '../hooks/use-users'
-import { useRouter } from "next/router";
-import projectListSwr from '@/hooks/use-project-list'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+} from './ui/form';
+import { Input } from './ui/input';
+import { useState } from 'react';
+import useUsers from '../hooks/use-users';
+import { useRouter } from 'next/router';
+import projectListSwr from '@/hooks/use-project-list';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
 
 const formSchema = z.object({
   email: z.string().email(),
-  projectId: z.string()
+  projectId: z.string(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -38,28 +44,28 @@ type FormData = z.infer<typeof formSchema>;
 export function CreateUserDialog() {
   const [open, setOpen] = useState<boolean>(false);
   const router = useRouter();
-  const { data, isLoading } = projectListSwr()
-  const { createUser } = useUsers()
+  const { data, isLoading } = projectListSwr();
+  const { createUser } = useUsers();
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      email: ''
+      email: '',
     },
   });
 
-  if(!data) return null;
+  if (!data) return null;
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    createUser(values.email, values.projectId)
+    createUser(values.email, values.projectId);
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default">
-          <Plus size="20" />
-          Gebruiker aanmaken
+        <Button className="flex w-fit">
+          <Plus size="20" className="hidden lg:flex" />
+          Gebruiker toevoegen
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -77,10 +83,7 @@ export function CreateUserDialog() {
                   <FormItem>
                     <FormLabel>E-mail van de gebruiker</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="E-mail van de gebruiker"
-                      />
+                      <Input {...field} placeholder="E-mail van de gebruiker" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -91,7 +94,10 @@ export function CreateUserDialog() {
                 name="projectId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Basisproject (Een gebruiker moet altijd één project hebben.)</FormLabel>
+                    <FormLabel>
+                      Basisproject (Een gebruiker moet altijd één project
+                      hebben.)
+                    </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -100,7 +106,9 @@ export function CreateUserDialog() {
                       </FormControl>
                       <SelectContent>
                         {data?.map((project: any) => (
-                          <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
+                          <SelectItem key={project.id} value={project.id}>
+                            {project.name}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

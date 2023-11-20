@@ -1,0 +1,36 @@
+
+.openstad-image-container {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 4px;
+    box-sizing: border-box;
+    position: relative;
+
+}
+
+.openstad-image-container.selected {
+    border: 4px solid var(--primary);
+}
+
+.openstad-image-container > img {
+    width: 100%;
+    height: 100%;
+    background: #212529;
+    border-radius: 4px;
+}
+
+.openstad-image-container > .openstad-image-footer {
+    display: flex;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    
+    gap: 1rem;
+    box-sizing: border-box;
+    padding: 1rem 1rem;
+
+}
+
+.openstad-image-footer > * {
+    flex-grow: 1;
+}

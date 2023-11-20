@@ -22,13 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
@@ -112,13 +105,13 @@ export default function ProjectSettingsIdeas() {
             url: `/projects/${project}/settings/ideas`,
           },
         ]}>
-        <div className="container mx-auto py-10 w-1/2 float-left">
-          <Form {...form}>
-            <Heading size="xl" className="mb-4">
-              Instellingen • Ideeën
-            </Heading>
-            <Separator className="mb-4" />
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="container py-6">
+          <Form {...form} className="p-6 bg-white rounded-md">
+            <Heading size="xl">Ideeën</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="canAddNewIdeas"
@@ -155,7 +148,7 @@ export default function ProjectSettingsIdeas() {
                       Minimum benodigde stemmen voor een idee?
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="100" {...field} />
+                      <Input type="number" placeholder="100" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -165,10 +158,10 @@ export default function ProjectSettingsIdeas() {
                 control={form.control}
                 name="titleMinLength"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-1">
                     <FormLabel>Minimum lengte van titel</FormLabel>
                     <FormControl>
-                      <Input placeholder="10" {...field} />
+                      <Input type="number" placeholder="10" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -178,10 +171,10 @@ export default function ProjectSettingsIdeas() {
                 control={form.control}
                 name="titleMaxLength"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-1">
                     <FormLabel>Maximum lengte van titel</FormLabel>
                     <FormControl>
-                      <Input placeholder="50" {...field} />
+                      <Input type="number" placeholder="50" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -191,10 +184,10 @@ export default function ProjectSettingsIdeas() {
                 control={form.control}
                 name="summaryMinLength"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-1">
                     <FormLabel>Minimum lengte van samenvatting</FormLabel>
                     <FormControl>
-                      <Input placeholder="20" {...field} />
+                      <Input type="number" placeholder="20" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -204,10 +197,10 @@ export default function ProjectSettingsIdeas() {
                 control={form.control}
                 name="summaryMaxLength"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-1">
                     <FormLabel>Maximum lengte van samenvatting</FormLabel>
                     <FormControl>
-                      <Input placeholder="140" {...field} />
+                      <Input type="number" placeholder="140" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -217,10 +210,10 @@ export default function ProjectSettingsIdeas() {
                 control={form.control}
                 name="descriptionMinLength"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Minimum lengte van descriptie</FormLabel>
+                  <FormItem className="col-span-1">
+                    <FormLabel>Minimum lengte van de beschrijving</FormLabel>
                     <FormControl>
-                      <Input placeholder="140" {...field} />
+                      <Input type="number" placeholder="140" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -230,64 +223,62 @@ export default function ProjectSettingsIdeas() {
                 control={form.control}
                 name="descriptionMaxLength"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Maximum lengte van descriptie</FormLabel>
+                  <FormItem className="col-span-1">
+                    <FormLabel>Maximum lengte van de beschrijving</FormLabel>
                     <FormControl>
-                      <Input placeholder="5000" {...field} />
+                      <Input type="number" placeholder="5000" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" variant={'default'}>
+              <Button type="button" className="w-fit mt-4">
                 Opslaan
               </Button>
             </form>
-            <br />
           </Form>
-          <Card>
-            <CardHeader>
-              <CardTitle>Stel hier een email op.</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form>
-                <div>
-                  <div>
-                    <Label>Type mail:</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecteer" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="thanks">Bedank-mail</SelectItem>
-                        <SelectItem value="submit">
-                          Opleveren van concept-plan
-                        </SelectItem>
-                        <SelectItem value="publish">
-                          Uitbrengen van concept-plan
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Vanaf adres:</Label>
-                    <Input id="mail" placeholder="email@example.com" />
-                  </div>
-                  <div>
-                    <Label>Onderwerp:</Label>
-                    <Input id="subject" placeholder="Onderwerp van de mail" />
-                  </div>
-                  <div>
-                    <Label>Mail-template:</Label>
-                    <Textarea id="template" placeholder="Inhoud van de mail" />
-                  </div>
-                </div>
-              </form>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button variant={'default'}>Opslaan</Button>
-            </CardFooter>
-          </Card>
+          <div className="p-6 bg-white rounded-md mt-4">
+            <Heading size="xl" className="mb-4">
+              Mail template
+            </Heading>
+            <Separator className="mb-4" />
+            <form
+              onSubmit={() => {}}
+              className="lg:w-1/2 grid grid-cols-2 gap-4">
+              <div className="col-span-full space-y-2">
+                <Label>Type e-mail</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecteer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="thanks">Bedank-mail</SelectItem>
+                    <SelectItem value="submit">
+                      Opleveren van concept-plan
+                    </SelectItem>
+                    <SelectItem value="publish">
+                      Uitbrengen van concept-plan
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="col-span-full space-y-2">
+                <Label>Vanaf adres</Label>
+                <Input id="mail" placeholder="email@example.com" />
+              </div>
+              <div className="col-span-full space-y-2">
+                <Label>Onderwerp</Label>
+                <Input id="subject" placeholder="Onderwerp van de mail" />
+              </div>
+              <div className="col-span-full space-y-2">
+                <Label>E-mail tekst template</Label>
+                <Textarea id="template" placeholder="Inhoud van de mail" />
+              </div>
+              <Button type="button" className="w-fit mt-4">
+                Opslaan
+              </Button>
+            </form>
+          </div>
         </div>
       </PageLayout>
     </div>

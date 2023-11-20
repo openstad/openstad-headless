@@ -23,7 +23,7 @@ export default function ProjectIdeaCreate() {
             url: `/projects/${project}/ideas`,
           },
           {
-            name: 'Idee aanmaken',
+            name: 'Idee toevoegen',
             url: `/projects/${project}/ideas/create`,
           },
         ]}>

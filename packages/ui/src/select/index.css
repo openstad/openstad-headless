@@ -1,0 +1,26 @@
+.osc-2-select {
+    padding: .5rem;
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+.osc-2-select-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0rem 1rem;
+}
+
+.ocs-2-select-item {
+    padding: 0rem 1rem;
+}
+
+.ocs-2-select-item.selected {
+    background-color: red;
+}
+
+
+.ocs-2-select-item:hover {
+    background-color: var(--border);
+}

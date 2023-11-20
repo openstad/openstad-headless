@@ -1,0 +1,38 @@
+.osc-2-multi-select {
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+.osc-2-multi-select-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .25rem 0rem;
+}
+
+.osc-2-multi-select-header > p{
+   margin: 0 1rem;
+   color: var(--foreground);
+}
+
+.osc-2-multi-select-header > .osc-2-icon {
+    color: var(--foreground);
+    font-weight: lighter;
+    gap: 0; 
+}
+
+.ocs-2-multi-select-item {
+    display: flex;
+    align-items: center;
+    padding: 0rem 1rem;
+    gap: 1rem;
+}
+
+.ocs-2-multi-select-item p {
+    color: var(--foreground);
+}
+
+.ocs-2-multi-select-item:hover {
+    background-color: var(--border);
+}

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -6,23 +6,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
-import { Heading } from "@/components/ui/typography";
-import { useWidgetConfig } from "@/hooks/use-widget-config";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { Heading } from '@/components/ui/typography';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   summaryCharLength: z.coerce.number(),
@@ -47,7 +47,7 @@ const formSchema = z.object({
 
 export default function WidgetResourceOverviewInfo() {
   type FormData = z.infer<typeof formSchema>;
-  const category = "info";
+  const category = 'info';
 
   const {
     data: widget,
@@ -56,9 +56,9 @@ export default function WidgetResourceOverviewInfo() {
   } = useWidgetConfig();
 
   const defaults = () => ({
-    excludeTheme: widget?.config?.[category]?.excludeTheme || "",
-    filterTheme: widget?.config?.[category]?.filterTheme || "",
-    filterResource: widget?.config?.[category]?.filterResource || "",
+    excludeTheme: widget?.config?.[category]?.excludeTheme || '',
+    filterTheme: widget?.config?.[category]?.filterTheme || '',
+    filterResource: widget?.config?.[category]?.filterResource || '',
 
     summaryCharLength: widget?.config?.[category]?.summaryCharLength || 30,
     step1:
@@ -66,40 +66,40 @@ export default function WidgetResourceOverviewInfo() {
       "Kies uit onderstaand overzicht jouw favoriete ontwerp voor de muurtekst 'Zorg goed voor onze stad en voor elkaar', en vul in de volgende stap je gegevens in.",
     step2:
       widget?.config?.[category]?.step2 ||
-      "Via onderstaande knop kun je op een aparte pagina je e-mailadres invullen. Ter controle krijg je een mail om je e-mailadres te bevestigen. Als dat lukt kom je terug op deze pagina.",
+      'Via onderstaande knop kun je op een aparte pagina je e-mailadres invullen. Ter controle krijg je een mail om je e-mailadres te bevestigen. Als dat lukt kom je terug op deze pagina.',
     step2ButtonFeedback:
-      widget?.config?.[category]?.step2ButtonFeedback || "Gevalideerd",
+      widget?.config?.[category]?.step2ButtonFeedback || 'Gevalideerd',
     step2Authenticated:
       widget?.config?.[category]?.step2Authenticated ||
-      "Het controleren van je e-mailadres is gelukt!<br/>Je bent bijna klaar. Klik op onderstaande knop om je stem te versturen.",
+      'Het controleren van je e-mailadres is gelukt!<br/>Je bent bijna klaar. Klik op onderstaande knop om je stem te versturen.',
 
     authenticateButtonText:
       widget?.config?.[category]?.authenticateButtonText ||
-      "Vul je email-adres in",
+      'Vul je email-adres in',
     authFormEmbedded: widget?.config?.[category]?.authFormEmbedded || false,
-    placeholder: widget?.config?.[category]?.placeholder || "Kies een ontwerp",
+    placeholder: widget?.config?.[category]?.placeholder || 'Kies een ontwerp',
     error:
-      widget?.config?.[category]?.error || "Je hebt nog geen selectie gemaakt.",
+      widget?.config?.[category]?.error || 'Je hebt nog geen selectie gemaakt.',
     successTitle:
       widget?.config?.[category]?.successTitle ||
-      "Gelukt, je stem is opgeslagen!",
+      'Gelukt, je stem is opgeslagen!',
     successDescription:
       widget?.config?.[category]?.successDescription ||
-      "Bedankt voor het stemmen. Hou deze website<br/> in de gaten voor de uitslag.",
-    siteId: widget?.config?.[category]?.siteId || "",
-    authCodeLabel: widget?.config?.[category]?.authCodeLabel || "",
-    authUniqueButton: widget?.config?.[category]?.authUniqueButton || "",
-    authSms: widget?.config?.[category]?.authSms || "",
-    authSmsButton: widget?.config?.[category]?.authSmsButton || "",
-    authMail: widget?.config?.[category]?.authMail || "",
-    authMailButton: widget?.config?.[category]?.authMailButton || "",
+      'Bedankt voor het stemmen. Hou deze website<br/> in de gaten voor de uitslag.',
+    siteId: widget?.config?.[category]?.siteId || '',
+    authCodeLabel: widget?.config?.[category]?.authCodeLabel || '',
+    authUniqueButton: widget?.config?.[category]?.authUniqueButton || '',
+    authSms: widget?.config?.[category]?.authSms || '',
+    authSmsButton: widget?.config?.[category]?.authSmsButton || '',
+    authMail: widget?.config?.[category]?.authMail || '',
+    authMailButton: widget?.config?.[category]?.authMailButton || '',
   });
 
   async function onSubmit(values: FormData) {
     try {
       await updateConfig({ [category]: values });
     } catch (error) {
-      console.error("could falset update", error);
+      console.error('could falset update', error);
     }
   }
 
@@ -113,23 +113,23 @@ export default function WidgetResourceOverviewInfo() {
   }, [widget]);
 
   return (
-    <div>
+    <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl" className="mb-4">
-          Resource Overview • Info
-        </Heading>
-        <Separator className="mb-4" />
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Heading size="xl">Info</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="lg:w-1/2 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="summaryCharLength"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>
                   Hoeveelheid karakters waar de samenvatting uit mag bestaan
                 </FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input type="number" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -142,7 +142,7 @@ export default function WidgetResourceOverviewInfo() {
               <FormItem>
                 <FormLabel>Stap 1: Intro</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea rows={6} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -155,7 +155,7 @@ export default function WidgetResourceOverviewInfo() {
               <FormItem>
                 <FormLabel>Stap 2: Intro</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea rows={6} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -165,7 +165,7 @@ export default function WidgetResourceOverviewInfo() {
             control={form.control}
             name="step2ButtonFeedback"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>Stap 2: Succesvolle feedback op knop</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -178,10 +178,10 @@ export default function WidgetResourceOverviewInfo() {
             control={form.control}
             name="step2Authenticated"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full ">
                 <FormLabel>Stap 2: Succesvolle authenticatie</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea rows={6} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -192,7 +192,7 @@ export default function WidgetResourceOverviewInfo() {
             name="authenticateButtonText"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Text op authenticatie knop</FormLabel>
+                <FormLabel>Tekst op authenticatie knop</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -207,9 +207,8 @@ export default function WidgetResourceOverviewInfo() {
               <FormItem>
                 <FormLabel>Authenticatie formulier embedded</FormLabel>
                 <Select
-                   onValueChange={(e: string) => field.onChange(e === "true")}
-                   value={field.value ? "true" : "false"}
-                >
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Nee" />
@@ -256,7 +255,7 @@ export default function WidgetResourceOverviewInfo() {
             control={form.control}
             name="successTitle"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>Succes titel</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -269,10 +268,10 @@ export default function WidgetResourceOverviewInfo() {
             control={form.control}
             name="successDescription"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full ">
                 <FormLabel>Succes beschrijving</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Textarea rows={6} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -282,7 +281,7 @@ export default function WidgetResourceOverviewInfo() {
             control={form.control}
             name="siteId"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-full">
                 <FormLabel>Site ID</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -375,11 +374,9 @@ export default function WidgetResourceOverviewInfo() {
               </FormItem>
             )}
           />
-          <div className="sticky bottom-0 py-4 bg-background border-t border-border flex flex-col">
-            <Button className="self-end" type="submit">
-              Opslaan
-            </Button>
-          </div>
+          <Button className="w-fit col-span-full" type="submit">
+            Opslaan
+          </Button>
         </form>
       </Form>
     </div>
