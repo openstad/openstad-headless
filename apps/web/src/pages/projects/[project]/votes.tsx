@@ -1,5 +1,4 @@
 import { PageLayout } from '../../../components/ui/page-layout';
-import useSWR from 'swr';
 import React from 'react';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
@@ -9,7 +8,7 @@ import { ChevronRight } from 'lucide-react';
 export default function ProjectIdeas() {
   const router = useRouter();
   const { project } = router.query;
-  const { data, isLoading } = useVotes(project as string);
+  const { data } = useVotes(project as string);
 
   if (!data) return null;
 

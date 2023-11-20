@@ -10,7 +10,7 @@ import useArea from '@/hooks/use-area';
 export default function ProjectAreas() {
   const router = useRouter();
   const { project } = router.query;
-  const { data, isLoading } = useArea(project as string);
+  const { data } = useArea(project as string);
 
   return (
     <div>

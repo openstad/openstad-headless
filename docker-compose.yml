@@ -1,4 +1,4 @@
-version: "3.4"
+version: '3.4'
 services:
   openstad-mysql:
     image: mysql:8
@@ -19,19 +19,13 @@ services:
       - 3306:3306
     volumes:
       # - ./export.sql:/docker-entrypoint-initdb.d/99-export.sql
+      - ./scripts/init-sql.sh:/docker-entrypoint-initdb.d/init-sql.sh
       - openstad-mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
       timeout: 20s
       retries: 10
-    entrypoint: |
-      bash -c "
-        echo ========== PASSWORD $$MYSQL_USER $$MYSQL_ROOT_PASSWORD $$MYSQL_PASSWORD
-        echo \"CREATE DATABASE IF NOT EXISTS \\`$$AUTH_DB_NAME\\`; CREATE DATABASE IF NOT EXISTS \\`$$IMAGE_DB_NAME\\`; CREATE DATABASE IF NOT EXISTS \\`$$API_DB_NAME\\`; FLUSH PRIVILEGES; GRANT ALL ON *.* TO '$$MYSQL_USER'@'%'; FLUSH PRIVILEGES;\"
-        echo \"CREATE DATABASE IF NOT EXISTS \\`$$AUTH_DB_NAME\\`; CREATE DATABASE IF NOT EXISTS \\`$$IMAGE_DB_NAME\\`; CREATE DATABASE IF NOT EXISTS \\`$$API_DB_NAME\\`; FLUSH PRIVILEGES; GRANT ALL ON *.* TO '$$MYSQL_USER'@'%'; FLUSH PRIVILEGES;\" > /docker-entrypoint-initdb.d/init.sql;
-        /usr/local/bin/docker-entrypoint.sh $$0 $$@
-      "
- 
+
   openstad-mailhog:
     image: mailhog/mailhog
     ports:
@@ -40,8 +34,13 @@ services:
 
   openstad-api-server:
     build:
-      context: apps/api-server
+      target: development
+      context: .
       dockerfile: Dockerfile
+      args:
+        - APP=api-server
+        - PORT=${API_PORT}
+    image: openstad/headless-api-server:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
       openstad-mysql:
@@ -68,26 +67,23 @@ services:
       - AUTH_FIXEDAUTHTOKENS=${API_AUTH_FIXEDAUTHTOKENS}
       - AUTH_ADAPTER_OPENSTAD_SERVERURL=${AUTH_APP_URL}
       - AUTH_ADAPTER_OPENSTAD_SERVERURL_INTERNAL=http://openstad-auth-server:${AUTH_PORT}
+      - NODE_ENV=development
     ports:
-      - "${API_PORT}:${API_PORT}"
+      - '${API_PORT}:${API_PORT}'
     volumes:
-      - ./apps/api-server:/opt/api-server
-      - openstad-api-server-node_modules:/opt/api-server/node_modules
-      - openstad-api-server-init:/opt/api-server/init
-    entrypoint: |
-      bash -c "
-        # todo: dit kan ook wel wat intelligenter...
-        if [ ! -f "/opt/api-server/init/done" ]; then
-          cd /opt/api-server
-          npm run init-database && touch /opt/api-server/init/done;
-        fi
-        NODE_ENV=development nodemon server.js
-      "
+      - ./apps/api-server:/opt/openstad-headless/apps/api-server
+      - openstad-api-server-node_modules:/opt/openstad-headless/apps/api-server/node_modules
+      - openstad-api-server-init:/opt/openstad-headless/apps/api-server/init
 
   openstad-auth-server:
     build:
-      context: apps/auth-server
+      target: development
+      context: .
       dockerfile: Dockerfile
+      args:
+        - APP=auth-server
+        - PORT=${AUTH_PORT}
+    image: openstad/headless-auth-server:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
       openstad-mysql:
@@ -120,32 +116,24 @@ services:
       - API_URL=${API_URL}
       - ADMIN_URL=${ADMIN_URL}
       - ALLOWED_ADMIN_DOMAINS=["${ADMIN_DOMAIN}"]
+      - NODE_ENV=development
     ports:
-      - "${AUTH_PORT}:${AUTH_PORT}"
+      - '${AUTH_PORT}:${AUTH_PORT}'
     volumes:
-      - ./apps/auth-server:/opt/auth-server
-      - openstad-auth-server-node_modules:/opt/auth-server/node_modules
-      - openstad-auth-server-certs:/opt/auth-server/certs
-      - openstad-auth-server-init:/opt/auth-server/init
-    entrypoint: |
-      bash -c "
-        # todo: dit kan ook wel wat intelligenter...
-        if [ ! -f "/opt/auth-server/init/done" ]; then
-          # create certificates');
-          cd /opt/auth-server/certs
-          /usr/bin/openssl genrsa -out privatekey.pem 2048
-          /usr/bin/openssl req -new -key privatekey.pem -out certrequest.csr -subj '/C=NL/ST=NA/L=NA/O=OpenStad/OU=OpenStad/CN=openstad.${AUTH_DOMAIN}'
-          /usr/bin/openssl x509 -req -in certrequest.csr -signkey privatekey.pem -out certificate.pem
-          cd /opt/auth-server
-          npm run init-database && touch /opt/auth-server/init/done;
-        fi
-        NODE_ENV=development nodemon server.js
-      "
+      - ./apps/auth-server:/opt/openstad-headless/apps/auth-server
+      - openstad-auth-server-node_modules:/opt/openstad-headless/apps/auth-server/node_modules
+      - openstad-auth-server-certs:/opt/openstad-headless/apps/auth-server/certs
+      - openstad-auth-server-init:/opt/openstad-headless/apps/auth-server/init
 
   openstad-image-server:
     build:
-      context: apps/image-server
+      target: development
+      context: .
       dockerfile: Dockerfile
+      args:
+        - APP=image-server
+        - PORT=${IMAGE_PORT_API}
+    image: openstad/headless-image-server:${RELEASE_VERSION:-latest}
     # TODO: dit moet conditional: alleen als we deze db gebruiken
     depends_on:
       openstad-mysql:
@@ -165,27 +153,24 @@ services:
       - THROTTLE_CC_PROCESSORS=${IMAGE_THROTTLE_CC_PROCESSORS}
       - THROTTLE_CC_PREFETCHER=${IMAGE_THROTTLE_CC_PREFETCHER}
       - THROTTLE_CC_REQUESTS=${IMAGE_THROTTLE_CC_REQUESTS}
+      - NODE_ENV=development
     ports:
-      - "${IMAGE_PORT_API}:${IMAGE_PORT_API}"
+      - '${IMAGE_PORT_API}:${IMAGE_PORT_API}'
     volumes:
-      - ./apps/image-server:/opt/image-server
-      - openstad-image-server-node_modules:/opt/image-server/node_modules
-      - openstad-image-server-images:/opt/image-server/images
-      - openstad-image-server-init:/opt/image-server/init
-    entrypoint: |
-      bash -c "
-        # todo: dit kan ook wel wat intelligenter...
-        if [ ! -f "/opt/image-server/init/done" ]; then
-          cd /opt/image-server
-          npm run init-database && touch /opt/image-server/init/done;
-        fi
-        NODE_ENV=development nodemon app.js
-      "
+      - ./apps/image-server:/opt/openstad-headless/apps/image-server
+      - openstad-image-server-node_modules:/opt/openstad-headless/apps/image-server/node_modules
+      - openstad-image-server-images:/opt/openstad-headless/apps/image-server/images
+      - openstad-image-server-init:/opt/openstad-headless/apps/image-server/init
 
   openstad-admin-server:
     build:
-      context: apps/web
+      target: development
+      context: .
       dockerfile: Dockerfile
+      args:
+        - APP=web
+        - PORT=${ADMIN_PORT}
+    image: openstad/headless-admin-server:${RELEASE_VERSION:-latest}
     container_name: openstad-admin-server
     restart: unless-stopped
     environment:
@@ -198,23 +183,10 @@ services:
       - API_URL=http://openstad-api-server:${API_PORT}
       - PORT=${ADMIN_PORT}
     ports:
-      - "${ADMIN_PORT}:${ADMIN_PORT}"
+      - '${ADMIN_PORT}:${ADMIN_PORT}'
     volumes:
-      - ./apps/web:/opt/admin-server
-      - openstad-admin-server-node_modules:/opt/admin-server/node_modules
-      - openstad-admin-server-init:/opt/admin-server/init
-    entrypoint: |
-      bash -c "
-        echo NEXTAUTH_URL $${NEXTAUTH_URL}
-        echo NEXTAUTH_SECRET $${NEXTAUTH_SECRET}
-        echo CLIENT_ID $${CLIENT_ID}
-        echo CLIENT_SECRET $${CLIENT_SECRET}
-        echo OAUTH_URL $${OAUTH_URL}
-        echo OAUTH_URL_INTERNAL $${OAUTH_URL_INTERNAL}
-        echo API_URL $${API_URL}
-        echo PORT $${PORT}
-        npm run dev
-      "
+      - ./apps/web:/opt/openstad-headless/apps/web
+      - openstad-admin-server-node_modules:/opt/openstad-headless/apps/web/node_modules
 
 volumes:
   openstad-mysql-data: {}
@@ -227,5 +199,3 @@ volumes:
   openstad-image-server-images: {}
   openstad-image-server-init: {}
   openstad-admin-server-node_modules: {}
-  openstad-admin-server-init: {}
-  
