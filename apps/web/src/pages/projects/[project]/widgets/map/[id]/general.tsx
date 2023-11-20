@@ -150,15 +150,15 @@ export default function WidgetMapGeneral() {
                 <FormLabel>
                   Opent op mobiel de lijst van ideeën over de kaart heen?
                 </FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={(e: string) => field.onChange(e === 'false')} value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Nee" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Yes">Ja</SelectItem>
-                    <SelectItem value="No">Nee</SelectItem>
+                    <SelectItem value="true">Ja</SelectItem>
+                    <SelectItem value="false">Nee</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

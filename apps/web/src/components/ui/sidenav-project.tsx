@@ -47,11 +47,6 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Instellingen</span>
             <ChevronDown
               size={16}
-              className={
-                location.includes('/settings')
-                  ? 'rotate-180 duration-200'
-                  : null
-              }
             />
           </Button>
         </Link>
@@ -131,11 +126,6 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Authenticatie</span>
             <ChevronDown
               size={16}
-              className={
-                location.includes('/authentication')
-                  ? 'rotate-180 duration-200'
-                  : null
-              }
             />
           </Button>
         </Link>
@@ -233,11 +223,21 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Gebieden</span>
           </Button>
         </Link>
+        <Link href={`/projects/${project}/duplicate`}>
+          <Button
+            variant={location.includes("/duplicate") ? "secondary" : "ghost"}
+            className="w-full flex justify-start"
+            onClick={(e) => {}}
+          >
+            <span className="truncate">Dupliceren</span>
+          </Button>
+        </Link>
         <Link href={`/projects/${project}/export`}>
           <Button
-            variant={location.includes('/export') ? 'secondary' : 'ghost'}
+            variant={location.includes("/export") ? "secondary" : "ghost"}
             className="w-full flex justify-start"
-            onClick={(e) => {}}>
+            onClick={(e) => {}}
+          >
             <span className="truncate">Exporteren</span>
           </Button>
         </Link>

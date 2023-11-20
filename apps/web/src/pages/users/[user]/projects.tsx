@@ -72,9 +72,7 @@ export default function CreateUserProjects() {
             <ul>
               {data.map((project: any) => {
                 return (
-                  <li
-                    className="grid grid-cols-1 lg:grid-cols-2 items-center py-3 h-fit hover:bg-secondary-background hover:cursor-pointer border-b border-border"
-                    key={project.id}>
+                  <li key={project.id} className="grid grid-cols-1 lg:grid-cols-2 items-center py-3 h-fit hover:bg-secondary-background hover:cursor-pointer border-b border-border">
                     <Paragraph className="truncate">{project.name}</Paragraph>
                     <Paragraph className="truncate">
                       <DropdownList

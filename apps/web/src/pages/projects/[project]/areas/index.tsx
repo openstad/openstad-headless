@@ -43,7 +43,7 @@ export default function ProjectAreas() {
 
             <ul>
               {data?.map((area: any) => (
-                <li className="grid grid-cols-2 lg:grid-cols-3 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                <li key={area.id} className="grid grid-cols-2 lg:grid-cols-3 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                   <Paragraph className="hidden lg:flex truncate">
                     {area.id}
                   </Paragraph>

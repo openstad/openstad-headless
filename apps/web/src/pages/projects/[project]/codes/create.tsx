@@ -18,16 +18,18 @@ import { Heading } from '@/components/ui/typography';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Separator } from '@/components/ui/separator';
-import useCodes from '@/hooks/use-codes';
+import { useProject } from '@/hooks/use-project';
+import useCode from '@/hooks/use-code';
 
 const formSchema = z.object({
-  numberOfCodes: z.coerce.number(),
-});
+  numberOfCodes: z.string(),
+})
 
 export default function ProjectCodeCreate() {
-  const router = useRouter();
-  const { project } = router.query;
-  const { create } = useCodes();
+    const router = useRouter();
+    const { project } = router.query;
+    const { data, isLoading } = useProject();
+    const { create } = useCode();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -35,17 +37,17 @@ export default function ProjectCodeCreate() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    create(values);
+    create(data.config.auth.provider.openstad.clientId, values.numberOfCodes)
   }
-
+    
   return (
     <div>
       <PageLayout
-        pageHeader="Projecten"
+        pageHeader='Projecten'
         breadcrumbs={[
           {
             name: 'Projecten',
-            url: '/projects',
+            url: '/projects'
           },
           {
             name: 'Stemcodes',
@@ -53,16 +55,9 @@ export default function ProjectCodeCreate() {
           },
           {
             name: 'Stemcodes toevoegen',
-            url: `projects/${project}/codes/create`,
+            url: `/projects/${project}/codes/create`,
           },
-        ]}
-        action={
-          <div className="flex">
-            <Link href="/projects/1/codes/export">
-              <Button variant="default">Exporteer stemcodes</Button>
-            </Link>
-          </div>
-        }>
+        ]}>
         <div className="container py-6">
           <Form {...form} className="p-6 bg-white rounded-md">
             <Heading size="xl">Toevoegen</Heading>
@@ -79,7 +74,7 @@ export default function ProjectCodeCreate() {
                       Hoeveelheid nieuwe codes om aan te maken:
                     </FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="" {...field} />
+                      <Input placeholder='' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

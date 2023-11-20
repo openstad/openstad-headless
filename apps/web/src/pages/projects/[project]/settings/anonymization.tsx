@@ -241,8 +241,8 @@ export default function ProjectSettingsAnonymization() {
                   <b> kan niet ongedaan gemaakt worden</b>.
                 </div>
                 <div className="mt-2">
-                  Het project moet eerst aangemerkt staan als beëindigd voordat
-                  deze actie uitgevoerd kan worden.
+                  Het project moet eerst aangemerkt staan als beëindigd
+                  voordat deze actie uitgevoerd kan worden.
                 </div>
                 <Button
                   variant={'destructive'}
