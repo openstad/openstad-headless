@@ -6,12 +6,14 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
+import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
+import toast from 'react-hot-toast';
 
 export default function ProjectTags() {
   const router = useRouter();
   const { project } = router.query;
 
-  const { data, isLoading } = useTags(project as string);
+  const { data, isLoading, removeTag } = useTags(project as string);
 
   if(!data) return null;
 
@@ -30,14 +32,12 @@ export default function ProjectTags() {
           },
         ]}
         action={
-          <div className="flex flex-row w-full md:w-auto my-auto">
-            <Link href={`/projects/${project}/tags/create`}>
-              <Button variant="default" className="text-xs p-2 w-fit">
-                <Plus size="20" className="hidden md:flex" />
-                Tag toevoegen
-              </Button>
-            </Link>
-          </div>
+          <Link href={`/projects/${project}/tags/create`} className="flex w-fit">
+            <Button variant="default">
+              <Plus size="20" className="hidden lg:flex" />
+              Tag toevoegen
+            </Button>
+          </Link>
         }>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
@@ -50,17 +50,38 @@ export default function ProjectTags() {
             </div>
             <ul>
               {data?.map((tag: any) => (
-                <li key={tag.id} className="grid grid-cols-2 lg:grid-cols-4 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
-                  <Paragraph className="hidden lg:flex truncate">{tag.id || null}</Paragraph>
-                  <Paragraph className="hidden lg:flex truncate">{tag.name || null}</Paragraph>
-                  <Paragraph className="flex truncate -mr-16">{tag.type}</Paragraph>
-                  <Paragraph className="flex">
-                    <ChevronRight
-                      strokeWidth={1.5}
-                      className="w-5 h-5 my-auto ml-auto"
-                    />
-                  </Paragraph>
-                </li>
+                <Link
+                href={`/projects/${project}/tags/${tag.id}`}
+                key={tag.id}>
+                  <li key={tag.id} className="grid grid-cols-2 lg:grid-cols-6 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                    <Paragraph className="my-auto -mr-16 lg:mr-0">{tag.id || null}</Paragraph>
+                    <Paragraph className="hidden lg:flex truncate my-auto">{tag.name || null}</Paragraph>
+                    <Paragraph className="hidden lg:flex truncate my-auto">{tag.type}</Paragraph>
+                    <div
+                      className="hidden lg:flex ml-auto"
+                      onClick={(e) => e.preventDefault()}>
+                      <RemoveResourceDialog
+                        header="Tag verwijderen"
+                        message="Weet je zeker dat je deze tag wilt verwijderen?"
+                        onDeleteAccepted={() =>
+                          removeTag(tag.id)
+                            .then(() =>
+                              toast.success('Tag successvol verwijderd')
+                            )
+                            .catch((e) =>
+                              toast.error('Tag kon niet worden verwijderd')
+                            )
+                        }
+                      />
+                    </div>
+                    <Paragraph className="flex">
+                      <ChevronRight
+                        strokeWidth={1.5}
+                        className="w-5 h-5 my-auto ml-auto"
+                      />
+                    </Paragraph>
+                  </li>
+                </Link>
               ))}  
             </ul>
           </div>
