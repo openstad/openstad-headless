@@ -1,5 +1,5 @@
 {
-  "name": "@openstad-headless/web",
+  "name": "@openstad-headless/admin-server",
   "description": "Next.js app that showcases openstad-headless widgets",
   "version": "0.1.0",
   "private": true,
