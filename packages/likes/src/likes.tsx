@@ -2,8 +2,7 @@ import 'remixicon/fonts/remixicon.css';
 import { ProgressBar } from '@openstad-headless/ui/src';
 import SessionStorage from '../../lib/session-storage.js';
 import DataStore from '@openstad-headless/data-store/src';
-import useSWR, { Fetcher } from 'swr';
-import { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import './likes.css';
 import loadWidget from '../../lib/load-widget.js';
 import hasRole from '../../lib/has-role';
@@ -19,21 +18,29 @@ type Props = {
       url: string;
     };
     votesNeeded?: number;
+    votes: {
+      isActive: boolean;
+      requiredUserRole: string;
+      voteType: string;
+      voteValues: Array<{
+        label: string;
+        value: string;
+      }>;
+    };
+    login: {
+      url: string;
+    };
   };
 };
 
 function Likes(props: Props) {
-  const projectId = props.projectId || props.config?.projectId;
-  const ideaId = props.ideaId || props.config?.ideaId;
-  const apIurl = props.apiUrl || props.config.api?.url;
   const necessaryVotes = props?.config?.votesNeeded || 50;
 
   const datastore = new DataStore(props);
   const session = new SessionStorage(props);
 
-  const [currentUser, currentUserError, currentUserIsLoading] =
-    datastore.useCurrentUser({ ...props });
-  const [idea, ideaError, ideaIsLoading] = datastore.useIdea({ ...props });
+  const [currentUser] = datastore.useCurrentUser({ ...props });
+  const [idea] = datastore.useIdea({ ...props });
   const [isBusy, setIsBusy] = useState(false);
 
   async function doVote(e, value) {
@@ -66,42 +73,41 @@ function Likes(props: Props) {
   }
 
   return (
-    <>
-      <div id="like-widget-container" onClick={(e) => doVote(e, 'yes')}>
-        <h3 className="like-widget-title">Likes</h3>
-        <div className="like-option">
-          <section className="like-kind">
-            <i className="ri-thumb-up-line"></i>
-            <div>Voor</div>
-          </section>
+    <div
+      className="openstad-widget"
+      id="like-widget-container"
+      onClick={(e) => doVote(e, 'yes')}>
+      <h3 className="like-widget-title">Likes</h3>
+      <div className="like-option">
+        <section className="like-kind">
+          <i className="ri-thumb-up-line"></i>
+          <div>Voor</div>
+        </section>
 
-          <section className="like-counter">
-            <p>
-              {idea.yes < 10 ? idea.yes.toString().padStart(2, '0') : idea.yes}
-            </p>
-          </section>
-        </div>
-        <div className="like-option" onClick={(e) => doVote(e, 'no')}>
-          <section className="like-kind">
-            <i className="ri-thumb-down-line"></i>
-            <div>Tegen</div>
-          </section>
-
-          <section className="like-counter">
-            <p>
-              {idea.no < 10 ? idea.no.toString().padStart(2, '0') : idea.no}
-            </p>
-          </section>
-        </div>
-
-        <div className="osc-progressbar-container">
-          <ProgressBar progress={(idea.yes / necessaryVotes) * 100} />
-          <p className="osc-progressbar-counter">
-            {idea.yes} /{necessaryVotes}
+        <section className="like-counter">
+          <p>
+            {idea.yes < 10 ? idea.yes.toString().padStart(2, '0') : idea.yes}
           </p>
-        </div>
+        </section>
       </div>
-    </>
+      <div className="like-option" onClick={(e) => doVote(e, 'no')}>
+        <section className="like-kind">
+          <i className="ri-thumb-down-line"></i>
+          <div>Tegen</div>
+        </section>
+
+        <section className="like-counter">
+          <p>{idea.no < 10 ? idea.no.toString().padStart(2, '0') : idea.no}</p>
+        </section>
+      </div>
+
+      <div className="osc-progressbar-container">
+        <ProgressBar progress={(idea.yes / necessaryVotes) * 100} />
+        <p className="osc-progressbar-counter">
+          {idea.yes} /{necessaryVotes}
+        </p>
+      </div>
+    </div>
   );
 }
 
