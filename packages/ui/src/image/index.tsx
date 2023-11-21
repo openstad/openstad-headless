@@ -10,9 +10,9 @@ export function Image({
   return (
     <div
       onClick={props.onClick}
-      className={`openstad-image-container ${props.className}`}>
+      className={`osc osc-image-container ${props.className}`}>
       <img alt={props.alt} {...props} />
-      <div className="openstad-image-footer">{imageFooter}</div>
+      <div className="osc-image-footer">{imageFooter}</div>
     </div>
   );
 }

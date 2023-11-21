@@ -11,12 +11,12 @@ type Props = React.InputHTMLAttributes<HTMLInputElement> & {
 const Input = forwardRef<HTMLInputElement, Props>((props, ref) => {
   return (
     <>
-      {props.label ? <p className="input-label">{props.label}</p> : null}
+      {props.label ? <p className="osc input-label">{props.label}</p> : null}
       <input
         ref={ref}
         type="text"
         {...props}
-        className={`input ${props.errors ? 'alert' : null} ${props.className}`}
+        className={`osc ${props.errors ? 'alert' : null} ${props.className}`}
       />
 
       {props.errors ? (

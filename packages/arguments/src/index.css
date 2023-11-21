@@ -16,7 +16,7 @@
  }
  
  p.reaction-name { 
-   color: var(--foreground, black);
+   color: var(--osc-foreground, black);
  }
  .argument-item-header {
    display: flex;
@@ -32,7 +32,7 @@
  .reaction-container {
    margin-top: 1rem;
    padding-left: 1rem;
-   border-left: 1px solid var(--border);
+   border-left: 1px solid var(--osc-border);
  }
 
  .reaction-input-container {
@@ -40,5 +40,5 @@
  }
 
  hr {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--osc-border);
  }

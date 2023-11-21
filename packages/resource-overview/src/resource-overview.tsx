@@ -26,7 +26,7 @@ const defaultHeaderRenderer = (resources?: any) => {
       <Banner>
         <Spacer size={12} />
       </Banner>
-      <section className="osc2-resource-overview-title-container">
+      <section className="osc-resource-overview-title-container">
         <Spacer size={2} />
         <h4>Plannen</h4>
       </section>
@@ -42,7 +42,7 @@ const defaultItemRenderer = (resource: any) => {
         onClick={() => console.log({ resource })}
         imageFooter={
           <div>
-            <p className="osc2-resource-overview-content-item-status">
+            <p className="osc-resource-overview-content-item-status">
               {resource.status === 'OPEN' ? 'Open' : 'Gesloten'}
             </p>
           </div>
@@ -51,11 +51,11 @@ const defaultItemRenderer = (resource: any) => {
       <div>
         <Spacer size={1} />
         <h6>{resource.title}</h6>
-        <p className="osc2-resource-overview-content-item-description">
+        <p className="osc-resource-overview-content-item-description">
           {resource.description}
         </p>
       </div>
-      <div className="osc2-resource-overview-content-item-footer">
+      <div className="osc-resource-overview-content-item-footer">
         <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} />
         <Icon icon="ri-thumb-down-line" variant="big" text={resource.yes} />
         <Icon icon="ri-message-line" variant="big" text="0" />
@@ -75,13 +75,13 @@ function ResourceOverview({
   const [ideas] = datastore.useIdeas({ ...props });
 
   return (
-    <>
+    <div className="openstad-widget">
       {renderHeader()}
 
       <Spacer size={2} />
 
       <section
-        className={`osc2-resource-overview-content ${
+        className={`osc-resource-overview-content ${
           !allowFiltering ? 'full' : ''
         }`}>
         {allowFiltering && datastore ? (
@@ -95,7 +95,7 @@ function ResourceOverview({
           />
         ) : null}
 
-        <section className="osc2-resource-overview-resource-collection">
+        <section className="osc-resource-overview-resource-collection">
           {ideas &&
             ideas.map((resource: any) => {
               return (
@@ -106,7 +106,7 @@ function ResourceOverview({
             })}
         </section>
       </section>
-    </>
+    </div>
   );
 }
 

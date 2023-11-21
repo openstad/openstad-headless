@@ -8,7 +8,7 @@ export function Banner(
   return (
     <div
       {...props}
-      className={`banner ${props.big ? 'big' : ''} ${props.className}`}>
+      className={`osc osc-banner ${props.big ? 'big' : ''} ${props.className}`}>
       {props.children}
     </div>
   );

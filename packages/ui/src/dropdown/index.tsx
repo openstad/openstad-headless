@@ -15,11 +15,11 @@ export const DropDownMenu = ({
     <DropdownMenu.Trigger asChild>{children}</DropdownMenu.Trigger>
 
     <DropdownMenu.Portal>
-      <DropdownMenu.Content className="DropdownMenuContent" sideOffset={5}>
+      <DropdownMenu.Content className="Osc-DropdownMenuContent" sideOffset={5}>
         {items.map((item) => (
           <DropdownMenu.Item
             key={`dialog-option-${item.label}`}
-            className="DropdownMenuItem"
+            className="Osc-DropdownMenuItem"
             onClick={() => item.onClick()}>
             {item.label}
           </DropdownMenu.Item>

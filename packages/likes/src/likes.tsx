@@ -31,12 +31,12 @@ function Likes(props: Props) {
   const datastore = new DataStore(props);
   const session = new SessionStorage(props);
 
-  const [currentUser, currentUserError, currentUserIsLoading] = datastore.useCurrentUser({ ...props });
+  const [currentUser, currentUserError, currentUserIsLoading] =
+    datastore.useCurrentUser({ ...props });
   const [idea, ideaError, ideaIsLoading] = datastore.useIdea({ ...props });
-  const [isBusy, setIsBusy] = useState(false)
+  const [isBusy, setIsBusy] = useState(false);
 
   async function doVote(e, value) {
-
     if (e) e.stopPropagation();
 
     if (isBusy) return;
@@ -46,26 +46,28 @@ function Likes(props: Props) {
       return;
     }
 
-    if (!currentUser.role || !hasRole(currentUser, props.config.votes.requiredUserRole)) {
+    if (
+      !currentUser.role ||
+      !hasRole(currentUser, props.config.votes.requiredUserRole)
+    ) {
       // login
       session.set('osc-idea-vote-pending', { [idea.id]: value });
-      return document.location.href = props.config.login.url;
+      return (document.location.href = props.config.login.url);
     }
 
     let change = {};
     if (idea.userVote) change[idea.userVote.opinion] = -1;
 
     await idea.submitLike({
-      opinion: value
-    })
+      opinion: value,
+    });
 
     setIsBusy(false);
-
   }
 
   return (
     <>
-      <div id="like-widget-container" onClick={e => doVote(e, 'yes')}>
+      <div id="like-widget-container" onClick={(e) => doVote(e, 'yes')}>
         <h3 className="like-widget-title">Likes</h3>
         <div className="like-option">
           <section className="like-kind">
@@ -79,7 +81,7 @@ function Likes(props: Props) {
             </p>
           </section>
         </div>
-        <div className="like-option" onClick={e => doVote(e, 'no')}>
+        <div className="like-option" onClick={(e) => doVote(e, 'no')}>
           <section className="like-kind">
             <i className="ri-thumb-down-line"></i>
             <div>Tegen</div>
@@ -92,9 +94,9 @@ function Likes(props: Props) {
           </section>
         </div>
 
-        <div className="progressbar-container">
+        <div className="osc-progressbar-container">
           <ProgressBar progress={(idea.yes / necessaryVotes) * 100} />
-          <p className="progressbar-counter">
+          <p className="osc-progressbar-counter">
             {idea.yes} /{necessaryVotes}
           </p>
         </div>
