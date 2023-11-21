@@ -24,57 +24,51 @@
     --osc-radius: .25rem;
 }
 
-
-/* openstad-widget should only be used at the very top of the widget this defines the default styling for all texts in the widgets */
-.osc, .osc *, .openstad-widget, .openstad-widget * {
+.osc, .osc * {
     font-family:'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
 }
 
-.osc h1, osc .h2, osc h3, osc h4, osc h5, osc h6 {
+.osc h1, .osc h2, .osc h3, .osc h4, .osc h5, .osc h6 {
     color: var(--osc-foreground, black);
     margin: 0;
+    padding: 0;
 }
 
-.openstad-widget h1, .openstad-widget .h2, .openstad-widget h3, .openstad-widget h4, .openstad-widget h5, .openstad-widget h6 {
-    color: var(--osc-foreground, black);
-    margin: 0;
-}
-
-.osc h1, .openstad-widget h1 {
+.osc h1 {
     font-size: 3.75rem;
     font-weight: bold;
     line-height: auto;
 }
 
-.osc h2, .openstad-widget h2 {
+.osc h2  {
     font-size: 3rem;
     font-weight: bold;
     line-height: auto;
 }
 
-.osc h3, .openstad-widget h3 {
+.osc h3 {
     font-size: 2.125rem;
     font-weight: bold;
     line-height: auto;
 }
-.osc h4, .openstad-widget h4 {
+.osc h4 {
     font-size: 1.5rem;
     font-weight: bold;
     line-height: auto;
 }
-.osc h5, .openstad-widget h5  {
+.osc h5 {
     font-size: 1.25rem;
     font-weight: bold;
     line-height: auto;
 }
-.osc h6, .openstad-widget h6  {
+
+.osc h6 {
     font-size: 1rem;
     font-weight: 400;
     line-height: 24px;
 }
 
-
-.osc p, .openstad-widget p { 
+.osc p { 
     color: var(--osc-muted, black);
     font-size: 0.875rem;
     font-weight: 400;
@@ -83,7 +77,7 @@
     text-align: left;
 }
 
-.osc p.strong, .openstad-widget p.strong {
+.osc p.strong {
     color: var(--osc-foreground, black);
     letter-spacing: 0px;
     font-size: 0.875rem;
@@ -92,7 +86,7 @@
     letter-spacing: 0px;
 }
 
-.osc p.helptext, widget p.helptext {
+.osc p.helptext {
     margin: .5 0;
     font-size: 0.75rem;
     font-weight: 400;
@@ -102,10 +96,10 @@
     color: var(--osc-muted);
 }
 
-.osc p.helptext > i, .openstad-widget p.helptext > i  {
+.osc p.helptext > i {
     margin-right: .25rem;
 }
 
-.osc p.helptext.error .openstad-widget {
+.osc p.helptext.error {
     color: var(--osc-destructive);
 }

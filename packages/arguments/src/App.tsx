@@ -43,7 +43,7 @@ function App(props: Props) {
   ];
 
   return (
-    <div className="openstad-widget">
+    <div className="osc">
       <h3 className="arguments-title">Argumenten</h3>
       <hr />
 

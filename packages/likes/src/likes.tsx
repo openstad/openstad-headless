@@ -74,7 +74,7 @@ function Likes(props: Props) {
 
   return (
     <div
-      className="openstad-widget"
+      className="osc"
       id="like-widget-container"
       onClick={(e) => doVote(e, 'yes')}>
       <h3 className="like-widget-title">Likes</h3>

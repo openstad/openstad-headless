@@ -75,7 +75,7 @@ function ResourceOverview({
   const [ideas] = datastore.useIdeas({ ...props });
 
   return (
-    <div className="openstad-widget">
+    <div className="osc">
       {renderHeader()}
 
       <Spacer size={2} />
