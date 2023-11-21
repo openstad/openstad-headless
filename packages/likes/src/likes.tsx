@@ -86,7 +86,9 @@ function Likes(props: Props) {
 
         <section className="like-counter">
           <p>
-            {idea.yes < 10 ? idea.yes.toString().padStart(2, '0') : idea.yes}
+            {idea.yes && idea.yes < 10
+              ? idea.yes.toString().padStart(2, '0')
+              : idea.yes || (0).toString().padStart(2, '0')}
           </p>
         </section>
       </div>
@@ -97,14 +99,18 @@ function Likes(props: Props) {
         </section>
 
         <section className="like-counter">
-          <p>{idea.no < 10 ? idea.no.toString().padStart(2, '0') : idea.no}</p>
+          <p>
+            {idea.no < 10
+              ? idea.no.toString().padStart(2, '0')
+              : idea.no || (0).toString().padStart(2, '0')}
+          </p>
         </section>
       </div>
 
       <div className="osc-progressbar-container">
         <ProgressBar progress={(idea.yes / necessaryVotes) * 100} />
         <p className="osc-progressbar-counter">
-          {idea.yes} /{necessaryVotes}
+          {idea.yes || 0} /{necessaryVotes}
         </p>
       </div>
     </div>
