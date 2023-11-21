@@ -1,5 +1,6 @@
 import { Input, Spacer } from '@openstad-headless/ui/src';
 import { SecondaryButton } from '@openstad-headless/ui/src/button';
+import React from 'react';
 import { useState } from 'react';
 
 export default function ({
@@ -14,6 +15,7 @@ export default function ({
   return (
     <div className="reaction-input-container">
       <Input
+        className="opentstad-arguments-reaction-input"
         onFocus={() => setShowButton(true)}
         onBlur={() => !value && setShowButton(false)}
         placeholder="Type hier uw reactie"

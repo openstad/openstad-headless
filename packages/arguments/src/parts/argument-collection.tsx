@@ -5,6 +5,7 @@ import { Button, Spacer } from '@openstad-headless/ui/src';
 import { Banner } from '@openstad-headless/ui/src';
 import ReactionItem from './reaction.js';
 import ReactionInput from './reaction-input.js';
+import React from 'react';
 
 type Props = {
   title: string;
@@ -37,6 +38,8 @@ function ArgumentsCollection(props: Props) {
 
       {reactionOpen && loggedIn ? (
         <div className="input-container">
+          <Spacer size={1} />
+
           <ReactionInput resourceId={resourceId} />
           <Spacer size={1} />
         </div>

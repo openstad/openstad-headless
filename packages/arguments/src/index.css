@@ -39,6 +39,10 @@
     text-align: right;
  }
 
+ .reaction-input-container .opentstad-arguments-reaction-input {
+  padding: 1rem .5rem;  
+}
+
  hr {
   border-top: 1px solid var(--osc-border);
  }

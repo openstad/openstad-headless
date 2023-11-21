@@ -4,6 +4,7 @@ import { GhostButton } from '@openstad-headless/ui/src';
 import { Reaction } from '../types/index.js';
 import ReactionInput from './reaction-input.js';
 import { DropDownMenu } from '@openstad-headless/ui/src';
+import React from 'react';
 
 export default function ReactionItem({
   resourceId,
