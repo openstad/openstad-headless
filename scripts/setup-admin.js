@@ -22,12 +22,12 @@ PORT=${process.env.ADMIN_PORT}
 `
     console.log('------------------------------');
     console.log('Create config file');
-    await fs.writeFileSync('./apps/web/.env', imgConfig);
+    await fs.writeFileSync('./apps/admin-server/.env', imgConfig);
 
     // npm i
     console.log('------------------------------');
     console.log('Execute `npm i`');
-    await execute('npm', ['i'], { cwd: './apps/web' });
+    await execute('npm', ['i'], { cwd: './apps/admin-server' });
     
   } catch(err) {
     console.log('------------------------------');
