@@ -39,8 +39,8 @@ function Likes(props: Props) {
   const datastore = new DataStore(props);
   const session = new SessionStorage(props);
 
-  const [currentUser] = datastore.useCurrentUser({ ...props });
-  const [idea] = datastore.useIdea({ ...props });
+  const [currentUser] = datastore.useCurrentUser(props);
+  const [idea] = datastore.useIdea(props);
   const [isBusy, setIsBusy] = useState(false);
 
   async function doVote(e, value) {
