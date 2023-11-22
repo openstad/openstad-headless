@@ -2,6 +2,13 @@ import React from 'react';
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import { useRouter } from 'next/router';
 import ChoicesSelectorForm from './form';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '../../../../../../components/ui/tabs';
+import Preview from '@/components/widget-preview';
 
 export default function WidgetKeuzewijzer() {
   const router = useRouter();
@@ -26,9 +33,18 @@ export default function WidgetKeuzewijzer() {
           },
         ]}>
         <div className="container py-6">
-          <div className="p-6 bg-white rounded-md">
-            <ChoicesSelectorForm />
-          </div>
+          <Tabs defaultValue="preview">
+            <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
+              <TabsTrigger value="preview">Preview</TabsTrigger>
+              <TabsTrigger value="form">Form</TabsTrigger>
+            </TabsList>
+            <TabsContent value="form" className="p-0">
+              <ChoicesSelectorForm />
+            </TabsContent>
+            <TabsContent value="preview" className="p-0">
+              <Preview type="keuzewijzer" />
+            </TabsContent>
+          </Tabs>
         </div>
       </PageLayout>
     </div>
