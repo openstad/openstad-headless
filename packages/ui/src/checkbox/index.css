@@ -1,4 +1,4 @@
-.osc-checkbox {
+.osc .checkbox {
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -8,7 +8,7 @@
     border-radius: .5rem;
 }
 
-.osc-checkbox.checked {
+.osc .checkbox.checked {
    background-color: var(--osc-secondary);
    color: var(--osc-secondary-foreground);
 }

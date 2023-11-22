@@ -1,21 +1,19 @@
-
-  
-  .osc-progressbar {
+.osc .progressbar {
       height: .5rem;
       width: 100%;
       background-color: var(--osc-border);
       border-radius: 50px;
       overflow-x: hidden;
-    }
-    
-    .osc-progressbar-tracker {
-      height: 100%;
-      background-color: var(--osc-primary);
-      border-radius: inherit;
-    }
-  
-    .osc-progressbar-counter {
-      font-weight: 600;
-      text-align: center;
-      color: var(--osc-foreground)
-    }
+}
+
+.osc .progressbar-tracker {
+  height: 100%;
+  background-color: var(--osc-primary);
+  border-radius: inherit;
+}
+
+.osc .progressbar-counter {
+  font-weight: 600;
+  text-align: center;
+  color: var(--osc-foreground)
+}

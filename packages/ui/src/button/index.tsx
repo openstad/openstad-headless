@@ -11,7 +11,7 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (props, ref) => {
     return (
-      <button ref={ref} {...props} className={`osc ${props.className}`}>
+      <button ref={ref} {...props} className={`${props.className}`}>
         {props.icon && !props.iconBack ? <i className={props.icon}></i> : null}
         {props.children}
         {props.icon && props.iconBack ? <i className={props.icon}></i> : null}

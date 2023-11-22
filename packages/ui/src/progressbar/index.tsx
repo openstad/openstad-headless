@@ -12,8 +12,8 @@ const ProgressBar = (
   };
 
   return (
-    <div className="osc osc-progressbar">
-      <div className="osc-progressbar-tracker" style={fillerStyles}></div>
+    <div className="progressbar">
+      <div className="progressbar-tracker" style={fillerStyles}></div>
     </div>
   );
 };

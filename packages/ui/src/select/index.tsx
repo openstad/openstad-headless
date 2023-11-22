@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef } from 'react';
 import './index.css';
 
 type Props = {
@@ -14,13 +14,13 @@ const Select = forwardRef<HTMLSelectElement, Props>(
       <select
         ref={ref}
         {...props}
-        className={`osc osc-select ${props.className}`}
+        className={`select ${props.className}`}
         onChange={(e) => onValueChange && onValueChange(e.target.value)}>
         {props.children}
 
         {selectOptions.map((option) => (
           <React.Fragment key={`select-item-${option.label}`}>
-            <option className="osc-select-item" value={option.value}>
+            <option className="select-item" value={option.value}>
               {option.label}
             </option>
           </React.Fragment>

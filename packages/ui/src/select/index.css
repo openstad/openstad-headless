@@ -1,26 +1,26 @@
-.osc-select {
+.osc .select {
     padding: .5rem;
     background-color: var(--osc-background);
     border: 1px solid var(--osc-border);
     border-radius: 6px;
 }
 
-.osc-select-header {
+.osc .select-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0rem 1rem;
 }
 
-.osc-select-item {
+.osc .select-item {
     padding: 0rem 1rem;
 }
 
-.osc-select-item.selected {
+.osc .select-item.selected {
     background-color: red;
 }
 
 
-.osc-select-item:hover {
+.osc .select-item:hover {
     background-color: var(--osc-border);
 }

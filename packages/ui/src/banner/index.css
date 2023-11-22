@@ -1,4 +1,4 @@
-.osc-banner {
+.osc .banner {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -7,12 +7,12 @@
     padding:.5rem
 }
 
-.osc-banner > p {
+.osc .banner > p {
 
     color: var(--osc-card-foreground);
 }
 
-.osc-banner.big {
+.osc .banner.big {
     justify-content: center;
     padding: 3rem 2rem;
     border: 1px solid var(--osc-border);

@@ -1,4 +1,4 @@
-button.osc {
+.osc button {
     padding: 0.625rem 3rem 0.625rem 3rem;
     border: none;
     border-radius: 0.375rem;
@@ -8,11 +8,11 @@ button.osc {
     text-align: center;
 }
 
-button.osc.secondary {
+.osc button.secondary {
     background-color: var(--osc-secondary);
 }
 
-button.osc.ghost {
+.osc button.ghost {
     padding: 0;
     display: inline-flex;
     align-items: center;
@@ -22,24 +22,24 @@ button.osc.ghost {
     color: var(--osc-foreground)
 }
 
-button.osc > i {
+.osc button > i {
     font-size: 1.5rem;
 }
 
-button.osc:hover {
+.osc button:hover {
     background-color: var(--osc-primary-hover);
 }
 
-button.osc.secondary:hover {
+.osc button.secondary:hover {
     background-color: var(--osc-secondary-hover);
 }
 
-button.osc.ghost:hover {
+.osc button.ghost:hover {
     color: var(--osc-muted);
     background-color: var(--osc-background);
 }
 
-button.osc:disabled {
+.osc button:disabled {
     opacity: .5;
     cursor: not-allowed;
 }

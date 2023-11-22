@@ -1,38 +1,38 @@
-.osc-multi-select {
+.osc .multi-select {
     background-color: var(--osc-background);
     border: 1px solid var(--osc-border);
     border-radius: 6px;
 }
 
-.osc-multi-select-header {
+.osc .multi-select-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: .25rem 0rem;
 }
 
-.osc-multi-select-header > p{
+.osc .multi-select-header > p{
    margin: 0 1rem;
    color: var(--osc-foreground);
 }
 
-.osc-multi-select-header > .osc-icon {
+.osc .multi-select-header > .osc-icon {
     color: var(--osc-foreground);
     font-weight: lighter;
     gap: 0; 
 }
 
-.osc-multi-select-item {
+.osc .multi-select-item {
     display: flex;
     align-items: center;
     padding: 0rem 1rem;
     gap: 1rem;
 }
 
-.osc-multi-select-item p {
+.osc .multi-select-item p {
     color: var(--osc-foreground);
 }
 
-.osc-multi-select-item:hover {
+.osc .multi-select-item:hover {
     background-color: var(--osc-border);
 }

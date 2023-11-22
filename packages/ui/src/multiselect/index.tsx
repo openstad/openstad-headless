@@ -17,9 +17,9 @@ export function MultiSelect({
   const [isOpen, setOpen] = useState<boolean>(defaultOpen || false);
 
   return (
-    <div className="osc osc-multi-select">
+    <div className="multi-select">
       <div
-        className="osc-multi-select-header"
+        className="multi-select-header"
         onClick={() => {
           setOpen(!isOpen);
         }}>
@@ -36,8 +36,8 @@ export function MultiSelect({
                     const value = option.value;
                     onItemSelected(value);
                   }}
-                  className="osc-multi-select-item"
-                  key={`osc-multi-select-item-${option.label}`}>
+                  className="multi-select-item"
+                  key={`multi-select-item-${option.label}`}>
                   <Checkbox checked={option.checked} />
                   <p>{option.label}</p>
                 </div>

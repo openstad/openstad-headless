@@ -34,6 +34,10 @@
     padding: 0;
 }
 
+.osc figure {
+    margin: 0;
+}
+
 .osc h1 {
     font-size: 3.75rem;
     font-weight: bold;

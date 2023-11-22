@@ -1,4 +1,4 @@
-input.osc {
+.osc input {
     width: 100%;
     margin :0;
     color: var(--osc-muted);
@@ -7,36 +7,34 @@ input.osc {
     box-sizing: border-box;
 }
 
-input.osc::placeholder {
+.osc input::placeholder {
     color: var(--osc-muted);
     opacity: 1; /* Firefox */
   }
   
-input.osc::-ms-input-placeholder { /* Edge 12 -18 */
+.osc input::-ms-input-placeholder { /* Edge 12 -18 */
   color: var(--osc-muted);
 }
 
-input.osc:focus {
+.osc input:focus {
   outline-color: var(--osc-secondary);
 }
 
-input.osc.alert {
+.osc input.alert {
   outline-color: var(--osc-destructive);
   border: 1px solid var(--osc-destructive);
 }
 
-input.osc:disabled {
+.osc input:disabled {
   opacity: .5;
   cursor: not-allowed;
 }
 
-p.osc.input-label {
+.osc p.input-label {
   margin: .5rem 0rem;
-
   font-size: 14px;
   font-weight: 600;
   line-height: 19px;
   letter-spacing: 0px;
-
   color: var(--osc-foreground);
 }
