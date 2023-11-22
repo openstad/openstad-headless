@@ -1,4 +1,4 @@
-#like-widget-container {
+.like-widget-container {
   font-family: 'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
 
   display: grid;

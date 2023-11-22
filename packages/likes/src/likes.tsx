@@ -74,8 +74,7 @@ function Likes(props: Props) {
 
   return (
     <div
-      className="osc"
-      id="like-widget-container"
+      className="osc like-widget-container"
       onClick={(e) => doVote(e, 'yes')}>
       <h3 className="like-widget-title">Likes</h3>
       <div className="like-option">
