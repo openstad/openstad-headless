@@ -12,7 +12,7 @@ export function Icon({
   variant?: 'small' | 'regular' | 'big';
 }) {
   return (
-    <div className={`osc-2-icon ${text === undefined ? 'no-label' : ''}`}>
+    <div className={`icon ${text === undefined ? 'no-label' : ''}`}>
       <i className={`${icon} ${variant}`}></i>
       <p>{text}</p>
     </div>

@@ -112,11 +112,11 @@ export function Filters({
 
   return (
     <section>
-      <div className="osc2-resource-overview-filters">
+      <div className="osc-resource-overview-filters">
         <Input
           ref={searchRef}
           onChange={(e) => search(e.target.value)}
-          className="osc2-resource-overview-search"
+          className="osc-resource-overview-search"
           placeholder="Zoeken"
         />
 

@@ -1,5 +1,5 @@
 
-.openstad-image-container {
+.osc .image-container {
     width: 100%;
     aspect-ratio: 16/9;
     border-radius: 4px;
@@ -8,29 +8,27 @@
 
 }
 
-.openstad-image-container.selected {
-    border: 4px solid var(--primary);
+.osc .image-container.selected {
+    border: 4px solid var(--osc-primary);
 }
 
-.openstad-image-container > img {
+.osc .image-container > img {
     width: 100%;
     height: 100%;
     background: #212529;
     border-radius: 4px;
 }
 
-.openstad-image-container > .openstad-image-footer {
+.osc .image-container > .image-footer {
     display: flex;
     width: 100%;
     position: absolute;
     bottom: 0;
-    
     gap: 1rem;
     box-sizing: border-box;
     padding: 1rem 1rem;
-
 }
 
-.openstad-image-footer > * {
+.osc .image-footer > * {
     flex-grow: 1;
 }

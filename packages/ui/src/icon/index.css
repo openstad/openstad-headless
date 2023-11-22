@@ -1,4 +1,4 @@
-.osc-2-icon {
+.osc .icon {
     display: inline-flex;  
     justify-items: center;
     align-items: center;
@@ -6,19 +6,19 @@
     font-weight: 600;
   }
 
-  .osc-2-icon.no-label {
+  .osc .icon.no-label {
     gap: 0rem;
   }
 
 
-  .osc-2-icon > i.big {
+  .osc .icon > i.big {
     font-size: 24px;
   }
 
-  .osc-2-icon > i.regular {
+  .osc .icon > i.regular {
     font-size: 16px;
   }
 
-  .osc-2-icon > i.small {
+  .osc .icon > i.small {
     font-size: 8px;
   }

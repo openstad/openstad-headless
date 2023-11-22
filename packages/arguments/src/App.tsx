@@ -4,6 +4,7 @@ import './index.css';
 import { Toaster } from 'react-hot-toast';
 import ArgumentsCollection from './parts/argument-collection';
 import { Reaction } from './types';
+import React from 'react';
 
 type Props = {
   // projectId?: string;
@@ -42,7 +43,7 @@ function App(props: Props) {
   ];
 
   return (
-    <>
+    <div className="osc">
       <h3 className="arguments-title">Argumenten</h3>
       <hr />
 
@@ -62,7 +63,7 @@ function App(props: Props) {
           }
         />
       </div>
-    </>
+    </div>
   );
 }
 

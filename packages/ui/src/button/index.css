@@ -1,45 +1,45 @@
-button {
+.osc button {
     padding: 0.625rem 3rem 0.625rem 3rem;
     border: none;
     border-radius: 0.375rem;
     gap: .5rem;
-    background-color: var(--primary);
-    color: var(--primary-foreground);
+    background-color: var(--osc-primary);
+    color: var(--osc-primary-foreground);
     text-align: center;
 }
 
-button.secondary {
-    background-color: var(--secondary);
+.osc button.secondary {
+    background-color: var(--osc-secondary);
 }
 
-button.ghost {
+.osc button.ghost {
     padding: 0;
     display: inline-flex;
     align-items: center;
     gap: .5rem;
     border: none;
-    background-color: var(--background);
-    color: var(--foreground)
+    background-color: var(--osc-background);
+    color: var(--osc-foreground)
 }
 
-button > i {
+.osc button > i {
     font-size: 1.5rem;
 }
 
-button:hover {
-    background-color: var(--primary-hover);
+.osc button:hover {
+    background-color: var(--osc-primary-hover);
 }
 
-button.secondary:hover {
-    background-color: var(--secondary-hover);
+.osc button.secondary:hover {
+    background-color: var(--osc-secondary-hover);
 }
 
-button.ghost:hover {
-    color: var(--muted);
-    background-color: var(--background);
+.osc button.ghost:hover {
+    color: var(--osc-muted);
+    background-color: var(--osc-background);
 }
 
-button:disabled {
+.osc button:disabled {
     opacity: .5;
     cursor: not-allowed;
 }
