@@ -5,13 +5,6 @@ import { Button } from '../../../components/ui/button';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
-import { useProject } from '@/hooks/use-project';
-import useVotes from '@/hooks/use-votes';
-import useIdeas from '@/hooks/use-ideas';
-import useTags from '@/hooks/use-tags';
-import useComments from '@/hooks/use-comments';
-import usePolls from '@/hooks/use-poll';
-import useActions from '@/hooks/use-actions';
 import useExport from '@/hooks/use-export';
 
 export default function ProjectExport() {
