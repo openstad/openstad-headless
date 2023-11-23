@@ -29,7 +29,7 @@ const config = {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <div className="osc">
-      <Likes projectId="2" ideaId="1" config={config} variant="medium" />
+      <Likes projectId="2" ideaId="1" config={config} variant="small" />
     </div>
   </React.StrictMode>
 );

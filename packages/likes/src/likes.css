@@ -9,13 +9,6 @@
   color: var(--osc-muted);
 }
 
-.like-widget-container.small {
-  display: inline-grid;
-}
-
-.like-widget-container.medium {
-}
-
 .like-option-container {
   display: grid;
   gap: .5rem;
