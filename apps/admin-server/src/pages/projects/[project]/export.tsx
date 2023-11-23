@@ -26,8 +26,7 @@ export default function ProjectExport() {
 
 
   function transform() {
-    const totalData = {data};
-    const jsonData = JSON.stringify(totalData);
+    const jsonData = JSON.stringify(data);
     exportData(jsonData, `${data.name}.json`, "application/json");
   }
 

@@ -14,6 +14,26 @@ const authSettings = require('../../util/auth-settings');
 
 let router = express.Router({mergeParams: true});
 
+function getProject(req, res, next) {
+	const projectId = req.params.projectId;
+	let query;
+	if (req?.route?.path === '/:projectId(\\d+)/export') {
+		query = { where: { id: parseInt(projectId) }, include: [{model: db.Idea, include: [{model: db.Tag}, {model: db.Vote}, {model: db.Comment, as: 'commentsFor'}, {model: db.Comment, as: 'commentsAgainst'}, {model: db.Poll, as: 'poll'}]}, {model: db.Tag}] }
+	} else {
+		query = { where: { id: parseInt(projectId) } }
+	}
+	db.Project
+		.scope(req.scope)
+		.findOne(query)
+		.then(found => {
+			if ( !found ) throw new Error('Project not found');
+			req.results = found;
+			req.project = req.results; // middleware expects this to exist
+			next();
+		})
+		.catch(next);
+}
+
 // scopes
 // ------
 router
@@ -143,18 +163,7 @@ router.route('/issues')
 router.route('/:projectId') //(\\d+)
 	.all(auth.can('Project', 'view'))
 	.all(function(req, res, next) {
-		const projectId = req.params.projectId;
-		let query = { where: { id: parseInt(projectId) } }
-		db.Project
-			.scope(req.scope)
-			.findOne(query)
-			.then(found => {
-				if ( !found ) throw new Error('Project not found');
-				req.results = found;
-				req.project = req.results; // middleware expects this to exist
-				next();
-			})
-			.catch(next);
+		getProject(req, res, next)
 	})
 
 // view project
@@ -231,21 +240,7 @@ router.route('/:projectId') //(\\d+)
 router.route('/:projectId(\\d+)/export')
 	.all(auth.can('Project', 'view'))
 	.all(function(req, res, next) {
-		const projectId = req.params.projectId;
-		let query = { where: { id: parseInt(projectId) }, include: [{model: db.Idea, include: [{model: db.Tag}, {model: db.Vote}, {model: db.Comment, as: 'commentsFor'}, {model: db.Comment, as: 'commentsAgainst'}, {model: db.Poll, as: 'poll'}]}, {model: db.Tag}] }
-		db.Project
-			.scope(req.scope)
-			.findOne(query)
-			.then(found => {
-				if ( !found ) throw new Error('Project not found');
-				req.results = found;
-				req.project = req.results; // middleware expects this to exist
-
-				next();
-			})
-			.catch(next);
-
-		db.action
+		getProject(req, res, next)
 	})
 
 	.get(auth.can('Project', 'view'))
