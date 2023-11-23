@@ -1,5 +1,7 @@
+import CommentType from '../../types/comment.ts';
+
 type Props = {
-  comment: Comment;
+  comment: CommentType;
   descriptionMinLength: number;
   descriptionMaxLength: number;
   placeholder: string;

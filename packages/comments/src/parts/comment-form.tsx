@@ -7,6 +7,7 @@ import DataStore from '@openstad-headless/data-store/src';
 import hasRole from '../../../lib/has-role';
 
 function CommentForm({
+  // comment = {},
   descriptionMinLength = 30,
   descriptionMaxLength = 500,
   placeholder = 'Type hier je reactie',
@@ -18,34 +19,52 @@ function CommentForm({
   const datastore = new DataStore(props);
   const [currentUser, currentUserError, currentUserIsLoading] = datastore.useCurrentUser({ ...props });
 
-  const [showButton, setShowButton] = useState<boolean>(false);
-  const [value, setValue] = useState<string>('');
-
   function canSubmit() {
-    return hasRole(currentUser, props.requiredUserRole)
+    return true;
   }
 
   return (
     <div className="reaction-input-container">
-      <p>{formIntro}</p>
-      <Input
-        onFocus={() => setShowButton(true)}
-        onBlur={() => !value && setShowButton(false)}
-        placeholder="Type hier uw reactie"
-        onChange={(e) => setValue(e.target.value)}
-        defaultValue={value}
-      />
-      <Spacer size={0.5} />
-      {showButton ? (
-        <SecondaryButton
-          disabled={!value}
-          onClick={() => {
-            // Do stuffs here update swr caches
-            setShowButton(false);
-          }}>
-          Submit
-        </SecondaryButton>
-      ) : null}
+
+      <form onSubmit={props.submitComment}>
+
+        {props.formIntro ? (
+          <p>{props.formIntro}</p>
+        ) : null}
+
+        {props.comment?.parentId ? (
+          <input type="hidden" defaultValue={props.comment.parentId} name="parentId" />
+        ) : null}
+
+        {props.comment?.id ? (
+          <input type="hidden" defaultValue={props.comment.id} name="id" />
+        ) : null}
+
+        <input type="hidden" defaultValue={props.sentiment} name="sentiment" />
+
+        <Input
+          name="description"
+          placeholder={props.placeholder}
+          defaultValue={props.comment?.description}
+        />
+        <Spacer size={0.5} />
+        {hasRole(currentUser, 'member') ? ( // todo: props.requiredUserRole werkt nog niet
+          <SecondaryButton
+            disabled={!canSubmit()}>
+            Verstuur
+          </SecondaryButton>
+        ) : (
+          <SecondaryButton
+            type="button"
+            onClick={() => {
+              // login
+              document.location.href = props.login.url;
+            }}>
+            Inloggen
+          </SecondaryButton>
+        )}
+      </form>
+
     </div>
   );
 }

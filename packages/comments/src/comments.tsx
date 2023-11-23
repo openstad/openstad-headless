@@ -1,6 +1,5 @@
 import React from 'react';
 import './index.css';
-import { Reaction } from './types/index.js';
 import { useState } from 'react';
 import DataStore from '@openstad-headless/data-store/src';
 import { Button, Spacer } from '@openstad-headless/ui/src';
@@ -8,10 +7,9 @@ import { Banner } from '@openstad-headless/ui/src';
 import Comment from './parts/comment.js';
 import CommentForm from './parts/comment-form.js';
 import CommentsPropsType from './types/comments-props';
-import hasRole from '../../lib/has-role';
 
 function Comments({
-  requiredUserRole = 'member',
+  requiredUserRole = 'niels',
   title = '[[nr]] comments',
   emptyListText = 'Nog geen reacties',
   isVotingEnabled = true,
@@ -20,11 +18,6 @@ function Comments({
   isClosedText = 'Het inzenden van reacties is niet langer mogelijk',
   ...props
 }: CommentsPropsType) {
-
-  console.log(props.ideaId) // deze lijkt ok
-  console.log(props.title) // maar deze geeft een type error
-
-  const [loggedIn, setLoggedIn] = useState<boolean>(true);
 
   const datastore = new DataStore(props);
 
@@ -44,6 +37,10 @@ function Comments({
     try {
       if (formData.id) {
         let comment = comments.find(c => c.id == formData.id);
+        if (formData.parentId) {
+          let parent = comments.find(c => c.id == formData.parentId);
+          comment = parent.replies.find(c => c.id == formData.id);
+        }
         await comment.update(formData)
       } else {
         await comments.create(formData)
@@ -67,7 +64,7 @@ function Comments({
         </Banner>
       ) : (
         <div className="input-container">
-          <CommentForm resourceId={props.ideaId} />
+          <CommentForm submitComment={submitComment} {...props} />
           <Spacer size={1} />
         </div>
       )}
@@ -75,7 +72,7 @@ function Comments({
       <Spacer size={1} />
 
       {(comments || []).map((comment, index) => {
-        let attributes = { ...props, comment, currentUser, submitComment };
+        let attributes = { ...props, comment, submitComment };
         return (
           <Comment
             {...attributes}
