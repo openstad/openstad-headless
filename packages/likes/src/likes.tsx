@@ -104,7 +104,9 @@ function Likes({
               className={`like-option  ${
                 hideCounters ? 'osc-no-counter' : ''
               }`}>
-              <section className="like-kind" onClick={(e) => doVote(e, 'yes')}>
+              <section
+                className="like-kind"
+                onClick={(e) => doVote(e, likeVariant.type)}>
                 <i className={likeVariant.icon}></i>
                 {variant === 'small' ? null : (
                   <h6 className="osc-like-variant-label">
