@@ -9,7 +9,7 @@ import CommentForm from './parts/comment-form.js';
 import CommentsPropsType from './types/comments-props';
 
 function Comments({
-  requiredUserRole = 'niels',
+  requiredUserRole = 'member',
   title = '[[nr]] comments',
   emptyListText = 'Nog geen reacties',
   isVotingEnabled = true,
@@ -18,6 +18,8 @@ function Comments({
   isClosedText = 'Het inzenden van reacties is niet langer mogelijk',
   ...props
 }: CommentsPropsType) {
+
+  const [loggedIn, setLoggedIn] = useState<boolean>(true);
 
   const datastore = new DataStore(props);
 

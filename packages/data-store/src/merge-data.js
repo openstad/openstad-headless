@@ -4,7 +4,7 @@ export default function mergeData(currentData, newData, action) {
 
   let result;
 
-  if (action == 'create' && newData.id) action = 'update'; // return call na de POST
+  // if (action == 'create' && newData.id) action = 'update'; // return call na de POST
   // maar dat werkt natuurlijk niet want de oorspronkelijke had geen id
 
   switch (action) {
