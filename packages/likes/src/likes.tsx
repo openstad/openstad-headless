@@ -31,9 +31,11 @@ type Props = {
       url: string;
     };
   };
+  title?: string;
+  variant?: 'small' | 'medium' | 'large';
 };
 
-function Likes(props: Props) {
+function Likes({ title = 'Likes', variant = 'large', ...props }: Props) {
   const necessaryVotes = props?.config?.votesNeeded || 50;
 
   const datastore = new DataStore(props);
@@ -74,41 +76,43 @@ function Likes(props: Props) {
 
   return (
     <div
-      className="osc like-widget-container"
+      className={`like-widget-container ${variant}`}
       onClick={(e) => doVote(e, 'yes')}>
-      <h3 className="like-widget-title">Likes</h3>
-      <div className="like-option">
-        <section className="like-kind">
-          <i className="ri-thumb-up-line"></i>
-          <div>Voor</div>
-        </section>
+      <h5 className="like-widget-title">{title}</h5>
+      <div className="like-option-container">
+        <div className={`like-option`}>
+          <section className="like-kind">
+            <i className="ri-thumb-up-line"></i>
+            {variant === 'small' ? null : <div>Voor</div>}
+          </section>
 
-        <section className="like-counter">
-          <p>
-            {idea.yes && idea.yes < 10
-              ? idea.yes.toString().padStart(2, '0')
-              : idea.yes || (0).toString().padStart(2, '0')}
-          </p>
-        </section>
+          <section className="like-counter">
+            <p>
+              {idea.yes && idea.yes < 10
+                ? idea.yes.toString().padStart(2, '0')
+                : idea.yes || (0).toString().padStart(2, '0')}
+            </p>
+          </section>
+        </div>
+        <div className={`like-option`} onClick={(e) => doVote(e, 'no')}>
+          <section className="like-kind">
+            <i className="ri-thumb-down-line"></i>
+            {variant === 'small' ? null : <div>Tegen</div>}
+          </section>
+
+          <section className="like-counter">
+            <p>
+              {idea.no < 10
+                ? idea.no.toString().padStart(2, '0')
+                : idea.no || (0).toString().padStart(2, '0')}
+            </p>
+          </section>
+        </div>
       </div>
-      <div className="like-option" onClick={(e) => doVote(e, 'no')}>
-        <section className="like-kind">
-          <i className="ri-thumb-down-line"></i>
-          <div>Tegen</div>
-        </section>
 
-        <section className="like-counter">
-          <p>
-            {idea.no < 10
-              ? idea.no.toString().padStart(2, '0')
-              : idea.no || (0).toString().padStart(2, '0')}
-          </p>
-        </section>
-      </div>
-
-      <div className="osc-progressbar-container">
+      <div className="progressbar-container">
         <ProgressBar progress={(idea.yes / necessaryVotes) * 100} />
-        <p className="osc-progressbar-counter">
+        <p className="progressbar-counter">
           {idea.yes || 0} /{necessaryVotes}
         </p>
       </div>
