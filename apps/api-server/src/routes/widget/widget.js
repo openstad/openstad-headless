@@ -36,10 +36,10 @@ router
 
     // @todo: add all widgets
     const widgetSettingsMapping = {
-      arguments: {
-        js: ['comments.js'],
-        css: ['css/comments.css'],
-        name: 'Comments',
+      /*arguments: {
+        js: ['@openstad-headless/arguments-component/dist/arguments-component.umd.cjs'],
+        css: ['@openstad-headless/arguments-component/dist/style.css'],
+        name: 'OpenstadHeadlessArguments',
         defaultConfig: {
           ideaId: null,
           title: '[[nr]] reacties voor',
@@ -54,7 +54,16 @@ router
           placeholder: 'Voer hier uw reactie in',
           formIntro: '',
         },
-      },
+      }*/,
+      
+      likes: {
+        js: ['@openstad-headless/likes-component/dist/likes.iife.js'],
+        css: ['@openstad-headless/likes-component/dist/style.css'],
+        name: 'OpenstadHeadlessLikes',
+        defaultConfig: {
+          ideaId: null,
+        },
+      }
     };
 
     const widgetSettings = widgetSettingsMapping[widget.type];
@@ -65,18 +74,19 @@ router
 
     [widgetSettings.js].forEach((file) => {
       widgetOutput += fs.readFileSync(
-        require.resolve(`@openstad/components/dist/${file}`),
+        require.resolve(file),
         'utf8'
       );
     });
 
     [widgetSettings.css].forEach((file) => {
       css += fs.readFileSync(
-        require.resolve(`@openstad/components/dist/${file}`),
+        require.resolve(file),
         'utf8'
       );
     });
 
+    // @todo: add the component name in this url so we can statically serve the images per component
     css = css.replaceAll('url(../images/', `url(${config.url}/widget/images/`);
 
     const componentId = `osc-component-${widgetId}-${randomId}`;
@@ -121,7 +131,7 @@ router
         
         function renderWidget () {
           ${widgetOutput}
-          OS20['${widgetSettings.name}'].loadWidget('${componentId}', { config });
+          ${widgetSettings.name}.loadWidget('${componentId}', { config });
         }
         
         ${reactCheck}
@@ -136,15 +146,15 @@ router
     res.send(output);
   });
 
-// @todo: this path resolve w/ require resolve feels really hacky, get the path in a better way
-router.use(
+// @todo: server the images statically for each component
+/*router.use(
   '/images',
   express.static(
     path.resolve(
-      require.resolve(`@openstad/components/dist/index.js`),
+      require.resolve(`@openstad-headless/likes-components/dist/likes.iife.js`),
       '../images/'
     )
   )
-);
+);*/
 
 module.exports = router;
