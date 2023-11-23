@@ -33,9 +33,19 @@ type Props = {
   };
   title?: string;
   variant?: 'small' | 'medium' | 'large';
+  yesLabel?: string;
+  noLabel?: string;
+  hideCounters?: boolean;
 };
 
-function Likes({ title = 'Likes', variant = 'large', ...props }: Props) {
+function Likes({
+  title = 'Likes',
+  variant = 'large',
+  hideCounters,
+  yesLabel = 'Voor',
+  noLabel = 'Tegen',
+  ...props
+}: Props) {
   const necessaryVotes = props?.config?.votesNeeded || 50;
 
   const datastore = new DataStore(props);
@@ -44,6 +54,14 @@ function Likes({ title = 'Likes', variant = 'large', ...props }: Props) {
   const [currentUser] = datastore.useCurrentUser(props);
   const [idea] = datastore.useIdea(props);
   const [isBusy, setIsBusy] = useState(false);
+  const supportedLikeTypes: Array<{
+    type: 'yes' | 'no';
+    label: string;
+    icon: string;
+  }> = [
+    { type: 'yes', label: yesLabel, icon: 'ri-thumb-up-line' },
+    { type: 'no', label: noLabel, icon: 'ri-thumb-down-line' },
+  ];
 
   async function doVote(e, value) {
     if (e) e.stopPropagation();
@@ -78,44 +96,37 @@ function Likes({ title = 'Likes', variant = 'large', ...props }: Props) {
     <div
       className={`like-widget-container ${variant}`}
       onClick={(e) => doVote(e, 'yes')}>
-      <h5 className="like-widget-title">{title}</h5>
+      {title ? <h5 className="like-widget-title">{title}</h5> : null}
+
       <div className="like-option-container">
-        <div className={`like-option`}>
-          <section className="like-kind">
-            <i className="ri-thumb-up-line"></i>
-            {variant === 'small' ? null : <div>Voor</div>}
-          </section>
+        {supportedLikeTypes.map((likeVariant) => (
+          <div className={`like-option`}>
+            <section className="like-kind">
+              <i className={likeVariant.icon}></i>
+              {variant === 'small' ? null : <div>{likeVariant.label}</div>}
+            </section>
 
-          <section className="like-counter">
-            <p>
-              {idea.yes && idea.yes < 10
-                ? idea.yes.toString().padStart(2, '0')
-                : idea.yes || (0).toString().padStart(2, '0')}
-            </p>
-          </section>
-        </div>
-        <div className={`like-option`} onClick={(e) => doVote(e, 'no')}>
-          <section className="like-kind">
-            <i className="ri-thumb-down-line"></i>
-            {variant === 'small' ? null : <div>Tegen</div>}
-          </section>
-
-          <section className="like-counter">
-            <p>
-              {idea.no < 10
-                ? idea.no.toString().padStart(2, '0')
-                : idea.no || (0).toString().padStart(2, '0')}
-            </p>
-          </section>
-        </div>
+            {!hideCounters ? (
+              <section className="like-counter">
+                <p>
+                  {idea[likeVariant.type] && idea[likeVariant.type] < 10
+                    ? idea[likeVariant.type].toString().padStart(2, '0')
+                    : idea[likeVariant.type] || (0).toString().padStart(2, '0')}
+                </p>
+              </section>
+            ) : null}
+          </div>
+        ))}
       </div>
 
-      <div className="progressbar-container">
-        <ProgressBar progress={(idea.yes / necessaryVotes) * 100} />
-        <p className="progressbar-counter">
-          {idea.yes || 0} /{necessaryVotes}
-        </p>
-      </div>
+      {!props?.config?.votesNeeded ? null : (
+        <div className="progressbar-container">
+          <ProgressBar progress={(idea.yes / necessaryVotes) * 100} />
+          <p className="progressbar-counter">
+            {idea.yes || 0} /{necessaryVotes}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
