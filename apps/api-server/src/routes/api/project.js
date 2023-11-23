@@ -14,14 +14,9 @@ const authSettings = require('../../util/auth-settings');
 
 let router = express.Router({mergeParams: true});
 
-function getProject(req, res, next) {
+function getProject(req, res, next, include = []) {
 	const projectId = req.params.projectId;
-	let query;
-	if (req?.route?.path === '/:projectId(\\d+)/export') {
-		query = { where: { id: parseInt(projectId) }, include: [{model: db.Idea, include: [{model: db.Tag}, {model: db.Vote}, {model: db.Comment, as: 'commentsFor'}, {model: db.Comment, as: 'commentsAgainst'}, {model: db.Poll, as: 'poll'}]}, {model: db.Tag}] }
-	} else {
-		query = { where: { id: parseInt(projectId) } }
-	}
+	let query = { where: { id: parseInt(projectId) }, include: include };
 	db.Project
 		.scope(req.scope)
 		.findOne(query)
@@ -240,7 +235,7 @@ router.route('/:projectId') //(\\d+)
 router.route('/:projectId(\\d+)/export')
 	.all(auth.can('Project', 'view'))
 	.all(function(req, res, next) {
-		getProject(req, res, next)
+		getProject(req, res, next, [{model: db.Idea, include: [{model: db.Tag}, {model: db.Vote}, {model: db.Comment, as: 'commentsFor'}, {model: db.Comment, as: 'commentsAgainst'}, {model: db.Poll, as: 'poll'}]}, {model: db.Tag}])
 	})
 
 	.get(auth.can('Project', 'view'))
