@@ -2,11 +2,11 @@ import React from 'react';
 import './index.css';
 import { useState } from 'react';
 import DataStore from '@openstad-headless/data-store/src';
-import { Button, Spacer } from '@openstad-headless/ui/src';
+import { Spacer } from '@openstad-headless/ui/src';
 import { Banner } from '@openstad-headless/ui/src';
 import Comment from './parts/comment.js';
 import CommentForm from './parts/comment-form.js';
-import CommentsPropsType from './types/comments-props';
+import CommentsPropsType from './types/index';
 
 function Comments({
   requiredUserRole = 'member',
@@ -19,12 +19,21 @@ function Comments({
   ...props
 }: CommentsPropsType) {
 
-  const [loggedIn, setLoggedIn] = useState<boolean>(true);
+  const args = {
+    requiredUserRole,
+    title,
+    emptyListText,
+    isVotingEnabled,
+    isReplyingEnabled,
+    isClosed,
+    isClosedText,
+    ...props
+  } as CommentsPropsType;
 
-  const datastore = new DataStore(props);
+  const datastore = new DataStore(args);
 
-  const [currentUser, currentUserError, currentUserIsLoading] = datastore.useCurrentUser({ ...props });
-  const [comments, commentsError, commentsIsLoading] = datastore.useComments({ ...props });
+  const [currentUser, currentUserError, currentUserIsLoading] = datastore.useCurrentUser({ ...args });
+  const [comments, commentsError, commentsIsLoading] = datastore.useComments({ ...args });
 
   async function submitComment(e) {
 
@@ -34,7 +43,7 @@ function Comments({
     let formData = new FormData(e.target);
     formData = Object.fromEntries(formData.entries());
 
-    formData.ideaId = props.ideaId;
+    formData.ideaId = args.ideaId;
 
     try {
       if (formData.id) {
@@ -57,16 +66,16 @@ function Comments({
   let [submitError, setSubmitError] = useState();
 
   return (
-    <section>
+    <section className="osc">
       <h4 className="comments-title">{title.replace(/\[\[nr\]\]/, comments.length)}</h4>
 
-      {props.isClosed ? (
+      {args.isClosed ? (
         <Banner>
-          <p>{closedText}</p>
+          <p>{args.closedText}</p>
         </Banner>
       ) : (
         <div className="input-container">
-          <CommentForm submitComment={submitComment} {...props} />
+          <CommentForm submitComment={submitComment} {...args} />
           <Spacer size={1} />
         </div>
       )}
@@ -74,7 +83,7 @@ function Comments({
       <Spacer size={1} />
 
       {(comments || []).map((comment, index) => {
-        let attributes = { ...props, comment, submitComment };
+        let attributes = { ...args, comment, submitComment };
         return (
           <Comment
             {...attributes}

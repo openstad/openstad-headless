@@ -3,13 +3,13 @@ import '../index.css';
 import { Fragment, useState } from 'react';
 import DataStore from '@openstad-headless/data-store/src';
 import { GhostButton, Spacer } from '@openstad-headless/ui/src';
-import CommentPropsType from '../types/comments.ts';
+import CommentPropsType from '../types/index';
 import CommentForm from './comment-form.js';
 import { DropDownMenu } from '@openstad-headless/ui/src';
 import hasRole from '../../../lib/has-role';
 
 function Comment({
-  // comment = {},
+  comment = {},
   isClosed = false,
   isVotingEnabled = true,
   isReplyingEnabled = true,
@@ -18,8 +18,18 @@ function Comment({
   ...props
 }: CommentPropsType) {
 
-  const datastore = new DataStore(props);
-  const [currentUser, currentUserError, currentUserIsLoading] = datastore.useCurrentUser({ ...props });
+  const args = {
+    comment,
+    isClosed,
+    isVotingEnabled,
+    isReplyingEnabled,
+    requiredUserRole,
+    userNameFields,
+    ...props
+  } as CommentPropsType;
+
+  const datastore = new DataStore(args);
+  const [currentUser, currentUserError, currentUserIsLoading] = datastore.useCurrentUser({ ...args });
 
   const [isReplyFormActive, setIsReplyFormActive] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);
@@ -34,38 +44,38 @@ function Comment({
   }
 
   function canReply() {
-    if (props.isClosed) return false;
+    if (args.isClosed) return false;
     if (hasRole(currentUser, 'moderator')) return true;
-    return props.comment.can && props.comment.can.reply;
+    return args.comment.can && args.comment.can.reply;
   }
 
   function canLike() {
-    if (props.isClosed) return false;
+    if (args.isClosed) return false;
     if (hasRole(currentUser, 'moderator')) return true;
     return hasRole(currentUser, requiredUserRole);
   }
 
   function canEdit() {
-    if (props.isClosed) return false;
+    if (args.isClosed) return false;
     if (hasRole(currentUser, 'moderator')) return true;
-    return props.comment.can && props.comment.can.edit;
+    return args.comment.can && args.comment.can.edit;
   }
 
   function canDelete() {
-    if (props.isClosed) return false;
+    if (args.isClosed) return false;
     if (hasRole(currentUser, 'moderator')) return true;
-    return props.comment.can && props.comment.can.delete;
+    return args.comment.can && args.comment.can.delete;
   }
 
   return (
     <Fragment>
       <section className="comment-item-header">
-        <h6 className="reaction-name">{props.comment.user && props.comment.user.displayName} {/* todo: gebruik de meegstuurde param */}</h6>
+        <h6 className="reaction-name">{args.comment.user && args.comment.user.displayName} {/* todo: gebruik de meegstuurde param */}</h6>
         {canEdit() || canDelete() ? (
           <DropDownMenu
             items={[
               { label: 'Bewerken', onClick: () => toggleEditForm() },
-              { label: 'Verwijderen', onClick: () => { if (confirm('Weet u het zeker?')) props.comment.delete(props.id); } },
+              { label: 'Verwijderen', onClick: () => { if (confirm('Weet u het zeker?')) args.comment.delete(args.id); } },
             ]}>
             <GhostButton icon="ri-more-fill"></GhostButton>
           </DropDownMenu>
@@ -73,20 +83,20 @@ function Comment({
       </section>
 
       {editMode ? (
-        <CommentForm {...props} submitComment={e => { props.submitComment(e); toggleEditForm() }} />
+        <CommentForm {...args} submitComment={e => { args.submitComment(e); toggleEditForm() }} />
       ) : (
-        <p>{props.comment.description}</p>
+        <p>{args.comment.description}</p>
       )}
 
-      {!props.comment.parentId ? (
+      {!args.comment.parentId ? (
         <section className="comment-item-footer">
-          <p className="strong">{props.comment.createDateHumanized}</p>
+          <p className="strong">{args.comment.createDateHumanized}</p>
           {isVotingEnabled ?
             canLike() ?
               (
-                <GhostButton icon="ri-thumb-up-line" onClick={() => props.comment.submitLike()}>Mee eens (<span>{props.comment.yes || 0}</span>)</GhostButton>
+                <GhostButton icon="ri-thumb-up-line" onClick={() => args.comment.submitLike()}>Mee eens (<span>{args.comment.yes || 0}</span>)</GhostButton>
               ) : (
-                <GhostButton icon="ri-thumb-up-line">Mee eens (<span>{props.comment.yes || 0}</span>)</GhostButton>
+                <GhostButton icon="ri-thumb-up-line">Mee eens (<span>{args.comment.yes || 0}</span>)</GhostButton>
               )
             :
             null}
@@ -98,11 +108,11 @@ function Comment({
         </section>
       ) : null}
 
-      {props.comment.replies && props.comment.replies.map((reply, index) => {
+      {args.comment.replies && args.comment.replies.map((reply, index) => {
         return (
           <div className="reaction-container" key={index}>
             <Comment
-              {...props}
+              {...args}
               comment={reply}
             />
           </div>
@@ -112,7 +122,7 @@ function Comment({
       {isReplyFormActive ? (
         <div className="reaction-container">
           <div className="input-container">
-            <CommentForm {...props} comment={{ parentId: props.comment.id }} submitComment={e => { props.submitComment(e); toggleReplyForm() }} />
+            <CommentForm {...args} comment={{ parentId: args.comment.id }} submitComment={e => { args.submitComment(e); toggleReplyForm() }} />
             <Spacer size={1} />
           </div>
         </div>

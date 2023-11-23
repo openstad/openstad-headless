@@ -10,6 +10,7 @@ type Props = {
   isClosedText?: string,
   placeholder?: string,
   userNameFields: Array<string>;
+  descriptionMaxLength?: number,
 };
 
 export {
