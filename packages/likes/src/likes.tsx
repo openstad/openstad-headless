@@ -93,40 +93,46 @@ function Likes({
   }
 
   return (
-    <div
-      className={`like-widget-container ${variant}`}
-      onClick={(e) => doVote(e, 'yes')}>
-      {title ? <h5 className="like-widget-title">{title}</h5> : null}
+    <div className="osc">
+      <div
+        className={`like-widget-container ${variant}`}
+        onClick={(e) => doVote(e, 'yes')}>
+        {title ? <h5 className="like-widget-title">{title}</h5> : null}
 
-      <div className="like-option-container">
-        {supportedLikeTypes.map((likeVariant) => (
-          <div className={`like-option`}>
-            <section className="like-kind">
-              <i className={likeVariant.icon}></i>
-              {variant === 'small' ? null : <div>{likeVariant.label}</div>}
-            </section>
-
-            {!hideCounters ? (
-              <section className="like-counter">
-                <p>
-                  {idea[likeVariant.type] && idea[likeVariant.type] < 10
-                    ? idea[likeVariant.type].toString().padStart(2, '0')
-                    : idea[likeVariant.type] || (0).toString().padStart(2, '0')}
-                </p>
+        <div className={`like-option-container`}>
+          {supportedLikeTypes.map((likeVariant) => (
+            <div
+              className={`like-option  ${
+                hideCounters ? 'osc-no-counter' : ''
+              }`}>
+              <section className="like-kind">
+                <i className={likeVariant.icon}></i>
+                {variant === 'small' ? null : <div>{likeVariant.label}</div>}
               </section>
-            ) : null}
-          </div>
-        ))}
-      </div>
 
-      {!props?.config?.votesNeeded ? null : (
-        <div className="progressbar-container">
-          <ProgressBar progress={(idea.yes / necessaryVotes) * 100} />
-          <p className="progressbar-counter">
-            {idea.yes || 0} /{necessaryVotes}
-          </p>
+              {!hideCounters ? (
+                <section className="like-counter">
+                  <p>
+                    {idea[likeVariant.type] && idea[likeVariant.type] < 10
+                      ? idea[likeVariant.type].toString().padStart(2, '0')
+                      : idea[likeVariant.type] ||
+                        (0).toString().padStart(2, '0')}
+                  </p>
+                </section>
+              ) : null}
+            </div>
+          ))}
         </div>
-      )}
+
+        {!props?.config?.votesNeeded ? null : (
+          <div className="progressbar-container">
+            <ProgressBar progress={(idea.yes / necessaryVotes) * 100} />
+            <p className="progressbar-counter">
+              {idea.yes || 0} /{necessaryVotes}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

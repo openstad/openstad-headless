@@ -32,8 +32,19 @@
   
 }
 
+.like-option.osc-no-counter {
+  grid-template-columns: 1fr;
+} 
+
+
+
 .like-widget-container.small .like-option {
   grid-template-columns: 1fr 1fr;
+  gap: .125rem;
+}
+
+.like-widget-container.small .like-option.osc-no-counter {
+  grid-template-columns: 1fr;
   gap: .125rem;
 }
 

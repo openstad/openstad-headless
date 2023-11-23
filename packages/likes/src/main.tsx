@@ -24,12 +24,11 @@ const config = {
       },
     ],
   },
+  votesNeeded: 50,
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <div className="osc">
-      <Likes projectId="2" ideaId="1" config={config} variant="large" />
-    </div>
+    <Likes projectId="2" ideaId="1" config={config} variant="large" />
   </React.StrictMode>
 );
