@@ -4,23 +4,51 @@ export default function mergeData(currentData, newData, action) {
 
   let result;
 
+  // if (action == 'create' && newData.id) action = 'update'; // return call na de POST
+  // maar dat werkt natuurlijk niet want de oorspronkelijke had geen id
+
   switch (action) {
 
     case 'create':
+      console.log('CREATE', newData);
       if (Array.isArray(currentData)) {
-        result = [ ...currentData ];
-        result.push(newData);
+        if (newData.parentId) { // currently only for comments; dit kan eleganter
+          let parentIndex = currentData.findIndex(elem => elem.id == newData.parentId);
+          if (parentIndex != -1) {
+            console.log('C', parentIndex);
+            result = [ ...currentData ];
+            result[parentIndex].replies = result[parentIndex].replies || [];
+            result[parentIndex].replies.push(newData);
+            console.log('C', result[parentIndex].replies);
+          }
+        } else {
+          result = [ ...currentData ];
+          result.push(newData);
+        }
       } else {
         result = merge.recursive({}, currentData, newData)
       }
       break;
 
     case 'update':
+      console.log('UPDATE', newData);
       if (Array.isArray(currentData)) {
-        let index = currentData.findIndex(elem => elem.id == newData.id);
-        if (index != -1) {
-          result = [ ...currentData ];
-          result[index] = merge.recursive({}, result[index], newData);
+        if (newData.parentId) { // currently only for comments; dit kan eleganter
+          let parentIndex = currentData.findIndex(elem => elem.id == newData.parentId);
+          if (parentIndex != -1) {
+            let index = currentData[parentIndex].replies.findIndex(elem => elem.id == newData.id);
+            if (index != -1) {
+              result = [ ...currentData ];
+              result[parentIndex] = { ...result[parentIndex] }
+              result[parentIndex].replies[index] = merge.recursive({}, result[parentIndex].replies[index], newData);
+            }
+          }
+        } else {
+          let index = currentData.findIndex(elem => elem.id == newData.id);
+          if (index != -1) {
+            result = [ ...currentData ];
+            result[index] = merge.recursive({}, result[index], newData);
+          }
         }
       } else {
         result = merge.recursive({}, currentData, newData)
@@ -29,10 +57,22 @@ export default function mergeData(currentData, newData, action) {
 
     case 'delete':
       if (Array.isArray(currentData)) {
-        let index = currentData.findIndex(elem => elem.id == newData.id);
-        if (index != -1) {
-          result = [ ...currentData ];
-          result.splice(index, 1);
+        if (newData.parentId) { // currently only for comments; dit kan eleganter
+          let parentIndex = currentData.findIndex(elem => elem.id == newData.parentId);
+          if (parentIndex != -1) {
+            let index = currentData[parentIndex].replies.findIndex(elem => elem.id == newData.id);
+            if (index != -1) {
+              result = [ ...currentData ];
+              result[parentIndex] = { ...result[parentIndex] }
+              result[parentIndex].replies.splice(index, 1);
+            }
+          }
+        } else {
+          let index = currentData.findIndex(elem => elem.id == newData.id);
+          if (index != -1) {
+            result = [ ...currentData ];
+            result.splice(index, 1);
+          }
         }
       } else {
         result = undefined;
@@ -40,7 +80,6 @@ export default function mergeData(currentData, newData, action) {
     break;
 
     case 'submitLike':
-    console.log('MERGEDATA', 'submitLike');
       if (Array.isArray(currentData)) {
         let index = currentData.findIndex(elem => elem.id == newData.id);
         if (index != -1) {
