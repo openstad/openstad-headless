@@ -94,20 +94,23 @@ function Likes({
 
   return (
     <div className="osc">
-      <div
-        className={`like-widget-container ${variant}`}
-        onClick={(e) => doVote(e, 'yes')}>
+      <div className={`like-widget-container ${variant}`}>
         {title ? <h5 className="like-widget-title">{title}</h5> : null}
 
         <div className={`like-option-container`}>
-          {supportedLikeTypes.map((likeVariant) => (
+          {supportedLikeTypes.map((likeVariant, index) => (
             <div
+              key={`${likeVariant.type}-${index}`}
               className={`like-option  ${
                 hideCounters ? 'osc-no-counter' : ''
               }`}>
-              <section className="like-kind">
+              <section className="like-kind" onClick={(e) => doVote(e, 'yes')}>
                 <i className={likeVariant.icon}></i>
-                {variant === 'small' ? null : <div>{likeVariant.label}</div>}
+                {variant === 'small' ? null : (
+                  <h6 className="osc-like-variant-label">
+                    {likeVariant.label}
+                  </h6>
+                )}
               </section>
 
               {!hideCounters ? (
