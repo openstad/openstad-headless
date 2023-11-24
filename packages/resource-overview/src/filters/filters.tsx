@@ -35,9 +35,15 @@ export function Filters({
     { type: 'theme', placeholder: 'Selecteer een thema', multiple: true },
     { type: 'area', placeholder: 'Selecteer een gebied' },
   ],
+  sortOptions = [
+    { value: 'title', label: 'Titel' },
+    { value: 'createdAt_desc', label: 'Nieuwste eerst' },
+    { value: 'createdAt_asc', label: 'Oudste eerst' },
+  ],
   onUpdateFilter,
   ...props
 }: Props) {
+
   const defaultFilter = { tags: {}, search: { text: '' } };
   tagTypes.forEach((tagType) => {
     defaultFilter.tags[tagType.type] = null;
@@ -163,10 +169,9 @@ export function Filters({
         <Select
           ref={sortingRef}
           onValueChange={setSort}
-          options={[
-            { label: 'Datum (nieuw-oud)', value: 'createdAt_desc' },
-            { label: 'Datum (oud-nieuw)', value: 'createdAt_asc' },
-          ]}>
+          options={
+            sortOptions
+          }>
           <option value={''}>Sorteer op</option>
         </Select>
 
