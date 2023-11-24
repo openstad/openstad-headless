@@ -1,6 +1,4 @@
 .like-widget-container {
-  font-family: 'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
-
   display: grid;
   margin: 0;
   padding: 1.5rem;
@@ -29,14 +27,36 @@
   grid-template-columns: 1fr 4rem;
   gap: .125rem;
   font-weight: 600;
-  
+  border: 1px solid transparent;
+}
+
+.like-option:hover {
+  border-color: var(--osc-border);
+  transition: border-color .3s;
+}
+
+.like-option:hover {
+  border: 1px solid var(--osc-border);
+}
+
+.like-kind:hover {
+  cursor: pointer;
+}
+
+.like-option .osc-like-variant-label {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+  color: var(--osc-muted);
+}
+
+.like-option:hover .osc-like-variant-label {
+  text-decoration: underline;
 }
 
 .like-option.osc-no-counter {
   grid-template-columns: 1fr;
 } 
-
-
 
 .like-widget-container.small .like-option {
   grid-template-columns: 1fr 1fr;
