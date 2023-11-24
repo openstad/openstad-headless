@@ -4,22 +4,16 @@ export default function mergeData(currentData, newData, action) {
 
   let result;
 
-  // if (action == 'create' && newData.id) action = 'update'; // return call na de POST
-  // maar dat werkt natuurlijk niet want de oorspronkelijke had geen id
-
   switch (action) {
 
     case 'create':
-      console.log('CREATE', newData);
       if (Array.isArray(currentData)) {
-        if (newData.parentId) { // currently only for comments; dit kan eleganter
+        if (newData.parentId) { // currently for comments
           let parentIndex = currentData.findIndex(elem => elem.id == newData.parentId);
           if (parentIndex != -1) {
-            console.log('C', parentIndex);
             result = [ ...currentData ];
             result[parentIndex].replies = result[parentIndex].replies || [];
             result[parentIndex].replies.push(newData);
-            console.log('C', result[parentIndex].replies);
           }
         } else {
           result = [ ...currentData ];
@@ -31,15 +25,13 @@ export default function mergeData(currentData, newData, action) {
       break;
 
     case 'update':
-      console.log('UPDATE', newData);
       if (Array.isArray(currentData)) {
-        if (newData.parentId) { // currently only for comments; dit kan eleganter
+        if (newData.parentId) { // currently for comments
           let parentIndex = currentData.findIndex(elem => elem.id == newData.parentId);
           if (parentIndex != -1) {
             let index = currentData[parentIndex].replies.findIndex(elem => elem.id == newData.id);
             if (index != -1) {
               result = [ ...currentData ];
-              result[parentIndex] = { ...result[parentIndex] }
               result[parentIndex].replies[index] = merge.recursive({}, result[parentIndex].replies[index], newData);
             }
           }
@@ -57,13 +49,12 @@ export default function mergeData(currentData, newData, action) {
 
     case 'delete':
       if (Array.isArray(currentData)) {
-        if (newData.parentId) { // currently only for comments; dit kan eleganter
+        if (newData.parentId) { // currently for comments
           let parentIndex = currentData.findIndex(elem => elem.id == newData.parentId);
           if (parentIndex != -1) {
             let index = currentData[parentIndex].replies.findIndex(elem => elem.id == newData.id);
             if (index != -1) {
               result = [ ...currentData ];
-              result[parentIndex] = { ...result[parentIndex] }
               result[parentIndex].replies.splice(index, 1);
             }
           }
