@@ -1,6 +1,6 @@
-import CommentType from '../../types/comment.ts';
+import CommentType from '../../../types/comment';
 
-type Props = {
+export type CommentFormProps = {
   comment: CommentType;
   descriptionMinLength: number;
   descriptionMaxLength: number;
@@ -8,7 +8,3 @@ type Props = {
   formIntro: string;
   requiredUserRole: string;
 };
-
-export {
-  Props as default,
-}
