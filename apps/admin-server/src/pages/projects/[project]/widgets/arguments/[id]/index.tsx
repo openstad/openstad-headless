@@ -10,6 +10,7 @@ import ArgumentsGeneral from './general';
 import ArgumentsList from './list';
 import ArgumentsForm from './form';
 import { useRouter } from 'next/router';
+import Preview from '@/components/widget-preview';
 
 export default function WidgetArguments() {
   const router = useRouter();
@@ -35,12 +36,16 @@ export default function WidgetArguments() {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="general">
+          <Tabs defaultValue="preview">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
+              <TabsTrigger value="preview">Algemeen</TabsTrigger>
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="list">Lijst</TabsTrigger>
               <TabsTrigger value="form">Formulier</TabsTrigger>
             </TabsList>
+            <TabsContent value="preview" className="p-0">
+              <Preview type="arguments" />
+            </TabsContent>
             <TabsContent value="general" className="p-0">
               <ArgumentsGeneral />
             </TabsContent>

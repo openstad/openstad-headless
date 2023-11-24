@@ -13,6 +13,7 @@ import BegrootmoduleExplanation from './explanation';
 import BegrootmoduleAuthentication from './authentication';
 import BegrootmoduleLabels from './label';
 import { useRouter } from 'next/router';
+import Preview from '@/components/widget-preview';
 
 export default function WidgetBegrootmodule() {
   const router = useRouter();
@@ -38,8 +39,9 @@ export default function WidgetBegrootmodule() {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="voting">
+          <Tabs defaultValue="preview">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
+              <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="voting">Stem opties</TabsTrigger>
               <TabsTrigger value="display">Weergave opties</TabsTrigger>
               <TabsTrigger value="sorting">Sorteer opties</TabsTrigger>
@@ -47,6 +49,9 @@ export default function WidgetBegrootmodule() {
               <TabsTrigger value="authentication">Authenticatie</TabsTrigger>
               <TabsTrigger value="labels">Labels</TabsTrigger>
             </TabsList>
+            <TabsContent value="preview" className="p-0">
+              <Preview type="begrootmodule" />
+            </TabsContent>
             <TabsContent value="voting" className="p-0">
               <BegrootmoduleVoting />
             </TabsContent>

@@ -12,6 +12,7 @@ import WidgetIdeasMapButton from './button';
 import WidgetIdeasMapCounter from './counter';
 import WidgetIdeasMapContent from './content';
 import { useRouter } from 'next/router';
+import Preview from '@/components/widget-preview';
 
 export default function WidgetIdeasMap() {
   const router = useRouter();
@@ -37,13 +38,17 @@ export default function WidgetIdeasMap() {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="map">
+          <Tabs defaultValue="preview">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
+              <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="map">Map</TabsTrigger>
               <TabsTrigger value="button">Call-To-Action knop</TabsTrigger>
               <TabsTrigger value="counter">Teller</TabsTrigger>
               <TabsTrigger value="content">Content</TabsTrigger>
             </TabsList>
+            <TabsContent value="preview" className="p-0">
+              <Preview type="ideasmap" />
+            </TabsContent>
             <TabsContent value="map" className="p-0">
               <WidgetIdeasMapMaps />
             </TabsContent>

@@ -19,6 +19,7 @@ import WidgetResourceOverviewInclude from './include';
 import WidgetResourceOverviewLabel from './label';
 import WidgetResourceOverviewInfo from './info';
 import { useRouter } from 'next/router';
+import Preview from '@/components/widget-preview';
 
 export default function WidgetResourceOverview() {
   const router = useRouter();
@@ -44,8 +45,9 @@ export default function WidgetResourceOverview() {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="general">
+          <Tabs defaultValue="preview">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
+              <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="image">Afbeeldingen</TabsTrigger>
               <TabsTrigger value="display">Display</TabsTrigger>
@@ -59,6 +61,9 @@ export default function WidgetResourceOverview() {
               <TabsTrigger value="labels">Labels</TabsTrigger>
               <TabsTrigger value="info">Info</TabsTrigger>
             </TabsList>
+            <TabsContent value="preview" className="p-0">
+              <Preview type="resourceoverview" />
+            </TabsContent>
             <TabsContent value="general" className="p-0">
               <WidgetResourceOverviewGeneral />
             </TabsContent>
