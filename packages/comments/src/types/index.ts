@@ -1,13 +1,8 @@
-import { BaseProps } from '../types/base-props.ts';
-import { CommentsProps } from './comments-props.ts';
-import { CommentProps } from './comment-props.ts';
-import { CommentFormProps } from './comment-form-props.ts';
+import { BaseProps } from '../../../types/base-props';
+import { CommentsProps } from './comments-props';
+import { CommentProps } from './comment-props';
+import { CommentFormProps } from './comment-form-props';
 
-type Props = {
-} & BaseProps & CommentsProps & CommentProps & CommentFormProps;
+type Props = {} & BaseProps & CommentsProps & CommentProps & CommentFormProps;
 
-export {
-  Props as default,
-}
-
-
+export { Props as default };

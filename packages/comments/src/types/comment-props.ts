@@ -1,6 +1,6 @@
-import CommentType from '../../types/comment.ts';
+import CommentType from '../../../types/comment';
 
-type Props = {
+export type CommentProps = {
   comment: CommentType;
   sentiment: string;
   emptyListText: string;
@@ -8,10 +8,6 @@ type Props = {
   commentIsClosedText: string;
   isVotingEnabled: boolean;
   isReplyingEnabled: boolean;
-  requiredUserRole: boolean;
+  requiredUserRole: string;
   userNameFields: Array<string>;
 };
-
-export {
-  Props as default,
-}
