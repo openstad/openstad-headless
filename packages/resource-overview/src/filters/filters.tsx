@@ -18,6 +18,7 @@ type Filter = {
   search: {
     text: string;
   };
+  sort: string;
 };
 
 type Props = {
@@ -90,6 +91,13 @@ export function Filters({
     });
   }
 
+  function setSort(value) {
+    updateFilter({
+      ...filter,
+      sort: value,
+    });
+  }
+
   const updateTagList = (tagType: string, updatedTag: string) => {
     const existingTags = selectedOptions[tagType];
     let selected = [...(existingTags || [])];
@@ -154,9 +162,10 @@ export function Filters({
 
         <Select
           ref={sortingRef}
+          onValueChange={setSort}
           options={[
-            { label: 'Datum (nieuw-oud)', value: 'date-desc' },
-            { label: 'Datum (oud-nieuw)', value: 'date-asc' },
+            { label: 'Datum (nieuw-oud)', value: 'createdAt_desc' },
+            { label: 'Datum (oud-nieuw)', value: 'createdAt_asc' },
           ]}>
           <option value={''}>Sorteer op</option>
         </Select>
@@ -183,6 +192,6 @@ export function Filters({
           Wis alles
         </SecondaryButton>
       </div>
-    </section>
+    </section >
   );
 }
