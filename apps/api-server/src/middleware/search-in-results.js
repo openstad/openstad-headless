@@ -64,7 +64,9 @@ module.exports = function({ searchfields = ['title', 'summary', 'description'] }
 
     }
 
-    merged = merged.sort( (a,b) => b.score - a.score )
+    if (!req.dbQuery.order) {
+      merged = merged.sort( (a,b) => b.score - a.score )
+    }
     merged = merged.map(elem => elem.obj);
 
     req.results = merged
