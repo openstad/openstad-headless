@@ -99,6 +99,33 @@ router.route('/')
 			})
 			.catch(next)
 	})
+	.post(async function (req, res, next) {
+    // create an oauth client if nessecary
+    let project = req.results;
+    try {
+      let providers = await authSettings.providers({ project });
+      let providersDone = [];
+      for (let provider of providers) {
+        let authConfig = await authSettings.config({ project, useAuth: provider });
+        if ( !providersDone[authConfig.provider] ) { // filter for duplicates like 'default'
+          let adapter = await authSettings.adapter({ authConfig });
+          if (adapter.service.createClient) {
+            let client = await adapter.service.createClient({ authConfig, project });
+            project.config.auth.provider[authConfig.provider] = project.config.auth.provider[authConfig.provider] || {};
+            project.config.auth.provider[authConfig.provider].clientId = client.clientId;
+            project.config.auth.provider[authConfig.provider].clientSecret = client.clientSecret;
+          }
+          providersDone[authConfig.provider] = true;
+        }
+      }
+      if (Object.keys(providersDone).length) {
+        project.update({ config: project.config })
+      }
+      return next();
+    } catch(err) {
+      return next(err);
+    }
+	})
 	.post(auth.useReqUser)
 	.post(function(req, res, next) {
     return res.json(req.results);
@@ -205,7 +232,7 @@ router.route('/:projectId') //(\\d+)
         let authConfig = await authSettings.config({ project: req.results, useAuth: provider });
         let adapter = await authSettings.adapter({ authConfig });
         if (adapter.service.updateClient) {
-          await adapter.service.updateClient({ authConfig, config: req.results.config });
+          await adapter.service.updateClient({ authConfig, project: req.results });
         }
       }
       return next();

@@ -151,6 +151,10 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
     },
 	},
 
+  admin: {
+    projectId: process.env.ADMIN_PROJECTID || 1,
+  },
+
   dev: {
     'Header-Access-Control-Allow-Origin': '*'
   }
