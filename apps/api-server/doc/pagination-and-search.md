@@ -2,7 +2,7 @@
 
 ## Middleware
 
-Pagination and search are both middleware. Information is stord in the `req` object.
+Pagination and search are both middleware. Information is stored in the `req` object.
 
 Pagination is implemented on all GET routes. Search on most.
 
@@ -37,9 +37,9 @@ Pagination is done in the database query. A request  asking for 20 records from 
 
 But...
 
-Search is done on the result. This is because fuzzy search is hardly available in SQL. If pagination is combined with search the pagination is of course done after the search, and no longer in the database quey.
+Search is done on the result. This is because fuzzy search is hardly available in SQL. If pagination is combined with search the pagination is of course done after the search, and no longer in the database query.
 
-Which means that a search could make the previosly very fast query quite expensive.
+Which means that a search could make the previously very fast query quite expensive.
 
 ## Search
 

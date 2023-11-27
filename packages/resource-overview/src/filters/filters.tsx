@@ -18,6 +18,7 @@ type Filter = {
   search: {
     text: string;
   };
+  sort: string;
 };
 
 type Props = {
@@ -34,9 +35,15 @@ export function Filters({
     { type: 'theme', placeholder: 'Selecteer een thema', multiple: true },
     { type: 'area', placeholder: 'Selecteer een gebied' },
   ],
+  sortOptions = [
+    { value: 'title', label: 'Titel' },
+    { value: 'createdAt_desc', label: 'Nieuwste eerst' },
+    { value: 'createdAt_asc', label: 'Oudste eerst' },
+  ],
   onUpdateFilter,
   ...props
 }: Props) {
+
   const defaultFilter = { tags: {}, search: { text: '' } };
   tagTypes.forEach((tagType) => {
     defaultFilter.tags[tagType.type] = null;
@@ -87,6 +94,13 @@ export function Filters({
       search: {
         text: value,
       },
+    });
+  }
+
+  function setSort(value) {
+    updateFilter({
+      ...filter,
+      sort: value,
     });
   }
 
@@ -154,10 +168,10 @@ export function Filters({
 
         <Select
           ref={sortingRef}
-          options={[
-            { label: 'Datum (nieuw-oud)', value: 'date-desc' },
-            { label: 'Datum (oud-nieuw)', value: 'date-asc' },
-          ]}>
+          onValueChange={setSort}
+          options={
+            sortOptions
+          }>
           <option value={''}>Sorteer op</option>
         </Select>
 
@@ -183,6 +197,6 @@ export function Filters({
           Wis alles
         </SecondaryButton>
       </div>
-    </section>
+    </section >
   );
 }
