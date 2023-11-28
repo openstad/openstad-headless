@@ -128,11 +128,11 @@ Object.keys(widgetSettingsMapping).forEach((widget) => {
   if (!widgetSettingsMapping[widget].css) return;
   
   router.use(
-    `/widget/${widget}-images`,
+    `/${widget}-images`,
     express.static(
       path.resolve(
         require.resolve(widgetSettingsMapping[widget].css[0]),
-        '../images/'
+        '../../images/'
       )
     )
   );
