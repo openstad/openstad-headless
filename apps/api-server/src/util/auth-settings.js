@@ -2,7 +2,7 @@ const path = require('node:path');
 const config = require('config');
 const merge = require('merge');
 
-let createProjectConfig = function({ project }) {
+let createProjectConfig = function({ project, useOnlyDefinedOnProject = false }) {
   
   let defaultConfig = config && config.auth || {};
   let temp = { provider: {}, adapter: {} };
@@ -10,8 +10,22 @@ let createProjectConfig = function({ project }) {
   let apiAuthConfig = merge.recursive( temp, defaultConfig );
 
   let projectSpecificConfig = project && project.config && project.config.auth || {};
+  let mergedConfig = merge.recursive( {}, apiAuthConfig, projectSpecificConfig );
 
-  return merge.recursive( apiAuthConfig, projectSpecificConfig )
+  if ( useOnlyDefinedOnProject ) {
+    // use only providers that are configured on the project, but fallback on defaults if nothing is defined on the project
+    let projectProviders = Object.keys(projectSpecificConfig.provider || {});
+    if (projectProviders) {
+      let mergedProviders = Object.keys(mergedConfig.provider || {});
+      mergedProviders.map(target => {
+        if (!projectProviders.find( p => p == target )) {
+          delete mergedConfig.provider[ target ];
+        }
+      })
+    }
+  }
+
+  return mergedConfig;
 
 }
 
@@ -56,9 +70,9 @@ let getAdapter = async function({  authConfig, project, useAuth = 'default' }){
 
 };
 
-let getProviders = async function({ project }){
+let getProviders = async function({ project, useOnlyDefinedOnProject = false }){
 
-  let projectConfig = createProjectConfig({ project })
+  let projectConfig = createProjectConfig({ project, useOnlyDefinedOnProject })
   let providers = Object.keys(projectConfig.provider);
 
   return providers;

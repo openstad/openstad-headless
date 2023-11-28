@@ -89,21 +89,13 @@ router.route('/')
 // create project
 // -----------
 	.post(auth.can('Project', 'create'))
-	.post(function(req, res, next) {
-		db.Project
-			.create(req.body)
-			.then((result) => {
-				req.results = result;
-				next();
-				//return checkHostStatus({id: result.id});
-			})
-			.catch(next)
-	})
 	.post(async function (req, res, next) {
     // create an oauth client if nessecary
-    let project = req.results;
+    let project = {
+      config: req.body.config || {}
+    };
     try {
-      let providers = await authSettings.providers({ project });
+      let providers = await authSettings.providers({ project, useOnlyDefinedOnProject: true });
       let providersDone = [];
       for (let provider of providers) {
         let authConfig = await authSettings.config({ project, useAuth: provider });
@@ -114,17 +106,28 @@ router.route('/')
             project.config.auth.provider[authConfig.provider] = project.config.auth.provider[authConfig.provider] || {};
             project.config.auth.provider[authConfig.provider].clientId = client.clientId;
             project.config.auth.provider[authConfig.provider].clientSecret = client.clientSecret;
+            delete project.config.auth.provider[authConfig.provider].authTypes;
+            delete project.config.auth.provider[authConfig.provider].requiredUserFields;
           }
           providersDone[authConfig.provider] = true;
         }
       }
       if (Object.keys(providersDone).length) {
-        project.update({ config: project.config })
+        req.body.config.auth = project.config.auth;
       }
       return next();
     } catch(err) {
       return next(err);
     }
+	})
+	.post(function(req, res, next) {
+		db.Project
+			.create(req.body)
+			.then((result) => {
+				req.results = result;
+				return next();
+			})
+			.catch(next)
 	})
 	.post(auth.useReqUser)
 	.post(function(req, res, next) {
