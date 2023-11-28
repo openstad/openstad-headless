@@ -19,7 +19,7 @@ export default defineConfig(({command}) => {
                     name: 'OpenstadHeadlessLikes',
                 },
                 rollupOptions: {
-                    external: ['react', 'react-dom'],
+                    external: ['react', 'react-dom', 'remixicon/fonts/remixicon.css'],
                     output: {
                         globals: {
                             'react': 'React',

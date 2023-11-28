@@ -5,6 +5,9 @@ const fs = require('fs');
 const config = require('config');
 const path = require('path');
 const createError = require('http-errors');
+const flattenObject = require('../../util/flatten-object');
+const widgetSettingsMapping = require('./widget-settings');
+const reactCheck = require('../../util/react-check');
 
 let router = express.Router({ mergeParams: true });
 
@@ -32,69 +35,40 @@ router
   .get((req, res) => {
     const widgetId = req.params.widgetId;
     const randomId = Math.floor(Math.random() * 1000000);
+    const componentId = `osc-component-${widgetId}-${randomId}`;
     const widget = req.widget;
-
-    // @todo: add all widgets
-    const widgetSettingsMapping = {
-      /*arguments: {
-        js: ['@openstad-headless/arguments-component/dist/arguments-component.umd.cjs'],
-        css: ['@openstad-headless/arguments-component/dist/style.css'],
-        name: 'OpenstadHeadlessArguments',
-        defaultConfig: {
-          ideaId: null,
-          title: '[[nr]] reacties voor',
-          isClosed: widget.project?.config?.arguments?.isClosed || true,
-          closedText: 'Het inzenden van reacties is niet langer mogelijk',
-          isVotingEnabled: false,
-          isReplyingEnabled: false,
-          descriptionMinLength:
-            widget.project?.config?.arguments?.descriptionMinLength || '2',
-          descriptionMaxLength:
-            widget.project?.config?.arguments?.descriptionMaxLength || '1000',
-          placeholder: 'Voer hier uw reactie in',
-          formIntro: '',
-        },
-      }*/,
-      
-      likes: {
-        js: ['@openstad-headless/likes-component/dist/likes.iife.js'],
-        css: ['@openstad-headless/likes-component/dist/style.css'],
-        name: 'OpenstadHeadlessLikes',
-        defaultConfig: {
-          ideaId: null,
-        },
-      }
-    };
-
     const widgetSettings = widgetSettingsMapping[widget.type];
+    
+    // If we include remix icon in the components, we are sending a lot of data to the client
+    // By using a CDN and loading it through a <link> tag, we reduce the size of the response and leverage browser cache
+    const remixIconCss = process.env.REMIX_ICON_CDN || "https://unpkg.com/remixicon@3.5.0/fonts/remixicon.css"
 
     let output = '';
     let widgetOutput = '';
     let css = '';
 
-    [widgetSettings.js].forEach((file) => {
+    widgetSettings.js.forEach((file) => {
       widgetOutput += fs.readFileSync(
         require.resolve(file),
         'utf8'
       );
     });
 
-    [widgetSettings.css].forEach((file) => {
+    widgetSettings.css.forEach((file) => {
       css += fs.readFileSync(
         require.resolve(file),
         'utf8'
       );
     });
 
-    // @todo: add the component name in this url so we can statically serve the images per component
-    css = css.replaceAll('url(../images/', `url(${config.url}/widget/images/`);
-
-    const componentId = `osc-component-${widgetId}-${randomId}`;
+    // Rewrite the url to the images that we serve statically
+    css = css.replaceAll('url(../images/', `url(${config.url}/widget/${widget.type}-images/`);
 
     const loginUrl = `${config.url}/auth/project/${widget.project.id}/login?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
     const logoutUrl = `${config.url}/auth/project/${widget.project.id}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
 
     const defaultConfig = {
+      ...widget.project.config,
       api: {
         url: config.url,
       },
@@ -107,31 +81,34 @@ router
       projectId: widget.project.id,
       ...widgetSettings.defaultConfig,
     };
-
+    
     const widgetConfig = JSON.stringify({
       ...defaultConfig,
-      ...widget.config.general,
-      ...widget.config.list,
-      ...widget.config.form,
+      ...flattenObject(widget.config)
     });
 
-    const reactCheck = require('../../util/react-check');
-
     // Create function to render component
+    // The process.env.NODE_ENV is set to production, otherwise some React dependencies will not work correctly
+    // @todo: find a way around this so we don't have to provide the `process` variable
     output += `
+    let process = { env: { NODE_ENV: 'production' } };
     (function () {
       const currentScript = document.currentScript;
       window.addEventListener('load', function (e) {
         currentScript.insertAdjacentHTML('afterend', \`<div id="${componentId}"></div>\`);
         
-        document.querySelector('head').innerHTML += \`<style>${css}</style>\`;
+        document.querySelector('head').innerHTML += \`
+          <style>${css}</style>
+          <link href="${remixIconCss}" rel="stylesheet">
+        \`;
         
         const redirectUri = encodeURI(window.location.href);
-        const config = JSON.parse('${widgetConfig}'.replaceAll("[[REDIRECT_URI]]", redirectUri));
+        const config = JSON.parse(\`${widgetConfig}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
         
         function renderWidget () {
           ${widgetOutput}
-          ${widgetSettings.name}.loadWidget('${componentId}', { config });
+          
+          ${widgetSettings.functionName}.${widgetSettings.componentName}.loadWidget('${componentId}', { config });
         }
         
         ${reactCheck}
@@ -142,19 +119,24 @@ router
     `;
 
     res.header('Content-Type', 'application/javascript');
-
     res.send(output);
   });
 
-// @todo: server the images statically for each component
-/*router.use(
-  '/images',
-  express.static(
-    path.resolve(
-      require.resolve(`@openstad-headless/likes-components/dist/likes.iife.js`),
-      '../images/'
+// Add a static route for the images used in the CSS of the widgets
+Object.keys(widgetSettingsMapping).forEach((widget) => {
+  
+  if (!widgetSettingsMapping[widget].css) return;
+  
+  router.use(
+    `/widget/${widget}-images`,
+    express.static(
+      path.resolve(
+        require.resolve(widgetSettingsMapping[widget].css[0]),
+        '../images/'
+      )
     )
-  )
-);*/
+  );
+  
+});
 
 module.exports = router;
