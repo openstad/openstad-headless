@@ -18,6 +18,7 @@ type Filter = {
   search: {
     text: string;
   };
+  sort: string;
 };
 
 type Props = {
@@ -34,9 +35,15 @@ export function Filters({
     { type: 'theme', placeholder: 'Selecteer een thema', multiple: true },
     { type: 'area', placeholder: 'Selecteer een gebied' },
   ],
+  sortOptions = [
+    { value: 'title', label: 'Titel' },
+    { value: 'createdAt_desc', label: 'Nieuwste eerst' },
+    { value: 'createdAt_asc', label: 'Oudste eerst' },
+  ],
   onUpdateFilter,
   ...props
 }: Props) {
+
   const defaultFilter = { tags: {}, search: { text: '' } };
   tagTypes.forEach((tagType) => {
     defaultFilter.tags[tagType.type] = null;
@@ -90,6 +97,13 @@ export function Filters({
     });
   }
 
+  function setSort(value) {
+    updateFilter({
+      ...filter,
+      sort: value,
+    });
+  }
+
   const updateTagList = (tagType: string, updatedTag: string) => {
     const existingTags = selectedOptions[tagType];
     let selected = [...(existingTags || [])];
@@ -112,11 +126,11 @@ export function Filters({
 
   return (
     <section>
-      <div className="osc2-resource-overview-filters">
+      <div className="osc-resource-overview-filters">
         <Input
           ref={searchRef}
           onChange={(e) => search(e.target.value)}
-          className="osc2-resource-overview-search"
+          className="osc-resource-overview-search"
           placeholder="Zoeken"
         />
 
@@ -154,10 +168,10 @@ export function Filters({
 
         <Select
           ref={sortingRef}
-          options={[
-            { label: 'Datum (nieuw-oud)', value: 'date-desc' },
-            { label: 'Datum (oud-nieuw)', value: 'date-asc' },
-          ]}>
+          onValueChange={setSort}
+          options={
+            sortOptions
+          }>
           <option value={''}>Sorteer op</option>
         </Select>
 
@@ -183,6 +197,6 @@ export function Filters({
           Wis alles
         </SecondaryButton>
       </div>
-    </section>
+    </section >
   );
 }

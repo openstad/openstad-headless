@@ -64,6 +64,9 @@ function DataStore(props = { config: {} }) {
     if ( options.action != 'fetch' && options.revalidate != true ) {
       defaultOptions.populateCache = (newData, currentData) => mergeData(currentData, newData, options.action);
     }
+    if (newData.parentId) { // currently for comments: replies are subobjects and SWR can't handle that
+      defaultOptions.revalidate = true;
+    }
 
     return await mutate(key, fetcher(key, newData, options), { ...defaultOptions, ...options });
 

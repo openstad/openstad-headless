@@ -25,6 +25,17 @@ export default function useComments(props) {
     comment.submitLike = function() {
       return self.mutate({ projectId, ideaId, sentiment }, 'comments.submitLike', comment, { action: 'update' });
     }
+    comment.replies?.map( async reply => {
+      reply.update = function(newData) {
+        return self.mutate({ projectId, ideaId, sentiment }, 'comments.update', newData, { action: 'update' });
+      }
+      reply.delete = function(newData) {
+        return self.mutate({ projectId, ideaId, sentiment }, 'comments.delete', reply, { action: 'delete' });
+      }
+      reply.submitLike = function() {
+        return self.mutate({ projectId, ideaId, sentiment }, 'comments.submitLike', reply, { action: 'update' });
+      }
+    })
   })
 
   return [ comments, error, isLoading ];

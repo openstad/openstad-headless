@@ -15,6 +15,7 @@ import WidgetMapDetails from './details';
 import WidgetMapFilter from './filter';
 import WidgetMapReaction from './reaction';
 import { useRouter } from 'next/router';
+import Preview from '@/components/widget-preview';
 
 export default function WidgetMap() {
   const router = useRouter();
@@ -40,8 +41,9 @@ export default function WidgetMap() {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="general">
+          <Tabs defaultValue="preview">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
+              <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="map">Kaart</TabsTrigger>
               <TabsTrigger value="content">Content</TabsTrigger>
@@ -51,6 +53,9 @@ export default function WidgetMap() {
               <TabsTrigger value="filter">Filterbalk</TabsTrigger>
               <TabsTrigger value="reaction">Reacties</TabsTrigger>
             </TabsList>
+            <TabsContent value="preview" className="p-0">
+              <Preview type="map" />
+            </TabsContent>
             <TabsContent value="general" className="p-0">
               <WidgetMapGeneral />
             </TabsContent>

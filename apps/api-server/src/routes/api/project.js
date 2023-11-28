@@ -14,6 +14,21 @@ const authSettings = require('../../util/auth-settings');
 
 let router = express.Router({mergeParams: true});
 
+function getProject(req, res, next, include = []) {
+	const projectId = req.params.projectId;
+	let query = { where: { id: parseInt(projectId) }, include: include };
+	db.Project
+		.scope(req.scope)
+		.findOne(query)
+		.then(found => {
+			if ( !found ) throw new Error('Project not found');
+			req.results = found;
+			req.project = req.results; // middleware expects this to exist
+			next();
+		})
+		.catch(next);
+}
+
 // scopes
 // ------
 router
@@ -143,18 +158,7 @@ router.route('/issues')
 router.route('/:projectId') //(\\d+)
 	.all(auth.can('Project', 'view'))
 	.all(function(req, res, next) {
-		const projectId = req.params.projectId;
-		let query = { where: { id: parseInt(projectId) } }
-		db.Project
-			.scope(req.scope)
-			.findOne(query)
-			.then(found => {
-				if ( !found ) throw new Error('Project not found');
-				req.results = found;
-				req.project = req.results; // middleware expects this to exist
-				next();
-			})
-			.catch(next);
+		getProject(req, res, next)
 	})
 
 // view project
@@ -224,6 +228,20 @@ router.route('/:projectId') //(\\d+)
 				res.json({ "project": "deleted" });
 			})
 			.catch(next);
+	})
+
+// export a project
+// -------------------
+router.route('/:projectId(\\d+)/export')
+	.all(auth.can('Project', 'view'))
+	.all(function(req, res, next) {
+		getProject(req, res, next, [{model: db.Idea, include: [{model: db.Tag}, {model: db.Vote}, {model: db.Comment, as: 'commentsFor'}, {model: db.Comment, as: 'commentsAgainst'}, {model: db.Poll, as: 'poll'}]}, {model: db.Tag}])
+	})
+
+	.get(auth.can('Project', 'view'))
+	.get(auth.useReqUser)
+	.get(function(req, res, next) {
+		res.json(req.results);
 	})
 
 // anonymize all users
