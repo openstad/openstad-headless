@@ -19,14 +19,14 @@ module.exports = {
       formIntro: '',
     },
   },*/
-  
+
   likes: {
-    js:            ['@openstad-headless/likes-component/dist/likes-component.iife.js'],
-    css:           ['@openstad-headless/likes-component/dist/style.css'],
-    functionName:  'OpenstadHeadlessLikes',
+    js: ['@openstad-headless/likes-component/dist/likes-component.iife.js'],
+    css: ['@openstad-headless/likes-component/dist/style.css'],
+    functionName: 'OpenstadHeadlessLikes',
     componentName: 'Likes',
     defaultConfig: {
-      ideaId: null
+      ideaId: null,
     },
-  }
+  },
 };
