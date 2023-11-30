@@ -54,27 +54,27 @@ module.exports = {
       },
     },
 
-    'idea-details': {
-      import: './src/idea-details/index.jsx',
-      filename: 'idea-details.js',
+    'resource-details': {
+      import: './src/resource-details/index.jsx',
+      filename: 'resource-details.js',
       library: {
         name: 'OS20',
         type: 'assign-properties',
       },
     },
 
-    'ideas-filter': {
-      import: './src/ideas-filter/index.jsx',
-      filename: 'ideas-filter.js',
+    'resources-filter': {
+      import: './src/resources-filter/index.jsx',
+      filename: 'resources-filter.js',
       library: {
         name: 'OS20',
         type: 'assign-properties',
       },
     },
 
-    'ideas-overview': {
-      import: './src/ideas-overview/index.jsx',
-      filename: 'ideas-overview.js',
+    'resources-overview': {
+      import: './src/resources-overview/index.jsx',
+      filename: 'resources-overview.js',
       library: {
         name: 'OS20',
         type: 'assign-properties',

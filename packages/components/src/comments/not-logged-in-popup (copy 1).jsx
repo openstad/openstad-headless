@@ -20,7 +20,7 @@ export default class OpenStadComponentNotLoggedInPopup extends OpenStadComponent
       divId: self.divId,
       title: 'Login om verder te gaan',
       text: 'Login om een argument te plaatsen, te reageren of een argument te liken',
-      buttonAction: () => { OpenStadComponentLibs.localStorage.set('osc-login-pending-scroll-to-reactions', true); OpenStadComponentLibs.localStorage.set('osc-login-pending-show-details', self.config.ideaId); document.location.href = loginUrl; },
+      buttonAction: () => { OpenStadComponentLibs.localStorage.set('osc-login-pending-scroll-to-reactions', true); OpenStadComponentLibs.localStorage.set('osc-login-pending-show-details', self.config.resourceId); document.location.href = loginUrl; },
       buttonText: 'Inloggen',
     }});
 		document.dispatchEvent(event);

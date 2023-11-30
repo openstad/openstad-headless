@@ -1,13 +1,13 @@
 import merge from 'merge';
 import { useState, useEffect, useCallback } from 'react';
 import DataStore from '../data-store';
-import IdeasFilter from '../ideas-filter';
+import ResourcesFilter from '../resources-filter';
 
 // TODO: op verzoek van Daan; gaan we dat gebruiken?
 // TODO: dit moet, sort of, passen op NLDS
 import { cva } from "class-variance-authority";
 const commentVariants = cva(
-  "osc-ideasOverview-component osc-ideasOverview inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
+  "osc-resourcesOverview-component osc-resourcesOverview inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
   {
     variants: {
       variant: {
@@ -35,41 +35,41 @@ const commentVariants = cva(
   }
 );
 
-const IdeasOverview = function(props) {
+const ResourcesOverview = function(props) {
 
   props = merge.recursive({}, {
-    title: 'Ideas overview',
-    onIdeaClick: onIdeaClick,
+    title: 'Resources overview',
+    onResourceClick: onResourceClick,
   }, props.config,  props);
 
   const datastore = new DataStore(props);
 
   const [ currentUser, currentUserError, currentUserIsLoading ] = datastore.useCurrentUser({ ...props });
   const [ tags, tagsError, tagsIsLoading ] = datastore.useTags({ ...props });
-  const [ ideas, ideasError, ideasIsLoading ] = datastore.useIdeas({ ...props });
+  const [ resources, resourcesError, resourcesIsLoading ] = datastore.useResources({ ...props });
 
-  function onIdeaClick(e, idea) {
-    console.log('ONIDEACLICK', idea.id);
+  function onResourceClick(e, resource) {
+    console.log('ONRESOURCECLICK', resource.id);
   }
 
   let titleHTML = props.title ? <h3>{ props.title }</h3> : null;
 
   // TODO: errors moeten nog
   let errorHTML = null;
-  // let error = submitError || ideasOverviewError;
+  // let error = submitError || resourcesOverviewError;
   // if (error) {
   //   console.log(error);
   //   errorHTML = <div className="osc-error-block">{error.message}</div>
   // }
 
-  let ideasHTML = null;
-  if (ideas.length) {
-    ideasHTML = (
+  let resourcesHTML = null;
+  if (resources.length) {
+    resourcesHTML = (
       <>
-        { ideas.map( ( idea, index ) => {
+        { resources.map( ( resource, index ) => {
           return (
-            <div onClick={e => props.onIdeaClick(e, idea)} key={`osc-idea-${ index }`}>
-              {idea.title} ({ idea.tags && idea.tags.map( ( tag, jndex ) => tag.name).join(', ') })
+            <div onClick={e => props.onResourceClick(e, resource)} key={`osc-resource-${ index }`}>
+              {resource.title} ({ resource.tags && resource.tags.map( ( tag, jndex ) => tag.name).join(', ') })
             </div>
           );
         })
@@ -77,10 +77,10 @@ const IdeasOverview = function(props) {
       </>
     );
   } else{
-    if (ideasIsLoading) { // TODO: i18n
-      ideasHTML = <div className="osc-empty-list-text">Loading...</div>
+    if (resourcesIsLoading) { // TODO: i18n
+      resourcesHTML = <div className="osc-empty-list-text">Loading...</div>
     } else {
-      ideasHTML = <div className="osc-empty-list-text">{props.emptyListText}</div>
+      resourcesHTML = <div className="osc-empty-list-text">{props.emptyListText}</div>
     }
   }
   
@@ -88,12 +88,12 @@ const IdeasOverview = function(props) {
     <div id={props.config.divId} className={commentVariants({ variant: props.variant, size: props.size, className: props.className })}>
       {titleHTML}
       {errorHTML}
-      <IdeasFilter { ...props } onUpdateFilter={ideas.filter}/>
-      <h4>Ideas</h4>
-      {ideasHTML}
+      <ResourcesFilter { ...props } onUpdateFilter={resources.filter}/>
+      <h4>Resources</h4>
+      {resourcesHTML}
     </div>
   );
 
 }
 
-export default IdeasOverview;
+export default ResourcesOverview;

@@ -8,7 +8,7 @@ import Error from '../error';
 // TODO: dit moet, sort of, passen op NLDS
 import { cva } from "class-variance-authority";
 const commentVariants = cva(
-  "osc-ideaDetails-component osc-ideaDetails inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
+  "osc-resourceDetails-component osc-resourceDetails inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
   {
     variants: {
       variant: {
@@ -36,49 +36,49 @@ const commentVariants = cva(
   }
 );
 
-const IdeaDetails = function(props) {
+const ResourceDetails = function(props) {
 
   props = merge.recursive({}, {
-    title: 'Idea details',
+    title: 'Resource details',
   }, props.config,  props);
 
   const datastore = new DataStore(props);
 
   const [ currentUser, currentUserError, currentUserIsLoading ] = datastore.useCurrentUser({ ...props });
-  const [ idea, ideaError, ideaIsLoading ] = datastore.useIdea({ ...props });
+  const [ resource, resourceError, resourceIsLoading ] = datastore.useResource({ ...props });
 
-  let ideaHTML = null;
-  if (idea) {
-    ideaHTML = (
+  let resourceHTML = null;
+  if (resource) {
+    resourceHTML = (
       <>
-        <h3>{idea.title}</h3>
+        <h3>{resource.title}</h3>
         <p>
-          <strong>Images:</strong> {JSON.stringify(idea.images, null, 2)}
+          <strong>Images:</strong> {JSON.stringify(resource.images, null, 2)}
         </p>
         <p>
-          <strong>Summary:</strong> {idea.summary}
+          <strong>Summary:</strong> {resource.summary}
         </p>
         <p>
-          <strong>Description:</strong> {idea.description}
+          <strong>Description:</strong> {resource.description}
         </p>
       </>
     );
   } else{
-    if (ideaIsLoading) { // TODO: i18n
-      ideaHTML = <div className="osc-empty-list-text">Loading...</div>
+    if (resourceIsLoading) { // TODO: i18n
+      resourceHTML = <div className="osc-empty-list-text">Loading...</div>
     } else {
-      ideaHTML = <div className="osc-empty-list-text">{props.emptyListText}</div>
+      resourceHTML = <div className="osc-empty-list-text">{props.emptyListText}</div>
     }
   }
   
   return (
     <div id={props.config.divId} className={commentVariants({ variant: props.variant, size: props.size, className: props.className })}>
       <Error/>
-      {ideaHTML}
-      <LikeButtons {...props} idea={idea}/>
+      {resourceHTML}
+      <LikeButtons {...props} resource={resource}/>
     </div>
   );
 
 }
 
-export default IdeaDetails;
+export default ResourceDetails;

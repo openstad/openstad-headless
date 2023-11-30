@@ -7,7 +7,7 @@ import hasRole from '../lib/user-has-role';
 // TODO: dit moet, sort of, passen op NLDS
 import { cva } from "class-variance-authority";
 const commentVariants = cva(
-  "osc-ideasFilter-component osc-ideasFilter inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
+  "osc-resourcesFilter-component osc-resourcesFilter inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
   {
     variants: {
       variant: {
@@ -35,10 +35,10 @@ const commentVariants = cva(
   }
 );
 
-const IdeasFilter = function(props) {
+const ResourcesFilter = function(props) {
 
   props = merge.recursive({}, {
-    title: 'Ideas filter',
+    title: 'Resources filter',
     search: true,
     tagTypes: [ 'theme', 'area' ],
     onUpdateFilter: filter => console.log(filter),
@@ -137,4 +137,4 @@ const IdeasFilter = function(props) {
 
 }
 
-export default IdeasFilter;
+export default ResourcesFilter;

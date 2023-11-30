@@ -61,7 +61,7 @@ const Comments = function(props) {
     let formData = new FormData(e.target);
     formData = Object.fromEntries(formData.entries());
 
-    formData.ideaId = props.ideaId;
+    formData.resourceId = props.resourceId;
 
     try {
       if ( formData.id ) {
