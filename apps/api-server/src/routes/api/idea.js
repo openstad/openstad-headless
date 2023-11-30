@@ -267,9 +267,9 @@ router
   .post(function (req, res, next) {
     res.json(req.results);
     if (!req.query.nomail && req.body['publishDate']) {
-      mail.sendThankYouMail(req.results, 'ideas', req.project, req.user);
+      mail.sendThankYouMail(req.results, req.project, req.user);
     } else if (!req.query.nomail && !req.body['publishDate']) {
-      mail.sendConceptEmail(req.results, 'ideas', req.project, req.user);
+      mail.sendConceptEmail(req.results, req.project, req.user);
     }
   });
 
@@ -424,7 +424,7 @@ router
   })
   .put(function (req, res, next) {
     if (req.changedToPublished) {
-      mail.sendConceptEmail(req.results, 'ideas', req.project, req.user);
+      mail.sendConceptEmail(req.results, req.project, req.user);
     }
     next();
   })

@@ -134,37 +134,13 @@ module.exports = function (db, sequelize, DataTypes) {
     }
 
     Action.types = [
-        /*
-         TODO!
-
-             name: 'createModel',
-             act: async (action, selectedResource, req, res) => {
-                 const {modelName, values} = settings;
-
-                 if (!modelName) {
-                     throw new Error('No model name defined for create resource action');
-                 }
-
-                 if (!db[resource]) {
-                     throw new Error('No modelname defined for create resource action');
-                 }
-
-                 try {
-                     await db[resource].create(values);
-                 } catch (e) {
-                     throw new Error('Error while creating model in createModel action for variables: ' + JSON.stringify(variables));
-                 }
-
-             }
-         },
-          */
 
         /***
          * models can be updated
          */
         {
             name: 'updateModel',
-            act: async (action, selectedResource, req, res) => {
+            act: async (action, instance, req, res) => {
 
                 const {
                     keyToUpdate,
@@ -186,12 +162,12 @@ module.exports = function (db, sequelize, DataTypes) {
                     pointer = (pointer[key] = (index == arr.length - 1 ? newValue : {}))
                 });
 
-                let resourceData = selectedResource.toJSON();
-                resourceData = _.merge(resourceData, updates);
+                let instanceData = instance.toJSON();
+                instanceData = _.merge(instanceData, updates);
 
 
-                selectedResource
-                    .update(resourceData)
+                instance
+                    .update(instanceData)
                     .then(result => {
                         console.log('Succesful updateModel action');
                     })
@@ -200,151 +176,6 @@ module.exports = function (db, sequelize, DataTypes) {
                     });
             }
         },
-        /*
- TODO!
-
- {
-     name: 'mail',
-     act: async (action, selectedResource, req, res) => {
-         const {
-             usePredefinedTemplate,
-             templateString,
-             templateName,
-             data,
-             subject,
-             fromAddress,
-             conditions,
-             recipients
-         } = action.settings;
-
-         console.log('Start email action ', action, ' with selectedResource', selectedResource);
-
-         let recipientUsers = [];
-
-         if (!recipients) {
-             console.log('No recipients defined; abort mission for action: ', action);
-             throw new Error('No recipients defined; abort mission for action: ' + action.id, 'with selectedResource' + selectedResource.id);
-             return;
-         }
-
-         for (var i = 0; i < recipients.length; i++) {
-             const recipient = recipients[i];
-
-             if (recipient.type === 'owner') {
-                 /**
-                  * @todo better handling of getting users
-                  * fetch all users connected to accountId, probably can just set better type
-                  *
-                        recipientUsers = selectedResources.filter((selectedResource) => {
-                            return (selectedResource.user && selectedResource.user) || (selectedResource.account && selectedResource.account);
-                        }).map((selectedResource) => {
-
-                            if (selectedResource.account.email) {
-                                return {
-                                    email: selectedResource.account.email,
-                                    firstName: selectedResource.account.firstName,
-                                    lastName: selectedResource.account.lastName,
-                                }
-                            } else {
-                                return selectedResource.user;
-                            }
-                        });
-
-                        console.log('recipient.type owner and found: ', recipientUsers);
-                    }
-
-                    if (recipient.type === 'admin') {
-                        /**
-                         * Todo fetch admin for all projects
-                         *
-                    }
-
-                    if (recipient.type === 'static') {
-                        recipientUsers.concat(recipient.users)
-                    }
-                }
-
-                // make sure email list is unique, does this work with nested?
-                recipientUsers = Array.from(new Set(recipientUsers));
-
-                console.log('All recipientUsers ', recipientUsers);
-
-                let html = '';
-
-                if (recipientEmails.length > 0) {
-                    for (var i = 0; i < recipientEmails.length; i++) {
-
-                        const recipientUser = recipientUsers[i];
-                        const recipientEmail = recipientUser.email;
-
-                        console.log('Trying email for recipientUser ', recipientUser);
-
-                        if (!recipientEmail) {
-                            console.log('Email empty for recipientUser ', recipientUser);
-                            return false;
-                        }
-
-                        // we double check to make sure e-mail/notify actions really only
-                        const actionLog = await db.ActionLog.findOne({
-                            actionId: action.id,
-                            email: recipientEmail
-                        });
-
-                        /*
-                        if (actionLog) {
-                            return await db.Event.create({
-                                message: `Tried to email ${recipientEmail} double in action ${action.id}`,
-                                name: 'doubleEmailAttemptStop',
-                                type: 'warning',
-                                resourceId: action.id,
-                                resourceType: 'action'
-                            });
-                        }
-
-
-
-                        const templateData = {
-                            ...data,
-                            activeResource: selectedResource,
-                            recipient: recipientUsers
-                        }
-
-                        if (usePredefinedTemplate) {
-                            html = nunjucks.render(templateName + '.njk', templateData);
-                        } else {
-                            html = nunjucks.renderString(templateString, templateData);
-                        }
-
-                        let text = htmlToText.fromString(html, {
-                            ignoreImage: true,
-                            hideLinkHrefIfSameAsText: true,
-                            uppercaseHeadings: false
-                        });
-
-                        // TODO: project meesturen in sendmail
-                        const response = await sendMail({
-                            // in some cases the resource, like order or account has a different email from the submitted user, default to resource, otherwise send to owner of resource
-                            to: recipientEmail, //resource.email ?  resource.email : user.email,
-                            from: fromAddress,
-                            subject: subject,
-                            html: html,
-                            text: text,
-                        });
-
-                        console.log('Response for successful email is : ', response)
-
-                        //assume success for now
-                        await db.ActionLog.create({
-                            actionId: action.id,
-                            email: recipientEmail,
-                            userId: recipientUser.id
-                        });
-                    }
-                } else {
-                    console.log(`No recipients found for action with ID ${action.id}`);
-                }
-            }
-        }*/
     ]
 
     Action.prototype.getSelection = async (action, checkFromDate) => {
@@ -481,9 +312,9 @@ module.exports = function (db, sequelize, DataTypes) {
                 status: 'running',
             });
 
-            //resource, action, lastCheck
-            // trigger, resource created
-            // Get last run date, or now, don't leave blanco otherwise a run can target all previous resources
+            // instance, action, lastCheck
+            // trigger, instance created
+            // Get last run date, or now, don't leave blanco otherwise a run can target all previous instances
             // Running actions on lots of rows in the past. In same cases that might desired, but is not default behaviour
             const lastRunDate = lastRun ? lastRun.createdAt : new Date().toISOString().slice(0, 19).replace('T', ' ');
 
@@ -521,14 +352,14 @@ module.exports = function (db, sequelize, DataTypes) {
 
                 console.log('selectionToActUpon', selectionToActUpon);
 
-                // there are also actions where all the resources should be bundled, or treated as one
+                // there are also actions where all the instances should be bundled, or treated as one
                 for (var j = 0; j < selectionToActUpon.length; j++) {
-                    const selectedResource = selectionToActUpon[j];
+                    const selectedInstance = selectionToActUpon[j];
 
                     try {
                         // cron runs req, res will be empty, this will cause request actions to fail in case people try to run them as cron
                         // which is perfectly fine, the act method should properly display an error here.
-                        await actionType.act(action, selectedResource, req, res);
+                        await actionType.act(action, selectedInstance, req, res);
 
                         if (action.type === 'once') {
                             await action.update({

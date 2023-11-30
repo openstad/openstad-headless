@@ -207,9 +207,9 @@ router.route('/')
       });
 
       if (activityConfig[which]) {
-        const formattedAsActivities = req.results[which] && Array.isArray(req.results[which]) ? req.results[which].map((resource) => {
+        const formattedAsActivities = req.results[which] && Array.isArray(req.results[which]) ? req.results[which].map((instance) => {
           const config = activityConfig[which];
-          const idea = which === 'ideas' ? resource : resource.idea;
+          const idea = which === 'ideas' ? instance : instance.idea;
 
           const project =  req.results.projects.find((project) => {
             return project.id === idea.projectId;
@@ -217,11 +217,11 @@ router.route('/')
 
           return {
              //strip html tags
-            description: resource[config.descriptionKey] ? resource[config.descriptionKey].replace(/<[^>]+>/g, '') : '',
+            description: instance[config.descriptionKey] ? instance[config.descriptionKey].replace(/<[^>]+>/g, '') : '',
             type: config.type,
             idea: idea,
             project: project ? project : false,
-            createdAt: resource.createdAt
+            createdAt: instance.createdAt
           }
         }) : [];
 
