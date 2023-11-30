@@ -173,8 +173,7 @@ function getWidgetJavascriptOutput(
     let process = { env: { NODE_ENV: 'production' } };
     (function () {
       const currentScript = document.currentScript;
-      console.log ('hi!', currentScript);
-      //window.addEventListener('load', function (e) {
+      window.addEventListener('load', function (e) {
         currentScript.insertAdjacentHTML('afterend', \`<div id="${componentId}"></div>\`);
         
         document.querySelector('head').innerHTML += \`
@@ -194,7 +193,7 @@ function getWidgetJavascriptOutput(
         ${reactCheck}
         
         currentScript.remove();
-      //});
+      });
     })();
     `;
   return output;
