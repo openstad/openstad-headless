@@ -46,7 +46,6 @@ API_DB_NAME=${process.env.API_DB_NAME}
 IMAGE_DB_NAME=${process.env.IMAGE_DB_NAME}
 
 API_URL=${process.env.API_URL}
-API_PORT=${process.env.API_PORT}
 API_HOSTNAME=${process.env.API_DOMAIN}
 API_PORT=${process.env.API_PORT}
 API_DATABASE_USER=${process.env.API_DB_USERNAME}
