@@ -20,11 +20,11 @@ If you do the following metadata is added to the results:
     "pageCount": 6,
     "totalCount": 118,
     "links": {
-      "self": "/api/site/18/idea?page=3",
-      "first": "/api/site/18/idea?page=0",
-      "last": "/api/site/18/idea?page=5",
-      "previous": "/api/site/18/idea?page=2",
-      "next": "/api/site/18/idea?page=4"
+      "self": "/api/site/18/resource?page=3",
+      "first": "/api/site/18/resource?page=0",
+      "last": "/api/site/18/resource?page=5",
+      "previous": "/api/site/18/resource?page=2",
+      "next": "/api/site/18/resource?page=4"
     }
   },
   "records": [
@@ -62,7 +62,7 @@ A npm module like `ns` can translate nested objects automatically to such an url
 ],
 ```
 
-Search is done in textfields of the object. That would e.g. be `title`, `summary` and `description` in ideas. `text` will search in all available fields.
+Search is done in textfields of the object. That would e.g. be `title`, `summary` and `description` in resources. `text` will search in all available fields.
 
 Searching is done using the [fuzzysort](https://github.com/farzher/fuzzysort) module. This will add scores; the results are ordered by that score.
 
