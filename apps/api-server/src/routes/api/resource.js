@@ -100,7 +100,7 @@ router.all('*', function (req, res, next) {
   if (req.canIncludeVoteCount) req.scope.push('includeVoteCount');
   // todo? volgens mij wordt dit niet meer gebruikt
   // if (req.query.highlighted) {
-  //  	query = db.Idea.getHighlighted({ projectId: req.params.projectId })
+  //  	query = db.Resource.getHighlighted({ projectId: req.params.projectId })
   // }
 
   return next();
@@ -109,9 +109,9 @@ router.all('*', function (req, res, next) {
 router
   .route('/')
 
-  // list ideas
+  // list resources
   // ----------
-  .get(auth.can('Idea', 'list'))
+  .get(auth.can('Resource', 'list'))
   .get(pagination.init)
   .get(function(req, res, next) {
     let { dbQuery } = req;
@@ -135,13 +135,13 @@ router
       });
     }
 
-    db.Idea.scope(...req.scope)
+    db.Resource.scope(...req.scope)
       .findAndCountAll(dbQuery)
       .then(function (result) {
-        result.rows.forEach((idea) => {
-          idea.project = req.project;
-          if (req.query.includePoll && idea.poll)
-            idea.poll.countVotes(!req.query.withVotes);
+        result.rows.forEach((resource) => {
+          resource.project = req.project;
+          if (req.query.includePoll && resource.poll)
+            resource.poll.countVotes(!req.query.withVotes);
         });
         const { rows } = result;
         req.results = rows;
@@ -158,9 +158,9 @@ router
     res.json(req.results);
   })
 
-  // create idea
+  // create resource
   // -----------
-  .post(auth.can('Idea', 'create'))
+  .post(auth.can('Resource', 'create'))
   .post(function (req, res, next) {
     if (!req.project) return next(createError(401, 'Project niet gevonden'));
     return next();
@@ -169,8 +169,8 @@ router
     if (
       !(
         req.project.config &&
-        req.project.config.ideas &&
-        req.project.config.ideas.canAddNewIdeas
+        req.project.config.resources &&
+        req.project.config.resources.canAddNewResources
       )
     )
       return next(createError(401, 'Inzenden is gesloten'));
@@ -202,11 +202,11 @@ router
     };
 
     let responseData;
-    db.Idea.authorizeData(data, 'create', req.user, null, req.project)
+    db.Resource.authorizeData(data, 'create', req.user, null, req.project)
       .create(data)
-      .then((ideaInstance) => {
-        db.Idea.scope(...req.scope)
-          .findByPk(ideaInstance.id)
+      .then((resourceInstance) => {
+        db.Resource.scope(...req.scope)
+          .findByPk(resourceInstance.id)
           .then((result) => {
             result.project = req.project;
             req.results = result;
@@ -242,21 +242,21 @@ router
     let tags = req.body.tags;
     if (!tags) return next();
 
-    const ideaInstance = req.results;
+    const resourceInstance = req.results;
     const projectId = req.params.projectId;
 
     let tagIds = Array.from(await getOrCreateTagIds(projectId, tags, req.user));
 
-    ideaInstance.setTags(tagIds).then((tags) => {
+    resourceInstance.setTags(tagIds).then((tags) => {
       // refetch. now with tags
       let scope = [...req.scope, 'includeTags'];
       if (req.canIncludeVoteCount) scope.push('includeVoteCount');
-      return db.Idea.scope(...scope)
+      return db.Resource.scope(...scope)
         .findOne({
-          where: { id: ideaInstance.id, projectId: req.params.projectId },
+          where: { id: resourceInstance.id, projectId: req.params.projectId },
         })
         .then((found) => {
-          if (!found) throw new Error('Idea not found');
+          if (!found) throw new Error('Resource not found');
           found.project = req.project;
           req.results = found;
           return next();
@@ -273,29 +273,29 @@ router
     }
   });
 
-// one idea
+// one resource
 // --------
 router
-  .route('/:ideaId(\\d+)')
+  .route('/:resourceId(\\d+)')
   .all(function (req, res, next) {
-    var ideaId = parseInt(req.params.ideaId) || 1;
+    var resourceId = parseInt(req.params.resourceId) || 1;
 
     let scope = [...req.scope];
     if (req.canIncludeVoteCount) scope.push('includeVoteCount');
 
-    db.Idea.scope(...scope)
+    db.Resource.scope(...scope)
       .findOne({
-        where: { id: ideaId, projectId: req.params.projectId },
+        where: { id: resourceId, projectId: req.params.projectId },
       })
       .then((found) => {
-        if (!found) throw new Error('Idea not found');
+        if (!found) throw new Error('Resource not found');
         found.project = req.project;
         if (req.query.includePoll) {
           // TODO: naar poll hooks
           if (found.poll) found.poll.countVotes(!req.query.withVotes);
         }
-        req.idea = found;
-        req.results = req.idea;
+        req.resource = found;
+        req.results = req.resource;
         next();
       })
       .catch((err) => {
@@ -304,23 +304,23 @@ router
       });
   })
 
-  // view idea
+  // view resource
   // ---------
-  .get(auth.can('Idea', 'view'))
+  .get(auth.can('Resource', 'view'))
   .get(auth.useReqUser)
   .get(function (req, res, next) {
     res.json(req.results);
   })
 
-  // update idea
+  // update resource
   // -----------
   .put(auth.useReqUser)
   .put(function (req, res, next) {
     if (
       !(
         req.project.config &&
-        req.project.config.ideas &&
-        req.project.config.ideas.canAddNewIdeas
+        req.project.config.resources &&
+        req.project.config.resources.canAddNewResources
       )
     ) {
       if (!req.results.dataValues.publishDate) {
@@ -339,17 +339,17 @@ router
     next();
   })
   .put(function (req, res, next) {
-    const currentIdea = req.results.dataValues;
-    const wasConcept = currentIdea && !currentIdea.publishDate;
+    const currentResource = req.results.dataValues;
+    const wasConcept = currentResource && !currentResource.publishDate;
     const willNowBePublished = req.body['publishDate'];
     req.changedToPublished = wasConcept && willNowBePublished;
     next();
   })
   .put(function (req, res, next) {
-    var idea = req.results;
+    var resource = req.results;
 
-    if (!(idea && idea.can && idea.can('update')))
-      return next(new Error('You cannot update this Idea'));
+    if (!(resource && resource.can && resource.can('update')))
+      return next(new Error('You cannot update this Resource'));
 
     if (req.body.location) {
       try {
@@ -380,7 +380,7 @@ router
       }
     }
 
-    idea
+    resource
       .authorizeData(data, 'update')
       .update(data)
       .then((result) => {
@@ -395,21 +395,21 @@ router
     let tags = req.body.tags;
     if (!tags) return next();
 
-    const ideaInstance = req.results;
+    const resourceInstance = req.results;
     const projectId = req.params.projectId;
 
     let tagIds = Array.from(await getOrCreateTagIds(projectId, tags, req.user));
 
-    ideaInstance.setTags(tagIds).then((result) => {
+    resourceInstance.setTags(tagIds).then((result) => {
       // refetch. now with tags
       let scope = [...req.scope, 'includeTags'];
       if (req.canIncludeVoteCount) scope.push('includeVoteCount');
-      return db.Idea.scope(...scope)
+      return db.Resource.scope(...scope)
         .findOne({
-          where: { id: ideaInstance.id, projectId: req.params.projectId },
+          where: { id: resourceInstance.id, projectId: req.params.projectId },
         })
         .then((found) => {
-          if (!found) throw new Error('Idea not found');
+          if (!found) throw new Error('Resource not found');
 
           if (req.query.includePoll) {
             // TODO: naar poll hooks
@@ -432,23 +432,23 @@ router
     res.json(req.results);
   })
 
-  // delete idea
+  // delete resource
   // ---------
   .delete(auth.useReqUser)
   .delete(function (req, res, next) {
-    const idea = req.results;
-    if (!(idea && idea.can && idea.can('delete')))
-      return next(new Error('You cannot delete this idea'));
+    const resource = req.results;
+    if (!(resource && resource.can && resource.can('delete')))
+      return next(new Error('You cannot delete this resource'));
 
-    idea
+    resource
       .destroy()
       .then(() => {
-        res.json({ idea: 'deleted' });
+        res.json({ resource: 'deleted' });
       })
       .catch(next);
   });
 
-// when adding or updating ideas parse the tags
+// when adding or updating resources parse the tags
 async function getOrCreateTagIds(projectId, tags, user) {
   let result = [];
   let tagsOfProject = await db.Tag.findAll({ where: { projectId } });

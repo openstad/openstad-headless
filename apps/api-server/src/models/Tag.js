@@ -88,7 +88,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 	}
 
 	Tag.associate = function( models ) {
-		this.belongsToMany(models.Idea, { through: 'idea_tags', constraints: false });
+		this.belongsToMany(models.Resource, { through: 'resource_tags', constraints: false });
 		this.belongsTo(models.Project, { onDelete: 'CASCADE' });
 	}
 

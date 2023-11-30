@@ -80,7 +80,7 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
     },
   },
 
-  ideas: {
+  resources: {
     type: 'object',
     subset: {
       feedbackEmail: {
@@ -94,7 +94,7 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
         },
         inzendingPath: {
           type: 'string',
-          default: "/PATH/TO/PLAN/[[ideaId]]",
+          default: "/PATH/TO/PLAN/[[resourceId]]",
         },
         template: {
           type: 'string',
@@ -116,7 +116,7 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
         },
         inzendingPath: {
           type: 'string',
-          default: "/PATH/TO/PLAN/[[ideaId]]",
+          default: "/PATH/TO/PLAN/[[resourceId]]",
         },
         template: {
           type: 'string',
@@ -138,7 +138,7 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
         },
         inzendingPath: {
           type: 'string',
-          default: "/PATH/TO/PLAN/[[ideaId]]",
+          default: "/PATH/TO/PLAN/[[resourceId]]",
         },
         template: {
           type: 'string',

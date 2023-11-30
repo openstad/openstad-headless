@@ -10,13 +10,13 @@ const merge = require('merge');
 
 const router = express.Router({mergeParams: true});
 
-const activityKeys = ['ideas', 'comments', 'votes', 'projects'];
+const activityKeys = ['resources', 'comments', 'votes', 'projects'];
 
 const activityConfig = {
-  'ideas' : {
+  'resources' : {
       descriptionKey: 'description',
       type: {
-        slug: 'idea',
+        slug: 'resource',
         label: 'inzending'
       }
   },
@@ -52,14 +52,14 @@ router
     next();
   });
 
-// list user ideas, comments, votes
+// list user resources, comments, votes
 // -------------------------------------------
 router.route('/')
 
 // what to include
   .get(function (req, res, next) {
     req.activities = [];
-    ['ideas', 'comments', 'votes'].forEach(key => {
+    ['resources', 'comments', 'votes'].forEach(key => {
       let include = 'include' + key.charAt(0).toUpperCase() + key.slice(1);;
       if (req.query[include]) {
         req.activities.push(key)
@@ -143,19 +143,19 @@ router.route('/')
         return next();
       })
   })
-// ideas
+// resources
   .get(function(req, res, next) {
-    if (!req.activities.includes('ideas')) return next();
-    return auth.can('Idea', 'list')(req, res, next);
+    if (!req.activities.includes('resources')) return next();
+    return auth.can('Resource', 'list')(req, res, next);
   })
   .get(function(req, res, next) {
-    if (!req.activities.includes('ideas')) return next();
+    if (!req.activities.includes('resources')) return next();
     let where = { userId: req.userIds };
-    return db.Idea
+    return db.Resource
       .scope(['includeProject'])
       .findAll({ where })
       .then(function(rows) {
-        req.results.ideas = rows;
+        req.results.resources = rows;
         return next();
       })
   })
@@ -169,10 +169,10 @@ router.route('/')
     if (!req.activities.includes('comments')) return next();
     let where = { userId: req.userIds };
     return db.Comment
-      .scope(['withIdea'])
+      .scope(['withResource'])
       .findAll({ where })
       .then(function(rows) {
-        req.results.comments = rows.filter(row => !!row.idea);
+        req.results.comments = rows.filter(row => !!row.resource);
         return next();
       })
   })
@@ -186,10 +186,10 @@ router.route('/')
     if (!req.activities.includes('votes')) return next();
     let where = { userId: req.userIds };
     return db.Vote
-      .scope(['withIdea'])
+      .scope(['withResource'])
       .findAll({ where })
       .then(function(rows) {
-        req.results.votes = rows.filter(row => !!row.idea);;
+        req.results.votes = rows.filter(row => !!row.resource);;
         return next();
       })
   })
@@ -209,17 +209,17 @@ router.route('/')
       if (activityConfig[which]) {
         const formattedAsActivities = req.results[which] && Array.isArray(req.results[which]) ? req.results[which].map((instance) => {
           const config = activityConfig[which];
-          const idea = which === 'ideas' ? instance : instance.idea;
+          const resource = which === 'resources' ? instance : instance.resource;
 
           const project =  req.results.projects.find((project) => {
-            return project.id === idea.projectId;
+            return project.id === resource.projectId;
           })
 
           return {
              //strip html tags
             description: instance[config.descriptionKey] ? instance[config.descriptionKey].replace(/<[^>]+>/g, '') : '',
             type: config.type,
-            idea: idea,
+            resource: resource,
             project: project ? project : false,
             createdAt: instance.createdAt
           }
@@ -245,7 +245,7 @@ router.route('/')
   })
   .get(function (req, res, next) {
     // console.log({
-    //   ideas: req.results.ideas && req.results.ideas.length,
+    //   resources: req.results.resources && req.results.resources.length,
     //   comment: req.results.comment && req.results.comments.length,
     //   votes: req.results.votes && req.results.votes.length,
     // });

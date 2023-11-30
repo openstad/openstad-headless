@@ -79,9 +79,9 @@ router.route('/')
 		let { dbQuery } = req;
 
 		let where = {...dbQuery.where};
-		let ideaId = parseInt(req.query.ideaId);
-		if (ideaId) {
-			where.ideaId = ideaId;
+		let resourceId = parseInt(req.query.resourceId);
+		if (resourceId) {
+			where.resourceId = resourceId;
 		}
 		let userId = parseInt(req.query.userId);
 		if (userId) {
@@ -131,7 +131,7 @@ router.route('/')
 		records.forEach((entry, i) => {
 			let vote = {
 				id: entry.id,
-				ideaId: entry.ideaId,
+				resourceId: entry.resourceId,
 				confirmed: entry.confirmed,
 				opinion: entry.opinion,
 				createdAt: entry.createdAt
@@ -184,7 +184,7 @@ router.route('/*')
 		if (!Array.isArray(votes)) votes = [votes];
 		votes = votes.map((entry) => {
 			return {
-				ideaId: parseInt(entry.ideaId, 10),
+				resourceId: parseInt(entry.resourceId, 10),
 				opinion: typeof entry.opinion == 'string' ? entry.opinion : null,
 				userId: req.user.id,
 				confirmed: false,
@@ -198,7 +198,7 @@ router.route('/*')
     if (req.project.config.votes.withExisting == 'merge') {
       // no double votes
       try {
-        if (req.existingVotes.find( newVote => votes.find( oldVote => oldVote.ideaId == newVote.ideaId) )) {
+        if (req.existingVotes.find( newVote => votes.find( oldVote => oldVote.resourceId == newVote.resourceId) )) {
 			const transaction = res.locals.transaction
 			const err = createError(403, 'Je hebt al gestemd')
 			if (transaction) {
@@ -216,7 +216,7 @@ router.route('/*')
           req.existingVotes
             .map( oldVote => {
               return {
-                ideaId: parseInt(oldVote.ideaId, 10),
+                resourceId: parseInt(oldVote.resourceId, 10),
                 opinion: typeof oldVote.opinion == 'string' ? oldVote.opinion : null,
                 userId: req.user.id,
                 confirmed: false,
@@ -236,9 +236,9 @@ router.route('/*')
 
   // validaties: bestaan de ideeen waar je op wilt stemmen
 	.post(function(req, res, next) {
-		let ids = req.votes.map( entry => entry.ideaId );
+		let ids = req.votes.map( entry => entry.resourceId );
 		let transaction = res.locals.transaction
-		db.Idea
+		db.Resource
 			.findAll({ where: { id:ids, projectId: req.project.id }, transaction, lock: true })
 			.then(found => {
 
@@ -249,7 +249,7 @@ router.route('/*')
 
 					return next(createError(400, 'Idee niet gevonden'));
 				}
-				req.ideas = found;
+				req.resources = found;
 				return next();
 			})
 			.catch(err => {
@@ -273,7 +273,7 @@ router.route('/*')
 				const whereClause = {
 						ip: vote.ip,
 			//			opinion : vote.opinion,
-						ideaId: vote.ideaId,
+						resourceId: vote.resourceId,
 						createdAt: {
 							[Op.gte]: db.sequelize.literal('NOW() - INTERVAL 5 MINUTE'),
 						}
@@ -314,7 +314,7 @@ router.route('/*')
 	.post(function(req, res, next) {
 		let transaction = res.locals.transaction
 		if (req.project.config.votes.voteType != 'count') return next();
-		if (req.votes.length >= req.project.config.votes.minIdeas && req.votes.length <= req.project.config.votes.maxIdeas) {
+		if (req.votes.length >= req.project.config.votes.minResources && req.votes.length <= req.project.config.votes.maxResources) {
 			return next();
 		}
 		let err = createError(400, 'Aantal ideeen klopt niet');
@@ -333,14 +333,14 @@ router.route('/*')
 		if (req.project.config.votes.voteType != 'budgeting') return next();
 		let budget = 0;
 		req.votes.forEach((vote) => {
-			let idea = req.ideas.find(idea => idea.id == vote.ideaId);
-			budget += idea.budget;
+			let resource = req.resources.find(resource => resource.id == vote.resourceId);
+			budget += resource.budget;
 		});
 		let err;
 		if (!( budget >= req.project.config.votes.minBudget && budget <= req.project.config.votes.maxBudget )) {
 		  err = createError(400, 'Budget klopt niet');
 		}
-		if (!( req.votes.length >= req.project.config.votes.minIdeas && req.votes.length <= req.project.config.votes.maxIdeas )) {
+		if (!( req.votes.length >= req.project.config.votes.minResources && req.votes.length <= req.project.config.votes.maxResources )) {
 		  err = createError(400, 'Aantal ideeen klopt niet');
 		}
 		if (err) {
@@ -363,9 +363,9 @@ router.route('/*')
     let themes = req.project.config.votes.themes || [];
     let totalNoOfVotes = 0;
     req.votes.forEach((vote) => {
-			let idea = req.ideas.find(idea => idea.id == vote.ideaId);
-      totalNoOfVotes += idea ? 1 : 0;
-      let themename = idea && idea.extraData && idea.extraData.theme;
+			let resource = req.resources.find(resource => resource.id == vote.resourceId);
+      totalNoOfVotes += resource ? 1 : 0;
+      let themename = resource && resource.extraData && resource.extraData.theme;
       let theme = themes.find( theme => theme.value == themename );
       if (theme) {
 	      theme.noOf = theme.noOf || 0;
@@ -376,12 +376,12 @@ router.route('/*')
     let isOk = true;
     themes.forEach((theme) => {
 	    theme.noOf = theme.noOf || 0;
-		  if (theme.noOf < theme.minIdeas || theme.noOf > theme.maxIdeas) {
+		  if (theme.noOf < theme.minResources || theme.noOf > theme.maxResources) {
         isOk = false;
 		  }
     });
 
-		if (( req.project.config.votes.minIdeas && totalNoOfVotes < req.project.config.votes.minIdeas ) || ( req.project.config.votes.maxIdeas && totalNoOfVotes > req.project.config.votes.maxIdeas )) {
+		if (( req.project.config.votes.minResources && totalNoOfVotes < req.project.config.votes.minResources ) || ( req.project.config.votes.maxResources && totalNoOfVotes > req.project.config.votes.maxResources )) {
       isOk = false;
 		}
 
@@ -405,12 +405,12 @@ router.route('/*')
 		if (req.project.config.votes.voteType != 'budgeting-per-theme') return next();
     let themes = req.project.config.votes.themes || [];
 		req.votes.forEach((vote) => {
-			let idea = req.ideas.find(idea => idea.id == vote.ideaId);
-      let themename = idea && idea.extraData && idea.extraData.theme;
+			let resource = req.resources.find(resource => resource.id == vote.resourceId);
+      let themename = resource && resource.extraData && resource.extraData.theme;
       let theme = themes.find( theme => theme.value == themename );
       if (theme) {
 	      theme.budget = theme.budget || 0;
-        theme.budget += idea.budget;
+        theme.budget += resource.budget;
       }
 		});
     let isOk = true;
@@ -442,7 +442,7 @@ router.route('/*')
 
 			case 'likes':
 				req.votes.forEach((vote) => {
-					let existingVote =  req.existingVotes ? req.existingVotes.find(entry => entry.ideaId == vote.ideaId) : false;
+					let existingVote =  req.existingVotes ? req.existingVotes.find(entry => entry.resourceId == vote.resourceId) : false;
 					if ( existingVote ) {
 						if (existingVote.opinion == vote.opinion) {
 							actions.push({ action: 'delete', vote: existingVote })
@@ -507,13 +507,13 @@ router.route('/*')
 	})
 
 	.post(function(req, res, next) {
-		let ideaIds = req.votes.map( entry => entry.ideaId );
+		let resourceIds = req.votes.map( entry => entry.resourceId );
 		db.Vote // get existing votes for this user
-			.findAll({ where: { userId: req.user.id, ideaId: ideaIds } })
+			.findAll({ where: { userId: req.user.id, resourceId: resourceIds } })
 			.then(found => {
 				let result = found.map(entry => { return {
 					id: entry.id,
-					ideaId: entry.ideaId,
+					resourceId: entry.resourceId,
 					opinion: entry.opinion,
 					userId: entry.userId,
 					confirmed: entry.confirmed,
@@ -521,7 +521,7 @@ router.route('/*')
 				}})
 				res.json(result.map(entry => { return {
 					id: entry.id,
-					ideaId: entry.ideaId,
+					resourceId: entry.resourceId,
 					userId: entry.userId,
 					confirmed: entry.confirmed,
 					opinion: entry.opinion,
@@ -577,14 +577,14 @@ router.route('/*')
 		})
 	.all(auth.can('Vote', 'toggle'))
 			.get(function( req, res, next ) {
-				var ideaId = req.params.ideaId;
+				var resourceId = req.params.resourceId;
 				var vote   = req.vote;
 
 				vote.toggle()
 					.then(function() {
 						res.json({
 							id: vote.id,
-							ideaId: vote.ideaId,
+							resourceId: vote.resourceId,
 							userId: vote.userId,
 							confirmed: vote.confirmed,
 							opinion: vote.opinion,

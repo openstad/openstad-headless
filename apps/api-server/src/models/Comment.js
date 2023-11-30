@@ -21,7 +21,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 			allowNull    : true
 		},
 
-		ideaId: {
+		resourceId: {
 			type         : DataTypes.INTEGER,
       auth: {
         updateableBy : 'editor',
@@ -100,14 +100,14 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 				return new Promise((resolve, reject) => {
 
-					if (instance.ideaId) {
-						db.Idea.scope('includeProject').findByPk(instance.ideaId)
-							.then( idea => {
-								if (!idea) throw Error('Idea niet gevonden')
-								instance.config = merge.recursive(true, config, idea.project.config);
-								return idea;
+					if (instance.resourceId) {
+						db.Resource.scope('includeProject').findByPk(instance.resourceId)
+							.then( resource => {
+								if (!resource) throw Error('Resource niet gevonden')
+								instance.config = merge.recursive(true, config, resource.project.config);
+								return resource;
 							})
-							.then( idea => {
+							.then( resource => {
 								return resolve();
 							}).catch(err => {
 								throw err;
@@ -123,16 +123,16 @@ module.exports = function( db, sequelize, DataTypes ) {
 			},
 
 			afterCreate: function(instance, options) {
-				db.Idea.findByPk(instance.ideaId)
-					.then( idea => {
-						notifications.addToQueue({ type: 'comment', action: 'create', projectId: idea.projectId, instanceId: instance.id });
+				db.Resource.findByPk(instance.resourceId)
+					.then( resource => {
+						notifications.addToQueue({ type: 'comment', action: 'create', projectId: resource.projectId, instanceId: instance.id });
 					})
 			},
 
 			afterUpdate: function(instance, options) {
-				db.Idea.findByPk(instance.ideaId)
-					.then( idea => {
-						notifications.addToQueue({ type: 'comment', action: 'update', projectId: idea.projectId, instanceId: instance.id });
+				db.Resource.findByPk(instance.resourceId)
+					.then( resource => {
+						notifications.addToQueue({ type: 'comment', action: 'update', projectId: resource.projectId, instanceId: instance.id });
 					})
 			},
 
@@ -171,7 +171,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 			forProjectId: function( projectId ) {
 				return {
 					where: {
-						ideaId: [ sequelize.literal(`select id FROM ideas WHERE projectId = ${projectId}`) ]
+						resourceId: [ sequelize.literal(`select id FROM resources WHERE projectId = ${projectId}`) ]
 					}
 				};
 			},
@@ -184,7 +184,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 						as         : 'replies',
 						required   : false,
             // force attribs because the automatic list is incomplete
-					  attributes : ['id', 'parentId', 'ideaId', 'userId', 'sentiment', 'description', 'label', 'createdAt', 'updatedAt', 'createDateHumanized']
+					  attributes : ['id', 'parentId', 'resourceId', 'userId', 'sentiment', 'description', 'label', 'createdAt', 'updatedAt', 'createDateHumanized']
 					}],
 					where: {
 						parentId: null
@@ -198,10 +198,10 @@ module.exports = function( db, sequelize, DataTypes ) {
 				};
 			},
 
-			includeIdea: function() {
+			includeResource: function() {
 				return {
 					include: [{
-						model      : db.Idea,
+						model      : db.Resource,
 						attributes : ['id', 'projectId', 'title', 'status', 'viewableByRole']
 					}]
 				}
@@ -250,7 +250,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 	}
 
 	Comment.associate = function( models ) {
-		this.belongsTo(models.Idea, { onDelete: 'CASCADE' }); // TODO: defined in the DB as NOT NULL, which is incorrect when parentId is used
+		this.belongsTo(models.Resource, { onDelete: 'CASCADE' }); // TODO: defined in the DB as NOT NULL, which is incorrect when parentId is used
 		this.belongsTo(models.User, { onDelete: 'CASCADE' });
 		this.hasMany(models.CommentVote, {
 			as: 'votes',
@@ -272,13 +272,13 @@ module.exports = function( db, sequelize, DataTypes ) {
 			ip         : ip
 		};
 
-		// See `Idea.addUserVote` for an explanation of the logic below.
+		// See `Resource.addUserVote` for an explanation of the logic below.
 		return db.CommentVote.findOne({where: data})
 			.then(function( vote ) {
 				if( vote ) {
 					return vote.destroy();
 				} else {
-					// HACK: See `Idea.addUserVote`.
+					// HACK: See `Resource.addUserVote`.
 					data.deletedAt = null;
 					return db.CommentVote.upsert(data);
 				}
@@ -295,7 +295,7 @@ module.exports = function( db, sequelize, DataTypes ) {
     updateableBy: ['moderator','owner'],
     deleteableBy: ['moderator','owner'],
     canVote: function(user, self) {
-      // TODO: ik denk dat je alleen moet kunnen voten bij idea.isOpen, maar dat doet hij nu ook niet. Sterker: hij checkt nu alleen maar op parentId.
+      // TODO: ik denk dat je alleen moet kunnen voten bij resource.isOpen, maar dat doet hij nu ook niet. Sterker: hij checkt nu alleen maar op parentId.
       if (userHasRole(user, 'member') && self.id && !self.parentId) {
         return true;
       } else {
@@ -303,8 +303,8 @@ module.exports = function( db, sequelize, DataTypes ) {
       }
     },
     canReply: function(user, self) {
-      if (!self.idea) return false;
-      if (self.idea.isRunning() && userHasRole(user, 'member') && self.id && !self.parentId) {
+      if (!self.resource) return false;
+      if (self.resource.isRunning() && userHasRole(user, 'member') && self.id && !self.parentId) {
         return true;
       } else {
         return false;

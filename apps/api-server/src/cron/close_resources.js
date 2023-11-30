@@ -5,7 +5,7 @@ const db	= require('../db');
 
 // Purpose
 // -------
-// Auto-close ideas that passed the deadline.
+// Auto-close resources that passed the deadline.
 // 
 // Runs every hour
 module.exports = {
@@ -17,13 +17,13 @@ module.exports = {
     try {
 
       let projects = await db.Project.findAll({
-        where: Sequelize.where(Sequelize.fn('JSON_VALUE', Sequelize.col('config'), Sequelize.literal('"$.ideas.automaticallyUpdateStatus.isActive"')), 'true')
+        where: Sequelize.where(Sequelize.fn('JSON_VALUE', Sequelize.col('config'), Sequelize.literal('"$.resources.automaticallyUpdateStatus.isActive"')), 'true')
       });
 
       for ( let project of projects ) {
 
-        let days = project.config.ideas.automaticallyUpdateStatus.afterXDays || 90;
-        let ideas = await db.Idea.findAll({
+        let days = project.config.resources.automaticallyUpdateStatus.afterXDays || 90;
+        let resources = await db.Resource.findAll({
           where: {
             projectId: project.id,
             startDate: { [Op.lte]: moment().subtract(days, 'days').toDate() },
@@ -31,9 +31,9 @@ module.exports = {
           }
         });
 
-        for ( let idea of ideas ) {
-          let result = await idea.setStatus('CLOSED');
-          log('Automatically closed idea %d', idea.id);
+        for ( let resource of resources ) {
+          let result = await resource.setStatus('CLOSED');
+          log('Automatically closed resource %d', resource.id);
         }
 
       }

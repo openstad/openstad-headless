@@ -222,7 +222,7 @@ function prepareEmailData(
   return {
     date: new Date(),
     user,
-    idea: resource,
+    resource,
     HOSTNAME: hostname,
     PROJECTNAME: projectname,
     inzendingURL,
@@ -311,7 +311,7 @@ async function sendInactiveWarningEmail(project, user) {
     });
 
     let attachments =
-      projectConfig.getResourceFeedbackEmailAttachments('idea') ||
+      projectConfig.getResourceFeedbackEmailAttachments() ||
       projectConfig.getDefaultEmailAttachments();
 
     sendMail(project, {
@@ -330,15 +330,15 @@ async function sendInactiveWarningEmail(project, user) {
 }
 
 function getInzendingURL(inzendingPath, url, resource) {
-  let idRegex = new RegExp(`\\{(?:ideas|idea)?Id\\}`, 'g');
-  let oldIdRegex = new RegExp(`\\[\\[(?:Ideas|idea)?Id\\]\\]`, 'g');
+  let idRegex = new RegExp(`\\{(?:resources|resource)?Id\\}`, 'g');
+  let oldIdRegex = new RegExp(`\\[\\[(?:Resources|resource)?Id\\]\\]`, 'g');
 
   inzendingPath =
     (inzendingPath &&
       inzendingPath
         .replace(idRegex, resource.id)
         .replace(oldIdRegex, resource.id)
-        .replace(/\[\[resourceType\]\]/, 'ideas')) ||
+        .replace(/\[\[resourceType\]\]/, 'resources')) ||
     '/';
   return url + inzendingPath;
 }

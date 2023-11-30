@@ -100,8 +100,8 @@
 				<td></td>
 				<td>
 
-					{% if idea.extraData and idea.extraData.images %}
-						{% for image in idea.extraData.images %}
+					{% if resource.extraData and resource.extraData.images %}
+						{% for image in resource.extraData.images %}
 							<img class="multipleImages" src="{{image}}" width="100%"/><br/>
 						{% endfor %}
 					{% endif %}

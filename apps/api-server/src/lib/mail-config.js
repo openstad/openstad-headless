@@ -51,7 +51,7 @@ class MailConfig {
 
   getResourceConfig() {
     console.log(self.config);
-    return this.config.ideas || {};
+    return this.config.resources || {};
   }
 
   getResourceFeedbackEmail() {

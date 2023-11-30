@@ -15,14 +15,14 @@ router
 		next();
 	})
 
-router.route('/idea-marker')
+router.route('/resource-marker')
 
-// list ideas as map markers
+// list resources as map markers
 // -------------------------
-	.get(auth.can('Idea', 'list'))
+	.get(auth.can('Resource', 'list'))
 	.get(function(req, res, next) {
 
-		db.Idea
+		db.Resource
 			.scope(...req.scope)
 			.findAll({ where: { projectId: req.params.projectId } })
 			.then( found => {
@@ -36,31 +36,31 @@ router.route('/idea-marker')
 			.catch(next);
 	})
 
-// one idea as map marker
+// one resource as map marker
 // ----------------------
-router.route('/idea-marker/:ideaId(\\d+)')
+router.route('/resource-marker/:resourceId(\\d+)')
 
 	.all(function(req, res, next) {
-		const ideaId = parseInt(req.params.ideaId) || 1;
+		const resourceId = parseInt(req.params.resourceId) || 1;
 
-		db.Idea
+		db.Resource
 			.scope(...req.scope)
 			.findOne({
-				where: { id: ideaId, projectId: req.params.projectId }
+				where: { id: resourceId, projectId: req.params.projectId }
 			})
 			.then(found => {
-				if ( !found ) throw new Error('Idea not found');
-				req.idea = found;
+				if ( !found ) throw new Error('Resource not found');
+				req.resource = found;
 				next();
 			})
 			.catch(next);
 	})
 
-// view idea
+// view resource
 // ---------
-	.get(auth.can('Idea', 'view'))
+	.get(auth.can('Resource', 'view'))
 	.get(function(req, res, next) {
-		res.json(createMarker(req.idea));
+		res.json(createMarker(req.resource));
 	})
 
 // polygon
@@ -69,7 +69,7 @@ router.route('/polygon')
 
 // the polygon as defined for this project
 // ------------------------------------
-	.get(auth.can('Idea', 'list'))
+	.get(auth.can('Resource', 'list'))
 	.get(function(req, res, next) {
 
 		// use from project config
@@ -83,18 +83,18 @@ router.route('/polygon')
 // helper functions
 // ----------------
 
-function createMarker(idea) {
+function createMarker(resource) {
 	return {
-		id: idea.id,
-		location: idea.location,
-		position: idea.position,
+		id: resource.id,
+		location: resource.location,
+		position: resource.position,
 		icon     : {
-			url    : idea.status == 'DONE' || idea.status == 'ACCEPTED' || idea.status == 'BUSY' ? '/img/idea/flag-blue.svg' : ( idea.status == 'CLOSED' || idea.status == 'DENIED' ? '/img/idea/flag-gray.svg' : '/img/idea/flag-red.svg' ),
+			url    : resource.status == 'DONE' || resource.status == 'ACCEPTED' || resource.status == 'BUSY' ? '/img/resource/flag-blue.svg' : ( resource.status == 'CLOSED' || resource.status == 'DENIED' ? '/img/resource/flag-gray.svg' : '/img/resource/flag-red.svg' ),
 			size   : [22, 24],
 			anchor : [ 4, 21],
 		},
-		href: `/plan/${idea.id}`,
-		status: idea.status,
+		href: `/plan/${resource.id}`,
+		status: resource.status,
 	}
 
 }

@@ -11,7 +11,7 @@ const notifications = require('../notifications');
 
 const merge = require('merge');
 
-const commentVoteThreshold = config.ideas && config.ideas.commentVoteThreshold;
+const commentVoteThreshold = config.resources && config.resources.commentVoteThreshold;
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 const roles = require('../lib/sequelize-authorization/lib/roles');
 const getExtraDataConfig = require('../lib/sequelize-authorization/lib/getExtraDataConfig');
@@ -35,7 +35,7 @@ function hideEmailsForNormalUsers(comments) {
 
 module.exports = function (db, sequelize, DataTypes) {
 
-  var Idea = sequelize.define('idea', {
+  var Resource = sequelize.define('resource', {
 
     projectId: {
       type: DataTypes.INTEGER,
@@ -82,18 +82,18 @@ module.exports = function (db, sequelize, DataTypes) {
         var _config = merge.recursive(true, config, this.project.config);
         var duration =
           (_config &&
-            _config.ideas &&
-            _config.ideas.duration) ||
+            _config.resources &&
+            _config.resources.duration) ||
           90;
         if (
           this.project &&
           this.project.config &&
-          this.project.config.ideas &&
-          this.project.config.ideas.automaticallyUpdateStatus &&
-          this.project.config.ideas.automaticallyUpdateStatus.isActive
+          this.project.config.resources &&
+          this.project.config.resources.automaticallyUpdateStatus &&
+          this.project.config.resources.automaticallyUpdateStatus.isActive
         ) {
           duration =
-            this.project.config.ideas.automaticallyUpdateStatus.afterXDays || 0;
+            this.project.config.resources.automaticallyUpdateStatus.afterXDays || 0;
         }
         var endDate = moment(this.getDataValue('startDate'))
           .add(duration, 'days')
@@ -122,7 +122,7 @@ module.exports = function (db, sequelize, DataTypes) {
           project = project || self.project;
           if (!project) return; // todo: die kun je ophalen als eea. async is
           let value = data || self.typeId;
-          let config = project.config.ideas.types;
+          let config = project.config.resources.types;
           if (!config || !Array.isArray(config) || !config[0] || !config[0].id) return null; // no config; this field is not used
           let defaultValue = config[0].id;
 
@@ -161,8 +161,8 @@ module.exports = function (db, sequelize, DataTypes) {
       validate: {
         textLength(value) {
           let len = sanitize.title(value.trim()).length;
-          let titleMinLength = (this.config && this.config.ideas && this.config.ideas.titleMinLength || 10)
-          let titleMaxLength = (this.config && this.config.ideas && this.config.ideas.titleMaxLength || 50)
+          let titleMinLength = (this.config && this.config.resources && this.config.resources.titleMinLength || 10)
+          let titleMaxLength = (this.config && this.config.resources && this.config.resources.titleMaxLength || 50)
           if (len < titleMinLength || len > titleMaxLength)
             throw new Error(`Titel moet tussen ${titleMinLength} en ${titleMaxLength} tekens zijn`);
         }
@@ -179,8 +179,8 @@ module.exports = function (db, sequelize, DataTypes) {
         textLength(value) {
           // We need to undo the sanitization before we can check the length
           let len = htmlToText.fromString(value).length
-          let summaryMinLength = (this.config && this.config.ideas && this.config.ideas.summaryMinLength || 20)
-          let summaryMaxLength = (this.config && this.config.ideas && this.config.ideas.summaryMaxLength || 140)
+          let summaryMinLength = (this.config && this.config.resources && this.config.resources.summaryMinLength || 20)
+          let summaryMaxLength = (this.config && this.config.resources && this.config.resources.summaryMaxLength || 140)
           if (this.publishDate && (len < summaryMinLength || len > summaryMaxLength))
             throw new Error(`Samenvatting moet tussen ${summaryMinLength} en ${summaryMaxLength} tekens zijn`);
         }
@@ -196,8 +196,8 @@ module.exports = function (db, sequelize, DataTypes) {
       validate: {
         textLength(value) {
           let len = sanitize.summary(value.trim()).length;
-          let descriptionMinLength = (this.config && this.config.ideas && this.config.ideas.descriptionMinLength || 140)
-          let descriptionMaxLength = (this.config && this.config.ideas && this.config.ideas.descriptionMaxLength || 5000)
+          let descriptionMinLength = (this.config && this.config.resources && this.config.resources.descriptionMinLength || 140)
+          let descriptionMaxLength = (this.config && this.config.resources && this.config.resources.descriptionMaxLength || 5000)
           if (this.publishDate && (len < descriptionMinLength || len > descriptionMaxLength)) {
             throw new Error(`Beschrijving moet tussen ${descriptionMinLength} en ${descriptionMaxLength} tekens zijn`);
           }
@@ -226,11 +226,11 @@ module.exports = function (db, sequelize, DataTypes) {
       }
     },
 
-    extraData: getExtraDataConfig(DataTypes.JSON,  'ideas'),
+    extraData: getExtraDataConfig(DataTypes.JSON,  'resources'),
 
     location: {
       type: DataTypes.GEOMETRY('POINT'),
-      allowNull: !(config.ideas && config.ideas.location && config.ideas.location.isMandatory),
+      allowNull: !(config.resources && config.resources.location && config.resources.location.isMandatory),
       set: function (location) {
         location = location ? location : null
         this.setDataValue('location', location);
@@ -300,7 +300,7 @@ module.exports = function (db, sequelize, DataTypes) {
     progress: {
       type: DataTypes.VIRTUAL,
       get: function () {
-        var minimumYesVotes = (this.project && this.project.config && this.project.config.ideas && this.project.config.ideas.minimumYesVotes) || config.get('ideas.minimumYesVotes');
+        var minimumYesVotes = (this.project && this.project.config && this.project.config.resources && this.project.config.resources.minimumYesVotes) || config.get('resources.minimumYesVotes');
         var yes = this.getDataValue('yes');
         return yes !== undefined ?
           Number((Math.min(1, (yes / minimumYesVotes)) * 100).toFixed(2)) :
@@ -348,7 +348,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
       afterCreate: function (instance, options) {
         notifications.addToQueue({
-          type: 'idea',
+          type: 'resource',
           action: 'create',
           projectId: instance.projectId,
           instanceId: instance.id
@@ -357,7 +357,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
       afterUpdate: function (instance, options) {
         notifications.addToQueue({
-          type: 'idea',
+          type: 'resource',
           action: 'update',
           projectId: instance.projectId,
           instanceId: instance.id
@@ -385,7 +385,7 @@ module.exports = function (db, sequelize, DataTypes) {
         let value = self.extraData || {}
         let validated = {};
 
-        let configExtraData = self.config && self.config.ideas && self.config.ideas.extraData;
+        let configExtraData = self.config && self.config.resources && self.config.resources.extraData;
 
         function checkValue(value, config) {
 
@@ -465,7 +465,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
             Object.keys(value).forEach((key) => {
               if (typeof validated[key] == 'undefined') {
-                if (!( self.config && self.config.ideas && self.config.ideas.extraDataMustBeDefined === false )) {
+                if (!( self.config && self.config.resources && self.config.resources.extraDataMustBeDefined === false )) {
                   errors.push(`${key} is niet gedefinieerd in project.config`)
                 }
               }
@@ -473,8 +473,8 @@ module.exports = function (db, sequelize, DataTypes) {
 
           } else {
             // extra data not defined in the config
-            if (!(self.config && self.config.ideas && self.config.ideas.extraDataMustBeDefined === false)) {
-              errors.push(`idea.extraData is not configured in project.config`)
+            if (!(self.config && self.config.resources && self.config.resources.extraDataMustBeDefined === false)) {
+              errors.push(`resource.extraData is not configured in project.config`)
             }
           }
         }
@@ -482,7 +482,7 @@ module.exports = function (db, sequelize, DataTypes) {
         checkValue(value, configExtraData);
 
         if (errors.length) {
-          console.log('Idea validation error:', errors);
+          console.log('Resource validation error:', errors);
           throw Error(errors.join('\n'));
         }
 
@@ -493,7 +493,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
   });
 
-  Idea.scopes = function scopes() {
+  Resource.scopes = function scopes() {
 
     function voteCount(opinion) {
       if (config.votes && config.votes.confirmationRequired) {
@@ -508,7 +508,7 @@ module.exports = function (db, sequelize, DataTypes) {
 						v.checked IS NULL OR
 						v.checked  = 1
 					) AND
-					v.ideaId     = idea.id AND
+					v.resourceId     = resource.id AND
 					v.opinion    = "${opinion}")
 			`), opinion];
       } else {
@@ -522,7 +522,7 @@ module.exports = function (db, sequelize, DataTypes) {
 						v.checked IS NULL OR
 						v.checked  = 1
 					) AND
-					v.ideaId     = idea.id AND
+					v.resourceId     = resource.id AND
 					v.opinion    = "${opinion}")
 			`), opinion];
       }
@@ -536,7 +536,7 @@ module.exports = function (db, sequelize, DataTypes) {
 					comments a
 				WHERE
 					a.deletedAt IS NULL AND
-					a.ideaId = idea.id)
+					a.resourceId = resource.id)
 			`), fieldName];
     }
 
@@ -600,7 +600,7 @@ module.exports = function (db, sequelize, DataTypes) {
           },
           sequelize.and(
             {status: 'CLOSED'},
-            sequelize.literal(`DATEDIFF(NOW(), idea.updatedAt) <= 90`)
+            sequelize.literal(`DATEDIFF(NOW(), resource.updatedAt) <= 90`)
           )
         )
       },
@@ -613,7 +613,7 @@ module.exports = function (db, sequelize, DataTypes) {
           },
           sequelize.and(
             {status: 'DENIED'},
-            sequelize.literal(`DATEDIFF(NOW(), idea.updatedAt) <= 7`)
+            sequelize.literal(`DATEDIFF(NOW(), resource.updatedAt) <= 7`)
           )
         )
       },
@@ -680,19 +680,19 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 
       includeRanking: {
-        // 				}).then((ideas) => {
+        // 				}).then((resources) => {
         // 					// add ranking
-        // 					let ranked = ideas.slice();
-        // 					ranked.forEach(idea => {
-        // 						idea.ranking = idea.status == 'DENIED' ? -10000 : idea.yes - idea.no;
+        // 					let ranked = resources.slice();
+        // 					ranked.forEach(resource => {
+        // 						resource.ranking = resource.status == 'DENIED' ? -10000 : resource.yes - resource.no;
         // 					});
         // 					ranked.sort( (a, b) => a.ranking < b.ranking );
         // 					let rank = 1;
-        // 					ranked.forEach(idea => {
-        // 						idea.ranking = rank;
+        // 					ranked.forEach(resource => {
+        // 						resource.ranking = rank;
         // 						rank++;
         // 					});
-        // 					return sort == 'ranking' ? ranked : ideas;
+        // 					return sort == 'ranking' ? ranked : resources;
         // 				});
       },
 
@@ -743,7 +743,7 @@ module.exports = function (db, sequelize, DataTypes) {
       includePoll:  function (userId) {
         return {
           include: [{
-            model: db.Poll.scope([ 'defaultScope', 'withIdea', { method: ['withVotes', 'poll', userId]}, { method: ['withUserVote', 'poll', userId]} ]),
+            model: db.Poll.scope([ 'defaultScope', 'withResource', { method: ['withVotes', 'poll', userId]}, { method: ['withUserVote', 'poll', userId]} ]),
           as: 'poll',
           required: false,
         }]
@@ -896,18 +896,18 @@ module.exports = function (db, sequelize, DataTypes) {
     }
   }
 
-  Idea.associate = function (models) {
+  Resource.associate = function (models) {
     this.belongsTo(models.User, { onDelete: 'CASCADE' });
     this.belongsTo(models.Project, { onDelete: 'CASCADE' });
     this.hasMany(models.Vote, { onDelete: 'CASCADE' });
     this.hasMany(models.Comment, {as: 'commentsAgainst', onDelete: 'CASCADE' });
     this.hasMany(models.Comment, {as: 'commentsFor', onDelete: 'CASCADE'});
-    this.hasOne(models.Poll, {as: 'poll', foreignKey: 'ideaId', onDelete: 'CASCADE' });
-    this.hasOne(models.Vote, {as: 'userVote', foreignKey: 'ideaId', onDelete: 'CASCADE' });
-    this.belongsToMany(models.Tag, {through: 'idea_tags', constraints: false, onDelete: 'CASCADE' });
+    this.hasOne(models.Poll, {as: 'poll', foreignKey: 'resourceId', onDelete: 'CASCADE' });
+    this.hasOne(models.Vote, {as: 'userVote', foreignKey: 'resourceId', onDelete: 'CASCADE' });
+    this.belongsToMany(models.Tag, {through: 'resource_tags', constraints: false, onDelete: 'CASCADE' });
   }
 
-  Idea.getRunning = function (sort, extraScopes) {
+  Resource.getRunning = function (sort, extraScopes) {
 
     var order;
     switch (sort) {
@@ -942,8 +942,8 @@ module.exports = function (db, sequelize, DataTypes) {
 						`);
     }
 
-    // Get all running ideas.
-    // TODO: Ideas with status CLOSED should automatically
+    // Get all running resources.
+    // TODO: Resources with status CLOSED should automatically
     //       become DENIED at a certain point.
     let scopes = ['summary'];
     if (extraScopes) {
@@ -956,7 +956,7 @@ module.exports = function (db, sequelize, DataTypes) {
       },
       sequelize.and(
         {status: 'DENIED'},
-        sequelize.literal(`DATEDIFF(NOW(), idea.updatedAt) <= 7`)
+        sequelize.literal(`DATEDIFF(NOW(), resource.updatedAt) <= 7`)
       )
     );
 
@@ -973,31 +973,31 @@ module.exports = function (db, sequelize, DataTypes) {
     return this.scope(...scopes).findAll({
       where,
       order: order,
-    }).then((ideas) => {
+    }).then((resources) => {
       // add ranking
-      let ranked = ideas.slice();
-      ranked.forEach(idea => {
-        idea.ranking = idea.status == 'DENIED' ? -10000 : idea.yes - idea.no;
+      let ranked = resources.slice();
+      ranked.forEach(resource => {
+        resource.ranking = resource.status == 'DENIED' ? -10000 : resource.yes - resource.no;
       });
       ranked.sort((a, b) => b.ranking - a.ranking);
       let rank = 1;
-      ranked.forEach(idea => {
-        idea.ranking = rank;
+      ranked.forEach(resource => {
+        resource.ranking = rank;
         rank++;
       });
-      return sort == 'ranking' ? ranked : (sort == 'rankinginverse' ? ranked.reverse() : ideas);
-    }).then((ideas) => {
-      if (sort != 'random') return ideas;
-      let randomized = ideas.slice();
-      randomized.forEach(idea => {
-        idea.random = Math.random();
+      return sort == 'ranking' ? ranked : (sort == 'rankinginverse' ? ranked.reverse() : resources);
+    }).then((resources) => {
+      if (sort != 'random') return resources;
+      let randomized = resources.slice();
+      randomized.forEach(resource => {
+        resource.random = Math.random();
       });
       randomized.sort((a, b) => b.random - a.random);
       return randomized;
     })
   }
 
-  Idea.getHistoric = function () {
+  Resource.getHistoric = function () {
     return this.scope('summary').findAll({
       where: {
         status: {[Sequelize.Op.not]: ['OPEN', 'CLOSED']}
@@ -1006,21 +1006,21 @@ module.exports = function (db, sequelize, DataTypes) {
     });
   }
 
-  Idea.prototype.getUserVote = function (user) {
+  Resource.prototype.getUserVote = function (user) {
     return db.Vote.findOne({
       attributes: ['opinion'],
       where: {
-        ideaId: this.id,
+        resourceId: this.id,
         userId: user.id
       }
     });
   }
 
-  Idea.prototype.isOpen = function () {
+  Resource.prototype.isOpen = function () {
     return this.status === 'OPEN';
   }
 
-  Idea.prototype.isRunning = function () {
+  Resource.prototype.isRunning = function () {
     return this.status === 'OPEN' ||
       this.status === 'CLOSED' ||
       this.status === 'ACCEPTED' ||
@@ -1028,10 +1028,10 @@ module.exports = function (db, sequelize, DataTypes) {
   }
 
   // standaard stemvan
-  Idea.prototype.addUserVote = function (user, opinion, ip, extended) {
+  Resource.prototype.addUserVote = function (user, opinion, ip, extended) {
 
     var data = {
-      ideaId: this.id,
+      resourceId: this.id,
       userId: user.id,
       opinion: opinion,
       ip: ip
@@ -1079,7 +1079,7 @@ module.exports = function (db, sequelize, DataTypes) {
   }
 
   // stemtool stijl, voor eberhard3 - TODO: werkt nu alleen voor maxChoices = 1;
-  Idea.prototype.setUserVote = function (user, opinion, ip) {
+  Resource.prototype.setUserVote = function (user, opinion, ip) {
     let self = this;
     if (config.votes && config.votes.maxChoices) {
 
@@ -1088,11 +1088,11 @@ module.exports = function (db, sequelize, DataTypes) {
           if (vote) {
             if (config.votes.switchOrError == 'error') throw new Error('Je hebt al gestemd'); // waarmee de default dus switch is
             return vote
-              .update({ip, confirmIdeaId: self.id})
+              .update({ip, confirmResourceId: self.id})
               .then(vote => true)
           } else {
             return db.Vote.create({
-              ideaId: self.id,
+              resourceId: self.id,
               userId: user.id,
               opinion: opinion,
               ip: ip
@@ -1107,12 +1107,12 @@ module.exports = function (db, sequelize, DataTypes) {
         })
 
     } else {
-      throw new Error('Idea.setUserVote: missing params');
+      throw new Error('Resource.setUserVote: missing params');
     }
 
   }
 
-  Idea.prototype.setModBreak = function (user, modBreak) {
+  Resource.prototype.setModBreak = function (user, modBreak) {
     return this.update({
       modBreak: modBreak,
       modBreakUserId: user.id,
@@ -1120,7 +1120,7 @@ module.exports = function (db, sequelize, DataTypes) {
     });
   }
 
-  Idea.prototype.setStatus = function (status) {
+  Resource.prototype.setStatus = function (status) {
     return this.update({status: status});
   }
 
@@ -1141,7 +1141,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
   }
 
-	Idea.auth = Idea.prototype.auth = {
+	Resource.auth = Resource.prototype.auth = {
     listableBy: 'all',
     viewableBy: 'all',
     createableBy: 'member',
@@ -1167,7 +1167,7 @@ module.exports = function (db, sequelize, DataTypes) {
         return {};
       }
 
-	   /* if (idea.project.config.archivedVotes) {
+	   /* if (resource.project.config.archivedVotes) {
 		    if (req.query.includeVoteCount && req.project && req.project.config && req.project.config.votes && req.project.config.votes.isViewable) {
 			      result.yes = result.extraData.archivedYes;
 			      result.no = result.extraData.archivedNo;
@@ -1187,7 +1187,7 @@ module.exports = function (db, sequelize, DataTypes) {
       // er is ook al een createDateHumanized veld; waarom is dit er dan ook nog?
 	    data.createdAtText = moment(data.createdAt).format('LLL');
 
-      // if user is not allowed to edit idea then remove phone key, otherwise publically available
+      // if user is not allowed to edit resource then remove phone key, otherwise publically available
       // needs to move to definition per key
       if (!canMutate(user, self) && data.extraData && data.extraData.phone) {
 		    delete data.extraData.phone;
@@ -1211,7 +1211,7 @@ module.exports = function (db, sequelize, DataTypes) {
     },
   }
 
-  return Idea;
+  return Resource;
 
   async function beforeValidateHook(instance, options) {
 
@@ -1226,10 +1226,10 @@ module.exports = function (db, sequelize, DataTypes) {
     // count comments and votes
     let canEditAfterFirstLikeOrComment = projectConfig && projectConfig.canEditAfterFirstLikeOrComment || false
     if (!canEditAfterFirstLikeOrComment && !userHasRole(instance.auth && instance.auth.user, 'moderator')) {
-      let firstLikeSubmitted = await db.Vote.count({ where: { ideaId: instance.id }});
-      let firstCommentSubmitted  = await db.Comment.count({ where: { ideaId: instance.id }});
+      let firstLikeSubmitted = await db.Vote.count({ where: { resourceId: instance.id }});
+      let firstCommentSubmitted  = await db.Comment.count({ where: { resourceId: instance.id }});
       if (firstLikeSubmitted || firstCommentSubmitted) {
-        throw Error('You cannot edit an idea after the first like or comment has been added')
+        throw Error('You cannot edit an resource after the first like or comment has been added')
       }
     }
 

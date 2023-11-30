@@ -17,14 +17,14 @@ router.use(sorting);
 router.use( '/project', require('./project') );
 
 // comments
-router.use( '/project/:projectId(\\d+)(/idea/:ideaId(\\d+))?/comment', require('./comment') );
+router.use( '/project/:projectId(\\d+)(/resource/:resourceId(\\d+))?/comment', require('./comment') );
 
-// ideas
-router.use( '/project/:projectId(\\d+)/idea', require('./idea') );
-//router.use( '/project/:projectId(\\d+)/idea', require('./idea.old') );
+// resources
+router.use( '/project/:projectId(\\d+)/resource', require('./resource') );
+//router.use( '/project/:projectId(\\d+)/resource', require('./resource.old') );
 
 // polls
-router.use( '/project/:projectId(\\d+)(/idea/:ideaId(\\d+))?/poll', require('./poll') );
+router.use( '/project/:projectId(\\d+)(/resource/:resourceId(\\d+))?/poll', require('./poll') );
 
 // tags
 router.use( '/project/:projectId(\\d+)/tag', require('./tag') );
