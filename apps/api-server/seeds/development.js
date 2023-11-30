@@ -146,8 +146,8 @@ module.exports = async function seed(config, db) {
     });
 
 
-    console.log('    10 ideas');
-    let idea1 = await db.Idea.create({
+    console.log('    10 resources');
+    let resource1 = await db.Resource.create({
       userId: 2,
       projectId: 2,
       title: 'Lorem ipsum dolor',
@@ -165,7 +165,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    let idea2 = await db.Idea.create({
+    let resource2 = await db.Resource.create({
       userId: 2,
       projectId: 2,
       title: 'Etiam euismod odio',
@@ -183,7 +183,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    let idea3 = await db.Idea.create({
+    let resource3 = await db.Resource.create({
       userId: 2,
       projectId: 2,
       title: 'Quisque et viverra',
@@ -201,7 +201,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    let idea4 = await db.Idea.create({
+    let resource4 = await db.Resource.create({
       userId: 2,
       projectId: 2,
       title: 'Ut eu porttitor',
@@ -219,7 +219,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    let idea5 = await db.Idea.create({
+    let resource5 = await db.Resource.create({
       userId: 2,
       projectId: 2,
       title: 'Pellentesque consectetur eros',
@@ -237,7 +237,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    let idea6 = await db.Idea.create({
+    let resource6 = await db.Resource.create({
       userId: 2,
       projectId: 3,
       title: 'Vestibulum ante ipsum',
@@ -255,7 +255,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    let idea7 = await db.Idea.create({
+    let resource7 = await db.Resource.create({
       userId: 2,
       projectId: 3,
       title: 'Nulla laoreet pretium',
@@ -273,7 +273,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    let idea8 = await db.Idea.create({
+    let resource8 = await db.Resource.create({
       userId: 2,
       projectId: 3,
       title: 'Aliquam ut magna',
@@ -291,7 +291,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    let idea9 = await db.Idea.create({
+    let resource9 = await db.Resource.create({
       userId: 2,
       projectId: 3,
       title: 'Etiam ultricies dui',
@@ -309,7 +309,7 @@ module.exports = async function seed(config, db) {
       publishDate: db.sequelize.fn('now'),
     });
 
-    let idea10 = await db.Idea.create({
+    let resource10 = await db.Resource.create({
       userId: 2,
       projectId: 3,
       title: 'Nullam dignissim tincidunt',
@@ -370,17 +370,17 @@ module.exports = async function seed(config, db) {
       seqnr: 30,
     });
 
-    idea1.addTag(theme1);
-    idea2.addTag(theme1);
-    idea3.addTag(theme2);
-    idea4.addTag(theme2);
-    idea5.addTag(theme3);
+    resource1.addTag(theme1);
+    resource2.addTag(theme1);
+    resource3.addTag(theme2);
+    resource4.addTag(theme2);
+    resource5.addTag(theme3);
 
-    idea1.addTag(area2);
-    idea2.addTag(area3);
-    idea3.addTag(area3);
-    idea4.addTag(area1);
-    idea5.addTag(area1);
+    resource1.addTag(area2);
+    resource2.addTag(area3);
+    resource3.addTag(area3);
+    resource4.addTag(area1);
+    resource5.addTag(area1);
 
     let theme4 = await db.Tag.create({
       projectId: 3,
@@ -403,40 +403,40 @@ module.exports = async function seed(config, db) {
       seqnr: 30,
     });
 
-    idea6.addTag(theme4);
-    idea7.addTag(theme5);
-    idea8.addTag(theme6);
-    idea9.addTag(theme4);
-    idea10.addTag(theme6);
+    resource6.addTag(theme4);
+    resource7.addTag(theme5);
+    resource8.addTag(theme6);
+    resource9.addTag(theme4);
+    resource10.addTag(theme6);
 
     console.log('      with 5 likes');
     await db.Vote.create({
       userId: 1,
-      ideaId: 1,
+      resourceId: 1,
       opinion: 'no',
     });
 
     await db.Vote.create({
       userId: 2,
-      ideaId: 1,
+      resourceId: 1,
       opinion: 'yes',
     });
  	  
     await db.Vote.create({
       userId: 3,
-      ideaId: 1,
+      resourceId: 1,
       opinion: 'yes',
     });
  	  
     await db.Vote.create({
       userId: 2,
-      ideaId: 2,
+      resourceId: 2,
       opinion: 'yes',
     });
 
     await db.Vote.create({
       userId: 3,
-      ideaId: 2,
+      resourceId: 2,
       opinion: 'no',
     });
 
@@ -444,14 +444,14 @@ module.exports = async function seed(config, db) {
 
     await db.Comment.create({
       userId: 2,
-      ideaId: 1,
+      resourceId: 1,
       description: 'In id vestibulum leo. Integer a justo quis est porttitor auctor. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Pellentesque porta laoreet scelerisque. Etiam laoreet ultrices est, vitae malesuada magna tempor eu.',
       sentiment: 'for',
     });
 
     await db.Comment.create({
       userId: 2,
-      ideaId: 1,
+      resourceId: 1,
       parentId: 1,
       sentiment: 'for',
       description: 'Sed egestas sapien nec tristique cursus. Nunc euismod tempus nisl, sit amet malesuada velit. Vivamus nec nulla eleifend, congue dolor quis, dignissim est. Maecenas rhoncus tellus et augue efficitur tincidunt. Ut euismod libero vel lorem semper.',
@@ -459,28 +459,28 @@ module.exports = async function seed(config, db) {
 
     await db.Comment.create({
       userId: 3,
-      ideaId: 1,
+      resourceId: 1,
       description: 'Aliquam tincidunt enim et arcu dictum, mollis consequat ligula feugiat. Cras vel imperdiet eros. Nulla finibus sed metus a mattis. Aenean lobortis fringilla felis id congue. Cras lacus justo, imperdiet in tellus vitae, volutpat pretium dolor.',
       sentiment: 'for',
     });
 
     await db.Comment.create({
       userId: 3,
-      ideaId: 1,
+      resourceId: 1,
       description: 'Curabitur vestibulum ex sem, in tempor mi ullamcorper vitae. Aenean dui magna, auctor in eleifend nec, elementum quis massa. Etiam quis eros sapien. Mauris ornare mi ut justo pretium, quis mollis sapien pulvinar. Maecenas feugiat sapien.',
       sentiment: 'for',
     });
 
     await db.Comment.create({
       userId: 2,
-      ideaId: 2,
+      resourceId: 2,
       description: 'Mauris a vestibulum justo, a mattis purus. Phasellus auctor eros vitae augue dictum aliquam. Pellentesque quis pulvinar est, sed congue metus. Morbi volutpat velit libero, ac condimentum justo egestas ac. Integer eu sollicitudin mauris. Curabitur sed.',
       sentiment: 'for',
     });
 
     await db.Comment.create({
       userId: 2,
-      ideaId: 1,
+      resourceId: 1,
       description: 'Mauris a vestibulum justo, a mattis purus. Phasellus auctor eros vitae augue dictum aliquam. Pellentesque quis pulvinar est, sed congue metus. Morbi volutpat velit libero, ac condimentum justo egestas ac. Integer eu sollicitudin mauris. Curabitur sed.',
       sentiment: 'against',
     });
