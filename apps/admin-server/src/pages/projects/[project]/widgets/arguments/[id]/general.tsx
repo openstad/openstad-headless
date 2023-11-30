@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
@@ -23,9 +24,10 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
+  ideaId: z.coerce.number(),
   sentiment: z.enum(['for', 'against', 'none']),
-  replyReactions: z.boolean(),
-  voteReactions: z.boolean(),
+  isReplyingEnabled: z.boolean(),
+  isVotingEnabled: z.boolean(),
 });
 
 export default function ArgumentsGeneral() {
@@ -34,13 +36,13 @@ export default function ArgumentsGeneral() {
   const {
     data: widget,
     isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig();
+    updateConfig, } = useWidgetConfig();
 
-  const defaults = () => ({
-    sentiment: widget?.config?.[category]?.sentiment || 'for',
-    replyReactions: widget?.config?.[category]?.replyReactions || false,
-    voteReactions: widget?.config?.[category]?.voteReactions || false,
+    const defaults = () =>({
+      ideaId: widget?.config?.[category]?.ideaId || null,
+      sentiment: widget?.config?.[category]?.sentiment || 'for',
+      isReplyingEnabled: widget?.config?.[category]?.isReplyingEnabled || false,
+      isVotingEnabled: widget?.config?.[category]?.isVotingEnabled || false,
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -67,6 +69,21 @@ export default function ArgumentsGeneral() {
           className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
+            name="ideaId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Plan ID
+                </FormLabel>
+                <FormControl>
+                    <Input placeholder="1" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+            />
+          <FormField
+            control={form.control}
             name="sentiment"
             render={({ field }) => (
               <FormItem>
@@ -89,7 +106,7 @@ export default function ArgumentsGeneral() {
           />
           <FormField
             control={form.control}
-            name="replyReactions"
+            name="isReplyingEnabled"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
@@ -114,7 +131,7 @@ export default function ArgumentsGeneral() {
           />
           <FormField
             control={form.control}
-            name="voteReactions"
+            name="isVotingEnabled"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>

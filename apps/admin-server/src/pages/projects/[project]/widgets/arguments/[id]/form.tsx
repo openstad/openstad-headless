@@ -30,7 +30,7 @@ export default function ArgumentsForm() {
     updateConfig,
   } = useWidgetConfig();
   const defaults = () => ({
-    intro: widget?.config?.[category]?.intro || 'Type hier de intro tekst',
+    formIntro: widget?.config?.[category]?.formIntro || 'Type hier de intro tekst',
     placeholder:
       widget?.config?.[category]?.placeholder || 'Type hier uw reactie.',
   });
@@ -62,7 +62,7 @@ export default function ArgumentsForm() {
           className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
-            name="intro"
+            name="formIntro"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Formulier intro</FormLabel>

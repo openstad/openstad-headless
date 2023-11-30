@@ -105,7 +105,3 @@ IMAGE_APP_URL=process.env.IMAGE_APP_URL
   }
 
 }
-
-
-
-
