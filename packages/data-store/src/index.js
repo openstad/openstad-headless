@@ -3,9 +3,9 @@ import { useEffect } from "react"
 import { useSWRConfig } from "swr"
 import useSWR from 'swr';
 import API from './api';
-import useIdea from './hooks/use-idea.js';
+import useResource from './hooks/use-resource.js';
 import useComments from './hooks/use-comments.js';
-import useIdeas from './hooks/use-ideas.js';
+import useResources from './hooks/use-resources.js';
 import useTags from './hooks/use-tags.js';
 import useCurrentUser from './hooks/use-current-user.js';
 import useUserVote from './hooks/use-user-vote.js';
@@ -19,9 +19,9 @@ function DataStore(props = { config: {} }) {
   self.projectId = props.projectId || props.config?.projectId;
 
   // hooks
-  self.useIdea = useIdea.bind(self);
+  self.useResource = useResource.bind(self);
   self.useComments = useComments.bind(self);
-  self.useIdeas = useIdeas.bind(self);
+  self.useResources = useResources.bind(self);
   self.useTags = useTags.bind(self);
   self.useCurrentUser = useCurrentUser.bind(self);
   self.useUserVote = useUserVote.bind(self);
@@ -70,7 +70,7 @@ function DataStore(props = { config: {} }) {
 
     return await mutate(key, fetcher(key, newData, options), { ...defaultOptions, ...options });
 
-    // return mutate( // mutate other caches; idea taken from https://koba04.medium.com/organize-swr-cache-with-tag-33d5b1aac3bd
+    // return mutate( // mutate other caches; resource taken from https://koba04.medium.com/organize-swr-cache-with-tag-33d5b1aac3bd
     //   cacheKey => cacheKey != key && cacheKey.type == key.type,
     //   currentData => mergeData(currentData, newData),
     //   { revalidate: false } // meybe true? or option?

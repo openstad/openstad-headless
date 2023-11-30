@@ -7,7 +7,7 @@ const config = {
     url: import.meta.env.VITE_API_URL,
   },
   projectId: import.meta.env.VITE_PROJECT_ID,
-  ideaId: import.meta.env.VITE_IDEA_ID,
+  resourceId: import.meta.env.VITE_RESOURCE_ID,
   login: {
     url: `${import.meta.env.VITE_API_URL}/auth/project/${
       import.meta.env.VITE_PROJECT_ID
@@ -29,6 +29,6 @@ const config = {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Likes projectId="2" ideaId="1" config={config} variant="large" />
+    <Likes projectId="2" resourceId="1" config={config} variant="large" />
   </React.StrictMode>
 );

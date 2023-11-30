@@ -3,7 +3,7 @@ import React, { useState, forwardRef } from 'react';
 import DataStore from '../../../components/src/data-store';
 import { BaseConfig } from '../../../generic-widget-types';
 
-//Todo correctly type ideas. Will be possible when the datastore is correctly typed
+//Todo correctly type resources. Will be possible when the datastore is correctly typed
 
 type Props = {
   dataStore: DataStore;

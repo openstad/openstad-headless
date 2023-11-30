@@ -28,7 +28,7 @@ export default {
 
     }
 
-    let url = `/api/project/${projectId}/idea?includeUser=1&includeUserVote=1&includeVoteCount=1&includeTags=1&${params.toString()}`;
+    let url = `/api/project/${projectId}/resource?includeUser=1&includeUserVote=1&includeVoteCount=1&includeTags=1&${params.toString()}`;
     return this.fetch(url);
   },
 };

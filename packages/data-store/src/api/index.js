@@ -1,7 +1,7 @@
 import fetchx from './fetch';
-import idea from './idea';
+import resource from './resource';
 import comments from './comments';
-import ideas from './ideas';
+import resources from './resources';
 import tags from './tags';
 import user from './user';
 import userVote from './user-vote';
@@ -27,14 +27,14 @@ function API(props = { config: {} }) {
     submitLike: comments.submitLike.bind(self),
   };
 
-  self.idea = {
-    fetch: idea.fetch.bind(self),
-    update: idea.update.bind(self),
-    submitLike: idea.submitLike.bind(self),
+  self.resource = {
+    fetch: resource.fetch.bind(self),
+    update: resource.update.bind(self),
+    submitLike: resource.submitLike.bind(self),
   };
 
-  self.ideas = {
-    fetch: ideas.fetch.bind(self),
+  self.resources = {
+    fetch: resources.fetch.bind(self),
   };
 
   self.tags = {

@@ -43,7 +43,7 @@ function Comments({
     let formData = new FormData(e.target);
     formData = Object.fromEntries(formData.entries());
 
-    formData.ideaId = args.ideaId;
+    formData.resourceId = args.resourceId;
 
     try {
       if (formData.id) {
