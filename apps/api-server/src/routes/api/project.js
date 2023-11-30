@@ -89,13 +89,43 @@ router.route('/')
 // create project
 // -----------
 	.post(auth.can('Project', 'create'))
+	.post(async function (req, res, next) {
+    // create an oauth client if nessecary
+    let project = {
+      config: req.body.config || {}
+    };
+    try {
+      let providers = await authSettings.providers({ project, useOnlyDefinedOnProject: true });
+      let providersDone = [];
+      for (let provider of providers) {
+        let authConfig = await authSettings.config({ project, useAuth: provider });
+        if ( !providersDone[authConfig.provider] ) { // filter for duplicates like 'default'
+          let adapter = await authSettings.adapter({ authConfig });
+          if (adapter.service.createClient) {
+            let client = await adapter.service.createClient({ authConfig, project });
+            project.config.auth.provider[authConfig.provider] = project.config.auth.provider[authConfig.provider] || {};
+            project.config.auth.provider[authConfig.provider].clientId = client.clientId;
+            project.config.auth.provider[authConfig.provider].clientSecret = client.clientSecret;
+            delete project.config.auth.provider[authConfig.provider].authTypes;
+            delete project.config.auth.provider[authConfig.provider].requiredUserFields;
+          }
+          providersDone[authConfig.provider] = true;
+        }
+      }
+      if (Object.keys(providersDone).length) {
+        req.body.config.auth = project.config.auth;
+      }
+      return next();
+    } catch(err) {
+      return next(err);
+    }
+	})
 	.post(function(req, res, next) {
 		db.Project
 			.create(req.body)
 			.then((result) => {
 				req.results = result;
-				next();
-				//return checkHostStatus({id: result.id});
+				return next();
 			})
 			.catch(next)
 	})
@@ -205,7 +235,7 @@ router.route('/:projectId') //(\\d+)
         let authConfig = await authSettings.config({ project: req.results, useAuth: provider });
         let adapter = await authSettings.adapter({ authConfig });
         if (adapter.service.updateClient) {
-          await adapter.service.updateClient({ authConfig, config: req.results.config });
+          await adapter.service.updateClient({ authConfig, project: req.results });
         }
       }
       return next();

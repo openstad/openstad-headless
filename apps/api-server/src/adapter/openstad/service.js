@@ -1,6 +1,9 @@
 const fetch = require('node-fetch');
 const merge = require('merge');
 const mapUserData = require('../../util/map-user-data');
+const authSettings = require('../../util/auth-settings');
+const config = require('config');
+const db = require('../../db');
 
 let service = {};
 
@@ -182,7 +185,66 @@ service.deleteUser = async function({ authConfig, userData = {} }) {
 
 }
 
-service.updateClient = async function({ authConfig, config }) {
+service.createClient = async function({ authConfig, project }) {
+
+  // sync only configuration that is used by the OpenStad auth server - compare updateConfig below
+  let newConfig = {
+    users: {
+      canCreateNewUsers: project.config.users?.canCreateNewUsers
+    },
+    styling: {
+      logo: project.config.styling?.logo,
+      favicon: project.config.styling?.favicon,
+      inlineCSS: project.config.styling?.inlineCSS,
+      displayClientName: project.config.styling?.displayClientName,
+    }
+  };
+
+  try {
+
+    // auth through admin project
+    let adminProject = await db.Project.findByPk(config.admin.projectId);
+    let adminAuthConfig = await authSettings.config({ project: adminProject, useAuth: 'openstad' });
+
+    // create client
+    let authTypes = authConfig.authTypes || ( authConfig.provider == 'openstad' && 'Url' ) || ( authConfig.provider == 'anonymous' && 'Anonymous' );
+    if (!Array.isArray(authTypes)) authTypes = [ authTypes ];
+    let requiredUserFields = authConfig.requiredUserFields || ( authConfig.provider == 'openstad' && 'name' ) || ( authConfig.provider == 'anonymous' && 'postcode' )
+    if (!Array.isArray(requiredUserFields)) requiredUserFields = [ requiredUserFields ];
+    let url = `${adminAuthConfig.serverUrlInternal}/api/admin/client`;
+    let response = await fetch(url, {
+	    headers: {
+        Authorization: `Basic ${new Buffer(`${adminAuthConfig.clientId}:${adminAuthConfig.clientSecret}`).toString('base64')}`,
+        'Content-type': 'application/json',
+      },
+      method: 'post',
+      body: JSON.stringify({
+        authTypes,
+        requiredUserFields,
+        siteUrl: `${project.url}`,
+        redirectUrl: `${config.url}`,
+        allowedDomains: [ config.domain ],
+        name: `${project.name}`,
+        description: `Client for API project ${project.name} (${project.id})`,
+        config: newConfig
+      }),
+    })
+    if (!response.ok) {
+      console.log(response);
+      throw new Error('OpenStad.service.createClient: create client failed')
+    }
+
+    let client = response.json();
+    return client;
+
+  } catch(err) {
+    console.log(err);
+    throw new Error('Cannot connect to auth server');
+  }
+
+}
+
+service.updateClient = async function({ authConfig, project }) {
 
   let clientId = authConfig.clientId;
   if (!clientId) throw Error('OpenStad.service.updateClient: clientId not found');
@@ -190,14 +252,13 @@ service.updateClient = async function({ authConfig, config }) {
   // sync only configuration that is used by the OpenStad auth server
   let newConfig = {
     users: {
-      canCreateNewUsers:
-      config.users?.canCreateNewUsers
+      canCreateNewUsers: project.config.users?.canCreateNewUsers
     },
     styling: {
-      logo: config.styling?.logo,
-      favicon: config.styling?.favicon,
-      inlineCSS: config.styling?.inlineCSS,
-      displayClientName: config.styling?.displayClientName,
+      logo: project.config.styling?.logo,
+      favicon: project.config.styling?.favicon,
+      inlineCSS: project.config.styling?.inlineCSS,
+      displayClientName: project.config.styling?.displayClientName,
     }
   };
 
@@ -227,7 +288,7 @@ service.updateClient = async function({ authConfig, config }) {
   // label: configAuthType.label ?  configAuthType.label : authCodeConfig.label,
   // backUrl: authCodeConfig.displayBackbutton ? backUrl : false,
   //
-  // config.requiredFields
+  // config.requiredUserFields
   // config.twoFactor
 
   try {
