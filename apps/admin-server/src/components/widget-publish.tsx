@@ -28,7 +28,7 @@ export default function WidgetPublish() {
           Voeg bovenstaande code toe op de plek waar u de widget wilt tonen.
         </em>
       </p>
-      <Button onClick={onCopy}>Kopiëer code</Button>
+      <Button onClick={onCopy}>Kopieer code</Button>
     </div>
   );
 }
