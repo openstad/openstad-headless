@@ -105,6 +105,8 @@ ADMIN_URL=${process.env.ADMIN_URL}
 ADMIN_DOMAIN=${process.env.ADMIN_DOMAIN}
 ADMIN_PORT=${process.env.ADMIN_PORT}
 ADMIN_SECRET=${process.env.ADMIN_SECRET}
+
+NEXT_PUBLIC_API_URL=${process.env.API_URL}
 `;
 
     await fs.writeFile('./.env', configfile);
@@ -113,7 +115,7 @@ ADMIN_SECRET=${process.env.ADMIN_SECRET}
 Config is created.
 You can now build and run a docker environment using the command.
 docker-compose up --build
-   
+
 Once that is running you can visit the servers on these urls:
 List ideas: ${process.env.API_URL}/api/project/1/idea
 Login: ${process.env.API_URL}/auth/project/1/login
