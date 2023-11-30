@@ -1,7 +1,7 @@
 export const WidgetDefinitions = {
   arguments: 'Argumenten',
   begrootmodule: 'Begrootmodule',
-  ideasmap: 'Ideeën map',
+  resourcesmap: 'Ideeën map',
   keuzewijzer: 'Keuzewijzer',
   like: 'Like',
   map: 'Map',

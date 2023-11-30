@@ -1,9 +1,9 @@
 import useSWR from 'swr';
 
-export default function useIdeas(projectId?: string) {
-  const url = `/api/openstad/api/project/${projectId}/idea?includeUserVote=1`;
+export default function useResources(projectId?: string) {
+  const url = `/api/openstad/api/project/${projectId}/resource?includeUserVote=1`;
 
-  const ideasListSwr = useSWR(projectId ? url : null);
+  const resourcesListSwr = useSWR(projectId ? url : null);
 
   async function create(body: any) {
     const res = await fetch(url, {
@@ -16,7 +16,7 @@ export default function useIdeas(projectId?: string) {
 
     if (res.ok) {
       const data = await res.json();
-      ideasListSwr.mutate([...ideasListSwr.data, data]);
+      resourcesListSwr.mutate([...resourcesListSwr.data, data]);
       return data;
     } else {
       throw new Error('Could not create the plan');
@@ -24,7 +24,7 @@ export default function useIdeas(projectId?: string) {
   }
 
   async function update(id: number, body: any) {
-    const updateUrl = `/api/openstad/api/project/${projectId}/idea/${id}?includeUserVote=1`;
+    const updateUrl = `/api/openstad/api/project/${projectId}/resource/${id}?includeUserVote=1`;
 
     const res = await fetch(updateUrl, {
       method: 'PUT',
@@ -36,10 +36,10 @@ export default function useIdeas(projectId?: string) {
 
     if (res.ok) {
       const data = await res.json();
-      const existingData = [...ideasListSwr.data];
+      const existingData = [...resourcesListSwr.data];
       const updatedList = existingData.filter((ed) => ed.id !== data.id);
       updatedList.push(data);
-      ideasListSwr.mutate(updatedList);
+      resourcesListSwr.mutate(updatedList);
       return data;
     } else {
       throw new Error('Could not update the plan');
@@ -47,7 +47,7 @@ export default function useIdeas(projectId?: string) {
   }
 
   async function remove(id: number) {
-    const deleteUrl = `/api/openstad/api/project/${projectId}/idea/${id}?includeUserVote=1`;
+    const deleteUrl = `/api/openstad/api/project/${projectId}/resource/${id}?includeUserVote=1`;
 
     const res = await fetch(deleteUrl, {
       method: 'DELETE',
@@ -57,13 +57,13 @@ export default function useIdeas(projectId?: string) {
     });
 
     if (res.ok) {
-      const existingData = [...ideasListSwr.data];
+      const existingData = [...resourcesListSwr.data];
       const updatedList = existingData.filter((ed) => ed.id !== id);
-      ideasListSwr.mutate(updatedList);
+      resourcesListSwr.mutate(updatedList);
       return updatedList;
     } else {
       throw new Error('Could not remove the plan');
     }
   }
-  return { ...ideasListSwr, create, update, remove };
+  return { ...resourcesListSwr, create, update, remove };
 }

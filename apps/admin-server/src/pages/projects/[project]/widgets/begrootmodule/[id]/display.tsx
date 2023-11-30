@@ -28,8 +28,8 @@ const formSchema = z.object({
   displayPriceLabel: z.boolean(),
   showVoteCount: z.boolean(),
   unavailableButton: z.string(),
-  originalIdea: z.boolean(),
-  originalIdeaUrl: z.string().url(),
+  originalResource: z.boolean(),
+  originalResourceUrl: z.string().url(),
 });
 
 export default function BegrootmoduleDisplay() {
@@ -46,8 +46,8 @@ export default function BegrootmoduleDisplay() {
     showVoteCount: widget?.config?.[category]?.showVoteCount || false,
     unavailableButton:
       widget?.config?.[category]?.unavailableButton || 'Geen ruimte',
-    originalIdea: widget?.config?.[category]?.originalIdea || false,
-    originalIdeaUrl: widget?.config?.[category]?.originalIdeaUrl || '',
+    originalResource: widget?.config?.[category]?.originalResource || false,
+    originalResourceUrl: widget?.config?.[category]?.originalResourceUrl || '',
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -155,7 +155,7 @@ export default function BegrootmoduleDisplay() {
           />
           <FormField
             control={form.control}
-            name="originalIdea"
+            name="originalResource"
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Display de URL van het originele idee</FormLabel>
@@ -178,7 +178,7 @@ export default function BegrootmoduleDisplay() {
           />
           <FormField
             control={form.control}
-            name="originalIdeaUrl"
+            name="originalResourceUrl"
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>

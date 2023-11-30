@@ -17,12 +17,12 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  showIdeas: z.string(),
-  excludeIdeas: z.string(),
-  showIdeasFromTheme: z.string(),
+  showResources: z.string(),
+  excludeResources: z.string(),
+  showResourcesFromTheme: z.string(),
 });
 
-export default function WidgetIdeasMapContent() {
+export default function WidgetResourcesMapContent() {
   const category = 'content';
 
   const {
@@ -32,9 +32,9 @@ export default function WidgetIdeasMapContent() {
   } = useWidgetConfig();
 
   const defaults = () => ({
-    showIdeas: widget?.config?.[category]?.showIdeas || '',
-    excludeIdeas: widget?.config?.[category]?.excludeIdeas || '',
-    showIdeasFromTheme: widget?.config?.[category]?.showIdeasFromTheme || '',
+    showResources: widget?.config?.[category]?.showResources || '',
+    excludeResources: widget?.config?.[category]?.excludeResources || '',
+    showResourcesFromTheme: widget?.config?.[category]?.showResourcesFromTheme || '',
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -60,7 +60,7 @@ export default function WidgetIdeasMapContent() {
           className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
-            name="showIdeas"
+            name="showResources"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
@@ -78,7 +78,7 @@ export default function WidgetIdeasMapContent() {
           />
           <FormField
             control={form.control}
-            name="excludeIdeas"
+            name="excludeResources"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
@@ -96,7 +96,7 @@ export default function WidgetIdeasMapContent() {
           />
           <FormField
             control={form.control}
-            name="showIdeasFromTheme"
+            name="showResourcesFromTheme"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>

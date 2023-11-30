@@ -29,7 +29,7 @@ const formSchema = z.object({
   ctaText: z.string(),
 });
 
-export default function WidgetIdeasMapButton() {
+export default function WidgetResourcesMapButton() {
   const category = 'button';
 
   const {

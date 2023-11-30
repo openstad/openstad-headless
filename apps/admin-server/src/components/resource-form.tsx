@@ -18,7 +18,7 @@ import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
 import { SimpleCalendar } from '@/components/simple-calender-popup';
-import useIdea from '@/hooks/use-idea';
+import useResource from '@/hooks/use-resource';
 import toast from 'react-hot-toast';
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
@@ -85,11 +85,11 @@ type Props = {
   onFormSubmit: (body: FormType) => Promise<any>;
 };
 
-export default function IdeaForm({ onFormSubmit }: Props) {
+export default function ResourceForm({ onFormSubmit }: Props) {
   const router = useRouter();
   const { project, id } = router.query;
 
-  const { data: existingData, error } = useIdea(
+  const { data: existingData, error } = useResource(
     project as string,
     id as string
   );
@@ -134,7 +134,7 @@ export default function IdeaForm({ onFormSubmit }: Props) {
     onFormSubmit(values)
       .then(() => {
         toast.success(`Plan successvol ${id ? 'aangepast' : 'aangemaakt'}`);
-        router.push(`/projects/${project}/ideas`);
+        router.push(`/projects/${project}/resources`);
       })
       .catch((e) => {
         toast.error(`Plan kon niet ${id ? 'aangepast' : 'aangemaakt'} worden`);

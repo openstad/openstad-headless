@@ -1,13 +1,13 @@
 import React from 'react';
 import { PageLayout } from '@/components/ui/page-layout';
-import useIdeas from '@/hooks/use-ideas';
+import useResources from '@/hooks/use-resources';
 import { useRouter } from 'next/router';
-import IdeaForm from '@/components/idea-form';
+import ResourceForm from '@/components/resource-form';
 
-export default function ProjectIdeaCreate() {
+export default function ProjectResourceCreate() {
   const router = useRouter();
   const { project } = router.query;
-  const { create } = useIdeas(project as string);
+  const { create } = useResources(project as string);
 
   return (
     <div>
@@ -20,14 +20,14 @@ export default function ProjectIdeaCreate() {
           },
           {
             name: 'Ideeën',
-            url: `/projects/${project}/ideas`,
+            url: `/projects/${project}/resources`,
           },
           {
             name: 'Idee toevoegen',
-            url: `/projects/${project}/ideas/create`,
+            url: `/projects/${project}/resources/create`,
           },
         ]}>
-        <IdeaForm onFormSubmit={(body) => create(body)} />
+        <ResourceForm onFormSubmit={(body) => create(body)} />
       </PageLayout>
     </div>
   );

@@ -11,7 +11,7 @@ type Props = {
     | 'resourceoverview'
     | 'resourceform'
     | 'begrootmodule'
-    | 'ideasmap'
+    | 'resourcesmap'
     | 'map'
     | 'keuzewijzer';
   config?: any;

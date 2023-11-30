@@ -7,6 +7,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -23,12 +24,13 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  link: z.boolean(),
-  autoCenter: z.boolean(),
+  displayCounter: z.boolean(),
+  counterText: z.string(),
+  counterUrl: z.string().url(),
 });
 
-export default function WidgetIdeasMapMaps() {
-  const category = 'map';
+export default function WidgetResourcesMapCounter() {
+  const category = 'counter';
 
   const {
     data: widget,
@@ -37,8 +39,9 @@ export default function WidgetIdeasMapMaps() {
   } = useWidgetConfig();
 
   const defaults = () => ({
-    link: widget?.config?.[category]?.link || false,
-    autoCenter: widget?.config?.[category]?.autoCenter || false,
+    displayCounter: widget?.config?.[category]?.displayCounter || false,
+    counterText: widget?.config?.[category]?.counterText || '',
+    counterUrl: widget?.config?.[category]?.counterUrl || '',
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -57,19 +60,17 @@ export default function WidgetIdeasMapMaps() {
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Map</Heading>
+        <Heading size="xl">Teller</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
-            name="link"
+            name="displayCounter"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Worden links naar de detailpagina gevlagd?
-                </FormLabel>
+                <FormLabel>Wordt de teller weergegeven?</FormLabel>
                 <Select
                   onValueChange={(e: string) => field.onChange(e === 'true')}
                   value={field.value ? 'true' : 'false'}>
@@ -89,26 +90,26 @@ export default function WidgetIdeasMapMaps() {
           />
           <FormField
             control={form.control}
-            name="autoCenter"
+            name="counterText"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  {`Wordt het automatisch centreren van de map op de gebruiker's
-                  locatie toegelaten?`}
-                </FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Nee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormLabel>Teller tekst</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="counterUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Teller URL</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

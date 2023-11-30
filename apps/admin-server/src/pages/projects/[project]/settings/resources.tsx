@@ -30,7 +30,7 @@ import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
 
 const formSchema = z.object({
-  canAddNewIdeas: z.boolean(),
+  canAddNewResources: z.boolean(),
   minimumYesVotes: z.coerce.number(),
   titleMinLength: z.coerce.number(),
   titleMaxLength: z.coerce.number(),
@@ -40,14 +40,14 @@ const formSchema = z.object({
   descriptionMaxLength: z.coerce.number(),
 });
 
-export default function ProjectSettingsIdeas() {
-  const category = 'ideas';
+export default function ProjectSettingsResources() {
+  const category = 'resources';
 
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading, updateProject } = useProject();
   const defaults = () => ({
-    canAddNewIdeas: data?.config?.[category]?.canAddNewIdeas || null,
+    canAddNewResources: data?.config?.[category]?.canAddNewResources || null,
     minimumYesVotes: data?.config?.[category]?.minimumYesVotes || null,
     titleMinLength: data?.config?.[category]?.titleMinLength || null,
     titleMaxLength: data?.config?.[category]?.titleMaxLength || null,
@@ -72,7 +72,7 @@ export default function ProjectSettingsIdeas() {
     try {
       await updateProject({
         [category]: {
-          canAddNewIdeas: values.canAddNewIdeas,
+          canAddNewResources: values.canAddNewResources,
           minimumYesVotes: values.minimumYesVotes,
           titleMinLength: values.titleMinLength,
           titleMaxLength: values.titleMaxLength,
@@ -102,7 +102,7 @@ export default function ProjectSettingsIdeas() {
           },
           {
             name: 'Ideeën',
-            url: `/projects/${project}/settings/ideas`,
+            url: `/projects/${project}/settings/resources`,
           },
         ]}>
         <div className="container py-6">
@@ -114,7 +114,7 @@ export default function ProjectSettingsIdeas() {
               className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="canAddNewIdeas"
+                name="canAddNewResources"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>

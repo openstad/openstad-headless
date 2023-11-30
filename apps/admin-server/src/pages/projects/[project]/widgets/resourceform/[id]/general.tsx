@@ -25,7 +25,7 @@ import * as z from 'zod';
 
 const formSchema = z.object({
   resource: z.enum([
-    'idea',
+    'resource',
     'article',
     'activeUser',
     'resourceUser',
@@ -48,7 +48,7 @@ export default function WidgetResourceFormGeneral() {
   } = useWidgetConfig();
 
   const defaults = () => ({
-    resource: widget?.config?.[category]?.resource || 'idea',
+    resource: widget?.config?.[category]?.resource || 'resource',
     formName: widget?.config?.[category]?.formName || '',
     redirectUrl: widget?.config?.[category]?.redirectUrl || '',
     hideAdmin: widget?.config?.[category]?.hideAdmin || false,
@@ -93,7 +93,7 @@ export default function WidgetResourceFormGeneral() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="idea">Idee</SelectItem>
+                    <SelectItem value="resource">Idee</SelectItem>
                     <SelectItem value="article">Artikel</SelectItem>
                     <SelectItem value="activeUser">
                       Actieve gebruiker

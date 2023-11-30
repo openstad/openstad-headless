@@ -3,16 +3,16 @@ import { Button } from '../../../../components/ui/button';
 import Link from 'next/link';
 import { ChevronRight, Plus } from 'lucide-react';
 import React from 'react';
-import useIdeas from '@/hooks/use-ideas';
+import useResources from '@/hooks/use-resources';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { toast } from 'react-hot-toast';
 
-export default function ProjectIdeas() {
+export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
-  const { data, error, isLoading, remove } = useIdeas(project as string);
+  const { data, error, isLoading, remove } = useResources(project as string);
 
   if (!data) return null;
 
@@ -27,12 +27,12 @@ export default function ProjectIdeas() {
           },
           {
             name: 'Ideeën',
-            url: `/projects/${project}/ideas`,
+            url: `/projects/${project}/resources`,
           },
         ]}
         action={
           <Link
-            href={`/projects/${project}/ideas/create`}
+            href={`/projects/${project}/resources/create`}
             className="flex w-fit">
             <Button variant="default">
               <Plus size="20" className="hidden lg:flex" />
@@ -56,22 +56,22 @@ export default function ProjectIdeas() {
               <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
             </div>
             <ul>
-              {data?.map((idea: any) => (
+              {data?.map((resource: any) => (
                 <Link
-                  href={`/projects/${project}/ideas/${idea.id}`}
-                  key={idea.id}>
+                  href={`/projects/${project}/resources/${resource.id}`}
+                  key={resource.id}>
                   <li className="grid grid-cols-2 lg:grid-cols-6 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                     <Paragraph className="my-auto -mr-16 lg:mr-0">
-                      {idea.title}
+                      {resource.title}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">
-                      {idea.yes || 0}
+                      {resource.yes || 0}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">
-                      {idea.no || 0}
+                      {resource.no || 0}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto lg:-mr-16">
-                      {idea.createDateHumanized}
+                      {resource.createDateHumanized}
                     </Paragraph>
 
                     <div
@@ -81,7 +81,7 @@ export default function ProjectIdeas() {
                         header="Idee verwijderen"
                         message="Weet je zeker dat je dit idee wilt verwijderen?"
                         onDeleteAccepted={() =>
-                          remove(idea.id)
+                          remove(resource.id)
                             .then(() =>
                               toast.success('Idee successvol verwijderd')
                             )

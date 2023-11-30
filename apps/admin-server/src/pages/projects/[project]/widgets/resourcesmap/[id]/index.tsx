@@ -7,14 +7,14 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-import WidgetIdeasMapMaps from './maps';
-import WidgetIdeasMapButton from './button';
-import WidgetIdeasMapCounter from './counter';
-import WidgetIdeasMapContent from './content';
+import WidgetResourcesMapMaps from './maps';
+import WidgetResourcesMapButton from './button';
+import WidgetResourcesMapCounter from './counter';
+import WidgetResourcesMapContent from './content';
 import { useRouter } from 'next/router';
 import Preview from '@/components/widget-preview';
 
-export default function WidgetIdeasMap() {
+export default function WidgetResourcesMap() {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
@@ -34,7 +34,7 @@ export default function WidgetIdeasMap() {
           },
           {
             name: 'Ideeën Map',
-            url: `/projects/${projectId}/widgets/ideasmap/${id}`,
+            url: `/projects/${projectId}/widgets/resourcesmap/${id}`,
           },
         ]}>
         <div className="container py-6">
@@ -47,19 +47,19 @@ export default function WidgetIdeasMap() {
               <TabsTrigger value="content">Content</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
-              <Preview type="ideasmap" />
+              <Preview type="resourcesmap" />
             </TabsContent>
             <TabsContent value="map" className="p-0">
-              <WidgetIdeasMapMaps />
+              <WidgetResourcesMapMaps />
             </TabsContent>
             <TabsContent value="button" className="p-0">
-              <WidgetIdeasMapButton />
+              <WidgetResourcesMapButton />
             </TabsContent>
             <TabsContent value="counter" className="p-0">
-              <WidgetIdeasMapCounter />
+              <WidgetResourcesMapCounter />
             </TabsContent>
             <TabsContent value="content" className="p-0">
-              <WidgetIdeasMapContent />
+              <WidgetResourcesMapContent />
             </TabsContent>
           </Tabs>
         </div>

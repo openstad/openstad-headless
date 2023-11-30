@@ -1,15 +1,15 @@
 import React from 'react';
 import { PageLayout } from '@/components/ui/page-layout';
-import useIdeas from '@/hooks/use-ideas';
+import useResources from '@/hooks/use-resources';
 import { useRouter } from 'next/router';
 
-import IdeaForm from '@/components/idea-form';
+import ResourceForm from '@/components/resource-form';
 
-export default function ProjectIdeaCreate() {
+export default function ProjectResourceCreate() {
   const router = useRouter();
   const { project } = router.query;
   const { id } = router.query;
-  const { update } = useIdeas(project as string);
+  const { update } = useResources(project as string);
 
   return id ? (
     <div>
@@ -22,14 +22,14 @@ export default function ProjectIdeaCreate() {
           },
           {
             name: 'Ideeën',
-            url: `/projects/${project}/ideas`,
+            url: `/projects/${project}/resources`,
           },
           {
             name: 'Ideeën aanpassen',
-            url: `/projects/${project}/ideas/${id}`,
+            url: `/projects/${project}/resources/${id}`,
           },
         ]}>
-        <IdeaForm
+        <ResourceForm
           onFormSubmit={(values) =>
             update(Number.parseInt(id as string), values)
           }

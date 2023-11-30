@@ -39,8 +39,8 @@ const formSchema = z.object({
     'countPerTheme',
     'budgetingPerTheme',
   ]),
-  minIdeas: z.coerce.number().gt(0),
-  maxIdeas: z.coerce.number(),
+  minResources: z.coerce.number().gt(0),
+  maxResources: z.coerce.number(),
 });
 
 export default function ProjectSettingsVoting() {
@@ -55,8 +55,8 @@ export default function ProjectSettingsVoting() {
     withExisting: data?.config?.[category]?.withExisting || null,
     requiredUserRole: data?.config?.[category]?.requiredUserRole || null,
     voteType: data?.config?.[category]?.voteType || null,
-    minIdeas: data?.config?.[category]?.minIdeas || null,
-    maxIdeas: data?.config?.[category]?.maxIdeas || null,
+    minResources: data?.config?.[category]?.minResources || null,
+    maxResources: data?.config?.[category]?.maxResources || null,
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -77,8 +77,8 @@ export default function ProjectSettingsVoting() {
           withExisting: values.withExisting,
           requiredUserRole: values.requiredUserRole,
           voteType: values.voteType,
-          minIdeas: values.minIdeas,
-          maxIdeas: values.maxIdeas,
+          minResources: values.minResources,
+          maxResources: values.maxResources,
         },
       });
     } catch (error) {
@@ -248,7 +248,7 @@ export default function ProjectSettingsVoting() {
               />
               <FormField
                 control={form.control}
-                name="minIdeas"
+                name="minResources"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>
@@ -264,7 +264,7 @@ export default function ProjectSettingsVoting() {
               />
               <FormField
                 control={form.control}
-                name="maxIdeas"
+                name="maxResources"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>

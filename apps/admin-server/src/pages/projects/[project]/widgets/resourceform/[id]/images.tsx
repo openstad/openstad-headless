@@ -42,7 +42,7 @@ export default function WidgetResourceFormImages() {
   } = useWidgetConfig();
 
   const defaults = () => ({
-    imageLabel: widget?.config?.[category]?.imageLabel || 'idea',
+    imageLabel: widget?.config?.[category]?.imageLabel || 'resource',
     imageInfo: widget?.config?.[category]?.imageInfo || '',
     imageMultiple: widget?.config?.[category]?.imageMultiple || false,
     imageRequired: widget?.config?.[category]?.imageRequired || false,

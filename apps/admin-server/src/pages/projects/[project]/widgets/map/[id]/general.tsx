@@ -26,7 +26,7 @@ import * as z from 'zod';
 const formSchema = z.object({
   display: z.enum(['simple', 'full']),
   name: z.string(),
-  submissionField: z.enum(['ideaType', 'theme']),
+  submissionField: z.enum(['resourceType', 'theme']),
   filterLabel: z.string(),
   mobileCase: z.boolean(),
 });
@@ -121,7 +121,7 @@ export default function WidgetMapGeneral() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="ideaType">Idee type</SelectItem>
+                    <SelectItem value="resourceType">Idee type</SelectItem>
                     <SelectItem value="theme">Thema</SelectItem>
                   </SelectContent>
                 </Select>
