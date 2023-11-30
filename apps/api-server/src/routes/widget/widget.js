@@ -44,6 +44,7 @@ router
     const componentId = `osc-component-${widgetId}-${randomId}`;
     const widgetType = req.widgetConfig.widgetType;
     const widgetSettings = widgetSettingsMapping[widgetType];
+    
 
     // Remove widgetType from config, but pass all other keys to the widget
     delete req.widgetConfig.widgetType;
@@ -123,7 +124,7 @@ router
 // Add a static route for the images used in the CSS in each of the widgets
 Object.keys(widgetSettingsMapping).forEach((widget) => {
   if (!widgetSettingsMapping[widget].css) return;
-
+  
   router.use(
     `/${widget}-images`,
     express.static(
@@ -150,7 +151,7 @@ function getWidgetJavascriptOutput(
   let output = '';
   let widgetOutput = '';
   let css = '';
-
+  
   widgetSettings.js.forEach((file) => {
     widgetOutput += fs.readFileSync(require.resolve(file), 'utf8');
   });
@@ -172,7 +173,8 @@ function getWidgetJavascriptOutput(
     let process = { env: { NODE_ENV: 'production' } };
     (function () {
       const currentScript = document.currentScript;
-      window.addEventListener('load', function (e) {
+      console.log ('hi!', currentScript);
+      //window.addEventListener('load', function (e) {
         currentScript.insertAdjacentHTML('afterend', \`<div id="${componentId}"></div>\`);
         
         document.querySelector('head').innerHTML += \`
@@ -192,7 +194,7 @@ function getWidgetJavascriptOutput(
         ${reactCheck}
         
         currentScript.remove();
-      });
+      //});
     })();
     `;
   return output;

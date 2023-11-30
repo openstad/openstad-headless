@@ -20,7 +20,7 @@ module.exports = {
     },
   },*/
 
-  likes: {
+  like: {
     js: ['@openstad-headless/likes/dist/likes.iife.js'],
     css: ['@openstad-headless/likes/dist/style.css'],
     functionName: 'OpenstadHeadlessLikes',
