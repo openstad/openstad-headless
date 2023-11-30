@@ -21,8 +21,8 @@ module.exports = {
   },*/
 
   likes: {
-    js: ['@openstad-headless/likes-component/dist/likes-component.iife.js'],
-    css: ['@openstad-headless/likes-component/dist/style.css'],
+    js: ['@openstad-headless/likes/dist/likes.iife.js'],
+    css: ['@openstad-headless/likes/dist/style.css'],
     functionName: 'OpenstadHeadlessLikes',
     componentName: 'Likes',
     defaultConfig: {
