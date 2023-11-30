@@ -89,6 +89,7 @@ router
     const logoutUrl = `${config.url}/auth/project/${widget.project.id}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
 
     const defaultConfig = {
+      // @todo: filter out sensitive data from `widget.project.config`
       ...widget.project.config,
       api: {
         url: config.url,
