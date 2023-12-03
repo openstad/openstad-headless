@@ -1,0 +1,30 @@
+$info-bar-amsterdam-skyblue: '#67bde1'; 
+
+.info-bar {
+  position: relative;
+  margin-top: 20px;
+  margin-bottom: 0;
+  padding: 15px 15px 15px 64px;
+  padding-right: 30px; // This will override the previous right padding value
+  background-color: $info-bar-amsterdam-skyblue;
+  background-position: 19px 14px;
+  background-size: 24px 24px;
+  background-repeat: no-repeat;
+  background-image: url('/modules/openstad-assets/img/attention.svg');
+  font-size: 16px;
+  line-height: 22px;
+  color: #ffffff;
+
+  .close-button {
+    position: absolute;
+    top: 14px;
+    right: 20px;
+    width: 18px;
+    height: 18px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-image: url(/modules/openstad-assets/img/close-button-white-on-transparent.svg);
+    cursor: pointer;
+    z-index: 5;
+  }
+}

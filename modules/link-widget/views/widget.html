@@ -1,0 +1,37 @@
+<style>
+  {{data.widget.formattedContainerStyles}}
+</style>
+
+{% set href = data.widget.url %}
+{% if data.widget.addTelephoneProtocol %}
+{% set href = 'tel:' %}
+{% endif %}
+
+{% if not data.widget.onlyForModerator or (data.widget.onlyForModerator and data.hasModeratorRights) %}
+<a
+  id="{{data.widget.containerId}}"
+  href="{{ href  }}"
+  class="
+    {{data.widget.style}}
+    scroll-link margin-bottom-sm
+    {{ 'button-with-icon' if data.widget.icon else  'button-without-icon'}}
+    {{data.widget.classNameCustom}}
+    "
+  {% if data.widget.targetBlank %} target="_blank" {% endif %}
+  style=""
+>
+  {% if data.widget.icon %}
+	<img src="{{apos.attachment.url(data.widget.icon)}}"
+       {% if data.widget.iconAltText %}
+        alt="{{data.widget.iconAltText}}"
+       {% endif %}
+  />
+  {% endif %}
+
+  {{ data.widget.label  }}
+
+  {% if data.widget.screenReaderInfo %}
+  <span class="sr-only">{{ data.widget.screenReaderInfo }}</span>
+  {% endif %}
+</a>
+{% endif %}

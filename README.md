@@ -18,4 +18,3 @@ __API__
 - [Tags: thema's, areas and more](apps/api-server/doc/tags.md)
 - [Pagination and search](apps/api-server/doc/pagination-and-search.md)
 
-

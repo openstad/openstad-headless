@@ -1,0 +1,30 @@
+@import "vendor/bootstrap/scss/functions";
+
+// 2. Include any default variable overrides here
+// Default variable overrides
+$body-bg: #fff;
+$body-color: #111;
+
+// 3. Include remainder of required Bootstrap stylesheets
+@import "vendor/bootstrap/scss/variables";
+@import "vendor/bootstrap/scss/mixins";
+@import "vendor/bootstrap/scss/root";
+
+// 4. Include any optional Bootstrap CSS as needed
+@import "vendor/bootstrap/scss/utilities";
+@import "vendor/bootstrap/scss/reboot";
+@import "vendor/bootstrap/scss/type";
+@import "vendor/bootstrap/scss/images";
+@import "vendor/bootstrap/scss/containers";
+@import "vendor/bootstrap/scss/grid";
+@import "vendor/bootstrap/scss/helpers";
+
+// 5. Optionally include utilities API last to generate classes based on the Sass map in `_utilities.scss`
+@import "vendor/bootstrap/scss/utilities/api";
+
+@import "header.scss";
+@import "navbar.scss";
+
+.row img {
+  max-width: 100%;
+}
