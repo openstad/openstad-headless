@@ -18,7 +18,7 @@ export default function ImageUploader() {
   });
 
   function uploadImage(image: any){
-    return fetch('http://localhost:31450/image?access_token=189a52049e0f4c14740f2235b9318306', {
+    return fetch('http://localhost:31450/image', {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",
@@ -29,7 +29,7 @@ export default function ImageUploader() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     uploadImage(values.projectName)
-  }  
+  }
 
   return(
     <Form>
@@ -50,7 +50,7 @@ export default function ImageUploader() {
         <Button variant="default" type="submit" className="w-fit col-span-full">
           Opslaan
         </Button>
-      </form>  
+      </form>
     </Form>
-  )  
+  )
 }
