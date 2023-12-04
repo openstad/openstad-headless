@@ -1,11 +1,11 @@
 import 'remixicon/fonts/remixicon.css';
 import { ProgressBar } from '@openstad-headless/ui/src';
-import SessionStorage from '../../lib/session-storage.js';
+import { SessionStorage } from '@openstad-headless/lib/session-storage';
+import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { hasRole } from '@openstad-headless/lib/has-role';
 import DataStore from '@openstad-headless/data-store/src';
 import React, { useState } from 'react';
 import './likes.css';
-import loadWidget from '../../lib/load-widget.js';
-import hasRole from '../../lib/has-role';
 
 type Props = {
   projectId?: string;

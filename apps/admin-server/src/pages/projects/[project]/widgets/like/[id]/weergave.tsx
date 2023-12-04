@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../../../../components/ui/select';
+import { Input } from '../../../../../../components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -25,6 +26,8 @@ import { useWidgetConfig } from '@/hooks/use-widget-config';
 
 const formSchema = z.object({
   display: z.enum(['claps']),
+  yesLabel: z.string(),
+  noLabel: z.string(),
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -38,13 +41,17 @@ export default function LikesDisplay() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
+    mutateData
   } = useWidgetConfig();
 
   const defaults = () => ({
     display: widget?.config?.[category]?.display || 'claps',
+    yesLabel: widget?.config?.[category]?.yesLabel || 'Ik ben voor',
+    noLabel: widget?.config?.[category]?.noLabel || 'Ik ben tegen',
   });
 
   async function onSubmit(values: FormData) {
+    console.log ('values', values);
     try {
       await updateConfig({ [category]: values });
     } catch (error) {
@@ -86,6 +93,29 @@ export default function LikesDisplay() {
                   <SelectItem value="claps">Claps</SelectItem>
                 </SelectContent>
               </Select>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="yesLabel"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Label voor "Ja"</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        /><FormField
+          control={form.control}
+          name="noLabel"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Label voor "Nee"</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
             </FormItem>
           )}
         />

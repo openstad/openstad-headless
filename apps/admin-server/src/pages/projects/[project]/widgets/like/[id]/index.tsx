@@ -49,7 +49,7 @@ export default function WidgetArguments() {
           </Tabs>
 
             <div className="py-6 mt-6 bg-white rounded-md">
-              <WidgetPreview type="like" />
+              <WidgetPreview type="like" projectId={projectId} />
             </div>
         </div>
       </PageLayout>
