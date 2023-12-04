@@ -124,15 +124,19 @@ router
 Object.keys(widgetSettingsMapping).forEach((widget) => {
   if (!widgetSettingsMapping[widget].css) return;
 
-  router.use(
-    `/${widget}-images`,
-    express.static(
-      path.resolve(
-        require.resolve(widgetSettingsMapping[widget].css[0]),
-        '../../images/'
+  try {
+    router.use(
+      `/${widget}-images`,
+      express.static(
+        path.resolve(
+          require.resolve(widgetSettingsMapping[widget].css[0]),
+          '../../images/'
+        )
       )
-    )
-  );
+    );
+  } catch (e) {
+    console.log (`Could not find CSS file [${widgetSettingsMapping[widget].css[0]}] for widget [${widget}]. You might need to run \`npm run build\` in the widget's directory.`);
+  }
 });
 
 function getWidgetJavascriptOutput(
