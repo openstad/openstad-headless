@@ -10,7 +10,9 @@ import useTags from './hooks/use-tags.js';
 import useCurrentUser from './hooks/use-current-user.js';
 import useUserVote from './hooks/use-user-vote.js';
 
-window.OpenStadSWR = window.OpenStadSWR || {}; // keys used, for forced updates
+const windowGlobal = typeof window !== "undefined" ? window : {};
+
+windowGlobal.OpenStadSWR = windowGlobal.OpenStadSWR || {}; // keys used, for forced updates
 
 function DataStore(props = { config: {} }) {
   
@@ -42,7 +44,7 @@ function DataStore(props = { config: {} }) {
     let fetcher = eval(`self.api.${fetcherAsString}`);
     let key = self.createKey(props, fetcherAsString);
 
-    window.OpenStadSWR[ JSON.stringify(key, null, 2) ] = true;
+    windowGlobal.OpenStadSWR[ JSON.stringify(key, null, 2) ] = true;
 
     return useSWR(key, fetcher, {
       keepPreviousData: true,
@@ -81,7 +83,7 @@ function DataStore(props = { config: {} }) {
 
   self.refresh = function() {
     mutate(
-      cacheKey => Object.keys(window.OpenStadSWR).indexOf( JSON.stringify(cacheKey, null, 2) ) != -1,
+      cacheKey => Object.keys(windowGlobal.OpenStadSWR).indexOf( JSON.stringify(cacheKey, null, 2) ) != -1,
       async currentData => currentData, // optimistic ui as fetcher
       {
         revalidate: true,
@@ -97,5 +99,3 @@ export{
   DataStore as default,
   DataStore,
 }
-
-
