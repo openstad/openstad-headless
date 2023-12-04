@@ -14,7 +14,7 @@ let sites = {};
 const apostropheServer = {};
 const aposStartingUp = {};
 
-async function loadSites () {
+async function loadSites () { 
   const allSites = await siteService.fetchAll();
   sites = {};
 
@@ -97,7 +97,7 @@ app.use(async function (req, res, next) {
     return;
   }
 
-  const apiUrl = process.env.INTERNAL_API_URL ? process.env.INTERNAL_API_URL : process.env.API;
+  const apiUrl = process.env.INTERNAL_API_URL ? process.env.INTERNAL_API_URL : process.env.API_URL;
 
   /**
    * Stop server if no API URL is set
