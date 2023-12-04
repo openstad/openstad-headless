@@ -21,10 +21,7 @@ module.exports = {
         };
 
         req.data.global.siteName = 'Openstad';
-        req.site = self.apos.options.site;
-
-        console.log('req.data.global A', req.data.global);
-          
+        req.site = self.apos.options.site;          
         next();
       }
     };
