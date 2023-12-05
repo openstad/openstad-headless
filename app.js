@@ -136,6 +136,7 @@ app.use('/login', function (req, res, next) {
   const domainAndPath = req.openstadDomain;
   const i = req.url.indexOf('?');
   const query = req.url.substr(i + 1);
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
   const url = req.protocol + '://' + domainAndPath + '/oauth/login';
 
   return res.redirect(url && query ? url + '?' + query : url);
