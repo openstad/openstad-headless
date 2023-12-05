@@ -192,10 +192,7 @@ module.exports = {
           // unlimited admin permissions.
           const taskReq = self.apos.task.getReq();
 
-          const versionName = '0.0.1'; // todo
-          const username = user.id ? 'openstad_org_' + user.id + versionName : user.id;
-
-
+          const username = user.id ? 'openstad_org_' + user.id : user.id;
           const firstName = user.firstName ? user.firstName : 'first_name_' + user.id;
           const lastName = user.lastName ? user.lastName : 'last_name_' + user.id;
 
