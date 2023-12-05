@@ -13,6 +13,8 @@ PORT=3000
 OVERWRITE_DOMAIN=
 SITE_API_KEY=
 API_URL=
+# if your mongodb is not on localhost:27017
+APOS_MONGODB_URI=
 ```
 ### Npm i & npm run
 ```
