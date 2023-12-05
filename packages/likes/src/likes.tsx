@@ -1,13 +1,13 @@
 import 'remixicon/fonts/remixicon.css';
 import { ProgressBar } from '@openstad-headless/ui/src';
 import { SessionStorage } from '@openstad-headless/lib/session-storage';
-import { loadWidget } from '@openstad-headless/lib/load-widget';
+import loadWidget from '@openstad-headless/lib/load-widget';
 import { hasRole } from '@openstad-headless/lib/has-role';
 import DataStore from '@openstad-headless/data-store/src';
 import React, { useState } from 'react';
 import './likes.css';
 
-type Props = {
+export type LikeProps = {
   projectId?: string;
   ideaId?: string;
   apiUrl?: string;
@@ -45,7 +45,7 @@ function Likes({
   yesLabel = 'Voor',
   noLabel = 'Tegen',
   ...props
-}: Props) {
+}: LikeProps) {
   const necessaryVotes = props?.config?.votesNeeded || 50;
 
   const datastore = new DataStore(props);

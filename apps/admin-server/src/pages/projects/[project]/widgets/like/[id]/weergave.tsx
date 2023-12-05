@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { PageLayout } from '../../../../../../components/ui/page-layout';
 import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
@@ -21,42 +20,37 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useRouter } from 'next/router';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
 
 const formSchema = z.object({
-  display: z.enum(['claps']),
+  display: z.string(),
   yesLabel: z.string(),
   noLabel: z.string(),
 });
 type FormData = z.infer<typeof formSchema>;
 
-export default function LikesDisplay() {
-  const category = 'like';
-  const router = useRouter();
-  const id = router.query.id;
-  const projectId = router.query.project;
+type LikeProps = {
+  like?: {
+    display?: string;
+    yesLabel?: string;
+    noLabel?: string;
+  };
+};
 
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-    mutateData
-  } = useWidgetConfig();
+type LikeDisplayProps = {
+  config?: LikeProps;
+  updateConfig: (like: LikeProps) => void;
+  onFieldChanged: (key: string, value: string) => void;
+};
 
+export default function LikesDisplay(props: LikeDisplayProps) {
   const defaults = () => ({
-    display: widget?.config?.[category]?.display || 'claps',
-    yesLabel: widget?.config?.[category]?.yesLabel || 'Ik ben voor',
-    noLabel: widget?.config?.[category]?.noLabel || 'Ik ben tegen',
+    display: props?.config?.like?.display,
+    yesLabel: props?.config?.like?.yesLabel,
+    noLabel: props?.config?.like?.noLabel,
   });
 
-  async function onSubmit(values: FormData) {
-    console.log ('values', values);
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could not update', error);
-    }
+  function onSubmit(values: FormData) {
+    props.updateConfig({ like: values });
   }
 
   const form = useForm<FormData>({
@@ -66,7 +60,7 @@ export default function LikesDisplay() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [props]);
 
   return (
     <Form {...form} className="p-6 bg-white rounded-md">
@@ -83,7 +77,11 @@ export default function LikesDisplay() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Weergave type</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value);
+                }}
+                value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Claps" />
@@ -103,18 +101,31 @@ export default function LikesDisplay() {
             <FormItem>
               <FormLabel>Label voor "Ja"</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    props.onFieldChanged('yesLabel', e.target.value);
+                  }}
+                />
               </FormControl>
             </FormItem>
           )}
-        /><FormField
+        />
+        <FormField
           control={form.control}
           name="noLabel"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Label voor "Nee"</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    props.onFieldChanged('noLabel', e.target.value);
+                  }}
+                />
               </FormControl>
             </FormItem>
           )}

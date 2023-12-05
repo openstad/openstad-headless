@@ -169,8 +169,9 @@ function getWidgetJavascriptOutput(
   // The process.env.NODE_ENV is set to production, otherwise some React dependencies will not work correctly
   // @todo: find a way around this so we don't have to provide the `process` variable
   output += `
-    let process = { env: { NODE_ENV: 'production' } };
     (function () {
+      let process = { env: { NODE_ENV: 'production' } };
+
       const currentScript = document.currentScript;
       window.addEventListener('load', function (e) {
         currentScript.insertAdjacentHTML('afterend', \`<div id="${componentId}"></div>\`);
