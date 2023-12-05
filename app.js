@@ -9,6 +9,7 @@ const siteService = require('./services/sites');
 const aposConfig = require('./lib/apos-config');
 const { refresh } = require('less');
 const REFRESH_SITES_INTERVAL = 60000 * 5;
+const Url = require('node:url');
 
 let sites = {};
 const apostropheServer = {};
