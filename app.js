@@ -9,6 +9,7 @@ const siteService = require('./services/sites');
 const aposConfig = require('./lib/apos-config');
 const { refresh } = require('less');
 const REFRESH_SITES_INTERVAL = 60000 * 5;
+const Url = require('node:url');
 
 let sites = {};
 const apostropheServer = {};
@@ -149,7 +150,8 @@ app.use('/login', function (req, res, next) {
   const domainAndPath = req.openstadDomain;
   const i = req.url.indexOf('?');
   const query = req.url.substr(i + 1);
-  const url = req.protocol + '://' + domainAndPath + '/oauth/login';
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+  const url = protocol + '://' + domainAndPath + '/oauth/login';
 
   return res.redirect(url && query ? url + '?' + query : url);
 });
