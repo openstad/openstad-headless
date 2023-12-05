@@ -17,7 +17,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  intro: z.string(),
+  formIntro: z.string(),
   placeholder: z.string(),
 });
 
