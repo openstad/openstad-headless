@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createHash, randomInt } from "crypto";
 import * as querystring from "querystring";
+import { Signature } from '@/pages/projects/[project]/crypto';
 
 const formSchema = z.object({
   projectName: z.any(),
@@ -18,9 +19,6 @@ type SignatureData = {
 };
 
 export default function ImageUploader() {  
-  const secret : string = '';
-  const ttl : number = 0;
-  const hash : string = "sha1"
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -28,38 +26,18 @@ export default function ImageUploader() {
   });
 
   function uploadImage(image: any){
-    return fetch('http://localhost:31450/image?access_token=7a3bde0d196d439926e515fc167ffb8a', {
-        method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: image
-    })
+    new Signature({secret: 'Secret', ttl: 20, hash: "sha1"}).sign("localhost:31450", 20)
+    // return fetch('http://localhost:31450/image?access_token=7a3bde0d196d439926e515fc167ffb8a', {
+    //     method: 'POST',
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: image
+    // })
   }
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     uploadImage(values.projectName)
-  }
-
-  function sign(url: string, signTTL: number): string {
-    const data: SignatureData = {
-      rndNumber: randomInt(10000000000).toString()
-    }
-
-    const newttl = signTTL ?? ttl;
-    if (newttl) {
-      data.exp = Date.now() + newttl * 1000;
-    }
-
-    const prefixSign = url.indexOf("?") == -1 ? "?" : "&";
-    url += `${prefixSign}signed=${querystring.stringify(
-      data as Record<string, string | number>,
-      "-",
-      "_"
-    )}`;
-    url += `-${this.hash(url, this.secret)}`;
-
-    return url;
   }
 
   return(
