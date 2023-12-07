@@ -115,7 +115,7 @@ You can now build and run a docker environment using the command.
 docker-compose up --build
    
 Once that is running you can visit the servers on these urls:
-List ideas: ${process.env.API_URL}/api/project/1/idea
+List resources: ${process.env.API_URL}/api/project/1/resource
 Login: ${process.env.API_URL}/auth/project/1/login
 Which should redirect you to the login form: ${process.env.AUTH_APP_URL}/auth/code/login?clientId=uniquecode
 Show an image: ${process.env.IMAGE_APP_URL}/image/forum.romanum.06.webp

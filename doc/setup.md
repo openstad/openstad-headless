@@ -27,7 +27,7 @@ Note: in some environments running `npm i` requires `make` ofr another build com
 ### 2. Create databases
 
 If  your OpenStad database user has GRANT privileges you can skip this step; the setup script will create the databases for you.
-But since this is usually a bas idea you may want to create the databases by hand.
+But since this is usually a bad idea you may want to create the databases by hand.
 
 In SQL:
 ```
