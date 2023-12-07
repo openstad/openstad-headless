@@ -3,11 +3,13 @@ const express = require('express');
 const app = express();
 const imgSteam = require('image-steam');
 const multer = require('multer');
-//const AWS = require('aws-sdk')
-//const multerS3 = require('multer-s3')
+const AWS = require('aws-sdk')
+const multerS3 = require('multer-s3')
 const passport = require('passport');
 const Strategy = require('passport-http-bearer').Strategy;
 const db = require('./db');
+const cors = require('cors');
+
 
 const multerConfig = {
   onError: function (err, next) {
@@ -197,6 +199,10 @@ app.use(function (err, req, res, next) {
     error: err.message
   }));
 })
+
+app.use(cors({
+  origin: '*'
+}));
 
 app.listen(argv.port, function () {
   console.log('Application listen on port %d...', argv.port);

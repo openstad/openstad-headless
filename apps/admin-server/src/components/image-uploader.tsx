@@ -5,12 +5,22 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Button } from './ui/button';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { createHash, randomInt } from "crypto";
+import * as querystring from "querystring";
 
 const formSchema = z.object({
   projectName: z.any(),
   });
 
+type SignatureData = {
+  exp?: number; // exp timestamp
+  rndNumber: string; // random number
+};
+
 export default function ImageUploader() {  
+  const secret : string = '';
+  const ttl : number = 0;
+  const hash : string = "sha1"
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -18,7 +28,7 @@ export default function ImageUploader() {
   });
 
   function uploadImage(image: any){
-    return fetch('http://localhost:31450/image', {
+    return fetch('http://localhost:31450/image?access_token=7a3bde0d196d439926e515fc167ffb8a', {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",
@@ -29,6 +39,27 @@ export default function ImageUploader() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     uploadImage(values.projectName)
+  }
+
+  function sign(url: string, signTTL: number): string {
+    const data: SignatureData = {
+      rndNumber: randomInt(10000000000).toString()
+    }
+
+    const newttl = signTTL ?? ttl;
+    if (newttl) {
+      data.exp = Date.now() + newttl * 1000;
+    }
+
+    const prefixSign = url.indexOf("?") == -1 ? "?" : "&";
+    url += `${prefixSign}signed=${querystring.stringify(
+      data as Record<string, string | number>,
+      "-",
+      "_"
+    )}`;
+    url += `-${this.hash(url, this.secret)}`;
+
+    return url;
   }
 
   return(
