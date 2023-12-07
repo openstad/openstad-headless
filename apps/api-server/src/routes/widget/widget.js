@@ -135,7 +135,9 @@ Object.keys(widgetSettingsMapping).forEach((widget) => {
       )
     );
   } catch (e) {
-    console.log (`Could not find CSS file [${widgetSettingsMapping[widget].css[0]}] for widget [${widget}]. You might need to run \`npm run build\` in the widget's directory.`);
+    console.log(
+      `Could not find CSS file [${widgetSettingsMapping[widget].css[0]}] for widget [${widget}]. You might need to run \`npm run build\` in the widget's directory.`
+    );
   }
 });
 
@@ -174,30 +176,31 @@ function getWidgetJavascriptOutput(
   // @todo: find a way around this so we don't have to provide the `process` variable
   output += `
     (function () {
-      let process = { env: { NODE_ENV: 'production' } };
+      try {
+        let process = { env: { NODE_ENV: 'production' } };
 
-      const currentScript = document.currentScript;
-      window.addEventListener('load', function (e) {
-        currentScript.insertAdjacentHTML('afterend', \`<div id="${componentId}"></div>\`);
-        
-        document.querySelector('head').innerHTML += \`
-          <style>${css}</style>
-          <link href="${remixIconCss}" rel="stylesheet">
-        \`;
-        
-        const redirectUri = encodeURI(window.location.href);
-        const config = JSON.parse(\`${widgetConfig}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
-        
-        function renderWidget () {
-          ${widgetOutput}
+        const currentScript = document.currentScript;
+          currentScript.insertAdjacentHTML('afterend', \`<div id="${componentId}"></div>\`);
           
-          ${widgetSettings.functionName}.${widgetSettings.componentName}.loadWidget('${componentId}', { config });
-        }
-        
-        ${reactCheck}
-        
-        currentScript.remove();
-      });
+          document.querySelector('head').innerHTML += \`
+            <style>${css}</style>
+            <link href="${remixIconCss}" rel="stylesheet">
+          \`;
+          
+          const redirectUri = encodeURI(window.location.href);
+          const config = JSON.parse(\`${widgetConfig}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
+          
+          function renderWidget () {
+            ${widgetOutput}
+            
+            ${widgetSettings.functionName}.${widgetSettings.componentName}.loadWidget('${componentId}', config);
+          }
+          
+          ${reactCheck}
+          currentScript.remove();
+      } catch(e) {
+        console.error("Could not place widget", e);
+      }
     })();
     `;
   return output;

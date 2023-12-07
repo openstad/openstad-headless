@@ -20,6 +20,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
+import { LikeProps } from '@openstad/likes/src/likes';
 
 const formSchema = z.object({
   display: z.string(),
@@ -28,29 +29,26 @@ const formSchema = z.object({
 });
 type FormData = z.infer<typeof formSchema>;
 
-type LikeProps = {
-  like?: {
-    display?: string;
-    yesLabel?: string;
-    noLabel?: string;
-  };
+type Props = {
+  display: string;
+  yesLabel: string;
+  noLabel: string;
 };
 
-type LikeDisplayProps = {
-  config?: LikeProps;
-  updateConfig: (like: LikeProps) => void;
+type LikeDisplayProps = Props & {
+  updateConfig: (likes: LikeProps) => void;
   onFieldChanged: (key: string, value: string) => void;
 };
 
 export default function LikesDisplay(props: LikeDisplayProps) {
   const defaults = () => ({
-    display: props?.config?.like?.display,
-    yesLabel: props?.config?.like?.yesLabel,
-    noLabel: props?.config?.like?.noLabel,
+    display: props?.display,
+    yesLabel: props?.yesLabel,
+    noLabel: props?.noLabel,
   });
 
   function onSubmit(values: FormData) {
-    props.updateConfig({ like: values });
+    props.updateConfig(values);
   }
 
   const form = useForm<FormData>({

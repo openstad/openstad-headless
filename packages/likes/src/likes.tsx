@@ -6,17 +6,11 @@ import { hasRole } from '@openstad-headless/lib/has-role';
 import DataStore from '@openstad-headless/data-store/src';
 import React, { useState } from 'react';
 import './likes.css';
+import { BaseProps } from '../../types/base-props';
 
-export type LikeProps = {
-  projectId?: string;
-  ideaId?: string;
-  apiUrl?: string;
-  config: {
-    projectId?: string;
-    ideaId?: string;
-    api?: {
-      url: string;
-    };
+export type LikeWidgetProps = BaseProps &
+  LikeProps & {
+    ideaId: string;
     votesNeeded?: number;
     votes: {
       isActive: boolean;
@@ -27,10 +21,9 @@ export type LikeProps = {
         value: string;
       }>;
     };
-    login: {
-      url: string;
-    };
   };
+
+export type LikeProps = {
   title?: string;
   variant?: 'small' | 'medium' | 'large';
   yesLabel?: string;
@@ -45,14 +38,21 @@ function Likes({
   yesLabel = 'Voor',
   noLabel = 'Tegen',
   ...props
-}: LikeProps) {
-  const necessaryVotes = props?.config?.votesNeeded || 50;
+}: LikeWidgetProps) {
+  const necessaryVotes = props?.votesNeeded || 50;
 
-  const datastore = new DataStore(props);
+  console.log(yesLabel, noLabel);
+  // Pass explicitely because datastore is not ts, we will not get a hint if the props have changed
+  const datastore = new DataStore({
+    projectId: props.projectId,
+    config: { api: props.api },
+  });
   const session = new SessionStorage(props);
-
   const [currentUser] = datastore.useCurrentUser(props);
-  const [idea] = datastore.useIdea(props);
+  const [idea] = datastore.useIdea({
+    projectId: props.projectId,
+    ideaId: props.ideaId,
+  });
   const [isBusy, setIsBusy] = useState(false);
   const supportedLikeTypes: Array<{
     type: 'yes' | 'no';
@@ -69,17 +69,18 @@ function Likes({
     if (isBusy) return;
     setIsBusy(true);
 
-    if (!props.config.votes.isActive) {
+    if (!props.votes.isActive) {
       return;
     }
 
     if (
-      !currentUser.role ||
-      !hasRole(currentUser, props.config.votes.requiredUserRole)
+      (!currentUser.role ||
+        !hasRole(currentUser, props.votes.requiredUserRole)) &&
+      props.login
     ) {
       // login
       session.set('osc-idea-vote-pending', { [idea.id]: value });
-      return (document.location.href = props.config.login.url);
+      return (document.location.href = props?.login.url);
     }
 
     let change = {};
@@ -129,7 +130,7 @@ function Likes({
           ))}
         </div>
 
-        {!props?.config?.votesNeeded ? null : (
+        {!props?.votesNeeded ? null : (
           <div className="progressbar-container">
             <ProgressBar progress={(idea.yes / necessaryVotes) * 100} />
             <p className="progressbar-counter">
@@ -144,4 +145,4 @@ function Likes({
 
 Likes.loadWidget = loadWidget;
 
-export { Likes as default, Likes };
+export { Likes };

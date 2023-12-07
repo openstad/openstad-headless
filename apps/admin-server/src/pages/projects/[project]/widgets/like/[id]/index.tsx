@@ -7,12 +7,13 @@ import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import toast from 'react-hot-toast';
+import { LikeProps, LikeWidgetProps } from '@openstad/likes/src/likes';
 
-export default function WidgetArguments() {
+export default function WidgetLikes() {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
-  const [previewConfig, setPreviewConfig] = useState<any>();
+  const [previewConfig, setPreviewConfig] = useState<LikeProps>();
 
   const {
     data: widget,
@@ -31,8 +32,9 @@ export default function WidgetArguments() {
 
   // Set the preview the first time the widget config is loaded
   useEffect(() => {
-    if (widget?.config?.like) {
-      setPreviewConfig({ ...widget });
+    const config = widget?.config;
+    if (config) {
+      setPreviewConfig({ ...config.likes });
     }
   }, [widget]);
 
@@ -62,27 +64,16 @@ export default function WidgetArguments() {
             </TabsList>
             <TabsContent value="display" className="p-0">
               <LikesDisplay
-                config={{
-                  like: {
-                    display: previewConfig?.config?.like?.display || 'claps',
-                    yesLabel:
-                      previewConfig?.config?.like?.yesLabel || 'Ik ben voor',
-                    noLabel:
-                      previewConfig?.config?.like?.noLabel || 'Ik ben tegen',
-                  },
-                }}
+                {...previewConfig}
+                display="claps"
+                yesLabel={previewConfig?.yesLabel || 'yes'}
+                noLabel={previewConfig?.noLabel || 'no'}
                 updateConfig={(config) => update(config)}
                 onFieldChanged={(key, value) => {
                   if (previewConfig) {
                     setPreviewConfig({
                       ...previewConfig,
-                      config: {
-                        ...previewConfig?.config,
-                        like: {
-                          ...previewConfig?.config?.like,
-                          [key]: value,
-                        },
-                      },
+                      [key]: value,
                     });
                   }
                 }}
@@ -94,12 +85,34 @@ export default function WidgetArguments() {
           </Tabs>
 
           <div className="py-6 mt-6 bg-white rounded-md">
-            <WidgetPreview
-              type="like"
-              config={...previewConfig?.config}
-              projectId={projectId as string}
-              widgetId={id as string}
-            />
+            {previewConfig ? (
+              <WidgetPreview
+                type="likes"
+                config={
+                  {
+                    projectId,
+                    ideaId: '2',
+                    api: {
+                      url: '/api/openstad',
+                    },
+                    title: 'Vind je dit een goed idee?',
+                    hideCounters: true,
+                    variant: 'medium',
+                    yesLabel: previewConfig?.yesLabel,
+                    noLabel: previewConfig?.noLabel,
+                    votesNeeded: 30,
+                    votes: {
+                      isActive: false,
+                      requiredUserRole: 'admin',
+                      voteType: 'test',
+                      voteValues: [{ label: 'ja', value: 'yes' }],
+                    },
+                  } as LikeWidgetProps
+                }
+                projectId={projectId as string}
+                widgetId={id as string}
+              />
+            ) : null}
           </div>
         </div>
       </PageLayout>

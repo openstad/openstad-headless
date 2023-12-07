@@ -16,7 +16,7 @@ COPY --chown=node:node package*.json .
 COPY --chown=node:node packages/ ./packages
 COPY --chown=node:node apps/$APP ./apps/$APP
 
-RUN npm install --ws
+RUN npm install --prefix=$WORKSPACE
 # Disabled for now since the admin/web server won't build due to errors
 # && \
 #     npm run build --prefix=@openstad-headless/${APP} --if-present
