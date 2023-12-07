@@ -100,7 +100,7 @@ export default function WidgetMapGeneral() {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Naam van het idee</FormLabel>
+                <FormLabel>Naam van het resource</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -121,7 +121,7 @@ export default function WidgetMapGeneral() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="resourceType">Idee type</SelectItem>
+                    <SelectItem value="resourceType">Resource type</SelectItem>
                     <SelectItem value="theme">Thema</SelectItem>
                   </SelectContent>
                 </Select>
@@ -148,7 +148,7 @@ export default function WidgetMapGeneral() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Opent op mobiel de lijst van ideeën over de kaart heen?
+                  Opent op mobiel de lijst van resources over de kaart heen?
                 </FormLabel>
                 <Select onValueChange={(e: string) => field.onChange(e === 'false')} value={field.value ? 'true' : 'false'}>
                   <FormControl>

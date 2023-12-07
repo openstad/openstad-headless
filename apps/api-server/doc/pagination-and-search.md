@@ -46,7 +46,7 @@ Which means that a search could make the previously very fast query quite expens
 Search requests are sent as query parameter `search`, build as an object in the url:
 
 ```
-?search[description]=openstad&search[title]=goed%20idee
+?search[description]=openstad&search[title]=goed%20resource
 ```
 
 A npm module like `ns` can translate nested objects automatically to such an url.
@@ -57,7 +57,7 @@ A npm module like `ns` can translate nested objects automatically to such an url
     "text": "openstad"
   },
   {
-    "title": "goed idee"
+    "title": "goed resource"
   }
 ],
 ```

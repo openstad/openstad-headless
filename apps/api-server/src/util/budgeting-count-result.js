@@ -24,7 +24,7 @@ db.BudgetVote
 		return result;
 	})
 	.then(result => {
-		// haal de ideeen erbij om de leesbaarheid te vergroten
+		// haal de resources erbij om de leesbaarheid te vergroten
 		db.Resource
 			.findAll({ where: { id: Object.keys(voteResult) } })
 			.then(result => {

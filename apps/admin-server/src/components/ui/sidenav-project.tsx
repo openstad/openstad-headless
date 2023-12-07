@@ -67,7 +67,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 }
                 size="default"
                 className="w-full flex justify-start pl-8">
-                <span className="truncate">Ideeën</span>
+                <span className="truncate">Resources</span>
               </Button>
             </Link>
             <Link href={`/projects/${project}/settings/voting`}>
@@ -196,7 +196,7 @@ export function SidenavProject({ className }: { className?: string }) {
             variant={location.includes('/resources') ? 'secondary' : 'ghost'}
             className="w-full flex justify-start"
             onClick={(e) => {}}>
-            <span className="truncate">Ideeën</span>
+            <span className="truncate">Resources</span>
           </Button>
         </Link>
         <Link href={`/projects/${project}/codes`}>

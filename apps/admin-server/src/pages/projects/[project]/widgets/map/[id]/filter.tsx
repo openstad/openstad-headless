@@ -78,14 +78,14 @@ export default function WidgetMapFilter() {
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Zoek in ideeën en adressen" />
+                      <SelectValue placeholder="Zoek in resources en adressen" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="resourcesAndAddresses">
-                      Zoek in ideeën en adressen
+                      Zoek in resources en adressen
                     </SelectItem>
-                    <SelectItem value="resources">Zoek in ideeën</SelectItem>
+                    <SelectItem value="resources">Zoek in resources</SelectItem>
                     <SelectItem value="addresses">Zoek in adressen</SelectItem>
                     <SelectItem value="none">Geen zoekveld</SelectItem>
                   </SelectContent>

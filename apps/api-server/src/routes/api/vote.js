@@ -234,7 +234,7 @@ router.route('/*')
 		return next();
 	})
 
-  // validaties: bestaan de ideeen waar je op wilt stemmen
+  // validaties: bestaan de resources waar je op wilt stemmen
 	.post(function(req, res, next) {
 		let ids = req.votes.map( entry => entry.resourceId );
 		let transaction = res.locals.transaction
@@ -247,7 +247,7 @@ router.route('/*')
 					console.log('found', found);
 					console.log('req.body',req.body);
 
-					return next(createError(400, 'Idee niet gevonden'));
+					return next(createError(400, 'Resource niet gevonden'));
 				}
 				req.resources = found;
 				return next();
@@ -317,7 +317,7 @@ router.route('/*')
 		if (req.votes.length >= req.project.config.votes.minResources && req.votes.length <= req.project.config.votes.maxResources) {
 			return next();
 		}
-		let err = createError(400, 'Aantal ideeen klopt niet');
+		let err = createError(400, 'Aantal resources klopt niet');
 		if (transaction) {
 			return transaction.rollback()
 				.then(() => next(err))
@@ -341,7 +341,7 @@ router.route('/*')
 		  err = createError(400, 'Budget klopt niet');
 		}
 		if (!( req.votes.length >= req.project.config.votes.minResources && req.votes.length <= req.project.config.votes.maxResources )) {
-		  err = createError(400, 'Aantal ideeen klopt niet');
+		  err = createError(400, 'Aantal resources klopt niet');
 		}
 		if (err) {
 			if (transaction) {

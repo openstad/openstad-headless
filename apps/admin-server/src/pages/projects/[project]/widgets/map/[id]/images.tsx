@@ -66,7 +66,7 @@ export default function WidgetMapImage() {
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Idee afbeeldingen</Heading>
+        <Heading size="xl">Resource afbeeldingen</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -76,7 +76,7 @@ export default function WidgetMapImage() {
             name="multipleImages"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Meerdere afbeeldingen bij één idee?</FormLabel>
+                <FormLabel>Meerdere afbeeldingen bij één resource?</FormLabel>
                 <Select
                   onValueChange={(e: string) => field.onChange(e === 'true')}
                   value={field.value ? 'true' : 'false'}>

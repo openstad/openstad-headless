@@ -12,18 +12,18 @@ export default function ProjectResourceCreate() {
   return (
     <div>
       <PageLayout
-        pageHeader="Ideeën"
+        pageHeader="Resources"
         breadcrumbs={[
           {
             name: 'Projecten',
             url: '/projects',
           },
           {
-            name: 'Ideeën',
+            name: 'Resources',
             url: `/projects/${project}/resources`,
           },
           {
-            name: 'Idee toevoegen',
+            name: 'Resource toevoegen',
             url: `/projects/${project}/resources/create`,
           },
         ]}>

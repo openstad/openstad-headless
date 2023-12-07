@@ -33,7 +33,7 @@ export default function WidgetResourcesMap() {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Ideeën Map',
+            name: 'Resources Map',
             url: `/projects/${projectId}/widgets/resourcesmap/${id}`,
           },
         ]}>

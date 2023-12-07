@@ -252,7 +252,7 @@ export default function ProjectSettingsVoting() {
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>
-                      Wat is de minimum hoeveelheid ideeën waar iemand op kan
+                      Wat is de minimum hoeveelheid resources waar iemand op kan
                       stemmen?
                     </FormLabel>
                     <FormControl>
@@ -268,7 +268,7 @@ export default function ProjectSettingsVoting() {
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>
-                      Wat is de maximum hoeveelheid ideeën waar iemand op kan
+                      Wat is de maximum hoeveelheid resources waar iemand op kan
                       stemmen?
                     </FormLabel>
                     <FormControl>

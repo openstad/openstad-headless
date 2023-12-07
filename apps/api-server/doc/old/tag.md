@@ -12,13 +12,13 @@ Tags zijn objecten om ideas (en straks articles) te kunnen voorzien van een labe
 
 Voor het beheren van tags zijn er standaard CRUD endpoints.
 
-In ideas zijn tags terug gebracht tot alleen de name, zowel in de resultaten als in de create/update van het idee.
+In ideas zijn tags terug gebracht tot alleen de name, zowel in de resultaten als in de create/update van het resource.
 
 ```
 { "tags": ["Rode fietsen", "Gele auto's"] }
 ```
 
-Beheren van tags kan alleen admin. Toevoegen aan ideeen kan iedereen die een idee kan bewerken.
+Beheren van tags kan alleen admin. Toevoegen aan resources kan iedereen die een resource kan bewerken.
 
 ## Endpoints
 
@@ -59,7 +59,7 @@ DELETE :HOSTNAME/api/site/:SITE_ID/tag/:TAG_ID
 
 ## Ideas
 
-Op idee niveau worden tags alleen op name gebruikt.
+Op resource niveau worden tags alleen op name gebruikt.
 
 Gebruik includeTags om tags in het resultaat mee te nemen:
 ```

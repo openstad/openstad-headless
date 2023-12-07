@@ -101,13 +101,13 @@ export default function ProjectSettingsResources() {
             url: `/projects/${project}/settings`,
           },
           {
-            name: 'Ideeën',
+            name: 'Resources',
             url: `/projects/${project}/settings/resources`,
           },
         ]}>
         <div className="container py-6">
           <Form {...form} className="p-6 bg-white rounded-md">
-            <Heading size="xl">Ideeën</Heading>
+            <Heading size="xl">Resources</Heading>
             <Separator className="my-4" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -118,7 +118,7 @@ export default function ProjectSettingsResources() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Is het mogelijk om een idee in te sturen?
+                      Is het mogelijk om een resource in te sturen?
                     </FormLabel>
                     <Select
                       onValueChange={(e: string) =>
@@ -145,7 +145,7 @@ export default function ProjectSettingsResources() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Minimum benodigde stemmen voor een idee?
+                      Minimum benodigde stemmen voor een resource?
                     </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="100" {...field} />

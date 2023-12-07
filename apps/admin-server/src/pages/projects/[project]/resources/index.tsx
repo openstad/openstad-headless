@@ -19,14 +19,14 @@ export default function ProjectResources() {
   return (
     <div>
       <PageLayout
-        pageHeader="Ideeën"
+        pageHeader="Resources"
         breadcrumbs={[
           {
             name: 'Projecten',
             url: '/projects',
           },
           {
-            name: 'Ideeën',
+            name: 'Resources',
             url: `/projects/${project}/resources`,
           },
         ]}
@@ -36,14 +36,14 @@ export default function ProjectResources() {
             className="flex w-fit">
             <Button variant="default">
               <Plus size="20" className="hidden lg:flex" />
-              Idee toevoegen
+              Resource toevoegen
             </Button>
           </Link>
         }>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
             <div className="grid grid-cols-2 lg:grid-cols-6 items-center py-2 px-2 border-b border-border">
-              <ListHeading className="hidden lg:flex">Ideeën</ListHeading>
+              <ListHeading className="hidden lg:flex">Resources</ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
                 Gestemd op ja
               </ListHeading>
@@ -78,15 +78,15 @@ export default function ProjectResources() {
                       className="hidden lg:flex ml-auto"
                       onClick={(e) => e.preventDefault()}>
                       <RemoveResourceDialog
-                        header="Idee verwijderen"
-                        message="Weet je zeker dat je dit idee wilt verwijderen?"
+                        header="Resource verwijderen"
+                        message="Weet je zeker dat je deze resource wilt verwijderen?"
                         onDeleteAccepted={() =>
                           remove(resource.id)
                             .then(() =>
-                              toast.success('Idee successvol verwijderd')
+                              toast.success('Resource successvol verwijderd')
                             )
                             .catch((e) =>
-                              toast.error('Idee kon niet worden verwijderd')
+                              toast.error('Resource kon niet worden verwijderd')
                             )
                         }
                       />

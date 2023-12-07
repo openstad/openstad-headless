@@ -138,7 +138,7 @@ export default function BegrootmoduleVoting() {
           name="minimumSelectableResources"
           render={({ field }) => (
             <FormItem className="col-span-1">
-              <FormLabel>Minimum hoeveelheid selecteerbare ideeën</FormLabel>
+              <FormLabel>Minimum hoeveelheid selecteerbare resources</FormLabel>
               <FormControl>
                 <Input type="number" {...field} />
               </FormControl>
@@ -151,7 +151,7 @@ export default function BegrootmoduleVoting() {
           name="maximumSelectableResources"
           render={({ field }) => (
             <FormItem className="col-span-1">
-              <FormLabel>Maximum hoeveelheid selecteerbare ideeën</FormLabel>
+              <FormLabel>Maximum hoeveelheid selecteerbare resources</FormLabel>
               <FormControl>
                 <Input type="number" {...field} />
               </FormControl>

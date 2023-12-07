@@ -158,7 +158,7 @@ export default function BegrootmoduleDisplay() {
             name="originalResource"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Display de URL van het originele idee</FormLabel>
+                <FormLabel>Display de URL van het originele resource</FormLabel>
                 <Select
                   onValueChange={(e: string) => field.onChange(e === 'true')}
                   value={field.value ? 'true' : 'false'}>
@@ -182,7 +182,7 @@ export default function BegrootmoduleDisplay() {
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>
-                  URL waar het idee oorspronkelijk vandaan is gehaald
+                  URL waar het resource oorspronkelijk vandaan is gehaald
                 </FormLabel>
                 <FormControl>
                   <Input {...field} />

@@ -84,11 +84,11 @@ export default function WidgetResourceOverviewGeneral() {
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Idee" />
+                      <SelectValue placeholder="Resource" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="resource">Idee</SelectItem>
+                    <SelectItem value="resource">Resource</SelectItem>
                     <SelectItem value="article">Artikel</SelectItem>
                     <SelectItem value="activeUser">
                       Actieve gebruiker

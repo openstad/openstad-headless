@@ -30,7 +30,7 @@ router
 
   })
   .all('*', function(req, res, next) {
-    // zoek het idee
+    // zoek het resource
     // todo: ik denk momenteel alleen nog gebruikt door create; dus zet hem daar neer
     let resourceId = parseInt(req.params.resourceId) || 0;
     if (!resourceId) return next();

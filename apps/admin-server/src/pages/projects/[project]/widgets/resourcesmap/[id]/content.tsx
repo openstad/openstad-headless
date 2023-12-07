@@ -65,8 +65,8 @@ export default function WidgetResourcesMapContent() {
               <FormItem>
                 <FormLabel>
                   {`
-                   Laat alleen de volgende ideeën zien (Vul hier de IDs van
-                  ideeën in, gescheiden met komma's):
+                   Laat alleen de volgende resources zien (Vul hier de IDs van
+                  resources in, gescheiden met komma's):
                   `}
                 </FormLabel>
                 <FormControl>
@@ -83,7 +83,7 @@ export default function WidgetResourcesMapContent() {
               <FormItem>
                 <FormLabel>
                   {`
-                   Laat geen ideeën zien van de volgende themas (Vul hier de
+                   Laat geen resources zien van de volgende themas (Vul hier de
                    namen van themas in, gescheiden met komma's):
                   `}
                 </FormLabel>
@@ -101,7 +101,7 @@ export default function WidgetResourcesMapContent() {
               <FormItem>
                 <FormLabel>
                   {`
-                   Laat alleen ideeën zien van de volgende themas (Vul hier de
+                   Laat alleen resources zien van de volgende themas (Vul hier de
                     namen van themas in, gescheiden met komma's):
                   `}
                 </FormLabel>
