@@ -1,4 +1,4 @@
-import { createHash, randomInt } from "crypto";
+import * as crypto from "crypto";
 import * as querystring from "querystring";
 
 export interface SignatureOptions {
@@ -23,12 +23,12 @@ export class Signature {
     this.secret = secret;
     this.ttl = ttl;
     this.hash = (input: string, secret: string) =>
-      createHash(hash).update(input).update(secret).digest("hex");
+      crypto.createHash(hash).update(input).update(secret).digest("hex");
   }
 
   public sign(url: string, signTTL?: number): string {
     const data: SignatureData = {
-      rndNumber: randomInt(10000000000).toString(),
+      rndNumber: crypto.randomInt(10000000000).toString()
     };
 
     const ttl = signTTL ?? this.ttl;
@@ -91,6 +91,6 @@ export class Signature {
   }
 }
 
-export default function signed(options: SignatureOptions) {
+export function signed(options: SignatureOptions) {
   return new Signature(options);
 }

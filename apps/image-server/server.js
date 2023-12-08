@@ -9,7 +9,9 @@ const passport = require('passport');
 const Strategy = require('passport-http-bearer').Strategy;
 const db = require('./db');
 const cors = require('cors');
+const crypto = require('crypto')
 
+const secret = "7a3bde0d196d439926e515fc167ffb8a"
 
 const multerConfig = {
   onError: function (err, next) {
@@ -157,16 +159,17 @@ app.get('/image/*',
  *  The url for creating one Image
  */
 app.post('/image',
-  passport.authenticate('bearer', {session: false}),
   upload.single('image'), (req, res, next) => {
     // req.file is the `image` file
     // req.body will hold the text fields, if there were any
     //
-    if (!res.headerSent) {
-      res.setHeader('Content-Type', 'application/json');
+    const verification = crypto.createHmac("sha256", secret).digest("hex")
+    if(Date.now() < req.query.exp_date && verification === req.query.signature) {
+      console.log("This post has been successfully verified!")
     }
+    console.log(req.file)
 
-    const fileName = req.file.filename || req.file.key;
+    const fileName = "TestForConnection"
     res.send(JSON.stringify({
       url: process.env.APP_URL + '/image/' + fileName
     }));
@@ -177,8 +180,9 @@ app.post('/images',
   upload.array('images', 30), (req, res, next) => {
     // req.files is array of `photos` files
     // req.body will contain the text fields, if there were any
-    if (!res.headerSent) {
-      res.setHeader('Content-Type', 'application/json');
+    const verification = crypto.createHmac("sha256", secret).digest("hex")
+    if(Date.now() < req.query.exp_date && verification === req.query.signature) {
+      console.log("This post has been successfully verified!")
     }
 
     const fileName = req.file.filename || req.file.key;

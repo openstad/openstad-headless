@@ -5,20 +5,24 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Button } from './ui/button';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createHash, randomInt } from "crypto";
-import * as querystring from "querystring";
-import { Signature } from '@/pages/projects/[project]/crypto';
+import * as crypto from 'crypto'
 
 const formSchema = z.object({
-  projectName: z.any(),
+  image: z.any(),
   });
 
-type SignatureData = {
-  exp?: number; // exp timestamp
-  rndNumber: string; // random number
-};
-
 export default function ImageUploader() {  
+  const secret = "7a3bde0d196d439926e515fc167ffb8a"
+
+  const [file, setFile] = React.useState<File>()
+
+  function prepareFile(image: any) {
+    const formData = new FormData();
+    formData.append('file', image);
+    formData.append('filename', 'testName');
+    formData.append('description', 'testDescription');
+    return(formData)
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -26,18 +30,22 @@ export default function ImageUploader() {
   });
 
   function uploadImage(image: any){
-    new Signature({secret: 'Secret', ttl: 20, hash: "sha1"}).sign("localhost:31450", 20)
-    // return fetch('http://localhost:31450/image?access_token=7a3bde0d196d439926e515fc167ffb8a', {
-    //     method: 'POST',
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: image
-    // })
+    const hash = crypto.createHmac("sha256", secret).digest("hex")
+    const ttl = Date.now() + 60 * 1000;
+    const url = `http://localhost:31450/image?exp_date=${ttl}&signature=${hash}`;
+    const data = prepareFile(image)
+
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: data
+    })
   }
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    uploadImage(values.projectName)
+    uploadImage(file)
   }
 
   return(
@@ -45,12 +53,12 @@ export default function ImageUploader() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <FormField
           control={form.control}
-          name="projectName"
+          name="image"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Afbeelding</FormLabel>
               <FormControl>
-                <Input type='file' {...field} />
+                <Input type='file' {...field} onChange={(e) => setFile(e.target.files?.[0])} />
               </FormControl>
               <FormMessage />
             </FormItem>
