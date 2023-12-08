@@ -197,6 +197,7 @@ function getWidgetJavascriptOutput(
           }
           
           ${reactCheck}
+          console.log("Geplaatst")
           currentScript.remove();
       } catch(e) {
         console.error("Could not place widget", e);

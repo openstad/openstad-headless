@@ -41,7 +41,6 @@ function Likes({
 }: LikeWidgetProps) {
   const necessaryVotes = props?.votesNeeded || 50;
 
-  console.log(yesLabel, noLabel);
   // Pass explicitely because datastore is not ts, we will not get a hint if the props have changed
   const datastore = new DataStore({
     projectId: props.projectId,

@@ -36,7 +36,7 @@ type Props = {
 };
 
 type LikeDisplayProps = Props & {
-  updateConfig: (likes: LikeProps) => void;
+  updateConfig: (changedValues: LikeProps) => void;
   onFieldChanged: (key: string, value: string) => void;
 };
 
@@ -55,10 +55,6 @@ export default function LikesDisplay(props: LikeDisplayProps) {
     resolver: zodResolver<any>(formSchema),
     defaultValues: defaults(),
   });
-
-  useEffect(() => {
-    form.reset(defaults());
-  }, [props]);
 
   return (
     <Form {...form} className="p-6 bg-white rounded-md">
@@ -100,7 +96,7 @@ export default function LikesDisplay(props: LikeDisplayProps) {
               <FormLabel>Label voor "Ja"</FormLabel>
               <FormControl>
                 <Input
-                  {...field}
+                  defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
                     props.onFieldChanged('yesLabel', e.target.value);
@@ -118,7 +114,7 @@ export default function LikesDisplay(props: LikeDisplayProps) {
               <FormLabel>Label voor "Nee"</FormLabel>
               <FormControl>
                 <Input
-                  {...field}
+                  defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
                     props.onFieldChanged('noLabel', e.target.value);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import LikesDisplay from './weergave';
@@ -7,13 +7,13 @@ import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import toast from 'react-hot-toast';
-import { LikeProps, LikeWidgetProps } from '@openstad/likes/src/likes';
+import { LikeWidgetProps } from '@openstad/likes/src/likes';
 
 export default function WidgetLikes() {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
-  const [previewConfig, setPreviewConfig] = useState<LikeProps>();
+  const [previewConfig, setPreviewConfig] = useState<LikeWidgetProps>();
 
   const {
     data: widget,
@@ -23,6 +23,7 @@ export default function WidgetLikes() {
 
   async function update(values: any) {
     try {
+      console.log({ values });
       await updateConfig(values);
       toast.success('Configuratie aangepast');
     } catch (error) {
@@ -34,7 +35,26 @@ export default function WidgetLikes() {
   useEffect(() => {
     const config = widget?.config;
     if (config) {
-      setPreviewConfig({ ...config.likes });
+      setPreviewConfig({
+        projectId,
+        ideaId: '2',
+        api: {
+          url: '/api/openstad',
+        },
+        title: 'Vind je dit een goed idee?',
+        hideCounters: true,
+        variant: 'medium',
+        yesLabel: previewConfig?.yesLabel,
+        noLabel: previewConfig?.noLabel,
+        votesNeeded: 30,
+        votes: {
+          isActive: false,
+          requiredUserRole: 'admin',
+          voteType: 'test',
+          voteValues: [{ label: 'ja', value: 'yes' }],
+        },
+        ...config,
+      });
     }
   }, [widget]);
 
@@ -63,21 +83,22 @@ export default function WidgetLikes() {
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="display" className="p-0">
-              <LikesDisplay
-                {...previewConfig}
-                display="claps"
-                yesLabel={previewConfig?.yesLabel || 'yes'}
-                noLabel={previewConfig?.noLabel || 'no'}
-                updateConfig={(config) => update(config)}
-                onFieldChanged={(key, value) => {
-                  if (previewConfig) {
-                    setPreviewConfig({
-                      ...previewConfig,
-                      [key]: value,
-                    });
-                  }
-                }}
-              />
+              {widget?.config ? (
+                <LikesDisplay
+                  {...widget?.config}
+                  updateConfig={(config) => {
+                    update(config);
+                  }}
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      setPreviewConfig({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                />
+              ) : null}
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish />
@@ -88,29 +109,8 @@ export default function WidgetLikes() {
             {previewConfig ? (
               <WidgetPreview
                 type="likes"
-                config={
-                  {
-                    projectId,
-                    ideaId: '2',
-                    api: {
-                      url: '/api/openstad',
-                    },
-                    title: 'Vind je dit een goed idee?',
-                    hideCounters: true,
-                    variant: 'medium',
-                    yesLabel: previewConfig?.yesLabel,
-                    noLabel: previewConfig?.noLabel,
-                    votesNeeded: 30,
-                    votes: {
-                      isActive: false,
-                      requiredUserRole: 'admin',
-                      voteType: 'test',
-                      voteValues: [{ label: 'ja', value: 'yes' }],
-                    },
-                  } as LikeWidgetProps
-                }
+                config={previewConfig}
                 projectId={projectId as string}
-                widgetId={id as string}
               />
             ) : null}
           </div>

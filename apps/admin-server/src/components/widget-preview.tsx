@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
@@ -16,30 +16,24 @@ type Props = {
     | 'keuzewijzer';
   config?: any;
   projectId: string;
-  widgetId: string;
 };
 
-export default function WidgetPreview({
-  type,
-  config,
-  projectId,
-  widgetId,
-}: Props) {
+export default function WidgetPreview({ type, config, projectId }: Props) {
   // @todo: get the correct defaults
   // Dit moet alleen doorgegeven worden in config prop
-  const finalConfig = config;
-  finalConfig['login'] = {
+  config['login'] = {
     url: `/api/auth/project/${projectId}/login?useAuth=default&redirectUri=[[REDIRECT_URI]]`,
   };
 
-  finalConfig['logout'] = {
+  config['logout'] = {
     url: `/api/auth/project/${projectId}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`,
   };
 
-  console.log({ finalConfig });
-
   useEffect(() => {
-    const sc = document.createElement('script');
+    fetchWidget();
+  }, [config]);
+
+  function fetchWidget() {
     const previewContainer = document.querySelector(
       '#widget-preview-script-holder'
     );
@@ -47,34 +41,38 @@ export default function WidgetPreview({
     if (previewContainer && projectId && config) {
       fetch(`/api/openstad/widget/preview`, {
         headers: {
+          'cache-control': 'no-cache',
           'Content-Type': 'application/json',
           'Widget-Config': JSON.stringify({
             widgetType: type,
-            ...finalConfig,
-            widgetId,
+            ...config,
           }),
         },
       })
         .then((v) => {
           if (v.ok) {
             v.text().then((script) => {
-              sc.text = script;
+              while (previewContainer.firstChild) {
+                previewContainer.removeChild(previewContainer.lastChild);
+              }
+
+              const randomId = Math.floor(Math.random() * 1000000);
+
+              const sc = document.createElement('script');
               sc.setAttribute('type', 'text/javascript');
+              sc.setAttribute('id', `openstad-widget-script-${randomId}`);
+              sc.text = script;
               previewContainer?.appendChild(sc);
+
+              const testnode = document.createElement('p');
+              testnode.innerText = `${JSON.stringify(config)}`;
+              previewContainer?.appendChild(testnode);
             });
           }
         })
         .catch((e) => console.error(e));
     }
-
-    return () => {
-      if (previewContainer) {
-        previewContainer.childNodes.forEach((node) => {
-          previewContainer.removeChild(node);
-        });
-      }
-    };
-  }, [projectId, config]);
+  }
 
   return (
     <div id="widget-preview-container" className="p-6 bg-white rounded-md">
