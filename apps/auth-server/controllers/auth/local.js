@@ -135,7 +135,7 @@ exports.logout = async (req, res) => {
   redirectURL = redirectUrlHost && allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1 ? redirectURL : false;
 
   if (!redirectURL) {
-    redirectURL =  config && config.logoutUrl ? config.logoutUrl : req.client.siteUrl
+    redirectURL =  config && config.logoutUrl ? config.logoutUrl : req.client.redirectUrl
   }
 
   res.redirect(redirectURL);
