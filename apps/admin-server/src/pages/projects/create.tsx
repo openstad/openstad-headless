@@ -17,6 +17,7 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useProject } from '@/hooks/use-project';
+import router from 'next/router';
 
 const formSchema = z.object({
   projectName: z.string().min(6, {
@@ -34,6 +35,7 @@ export default function CreateProject() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     createProject(values.projectName)
+    router.push(`/projects`);
   }
 
   return (
