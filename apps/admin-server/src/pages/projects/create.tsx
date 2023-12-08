@@ -33,9 +33,11 @@ export default function CreateProject() {
     defaultValues: {},
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    createProject(values.projectName)
-    router.push(`/projects`);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const project = await createProject(values.projectName);
+    if (project) {
+      router.push(`/projects/${project.id}/widgets`);
+    }
   }
 
   return (
