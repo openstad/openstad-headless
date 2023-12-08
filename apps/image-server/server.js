@@ -5,8 +5,6 @@ const imgSteam = require('image-steam');
 const multer = require('multer');
 const AWS = require('aws-sdk')
 const multerS3 = require('multer-s3')
-const passport = require('passport');
-const Strategy = require('passport-http-bearer').Strategy;
 const db = require('./db');
 const cors = require('cors');
 const crypto = require('crypto')
@@ -115,22 +113,6 @@ const argv = require('yargs')
   .help()
   .argv;
 
-passport.use(new Strategy(
-  function (token, done) {
-    db.Client
-      .findOne({ where: { token } })
-      .then(client => {
-        if (!client) {
-          return done(null, false);
-        }
-        return done(null, client, {scope: 'all'});
-      })
-      .catch(err => {
-        return done(err);
-      })
-  }
-));
-
 /**
  * Instantiate the Image steam server, and proxy it with
  */
@@ -167,22 +149,28 @@ app.post('/image',
     if(Date.now() < req.query.exp_date && verification === req.query.signature) {
       console.log("This post has been successfully verified!")
     }
-    console.log(req.file)
 
-    const fileName = "TestForConnection"
+    if (!res.headerSent) {
+      res.setHeader('Content-Type', 'application/json');
+    }
+
+    const fileName = req.file.filename || req.file.key;
     res.send(JSON.stringify({
       url: process.env.APP_URL + '/image/' + fileName
     }));
   });
 
 app.post('/images',
-  passport.authenticate('bearer', {session: false}),
   upload.array('images', 30), (req, res, next) => {
     // req.files is array of `photos` files
     // req.body will contain the text fields, if there were any
     const verification = crypto.createHmac("sha256", secret).digest("hex")
     if(Date.now() < req.query.exp_date && verification === req.query.signature) {
       console.log("This post has been successfully verified!")
+    }
+
+    if (!res.headerSent) {
+      res.setHeader('Content-Type', 'application/json');
     }
 
     const fileName = req.file.filename || req.file.key;
@@ -199,6 +187,7 @@ app.use(function (err, req, res, next) {
   if (!res.headerSent) {
     res.setHeader('Content-Type', 'application/json');
   }
+
   res.status(status).send(JSON.stringify({
     error: err.message
   }));

@@ -29,18 +29,15 @@ export default function ImageUploader() {
     defaultValues: {},
   });
 
-  function uploadImage(image: any){
+  function uploadImage(data: any){
     const hash = crypto.createHmac("sha256", secret).digest("hex")
     const ttl = Date.now() + 60 * 1000;
     const url = `http://localhost:31450/image?exp_date=${ttl}&signature=${hash}`;
-    const data = prepareFile(image)
+    const image = prepareFile(data)
 
     return fetch(url, {
       method: 'POST',
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: data
+      body: image
     })
   }
 
