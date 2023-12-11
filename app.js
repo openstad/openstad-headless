@@ -49,7 +49,7 @@ function cleanUpSites() {
 }
 
 async function run(id, siteData, options, callback) {
-  const site = {
+  const siteConfig = {
     ...aposConfig,
     baseUrl: process.env.OVERWRITE_DOMAIN ? 'http://localhost:3000' : siteData.config.cms.url,
     options: siteData,
@@ -57,19 +57,6 @@ async function run(id, siteData, options, callback) {
     _id: id,
     shortName: siteData.config.cms.dbName,
   };
-
-  const config = site;
-
-  let assetsIdentifier;
-
-  // for dev sites grab the assetsIdentifier from the first site in order to share assets
-
-  if (Object.keys(apostropheServer).length > 0) {
-    const firstSite = apostropheServer[Object.keys(apostropheServer)[0]];
-    // assetsIdentifier = firstSite.assets.generation;
-  }
-
-  const siteConfig = config;
 
   siteConfig.afterListen = function () {
     apos._id = site._id;
