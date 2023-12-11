@@ -192,18 +192,18 @@ function getWidgetJavascriptOutput(
           
           function renderWidget () {
             ${widgetOutput}
-            
             ${widgetSettings.functionName}.${widgetSettings.componentName}.loadWidget('${componentId}', config);
           }
           
           ${reactCheck}
-          console.log("Geplaatst")
           currentScript.remove();
       } catch(e) {
         console.error("Could not place widget", e);
       }
     })();
     `;
+
+  console.log({ name: widgetSettings.functionName });
   return output;
 }
 

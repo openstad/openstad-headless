@@ -56,17 +56,15 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
                 previewContainer.removeChild(previewContainer.lastChild);
               }
 
-              const randomId = Math.floor(Math.random() * 1000000);
+              if (React) {
+                const randomId = Math.floor(Math.random() * 1000000);
+                const sc = document.createElement('script');
+                sc.setAttribute('type', 'text/javascript');
+                sc.setAttribute('id', `openstad-widget-script-${randomId}`);
+                sc.text = script;
 
-              const sc = document.createElement('script');
-              sc.setAttribute('type', 'text/javascript');
-              sc.setAttribute('id', `openstad-widget-script-${randomId}`);
-              sc.text = script;
-              previewContainer?.appendChild(sc);
-
-              const testnode = document.createElement('p');
-              testnode.innerText = `${JSON.stringify(config)}`;
-              previewContainer?.appendChild(testnode);
+                previewContainer?.appendChild(sc);
+              }
             });
           }
         })
