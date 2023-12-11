@@ -87,6 +87,7 @@ if (process.env.S3_ENDPOINT) {
   };
 } else {
   multerConfig.dest = process.env.IMAGES_DIR || 'images/';
+  console.log(process.env.IMAGES_DIR)
 }
 
 const upload = multer(multerConfig);
@@ -150,11 +151,13 @@ app.post('/image',
       console.log("This post has been successfully verified!")
     }
 
-    if (!res.headerSent) {
-      res.setHeader('Content-Type', 'application/json');
-    }
+    // if (!res.headerSent) {
+    //   res.setHeader('Content-Type', 'application/json');
+    //   res.setHeader('')
+    // }
 
     const fileName = req.file.filename || req.file.key;
+    console.log(req.file)
     res.send(JSON.stringify({
       url: process.env.APP_URL + '/image/' + fileName
     }));
@@ -184,18 +187,22 @@ app.post('/images',
 app.use(function (err, req, res, next) {
   const status = err.status ? err.status : 500;
   console.error(err);
-  if (!res.headerSent) {
-    res.setHeader('Content-Type', 'application/json');
-  }
+  // if (!res.headerSent) {
+  //   res.setHeader('Content-Type', 'application/json');
+  // }
 
   res.status(status).send(JSON.stringify({
     error: err.message
   }));
 })
 
-app.use(cors({
-  origin: '*'
-}));
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*' )
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, x-http-method-override');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next()
+})
 
 app.listen(argv.port, function () {
   console.log('Application listen on port %d...', argv.port);

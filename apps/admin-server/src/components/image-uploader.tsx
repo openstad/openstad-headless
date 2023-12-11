@@ -18,7 +18,7 @@ export default function ImageUploader() {
 
   function prepareFile(image: any) {
     const formData = new FormData();
-    formData.append('file', image);
+    formData.append('image', image);
     formData.append('filename', 'testName');
     formData.append('description', 'testDescription');
     return(formData)
@@ -37,7 +37,11 @@ export default function ImageUploader() {
 
     return fetch(url, {
       method: 'POST',
-      body: image
+      body: image,
+      mode: 'no-cors',
+      headers: {
+        origin: 'http://localhost:31450'
+      }
     })
   }
 
@@ -47,7 +51,7 @@ export default function ImageUploader() {
 
   return(
     <Form>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} encType='multipart/form-data' className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <FormField
           control={form.control}
           name="image"
