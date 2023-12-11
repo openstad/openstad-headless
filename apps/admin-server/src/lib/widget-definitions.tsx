@@ -3,7 +3,7 @@ export const WidgetDefinitions = {
   begrootmodule: 'Begrootmodule',
   ideasmap: 'Ideeën map',
   keuzewijzer: 'Keuzewijzer',
-  like: 'Like',
+  likes: 'Like',
   map: 'Map',
   resourceform: 'Resource form',
   resourceoverview: 'Resource overview',
