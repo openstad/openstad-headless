@@ -53,7 +53,7 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
           if (v.ok) {
             v.text().then((script) => {
               while (previewContainer.firstChild) {
-                previewContainer.removeChild(previewContainer.lastChild);
+                previewContainer.removeChild(previewContainer.firstChild);
               }
 
               if (React) {

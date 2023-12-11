@@ -10,7 +10,7 @@ import { BaseProps } from '../../types/base-props';
 
 export type LikeWidgetProps = BaseProps &
   LikeProps & {
-    ideaId: string;
+    resourceId?: string;
     votesNeeded?: number;
     votes: {
       isActive: boolean;
@@ -39,6 +39,8 @@ function Likes({
   noLabel = 'Tegen',
   ...props
 }: LikeWidgetProps) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const resourceId = urlParams.get('openstadResourceId') || props.resourceId;
   const necessaryVotes = props?.votesNeeded || 50;
 
   // Pass explicitely because datastore is not ts, we will not get a hint if the props have changed
@@ -48,9 +50,9 @@ function Likes({
   });
   const session = new SessionStorage(props);
   const [currentUser] = datastore.useCurrentUser(props);
-  const [idea] = datastore.useIdea({
+  const [resource] = datastore.useIdea({
     projectId: props.projectId,
-    ideaId: props.ideaId,
+    ideaId: resourceId,
   });
   const [isBusy, setIsBusy] = useState(false);
   const supportedLikeTypes: Array<{
@@ -78,14 +80,14 @@ function Likes({
       props.login
     ) {
       // login
-      session.set('osc-idea-vote-pending', { [idea.id]: value });
+      session.set('osc-idea-vote-pending', { [resource.id]: value });
       return (document.location.href = props?.login.url);
     }
 
     let change = {};
-    if (idea.userVote) change[idea.userVote.opinion] = -1;
+    if (resource.userVote) change[resource.userVote.opinion] = -1;
 
-    await idea.submitLike({
+    await resource.submitLike({
       opinion: value,
     });
 
@@ -118,9 +120,10 @@ function Likes({
               {!hideCounters ? (
                 <section className="like-counter">
                   <p>
-                    {idea[likeVariant.type] && idea[likeVariant.type] < 10
-                      ? idea[likeVariant.type].toString().padStart(2, '0')
-                      : idea[likeVariant.type] ||
+                    {resource[likeVariant.type] &&
+                    resource[likeVariant.type] < 10
+                      ? resource[likeVariant.type].toString().padStart(2, '0')
+                      : resource[likeVariant.type] ||
                         (0).toString().padStart(2, '0')}
                   </p>
                 </section>
@@ -131,9 +134,9 @@ function Likes({
 
         {!props?.votesNeeded ? null : (
           <div className="progressbar-container">
-            <ProgressBar progress={(idea.yes / necessaryVotes) * 100} />
+            <ProgressBar progress={(resource.yes / necessaryVotes) * 100} />
             <p className="progressbar-counter">
-              {idea.yes || 0} /{necessaryVotes}
+              {resource.yes || 0} /{necessaryVotes}
             </p>
           </div>
         )}

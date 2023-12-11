@@ -23,7 +23,6 @@ export default function WidgetLikes() {
 
   async function update(values: any) {
     try {
-      console.log({ values });
       await updateConfig(values);
       toast.success('Configuratie aangepast');
     } catch (error) {
@@ -41,17 +40,19 @@ export default function WidgetLikes() {
         api: {
           url: '/api/openstad',
         },
-        title: 'Vind je dit een goed idee?',
-        hideCounters: true,
-        variant: 'medium',
+        title: previewConfig?.title || 'Vind je dit een goed idee?',
+        hideCounters: previewConfig?.hideCounters,
+        variant: previewConfig?.variant || 'medium',
         yesLabel: previewConfig?.yesLabel,
         noLabel: previewConfig?.noLabel,
-        votesNeeded: 30,
+        votesNeeded: previewConfig?.votesNeeded || 30,
         votes: {
-          isActive: false,
-          requiredUserRole: 'admin',
-          voteType: 'test',
-          voteValues: [{ label: 'ja', value: 'yes' }],
+          isActive: previewConfig?.votes.isActive || false,
+          requiredUserRole: previewConfig?.votes.requiredUserRole || 'member',
+          voteType: previewConfig?.votes.voteType || 'vote',
+          voteValues: previewConfig?.votes.voteValues || [
+            { label: 'ja', value: 'yes' },
+          ],
         },
         ...config,
       });
