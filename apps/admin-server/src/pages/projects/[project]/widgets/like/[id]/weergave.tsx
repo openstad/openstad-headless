@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
@@ -21,6 +21,7 @@ import * as z from 'zod';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { LikeProps } from '@openstad/likes/src/likes';
+import { useDebounce } from 'rooks';
 
 const formSchema = z.object({
   display: z.string(),
@@ -55,6 +56,18 @@ export default function LikesDisplay(props: LikeDisplayProps) {
     resolver: zodResolver<any>(formSchema),
     defaultValues: defaults(),
   });
+
+  const debounceValue = 300;
+
+  const setNoLabelDebounced = useDebounce(
+    (val) => props.onFieldChanged('noLabel', val),
+    debounceValue
+  );
+
+  const setYesLabelDebounced = useDebounce(
+    (val) => props.onFieldChanged('yesLabel', val),
+    debounceValue
+  );
 
   return (
     <Form {...form} className="p-6 bg-white rounded-md">
@@ -99,7 +112,7 @@ export default function LikesDisplay(props: LikeDisplayProps) {
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
-                    props.onFieldChanged('yesLabel', e.target.value);
+                    setYesLabelDebounced(e.target.value);
                   }}
                 />
               </FormControl>
@@ -117,7 +130,7 @@ export default function LikesDisplay(props: LikeDisplayProps) {
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
-                    props.onFieldChanged('noLabel', e.target.value);
+                    setNoLabelDebounced(e.target.value);
                   }}
                 />
               </FormControl>
