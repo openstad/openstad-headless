@@ -3,7 +3,7 @@ const util = require('util');
 const imgDb = require('promise-mysql');
 const execute = require('./execute');
 
-module.exports = async function setupAdminServer() {
+module.exports = async function setupAdminServer(actions) {
 
   console.log('==============================');
   console.log('Setup admin server');
@@ -20,14 +20,18 @@ OAUTH_URL=${process.env.AUTH_APP_URL}
 API_URL=${process.env.API_URL}
 PORT=${process.env.ADMIN_PORT}
 `
-    console.log('------------------------------');
-    console.log('Create config file');
-    await fs.writeFileSync('./apps/admin-server/.env', imgConfig);
-
+    if (actions['create config']) {
+      console.log('------------------------------');
+      console.log('Create config file');
+      await fs.writeFileSync('./apps/admin-server/.env', imgConfig);
+    }
+    
     // npm i
-    console.log('------------------------------');
-    console.log('Execute `npm i`');
-    await execute('npm', ['i'], { cwd: './apps/admin-server' });
+    if (actions['npm install']) {
+      console.log('------------------------------');
+      console.log('Execute `npm i`');
+      await execute('npm', ['i'], { cwd: './apps/admin-server' });
+    }
     
   } catch(err) {
     console.log('------------------------------');
