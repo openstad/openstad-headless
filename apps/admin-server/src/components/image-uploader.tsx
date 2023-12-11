@@ -38,7 +38,7 @@ export default function ImageUploader() {
     return fetch(url, {
       method: 'POST',
       body: image,
-      mode: 'no-cors',
+      //mode: 'no-cors',
       headers: {
         origin: 'http://localhost:31450'
       }

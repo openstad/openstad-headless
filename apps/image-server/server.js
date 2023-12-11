@@ -128,6 +128,14 @@ ImageServer.on('error', (err) => {
   // Don't log 404 errors, so we do nothing here.
 });
 
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*' )
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, x-http-method-override');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next()
+})
+
 app.get('/image/*',
   function (req, res, next) {
     req.url = req.url.replace('/image', '');
@@ -194,14 +202,6 @@ app.use(function (err, req, res, next) {
   res.status(status).send(JSON.stringify({
     error: err.message
   }));
-})
-
-app.use(function(req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*' )
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, x-http-method-override');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  next()
 })
 
 app.listen(argv.port, function () {
