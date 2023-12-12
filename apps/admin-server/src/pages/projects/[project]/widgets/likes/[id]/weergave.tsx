@@ -27,7 +27,6 @@ import { useDebounce } from 'rooks';
 const formSchema = z.object({
   title: z.string(),
   variant: z.enum(['small', 'medium', 'large']),
-  display: z.string(),
   yesLabel: z.string(),
   noLabel: z.string(),
   hideCounters: z.boolean(),
@@ -36,7 +35,6 @@ type FormData = z.infer<typeof formSchema>;
 
 type Props = {
   title: string;
-  display: string;
   variant: 'small' | 'medium' | 'large';
   yesLabel: string;
   noLabel: string;
@@ -50,12 +48,11 @@ type LikeDisplayProps = Props & {
 
 export default function LikesDisplay(props: LikeDisplayProps) {
   const defaults = () => ({
-    title: props?.title,
-    variant: props?.variant,
-    display: props?.display,
-    yesLabel: props?.yesLabel,
-    noLabel: props?.noLabel,
-    hideCounters: props?.hideCounters,
+    title: props?.title || 'Wat vindt u van dit plan',
+    variant: props?.variant || 'medium',
+    yesLabel: props?.yesLabel || 'Ja',
+    noLabel: props?.noLabel || 'Nee',
+    hideCounters: props?.hideCounters || false,
   });
 
   function onSubmit(values: FormData) {
@@ -176,30 +173,6 @@ export default function LikesDisplay(props: LikeDisplayProps) {
             </FormItem>
           )}
         />
-
-        {/* <FormField
-          control={form.control}
-          name="display"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Weergave type</FormLabel>
-              <Select
-                onValueChange={(value) => {
-                  field.onChange(value);
-                }}
-                value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Claps" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="claps">Claps</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        /> */}
 
         <FormField
           control={form.control}

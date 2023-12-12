@@ -36,7 +36,7 @@ export default function WidgetLikes() {
     if (config) {
       setPreviewConfig({
         projectId,
-        ideaId: '2',
+        resourceId: '2',
         api: {
           url: '/api/openstad',
         },
@@ -65,7 +65,7 @@ export default function WidgetLikes() {
           },
           {
             name: 'Likes',
-            url: `/projects/${projectId}/widgets/like/${id}`,
+            url: `/projects/${projectId}/widgets/likes/${id}`,
           },
         ]}>
         <div className="container py-6">
