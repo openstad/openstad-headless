@@ -45,15 +45,6 @@ export default function WidgetLikes() {
         variant: previewConfig?.variant || 'medium',
         yesLabel: previewConfig?.yesLabel,
         noLabel: previewConfig?.noLabel,
-        votesNeeded: previewConfig?.votesNeeded || 30,
-        votes: {
-          isActive: previewConfig?.votes.isActive || false,
-          requiredUserRole: previewConfig?.votes.requiredUserRole || 'member',
-          voteType: previewConfig?.votes.voteType || 'vote',
-          voteValues: previewConfig?.votes.voteValues || [
-            { label: 'ja', value: 'yes' },
-          ],
-        },
         ...config,
       });
     }

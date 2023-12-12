@@ -38,7 +38,8 @@ router
 
     return next();
   })
-  .get((req, res, next) => {
+  .get(async (req, res, next) => {
+    const projectId = req.query.projectId;
     const widgetId = Math.floor(Math.random() * 1000000);
     const randomId = Math.floor(Math.random() * 1000000);
     const componentId = `osc-component-${widgetId}-${randomId}`;
@@ -47,13 +48,29 @@ router
 
     // Remove widgetType from config, but pass all other keys to the widget
     delete req.widgetConfig.widgetType;
-    const widgetConfig = JSON.stringify(req.widgetConfig);
+    let projectConfig = {};
+    let defaultConfig = {};
 
-    let output = getWidgetJavascriptOutput(
-      widgetSettings,
+    if (projectId) {
+      const project = await db.Project.findOne({
+        where: {
+          id: projectId,
+        },
+      });
+
+      if (project) {
+        projectConfig = project.config;
+      }
+      defaultConfig = getDefaultConfig(projectId);
+    }
+
+    const output = setConfigsToOutput(
       widgetType,
       componentId,
-      widgetConfig
+      widgetSettings,
+      defaultConfig,
+      projectConfig,
+      flattenObject(req.widgetConfig)
     );
 
     res.header('Content-Type', 'application/javascript');
@@ -84,36 +101,15 @@ router
     const componentId = `osc-component-${widgetId}-${randomId}`;
     const widget = req.widget;
     const widgetSettings = widgetSettingsMapping[widget.type];
+    const defaultConfig = getDefaultConfig(widget.project.id);
 
-    const loginUrl = `${config.url}/auth/project/${widget.project.id}/login?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
-    const logoutUrl = `${config.url}/auth/project/${widget.project.id}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
-
-    const defaultConfig = {
-      // @todo: filter out sensitive data from `widget.project.config`
-      ...widget.project.config,
-      api: {
-        url: config.url,
-      },
-      login: {
-        url: loginUrl,
-      },
-      logout: {
-        url: logoutUrl,
-      },
-      projectId: widget.project.id,
-      ...widgetSettings.defaultConfig,
-    };
-
-    const widgetConfig = JSON.stringify({
-      ...defaultConfig,
-      ...flattenObject(widget.config),
-    });
-
-    let output = getWidgetJavascriptOutput(
-      widgetSettings,
+    const output = setConfigsToOutput(
       widget.type,
       componentId,
-      widgetConfig
+      widgetSettings,
+      defaultConfig,
+      widget.project.config,
+      flattenObject(widget.config)
     );
 
     res.header('Content-Type', 'application/javascript');
@@ -140,6 +136,47 @@ Object.keys(widgetSettingsMapping).forEach((widget) => {
     );
   }
 });
+
+function getDefaultConfig(projectId) {
+  const loginUrl = `${config.url}/auth/project/${projectId}/login?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
+  const logoutUrl = `${config.url}/auth/project/${projectId}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
+
+  return {
+    api: {
+      url: config.url,
+    },
+    login: {
+      url: loginUrl,
+    },
+    logout: {
+      url: logoutUrl,
+    },
+    projectId: projectId,
+  };
+}
+
+function setConfigsToOutput(
+  widgetType,
+  componentId,
+  widgetSettings,
+  defaultConfig,
+  projectConfig,
+  widgetConfig
+) {
+  const config = JSON.stringify({
+    ...widgetSettings.Config,
+    ...defaultConfig,
+    ...projectConfig,
+    ...widgetConfig,
+  });
+
+  return getWidgetJavascriptOutput(
+    widgetSettings,
+    widgetType,
+    componentId,
+    config
+  );
+}
 
 function getWidgetJavascriptOutput(
   widgetSettings,
@@ -202,8 +239,6 @@ function getWidgetJavascriptOutput(
       }
     })();
     `;
-
-  console.log({ name: widgetSettings.functionName });
   return output;
 }
 

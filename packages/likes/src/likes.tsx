@@ -7,20 +7,12 @@ import DataStore from '@openstad-headless/data-store/src';
 import React, { useState } from 'react';
 import './likes.css';
 import { BaseProps } from '../../types/base-props';
+import { ProjectSettingProps } from '../../types/project-setting-props';
 
 export type LikeWidgetProps = BaseProps &
-  LikeProps & {
+  LikeProps &
+  ProjectSettingProps & {
     resourceId?: string;
-    votesNeeded?: number;
-    votes: {
-      isActive: boolean;
-      requiredUserRole: string;
-      voteType: string;
-      voteValues: Array<{
-        label: string;
-        value: string;
-      }>;
-    };
   };
 
 export type LikeProps = {
@@ -41,14 +33,16 @@ function Likes({
 }: LikeWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);
   const resourceId = urlParams.get('openstadResourceId') || props.resourceId;
-  const necessaryVotes = props?.votesNeeded || 50;
+  const necessaryVotes = props?.ideas?.minimumYesVotes || 50;
 
   // Pass explicitely because datastore is not ts, we will not get a hint if the props have changed
   const datastore = new DataStore({
     projectId: props.projectId,
     config: { api: props.api },
   });
+
   const session = new SessionStorage(props);
+
   const [currentUser] = datastore.useCurrentUser(props);
   const [resource] = datastore.useIdea({
     projectId: props.projectId,
@@ -132,7 +126,7 @@ function Likes({
           ))}
         </div>
 
-        {!props?.votesNeeded ? null : (
+        {!props?.ideas?.minimumYesVotes ? null : (
           <div className="progressbar-container">
             <ProgressBar progress={(resource.yes / necessaryVotes) * 100} />
             <p className="progressbar-counter">

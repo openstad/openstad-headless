@@ -39,7 +39,7 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
     );
 
     if (previewContainer && projectId && config) {
-      fetch(`/api/openstad/widget/preview`, {
+      fetch(`/api/openstad/widget/preview?projectId=${projectId}`, {
         headers: {
           'cache-control': 'no-cache',
           'Content-Type': 'application/json',
