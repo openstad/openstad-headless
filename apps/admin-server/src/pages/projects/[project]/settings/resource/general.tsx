@@ -96,8 +96,19 @@ export default function ProjectSettingsResourceGeneral() {
   const { project } = router.query;
   const { data, isLoading, updateProject } = useProject();
   const defaults = () => ({
-    label: [],
-    reactionSettings: []
+    title: data?.config?.[category]?.title || null,
+    summary: data?.config?.[category]?.summary || null,
+    description: data?.config?.[category]?.description || null,
+    image: data?.config?.[category]?.image || null,
+    location: data?.config?.[category]?.location || null,
+    theme: data?.config?.[category]?.theme || null,
+    neighbourhood: data?.config?.[category]?.neighbourhood || null,
+    label: data?.config?.[category]?.title || [],
+    modBreakAuthor: data?.config?.[category]?.modBreakAuthor || null,
+    likeTitle: data?.config?.[category]?.likeTitle || null,
+    displayLikes: data?.config?.[category]?.displayLikes || null,
+    displayDislikes: data?.config?.[category]?.displayDislikes || null,
+    reactionSettings: data?.config?.[category]?.reactionSettings || [],
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
