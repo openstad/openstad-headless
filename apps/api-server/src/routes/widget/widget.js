@@ -44,7 +44,13 @@ router
     const randomId = Math.floor(Math.random() * 1000000);
     const componentId = `osc-component-${widgetId}-${randomId}`;
     const widgetType = req.widgetConfig.widgetType;
-    const widgetSettings = widgetSettingsMapping[widgetType];
+    let widgetSettings = widgetSettingsMapping[widgetType];
+
+    if (!widgetSettings) {
+      return next(
+        createError(400, 'Invalid widget type given for fetching settings')
+      );
+    }
 
     // Remove widgetType from config, but pass all other keys to the widget
     delete req.widgetConfig.widgetType;
@@ -52,29 +58,44 @@ router
     let defaultConfig = {};
 
     if (projectId) {
-      const project = await db.Project.findOne({
-        where: {
-          id: projectId,
-        },
-      });
+      try {
+        const project = await db.Project.findOne({
+          where: {
+            id: projectId,
+          },
+        });
 
-      if (project) {
-        projectConfig = project.config;
+        if (project) {
+          projectConfig = project.config;
+        } else {
+          createError(404, 'Could not find the project belonging to given id');
+        }
+        defaultConfig = getDefaultConfig(projectId);
+      } catch (e) {
+        return next(createError(500, 'Could not fetch the project'));
       }
-      defaultConfig = getDefaultConfig(projectId);
     }
 
-    const output = setConfigsToOutput(
-      widgetType,
-      componentId,
-      widgetSettings,
-      defaultConfig,
-      projectConfig,
-      flattenObject(req.widgetConfig)
-    );
+    try {
+      const output = setConfigsToOutput(
+        widgetType,
+        componentId,
+        widgetSettings,
+        defaultConfig,
+        projectConfig,
+        flattenObject(req.widgetConfig)
+      );
 
-    res.header('Content-Type', 'application/javascript');
-    res.send(output);
+      res.header('Content-Type', 'application/javascript');
+      res.send(output);
+    } catch (e) {
+      return next(
+        createError(
+          500,
+          'Something went wrong when trying to create the widget script '
+        )
+      );
+    }
   });
 
 router
