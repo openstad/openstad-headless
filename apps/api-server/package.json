@@ -26,6 +26,7 @@
     "co": "^4.6.0",
     "compression": "^1.7.4",
     "config": "^3.3.7",
+    "cors": "^2.8.5",
     "cron": "^1.8.2",
     "dotenv": "^8.6.0",
     "express": "^4.17.3",
@@ -50,7 +51,9 @@
     "sanitize-html": "^2.7.0",
     "sequelize": "^6.28.0",
     "umzug": "^3.2.1",
-    "ws": "^7.5.7"
+    "ws": "^7.5.7",
+    "@openstad-headless/comments": "file:../../packages/comments",
+    "@openstad-headless/likes": "file:../../packages/likes"
   },
   "devDependencies": {
     "@types/cron": "^2.4.0",

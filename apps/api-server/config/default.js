@@ -55,6 +55,7 @@ let defaultConfig = {
 			{ "route": "/api", "router": "./routes/api" },
 			{ "route": "/auth", "router": "./routes/auth" },
       { "route": "/stats", "router": "./routes/stats" },
+      { "route": "/widget", "router": "./routes/widget" },
 		]
 	},
 
@@ -150,6 +151,10 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
       isMandatory: process.env.IDEAS_LOCATION_IS_MANDATORY || false,
     },
 	},
+
+  admin: {
+    projectId: process.env.ADMIN_PROJECTID || 1,
+  },
 
   dev: {
     'Header-Access-Control-Allow-Origin': '*'

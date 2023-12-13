@@ -14,6 +14,21 @@ const authSettings = require('../../util/auth-settings');
 
 let router = express.Router({mergeParams: true});
 
+function getProject(req, res, next, include = []) {
+	const projectId = req.params.projectId;
+	let query = { where: { id: parseInt(projectId) }, include: include };
+	db.Project
+		.scope(req.scope)
+		.findOne(query)
+		.then(found => {
+			if ( !found ) throw new Error('Project not found');
+			req.results = found;
+			req.project = req.results; // middleware expects this to exist
+			next();
+		})
+		.catch(next);
+}
+
 // scopes
 // ------
 router
@@ -74,13 +89,43 @@ router.route('/')
 // create project
 // -----------
 	.post(auth.can('Project', 'create'))
+	.post(async function (req, res, next) {
+    // create an oauth client if nessecary
+    let project = {
+      config: req.body.config || {}
+    };
+    try {
+      let providers = await authSettings.providers({ project, useOnlyDefinedOnProject: true });
+      let providersDone = [];
+      for (let provider of providers) {
+        let authConfig = await authSettings.config({ project, useAuth: provider });
+        if ( !providersDone[authConfig.provider] ) { // filter for duplicates like 'default'
+          let adapter = await authSettings.adapter({ authConfig });
+          if (adapter.service.createClient) {
+            let client = await adapter.service.createClient({ authConfig, project });
+            project.config.auth.provider[authConfig.provider] = project.config.auth.provider[authConfig.provider] || {};
+            project.config.auth.provider[authConfig.provider].clientId = client.clientId;
+            project.config.auth.provider[authConfig.provider].clientSecret = client.clientSecret;
+            delete project.config.auth.provider[authConfig.provider].authTypes;
+            delete project.config.auth.provider[authConfig.provider].requiredUserFields;
+          }
+          providersDone[authConfig.provider] = true;
+        }
+      }
+      if (Object.keys(providersDone).length) {
+        req.body.config.auth = project.config.auth;
+      }
+      return next();
+    } catch(err) {
+      return next(err);
+    }
+	})
 	.post(function(req, res, next) {
 		db.Project
 			.create(req.body)
 			.then((result) => {
 				req.results = result;
-				next();
-				//return checkHostStatus({id: result.id});
+				return next();
 			})
 			.catch(next)
 	})
@@ -143,18 +188,7 @@ router.route('/issues')
 router.route('/:projectId') //(\\d+)
 	.all(auth.can('Project', 'view'))
 	.all(function(req, res, next) {
-		const projectId = req.params.projectId;
-		let query = { where: { id: parseInt(projectId) } }
-		db.Project
-			.scope(req.scope)
-			.findOne(query)
-			.then(found => {
-				if ( !found ) throw new Error('Project not found');
-				req.results = found;
-				req.project = req.results; // middleware expects this to exist
-				next();
-			})
-			.catch(next);
+		getProject(req, res, next)
 	})
 
 // view project
@@ -201,7 +235,7 @@ router.route('/:projectId') //(\\d+)
         let authConfig = await authSettings.config({ project: req.results, useAuth: provider });
         let adapter = await authSettings.adapter({ authConfig });
         if (adapter.service.updateClient) {
-          await adapter.service.updateClient({ authConfig, config: req.results.config });
+          await adapter.service.updateClient({ authConfig, project: req.results });
         }
       }
       return next();
@@ -224,6 +258,20 @@ router.route('/:projectId') //(\\d+)
 				res.json({ "project": "deleted" });
 			})
 			.catch(next);
+	})
+
+// export a project
+// -------------------
+router.route('/:projectId(\\d+)/export')
+	.all(auth.can('Project', 'view'))
+	.all(function(req, res, next) {
+		getProject(req, res, next, [{model: db.Idea, include: [{model: db.Tag}, {model: db.Vote}, {model: db.Comment, as: 'commentsFor'}, {model: db.Comment, as: 'commentsAgainst'}, {model: db.Poll, as: 'poll'}]}, {model: db.Tag}])
+	})
+
+	.get(auth.can('Project', 'view'))
+	.get(auth.useReqUser)
+	.get(function(req, res, next) {
+		res.json(req.results);
 	})
 
 // anonymize all users

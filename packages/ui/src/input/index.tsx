@@ -16,7 +16,7 @@ const Input = forwardRef<HTMLInputElement, Props>((props, ref) => {
         ref={ref}
         type="text"
         {...props}
-        className={`input ${props.errors ? 'alert' : null} ${props.className}`}
+        className={`${props.errors ? 'alert' : null} ${props.className}`}
       />
 
       {props.errors ? (

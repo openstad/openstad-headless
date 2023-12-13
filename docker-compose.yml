@@ -74,6 +74,7 @@ services:
       - ./apps/api-server:/opt/openstad-headless/apps/api-server
       - openstad-api-server-node_modules:/opt/openstad-headless/apps/api-server/node_modules
       - openstad-api-server-init:/opt/openstad-headless/apps/api-server/init
+      - ./packages:/opt/openstad-headless/packages
 
   openstad-auth-server:
     build:

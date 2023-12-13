@@ -23,6 +23,7 @@ import WidgetResourceFormBudget from './budget';
 import WidgetResourceFormInfo from './info';
 import WidgetResourceFormConfirmation from './confirmation';
 import { useRouter } from 'next/router';
+import Preview from '@/components/widget-preview';
 
 export default function WidgetResourceForm() {
   const router = useRouter();
@@ -48,8 +49,9 @@ export default function WidgetResourceForm() {
           },
         ]}>
         <div className="container py-6 overflow-hidden">
-          <Tabs defaultValue="general">
+          <Tabs defaultValue="preview">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
+              <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="title">Titel</TabsTrigger>
               <TabsTrigger value="summary">Samenvatting</TabsTrigger>
@@ -67,6 +69,9 @@ export default function WidgetResourceForm() {
               <TabsTrigger value="confirmation">Bevestiging</TabsTrigger>
               <TabsTrigger value="info">Info</TabsTrigger>
             </TabsList>
+            <TabsContent value="preview" className="p-0">
+              <Preview type="resourceform" />
+            </TabsContent>
             <TabsContent value="general" className="p-0">
               <WidgetResourceFormGeneral />
             </TabsContent>

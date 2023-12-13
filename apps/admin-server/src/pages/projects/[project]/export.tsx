@@ -5,13 +5,7 @@ import { Button } from '../../../components/ui/button';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
-import { useProject } from '@/hooks/use-project';
-import useVotes from '@/hooks/use-votes';
-import useIdeas from '@/hooks/use-ideas';
-import useTags from '@/hooks/use-tags';
-import useComments from '@/hooks/use-comments';
-import usePolls from '@/hooks/use-poll';
-import useActions from '@/hooks/use-actions';
+import useExport from '@/hooks/use-export';
 
 export default function ProjectExport() {
   const router = useRouter();
@@ -28,20 +22,12 @@ export default function ProjectExport() {
     a.click();
     window.URL.revokeObjectURL(url);
   };
-
-  const { data: projectData, isLoading } = useProject();
-  const { data: projectVotes, isLoading: isLoadingVotes } = useVotes(project as string);
-  const { data: projectIdeas, isLoading: isLoadingIdeas } = useIdeas(project as string);
-  const { data: projectTags, isLoading: isLoadingTags } = useTags(project as string);
-  const { data: projectComments, isLoading: isLoadingComments } = useComments(project as string);
-  const { data: projectPolls, isLoading: isLoadingPolls } = usePolls(project as string);
-  const { data: projectActions, isLoading: isLoadingActions } = useActions(project as string);
+  const { data, isLoading } = useExport(project as string);
 
 
   function transform() {
-    const totalData = {projectData, projectVotes, projectIdeas, projectTags, projectComments, projectPolls, projectActions};
-    const jsonData = JSON.stringify(totalData);
-    exportData(jsonData, `${projectData.name}.json`, "application/json");
+    const jsonData = JSON.stringify(data);
+    exportData(jsonData, `${data.name}.json`, "application/json");
   }
 
   return (

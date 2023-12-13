@@ -1,38 +1,38 @@
-.osc-2-multi-select {
-    background-color: var(--background);
-    border: 1px solid var(--border);
+.osc .multi-select {
+    background-color: var(--osc-background);
+    border: 1px solid var(--osc-border);
     border-radius: 6px;
 }
 
-.osc-2-multi-select-header {
+.osc .multi-select-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: .25rem 0rem;
 }
 
-.osc-2-multi-select-header > p{
+.osc .multi-select-header > p{
    margin: 0 1rem;
-   color: var(--foreground);
+   color: var(--osc-foreground);
 }
 
-.osc-2-multi-select-header > .osc-2-icon {
-    color: var(--foreground);
+.osc .multi-select-header > .osc-icon {
+    color: var(--osc-foreground);
     font-weight: lighter;
     gap: 0; 
 }
 
-.ocs-2-multi-select-item {
+.osc .multi-select-item {
     display: flex;
     align-items: center;
     padding: 0rem 1rem;
     gap: 1rem;
 }
 
-.ocs-2-multi-select-item p {
-    color: var(--foreground);
+.osc .multi-select-item p {
+    color: var(--osc-foreground);
 }
 
-.ocs-2-multi-select-item:hover {
-    background-color: var(--border);
+.osc .multi-select-item:hover {
+    background-color: var(--osc-border);
 }

@@ -8,8 +8,17 @@ export default function mergeData(currentData, newData, action) {
 
     case 'create':
       if (Array.isArray(currentData)) {
-        result = [ ...currentData ];
-        result.push(newData);
+        if (newData.parentId) { // currently for comments
+          let parentIndex = currentData.findIndex(elem => elem.id == newData.parentId);
+          if (parentIndex != -1) {
+            result = [ ...currentData ];
+            result[parentIndex].replies = result[parentIndex].replies || [];
+            result[parentIndex].replies.push(newData);
+          }
+        } else {
+          result = [ ...currentData ];
+          result.push(newData);
+        }
       } else {
         result = merge.recursive({}, currentData, newData)
       }
@@ -17,10 +26,21 @@ export default function mergeData(currentData, newData, action) {
 
     case 'update':
       if (Array.isArray(currentData)) {
-        let index = currentData.findIndex(elem => elem.id == newData.id);
-        if (index != -1) {
-          result = [ ...currentData ];
-          result[index] = merge.recursive({}, result[index], newData);
+        if (newData.parentId) { // currently for comments
+          let parentIndex = currentData.findIndex(elem => elem.id == newData.parentId);
+          if (parentIndex != -1) {
+            let index = currentData[parentIndex].replies.findIndex(elem => elem.id == newData.id);
+            if (index != -1) {
+              result = [ ...currentData ];
+              result[parentIndex].replies[index] = merge.recursive({}, result[parentIndex].replies[index], newData);
+            }
+          }
+        } else {
+          let index = currentData.findIndex(elem => elem.id == newData.id);
+          if (index != -1) {
+            result = [ ...currentData ];
+            result[index] = merge.recursive({}, result[index], newData);
+          }
         }
       } else {
         result = merge.recursive({}, currentData, newData)
@@ -29,10 +49,21 @@ export default function mergeData(currentData, newData, action) {
 
     case 'delete':
       if (Array.isArray(currentData)) {
-        let index = currentData.findIndex(elem => elem.id == newData.id);
-        if (index != -1) {
-          result = [ ...currentData ];
-          result.splice(index, 1);
+        if (newData.parentId) { // currently for comments
+          let parentIndex = currentData.findIndex(elem => elem.id == newData.parentId);
+          if (parentIndex != -1) {
+            let index = currentData[parentIndex].replies.findIndex(elem => elem.id == newData.id);
+            if (index != -1) {
+              result = [ ...currentData ];
+              result[parentIndex].replies.splice(index, 1);
+            }
+          }
+        } else {
+          let index = currentData.findIndex(elem => elem.id == newData.id);
+          if (index != -1) {
+            result = [ ...currentData ];
+            result.splice(index, 1);
+          }
         }
       } else {
         result = undefined;
@@ -40,7 +71,6 @@ export default function mergeData(currentData, newData, action) {
     break;
 
     case 'submitLike':
-    console.log('MERGEDATA', 'submitLike');
       if (Array.isArray(currentData)) {
         let index = currentData.findIndex(elem => elem.id == newData.id);
         if (index != -1) {

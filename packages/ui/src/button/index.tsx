@@ -11,7 +11,7 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (props, ref) => {
     return (
-      <button ref={ref} className={`${props.className}`} {...props}>
+      <button ref={ref} {...props} className={`${props.className}`}>
         {props.icon && !props.iconBack ? <i className={props.icon}></i> : null}
         {props.children}
         {props.icon && props.iconBack ? <i className={props.icon}></i> : null}
@@ -23,7 +23,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 export const SecondaryButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (props, ref) => {
     return (
-      <Button ref={ref} className={`secondary ${props.className}`} {...props} />
+      <Button ref={ref} {...props} className={`secondary ${props.className}`} />
     );
   }
 );
@@ -31,7 +31,7 @@ export const SecondaryButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 export const GhostButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (props, ref) => {
     return (
-      <Button ref={ref} className={`ghost ${props.className}`} {...props} />
+      <Button ref={ref} {...props} className={`ghost ${props.className}`} />
     );
   }
 );

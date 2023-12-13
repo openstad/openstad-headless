@@ -8,11 +8,11 @@ export function Image({
   ...props
 }: React.ImgHTMLAttributes<HTMLImageElement> & { imageFooter?: ReactNode }) {
   return (
-    <div
+    <figure
       onClick={props.onClick}
-      className={`openstad-image-container ${props.className}`}>
+      className={`image-container ${props.className}`}>
       <img alt={props.alt} {...props} />
-      <div className="openstad-image-footer">{imageFooter}</div>
-    </div>
+      <figcaption className="image-footer">{imageFooter}</figcaption>
+    </figure>
   );
 }

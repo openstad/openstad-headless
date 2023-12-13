@@ -1,26 +1,26 @@
-.osc-2-select {
+.osc .select {
     padding: .5rem;
-    background-color: var(--background);
-    border: 1px solid var(--border);
+    background-color: var(--osc-background);
+    border: 1px solid var(--osc-border);
     border-radius: 6px;
 }
 
-.osc-2-select-header {
+.osc .select-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0rem 1rem;
 }
 
-.ocs-2-select-item {
+.osc .select-item {
     padding: 0rem 1rem;
 }
 
-.ocs-2-select-item.selected {
+.osc .select-item.selected {
     background-color: red;
 }
 
 
-.ocs-2-select-item:hover {
-    background-color: var(--border);
+.osc .select-item:hover {
+    background-color: var(--osc-border);
 }

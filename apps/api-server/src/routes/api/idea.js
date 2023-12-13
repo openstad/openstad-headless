@@ -8,7 +8,6 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const mail = require('../../lib/mail');
 const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
-const isJson = require('../../util/isJson');
 const c = require('config');
 
 const router = express.Router({ mergeParams: true });
@@ -62,17 +61,6 @@ router.all('*', function (req, res, next) {
     userhasModeratorRights(req.user)
   ) {
     req.canIncludeVoteCount = true; // scope.push(undefined) would be easier but creates an error
-  }
-
-  /**
-   * Old sort for backward compatibility
-   */
-  let sort = (req.query.sort || '').replace(/[^a-z_]+/i, '');
-  if (sort) {
-    if (sort == 'votes_desc' || sort == 'votes_asc') {
-      if (req.canIncludeVoteCount) req.scope.push({ method: ['includeVoteCount', req.project.config.votes] }); // het werkt niet als je dat in de sort scope functie doet...
-    }
-    req.scope.push({ method: ['sort', req.query.sort] });
   }
 
   if (req.query.mapMarkers) {

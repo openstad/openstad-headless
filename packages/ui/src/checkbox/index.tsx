@@ -11,8 +11,8 @@ type Props = {
 export function Checkbox({ checked, iconVariant, ...props }: Props) {
   return (
     <div
-      className={`${props.className} osc2-checkbox ${checked ? 'checked' : ''}`}
-      {...props}>
+      {...props}
+      className={`${props.className} checkbox ${checked ? 'checked' : ''}`}>
       {checked ? <Icon variant={iconVariant} icon="ri-check-line" /> : null}
     </div>
   );
