@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -10,12 +10,37 @@ import ArgumentsGeneral from './general';
 import ArgumentsList from './list';
 import ArgumentsForm from './form';
 import { useRouter } from 'next/router';
-import Preview from '@/components/widget-preview';
+import WidgetPreview from '@/components/widget-preview';
+import { CommentsWidgetProps } from '@openstad/comments/src/comments';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
 
 export default function WidgetArguments() {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
+  const [previewConfig, setPreviewConfig] = useState<CommentsWidgetProps>();
+
+  const {
+    data: widget,
+    isLoading: isLoadingWidget,
+    updateConfig,
+  } = useWidgetConfig();
+
+  // Set the preview the first time the widget config is loaded
+  useEffect(() => {
+    const config = widget?.config;
+    if (config) {
+      setPreviewConfig({
+        projectId,
+        resourceId: '2',
+        api: {
+          url: '/api/openstad',
+        },
+        title: previewConfig?.title || 'Vind je dit een goed idee?',
+        ...config,
+      });
+    }
+  }, [widget]);
 
   return (
     <div>
@@ -38,14 +63,10 @@ export default function WidgetArguments() {
         <div className="container py-6">
           <Tabs defaultValue="preview">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
-              <TabsTrigger value="preview">Algemeen</TabsTrigger>
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="list">Lijst</TabsTrigger>
               <TabsTrigger value="form">Formulier</TabsTrigger>
             </TabsList>
-            <TabsContent value="preview" className="p-0">
-              {/* <Preview type="arguments" /> */}
-            </TabsContent>
             <TabsContent value="general" className="p-0">
               <ArgumentsGeneral />
             </TabsContent>
@@ -56,6 +77,16 @@ export default function WidgetArguments() {
               <ArgumentsForm />
             </TabsContent>
           </Tabs>
+
+          <div className="py-6 mt-6 bg-white rounded-md">
+            {previewConfig ? (
+              <WidgetPreview
+                type="comments"
+                config={previewConfig}
+                projectId={projectId as string}
+              />
+            ) : null}
+          </div>
         </div>
       </PageLayout>
     </div>

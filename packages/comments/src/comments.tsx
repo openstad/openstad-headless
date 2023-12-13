@@ -7,6 +7,14 @@ import { Banner } from '@openstad-headless/ui/src';
 import Comment from './parts/comment.js';
 import CommentForm from './parts/comment-form.js';
 import CommentsPropsType from './types/index';
+import loadWidget from '@openstad-headless/lib/load-widget';
+
+import { BaseProps } from '../../types/base-props';
+import { ProjectSettingProps } from '../../types/project-setting-props';
+
+export type CommentsWidgetProps = BaseProps &
+  ProjectSettingProps &
+  CommentsPropsType;
 
 function Comments({
   requiredUserRole = 'member',
@@ -18,7 +26,6 @@ function Comments({
   isClosedText = 'Het inzenden van reacties is niet langer mogelijk',
   ...props
 }: CommentsPropsType) {
-
   const args = {
     requiredUserRole,
     title,
@@ -27,17 +34,19 @@ function Comments({
     isReplyingEnabled,
     isClosed,
     isClosedText,
-    ...props
+    ...props,
   } as CommentsPropsType;
 
   const datastore = new DataStore(args);
 
-  const [currentUser, currentUserError, currentUserIsLoading] = datastore.useCurrentUser({ ...args });
-  const [comments, commentsError, commentsIsLoading] = datastore.useComments({ ...args });
+  const [currentUser, currentUserError, currentUserIsLoading] =
+    datastore.useCurrentUser({ ...args });
+  const [comments, commentsError, commentsIsLoading] = datastore.useComments({
+    ...args,
+  });
 
   async function submitComment(e) {
-
-    setSubmitError(null)
+    setSubmitError(undefined);
     e.preventDefault();
 
     let formData = new FormData(e.target);
@@ -47,27 +56,28 @@ function Comments({
 
     try {
       if (formData.id) {
-        let comment = comments.find(c => c.id == formData.id);
+        let comment = comments.find((c) => c.id == formData.id);
         if (formData.parentId) {
-          let parent = comments.find(c => c.id == formData.parentId);
-          comment = parent.replies.find(c => c.id == formData.id);
+          let parent = comments.find((c) => c.id == formData.parentId);
+          comment = parent.replies.find((c) => c.id == formData.id);
         }
-        await comment.update(formData)
+        await comment.update(formData);
       } else {
-        await comments.create(formData)
+        await comments.create(formData);
       }
     } catch (err) {
       console.log(err);
-      setSubmitError(err)
+      setSubmitError(err);
     }
-
   }
 
   let [submitError, setSubmitError] = useState();
 
   return (
     <section className="osc">
-      <h4 className="comments-title">{title.replace(/\[\[nr\]\]/, comments.length)}</h4>
+      <h4 className="comments-title">
+        {title.replace(/\[\[nr\]\]/, comments.length)}
+      </h4>
 
       {args.isClosed ? (
         <Banner>
@@ -84,18 +94,12 @@ function Comments({
 
       {(comments || []).map((comment, index) => {
         let attributes = { ...args, comment, submitComment };
-        return (
-          <Comment
-            {...attributes}
-            key={index}
-          />
-        )
+        return <Comment {...attributes} key={index} />;
       })}
     </section>
   );
 }
 
-export {
-  Comments as default,
-  Comments,
-}
+Comments.loadWidget = loadWidget;
+
+export { Comments };

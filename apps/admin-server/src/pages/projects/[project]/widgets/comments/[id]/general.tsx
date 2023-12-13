@@ -36,13 +36,14 @@ export default function ArgumentsGeneral() {
   const {
     data: widget,
     isLoading: isLoadingWidget,
-    updateConfig, } = useWidgetConfig();
+    updateConfig,
+  } = useWidgetConfig();
 
-    const defaults = () =>({
-      ideaId: widget?.config?.[category]?.ideaId || null,
-      sentiment: widget?.config?.[category]?.sentiment || 'for',
-      isReplyingEnabled: widget?.config?.[category]?.isReplyingEnabled || false,
-      isVotingEnabled: widget?.config?.[category]?.isVotingEnabled || false,
+  const defaults = () => ({
+    ideaId: widget?.config?.[category]?.ideaId || null,
+    sentiment: widget?.config?.[category]?.sentiment || 'for',
+    isReplyingEnabled: widget?.config?.[category]?.isReplyingEnabled || false,
+    isVotingEnabled: widget?.config?.[category]?.isVotingEnabled || false,
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -72,16 +73,14 @@ export default function ArgumentsGeneral() {
             name="ideaId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Plan ID
-                </FormLabel>
+                <FormLabel>Plan ID</FormLabel>
                 <FormControl>
-                    <Input placeholder="1" {...field} />
+                  <Input placeholder="1" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
-            />
+          />
           <FormField
             control={form.control}
             name="sentiment"
