@@ -31,8 +31,6 @@ const formSchema = z.object({
 });
 
 export default function ArgumentsGeneral() {
-  const category = 'general';
-
   const {
     data: widget,
     isLoading: isLoadingWidget,
@@ -40,10 +38,9 @@ export default function ArgumentsGeneral() {
   } = useWidgetConfig();
 
   const defaults = () => ({
-    ideaId: widget?.config?.[category]?.ideaId || null,
-    sentiment: widget?.config?.[category]?.sentiment || 'for',
-    isReplyingEnabled: widget?.config?.[category]?.isReplyingEnabled || false,
-    isVotingEnabled: widget?.config?.[category]?.isVotingEnabled || false,
+    sentiment: widget?.config?.sentiment || 'for',
+    isReplyingEnabled: widget?.config?.isReplyingEnabled || false,
+    isVotingEnabled: widget?.config?.isVotingEnabled || false,
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -56,7 +53,7 @@ export default function ArgumentsGeneral() {
   }, [widget]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ [category]: values });
+    updateConfig({ values });
   }
 
   return (

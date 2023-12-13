@@ -43,10 +43,10 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
         headers: {
           'cache-control': 'no-cache',
           'Content-Type': 'application/json',
-          'Widget-Config': JSON.stringify({
+          'Widget-Config': {
             widgetType: type,
             ...config,
-          }),
+          },
         },
       })
         .then((v) => {

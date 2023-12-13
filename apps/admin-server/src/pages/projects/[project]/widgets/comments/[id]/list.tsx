@@ -22,16 +22,15 @@ const formSchema = z.object({
 });
 
 export default function ArgumentsList() {
-  const category = 'list';
-
   const {
     data: widget,
     isLoading: isLoadingWidget,
-    updateConfig, } = useWidgetConfig();
-    const defaults = () =>({
-      title: widget?.config?.[category]?.title || 'Argumenten',
-      emptyListText:
-        widget?.config?.[category]?.emptyListText || 'Nog geen reacties geplaatst.',
+    updateConfig,
+  } = useWidgetConfig();
+  const defaults = () => ({
+    title: widget?.config?.title || 'Argumenten',
+    emptyListText:
+      widget?.config?.emptyListText || 'Nog geen reacties geplaatst.',
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -44,7 +43,7 @@ export default function ArgumentsList() {
   }, [widget]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ [category]: values });
+    updateConfig({ values });
   }
 
   return (

@@ -33,6 +33,7 @@ export default function WidgetArguments() {
       setPreviewConfig({
         projectId,
         resourceId: '2',
+        sentiment: 'yes',
         api: {
           url: '/api/openstad',
         },
@@ -61,7 +62,7 @@ export default function WidgetArguments() {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="preview">
+          <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="list">Lijst</TabsTrigger>

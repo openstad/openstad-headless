@@ -3,6 +3,4 @@ import { CommentsProps } from './comments-props';
 import { CommentProps } from './comment-props';
 import { CommentFormProps } from './comment-form-props';
 
-type Props = CommentsProps & CommentProps & CommentFormProps;
-
-export { Props as default };
+export type CommentPropsType = CommentsProps & CommentProps & CommentFormProps;
