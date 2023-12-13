@@ -77,7 +77,7 @@ const formSchema = z.object({
   title: z.string(),
   summary: z.string(),
   description: z.string(),
-  image: z.string(),
+  image: z.string().optional(),
   location: z.string(),
   theme: z.string(),
   neighbourhood: z.string(),
@@ -90,10 +90,15 @@ const formSchema = z.object({
 });
 
 export default function ProjectSettingsResourceGeneral() {
+  const category = 'resource';
+
   const router = useRouter();
   const { project } = router.query;
-  const { data, isLoading } = useProject();
-  const defaults = () => ({});
+  const { data, isLoading, updateProject } = useProject();
+  const defaults = () => ({
+    label: [],
+    reactionSettings: []
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -105,7 +110,27 @@ export default function ProjectSettingsResourceGeneral() {
   }, [data]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+    try {
+      await updateProject({
+        [category]: {
+          title: values.title,
+          summary: values.summary,
+          description: values.description,
+          image: values.image,
+          location: values.location,
+          theme: values.theme,
+          neighbourhood: values.neighbourhood,
+          label: values.label,
+          modBreakAuthor: values.modBreakAuthor,
+          likeTitle: values.likeTitle,
+          displayLikes: values.displayLikes,
+          displayDislikes: values.displayDislikes,
+          reactionSettings: values.reactionSettings
+        },
+      });
+    } catch (error) {
+      console.error('could not update', error);
+    }
   }
 
   return (

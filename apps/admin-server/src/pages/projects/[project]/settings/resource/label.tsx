@@ -95,27 +95,15 @@ export default function ProjectSettingsResourceLabels() {
               />
               <FormField
                 control={form.control}
-                name="optionRejected"
+                name="textOpen"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-1">
                     <FormLabel>
-                      Wat gebeurt er als de 'Afgewezen' label van sprake is?
+                      Tekst voor de 'Afgewezen' label
                     </FormLabel>
-                    <Select
-                      onValueChange={(e: string) =>
-                        field.onChange(e === 'true')
-                      }
-                      value={field.value ? 'true' : 'false'}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Ja" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Ja</SelectItem>
-                        <SelectItem value="false">Nee</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -137,81 +125,30 @@ export default function ProjectSettingsResourceLabels() {
               />
               <FormField
                 control={form.control}
-                name="optionAccepted"
+                name="textOpen"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-1">
                     <FormLabel>
-                      Wat gebeurt er als de 'Geaccepteerd' label van sprake is?
+                      Tekst voor de 'Afgerond' label
                     </FormLabel>
-                    <Select
-                      onValueChange={(e: string) =>
-                        field.onChange(e === 'true')
-                      }
-                      value={field.value ? 'true' : 'false'}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Ja" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Ja</SelectItem>
-                        <SelectItem value="false">Nee</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
-                name="optionDone"
+                name="textOpen"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-1">
                     <FormLabel>
-                      Wat gebeurt er als de 'Afgerond' label van sprake is?
+                      Tekst voor de 'In overweging' label
                     </FormLabel>
-                    <Select
-                      onValueChange={(e: string) =>
-                        field.onChange(e === 'true')
-                      }
-                      value={field.value ? 'true' : 'false'}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Ja" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Ja</SelectItem>
-                        <SelectItem value="false">Nee</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="optionConsidered"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Wat gebeurt er als de 'In overweging' label van sprake is?
-                    </FormLabel>
-                    <Select
-                      onValueChange={(e: string) =>
-                        field.onChange(e === 'true')
-                      }
-                      value={field.value ? 'true' : 'false'}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Ja" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Ja</SelectItem>
-                        <SelectItem value="false">Nee</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
