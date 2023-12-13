@@ -62,11 +62,13 @@ router.use( '/lock', require('./lock') );
 // openstad-map
 router.use( '/project/:projectId(\\d+)/openstad-map', require('./openstad-map') );
 
+router.use( '/generatecode', require('./generatecode') );
+
 // area on project and no project route, system wide the same
 router.use( '/project/:projectId(\\d+)/area', require('./area') );
 router.use( '/area', require('./area') );
 
-router.use( '/repo', require('./template') ); // backwards conpatibility
+router.use( '/repo', require('./template') ); // backwards compatibility
 router.use( '/template', require('./template') );
 
 module.exports = router;

@@ -29,19 +29,18 @@ export default function ImageUploader() {
     defaultValues: {},
   });
 
-  function uploadImage(data: any){
-    const hash = crypto.createHmac("sha256", secret).digest("hex")
-    const ttl = Date.now() + 60 * 1000;
-    const url = `http://localhost:31450/image?exp_date=${ttl}&signature=${hash}`;
-    const image = prepareFile(data)
-
-    return fetch(url, {
-      method: 'POST',
-      body: image,
-      //mode: 'no-cors',
-      headers: {
-        origin: 'http://localhost:31450'
-      }
+  async function uploadImage(data: any){
+    let image = prepareFile(data)
+    await fetch('/api/openstad/api/generatecode', {
+      method: 'GET',
+      // mode: 'no-cors',
+    })
+    .then(response => response.json())
+    .then(data => {
+      fetch(data, {
+        method: 'POST',
+        body: image
+      })
     })
   }
 
