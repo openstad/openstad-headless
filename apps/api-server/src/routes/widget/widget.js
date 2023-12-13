@@ -122,19 +122,35 @@ router
     const componentId = `osc-component-${widgetId}-${randomId}`;
     const widget = req.widget;
     const widgetSettings = widgetSettingsMapping[widget.type];
+
+    if (!widgetSettings) {
+      return next(
+        createError(400, 'Invalid widget type given for fetching settings')
+      );
+    }
+
     const defaultConfig = getDefaultConfig(widget.project.id);
 
-    const output = setConfigsToOutput(
-      widget.type,
-      componentId,
-      widgetSettings,
-      defaultConfig,
-      widget.project.config,
-      flattenObject(widget.config)
-    );
+    try {
+      const output = setConfigsToOutput(
+        widget.type,
+        componentId,
+        widgetSettings,
+        defaultConfig,
+        widget.project.config,
+        flattenObject(widget.config)
+      );
 
-    res.header('Content-Type', 'application/javascript');
-    res.send(output);
+      res.header('Content-Type', 'application/javascript');
+      res.send(output);
+    } catch (e) {
+      return next(
+        createError(
+          500,
+          'Something went wrong when trying to create the widget script'
+        )
+      );
+    }
   });
 
 // Add a static route for the images used in the CSS in each of the widgets
