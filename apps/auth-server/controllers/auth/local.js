@@ -131,8 +131,13 @@ exports.logout = async (req, res) => {
   const config = req.client.config;
   const allowedDomains = req.client.allowedDomains ? req.client.allowedDomains : false;
   let redirectURL = req.query.redirectUrl;
-  const redirectUrlHost = redirectURL ? new URL(redirectURL).hostname : false;
-  redirectURL = redirectUrlHost && allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1 ? redirectURL : false;
+
+  try {
+    const redirectUrlHost = redirectURL ? new URL(redirectURL).hostname : false;
+    redirectURL = redirectUrlHost && allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1 ? redirectURL : false;
+  } catch (e) {
+    redirectURL = null;
+  }
 
   if (!redirectURL) {
     redirectURL =  config && config.logoutUrl ? config.logoutUrl : req.client.siteUrl
