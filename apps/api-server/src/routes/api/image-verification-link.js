@@ -11,9 +11,9 @@ const router = express.Router({ mergeParams: true });
 
 router.route('/')
   .get(function(req, res, next) {
-    const secret = process.env.IMAGE_VERIFICATION_TOKEN
-    const hash = crypto.createHmac("sha256", secret).digest("hex")
     const ttl = Date.now() + 60 * 1000;
+    const secret = process.env.IMAGE_VERIFICATION_TOKEN + ttl
+    const hash = crypto.createHmac("sha256", secret).digest("hex")
     const url = `${process.env.IMAGE_APP_URL}/image?exp_date=${ttl}&signature=${hash}`
 
     res.json(url)

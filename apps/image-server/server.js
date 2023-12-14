@@ -5,8 +5,6 @@ const imgSteam = require('image-steam');
 const multer = require('multer');
 const AWS = require('aws-sdk')
 const multerS3 = require('multer-s3')
-const db = require('./db');
-const cors = require('cors');
 const crypto = require('crypto')
 
 const secret = process.env.IMAGE_VERIFICATION_TOKEN
@@ -154,7 +152,8 @@ app.post('/image',
     // req.file is the `image` file
     // req.body will hold the text fields, if there were any
     //
-    const verification = crypto.createHmac("sha256", secret).digest("hex")
+    const createdCombination = secret + req.query.exp_date
+    const verification = crypto.createHmac("sha256", createdCombination).digest("hex")
     if(Date.now() < req.query.exp_date && verification === req.query.signature) {
       console.log("This post has been successfully verified!")
     }
