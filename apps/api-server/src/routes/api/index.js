@@ -62,7 +62,7 @@ router.use( '/lock', require('./lock') );
 // openstad-map
 router.use( '/project/:projectId(\\d+)/openstad-map', require('./openstad-map') );
 
-router.use( '/generatecode', require('./generatecode') );
+router.use( '/image', require('./image-verification-link') );
 
 // area on project and no project route, system wide the same
 router.use( '/project/:projectId(\\d+)/area', require('./area') );

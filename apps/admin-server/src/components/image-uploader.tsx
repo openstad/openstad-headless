@@ -29,7 +29,7 @@ export default function ImageUploader() {
 
   async function uploadImage(data: any){
     let image = prepareFile(data)
-    await fetch('/api/openstad/api/generatecode', {
+    await fetch('/api/openstad/api/image', {
       method: 'GET',
     })
     .then(response => response.json())

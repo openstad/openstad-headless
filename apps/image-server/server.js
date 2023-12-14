@@ -9,7 +9,7 @@ const db = require('./db');
 const cors = require('cors');
 const crypto = require('crypto')
 
-const secret = "7a3bde0d196d439926e515fc167ffb8a"
+const secret = process.env.IMAGE_VERIFICATION_TOKEN
 
 const multerConfig = {
   onError: function (err, next) {

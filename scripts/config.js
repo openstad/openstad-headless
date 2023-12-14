@@ -30,6 +30,7 @@ let IMAGE_DOMAIN = process.env.IMAGE_DOMAIN || ( process.env.BASE_DOMAIN == 'loc
 let IMAGE_APP_URL = process.env.IMAGE_APP_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + IMAGE_DOMAIN;
 let IMAGE_PORT_IMAGE_SERVER = process.env.IMAGE_PORT_IMAGE_SERVER || IMAGE_PORT_API + 1;
 let IMAGE_CLIENT_TOKEN = process.env.IMAGE_CLIENT_TOKEN || generateRandomToken({ length: 255 });
+let IMAGE_VERIFICATION_TOKEN = process.env.IMAGE_VERIFICATION_TOKEN || generateRandomToken({ length: 32 })
 
 let ADMIN_PORT = process.env.ADMIN_PORT || BASE_PORT + 70;
 let ADMIN_DOMAIN = process.env.ADMIN_DOMAIN || ( process.env.BASE_DOMAIN == 'localhost' ? 'localhost:' + ADMIN_PORT : 'admin.' + process.env.BASE_DOMAIN );
