@@ -67,6 +67,7 @@ services:
       - AUTH_FIXEDAUTHTOKENS=${API_AUTH_FIXEDAUTHTOKENS}
       - AUTH_ADAPTER_OPENSTAD_SERVERURL=${AUTH_APP_URL}
       - AUTH_ADAPTER_OPENSTAD_SERVERURL_INTERNAL=http://openstad-auth-server:${AUTH_PORT}
+      - IMAGE_APP_URL=${IMAGE_APP_URL}
       - NODE_ENV=development
     ports:
       - '${API_PORT}:${API_PORT}'

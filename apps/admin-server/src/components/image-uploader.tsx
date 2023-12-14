@@ -5,14 +5,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Button } from './ui/button';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as crypto from 'crypto'
 
 const formSchema = z.object({
   image: z.any(),
   });
 
 export default function ImageUploader() {  
-  const secret = "7a3bde0d196d439926e515fc167ffb8a"
 
   const [file, setFile] = React.useState<File>()
 
@@ -33,7 +31,6 @@ export default function ImageUploader() {
     let image = prepareFile(data)
     await fetch('/api/openstad/api/generatecode', {
       method: 'GET',
-      // mode: 'no-cors',
     })
     .then(response => response.json())
     .then(data => {
