@@ -23,7 +23,6 @@ import {
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useEffect } from 'react';
-import { useRouter } from 'next/router';
 import { useProject } from '../../../../../hooks/use-project';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -84,6 +83,8 @@ const formSchema = z.object({
   label: z.array(z.string()).refine((value) => value.some((item) => item)),
   modBreakAuthor: z.string(),
   likeTitle: z.string(),
+  enableLikes: z.boolean(),
+  enableReactions: z.boolean(),
   displayLikes: z.boolean(),
   displayDislikes: z.boolean(),
   reactionSettings: z.array(z.string()).refine((value) => value.some((item) => item))
@@ -92,8 +93,6 @@ const formSchema = z.object({
 export default function ProjectSettingsResourceGeneral() {
   const category = 'resource';
 
-  const router = useRouter();
-  const { project } = router.query;
   const { data, isLoading, updateProject } = useProject();
   const defaults = () => ({
     title: data?.config?.[category]?.title || null,
@@ -106,6 +105,8 @@ export default function ProjectSettingsResourceGeneral() {
     label: data?.config?.[category]?.title || [],
     modBreakAuthor: data?.config?.[category]?.modBreakAuthor || null,
     likeTitle: data?.config?.[category]?.likeTitle || null,
+    enableLikes: data?.config?.[category]?.enableLikes || null,
+    enableReactions: data?.config?.[category]?.enableReactions || null,
     displayLikes: data?.config?.[category]?.displayLikes || null,
     displayDislikes: data?.config?.[category]?.displayDislikes || null,
     reactionSettings: data?.config?.[category]?.reactionSettings || [],
@@ -134,6 +135,8 @@ export default function ProjectSettingsResourceGeneral() {
           label: values.label,
           modBreakAuthor: values.modBreakAuthor,
           likeTitle: values.likeTitle,
+          enableLikes: values.enableLikes,
+          enableReactions: values.enableReactions,
           displayLikes: values.displayLikes,
           displayDislikes: values.displayDislikes,
           reactionSettings: values.reactionSettings
@@ -334,6 +337,60 @@ export default function ProjectSettingsResourceGeneral() {
               />
               <FormField
                 control={form.control}
+                name="enableLikes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Is het mogelijk om likes te plaatsen?
+                    </FormLabel>
+                    <Select
+                      onValueChange={(e: string) =>
+                        field.onChange(e === 'true')
+                      }
+                      value={field.value ? 'true' : 'false'}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Nee" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="true">Ja</SelectItem>
+                        <SelectItem value="false">Nee</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="enableReactions"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Is het mogelijk om reacties te plaatsen?
+                    </FormLabel>
+                    <Select
+                      onValueChange={(e: string) =>
+                        field.onChange(e === 'true')
+                      }
+                      value={field.value ? 'true' : 'false'}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Nee" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="true">Ja</SelectItem>
+                        <SelectItem value="false">Nee</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="displayLikes"
                 render={({ field }) => (
                   <FormItem>
@@ -347,7 +404,7 @@ export default function ProjectSettingsResourceGeneral() {
                       value={field.value ? 'true' : 'false'}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Ja" />
+                          <SelectValue placeholder="Nee" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -374,7 +431,7 @@ export default function ProjectSettingsResourceGeneral() {
                       value={field.value ? 'true' : 'false'}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Ja" />
+                          <SelectValue placeholder="Nee" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

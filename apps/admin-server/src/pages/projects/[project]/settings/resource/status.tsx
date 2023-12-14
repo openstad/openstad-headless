@@ -13,17 +13,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useEffect } from 'react';
-import { useRouter } from 'next/router';
 import { useProject } from '../../../../../hooks/use-project';
 
 const formSchema = z.object({
@@ -37,8 +29,6 @@ const formSchema = z.object({
 });
 
 export default function ProjectSettingsResourceLabels() {
-  const router = useRouter();
-  const { project } = router.query;
   const { data, isLoading } = useProject();
   const defaults = () => ({});
 
