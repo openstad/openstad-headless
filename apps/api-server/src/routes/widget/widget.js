@@ -116,7 +116,7 @@ router
       })
       .catch(next);
   })
-  .get((req, res) => {
+  .get((req, res, next) => {
     const widgetId = req.params.widgetId;
     const randomId = Math.floor(Math.random() * 1000000);
     const componentId = `osc-component-${widgetId}-${randomId}`;
