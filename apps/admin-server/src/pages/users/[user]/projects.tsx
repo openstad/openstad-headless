@@ -3,60 +3,73 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import projectListSwr from '@/hooks/use-project-list';
-import useUsers from '@/hooks/use-users';
+import useUser from '@/hooks/use-user';
 import { Form } from '@/components/ui/form';
 import { Heading, ListHeading, Paragraph } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import DropdownList from '@/components/dropdown-list';
 import { Button } from '@/components/ui/button';
+import useIdpUser from '@/hooks/use-idpuser'
 
 const formSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email().optional(),
 });
 
 type ProjectRole = {
   projectId: string;
-  roleId: string;
+  role: string;
+  id: string;
 };
 
 export default function CreateUserProjects() {
-  let projectRoles: Array<ProjectRole> = [];
+  let projectRolesNewlyAdded: Array<ProjectRole> = [];
+  let projectRolesEdited: Array<ProjectRole> = [];
   const { data, isLoading } = projectListSwr();
-  const { createUser } = useUsers();
+  const { data:user, isLoading:userLoading } = useUser();
+  const {data: rolesByProject, createUser, updateUser} = useIdpUser(user.idpUser.identifier, user.idpUser.provider)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {},
   });
 
-  const addProject = (projectId: string, roleId: string) => {
-    if (projectRoles.find((e) => e.projectId === projectId)) {
-      if (roleId === '0') {
-        projectRoles = projectRoles.filter(function (project) {
+  const addProject = (projectId: string, role: string) => {
+    const roleByProject = rolesByProject.find((obj) => obj.projectId == projectId);
+    const existingInEditedProjectIndex = rolesByProject.findIndex((obj) => obj.projectId == projectId)
+
+    if (existingInEditedProjectIndex >= 0) {
+      if (role === '0') {
+        projectRolesEdited = projectRolesEdited.filter(function(project) {
           return project.projectId !== projectId;
-        });
+        })
       } else {
-        let role = projectRoles.findIndex((obj) => obj.projectId == projectId);
-        projectRoles[role].roleId = roleId;
+        if(!projectRolesEdited[existingInEditedProjectIndex]) {
+          projectRolesEdited.push({id: roleByProject.id, projectId, role})
+        } else {
+          const editIndex = projectRolesEdited.findIndex((obj) => obj.projectId == projectId)
+          projectRolesEdited[editIndex].role = role;
+        }
       }
     } else {
-      if (roleId !== '0') {
-        projectRoles.push({ projectId: projectId, roleId: roleId });
+      if (role !== '0') {
+        projectRolesNewlyAdded.push({ id: "0", projectId: projectId, role: role })
       }
     }
   };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    for (let i = 0; i < projectRoles.length; i++) {
-      createUser(
-        values.email,
-        projectRoles[i].projectId,
-        projectRoles[i].roleId
-      );
-    }
+    console.log({projectRolesNewlyAdded})
+    
+    projectRolesEdited.forEach(rbp => {
+      updateUser(rbp.id, rbp.projectId, rbp.role)
+    })
+
+    projectRolesNewlyAdded.forEach(rbp => {
+      createUser(user.email. rbp.projectId, rbp.role)
+    })
   }
 
-  if (!data) return null;
+  if (!data || !rolesByProject) return null;
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -71,14 +84,15 @@ export default function CreateUserProjects() {
             </div>
             <ul>
               {data.map((project: any) => {
+                const roleByProject = rolesByProject.find(r => r.projectId === project.id)
                 return (
                   <li key={project.id} className="grid grid-cols-1 lg:grid-cols-2 items-center py-3 h-fit hover:bg-secondary-background hover:cursor-pointer border-b border-border">
                     <Paragraph className="truncate">{project.name}</Paragraph>
                     <Paragraph className="truncate">
                       <DropdownList
-                        roleId="0"
-                        addProject={(roleId) => {
-                          addProject(project.id, roleId);
+                        role={roleByProject?.role || "0"}
+                        addProject={(role) => {
+                          addProject(project.id, role);
                         }}
                       />
                     </Paragraph>
