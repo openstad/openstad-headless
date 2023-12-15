@@ -2,10 +2,33 @@
   "name": "openstad-frontend",
   "version": "1.0.0",
   "description": "Openstad frontent project including openstad frontend packages\"",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon"
+  },
+  "nodemonConfig": {
+    "delay": 1000,
+    "verbose": true,
+    "watch": [
+      "./app.js",
+      "./modules/**/*",
+      "./lib/**/*.js",
+      "./views/**/*.html"
+    ],
+    "ignoreRoot": [
+      ".git"
+    ],
+    "ignore": [
+      "**/ui/apos/",
+      "**/ui/src/",
+      "**/ui/public/",
+      "locales/*.json",
+      "public/uploads/",
+      "public/apos-frontend/*.js",
+      "data/"
+    ],
+    "ext": "json, js, html, scss, vue"
   },
   "repository": {
     "type": "git",
@@ -27,6 +50,6 @@
   "devDependencies": {
     "less": "^4.1.3",
     "less-loader": "^11.1.0",
-    "nodemon": "^1.17.5"
+    "nodemon": "^3.0.1"
   }
 }
