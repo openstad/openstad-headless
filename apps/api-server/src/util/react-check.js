@@ -7,36 +7,43 @@ const reactDomJs =
 
 module.exports = `
   function triggerEvent() {
-    document.dispatchEvent(reactLoadedEvent);
+    document.dispatchEvent(new CustomEvent('OpenStadReactLoaded'));
   }
-  
-  const reactLoadedEvent = new CustomEvent('OpenStadReactLoaded');
-  
-  if (typeof React === 'undefined' && !window.OpenStadReactLoaded) {
+
+  const hasReact = typeof React !== 'undefined';
+  const reactLoaded = window.OpenStadReactLoaded;
+  const hasReactDom = typeof ReactDOM !== 'undefined';
+  const reactDomLoaded = window.OSReactDomLoaded;
+
+  if (!hasReact && !reactLoaded) {
     const script = document.createElement('script');
     script.src = '${reactJs}';
     document.body.appendChild(script);
     window.OpenStadReactLoaded = true;
-  } else if (
-    typeof React !== 'undefined' &&
-    React.version.substr(0, 2) !== '18'
-  ) {
+  } 
+  
+  if(hasReact && React.version.substr(0, 2) < '18') {
     throw new Error('React version 18 is required');
   }
   
-  if (typeof ReactDOM === 'undefined' && !window.OSReactDomLoaded) {
-    const script = document.createElement('script');
-    script.src = '${reactDomJs}';
-    script.onload = triggerEvent;
+  if (!hasReactDom && !reactDomLoaded) {
+      const script = document.createElement('script');
+      script.src = '${reactDomJs}';
+      script.onload = function() {
+      document.addEventListener('OpenStadReactLoaded', renderWidget);
+      triggerEvent();
+    }
     document.body.appendChild(script);
-    window.OSReactDomLoaded = true;
-    document.addEventListener('OpenStadReactLoaded', renderWidget);
   } else if (
     typeof ReactDOM !== 'undefined' &&
     ReactDOM.version.substr(0, 2) !== '18'
   ) {
+    console.log("NOT A REACT REACTDOM FOUND!");
+
     throw new Error('ReactDOM version 18 is required');
   } else {
+    console.log("Already loaded")
     document.addEventListener('OpenStadReactLoaded', renderWidget);
+    triggerEvent();
   }
 `;

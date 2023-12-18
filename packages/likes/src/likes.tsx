@@ -1,36 +1,21 @@
 import 'remixicon/fonts/remixicon.css';
 import { ProgressBar } from '@openstad-headless/ui/src';
-import SessionStorage from '../../lib/session-storage.js';
+import { SessionStorage } from '@openstad-headless/lib/session-storage';
+import loadWidget from '@openstad-headless/lib/load-widget';
+import { hasRole } from '@openstad-headless/lib/has-role';
 import DataStore from '@openstad-headless/data-store/src';
 import React, { useState } from 'react';
 import './likes.css';
-import loadWidget from '../../lib/load-widget.js';
-import hasRole from '../../lib/has-role';
+import { BaseProps } from '../../types/base-props';
+import { ProjectSettingProps } from '../../types/project-setting-props';
 
-type Props = {
-  projectId?: string;
-  ideaId?: string;
-  apiUrl?: string;
-  config: {
-    projectId?: string;
-    ideaId?: string;
-    api?: {
-      url: string;
-    };
-    votesNeeded?: number;
-    votes: {
-      isActive: boolean;
-      requiredUserRole: string;
-      voteType: string;
-      voteValues: Array<{
-        label: string;
-        value: string;
-      }>;
-    };
-    login: {
-      url: string;
-    };
+export type LikeWidgetProps = BaseProps &
+  LikeProps &
+  ProjectSettingProps & {
+    resourceId?: string;
   };
+
+export type LikeProps = {
   title?: string;
   variant?: 'small' | 'medium' | 'large';
   yesLabel?: string;
@@ -45,14 +30,24 @@ function Likes({
   yesLabel = 'Voor',
   noLabel = 'Tegen',
   ...props
-}: Props) {
-  const necessaryVotes = props?.config?.votesNeeded || 50;
+}: LikeWidgetProps) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const resourceId = urlParams.get('openstadResourceId') || props.resourceId;
+  const necessaryVotes = props?.ideas?.minimumYesVotes || 50;
 
-  const datastore = new DataStore(props);
+  // Pass explicitely because datastore is not ts, we will not get a hint if the props have changed
+  const datastore = new DataStore({
+    projectId: props.projectId,
+    config: { api: props.api },
+  });
+
   const session = new SessionStorage(props);
 
   const [currentUser] = datastore.useCurrentUser(props);
-  const [idea] = datastore.useIdea(props);
+  const [resource] = datastore.useIdea({
+    projectId: props.projectId,
+    ideaId: resourceId,
+  });
   const [isBusy, setIsBusy] = useState(false);
   const supportedLikeTypes: Array<{
     type: 'yes' | 'no';
@@ -69,23 +64,24 @@ function Likes({
     if (isBusy) return;
     setIsBusy(true);
 
-    if (!props.config.votes.isActive) {
+    if (!props.votes.isActive) {
       return;
     }
 
     if (
-      !currentUser.role ||
-      !hasRole(currentUser, props.config.votes.requiredUserRole)
+      (!currentUser.role ||
+        !hasRole(currentUser, props.votes.requiredUserRole)) &&
+      props.login
     ) {
       // login
-      session.set('osc-idea-vote-pending', { [idea.id]: value });
-      return (document.location.href = props.config.login.url);
+      session.set('osc-idea-vote-pending', { [resource.id]: value });
+      return (document.location.href = props?.login.url);
     }
 
     let change = {};
-    if (idea.userVote) change[idea.userVote.opinion] = -1;
+    if (resource.userVote) change[resource.userVote.opinion] = -1;
 
-    await idea.submitLike({
+    await resource.submitLike({
       opinion: value,
     });
 
@@ -118,9 +114,10 @@ function Likes({
               {!hideCounters ? (
                 <section className="like-counter">
                   <p>
-                    {idea[likeVariant.type] && idea[likeVariant.type] < 10
-                      ? idea[likeVariant.type].toString().padStart(2, '0')
-                      : idea[likeVariant.type] ||
+                    {resource[likeVariant.type] &&
+                    resource[likeVariant.type] < 10
+                      ? resource[likeVariant.type].toString().padStart(2, '0')
+                      : resource[likeVariant.type] ||
                         (0).toString().padStart(2, '0')}
                   </p>
                 </section>
@@ -129,11 +126,11 @@ function Likes({
           ))}
         </div>
 
-        {!props?.config?.votesNeeded ? null : (
+        {!props?.ideas?.minimumYesVotes ? null : (
           <div className="progressbar-container">
-            <ProgressBar progress={(idea.yes / necessaryVotes) * 100} />
+            <ProgressBar progress={(resource.yes / necessaryVotes) * 100} />
             <p className="progressbar-counter">
-              {idea.yes || 0} /{necessaryVotes}
+              {resource.yes || 0} /{necessaryVotes}
             </p>
           </div>
         )}
@@ -144,4 +141,4 @@ function Likes({
 
 Likes.loadWidget = loadWidget;
 
-export { Likes as default, Likes };
+export { Likes };

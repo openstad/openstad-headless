@@ -47,7 +47,7 @@ export default function WidgetIdeasMap() {
               <TabsTrigger value="content">Content</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
-              <Preview type="ideasmap" />
+              {/* <Preview type="ideasmap" /> */}
             </TabsContent>
             <TabsContent value="map" className="p-0">
               <WidgetIdeasMapMaps />

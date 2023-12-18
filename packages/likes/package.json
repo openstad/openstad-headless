@@ -12,6 +12,7 @@
   "dependencies": {
     "@openstad-headless/ui": "^1.0.0",
     "@openstad-headless/data-store": "^1.0.0",
+    "@openstad-headless/lib": "^1.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "remixicon": "^3.5.0",

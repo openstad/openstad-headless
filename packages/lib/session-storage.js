@@ -1,4 +1,4 @@
-export default function(props) {
+function SessionStorage (props) {
 
   let self = this;
   self.projectId = props.projectId || props.config.projectId;
@@ -59,4 +59,9 @@ export default function(props) {
 
   }
 
+}
+
+export {
+  SessionStorage as default,
+  SessionStorage
 }

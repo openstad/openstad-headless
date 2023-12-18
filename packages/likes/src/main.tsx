@@ -29,6 +29,6 @@ const config = {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Likes projectId="2" ideaId="1" config={config} variant="large" />
+    <Likes projectId="2" ideaId="1" title="dsfsf" variant="large" />
   </React.StrictMode>
 );
