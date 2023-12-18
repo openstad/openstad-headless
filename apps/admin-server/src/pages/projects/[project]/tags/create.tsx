@@ -37,6 +37,7 @@ export default function ProjectTagCreate() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     createTag(values.name, values.type, values.seqnr);
+    router.push(`/projects/${project}/tags`);
   }
 
   return (

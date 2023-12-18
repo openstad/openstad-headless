@@ -17,6 +17,8 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useProject } from '@/hooks/use-project';
+import router from 'next/router';
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   projectName: z.string().min(6, {
@@ -32,8 +34,12 @@ export default function CreateProject() {
     defaultValues: {},
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    createProject(values.projectName)
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const project = await createProject(values.projectName);
+    if (project) {
+      toast.success('Widget aangemaakt!');
+      router.push(`/projects/${project.id}/widgets`);
+    }
   }
 
   return (

@@ -12,7 +12,7 @@ export function useProject() {
   );
 
   async function createProject(name: string) {
-    await fetch('/api/openstad/api/project', {
+    const res = await fetch('/api/openstad/api/project', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -21,6 +21,8 @@ export function useProject() {
         name,
       }),
     });
+    const data = await res.json();
+    return data;
   }
 
   async function updateProject(config: any, name?: any) {
