@@ -158,13 +158,7 @@ app.post('/image',
       console.log("This post has been successfully verified!")
     }
 
-    // if (!res.headerSent) {
-    //   res.setHeader('Content-Type', 'application/json');
-    //   res.setHeader('')
-    // }
-
     const fileName = req.file.filename || req.file.key;
-    console.log(req.file)
     res.send(JSON.stringify({
       url: process.env.APP_URL + '/image/' + fileName
     }));
@@ -174,13 +168,10 @@ app.post('/images',
   upload.array('images', 30), (req, res, next) => {
     // req.files is array of `photos` files
     // req.body will contain the text fields, if there were any
-    const verification = crypto.createHmac("sha256", secret).digest("hex")
+    const createdCombination = secret + req.query.exp_date
+    const verification = crypto.createHmac("sha256", createdCombination).digest("hex")
     if(Date.now() < req.query.exp_date && verification === req.query.signature) {
       console.log("This post has been successfully verified!")
-    }
-
-    if (!res.headerSent) {
-      res.setHeader('Content-Type', 'application/json');
     }
 
     const fileName = req.file.filename || req.file.key;
