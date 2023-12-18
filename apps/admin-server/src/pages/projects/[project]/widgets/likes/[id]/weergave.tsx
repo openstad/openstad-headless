@@ -23,6 +23,7 @@ import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { LikeProps } from '@openstad/likes/src/likes';
 import { useDebounce } from 'rooks';
+import { EditFieldProps } from '@/lib/EditFieldProps';
 
 const formSchema = z.object({
   title: z.string(),
@@ -41,12 +42,7 @@ type Props = {
   hideCounters: boolean;
 };
 
-type LikeDisplayProps = Props & {
-  updateConfig: (changedValues: LikeProps) => void;
-  onFieldChanged: (key: string, value: any) => void;
-};
-
-export default function LikesDisplay(props: LikeDisplayProps) {
+export default function LikesDisplay(props: Props & EditFieldProps<LikeProps>) {
   const defaults = () => ({
     title: props?.title || 'Wat vindt u van dit plan',
     variant: props?.variant || 'medium',

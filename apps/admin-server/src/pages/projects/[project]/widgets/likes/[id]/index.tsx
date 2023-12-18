@@ -8,47 +8,23 @@ import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import toast from 'react-hot-toast';
 import { LikeWidgetProps } from '@openstad/likes/src/likes';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 
 export default function WidgetLikes() {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
-  const [previewConfig, setPreviewConfig] = useState<LikeWidgetProps>();
 
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig();
-
-  async function update(values: any) {
-    try {
-      await updateConfig(values);
-      toast.success('Configuratie aangepast');
-    } catch (error) {
-      toast.error('De configuratie kon niet worden aangepast');
-    }
-  }
-
-  // Set the preview the first time the widget config is loaded
-  useEffect(() => {
-    const config = widget?.config;
-    if (config) {
-      setPreviewConfig({
-        projectId,
-        resourceId: '2',
-        api: {
-          url: '/api/openstad',
-        },
-        title: previewConfig?.title || 'Vind je dit een goed idee?',
-        hideCounters: previewConfig?.hideCounters,
-        variant: previewConfig?.variant || 'medium',
-        yesLabel: previewConfig?.yesLabel,
-        noLabel: previewConfig?.noLabel,
-        ...config,
-      });
-    }
-  }, [widget]);
+  const { data: widget, updateConfig } = useWidgetConfig();
+  const { previewConfig, updatePreview } = useWidgetPreview<LikeWidgetProps>({
+    projectId,
+    resourceId: '2',
+    api: {
+      url: '/api/openstad',
+    },
+    title: 'Vind je dit een goed idee?',
+    variant: 'medium',
+  });
 
   return (
     <div>
@@ -78,12 +54,12 @@ export default function WidgetLikes() {
               {widget?.config ? (
                 <LikesDisplay
                   {...widget?.config}
-                  updateConfig={(config) => {
-                    update(config);
-                  }}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
+                  }
                   onFieldChanged={(key, value) => {
                     if (previewConfig) {
-                      setPreviewConfig({
+                      updatePreview({
                         ...previewConfig,
                         [key]: value,
                       });

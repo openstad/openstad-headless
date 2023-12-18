@@ -22,15 +22,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { EditFieldProps } from '@/lib/EditFieldProps';
+import { CommentsWidgetProps } from '@openstad/comments/src/comments';
 
 const formSchema = z.object({
   ideaId: z.coerce.number(),
-  sentiment: z.enum(['for', 'against', 'none']),
+  sentiment: z.string(),
   isReplyingEnabled: z.boolean(),
   isVotingEnabled: z.boolean(),
 });
 
-export default function ArgumentsGeneral() {
+export default function ArgumentsGeneral(
+  props: CommentsWidgetProps & EditFieldProps<CommentsWidgetProps>
+) {
   const {
     data: widget,
     isLoading: isLoadingWidget,
@@ -38,9 +42,9 @@ export default function ArgumentsGeneral() {
   } = useWidgetConfig();
 
   const defaults = () => ({
-    sentiment: widget?.config?.sentiment || 'for',
-    isReplyingEnabled: widget?.config?.isReplyingEnabled || false,
-    isVotingEnabled: widget?.config?.isVotingEnabled || false,
+    sentiment: props.sentiment || 'for',
+    isReplyingEnabled: props.isReplyingEnabled || false,
+    isVotingEnabled: props.isVotingEnabled || false,
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -53,7 +57,7 @@ export default function ArgumentsGeneral() {
   }, [widget]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ values });
+    updateConfig(values);
   }
 
   return (

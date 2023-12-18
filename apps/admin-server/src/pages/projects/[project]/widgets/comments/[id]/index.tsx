@@ -13,35 +13,24 @@ import { useRouter } from 'next/router';
 import WidgetPreview from '@/components/widget-preview';
 import { CommentsWidgetProps } from '@openstad/comments/src/comments';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 
 export default function WidgetArguments() {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
-  const [previewConfig, setPreviewConfig] = useState<CommentsWidgetProps>();
 
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig();
-
-  // Set the preview the first time the widget config is loaded
-  useEffect(() => {
-    const config = widget?.config;
-    if (config) {
-      setPreviewConfig({
-        projectId,
-        resourceId: '2',
-        sentiment: 'yes',
-        api: {
-          url: '/api/openstad',
-        },
-        title: previewConfig?.title || 'Vind je dit een goed idee?',
-        ...config,
-      });
-    }
-  }, [widget]);
+  const { data: widget, updateConfig } = useWidgetConfig();
+  const { previewConfig, updatePreview } =
+    useWidgetPreview<CommentsWidgetProps>({
+      projectId,
+      resourceId: '2',
+      api: {
+        url: '/api/openstad',
+      },
+      title: 'Vind je dit een goed idee?',
+      variant: 'medium',
+    });
 
   return (
     <div>
@@ -69,7 +58,20 @@ export default function WidgetArguments() {
               <TabsTrigger value="form">Formulier</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
-              <ArgumentsGeneral />
+              <ArgumentsGeneral
+                {...widget?.config}
+                updateConfig={(config) =>
+                  updateConfig({ ...widget.config, ...config })
+                }
+                onFieldChanged={(key, value) => {
+                  if (previewConfig) {
+                    updatePreview({
+                      ...previewConfig,
+                      [key]: value,
+                    });
+                  }
+                }}
+              />
             </TabsContent>
             <TabsContent value="list" className="p-0">
               <ArgumentsList />

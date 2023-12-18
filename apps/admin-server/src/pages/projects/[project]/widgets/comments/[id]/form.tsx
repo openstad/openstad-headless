@@ -43,7 +43,7 @@ export default function ArgumentsForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await updateConfig({ values });
+      await updateConfig(values);
     } catch (error) {
       console.error('could not update', error);
     }

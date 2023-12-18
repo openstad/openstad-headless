@@ -57,7 +57,7 @@ function Comments({
     let formData = new FormData(e.target);
     const formDataCopy = Object.fromEntries(formData.entries());
 
-    formDataCopy.ideaId = args.ideaId;
+    formDataCopy.resourceId = args.resourceId;
 
     try {
       if (formDataCopy.id) {
