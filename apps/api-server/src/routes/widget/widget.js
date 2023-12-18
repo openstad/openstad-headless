@@ -5,7 +5,6 @@ const fs = require('fs');
 const config = require('config');
 const path = require('path');
 const createError = require('http-errors');
-const flattenObject = require('../../util/flatten-object');
 const widgetSettingsMapping = require('./widget-settings');
 const reactCheck = require('../../util/react-check');
 
@@ -83,7 +82,7 @@ router
         widgetSettings,
         defaultConfig,
         projectConfig,
-        flattenObject(req.widgetConfig)
+        req.widgetConfig
       );
 
       res.header('Content-Type', 'application/javascript');
@@ -138,7 +137,7 @@ router
         widgetSettings,
         defaultConfig,
         widget.project.safeConfig,
-        flattenObject(widget.config)
+        widget.config
       );
 
       res.header('Content-Type', 'application/javascript');
@@ -200,19 +199,18 @@ function setConfigsToOutput(
   projectConfig,
   widgetConfig
 ) {
-  
   let config = {
     ...widgetSettings.Config,
     ...defaultConfig,
     ...projectConfig,
     ...widgetConfig,
   };
-  
+
   config = JSON.stringify(config)
-    .replaceAll("\\", "\\\\")
+    .replaceAll('\\', '\\\\')
     .replaceAll("'", "\\'")
-    .replaceAll("`", "\\`");
-  
+    .replaceAll('`', '\\`');
+
   return getWidgetJavascriptOutput(
     widgetSettings,
     widgetType,
