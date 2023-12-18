@@ -54,7 +54,7 @@ module.exports = function (db, sequelize, DataTypes) {
         return getSafeConfig(this.getDataValue('config'));
       },
       set (value) {
-        throw new Error ('`sanitizedConfig` is a virtual field and cannot be set')
+        throw new Error ('`safeConfig` is a virtual field and cannot be set')
       }
     },
 
