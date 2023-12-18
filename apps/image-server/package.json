@@ -19,7 +19,6 @@
     "init-database": "node ./scripts/init-database.js",
     "migrate-database": "node ./scripts/migrate-database.js",
     "start": "node ./server.js",
-    "predev": "./scripts/predev.sh",
     "dev": "nodemon ./server.js"
   },
   "dependencies": {

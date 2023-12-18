@@ -29,7 +29,6 @@ let IMAGE_PORT_API = process.env.IMAGE_PORT_API || BASE_PORT + 50;
 let IMAGE_DOMAIN = process.env.IMAGE_DOMAIN || ( process.env.BASE_DOMAIN == 'localhost' ? 'localhost:' + IMAGE_PORT_API : 'image.' + process.env.BASE_DOMAIN );
 let IMAGE_APP_URL = process.env.IMAGE_APP_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + IMAGE_DOMAIN;
 let IMAGE_PORT_IMAGE_SERVER = process.env.IMAGE_PORT_IMAGE_SERVER || IMAGE_PORT_API + 1;
-let IMAGE_CLIENT_TOKEN = process.env.IMAGE_CLIENT_TOKEN || generateRandomToken({ length: 255 });
 let IMAGE_VERIFICATION_TOKEN = process.env.IMAGE_VERIFICATION_TOKEN || generateRandomToken({ length: 32 })
 
 let ADMIN_PORT = process.env.ADMIN_PORT || BASE_PORT + 70;
@@ -99,11 +98,6 @@ process.env.IMAGE_DOMAIN = IMAGE_DOMAIN || '';
 process.env.IMAGE_APP_URL = IMAGE_APP_URL || '';
 process.env.IMAGE_PORT_API = IMAGE_PORT_API || '';
 process.env.IMAGE_PORT_IMAGE_SERVER = IMAGE_PORT_IMAGE_SERVER || '';
-
-process.env.IMAGE_DB_HOST = process.env.IMAGE_DB_HOST || process.env.DB_HOST || '';
-process.env.IMAGE_DB_USERNAME = process.env.IMAGE_DB_USERNAME || process.env.DB_USERNAME || '';
-process.env.IMAGE_DB_PASSWORD = process.env.IMAGE_DB_PASSWORD || process.env.DB_PASSWORD || '';
-process.env.IMAGE_DB_NAME = process.env.IMAGE_DB_NAME || ( process.env.DB_BASE_NAME ? process.env.DB_BASE_NAME + '-image' :  'openstad-image' );
 
 process.env.IMAGE_IMAGES_DIR = process.env.IMAGE_IMAGES_DIR || '';
 process.env.IMAGE_THROTTLE = process.env.IMAGE_THROTTLE || true;

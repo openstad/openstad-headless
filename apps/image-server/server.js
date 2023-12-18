@@ -3,8 +3,6 @@ const express = require('express');
 const app = express();
 const imgSteam = require('image-steam');
 const multer = require('multer');
-const AWS = require('aws-sdk')
-const multerS3 = require('multer-s3')
 const crypto = require('crypto')
 
 const secret = process.env.IMAGE_VERIFICATION_TOKEN
@@ -51,42 +49,7 @@ const imageSteamConfig = {
   }
 };
 
-if (process.env.S3_ENDPOINT) {
-  try {
-    const endpoint = new AWS.Endpoint(process.env.S3_ENDPOINT);
-    const s3 = new AWS.S3({
-      accessKeyId: process.env.S3_KEY,
-      secretAccessKey: process.env.S3_SECRET,
-      endpoint: endpoint
-    });
-
-    multerConfig.storage = multerS3({
-      s3: s3,
-      bucket: process.env.S3_BUCKET,
-      acl: 'public-read',
-      metadata: function (req, file, cb) {
-        cb(null, {
-          fieldName: file.fieldname
-        });
-      },
-      key: function (req, file, cb) {
-        cb(null, Date.now().toString())
-      }
-    });
-  } catch(error) {
-    console.error(error);
-  }
-  imageSteamConfig.storage.defaults = {
-      "driverPath": "image-steam-s3",
-      "endpoint": process.env.S3_ENDPOINT,
-      "bucket": process.env.S3_BUCKET,
-      "accessKey": process.env.S3_KEY,
-      "secretKey": process.env.S3_SECRET
-  };
-} else {
-  multerConfig.dest = process.env.IMAGES_DIR || 'images/';
-  console.log(process.env.IMAGES_DIR)
-}
+multerConfig.dest = process.env.IMAGES_DIR || 'images/';
 
 const upload = multer(multerConfig);
 
@@ -196,5 +159,4 @@ app.use(function (err, req, res, next) {
 
 app.listen(argv.port, function () {
   console.log('Application listen on port %d...', argv.port);
-  //console.log('Image  server listening on port %d...', argv.portImageSteam);
 });

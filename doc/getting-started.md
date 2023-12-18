@@ -105,7 +105,6 @@ DB_USERNAME=
 DB_PASSWORD=
 API_DB_NAME=
 AUTH_DB_NAME=
-IMAGE_DB_NAME=
 ```
 
 ### If everything else fails
