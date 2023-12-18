@@ -1,0 +1,116 @@
+{
+  "api": {
+    "url": "https://api.os20.nlsvgtr.nl"
+  },
+  "login": {
+    "url": "https://api.os20.nlsvgtr.nl/auth/project/2/login?useAuth=default&redirectUri=[[REDIRECT_URI]]"
+  },
+  "logout": {
+    "url": "https://api.os20.nlsvgtr.nl/auth/project/2/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]"
+  },
+  "projectId": "2",
+  "allowedDomains": ["api.os20.nlsvgtr.nl", "component-tester.os20.nlsvgtr.nl"],
+  "project": {
+    "endDate": null,
+    "endDateNotificationSent": false,
+    "projectHasEnded": false
+  },
+  "anonymize": {
+    "anonymizeUsersXDaysAfterEndDate": 60,
+    "warnUsersAfterXDaysOfInactivity": 770,
+    "anonymizeUsersAfterXDaysOfInactivity": 860
+  },
+  "auth": {
+    "default": "openstad",
+    "adapter": {},
+    "provider": {
+      "openstad": {
+        "adapter": "openstad",
+        "clientId": "uniquecode",
+        "clientSecret": "uniquecode123"
+      },
+      "anonymous": {
+        "adapter": "openstad",
+        "clientId": "anonymous",
+        "clientSecret": "anonymous123"
+      },
+      "oidc": {
+        "adapter": "oidc",
+        "serverUrl": "https://auth.development.nlsvgtr.nl",
+        "serverUserInfoPath": "/oidc/me",
+        "userMapping": "{\"identifier\":\"user => user.sub == '' ? null : user.sub\",\"email\":\"user => user.email == '' ? null : user.email\",\"role\":\"user => user.role || ((user.email || user.phoneNumber || user.hashedPhoneNumber) ? 'member' : 'uniquecode')\"}"
+      }
+    }
+  },
+  "ideas": {
+    "canAddNewIdeas": true,
+    "titleMinLength": 10,
+    "titleMaxLength": 50,
+    "summaryMinLength": 20,
+    "summaryMaxLength": 140,
+    "descriptionMinLength": 140,
+    "descriptionMaxLength": 5000,
+    "minimumYesVotes": 100,
+    "showVoteButtons": true,
+    "canEditAfterFirstLikeOrComment": false,
+    "extraDataMustBeDefined": false,
+    "types": []
+  },
+  "comments": {
+    "new": {
+      "anonymous": {
+        "redirect": null,
+        "notAllowedMessage": null
+      },
+      "showFields": ["zipCode", "displayName"]
+    },
+    "isClosed": false,
+    "closedText": "De reactiemogelijkheid is gesloten, u kunt niet meer reageren"
+  },
+  "users": {
+    "extraDataMustBeDefined": false,
+    "canCreateNewUsers": true,
+    "allowUseOfNicknames": false
+  },
+  "votes": {
+    "isViewable": true,
+    "isActive": true,
+    "requiredUserRole": "anonymous",
+    "mustConfirm": false,
+    "withExisting": "error",
+    "voteType": "likes",
+    "voteValues": [
+      {
+        "label": "I like",
+        "value": "yes"
+      },
+      {
+        "label": "Don't know",
+        "value": "mayby"
+      },
+      {
+        "label": "I do not like",
+        "value": "no"
+      }
+    ],
+    "maxIdeas": 100,
+    "minIdeas": 1
+  },
+  "polls": {
+    "canAddPolls": false,
+    "requiredUserRole": "anonymous"
+  },
+  "widgets": {
+    "beta": false,
+    "deprecated": false,
+    "visibleWidgets": []
+  },
+  "ignoreBruteForce": [],
+  "resourceId": "2",
+  "url": "/api/auth/project/2/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]",
+  "title": "Wat vindt u van dit plan",
+  "hideCounters": true,
+  "variant": "medium",
+  "yesLabel": "Ja",
+  "noLabel": "Nee"
+}

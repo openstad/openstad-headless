@@ -62,18 +62,8 @@ export default function LikesDisplay(props: Props & EditFieldProps<LikeProps>) {
 
   const debounceValue = 300;
 
-  const setTitleDebounced = useDebounce(
-    (val) => props.onFieldChanged('title', val),
-    debounceValue
-  );
-
-  const setNoLabelDebounced = useDebounce(
-    (val) => props.onFieldChanged('noLabel', val),
-    debounceValue
-  );
-
-  const setYesLabelDebounced = useDebounce(
-    (val) => props.onFieldChanged('yesLabel', val),
+  const setFieldDebounced = useDebounce(
+    (name, val) => props.onFieldChanged(name, val),
     debounceValue
   );
 
@@ -97,7 +87,7 @@ export default function LikesDisplay(props: Props & EditFieldProps<LikeProps>) {
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
-                    setTitleDebounced(e.target.value);
+                    setFieldDebounced(field.name, e.target.value);
                   }}
                 />
               </FormControl>
@@ -116,7 +106,7 @@ export default function LikesDisplay(props: Props & EditFieldProps<LikeProps>) {
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
-                    setYesLabelDebounced(e.target.value);
+                    setFieldDebounced(field.name, e.target.value);
                   }}
                 />
               </FormControl>
@@ -135,7 +125,7 @@ export default function LikesDisplay(props: Props & EditFieldProps<LikeProps>) {
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
-                    setNoLabelDebounced(e.target.value);
+                    setFieldDebounced(field.name, e.target.value);
                   }}
                 />
               </FormControl>
@@ -152,7 +142,7 @@ export default function LikesDisplay(props: Props & EditFieldProps<LikeProps>) {
               <Select
                 onValueChange={(value) => {
                   field.onChange(value);
-                  props.onFieldChanged('variant', value);
+                  props.onFieldChanged(field.name, value);
                 }}
                 value={field.value}>
                 <FormControl>
@@ -179,7 +169,7 @@ export default function LikesDisplay(props: Props & EditFieldProps<LikeProps>) {
               <Select
                 onValueChange={(e: string) => {
                   field.onChange(e === 'true');
-                  props.onFieldChanged('hideCounters', e === 'true');
+                  props.onFieldChanged(field.name, e === 'true');
                 }}
                 value={field.value ? 'true' : 'false'}>
                 <FormControl>

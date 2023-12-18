@@ -26,6 +26,9 @@ function Comments({
   isClosedText = 'Het inzenden van reacties is niet langer mogelijk',
   ...props
 }: CommentsWidgetProps) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const resourceId = urlParams.get('openstadResourceId') || props.resourceId;
+
   const args = {
     requiredUserRole,
     title,
@@ -46,7 +49,7 @@ function Comments({
     datastore.useCurrentUser({ ...args });
   const [comments, commentsError, commentsIsLoading] = datastore.useComments({
     projectId: props.projectId,
-    ideaId: props.resourceId,
+    ideaId: resourceId || props.resourceId,
     sentiment: props.sentiment,
   });
 
@@ -57,7 +60,7 @@ function Comments({
     let formData = new FormData(e.target);
     const formDataCopy = Object.fromEntries(formData.entries());
 
-    formDataCopy.resourceId = args.resourceId;
+    formDataCopy.resourceId = `${resourceId}`;
 
     try {
       if (formDataCopy.id) {

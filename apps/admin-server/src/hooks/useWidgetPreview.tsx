@@ -21,6 +21,7 @@ export function useWidgetPreview<T extends {}>(backupConfig: {}): {
   }, [widget]);
 
   function updatePreview(config: T) {
+    console.log({ config });
     setPreviewConfig(config);
   }
   return { previewConfig, updatePreview };

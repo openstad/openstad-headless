@@ -58,20 +58,22 @@ export default function WidgetArguments() {
               <TabsTrigger value="form">Formulier</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
-              <ArgumentsGeneral
-                {...widget?.config}
-                updateConfig={(config) =>
-                  updateConfig({ ...widget.config, ...config })
-                }
-                onFieldChanged={(key, value) => {
-                  if (previewConfig) {
-                    updatePreview({
-                      ...previewConfig,
-                      [key]: value,
-                    });
+              {widget?.config ? (
+                <ArgumentsGeneral
+                  {...widget?.config}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
                   }
-                }}
-              />
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                />
+              ) : null}
             </TabsContent>
             <TabsContent value="list" className="p-0">
               <ArgumentsList />

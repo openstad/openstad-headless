@@ -14,10 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -26,7 +24,6 @@ import { EditFieldProps } from '@/lib/EditFieldProps';
 import { CommentsWidgetProps } from '@openstad/comments/src/comments';
 
 const formSchema = z.object({
-  ideaId: z.coerce.number(),
   sentiment: z.string(),
   isReplyingEnabled: z.boolean(),
   isVotingEnabled: z.boolean(),
@@ -35,12 +32,6 @@ const formSchema = z.object({
 export default function ArgumentsGeneral(
   props: CommentsWidgetProps & EditFieldProps<CommentsWidgetProps>
 ) {
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig();
-
   const defaults = () => ({
     sentiment: props.sentiment || 'for',
     isReplyingEnabled: props.isReplyingEnabled || false,
@@ -52,12 +43,8 @@ export default function ArgumentsGeneral(
     defaultValues: defaults(),
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [widget]);
-
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig(values);
+    props.updateConfig({ ...props, ...values });
   }
 
   return (
@@ -71,24 +58,16 @@ export default function ArgumentsGeneral(
           className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
-            name="ideaId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Plan ID</FormLabel>
-                <FormControl>
-                  <Input placeholder="1" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
             name="sentiment"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Sentiment</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  value={field.value}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    props.onFieldChanged(field.name, value);
+                  }}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Voor" />
@@ -113,7 +92,10 @@ export default function ArgumentsGeneral(
                   Is het toegestaan om te reageren op reacties?
                 </FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
+                  onValueChange={(e: string) => {
+                    field.onChange(e === 'true');
+                    props.onFieldChanged(field.name, e === 'true');
+                  }}
                   value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
@@ -138,8 +120,11 @@ export default function ArgumentsGeneral(
                   Is het mogelijk om te stemmen op reacties?
                 </FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
+                  value={field.value ? 'true' : 'false'}
+                  onValueChange={(e: string) => {
+                    field.onChange(e === 'true');
+                    props.onFieldChanged(field.name, e === 'true');
+                  }}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Ja" />
