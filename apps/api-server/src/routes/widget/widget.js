@@ -5,7 +5,6 @@ const fs = require('fs');
 const config = require('config');
 const path = require('path');
 const createError = require('http-errors');
-const flattenObject = require('../../util/flatten-object');
 const widgetSettingsMapping = require('./widget-settings');
 const reactCheck = require('../../util/react-check');
 
@@ -66,7 +65,7 @@ router
         });
 
         if (project) {
-          projectConfig = project.config;
+          projectConfig = project.safeConfig;
         } else {
           createError(404, 'Could not find the project belonging to given id');
         }
@@ -83,7 +82,7 @@ router
         widgetSettings,
         defaultConfig,
         projectConfig,
-        flattenObject(req.widgetConfig)
+        req.widgetConfig
       );
 
       res.header('Content-Type', 'application/javascript');
@@ -137,8 +136,8 @@ router
         componentId,
         widgetSettings,
         defaultConfig,
-        widget.project.config,
-        flattenObject(widget.config)
+        widget.project.safeConfig,
+        widget.config
       );
 
       res.header('Content-Type', 'application/javascript');
@@ -200,12 +199,17 @@ function setConfigsToOutput(
   projectConfig,
   widgetConfig
 ) {
-  const config = JSON.stringify({
+  let config = {
     ...widgetSettings.Config,
     ...defaultConfig,
     ...projectConfig,
     ...widgetConfig,
-  });
+  };
+
+  config = JSON.stringify(config)
+    .replaceAll('\\', '\\\\')
+    .replaceAll("'", "\\'")
+    .replaceAll('`', '\\`');
 
   return getWidgetJavascriptOutput(
     widgetSettings,
