@@ -66,7 +66,7 @@ router
         });
 
         if (project) {
-          projectConfig = project.config;
+          projectConfig = project.safeConfig;
         } else {
           createError(404, 'Could not find the project belonging to given id');
         }
@@ -137,7 +137,7 @@ router
         componentId,
         widgetSettings,
         defaultConfig,
-        widget.project.config,
+        widget.project.safeConfig,
         flattenObject(widget.config)
       );
 
