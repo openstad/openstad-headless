@@ -19,6 +19,12 @@ export default function Projects() {
     'Issue',
   ];
 
+  function addDays(date: string | number | Date, days: number) {
+    let result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result.getTime();
+  }
+
   return (
     <div>
       <PageLayout
@@ -48,31 +54,9 @@ export default function Projects() {
             </div>
             <ul>
               {data.map((project: any) => {
-                if (project.config.project.endDate === null) {
-                  return (
-                    <li
-                      className="grid grid-cols-2 lg:grid-cols-11 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
-                      key={project.id}
-                      onClick={(d) => {
-                        router.push(`/projects/${project.id}/widgets`);
-                      }}>
-                      <Paragraph className="truncate">{project.name}</Paragraph>
-                      <Paragraph className="hidden lg:flex truncate">
-                        {project.createdAt}
-                      </Paragraph>
-                      <Paragraph className="hidden lg:flex truncate -mr-16">
-                        De einddatum van het project is nog niet gezet.
-                      </Paragraph>
-                      <Paragraph className="flex">
-                        <ChevronRight
-                          strokeWidth={1.5}
-                          className="w-5 h-5 my-auto ml-auto"
-                        />
-                      </Paragraph>
-                    </li>
-                  );
-                }
-                if (Date.now > project.config.project.endDate) {
+                const currentDate = Date.now()
+                const anonymizationDate = addDays(project.config.project.endDate, project.config.anonymize.anonymizeUsersXDaysAfterEndDate)
+                if (currentDate > project.config.project.endDate && project.config.project.endDate != null) {
                   return (
                     <li
                       className="grid grid-cols-2 lg:grid-cols-11 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
@@ -86,6 +70,30 @@ export default function Projects() {
                       </Paragraph>
                       <Paragraph className="hidden lg:flex truncate -mr-16">
                         Einddatum is geweest, maar het project loopt nog.
+                      </Paragraph>
+                      <Paragraph className="flex">
+                        <ChevronRight
+                          strokeWidth={1.5}
+                          className="w-5 h-5 my-auto ml-auto"
+                        />
+                      </Paragraph>
+                    </li>
+                  );
+                }
+                if (currentDate > anonymizationDate && project.config.project.endDate != null) {
+                  return (
+                    <li
+                      className="grid grid-cols-2 lg:grid-cols-11 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
+                      key={project.id}
+                      onClick={(d) => {
+                        router.push(`/projects/${project.id}/widgets`);
+                      }}>
+                      <Paragraph className="truncate">{project.name}</Paragraph>
+                      <Paragraph className="hidden lg:flex truncate">
+                        {project.createdAt}
+                      </Paragraph>
+                      <Paragraph className="hidden lg:flex truncate -mr-16">
+                        De gebruikers van het project moeten geanonimiseerd worden.
                       </Paragraph>
                       <Paragraph className="flex">
                         <ChevronRight
