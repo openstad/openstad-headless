@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { FolderOpen, LogOut, Settings, Users } from 'lucide-react';
+import { FolderOpen, LogOut, Settings, Users, AlertTriangle } from 'lucide-react';
 import { Logo } from './logo';
 
 export function Sidenav({
@@ -71,6 +71,23 @@ export function Sidenav({
               }
             />
             {narrow ? '' : 'Gebruikers'}
+          </Button>
+        </Link>
+        <Link href="/issues">
+          <Button
+            variant={location.startsWith('/issues') ? 'secondary' : 'ghost'}
+            className={cn(
+              'w-full flex flex-row justify-start',
+              narrow ? 'p-0 h-10 w-10 justify-center' : null
+            )}
+            onClick={(e) => {}}>
+            <AlertTriangle
+              size="20"
+              className={
+                location.startsWith('/issues') ? 'text-brand' : 'text-foreground'
+              }
+            />
+            {narrow ? '' : 'Issues'}
           </Button>
         </Link>
       </div>

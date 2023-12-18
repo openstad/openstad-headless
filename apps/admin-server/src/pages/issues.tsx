@@ -28,21 +28,13 @@ export default function Projects() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projects"
+        pageHeader="Issues"
         breadcrumbs={[
           {
-            name: 'Projects',
-            url: '/projects',
+            name: 'Issues',
+            url: '/issues',
           },
-        ]}
-        action={
-          <Link href="/projects/create">
-            <Button variant="default" className="flex w-fit">
-              <Plus size="20" className="hidden lg:flex" />
-              Project toevoegen
-            </Button>
-          </Link>
-        }>
+        ]}>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
             <div className="grid grid-cols-1 lg:grid-cols-11 items-center py-2 px-2 border-b border-border">
