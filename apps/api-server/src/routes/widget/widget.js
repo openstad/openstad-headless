@@ -200,13 +200,19 @@ function setConfigsToOutput(
   projectConfig,
   widgetConfig
 ) {
-  const config = JSON.stringify({
+  
+  let config = {
     ...widgetSettings.Config,
     ...defaultConfig,
     ...projectConfig,
     ...widgetConfig,
-  });
-
+  };
+  
+  config = JSON.stringify(config)
+    .replaceAll("\\", "\\\\")
+    .replaceAll("'", "\\'")
+    .replaceAll("`", "\\`");
+  
   return getWidgetJavascriptOutput(
     widgetSettings,
     widgetType,
