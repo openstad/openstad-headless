@@ -28,6 +28,7 @@
     "date-fns": "^2.30.0",
     "eslint": "8.47.0",
     "eslint-config-next": "13.4.17",
+    "http-proxy-middleware": "^2.0.6",
     "leaflet": "^1.9.4",
     "leaflet-draw": "^1.0.4",
     "lucide-react": "^0.276.0",

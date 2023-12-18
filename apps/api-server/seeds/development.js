@@ -555,7 +555,7 @@ module.exports = async function seed(config, db) {
       questionGroupId: 1,
       title: 'Vraag 23',
       description: 'Is het leuk om deze vraag te beantwoorden?',
-      images: [ { src: `process.env.IMAGE_APP_URL}/image/zand.03.j` } ],
+      images: [ { src: `${process.env.IMAGE_APP_URL}/image/zand.03.j` } ],
       type: 'enum-radio',
       dimensions: '["y"]',
       values: '[ { "text": "Ja", "value": { "x": "0", "y": "0" } }, { "text": "Nee", "value": { "x": "100", "y": "100" } } ]',
