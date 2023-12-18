@@ -15,12 +15,9 @@ export default function Projects() {
 
   const headers = [
     'Projectnaam',
-    'Data',
     'Issues',
-    'Status',
-    'Reacties',
     'Likes',
-    'Indiener',
+    'Reacties',
     'Resources',
     'Stemmen',
     'Einddatum',
@@ -64,28 +61,19 @@ export default function Projects() {
                     }}>
                     <Paragraph className="truncate">{project.name}</Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
-                      Data
+                      Geen
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
-                      Issues
+                      {project?.config?.resource?.enableLikes === true ? 'Aan' : 'Uit'}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
-                      Status
+                      {project?.config?.resource?.enableReactions === true ? 'Aan' : 'Uit'}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
-                      Reacties
+                      Open
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
-                      Likes
-                    </Paragraph>
-                    <Paragraph className="hidden lg:flex truncate">
-                      Indiener
-                    </Paragraph>
-                    <Paragraph className="hidden lg:flex truncate">
-                      Resources
-                    </Paragraph>
-                    <Paragraph className="hidden lg:flex truncate">
-                      Stemmen
+                      {project?.config?.votes?.isActive === true ? 'Aan' : 'Uit'}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate -mr-16">
                       {project?.config?.project?.endDate}

@@ -3,11 +3,11 @@ const express = require('express');
 const app = express();
 const imgSteam = require('image-steam');
 const multer = require('multer');
-//const AWS = require('aws-sdk')
-//const multerS3 = require('multer-s3')
-const passport = require('passport');
-const Strategy = require('passport-http-bearer').Strategy;
-const db = require('./db');
+const AWS = require('aws-sdk')
+const multerS3 = require('multer-s3')
+const crypto = require('crypto')
+
+const secret = process.env.IMAGE_VERIFICATION_TOKEN
 
 const multerConfig = {
   onError: function (err, next) {
@@ -85,6 +85,7 @@ if (process.env.S3_ENDPOINT) {
   };
 } else {
   multerConfig.dest = process.env.IMAGES_DIR || 'images/';
+  console.log(process.env.IMAGES_DIR)
 }
 
 const upload = multer(multerConfig);
@@ -111,22 +112,6 @@ const argv = require('yargs')
   .help()
   .argv;
 
-passport.use(new Strategy(
-  function (token, done) {
-    db.Client
-      .findOne({ where: { token } })
-      .then(client => {
-        if (!client) {
-          return done(null, false);
-        }
-        return done(null, client, {scope: 'all'});
-      })
-      .catch(err => {
-        return done(err);
-      })
-  }
-));
-
 /**
  * Instantiate the Image steam server, and proxy it with
  */
@@ -140,6 +125,14 @@ const imageHandler = ImageServer.getHandler();
 ImageServer.on('error', (err) => {
   // Don't log 404 errors, so we do nothing here.
 });
+
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*' )
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, x-http-method-override');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next()
+})
 
 app.get('/image/*',
   function (req, res, next) {
@@ -155,13 +148,14 @@ app.get('/image/*',
  *  The url for creating one Image
  */
 app.post('/image',
-  passport.authenticate('bearer', {session: false}),
   upload.single('image'), (req, res, next) => {
     // req.file is the `image` file
     // req.body will hold the text fields, if there were any
     //
-    if (!res.headerSent) {
-      res.setHeader('Content-Type', 'application/json');
+    const createdCombination = secret + req.query.exp_date
+    const verification = crypto.createHmac("sha256", createdCombination).digest("hex")
+    if(Date.now() < req.query.exp_date && verification === req.query.signature) {
+      console.log("This post has been successfully verified!")
     }
 
     const fileName = req.file.filename || req.file.key;
@@ -171,12 +165,13 @@ app.post('/image',
   });
 
 app.post('/images',
-  passport.authenticate('bearer', {session: false}),
   upload.array('images', 30), (req, res, next) => {
     // req.files is array of `photos` files
     // req.body will contain the text fields, if there were any
-    if (!res.headerSent) {
-      res.setHeader('Content-Type', 'application/json');
+    const createdCombination = secret + req.query.exp_date
+    const verification = crypto.createHmac("sha256", createdCombination).digest("hex")
+    if(Date.now() < req.query.exp_date && verification === req.query.signature) {
+      console.log("This post has been successfully verified!")
     }
 
     const fileName = req.file.filename || req.file.key;
@@ -190,9 +185,10 @@ app.post('/images',
 app.use(function (err, req, res, next) {
   const status = err.status ? err.status : 500;
   console.error(err);
-  if (!res.headerSent) {
-    res.setHeader('Content-Type', 'application/json');
-  }
+  // if (!res.headerSent) {
+  //   res.setHeader('Content-Type', 'application/json');
+  // }
+
   res.status(status).send(JSON.stringify({
     error: err.message
   }));

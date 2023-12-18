@@ -56,10 +56,6 @@ export default function ProjectIdeas() {
                   </Paragraph>
                   <Paragraph className="hidden lg:flex truncate lg:col-span-1 -mr-16">
                     {vote.userId}
-                    <ChevronRight
-                      strokeWidth={1.5}
-                      className="w-5 h-5 my-auto ml-auto"
-                    />
                   </Paragraph>
                   <Paragraph className="flex">
                     <ChevronRight
