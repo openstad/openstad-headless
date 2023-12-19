@@ -31,15 +31,13 @@ const formSchema = z.object({
 export default function ArgumentsGeneral(
   props: CommentsWidgetProps & EditFieldProps<CommentsWidgetProps>
 ) {
-  const defaults = () => ({
-    sentiment: props.sentiment || 'for',
-    isReplyingEnabled: props.isReplyingEnabled || false,
-    isVotingEnabled: props.isVotingEnabled || false,
-  });
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      sentiment: props.sentiment || 'for',
+      isReplyingEnabled: props.isReplyingEnabled || false,
+      isVotingEnabled: props.isVotingEnabled || false,
+    },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
   Tabs,
@@ -76,10 +76,40 @@ export default function WidgetArguments() {
               ) : null}
             </TabsContent>
             <TabsContent value="list" className="p-0">
-              <ArgumentsList />
+              {widget?.config ? (
+                <ArgumentsList
+                  {...widget?.config}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
+                  }
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                />
+              ) : null}
             </TabsContent>
             <TabsContent value="form" className="p-0">
-              <ArgumentsForm />
+              {widget?.config ? (
+                <ArgumentsForm
+                  {...widget?.config}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
+                  }
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                />
+              ) : null}
             </TabsContent>
           </Tabs>
 

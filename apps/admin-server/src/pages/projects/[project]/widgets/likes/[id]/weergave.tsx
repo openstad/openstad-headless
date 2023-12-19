@@ -22,8 +22,8 @@ import * as z from 'zod';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { LikeProps } from '@openstad/likes/src/likes';
-import { useDebounce } from 'rooks';
 import { EditFieldProps } from '@/lib/EditFieldProps';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 
 const formSchema = z.object({
   title: z.string(),
@@ -43,13 +43,7 @@ type Props = {
 };
 
 export default function LikesDisplay(props: Props & EditFieldProps<LikeProps>) {
-  const defaults = () => ({
-    title: props?.title || 'Wat vindt u van dit plan',
-    variant: props?.variant || 'medium',
-    yesLabel: props?.yesLabel || 'Ja',
-    noLabel: props?.noLabel || 'Nee',
-    hideCounters: props?.hideCounters || false,
-  });
+  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   function onSubmit(values: FormData) {
     props.updateConfig(values);
@@ -57,15 +51,14 @@ export default function LikesDisplay(props: Props & EditFieldProps<LikeProps>) {
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      title: props?.title || 'Wat vindt u van dit plan',
+      variant: props?.variant || 'medium',
+      yesLabel: props?.yesLabel || 'Ja',
+      noLabel: props?.noLabel || 'Nee',
+      hideCounters: props?.hideCounters || false,
+    },
   });
-
-  const debounceValue = 300;
-
-  const setFieldDebounced = useDebounce(
-    (name, val) => props.onFieldChanged(name, val),
-    debounceValue
-  );
 
   return (
     <Form {...form} className="p-6 bg-white rounded-md">
@@ -87,7 +80,7 @@ export default function LikesDisplay(props: Props & EditFieldProps<LikeProps>) {
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
-                    setFieldDebounced(field.name, e.target.value);
+                    onFieldChange(field.name, e.target.value);
                   }}
                 />
               </FormControl>
@@ -106,7 +99,7 @@ export default function LikesDisplay(props: Props & EditFieldProps<LikeProps>) {
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
-                    setFieldDebounced(field.name, e.target.value);
+                    onFieldChange(field.name, e.target.value);
                   }}
                 />
               </FormControl>
@@ -125,7 +118,7 @@ export default function LikesDisplay(props: Props & EditFieldProps<LikeProps>) {
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
-                    setFieldDebounced(field.name, e.target.value);
+                    onFieldChange(field.name, e.target.value);
                   }}
                 />
               </FormControl>

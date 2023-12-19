@@ -5,14 +5,14 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { EditFieldProps } from '@/lib/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { CommentsWidgetProps } from '@openstad/comments/src/comments';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -21,29 +21,21 @@ const formSchema = z.object({
   emptyListText: z.string(),
 });
 
-export default function ArgumentsList() {
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig();
-  const defaults = () => ({
-    title: widget?.config?.title || 'Argumenten',
-    emptyListText:
-      widget?.config?.emptyListText || 'Nog geen reacties geplaatst.',
-  });
-
+export default function ArgumentsList(
+  props: CommentsWidgetProps & EditFieldProps<CommentsWidgetProps>
+) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      title: props?.title || 'Argumenten',
+      emptyListText: props?.emptyListText || 'Nog geen reacties geplaatst.',
+    },
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [widget]);
+  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ values });
+    props.updateConfig({ ...props, ...values });
   }
 
   return (
@@ -61,7 +53,13 @@ export default function ArgumentsList() {
               <FormItem>
                 <FormLabel>Titel</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -76,6 +74,10 @@ export default function ArgumentsList() {
                   <Input
                     placeholder="Dit wordt weergegeven wanneer er geen reacties zijn."
                     {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
                   />
                 </FormControl>
               </FormItem>
