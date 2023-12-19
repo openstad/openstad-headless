@@ -93,7 +93,7 @@ function Comments({
         </Banner>
       ) : (
         <div className="input-container">
-          <CommentForm submitComment={submitComment} {...args} />
+          <CommentForm {...args} submitComment={submitComment} />
           <Spacer size={1} />
         </div>
       )}
