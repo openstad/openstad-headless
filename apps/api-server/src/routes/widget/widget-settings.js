@@ -29,4 +29,13 @@ module.exports = {
       ideaId: null,
     },
   },
+  comments: {
+    js: ['@openstad-headless/comments/dist/comments.iife.js'],
+    css: ['@openstad-headless/comments/dist/style.css'],
+    functionName: 'OpenstadHeadlessComments',
+    componentName: 'Comments',
+    defaultConfig: {
+      ideaId: null,
+    },
+  },
 };

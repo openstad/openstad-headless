@@ -7,4 +7,5 @@ export type CommentFormProps = {
   placeholder: string;
   formIntro: string;
   requiredUserRole: string;
+  submitComment: (e: any) => void;
 };

@@ -6,7 +6,15 @@ import { Spacer } from '@openstad-headless/ui/src';
 import { Banner } from '@openstad-headless/ui/src';
 import Comment from './parts/comment.js';
 import CommentForm from './parts/comment-form.js';
-import CommentsPropsType from './types/index';
+import { CommentPropsType } from './types/index';
+import loadWidget from '@openstad-headless/lib/load-widget';
+
+import { BaseProps } from '../../types/base-props';
+import { ProjectSettingProps } from '../../types/project-setting-props';
+
+export type CommentsWidgetProps = BaseProps &
+  ProjectSettingProps &
+  CommentPropsType;
 
 function Comments({
   requiredUserRole = 'member',
@@ -17,7 +25,9 @@ function Comments({
   isClosed = false,
   isClosedText = 'Het inzenden van reacties is niet langer mogelijk',
   ...props
-}: CommentsPropsType) {
+}: CommentsWidgetProps) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const resourceId = urlParams.get('openstadResourceId') || props.resourceId;
 
   const args = {
     requiredUserRole,
@@ -27,75 +37,80 @@ function Comments({
     isReplyingEnabled,
     isClosed,
     isClosedText,
-    ...props
-  } as CommentsPropsType;
+    ...props,
+  } as CommentsWidgetProps;
 
-  const datastore = new DataStore(args);
+  const datastore = new DataStore({
+    projectId: props.projectId,
+    config: { api: props.api },
+  });
 
-  const [currentUser, currentUserError, currentUserIsLoading] = datastore.useCurrentUser({ ...args });
-  const [comments, commentsError, commentsIsLoading] = datastore.useComments({ ...args });
+  const [currentUser, currentUserError, currentUserIsLoading] =
+    datastore.useCurrentUser({ ...args });
+  const [comments, commentsError, commentsIsLoading] = datastore.useComments({
+    projectId: props.projectId,
+    ideaId: resourceId || props.resourceId,
+    sentiment: props.sentiment,
+  });
 
-  async function submitComment(e) {
-
-    setSubmitError(null)
+  async function submitComment(e: any) {
+    setSubmitError(undefined);
     e.preventDefault();
 
     let formData = new FormData(e.target);
-    formData = Object.fromEntries(formData.entries());
+    const formDataCopy = Object.fromEntries(formData.entries());
 
-    formData.ideaId = args.ideaId;
+    formDataCopy.resourceId = `${resourceId}`;
 
     try {
-      if (formData.id) {
-        let comment = comments.find(c => c.id == formData.id);
-        if (formData.parentId) {
-          let parent = comments.find(c => c.id == formData.parentId);
-          comment = parent.replies.find(c => c.id == formData.id);
+      if (formDataCopy.id) {
+        let comment = comments.find((c: any) => c.id == formDataCopy.id);
+        if (formDataCopy.parentId) {
+          let parent = comments.find((c: any) => c.id == formDataCopy.parentId);
+          comment = parent.replies.find((c: any) => c.id == formDataCopy.id);
         }
-        await comment.update(formData)
+        await comment.update(formDataCopy);
       } else {
-        await comments.create(formData)
+        await comments.create(formDataCopy);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.log(err);
-      setSubmitError(err)
+      setSubmitError(err);
     }
-
   }
 
-  let [submitError, setSubmitError] = useState();
+  let [submitError, setSubmitError] = useState<any>();
 
   return (
     <section className="osc">
-      <h4 className="comments-title">{title.replace(/\[\[nr\]\]/, comments.length)}</h4>
+      <h4 className="comments-title">
+        {title.replace(/\[\[nr\]\]/, comments.length)}
+      </h4>
 
       {args.isClosed ? (
         <Banner>
-          <p>{args.closedText}</p>
+          <p>{args.isClosedText}</p>
         </Banner>
       ) : (
         <div className="input-container">
-          <CommentForm submitComment={submitComment} {...args} />
+          <CommentForm {...args} submitComment={submitComment} />
           <Spacer size={1} />
         </div>
       )}
 
       <Spacer size={1} />
 
-      {(comments || []).map((comment, index) => {
+      {Array.isArray(comments) && comments.length === 0 ? (
+        <p>{emptyListText}</p>
+      ) : null}
+      {(comments || []).map((comment: any, index: number) => {
         let attributes = { ...args, comment, submitComment };
-        return (
-          <Comment
-            {...attributes}
-            key={index}
-          />
-        )
+        return <Comment {...attributes} key={index} />;
       })}
     </section>
   );
 }
 
-export {
-  Comments as default,
-  Comments,
-}
+Comments.loadWidget = loadWidget;
+
+export { Comments };
