@@ -2,7 +2,7 @@ module.exports = [
     {
         name: 'general',
         label: 'Algemene instellingen',
-        fields: ['siteTitle', 'hideSiteTitle', 'showAdminBar', 'fbImage', 'favicon', 'modbreakAuthor'],
+        fields: ['projectTitle', 'hideProjectTitle', 'showAdminBar', 'fbImage', 'favicon', 'modbreakAuthor'],
     },
     {
         name: 'analytics',
@@ -12,7 +12,7 @@ module.exports = [
     {
         name: 'api',
         label: 'Url & api instellingen',
-        fields: ['siteId', 'ideaSlug', 'ideaOverviewSlug', 'editIdeaUrl', 'cacheIdeas']
+        fields: ['projectId', 'ideaSlug', 'ideaOverviewSlug', 'editIdeaUrl', 'cacheIdeas']
     },
 
     {
@@ -28,7 +28,7 @@ module.exports = [
     {
         name: 'design',
         label: 'Vormgeving',
-        fields: ['siteLogo', 'logoLink', 'stylesheets', 'inlineCss', 'applyPaletteStyling']
+        fields: ['projectLogo', 'logoLink', 'stylesheets', 'inlineCss', 'applyPaletteStyling']
     },
     {
         name: 'footer',
@@ -62,7 +62,7 @@ module.exports = [
     },
 
     // this is a bit of a hack. We hide the section link with CSS
-    // We're adding formattedFields that get formatted after save, meant for syncing to site siteConfig
+    // We're adding formattedFields that get formatted after save, meant for syncing to project projectConfig
     // In future we either make "proper" invisible schema fields
     // or we move these fields to different editor so syncing is not necessary anymore
     {

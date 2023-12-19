@@ -11,7 +11,7 @@
         </a>
         {% elif data.global.siteLogo %}
         <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-uploaded logo-main-container">
-          <img src="{{apos.attachments.url(data.global.siteLogo)}}" alt="logo" id="logo-image">
+          <img src="{{apos.attachment.url(data.global.siteLogo)}}" alt="logo" id="logo-image">
         </a>
         {% else %}
         <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-default logo-main-container">
