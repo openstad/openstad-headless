@@ -5,41 +5,51 @@ const express = require('express');
 const app = express();
 const _ = require('lodash');
 const apiUrl = process.env.API_URL || 'http://localhost:8111';
-const siteService = require('./services/sites');
+const projectService = require('./services/projects');
 const aposConfig = require('./lib/apos-config');
 const { refresh } = require('less');
-const REFRESH_SITES_INTERVAL = 60000 * 5;
+const REFRESH_PROJECTS_INTERVAL = 60000 * 5;
 const Url = require('node:url');
 
-let sites = {};
+let projects = {};
 const apostropheServer = {};
-const aposStartingUp = {};
 
-async function loadSites () { 
-  const allSites = await siteService.fetchAll();
-  sites = {};
+let startUpIsBusy = false;
+let startUpQueue = [];
 
-  allSites.forEach((site, i) => {
-    console.log('Site fetched: ' + site.domain);
+async function loadProjects () { 
+  try {
 
-    // for convenience and speed we set the domain name as the key
-    sites[site.domain] = site;
-  });
+    const allProjects = await projectService.fetchAll();
+    projects = {};
 
-  cleanUpSites();
+    allProjects.forEach((project, i) => {
+      if (!project.url) return;
+      let url = Url.parse(project.url);
+      console.log('Project fetched: ' + url.host);
+
+      // for convenience and speed we set the domain name as the key
+      projects[url.host] = project;
+    });
+
+    cleanUpProjects();
+    
+  } catch(err) {
+    console.log('Error fetching projects:', err);
+  }
 }
 
-// run through all sites see if anyone is not active anymore and needs to be shut down
-function cleanUpSites() {
+// run through all projects see if anyone is not active anymore and needs to be shut down
+function cleanUpProjects() {
   const runningDomains = Object.keys(apostropheServer);
 
   if (runningDomains) {
     runningDomains.forEach((runningDomain) => {
-      if (!sites[runningDomain]) {
+      if (!projects[runningDomain]) {
         try {
           apostropheServer[runningDomain].apos.destroy();
         } catch (e) {
-          console.log('Error stopping site', e);
+          console.log('Error stopping project', e);
         }
 
         delete apostropheServer[runningDomain];
@@ -49,25 +59,54 @@ function cleanUpSites() {
   }
 }
 
-async function run(id, siteData, options, callback) {
-  const siteConfig = {
+async function doStartServer(domain, req, res) {
+  if (!apostropheServer[domain]) {
+    console.log('Starting up project: ', domain);
+    apostropheServer[domain] = await run(domain, projects[domain], {});
+    apostropheServer[domain].app.set('trust proxy', true);
+    apostropheServer[domain].app(req, res);
+    return Promise.resolve();
+  }
+}
+
+async function run(id, projectData, options, callback) {
+
+  const project = {
     ...aposConfig,
-    baseUrl: process.env.OVERWRITE_DOMAIN ? 'http://localhost:3000' : siteData.config.cms.url,
-    options: siteData,
-    site: siteData,
+    baseUrl: process.env.OVERWRITE_DOMAIN ? 'http://localhost:3000' : projectData.url,
+    options: projectData,
+    project: projectData,
     _id: id,
-    shortName: siteData.config.cms.dbName,
+    shortName: 'openstad-' + projectData.id,
+    mongo: {},
   };
 
-  siteConfig.afterListen = function () {
-    apos._id = site._id;
+  if (process.env.MONGODB_URI) {
+    project.mongo.uri = process.env.MONGODB_URI + '/' + project.shortName;
+  }
+
+  const config = project;
+
+  let assetsIdentifier;
+
+  // for dev projects grab the assetsIdentifier from the first project in order to share assets
+
+  if (Object.keys(apostropheServer).length > 0) {
+    const firstProject = apostropheServer[Object.keys(apostropheServer)[0]];
+    // assetsIdentifier = firstProject.assets.generation;
+  }
+
+  const projectConfig = config;
+
+  projectConfig.afterListen = function () {
+    apos._id = project._id;
     if (callback) {
       return callback(null, apos);
     }
   };
 
   const apos = apostrophe(
-    siteConfig
+    projectConfig
   );
 
   return apos;
@@ -75,12 +114,12 @@ async function run(id, siteData, options, callback) {
 
 app.use(async function (req, res, next) {
   /**
-   * Stop server if Site Api Key is not set.
+   * Stop server if Project Api Key is not set.
    */
-  if (!process.env.SITE_API_KEY) {
-    console.error('Site api key is not set!');
+  if (!process.env.API_KEY) {
+    console.error('Project api key is not set!');
     if (res) {
-      res.status(500).json({ error: 'Site api key is not set!' });
+      res.status(500).json({ error: 'Project api key is not set!' });
     }
     return;
   }
@@ -99,23 +138,23 @@ app.use(async function (req, res, next) {
   }
 
   /**
-   * If sites are not loaded fetch from API
+   * If projects are not loaded fetch from API
    *
    * All we be loaded in memory and refreshed every few minutes
    */
-  if (Object.keys(sites).length === 0) {
-    console.log('Fetching config for all sites');
+  if (Object.keys(projects).length === 0) {
+    console.log('Fetching config for all projects');
 
     try {
-      await loadSites();
+      await loadProjects();
     } catch (err) {
       next(err);
     }
   }
 
-  if (Object.keys(sites).length === 0) {
-    console.log('No config for sites found');
-    return res.status(500).json({ error: 'No sites found' });
+  if (Object.keys(projects).length === 0) {
+    console.log('No config for projects found');
+    return res.status(500).json({ error: 'No projects found' });
   }
 
   // format domain to our specification
@@ -129,7 +168,7 @@ app.use(async function (req, res, next) {
 });
 
 app.use('/config-reset', async function (req, res, next) {
-  await loadSites();
+  await loadProjects();
   next();
 });
 
@@ -138,17 +177,17 @@ app.use('/login', function (req, res, next) {
   const i = req.url.indexOf('?');
   const query = req.url.substr(i + 1);
   const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-  const url = protocol + '://' + domainAndPath + '/oauth/login';
+  const url = protocol + '://' + domainAndPath + '/auth/login';
 
   return res.redirect(url && query ? url + '?' + query : url);
 });
 
-app.get('/oauth/login', (req, res, next) => {
+app.get('/auth/login', (req, res, next) => {
   // check in url if returnTo params is set for redirecting to page
   // req.session.returnTo = req.query.returnTo ? decodeURIComponent(req.query.returnTo) : null;
-  let siteDomain = process.env.OVERWRITE_DOMAIN ? process.env.OVERWRITE_DOMAIN : req.openstadDomain;
-  const site = (sites[siteDomain] ? sites[siteDomain] : false);
-  //const site = sites[0];
+  let projectDomain = process.env.OVERWRITE_DOMAIN ? process.env.OVERWRITE_DOMAIN : req.openstadDomain;
+  const project = (projects[projectDomain] ? projects[projectDomain] : false);
+  //const project = projects[0];
 
   //    req.session.save(() => {
   const thisHost = req.headers['x-forwarded-host'] || req.get('host');
@@ -162,7 +201,9 @@ app.get('/oauth/login', (req, res, next) => {
     returnUrl = returnUrl + pathToReturnTo;
   }
 
-  let url = `${apiUrl}/oauth/site/${site.id}/login?redirectUrl=${returnUrl}`;
+  returnUrl = encodeURIComponent(returnUrl + '?logintoken=[[jwt]]');
+
+  let url = `${apiUrl}/auth/project/${project.id}/login?redirectUri=${returnUrl}`;
   url = req.query.useOauth ? url + '&useOauth=' + req.query.useOauth : url;
   url = req.query.loginPriviliged ? url + '&loginPriviliged=1' : url + '&forceNewLogin=1'; // ;
 
@@ -170,39 +211,60 @@ app.get('/oauth/login', (req, res, next) => {
 });
 
 app.use(async function (req, res, next) {
-  // format domain to our specification
-  let domain = req.headers['x-forwarded-host'] || req.get('host');
-  domain = domain.replace([ 'http://', 'https://' ], [ '' ]);
-  domain = domain.replace([ 'www' ], [ '' ]);
-
-  // for dev purposes allow overwrite domain name
-  domain = process.env.OVERWRITE_DOMAIN ? process.env.OVERWRITE_DOMAIN : domain;
-
-  if (!sites[domain]) {
-    console.log('Site not found: ', domain);
-    res.status(404).json({ error: 'Site not found' });
-    return;
-  }
-
-  if (!apostropheServer[domain]) {
-    console.log('Starting up site: ', domain);
-    apostropheServer[domain] = await run(domain, sites[domain], {});
-  }
 
   try {
-    aposStartingUp[domain] = false;
-    apostropheServer[domain].app.set('trust proxy', true);
-    apostropheServer[domain].app(req, res);
-  } catch (e) {
-    console.log('Error starting up site: ', domain, e);
 
+    // format domain to our specification
+    let domain = req.headers['x-forwarded-host'] || req.get('host');
+    domain = domain.replace([ 'http://', 'https://' ], [ '' ]);
+    domain = domain.replace([ 'www' ], [ '' ]);
+
+    // for dev purposes allow overwrite domain name
+    domain = process.env.OVERWRITE_DOMAIN ? process.env.OVERWRITE_DOMAIN : domain;
+
+    if (!projects[domain]) {
+      console.log('Project not found: ', domain);
+      res.status(404).json({ error: 'Project not found' });
+      return;
+    }
+
+    // use existing server
+    if (apostropheServer[domain]) {
+      return apostropheServer[domain].app(req , res);
+    }
+
+    // busy? add to queue
+    if (startUpIsBusy) {
+      return startUpQueue.push([domain, req, res]);
+    } else {
+      startUpIsBusy = true;
+    }
+
+    await doStartServer(domain, req, res)
+
+    // handle queue
+    while (startUpQueue.length) {
+      let nextInQueue = startUpQueue.shift();
+      let [ nextDomain, nextReq, nextRes ] = nextInQueue;
+      if (apostropheServer[nextDomain]) {
+        apostropheServer[nextDomain].app(nextReq, nextRes);
+      } else {
+        doStartServer(...nextInQueue);
+      } 
+    } 
+
+    startUpIsBusy = false;
+
+  } catch (e) {
+    console.log('Error starting up project: ', domain, e);
     res.status(500).json({
-      error: 'An error occured running site ',
+      error: 'An error occured running project ',
       domain
     });
   }
+
 });
 
-setInterval(loadSites, REFRESH_SITES_INTERVAL);
+setInterval(loadProjects, REFRESH_PROJECTS_INTERVAL);
 
 app.listen(process.env.PORT || 3000);
