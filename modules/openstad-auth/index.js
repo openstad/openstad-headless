@@ -3,7 +3,7 @@
  * and if valid fetches the user data
  */
 
-const rp = require('request-promise');
+const fetch = require('node-fetch');
 const Url = require('url');
 const generateRandomPassword = () => {
   return require('crypto').randomBytes(64).toString('hex');
@@ -33,7 +33,7 @@ function removeURLParameter(url, parameter) {
 module.exports = {
   middleware(self) {
     return {
-      authenticate (req, res, next) {
+      async authenticate (req, res, next) {
         if (!req.session) {
           next();
         }
@@ -48,7 +48,7 @@ module.exports = {
           return self.apos.permissions.can(req, permission);
         };
 
-        if (req.query.jwt) {
+        if (req.query.logintoken) {
           const thisHost = req.headers['x-forwarded-host'] || req.get('host');
           const protocol = req.headers['x-forwarded-proto'] || req.protocol;
           const fullUrl = protocol + '://' + thisHost + req.originalUrl;
@@ -56,12 +56,12 @@ module.exports = {
           const fullUrlPath = parsedUrl.path;
 
           // remove the JWT Parameter otherwise keeps redirecting
-          let returnTo = req.session && req.session.returnTo ? req.session.returnTo : removeURLParameter(fullUrlPath, 'jwt');
+          let returnTo = req.session && req.session.returnTo ? req.session.returnTo : removeURLParameter(fullUrlPath, 'logintoken');
 
           // make sure references to external urls fail, only take the path
           returnTo = Url.parse(returnTo, true);
           returnTo = returnTo.path;
-          req.session.jwt = req.query.jwt;
+          req.session.jwt = req.query.logintoken;
           req.session.returnTo = null;
 
           req.session.save(() => {
@@ -69,6 +69,7 @@ module.exports = {
           });
 
         } else {
+
           const jwt = req.session.jwt;
           const apiUrl = process.env.API_URL;
 
@@ -76,17 +77,8 @@ module.exports = {
             next();
           } else {
 
-            const siteId = req.site.id;
-            const url = siteId ? `${apiUrl}/oauth/site/${siteId}/me` : `${apiUrl}/oauth/me`;
-            const options = {
-              uri: url,
-              headers: {
-                Accept: 'application/json',
-                'X-Authorization': `Bearer ${jwt}`,
-                'Cache-Control': 'no-cache'
-              },
-              json: true // Automatically parses the JSON string in the response
-            };
+            const projectId = req.project.id;
+            const url = projectId ? `${apiUrl}/auth/project/${projectId}/me` : `${apiUrl}/auth/me`;
 
             const setUserData = function (req, next) {
 
@@ -117,28 +109,43 @@ module.exports = {
             if (req.user && req.session.openstadUser && ((date - dateToCheck) < FIVE_MINUTES)) {
               setUserData(req, next);
             } else {
-              rp(options)
-                .then(function (user) {
-                  if (user && Object.keys(user).length > 0 && user.id) {
-                    req.session.openstadUser = user;
-                    req.session.lastJWTCheck = new Date().toISOString();
 
-                    setUserData(req, next);
-                  } else {
-                    // if not valid clear the JWT and redirect
-                    req.session.destroy(() => {
-                      res.redirect('/');
-
-                    });
-                  }
-
+              try {
+                let response = await fetch(url, {
+                  headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${jwt}`,
+                    'Cache-Control': 'no-cache'
+                  },
                 })
-                .catch((e) => {
+                if (!response.ok) {
+                  console.log(response);
+                  throw new Error('Fetch failed')
+                }
+
+                let user = await response.json();
+
+                if (user && Object.keys(user).length > 0 && user.id) {
+
+                  req.session.openstadUser = user;
+                  req.session.lastJWTCheck = new Date().toISOString();
+
+                  setUserData(req, next);
+
+                } else {
+                  // if not valid clear the JWT and redirect
                   req.session.destroy(() => {
                     res.redirect('/');
-
                   });
+                }
+
+              } catch(err) {
+                console.log(err);
+                req.session.destroy(() => {
+                  res.redirect('/');
                 });
+              }
+
             }
           }
         }
