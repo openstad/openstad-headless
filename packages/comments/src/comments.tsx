@@ -100,6 +100,9 @@ function Comments({
 
       <Spacer size={1} />
 
+      {Array.isArray(comments) && comments.length === 0 ? (
+        <p>{emptyListText}</p>
+      ) : null}
       {(comments || []).map((comment: any, index: number) => {
         let attributes = { ...args, comment, submitComment };
         return <Comment {...attributes} key={index} />;
