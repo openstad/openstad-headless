@@ -35,7 +35,7 @@ module.exports = {
     functionName: 'OpenstadHeadlessComments',
     componentName: 'Comments',
     defaultConfig: {
-      ideaId: null,
+      resourceId: null,
     },
   },
 };
