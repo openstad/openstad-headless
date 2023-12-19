@@ -20,7 +20,7 @@ module.exports = (self, options) => {
     const destinationLanguage = req.body.targetLanguageCode;
 
     if (destinationLanguage === 'nl') {
-      console.log(`Target language is dutch, not translating and responding with the dutch sentences received for site ${origin}`);
+      console.log(`Target language is dutch, not translating and responding with the dutch sentences received for project ${origin}`);
       return res.json(content);
     }
 
@@ -66,7 +66,7 @@ module.exports = (self, options) => {
     if (untranslatedElements.length) {
 
       const characterCount = untranslatedElements.map(word => word.length).reduce((total, a) => total + a, 0);
-      console.log(`Fetch missing translations from DeepL for site: ${origin} with charactersize of ${characterCount} and destination language ${destinationLanguage}`);
+      console.log(`Fetch missing translations from DeepL for project: ${origin} with charactersize of ${characterCount} and destination language ${destinationLanguage}`);
 
       try {
 
@@ -139,7 +139,7 @@ module.exports = (self, options) => {
 
         // Todo: deserialize formatting fields to get values from the api?
 
-        req.piece = self.apos.openstadApi.syncApiFields(_piece, self.apiSyncFields, req.data.global.siteConfig, req.data.global.workflowLocale);
+        req.piece = self.apos.openstadApi.syncApiFields(_piece, self.apiSyncFields, req.data.global.projectConfig, req.data.global.workflowLocale);
 
         return next();
       });
@@ -170,7 +170,7 @@ module.exports = (self, options) => {
 
     if (req.data.global) {
       try {
-        await self.apos.openstadApi.updateSiteConfig(req, req.data.global.siteConfig, doc, self.apiSyncFields);
+        await self.apos.openstadApi.updateProjectConfig(req, req.data.global.projectConfig, doc, self.apiSyncFields);
       } catch (err) {
         console.error(err);
       }
@@ -181,32 +181,32 @@ module.exports = (self, options) => {
     eventEmitter.emit('clearCache');
   }
 
-  self.overrideGlobalDataWithSiteConfig = (req, res, next) => {
-    const siteConfig = self.apos.settings.getOption(req, 'siteConfig');
+  self.overrideGlobalDataWithProjectConfig = (req, res, next) => {
+    const projectConfig = self.apos.settings.getOption(req, 'projectConfig');
 
-    // Take default site ID, possible to overwritten
-    if (!req.data.global.siteId) {
-      req.data.global.siteId = siteConfig.id;
+    // Take default project ID, possible to overwritten
+    if (!req.data.global.projectId) {
+      req.data.global.projectId = projectConfig.id;
     }
 
     // empty
-    //  req.data.global.siteTitle = '';
+    //  req.data.global.projectTitle = '';
 
-    req.data.global.siteConfigTitle = siteConfig.title;
+    req.data.global.projectConfigTitle = projectConfig.title;
 
-    //  req.data.global.siteConfig = siteConfig;
+    //  req.data.global.projectConfig = projectConfig;
     req.data.originalUrl = req.originalUrl;
 
     //add query tot data object, so it can be used
     req.data.query = req.query;
 
     //
-    if (siteConfig && siteConfig.area && siteConfig.area.polygon) {
-      req.data.global.mapPolygons = siteConfig && siteConfig.area && siteConfig.area.polygon || '';
+    if (projectConfig && projectConfig.area && projectConfig.area.polygon) {
+      req.data.global.mapPolygons = projectConfig && projectConfig.area && projectConfig.area.polygon || '';
     }
 
-    // Todo: remove this fallback when every site use the areaId from the api.
-    // This is the fallback for old sites, polygons were hardcoded in the site
+    // Todo: remove this fallback when every project use the areaId from the api.
+    // This is the fallback for old projects, polygons were hardcoded in the project
     if (req.data.global.mapPolygons === '' && req.data.global.mapPolygonsKey) {
       req.data.global.mapPolygons = polygons[req.data.global.mapPolygonsKey];
     }

@@ -15,31 +15,141 @@ module.exports = {
   middleware(self) {
     return {
       async enrich(req, res, next) {
-        // console.log(' addGlobal');
-        req.data.siteConfig = {
+        req.data.projectConfig = {
           organisationName: 'Amsterdam'
         };
+        req.data.global.projectName = 'Openstad';
+        req.project = self.apos.options.project;          
 
-        req.data.global.siteName = 'Openstad';
-        req.site = self.apos.options.site;          
-        next();
+        // system defaults
+        let cmsDefaults = process.env.CMS_DEFAULTS;
+        try {
+          if (typeof cmsDefaults == 'string') cmsDefaults = JSON.parse(cmsDefaults);
+        } catch(err) {}
+
+        // analytics
+        if (req.data.global.analyticsType == 'serverdefault') {
+          req.data.global.analyticsType = cmsDefaults.analyticsType;
+          req.data.global.analyticsIdentifier = cmsDefaults.analyticsIdentifier;
+          req.data.global.analyticsCodeBlock = cmsDefaults.analyticsCodeBlock;
+        }
+
+        // cookie consent
+        req.data.global.cookieConsentDefined = req.data.global.useCookieWarning ? req.cookies && typeof(req.cookies['openstad-cookie-consent']) != 'undefined' : undefined;
+        req.data.global.cookieConsent = req.data.global.useCookieWarning ? req.cookies && req.cookies['openstad-cookie-consent'] == 1 : true;
+
+        return next();
       }
     };
   },
+
   fields: {
+
     add: {
-      githubUrl: {
-        type: 'url',
-        label: 'Github organization url'
-      }
+      siteTitle: {
+        type: 'string',
+        label: 'Site titel'
+      },
+
+      siteLogo: {
+        type: 'attachment',
+        label: 'Site logo',
+        fileGroup: 'images'
+      },
+
+      analyticsType:   {
+        type: 'select',
+        permission: 'admin',
+        label: 'Analytics type',
+        def: 'none',
+        choices: [
+          {
+            value: 'none',
+            label: "No analytics",
+          },
+          {
+            value: 'google-analytics',
+            label: "Google Analytics (with a property like G-xxxxx)",
+            showFields: ['analyticsIdentifier']
+          },
+          {
+            value: 'custom',
+            label: "Custom: use a custom codeblock",
+            showFields: ['analyticsCodeBlock']
+          },
+          {
+            value: 'serverdefault',
+            label: "Use the server default settings",
+          },
+        ]
+      },
+
+      analyticsIdentifier: {
+        type: 'string',
+        permission: 'admin',
+        label: 'Google Analytics Property ID (like G-xxxxx)',
+        if: {
+          analyticsType: 'google-analytics'
+        },
+      },
+
+      analyticsCodeBlock: {
+        type: 'string',
+        permission: 'admin',
+        label: 'Custom code',
+        if: {
+          analyticsType: 'custom'
+        },
+      },
+
+      useCookieWarning: {
+        type: 'boolean',
+        label: 'Use a cookie warning',
+        def: false,
+        choices: [
+          {
+            label: 'Yes',
+            value: true,
+            showFields: [
+              'cookiePageLink'
+            ]
+          },
+          {
+            label: 'No',
+            value: false
+          }
+        ]
+      },
+
+      cookiePageLink: {
+        type: 'string',
+        label: "Link to 'about cookies' page",
+        def: '/about-cookies',
+        required: true,
+        if: {
+          useCookieWarning: true
+        },
+      },
+
+
     },
+
     group: {
       basics: {
-        label: 'Basics',
-        fields: [ 'githubUrl' ]
-      }
+        label: 'Algemene instellingen',
+        fields: [ 'siteTitle', 'siteLogo' ],
+      },
+      analitics: {
+        label: 'Analitics',
+        fields: [ 'analyticsType', 'analyticsIdentifier', 'analyticsCodeBlock' ],
+      },
+      cookies: {
+        label: 'Cookie instellingen',
+        fields: [ 'useCookieWarning', 'cookiePageLink' ],
+      },
     }
   }
+
 };
 
 
@@ -51,7 +161,7 @@ module.exports = {
   improve: 'apostrophe-global',
   addFields: fields,
   afterConstruct: function(self) {
-    self.expressMiddleware.push(self.overrideGlobalDataWithSiteConfig);
+    self.expressMiddleware.push(self.overrideGlobalDataWithProjectConfig);
   },
   construct: function (self, options) {
     require('./lib/api')(self, options);
@@ -76,8 +186,8 @@ module.exports = {
     });
 
     self.apos.app.use((req, res, next) => {
-      const siteConfig = self.apos.settings.getOption(req, 'siteConfig');
-      // load env sheets that have been set for complete Environment, not just one site specific
+      const projectConfig = self.apos.settings.getOption(req, 'projectConfig');
+      // load env sheets that have been set for complete Environment, not just one project specific
       if (process.env.STYLESHEETS) {
         const sheets = process.env.STYLESHEETS.split(',');
         req.data.envStyleSheets = sheets;
@@ -85,24 +195,24 @@ module.exports = {
 
       // for legacy purposes, remove to better solutions at some point
       // Amsterdam
-      if (!req.data.global.siteLogo && process.env.LOGO_AMSTERDAM && process.env.LOGO_AMSTERDAM === 'yes') {
+      if (!req.data.global.projectLogo && process.env.LOGO_AMSTERDAM && process.env.LOGO_AMSTERDAM === 'yes') {
         //make sure we
-        req.data.global.siteLogo = 'amsterdam';
+        req.data.global.projectLogo = 'amsterdam';
       }
 
 
 
       // WARNING!!!! ApostrhopeCMS exposes global values in HTML often, so DONT add senstive info in global
-      req.data.global.siteConfig = {
-        ideas: siteConfig.ideas,
-        articles: siteConfig.articles,
-        polls: siteConfig.polls,
-        votes: siteConfig.votes,
-        area: siteConfig.area,
-        arguments:siteConfig.arguments,
-        openstadMap:siteConfig.openstadMap,
+      req.data.global.projectConfig = {
+        ideas: projectConfig.ideas,
+        articles: projectConfig.articles,
+        polls: projectConfig.polls,
+        votes: projectConfig.votes,
+        area: projectConfig.area,
+        arguments:projectConfig.arguments,
+        openstadMap:projectConfig.openstadMap,
         users: {
-          allowUseOfNicknames: siteConfig.users && siteConfig.users.allowUseOfNicknames ? siteConfig.users.allowUseOfNicknames : false
+          allowUseOfNicknames: projectConfig.users && projectConfig.users.allowUseOfNicknames ? projectConfig.users.allowUseOfNicknames : false
         }
       };
 

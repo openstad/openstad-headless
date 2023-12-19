@@ -11,7 +11,9 @@ page or piece.') }}
 
 {% block beforeMain %}
 <div class="bp-wrapper">
+  {% include 'partials/cookie-warning.html' %}
   {% include 'partials/header.html' %}
+  {% include 'partials/analytics.html' %}
   {% include 'partials/navbar.html' %}
   <div class="page">
     {% endblock %}

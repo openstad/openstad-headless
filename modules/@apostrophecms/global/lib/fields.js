@@ -61,8 +61,8 @@ const resultObject = (inputArray) => {
 module.exports = resultObject([
   {
     type: 'string',
-    name: 'siteTitle',
-    label: 'Site title',
+    name: 'projectTitle',
+    label: 'Project title',
   },
   {
     name: 'fbImage',
@@ -146,32 +146,6 @@ module.exports = resultObject([
     required: false
   },
   {
-    type: 'boolean',
-    name: 'useCookieWarning',
-    label: 'Use a cookie warning',
-    def: false,
-    choices: [
-      {
-        label: 'Yes',
-        value: true,
-        showFields: [
-          'cookiePageLink'
-        ]
-      },
-      {
-        label: 'No',
-        value: false
-      }
-    ]
-  },
-  {
-    type: 'string',
-    name: 'cookiePageLink',
-    label: "Link to 'about cookies' page",
-    def: '/about-cookies',
-    required: true,
-  },
-  {
     type: 'string',
     name: 'captchaRefreshText',
     label: "Text for captcha refresh",
@@ -179,67 +153,12 @@ module.exports = resultObject([
 
   {
     type: 'boolean',
-    name: 'hideSiteTitle',
-    label: 'Hide the site title in the header?',
+    name: 'hideProjectTitle',
+    label: 'Hide the project title in the header?',
     def: true
   },
-
   {
-    type: 'select',
-    name: 'analyticsType',
-    permission: 'admin',
-    label: 'Analytics type',
-    def: 'none',
-    choices: [
-      {
-        value: 'none',
-        label: "No analytics",
-      },
-      {
-        value: 'google-analytics-old-style',
-        label: "Google Analytics old style (with a property like UA-xxxxx)",
-        showFields: ['analyticsIdentifier']
-      },
-      {
-        value: 'google-analytics-new-style',
-        label: "Google Analytics new style (with a property like G-xxxxx)",
-        showFields: ['analyticsIdentifier']
-      },
-      {
-        value: 'custom',
-        label: "Custom: use a custom codeblock",
-        showFields: ['analyticsCodeBlock']
-      },
-      {
-        value: 'serverdefault',
-        label: "Use the server default settings",
-      },
-    ]
-  },
-
-  {
-    type: 'string',
-    name: 'analyticsCodeBlock',
-    permission: 'admin',
-    label: 'Custom code',
-    textarea: true,
-  },
-
-  {
-    type: 'string',
-    name: 'analyticsIdentifier',
-    permission: 'admin',
-    label: 'Google Analytics Property ID (like UA-xxxxx or G-xxxxx)'
-  },
-
-  {
-    type: 'string',
-    name: 'tagmanager',
-    permission: 'admin',
-    label: 'Google Tag Manager Property ID (like GTM-xxxxx)'
-  },
-  {
-    name: 'siteLogo',
+    name: 'projectLogo',
     type: 'attachment',
     svgImages: true,
     label: 'Logo',
@@ -252,8 +171,8 @@ module.exports = resultObject([
     type: 'string',
     label: 'Formatted Logo',
     formatField: function (value, apos, doc, req) {
-      const siteUrl = apos.settings.getOption(req, 'siteUrl');
-      return  doc.siteLogo ? siteUrl + apos.attachments.url(doc.siteLogo) : '';
+      const projectUrl = apos.settings.getOption(req, 'projectUrl');
+      return  doc.projectLogo ? projectUrl + apos.attachments.url(doc.projectLogo) : '';
     },
     apiSyncField: 'styling.logo',
   },
@@ -616,7 +535,7 @@ module.exports = resultObject([
     name: 'cacheIdeas',
     permission: 'admin',
     type: 'boolean',
-    label: 'Cache ideas? This optimises performance for sites, only works for sites where ideas are static, most voting sits'
+    label: 'Cache ideas? This optimises performance for projects, only works for projects where ideas are static, most voting sits'
   },
   {
     name: 'newsletterModalTitle',
