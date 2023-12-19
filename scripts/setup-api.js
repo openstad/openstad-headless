@@ -3,7 +3,7 @@ const util = require('util');
 const apiDb = require('promise-mysql');
 const execute = require('./execute');
 
-module.exports = async function setupApi() {
+module.exports = async function setupApi(actions) {
 
   console.log('==============================');
   console.log('Setup API');
@@ -74,29 +74,35 @@ AUTH_FIXEDAUTHTOKENS='[{"token":"${process.env.API_FIXED_AUTH_KEY}","userId":"1"
 
 IMAGE_APP_URL=process.env.IMAGE_APP_URL
 `
-    console.log('------------------------------');
-    console.log('Create config file');
-    console.log('API_FIXED_AUTH_KEY:', process.env.API_FIXED_AUTH_KEY);
-    await fs.writeFileSync('./apps/api-server/.env', apiConfig);
-
-    // npm i
-    console.log('------------------------------');
-    console.log('Execute `npm i`');
-    await execute('npm', ['i'], { cwd: './apps/api-server' });
-
-    // init db
-    if (1 || doCreateDBTables) { // TODO: hij update voor nu altijd
+    if (actions['create config']) {
       console.log('------------------------------');
-      console.log('Init API database');
-      await execute('npm', ['run', 'init-database'], { cwd: './apps/api-server' });
-    } else {
-      console.log('------------------------------');
-      console.log('API database already initialized');
+      console.log('Create config file');
+      console.log('API_FIXED_AUTH_KEY:', process.env.API_FIXED_AUTH_KEY);
+      await fs.writeFileSync('./apps/api-server/.env', apiConfig);
     }
+    
+    // npm i
+    if (actions['npm install']) {
+      console.log('------------------------------');
+      console.log('Execute `npm i`');
+      await execute('npm', ['i'], { cwd: './apps/api-server' });
+    }
+    
+    // init db
+    if (actions['init database']) {
+      if (1 || doCreateDBTables) { // TODO: hij update voor nu altijd
+        console.log('------------------------------');
+        console.log('Init API database');
+        await execute('npm', ['run', 'init-database'], { cwd: './apps/api-server' });
+      } else {
+        console.log('------------------------------');
+        console.log('API database already initialized');
+      }
 
-    // console.log('Update database records');
-    // TODO: je kunt met process.env.WHATEVER de seeds vullen vanaf hier, en zo de hele basis setup configureerbar maken
-  
+      // console.log('Update database records');
+      // TODO: je kunt met process.env.WHATEVER de seeds vullen vanaf hier, en zo de hele basis setup configureerbar maken
+    }
+    
   } catch(err) {
     console.log('------------------------------');
     console.log('API initialisatie error');

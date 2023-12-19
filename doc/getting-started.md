@@ -44,6 +44,10 @@ You now have four servers, running on localhost:31410, 31430, 31450 and 31470. T
 
 You are now done. Everything below this line is extra information for the incurably curious.
 
+### important notes for the admin server > widget management pages
+Each widget management page shows a preview of how the widget will look given a set of configurations.
+To make this work however, one must first use the command "npm run build" in the specific widget (in the packages > [widget] folder). This is only neccesary in development. In production these widgets are already prebuild.
+
 ### Code
 
 The code is mounted from the `/apps` dirs in the repo, and run using `nodemon`. That means that changes in the code will immediately be available.

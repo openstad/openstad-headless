@@ -3,7 +3,7 @@ const util = require('util');
 const imgDb = require('promise-mysql');
 const execute = require('./execute');
 
-module.exports = async function setupImageServer() {
+module.exports = async function setupImageServer(actions) {
 
   console.log('==============================');
   console.log('Setup image server');
@@ -66,35 +66,42 @@ THROTTLE_CC_PROCESSORS=${process.env.IMAGE_THROTTLE_CC_PROCESSORS}
 THROTTLE_CC_PREFETCHER=${process.env.IMAGE_THROTTLE_CC_PREFETCHER}
 THROTTLE_CC_REQUESTS=${process.env.IMAGE_THROTTLE_CC_REQUESTS}
 `
-    console.log('------------------------------');
-    console.log('Create config file');
-    await fs.writeFileSync('./apps/image-server/.env', imgConfig);
 
-    // npm i
-    console.log('------------------------------');
-    console.log('Execute `npm i`');
-    await execute('npm', ['i'], { cwd: './apps/image-server' });
-
-    // init db
-    if (1 || doCreateDBTables) { // TODO: hij update voor nu altijd
+    if (actions['create config']) {
       console.log('------------------------------');
-      console.log('Init IMAGE database');
-      await execute('npm', ['run', 'init-database'], { cwd: './apps/image-server' });
-    } else {
-      console.log('------------------------------');
-      console.log('IMAGE database already initialized');
+      console.log('Create config file');
+      await fs.writeFileSync('./apps/image-server/.env', imgConfig);
     }
 
-    // create client
-    // rows = await connection.query('SELECT * FROM clients;')
-    // if (rows && rows.length) {
-    //   console.log('Now update existing client');
-    //   await connection.query('UPDATE clients SET clientName = ?, token = ?, displayName = ? WHERE id = ?', [process.env.IMAGE_CLIENT_NAME, process.env.IMAGE_CLIENT_TOKEN, process.env.IMAGE_CLIENT_DISPLAY_NAME, 1 ]);
-    // } else {
-    //   console.log('Create a client');
-    //   await connection.query('INSERT INTO clients VALUES( ?, ?, ?, ?, NOW(), NOW() );', [1, process.env.IMAGE_CLIENT_NAME, process.env.IMAGE_CLIENT_TOKEN, process.env.IMAGE_CLIENT_DISPLAY_NAME])
-    // }
+    // npm i
+    if (actions['npm install']) {
+      console.log('------------------------------');
+      console.log('Execute `npm i`');
+      await execute('npm', ['i'], { cwd: './apps/image-server' });
+    }
+    
+    // init db
+    if (actions['init database']) {
+      if (1 || doCreateDBTables) { // TODO: hij update voor nu altijd
+        console.log('------------------------------');
+        console.log('Init IMAGE database');
+        await execute('npm', ['run', 'init-database'], { cwd: './apps/image-server' });
+      } else {
+        console.log('------------------------------');
+        console.log('IMAGE database already initialized');
+      }
 
+      // create client
+      // rows = await connection.query('SELECT * FROM clients;')
+      // if (rows && rows.length) {
+      //   console.log('Now update existing client');
+      //   await connection.query('UPDATE clients SET clientName = ?, token = ?, displayName = ? WHERE id = ?', [process.env.IMAGE_CLIENT_NAME, process.env.IMAGE_CLIENT_TOKEN, process.env.IMAGE_CLIENT_DISPLAY_NAME, 1 ]);
+      // } else {
+      //   console.log('Create a client');
+      //   await connection.query('INSERT INTO clients VALUES( ?, ?, ?, ?, NOW(), NOW() );', [1, process.env.IMAGE_CLIENT_NAME, process.env.IMAGE_CLIENT_TOKEN, process.env.IMAGE_CLIENT_DISPLAY_NAME])
+      // }
+    }
+    
   } catch(err) {
     console.log('------------------------------');
     console.log('Image server initialisatie error');

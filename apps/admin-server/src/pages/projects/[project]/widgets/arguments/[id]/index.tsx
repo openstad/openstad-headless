@@ -44,7 +44,7 @@ export default function WidgetArguments() {
               <TabsTrigger value="form">Formulier</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
-              <Preview type="arguments" />
+              {/* <Preview type="arguments" /> */}
             </TabsContent>
             <TabsContent value="general" className="p-0">
               <ArgumentsGeneral />

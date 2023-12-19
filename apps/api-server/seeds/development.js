@@ -510,7 +510,7 @@ module.exports = async function seed(config, db) {
       projectId: 2,
       type: 'arguments',
       description: 'An arguments widget',
-      config: {"general":{"ideaId":1,"sentiment":"for","isReplyingEnabled":true,"isVotingEnabled":true}},
+      config: {"general":{"resourceId":1,"sentiment":"for","isReplyingEnabled":true,"isVotingEnabled":true}},
     });
 
     console.log('    a choices-guide');
@@ -555,7 +555,7 @@ module.exports = async function seed(config, db) {
       questionGroupId: 1,
       title: 'Vraag 23',
       description: 'Is het leuk om deze vraag te beantwoorden?',
-      images: [ { src: `process.env.IMAGE_APP_URL}/image/zand.03.j` } ],
+      images: [ { src: `${process.env.IMAGE_APP_URL}/image/zand.03.j` } ],
       type: 'enum-radio',
       dimensions: '["y"]',
       values: '[ { "text": "Ja", "value": { "x": "0", "y": "0" } }, { "text": "Nee", "value": { "x": "100", "y": "100" } } ]',

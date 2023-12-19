@@ -47,7 +47,7 @@ export default function WidgetResourcesMap() {
               <TabsTrigger value="content">Content</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
-              <Preview type="resourcesmap" />
+              {/* <Preview type="resourcesmap" /> */}
             </TabsContent>
             <TabsContent value="map" className="p-0">
               <WidgetResourcesMapMaps />

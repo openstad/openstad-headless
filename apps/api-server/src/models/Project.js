@@ -4,6 +4,7 @@ const moment = require('moment');
 const configField = require('./lib/config-field');
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 const authSettings = require('../util/auth-settings');
+const {getSafeConfig} = require("./lib/safe-config");
 
 module.exports = function (db, sequelize, DataTypes) {
 
@@ -45,6 +46,16 @@ module.exports = function (db, sequelize, DataTypes) {
         viewableBy: 'editor',
         updateableBy: 'editor',
       },
+    },
+    
+    safeConfig: {
+      type: Sequelize.DataTypes.VIRTUAL,
+      get() {
+        return getSafeConfig(this.getDataValue('config'));
+      },
+      set (value) {
+        throw new Error ('`safeConfig` is a virtual field and cannot be set')
+      }
     },
 
     emailConfig: {
@@ -153,7 +164,7 @@ module.exports = function (db, sequelize, DataTypes) {
             })
 
         if (found.length > 0) throw Error('Cannot delete an active project - first anonymize all users');
-        return 
+        return
       },
 
     },
@@ -237,7 +248,7 @@ module.exports = function (db, sequelize, DataTypes) {
             let res = await user.doAnonymize();
             user.project = null;
           }, 1000 / amountOfUsersPerSecond)
-        })       
+        })
         .then(result => Promise.resolve() )
           .catch(function (err) {
             throw err;

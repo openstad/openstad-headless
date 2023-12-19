@@ -24,7 +24,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  ideaId: z.coerce.number(),
+  resourceId: z.coerce.number(),
   sentiment: z.enum(['for', 'against', 'none']),
   isReplyingEnabled: z.boolean(),
   isVotingEnabled: z.boolean(),
@@ -38,11 +38,11 @@ export default function ArgumentsGeneral() {
     isLoading: isLoadingWidget,
     updateConfig, } = useWidgetConfig();
 
-    const defaults = () =>({
-      ideaId: widget?.config?.[category]?.ideaId || null,
-      sentiment: widget?.config?.[category]?.sentiment || 'for',
-      isReplyingEnabled: widget?.config?.[category]?.isReplyingEnabled || false,
-      isVotingEnabled: widget?.config?.[category]?.isVotingEnabled || false,
+  const defaults = () => ({
+    resourceId: widget?.config?.[category]?.resourceId || null,
+    sentiment: widget?.config?.[category]?.sentiment || 'for',
+    isReplyingEnabled: widget?.config?.[category]?.isReplyingEnabled || false,
+    isVotingEnabled: widget?.config?.[category]?.isVotingEnabled || false,
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -69,19 +69,19 @@ export default function ArgumentsGeneral() {
           className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
-            name="ideaId"
+            name="resourceId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
                   Plan ID
                 </FormLabel>
                 <FormControl>
-                    <Input placeholder="1" {...field} />
+                  <Input placeholder="1" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
-            />
+          />
           <FormField
             control={form.control}
             name="sentiment"

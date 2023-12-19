@@ -3,7 +3,7 @@ const util = require('util');
 const authDb = require('promise-mysql');
 const execute = require('./execute');
 
-module.exports = async function setupAuthServer() {
+module.exports = async function setupAuthServer(actions) {
 
   console.log('==============================');
   console.log('Setup auth server');
@@ -73,41 +73,49 @@ ADMIN_REDIRECT_URL=${process.env.AUTH_ADMIN_REDIRECT_URL}
 COOKIE_SECURE_OFF=${process.env.AUTH_COOKIE_SECURE_OFF}
 SESSION_SECRET=${process.env.AUTH_SESSION_SECRET}
 `
-    console.log('------------------------------');
-    console.log('Create config file');
-    await fs.writeFile('./apps/auth-server/.env', authConfig);
-
-    // npm i
-    console.log('------------------------------');
-    console.log('Execute `npm i`');
-    await execute('npm', ['i'], { cwd: './apps/auth-server' });
- 
-    // certs
-    console.log('------------------------------');
-    try {
-      await fs.mkdir('apps/auth-server/certs')
-      console.error('Certs dir created');
-    } catch(err) {
-      if (err.code !== 'EEXIST') {
-        throw err;
-        return;
-      }
-      console.error('Certs dir exists');
+    if (actions['create config']) {
+      console.log('------------------------------');
+      console.log('Create config file');
+      await fs.writeFile('./apps/auth-server/.env', authConfig);
     }
 
-    console.log('Create certificates');
-    await execute('/usr/bin/openssl', ['genrsa', '-out', 'privatekey.pem', '2048'], { cwd: './apps/auth-server/certs/' });
-    await execute('/usr/bin/openssl', ['req', '-new', '-key', 'privatekey.pem', '-out', 'certrequest.csr', '-subj', `/C=NL/ST=NA/L=NA/O=OpenStad/OU=OpenStad/CN=openstad.niels${process.env.BASE_DOMAIN}"`], { cwd: './apps/auth-server/certs/' });
-    await execute('/usr/bin/openssl', ['x509', '-req', '-in', 'certrequest.csr', '-signkey', 'privatekey.pem', '-out', 'certificate.pem'], { cwd: './apps/auth-server/certs/' });
+    // npm i
+    if (actions['npm install']) {
+      console.log('------------------------------');
+      console.log('Execute `npm i`');
+      await execute('npm', ['i'], { cwd: './apps/auth-server' });
+    }
+    
+    // certs
+    if (actions['create certs']) {
+      console.log('------------------------------');
+      try {
+        await fs.mkdir('apps/auth-server/certs')
+        console.error('Certs dir created');
+      } catch(err) {
+        if (err.code !== 'EEXIST') {
+          throw err;
+          return;
+        }
+        console.error('Certs dir exists');
+      }
+    
+      console.log('Create certificates');
+      await execute('/usr/bin/openssl', ['genrsa', '-out', 'privatekey.pem', '2048'], { cwd: './apps/auth-server/certs/' });
+      await execute('/usr/bin/openssl', ['req', '-new', '-key', 'privatekey.pem', '-out', 'certrequest.csr', '-subj', `/C=NL/ST=NA/L=NA/O=OpenStad/OU=OpenStad/CN=openstad.niels${process.env.BASE_DOMAIN}"`], { cwd: './apps/auth-server/certs/' });
+      await execute('/usr/bin/openssl', ['x509', '-req', '-in', 'certrequest.csr', '-signkey', 'privatekey.pem', '-out', 'certificate.pem'], { cwd: './apps/auth-server/certs/' });
+    }
 
     // init db
-    if (1 || doCreateDBTables) { // TODO: hij update voor nu altijd
-      console.log('------------------------------');
-      console.log('Init auth database');
-      await execute('npm', ['run', 'init-database'], { cwd: './apps/auth-server' });
-    } else {
-      console.log('------------------------------');
-      console.log('Auth database already initialized');
+    if (actions['init database']) {
+      if (1 || doCreateDBTables) { // TODO: hij update voor nu altijd
+        console.log('------------------------------');
+        console.log('Init auth database');
+        await execute('npm', ['run', 'init-database'], { cwd: './apps/auth-server' });
+      } else {
+        console.log('------------------------------');
+        console.log('Auth database already initialized');
+      }
     }
     
   } catch(err) {

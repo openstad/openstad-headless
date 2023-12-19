@@ -46,7 +46,6 @@ API_DB_NAME=${process.env.API_DB_NAME}
 IMAGE_DB_NAME=${process.env.IMAGE_DB_NAME}
 
 API_URL=${process.env.API_URL}
-API_PORT=${process.env.API_PORT}
 API_HOSTNAME=${process.env.API_DOMAIN}
 API_PORT=${process.env.API_PORT}
 API_DATABASE_USER=${process.env.API_DB_USERNAME}
@@ -105,6 +104,8 @@ ADMIN_URL=${process.env.ADMIN_URL}
 ADMIN_DOMAIN=${process.env.ADMIN_DOMAIN}
 ADMIN_PORT=${process.env.ADMIN_PORT}
 ADMIN_SECRET=${process.env.ADMIN_SECRET}
+
+NEXT_PUBLIC_API_URL=${process.env.API_URL}
 `;
 
     await fs.writeFile('./.env', configfile);
@@ -113,7 +114,7 @@ ADMIN_SECRET=${process.env.ADMIN_SECRET}
 Config is created.
 You can now build and run a docker environment using the command.
 docker-compose up --build
-   
+
 Once that is running you can visit the servers on these urls:
 List resources: ${process.env.API_URL}/api/project/1/resource
 Login: ${process.env.API_URL}/auth/project/1/login

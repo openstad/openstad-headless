@@ -6,9 +6,11 @@ import tags from './tags';
 import user from './user';
 import userVote from './user-vote';
 
-window.OpenStadAPI = null;
+const windowGlobal = typeof window !== "undefined" ? window : {};
+
+windowGlobal.OpenStadAPI = null;
 export default function singelton(props = { config: {} }) {
-  return (window.OpenStadAPI = window.OpenStadAPI || new API(props));
+  return (windowGlobal.OpenStadAPI = windowGlobal.OpenStadAPI || new API(props));
 }
 
 function API(props = { config: {} }) {

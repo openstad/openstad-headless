@@ -54,7 +54,7 @@ export default function WidgetMap() {
               <TabsTrigger value="reaction">Reacties</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
-              <Preview type="map" />
+              {/* <Preview type="map" /> */}
             </TabsContent>
             <TabsContent value="general" className="p-0">
               <WidgetMapGeneral />

@@ -70,7 +70,7 @@ export default function WidgetResourceForm() {
               <TabsTrigger value="info">Info</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
-              <Preview type="resourceform" />
+              {/* <Preview type="resourceform" /> */}
             </TabsContent>
             <TabsContent value="general" className="p-0">
               <WidgetResourceFormGeneral />
