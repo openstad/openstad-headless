@@ -114,7 +114,7 @@ function Comment({
                 Mee eens (<span>{args.comment.yes || 0}</span>)
               </GhostButton>
             ) : (
-              <GhostButton icon="ri-thumb-up-line">
+              <GhostButton disabled icon="ri-thumb-up-line">
                 Mee eens (<span>{args.comment.yes || 0}</span>)
               </GhostButton>
             )
@@ -123,7 +123,9 @@ function Comment({
             <GhostButton onClick={() => toggleReplyForm()}>
               Reageren
             </GhostButton>
-          ) : null}
+          ) : (
+            <GhostButton disabled>Reageren</GhostButton>
+          )}
         </section>
       ) : null}
 
