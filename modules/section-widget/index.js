@@ -27,14 +27,7 @@ const contentWidgets = {
       }
     ]
   },
-  '@apostrophecms/image': {},
-  '@apostrophecms/video': {},
-  agenda: {},
-  title: {},
-  list: {},
-  link: {},
-  'info-bar': {},
-  'ideas-on-map': {}
+  'openstad-component': {},
 };
 
 // modules/two-column-widget/index.js
