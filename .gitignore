@@ -15,4 +15,6 @@ node_modules
 # Don't commit masters generated on the fly at startup, these import all the rest
 /public/css/master-*.less
 .jshintrc
-.env
+.DS_Store
+
+/.env
