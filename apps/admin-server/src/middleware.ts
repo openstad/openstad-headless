@@ -3,12 +3,26 @@ import { NextResponse } from 'next/server';
 import logger from '@/lib/logger';
 
 export default withAuth(
-  function middleware(req) {
+  async function middleware(req) {
     if (req.nextUrl.pathname.startsWith('/api/openstad')) {
       if (!req.nextauth.token?.accessToken) {
         logger.error('No access token in JWT');
         return NextResponse.json({ error: 'No access token' }, { status: 401 });
       }
+
+      // Check if the accessToken is still valid
+      // @todo: make project id dynamic
+      const validationResponse = await fetch(`${process.env.API_URL}/auth/project/1/me`, {
+        headers: {
+          Authorization: 'Bearer ' + req.nextauth.token?.accessToken,
+        },
+      });
+
+      if (!validationResponse.ok) {
+        logger.error('Invalid or expired token');
+        return NextResponse.redirect('/auth/signin');
+      }
+
       logger.debug(
         { Authorization: 'Bearer ' + req.nextauth.token?.accessToken },
         'Rewrite with access token'
