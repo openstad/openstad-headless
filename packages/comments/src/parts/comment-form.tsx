@@ -1,7 +1,7 @@
 import React from 'react';
-import { Input, Spacer } from '@openstad-headless/ui/src';
+import { Banner, Input, Spacer } from '@openstad-headless/ui/src';
 import { SecondaryButton } from '@openstad-headless/ui/src/button';
-import CommentFormPropsType from '../types/index';
+import { CommentPropsType } from '../types/index';
 import DataStore from '@openstad-headless/data-store/src';
 import hasRole from '../../../lib/has-role';
 
@@ -12,19 +12,19 @@ function CommentForm({
   placeholder = 'Type hier je reactie',
   requiredUserRole = 'member',
   ...props
-}: CommentFormPropsType) {
-
+}: CommentPropsType) {
   const args = {
     comment,
     descriptionMinLength,
     descriptionMaxLength,
     placeholder,
     requiredUserRole,
-    ...props
-  } as CommentFormPropsType;
+    ...props,
+  } as CommentPropsType;
 
   const datastore = new DataStore(args);
-  const [currentUser, currentUserError, currentUserIsLoading] = datastore.useCurrentUser({ ...args });
+  const [currentUser, currentUserError, currentUserIsLoading] =
+    datastore.useCurrentUser({ ...args });
 
   function canSubmit() {
     return true;
@@ -32,15 +32,15 @@ function CommentForm({
 
   return (
     <div className="reaction-input-container">
-
       <form onSubmit={args.submitComment}>
-
-        {args.formIntro ? (
-          <p>{args.formIntro}</p>
-        ) : null}
+        {args.formIntro ? <p>{args.formIntro}</p> : null}
 
         {args.comment?.parentId ? (
-          <input type="hidden" defaultValue={args.comment.parentId} name="parentId" />
+          <input
+            type="hidden"
+            defaultValue={args.comment.parentId}
+            name="parentId"
+          />
         ) : null}
 
         {args.comment?.id ? (
@@ -49,34 +49,31 @@ function CommentForm({
 
         <input type="hidden" defaultValue={args.sentiment} name="sentiment" />
 
-        <Input
-          name="description"
-          placeholder={args.placeholder}
-          defaultValue={args.comment?.description}
-        />
-        <Spacer size={0.5} />
         {hasRole(currentUser, 'member') ? ( // todo: args.requiredUserRole werkt nog niet
-          <SecondaryButton
-            disabled={!canSubmit()}>
-            Verstuur
-          </SecondaryButton>
+          <>
+            <Input
+              name="description"
+              placeholder={args.placeholder}
+              defaultValue={args.comment?.description}
+            />
+            <Spacer size={0.5} />
+            <SecondaryButton disabled={!canSubmit()}>Verstuur</SecondaryButton>
+          </>
         ) : (
-          <SecondaryButton
-            type="button"
-            onClick={() => {
-              // login
-              document.location.href = args.login.url;
-            }}>
-            Inloggen
-          </SecondaryButton>
+          <Banner>
+            <SecondaryButton
+              type="button"
+              onClick={() => {
+                // login
+                document.location.href = args.login.url;
+              }}>
+              Inloggen
+            </SecondaryButton>
+          </Banner>
         )}
       </form>
-
     </div>
   );
 }
 
-export {
-  CommentForm as default,
-  CommentForm,
-}
+export { CommentForm as default, CommentForm };

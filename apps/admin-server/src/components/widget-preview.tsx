@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator';
 type Props = {
   type:
     | 'likes'
-    | 'arguments'
+    | 'comments'
     | 'resourceoverview'
     | 'resourceform'
     | 'begrootmodule'

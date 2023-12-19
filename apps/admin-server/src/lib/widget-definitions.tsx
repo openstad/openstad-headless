@@ -1,5 +1,5 @@
 export const WidgetDefinitions = {
-  arguments: 'Argumenten',
+  comments: 'Argumenten',
   begrootmodule: 'Begrootmodule',
   resourcesmap: 'Resource map',
   keuzewijzer: 'Keuzewijzer',
