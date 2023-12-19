@@ -49,7 +49,7 @@ function Comments({
     datastore.useCurrentUser({ ...args });
   const [comments, commentsError, commentsIsLoading] = datastore.useComments({
     projectId: props.projectId,
-    ideaId: resourceId || props.resourceId,
+    resourceId: resourceId || props.resourceId,
     sentiment: props.sentiment,
   });
 
