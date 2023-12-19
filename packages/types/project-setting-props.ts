@@ -15,8 +15,8 @@ export type ProjectSettingProps = {
     adapter: {};
     provider: {};
   };
-  ideas: {
-    canAddNewIdeas: boolean;
+  resources: {
+    canAddNewResources: boolean;
     titleMinLength: number;
     titleMaxLength: number;
     summaryMinLength: number;
@@ -48,8 +48,8 @@ export type ProjectSettingProps = {
     withExisting: string;
     voteType: string;
     voteValues: Array<{ label: string; value: string }>;
-    maxIdeas: number;
-    minIdeas: number;
+    maxResources: number;
+    minResources: number;
   };
   polls: {
     canAddPolls: boolean;

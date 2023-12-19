@@ -31,10 +31,10 @@ const formSchema = z.object({
     'count',
     'countPerTheme',
   ]),
-  maximumSelectableIdeas: z.coerce
+  maximumSelectableResources: z.coerce
     .number()
     .gt(0, 'Nummer moet groter zijn dan 0'),
-  minimumSelectableIdeas: z.coerce
+  minimumSelectableResources: z.coerce
     .number()
     .gte(0, 'Nummer moet groter of gelijk zijn aan 0'),
   budget: z.coerce.number().gt(0, 'Nummer moet groter zijn dan 0'),
@@ -53,10 +53,10 @@ export default function BegrootmoduleVoting() {
   const defaults = () => ({
     allowVoting: widget?.config?.[category]?.allowVoting || false,
     votingType: widget?.config?.[category]?.votingType || 'budgeting',
-    maximumSelectableIdeas:
-      widget?.config?.[category]?.maximumSelectableIdeas || 1000,
-    minimumSelectableIdeas:
-      widget?.config?.[category]?.minimumSelectableIdeas || 0,
+    maximumSelectableResources:
+      widget?.config?.[category]?.maximumSelectableResources || 1000,
+    minimumSelectableResources:
+      widget?.config?.[category]?.minimumSelectableResources || 0,
     minimumBudget: widget?.config?.[category]?.minimumBudget || 0,
     budget: widget?.config?.[category]?.budget || 0,
   });
@@ -135,10 +135,10 @@ export default function BegrootmoduleVoting() {
         />
         <FormField
           control={form.control}
-          name="minimumSelectableIdeas"
+          name="minimumSelectableResources"
           render={({ field }) => (
             <FormItem className="col-span-1">
-              <FormLabel>Minimum hoeveelheid selecteerbare ideeën</FormLabel>
+              <FormLabel>Minimum hoeveelheid selecteerbare resources</FormLabel>
               <FormControl>
                 <Input type="number" {...field} />
               </FormControl>
@@ -148,10 +148,10 @@ export default function BegrootmoduleVoting() {
         />
         <FormField
           control={form.control}
-          name="maximumSelectableIdeas"
+          name="maximumSelectableResources"
           render={({ field }) => (
             <FormItem className="col-span-1">
-              <FormLabel>Maximum hoeveelheid selecteerbare ideeën</FormLabel>
+              <FormLabel>Maximum hoeveelheid selecteerbare resources</FormLabel>
               <FormControl>
                 <Input type="number" {...field} />
               </FormControl>

@@ -33,7 +33,7 @@ function Likes({
 }: LikeWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);
   const resourceId = urlParams.get('openstadResourceId') || props.resourceId;
-  const necessaryVotes = props?.ideas?.minimumYesVotes || 50;
+  const necessaryVotes = props?.resources?.minimumYesVotes || 50;
 
   // Pass explicitely because datastore is not ts, we will not get a hint if the props have changed
   const datastore = new DataStore({
@@ -44,9 +44,9 @@ function Likes({
   const session = new SessionStorage(props);
 
   const [currentUser] = datastore.useCurrentUser(props);
-  const [resource] = datastore.useIdea({
+  const [resource] = datastore.useResource({
     projectId: props.projectId,
-    ideaId: resourceId,
+    resourceId,
   });
   const [isBusy, setIsBusy] = useState(false);
   const supportedLikeTypes: Array<{
@@ -54,9 +54,9 @@ function Likes({
     label: string;
     icon: string;
   }> = [
-    { type: 'yes', label: yesLabel, icon: 'ri-thumb-up-line' },
-    { type: 'no', label: noLabel, icon: 'ri-thumb-down-line' },
-  ];
+      { type: 'yes', label: yesLabel, icon: 'ri-thumb-up-line' },
+      { type: 'no', label: noLabel, icon: 'ri-thumb-down-line' },
+    ];
 
   async function doVote(e, value) {
     if (e) e.stopPropagation();
@@ -74,8 +74,8 @@ function Likes({
       props.login
     ) {
       // login
-      session.set('osc-idea-vote-pending', { [resource.id]: value });
-      return (document.location.href = props?.login.url);
+      session.set('osc-resource-vote-pending', { [resource.id]: value });
+      return (document.location.href = props?.login?.url);
     }
 
     let change = {};
@@ -97,9 +97,8 @@ function Likes({
           {supportedLikeTypes.map((likeVariant, index) => (
             <div
               key={`${likeVariant.type}-${index}`}
-              className={`like-option  ${
-                hideCounters ? 'osc-no-counter' : ''
-              }`}>
+              className={`like-option  ${hideCounters ? 'osc-no-counter' : ''
+                }`}>
               <section
                 className="like-kind"
                 onClick={(e) => doVote(e, likeVariant.type)}>
@@ -115,10 +114,10 @@ function Likes({
                 <section className="like-counter">
                   <p>
                     {resource[likeVariant.type] &&
-                    resource[likeVariant.type] < 10
+                      resource[likeVariant.type] < 10
                       ? resource[likeVariant.type].toString().padStart(2, '0')
                       : resource[likeVariant.type] ||
-                        (0).toString().padStart(2, '0')}
+                      (0).toString().padStart(2, '0')}
                   </p>
                 </section>
               ) : null}
@@ -126,7 +125,7 @@ function Likes({
           ))}
         </div>
 
-        {!props?.ideas?.minimumYesVotes ? null : (
+        {!props?.resources?.minimumYesVotes ? null : (
           <div className="progressbar-container">
             <ProgressBar progress={(resource.yes / necessaryVotes) * 100} />
             <p className="progressbar-counter">

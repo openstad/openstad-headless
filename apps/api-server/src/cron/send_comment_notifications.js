@@ -5,7 +5,7 @@ var notifications = require('../notifications');
 // -------
 // Send notifications emails.
 // 
-// Runs every 5 minutes on the 15th second, because the close_ideas
+// Runs every 5 minutes on the 15th second, because the close_resources
 // cron already runs on the 0th second.
 module.exports = {
 	// cronTime: '*/5 * * * * *',

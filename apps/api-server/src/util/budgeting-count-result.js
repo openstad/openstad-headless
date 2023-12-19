@@ -24,14 +24,14 @@ db.BudgetVote
 		return result;
 	})
 	.then(result => {
-		// haal de ideeen erbij om de leesbaarheid te vergroten
-		db.Idea
+		// haal de resources erbij om de leesbaarheid te vergroten
+		db.Resource
 			.findAll({ where: { id: Object.keys(voteResult) } })
 			.then(result => {
-				result.forEach((idea) => {
-					voteResult[idea.id] = {
-						title: idea.title,
-						noOfVotes: voteResult[idea.id],
+				result.forEach((resource) => {
+					voteResult[resource.id] = {
+						title: resource.title,
+						noOfVotes: voteResult[resource.id],
 					}
 				});
 

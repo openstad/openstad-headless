@@ -23,7 +23,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  searchLocations: z.enum(['ideasAndAddresses', 'ideas', 'addresses', 'none']),
+  searchLocations: z.enum(['resourcesAndAddresses', 'resources', 'addresses', 'none']),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -39,7 +39,7 @@ export default function WidgetMapFilter() {
 
   const defaults = () => ({
     searchLocations:
-      widget?.config?.[category]?.searchLocations || 'ideasAndAddresses',
+      widget?.config?.[category]?.searchLocations || 'resourcesAndAddresses',
   });
 
   async function onSubmit(values: FormData) {
@@ -78,14 +78,14 @@ export default function WidgetMapFilter() {
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Zoek in ideeën en adressen" />
+                      <SelectValue placeholder="Zoek in resources en adressen" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="ideasAndAddresses">
-                      Zoek in ideeën en adressen
+                    <SelectItem value="resourcesAndAddresses">
+                      Zoek in resources en adressen
                     </SelectItem>
-                    <SelectItem value="ideas">Zoek in ideeën</SelectItem>
+                    <SelectItem value="resources">Zoek in resources</SelectItem>
                     <SelectItem value="addresses">Zoek in adressen</SelectItem>
                     <SelectItem value="none">Geen zoekveld</SelectItem>
                   </SelectContent>

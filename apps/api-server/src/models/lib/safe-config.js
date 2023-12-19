@@ -5,7 +5,7 @@ const allowlist = [
   'auth.default',
   'auth.provider.*.adapter',
   'auth.provider.*.clientId',
-  'ideas.*',
+  'resources.*',
   'polls.*',
   'users.*',
   'votes.*',

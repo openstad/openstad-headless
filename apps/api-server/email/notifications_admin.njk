@@ -86,38 +86,38 @@
 				<td></td>
 				<td width="560">
 
-					{% if data.idea %}
-						{% for idea in data.idea %}
+					{% if data.resource %}
+						{% for resource in data.resource %}
 							<table cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="color: #000; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; width:100%; border: solid 3px #f3f3f4;">
 								<tr>
 									<td style="background-color: white;">
 
 										<div style="padding: 20px;">
 
-											{% if idea.extraData and idea.extraData.images %}
-												{% for image in idea.extraData.images %}
+											{% if resource.extraData and resource.extraData.images %}
+												{% for image in resource.extraData.images %}
 													<img class="multipleImages" src="{{image}}" width="100%"/><br/>
 												{% endfor %}
 											{% endif %}
 											<br/>
 											<br/>
-											<strong>{{idea.user.displayName}} | {{idea.startDateHumanized}}</strong><br/><br/>
+											<strong>{{resource.user.displayName}} | {{resource.startDateHumanized}}</strong><br/><br/>
 
-											<h2>{{idea.title}}</h2>
+											<h2>{{resource.title}}</h2>
 
-											<strong>{{idea.summary | nl2br | safe}}</strong><br/>
+											<strong>{{resource.summary | nl2br | safe}}</strong><br/>
 											<br/>
 
-											{% if idea.modBreak %}
+											{% if resource.modBreak %}
 												<div id="modBreak">
-													<b>{{PROJECTNAME}}</b> &nbsp;&nbsp;|&nbsp;&nbsp; {{idea.modBreakDateHumanized}}<br>
+													<b>{{PROJECTNAME}}</b> &nbsp;&nbsp;|&nbsp;&nbsp; {{resource.modBreakDateHumanized}}<br>
 													<p>
-														{{idea.modBreak | safe | nl2br}}
+														{{resource.modBreak | safe | nl2br}}
 													</p>
 												</div>
 											{% endif %}
 
-											{{idea.description | nl2br | safe}}<br/>
+											{{resource.description | nl2br | safe}}<br/>
 
 										</div>
 
@@ -126,7 +126,7 @@
 								<tr>
 									<td style="border-top: solid 3px #f3f3f4;">
 										<div style="padding: 8px 20px; font-size: 12px;">
-											<strong>Link naar inzending:</strong> <a href="{{idea.inzendingURL}}" target="_blank" style="color: #EC0000">{{idea.inzendingURL}}</a>
+											<strong>Link naar inzending:</strong> <a href="{{resource.inzendingURL}}" target="_blank" style="color: #EC0000">{{resource.inzendingURL}}</a>
 										</div>
 									</td>
 								</tr>
@@ -160,7 +160,7 @@
 								<tr>
 									<td style="background-color: white;">
 										<div style="padding: 6px 15px; font-size: 12px;;">
-											<strong>Inzending:</strong> <a href="{{URL}}/plan/{{comm.ideaId}}" target="_blank" style="color: #EC0000">{{comm.idea.title}}</a>
+											<strong>Inzending:</strong> <a href="{{URL}}/plan/{{comm.resourceId}}" target="_blank" style="color: #EC0000">{{comm.resource.title}}</a>
 										</div>
 									</td>
 								</tr>

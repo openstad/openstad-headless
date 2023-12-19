@@ -149,7 +149,7 @@ export default function WidgetMapReaction() {
             render={({ field }) => (
               <FormItem className="col-span-full">
                 <FormLabel>
-                  IDs van ideeën waar reacties niet actief voor zijn.
+                  IDs van resources waar reacties niet actief voor zijn.
                 </FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -167,18 +167,18 @@ export default function WidgetMapReaction() {
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="... open voor alle ideeën" />
+                      <SelectValue placeholder="... open voor alle resources" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="open">
-                      ... open voor alle ideeën.
+                      ... open voor alle resources.
                     </SelectItem>
                     <SelectItem value="closed">
-                      ... gesloten voor alle ideeën.
+                      ... gesloten voor alle resources.
                     </SelectItem>
                     <SelectItem value="limited">
-                      ... open voor sommige ideeën.
+                      ... open voor sommige resources.
                     </SelectItem>
                   </SelectContent>
                 </Select>

@@ -41,7 +41,7 @@ export default function WidgetResourceFormThemes() {
   } = useWidgetConfig();
 
   const defaults = () => ({
-    themesLabel: widget?.config?.[category]?.themesLabel || 'idea',
+    themesLabel: widget?.config?.[category]?.themesLabel || 'resource',
     themesInfo: widget?.config?.[category]?.themesInfo || '',
     themesRequired: widget?.config?.[category]?.themesRequired || false,
   });

@@ -41,7 +41,7 @@ const commentVariants = cva(
 const LikeButtons = function(props) {
 
   props = merge.recursive({}, {
-    idea: {},
+    resource: {},
     votes: {
       isActive: false,
       requiredUserRole: 'member',
@@ -62,14 +62,14 @@ const LikeButtons = function(props) {
   const [ isBusy, setIsBusy ] = useState(false)
 
   useEffect(() => {
-    let pending = session.get('osc-idea-vote-pending');
-    if (pending && pending[props.idea.id]) {
+    let pending = session.get('osc-resource-vote-pending');
+    if (pending && pending[props.resource.id]) {
       if (currentUser && currentUser.role) {
-        doVote(null, pending[props.idea.id])
-        session.remove('osc-idea-vote-pending');
+        doVote(null, pending[props.resource.id])
+        session.remove('osc-resource-vote-pending');
       }
     }
-  }, [props.idea, currentUser]);
+  }, [props.resource, currentUser]);
 
   async function doVote(e, value) {
 
@@ -84,14 +84,14 @@ const LikeButtons = function(props) {
  
     if (!currentUser.role || !hasRole(currentUser, props.votes.requiredUserRole) ) {
       // login
-      session.set('osc-idea-vote-pending', { [props.idea.id]: value });
+      session.set('osc-resource-vote-pending', { [props.resource.id]: value });
       return document.location.href = props.login.url;
     }
 
     let change = {};
-    if (props.idea.userVote) change[props.idea.userVote.opinion] = -1;
+    if (props.resource.userVote) change[props.resource.userVote.opinion] = -1;
 
-    await props.idea.submitLike({
+    await props.resource.submitLike({
       opinion: value
     })
 
@@ -106,7 +106,7 @@ const LikeButtons = function(props) {
   for (let value of props.votes.voteValues) {
     let isBusy = false;
     let VoteButton = (
-      <Button type="button" disabled={isBusy} onClick={e => doVote(e, value.value)} key={`osc-vote-button-${value.value}`}>{value.label} ({props.idea && props.idea[value.value]})</Button>
+      <Button type="button" disabled={isBusy} onClick={e => doVote(e, value.value)} key={`osc-vote-button-${value.value}`}>{value.label} ({props.resource && props.resource[value.value]})</Button>
     );
     buttonsHTML.push(VoteButton);
   }

@@ -61,10 +61,10 @@ module.exports = {
     },
   },
 
-  ideas: {
+  resources: {
     type: 'object',
     subset: {
-      canAddNewIdeas: {
+      canAddNewResources: {
         type: 'boolean',
         default: true,
       },
@@ -282,11 +282,11 @@ module.exports = {
           },
         ],
       },
-      maxIdeas: {
+      maxResources: {
         type: 'int',
         default: 100,
       },
-      minIdeas: {
+      minResources: {
         type: 'int',
         default: 1,
       },

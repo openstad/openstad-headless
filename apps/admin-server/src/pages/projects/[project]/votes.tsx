@@ -5,7 +5,7 @@ import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useVotes from '@/hooks/use-votes';
 import { ChevronRight } from 'lucide-react';
 
-export default function ProjectIdeas() {
+export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
   const { data } = useVotes(project as string);
@@ -52,7 +52,7 @@ export default function ProjectIdeas() {
                     {vote.createdAt}
                   </Paragraph>
                   <Paragraph className="hidden lg:flex truncate lg:col-span-1">
-                    {vote.ideaId}
+                    {vote.resourceId}
                   </Paragraph>
                   <Paragraph className="hidden lg:flex truncate lg:col-span-1 -mr-16">
                     {vote.userId}

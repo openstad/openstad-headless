@@ -341,7 +341,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
         // todo: hij kan alleen tegen een enkelvoudige listableBy
         // todo: owner wordt nu altijd toegevoegd, dat moet alleen als die in listableBy staat, maar zie vorige regel
-        // todo: gelijkttrekken met Idea.onlyVisible: die is nu exclusive en deze inclusive
+        // todo: gelijkttrekken met Resource.onlyVisible: die is nu exclusive en deze inclusive
 
         let requiredRole = this.auth && this.auth.listableBy || 'all';
 
@@ -410,7 +410,7 @@ module.exports = function (db, sequelize, DataTypes) {
   }
 
   User.associate = function (models) {
-    this.hasMany(models.Idea, { onDelete: 'CASCADE', hooks: true });
+    this.hasMany(models.Resource, { onDelete: 'CASCADE', hooks: true });
     this.hasMany(models.Vote, { onDelete: 'CASCADE', hooks: true });
     this.hasMany(models.Comment, { onDelete: 'CASCADE', hooks: true });
     this.belongsTo(models.Project, { onDelete: 'CASCADE' });
@@ -449,12 +449,12 @@ module.exports = function (db, sequelize, DataTypes) {
     return this.id && this.id !== 1 && this.isMember();
   }
 
-  User.prototype.getUserVoteIdeaId = function () {
+  User.prototype.getUserVoteResourceId = function () {
     let self = this;
     return db.Vote
       .findOne({where: {userId: self.id}})
       .then(vote => {
-        return vote ? vote.ideaId : undefined;
+        return vote ? vote.resourceId : undefined;
       })
   }
 
@@ -470,7 +470,7 @@ module.exports = function (db, sequelize, DataTypes) {
   User.prototype.hasConfirmed = function () {
     let self = this;
     return db.Vote
-      .findOne({where: {userId: self.id, confirmed: 1, confirmIdeaId: null}})
+      .findOne({where: {userId: self.id, confirmed: 1, confirmResourceId: null}})
       .then(vote => {
         return vote ? true : false;
       })
@@ -493,7 +493,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
         // wat gaat er allemaal gewijzigd worden
         result.project = self.project;
-        result.ideas = await self.getIdeas();
+        result.resources = await self.getResources();
         result.comments = await self.getComments();
 
         // TODO: for now the check is on active vote but this is wrong; a new 'vote had ended' param should be created

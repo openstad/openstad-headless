@@ -265,7 +265,7 @@ router.route('/:projectId') //(\\d+)
 router.route('/:projectId(\\d+)/export')
 	.all(auth.can('Project', 'view'))
 	.all(function(req, res, next) {
-		getProject(req, res, next, [{model: db.Idea, include: [{model: db.Tag}, {model: db.Vote}, {model: db.Comment, as: 'commentsFor'}, {model: db.Comment, as: 'commentsAgainst'}, {model: db.Poll, as: 'poll'}]}, {model: db.Tag}])
+		getProject(req, res, next, [{model: db.Resource, include: [{model: db.Tag}, {model: db.Vote}, {model: db.Comment, as: 'commentsFor'}, {model: db.Comment, as: 'commentsAgainst'}, {model: db.Poll, as: 'poll'}]}, {model: db.Tag}])
 	})
 
 	.get(auth.can('Project', 'view'))

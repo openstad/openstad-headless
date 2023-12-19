@@ -34,7 +34,7 @@ router.route('/total')
         isViewable = isViewable || ( req.user && ( req.user.role == 'admin' || req.user.role == 'editor' || req.user.role == 'moderator' ) )
         if (!isViewable) return next(createError(401, 'Je kunt deze stats niet bekijken'));
 
-        let query = "SELECT count(votes.id) AS counted FROM votes LEFT JOIN ideas ON votes.ideaId = ideas.id WHERE votes.deletedAt IS NULL AND  (votes.checked IS NULL OR votes.checked = 1) AND ideas.deletedAt IS NULL AND ideas.projectId=?";
+        let query = "SELECT count(votes.id) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE votes.deletedAt IS NULL AND  (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL AND resources.projectId=?";
         let bindvars = [req.params.projectId]
 
         if (req.query.opinion) {
@@ -63,7 +63,7 @@ router.route('/no-of-users')
     // -----------
     .get(function(req, res, next) {
 
-        let query = "SELECT count(votes.id) AS counted FROM votes LEFT JOIN ideas ON votes.ideaId = ideas.id WHERE ideas.projectId=? AND votes.deletedAt  IS NULL AND  (votes.checked IS NULL OR votes.checked = 1)  AND ideas.deletedAt IS NULL GROUP BY votes.userId";
+        let query = "SELECT count(votes.id) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE resources.projectId=? AND votes.deletedAt  IS NULL AND  (votes.checked IS NULL OR votes.checked = 1)  AND resources.deletedAt IS NULL GROUP BY votes.userId";
         let bindvars = [req.params.projectId]
 
         pool

@@ -14,7 +14,7 @@ Dit gebruikt directe queries op de DB, dus zonder sequelize.
 GET :HOSTNAME/stats/site/:SITE_ID/idea/total
 ```
 
-Aantal ideeen.
+Aantal resources.
 
 
 ### Votes

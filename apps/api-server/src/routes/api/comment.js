@@ -10,7 +10,7 @@ const router = express.Router({ mergeParams: true });
 // scopes: for all get requests
 router
   .all('*', function(req, res, next) {
-    req.scope = ['defaultScope', 'includeIdea'];
+    req.scope = ['defaultScope', 'includeResource'];
     req.scope.push({ method: ['forProjectId', req.params.projectId] });
 
     if (req.query.includeRepliesOnComments) {
@@ -30,14 +30,14 @@ router
 
   })
   .all('*', function(req, res, next) {
-    // zoek het idee
+    // zoek het resource
     // todo: ik denk momenteel alleen nog gebruikt door create; dus zet hem daar neer
-    let ideaId = parseInt(req.params.ideaId) || 0;
-    if (!ideaId) return next();
-    db.Idea.findByPk(ideaId)
-      .then(idea => {
-        if (!idea || idea.projectId != req.params.projectId) return next(createError(400, 'Idea not found'));
-        req.idea = idea;
+    let resourceId = parseInt(req.params.resourceId) || 0;
+    if (!resourceId) return next();
+    db.Resource.findByPk(resourceId)
+      .then(resource => {
+        if (!resource || resource.projectId != req.params.projectId) return next(createError(400, 'Resource not found'));
+        req.resource = resource;
         return next();
       });
   })
@@ -78,10 +78,10 @@ router.route('/')
   .get(function(req, res, next) {
     let { dbQuery } = req;
 
-    let ideaId = parseInt(req.params.ideaId) || 0;
+    let resourceId = parseInt(req.params.resourceId) || 0;
     let where = {};
-    if (ideaId) {
-      where.ideaId = ideaId;
+    if (resourceId) {
+      where.resourceId = resourceId;
     }
     let sentiment = req.query.sentiment;
     if (sentiment && (sentiment == 'against' || sentiment == 'for' || sentiment == 'no sentiment')) {
@@ -117,10 +117,10 @@ router.route('/')
   .post(auth.useReqUser)
   .post(function(req, res, next) {
 
-    if (!req.idea) return next(createError(400, 'Inzending niet gevonden'));
-    if (!req.idea.publishDate) return next(createError(400, 'Kan geen comment toevoegen aan een concept plan'));
+    if (!req.resource) return next(createError(400, 'Inzending niet gevonden'));
+    if (!req.resource.publishDate) return next(createError(400, 'Kan geen comment toevoegen aan een concept plan'));
     // todo: dit moet een can functie worden
-    if (req.user.role != 'admin' && req.idea.status != 'OPEN') return next(createError(400, 'Reactie toevoegen is niet mogelijk bij planen met status: ' + req.idea.status));
+    if (req.user.role != 'admin' && req.resource.status != 'OPEN') return next(createError(400, 'Reactie toevoegen is niet mogelijk bij planen met status: ' + req.resource.status));
     next();
   })
   .post(function(req, res, next) {
@@ -128,7 +128,7 @@ router.route('/')
     db.Comment
       .scope(
         'defaultScope',
-        'includeIdea',
+        'includeResource',
       )
       .findByPk(req.body.parentId)
       .then(function(comment) {
@@ -143,7 +143,7 @@ router.route('/')
     
     let data = {
       ...req.body,
-      ideaId: req.params.ideaId,
+      resourceId: req.params.resourceId,
       userId,
     };
 
@@ -156,7 +156,7 @@ router.route('/')
         db.Comment
           .scope(
             'defaultScope',
-            'includeIdea',
+            'includeResource',
             { method: ['includeVoteCount', 'comment'] },
             { method: ['includeUserVote', 'comment', req.user.id] },
           )
@@ -228,7 +228,7 @@ router.route('/:commentId(\\d+)/vote')
         db.Comment
           .scope(
             'defaultScope',
-            'includeIdea',
+            'includeResource',
             { method: ['includeVoteCount', 'comment'] },
             { method: ['includeUserVote', 'comment', req.user.id] },
           )

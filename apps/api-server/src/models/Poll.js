@@ -8,7 +8,7 @@ module.exports = function (db, sequelize, DataTypes) {
   var Poll = sequelize.define(
     'poll',
     {
-      ideaId: {
+      resourceId: {
         type: DataTypes.INTEGER,
         auth: {
           updateableBy: 'editor',
@@ -94,19 +94,19 @@ module.exports = function (db, sequelize, DataTypes) {
       hooks: {
         beforeValidate: function (instance, options) {
           return new Promise((resolve, reject) => {
-            if (instance.ideaId) {
-              db.Idea.scope('includeProject')
-                .findByPk(instance.ideaId)
-                .then((idea) => {
-                  if (!idea) throw Error('Idea niet gevonden');
+            if (instance.resourceId) {
+              db.Resource.scope('includeProject')
+                .findByPk(instance.resourceId)
+                .then((resource) => {
+                  if (!resource) throw Error('Resource niet gevonden');
                   instance.config = merge.recursive(
                     true,
                     config,
-                    idea.project.config
+                    resource.project.config
                   );
-                  return idea;
+                  return resource;
                 })
-                .then((idea) => {
+                .then((resource) => {
                   return resolve();
                 })
                 .catch((err) => {
@@ -145,20 +145,20 @@ module.exports = function (db, sequelize, DataTypes) {
       forProjectId: function (projectId) {
         return {
           where: {
-            ideaId: [
+            resourceId: [
               sequelize.literal(
-                `select id FROM ideas WHERE projectId = ${projectId}`
+                `select id FROM resources WHERE projectId = ${projectId}`
               ),
             ],
           },
         };
       },
 
-      withIdea: function () {
+      withResource: function () {
         return {
           include: [
             {
-              model: db.Idea,
+              model: db.Resource,
               attributes: ['id', 'title', 'status'],
             },
           ],
@@ -213,7 +213,7 @@ module.exports = function (db, sequelize, DataTypes) {
   };
 
   Poll.associate = function (models) {
-    this.belongsTo(models.Idea, { onDelete: 'CASCADE' });
+    this.belongsTo(models.Resource, { onDelete: 'CASCADE' });
     this.belongsTo(models.User, { onDelete: 'CASCADE' });
     this.hasMany(models.PollVote, {
       as: 'votes',
@@ -243,9 +243,9 @@ module.exports = function (db, sequelize, DataTypes) {
       );
     },
     canVote: function (user, self) {
-      if (!self.idea) return false;
+      if (!self.resource) return false;
       if (
-        self.idea.isRunning() &&
+        self.resource.isRunning() &&
         userHasRole(user, 'member') &&
         self.id &&
         self.status == 'OPEN'

@@ -55,6 +55,21 @@ export default function ArgumentsGeneral(
           className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
+            name="resourceId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Plan ID
+                </FormLabel>
+                <FormControl>
+                  <Input placeholder="1" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
             name="sentiment"
             render={({ field }) => (
               <FormItem>

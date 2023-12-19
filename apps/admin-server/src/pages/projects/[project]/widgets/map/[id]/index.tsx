@@ -48,8 +48,8 @@ export default function WidgetMap() {
               <TabsTrigger value="map">Kaart</TabsTrigger>
               <TabsTrigger value="content">Content</TabsTrigger>
               <TabsTrigger value="sort">Sorteren</TabsTrigger>
-              <TabsTrigger value="images">Idee afbeeldingen</TabsTrigger>
-              <TabsTrigger value="details">Idee details</TabsTrigger>
+              <TabsTrigger value="images">Resource afbeeldingen</TabsTrigger>
+              <TabsTrigger value="details">Resource details</TabsTrigger>
               <TabsTrigger value="filter">Filterbalk</TabsTrigger>
               <TabsTrigger value="reaction">Reacties</TabsTrigger>
             </TabsList>

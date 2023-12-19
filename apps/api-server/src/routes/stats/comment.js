@@ -28,20 +28,20 @@ router.route('/total')
 // ---------------
 	.get(function(req, res, next) {
 
-    let ideaId = req.query.ideaId;
+    let resourceId = req.query.resourceId;
     let sentiment = req.query.sentiment;
 
-    let query = `SELECT count(comments.id) AS counted FROM ideas LEFT JOIN comments ON comments.ideaId = ideas.id `;
+    let query = `SELECT count(comments.id) AS counted FROM resources LEFT JOIN comments ON comments.resourceId = resources.id `;
     let bindvars = []
     if (sentiment) {
       query += `AND comments.sentiment = ? `;
       bindvars.push(sentiment);
     }
-    query += "WHERE ideas.deletedAt IS NULL AND ideas.projectId = ? ";
+    query += "WHERE resources.deletedAt IS NULL AND resources.projectId = ? ";
     bindvars.push(req.params.projectId);
-    if (ideaId) {
-      query += "AND ideas.id = ? ";
-      bindvars.push(ideaId);
+    if (resourceId) {
+      query += "AND resources.id = ? ";
+      bindvars.push(resourceId);
     }
 
     pool

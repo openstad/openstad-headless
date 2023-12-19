@@ -119,14 +119,14 @@ module.exports = function (db, sequelize, DataTypes) {
             let config = merge.recursive(true, instance.config);
             if (instance.config.project.projectHasEnded) {
               config.votes.isActive = false;
-              config.ideas.canAddNewIdeas = false;
+              config.resources.canAddNewResources = false;
               config.comments.isClosed = true;
               config.polls.canAddPolls = false;
               config.users.canCreateNewUsers = false;
             } else {
               // commented: do not update these params on unsetting
               // config.votes.isActive = true;
-              // config.ideas.canAddNewIdeas = true;
+              // config.resources.canAddNewResources = true;
               // config.comments.isClosed = false;
               // config.polls.canAddPolls = true;
               // config.users.canCreateNewUsers = true;
@@ -203,7 +203,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
   Project.associate = function (models) {
     this.hasMany(models.User, { onDelete: 'CASCADE', hooks: true });
-    this.hasMany(models.Idea, { onDelete: 'CASCADE', hooks: true });
+    this.hasMany(models.Resource, { onDelete: 'CASCADE', hooks: true });
     this.hasMany(models.Tag, { onDelete: 'CASCADE', hooks: true });
     this.belongsTo(models.Area, { onDelete: 'CASCADE' });
   }

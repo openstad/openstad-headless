@@ -20,8 +20,8 @@ router
 
       try {
 
-        console.log(req.body);
-        console.log(req.authConfig);
+        // console.log(req.body);
+        // console.log(req.authConfig);
 
         let iss = req.body.iss;
         if (iss !== req.authConfig.serverUrl) throw Error('Unknown auth server');

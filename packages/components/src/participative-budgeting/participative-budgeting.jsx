@@ -6,7 +6,7 @@ import SessionStorage from '../lib/session-storage.js';
 import Button from '../button';
 import LoginButton from '../user/login-button';
 import VoteSelection from '../voting/vote-selection';
-import IdeasOverview from '../ideas-overview';
+import ResourcesOverview from '../resources-overview';
 import ErrorComponent from '../error';
 
 import { cva } from "class-variance-authority";
@@ -39,15 +39,15 @@ const ParticipativeBudgeting = function(props) {
     setStep(session.get('osc-voting-step') || 0);
   }, []);
 
-  function addToSelection(e, idea) {
+  function addToSelection(e, resource) {
     let result = [...selection];
-    result.push(idea)
+    result.push(resource)
     setSelection(result);
     session.set('osc-voting-selection', result);
   }
 
-  function removeFromSelection(e, idea) {
-    let index = selection.findIndex(elem => elem.id == idea.id);
+  function removeFromSelection(e, resource) {
+    let index = selection.findIndex(elem => elem.id == resource.id);
     if (index != -1) {
       let result = [...selection]
       result.splice(index, 1)
@@ -56,12 +56,12 @@ const ParticipativeBudgeting = function(props) {
     }
   }
 
-  function toggleSelection(e, idea) {
-    let index = selection.findIndex(elem => elem.id == idea.id);
+  function toggleSelection(e, resource) {
+    let index = selection.findIndex(elem => elem.id == resource.id);
     if (index == -1) {
-      addToSelection(e, idea);
+      addToSelection(e, resource);
     } else {
-      removeFromSelection(e, idea);
+      removeFromSelection(e, resource);
     }
   }
 
@@ -117,12 +117,12 @@ const ParticipativeBudgeting = function(props) {
   let allHTML = null;
 
   switch (step) {
-    case 0: // select ideas
+    case 0: // select resources
       allHTML = (
         <>
           <VoteSelection {...props} selection={selection}/>
           <Button type="button" disabled={isBusy} onClick={e => nextStep()}>Volgende</Button>
-          <IdeasOverview {...props} selection={selection} title="Selecteer je plannen" onIdeaClick={toggleSelection}/>
+          <ResourcesOverview {...props} selection={selection} title="Selecteer je plannen" onResourceClick={toggleSelection}/>
         </>
       );
       break;
