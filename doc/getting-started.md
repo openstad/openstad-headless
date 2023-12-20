@@ -49,7 +49,7 @@ Each widget management page shows a preview of how the widget will look given a 
 To make this work however, one must first use the command "npm run build" in the specific widget (in the packages > [widget] folder). This is only neccesary in development. In production these widgets are already prebuild.
 
 ### Getting the widget preview to work:
-There are quite a view thinks to take into account when you try to get a new widget to render in the preview component. The following steps need to be done
+There are a few steps to follow when trying to get a new widget rendered for your preview component:
 * In widget-settings.js define the way the api-server should bundle the widget. For example:
   ```
   resourceoverview: {
