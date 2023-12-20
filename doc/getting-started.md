@@ -115,7 +115,7 @@ export default defineConfig(({ command }) => {
 });
 
 ```
-> In Development, the preview will only work if you have builded the widget with. npm run build, afterwards you should see the widget being rendered, given that you have given it the required config and the widget is not faulty.
+> In Development, the preview will only work if you have builded the widget with. npm run build, afterwards you should see the widget being rendered, given that you have given it the required config and the widget is not faulty. If you get an error regarding a dependency (for example rollup), try to run npm install for the specific widget.
 
 ### Code
 
