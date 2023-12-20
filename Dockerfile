@@ -19,6 +19,9 @@ COPY --chown=node:node packages/ ./packages
 COPY --chown=node:node apps/$APP ./apps/$APP
 
 RUN npm install --prefix=$WORKSPACE
+
+RUN npm run build-packages --if-present --prefix=$WORKSPACE
+
 # Disabled for now since the admin/web server won't build due to errors
 # && \
 #     npm run build --prefix=@openstad-headless/${APP} --if-present
@@ -27,7 +30,15 @@ RUN npm install --prefix=$WORKSPACE
 FROM builder as development
 ARG APP
 ENV WORKSPACE apps/${APP}
+# Create app directory
+WORKDIR /opt/openstad-headless
 CMD ["npm", "run", "dev", "--prefix=${WORKSPACE}"]
+
+# Prepare production
+FROM builder as prepare-production
+ARG APP
+ENV WORKSPACE apps/${APP}
+RUN npm --prefix=apps/${APP} prune --production
 
 # Release image
 FROM node:18-slim as release
@@ -37,10 +48,9 @@ ENV WORKSPACE apps/${APP}
 
 WORKDIR /opt/openstad-headless
 
-# copy filesc
-COPY --chown=node:node apps/${APP} /opt/openstad-headless/apps/${APP}
-
-RUN npm --prefix=apps/${APP} prune --production
+# copy files
+COPY --from=prepare-production --chown=node:node /opt/openstad-headless/apps/${APP} ./apps/${APP}
+COPY --from=prepare-production --chown=node:node /opt/openstad-headless/packages ./packages
 
 USER node
 
