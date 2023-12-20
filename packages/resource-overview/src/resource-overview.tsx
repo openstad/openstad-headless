@@ -21,6 +21,16 @@ export type ResourceOverviewWidgetProps = BaseProps &
       placeholder: string;
       multiple?: boolean;
     }>;
+    displayTitle?: boolean;
+    displayRanking?: boolean;
+    displayLabel?: boolean;
+    displaySummary?: boolean;
+    displayDescription?: boolean;
+    displayArguments?: boolean;
+    displayVote?: boolean;
+    displayShareButtons?: boolean;
+    displayEditLink?: boolean;
+    displayCaption?: boolean;
   };
 
 //Temp: Header can only be made when the map works so for now a banner

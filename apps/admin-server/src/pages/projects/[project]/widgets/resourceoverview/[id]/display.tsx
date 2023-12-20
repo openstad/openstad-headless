@@ -1,24 +1,17 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -35,46 +28,31 @@ const formSchema = z.object({
   displayCaption: z.boolean(),
 });
 
-export default function WidgetResourceOverviewDisplay() {
+export default function WidgetResourceOverviewDisplay(
+  props: ResourceOverviewWidgetProps &
+    EditFieldProps<ResourceOverviewWidgetProps>
+) {
   type FormData = z.infer<typeof formSchema>;
-  const category = 'display';
-
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig();
-
-  const defaults = () => ({
-    displayTitle: widget?.config?.[category]?.displayTitle || false,
-    displayRanking: widget?.config?.[category]?.displayRanking || false,
-    displayLabel: widget?.config?.[category]?.displayLabel || false,
-    displaySummary: widget?.config?.[category]?.displaySummary || false,
-    displayDescription: widget?.config?.[category]?.displayDescription || false,
-    displayArguments: widget?.config?.[category]?.displayArguments || false,
-    displayVote: widget?.config?.[category]?.displayVote || false,
-    displayShareButtons:
-      widget?.config?.[category]?.displayShareButtons || false,
-    displayEditLink: widget?.config?.[category]?.displayEditLink || false,
-    displayCaption: widget?.config?.[category]?.displayCaption || false,
-  });
 
   async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could falset update', error);
-    }
+    props.updateConfig({ ...props, ...values });
   }
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      displayTitle: props?.displayTitle || false,
+      displayRanking: props?.displayRanking || false,
+      displayLabel: props?.displayLabel || false,
+      displaySummary: props?.displaySummary || false,
+      displayDescription: props?.displayDescription || false,
+      displayArguments: props?.displayArguments || false,
+      displayVote: props?.displayVote || false,
+      displayShareButtons: props?.displayShareButtons || false,
+      displayEditLink: props?.displayEditLink || false,
+      displayCaption: props?.displayCaption || false,
+    },
   });
-
-  useEffect(() => {
-    form.reset(defaults());
-  }, [widget]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -90,19 +68,7 @@ export default function WidgetResourceOverviewDisplay() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Titel weergeven</FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Ja" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
@@ -113,19 +79,7 @@ export default function WidgetResourceOverviewDisplay() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Ranking weergeven</FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Ja" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
@@ -136,19 +90,7 @@ export default function WidgetResourceOverviewDisplay() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Label weergeven</FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Ja" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
@@ -159,19 +101,7 @@ export default function WidgetResourceOverviewDisplay() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Samenvatting weergeven</FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Ja" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
@@ -182,19 +112,7 @@ export default function WidgetResourceOverviewDisplay() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Beschrijving weergeven</FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Ja" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
@@ -205,19 +123,7 @@ export default function WidgetResourceOverviewDisplay() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Hoeveelheid aan argumenten weergeven</FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Nee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
@@ -230,19 +136,7 @@ export default function WidgetResourceOverviewDisplay() {
                 <FormLabel>
                   Hoeveelheid stemmen weergeven (voor Gridder)
                 </FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Ja" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
@@ -253,19 +147,7 @@ export default function WidgetResourceOverviewDisplay() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Deel knoppen weergeven</FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Ja" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
@@ -276,19 +158,7 @@ export default function WidgetResourceOverviewDisplay() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Aanpas-link weergeven voor moderators</FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Ja" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}

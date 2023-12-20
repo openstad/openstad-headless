@@ -22,7 +22,7 @@ import * as z from 'zod';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { LikeProps } from '@openstad/likes/src/likes';
-import { EditFieldProps } from '@/lib/EditFieldProps';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 
 const formSchema = z.object({

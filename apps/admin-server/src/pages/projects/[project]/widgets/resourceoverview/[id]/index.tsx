@@ -82,7 +82,20 @@ export default function WidgetResourceOverview() {
               <WidgetResourceOverviewImage />
             </TabsContent>
             <TabsContent value="display" className="p-0">
-              <WidgetResourceOverviewDisplay />
+              <WidgetResourceOverviewDisplay
+                {...widget?.config}
+                updateConfig={(config) =>
+                  updateConfig({ ...widget.config, ...config })
+                }
+                onFieldChanged={(key, value) => {
+                  if (previewConfig) {
+                    updatePreview({
+                      ...previewConfig,
+                      [key]: value,
+                    });
+                  }
+                }}
+              />
             </TabsContent>
             <TabsContent value="button" className="p-0">
               <WidgetResourceOverviewButton />

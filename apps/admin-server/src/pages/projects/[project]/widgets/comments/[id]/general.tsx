@@ -19,7 +19,7 @@ import { Heading } from '@/components/ui/typography';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { EditFieldProps } from '@/lib/EditFieldProps';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { CommentsWidgetProps } from '@openstad/comments/src/comments';
 
 const formSchema = z.object({
