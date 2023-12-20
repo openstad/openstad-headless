@@ -3,6 +3,8 @@ FROM node:18-slim as builder
 ARG APP
 ENV WORKSPACE apps/${APP}
 
+LABEL org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}
+
 # Create app directory
 WORKDIR /opt/openstad-headless
 
