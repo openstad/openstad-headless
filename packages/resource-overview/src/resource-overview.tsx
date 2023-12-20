@@ -4,19 +4,24 @@ import { Banner, Icon } from '@openstad-headless/ui/src';
 import DataStore from '@openstad-headless/data-store/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import { Image } from '@openstad-headless/ui/src';
-import { BaseConfig } from '../../generic-widget-types';
+import { BaseProps } from '../../types/base-props';
+import { ProjectSettingProps } from '../../types/project-setting-props';
 import { Filters } from './filters/filters';
+import loadWidget from '@openstad-headless/lib/load-widget';
 
-type Props = {
-  renderHeader?: (resources?: Array<any>) => React.JSX.Element;
-  renderItem?: (resource: any) => React.JSX.Element;
-  allowFiltering?: boolean;
-  tagTypes?: Array<{
-    type: string;
-    placeholder: string;
-    multiple?: boolean;
-  }>;
-} & BaseConfig;
+export type ResourceOverviewWidgetProps = BaseProps &
+  ProjectSettingProps & {
+    projectId?: string;
+  } & {
+    renderHeader?: (resources?: Array<any>) => React.JSX.Element;
+    renderItem?: (resource: any) => React.JSX.Element;
+    allowFiltering?: boolean;
+    tagTypes?: Array<{
+      type: string;
+      placeholder: string;
+      multiple?: boolean;
+    }>;
+  };
 
 //Temp: Header can only be made when the map works so for now a banner
 // If you dont want a banner pas <></> into the renderHeader prop
@@ -70,8 +75,11 @@ function ResourceOverview({
   allowFiltering = true,
   tagTypes = [],
   ...props
-}: Props) {
-  const datastore = new DataStore(props);
+}: ResourceOverviewWidgetProps) {
+  const datastore = new DataStore({
+    projectId: props.projectId,
+    config: { api: props.api },
+  });
   const [resources] = datastore.useResources({ ...props });
 
   return (
@@ -86,8 +94,8 @@ function ResourceOverview({
         }`}>
         {allowFiltering && datastore ? (
           <Filters
+            {...props}
             projectId={props.projectId}
-            config={props.config}
             dataStore={datastore}
             resources={resources}
             onUpdateFilter={resources.filter}
@@ -110,4 +118,6 @@ function ResourceOverview({
   );
 }
 
-export default ResourceOverview;
+ResourceOverview.loadWidget = loadWidget;
+
+export { ResourceOverview };

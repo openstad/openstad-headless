@@ -19,12 +19,27 @@ import WidgetResourceOverviewInclude from './include';
 import WidgetResourceOverviewLabel from './label';
 import WidgetResourceOverviewInfo from './info';
 import { useRouter } from 'next/router';
-import Preview from '@/components/widget-preview';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
+import WidgetPreview from '@/components/widget-preview';
 
 export default function WidgetResourceOverview() {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
+
+  const { data: widget, updateConfig } = useWidgetConfig();
+  const { previewConfig, updatePreview } =
+    useWidgetPreview<ResourceOverviewWidgetProps>({
+      projectId,
+      resourceId: '2',
+      api: {
+        url: '/api/openstad',
+      },
+      title: 'Vind je dit een goed idee?',
+      variant: 'medium',
+    });
 
   return (
     <div>
@@ -45,9 +60,8 @@ export default function WidgetResourceOverview() {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="preview">
+          <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
-              <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="image">Afbeeldingen</TabsTrigger>
               <TabsTrigger value="display">Display</TabsTrigger>
@@ -61,9 +75,6 @@ export default function WidgetResourceOverview() {
               <TabsTrigger value="labels">Labels</TabsTrigger>
               <TabsTrigger value="info">Info</TabsTrigger>
             </TabsList>
-            <TabsContent value="preview" className="p-0">
-              {/* <Preview type="resourceoverview" /> */}
-            </TabsContent>
             <TabsContent value="general" className="p-0">
               <WidgetResourceOverviewGeneral />
             </TabsContent>
@@ -101,6 +112,16 @@ export default function WidgetResourceOverview() {
               <WidgetResourceOverviewInfo />
             </TabsContent>
           </Tabs>
+
+          <div className="py-6 mt-6 bg-white rounded-md">
+            {previewConfig ? (
+              <WidgetPreview
+                type="resourceoverview"
+                config={previewConfig}
+                projectId={projectId as string}
+              />
+            ) : null}
+          </div>
         </div>
       </PageLayout>
     </div>
