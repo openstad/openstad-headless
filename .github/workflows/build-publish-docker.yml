@@ -53,18 +53,18 @@ jobs:
             APP=${{ matrix.app }}
 
       # Comment build info in commit
-#      - uses: actions/github-script@0.9.0
-#        env:
-#          STDOUT: "Published new image: `${{ fromJson(steps.docker_build.outputs.metadata)['image.name'] }}`"
-#        with:
-#          github-token: ${{ secrets.GITHUB_TOKEN }}
-#          script: |
-#            github.repos.createCommitComment({
-#              owner: context.repo.owner,
-#              repo: context.repo.repo,
-#              commit_sha: context.sha,
-#              body: process.env.STDOUT
-#            })
+      - uses: actions/github-script@0.9.0
+        env:
+          STDOUT: "[${{ matrix.app }}] new image: `${{ fromJson(steps.docker_build.outputs.metadata)['image.name'] }}` version: `${{ steps.meta.outputs.version }}` @ ${{ steps.meta.outputs.tags }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: process.env.STDOUT
+            })
 
       - name: Image digest
         run: echo "${{ steps.docker_build.outputs.metadata }}"
