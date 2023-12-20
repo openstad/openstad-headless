@@ -94,13 +94,6 @@ IMAGE_APP_URL = 'http://' + IMAGE_DOMAIN;
 IMAGE_PORT_API = BASE_PORT + 50;
 IMAGE_PORT_IMAGE_SERVER = IMAGE_PORT_API + 1;
 
-IMAGE_CLIENT_TOKEN = generateRandomToken({ length: 255 });
-
-IMAGE_DB_HOST = process.env.DB_HOST
-IMAGE_DB_USERNAME = process.env.DB_USERNAME
-IMAGE_DB_PASSWORD = process.env.DB_PASSWORD
-IMAGE_DB_NAME = ( process.env.DB_BASE_NAME ? process.env.DB_BASE_NAME + '-image-server' :  'image-server' )
-
 IMAGE_IMAGES_DIR = ''
 IMAGE_THROTTLE = true
 IMAGE_THROTTLE_CC_PROCESSORS = 4
