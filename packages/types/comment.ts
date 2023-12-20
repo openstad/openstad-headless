@@ -1,6 +1,6 @@
 type Comment = {
   parentId: number;
-  ideaId: number;
+  resourceId: number;
   userId: number;
   sentiment: string;
   description: string;

@@ -16,8 +16,8 @@ export default {
       'Content-Type': 'application/json'
     };
 
-    let votes = data.map(idea => ({
-      ideaId: idea.id,
+    let votes = data.map(resource => ({
+      resourceId: resource.id,
       opinion: 'selected',
     }))
 

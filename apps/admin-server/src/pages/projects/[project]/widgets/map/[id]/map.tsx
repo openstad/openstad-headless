@@ -211,12 +211,12 @@ export default function WidgetMapMap() {
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecteert een idee" />
+                      <SelectValue placeholder="Selecteert een resource" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="select">Selecteert een idee</SelectItem>
-                    <SelectItem value="details">Toon idee details</SelectItem>
+                    <SelectItem value="select">Selecteert een resource</SelectItem>
+                    <SelectItem value="details">Toon resource details</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

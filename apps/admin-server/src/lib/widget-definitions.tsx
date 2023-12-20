@@ -1,9 +1,9 @@
 export const WidgetDefinitions = {
-  arguments: 'Argumenten',
+  comments: 'Argumenten',
   begrootmodule: 'Begrootmodule',
-  ideasmap: 'Ideeën map',
+  resourcesmap: 'Resource map',
   keuzewijzer: 'Keuzewijzer',
-  like: 'Like',
+  likes: 'Like',
   map: 'Map',
   resourceform: 'Resource form',
   resourceoverview: 'Resource overview',

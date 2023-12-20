@@ -1,15 +1,15 @@
 export default {
 
-  fetch: async function({ projectId, ideaId, sentiment }) {
+  fetch: async function({ projectId, resourceId, sentiment }) {
 
-    let url = `/api/project/${projectId}/idea/${ideaId}/comment?sentiment=${sentiment}&includeUser=1&includeUserVote=1&includeVoteCount=1&includeRepliesOnComments=1`;
+    let url = `/api/project/${projectId}/resource/${resourceId}/comment?sentiment=${sentiment}&includeUser=1&includeUserVote=1&includeVoteCount=1&includeRepliesOnComments=1`;
     return this.fetch(url);
 
   },
 
-  create: async function({ projectId, ideaId }, data) {
+  create: async function({ projectId, resourceId }, data) {
 
-    let url = `/api/project/${projectId}/idea/${ideaId}/comment`;
+    let url = `/api/project/${projectId}/resource/${resourceId}/comment`;
     let method = 'post';
     delete data.id;
     let body = JSON.stringify(data);
@@ -19,9 +19,9 @@ export default {
 
   },
 
-  update: async function({ projectId, ideaId }, data) {
+  update: async function({ projectId, resourceId }, data) {
 
-    let url = `/api/project/${projectId}/idea/${ideaId}/comment/${data.id}`;
+    let url = `/api/project/${projectId}/resource/${resourceId}/comment/${data.id}`;
     let method = 'put';
     let body = JSON.stringify(data);
       
@@ -30,10 +30,10 @@ export default {
 
   },
 
-  delete: async function({ projectId, ideaId }, data) {
+  delete: async function({ projectId, resourceId }, data) {
 
 
-    let url = `/api/project/${projectId}/idea/${ideaId}/comment/${data.id}`;
+    let url = `/api/project/${projectId}/resource/${resourceId}/comment/${data.id}`;
     let method = 'delete';
 
     let newData = await this.fetch(url, { method })
@@ -42,9 +42,9 @@ export default {
     
   },
 
-  submitLike: async function({ projectId, ideaId }, data) {
+  submitLike: async function({ projectId, resourceId }, data) {
 
-    let url = `/api/project/${projectId}/idea/${ideaId}/comment/${data.id}/vote`;
+    let url = `/api/project/${projectId}/resource/${resourceId}/comment/${data.id}/vote`;
     let method = 'post';
     let body = JSON.stringify({});
 

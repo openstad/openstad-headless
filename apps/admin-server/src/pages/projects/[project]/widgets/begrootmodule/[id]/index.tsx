@@ -50,7 +50,7 @@ export default function WidgetBegrootmodule() {
               <TabsTrigger value="labels">Labels</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
-              <Preview type="begrootmodule" />
+              {/* <Preview type="begrootmodule" /> */}
             </TabsContent>
             <TabsContent value="voting" className="p-0">
               <BegrootmoduleVoting />

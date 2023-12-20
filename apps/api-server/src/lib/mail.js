@@ -89,18 +89,16 @@ async function sendNotificationMail(data, project) {
   }
 }
 
-async function sendConceptEmail(resource, resourceType, project, user) {
+async function sendConceptEmail(resource, project, user) {
   try {
     let projectConfig = await new MailConfig(project);
-    if (!resourceType)
-      return console.error('sendConceptMail error: resourceType not provided');
 
     let resourceConceptEmail =
-      projectConfig.getResourceConceptEmail(resourceType);
+      projectConfig.getResourceConceptEmail();
     const hasBeenPublished = resource.publishDate;
     if (hasBeenPublished) {
       resourceConceptEmail =
-        projectConfig.getResourceConceptToPublishedEmail(resourceType);
+        projectConfig.getResourceConceptToPublishedEmail();
     }
 
     const url = projectConfig.getCmsUrl();
@@ -113,7 +111,6 @@ async function sendConceptEmail(resource, resourceType, project, user) {
       inzendingPath,
       url,
       resource,
-      resourceType
     );
 
     let fromAddress = resourceConceptEmail.from || config.email;
@@ -155,27 +152,23 @@ async function sendConceptEmail(resource, resourceType, project, user) {
 }
 
 // send email to user that submitted a resource
-async function sendThankYouMail(resource, resourceType, project, user) {
+async function sendThankYouMail(resource, project, user) {
   try {
     let projectConfig = await new MailConfig(project);
-
-    if (!resourceType)
-      return console.error('sendThankYouMail error: resourceType not provided');
 
     const url = projectConfig.getCmsUrl();
     const hostname = projectConfig.getCmsHostname();
     const projectname = projectConfig.getTitle();
     let inzendingPath =
-      projectConfig.getFeedbackEmailInzendingPath(resourceType);
+      projectConfig.getFeedbackEmailInzendingPath();
     const inzendingURL = getInzendingURL(
       inzendingPath,
       url,
       resource,
-      resourceType
     );
 
     let fromAddress =
-      projectConfig.getFeedbackEmailFrom(resourceType) || config.email;
+      projectConfig.getFeedbackEmailFrom() || config.email;
     if (!fromAddress)
       return console.error('Email error: fromAddress not provided');
     if (fromAddress.match(/^.+<(.+)>$/, '$1'))
@@ -193,11 +186,11 @@ async function sendThankYouMail(resource, resourceType, project, user) {
       logo
     );
 
-    let template = projectConfig.getResourceFeedbackEmailTemplate(resourceType);
+    let template = projectConfig.getResourceFeedbackEmailTemplate();
     const html = prepareHtml(template, data);
     const text = convertHtmlToText(html);
     const attachments =
-      projectConfig.getResourceFeedbackEmailAttachments(resourceType) ||
+      projectConfig.getResourceFeedbackEmailAttachments() ||
       projectConfig.getDefaultEmailAttachments();
 
     sendMail(project, {
@@ -205,7 +198,7 @@ async function sendThankYouMail(resource, resourceType, project, user) {
       to: resource.email ? resource.email : user.email,
       from: fromAddress,
       subject:
-        projectConfig.getResourceFeedbackEmailSubject(resourceType) ||
+        projectConfig.getResourceFeedbackEmailSubject() ||
         'Bedankt voor je inzending',
       html: html,
       text: text,
@@ -229,7 +222,7 @@ function prepareEmailData(
   return {
     date: new Date(),
     user,
-    idea: resource,
+    resource,
     HOSTNAME: hostname,
     PROJECTNAME: projectname,
     inzendingURL,
@@ -318,7 +311,7 @@ async function sendInactiveWarningEmail(project, user) {
     });
 
     let attachments =
-      projectConfig.getResourceFeedbackEmailAttachments('idea') ||
+      projectConfig.getResourceFeedbackEmailAttachments() ||
       projectConfig.getDefaultEmailAttachments();
 
     sendMail(project, {
@@ -336,16 +329,16 @@ async function sendInactiveWarningEmail(project, user) {
   }
 }
 
-function getInzendingURL(inzendingPath, url, resource, resourceType) {
-  let idRegex = new RegExp(`\\{(?:${resourceType}|idea)?Id\\}`, 'g');
-  let oldIdRegex = new RegExp(`\\[\\[(?:${resourceType}|idea)?Id\\]\\]`, 'g');
+function getInzendingURL(inzendingPath, url, resource) {
+  let idRegex = new RegExp(`\\{(?:resources|resource)?Id\\}`, 'g');
+  let oldIdRegex = new RegExp(`\\[\\[(?:Resources|resource)?Id\\]\\]`, 'g');
 
   inzendingPath =
     (inzendingPath &&
       inzendingPath
         .replace(idRegex, resource.id)
         .replace(oldIdRegex, resource.id)
-        .replace(/\[\[resourceType\]\]/, resourceType)) ||
+        .replace(/\[\[resourceType\]\]/, 'resources')) ||
     '/';
   return url + inzendingPath;
 }

@@ -42,7 +42,7 @@ export default function WidgetKeuzewijzer() {
               <ChoicesSelectorForm />
             </TabsContent>
             <TabsContent value="preview" className="p-0">
-              <Preview type="keuzewijzer" />
+              {/* <Preview type="keuzewijzer" /> */}
             </TabsContent>
           </Tabs>
         </div>

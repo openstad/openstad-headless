@@ -5,7 +5,7 @@ module.exports = {
     css: ['@openstad-headless/arguments-component/dist/style.css'],
     name: 'OpenstadHeadlessArguments',
     defaultConfig: {
-      ideaId: null,
+      resourceId: null,
       title: '[[nr]] reacties voor',
       isClosed: widget.project?.config?.arguments?.isClosed || true,
       closedText: 'Het inzenden van reacties is niet langer mogelijk',
@@ -26,7 +26,16 @@ module.exports = {
     functionName: 'OpenstadHeadlessLikes',
     componentName: 'Likes',
     defaultConfig: {
-      ideaId: null,
+      resourceId: null,
+    },
+  },
+  comments: {
+    js: ['@openstad-headless/comments/dist/comments.iife.js'],
+    css: ['@openstad-headless/comments/dist/style.css'],
+    functionName: 'OpenstadHeadlessComments',
+    componentName: 'Comments',
+    defaultConfig: {
+      resourceId: null,
     },
   },
 };

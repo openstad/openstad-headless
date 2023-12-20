@@ -72,7 +72,7 @@ function ResourceOverview({
   ...props
 }: Props) {
   const datastore = new DataStore(props);
-  const [ideas] = datastore.useIdeas({ ...props });
+  const [resources] = datastore.useResources({ ...props });
 
   return (
     <div className="osc">
@@ -89,15 +89,15 @@ function ResourceOverview({
             projectId={props.projectId}
             config={props.config}
             dataStore={datastore}
-            ideas={ideas}
-            onUpdateFilter={ideas.filter}
+            resources={resources}
+            onUpdateFilter={resources.filter}
             tagTypes={tagTypes}
           />
         ) : null}
 
         <section className="osc-resource-overview-resource-collection">
-          {ideas &&
-            ideas.map((resource: any) => {
+          {resources &&
+            resources.map((resource: any) => {
               return (
                 <React.Fragment key={`resource-item-${resource.title}`}>
                   {renderItem(resource)}

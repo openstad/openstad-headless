@@ -1,5 +1,5 @@
 export type CommentsProps = {
-  ideaId: number;
+  resourceId: number;
   requiredUserRole: string;
   title?: string;
   sentiment?: string;

@@ -68,7 +68,7 @@ export default function WidgetResourceOverviewInclude() {
             name="excludeTheme"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Geef ideeën met dit thema niet weer:</FormLabel>
+                <FormLabel>Geef resources met dit thema niet weer:</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -82,7 +82,7 @@ export default function WidgetResourceOverviewInclude() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Geef enkel ideeën weer met dit specifieke thema:
+                  Geef enkel resources weer met dit specifieke thema:
                 </FormLabel>
                 <FormControl>
                   <Input {...field} />

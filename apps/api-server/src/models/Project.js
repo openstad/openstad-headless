@@ -4,6 +4,7 @@ const moment = require('moment');
 const configField = require('./lib/config-field');
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 const authSettings = require('../util/auth-settings');
+const {getSafeConfig} = require("./lib/safe-config");
 
 module.exports = function (db, sequelize, DataTypes) {
 
@@ -45,6 +46,16 @@ module.exports = function (db, sequelize, DataTypes) {
         viewableBy: 'editor',
         updateableBy: 'editor',
       },
+    },
+    
+    safeConfig: {
+      type: Sequelize.DataTypes.VIRTUAL,
+      get() {
+        return getSafeConfig(this.getDataValue('config'));
+      },
+      set (value) {
+        throw new Error ('`safeConfig` is a virtual field and cannot be set')
+      }
     },
 
     emailConfig: {
@@ -108,14 +119,14 @@ module.exports = function (db, sequelize, DataTypes) {
             let config = merge.recursive(true, instance.config);
             if (instance.config.project.projectHasEnded) {
               config.votes.isActive = false;
-              config.ideas.canAddNewIdeas = false;
+              config.resources.canAddNewResources = false;
               config.comments.isClosed = true;
               config.polls.canAddPolls = false;
               config.users.canCreateNewUsers = false;
             } else {
               // commented: do not update these params on unsetting
               // config.votes.isActive = true;
-              // config.ideas.canAddNewIdeas = true;
+              // config.resources.canAddNewResources = true;
               // config.comments.isClosed = false;
               // config.polls.canAddPolls = true;
               // config.users.canCreateNewUsers = true;
@@ -153,7 +164,7 @@ module.exports = function (db, sequelize, DataTypes) {
             })
 
         if (found.length > 0) throw Error('Cannot delete an active project - first anonymize all users');
-        return 
+        return
       },
 
     },
@@ -192,7 +203,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
   Project.associate = function (models) {
     this.hasMany(models.User, { onDelete: 'CASCADE', hooks: true });
-    this.hasMany(models.Idea, { onDelete: 'CASCADE', hooks: true });
+    this.hasMany(models.Resource, { onDelete: 'CASCADE', hooks: true });
     this.hasMany(models.Tag, { onDelete: 'CASCADE', hooks: true });
     this.belongsTo(models.Area, { onDelete: 'CASCADE' });
   }
@@ -237,7 +248,7 @@ module.exports = function (db, sequelize, DataTypes) {
             let res = await user.doAnonymize();
             user.project = null;
           }, 1000 / amountOfUsersPerSecond)
-        })       
+        })
         .then(result => Promise.resolve() )
           .catch(function (err) {
             throw err;

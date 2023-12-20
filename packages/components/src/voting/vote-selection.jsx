@@ -43,10 +43,10 @@ const VoteSelection = function(props) {
 
   let selectionHTML = (
     <>
-      {props.selection.map((idea, index) => {
+      {props.selection.map((resource, index) => {
         return (
-          <p key={`osc-selected-idea-${index}`}>
-            {idea.title}
+          <p key={`osc-selected-resource-${index}`}>
+            {resource.title}
           </p>);
       })}
     </>

@@ -66,7 +66,7 @@ function parseAuthHeader(authorizationHeader) {
 
   if (authorizationHeader.match(/^bearer /i)) {
     const jwt = parseJwt(authorizationHeader);
-    return (jwt && jwt.userId) ? { userId: jwt.userId, authProvider: jwt.authProvider } : null;
+    return (jwt && jwt.userId) ? { userId: jwt.userId, authProvider: jwt.authProvider } : {};
   }
 
   if (fixedAuthTokens) {
@@ -163,8 +163,8 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, isSu
     let mergedUser = merge(dbUser, userData);
     return mergedUser;
     
-  } catch(error) {
-    console.log(error);
+  } catch(err) {
+    console.log(err);
     return await resetUserToken(dbUser);
   }
 

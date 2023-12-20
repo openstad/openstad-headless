@@ -3,8 +3,8 @@ import React from "react";
 import About from './about/index.jsx';
 import Button from './button/index.jsx';
 import Comments from './comments/index.jsx';
-import IdeaDetails from './idea-details/index.jsx';
-import IdeasOverview from './ideas-overview/index.jsx';
+import ResourceDetails from './resource-details/index.jsx';
+import ResourcesOverview from './resources-overview/index.jsx';
 import ParticipativeBudgeting from './participative-budgeting/index.jsx';
 import User from './user/index.jsx';
 
@@ -19,8 +19,8 @@ export {
   About,
   Button,
   Comments,
-  IdeasOverview,
-  IdeaDetails,
+  ResourcesOverview,
+  ResourceDetails,
   ParticipativeBudgeting,
   User,
 }

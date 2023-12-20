@@ -7,7 +7,7 @@ const config = {
     url: import.meta.env.VITE_API_URL,
   },
   projectId: import.meta.env.VITE_PROJECT_ID,
-  ideaId: import.meta.env.VITE_IDEA_ID,
+  resourceId: import.meta.env.VITE_RESOURCE_ID,
   login: {
     label: import.meta.env.VITE_LOGIN_LABEL,
     url: `${import.meta.env.VITE_API_URL}/auth/project/${import.meta.env.VITE_PROJECT_ID}/login?forceNewLogin=1&useAuth=default&redirectUri=${document.location}`

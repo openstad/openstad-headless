@@ -86,7 +86,7 @@ export default function WidgetResourceOverviewButton() {
               <FormItem>
                 <FormLabel>
                   Tekst die weergegeven wordt in de stem knoppen van een open
-                  idee
+                  resource
                 </FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -100,7 +100,7 @@ export default function WidgetResourceOverviewButton() {
             name="fieldUsedForTitle"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Titel tekst van een idee</FormLabel>
+                <FormLabel>Titel tekst van een resource</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>

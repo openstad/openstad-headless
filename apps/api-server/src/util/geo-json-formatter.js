@@ -4,7 +4,7 @@ exports.formatPolygonToGeoJson = (polygons) => {
 
   //geoJSON has many more features, we just use this template because this is what
   //most generators and public data gives you and it looks is for the uploader and we can refer to a standard
-  //but we don't save property for instance, it might be an idea to look into it for the future
+  //but we don't save property for instance, it might be an resource to look into it for the future
   return {
     "type": "FeatureCollection",
     "features": [

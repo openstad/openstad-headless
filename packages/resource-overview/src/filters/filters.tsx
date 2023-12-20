@@ -11,7 +11,7 @@ import { useDebounce } from 'rooks';
 import { MultiSelectTagFilter } from './multiselect-tag-filter';
 import { SelectTagFilter } from './select-tag-filter';
 
-//Todo correctly type ideas. Will be possible when the datastore is correctly typed
+//Todo correctly type resources. Will be possible when the datastore is correctly typed
 
 type Filter = {
   tags: {};
@@ -22,14 +22,14 @@ type Filter = {
 };
 
 type Props = {
-  ideas: any;
+  resources: any;
   dataStore: DataStore;
   tagTypes?: Array<{ type: string; placeholder?: string; multiple?: boolean }>;
   onUpdateFilter?: (filter: Filter) => void;
 } & BaseConfig;
 
 export function Filters({
-  ideas,
+  resources,
   dataStore,
   tagTypes = [
     { type: 'theme', placeholder: 'Selecteer een thema', multiple: true },

@@ -62,7 +62,7 @@ export default function WidgetResourceOverview() {
               <TabsTrigger value="info">Info</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
-              <Preview type="resourceoverview" />
+              {/* <Preview type="resourceoverview" /> */}
             </TabsContent>
             <TabsContent value="general" className="p-0">
               <WidgetResourceOverviewGeneral />
