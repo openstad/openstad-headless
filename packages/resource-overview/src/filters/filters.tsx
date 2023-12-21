@@ -1,9 +1,4 @@
-import {
-  Input,
-  MultiSelect,
-  SecondaryButton,
-  Select,
-} from '@openstad-headless/ui/src';
+import { Input, SecondaryButton, Select } from '@openstad-headless/ui/src';
 import React, { useState, useEffect, useRef, createRef } from 'react';
 import DataStore from '../../../components/src/data-store';
 import { BaseProps } from '../../../types/base-props';
@@ -44,7 +39,7 @@ export function Filters({
   onUpdateFilter,
   ...props
 }: Props) {
-  const defaultFilter = { tags: {}, search: { text: '' } };
+  const defaultFilter = { tags: {}, search: { text: '' }, sort: '' };
   tagTypes.forEach((tagType) => {
     defaultFilter.tags[tagType.type] = null;
   });
@@ -76,7 +71,7 @@ export function Filters({
     onUpdateFilter && onUpdateFilter(newFilter);
   }
 
-  function setTags(type, values) {
+  function setTags(type: string, values: any[]) {
     updateFilter({
       ...filter,
       tags: {
@@ -88,7 +83,7 @@ export function Filters({
 
   const search = useDebounce(setSearch, 300);
 
-  function setSearch(value) {
+  function setSearch(value: string) {
     updateFilter({
       ...filter,
       search: {
