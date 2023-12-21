@@ -21,6 +21,7 @@ import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
 import { SimpleCalendar } from '@/components/simple-calender-popup';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -29,6 +30,8 @@ const formSchema = z.object({
   endDate: z.date().min(new Date(), {
     message: 'De datum moet nog niet geweest zijn!',
   }),
+  enableLikes: z.boolean(),
+  enableReactions: z.boolean(),
 });
 
 export default function ProjectSettings() {
@@ -39,9 +42,11 @@ export default function ProjectSettings() {
   const { data, isLoading, updateProject } = useProject();
   const defaults = () => ({
     name: data?.name || null,
-    endDate: data?.config?.[category]?.endDate
-      ? new Date(data?.config?.[category]?.endDate)
+    endDate: data?.config?.project?.endDate
+      ? new Date(data?.config?.project?.endDate)
       : new Date(),
+    enableLikes: data?.config?.resources?.enableLikes || null,
+    enableReactions: data?.config?.resources?.enableReactions || null,
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -58,9 +63,13 @@ export default function ProjectSettings() {
     try {
       await updateProject(
         {
-          [category]: {
+          project: {
             endDate: values.endDate,
           },
+          resources: {
+            enableLikes: values.enableLikes,
+            enableReactions: values.enableReactions,
+          }
         },
         name
       );
@@ -116,6 +125,60 @@ export default function ProjectSettings() {
                       form={form}
                       fieldName="endDate"
                       label="Einddatum"
+                    />
+                    <FormField
+                      control={form.control}
+                      name="enableLikes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Is het mogelijk om likes te plaatsen?
+                          </FormLabel>
+                          <Select
+                            onValueChange={(e: string) =>
+                              field.onChange(e === 'true')
+                            }
+                            value={field.value ? 'true' : 'false'}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Nee" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="true">Ja</SelectItem>
+                              <SelectItem value="false">Nee</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="enableReactions"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Is het mogelijk om reacties te plaatsen?
+                          </FormLabel>
+                          <Select
+                            onValueChange={(e: string) =>
+                              field.onChange(e === 'true')
+                            }
+                            value={field.value ? 'true' : 'false'}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Nee" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="true">Ja</SelectItem>
+                              <SelectItem value="false">Nee</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                     <Button className="w-fit col-span-full" type="submit">
                       Opslaan
