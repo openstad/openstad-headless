@@ -1,4 +1,3 @@
-import { EditFieldProps } from './EditFieldProps';
 import { ControllerRenderProps } from 'react-hook-form';
 import { FormControl } from '@/components/ui/form';
 import {
@@ -12,7 +11,7 @@ import {
 // Simple yes/no selector that uses a props.onFieldchanged method to emit changes
 export function YesNoSelect(
   field: ControllerRenderProps<any, any>,
-  props: Partial<EditFieldProps<any>>
+  props: { onFieldChanged?: (key: string, value: any) => void }
 ) {
   return (
     <Select

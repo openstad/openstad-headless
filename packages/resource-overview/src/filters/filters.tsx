@@ -6,7 +6,7 @@ import {
 } from '@openstad-headless/ui/src';
 import React, { useState, useEffect, useRef, createRef } from 'react';
 import DataStore from '../../../components/src/data-store';
-import { BaseConfig } from '../../../generic-widget-types';
+import { BaseProps } from '../../../types/base-props';
 import { useDebounce } from 'rooks';
 import { MultiSelectTagFilter } from './multiselect-tag-filter';
 import { SelectTagFilter } from './select-tag-filter';
@@ -24,9 +24,10 @@ type Filter = {
 type Props = {
   resources: any;
   dataStore: DataStore;
+  sortOptions?: Array<{ value: string; label: string }>;
   tagTypes?: Array<{ type: string; placeholder?: string; multiple?: boolean }>;
   onUpdateFilter?: (filter: Filter) => void;
-} & BaseConfig;
+} & BaseProps;
 
 export function Filters({
   resources,
@@ -43,7 +44,6 @@ export function Filters({
   onUpdateFilter,
   ...props
 }: Props) {
-
   const defaultFilter = { tags: {}, search: { text: '' } };
   tagTypes.forEach((tagType) => {
     defaultFilter.tags[tagType.type] = null;
@@ -166,12 +166,7 @@ export function Filters({
           }
         })}
 
-        <Select
-          ref={sortingRef}
-          onValueChange={setSort}
-          options={
-            sortOptions
-          }>
+        <Select ref={sortingRef} onValueChange={setSort} options={sortOptions}>
           <option value={''}>Sorteer op</option>
         </Select>
 
@@ -197,6 +192,6 @@ export function Filters({
           Wis alles
         </SecondaryButton>
       </div>
-    </section >
+    </section>
   );
 }
