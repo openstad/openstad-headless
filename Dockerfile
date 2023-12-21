@@ -46,7 +46,7 @@ ARG APP
 ARG PORT
 ENV WORKSPACE apps/${APP}
 
-LABEL org.opencontainers.image.description="Openstad Headless ${APP} image - related commit: ${GITHUB_SHA}"
+LABEL org.opencontainers.image.description="Openstad Headless ${APP} image"
 
 WORKDIR /opt/openstad-headless
 
