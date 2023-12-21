@@ -38,31 +38,32 @@ module.exports = async function seed(config, db) {
         },
         votes: {
           isActive: true,
-          requiredUserRole: "anonymous",
+          requiredUserRole: 'anonymous',
           isViewable: true,
+          withExisting: 'replace',
           voteValues: [
             {
-              label: "I like",
-              value: "yes"
+              label: 'I like',
+              value: 'yes'
             },
             {
-              label: "Don't know",
-              value: "mayby"
+              label: 'Don\'t know',
+              value: 'mayby'
             },
             {
-              label: "I do not like",
-              value: "no"
+              label: 'I do not like',
+              value: 'no'
             }
           ]
         },
       },
     });
     project = await project.update({
-      "config": {
-        "votes": {
-          "isActive": true,
-          "requiredUserRole": "anonymous",
-          "isViewable": true
+      'config': {
+        'votes': {
+          'isActive': true,
+          'requiredUserRole': 'anonymous',
+          'isViewable': true
         }
       }
     });
@@ -91,6 +92,9 @@ module.exports = async function seed(config, db) {
         },
         votes: {
           isActive: true,
+          withExisting: 'replace',
+          requiredUserRole: 'anonymous',
+          isViewable: true,
         }
       },
     });
@@ -505,12 +509,19 @@ module.exports = async function seed(config, db) {
       opinion: 'yes',
     });
 
-    console.log('    a widget');
+    console.log('    two widgets');
     await db.Widget.create({
       projectId: 2,
-      type: 'arguments',
-      description: 'An arguments widget',
-      config: {"general":{"resourceId":1,"sentiment":"for","isReplyingEnabled":true,"isVotingEnabled":true}},
+      type: 'likes',
+      description: 'Likes op plannen',
+      config: {"title":"Likes op plannen","variant":"medium","yesLabel":"Is goed","noLabel":"Liever niet","hideCounters":false},
+    });
+
+    await db.Widget.create({
+      projectId: 3,
+      type: 'likes',
+      description: 'Likes op begroot',
+      config: {"title":"Likes op begroot","variant":"medium","yesLabel":"Yes!","noLabel":"Neeee!","hideCounters":false},
     });
 
     console.log('    a choices-guide');
