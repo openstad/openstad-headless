@@ -75,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-push-docker-image
     steps:
-      - uses: actions/github-script@0.9.0
+      - uses: actions/github-script@v7
         env:
           STDOUT: "New images: \n
           `ghcr.io/${{ github.repository_owner }}/admin-server:${{ needs.build-and-push-docker-image.outputs.image_tag }}`\n
