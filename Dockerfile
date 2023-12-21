@@ -50,6 +50,22 @@ WORKDIR /opt/openstad-headless
 
 # copy files
 COPY --from=prepare-production --chown=node:node /opt/openstad-headless/apps/${APP} ./apps/${APP}
+
+USER node
+
+EXPOSE ${PORT}
+
+# Run the application
+CMD ["npm", "run", "start", "--prefix=${WORKSPACE}"]
+
+FROM release as release-with-packages
+ARG APP
+ARG PORT
+ENV WORKSPACE apps/${APP}
+
+WORKDIR /opt/openstad-headless
+
+# copy files
 COPY --from=prepare-production --chown=node:node /opt/openstad-headless/packages ./packages
 
 USER node

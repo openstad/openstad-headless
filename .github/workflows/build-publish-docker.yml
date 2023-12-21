@@ -11,14 +11,21 @@ jobs:
     strategy:
       matrix:
         app: [admin-server, api-server, auth-server, image-server]
+        include:
+          - app: api-server
+            build-target: release-with-packages
     name: '[${{ matrix.app }}] Build & push Docker'
     runs-on: ubuntu-latest
     env:
       IMAGE: '${{ github.repository_owner }}/${{ matrix.app }}'
       APP: ${{ matrix.app }}
+      BUILD_TARGET: release
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - if: ${{ matrix.build_target }}
+        run: echo "BUILD_TARGET=${{ matrix.build_target}}" >> $GITHUB_ENV
 
       - name: Docker meta
         id: meta
