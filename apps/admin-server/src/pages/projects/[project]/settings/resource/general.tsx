@@ -253,7 +253,7 @@ export default function ProjectSettingsResourceGeneral() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Wordt de locatie weergegeven in het resource-formulier?
+                      Wordt het invoerveld voor de locatie weergegeven in het resource-formulier?
                     </FormLabel>
                     <Select
                       onValueChange={(e: string) =>
@@ -280,7 +280,7 @@ export default function ProjectSettingsResourceGeneral() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Wordt het thema weergegeven in het resource-formulier?
+                      Wordt het invoerveld voor het thema weergegeven in het resource-formulier?
                     </FormLabel>
                     <Select
                       onValueChange={(e: string) =>
@@ -307,7 +307,7 @@ export default function ProjectSettingsResourceGeneral() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Wordt de buurt weergegeven in het resource-formulier?
+                      Wordt het invoerveld voor de buurt weergegeven in het resource-formulier?
                     </FormLabel>
                     <Select
                       onValueChange={(e: string) =>
@@ -334,7 +334,7 @@ export default function ProjectSettingsResourceGeneral() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Wordt de auteur van de modbreak weergegeven in het resource-formulier?
+                      Wordt het invoerveld voor de auteur van de modbreak weergegeven in het resource-formulier?
                     </FormLabel>
                     <Select
                       onValueChange={(e: string) =>
