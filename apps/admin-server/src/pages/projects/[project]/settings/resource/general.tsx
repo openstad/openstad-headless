@@ -25,33 +25,8 @@ import { Separator } from '@/components/ui/separator';
 import { useEffect } from 'react';
 import { useProject } from '../../../../../hooks/use-project';
 import { Checkbox } from '@/components/ui/checkbox';
-
-const labels = [
-  {
-    id: "open",
-    label: "Open"
-  },
-  {
-    id: "closed",
-    label: "Gesloten"
-  },
-  {
-    id: "rejected",
-    label: "Afgewezen"
-  },
-  {
-    id: "accepted",
-    label: "Geaccepteerd"
-  },
-  {
-    id: "done",
-    label: "Afgerond"
-  },
-  {
-    id: "considered",
-    label: "In overweging"
-  }
-];
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 const reactions = [
   {
@@ -73,42 +48,40 @@ const reactions = [
 ]
 
 const formSchema = z.object({
-  title: z.string(),
-  summary: z.string(),
-  description: z.string(),
+  canAddNewResources: z.boolean(),
+  minimumYesVotes: z.coerce.number(),
+  titleMinLength: z.coerce.number(),
+  titleMaxLength: z.coerce.number(),
+  summaryMinLength: z.coerce.number(),
+  summaryMaxLength: z.coerce.number(),
+  descriptionMinLength: z.coerce.number(),
+  descriptionMaxLength: z.coerce.number(),
+  displayLocation: z.boolean(),
+  displayTheme: z.boolean(),
+  displayNeighbourhood: z.boolean(),
+  displayModbreak: z.boolean(),
   image: z.string().optional(),
-  location: z.string(),
-  theme: z.string(),
-  neighbourhood: z.string(),
-  label: z.array(z.string()).refine((value) => value.some((item) => item)),
-  modBreakAuthor: z.string(),
-  likeTitle: z.string(),
-  enableLikes: z.boolean(),
-  enableReactions: z.boolean(),
-  displayLikes: z.boolean(),
-  displayDislikes: z.boolean(),
   reactionSettings: z.array(z.string()).refine((value) => value.some((item) => item))
 });
 
 export default function ProjectSettingsResourceGeneral() {
-  const category = 'resource';
+  const category = 'resources';
 
   const { data, isLoading, updateProject } = useProject();
   const defaults = () => ({
-    title: data?.config?.[category]?.title || null,
-    summary: data?.config?.[category]?.summary || null,
-    description: data?.config?.[category]?.description || null,
+    canAddNewResources: data?.config?.[category]?.canAddNewResources || null,
+    minimumYesVotes: data?.config?.[category]?.minimumYesVotes || null,
+    titleMinLength: data?.config?.[category]?.titleMinLength || null,
+    titleMaxLength: data?.config?.[category]?.titleMaxLength || null,
+    summaryMinLength: data?.config?.[category]?.summaryMinLength || null,
+    summaryMaxLength: data?.config?.[category]?.summaryMaxLength || null,
+    descriptionMinLength: data?.config?.[category]?.descriptionMinLength || null,
+    descriptionMaxLength: data?.config?.[category]?.descriptionMaxLength || null,
+    displayLocation: data?.config?.[category]?.displayLocation || null,
+    displayTheme: data?.config?.[category]?.displayTheme || null,
+    displayNeighbourhood: data?.config?.[category]?.displayNeighbourhood || null,
+    displayModbreak: data?.config?.[category]?.displayModbreak || null,
     image: data?.config?.[category]?.image || null,
-    location: data?.config?.[category]?.location || null,
-    theme: data?.config?.[category]?.theme || null,
-    neighbourhood: data?.config?.[category]?.neighbourhood || null,
-    label: data?.config?.[category]?.title || [],
-    modBreakAuthor: data?.config?.[category]?.modBreakAuthor || null,
-    likeTitle: data?.config?.[category]?.likeTitle || null,
-    enableLikes: data?.config?.[category]?.enableLikes || null,
-    enableReactions: data?.config?.[category]?.enableReactions || null,
-    displayLikes: data?.config?.[category]?.displayLikes || null,
-    displayDislikes: data?.config?.[category]?.displayDislikes || null,
     reactionSettings: data?.config?.[category]?.reactionSettings || [],
   });
 
@@ -125,20 +98,19 @@ export default function ProjectSettingsResourceGeneral() {
     try {
       await updateProject({
         [category]: {
-          title: values.title,
-          summary: values.summary,
-          description: values.description,
+          canAddNewResources: values.canAddNewResources,
+          minimumYesVotes: values.minimumYesVotes,
+          titleMinLength: values.titleMinLength,
+          titleMaxLength: values.titleMaxLength,
+          summaryMinLength: values.summaryMinLength,
+          summaryMaxLength: values.summaryMaxLength,
+          descriptionMinLength: values.descriptionMinLength,
+          descriptionMaxLength: values.descriptionMaxLength,
           image: values.image,
-          location: values.location,
-          theme: values.theme,
-          neighbourhood: values.neighbourhood,
-          label: values.label,
-          modBreakAuthor: values.modBreakAuthor,
-          likeTitle: values.likeTitle,
-          enableLikes: values.enableLikes,
-          enableReactions: values.enableReactions,
-          displayLikes: values.displayLikes,
-          displayDislikes: values.displayDislikes,
+          displayLocation: values.displayLocation,
+          displayTheme: values.displayTheme,
+          displayNeighbourhood: values.displayNeighbourhood,
+          displayModbreak: values.displayModbreak,
           reactionSettings: values.reactionSettings
         },
       });
@@ -157,14 +129,41 @@ export default function ProjectSettingsResourceGeneral() {
               className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="title"
+                name="canAddNewResources"
                 render={({ field }) => (
-                  <FormItem className="col-span-1">
+                  <FormItem>
                     <FormLabel>
-                      Titel van de resource
+                      Is het mogelijk om een resource in te sturen?
+                    </FormLabel>
+                    <Select
+                      onValueChange={(e: string) =>
+                        field.onChange(e === 'true')
+                      }
+                      value={field.value ? 'true' : 'false'}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Ja" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="true">Ja</SelectItem>
+                        <SelectItem value="false">Nee</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="minimumYesVotes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Minimum benodigde stemmen voor een resource?
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type="number" placeholder="100" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -172,14 +171,12 @@ export default function ProjectSettingsResourceGeneral() {
               />
               <FormField
                 control={form.control}
-                name="summary"
+                name="titleMinLength"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
-                    <FormLabel>
-                      Samenvatting
-                    </FormLabel>
+                    <FormLabel>Minimum lengte van titel</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type="number" placeholder="10" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -187,15 +184,173 @@ export default function ProjectSettingsResourceGeneral() {
               />
               <FormField
                 control={form.control}
-                name="description"
+                name="titleMaxLength"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
-                    <FormLabel>
-                      Beschrijving
-                    </FormLabel>
+                    <FormLabel>Maximum lengte van titel</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type="number" placeholder="50" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="summaryMinLength"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>Minimum lengte van samenvatting</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="20" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="summaryMaxLength"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>Maximum lengte van samenvatting</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="140" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="descriptionMinLength"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>Minimum lengte van de beschrijving</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="140" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="descriptionMaxLength"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>Maximum lengte van de beschrijving</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="5000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="displayLocation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Wordt het invoerveld voor de locatie weergegeven in het resource-formulier?
+                    </FormLabel>
+                    <Select
+                      onValueChange={(e: string) =>
+                        field.onChange(e === 'false')
+                      }
+                      value={field.value ? 'true' : 'false'}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Nee" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="true">Ja</SelectItem>
+                        <SelectItem value="false">Nee</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="displayTheme"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Wordt het invoerveld voor het thema weergegeven in het resource-formulier?
+                    </FormLabel>
+                    <Select
+                      onValueChange={(e: string) =>
+                        field.onChange(e === 'false')
+                      }
+                      value={field.value ? 'true' : 'false'}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Nee" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="true">Ja</SelectItem>
+                        <SelectItem value="false">Nee</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="displayNeighbourhood"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Wordt het invoerveld voor de buurt weergegeven in het resource-formulier?
+                    </FormLabel>
+                    <Select
+                      onValueChange={(e: string) =>
+                        field.onChange(e === 'false')
+                      }
+                      value={field.value ? 'true' : 'false'}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Nee" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="true">Ja</SelectItem>
+                        <SelectItem value="false">Nee</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="displayModbreak"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Wordt het invoerveld voor de auteur van de modbreak weergegeven in het resource-formulier?
+                    </FormLabel>
+                    <Select
+                      onValueChange={(e: string) =>
+                        field.onChange(e === 'false')
+                      }
+                      value={field.value ? 'true' : 'false'}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Nee" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="true">Ja</SelectItem>
+                        <SelectItem value="false">Nee</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -206,239 +361,11 @@ export default function ProjectSettingsResourceGeneral() {
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>
-                      Afbeelding
+                      Standaard afbeelding
                     </FormLabel>
                     <FormControl>
                       <Input type='file' {...field} />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Locatie
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="theme"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Thema
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="neighbourhood"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Buurt
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="label"
-                render={() => (
-                  <FormItem>
-                    <div>
-                      <FormLabel>Selecteer uw gewenste sorteeropties</FormLabel>
-                    </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-2 gap-x-4">
-                      {labels.map((item) => (
-                        <FormField
-                          key={item.id}
-                          control={form.control}
-                          name="label"
-                          render={({ field }) => {
-                              return (
-                              <FormItem
-                                  key={item.id}
-                                  className="flex flex-row items-start space-x-3 space-y-0">
-                                  <FormControl>
-                                  <Checkbox
-                                      checked={field.value?.includes(item.id)}
-                                      onCheckedChange={(checked: any) => {
-                                      return checked
-                                          ? field.onChange([...field.value, item.id])
-                                          : field.onChange(
-                                              field.value?.filter(
-                                              (value) => value !== item.id
-                                              )
-                                          );
-                                      }}
-                                  />
-                                  </FormControl>
-                                  <FormLabel className="font-normal">
-                                  {item.label}
-                                  </FormLabel>
-                              </FormItem>
-                              );
-                          }}
-                          />
-                      ))}
-                      </div>
-                  </FormItem>
-                  )}
-                />
-              <FormField
-                control={form.control}
-                name="modBreakAuthor"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Auteur modbreaks
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="likeTitle"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Titel voor likebox
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="enableLikes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Is het mogelijk om likes te plaatsen?
-                    </FormLabel>
-                    <Select
-                      onValueChange={(e: string) =>
-                        field.onChange(e === 'true')
-                      }
-                      value={field.value ? 'true' : 'false'}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Nee" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Ja</SelectItem>
-                        <SelectItem value="false">Nee</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="enableReactions"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Is het mogelijk om reacties te plaatsen?
-                    </FormLabel>
-                    <Select
-                      onValueChange={(e: string) =>
-                        field.onChange(e === 'true')
-                      }
-                      value={field.value ? 'true' : 'false'}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Nee" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Ja</SelectItem>
-                        <SelectItem value="false">Nee</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="displayLikes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Worden likes weergegeven?
-                    </FormLabel>
-                    <Select
-                      onValueChange={(e: string) =>
-                        field.onChange(e === 'true')
-                      }
-                      value={field.value ? 'true' : 'false'}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Nee" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Ja</SelectItem>
-                        <SelectItem value="false">Nee</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="displayDislikes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Worden dislikes weergegeven?
-                    </FormLabel>
-                    <Select
-                      onValueChange={(e: string) =>
-                        field.onChange(e === 'true')
-                      }
-                      value={field.value ? 'true' : 'false'}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Nee" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Ja</SelectItem>
-                        <SelectItem value="false">Nee</SelectItem>
-                      </SelectContent>
-                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -493,6 +420,48 @@ export default function ProjectSettingsResourceGeneral() {
               </Button>
             </form>
           </Form>
+          <div className="p-6 bg-white rounded-md mt-4">
+            <Heading size="xl" className="mb-4">
+              Resource mail template
+            </Heading>
+            <Separator className="mb-4" />
+            <form
+              onSubmit={() => {}}
+              className="lg:w-1/2 grid grid-cols-2 gap-4">
+              <div className="col-span-full space-y-2">
+                <Label>Type e-mail</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecteer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="thanks">Bedank-mail</SelectItem>
+                    <SelectItem value="submit">
+                      Opleveren van concept-plan
+                    </SelectItem>
+                    <SelectItem value="publish">
+                      Uitbrengen van concept-plan
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="col-span-full space-y-2">
+                <Label>Vanaf adres</Label>
+                <Input id="mail" placeholder="email@example.com" />
+              </div>
+              <div className="col-span-full space-y-2">
+                <Label>Onderwerp</Label>
+                <Input id="subject" placeholder="Onderwerp van de mail" />
+              </div>
+              <div className="col-span-full space-y-2">
+                <Label>E-mail tekst template</Label>
+                <Textarea id="template" placeholder="Inhoud van de mail" />
+              </div>
+              <Button type="button" className="w-fit mt-4">
+                Opslaan
+              </Button>
+            </form>
+          </div>
         </div>
   );
 }

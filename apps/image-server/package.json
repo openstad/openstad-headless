@@ -16,10 +16,7 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "init-database": "node ./scripts/init-database.js",
-    "migrate-database": "node ./scripts/migrate-database.js",
     "start": "node ./server.js",
-    "predev": "./scripts/predev.sh",
     "dev": "nodemon ./server.js"
   },
   "dependencies": {
