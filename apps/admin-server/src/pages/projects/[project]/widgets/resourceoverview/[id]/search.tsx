@@ -75,7 +75,7 @@ export default function WidgetResourceOverviewSearch() {
             name="displaySearch"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Toestaan van stemmen</FormLabel>
+                <FormLabel>Zoekbalk weergeven</FormLabel>
                 <Select
                   onValueChange={(e: string) => field.onChange(e === 'true')}
                   value={field.value ? 'true' : 'false'}>

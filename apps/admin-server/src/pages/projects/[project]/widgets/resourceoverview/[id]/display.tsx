@@ -17,15 +17,15 @@ import * as z from 'zod';
 
 const formSchema = z.object({
   displayTitle: z.boolean(),
-  displayRanking: z.boolean(),
-  displayLabel: z.boolean(),
-  displaySummary: z.boolean(),
+  // displayRanking: z.boolean(),
+  // displayLabel: z.boolean(),
+  // displaySummary: z.boolean(),
   displayDescription: z.boolean(),
   displayArguments: z.boolean(),
   displayVote: z.boolean(),
-  displayShareButtons: z.boolean(),
-  displayEditLink: z.boolean(),
-  displayCaption: z.boolean(),
+  // displayShareButtons: z.boolean(),
+  // displayEditLink: z.boolean(),
+  // displayCaption: z.boolean(),
 });
 
 export default function WidgetResourceOverviewDisplay(
@@ -42,15 +42,15 @@ export default function WidgetResourceOverviewDisplay(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       displayTitle: props?.displayTitle || false,
-      displayRanking: props?.displayRanking || false,
-      displayLabel: props?.displayLabel || false,
-      displaySummary: props?.displaySummary || false,
+      // displayRanking: props?.displayRanking || false,
+      // displayLabel: props?.displayLabel || false,
+      // displaySummary: props?.displaySummary || false,
       displayDescription: props?.displayDescription || false,
       displayArguments: props?.displayArguments || false,
       displayVote: props?.displayVote || false,
-      displayShareButtons: props?.displayShareButtons || false,
-      displayEditLink: props?.displayEditLink || false,
-      displayCaption: props?.displayCaption || false,
+      // displayShareButtons: props?.displayShareButtons || false,
+      // displayEditLink: props?.displayEditLink || false,
+      // displayCaption: props?.displayCaption || false,
     },
   });
 
@@ -73,7 +73,7 @@ export default function WidgetResourceOverviewDisplay(
               </FormItem>
             )}
           />
-          <FormField
+          {/* <FormField
             control={form.control}
             name="displayRanking"
             render={({ field }) => (
@@ -83,8 +83,8 @@ export default function WidgetResourceOverviewDisplay(
                 <FormMessage />
               </FormItem>
             )}
-          />
-          <FormField
+          /> */}
+          {/* <FormField
             control={form.control}
             name="displayLabel"
             render={({ field }) => (
@@ -94,8 +94,8 @@ export default function WidgetResourceOverviewDisplay(
                 <FormMessage />
               </FormItem>
             )}
-          />
-          <FormField
+          /> */}
+          {/* <FormField
             control={form.control}
             name="displaySummary"
             render={({ field }) => (
@@ -105,7 +105,7 @@ export default function WidgetResourceOverviewDisplay(
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
           <FormField
             control={form.control}
             name="displayDescription"
@@ -141,7 +141,7 @@ export default function WidgetResourceOverviewDisplay(
               </FormItem>
             )}
           />
-          <FormField
+          {/* <FormField
             control={form.control}
             name="displayShareButtons"
             render={({ field }) => (
@@ -151,8 +151,8 @@ export default function WidgetResourceOverviewDisplay(
                 <FormMessage />
               </FormItem>
             )}
-          />
-          <FormField
+          /> */}
+          {/* <FormField
             control={form.control}
             name="displayEditLink"
             render={({ field }) => (
@@ -162,7 +162,7 @@ export default function WidgetResourceOverviewDisplay(
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

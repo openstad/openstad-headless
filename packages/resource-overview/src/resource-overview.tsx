@@ -14,7 +14,10 @@ export type ResourceOverviewWidgetProps = BaseProps &
     projectId?: string;
   } & {
     renderHeader?: (resources?: Array<any>) => React.JSX.Element;
-    renderItem?: (resource: any) => React.JSX.Element;
+    renderItem?: (
+      resource: any,
+      props: ResourceOverviewWidgetProps
+    ) => React.JSX.Element;
     allowFiltering?: boolean;
     tagTypes?: Array<{
       type: string;
@@ -49,7 +52,10 @@ const defaultHeaderRenderer = (resources?: any) => {
   );
 };
 
-const defaultItemRenderer = (resource: any) => {
+const defaultItemRenderer = (
+  resource: any,
+  props: ResourceOverviewWidgetProps
+) => {
   return (
     <article>
       <Image
@@ -63,17 +69,27 @@ const defaultItemRenderer = (resource: any) => {
           </div>
         }
       />
+
       <div>
         <Spacer size={1} />
-        <h6>{resource.title}</h6>
-        <p className="osc-resource-overview-content-item-description">
-          {resource.description}
-        </p>
+        {props.displayTitle ? <h6>{resource.title}</h6> : null}
+        {props.displayDescription ? (
+          <p className="osc-resource-overview-content-item-description">
+            {resource.description}
+          </p>
+        ) : null}
       </div>
       <div className="osc-resource-overview-content-item-footer">
-        <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} />
-        <Icon icon="ri-thumb-down-line" variant="big" text={resource.yes} />
-        <Icon icon="ri-message-line" variant="big" text="0" />
+        {props.displayVote ? (
+          <>
+            <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} />
+            <Icon icon="ri-thumb-down-line" variant="big" text={resource.yes} />
+          </>
+        ) : null}
+
+        {props.displayArguments ? (
+          <Icon icon="ri-message-line" variant="big" text="0" />
+        ) : null}
       </div>
     </article>
   );
@@ -118,7 +134,7 @@ function ResourceOverview({
             resources.map((resource: any) => {
               return (
                 <React.Fragment key={`resource-item-${resource.title}`}>
-                  {renderItem(resource)}
+                  {renderItem(resource, props)}
                 </React.Fragment>
               );
             })}

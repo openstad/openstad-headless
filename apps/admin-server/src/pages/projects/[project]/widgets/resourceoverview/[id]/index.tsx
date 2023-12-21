@@ -16,7 +16,6 @@ import WidgetResourceOverviewFilter from './filter';
 import WidgetResourceOverviewSearch from './search';
 import WidgetResourceOverviewTags from './tags';
 import WidgetResourceOverviewInclude from './include';
-import WidgetResourceOverviewLabel from './label';
 import WidgetResourceOverviewInfo from './info';
 import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
@@ -65,7 +64,7 @@ export default function WidgetResourceOverview() {
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="image">Afbeeldingen</TabsTrigger>
               <TabsTrigger value="display">Display</TabsTrigger>
-              <TabsTrigger value="button">Knop teksten</TabsTrigger>
+              {/* <TabsTrigger value="button">Knop teksten</TabsTrigger> */}
               <TabsTrigger value="sorting">Sorteren</TabsTrigger>
               <TabsTrigger value="pagination">Pagination</TabsTrigger>
               <TabsTrigger value="filter">Filters</TabsTrigger>
@@ -73,7 +72,7 @@ export default function WidgetResourceOverview() {
               <TabsTrigger value="tags">Tags</TabsTrigger>
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
               <TabsTrigger value="labels">Labels</TabsTrigger>
-              <TabsTrigger value="info">Info</TabsTrigger>
+              {/* <TabsTrigger value="info">Info</TabsTrigger> */}
             </TabsList>
             <TabsContent value="general" className="p-0">
               <WidgetResourceOverviewGeneral />
@@ -117,9 +116,6 @@ export default function WidgetResourceOverview() {
             </TabsContent>
             <TabsContent value="include" className="p-0">
               <WidgetResourceOverviewInclude />
-            </TabsContent>
-            <TabsContent value="labels" className="p-0">
-              <WidgetResourceOverviewLabel />
             </TabsContent>
             <TabsContent value="info" className="p-0">
               <WidgetResourceOverviewInfo />
