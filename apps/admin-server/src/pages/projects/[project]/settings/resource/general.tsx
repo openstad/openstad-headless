@@ -56,6 +56,10 @@ const formSchema = z.object({
   summaryMaxLength: z.coerce.number(),
   descriptionMinLength: z.coerce.number(),
   descriptionMaxLength: z.coerce.number(),
+  displayLocation: z.boolean(),
+  displayTheme: z.boolean(),
+  displayNeighbourhood: z.boolean(),
+  displayModbreak: z.boolean(),
   image: z.string().optional(),
   reactionSettings: z.array(z.string()).refine((value) => value.some((item) => item))
 });
@@ -73,6 +77,10 @@ export default function ProjectSettingsResourceGeneral() {
     summaryMaxLength: data?.config?.[category]?.summaryMaxLength || null,
     descriptionMinLength: data?.config?.[category]?.descriptionMinLength || null,
     descriptionMaxLength: data?.config?.[category]?.descriptionMaxLength || null,
+    displayLocation: data?.config?.[category]?.displayLocation || null,
+    displayTheme: data?.config?.[category]?.displayTheme || null,
+    displayNeighbourhood: data?.config?.[category]?.displayNeighbourhood || null,
+    displayModbreak: data?.config?.[category]?.displayModbreak || null,
     image: data?.config?.[category]?.image || null,
     reactionSettings: data?.config?.[category]?.reactionSettings || [],
   });
@@ -99,6 +107,10 @@ export default function ProjectSettingsResourceGeneral() {
           descriptionMinLength: values.descriptionMinLength,
           descriptionMaxLength: values.descriptionMaxLength,
           image: values.image,
+          displayLocation: values.displayLocation,
+          displayTheme: values.displayTheme,
+          displayNeighbourhood: values.displayNeighbourhood,
+          displayModbreak: values.displayModbreak,
           reactionSettings: values.reactionSettings
         },
       });
@@ -231,6 +243,114 @@ export default function ProjectSettingsResourceGeneral() {
                     <FormControl>
                       <Input type="number" placeholder="5000" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="displayLocation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Wordt de locatie weergegeven in het resource-formulier?
+                    </FormLabel>
+                    <Select
+                      onValueChange={(e: string) =>
+                        field.onChange(e === 'false')
+                      }
+                      value={field.value ? 'true' : 'false'}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Nee" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="true">Ja</SelectItem>
+                        <SelectItem value="false">Nee</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="displayTheme"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Wordt het thema weergegeven in het resource-formulier?
+                    </FormLabel>
+                    <Select
+                      onValueChange={(e: string) =>
+                        field.onChange(e === 'false')
+                      }
+                      value={field.value ? 'true' : 'false'}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Nee" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="true">Ja</SelectItem>
+                        <SelectItem value="false">Nee</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="displayNeighbourhood"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Wordt de buurt weergegeven in het resource-formulier?
+                    </FormLabel>
+                    <Select
+                      onValueChange={(e: string) =>
+                        field.onChange(e === 'false')
+                      }
+                      value={field.value ? 'true' : 'false'}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Nee" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="true">Ja</SelectItem>
+                        <SelectItem value="false">Nee</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="displayModbreak"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Wordt de auteur van de modbreak weergegeven in het resource-formulier?
+                    </FormLabel>
+                    <Select
+                      onValueChange={(e: string) =>
+                        field.onChange(e === 'false')
+                      }
+                      value={field.value ? 'true' : 'false'}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Nee" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="true">Ja</SelectItem>
+                        <SelectItem value="false">Nee</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
