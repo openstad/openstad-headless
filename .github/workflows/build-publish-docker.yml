@@ -62,33 +62,22 @@ jobs:
           build-args: |
             APP=${{ matrix.app }}
 
-      - name: Adding image to step summary
-        run: |
-          echo "new image: \`ghcr.io/${{ github.repository_owner}}/${{ matrix.app }}:${{ steps.meta.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
-
       - name: Add image output
         id: image_output
         run: echo "image_tag=${{ steps.meta.outputs.version }}" >> "$GITHUB_OUTPUT"
 
-  add_images_to_commit_comment:
-    name: Add images to commit comment
+  display_images_in_action:
+    name: Display images in Github Action
     runs-on: ubuntu-latest
     needs: build-and-push-docker-image
     steps:
-      - uses: actions/github-script@v7
-        env:
-          STDOUT: "New images: \n
-          `ghcr.io/${{ github.repository_owner }}/admin-server:${{ needs.build-and-push-docker-image.outputs.image_tag }}`\n
-          `ghcr.io/${{ github.repository_owner }}/api-server:${{ needs.build-and-push-docker-image.outputs.image_tag }}`\n
-          `ghcr.io/${{ github.repository_owner }}/auth-server:${{ needs.build-and-push-docker-image.outputs.image_tag }}`\n
-          `ghcr.io/${{ github.repository_owner }}/image-server:${{ needs.build-and-push-docker-image.outputs.image_tag }}`
-          "
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: process.env.STDOUT
-            })
+      - name: Display images in Github Action
+        run: |
+          echo "**New images 🐳**
+          
+          | App | Image |
+          |---|---|
+          | admin-server | \`ghcr.io/${{ github.repository_owner}}/admin-server:${{ needs.build-and-push-docker-image.outputs.image_tag }}\` |
+          | api-server | \`ghcr.io/${{ github.repository_owner}}/api-server:${{ needs.build-and-push-docker-image.outputs.image_tag }}\` |
+          | auth-server | \`ghcr.io/${{ github.repository_owner}}/auth-server:${{ needs.build-and-push-docker-image.outputs.image_tag }}\` |
+          | image-server | \`ghcr.io/${{ github.repository_owner}}/image-server:${{ needs.build-and-push-docker-image.outputs.image_tag }}\` |" >> $GITHUB_STEP_SUMMARY
