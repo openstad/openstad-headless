@@ -62,8 +62,6 @@ jobs:
           outputs: >-
             type=image,
             name=${{ github.repository }},
-            name-canonical=true,
-            push-by-digest=true,
             push=true,
             annotation-index.org.opencontainers.image.description=Openstad Headless ${{ matrix.app }}, related commit: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
             annotation.org.opencontainers.image.title=${{ matrix.app }},
