@@ -46,8 +46,6 @@ ARG APP
 ARG PORT
 ENV WORKSPACE apps/${APP}
 
-LABEL org.opencontainers.image.description="Openstad Headless ${APP} image"
-
 WORKDIR /opt/openstad-headless
 
 # copy files

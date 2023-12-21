@@ -36,7 +36,7 @@ jobs:
         with:
           images: ${{ env.IMAGE }}
           labels: |
-            org.opencontainers.image.description=Openstad Headless ${{ matrix.app }}, related commit: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+            org.opencontainers.image.description="Openstad Headless ${{ matrix.app }}, related commit: https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
           tags: |
             # branch event
             type=ref,event=branch,suffix=-{{sha}}
@@ -61,7 +61,7 @@ jobs:
           context: .
           push: true
           tags: 'ghcr.io/${{ steps.meta.outputs.tags }}'
-          labels: '${{ steps.meta.output.labels }}'
+          labels: ${{ steps.meta.output.labels }}
           build-args: |
             APP=${{ matrix.app }}
 
