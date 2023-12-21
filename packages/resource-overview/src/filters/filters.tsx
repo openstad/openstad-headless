@@ -92,7 +92,7 @@ export function Filters({
     });
   }
 
-  function setSort(value) {
+  function setSort(value: string) {
     updateFilter({
       ...filter,
       sort: value,

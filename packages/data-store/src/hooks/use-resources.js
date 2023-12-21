@@ -7,7 +7,10 @@ export default function useResources(props) {
   const resourceId = props.resourceId || props.config?.resourceId;
   const sentiment = props.sentiment || props.config?.sentiment || null;
 
-  const { data, error, isLoading } = self.useSWR({ projectId }, 'resources.fetch');
+  const { data, error, isLoading } = self.useSWR(
+    { projectId },
+    'resources.fetch'
+  );
 
   // add functionality
   let resources = data || [];
