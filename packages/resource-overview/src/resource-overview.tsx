@@ -8,6 +8,7 @@ import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 import { Filters } from './filters/filters';
 import loadWidget from '@openstad-headless/lib/load-widget';
+import { elipsize } from '../../lib/ui-helpers';
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -25,15 +26,19 @@ export type ResourceOverviewWidgetProps = BaseProps &
       multiple?: boolean;
     }>;
     displayTitle?: boolean;
+    titleMaxLength?: number;
     displayRanking?: boolean;
     displayLabel?: boolean;
     displaySummary?: boolean;
+    summaryMaxLength?: number;
     displayDescription?: boolean;
+    descriptionMaxLength?: number;
     displayArguments?: boolean;
     displayVote?: boolean;
     displayShareButtons?: boolean;
     displayEditLink?: boolean;
     displayCaption?: boolean;
+    summaryCharLength?: number;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -72,13 +77,21 @@ const defaultItemRenderer = (
 
       <div>
         <Spacer size={1} />
-        {props.displayTitle ? <h6>{resource.title}</h6> : null}
+        {props.displayTitle ? (
+          <h6>{elipsize(resource.title, props.titleMaxLength || 20)}</h6>
+        ) : null}
+
+        {props.displaySummary ? (
+          <h6>{elipsize(resource.summary, props.summaryMaxLength || 20)}</h6>
+        ) : null}
+
         {props.displayDescription ? (
           <p className="osc-resource-overview-content-item-description">
-            {resource.description}
+            {elipsize(resource.description, props.descriptionMaxLength || 30)}
           </p>
         ) : null}
       </div>
+
       <div className="osc-resource-overview-content-item-footer">
         {props.displayVote ? (
           <>
@@ -145,5 +158,4 @@ function ResourceOverview({
 }
 
 ResourceOverview.loadWidget = loadWidget;
-
 export { ResourceOverview };

@@ -7,7 +7,6 @@ import {
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
 import WidgetResourceOverviewGeneral from './general';
-import WidgetResourceOverviewImage from './image';
 import WidgetResourceOverviewDisplay from './display';
 import WidgetResourceOverviewButton from './button';
 import WidgetResourceOverviewSorting from './sorting';
@@ -62,7 +61,7 @@ export default function WidgetResourceOverview() {
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
-              <TabsTrigger value="image">Afbeeldingen</TabsTrigger>
+              {/* <TabsTrigger value="image">Afbeeldingen</TabsTrigger> */}
               <TabsTrigger value="display">Display</TabsTrigger>
               {/* <TabsTrigger value="button">Knop teksten</TabsTrigger> */}
               <TabsTrigger value="sorting">Sorteren</TabsTrigger>
@@ -71,14 +70,10 @@ export default function WidgetResourceOverview() {
               <TabsTrigger value="search">Zoeken</TabsTrigger>
               <TabsTrigger value="tags">Tags</TabsTrigger>
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
-              <TabsTrigger value="labels">Labels</TabsTrigger>
-              {/* <TabsTrigger value="info">Info</TabsTrigger> */}
+              <TabsTrigger value="info">Info</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               <WidgetResourceOverviewGeneral />
-            </TabsContent>
-            <TabsContent value="image" className="p-0">
-              <WidgetResourceOverviewImage />
             </TabsContent>
             <TabsContent value="display" className="p-0">
               <WidgetResourceOverviewDisplay
