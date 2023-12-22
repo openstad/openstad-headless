@@ -19,7 +19,6 @@ type Filter = {
 type Props = {
   resources: any;
   dataStore: DataStore;
-  tagTypes?: Array<{ type: string; placeholder?: string; multiple?: boolean }>;
   onUpdateFilter?: (filter: Filter) => void;
 } & ResourceOverviewWidgetProps;
 
@@ -27,16 +26,14 @@ export function Filters({
   resources,
   dataStore,
   sorting = [],
-  tagTypes = [
-    { type: 'theme', placeholder: 'Selecteer een thema', multiple: true },
-    { type: 'area', placeholder: 'Selecteer een gebied' },
-  ],
+  tagGroups = [],
+
   onUpdateFilter,
   ...props
 }: Props) {
   const defaultFilter = { tags: {}, search: { text: '' }, sort: '' };
-  tagTypes.forEach((tagType) => {
-    defaultFilter.tags[tagType.type] = null;
+  tagGroups.forEach((tGroup) => {
+    defaultFilter.tags[tGroup] = null;
   });
 
   const [filter, setFilter] = useState(defaultFilter);
@@ -55,11 +52,11 @@ export function Filters({
   useEffect(() => {
     // add or remove refs
     setElRefs((elRefs) =>
-      Array(tagTypes.length)
+      Array(tagGroups.length)
         .fill(undefined)
         .map((_, i) => elRefs[i] || createRef<HTMLSelectElement>())
     );
-  }, [tagTypes]);
+  }, [tagGroups]);
 
   useEffect(() => {
     if (sortingRef.current && props.defaultSorting) {
@@ -127,43 +124,45 @@ export function Filters({
   return (
     <section>
       <div className="osc-resource-overview-filters">
-        <Input
-          ref={searchRef}
-          onChange={(e) => search(e.target.value)}
-          className="osc-resource-overview-search"
-          placeholder="Zoeken"
-        />
+        {props.displaySearch ? (
+          <Input
+            ref={searchRef}
+            onChange={(e) => search(e.target.value)}
+            className="osc-resource-overview-search"
+            placeholder="Zoeken"
+          />
+        ) : null}
 
-        {tagTypes.map((tagType, index) => {
-          if (tagType.multiple) {
-            return (
-              <MultiSelectTagFilter
-                key={`tag-select-${tagType.type}`}
-                {...props}
-                selected={selectedOptions[tagType.type] || []}
-                dataStore={dataStore}
-                tagType={tagType.type}
-                placeholder={tagType.placeholder}
-                onUpdateFilter={(updatedTag) =>
-                  updateTagList(tagType.type, updatedTag)
-                }
-              />
-            );
-          } else {
-            return (
-              <SelectTagFilter
-                ref={elRefs[index]}
-                key={`tag-select-${tagType.type}`}
-                {...props}
-                dataStore={dataStore}
-                tagType={tagType.type}
-                placeholder={tagType.placeholder}
-                onUpdateFilter={(updatedTag) =>
-                  updateTagList(tagType.type, updatedTag)
-                }
-              />
-            );
-          }
+        {tagGroups.map((tagGroup, index) => {
+          // if (tagType.multiple) {
+          //   return (
+          //     <MultiSelectTagFilter
+          //       key={`tag-select-${tagType.type}`}
+          //       {...props}
+          //       selected={selectedOptions[tagType.type] || []}
+          //       dataStore={dataStore}
+          //       tagType={tagType.type}
+          //       placeholder={tagType.placeholder}
+          //       onUpdateFilter={(updatedTag) =>
+          //         updateTagList(tagType.type, updatedTag)
+          //       }
+          //     />
+          //   );
+          // } else {
+          return (
+            <SelectTagFilter
+              ref={elRefs[index]}
+              key={`tag-select-${tagGroup}`}
+              {...props}
+              dataStore={dataStore}
+              tagType={tagGroup}
+              placeholder={'select'}
+              onUpdateFilter={(updatedTag) =>
+                updateTagList(tagGroup, updatedTag)
+              }
+            />
+          );
+          // }
         })}
 
         {props.displaySorting ? (

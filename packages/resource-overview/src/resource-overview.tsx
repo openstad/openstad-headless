@@ -21,11 +21,6 @@ export type ResourceOverviewWidgetProps = BaseProps &
       props: ResourceOverviewWidgetProps
     ) => React.JSX.Element;
     allowFiltering?: boolean;
-    tagTypes?: Array<{
-      type: string;
-      placeholder: string;
-      multiple?: boolean;
-    }>;
     displayTitle?: boolean;
     titleMaxLength?: number;
     displayRanking?: boolean;
@@ -46,6 +41,10 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displaySearch?: boolean;
     textActiveSearch?: string;
     sorting: Array<{ value: string; label: string }>;
+
+    displayTagFilters?: boolean;
+    tagGroups?: Array<string>;
+    displayTagGroupName?: boolean;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -119,7 +118,6 @@ function ResourceOverview({
   renderHeader = defaultHeaderRenderer,
   renderItem = defaultItemRenderer,
   allowFiltering = true,
-  tagTypes = [],
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -145,7 +143,6 @@ function ResourceOverview({
             dataStore={datastore}
             resources={resources}
             onUpdateFilter={resources.filter}
-            tagTypes={tagTypes}
           />
         ) : null}
 

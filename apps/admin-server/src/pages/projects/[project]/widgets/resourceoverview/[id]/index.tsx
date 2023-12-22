@@ -11,7 +11,6 @@ import WidgetResourceOverviewDisplay from './display';
 import WidgetResourceOverviewButton from './button';
 import WidgetResourceOverviewSorting from './sorting';
 import WidgetResourceOverviewPagination from './pagination';
-import WidgetResourceOverviewFilter from './filter';
 import WidgetResourceOverviewSearch from './search';
 import WidgetResourceOverviewTags from './tags';
 import WidgetResourceOverviewInclude from './include';
@@ -52,6 +51,7 @@ export default function WidgetResourceOverview() {
         });
       }
     },
+    projectId,
   };
 
   return (
@@ -79,11 +79,10 @@ export default function WidgetResourceOverview() {
               {/* <TabsTrigger value="image">Afbeeldingen</TabsTrigger> */}
               <TabsTrigger value="display">Display</TabsTrigger>
               {/* <TabsTrigger value="button">Knop teksten</TabsTrigger> */}
+              <TabsTrigger value="tags">Tags</TabsTrigger>
+              <TabsTrigger value="search">Zoeken</TabsTrigger>
               <TabsTrigger value="sorting">Sorteren</TabsTrigger>
               <TabsTrigger value="pagination">Pagination</TabsTrigger>
-              <TabsTrigger value="filter">Filters</TabsTrigger>
-              <TabsTrigger value="search">Zoeken</TabsTrigger>
-              <TabsTrigger value="tags">Tags</TabsTrigger>
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
               <TabsTrigger value="info">Info</TabsTrigger>
             </TabsList>
@@ -101,9 +100,6 @@ export default function WidgetResourceOverview() {
             </TabsContent>
             <TabsContent value="pagination" className="p-0">
               <WidgetResourceOverviewPagination {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="filter" className="p-0">
-              <WidgetResourceOverviewFilter {...totalPropPackage} />
             </TabsContent>
             <TabsContent value="search" className="p-0">
               <WidgetResourceOverviewSearch {...totalPropPackage} />
