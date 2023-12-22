@@ -1,6 +1,6 @@
 module.exports = {
   options: {
-    label: 'Home Page'
+    label: 'Home pagina',
   },
   fields: {
     add: {
@@ -8,8 +8,7 @@ module.exports = {
         type: 'area',
         options: {
           widgets: {
-            section: {},
-           // 'two-column': {}
+            'openstad-section': {},
           }
         }
       }
