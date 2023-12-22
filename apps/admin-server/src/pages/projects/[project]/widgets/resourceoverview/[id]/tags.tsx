@@ -7,6 +7,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
@@ -23,9 +24,17 @@ import _ from 'lodash';
 
 const formSchema = z.object({
   displayTagFilters: z.boolean(),
-  tagGroups: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: 'You have to select at least one item.',
-  }),
+  tagGroups: z
+    .array(
+      z.object({
+        type: z.string(),
+        label: z.string().optional(),
+        multiple: z.boolean(),
+      })
+    )
+    .refine((value) => value.some((item) => item), {
+      message: 'You have to select at least one item.',
+    }),
   displayTagGroupName: z.boolean(),
 });
 
@@ -105,45 +114,133 @@ export default function WidgetResourceOverviewTags(
                 <div>
                   <FormLabel>Selecteer de gewenste tag groepen</FormLabel>
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
-                  {(tagGroupNames || []).map((groupName) => (
-                    <FormField
-                      key={groupName}
-                      control={form.control}
-                      name="tagGroups"
-                      render={({ field }) => {
-                        return (
-                          <FormItem
-                            key={groupName}
-                            className="flex flex-row items-start space-x-3 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={
-                                  field.value?.findIndex(
-                                    (el) => el === groupName
-                                  ) > -1
-                                }
-                                onCheckedChange={(checked: any) => {
-                                  return checked
-                                    ? field.onChange([
-                                        ...field.value,
-                                        groupName,
-                                      ])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (val) => val !== groupName
-                                        )
-                                      );
-                                }}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              {groupName}
-                            </FormLabel>
-                          </FormItem>
-                        );
-                      }}
-                    />
+                <div className="grid grid-cols-1 lg:grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-2">
+                  {(tagGroupNames || []).map((groupName, index) => (
+                    <>
+                      <FormField
+                        key={`parent${groupName}`}
+                        control={form.control}
+                        name="tagGroups"
+                        render={({ field }) => {
+                          return (
+                            <FormItem
+                              key={groupName}
+                              className="flex flex-row items-start space-x-3 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={
+                                    field.value?.findIndex(
+                                      (el) => el.type === groupName
+                                    ) > -1
+                                  }
+                                  onCheckedChange={(checked: any) => {
+                                    return checked
+                                      ? field.onChange([
+                                          ...field.value,
+                                          {
+                                            type: groupName,
+                                            multiple: false,
+                                            label: '',
+                                          },
+                                        ])
+                                      : field.onChange(
+                                          field.value?.filter(
+                                            (val) => val.type !== groupName
+                                          )
+                                        );
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                {groupName}
+                              </FormLabel>
+                            </FormItem>
+                          );
+                        }}
+                      />
+
+                      <FormField
+                        key={`parent-label-input${groupName}`}
+                        control={form.control}
+                        name="tagGroups"
+                        render={({ field }) => {
+                          return (
+                            <FormItem
+                              key={`${groupName}-label-input`}
+                              className="flex flex-row items-start space-x-3 space-y-0">
+                              <FormControl>
+                                <Input
+                                  placeholder="Groep label"
+                                  key={`${groupName}-label-input-field`}
+                                  defaultValue={field.value.at(index)?.label}
+                                  disabled={
+                                    field.value.find(
+                                      (g) => g.type === groupName
+                                    ) === undefined
+                                  }
+                                  onChange={(e) => {
+                                    const groups = field.value;
+                                    const existingGroup = groups[index];
+
+                                    if (existingGroup) {
+                                      existingGroup.label = e.target.value;
+                                      groups[index] = existingGroup;
+                                      field.onChange(groups);
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          );
+                        }}
+                      />
+
+                      <FormField
+                        key={`parent${groupName}-multiple`}
+                        control={form.control}
+                        name="tagGroups"
+                        render={({ field }) => {
+                          return (
+                            <FormItem
+                              key={groupName}
+                              className="flex flex-row items-start space-x-3 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  disabled={
+                                    field.value.find(
+                                      (g) => g.type === groupName
+                                    ) === undefined
+                                  }
+                                  checked={
+                                    field.value?.findIndex(
+                                      (el) =>
+                                        el.type === groupName && el.multiple
+                                    ) > -1
+                                  }
+                                  onCheckedChange={(checked: any) => {
+                                    const groups = field.value;
+                                    const existingGroup = groups[index];
+
+                                    // Safety check
+                                    if (!checked && existingGroup) {
+                                      existingGroup.multiple = checked;
+                                      groups[index] = existingGroup;
+                                      field.onChange(groups);
+                                    } else {
+                                      existingGroup.multiple = checked;
+                                      field.onChange(groups);
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Multiple
+                              </FormLabel>
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    </>
                   ))}
                 </div>
               </FormItem>

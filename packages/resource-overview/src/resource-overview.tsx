@@ -43,7 +43,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     sorting: Array<{ value: string; label: string }>;
 
     displayTagFilters?: boolean;
-    tagGroups?: Array<string>;
+    tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     displayTagGroupName?: boolean;
   };
 

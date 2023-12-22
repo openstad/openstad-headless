@@ -33,9 +33,10 @@ export function Filters({
 }: Props) {
   const defaultFilter = { tags: {}, search: { text: '' }, sort: '' };
   tagGroups.forEach((tGroup) => {
-    defaultFilter.tags[tGroup] = null;
+    defaultFilter.tags[tGroup.type] = null;
   });
 
+  console.log({ tagGroups });
   const [filter, setFilter] = useState(defaultFilter);
   const [selectedOptions, setSelected] = useState<{}>({});
 
@@ -133,37 +134,41 @@ export function Filters({
           />
         ) : null}
 
-        {tagGroups.map((tagGroup, index) => {
-          // if (tagType.multiple) {
-          //   return (
-          //     <MultiSelectTagFilter
-          //       key={`tag-select-${tagType.type}`}
-          //       {...props}
-          //       selected={selectedOptions[tagType.type] || []}
-          //       dataStore={dataStore}
-          //       tagType={tagType.type}
-          //       placeholder={tagType.placeholder}
-          //       onUpdateFilter={(updatedTag) =>
-          //         updateTagList(tagType.type, updatedTag)
-          //       }
-          //     />
-          //   );
-          // } else {
-          return (
-            <SelectTagFilter
-              ref={elRefs[index]}
-              key={`tag-select-${tagGroup}`}
-              {...props}
-              dataStore={dataStore}
-              tagType={tagGroup}
-              placeholder={'select'}
-              onUpdateFilter={(updatedTag) =>
-                updateTagList(tagGroup, updatedTag)
+        {props.displayTagFilters ? (
+          <>
+            {tagGroups.map((tagGroup, index) => {
+              if (tagGroup.multiple) {
+                return (
+                  <MultiSelectTagFilter
+                    key={`tag-select-${tagGroup.type}`}
+                    {...props}
+                    selected={selectedOptions[tagGroup.type] || []}
+                    dataStore={dataStore}
+                    tagType={tagGroup.type}
+                    placeholder={tagGroup.label}
+                    onUpdateFilter={(updatedTag) =>
+                      updateTagList(tagGroup.type, updatedTag)
+                    }
+                  />
+                );
+              } else {
+                return (
+                  <SelectTagFilter
+                    ref={elRefs[index]}
+                    key={`tag-select-${tagGroup}`}
+                    {...props}
+                    dataStore={dataStore}
+                    tagType={tagGroup.type}
+                    placeholder={tagGroup.label}
+                    onUpdateFilter={(updatedTag) =>
+                      updateTagList(tagGroup.type, updatedTag)
+                    }
+                  />
+                );
               }
-            />
-          );
-          // }
-        })}
+            })}
+          </>
+        ) : null}
 
         {props.displaySorting ? (
           <Select ref={sortingRef} onValueChange={setSort} options={sorting}>
