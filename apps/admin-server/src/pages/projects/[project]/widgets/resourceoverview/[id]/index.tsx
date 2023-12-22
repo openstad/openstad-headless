@@ -95,7 +95,20 @@ export default function WidgetResourceOverview() {
               <WidgetResourceOverviewButton />
             </TabsContent>
             <TabsContent value="sorting" className="p-0">
-              <WidgetResourceOverviewSorting />
+              <WidgetResourceOverviewSorting
+                {...widget?.config}
+                updateConfig={(config) =>
+                  updateConfig({ ...widget.config, ...config })
+                }
+                onFieldChanged={(key, value) => {
+                  if (previewConfig) {
+                    updatePreview({
+                      ...previewConfig,
+                      [key]: value,
+                    });
+                  }
+                }}
+              />
             </TabsContent>
             <TabsContent value="pagination" className="p-0">
               <WidgetResourceOverviewPagination />

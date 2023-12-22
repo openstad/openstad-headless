@@ -1,6 +1,7 @@
 import './resource-overview.css';
 import React from 'react';
 import { Banner, Icon } from '@openstad-headless/ui/src';
+//@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import { Image } from '@openstad-headless/ui/src';
@@ -39,6 +40,9 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayEditLink?: boolean;
     displayCaption?: boolean;
     summaryCharLength?: number;
+    displaySorting?: boolean;
+    defaultSorting?: string;
+    sorting: Array<{ value: string; label: string }>;
   };
 
 //Temp: Header can only be made when the map works so for now a banner

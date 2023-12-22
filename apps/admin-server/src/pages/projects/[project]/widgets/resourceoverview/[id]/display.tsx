@@ -60,7 +60,6 @@ export default function WidgetResourceOverviewDisplay(
       displayVote: props?.displayVote || false,
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
-      // displaySummary: props?.displaySummary || false,
       // displayShareButtons: props?.displayShareButtons || false,
       // displayEditLink: props?.displayEditLink || false,
       // displayCaption: props?.displayCaption || false,

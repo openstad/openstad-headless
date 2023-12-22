@@ -1,10 +1,10 @@
 import { Input, SecondaryButton, Select } from '@openstad-headless/ui/src';
 import React, { useState, useEffect, useRef, createRef } from 'react';
 import DataStore from '../../../components/src/data-store';
-import { BaseProps } from '../../../types/base-props';
 import { useDebounce } from 'rooks';
 import { MultiSelectTagFilter } from './multiselect-tag-filter';
 import { SelectTagFilter } from './select-tag-filter';
+import { ResourceOverviewWidgetProps } from '../resource-overview';
 
 //Todo correctly type resources. Will be possible when the datastore is correctly typed
 
@@ -19,22 +19,17 @@ type Filter = {
 type Props = {
   resources: any;
   dataStore: DataStore;
-  sortOptions?: Array<{ value: string; label: string }>;
   tagTypes?: Array<{ type: string; placeholder?: string; multiple?: boolean }>;
   onUpdateFilter?: (filter: Filter) => void;
-} & BaseProps;
+} & ResourceOverviewWidgetProps;
 
 export function Filters({
   resources,
   dataStore,
+  sorting = [],
   tagTypes = [
     { type: 'theme', placeholder: 'Selecteer een thema', multiple: true },
     { type: 'area', placeholder: 'Selecteer een gebied' },
-  ],
-  sortOptions = [
-    { value: 'title', label: 'Titel' },
-    { value: 'createdAt_desc', label: 'Nieuwste eerst' },
-    { value: 'createdAt_asc', label: 'Oudste eerst' },
   ],
   onUpdateFilter,
   ...props
@@ -65,6 +60,17 @@ export function Filters({
         .map((_, i) => elRefs[i] || createRef<HTMLSelectElement>())
     );
   }, [tagTypes]);
+
+  // Set the default sort in the sorting select
+  useEffect(() => {
+    if (sortingRef.current && props.defaultSorting) {
+      const index = sorting.findIndex((s) => s.value === props.defaultSorting);
+      if (index > -1) {
+        // + 1 for the placeholder option
+        sortingRef.current.selectedIndex = index + 1;
+      }
+    }
+  }, []);
 
   function updateFilter(newFilter: Filter) {
     setFilter(newFilter);
@@ -161,9 +167,11 @@ export function Filters({
           }
         })}
 
-        <Select ref={sortingRef} onValueChange={setSort} options={sortOptions}>
-          <option value={''}>Sorteer op</option>
-        </Select>
+        {props.displaySorting ? (
+          <Select ref={sortingRef} onValueChange={setSort} options={sorting}>
+            <option value={''}>Sorteer op</option>
+          </Select>
+        ) : null}
 
         <SecondaryButton
           onClick={() => {
