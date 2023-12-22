@@ -36,6 +36,11 @@ let ADMIN_DOMAIN = process.env.ADMIN_DOMAIN || ( process.env.BASE_DOMAIN == 'loc
 let ADMIN_URL = process.env.ADMIN_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + ADMIN_DOMAIN;
 let ADMIN_SECRET = process.env.ADMIN_SECRET || generateRandomToken({ length: 64 });
 
+let CMS_PORT = process.env.CMS_PORT || BASE_PORT + 90;
+let CMS_OVERWRITE_URL = process.env.CMS_OVERWRITE_URL || '';
+let CMS_MONGODB_URI = process.env.CMS_MONGODB_URI || '';
+let CMS_DEFAULT_SETTINGS = process.env.CMS_DEFAULT_SETTINGS || '{}';
+
 // api server
 process.env.API_URL = API_URL;
 process.env.API_DOMAIN = API_DOMAIN;
@@ -115,6 +120,12 @@ process.env.ADMIN_DOMAIN = ADMIN_DOMAIN;
 process.env.ADMIN_PORT = ADMIN_PORT;
 process.env.ADMIN_SECRET = ADMIN_SECRET;
 process.env.ADMIN_PORT = ADMIN_PORT;
+
+// cms server
+process.env.CMS_PORT=CMS_PORT;
+process.env.CMS_OVERWRITE_URL=CMS_OVERWRITE_URL;
+process.env.CMS_MONGODB_URI=CMS_MONGODB_URI;
+process.env.CMS_DEFAULT_SETTINGS=CMS_DEFAULT_SETTINGS;
 
 function generateRandomToken(params) {
 

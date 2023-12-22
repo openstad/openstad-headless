@@ -102,6 +102,11 @@ ADMIN_PORT=${process.env.ADMIN_PORT}
 ADMIN_SECRET=${process.env.ADMIN_SECRET}
 
 NEXT_PUBLIC_API_URL=${process.env.API_URL}
+
+CMS_PORT=${process.env.CMS_PORT}
+CMS_OVERWRITE_URL=${process.env.CMS_OVERWRITE_URL}
+CMS_MONGODB_URI=${process.env.CMS_MONGODB_URI}
+CMS_DEFAULT_SETTINGS=${process.env.CMS_DEFAULT_SETTINGS}
 `;
 
     await fs.writeFile('./.env', configfile);
