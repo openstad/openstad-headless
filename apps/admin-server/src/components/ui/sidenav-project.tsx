@@ -82,16 +82,6 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Anonimiseer gebruikers</span>
               </Button>
             </Link>
-            <Link href={`/projects/${project}/settings/themes`}>
-              <Button
-                variant={
-                  location.includes('/settings/themes') ? 'secondary' : 'ghost'
-                }
-                size="default"
-                className="w-full flex justify-start pl-8">
-                <span className="truncate">Themas en gebieden</span>
-              </Button>
-            </Link>
             <Link href={`/projects/${project}/settings/notifications`}>
               <Button
                 variant={
