@@ -1,0 +1,78 @@
+<header class="{{ 'amsterdam-header' if data.global.siteLogo === 'amsterdam' }}">
+  <div class="container relative">
+    <div class="row">
+      <div class="col-xs-12">
+        {% if data.global.siteLogo === 'amsterdam' %}
+        <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-container">
+          <img src="/modules/openstad-assets/img/andreas.svg" alt="logo">
+          <div id="amsterdam">
+            Gemeente<br>Amsterdam
+          </div>
+        </a>
+        {% elif data.global.siteLogo %}
+        <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-uploaded logo-main-container">
+          <img src="{{apos.attachment.url(data.global.siteLogo)}}" alt="logo" id="logo-image">
+        </a>
+        {% else %}
+        <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-default logo-main-container">
+          <img class="default" src="{{ apos.asset.url('/modules/openstad-assets/img/logo-openstad.png?v=1') }}" alt="logo" id="logo-image">
+        </a>
+        {% endif %}
+        <div class="header-side-container {{ 'without-site-title' if data.global.hideSiteTitle}}">
+          <div class="row">
+            {% if not data.global.hideSiteTitle %}
+            <div class="col-sm-7 col-md-6 col-xs-12">
+              <h2 class="header-subtitle">
+                {{data.global.siteTitle}}
+              </h2>
+            </div>
+            {% endif %}
+            <div class="{{ 'col-xs-12' if data.global.hideSiteTitle else 'col-sm-5 col-md-6' }}  hidden-xs">
+              {% if data.global.topLinks or data.global.displayLoginTopLink %}
+              <ul class="top-links">
+                {% if data.global.displayLoginTopLink %}
+                <li>
+                  {% if data.loggedIn %}
+                  <a href="{{data.siteUrl}}/oauth/logout" class="link-caret--black">
+                    {{ __('Uitloggen') }}
+                  </a>
+                  {% else %}
+                  <a href="{{data.siteUrl}}/oauth/login" class="link-caret--black"">
+                    <!-- <span class=" glyphicon glyphicon-user"></span> !-->
+                    {{ __('Inloggen') }}
+                  </a>
+                  {% endif %}
+                </li>
+                {% endif %}
+                {% for topLink in data.global.topLinks.reverse() %}
+                {% if (not topLink.displayWhen) or (topLink.displayWhen === 'always') or (topLink.displayWhen ===
+                'loggedIn' and data.loggedIn) or (topLink.displayWhen === 'notLoggedIn' and not data.loggedIn) %}
+                <li>
+                  <a href="{{topLink.url | safeRelativeUrl}}" {% if topLink.targetBlank %} target="_blank" {% endif %}
+                    class="link-caret--black" {% if data.currentPath.startsWith(topLink.url) %} aria-current="page" {%
+                    endif %}>
+                    {{topLink.label}}
+                  </a>
+                </li>
+                {% endif%}
+                {% endfor %}
+
+              </ul>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% if data.global.translations and data.global.translations.length > 0 %}
+        <div class="language-menu">
+          <ul>
+            {% for translation in data.global.translations %}
+            <li class="language"><a
+                href="{{translation.translationUrl | safeRelativeUrl}}">{{translation.translation}}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</header>
