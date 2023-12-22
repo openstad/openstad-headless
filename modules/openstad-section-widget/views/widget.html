@@ -44,13 +44,13 @@
       background-size: cover;
       " {% endif %}>
     <div class="full-screen-section-inner ">
-      {% area data.widget, 'area1' %}
+      {% area data.widget, 'column1' %}
     </div>
   </div>
 
   {% elseif data.widget.displayType === 'full-width' %}
   <div class="full-width-container">
-    {% area data.widget, 'area1' %}
+    {% area data.widget, 'column1' %}
   </div>
   {% else %}
 
@@ -58,114 +58,114 @@
     {% if data.widget.displayType === 'columns-twothird' %}
     <div class="row">
       <div class="col-sm-8 col-lg-9 col-xs-12">
-        {% area data.widget, 'area1' %}
+        {% area data.widget, 'column1' %}
       </div>
 
       <div class="col-sm-4 col-lg-3 col-xs-12">
-        {% area data.widget, 'area2' %}
+        {% area data.widget, 'column2' %}
       </div>
     </div>
 
     {% elseif data.widget.displayType === 'columns-four' %}
     <div class="row">
       <div class="col-sm-3">
-        {% area data.widget, 'area1' %}
+        {% area data.widget, 'column1' %}
       </div>
       <div class="col-sm-3">
-        {% area data.widget, 'area2' %}
+        {% area data.widget, 'column2' %}
       </div>
       <div class="col-sm-3">
-        {% area data.widget, 'area3' %}
+        {% area data.widget, 'column3' %}
       </div>
       <div class="col-sm-3">
-        {% area data.widget, 'area4' %}
+        {% area data.widget, 'column4' %}
       </div>
     </div>
     {% elseif data.widget.displayType === 'columns-half' %}
     <div class="row">
       <div class="col-sm-6">
-        {% area data.widget, 'area1' %}
+        {% area data.widget, 'column1' %}
       </div>
       <div class="col-sm-6">
-        {% area data.widget, 'area2' %}
+        {% area data.widget, 'column2' %}
       </div>
     </div>
     {% elseif data.widget.displayType === 'columns-one' %}
     <div class="row">
       <div class="col-xs-12">
-        {% area data.widget, 'area1' %}
+        {% area data.widget, 'column1' %}
       </div>
     </div>
 
     {% elseif data.widget.displayType === 'columns-onefourth-half' %}
     <div class="row">
       <div class="col-sm-3 col-xs-12">
-        {% area data.widget, 'area1' %}
+        {% area data.widget, 'column1' %}
       </div>
 
       <div class="col-sm-6 col-xs-12">
-        {% area data.widget, 'area2' %}
+        {% area data.widget, 'column2' %}
       </div>
 
       <div class="col-sm-3 col-xs-12">
-        {% area data.widget, 'area3' %}
+        {% area data.widget, 'column3' %}
       </div>
     </div>
 
     {% elseif data.widget.displayType === 'columns-onefourth' %}
     <div class="row">
       <div class="col-sm-3 col-xs-12">
-        {% area data.widget, 'area1' %}
+        {% area data.widget, 'column1' %}
       </div>
 
       <div class="col-sm-9 col-xs-12">
-        {% area data.widget, 'area2' %}
+        {% area data.widget, 'column2' %}
       </div>
     </div>
 
     {% elseif data.widget.displayType === 'columns-onethird' %}
     <div class="row">
       <div class="col-sm-4 col-xs-12">
-        {% area data.widget, 'area1' %}
+        {% area data.widget, 'column1' %}
       </div>
 
       <div class="col-sm-8 col-xs-12">
-        {% area data.widget, 'area2' %}
+        {% area data.widget, 'column2' %}
       </div>
     </div>
 
     {% elseif data.widget.displayType === 'columns-three' %}
     <div class="row">
       <div class="col-sm-4">
-        {% area data.widget, 'area1' %}
+        {% area data.widget, 'column1' %}
       </div>
       <div class="col-sm-4">
-        {% area data.widget, 'area2' %}
+        {% area data.widget, 'column2' %}
       </div>
       <div class="col-sm-4">
-        {% area data.widget, 'area3' %}
+        {% area data.widget, 'column3' %}
       </div>
     </div>
 
     {% elseif data.widget.displayType === 'columns-twothird-full' %}
     <div class="row">
       <div class="col-sm-9 col-xs-12">
-        {% area data.widget, 'area1' %}
+        {% area data.widget, 'column1' %}
       </div>
 
       <div class="col-sm-3 col-xs-12">
-        {% area data.widget, 'area2' %}
+        {% area data.widget, 'column2' %}
       </div>
     </div>
 
     {% elseif data.widget.displayType === 'columns-twothird-onethird' %}
     <div class="row">
       <div class="col-sm-8 col-xs-12">
-        {% area data.widget, 'area1' %}
+        {% area data.widget, 'column1' %}
       </div>
 
       <div class="col-sm-4 col-xs-12">
-        {% area data.widget, 'area2' %}
+        {% area data.widget, 'column2' %}
       </div>
     </div>
     </div>
