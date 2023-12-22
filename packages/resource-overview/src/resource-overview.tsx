@@ -42,6 +42,9 @@ export type ResourceOverviewWidgetProps = BaseProps &
     summaryCharLength?: number;
     displaySorting?: boolean;
     defaultSorting?: string;
+
+    displaySearch?: boolean;
+    textActiveSearch?: string;
     sorting: Array<{ value: string; label: string }>;
   };
 

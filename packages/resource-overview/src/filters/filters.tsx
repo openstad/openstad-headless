@@ -61,7 +61,6 @@ export function Filters({
     );
   }, [tagTypes]);
 
-  // Set the default sort in the sorting select
   useEffect(() => {
     if (sortingRef.current && props.defaultSorting) {
       const index = sorting.findIndex((s) => s.value === props.defaultSorting);

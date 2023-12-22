@@ -39,6 +39,21 @@ export default function WidgetResourceOverview() {
       variant: 'medium',
     });
 
+  const totalPropPackage = {
+    ...widget?.config,
+    updateConfig: (config: ResourceOverviewWidgetProps) =>
+      updateConfig({ ...widget.config, ...config }),
+
+    onFieldChanged: (key: keyof ResourceOverviewWidgetProps, value: string) => {
+      if (previewConfig) {
+        updatePreview({
+          ...previewConfig,
+          [key]: value,
+        });
+      }
+    },
+  };
+
   return (
     <div>
       <PageLayout
@@ -73,60 +88,34 @@ export default function WidgetResourceOverview() {
               <TabsTrigger value="info">Info</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
-              <WidgetResourceOverviewGeneral />
+              <WidgetResourceOverviewGeneral {...totalPropPackage} />
             </TabsContent>
             <TabsContent value="display" className="p-0">
-              <WidgetResourceOverviewDisplay
-                {...widget?.config}
-                updateConfig={(config) =>
-                  updateConfig({ ...widget.config, ...config })
-                }
-                onFieldChanged={(key, value) => {
-                  if (previewConfig) {
-                    updatePreview({
-                      ...previewConfig,
-                      [key]: value,
-                    });
-                  }
-                }}
-              />
+              <WidgetResourceOverviewDisplay {...totalPropPackage} />
             </TabsContent>
             <TabsContent value="button" className="p-0">
-              <WidgetResourceOverviewButton />
+              <WidgetResourceOverviewButton {...totalPropPackage} />
             </TabsContent>
             <TabsContent value="sorting" className="p-0">
-              <WidgetResourceOverviewSorting
-                {...widget?.config}
-                updateConfig={(config) =>
-                  updateConfig({ ...widget.config, ...config })
-                }
-                onFieldChanged={(key, value) => {
-                  if (previewConfig) {
-                    updatePreview({
-                      ...previewConfig,
-                      [key]: value,
-                    });
-                  }
-                }}
-              />
+              <WidgetResourceOverviewSorting {...totalPropPackage} />
             </TabsContent>
             <TabsContent value="pagination" className="p-0">
-              <WidgetResourceOverviewPagination />
+              <WidgetResourceOverviewPagination {...totalPropPackage} />
             </TabsContent>
             <TabsContent value="filter" className="p-0">
-              <WidgetResourceOverviewFilter />
+              <WidgetResourceOverviewFilter {...totalPropPackage} />
             </TabsContent>
             <TabsContent value="search" className="p-0">
-              <WidgetResourceOverviewSearch />
+              <WidgetResourceOverviewSearch {...totalPropPackage} />
             </TabsContent>
             <TabsContent value="tags" className="p-0">
-              <WidgetResourceOverviewTags />
+              <WidgetResourceOverviewTags {...totalPropPackage} />
             </TabsContent>
             <TabsContent value="include" className="p-0">
-              <WidgetResourceOverviewInclude />
+              <WidgetResourceOverviewInclude {...totalPropPackage} />
             </TabsContent>
             <TabsContent value="info" className="p-0">
-              <WidgetResourceOverviewInfo />
+              <WidgetResourceOverviewInfo {...totalPropPackage} />
             </TabsContent>
           </Tabs>
 
