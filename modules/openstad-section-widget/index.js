@@ -1,4 +1,3 @@
-
 const contentWidgets = {
   '@apostrophecms/rich-text': {
     toolbar: [
@@ -28,20 +27,21 @@ const contentWidgets = {
     ]
   },
   'openstad-component': {},
+  'openstad-section': {},
 };
 
-// modules/two-column-widget/index.js
 module.exports = {
   extend: '@apostrophecms/widget-type',
-  // 👇 The widget type's field schema
   fields: {
     add: {
+
       displayType: {
         name: 'displayType',
         label: 'Columns',
         type: 'select',
         help: 'Select the number of columns and their relative width',
         required: true,
+        def: 'columns-twothird-onethird',
         choices: [
           {
             label: 'Full page width ',
@@ -91,52 +91,92 @@ module.exports = {
             label: 'Full screen (vertical & horizontal)',
             value: 'full-screen'
           },
-          {
-            label: 'Dashboard',
-            value: 'dashboard'
-          }
           /*  {
                   label: 'icons',
                   value: 'icons',
                 }, */
         ]
       },
-      area1: {
-        name: 'area1',
+      column1: {
+        name: 'column1',
         type: 'area',
-        label: 'Area 1',
+        label: 'Kolom 1',
+        contextual: true,
         options: {
           widgets: contentWidgets,
           contextual: true
         }
       },
-      area2: {
-        name: 'area2',
+      column2: {
+        name: 'column2',
         type: 'area',
-        label: 'Area 2',
+        label: 'Kolom 2',
         contextual: true,
         options: {
           widgets: contentWidgets
-        }
+        },
+        if: {
+          $or: [
+            { displayType: 'columns-half' },
+            { displayType: 'columns-onethird' },
+            { displayType: 'columns-twothird-onethird' },
+            { displayType: 'columns-twothird-full' },
+            { displayType: 'columns-onefourth' },
+            { displayType: 'columns-twothird' },
+            { displayType: 'columns-onefourth-half' },
+            { displayType: 'columns-three' },
+            { displayType: 'columns-four' },
+          ]
+        },
       },
-      area3: {
-        name: 'area3',
+      column3: {
+        name: 'column3',
         type: 'area',
-        label: 'Area 3',
+        label: 'Kolom 3',
         contextual: true,
         options: {
           widgets: contentWidgets
-        }
+        },
+        if: {
+          $or: [
+            { displayType: 'columns-onefourth-half' },
+            { displayType: 'columns-three' },
+            { displayType: 'columns-four' },
+          ]
+        },
       },
-      area4: {
-        name: 'area4',
+      column4: {
+        name: 'column4',
         type: 'area',
-        label: 'Area 4',
+        label: 'Kolom 4',
         contextual: true,
         options: {
           widgets: contentWidgets
-        }
-      }
+        },
+        if: {
+          $or: [
+            { displayType: 'columns-four' },
+          ]
+        },
+      },
+
+      backgroundColor: {
+        type: 'color',
+        label: 'Achtergrond',
+      },
+
+    },
+
+    group: {
+      basics: {
+        label: 'Algemene instellingen',
+        fields: [ 'displayType' ],
+      },
+      styles: {
+        label: 'Vormgeving',
+        fields: [ 'backgroundColor' ],
+      },
     }
+
   }
 };

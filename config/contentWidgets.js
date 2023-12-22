@@ -14,7 +14,7 @@ const contentWidgets = {
   'arguments-form': {
     adminOnly: true
   },
-  'section': {
+  'openstad-section': {
     addLabel: 'Columns',
     controls: {
       movable: true,
