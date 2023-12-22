@@ -60,8 +60,7 @@ const formSchema = z.object({
   displayTheme: z.boolean(),
   displayNeighbourhood: z.boolean(),
   displayModbreak: z.boolean(),
-  image: z.string().optional(),
-  reactionSettings: z.array(z.string()).refine((value) => value.some((item) => item))
+  reactionSettings: z.string().array()
 });
 
 export default function ProjectSettingsResourceGeneral() {
@@ -69,7 +68,7 @@ export default function ProjectSettingsResourceGeneral() {
 
   const { data, isLoading, updateProject } = useProject();
   const defaults = () => ({
-    canAddNewResources: data?.config?.[category]?.canAddNewResources || null,
+    canAddNewResources: data?.config?.[category]?.canAddNewResources || false,
     minimumYesVotes: data?.config?.[category]?.minimumYesVotes || null,
     titleMinLength: data?.config?.[category]?.titleMinLength || null,
     titleMaxLength: data?.config?.[category]?.titleMaxLength || null,
@@ -77,11 +76,10 @@ export default function ProjectSettingsResourceGeneral() {
     summaryMaxLength: data?.config?.[category]?.summaryMaxLength || null,
     descriptionMinLength: data?.config?.[category]?.descriptionMinLength || null,
     descriptionMaxLength: data?.config?.[category]?.descriptionMaxLength || null,
-    displayLocation: data?.config?.[category]?.displayLocation || null,
-    displayTheme: data?.config?.[category]?.displayTheme || null,
-    displayNeighbourhood: data?.config?.[category]?.displayNeighbourhood || null,
-    displayModbreak: data?.config?.[category]?.displayModbreak || null,
-    image: data?.config?.[category]?.image || null,
+    displayLocation: data?.config?.[category]?.displayLocation || false,
+    displayTheme: data?.config?.[category]?.displayTheme || false,
+    displayNeighbourhood: data?.config?.[category]?.displayNeighbourhood || false,
+    displayModbreak: data?.config?.[category]?.displayModbreak || false,
     reactionSettings: data?.config?.[category]?.reactionSettings || [],
   });
 
@@ -106,7 +104,6 @@ export default function ProjectSettingsResourceGeneral() {
           summaryMaxLength: values.summaryMaxLength,
           descriptionMinLength: values.descriptionMinLength,
           descriptionMaxLength: values.descriptionMaxLength,
-          image: values.image,
           displayLocation: values.displayLocation,
           displayTheme: values.displayTheme,
           displayNeighbourhood: values.displayNeighbourhood,
@@ -351,21 +348,6 @@ export default function ProjectSettingsResourceGeneral() {
                         <SelectItem value="false">Nee</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="image"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Standaard afbeelding
-                    </FormLabel>
-                    <FormControl>
-                      <Input type='file' {...field} />
-                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -67,7 +67,7 @@ const formSchema = z.object({
     .optional(),
   modBreakDate: z.date().optional(),
 
-  location: z.string(),
+  location: z.string().optional(),
   images: z.string().array().default([]),
 
   extraData: z
