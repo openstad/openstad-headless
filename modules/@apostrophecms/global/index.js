@@ -46,6 +46,7 @@ module.exports = {
   fields: {
 
     add: {
+
       siteTitle: {
         type: 'string',
         label: 'Site titel'
@@ -55,6 +56,13 @@ module.exports = {
         type: 'attachment',
         label: 'Site logo',
         fileGroup: 'images'
+      },
+
+      cssExtras: {
+        type: 'string',
+        textarea: true,
+        def: '#logo-image {\n  max-height: 50px;\n}',
+        label: 'Extra CSS',
       },
 
       analyticsType:   {
@@ -82,24 +90,6 @@ module.exports = {
             label: "Use the server default settings",
           },
         ]
-      },
-
-      analyticsIdentifier: {
-        type: 'string',
-        permission: 'admin',
-        label: 'Google Analytics Property ID (like G-xxxxx)',
-        if: {
-          analyticsType: 'google-analytics'
-        },
-      },
-
-      analyticsCodeBlock: {
-        type: 'string',
-        permission: 'admin',
-        label: 'Custom code',
-        if: {
-          analyticsType: 'custom'
-        },
       },
 
       useCookieWarning: {
@@ -131,6 +121,23 @@ module.exports = {
         },
       },
 
+      analyticsIdentifier: {
+        type: 'string',
+        label: 'Google Analytics Property ID (like G-xxxxx)',
+        if: {
+          analyticsType: 'google-analytics'
+        },
+      },
+
+      analyticsCodeBlock: {
+        type: 'string',
+        permission: 'admin',
+        label: 'Custom code',
+        if: {
+          analyticsType: 'custom'
+        },
+      },
+
 
     },
 
@@ -139,13 +146,17 @@ module.exports = {
         label: 'Algemene instellingen',
         fields: [ 'siteTitle', 'siteLogo' ],
       },
-      analitics: {
-        label: 'Analitics',
-        fields: [ 'analyticsType', 'analyticsIdentifier', 'analyticsCodeBlock' ],
+      css: {
+        label: 'Vormgeving',
+        fields: [ 'cssExtras' ],
       },
       cookies: {
         label: 'Cookie instellingen',
         fields: [ 'useCookieWarning', 'cookiePageLink' ],
+      },
+      analitics: {
+        label: 'Analitics',
+        fields: [ 'analyticsType', 'analyticsIdentifier', 'analyticsCodeBlock' ],
       },
     }
   }
