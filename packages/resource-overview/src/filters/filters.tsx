@@ -1,15 +1,10 @@
-import {
-  Input,
-  MultiSelect,
-  SecondaryButton,
-  Select,
-} from '@openstad-headless/ui/src';
+import { Input, SecondaryButton, Select } from '@openstad-headless/ui/src';
 import React, { useState, useEffect, useRef, createRef } from 'react';
 import DataStore from '../../../components/src/data-store';
-import { BaseConfig } from '../../../generic-widget-types';
 import { useDebounce } from 'rooks';
 import { MultiSelectTagFilter } from './multiselect-tag-filter';
 import { SelectTagFilter } from './select-tag-filter';
+import { ResourceOverviewWidgetProps } from '../resource-overview';
 
 //Todo correctly type resources. Will be possible when the datastore is correctly typed
 
@@ -24,31 +19,24 @@ type Filter = {
 type Props = {
   resources: any;
   dataStore: DataStore;
-  tagTypes?: Array<{ type: string; placeholder?: string; multiple?: boolean }>;
   onUpdateFilter?: (filter: Filter) => void;
-} & BaseConfig;
+} & ResourceOverviewWidgetProps;
 
 export function Filters({
   resources,
   dataStore,
-  tagTypes = [
-    { type: 'theme', placeholder: 'Selecteer een thema', multiple: true },
-    { type: 'area', placeholder: 'Selecteer een gebied' },
-  ],
-  sortOptions = [
-    { value: 'title', label: 'Titel' },
-    { value: 'createdAt_desc', label: 'Nieuwste eerst' },
-    { value: 'createdAt_asc', label: 'Oudste eerst' },
-  ],
+  sorting = [],
+  tagGroups = [],
+
   onUpdateFilter,
   ...props
 }: Props) {
-
-  const defaultFilter = { tags: {}, search: { text: '' } };
-  tagTypes.forEach((tagType) => {
-    defaultFilter.tags[tagType.type] = null;
+  const defaultFilter = { tags: {}, search: { text: '' }, sort: '' };
+  tagGroups.forEach((tGroup) => {
+    defaultFilter.tags[tGroup.type] = null;
   });
 
+  console.log({ tagGroups });
   const [filter, setFilter] = useState(defaultFilter);
   const [selectedOptions, setSelected] = useState<{}>({});
 
@@ -65,18 +53,28 @@ export function Filters({
   useEffect(() => {
     // add or remove refs
     setElRefs((elRefs) =>
-      Array(tagTypes.length)
+      Array(tagGroups.length)
         .fill(undefined)
         .map((_, i) => elRefs[i] || createRef<HTMLSelectElement>())
     );
-  }, [tagTypes]);
+  }, [tagGroups]);
+
+  useEffect(() => {
+    if (sortingRef.current && props.defaultSorting) {
+      const index = sorting.findIndex((s) => s.value === props.defaultSorting);
+      if (index > -1) {
+        // + 1 for the placeholder option
+        sortingRef.current.selectedIndex = index + 1;
+      }
+    }
+  }, []);
 
   function updateFilter(newFilter: Filter) {
     setFilter(newFilter);
     onUpdateFilter && onUpdateFilter(newFilter);
   }
 
-  function setTags(type, values) {
+  function setTags(type: string, values: any[]) {
     updateFilter({
       ...filter,
       tags: {
@@ -88,7 +86,7 @@ export function Filters({
 
   const search = useDebounce(setSearch, 300);
 
-  function setSearch(value) {
+  function setSearch(value: string) {
     updateFilter({
       ...filter,
       search: {
@@ -97,7 +95,7 @@ export function Filters({
     });
   }
 
-  function setSort(value) {
+  function setSort(value: string) {
     updateFilter({
       ...filter,
       sort: value,
@@ -127,53 +125,56 @@ export function Filters({
   return (
     <section>
       <div className="osc-resource-overview-filters">
-        <Input
-          ref={searchRef}
-          onChange={(e) => search(e.target.value)}
-          className="osc-resource-overview-search"
-          placeholder="Zoeken"
-        />
+        {props.displaySearch ? (
+          <Input
+            ref={searchRef}
+            onChange={(e) => search(e.target.value)}
+            className="osc-resource-overview-search"
+            placeholder="Zoeken"
+          />
+        ) : null}
 
-        {tagTypes.map((tagType, index) => {
-          if (tagType.multiple) {
-            return (
-              <MultiSelectTagFilter
-                key={`tag-select-${tagType.type}`}
-                {...props}
-                selected={selectedOptions[tagType.type] || []}
-                dataStore={dataStore}
-                tagType={tagType.type}
-                placeholder={tagType.placeholder}
-                onUpdateFilter={(updatedTag) =>
-                  updateTagList(tagType.type, updatedTag)
-                }
-              />
-            );
-          } else {
-            return (
-              <SelectTagFilter
-                ref={elRefs[index]}
-                key={`tag-select-${tagType.type}`}
-                {...props}
-                dataStore={dataStore}
-                tagType={tagType.type}
-                placeholder={tagType.placeholder}
-                onUpdateFilter={(updatedTag) =>
-                  updateTagList(tagType.type, updatedTag)
-                }
-              />
-            );
-          }
-        })}
+        {props.displayTagFilters ? (
+          <>
+            {tagGroups.map((tagGroup, index) => {
+              if (tagGroup.multiple) {
+                return (
+                  <MultiSelectTagFilter
+                    key={`tag-select-${tagGroup.type}`}
+                    {...props}
+                    selected={selectedOptions[tagGroup.type] || []}
+                    dataStore={dataStore}
+                    tagType={tagGroup.type}
+                    placeholder={tagGroup.label}
+                    onUpdateFilter={(updatedTag) =>
+                      updateTagList(tagGroup.type, updatedTag)
+                    }
+                  />
+                );
+              } else {
+                return (
+                  <SelectTagFilter
+                    ref={elRefs[index]}
+                    key={`tag-select-${tagGroup}`}
+                    {...props}
+                    dataStore={dataStore}
+                    tagType={tagGroup.type}
+                    placeholder={tagGroup.label}
+                    onUpdateFilter={(updatedTag) =>
+                      updateTagList(tagGroup.type, updatedTag)
+                    }
+                  />
+                );
+              }
+            })}
+          </>
+        ) : null}
 
-        <Select
-          ref={sortingRef}
-          onValueChange={setSort}
-          options={
-            sortOptions
-          }>
-          <option value={''}>Sorteer op</option>
-        </Select>
+        {props.displaySorting ? (
+          <Select ref={sortingRef} onValueChange={setSort} options={sorting}>
+            <option value={''}>Sorteer op</option>
+          </Select>
+        ) : null}
 
         <SecondaryButton
           onClick={() => {
@@ -197,6 +198,6 @@ export function Filters({
           Wis alles
         </SecondaryButton>
       </div>
-    </section >
+    </section>
   );
 }

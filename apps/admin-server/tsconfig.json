@@ -29,6 +29,6 @@
     "**/*.js",
     "**/*.jsx",
     "types/**/*.d.ts"
-  ],
+, "src/lib/form-widget-helpers"  ],
   "exclude": ["node_modules"]
 }

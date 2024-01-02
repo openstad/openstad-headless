@@ -30,7 +30,6 @@ const formSchema = z.object({
     'resourceUser',
     'submission',
   ]),
-  enableVoting: z.boolean(),
   displayType: z.enum(['cardrow', 'cardgrid', 'raw']),
 });
 
@@ -46,7 +45,6 @@ export default function WidgetResourceOverviewGeneral() {
 
   const defaults = () => ({
     resource: widget?.config?.[category]?.resource || 'resource',
-    enableVoting: widget?.config?.[category]?.enableVoting || false,
     displayType: widget?.config?.[category]?.displayType || 'cardrow',
   });
 
@@ -97,29 +95,6 @@ export default function WidgetResourceOverviewGeneral() {
                       Gebruiker van de resource
                     </SelectItem>
                     <SelectItem value="submission">Oplevering</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="enableVoting"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Toestaan van stemmen</FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Nee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

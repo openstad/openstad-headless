@@ -25,7 +25,6 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  summaryCharLength: z.coerce.number(),
   step1: z.string(),
   step2: z.string(),
   step2ButtonFeedback: z.string(),
@@ -59,8 +58,6 @@ export default function WidgetResourceOverviewInfo() {
     excludeTheme: widget?.config?.[category]?.excludeTheme || '',
     filterTheme: widget?.config?.[category]?.filterTheme || '',
     filterResource: widget?.config?.[category]?.filterResource || '',
-
-    summaryCharLength: widget?.config?.[category]?.summaryCharLength || 30,
     step1:
       widget?.config?.[category]?.step1 ||
       "Kies uit onderstaand overzicht jouw favoriete ontwerp voor de muurtekst 'Zorg goed voor onze stad en voor elkaar', en vul in de volgende stap je gegevens in.",
@@ -120,21 +117,6 @@ export default function WidgetResourceOverviewInfo() {
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-1/2 grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="summaryCharLength"
-            render={({ field }) => (
-              <FormItem className="col-span-full">
-                <FormLabel>
-                  Hoeveelheid karakters waar de samenvatting uit mag bestaan
-                </FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
             name="step1"

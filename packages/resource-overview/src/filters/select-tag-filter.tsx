@@ -1,7 +1,7 @@
-import { MultiSelect, Select } from '@openstad-headless/ui/src';
-import React, { useState, forwardRef } from 'react';
+import { Select } from '@openstad-headless/ui/src';
+import React, { forwardRef } from 'react';
 import DataStore from '../../../components/src/data-store';
-import { BaseConfig } from '../../../generic-widget-types';
+import { BaseProps } from '../../../types/base-props';
 
 //Todo correctly type resources. Will be possible when the datastore is correctly typed
 
@@ -10,7 +10,7 @@ type Props = {
   tagType: string;
   placeholder?: string;
   onUpdateFilter?: (filter: string) => void;
-} & BaseConfig;
+} & BaseProps;
 
 const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
   ({ dataStore, tagType, onUpdateFilter, ...props }, ref) => {
@@ -23,7 +23,7 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
     return (
       <Select
         ref={ref}
-        options={(tags || []).map((tag) => ({
+        options={(tags || []).map((tag: { id: string; name: string }) => ({
           value: tag.id,
           label: tag.name,
         }))}

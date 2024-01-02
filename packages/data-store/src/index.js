@@ -67,7 +67,8 @@ function DataStore(props = { config: {} }) {
       defaultOptions.populateCache = (newData, currentData) =>
         mergeData(currentData, newData, options.action);
     }
-    if (newData.parentId) {
+
+    if (newData?.parentId) {
       // currently for comments: replies are subobjects and SWR can't handle that
       defaultOptions.revalidate = true;
     }

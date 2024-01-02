@@ -8,59 +8,70 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
+import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import useTags from '@/hooks/use-tags';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { useEffect, useState } from 'react';
+import _ from 'lodash';
 
 const formSchema = z.object({
   displayTagFilters: z.boolean(),
-  displayType: z.string().optional(),
-  displayGroupType: z.boolean(),
+  tagGroups: z
+    .array(
+      z.object({
+        type: z.string(),
+        label: z.string().optional(),
+        multiple: z.boolean(),
+      })
+    )
+    .refine((value) => value.some((item) => item), {
+      message: 'You have to select at least one item.',
+    }),
+  displayTagGroupName: z.boolean(),
 });
 
-export default function WidgetResourceOverviewTags() {
+type Tag = {
+  id: number;
+  name: string;
+  type: string;
+};
+
+export default function WidgetResourceOverviewTags(
+  props: ResourceOverviewWidgetProps &
+    EditFieldProps<ResourceOverviewWidgetProps>
+) {
   type FormData = z.infer<typeof formSchema>;
-  const category = 'tags';
+  const { data: tags } = useTags(props.projectId);
+  const [tagGroupNames, setGroupedNames] = useState<string[]>([]);
 
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig();
-
-  const defaults = () => ({
-    displayTagFilters: widget?.config?.[category]?.displayTagFilters || false,
-    displayType: widget?.config?.[category]?.displayType || '',
-    displayGroupType: widget?.config?.[category]?.displayGroupType || false,
-  });
+  useEffect(() => {
+    if (Array.isArray(tags)) {
+      const fetchedTags = tags as Array<Tag>;
+      const groupNames = _.chain(fetchedTags).map('type').uniq().value();
+      setGroupedNames(groupNames);
+    }
+  }, [tags]);
 
   async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could falset update', error);
-    }
+    props.updateConfig({ ...props, ...values });
   }
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      displayTagFilters: props?.displayTagFilters || false,
+      tagGroups: props.tagGroups || [],
+      displayTagGroupName: props?.displayTagGroupName || false,
+    },
   });
-
-  useEffect(() => {
-    form.reset(defaults());
-  }, [widget]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -76,64 +87,166 @@ export default function WidgetResourceOverviewTags() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Wordt het filteren op tags weergegeven?</FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Nee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
-            name="displayType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Laat alleen de volgende tags zien (indien ingevuld):
-                </FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
+            name="tagGroups"
+            render={() => (
+              <FormItem className="col-span-full">
+                <div>
+                  <FormLabel>Selecteer de gewenste tag groepen</FormLabel>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-2">
+                  {(tagGroupNames || []).map((groupName, index) => (
+                    <>
+                      <FormField
+                        key={`parent${groupName}`}
+                        control={form.control}
+                        name="tagGroups"
+                        render={({ field }) => {
+                          return (
+                            <FormItem
+                              key={groupName}
+                              className="flex flex-row items-start space-x-3 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={
+                                    field.value?.findIndex(
+                                      (el) => el.type === groupName
+                                    ) > -1
+                                  }
+                                  onCheckedChange={(checked: any) => {
+                                    if (checked) {
+                                      const updatedFields = [
+                                        ...field.value,
+                                        {
+                                          type: groupName,
+                                          multiple: false,
+                                          label: '',
+                                        },
+                                      ];
+                                      field.onChange(updatedFields);
+                                      props.onFieldChanged(
+                                        field.name,
+                                        updatedFields
+                                      );
+                                    } else {
+                                      const updatedFields = field.value?.filter(
+                                        (val) => val.type !== groupName
+                                      );
+                                      field.onChange(updatedFields);
+                                      props.onFieldChanged(
+                                        field.name,
+                                        updatedFields
+                                      );
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                {groupName}
+                              </FormLabel>
+                            </FormItem>
+                          );
+                        }}
+                      />
+
+                      <FormField
+                        key={`parent-label-input${groupName}`}
+                        control={form.control}
+                        name="tagGroups"
+                        render={({ field }) => {
+                          return (
+                            <FormItem
+                              key={`${groupName}-label-input`}
+                              className="flex flex-row items-start space-x-3 space-y-0">
+                              <FormControl>
+                                <Input
+                                  placeholder="Groep label"
+                                  key={`${groupName}-label-input-field`}
+                                  defaultValue={field.value.at(index)?.label}
+                                  disabled={
+                                    field.value.find(
+                                      (g) => g.type === groupName
+                                    ) === undefined
+                                  }
+                                  onChange={(e) => {
+                                    const groups = field.value;
+                                    const existingGroup = groups[index];
+
+                                    if (existingGroup) {
+                                      existingGroup.label = e.target.value;
+                                      groups[index] = existingGroup;
+                                      field.onChange(groups);
+                                      props.onFieldChanged(field.name, groups);
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          );
+                        }}
+                      />
+
+                      <FormField
+                        key={`parent${groupName}-multiple`}
+                        control={form.control}
+                        name="tagGroups"
+                        render={({ field }) => {
+                          return (
+                            <FormItem
+                              key={groupName}
+                              className="flex flex-row items-start space-x-3 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  disabled={
+                                    field.value.find(
+                                      (g) => g.type === groupName
+                                    ) === undefined
+                                  }
+                                  checked={
+                                    field.value?.findIndex(
+                                      (el) =>
+                                        el.type === groupName && el.multiple
+                                    ) > -1
+                                  }
+                                  onCheckedChange={(checked: any) => {
+                                    const groups = field.value;
+                                    const existingGroup = groups[index];
+
+                                    // Safety check
+                                    if (!checked && existingGroup) {
+                                      existingGroup.multiple = checked;
+                                      groups[index] = existingGroup;
+                                      field.onChange(groups);
+                                      props.onFieldChanged(field.name, groups);
+                                    } else {
+                                      existingGroup.multiple = checked;
+                                      field.onChange(groups);
+                                      props.onFieldChanged(field.name, groups);
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Multiple
+                              </FormLabel>
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    </>
+                  ))}
+                </div>
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="displayGroupType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Als er geen tag type geselecteerd is, moet de typename dan
-                  weergegeven worden per groep?
-                </FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Nee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>
