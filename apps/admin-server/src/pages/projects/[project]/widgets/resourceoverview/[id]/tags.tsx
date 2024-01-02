@@ -92,19 +92,6 @@ export default function WidgetResourceOverviewTags(
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="displayTagGroupName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Moeten de tag groepen apart getoond worden?
-                </FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           <FormField
             control={form.control}
