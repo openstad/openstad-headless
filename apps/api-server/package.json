@@ -4,7 +4,7 @@
   "description": "OpenStad API server",
   "main": "server.js",
   "scripts": {
-    "start": "node migrate.js && node server.js",
+    "start": "node ./scripts/migrate-database.js && node server.js",
     "predev": "./scripts/predev.sh",
     "dev": "nodemon server.js",
     "lint": "node ./scripts/lint",
@@ -17,7 +17,8 @@
     "test:e2e": "jest --no-cache --config jest-e2e.config.js --forceExit",
     "test:e2e:debug": "jest --no-cache --config jest-e2e.config.js --verbose --forceExit",
     "init-database": "node ./scripts/init-database.js",
-    "migrate-database": "node ./scripts/migrate-database.js"
+    "migrate-database": "node ./scripts/migrate-database.js",
+    "build-packages": "node ./scripts/build-packages.js"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.18.1",
