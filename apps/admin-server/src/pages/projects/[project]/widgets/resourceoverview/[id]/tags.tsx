@@ -183,6 +183,7 @@ export default function WidgetResourceOverviewTags(
                                       existingGroup.label = e.target.value;
                                       groups[index] = existingGroup;
                                       field.onChange(groups);
+                                      props.onFieldChanged('tagGroups', groups);
                                     }
                                   }}
                                 />
@@ -223,9 +224,11 @@ export default function WidgetResourceOverviewTags(
                                       existingGroup.multiple = checked;
                                       groups[index] = existingGroup;
                                       field.onChange(groups);
+                                      props.onFieldChanged('tagGroups', groups);
                                     } else {
                                       existingGroup.multiple = checked;
                                       field.onChange(groups);
+                                      props.onFieldChanged('tagGroups', groups);
                                     }
                                   }}
                                 />
