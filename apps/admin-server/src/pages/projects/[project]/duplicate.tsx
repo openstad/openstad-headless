@@ -72,12 +72,13 @@ export default function ProjectDuplicate() {
                 }
             ]}
             >
-                <div className='container mx-auto py-10 w-1/2 float-left'>
+                <div className='container py-6'>
+                    <div className='p-6 bg-white rounded-md'>
                     <Form {...form}>
-                        <Heading size="xl" className="mb-4">
-                            Instellingen • Algemeen
+                        <Heading size="xl">
+                            Dupliceren
                         </Heading>
-                        <Separator className="mb-4" />
+                        <Separator className="my-4" />
                         <form onSubmit={form.handleSubmit(duplicate)} className="space-y-4">
                             <p>Gebruik deze knop om de gegevens van je project te dupliceren.</p>
                             <p>Bij het dupliceren van je project zal er een compleet identieke versie van het project aangemaakt worden in de database.</p>
@@ -101,6 +102,7 @@ export default function ProjectDuplicate() {
                         <br/>
                     </Form>
                     </div>
+                </div>
             </PageLayout>
         </div>
     )

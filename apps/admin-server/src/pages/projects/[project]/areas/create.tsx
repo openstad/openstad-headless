@@ -19,6 +19,7 @@ import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
 import useArea from '@/hooks/use-area';
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   name: z.string(),
@@ -37,8 +38,14 @@ export default function ProjectAreaCreate() {
     defaultValues: {},
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    createArea(values.name, values.polygon);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const area = await createArea(values.name, values.polygon);
+    if (area) {
+      toast.success('Gebied aangemaakt!');
+      router.push(`/projects/${projectId}/areas`);
+    } else {
+      toast.error('De polygoon die is meegegeven lijkt niet helemaal te kloppen.')
+    }
   }
 
   return (

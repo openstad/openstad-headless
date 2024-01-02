@@ -50,7 +50,7 @@ export default function ProjectSettingsVoting() {
   const { project } = router.query;
   const { data, isLoading, updateProject } = useProject();
   const defaults = () => ({
-    isViewable: data?.config?.[category]?.isViewable || null,
+    isViewable: data?.config?.[category]?.isViewable || false,
     isActive: data?.config?.[category]?.isActive || false,
     withExisting: data?.config?.[category]?.withExisting || null,
     requiredUserRole: data?.config?.[category]?.requiredUserRole || null,
