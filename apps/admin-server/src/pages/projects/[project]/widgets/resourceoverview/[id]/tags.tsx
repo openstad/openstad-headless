@@ -132,7 +132,7 @@ export default function WidgetResourceOverviewTags(
                                       ];
                                       field.onChange(updatedFields);
                                       props.onFieldChanged(
-                                        'tagGroups',
+                                        field.name,
                                         updatedFields
                                       );
                                     } else {
@@ -141,7 +141,7 @@ export default function WidgetResourceOverviewTags(
                                       );
                                       field.onChange(updatedFields);
                                       props.onFieldChanged(
-                                        'tagGroups',
+                                        field.name,
                                         updatedFields
                                       );
                                     }
@@ -183,7 +183,7 @@ export default function WidgetResourceOverviewTags(
                                       existingGroup.label = e.target.value;
                                       groups[index] = existingGroup;
                                       field.onChange(groups);
-                                      props.onFieldChanged('tagGroups', groups);
+                                      props.onFieldChanged(field.name, groups);
                                     }
                                   }}
                                 />
@@ -224,11 +224,11 @@ export default function WidgetResourceOverviewTags(
                                       existingGroup.multiple = checked;
                                       groups[index] = existingGroup;
                                       field.onChange(groups);
-                                      props.onFieldChanged('tagGroups', groups);
+                                      props.onFieldChanged(field.name, groups);
                                     } else {
                                       existingGroup.multiple = checked;
                                       field.onChange(groups);
-                                      props.onFieldChanged('tagGroups', groups);
+                                      props.onFieldChanged(field.name, groups);
                                     }
                                   }}
                                 />
