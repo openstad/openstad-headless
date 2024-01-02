@@ -43,6 +43,8 @@ export default function ProjectAreaCreate() {
     if (area) {
       toast.success('Gebied aangemaakt!');
       router.push(`/projects/${projectId}/areas`);
+    } else {
+      toast.error('De polygoon die is meegegeven lijkt niet helemaal te kloppen.')
     }
   }
 
