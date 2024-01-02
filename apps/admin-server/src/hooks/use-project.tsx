@@ -21,8 +21,7 @@ export function useProject() {
         name,
       }),
     });
-    const data = await res.json();
-    return data;
+    return await res.json();
   }
   
   async function importProject(name: string, title: string, config: object, emailConfig: object) {
