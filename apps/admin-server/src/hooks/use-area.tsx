@@ -13,8 +13,7 @@ export default function useArea(projectId?: string) {
       },
       body: JSON.stringify({ name: name, polygon: JSON.parse(polygon) }),
     });
-    const data = await res.json();
-    return data;
+    return await res.json();
   }
 
   return { ...areasSwr, createArea };
