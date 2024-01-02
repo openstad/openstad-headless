@@ -121,20 +121,30 @@ export default function WidgetResourceOverviewTags(
                                     ) > -1
                                   }
                                   onCheckedChange={(checked: any) => {
-                                    return checked
-                                      ? field.onChange([
-                                          ...field.value,
-                                          {
-                                            type: groupName,
-                                            multiple: false,
-                                            label: '',
-                                          },
-                                        ])
-                                      : field.onChange(
-                                          field.value?.filter(
-                                            (val) => val.type !== groupName
-                                          )
-                                        );
+                                    if (checked) {
+                                      const updatedFields = [
+                                        ...field.value,
+                                        {
+                                          type: groupName,
+                                          multiple: false,
+                                          label: '',
+                                        },
+                                      ];
+                                      field.onChange(updatedFields);
+                                      props.onFieldChanged(
+                                        'tagGroups',
+                                        updatedFields
+                                      );
+                                    } else {
+                                      const updatedFields = field.value?.filter(
+                                        (val) => val.type !== groupName
+                                      );
+                                      field.onChange(updatedFields);
+                                      props.onFieldChanged(
+                                        'tagGroups',
+                                        updatedFields
+                                      );
+                                    }
                                   }}
                                 />
                               </FormControl>

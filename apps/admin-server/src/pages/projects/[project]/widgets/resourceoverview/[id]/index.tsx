@@ -43,7 +43,7 @@ export default function WidgetResourceOverview() {
     updateConfig: (config: ResourceOverviewWidgetProps) =>
       updateConfig({ ...widget.config, ...config }),
 
-    onFieldChanged: (key: keyof ResourceOverviewWidgetProps, value: string) => {
+    onFieldChanged: (key: keyof ResourceOverviewWidgetProps, value: any) => {
       if (previewConfig) {
         updatePreview({
           ...previewConfig,
