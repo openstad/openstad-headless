@@ -37,8 +37,7 @@ export function useProject() {
         emailConfig
       }),
     });
-    const data = await res.json();
-    return data;
+    return await res.json();
   }
 
   async function updateProject(config: any, name?: any) {
