@@ -1,19 +1,38 @@
-## OpenStad
+# Openstad Frontend - With ApostropheCMS v3
 
-This is the monorepo for the OpenStad headless project. OpenStad headless will be the new instllment of the OpenStad software from early 2024. Untill then, please refer to [openstad-app](https://github.com/openstad/openstad-app) or [openstad-kubernetes](https://github.com/openstad/openstad-kubernetes). To read more about OpenStad visit [the website](https://openstad.org/).
+## Intro
+The Openstad software allows organisation to easily build software for digital participation & democracy.
 
-### Docs
+The main software runs ApostropheCMS v2 for site management, this is a first draft for moving that to v3. It implements loading sites, connecting to auth & moved over a few widgets.
 
-Currently the following elements have been documented:
+## Installation
+### 1. Create a .env file
+```
+PORT=3000
+# able to set an external domain for dev & test purposed, make sure the oAuth is allowed to redirect to localhost
+OVERWRITE_DOMAIN=
+SITE_API_KEY=
+API_URL=
+# if your mongodb is not on localhost:27017
+APOS_MONGODB_URI=
+```
+### Npm i & npm run
+```
+npm i & npm run dev
+```
 
-__All__
-- [Getting started (dockerized)](doc/getting-started.md)
-- [Setup](doc/setup.md)
-- [About databases](doc/databases.md)
+### Crash on startup
+In development mode at times there is a crash after a change on startup. 
+A restart solves that. Needs more investigation.
 
-__API__
-- [API configuration](apps/api-server/doc/config.md)
-- [Authentication and authorization](apps/api-server/doc/auth.md)
-- [Tags: thema's, areas and more](apps/api-server/doc/tags.md)
-- [Pagination and search](apps/api-server/doc/pagination-and-search.md)
+## Moving from ApostropheV2 
+Moving from ApostropheCMS v2 a few things changed:
 
+- Construct is now named init
+- Schema fields are now structured as objects instead of an array, the name is now the key of the object
+- Options in a widgets are not top level elements, but nested under options key options: {label: 'Name of widget'} instead of label: 'Name of widget'
+- Widgets do not end in -widgets, but in -widget
+- Arraging is now then under key group:
+- less is no longer supported, have to migrate  over to sass
+- To link directly to a static file in a module now, make sure it's in public dir and link to it as such, assuming images is a direcotry in the ui/public directory. Example: lib/modules/agenda-widget/ui/public/img/bg.png : /modules/agenda-widget/img/bg.png
+>>>>>>> 630f01edb20a155fd0ba20304633ac97c486d8c4
