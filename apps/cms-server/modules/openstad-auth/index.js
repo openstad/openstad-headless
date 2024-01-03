@@ -71,7 +71,7 @@ module.exports = {
         } else {
 
           const jwt = req.session.jwt;
-          const apiUrl = process.env.API_URL;
+          const apiUrl = process.env.API_URL_INTERNAL || process.env.API_URL;
 
           if (!jwt) {
             next();

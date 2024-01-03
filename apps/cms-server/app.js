@@ -4,7 +4,6 @@ const apostrophe = require('apostrophe');
 const express = require('express');
 const app = express();
 const _ = require('lodash');
-const apiUrl = process.env.API_URL || 'http://localhost:8111';
 const projectService = require('./services/projects');
 const aposConfig = require('./lib/apos-config');
 const { refresh } = require('less');
@@ -124,7 +123,7 @@ app.use(async function (req, res, next) {
     return;
   }
 
-  const apiUrl = process.env.INTERNAL_API_URL ? process.env.INTERNAL_API_URL : process.env.API_URL;
+  const apiUrl = process.env.API_URL_INTERNAL || process.env.API_URL;
 
   /**
    * Stop server if no API URL is set
@@ -203,6 +202,7 @@ app.get('/auth/login', (req, res, next) => {
 
   returnUrl = encodeURIComponent(returnUrl + '?logintoken=[[jwt]]');
 
+  const apiUrl = process.env.API_URL;
   let url = `${apiUrl}/auth/project/${project.id}/login?redirectUri=${returnUrl}`;
   url = req.query.useOauth ? url + '&useOauth=' + req.query.useOauth : url;
   url = req.query.loginPriviliged ? url + '&loginPriviliged=1' : url + '&forceNewLogin=1'; // ;

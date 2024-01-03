@@ -19,6 +19,7 @@ module.exports = async function seed(config, db) {
       id: 2,
       name: 'Plannen',
       title: 'Plannen insturen',
+      url: process.env.BASE_DOMAIN == 'localhost' ? process.env.CMS_URL : `https://plannen.${process.env.BASE_DOMAIN}`,
       config: {
         allowedDomains,
         auth: {
@@ -72,6 +73,7 @@ module.exports = async function seed(config, db) {
       id: 3,
       name: 'Begroten',
       title: 'Begroten',
+      url: `https://begroot.${process.env.BASE_DOMAIN}`,
       config: {
         allowedDomains,
         auth: {
@@ -100,6 +102,7 @@ module.exports = async function seed(config, db) {
       id: 4,
       name: 'Keuzewijzer',
       title: 'Keuzewijzer',
+      url: `https://keuzewijzer.${process.env.BASE_DOMAIN}`,
       config: {
         allowedDomains,
         auth: {

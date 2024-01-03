@@ -38,6 +38,8 @@ const fs = require('fs').promises;
 
   try {
     let configfile = `
+BASE_DOMAIN=${process.env.BASE_DOMAIN}
+
 MYSQL_ROOT_PASSWORD=${process.env.DB_PASSWORD}
 MYSQL_USER=${process.env.DB_USERNAME}
 MYSQL_PASSWORD=${process.env.DB_PASSWORD}
@@ -62,7 +64,8 @@ API_MAIL_TRANSPORT_SMTP_AUTH_PASS=${process.env.API_SMTP_PASSWORD}
       process.env.API_NOTIFICATIONS_ADMIN_EMAILADDRESS
     }
 API_AUTH_JWTSECRET=${process.env.API_JWT_SECRET}
-API_AUTH_FIXEDAUTHTOKENS=${process.env.API_FIXED_AUTH_KEY}
+API_FIXED_AUTH_KEY=${process.env.API_FIXED_AUTH_KEY}
+API_AUTH_FIXEDAUTHTOKENS=${process.env.API_AUTH_FIXEDAUTHTOKENS}
 AUTH_API_URL=${process.env.AUTH_APP_URL}
 
 AUTH_APP_URL=${process.env.AUTH_APP_URL}
@@ -103,9 +106,10 @@ ADMIN_SECRET=${process.env.ADMIN_SECRET}
 
 NEXT_PUBLIC_API_URL=${process.env.API_URL}
 
+CMS_URL=${process.env.CMS_URL}
 CMS_PORT=${process.env.CMS_PORT}
 CMS_OVERWRITE_URL=${process.env.CMS_OVERWRITE_URL}
-CMS_MONGODB_URI=${process.env.CMS_MONGODB_URI}
+CMS_MONGODB_URI=${process.env.CMS_MONGODB_URI || 'mongodb://openstad-mongo:27017'}
 CMS_DEFAULT_SETTINGS=${process.env.CMS_DEFAULT_SETTINGS}
 `;
 
@@ -122,6 +126,7 @@ Login: ${process.env.API_URL}/auth/project/1/login
 Which should redirect you to the login form: ${process.env.AUTH_APP_URL}/auth/code/login?clientId=uniquecode
 Show an image: ${process.env.IMAGE_APP_URL}/image/forum.romanum.06.webp
 Admin server: ${process.env.ADMIN_URL}/
+CMS: ${process.env.CMS_URL}/
 
 You can login using the code ${process.env.AUTH_FIRST_LOGIN_CODE}
 

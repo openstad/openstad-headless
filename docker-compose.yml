@@ -25,6 +25,12 @@ services:
       timeout: 20s
       retries: 10
 
+  openstad-mongo:
+    image: mongo
+    restart: always
+    volumes:
+      - openstad-mongo-data:/var/lib/mongo
+
   openstad-mailhog:
     image: mailhog/mailhog
     ports:
@@ -69,6 +75,8 @@ services:
       - IMAGE_APP_URL=${IMAGE_APP_URL}
       - IMAGE_VERIFICATION_TOKEN=${IMAGE_VERIFICATION_TOKEN}
       - NODE_ENV=development
+      - CMS_URL=${CMS_URL}
+      - BASE_DOMAIN=${BASE_DOMAIN}
     ports:
       - '${API_PORT}:${API_PORT}'
     volumes:
@@ -189,8 +197,39 @@ services:
       - openstad-admin-server-node_modules:/opt/openstad-headless/apps/admin-server/node_modules
       - ./packages:/opt/openstad-headless/packages
 
+  openstad-cms-server:
+    build:
+      target: development
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - APP=cms-server
+        - PORT=${CMS_PORT}
+    image: openstad/headless-cms-server:${RELEASE_VERSION:-latest}
+    # TODO: dit moet conditional: alleen als we deze db gebruiken
+    # depends_on:
+    #   openstad-mongo:
+    #     condition: service_healthy
+    container_name: openstad-cms-server
+    restart: unless-stopped
+    environment:
+      - PORT=${CMS_PORT}
+      - OVERWRITE_URL=${CMS_URL}
+      - MONGODB_URI=${CMS_MONGODB_URI}
+      - CMS_DEFAULTS=${CMS_DEFAULTS}
+      - API_URL=${API_URL}
+      - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}
+      - API_KEY=${API_FIXED_AUTH_KEY}
+    ports:
+      - '${CMS_PORT}:${CMS_PORT}'
+    volumes:
+      - ./apps/cms-server:/opt/openstad-headless/apps/cms-server
+      - openstad-cms-server-node_modules:/opt/openstad-headless/apps/cms-server/node_modules
+      - openstad-cms-server-init:/opt/openstad-headless/apps/cms-server/init
+
 volumes:
   openstad-mysql-data: {}
+  openstad-mongo-data: {}
   openstad-api-server-node_modules: {}
   openstad-api-server-init: {}
   openstad-auth-server-node_modules: {}
@@ -200,3 +239,5 @@ volumes:
   openstad-image-server-images: {}
   openstad-image-server-init: {}
   openstad-admin-server-node_modules: {}
+  openstad-cms-server-node_modules: {}
+  openstad-cms-server-init: {}

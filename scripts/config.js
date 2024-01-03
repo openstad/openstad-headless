@@ -15,6 +15,7 @@ let API_PORT = process.env.API_PORT || BASE_PORT + 10;
 let API_DOMAIN = process.env.API_DOMAIN || ( process.env.BASE_DOMAIN == 'localhost' ? 'localhost:' + API_PORT : 'api.' + process.env.BASE_DOMAIN );
 let API_URL = process.env.API_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + API_DOMAIN;
 let API_FIXED_AUTH_KEY = process.env.API_FIXED_AUTH_KEY || process.env.AUTH_FIRST_LOGIN_CODE || generateRandomToken({ length: 2048 });
+let API_AUTH_FIXEDAUTHTOKENS = process.env.API_AUTH_FIXEDAUTHTOKENS || `[{"token":"${API_FIXED_AUTH_KEY}","userId":"1","authProvider":"openstad"}]`;
 
 let AUTH_PORT = process.env.AUTH_PORT || BASE_PORT + 30;
 let AUTH_DOMAIN = process.env.AUTH_DOMAIN || ( process.env.BASE_DOMAIN == 'localhost' ? 'localhost:' + AUTH_PORT : 'auth.' + process.env.BASE_DOMAIN )
@@ -37,7 +38,9 @@ let ADMIN_URL = process.env.ADMIN_URL || ( process.env.FORCE_HTTP ? 'http://' : 
 let ADMIN_SECRET = process.env.ADMIN_SECRET || generateRandomToken({ length: 64 });
 
 let CMS_PORT = process.env.CMS_PORT || BASE_PORT + 90;
-let CMS_OVERWRITE_URL = process.env.CMS_OVERWRITE_URL || '';
+let CMS_DOMAIN = process.env.CMS_DOMAIN || ( process.env.BASE_DOMAIN == 'localhost' ? 'localhost:' + CMS_PORT : 'cms.' + process.env.BASE_DOMAIN );
+let CMS_URL = process.env.CMS_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + CMS_DOMAIN;
+let CMS_OVERWRITE_URL = process.env.CMS_OVERWRITE_URL || ( process.env.BASE_DOMAIN == 'localhost' ? 'http://localhost:' + CMS_PORT : '' );
 let CMS_MONGODB_URI = process.env.CMS_MONGODB_URI || '';
 let CMS_DEFAULT_SETTINGS = process.env.CMS_DEFAULT_SETTINGS || '{}';
 
@@ -64,6 +67,7 @@ process.env.API_COOKIE_ONLY_SECURE = process.env.API_COOKIE_ONLY_SECURE || proce
 process.env.API_JWT_SECRET = process.env.API_JWT_SECRET || generateRandomToken({ length: 64 });
 
 process.env.API_FIXED_AUTH_KEY = API_FIXED_AUTH_KEY;
+process.env.API_AUTH_FIXEDAUTHTOKENS = API_AUTH_FIXEDAUTHTOKENS
 
 // auth server
 process.env.AUTH_APP_URL = process.env.AUTH_APP_URL || AUTH_URL || '';
@@ -122,6 +126,7 @@ process.env.ADMIN_SECRET = ADMIN_SECRET;
 process.env.ADMIN_PORT = ADMIN_PORT;
 
 // cms server
+process.env.CMS_URL=CMS_URL;
 process.env.CMS_PORT=CMS_PORT;
 process.env.CMS_OVERWRITE_URL=CMS_OVERWRITE_URL;
 process.env.CMS_MONGODB_URI=CMS_MONGODB_URI;
