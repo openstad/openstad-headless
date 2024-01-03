@@ -1,33 +1,55 @@
 {
-  "name": "openstad-headless",
+  "name": "openstad-frontend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Openstad frontent project including openstad frontend packages\"",
+  "main": "app.js",
   "scripts": {
-    "create-docker-config": "node ./scripts/create-docker-config.js",
-    "setup": "node ./scripts/setup-all.js",
-    "start": "node ./scripts/start-all.js",
-    "init-databases": "node ./scripts/init-databases.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "dev": "nodemon"
+  },
+  "nodemonConfig": {
+    "delay": 1000,
+    "verbose": true,
+    "watch": [
+      "./app.js",
+      "./modules/**/*",
+      "./lib/**/*.js",
+      "./views/**/*.html"
+    ],
+    "ignoreRoot": [
+      ".git"
+    ],
+    "ignore": [
+      "**/ui/apos/",
+      "**/ui/src/",
+      "**/ui/public/",
+      "locales/*.json",
+      "public/uploads/",
+      "public/apos-frontend/*.js",
+      "data/"
+    ],
+    "ext": "json, js, html, scss, vue"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/openstad/openstad-headless.git"
+    "url": "git+https://github.com/Amsterdam/openstad-frontend.git"
   },
-  "author": "OpenStad",
-  "license": "ISC",
+  "author": "Team Openstad: Niels Denes & Tosh Koevoets",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/openstad/openstad-headless/issues"
+    "url": "https://github.com/Amsterdam/openstad-frontend/issues"
   },
-  "homepage": "https://github.com/openstad/openstad-headless#readme",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "private": true,
+  "homepage": "https://github.com/Amsterdam/openstad-frontend#readme",
+  "dependencies": {
+    "apostrophe": "^3.0.0",
+    "dotenv": "^16.0.3",
+    "http-proxy-middleware": "^2.0.6",
+    "jquery": "^3.7.1",
+    "request-promise": "^4.2.6"
+  },
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "4.2.0",
-    "prettier": "3.0.3",
-    "promise-mysql": "^5.2.0"
+    "less": "^4.1.3",
+    "less-loader": "^11.1.0",
+    "nodemon": "^3.0.1"
   }
 }

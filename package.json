@@ -1,0 +1,33 @@
+{
+  "name": "openstad-headless",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "create-docker-config": "node ./scripts/create-docker-config.js",
+    "setup": "node ./scripts/setup-all.js",
+    "start": "node ./scripts/start-all.js",
+    "init-databases": "node ./scripts/init-databases.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openstad/openstad-headless.git"
+  },
+  "author": "OpenStad",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/openstad/openstad-headless/issues"
+  },
+  "homepage": "https://github.com/openstad/openstad-headless#readme",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "private": true,
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "4.2.0",
+    "prettier": "3.0.3",
+    "promise-mysql": "^5.2.0"
+  }
+}
