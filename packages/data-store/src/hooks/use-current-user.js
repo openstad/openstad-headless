@@ -1,22 +1,23 @@
 import SessionStorage from '../../../lib/session-storage.js';
 import useSWR from 'swr';
-import { useState } from 'react';
 
 export default function useCurrentUser(props) {
-
   let self = this;
 
   const projectId = props.projectId || props.config?.projectId;
 
-  const { data, error, isLoading } = useSWR({ type: 'current-user', projectId: self.projectId }, getCurrentUser);
+  const { data, error, isLoading } = useSWR(
+    { type: 'current-user', projectId: self.projectId },
+    getCurrentUser
+  );
 
   async function getCurrentUser() {
-
     // console.log('GETCURRENTUSER', self.currentUser);
-    if (self.currentUser && self.currentUser.id) { // just once TODO: ik denk dat het jkan met useSWRmutaion,: als ik het goedlees update die alleen met de hand
+    if (self.currentUser && self.currentUser.id) {
+      // just once TODO: ik denk dat het jkan met useSWRmutaion,: als ik het goedlees update die alleen met de hand
       return self.currentUser;
     }
-    
+
     // get user from props
     let initialUser = props.openStadUser || props.config?.openStadUser || {};
     if (initialUser.id && initialUser.projectId == self.projectId) {
@@ -57,29 +58,34 @@ export default function useCurrentUser(props) {
 
     // or get jwt for cmsUser
     if (!jwt && cmsUser && cmsUser.access_token && cmsUser.iss) {
-      jwt = await self.api.user.connectUser({ projectId: self.projectId, cmsUser })
+      jwt = await self.api.user.connectUser({
+        projectId: self.projectId,
+        cmsUser,
+      });
     }
 
     // fetch me for this jwt
     if (jwt) {
-
       self.api.currentUserJWT = jwt; // use current user in subsequent requests
 
       // refresh already fetched data, now with the current user
-      self.refresh()
+      self.refresh();
 
       // TODO: delete jwt on error
-      let openStadUser = await self.api.user.fetchMe({ projectId: self.projectId });
+      let openStadUser = await self.api.user.fetchMe({
+        projectId: self.projectId,
+      });
       session.set('openStadUser', { ...openStadUser, jwt });
-      console.log('ME', openStadUser);
       return openStadUser;
-
     } else {
       return {};
     }
-
   }
 
-  return [ data, () => console.log('setUser not (yet) implemented'), error, isLoading ];
-
+  return [
+    data,
+    () => console.log('setUser not (yet) implemented'),
+    error,
+    isLoading,
+  ];
 }
