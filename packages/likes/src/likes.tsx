@@ -4,7 +4,7 @@ import { SessionStorage } from '@openstad-headless/lib/session-storage';
 import loadWidget from '@openstad-headless/lib/load-widget';
 import { hasRole } from '@openstad-headless/lib/has-role';
 import DataStore from '@openstad-headless/data-store/src';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './likes.css';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
@@ -58,6 +58,16 @@ function Likes({
     { type: 'yes', label: yesLabel, icon: 'ri-thumb-up-line' },
     { type: 'no', label: noLabel, icon: 'ri-thumb-down-line' },
   ];
+
+  useEffect(() => {
+    let pending = session.get('osc-resource-vote-pending');
+    if (pending && pending[resource.id]) {
+      if (currentUser && currentUser.role) {
+        doVote(null, pending[resource.id])
+        session.remove('osc-resource-vote-pending');
+      }
+    }
+  }, [resource, currentUser]);
 
   async function doVote(e, value) {
     if (e) e.stopPropagation();
