@@ -22,6 +22,10 @@
     color: var(--osc-foreground)
 }
 
+.osc button.ghost.active i{
+    color: var(--osc-primary);
+}
+
 .osc button > i {
     font-size: 1.5rem;
 }

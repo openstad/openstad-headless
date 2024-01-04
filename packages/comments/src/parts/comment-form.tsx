@@ -91,6 +91,7 @@ function CommentForm({
         hasRole(currentUser, 'admin') ? (
           <>
             <Input
+              className="comment-description-inputfield"
               name="description"
               placeholder={args.placeholder}
               defaultValue={args.comment?.description}

@@ -10,4 +10,5 @@ export type CommentProps = {
   isReplyingEnabled: boolean;
   requiredUserRole: string;
   userNameFields: Array<string>;
+  showDateSeperately?: boolean;
 };
