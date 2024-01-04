@@ -13,5 +13,13 @@ module.exports = {
     'openstad-assets': { },
     'openstad-auth': { },
     'openstad-component-widget': { },
+    'openstad-component-widget': { },
+    'openstad-title-widget': { },
+    'openstad-timeline-widget': {
+      options: {
+        label: 'Een agenda'
+      }
+    },
+    'openstad-image-widget': { },
   }
 };

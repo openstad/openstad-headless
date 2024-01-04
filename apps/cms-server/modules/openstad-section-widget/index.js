@@ -28,10 +28,16 @@ const contentWidgets = {
   },
   'openstad-component': {},
   'openstad-section': {},
+  'openstad-title': {},
+  'openstad-timeline': {},
+  'openstad-image': {},
 };
 
 module.exports = {
   extend: '@apostrophecms/widget-type',
+  options: {
+    label: 'Sectie'
+  },
   fields: {
     add: {
 

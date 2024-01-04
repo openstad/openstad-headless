@@ -26,6 +26,10 @@ $body-color: #111;
 @import "navbar.scss";
 @import "cookie-warning.scss";
 
+.apos-popover {
+  z-index: 10000 !important;
+}
+
 .row img {
   max-width: 100%;
 }

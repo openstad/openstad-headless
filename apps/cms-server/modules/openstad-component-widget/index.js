@@ -3,7 +3,7 @@
 module.exports = {
   extend: '@apostrophecms/widget-type',
   options: {
-    label: 'Openstad Component Widget'
+    label: 'Openstad Component'
   },
   fields: {
     add: {
