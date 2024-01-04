@@ -48,15 +48,16 @@ function Likes({
     projectId: props.projectId,
     resourceId,
   });
+
   const [isBusy, setIsBusy] = useState(false);
   const supportedLikeTypes: Array<{
     type: 'yes' | 'no';
     label: string;
     icon: string;
   }> = [
-      { type: 'yes', label: yesLabel, icon: 'ri-thumb-up-line' },
-      { type: 'no', label: noLabel, icon: 'ri-thumb-down-line' },
-    ];
+    { type: 'yes', label: yesLabel, icon: 'ri-thumb-up-line' },
+    { type: 'no', label: noLabel, icon: 'ri-thumb-down-line' },
+  ];
 
   async function doVote(e, value) {
     if (e) e.stopPropagation();
@@ -97,8 +98,11 @@ function Likes({
           {supportedLikeTypes.map((likeVariant, index) => (
             <div
               key={`${likeVariant.type}-${index}`}
-              className={`like-option  ${hideCounters ? 'osc-no-counter' : ''
-                }`}>
+              className={`like-option ${
+                resource?.userVote?.opinion === likeVariant.type
+                  ? 'selected'
+                  : ''
+              } ${hideCounters ? 'osc-no-counter' : ''}`}>
               <section
                 className="like-kind"
                 onClick={(e) => doVote(e, likeVariant.type)}>
@@ -114,10 +118,10 @@ function Likes({
                 <section className="like-counter">
                   <p>
                     {resource[likeVariant.type] &&
-                      resource[likeVariant.type] < 10
+                    resource[likeVariant.type] < 10
                       ? resource[likeVariant.type].toString().padStart(2, '0')
                       : resource[likeVariant.type] ||
-                      (0).toString().padStart(2, '0')}
+                        (0).toString().padStart(2, '0')}
                   </p>
                 </section>
               ) : null}
