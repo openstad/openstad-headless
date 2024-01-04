@@ -20,6 +20,7 @@ export default function useCurrentUser(props) {
 
     // get user from props
     let initialUser = props.openStadUser || props.config?.openStadUser || {};
+
     if (initialUser.id && initialUser.projectId == self.projectId) {
       return initialUser;
     }
@@ -37,7 +38,7 @@ export default function useCurrentUser(props) {
       history.replaceState(null, '', url);
     }
 
-    const cmsUser = props.cmsUser || props.config.cmsUser || {};
+    const cmsUser = props.cmsUser || {};
     // get cmsUser from session data - this is a fix for badly written cms logouts
     let sessionCmsUser = session.get('cmsUser') || {};
     if (sessionCmsUser && cmsUser) {
