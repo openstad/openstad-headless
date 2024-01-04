@@ -15,3 +15,7 @@ services:
   openstad-admin-server:
     build:
       target: release
+
+  openstad-cms-server:
+    build:
+      target: release

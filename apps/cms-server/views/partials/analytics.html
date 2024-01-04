@@ -1,0 +1,19 @@
+{# --- Google --- #}
+{% if data.global.analyticsType == 'google-analytics' %}
+{% if data.global.cookieConsent %}
+<script async src="https://www.googletagmanager.com/gtag/js?id={{data.global.analyticsIdentifier}}"></script>
+<script>
+ window.dataLayer = window.dataLayer || [];
+ function gtag(){dataLayer.push(arguments);}
+ gtag('js', new Date());
+ gtag('config', '{{data.global.analyticsIdentifier}}');
+</script>
+{% endif %}
+{% endif %}
+
+{# --- Custom code --- #}
+{% if data.global.analyticsType == 'custom' %}
+{% if data.global.cookieConsent %}
+{{data.global.analyticsCodeBlock | safe}}
+{% endif %}
+{% endif %}
