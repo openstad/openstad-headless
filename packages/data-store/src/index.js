@@ -60,6 +60,7 @@ function DataStore(props = { config: {} }) {
     let defaultOptions = {
       optimisticData: (currentData) =>
         mergeData(currentData, newData, options.action),
+      populateCache: false,
       revalidate: false,
       rollbackOnError: true,
     };
