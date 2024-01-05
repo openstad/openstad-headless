@@ -6,8 +6,9 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { FolderOpen, LogOut, Settings, Users, AlertTriangle } from 'lucide-react';
+import { FolderOpen, LogOut, Users, AlertTriangle } from 'lucide-react';
 import { Logo } from './logo';
+import { signOut } from "next-auth/react"
 
 export function Sidenav({
   className,
@@ -63,7 +64,7 @@ export function Sidenav({
               'w-full flex flex-row justify-start',
               narrow ? 'p-0 h-10 w-10 justify-center' : null
             )}
-            onClick={(e) => {}}>
+            onClick={() => {}}>
             <Users
               size="20"
               className={
@@ -80,7 +81,7 @@ export function Sidenav({
               'w-full flex flex-row justify-start',
               narrow ? 'p-0 h-10 w-10 justify-center' : null
             )}
-            onClick={(e) => {}}>
+            onClick={() => {}}>
             <AlertTriangle
               size="20"
               className={
@@ -100,6 +101,7 @@ export function Sidenav({
         <Link href="/projects">
           <Button
             variant="ghost"
+            onClick={() => signOut()}
             className={cn(
               'w-full flex flex-row justify-start',
               narrow ? 'p-0 h-10 w-10 justify-center' : null

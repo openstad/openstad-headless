@@ -27,6 +27,7 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async jwt({ token, account, profile }) {
+      console.log({token, account})
       if (account?.provider === 'openstad' && account?.access_token) {
         if (token.accessToken) {
           logger.debug('Next-auth JWT token already has an access token');
