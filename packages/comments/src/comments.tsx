@@ -11,7 +11,6 @@ import loadWidget from '@openstad-headless/lib/load-widget';
 
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
-import hasRole from '@openstad/lib/has-role';
 
 export type CommentsWidgetProps = BaseProps &
   ProjectSettingProps &
