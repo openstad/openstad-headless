@@ -63,11 +63,17 @@ export default function CreateProject() {
   }
 
   async function onImport(values: z.infer<typeof importFormSchema>) {
-    const data = JSON.parse(file)
-    const project = await importProject(values.importedProjectName, data.projectData.title, data.projectData.config, data.projectData.emailConfig);
-    if (project) {
-      toast.success('Project aangemaakt!');
-      router.push(`/projects/${project.id}/widgets`);
+    try {
+      const data = JSON.parse(file)
+      const project = await importProject(values.importedProjectName, data.projectData.title, data.projectData.config, data.projectData.emailConfig);
+      if (project) {
+        toast.success('Project aangemaakt!');
+        router.push(`/projects/${project.id}/widgets`);
+      } else {
+        toast.error('De file die geüpload is bevat onjuiste data.')
+      }
+    } catch (e) {
+      toast.error('Alleen JSON files worden geaccepteerd!');
     }
   }
 
