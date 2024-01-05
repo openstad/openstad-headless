@@ -95,7 +95,11 @@ export default function WidgetResourceOverviewSorting(
                   </FormControl>
                   <SelectContent>
                     {SortingTypes.map((sort) => (
-                      <SelectItem value={sort.value}>{sort.label}</SelectItem>
+                      <SelectItem
+                        key={`sort-type-${sort.value}`}
+                        value={sort.value}>
+                        {sort.label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
