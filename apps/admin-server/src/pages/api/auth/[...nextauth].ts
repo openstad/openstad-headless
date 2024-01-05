@@ -31,7 +31,7 @@ export const authOptions: NextAuthOptions = {
       if ( token?.accessToken ) {
         console.log('Validate');
         try {
-          let url = 'http://api.os20.nlsvgtr.nl/auth/project/1/me'
+          let url = `${process.env.API_URL}/auth/project/1/me`
           let response = await fetch(url, {
             headers: { Authorization: token.accessToken },
           })
