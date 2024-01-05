@@ -17,7 +17,7 @@ export default function useResource(props) {
       self.mutate({ projectId, resourceId }, 'resource.delete', resource, { action: 'delete' });
     }
     resource.submitLike = function(vote) {
-      self.mutate({ projectId, resourceId }, 'resource.submitLike', vote, { action: 'submitLike', revalidate: true });
+      self.mutate({ projectId, resourceId }, 'resource.submitLike', vote, { action: 'submitLike', revalidate: true, populateCache: false });
     }
 
   return [ resource, error, isLoading ];

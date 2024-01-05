@@ -41,6 +41,7 @@ You now have four servers, running on localhost:31410, 31430, 31450 and 31470. T
 [http://localhost:31430/auth/code/login?clientId=uniquecode](http://localhost:31430/auth/code/login?clientId=uniquecode)  
 [http://localhost:31450/image/forum.romanum.06.webp](http://localhost:31450/image/forum.romanum.06.webp)  
 [http://localhost:31470](http://localhost:31470)
+[http://localhost:31490](http://localhost:31490)
 
 You are now done. Everything below this line is extra information for the incurably curious.
 
@@ -129,8 +130,9 @@ Six docker containers have been created:
 - openstad-mailhog
 - openstad-api-server
 - openstad-auth-server
-- openstad-image-serve
-- openstad-admin-serve
+- openstad-image-server
+- openstad-admin-server
+- openstad-cms-server
 
 ### Initial data
 

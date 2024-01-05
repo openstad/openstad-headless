@@ -1,0 +1,61 @@
+.timeline-period,
+.timeline-day {
+  padding: 10px 20px 20px 50px;
+  position: relative;
+  margin-bottom: 10px;
+  font-size: 16px;
+  background: #f3f3f3;
+}
+
+.timeline-period ul,
+.timeline-day ul {
+  padding: 0px 15px;
+}
+
+.timeline-period h3,
+.timeline-day h3 {
+  margin: 10px 0;
+}
+
+.timeline-period::before,
+.timeline-day::before {
+  content: '';
+  width: 10px;
+  background: #323333;
+  left: 15px;
+  top: -10px;
+  bottom: 0;
+  position: absolute;
+}
+
+.timeline-period:first-child::before,
+.timeline-day:first-child::before {
+  top: 0;
+}
+
+.timeline-period::after,
+.timeline-day::after {
+  top: 50%;
+  position: absolute;
+  content: '';
+  background-repeat: no-repeat;
+  transform: translateY(-50%);
+}
+
+.timeline-period::after {
+  background-image: url('/modules/openstad-timeline-widget/img/period.svg');
+  width: 22px;
+  height: 52px;
+  left: 10px;
+}
+
+.timeline-day::after {
+  background-image: url('/modules/openstad-timeline-widget/img/round-empty.svg');
+  width: 30px;
+  height: 30px;
+  left: 5px;
+}
+
+.timeline-link-list {
+  margin-top: 15px;
+}
