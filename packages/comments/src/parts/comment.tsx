@@ -48,6 +48,7 @@ function Comment({
   function canReply() {
     if (args.isClosed) return false;
     if (hasRole(currentUser, 'moderator')) return true;
+    if (!args.isReplyingEnabled) return false; // widget setting
     return args.comment.can && args.comment.can.reply;
   }
 
