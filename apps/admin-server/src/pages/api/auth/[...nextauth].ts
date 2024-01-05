@@ -27,21 +27,27 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async session({ session, token }) {
+
       // each request: validate jwt
       if ( token?.accessToken ) {
-        console.log('Validate');
         try {
           let url = `${process.env.API_URL}/auth/project/1/me`
           let response = await fetch(url, {
-            headers: { Authorization: token.accessToken },
+            headers: { Authorization: `Bearer ${token.accessToken}` },
           })
           if (!response.ok) {
-            console.log(response);
             throw new Error('TokenValidationFailed')
           }
 
           let result = await response.json();
-          if (result.id) return token;
+          if (!result.id) {
+            return {
+              ...session,
+              error: 'TokenValidationFailed',
+            };
+          }
+
+          return session;
 
         } catch(err) {
           console.log(err);

@@ -1,18 +1,19 @@
 import { Inter } from 'next/font/google';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export default function Home() {
   const { data } = useSession();
 
-  // dit werkt niet??
+  // dit moet in elke pagina, niet alleen de home
   useEffect(() => {
     console.log('----------');
-    console.log(session.error);
-    console.log(session);
-    if (session?.error === "TokenFetchError" || session?.error === "TokenValidationFailed") {
+    console.log(data?.error);
+    console.log(data);
+    if (data?.error === "TokenFetchError" || data?.error === "TokenValidationFailed") {
       signIn(); // Force sign in to hopefully resolve error
     }
   }, [data]);
