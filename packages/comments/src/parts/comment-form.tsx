@@ -62,33 +62,38 @@ function CommentForm({
               Inloggen
             </Button>
           </Banner>
-        ) : null}
+        ) : (
+          <>
+            {!hasRole(currentUser, 'moderator') && !props.isReplyingEnabled ? (
+              <Banner className="big">
+                <Spacer size={2} />
+                <h6>
+                  De reactiemogelijkheid is gesloten, u kunt niet meer reageren
+                </h6>
+                <Spacer size={2} />
+              </Banner>
+            ) : null}
 
-        {hasRole(currentUser, 'member') &&
-        !hasRole(currentUser, 'admin') &&
-        !props.isReplyingEnabled ? (
-          <Banner className="big">
-            <Spacer size={2} />
-            <h6>
-              De reactiemogelijkheid is gesloten, u kunt niet meer reageren
-            </h6>
-            <Spacer size={2} />
-          </Banner>
-        ) : null}
-
-        {hasRole(currentUser, 'admin') && !props.isReplyingEnabled ? (
-          <Banner>
-            <Spacer size={2} />
-            <h6>
-              Reageren is gesloten, maar je kunt nog reageren vanwege je rol als
-              admin
-            </h6>
-            <Spacer size={2} />
-          </Banner>
-        ) : null}
+            {hasRole(currentUser, 'moderator') &&
+            !props.isReplyingEnabled &&
+            !props.hideReplyAsAdmin ? (
+              <>
+                <Banner>
+                  <Spacer size={2} />
+                  <h6>
+                    Reageren is gesloten, maar je kunt nog reageren vanwege je
+                    rol als moderator
+                  </h6>
+                  <Spacer size={2} />
+                </Banner>
+                <Spacer size={2} />
+              </>
+            ) : null}
+          </>
+        )}
 
         {(hasRole(currentUser, 'member') && props.isReplyingEnabled) ||
-        hasRole(currentUser, 'admin') ? (
+        hasRole(currentUser, 'moderator') ? (
           <>
             <Input
               className="comment-description-inputfield"

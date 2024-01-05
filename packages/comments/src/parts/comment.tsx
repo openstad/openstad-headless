@@ -16,6 +16,7 @@ function Comment({
   requiredUserRole = 'member',
   userNameFields = ['displayName'],
   showDateSeperately = false,
+  hideReplyAsAdmin = false,
   ...props
 }: CommentPropsType) {
   const args = {
@@ -127,7 +128,7 @@ function Comment({
                     : 'ri-thumb-up-line'
                 }
                 onClick={() => args.comment.submitLike()}>
-                Mee eens ({args.comment.yes || 0})
+                Mee eens (<span>{args.comment.yes || 0}</span>)
               </GhostButton>
             ) : (
               <GhostButton disabled icon="ri-thumb-up-line">
@@ -161,6 +162,7 @@ function Comment({
           <div className="input-container">
             <CommentForm
               {...args}
+              hideReplyAsAdmin={true}
               comment={{ parentId: args.comment.id }}
               submitComment={(e) => {
                 args.submitComment(e);

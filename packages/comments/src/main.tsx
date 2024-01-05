@@ -27,6 +27,7 @@ const config: CommentsWidgetProps = {
   isReplyingEnabled: import.meta.env.VITE_IS_REPLYING_ENABLED != 'false',
   requiredUserRole: import.meta.env.VITE_REQUIRED_USER_ROLE,
   userNameFields: eval(import.meta.env.VITE_USER_NAME_FIELDS),
+  isClosed: import.meta.env.VITE_VOTING_IS_CLOSED,
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

@@ -11,4 +11,5 @@ export type CommentProps = {
   requiredUserRole: string;
   userNameFields: Array<string>;
   showDateSeperately?: boolean;
+  hideReplyAsAdmin?: boolean;
 };

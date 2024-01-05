@@ -19,7 +19,8 @@
     gap: .5rem;
     border: none;
     background-color: var(--osc-background);
-    color: var(--osc-foreground)
+    color: var(--osc-foreground);
+    cursor: pointer;
 }
 
 .osc button.ghost.active i{
