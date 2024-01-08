@@ -26,19 +26,54 @@ const formSchema = z.object({
   }),
 });
 
+const importFormSchema = z.object({
+  importedProjectName: z.string().min(6, {
+    message: 'Het project moet minimaal uit zes karakters bestaan!'
+  })
+})
+
 export default function CreateProject() {
-  const { createProject } = useProject()
+  const { createProject, importProject } = useProject()
+  const [file, setFile] = React.useState("")
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {},
   });
 
+  const importForm = useForm<z.infer<typeof importFormSchema>>({
+    resolver: zodResolver<any>(importFormSchema),
+    defaultValues: {}
+  })
+
+  function handleChange(e: any) {
+    const fileReader = new FileReader();
+    fileReader.readAsText(e.target.files[0], "UTF-8");
+    fileReader.onload = e => {
+      setFile(e.target?.result)
+    }
+  }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const project = await createProject(values.projectName);
     if (project) {
-      toast.success('Widget aangemaakt!');
+      toast.success('Project aangemaakt!');
       router.push(`/projects/${project.id}/widgets`);
+    }
+  }
+
+  async function onImport(values: z.infer<typeof importFormSchema>) {
+    try {
+      const data = JSON.parse(file)
+      const project = await importProject(values.importedProjectName, data.projectData.title, data.projectData.config, data.projectData.emailConfig);
+      if (project) {
+        toast.success('Project aangemaakt!');
+        router.push(`/projects/${project.id}/widgets`);
+      } else {
+        toast.error('De file die geüpload is bevat onjuiste data.')
+      }
+    } catch (e) {
+      toast.error('Alleen JSON files worden geaccepteerd!');
     }
   }
 
@@ -52,13 +87,13 @@ export default function CreateProject() {
             url: '/projects',
           },
         ]}>
-        <div className="p-6 bg-white rounded-md">
-          <Form {...form}>
+        <div className="container py-6">
+          <Form {...form} className="p-6 bg-white rounded-md">
             <Heading size="xl">Project toevoegen</Heading>
             <Separator className="my-4" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+              className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="projectName"
@@ -75,8 +110,35 @@ export default function CreateProject() {
               <Button
                 variant="default"
                 type="submit"
-                className="w-fit col-span-full">
+                className="w-fit mt-4">
                 Opslaan
+              </Button>
+            </form>
+          </Form>
+          <Form {...importForm} className="p-6 bg-white rounded-md mt-4">
+            <Heading size="xl" className="mb-4">
+              Importeer project
+            </Heading>
+            <Separator className="mb-4" />
+            <form
+              onSubmit={importForm.handleSubmit(onImport)}
+              className="lg:w-1/2 grid grid-cols-2 gap-4">
+              <FormField
+                control={importForm.control}
+                name="importedProjectName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project naam</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Naam" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Input type='file' onChange={handleChange} />
+              <Button variant="default" type="submit" className="w-fit mt-4">
+                Importeren
               </Button>
             </form>
           </Form>
