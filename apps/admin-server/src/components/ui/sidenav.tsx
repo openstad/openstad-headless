@@ -26,6 +26,7 @@ export function Sidenav({
   }, [router]);
 
   useEffect(() => {
+    console.log(data?.error)
     if (data?.error === "TokenFetchError" || data?.error === "TokenValidationFailed") {
       signOut(); // Force sign in to hopefully resolve error
     }
