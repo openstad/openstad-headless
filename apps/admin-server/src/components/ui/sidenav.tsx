@@ -73,8 +73,7 @@ export function Sidenav({
             className={cn(
               'w-full flex flex-row justify-start',
               narrow ? 'p-0 h-10 w-10 justify-center' : null
-            )}
-            onClick={() => {}}>
+            )}>
             <Users
               size="20"
               className={
@@ -90,8 +89,7 @@ export function Sidenav({
             className={cn(
               'w-full flex flex-row justify-start',
               narrow ? 'p-0 h-10 w-10 justify-center' : null
-            )}
-            onClick={() => {}}>
+            )}>
             <AlertTriangle
               size="20"
               className={
