@@ -1,6 +1,6 @@
 import { Input, SecondaryButton, Select } from '@openstad-headless/ui/src';
 import React, { useState, useEffect, useRef, createRef } from 'react';
-import DataStore from '../../../components/src/data-store';
+import DataStore from '@openstad-headless/data-store/src';
 import { useDebounce } from 'rooks';
 import { MultiSelectTagFilter } from './multiselect-tag-filter';
 import { SelectTagFilter } from './select-tag-filter';
@@ -18,27 +18,34 @@ type Filter = {
 
 type Props = {
   resources: any;
-  dataStore: DataStore;
   onUpdateFilter?: (filter: Filter) => void;
 } & ResourceOverviewWidgetProps;
 
 export function Filters({
   resources,
-  dataStore,
   sorting = [],
   tagGroups = [],
 
   onUpdateFilter,
   ...props
 }: Props) {
-  const defaultFilter = { tags: {}, search: { text: '' }, sort: '' };
+  const dataStore = new DataStore({
+    projectId: props.projectId,
+    config: { api: props.api },
+  });
+
+  const defaultFilter: {
+    tags: { [key: string]: any };
+    search: { text: string };
+    sort: string;
+  } = { tags: {}, search: { text: '' }, sort: '' };
   tagGroups.forEach((tGroup) => {
     defaultFilter.tags[tGroup.type] = null;
   });
 
   console.log({ tagGroups });
   const [filter, setFilter] = useState(defaultFilter);
-  const [selectedOptions, setSelected] = useState<{}>({});
+  const [selectedOptions, setSelected] = useState<{ [key: string]: any }>({});
 
   // Standard and dynamic refs used for resetting
   const searchRef = useRef<HTMLInputElement>(null);

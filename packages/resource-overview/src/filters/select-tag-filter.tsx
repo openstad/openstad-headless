@@ -1,12 +1,12 @@
 import { Select } from '@openstad-headless/ui/src';
 import React, { forwardRef } from 'react';
-import DataStore from '../../../components/src/data-store';
+import DataStore from '@openstad-headless/data-store/src';
 import { BaseProps } from '../../../types/base-props';
 
 //Todo correctly type resources. Will be possible when the datastore is correctly typed
 
 type Props = {
-  dataStore: DataStore;
+  dataStore: typeof DataStore;
   tagType: string;
   placeholder?: string;
   onUpdateFilter?: (filter: string) => void;

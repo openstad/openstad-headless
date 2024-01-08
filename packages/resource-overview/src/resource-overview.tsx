@@ -140,7 +140,6 @@ function ResourceOverview({
           <Filters
             {...props}
             projectId={props.projectId}
-            dataStore={datastore}
             resources={resources}
             onUpdateFilter={resources.filter}
           />

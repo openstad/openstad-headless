@@ -26,4 +26,4 @@ type Comment = {
   };
 }>;
 
-export { Comment as default };
+export default Comment;
