@@ -16,7 +16,7 @@
  }
  
  p.reaction-name { 
-   color: var(--foreground, black);
+   color: var(--osc-foreground, black);
  }
  .comment-item-header {
    display: flex;
@@ -24,22 +24,42 @@
  }
  
  .comment-item-footer {
-   margin-top: 1rem;
    display: flex;
    gap: 1rem;
    align-items: center;
  }
  
+ .reaction-name {
+  margin: 0px;
+  padding: 0px;
+ }
+
  .reaction-container {
-   margin-top: 1rem;
-   padding-left: 1rem;
-   border-left: 1px solid var(--border);
+   padding-left: 1.5rem;
+   border-left: 1px solid var(--osc-border);
+ }
+
+ .osc p.comment-reaction-text {
+  font-size: .75rem;
+  margin: 0;
+  overflow-wrap: break-word;
+ }
+
+ .osc p.comment-reaction-strong-text {
+  font-size: .75rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--osc-foreground)
  }
 
  .reaction-input-container {
     text-align: right;
  }
 
+ .comment-description-inputfield {
+  padding: .75rem;
+ }
+
  hr {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--osc-border);
  }
