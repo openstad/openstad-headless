@@ -28,13 +28,13 @@ const formSchema = z.object({
 
 const importFormSchema = z.object({
   importedProjectName: z.string().min(6, {
-    message: 'Het project moet minimaal uit zes karakters bestaan!'
-  })
-})
+    message: 'Het project moet minimaal uit zes karakters bestaan!',
+  }),
+});
 
 export default function CreateProject() {
-  const { createProject, importProject } = useProject()
-  const [file, setFile] = React.useState("")
+  const { createProject, importProject } = useProject();
+  const [file, setFile] = React.useState('');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -43,15 +43,17 @@ export default function CreateProject() {
 
   const importForm = useForm<z.infer<typeof importFormSchema>>({
     resolver: zodResolver<any>(importFormSchema),
-    defaultValues: {}
-  })
+    defaultValues: {},
+  });
 
   function handleChange(e: any) {
     const fileReader = new FileReader();
-    fileReader.readAsText(e.target.files[0], "UTF-8");
-    fileReader.onload = e => {
-      setFile(e.target?.result)
-    }
+    fileReader.readAsText(e.target.files[0], 'UTF-8');
+    fileReader.onload = (e) => {
+      if (typeof e?.target?.result === 'string') {
+        setFile(e.target?.result);
+      }
+    };
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -64,13 +66,18 @@ export default function CreateProject() {
 
   async function onImport(values: z.infer<typeof importFormSchema>) {
     try {
-      const data = JSON.parse(file)
-      const project = await importProject(values.importedProjectName, data.projectData.title, data.projectData.config, data.projectData.emailConfig);
+      const data = JSON.parse(file);
+      const project = await importProject(
+        values.importedProjectName,
+        data.projectData.title,
+        data.projectData.config,
+        data.projectData.emailConfig
+      );
       if (project) {
         toast.success('Project aangemaakt!');
         router.push(`/projects/${project.id}/widgets`);
       } else {
-        toast.error('De file die geüpload is bevat onjuiste data.')
+        toast.error('De file die geüpload is bevat onjuiste data.');
       }
     } catch (e) {
       toast.error('Alleen JSON files worden geaccepteerd!');
@@ -107,10 +114,7 @@ export default function CreateProject() {
                   </FormItem>
                 )}
               />
-              <Button
-                variant="default"
-                type="submit"
-                className="w-fit mt-4">
+              <Button variant="default" type="submit" className="w-fit mt-4">
                 Opslaan
               </Button>
             </form>
@@ -136,7 +140,7 @@ export default function CreateProject() {
                   </FormItem>
                 )}
               />
-              <Input type='file' onChange={handleChange} />
+              <Input type="file" onChange={handleChange} />
               <Button variant="default" type="submit" className="w-fit mt-4">
                 Importeren
               </Button>

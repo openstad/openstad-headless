@@ -1,4 +1,4 @@
-import SessionStorage from '../../../lib/session-storage.js';
+import { SessionStorage } from '../../../lib/session-storage';
 import useSWR from 'swr';
 
 export default function useCurrentUser(props) {

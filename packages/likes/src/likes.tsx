@@ -41,7 +41,7 @@ function Likes({
     config: { api: props.api },
   });
 
-  const session = new SessionStorage(props);
+  const session = new SessionStorage({ projectId: props.projectId });
 
   const [currentUser] = datastore.useCurrentUser(props);
   const [resource] = datastore.useResource({
@@ -63,13 +63,16 @@ function Likes({
     let pending = session.get('osc-resource-vote-pending');
     if (pending && pending[resource.id]) {
       if (currentUser && currentUser.role) {
-        doVote(null, pending[resource.id])
+        doVote(null, pending[resource.id]);
         session.remove('osc-resource-vote-pending');
       }
     }
   }, [resource, currentUser]);
 
-  async function doVote(e, value) {
+  async function doVote(
+    e: React.MouseEvent<HTMLElement, MouseEvent> | null,
+    value: string
+  ) {
     if (e) e.stopPropagation();
 
     if (isBusy) return;
@@ -89,7 +92,7 @@ function Likes({
       return (document.location.href = props?.login?.url);
     }
 
-    let change = {};
+    let change: { [key: string]: any } = {};
     if (resource.userVote) change[resource.userVote.opinion] = -1;
 
     await resource.submitLike({

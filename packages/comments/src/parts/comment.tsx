@@ -9,7 +9,15 @@ import { DropDownMenu } from '@openstad-headless/ui/src';
 import hasRole from '../../../lib/has-role';
 
 function Comment({
-  comment = {},
+  comment = {
+    id: 0,
+    delete(arg) {
+      throw new Error('Not implemented');
+    },
+    submitLike() {
+      throw new Error('Not implemented');
+    },
+  },
   isClosed = false,
   isVotingEnabled = true,
   isReplyingEnabled = true,
@@ -81,8 +89,8 @@ function Comment({
               {
                 label: 'Verwijderen',
                 onClick: () => {
-                  if (confirm('Weet u het zeker?'))
-                    args.comment.delete(args.id);
+                  if (args.comment && confirm('Weet u het zeker?'))
+                    args.comment.delete(args.comment.id);
                 },
               },
             ]}>
@@ -143,7 +151,7 @@ function Comment({
           <div className="input-container">
             <CommentForm
               {...args}
-              comment={{ parentId: args.comment.id }}
+              comment={{ ...args.comment }}
               submitComment={(e) => {
                 args.submitComment(e);
                 toggleReplyForm();
