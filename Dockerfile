@@ -50,7 +50,7 @@ ENV WORKSPACE apps/${APP}
 WORKDIR /opt/openstad-headless
 
 # copy files
-COPY --from=prepare-production --chown=node:node /opt/openstad-headless .
+COPY --from=prepare-production --chown=node:node /opt/openstad-headless/apps/${APP} ./apps/${APP}
 
 USER node
 
@@ -67,7 +67,7 @@ ENV WORKSPACE apps/${APP}
 WORKDIR /opt/openstad-headless
 
 # copy files
-COPY --from=prepare-production --chown=node:node /opt/openstad-headless .
+COPY --from=prepare-production --chown=node:node /opt/openstad-headless/packages ./packages
 
 USER node
 

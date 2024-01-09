@@ -2,7 +2,7 @@ version: '3.4'
 services:
   openstad-api-server:
     build:
-      target: release
+      target: release-with-packages
 
   openstad-auth-server:
     build:
