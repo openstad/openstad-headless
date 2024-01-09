@@ -18,7 +18,7 @@ COPY --chown=node:node package*.json .
 COPY --chown=node:node packages/ ./packages
 COPY --chown=node:node apps/$APP ./apps/$APP
 
-RUN npm install --prefix=$WORKSPACE
+RUN npm install -w $WORKSPACE
 
 RUN npm run build-packages --if-present --prefix=$WORKSPACE
 
@@ -50,7 +50,7 @@ ENV WORKSPACE apps/${APP}
 WORKDIR /opt/openstad-headless
 
 # copy files
-COPY --from=prepare-production --chown=node:node /opt/openstad-headless/apps/${APP} ./apps/${APP}
+COPY --from=prepare-production --chown=node:node /opt/openstad-headless .
 
 USER node
 
@@ -67,7 +67,7 @@ ENV WORKSPACE apps/${APP}
 WORKDIR /opt/openstad-headless
 
 # copy files
-COPY --from=prepare-production --chown=node:node /opt/openstad-headless/packages ./packages
+COPY --from=prepare-production --chown=node:node /opt/openstad-headless .
 
 USER node
 

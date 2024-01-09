@@ -12,7 +12,7 @@ import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CommentsWidgetProps } from '@openstad/comments/src/comments';
+// import type { CommentsWidgetProps } from '@openstad/comments/src/comments';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -22,7 +22,7 @@ const formSchema = z.object({
 });
 
 export default function ArgumentsList(
-  props: CommentsWidgetProps & EditFieldProps<CommentsWidgetProps>
+  props: any & EditFieldProps<any>
 ) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),

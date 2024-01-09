@@ -11,7 +11,7 @@ import ArgumentsList from './list';
 import ArgumentsForm from './form';
 import { useRouter } from 'next/router';
 import WidgetPreview from '@/components/widget-preview';
-import { CommentsWidgetProps } from '@openstad/comments/src/comments';
+// import { CommentsWidgetProps } from '@openstad/comments/src/comments';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 
@@ -22,7 +22,7 @@ export default function WidgetArguments() {
 
   const { data: widget, updateConfig } = useWidgetConfig();
   const { previewConfig, updatePreview } =
-    useWidgetPreview<CommentsWidgetProps>({
+    useWidgetPreview<any>({
       projectId,
       resourceId: '2',
       api: {
@@ -61,10 +61,10 @@ export default function WidgetArguments() {
               {widget?.config ? (
                 <ArgumentsGeneral
                   {...widget?.config}
-                  updateConfig={(config) =>
+                  updateConfig={(config:any) =>
                     updateConfig({ ...widget.config, ...config })
                   }
-                  onFieldChanged={(key, value) => {
+                  onFieldChanged={(key:string, value:any) => {
                     if (previewConfig) {
                       updatePreview({
                         ...previewConfig,
@@ -79,10 +79,10 @@ export default function WidgetArguments() {
               {widget?.config ? (
                 <ArgumentsList
                   {...widget?.config}
-                  updateConfig={(config) =>
+                  updateConfig={(config:any) =>
                     updateConfig({ ...widget.config, ...config })
                   }
-                  onFieldChanged={(key, value) => {
+                  onFieldChanged={(key:any, value:string) => {
                     if (previewConfig) {
                       updatePreview({
                         ...previewConfig,
@@ -97,10 +97,10 @@ export default function WidgetArguments() {
               {widget?.config ? (
                 <ArgumentsForm
                   {...widget?.config}
-                  updateConfig={(config) =>
+                  updateConfig={(config:any) =>
                     updateConfig({ ...widget.config, ...config })
                   }
-                  onFieldChanged={(key, value) => {
+                  onFieldChanged={(key:string, value:any) => {
                     if (previewConfig) {
                       updatePreview({
                         ...previewConfig,

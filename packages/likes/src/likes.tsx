@@ -1,8 +1,8 @@
 import 'remixicon/fonts/remixicon.css';
 import { ProgressBar } from '@openstad-headless/ui/src';
 import { SessionStorage } from '@openstad-headless/lib/session-storage';
-import loadWidget from '@openstad-headless/lib/load-widget';
-import { hasRole } from '@openstad-headless/lib/has-role';
+import {loadWidget} from '@openstad-headless/lib/load-widget';
+import { hasRole } from '@openstad-headless/lib';
 import DataStore from '@openstad-headless/data-store/src';
 import React, { useState, useEffect } from 'react';
 import './likes.css';

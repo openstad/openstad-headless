@@ -8,7 +8,7 @@ import { Image } from '@openstad-headless/ui/src';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 import { Filters } from './filters/filters';
-import loadWidget from '@openstad-headless/lib/load-widget';
+import {loadWidget} from '@openstad-headless/lib/load-widget';
 import { elipsize } from '../../lib/ui-helpers';
 
 export type ResourceOverviewWidgetProps = BaseProps &
