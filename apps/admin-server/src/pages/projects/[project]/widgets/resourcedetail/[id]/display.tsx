@@ -22,17 +22,10 @@ const formSchema = z.object({
   displayTitle: z.boolean(),
   titleMaxLength: z.coerce.number(),
   displayDescription: z.boolean(),
-  descriptionMaxLength: z.coerce.number(),
   displaySummary: z.boolean(),
-  summaryMaxLength: z.coerce.number(),
-
-  displayArguments: z.boolean(),
-  displayVote: z.boolean(),
-  // displayRanking: z.boolean(),
-  // displayLabel: z.boolean(),
-  // displayShareButtons: z.boolean(),
-  // displayEditLink: z.boolean(),
-  // displayCaption: z.boolean(),
+  displayUser: z.boolean(),
+  displayDate: z.boolean(),
+  displayLocation: z.boolean(),
 });
 
 export default function WidgetResourceDetailDisplay(
@@ -52,16 +45,10 @@ export default function WidgetResourceDetailDisplay(
       displayTitle: props?.displayTitle || false,
       titleMaxLength: props?.titleMaxLength || 20,
       displayDescription: props?.displayDescription || false,
-      descriptionMaxLength: props?.descriptionMaxLength || 20,
       displaySummary: props?.displaySummary || false,
-      summaryMaxLength: props?.summaryMaxLength || 30,
-      displayArguments: props?.displayArguments || false,
-      displayVote: props?.displayVote || false,
-      // displayRanking: props?.displayRanking || false,
-      // displayLabel: props?.displayLabel || false,
-      // displayShareButtons: props?.displayShareButtons || false,
-      // displayEditLink: props?.displayEditLink || false,
-      // displayCaption: props?.displayCaption || false,
+      displayUser: props?.displayUser || false,
+      displayDate: props?.displayDate || false,
+      displayLocation: props?.displayLocation || false,
     },
   });
 
@@ -109,27 +96,49 @@ export default function WidgetResourceDetailDisplay(
           />
           {/* <FormField
             control={form.control}
-            name="displayRanking"
+            name="displayTags"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Ranking weergeven</FormLabel>
+                <FormLabel>Tags weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
           /> */}
-          {/* <FormField
+          <FormField
             control={form.control}
-            name="displayLabel"
+            name="displayUser"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Label weergeven</FormLabel>
+                <FormLabel>Gebruiker weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
-          /> */}
-          {/* <FormField
+          />
+          <FormField
+            control={form.control}
+            name="displayDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Publicatiedatum weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="displayLocation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Plaats weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
             control={form.control}
             name="displaySummary"
             render={({ field }) => (
@@ -139,7 +148,7 @@ export default function WidgetResourceDetailDisplay(
                 <FormMessage />
               </FormItem>
             )}
-          /> */}
+          />
 
           <FormField
             control={form.control}
@@ -153,110 +162,6 @@ export default function WidgetResourceDetailDisplay(
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="descriptionMaxLength"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Hoeveelheid karakters van de beschrijving die getoond wordt
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="displaySummary"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Samenvatting weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="summaryMaxLength"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Hoeveelheid karakters van de samenvatting die getoond wordt
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="displayArguments"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Hoeveelheid aan argumenten weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="displayVote"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Hoeveelheid stemmen weergeven (voor Gridder)
-                </FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* <FormField
-            control={form.control}
-            name="displayShareButtons"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Deel knoppen weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
-          {/* <FormField
-            control={form.control}
-            name="displayEditLink"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Aanpas-link weergeven voor moderators</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

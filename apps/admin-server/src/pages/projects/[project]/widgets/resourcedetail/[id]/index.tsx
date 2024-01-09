@@ -9,10 +9,6 @@ import {
 import WidgetResourceDetailGeneral from './general';
 import WidgetResourceDetailDisplay from './display';
 import WidgetResourceDetailButton from './button';
-// import WidgetResourceDetailSorting from './sorting';
-// import WidgetResourceDetailPagination from './pagination';
-import WidgetResourceDetailSearch from './search';
-import WidgetResourceDetailTags from './tags';
 import WidgetResourceDetailInclude from './include';
 import WidgetResourceDetailInfo from './info';
 import { useRouter } from 'next/router';
@@ -21,18 +17,6 @@ import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import { ResourceDetailWidgetProps } from '@openstad/resource-detail/src/resource-detail';
 import WidgetPreview from '@/components/widget-preview';
 import useResources from '@/hooks/use-resources';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectSeparator,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import ResourceForm from '@/components/resource-form';
 
 export default function WidgetResourceDetail() {
   const router = useRouter();
@@ -91,13 +75,7 @@ export default function WidgetResourceDetail() {
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
-              {/* <TabsTrigger value="image">Afbeeldingen</TabsTrigger> */}
               <TabsTrigger value="display">Display</TabsTrigger>
-              {/* <TabsTrigger value="button">Knop teksten</TabsTrigger> */}
-              <TabsTrigger value="tags">Tags</TabsTrigger>
-              <TabsTrigger value="search">Zoeken</TabsTrigger>
-              {/* <TabsTrigger value="sorting">Sorteren</TabsTrigger>
-              <TabsTrigger value="pagination">Pagination</TabsTrigger> */}
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
               <TabsTrigger value="info">Info</TabsTrigger>
             </TabsList>
@@ -109,18 +87,6 @@ export default function WidgetResourceDetail() {
             </TabsContent>
             <TabsContent value="button" className="p-0">
               <WidgetResourceDetailButton {...totalPropPackage} />
-            </TabsContent>
-            {/* <TabsContent value="sorting" className="p-0">
-              <WidgetResourceDetailSorting {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="pagination" className="p-0">
-              <WidgetResourceDetailPagination {...totalPropPackage} />
-            </TabsContent> */}
-            <TabsContent value="search" className="p-0">
-              <WidgetResourceDetailSearch {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="tags" className="p-0">
-              <WidgetResourceDetailTags {...totalPropPackage} />
             </TabsContent>
             <TabsContent value="include" className="p-0">
               <WidgetResourceDetailInclude {...totalPropPackage} />

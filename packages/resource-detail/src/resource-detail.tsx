@@ -7,9 +7,11 @@ import { Spacer } from '@openstad-headless/ui/src';
 import { Image } from '@openstad-headless/ui/src';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
-import { Filters } from './filters/filters';
 import loadWidget from '@openstad-headless/lib/load-widget';
 import { elipsize } from '@openstad-headless/lib/ui-helpers';
+import format from 'date-fns/format';
+import { nl } from 'date-fns/locale';
+import { LikeWidgetProps, Likes } from '@openstad/likes/src/likes';
 
 export type ResourceDetailWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -21,29 +23,18 @@ export type ResourceDetailWidgetProps = BaseProps &
       props: ResourceDetailWidgetProps
     ) => React.JSX.Element;
     resourceId: string;
-    allowFiltering?: boolean;
     displayTitle?: boolean;
     titleMaxLength?: number;
-    displayRanking?: boolean;
     displayLabel?: boolean;
     displaySummary?: boolean;
-    summaryMaxLength?: number;
     displayDescription?: boolean;
-    descriptionMaxLength?: number;
-    displayArguments?: boolean;
-    displayVote?: boolean;
-    displayShareButtons?: boolean;
-    displayEditLink?: boolean;
+    displayUser?: boolean;
+    displayDate?: boolean;
+    displayLocation?: boolean;
     displayCaption?: boolean;
-    summaryCharLength?: number;
-    displaySorting?: boolean;
-    defaultSorting?: string;
-
-    displaySearch?: boolean;
     textActiveSearch?: string;
     sorting: Array<{ value: string; label: string }>;
 
-    displayTagFilters?: boolean;
     tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     displayTagGroupName?: boolean;
   };
@@ -56,10 +47,10 @@ const defaultHeaderRenderer = (resources?: any) => {
       <Banner>
         <Spacer size={12} />
       </Banner>
-      <section className="osc-resource-detail-title-container">
+      {/* <section className="osc-resource-detail-title-container">
         <Spacer size={2} />
         <h4>Plannen</h4>
-      </section>
+      </section> */}
     </>
   );
 };
@@ -68,8 +59,11 @@ const defaultItemRenderer = (
   resource: any,
   props: ResourceDetailWidgetProps
 ) => {
+  const dateString = resource.publishDate;
+  const date = new Date(dateString);
+  const formattedDate = format(date, 'd MMMM yyyy', { locale: nl });
   return (
-    <article>
+    <article className="osc-resource-detail-content-items">
       <Image
         src={resource.images?.at(0)?.src || ''}
         onClick={() => console.log({ resource })}
@@ -81,36 +75,37 @@ const defaultItemRenderer = (
           </div>
         }
       />
-
+      {props.displayTitle && (
+        <h4>{elipsize(resource.title, props.titleMaxLength || 20)}</h4>
+      )}
       <div>
-        <Spacer size={1} />
-        {props.displayTitle ? (
-          <h6>{elipsize(resource.title, props.titleMaxLength || 20)}</h6>
-        ) : null}
-
-        {props.displaySummary ? (
-          <h6>{elipsize(resource.summary, props.summaryMaxLength || 20)}</h6>
-        ) : null}
-
-        {props.displayDescription ? (
+        {props.displayUser && (
+          <h5 className="osc-resource-detail-content-item-user">
+            {resource.userId}
+          </h5>
+        )}
+        {props.displayDate && (
+          <h6 className="osc-resource-detail-content-item-date">
+            {formattedDate}
+          </h6>
+        )}
+      </div>
+      <div>
+        {props.displaySummary && <h5>{resource.summary}</h5>}
+        {props.displayDescription && (
           <p className="osc-resource-detail-content-item-description">
-            {elipsize(resource.description, props.descriptionMaxLength || 30)}
+            {resource.description}
           </p>
-        ) : null}
+        )}
       </div>
-
-      <div className="osc-resource-detail-content-item-footer">
-        {props.displayVote ? (
-          <>
-            <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} />
-            <Icon icon="ri-thumb-down-line" variant="big" text={resource.yes} />
-          </>
-        ) : null}
-
-        {props.displayArguments ? (
-          <Icon icon="ri-message-line" variant="big" text="0" />
-        ) : null}
-      </div>
+      {props.displayLocation && (
+        <>
+          <h4>Plaats</h4>
+          <p className="osc-resource-detail-content-item-location">
+            {resource.location.toString()}
+          </p>
+        </>
+      )}
     </article>
   );
 };
@@ -118,7 +113,6 @@ const defaultItemRenderer = (
 function ResourceDetail({
   renderHeader = defaultHeaderRenderer,
   renderItem = defaultItemRenderer,
-  allowFiltering = true,
   ...props
 }: ResourceDetailWidgetProps) {
   const datastore = new DataStore({
@@ -136,29 +130,20 @@ function ResourceDetail({
       {renderHeader()}
 
       <Spacer size={2} />
-
-      <section
-        className={`osc-resource-detail-content ${
-          !allowFiltering ? 'full' : ''
-        }`}>
-        {allowFiltering && datastore ? (
-          <Filters
-            {...props}
-            projectId={props.projectId}
-            dataStore={datastore}
-            resources={resources}
-            onUpdateFilter={resources.filter}
-          />
-        ) : null}
-        <section className="osc-resource-detail-resource-collection">
+      <section className="osc-resource-detail-container">
+        <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
           {resource ? (
-            <React.Fragment key={`resource-item-${resource.title}`}>
-              {renderItem(resource, props)}
-            </React.Fragment>
+            <React.Fragment>{renderItem(resource, props)}</React.Fragment>
           ) : (
             <span>resource niet gevonden..</span>
           )}
         </section>
+        <section className="osc-resource-detail-content">
+          Like widget komt hier
+        </section>
+      </section>
+      <section className="osc-resource-detail-container">
+        Argumenten widget komt hier
       </section>
     </div>
   );
