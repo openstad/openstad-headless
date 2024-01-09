@@ -1,9 +1,9 @@
 import React from 'react';
 import './index.css';
 import { useState } from 'react';
+import { Banner } from '@openstad-headless/ui/src';
 import DataStore from '@openstad-headless/data-store/src';
 import { Spacer } from '@openstad-headless/ui/src';
-import { Banner } from '@openstad-headless/ui/src';
 import Comment from './parts/comment.js';
 import CommentForm from './parts/comment-form.js';
 import { CommentPropsType } from './types/index';
