@@ -6,17 +6,17 @@ const roles = {
   anonymous: ['anonymous', 'all'],
   all: ['all'],   // special
   owner: null, // special
-}
+} as const
 
-function hasRole(user, minRoles, ownerId) {
+function hasRole(user:any, minRoles:any, ownerId?:any) {
 
   minRoles = minRoles || 'admin'; // admin can do anything
   if (!Array.isArray(minRoles)) minRoles = [minRoles];
 
-  let userRole = user && user.role;
+  let userRole:keyof typeof roles = user && user.role;
 
-  let valid = minRoles.find( minRole => {
-    return roles[userRole] && roles[userRole].indexOf(minRole) != -1
+  let valid = minRoles.find( (minRole:any) => {
+    return roles[userRole] && roles[userRole]?.indexOf(minRole) != -1
   });
 
   if (minRoles.includes('owner') && ownerId) {

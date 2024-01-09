@@ -11,7 +11,7 @@ import ArgumentsList from './list';
 import ArgumentsForm from './form';
 import { useRouter } from 'next/router';
 import WidgetPreview from '@/components/widget-preview';
-import { CommentsWidgetProps } from '@openstad/comments/src/comments';
+import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 
