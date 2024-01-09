@@ -38,7 +38,8 @@ CMD ["npm", "run", "dev", "--prefix=${WORKSPACE}"]
 FROM builder as prepare-production
 ARG APP
 ENV WORKSPACE apps/${APP}
-RUN npm --prefix=apps/${APP} prune --production
+RUN npm --prefix=apps/${APP} run build --if-present && \
+    npm --prefix=apps/${APP} prune --production
 
 # Release image
 FROM node:18-slim as release
