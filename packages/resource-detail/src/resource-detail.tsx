@@ -11,18 +11,18 @@ import loadWidget from '@openstad-headless/lib/load-widget';
 import { elipsize } from '@openstad-headless/lib/ui-helpers';
 import format from 'date-fns/format';
 import { nl } from 'date-fns/locale';
-import { LikeWidgetProps, Likes } from '@openstad/likes/src/likes';
 
 export type ResourceDetailWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
+    resourceId?: string;
   } & {
     renderHeader?: (resources?: Array<any>) => React.JSX.Element;
     renderItem?: (
       resource: any,
       props: ResourceDetailWidgetProps
     ) => React.JSX.Element;
-    resourceId: string;
+
     displayTitle?: boolean;
     titleMaxLength?: number;
     displayLabel?: boolean;
@@ -121,6 +121,7 @@ function ResourceDetail({
     config: { api: props.api },
   });
   const [resources] = datastore.useResources({ ...props });
+  console.log(props.resourceId);
   const resource = resources.find(
     (resource: any) => resource.id.toString() === props.resourceId
   );

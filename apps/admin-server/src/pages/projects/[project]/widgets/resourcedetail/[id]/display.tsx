@@ -94,17 +94,6 @@ export default function WidgetResourceDetailDisplay(
               </FormItem>
             )}
           />
-          {/* <FormField
-            control={form.control}
-            name="displayTags"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tags weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
           <FormField
             control={form.control}
             name="displayUser"
@@ -161,7 +150,6 @@ export default function WidgetResourceDetailDisplay(
               </FormItem>
             )}
           />
-
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

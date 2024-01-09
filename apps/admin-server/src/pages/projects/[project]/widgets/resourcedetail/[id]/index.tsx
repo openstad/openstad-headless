@@ -8,9 +8,6 @@ import {
 } from '../../../../../../components/ui/tabs';
 import WidgetResourceDetailGeneral from './general';
 import WidgetResourceDetailDisplay from './display';
-import WidgetResourceDetailButton from './button';
-import WidgetResourceDetailInclude from './include';
-import WidgetResourceDetailInfo from './info';
 import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
@@ -29,7 +26,7 @@ export default function WidgetResourceDetail() {
   const { previewConfig, updatePreview } =
     useWidgetPreview<ResourceDetailWidgetProps>({
       projectId,
-      resourceId: '11',
+      resourceId,
       api: {
         url: '/api/openstad',
       },
@@ -76,8 +73,6 @@ export default function WidgetResourceDetail() {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="display">Display</TabsTrigger>
-              <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
-              <TabsTrigger value="info">Info</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               <WidgetResourceDetailGeneral {...totalPropPackage} />
@@ -85,21 +80,11 @@ export default function WidgetResourceDetail() {
             <TabsContent value="display" className="p-0">
               <WidgetResourceDetailDisplay {...totalPropPackage} />
             </TabsContent>
-            <TabsContent value="button" className="p-0">
-              <WidgetResourceDetailButton {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="include" className="p-0">
-              <WidgetResourceDetailInclude {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="info" className="p-0">
-              <WidgetResourceDetailInfo {...totalPropPackage} />
-            </TabsContent>
           </Tabs>
 
           <div className="container py-6 mt-6 bg-white rounded-md">
             {previewConfig ? (
               <>
-                Preview config gevonden
                 <WidgetPreview
                   type="resourcedetail"
                   config={previewConfig}
