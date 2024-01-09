@@ -20,6 +20,7 @@ export type ResourceDetailWidgetProps = BaseProps &
       resource: any,
       props: ResourceDetailWidgetProps
     ) => React.JSX.Element;
+    resourceId: string;
     allowFiltering?: boolean;
     displayTitle?: boolean;
     titleMaxLength?: number;
@@ -55,7 +56,7 @@ const defaultHeaderRenderer = (resources?: any) => {
       <Banner>
         <Spacer size={12} />
       </Banner>
-      <section className="osc-resource-Detail-title-container">
+      <section className="osc-resource-detail-title-container">
         <Spacer size={2} />
         <h4>Plannen</h4>
       </section>
@@ -122,9 +123,13 @@ function ResourceDetail({
 }: ResourceDetailWidgetProps) {
   const datastore = new DataStore({
     projectId: props.projectId,
+    resourceId: props.resourceId,
     config: { api: props.api },
   });
   const [resources] = datastore.useResources({ ...props });
+  const resource = resources.find(
+    (resource: any) => resource.id.toString() === props.resourceId
+  );
 
   return (
     <div className="osc">
@@ -145,16 +150,14 @@ function ResourceDetail({
             onUpdateFilter={resources.filter}
           />
         ) : null}
-
         <section className="osc-resource-detail-resource-collection">
-          {resources &&
-            resources.map((resource: any) => {
-              return (
-                <React.Fragment key={`resource-item-${resource.title}`}>
-                  {renderItem(resource, props)}
-                </React.Fragment>
-              );
-            })}
+          {resource ? (
+            <React.Fragment key={`resource-item-${resource.title}`}>
+              {renderItem(resource, props)}
+            </React.Fragment>
+          ) : (
+            <span>resource niet gevonden..</span>
+          )}
         </section>
       </section>
     </div>

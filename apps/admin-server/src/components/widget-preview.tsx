@@ -9,12 +9,12 @@ type Props = {
     | 'likes'
     | 'comments'
     | 'resourceoverview'
+    | 'resourcedetail'
     | 'resourceform'
     | 'begrootmodule'
     | 'resourcesmap'
     | 'map'
-    | 'keuzewijzer'
-    | 'resource-detail';
+    | 'keuzewijzer';
   config?: any;
   projectId: string;
 };

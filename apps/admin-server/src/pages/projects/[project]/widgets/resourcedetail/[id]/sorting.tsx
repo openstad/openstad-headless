@@ -20,7 +20,7 @@ import { Heading } from '@/components/ui/typography';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
+import { ResourceDetailWidgetProps } from '@openstad/resource-detail/src/resource-detail';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -43,9 +43,8 @@ const formSchema = z.object({
     }),
 });
 
-export default function WidgetResourceOverviewSorting(
-  props: ResourceOverviewWidgetProps &
-    EditFieldProps<ResourceOverviewWidgetProps>
+export default function WidgetResourceDetailSorting(
+  props: ResourceDetailWidgetProps & EditFieldProps<ResourceDetailWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
 

@@ -25,7 +25,7 @@ const formSchema = z.object({
   labelDone: z.string(),
 });
 
-export default function WidgetResourceOverviewLabel() {
+export default function WidgetResourceDetailLabel() {
   type FormData = z.infer<typeof formSchema>;
   const category = 'label';
 

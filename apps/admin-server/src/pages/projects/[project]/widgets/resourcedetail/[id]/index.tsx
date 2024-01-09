@@ -20,17 +20,32 @@ import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import { ResourceDetailWidgetProps } from '@openstad/resource-detail/src/resource-detail';
 import WidgetPreview from '@/components/widget-preview';
+import useResources from '@/hooks/use-resources';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import ResourceForm from '@/components/resource-form';
 
 export default function WidgetResourceDetail() {
   const router = useRouter();
   const id = router.query.id;
-  const projectId = router.query.project;
+  const projectId = router.query.project as string;
+  const resourceId = router.query.resourceId || '11';
+  const { update } = useResources(projectId as string);
 
   const { data: widget, updateConfig } = useWidgetConfig();
   const { previewConfig, updatePreview } =
     useWidgetPreview<ResourceDetailWidgetProps>({
       projectId,
-      resourceId: '2',
+      resourceId: '11',
       api: {
         url: '/api/openstad',
       },
@@ -81,8 +96,8 @@ export default function WidgetResourceDetail() {
               {/* <TabsTrigger value="button">Knop teksten</TabsTrigger> */}
               <TabsTrigger value="tags">Tags</TabsTrigger>
               <TabsTrigger value="search">Zoeken</TabsTrigger>
-              {/* <TabsTrigger value="sorting">Sorteren</TabsTrigger> */}
-              {/* <TabsTrigger value="pagination">Pagination</TabsTrigger> */}
+              {/* <TabsTrigger value="sorting">Sorteren</TabsTrigger>
+              <TabsTrigger value="pagination">Pagination</TabsTrigger> */}
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
               <TabsTrigger value="info">Info</TabsTrigger>
             </TabsList>
@@ -115,13 +130,16 @@ export default function WidgetResourceDetail() {
             </TabsContent>
           </Tabs>
 
-          <div className="py-6 mt-6 bg-white rounded-md">
+          <div className="container py-6 mt-6 bg-white rounded-md">
             {previewConfig ? (
-              <WidgetPreview
-                type="resource-detail"
-                config={previewConfig}
-                projectId={projectId as string}
-              />
+              <>
+                Preview config gevonden
+                <WidgetPreview
+                  type="resourcedetail"
+                  config={previewConfig}
+                  projectId={projectId as string}
+                />
+              </>
             ) : null}
           </div>
         </div>

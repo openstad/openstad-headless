@@ -21,7 +21,7 @@ const formSchema = z.object({
   textResults: z.string(),
 });
 
-export default function WidgetResourceOverviewPagination() {
+export default function WidgetResourceDetailPagination() {
   type FormData = z.infer<typeof formSchema>;
   const category = 'pagination';
 

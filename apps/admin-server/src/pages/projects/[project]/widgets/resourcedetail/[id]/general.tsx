@@ -21,6 +21,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { useRouter } from 'next/router';
+import useResources from '@/hooks/use-resources';
 
 const formSchema = z.object({
   resource: z.enum([
@@ -31,9 +33,16 @@ const formSchema = z.object({
     'submission',
   ]),
   displayType: z.enum(['cardrow', 'cardgrid', 'raw']),
+  resourceId: z.string(),
 });
 
 export default function WidgetResourceDetailGeneral() {
+  const router = useRouter();
+
+  const projectId = router.query.project as string;
+  const resourceId = router.query.resourceId || '11';
+  const { data, error, isLoading, remove } = useResources(projectId as string);
+
   type FormData = z.infer<typeof formSchema>;
   const category = 'general';
 
@@ -44,6 +53,7 @@ export default function WidgetResourceDetailGeneral() {
   } = useWidgetConfig();
 
   const defaults = () => ({
+    resourceId: widget?.config?.[category]?.resourceId || '11',
     resource: widget?.config?.[category]?.resource || 'resource',
     displayType: widget?.config?.[category]?.displayType || 'cardrow',
   });
@@ -73,6 +83,30 @@ export default function WidgetResourceDetailGeneral() {
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-1/2 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="resourceId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Resource {field.value}</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Resource" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {data?.map((resource: any) => (
+                      <SelectItem value={resource.id}>
+                        {resource.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="resource"
