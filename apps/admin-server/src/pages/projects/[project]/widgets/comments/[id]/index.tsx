@@ -47,7 +47,7 @@ export default function WidgetArguments() {
           },
           {
             name: 'Argumenten',
-            url: `/projects/${projectId}/widgets/arguments/${id}`,
+            url: `/projects/${projectId}/widgets/comments/${id}`,
           },
         ]}>
         <div className="container py-6">
@@ -58,9 +58,9 @@ export default function WidgetArguments() {
               <TabsTrigger value="form">Formulier</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
-              {widget?.config ? (
+              {previewConfig ? (
                 <ArgumentsGeneral
-                  {...widget?.config}
+                  {...previewConfig}
                   updateConfig={(config) =>
                     updateConfig({ ...widget.config, ...config })
                   }
@@ -76,9 +76,9 @@ export default function WidgetArguments() {
               ) : null}
             </TabsContent>
             <TabsContent value="list" className="p-0">
-              {widget?.config ? (
+              {previewConfig ? (
                 <ArgumentsList
-                  {...widget?.config}
+                  {...previewConfig}
                   updateConfig={(config) =>
                     updateConfig({ ...widget.config, ...config })
                   }
@@ -94,9 +94,9 @@ export default function WidgetArguments() {
               ) : null}
             </TabsContent>
             <TabsContent value="form" className="p-0">
-              {widget?.config ? (
+              {previewConfig ? (
                 <ArgumentsForm
-                  {...widget?.config}
+                  {...previewConfig}
                   updateConfig={(config) =>
                     updateConfig({ ...widget.config, ...config })
                   }
