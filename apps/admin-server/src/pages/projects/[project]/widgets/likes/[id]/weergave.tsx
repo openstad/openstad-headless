@@ -21,7 +21,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { LikeProps } from '@openstad/likes/src/likes';
+import { LikeProps, LikeWidgetProps } from '@openstad/likes/src/likes';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 
@@ -34,19 +34,11 @@ const formSchema = z.object({
 });
 type FormData = z.infer<typeof formSchema>;
 
-type Props = {
-  title: string;
-  variant: 'small' | 'medium' | 'large';
-  yesLabel: string;
-  noLabel: string;
-  hideCounters: boolean;
-};
-
-export default function LikesDisplay(props: Props & EditFieldProps<LikeProps>) {
+export default function LikesDisplay(props: LikeWidgetProps & EditFieldProps<LikeWidgetProps>) {
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   function onSubmit(values: FormData) {
-    props.updateConfig(values);
+    props.updateConfig({...props, ...values});
   }
 
   const form = useForm<FormData>({

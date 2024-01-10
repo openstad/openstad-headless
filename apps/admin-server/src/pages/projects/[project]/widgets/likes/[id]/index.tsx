@@ -20,9 +20,7 @@ export default function WidgetLikes() {
     resourceId: '2',
     api: {
       url: '/api/openstad',
-    },
-    title: 'Vind je dit een goed idee?',
-    variant: 'medium',
+    }
   });
 
   return (
@@ -50,9 +48,9 @@ export default function WidgetLikes() {
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="display" className="p-0">
-              {widget?.config ? (
+              {previewConfig ? (
                 <LikesDisplay
-                  {...widget?.config}
+                  {...previewConfig}
                   updateConfig={(config) =>
                     updateConfig({ ...widget.config, ...config })
                   }
