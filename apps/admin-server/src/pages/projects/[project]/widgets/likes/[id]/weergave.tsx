@@ -93,7 +93,7 @@ export default function LikesDisplay(props: Props & EditFieldProps<LikeProps>) {
           name="yesLabel"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Label voor "Ja"</FormLabel>
+              <FormLabel>Label voor &quot;Ja&quot;</FormLabel>
               <FormControl>
                 <Input
                   defaultValue={field.value}
@@ -112,7 +112,7 @@ export default function LikesDisplay(props: Props & EditFieldProps<LikeProps>) {
           name="noLabel"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Label voor "Nee"</FormLabel>
+              <FormLabel>Label voor &quot;Nee&quot;</FormLabel>
               <FormControl>
                 <Input
                   defaultValue={field.value}

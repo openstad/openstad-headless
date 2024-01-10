@@ -42,112 +42,104 @@ export default function ProjectSettingsResourceLabels() {
   }, [data]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+    console.log(values);
   }
 
   return (
-        <div className="container py-6">
-          <Form {...form} className="p-6 bg-white rounded-md">
-            <Heading size="xl">Resource labels</Heading>
-            <Separator className="my-4" />
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="textOpen"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Tekst voor de 'Open' label
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="textClosed"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Tekst voor de 'Gesloten' label
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="textOpen"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Tekst voor de 'Afgewezen' label
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="textAccepted"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Tekst voor de 'Geaccepteerd' label
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="textOpen"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Tekst voor de 'Afgerond' label
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="textOpen"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Tekst voor de 'In overweging' label
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-fit col-span-full">
-                Opslaan
-              </Button>
-            </form>
-          </Form>
-        </div>
+    <div className="container py-6">
+      <Form {...form} className="p-6 bg-white rounded-md">
+        <Heading size="xl">Resource labels</Heading>
+        <Separator className="my-4" />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="textOpen"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Tekst voor de &apos;Open&apos; label</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="textClosed"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Tekst voor de &apos;Gesloten&apos; label</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="textOpen"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Tekst voor de &apos;Afgewezen&apos; label</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="textAccepted"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>
+                  Tekst voor de &apos;Geaccepteerd&apos; label
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="textOpen"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Tekst voor de &apos;Afgerond&apos; label</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="textOpen"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>
+                  Tekst voor de &apos;In overweging&apos; label
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="w-fit col-span-full">
+            Opslaan
+          </Button>
+        </form>
+      </Form>
+    </div>
   );
 }

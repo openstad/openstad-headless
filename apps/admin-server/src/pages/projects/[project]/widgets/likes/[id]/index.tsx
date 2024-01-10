@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { LikeWidgetProps } from '@openstad/likes/src/likes';
+import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 
 export default function WidgetLikes() {

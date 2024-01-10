@@ -30,6 +30,11 @@
   border: 1px solid transparent;
 }
 
+.like-option.selected *{
+  background-color: var(--osc-primary);
+  color: var(--osc-primary-foreground);
+}
+
 .like-option:hover {
   border-color: var(--osc-border);
   transition: border-color .3s;
@@ -48,6 +53,10 @@
   line-height: 1.5rem;
   font-weight: 600;
   color: var(--osc-muted);
+}
+
+.like-option.selected .osc-like-variant-label {
+  color: var(--osc-primary-foreground);
 }
 
 .like-option:hover .osc-like-variant-label {

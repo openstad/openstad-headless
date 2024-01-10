@@ -18,7 +18,7 @@ COPY --chown=node:node package*.json .
 COPY --chown=node:node packages/ ./packages
 COPY --chown=node:node apps/$APP ./apps/$APP
 
-RUN npm install --prefix=$WORKSPACE
+RUN npm install -w $WORKSPACE
 
 RUN npm run build-packages --if-present --prefix=$WORKSPACE
 
@@ -38,7 +38,8 @@ CMD ["npm", "run", "dev", "--prefix=${WORKSPACE}"]
 FROM builder as prepare-production
 ARG APP
 ENV WORKSPACE apps/${APP}
-RUN npm --prefix=apps/${APP} prune --production
+RUN npm --prefix=apps/${APP} run build --if-present && \
+    npm --prefix=apps/${APP} prune --production
 
 # Release image
 FROM node:18-slim as release

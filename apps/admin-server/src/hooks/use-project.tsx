@@ -21,8 +21,23 @@ export function useProject() {
         name,
       }),
     });
-    const data = await res.json();
-    return data;
+    return await res.json();
+  }
+  
+  async function importProject(name: string, title: string, config: object, emailConfig: object) {
+    const res = await fetch('/api/openstad/api/project', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name,
+        title,
+        config,
+        emailConfig
+      }),
+    });
+    return await res.json();
   }
 
   async function updateProject(config: any, name?: any) {
@@ -80,6 +95,7 @@ export function useProject() {
   return {
     ...projectSwr,
     createProject,
+    importProject,
     updateProject,
     updateProjectEmails,
     anonymizeUsersOfProject,

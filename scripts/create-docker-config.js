@@ -38,6 +38,8 @@ const fs = require('fs').promises;
 
   try {
     let configfile = `
+BASE_DOMAIN=${process.env.BASE_DOMAIN}
+
 MYSQL_ROOT_PASSWORD=${process.env.DB_PASSWORD}
 MYSQL_USER=${process.env.DB_USERNAME}
 MYSQL_PASSWORD=${process.env.DB_PASSWORD}
@@ -62,7 +64,8 @@ API_MAIL_TRANSPORT_SMTP_AUTH_PASS=${process.env.API_SMTP_PASSWORD}
       process.env.API_NOTIFICATIONS_ADMIN_EMAILADDRESS
     }
 API_AUTH_JWTSECRET=${process.env.API_JWT_SECRET}
-API_AUTH_FIXEDAUTHTOKENS=${process.env.API_FIXED_AUTH_KEY}
+API_FIXED_AUTH_KEY=${process.env.API_FIXED_AUTH_KEY}
+API_AUTH_FIXEDAUTHTOKENS=${process.env.API_AUTH_FIXEDAUTHTOKENS}
 AUTH_API_URL=${process.env.AUTH_APP_URL}
 
 AUTH_APP_URL=${process.env.AUTH_APP_URL}
@@ -90,7 +93,7 @@ AUTH_COOKIE_SECURE_OFF=${process.env.AUTH_COOKIE_SECURE_OFF}
 IMAGE_APP_URL=${process.env.IMAGE_APP_URL}
 IMAGE_PORT_API=${process.env.IMAGE_PORT_API}
 IMAGE_PORT_IMAGE_SERVER=${process.env.IMAGE_PORT_IMAGE_SERVER}
-IMAGE_IMAGES_DIR=${process.env.IMAGE_IMAGES_DIR || '/opt/image-server/images'}
+IMAGE_IMAGES_DIR=${process.env.IMAGE_IMAGES_DIR || '/opt/openstad-headless/apps/image-server/images'}
 IMAGE_THROTTLE=${process.env.IMAGE_THROTTLE}
 IMAGE_THROTTLE_CC_PROCESSORS=${process.env.IMAGE_THROTTLE_CC_PROCESSORS}
 IMAGE_THROTTLE_CC_PREFETCHER=${process.env.IMAGE_THROTTLE_CC_PREFETCHER}
@@ -102,6 +105,12 @@ ADMIN_PORT=${process.env.ADMIN_PORT}
 ADMIN_SECRET=${process.env.ADMIN_SECRET}
 
 NEXT_PUBLIC_API_URL=${process.env.API_URL}
+
+CMS_URL=${process.env.CMS_URL}
+CMS_PORT=${process.env.CMS_PORT}
+CMS_OVERWRITE_URL=${process.env.CMS_OVERWRITE_URL}
+CMS_MONGODB_URI=${process.env.CMS_MONGODB_URI || 'mongodb://openstad-mongo:27017'}
+CMS_DEFAULT_SETTINGS=${process.env.CMS_DEFAULT_SETTINGS}
 `;
 
     await fs.writeFile('./.env', configfile);
@@ -117,6 +126,7 @@ Login: ${process.env.API_URL}/auth/project/1/login
 Which should redirect you to the login form: ${process.env.AUTH_APP_URL}/auth/code/login?clientId=uniquecode
 Show an image: ${process.env.IMAGE_APP_URL}/image/forum.romanum.06.webp
 Admin server: ${process.env.ADMIN_URL}/
+CMS: ${process.env.CMS_URL}/
 
 You can login using the code ${process.env.AUTH_FIRST_LOGIN_CODE}
 
