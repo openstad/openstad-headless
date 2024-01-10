@@ -12,11 +12,6 @@ export type ResourceDetailWidgetProps = BaseProps &
     projectId?: string;
     resourceId?: string;
   } & {
-    renderHeader?: (resources?: Array<any>) => React.JSX.Element;
-    renderItem?: (
-      resource: any,
-      props: ResourceDetailWidgetProps
-    ) => React.JSX.Element;
     displayImage?: boolean;
     displayTitle?: boolean;
     displaySummary?: boolean;
@@ -32,7 +27,6 @@ const defaultItemRenderer = (
   resource: any,
   props: ResourceDetailWidgetProps
 ) => {
-  console.log(resource?.extraData);
   return (
     <article className="osc-resource-detail-content-items">
       {props.displayImage && resource.images?.at(0)?.src && (
@@ -103,10 +97,7 @@ const defaultItemRenderer = (
   );
 };
 
-function ResourceDetail({
-  renderItem = defaultItemRenderer,
-  ...props
-}: ResourceDetailWidgetProps) {
+function ResourceDetail({ ...props }: ResourceDetailWidgetProps) {
   const datastore = new DataStore({
     projectId: props.projectId,
     resourceId: props.resourceId,
@@ -120,7 +111,7 @@ function ResourceDetail({
       <Spacer size={2} />
       <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
         {resource ? (
-          <React.Fragment>{renderItem(resource, props)}</React.Fragment>
+          defaultItemRenderer(resource, props)
         ) : (
           <span>resource niet gevonden..</span>
         )}

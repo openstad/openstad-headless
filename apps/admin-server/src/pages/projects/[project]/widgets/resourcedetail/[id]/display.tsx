@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -13,10 +12,8 @@ import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceDetailWidgetProps } from '@openstad/resource-detail/src/resource-detail';
-import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 
 const formSchema = z.object({
   displayImage: z.boolean(),

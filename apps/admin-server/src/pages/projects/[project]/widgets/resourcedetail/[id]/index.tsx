@@ -31,22 +31,6 @@ export default function WidgetResourceDetail() {
       variant: 'medium',
     });
 
-  const totalPropPackage = {
-    ...widget?.config,
-    updateConfig: (config: ResourceDetailWidgetProps) =>
-      updateConfig({ ...widget.config, ...config }),
-
-    onFieldChanged: (key: keyof ResourceDetailWidgetProps, value: any) => {
-      if (previewConfig) {
-        updatePreview({
-          ...previewConfig,
-          [key]: value,
-        });
-      }
-    },
-    projectId,
-  };
-
   return (
     <div>
       <PageLayout
@@ -72,10 +56,40 @@ export default function WidgetResourceDetail() {
               <TabsTrigger value="display">Display</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
-              <WidgetResourceDetailGeneral {...totalPropPackage} />
+              {previewConfig && (
+                <WidgetResourceDetailGeneral
+                  {...previewConfig}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
+                  }
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                />
+              )}
             </TabsContent>
             <TabsContent value="display" className="p-0">
-              <WidgetResourceDetailDisplay {...totalPropPackage} />
+              {previewConfig && (
+                <WidgetResourceDetailDisplay
+                  {...previewConfig}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
+                  }
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                />
+              )}
             </TabsContent>
           </Tabs>
 
