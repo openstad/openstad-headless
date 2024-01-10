@@ -23,87 +23,13 @@ export type ResourceDetailWidgetProps = BaseProps &
     displayBudgetDocuments?: boolean;
   };
 
-const defaultItemRenderer = (
-  resource: any,
-  props: ResourceDetailWidgetProps
-) => {
-  return (
-    <article className="osc-resource-detail-content-items">
-      {props.displayImage && resource.images?.at(0)?.src && (
-        <Image
-          src={resource.images?.at(0)?.src || ''}
-          onClick={() => console.log({ resource })}
-          imageFooter={
-            <div>
-              <p className="osc-resource-detail-content-item-status">
-                {resource.status === 'OPEN' ? 'Open' : 'Gesloten'}
-              </p>
-            </div>
-          }
-        />
-      )}
-
-      {props.displayTitle && resource.title && <h4>{resource.title}</h4>}
-      <div className="osc-resource-detail-content-item-row">
-        {/* {props.displayBudgetDocuments &&
-          resource?.extraData?.budgetDocuments?.name && (
-            <div>
-              <h6 className="osc-resource-detail-content-item-title">
-                Bestanden
-              </h6>
-              <span className="osc-resource-detail-content-item-text">
-                {resource.extraData.budgetDocuments.name}
-              </span>
-            </div>
-          )} */}
-        {props.displayUser && resource?.user?.name && (
-          <div>
-            <h6 className="osc-resource-detail-content-item-title">Naam</h6>
-            <span className="osc-resource-detail-content-item-text">
-              {resource.user.name}
-            </span>
-          </div>
-        )}
-        {props.displayDate && resource.publishDateHumanized && (
-          <div>
-            <h6 className="osc-resource-detail-content-item-title">Datum</h6>
-            <span className="osc-resource-detail-content-item-text">
-              {resource.publishDateHumanized}
-            </span>
-          </div>
-        )}
-        {props.displayBudget && resource.budget && (
-          <div>
-            <h6 className="osc-resource-detail-content-item-title">Budget</h6>
-            <span className="osc-resource-detail-content-item-text">
-              {`€ ${resource.budget}`}
-            </span>
-          </div>
-        )}
-      </div>
-      <div>
-        {props.displaySummary && <h5>{resource.summary}</h5>}
-        {props.displayDescription && <p>{resource.description}</p>}
-      </div>
-      {props.displayLocation && resource.position && (
-        <>
-          <h4>Plaats</h4>
-          <p className="osc-resource-detail-content-item-location">
-            {`${resource.position.lat}, ${resource.position.lng}`}
-          </p>
-        </>
-      )}
-    </article>
-  );
-};
-
-function ResourceDetail({ ...props }: ResourceDetailWidgetProps) {
+function ResourceDetail(props: ResourceDetailWidgetProps) {
   const datastore = new DataStore({
     projectId: props.projectId,
     resourceId: props.resourceId,
     config: { api: props.api },
   });
-  const [resource] = datastore.useResource({ ...props });
+  const [resource] = datastore.useResource(props);
   if (!resource) return null;
 
   return (
@@ -111,7 +37,78 @@ function ResourceDetail({ ...props }: ResourceDetailWidgetProps) {
       <Spacer size={2} />
       <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
         {resource ? (
-          defaultItemRenderer(resource, props)
+          <article className="osc-resource-detail-content-items">
+            {props.displayImage && resource.images?.at(0)?.src && (
+              <Image
+                src={resource.images?.at(0)?.src || ''}
+                onClick={() => console.log({ resource })}
+                imageFooter={
+                  <div>
+                    <p className="osc-resource-detail-content-item-status">
+                      {resource.status === 'OPEN' ? 'Open' : 'Gesloten'}
+                    </p>
+                  </div>
+                }
+              />
+            )}
+
+            {props.displayTitle && resource.title && <h4>{resource.title}</h4>}
+            <div className="osc-resource-detail-content-item-row">
+              {/* {props.displayBudgetDocuments &&
+              resource?.extraData?.budgetDocuments?.name && (
+                <div>
+                  <h6 className="osc-resource-detail-content-item-title">
+                    Bestanden
+                  </h6>
+                  <span className="osc-resource-detail-content-item-text">
+                    {resource.extraData.budgetDocuments.name}
+                  </span>
+                </div>
+              )} */}
+              {props.displayUser && resource?.user?.name && (
+                <div>
+                  <h6 className="osc-resource-detail-content-item-title">
+                    Naam
+                  </h6>
+                  <span className="osc-resource-detail-content-item-text">
+                    {resource.user.name}
+                  </span>
+                </div>
+              )}
+              {props.displayDate && resource.publishDateHumanized && (
+                <div>
+                  <h6 className="osc-resource-detail-content-item-title">
+                    Datum
+                  </h6>
+                  <span className="osc-resource-detail-content-item-text">
+                    {resource.publishDateHumanized}
+                  </span>
+                </div>
+              )}
+              {props.displayBudget && resource.budget && (
+                <div>
+                  <h6 className="osc-resource-detail-content-item-title">
+                    Budget
+                  </h6>
+                  <span className="osc-resource-detail-content-item-text">
+                    {`€ ${resource.budget}`}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div>
+              {props.displaySummary && <h5>{resource.summary}</h5>}
+              {props.displayDescription && <p>{resource.description}</p>}
+            </div>
+            {props.displayLocation && resource.position && (
+              <>
+                <h4>Plaats</h4>
+                <p className="osc-resource-detail-content-item-location">
+                  {`${resource.position.lat}, ${resource.position.lng}`}
+                </p>
+              </>
+            )}
+          </article>
         ) : (
           <span>resource niet gevonden..</span>
         )}
