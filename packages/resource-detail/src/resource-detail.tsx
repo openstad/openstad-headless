@@ -1,6 +1,5 @@
 import './resource-detail.css';
 import React from 'react';
-import { Banner, Icon } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { Spacer } from '@openstad-headless/ui/src';
@@ -8,10 +7,6 @@ import { Image } from '@openstad-headless/ui/src';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 import loadWidget from '@openstad-headless/lib/load-widget';
-import { elipsize } from '@openstad-headless/lib/ui-helpers';
-import format from 'date-fns/format';
-import { nl } from 'date-fns/locale';
-
 export type ResourceDetailWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
@@ -22,60 +17,85 @@ export type ResourceDetailWidgetProps = BaseProps &
       resource: any,
       props: ResourceDetailWidgetProps
     ) => React.JSX.Element;
+    displayImage?: boolean;
     displayTitle?: boolean;
-    titleMaxLength?: number;
     displaySummary?: boolean;
     displayDescription?: boolean;
     displayUser?: boolean;
     displayDate?: boolean;
+    displayBudget?: boolean;
     displayLocation?: boolean;
+    displayBudgetDocuments?: boolean;
   };
 
 const defaultItemRenderer = (
   resource: any,
   props: ResourceDetailWidgetProps
 ) => {
+  console.log(resource?.extraData);
   return (
     <article className="osc-resource-detail-content-items">
-      <Image
-        src={resource.images?.at(0)?.src || ''}
-        onClick={() => console.log({ resource })}
-        imageFooter={
-          <div>
-            <p className="osc-resource-detail-content-item-status">
-              {resource.status === 'OPEN' ? 'Open' : 'Gesloten'}
-            </p>
-          </div>
-        }
-      />
-      {props.displayTitle && resource.title && (
-        <h4>{elipsize(resource.title, props.titleMaxLength || 20)}</h4>
+      {props.displayImage && resource.images?.at(0)?.src && (
+        <Image
+          src={resource.images?.at(0)?.src || ''}
+          onClick={() => console.log({ resource })}
+          imageFooter={
+            <div>
+              <p className="osc-resource-detail-content-item-status">
+                {resource.status === 'OPEN' ? 'Open' : 'Gesloten'}
+              </p>
+            </div>
+          }
+        />
       )}
-      <div>
+
+      {props.displayTitle && resource.title && <h4>{resource.title}</h4>}
+      <div className="osc-resource-detail-content-item-row">
+        {/* {props.displayBudgetDocuments &&
+          resource?.extraData?.budgetDocuments?.name && (
+            <div>
+              <h6 className="osc-resource-detail-content-item-title">
+                Bestanden
+              </h6>
+              <span className="osc-resource-detail-content-item-text">
+                {resource.extraData.budgetDocuments.name}
+              </span>
+            </div>
+          )} */}
         {props.displayUser && resource?.user?.name && (
-          <h5 className="osc-resource-detail-content-item-user">
-            {resource.user.name}
-          </h5>
+          <div>
+            <h6 className="osc-resource-detail-content-item-title">Naam</h6>
+            <span className="osc-resource-detail-content-item-text">
+              {resource.user.name}
+            </span>
+          </div>
         )}
         {props.displayDate && resource.publishDateHumanized && (
-          <h6 className="osc-resource-detail-content-item-date">
-            {resource.publishDateHumanized}
-          </h6>
+          <div>
+            <h6 className="osc-resource-detail-content-item-title">Datum</h6>
+            <span className="osc-resource-detail-content-item-text">
+              {resource.publishDateHumanized}
+            </span>
+          </div>
+        )}
+        {props.displayBudget && resource.budget && (
+          <div>
+            <h6 className="osc-resource-detail-content-item-title">Budget</h6>
+            <span className="osc-resource-detail-content-item-text">
+              {`€ ${resource.budget}`}
+            </span>
+          </div>
         )}
       </div>
       <div>
         {props.displaySummary && <h5>{resource.summary}</h5>}
-        {props.displayDescription && (
-          <p className="osc-resource-detail-content-item-description">
-            {resource.description}
-          </p>
-        )}
+        {props.displayDescription && <p>{resource.description}</p>}
       </div>
-      {props.displayLocation && resource.location && (
+      {props.displayLocation && resource.position && (
         <>
           <h4>Plaats</h4>
           <p className="osc-resource-detail-content-item-location">
-            {resource.location.toString()}
+            {`${resource.position.lat}, ${resource.position.lng}`}
           </p>
         </>
       )}

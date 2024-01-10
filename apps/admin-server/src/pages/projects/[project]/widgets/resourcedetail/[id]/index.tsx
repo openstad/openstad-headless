@@ -18,13 +18,12 @@ export default function WidgetResourceDetail() {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project as string;
-  const resourceId = router.query.resourceId || '11';
 
   const { data: widget, updateConfig } = useWidgetConfig();
   const { previewConfig, updatePreview } =
     useWidgetPreview<ResourceDetailWidgetProps>({
       projectId,
-      resourceId,
+      resourceId: '11',
       api: {
         url: '/api/openstad',
       },

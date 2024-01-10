@@ -13,18 +13,33 @@
   padding: 1rem;
 }
 
-h6.osc-resource-detail-content-item-date {
-  color: var(--osc-muted) !important;
+.osc-resource-detail-content-item-row {
+  background-color: var(--osc-card);
+  color:var(--osc-muted);
+  padding: 0.5rem 0.7rem;
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  align-items: center;
+  gap: 1rem;
 }
 
+@media (min-width: 768px) { 
+  .osc-resource-detail-content-item-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+h6.osc-resource-detail-content-item-title {
+  font-weight: bold !important;
+  color: var(--osc-card-foreground) !important;
+}
+
+/* Temporary until map component is finished */
 .osc-resource-detail-content-item-location {
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 100%;
   height: 50vh;
-}
-
-.osc-resource-detail-content-item-description {
-  max-height: 3rem;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  background-color: var(--osc-card);
 }

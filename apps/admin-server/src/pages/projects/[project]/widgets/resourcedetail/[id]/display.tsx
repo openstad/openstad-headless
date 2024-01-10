@@ -19,12 +19,14 @@ import * as z from 'zod';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 
 const formSchema = z.object({
+  displayImage: z.boolean(),
   displayTitle: z.boolean(),
-  titleMaxLength: z.coerce.number(),
   displayDescription: z.boolean(),
   displaySummary: z.boolean(),
   displayUser: z.boolean(),
   displayDate: z.boolean(),
+  displayBudget: z.boolean(),
+  displayBudgetDocuments: z.boolean(),
   displayLocation: z.boolean(),
 });
 
@@ -37,17 +39,17 @@ export default function WidgetResourceDetailDisplay(
     props.updateConfig({ ...props, ...values });
   }
 
-  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
-
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
+      displayImage: props?.displayImage || false,
       displayTitle: props?.displayTitle || false,
-      titleMaxLength: props?.titleMaxLength || 20,
       displayDescription: props?.displayDescription || false,
       displaySummary: props?.displaySummary || false,
       displayUser: props?.displayUser || false,
       displayDate: props?.displayDate || false,
+      displayBudget: props?.displayBudget || false,
+      displayBudgetDocuments: props?.displayBudgetDocuments || false,
       displayLocation: props?.displayLocation || false,
     },
   });
@@ -62,34 +64,22 @@ export default function WidgetResourceDetailDisplay(
           className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="displayTitle"
+            name="displayImage"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Titel weergeven</FormLabel>
+                <FormLabel>Afbeelding weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
-            name="titleMaxLength"
+            name="displayTitle"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Hoeveelheid karakters van de titel die getoond wordt
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
+                <FormLabel>Titel weergeven</FormLabel>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
@@ -118,15 +108,26 @@ export default function WidgetResourceDetailDisplay(
           />
           <FormField
             control={form.control}
-            name="displayLocation"
+            name="displayBudget"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Plaats weergeven</FormLabel>
+                <FormLabel>Budget weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
           />
+          {/* <FormField
+            control={form.control}
+            name="displayBudgetDocuments"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Budget bestanden weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          /> */}
           <FormField
             control={form.control}
             name="displaySummary"
@@ -145,6 +146,17 @@ export default function WidgetResourceDetailDisplay(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Beschrijving weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="displayLocation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Plaats weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
