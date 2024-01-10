@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
@@ -29,11 +29,7 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
     url: `/api/auth/project/${projectId}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`,
   };
 
-  useEffect(() => {
-    fetchWidget();
-  }, [config]);
-
-  function fetchWidget() {
+  const fetchWidget = useCallback(() => {
     const previewContainer = document.querySelector(
       '#widget-preview-script-holder'
     );
@@ -70,7 +66,11 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
         })
         .catch((e) => console.error(e));
     }
-  }
+  }, [config, projectId, type]);
+
+  useEffect(() => {
+    fetchWidget();
+  }, [fetchWidget]);
 
   return (
     <div id="widget-preview-container" className="p-6 bg-white rounded-md">
