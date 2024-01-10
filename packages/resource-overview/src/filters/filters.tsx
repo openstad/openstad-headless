@@ -36,7 +36,6 @@ export function Filters({
     defaultFilter.tags[tGroup.type] = null;
   });
 
-  console.log({ tagGroups });
   const [filter, setFilter] = useState(defaultFilter);
   const [selectedOptions, setSelected] = useState<{}>({});
 

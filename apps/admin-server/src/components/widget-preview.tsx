@@ -29,6 +29,7 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
   config['logout'] = {
     url: `/api/auth/project/${projectId}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`,
   };
+  const randomId = Math.floor(Math.random() * 1000000);
 
   useEffect(() => {
     fetchWidget();
@@ -36,7 +37,7 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
 
   function fetchWidget() {
     const previewContainer = document.querySelector(
-      '#widget-preview-script-holder'
+      `#widget-preview-script-holder-${randomId}`
     );
 
     if (previewContainer && projectId && config) {
@@ -58,7 +59,6 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
               }
 
               if (React) {
-                const randomId = Math.floor(Math.random() * 1000000);
                 const sc = document.createElement('script');
                 sc.setAttribute('type', 'text/javascript');
                 sc.setAttribute('id', `openstad-widget-script-${randomId}`);
@@ -79,7 +79,7 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
         Preview
       </Heading>
       <Separator className="mb-4" />
-      <div id="widget-preview-script-holder"></div>
+      <div id={`widget-preview-script-holder-${randomId}`}></div>
     </div>
   );
 }

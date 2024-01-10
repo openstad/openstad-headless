@@ -13,14 +13,12 @@ import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import { ResourceDetailWidgetProps } from '@openstad/resource-detail/src/resource-detail';
 import WidgetPreview from '@/components/widget-preview';
-import useResources from '@/hooks/use-resources';
 
 export default function WidgetResourceDetail() {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project as string;
   const resourceId = router.query.resourceId || '11';
-  const { update } = useResources(projectId as string);
 
   const { data: widget, updateConfig } = useWidgetConfig();
   const { previewConfig, updatePreview } =
@@ -83,7 +81,7 @@ export default function WidgetResourceDetail() {
           </Tabs>
 
           <div className="container py-6 mt-6 bg-white rounded-md">
-            {previewConfig ? (
+            {previewConfig && (
               <>
                 <WidgetPreview
                   type="resourcedetail"
@@ -91,7 +89,7 @@ export default function WidgetResourceDetail() {
                   projectId={projectId as string}
                 />
               </>
-            ) : null}
+            )}
           </div>
         </div>
       </PageLayout>

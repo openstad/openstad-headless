@@ -23,6 +23,7 @@ import { useRouter } from 'next/router';
 import useResources from '@/hooks/use-resources';
 import { ResourceDetailWidgetProps } from '@openstad/resource-detail/src/resource-detail';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { useEffect } from 'react';
 
 const formSchema = z.object({
   resourceId: z.string(),
@@ -41,12 +42,18 @@ export default function WidgetResourceDetailGeneral(
   const projectId = router.query.project as string;
   const { data, error, isLoading, remove } = useResources(projectId as string);
 
+  const defaults = () => ({
+    resourceId: props?.resourceId || '11',
+  });
+
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: {
-      resourceId: props?.resourceId || '11',
-    },
+    defaultValues: defaults(),
   });
+
+  useEffect(() => {
+    form.reset(defaults());
+  }, [props?.resourceId]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -55,14 +62,19 @@ export default function WidgetResourceDetailGeneral(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-1/2 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="resourceId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Resource</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={(e) => {
+                    field.onChange(e);
+                    props.onFieldChanged(field.name, e);
+                  }}
+                  value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecteer een resource." />
@@ -70,7 +82,7 @@ export default function WidgetResourceDetailGeneral(
                   </FormControl>
                   <SelectContent>
                     {data?.map((resource: any) => (
-                      <SelectItem value={resource.id}>
+                      <SelectItem key={resource.id} value={`${resource.id}`}>
                         {resource.title}
                       </SelectItem>
                     ))}

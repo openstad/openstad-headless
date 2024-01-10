@@ -22,46 +22,19 @@ export type ResourceDetailWidgetProps = BaseProps &
       resource: any,
       props: ResourceDetailWidgetProps
     ) => React.JSX.Element;
-
     displayTitle?: boolean;
     titleMaxLength?: number;
-    displayLabel?: boolean;
     displaySummary?: boolean;
     displayDescription?: boolean;
     displayUser?: boolean;
     displayDate?: boolean;
     displayLocation?: boolean;
-    displayCaption?: boolean;
-    textActiveSearch?: string;
-    sorting: Array<{ value: string; label: string }>;
-
-    tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
-    displayTagGroupName?: boolean;
   };
-
-//Temp: Header can only be made when the map works so for now a banner
-// If you dont want a banner pas <></> into the renderHeader prop
-const defaultHeaderRenderer = (resources?: any) => {
-  return (
-    <>
-      <Banner>
-        <Spacer size={12} />
-      </Banner>
-      {/* <section className="osc-resource-detail-title-container">
-        <Spacer size={2} />
-        <h4>Plannen</h4>
-      </section> */}
-    </>
-  );
-};
 
 const defaultItemRenderer = (
   resource: any,
   props: ResourceDetailWidgetProps
 ) => {
-  const dateString = resource.publishDate;
-  const date = new Date(dateString);
-  const formattedDate = format(date, 'd MMMM yyyy', { locale: nl });
   return (
     <article className="osc-resource-detail-content-items">
       <Image
@@ -75,18 +48,18 @@ const defaultItemRenderer = (
           </div>
         }
       />
-      {props.displayTitle && (
+      {props.displayTitle && resource.title && (
         <h4>{elipsize(resource.title, props.titleMaxLength || 20)}</h4>
       )}
       <div>
-        {props.displayUser && (
+        {props.displayUser && resource?.user?.name && (
           <h5 className="osc-resource-detail-content-item-user">
-            {resource.userId}
+            {resource.user.name}
           </h5>
         )}
-        {props.displayDate && (
+        {props.displayDate && resource.publishDateHumanized && (
           <h6 className="osc-resource-detail-content-item-date">
-            {formattedDate}
+            {resource.publishDateHumanized}
           </h6>
         )}
       </div>
@@ -98,7 +71,7 @@ const defaultItemRenderer = (
           </p>
         )}
       </div>
-      {props.displayLocation && (
+      {props.displayLocation && resource.location && (
         <>
           <h4>Plaats</h4>
           <p className="osc-resource-detail-content-item-location">
@@ -111,7 +84,6 @@ const defaultItemRenderer = (
 };
 
 function ResourceDetail({
-  renderHeader = defaultHeaderRenderer,
   renderItem = defaultItemRenderer,
   ...props
 }: ResourceDetailWidgetProps) {
@@ -120,31 +92,18 @@ function ResourceDetail({
     resourceId: props.resourceId,
     config: { api: props.api },
   });
-  const [resources] = datastore.useResources({ ...props });
-  console.log(props.resourceId);
-  const resource = resources.find(
-    (resource: any) => resource.id.toString() === props.resourceId
-  );
+  const [resource] = datastore.useResource({ ...props });
+  if (!resource) return null;
 
   return (
     <div className="osc">
-      {renderHeader()}
-
       <Spacer size={2} />
-      <section className="osc-resource-detail-container">
-        <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
-          {resource ? (
-            <React.Fragment>{renderItem(resource, props)}</React.Fragment>
-          ) : (
-            <span>resource niet gevonden..</span>
-          )}
-        </section>
-        <section className="osc-resource-detail-content">
-          Like widget komt hier
-        </section>
-      </section>
-      <section className="osc-resource-detail-container">
-        Argumenten widget komt hier
+      <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
+        {resource ? (
+          <React.Fragment>{renderItem(resource, props)}</React.Fragment>
+        ) : (
+          <span>resource niet gevonden..</span>
+        )}
       </section>
     </div>
   );
