@@ -12,7 +12,6 @@ export default function useResources(props) {
     'resources.fetch'
   );
 
-  console.log({ datavanresources:data, error });
 
   // add functionality
   let resources = data || [];
