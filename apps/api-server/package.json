@@ -57,7 +57,8 @@
     "@openstad-headless/datastore": "file:../../packages/data-store",
     "@openstad-headless/comments": "file:../../packages/comments",
     "@openstad-headless/likes": "file:../../packages/likes",
-    "@openstad-headless/resource-overview": "file:../../packages/resource-overview"
+    "@openstad-headless/resource-overview": "file:../../packages/resource-overview",
+    "@openstad-headless/resource-detail": "file:../../packages/resource-detail"
   },
   "devDependencies": {
     "@types/cron": "^2.4.0",

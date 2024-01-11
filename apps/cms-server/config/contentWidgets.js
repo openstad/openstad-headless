@@ -109,6 +109,9 @@ const contentWidgets = {
   'resource-overview': {
     adminOnly: true,
   },
+  'resource-detail': {
+    adminOnly: true,
+  },
   'resource-form': {
     adminOnly: true,
   },
