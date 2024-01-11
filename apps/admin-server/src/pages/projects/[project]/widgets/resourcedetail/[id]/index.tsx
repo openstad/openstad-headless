@@ -24,11 +24,6 @@ export default function WidgetResourceDetail() {
     useWidgetPreview<ResourceDetailWidgetProps>({
       projectId,
       resourceId: '11',
-      api: {
-        url: '/api/openstad',
-      },
-      title: 'Vind je dit een goed idee?',
-      variant: 'medium',
     });
 
   return (

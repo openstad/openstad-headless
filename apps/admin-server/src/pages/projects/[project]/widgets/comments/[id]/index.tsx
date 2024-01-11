@@ -25,11 +25,6 @@ export default function WidgetArguments() {
     useWidgetPreview<CommentsWidgetProps>({
       projectId,
       resourceId: '2',
-      api: {
-        url: '/api/openstad',
-      },
-      title: 'Vind je dit een goed idee?',
-      variant: 'medium',
     });
 
   return (

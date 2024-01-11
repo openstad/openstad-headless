@@ -67,7 +67,7 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
         })
         .catch((e) => console.error(e));
     }
-  }, [config, projectId, type]);
+  }, [config, projectId, type, randomId]);
 
   useEffect(() => {
     fetchWidget();

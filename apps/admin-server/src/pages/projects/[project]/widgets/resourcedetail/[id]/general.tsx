@@ -23,7 +23,7 @@ import { useRouter } from 'next/router';
 import useResources from '@/hooks/use-resources';
 import { ResourceDetailWidgetProps } from '@openstad/resource-detail/src/resource-detail';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
 const formSchema = z.object({
   resourceId: z.string(),
@@ -42,9 +42,12 @@ export default function WidgetResourceDetailGeneral(
   const projectId = router.query.project as string;
   const { data, error, isLoading, remove } = useResources(projectId as string);
 
-  const defaults = () => ({
-    resourceId: props?.resourceId || '11',
-  });
+  const defaults = useCallback(
+    () => ({
+      resourceId: props?.resourceId || '11',
+    }),
+    [props?.resourceId]
+  );
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
@@ -53,7 +56,7 @@ export default function WidgetResourceDetailGeneral(
 
   useEffect(() => {
     form.reset(defaults());
-  }, [props?.resourceId]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">
