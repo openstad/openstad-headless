@@ -20,7 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -44,15 +44,18 @@ export default function WidgetResourceFormRole() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    roleLabel: widget?.config?.[category]?.roleLabel || '',
-    roleInfo: widget?.config?.[category]?.roleInfo || '',
-    roleDisplayed: widget?.config?.[category]?.roleDisplayed || false,
-    roleRequired: widget?.config?.[category]?.roleRequired || false,
-    roleFieldType: widget?.config?.[category]?.roleFieldType || 'textbar',
-    roleMinimumChars: widget?.config?.[category]?.roleMinimumChars || 0,
-    roleMaximumChars: widget?.config?.[category]?.roleMaximumChars || 0,
-  });
+  const defaults = useCallback(
+    () => ({
+      roleLabel: widget?.config?.[category]?.roleLabel || '',
+      roleInfo: widget?.config?.[category]?.roleInfo || '',
+      roleDisplayed: widget?.config?.[category]?.roleDisplayed || false,
+      roleRequired: widget?.config?.[category]?.roleRequired || false,
+      roleFieldType: widget?.config?.[category]?.roleFieldType || 'textbar',
+      roleMinimumChars: widget?.config?.[category]?.roleMinimumChars || 0,
+      roleMaximumChars: widget?.config?.[category]?.roleMaximumChars || 0,
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -69,7 +72,7 @@ export default function WidgetResourceFormRole() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">

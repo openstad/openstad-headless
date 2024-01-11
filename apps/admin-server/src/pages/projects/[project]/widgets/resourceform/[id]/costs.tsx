@@ -44,15 +44,18 @@ export default function WidgetResourceFormCosts() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    costsLabel: widget?.config?.[category]?.costsLabel || '',
-    costsInfo: widget?.config?.[category]?.costsInfo || '',
-    costsDisplayed: widget?.config?.[category]?.costsDisplayed || false,
-    costsRequired: widget?.config?.[category]?.costsRequired || false,
-    costsFieldType: widget?.config?.[category]?.costsFieldType || 'textbar',
-    costsMinimumChars: widget?.config?.[category]?.costsMinimumChars || 0,
-    costsMaximumChars: widget?.config?.[category]?.costsMaximumChars || 0,
-  });
+  const defaults = useCallback(
+    () => ({
+      costsLabel: widget?.config?.[category]?.costsLabel || '',
+      costsInfo: widget?.config?.[category]?.costsInfo || '',
+      costsDisplayed: widget?.config?.[category]?.costsDisplayed || false,
+      costsRequired: widget?.config?.[category]?.costsRequired || false,
+      costsFieldType: widget?.config?.[category]?.costsFieldType || 'textbar',
+      costsMinimumChars: widget?.config?.[category]?.costsMinimumChars || 0,
+      costsMaximumChars: widget?.config?.[category]?.costsMaximumChars || 0,
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -69,7 +72,7 @@ export default function WidgetResourceFormCosts() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">

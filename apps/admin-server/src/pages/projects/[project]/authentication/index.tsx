@@ -152,7 +152,7 @@ export default function ProjectAuthentication() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [data?.config]);
+  }, [form, defaults]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {

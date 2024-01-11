@@ -20,7 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -41,12 +41,15 @@ export default function WidgetResourceFormLocation() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    locationLabel: widget?.config?.[category]?.locationLabel || '',
-    locationInfo: widget?.config?.[category]?.locationInfo || '',
-    locationDisplayed: widget?.config?.[category]?.locationDisplayed || false,
-    locationRequired: widget?.config?.[category]?.locationDisplayed || false,
-  });
+  const defaults = useCallback(
+    () => ({
+      locationLabel: widget?.config?.[category]?.locationLabel || '',
+      locationInfo: widget?.config?.[category]?.locationInfo || '',
+      locationDisplayed: widget?.config?.[category]?.locationDisplayed || false,
+      locationRequired: widget?.config?.[category]?.locationDisplayed || false,
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -63,7 +66,7 @@ export default function WidgetResourceFormLocation() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">

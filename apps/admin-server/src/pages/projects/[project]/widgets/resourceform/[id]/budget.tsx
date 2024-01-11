@@ -36,9 +36,12 @@ export default function WidgetResourceFormBudget() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    displayBudget: widget?.config?.[category]?.displayBudget || false,
-  });
+  const defaults = useCallback(
+    () => ({
+      displayBudget: widget?.config?.[category]?.displayBudget || false,
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -55,7 +58,7 @@ export default function WidgetResourceFormBudget() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">

@@ -20,7 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -41,13 +41,16 @@ export default function WidgetResourceFormDescription() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    descriptionLabel: widget?.config?.[category]?.descriptionLabel || '',
-    descriptionInfo: widget?.config?.[category]?.descriptionInfo || '',
-    descriptionEditor: widget?.config?.[category]?.descriptionEditor || false,
-    descriptionRequired:
-      widget?.config?.[category]?.descriptionRequired || false,
-  });
+  const defaults = useCallback(
+    () => ({
+      descriptionLabel: widget?.config?.[category]?.descriptionLabel || '',
+      descriptionInfo: widget?.config?.[category]?.descriptionInfo || '',
+      descriptionEditor: widget?.config?.[category]?.descriptionEditor || false,
+      descriptionRequired:
+        widget?.config?.[category]?.descriptionRequired || false,
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -64,7 +67,7 @@ export default function WidgetResourceFormDescription() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">

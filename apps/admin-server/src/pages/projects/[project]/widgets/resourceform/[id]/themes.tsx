@@ -20,7 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -40,11 +40,14 @@ export default function WidgetResourceFormThemes() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    themesLabel: widget?.config?.[category]?.themesLabel || 'resource',
-    themesInfo: widget?.config?.[category]?.themesInfo || '',
-    themesRequired: widget?.config?.[category]?.themesRequired || false,
-  });
+  const defaults = useCallback(
+    () => ({
+      themesLabel: widget?.config?.[category]?.themesLabel || 'resource',
+      themesInfo: widget?.config?.[category]?.themesInfo || '',
+      themesRequired: widget?.config?.[category]?.themesRequired || false,
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -61,7 +64,7 @@ export default function WidgetResourceFormThemes() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">

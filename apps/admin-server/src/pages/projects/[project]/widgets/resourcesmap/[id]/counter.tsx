@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -38,11 +38,14 @@ export default function WidgetResourcesMapCounter() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    displayCounter: widget?.config?.[category]?.displayCounter || false,
-    counterText: widget?.config?.[category]?.counterText || '',
-    counterUrl: widget?.config?.[category]?.counterUrl || '',
-  });
+  const defaults = useCallback(
+    () => ({
+      displayCounter: widget?.config?.[category]?.displayCounter || false,
+      counterText: widget?.config?.[category]?.counterText || '',
+      counterUrl: widget?.config?.[category]?.counterUrl || '',
+    }),
+    [widget?.config]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -51,7 +54,7 @@ export default function WidgetResourcesMapCounter() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     updateConfig({ [category]: values });
