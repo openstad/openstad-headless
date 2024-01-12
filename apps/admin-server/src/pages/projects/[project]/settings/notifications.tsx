@@ -19,6 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   fromAddress: z.string().email(),
@@ -51,12 +52,17 @@ export default function ProjectSettingsNotifications() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await updateProjectEmails({
+      const project = await updateProjectEmails({
         [category]: {
           fromAddress: values.fromAddress,
           projectmanagerAddress: values.projectmanagerAddress,
         },
       });
+      if (project) {
+        toast.success('Codes aangemaakt!');
+      } else {
+        toast.error('Er is helaas iets mis gegaan.')
+      }
     } catch (error) {
       console.error('could not update', error);
     }

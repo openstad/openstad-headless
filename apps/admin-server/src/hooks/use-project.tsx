@@ -52,6 +52,8 @@ export function useProject() {
       const data = await res.json();
 
       projectSwr.mutate(data);
+
+      return await data;
     } else {
       const res = await fetch(`/api/openstad/api/project/${projectId}`, {
         method: 'PUT',
@@ -63,6 +65,8 @@ export function useProject() {
       const data = await res.json();
 
       projectSwr.mutate(data);
+
+      return await data;
     }
   }
 
@@ -77,6 +81,8 @@ export function useProject() {
     const data = await res.json();
 
     projectSwr.mutate(data);
+
+    return await data;
   }
 
   async function anonymizeUsersOfProject() {
