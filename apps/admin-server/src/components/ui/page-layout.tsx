@@ -27,7 +27,7 @@ export function PageLayout({
 
   useEffect(() => {
     setHasProjectSidenav(location.startsWith('/projects/[project]'));
-  });
+  }, [location]);
 
   useEffect(() => {
     setLocation(router.pathname);

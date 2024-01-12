@@ -6,7 +6,7 @@ import { Spacer } from '@openstad-headless/ui/src';
 import { Image } from '@openstad-headless/ui/src';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
-import loadWidget from '@openstad-headless/lib/load-widget';
+import { loadWidget } from '@openstad-headless/lib/load-widget';
 export type ResourceDetailWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;

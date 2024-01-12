@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -47,13 +47,16 @@ export default function WidgetResourceFormGeneral() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    resource: widget?.config?.[category]?.resource || 'resource',
-    formName: widget?.config?.[category]?.formName || '',
-    redirectUrl: widget?.config?.[category]?.redirectUrl || '',
-    hideAdmin: widget?.config?.[category]?.hideAdmin || false,
-    organiseForm: widget?.config?.[category]?.organiseForm || 'static',
-  });
+  const defaults = useCallback(
+    () => ({
+      resource: widget?.config?.[category]?.resource || 'resource',
+      formName: widget?.config?.[category]?.formName || '',
+      redirectUrl: widget?.config?.[category]?.redirectUrl || '',
+      hideAdmin: widget?.config?.[category]?.hideAdmin || false,
+      organiseForm: widget?.config?.[category]?.organiseForm || 'static',
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -70,7 +73,7 @@ export default function WidgetResourceFormGeneral() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">

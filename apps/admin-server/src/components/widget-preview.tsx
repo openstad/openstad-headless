@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
@@ -31,11 +31,7 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
   };
   const randomId = Math.floor(Math.random() * 1000000);
 
-  useEffect(() => {
-    fetchWidget();
-  }, [config]);
-
-  function fetchWidget() {
+  const fetchWidget = useCallback(() => {
     const previewContainer = document.querySelector(
       `#widget-preview-script-holder-${randomId}`
     );
@@ -71,7 +67,11 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
         })
         .catch((e) => console.error(e));
     }
-  }
+  }, [config, projectId, type, randomId]);
+
+  useEffect(() => {
+    fetchWidget();
+  }, [fetchWidget]);
 
   return (
     <div id="widget-preview-container" className="p-6 bg-white rounded-md">

@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -38,11 +38,14 @@ export default function WidgetResourcesMapButton() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    displayButton: widget?.config?.[category]?.displayButton || false,
-    ctaUrl: widget?.config?.[category]?.ctaUrl || '',
-    ctaText: widget?.config?.[category]?.ctaText || '',
-  });
+  const defaults = useCallback(
+    () => ({
+      displayButton: widget?.config?.[category]?.displayButton || false,
+      ctaUrl: widget?.config?.[category]?.ctaUrl || '',
+      ctaText: widget?.config?.[category]?.ctaText || '',
+    }),
+    [widget?.config]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -51,7 +54,7 @@ export default function WidgetResourcesMapButton() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     updateConfig({ [category]: values });

@@ -18,7 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -35,10 +35,13 @@ export default function BegrootmoduleAuthentication() {
     isLoading: isLoadingWidget,
     updateConfig,
   } = useWidgetConfig();
-  const defaults = () => ({
-    authEmbedded: widget?.config?.[category]?.authEmbedded || 'no',
-    scrollBack: widget?.config?.[category]?.scrollBack || false,
-  });
+  const defaults = useCallback(
+    () => ({
+      authEmbedded: widget?.config?.[category]?.authEmbedded || 'no',
+      scrollBack: widget?.config?.[category]?.scrollBack || false,
+    }),
+    [widget?.config]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -47,7 +50,7 @@ export default function BegrootmoduleAuthentication() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     updateConfig({ [category]: values });

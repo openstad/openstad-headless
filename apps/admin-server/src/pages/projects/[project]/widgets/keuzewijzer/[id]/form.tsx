@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Button } from '../../../../../../components/ui/button';
 import { Input } from '../../../../../../components/ui/input';
 import {
@@ -44,21 +44,24 @@ export default function ChoicesSelectorForm() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    questionsOnPage: widget?.config?.selectionGuide?.questionsOnPage || 100,
-    preferences: widget?.config?.[category]?.preferences || 'standard',
-    display: widget?.config?.[category]?.display || '16:9',
-    titlePreference:
-      widget?.config?.[category]?.titlePreference ||
-      'Jouw voorkeur is {preferredChoice}.',
-    titleNoPreference:
-      widget?.config?.[category]?.titleNoPreference ||
-      'Je hebt nog geen keuze gemaakt.',
-    keuzewijzer: widget?.config?.[category]?.keuzewijzer || '',
-    startHalfway: widget?.config?.[category]?.startHalfway || '',
-    urlStartPage: widget?.config?.[category]?.urlStartPage || '',
-    urlResultPage: widget?.config?.[category]?.urlResultPage || '',
-  });
+  const defaults = useCallback(
+    () => ({
+      questionsOnPage: widget?.config?.selectionGuide?.questionsOnPage || 100,
+      preferences: widget?.config?.[category]?.preferences || 'standard',
+      display: widget?.config?.[category]?.display || '16:9',
+      titlePreference:
+        widget?.config?.[category]?.titlePreference ||
+        'Jouw voorkeur is {preferredChoice}.',
+      titleNoPreference:
+        widget?.config?.[category]?.titleNoPreference ||
+        'Je hebt nog geen keuze gemaakt.',
+      keuzewijzer: widget?.config?.[category]?.keuzewijzer || '',
+      startHalfway: widget?.config?.[category]?.startHalfway || '',
+      urlStartPage: widget?.config?.[category]?.urlStartPage || '',
+      urlResultPage: widget?.config?.[category]?.urlResultPage || '',
+    }),
+    [widget?.config]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -67,7 +70,7 @@ export default function ChoicesSelectorForm() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     updateConfig({ [category]: values });

@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -34,14 +34,17 @@ export default function BegrootmoduleLabels() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    labelOpen: widget?.config?.[category]?.labelOpen || '',
-    labelClosed: widget?.config?.[category]?.labelClosed || '',
-    labelAccepted: widget?.config?.[category]?.labelAccepted || '',
-    labelDenied: widget?.config?.[category]?.labelDenied || '',
-    labelBusy: widget?.config?.[category]?.labelBusy || '',
-    labelDone: widget?.config?.[category]?.labelDone || '',
-  });
+  const defaults = useCallback(
+    () => ({
+      labelOpen: widget?.config?.[category]?.labelOpen || '',
+      labelClosed: widget?.config?.[category]?.labelClosed || '',
+      labelAccepted: widget?.config?.[category]?.labelAccepted || '',
+      labelDenied: widget?.config?.[category]?.labelDenied || '',
+      labelBusy: widget?.config?.[category]?.labelBusy || '',
+      labelDone: widget?.config?.[category]?.labelDone || '',
+    }),
+    [widget?.config]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -50,7 +53,7 @@ export default function BegrootmoduleLabels() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     updateConfig({ [category]: values });
