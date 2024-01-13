@@ -1,0 +1,63 @@
+---
+{{- if .Values.image.ingress.enabled -}}
+{{ $serviceName := include "openstad.image.fullname" . }}
+{{ $servicePort := .Values.image.service.httpPort }}
+{{ $tls := .Values.image.ingress.tls }}
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+
+{{- if .Values.image.ingress.annotations }}
+  annotations:
+    {{- if .Values.clusterIssuer.enabled }}
+    cert-manager.io/cluster-issuer: {{ template "openstad.clusterIssuer.name" . }}
+    {{- end }}
+{{ toYaml .Values.image.ingress.annotations | indent 4 }}
+{{- end }}
+
+  labels:
+  {{- include "openstad.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ template "openstad.image.fullname" . }}-ingress
+{{- range $key, $value := .Values.image.ingress.extraLabels }}
+  {{ $key }}: {{ $value }}
+{{- end }}
+
+  name: {{ template "openstad.image.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+
+spec:
+  rules:
+{{- range $host := .Values.image.ingress.hosts }}
+    - host: {{ 1 }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $serviceName }}
+                port:
+                  number: {{ $servicePort }}
+{{- end }}
+    - host: {{ template "openstad.image.url" . }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $serviceName }}
+                port:
+                  number: {{ $servicePort }}
+
+  tls:
+    - secretName: {{ .Values.image.ingress.tls.secretName }}
+      hosts:
+        - {{ template "openstad.image.url" . }}
+  {{- range $value := .Values.image.ingress.tls.hosts -}}
+        - {{ $value }}
+  {{- end -}}
+
+{{- end -}}

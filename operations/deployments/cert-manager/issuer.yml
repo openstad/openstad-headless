@@ -1,0 +1,15 @@
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: openstad-letsencrypt-prod
+spec:
+  acme:
+    email: info@openstad.org
+    privateKeySecretRef:
+      name: openstad-letsencrypt-prod
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
