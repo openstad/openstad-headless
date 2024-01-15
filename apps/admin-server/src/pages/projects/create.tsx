@@ -61,6 +61,8 @@ export default function CreateProject() {
     if (project) {
       toast.success('Project aangemaakt!');
       router.push(`/projects/${project.id}/widgets`);
+    } else {
+      toast.error('Er is helaas iets mis gegaan.')
     }
   }
 

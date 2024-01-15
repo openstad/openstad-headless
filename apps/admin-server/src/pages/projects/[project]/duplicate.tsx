@@ -17,6 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -64,6 +65,7 @@ export default function ProjectDuplicate() {
       },
       body: JSON.stringify(duplicateData),
     });
+    toast.success('Er is een kopie van het project aangemaakt.')
     router.push('/projects');
   }
 

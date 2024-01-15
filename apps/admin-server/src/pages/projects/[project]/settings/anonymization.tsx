@@ -21,6 +21,7 @@ import { useProject } from '../../../../hooks/use-project';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   anonymizeUsersXDaysAfterEndDate: z.coerce.number(),
@@ -83,9 +84,14 @@ export default function ProjectSettingsAnonymization() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await updateProject({
+      const project = await updateProject({
         [category]: values,
       });
+      if (project) {
+        toast.success('Codes aangemaakt!');
+      } else {
+        toast.error('Er is helaas iets mis gegaan.')
+      }
     } catch (error) {
       console.error('Could not update', error);
     }

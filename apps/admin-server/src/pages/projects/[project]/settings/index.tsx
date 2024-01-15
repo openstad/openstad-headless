@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -70,7 +71,7 @@ export default function ProjectSettings() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const name = values.name;
     try {
-      await updateProject(
+      const project = await updateProject(
         {
           project: {
             endDate: values.endDate,
@@ -82,6 +83,11 @@ export default function ProjectSettings() {
         },
         name
       );
+      if (project) {
+        toast.success('Codes aangemaakt!');
+      } else {
+        toast.error('Er is helaas iets mis gegaan.')
+      }
     } catch (error) {
       console.error('could not update', error);
     }
