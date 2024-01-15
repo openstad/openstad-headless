@@ -23,9 +23,10 @@ import {
 } from '@/components/ui/select';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   isViewable: z.boolean(),
@@ -49,15 +50,18 @@ export default function ProjectSettingsVoting() {
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading, updateProject } = useProject();
-  const defaults = () => ({
-    isViewable: data?.config?.[category]?.isViewable || false,
-    isActive: data?.config?.[category]?.isActive || false,
-    withExisting: data?.config?.[category]?.withExisting || null,
-    requiredUserRole: data?.config?.[category]?.requiredUserRole || null,
-    voteType: data?.config?.[category]?.voteType || null,
-    minResources: data?.config?.[category]?.minResources || null,
-    maxResources: data?.config?.[category]?.maxResources || null,
-  });
+  const defaults = useCallback(
+    () => ({
+      isViewable: data?.config?.[category]?.isViewable || false,
+      isActive: data?.config?.[category]?.isActive || false,
+      withExisting: data?.config?.[category]?.withExisting || null,
+      requiredUserRole: data?.config?.[category]?.requiredUserRole || null,
+      voteType: data?.config?.[category]?.voteType || null,
+      minResources: data?.config?.[category]?.minResources || null,
+      maxResources: data?.config?.[category]?.maxResources || null,
+    }),
+    [data?.config]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -66,11 +70,11 @@ export default function ProjectSettingsVoting() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [data]);
+  }, [form, defaults]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await updateProject({
+      const project = await updateProject({
         [category]: {
           isViewable: values.isViewable,
           isActive: values.isActive,
@@ -81,6 +85,11 @@ export default function ProjectSettingsVoting() {
           maxResources: values.maxResources,
         },
       });
+      if (project) {
+        toast.success('Codes aangemaakt!');
+      } else {
+        toast.error('Er is helaas iets mis gegaan.')
+      }
     } catch (error) {
       console.error('could not update', error);
     }

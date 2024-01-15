@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -39,11 +39,14 @@ export default function WidgetResourceFormInfo() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    viewable: widget?.config?.[category]?.viewable || 'users',
-    nameInHeader: widget?.config?.[category]?.nameInHeader || false,
-    loginText: widget?.config?.[category]?.loginText || '',
-  });
+  const defaults = useCallback(
+    () => ({
+      viewable: widget?.config?.[category]?.viewable || 'users',
+      nameInHeader: widget?.config?.[category]?.nameInHeader || false,
+      loginText: widget?.config?.[category]?.loginText || '',
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -60,7 +63,7 @@ export default function WidgetResourceFormInfo() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">

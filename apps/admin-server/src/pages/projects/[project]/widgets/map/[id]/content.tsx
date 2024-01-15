@@ -19,7 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -46,26 +46,29 @@ export default function WidgetMapContent() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    noSelectionLoggedInHTML:
-      widget?.config?.[category]?.noSelectionLoggedInHTML || '',
-    noSelectionNotLoggedInHTML:
-      widget?.config?.[category]?.noSelectionNotLoggedInHTML || '',
-    showNoSelectionBlock:
-      widget?.config?.[category]?.showNoSelectionBlock || false,
-    selectionActiveLoggedInHTML:
-      widget?.config?.[category]?.selectionActiveLoggedInHTML || '',
-    selectionInactiveLoggedInHTML:
-      widget?.config?.[category]?.selectionInactiveLoggedInHTML || '',
-    mobilePreviewLoggedInHTML:
-      widget?.config?.[category]?.mobilePreviewLoggedInHTML || '',
-    selectionActiveNotLoggedInHTML:
-      widget?.config?.[category]?.selectionActiveNotLoggedInHTML || '',
-    selectionInactiveNotLoggedInHTML:
-      widget?.config?.[category]?.selectionInactiveNotLoggedInHTML || '',
-    mobilePreviewNotLoggedInHTML:
-      widget?.config?.[category]?.mobilePreviewNotLoggedInHTML || '',
-  });
+  const defaults = useCallback(
+    () => ({
+      noSelectionLoggedInHTML:
+        widget?.config?.[category]?.noSelectionLoggedInHTML || '',
+      noSelectionNotLoggedInHTML:
+        widget?.config?.[category]?.noSelectionNotLoggedInHTML || '',
+      showNoSelectionBlock:
+        widget?.config?.[category]?.showNoSelectionBlock || false,
+      selectionActiveLoggedInHTML:
+        widget?.config?.[category]?.selectionActiveLoggedInHTML || '',
+      selectionInactiveLoggedInHTML:
+        widget?.config?.[category]?.selectionInactiveLoggedInHTML || '',
+      mobilePreviewLoggedInHTML:
+        widget?.config?.[category]?.mobilePreviewLoggedInHTML || '',
+      selectionActiveNotLoggedInHTML:
+        widget?.config?.[category]?.selectionActiveNotLoggedInHTML || '',
+      selectionInactiveNotLoggedInHTML:
+        widget?.config?.[category]?.selectionInactiveNotLoggedInHTML || '',
+      mobilePreviewNotLoggedInHTML:
+        widget?.config?.[category]?.mobilePreviewNotLoggedInHTML || '',
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -82,7 +85,7 @@ export default function WidgetMapContent() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">

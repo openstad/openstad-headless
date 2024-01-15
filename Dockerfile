@@ -49,6 +49,11 @@ ENV WORKSPACE apps/${APP}
 
 WORKDIR /opt/openstad-headless
 
+RUN apt-get update && \
+    apt-get install -y netcat-traditional && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # copy files
 COPY --from=prepare-production --chown=node:node /opt/openstad-headless/apps/${APP} ./apps/${APP}
 

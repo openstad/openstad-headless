@@ -22,6 +22,8 @@ let sequelize = new Sequelize({
   dialect: process.env.DB_DIALECT || 'mysql',
   dialectOptions,
 
+  dialectModule: require('mysql2'),
+
   logging: null,
   // logging: console.log,
 

@@ -12,6 +12,7 @@ export default function useResources(props) {
     'resources.fetch'
   );
 
+
   // add functionality
   let resources = data || [];
   resources.create = function (newData) {

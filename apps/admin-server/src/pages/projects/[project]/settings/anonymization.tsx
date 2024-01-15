@@ -15,12 +15,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   anonymizeUsersXDaysAfterEndDate: z.coerce.number(),
@@ -45,21 +46,27 @@ export default function ProjectSettingsAnonymization() {
     updateProjectEmails,
     anonymizeUsersOfProject,
   } = useProject();
-  const defaults = () => ({
-    anonymizeUsersXDaysAfterEndDate:
-      data?.config?.[category]?.anonymizeUsersXDaysAfterEndDate || null,
-    warnUsersAfterXDaysOfInactivity:
-      data?.config?.[category]?.warnUsersAfterXDaysOfInactivity || null,
-    anonymizeUsersAfterXDaysOfInactivity:
-      data?.config?.[category]?.anonymizeUsersAfterXDaysOfInactivity || null,
-  });
+  const defaults = useCallback(
+    () => ({
+      anonymizeUsersXDaysAfterEndDate:
+        data?.config?.[category]?.anonymizeUsersXDaysAfterEndDate || null,
+      warnUsersAfterXDaysOfInactivity:
+        data?.config?.[category]?.warnUsersAfterXDaysOfInactivity || null,
+      anonymizeUsersAfterXDaysOfInactivity:
+        data?.config?.[category]?.anonymizeUsersAfterXDaysOfInactivity || null,
+    }),
+    [data?.config]
+  );
 
-  const emailDefaults = () => ({
-    subject:
-      data?.emailConfig?.[category]?.inactiveWarningEmail?.subject || null,
-    template:
-      data?.emailConfig?.[category]?.inactiveWarningEmail?.template || null,
-  });
+  const emailDefaults = useCallback(
+    () => ({
+      subject:
+        data?.emailConfig?.[category]?.inactiveWarningEmail?.subject || null,
+      template:
+        data?.emailConfig?.[category]?.inactiveWarningEmail?.template || null,
+    }),
+    [data?.emailConfig]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -73,13 +80,18 @@ export default function ProjectSettingsAnonymization() {
 
   useEffect(() => {
     form.reset(defaults()), emailForm.reset(emailDefaults());
-  }, [data]);
+  }, [form, defaults, emailForm, emailDefaults]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await updateProject({
+      const project = await updateProject({
         [category]: values,
       });
+      if (project) {
+        toast.success('Codes aangemaakt!');
+      } else {
+        toast.error('Er is helaas iets mis gegaan.')
+      }
     } catch (error) {
       console.error('Could not update', error);
     }
@@ -241,8 +253,8 @@ export default function ProjectSettingsAnonymization() {
                   <b> kan niet ongedaan gemaakt worden</b>.
                 </div>
                 <div className="mt-2">
-                  Het project moet eerst aangemerkt staan als beëindigd
-                  voordat deze actie uitgevoerd kan worden.
+                  Het project moet eerst aangemerkt staan als beëindigd voordat
+                  deze actie uitgevoerd kan worden.
                 </div>
                 <Button
                   variant={'destructive'}
