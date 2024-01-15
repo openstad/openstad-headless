@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
@@ -21,7 +21,13 @@ import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
 import { SimpleCalendar } from '@/components/simple-calender-popup';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -40,14 +46,17 @@ export default function ProjectSettings() {
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading, updateProject } = useProject();
-  const defaults = () => ({
-    name: data?.name || null,
-    endDate: data?.config?.project?.endDate
-      ? new Date(data?.config?.project?.endDate)
-      : new Date(),
-    enableLikes: data?.config?.resources?.enableLikes || null,
-    enableReactions: data?.config?.resources?.enableReactions || null,
-  });
+  const defaults = useCallback(
+    () => ({
+      name: data?.name || null,
+      endDate: data?.config?.project?.endDate
+        ? new Date(data?.config?.project?.endDate)
+        : new Date(),
+      enableLikes: data?.config?.resources?.enableLikes || null,
+      enableReactions: data?.config?.resources?.enableReactions || null,
+    }),
+    [data?.name, data?.config]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -55,8 +64,8 @@ export default function ProjectSettings() {
   });
 
   useEffect(() => {
-    form.reset(defaults());
-  }, [data?.config]);
+    form.reset();
+  }, [form, defaults]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const name = values.name;
@@ -69,7 +78,7 @@ export default function ProjectSettings() {
           resources: {
             enableLikes: values.enableLikes,
             enableReactions: values.enableReactions,
-          }
+          },
         },
         name
       );

@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -31,11 +31,15 @@ export default function WidgetResourcesMapContent() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    showResources: widget?.config?.[category]?.showResources || '',
-    excludeResources: widget?.config?.[category]?.excludeResources || '',
-    showResourcesFromTheme: widget?.config?.[category]?.showResourcesFromTheme || '',
-  });
+  const defaults = useCallback(
+    () => ({
+      showResources: widget?.config?.[category]?.showResources || '',
+      excludeResources: widget?.config?.[category]?.excludeResources || '',
+      showResourcesFromTheme:
+        widget?.config?.[category]?.showResourcesFromTheme || '',
+    }),
+    [widget?.config]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -44,7 +48,7 @@ export default function WidgetResourcesMapContent() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     updateConfig({ [category]: values });

@@ -30,16 +30,15 @@ const formSchema = z.object({
 
 export default function ProjectSettingsResourceLabels() {
   const { data, isLoading } = useProject();
-  const defaults = () => ({});
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {},
   });
 
   useEffect(() => {
-    form.reset(defaults());
-  }, [data]);
+    form.reset();
+  }, [form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);

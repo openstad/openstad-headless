@@ -18,26 +18,32 @@ import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
 import useTag from '@/hooks/use-tag';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
 const formSchema = z.object({
-    name: z.string(),
-    type: z.string(),
-    seqnr: z.coerce.number()
+  name: z.string(),
+  type: z.string(),
+  seqnr: z.coerce.number(),
 });
 
 export default function ProjectTagEdit() {
   const router = useRouter();
   console.log(router);
   const { project, tag } = router.query;
-  const { data, isLoading, updateTag } = useTag(project as string, tag as string);
+  const { data, isLoading, updateTag } = useTag(
+    project as string,
+    tag as string
+  );
 
-  const defaults = () => ({
-    name: data?.name || null,
-    type: data?.type || null,
-    seqnr: data?.seqnr || null,
-  })
-    
+  const defaults = useCallback(
+    () => ({
+      name: data?.name || null,
+      type: data?.type || null,
+      seqnr: data?.seqnr || null,
+    }),
+    [data]
+  );
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {},
@@ -49,7 +55,7 @@ export default function ProjectTagEdit() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [data]);
+  }, [form, defaults]);
 
   return (
     <div>
@@ -65,7 +71,7 @@ export default function ProjectTagEdit() {
             url: `/projects/${project}/tags`,
           },
           {
-            name: "Tag aanpassen",
+            name: 'Tag aanpassen',
             url: `/projects/${project}/tags/${tag}`,
           },
         ]}>

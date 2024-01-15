@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
 
@@ -31,11 +31,14 @@ export default function ProjectSettingsNotifications() {
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading, updateProjectEmails } = useProject();
-  const defaults = () => ({
-    fromAddress: data?.emailConfig?.[category]?.fromAddress || null,
-    projectmanagerAddress:
-      data?.emailConfig?.[category]?.projectmanagerAddress || null,
-  });
+  const defaults = useCallback(
+    () => ({
+      fromAddress: data?.emailConfig?.[category]?.fromAddress || null,
+      projectmanagerAddress:
+        data?.emailConfig?.[category]?.projectmanagerAddress || null,
+    }),
+    [data?.emailConfig]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -44,7 +47,7 @@ export default function ProjectSettingsNotifications() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [data]);
+  }, [form, defaults]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {

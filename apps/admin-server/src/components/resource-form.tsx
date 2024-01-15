@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
@@ -94,36 +94,39 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     id as string
   );
 
-  const defaults = (): FormType => ({
-    userId: existingData?.userId || undefined,
+  const defaults = useCallback(
+    (): FormType => ({
+      userId: existingData?.userId || undefined,
 
-    title: existingData?.title || '',
-    summary: existingData?.summary || '',
-    description: existingData?.description || '',
+      title: existingData?.title || '',
+      summary: existingData?.summary || '',
+      description: existingData?.description || '',
 
-    budgetMin: existingData?.budget?.min || undefined,
-    budgetMax: existingData?.budget?.max || undefined,
-    budgetInterval: existingData?.budget?.interval || undefined,
+      budgetMin: existingData?.budget?.min || undefined,
+      budgetMax: existingData?.budget?.max || undefined,
+      budgetInterval: existingData?.budget?.interval || undefined,
 
-    startDate: existingData?.startDate
-      ? new Date(existingData?.startDate)
-      : new Date(),
-    publishDate: existingData?.publishDate
-      ? new Date(existingData.publishDate)
-      : undefined,
+      startDate: existingData?.startDate
+        ? new Date(existingData?.startDate)
+        : new Date(),
+      publishDate: existingData?.publishDate
+        ? new Date(existingData.publishDate)
+        : undefined,
 
-    modBreak: existingData?.modBreak || '',
-    modBreakUserId: existingData?.modBreakUserId || undefined,
-    modBreakDate: existingData?.modBreakDate
-      ? new Date(existingData.modBreakDate)
-      : undefined,
+      modBreak: existingData?.modBreak || '',
+      modBreakUserId: existingData?.modBreakUserId || undefined,
+      modBreakDate: existingData?.modBreakDate
+        ? new Date(existingData.modBreakDate)
+        : undefined,
 
-    location: existingData?.location || '',
-    images: existingData?.images || [],
-    extraData: {
-      originalId: existingData?.extraData?.originalId || undefined,
-    },
-  });
+      location: existingData?.location || '',
+      images: existingData?.images || [],
+      extraData: {
+        originalId: existingData?.extraData?.originalId || undefined,
+      },
+    }),
+    [existingData]
+  );
 
   const form = useForm<FormType>({
     resolver: zodResolver<any>(formSchema),
@@ -145,7 +148,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     if (existingData) {
       form.reset(defaults());
     }
-  }, [existingData]);
+  }, [existingData, form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">

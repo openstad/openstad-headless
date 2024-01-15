@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -40,15 +40,19 @@ export default function BegrootmoduleDisplay() {
     isLoading: isLoadingWidget,
     updateConfig,
   } = useWidgetConfig();
-  const defaults = () => ({
-    displayRanking: widget?.config?.[category]?.displayRanking || false,
-    displayPriceLabel: widget?.config?.[category]?.displayPriceLabel || false,
-    showVoteCount: widget?.config?.[category]?.showVoteCount || false,
-    unavailableButton:
-      widget?.config?.[category]?.unavailableButton || 'Geen ruimte',
-    originalResource: widget?.config?.[category]?.originalResource || false,
-    originalResourceUrl: widget?.config?.[category]?.originalResourceUrl || '',
-  });
+  const defaults = useCallback(
+    () => ({
+      displayRanking: widget?.config?.[category]?.displayRanking || false,
+      displayPriceLabel: widget?.config?.[category]?.displayPriceLabel || false,
+      showVoteCount: widget?.config?.[category]?.showVoteCount || false,
+      unavailableButton:
+        widget?.config?.[category]?.unavailableButton || 'Geen ruimte',
+      originalResource: widget?.config?.[category]?.originalResource || false,
+      originalResourceUrl:
+        widget?.config?.[category]?.originalResourceUrl || '',
+    }),
+    [widget?.config]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -57,7 +61,7 @@ export default function BegrootmoduleDisplay() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     updateConfig({ [category]: values });

@@ -21,7 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -62,14 +62,17 @@ export default function WidgetMapDetails() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    template:
-      widget?.config?.[category]?.template ||
-      '<span class="ocs-gray-text">Door </span>{username} <span class="ocs-gray-text"> op </span>{createDate} <span class="ocs-gray-text">&nbsp;&nbsp;|&nbsp;&nbsp;</span> <span class="ocs-gray-text">Thema: </span>{theme}',
-    link: widget?.config?.[category]?.link || '',
-    displayShare: widget?.config?.[category]?.displayShare || false,
-    selectableOptions: widget?.config?.[category]?.selectableOptions || [],
-  });
+  const defaults = useCallback(
+    () => ({
+      template:
+        widget?.config?.[category]?.template ||
+        '<span class="ocs-gray-text">Door </span>{username} <span class="ocs-gray-text"> op </span>{createDate} <span class="ocs-gray-text">&nbsp;&nbsp;|&nbsp;&nbsp;</span> <span class="ocs-gray-text">Thema: </span>{theme}',
+      link: widget?.config?.[category]?.link || '',
+      displayShare: widget?.config?.[category]?.displayShare || false,
+      selectableOptions: widget?.config?.[category]?.selectableOptions || [],
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -86,7 +89,7 @@ export default function WidgetMapDetails() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">

@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -35,14 +35,17 @@ export default function WidgetResourceOverviewLabel() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    labelOpen: widget?.config?.[category]?.labelOpen || '',
-    labelClosed: widget?.config?.[category]?.labelClosed || '',
-    labelAccepted: widget?.config?.[category]?.labelAccepted || '',
-    labelDenied: widget?.config?.[category]?.labelDenied || '',
-    labelBusy: widget?.config?.[category]?.labelBusy || '',
-    labelDone: widget?.config?.[category]?.labelDone || '',
-  });
+  const defaults = useCallback(
+    () => ({
+      labelOpen: widget?.config?.[category]?.labelOpen || '',
+      labelClosed: widget?.config?.[category]?.labelClosed || '',
+      labelAccepted: widget?.config?.[category]?.labelAccepted || '',
+      labelDenied: widget?.config?.[category]?.labelDenied || '',
+      labelBusy: widget?.config?.[category]?.labelBusy || '',
+      labelDone: widget?.config?.[category]?.labelDone || '',
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -59,7 +62,7 @@ export default function WidgetResourceOverviewLabel() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">

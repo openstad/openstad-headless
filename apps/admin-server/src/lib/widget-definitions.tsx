@@ -7,6 +7,7 @@ export const WidgetDefinitions = {
   map: 'Map',
   resourceform: 'Resource form',
   resourceoverview: 'Resource overview',
+  resourcedetail: 'Resource detail',
 };
 
 export type WidgetDefinition = keyof typeof WidgetDefinitions;

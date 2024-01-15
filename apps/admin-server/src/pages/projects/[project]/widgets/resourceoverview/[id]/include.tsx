@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -32,11 +32,14 @@ export default function WidgetResourceOverviewInclude() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    excludeTheme: widget?.config?.[category]?.excludeTheme || '',
-    filterTheme: widget?.config?.[category]?.filterTheme || '',
-    filterResource: widget?.config?.[category]?.filterResource || '',
-  });
+  const defaults = useCallback(
+    () => ({
+      excludeTheme: widget?.config?.[category]?.excludeTheme || '',
+      filterTheme: widget?.config?.[category]?.filterTheme || '',
+      filterResource: widget?.config?.[category]?.filterResource || '',
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -53,7 +56,7 @@ export default function WidgetResourceOverviewInclude() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">
