@@ -4,7 +4,7 @@ import useSWR from 'swr';
 export default function useCurrentUser(props) {
   let self = this;
 
-  const projectId = props.projectId || props.config?.projectId;
+  const projectId = props.projectId;
 
   const { data, error, isLoading } = useSWR(
     { type: 'current-user', projectId: self.projectId },
@@ -19,7 +19,7 @@ export default function useCurrentUser(props) {
     }
 
     // get user from props
-    let initialUser = props.openStadUser || props.config?.openStadUser || {};
+    let initialUser = props.openStadUser || {};
 
     if (initialUser.id && initialUser.projectId == self.projectId) {
       return initialUser;

@@ -17,7 +17,7 @@ windowGlobal.OpenStadSWR = windowGlobal.OpenStadSWR || {}; // keys used, for for
 function DataStore(props = { config: {} }) {
   let self = this;
   self.api = new API(props);
-  self.projectId = props.projectId || props.config?.projectId;
+  self.projectId = props.projectId;
 
   // hooks
   self.useResource = useResource.bind(self);

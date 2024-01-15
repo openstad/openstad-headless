@@ -16,8 +16,8 @@ export default function singelton(props = { config: {} }) {
 function API(props = { config: {} }) {
   let self = this;
 
-  self.apiUrl = props.apiUrl || props.config.api?.url || null;
-  self.projectId = props.projectId || props.config?.projectId || 0;
+  self.apiUrl = props.apiUrl || null;
+  self.projectId = props.projectId || 0;
 
   self.fetch = fetchx.bind(self);
 
