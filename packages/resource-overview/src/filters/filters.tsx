@@ -31,7 +31,7 @@ export function Filters({
 }: Props) {
   const dataStore = new DataStore({
     projectId: props.projectId,
-    config: { api: props.api },
+    api: props.api,
   });
 
   const defaultFilter: {

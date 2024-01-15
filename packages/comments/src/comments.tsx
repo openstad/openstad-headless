@@ -42,7 +42,7 @@ function Comments({
 
   const datastore = new DataStore({
     projectId: props.projectId,
-    config: { api: props.api },
+    api: props.api,
   });
 
   const [currentUser, currentUserError, currentUserIsLoading] =

@@ -14,7 +14,7 @@ const windowGlobal = typeof window !== 'undefined' ? window : {};
 
 windowGlobal.OpenStadSWR = windowGlobal.OpenStadSWR || {}; // keys used, for forced updates
 
-function DataStore(props = { config: {} }) {
+function DataStore(props = {}) {
   let self = this;
   self.api = new API(props);
   self.projectId = props.projectId;
