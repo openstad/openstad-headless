@@ -26,6 +26,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   isViewable: z.boolean(),
@@ -73,7 +74,7 @@ export default function ProjectSettingsVoting() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await updateProject({
+      const project = await updateProject({
         [category]: {
           isViewable: values.isViewable,
           isActive: values.isActive,
@@ -84,6 +85,11 @@ export default function ProjectSettingsVoting() {
           maxResources: values.maxResources,
         },
       });
+      if (project) {
+        toast.success('Codes aangemaakt!');
+      } else {
+        toast.error('Er is helaas iets mis gegaan.')
+      }
     } catch (error) {
       console.error('could not update', error);
     }

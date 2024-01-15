@@ -20,6 +20,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Separator } from '@/components/ui/separator';
 import { useProject } from '@/hooks/use-project';
 import useCode from '@/hooks/use-code';
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   numberOfCodes: z.string(),
@@ -36,8 +37,13 @@ export default function ProjectCodeCreate() {
     defaultValues: {},
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    create(data.config.auth.provider.openstad.clientId, values.numberOfCodes)
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const codes = await create(data.config.auth.provider.openstad.clientId, values.numberOfCodes)
+    if (codes) {
+      toast.success('Codes aangemaakt!');
+    } else {
+      toast.error('Er is helaas iets mis gegaan.')
+    }
   }
     
   return (

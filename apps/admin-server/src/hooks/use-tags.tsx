@@ -13,6 +13,8 @@ export default function useTags(projectId?: string) {
       },
       body: JSON.stringify({ projectId, name, type, seqnr }),
     });
+
+    return await res.json();
   }
 
   async function removeTag(id: number) {

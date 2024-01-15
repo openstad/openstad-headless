@@ -27,6 +27,7 @@ import { useProject } from '../../../../../hooks/use-project';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import toast from 'react-hot-toast';
 
 const reactions = [
   {
@@ -100,7 +101,7 @@ export default function ProjectSettingsResourceGeneral() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await updateProject({
+      const project = await updateProject({
         [category]: {
           canAddNewResources: values.canAddNewResources,
           minimumYesVotes: values.minimumYesVotes,
@@ -117,6 +118,11 @@ export default function ProjectSettingsResourceGeneral() {
           reactionSettings: values.reactionSettings,
         },
       });
+      if (project) {
+        toast.success('Codes aangemaakt!');
+      } else {
+        toast.error('Er is helaas iets mis gegaan.')
+      }
     } catch (error) {
       console.error('could not update', error);
     }

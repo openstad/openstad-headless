@@ -18,6 +18,7 @@ import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
 import useTag from '@/hooks/use-tags';
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   name: z.string(),
@@ -35,9 +36,14 @@ export default function ProjectTagCreate() {
     defaultValues: {},
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    createTag(values.name, values.type, values.seqnr);
-    router.push(`/projects/${project}/tags`);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const tags = await createTag(values.name, values.type, values.seqnr);
+    if (tags) {
+      toast.success('Tag aangemaakt!');
+      router.push(`/projects/${project}/tags`);
+    } else {
+      toast.error('Er is helaas iets mis gegaan.')
+    }
   }
 
   return (

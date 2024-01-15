@@ -19,6 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
 import useTag from '@/hooks/use-tag';
 import { useCallback, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   name: z.string(),
@@ -49,8 +50,13 @@ export default function ProjectTagEdit() {
     defaultValues: {},
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    updateTag(values.name, values.type, values.seqnr);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const tag = await updateTag(values.name, values.type, values.seqnr);
+    if (tag) {
+      toast.success('Tag aangepast!');
+    } else {
+      toast.error('Er is helaas iets mis gegaan.')
+    }
   }
 
   useEffect(() => {

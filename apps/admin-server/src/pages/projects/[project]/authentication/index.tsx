@@ -26,6 +26,7 @@ import { Separator } from '@/components/ui/separator';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
+import toast from 'react-hot-toast';
 
 const availableAuthentication = [
   {
@@ -156,7 +157,7 @@ export default function ProjectAuthentication() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await updateProject({
+      const project = await updateProject({
         [category]: {
           availableAuthentication: values.availableAuthentication,
           twoFactorRoles: values.twoFactorRoles,
@@ -168,6 +169,9 @@ export default function ProjectAuthentication() {
           // emailHeader: values.emailHeader
         },
       });
+      if (project) {
+        toast.success('Het project is succesvol aangepast!')
+      }
     } catch (error) {
       console.error('could not update', error);
     }
