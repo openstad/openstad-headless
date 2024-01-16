@@ -4,8 +4,8 @@ export default function useResource(props) {
 
   let self = this;
 
-  const projectId = props.projectId || props.config.projectId;
-  const resourceId = props.resourceId || props.config.resourceId;
+  const projectId = props.projectId;
+  const resourceId = props.resourceId;
   const { data, error, isLoading } = self.useSWR({ projectId, resourceId }, 'resource.fetch');
 
   // add functionality

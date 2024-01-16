@@ -122,7 +122,7 @@ function ResourceOverview({
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
     projectId: props.projectId,
-    config: { api: props.api },
+    api: props.api,
   });
   const [resources] = datastore.useResources({ ...props });
 

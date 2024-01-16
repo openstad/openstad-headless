@@ -38,7 +38,7 @@ function Likes({
   // Pass explicitely because datastore is not ts, we will not get a hint if the props have changed
   const datastore = new DataStore({
     projectId: props.projectId,
-    config: { api: props.api },
+    api: props.api,
   });
 
   const session = new SessionStorage({ projectId: props.projectId });

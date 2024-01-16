@@ -13,11 +13,11 @@ export default function singelton(props = { config: {} }) {
   return (windowGlobal.OpenStadAPI = windowGlobal.OpenStadAPI || new API(props));
 }
 
-function API(props = { config: {} }) {
+function API(props = {}) {
   let self = this;
 
-  self.apiUrl = props.apiUrl || props.config.api?.url || null;
-  self.projectId = props.projectId || props.config?.projectId || 0;
+  self.apiUrl = props.apiUrl || props.api?.url || null;
+  self.projectId = props.projectId || 0;
 
   self.fetch = fetchx.bind(self);
 
