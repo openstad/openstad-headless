@@ -17,7 +17,14 @@ module.exports = {
       },
     },
   },
-  ignorePatterns: ['node_modules/', 'dist/', 'vite.config.ts'],
+
+  ignorePatterns: [
+    'node_modules/',
+    'dist/',
+    'vite.config.ts',
+    'vite-env.d.ts',
+    '/src/main.tsx',
+  ],
   rules: {
     'unicorn/filename-case': ['off'],
     '@typescript-eslint/explicit-function-return-type': ['off'],
