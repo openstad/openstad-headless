@@ -20,7 +20,13 @@
       "noUnusedParameters": true,
       "noFallthroughCasesInSwitch": true,
     },
-    "include": ["../**/src/**/*.tsx", "../**/src/**/*.ts"],
+
+    "include": ["next-env.d.ts",  "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    "types/**/*.d.ts"],
     "exclude": ["**/node_modules", "next-env.d.ts", "../**/src/main.tsx"],
   }
   

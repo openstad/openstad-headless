@@ -1,6 +1,6 @@
 const { resolve } = require('node:path');
 
-const project = resolve(process.cwd(), 'tsconfig.json');
+// const project = resolve(process.cwd(), 'tsconfig.json');
 
 module.exports = {
   extends: [
@@ -8,16 +8,15 @@ module.exports = {
     '@vercel/style-guide/eslint/typescript',
   ].map(require.resolve),
   parserOptions: {
-    project,
+    project: ['../configs/tsconfig.eslint.json'],
   },
   settings: {
     'import/resolver': {
       typescript: {
-        project,
+        project: ['../configs/tsconfig.eslint.json'],
       },
     },
   },
-
   ignorePatterns: [
     'node_modules/',
     'dist/',
