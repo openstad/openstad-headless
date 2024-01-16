@@ -87,7 +87,6 @@ function createMarker(resource) {
 	return {
 		id: resource.id,
 		location: resource.location,
-		position: resource.position,
 		icon     : {
 			url    : resource.status == 'DONE' || resource.status == 'ACCEPTED' || resource.status == 'BUSY' ? '/img/resource/flag-blue.svg' : ( resource.status == 'CLOSED' || resource.status == 'DENIED' ? '/img/resource/flag-gray.svg' : '/img/resource/flag-red.svg' ),
 			size   : [22, 24],
