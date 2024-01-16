@@ -1,5 +1,4 @@
 {
   "extends": "../configs/tsconfig",
-  "include": ["**/likes.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
