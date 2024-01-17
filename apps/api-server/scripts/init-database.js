@@ -1,4 +1,6 @@
-require('dotenv').config();
+require('dotenv').config({ path: '../../.env' })
+require('dotenv').config({ path: '.env' })
+
 const config = require('config');
 const db = require('../src/db');
 
