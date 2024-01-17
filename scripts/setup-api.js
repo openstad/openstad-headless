@@ -68,11 +68,11 @@ SMTP_PORT=${process.env.API_SMTP_PORT}
 SMTP_USERNAME=${process.env.API_SMTP_USERNAME}
 SMTP_PASSWORD=${process.env.API_SMTP_PASSWORD}
 
-AUTH_JWTSECRET=$process.env.{API_JWT_SECRET}
+AUTH_JWTSECRET=${process.env.API_JWT_SECRET}
 AUTH_ADAPTER_OPENSTAD_SERVERURL=${process.env.AUTH_APP_URL}
 AUTH_FIXEDAUTHTOKENS='[{"token":"${process.env.API_FIXED_AUTH_KEY}","userId":"1","authProvider":"openstad"}]'
 
-IMAGE_APP_URL=process.env.IMAGE_APP_URL
+IMAGE_APP_URL=${process.env.IMAGE_APP_URL}
 `
     if (actions['create config']) {
       console.log('------------------------------');
