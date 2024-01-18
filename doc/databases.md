@@ -36,7 +36,7 @@ npm run migrate-database
 ```
 can be run to update your cureent database to the newer version.
 
-A boilerplate magration file could look like this:
+A boilerplate migration file could look like this:
 ```
 const { Sequelize } = require('sequelize');
 
@@ -61,3 +61,5 @@ module.exports = {
   }
 };
 ```
+
+Filename convention is: sequence number + short description, e.g. `030-add-resource-example-fields`.
