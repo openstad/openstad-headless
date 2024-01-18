@@ -3,8 +3,14 @@ const db = require('../db');
 const { Umzug, SequelizeStorage } = require('umzug');
 
 const umzug = new Umzug({
-  migrations: { glob: './migrations/*.js' },
-  // context: db.sequelize.getQueryInterface(),
+  migrations: {
+    glob: './migrations/*.js',
+    params: [
+            db.sequelize.getQueryInterface(),
+            db.Sequelize // Sequelize constructor - the required module
+        ],
+     },
+  context: db.sequelize.getQueryInterface(),
   storage: new SequelizeStorage({ sequelize: db.sequelize, tableName : 'migrations' }),
   logger: console,
 });
