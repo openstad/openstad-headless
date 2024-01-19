@@ -133,12 +133,13 @@ const checkHostStatus = async (conditions) => {
           console.error('Error deleting ingress for ', project.name, ' domain: ', project.domain, ' :', error);
         }
       }
-    }
 
-    return await project.update({hostStatus});
-  });
+      return await project.update({hostStatus});
+    });
 
-  await Promise.all(promises);
+    await Promise.all(promises);
+
+  }
 
   // Todo: some output?
   console.log('all projects checked');
