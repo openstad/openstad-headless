@@ -5,13 +5,16 @@ import logger from '@/lib/logger';
 export default withAuth(
   function middleware(req) {
     if (req.nextUrl.pathname.startsWith('/api/openstad')) {
-      if (!req.nextauth.token?.accessToken) {
-        logger.error('No access token in JWT');
-        return NextResponse.json({ error: 'No access token' }, { status: 401 });
+
+      // deze afvanging moet op user role gaan werken denk ik maar waar vind ik de inglogde user data?
+      if (!req.isUserAdmin) {
+        logger.error('No admin user found');
+        return NextResponse.json({ error: 'No admin user found' }, { status: 401 });
       }
+
       logger.debug(
-        { Authorization: 'Bearer ' + req.nextauth.token?.accessToken },
-        'Rewrite with access token'
+        { Authorization: process.env.API_FIXED_AUTH_KEY },
+        'Rewrite with API_FIXED_AUTH_KEY'
       );
 
       const searchParams = req.nextUrl?.searchParams?.toString();
@@ -23,7 +26,7 @@ export default withAuth(
 
       return NextResponse.rewrite(rewrittenUrl, {
         headers: {
-          Authorization: 'Bearer ' + req.nextauth.token?.accessToken,
+          Authorization: '' + process.env.API_FIXED_AUTH_KEY, // '' + because of types...
         },
       });
     }
