@@ -88,6 +88,7 @@ router
       res.header('Content-Type', 'application/javascript');
       res.send(output);
     } catch (e) {
+      console.log(e)
       return next(
         createError(
           500,
@@ -143,6 +144,7 @@ router
       res.header('Content-Type', 'application/javascript');
       res.send(output);
     } catch (e) {
+      console.log(e);
       return next(
         createError(
           500,
