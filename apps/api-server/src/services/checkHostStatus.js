@@ -91,22 +91,23 @@ const checkHostStatus = async (conditions) => {
   const where = conditions ? conditions : {};
   const serverIp = process.env.PUBLIC_IP ? process.env.PUBLIC_IP : ip.address();
 
-  console.log('Server IP should be: ', serverIp, ' IP from env value is: ', process.env.PUBLIC_IP, ' npm thinks it is:', ip.address());
+  if (isOnK8s) {
 
-  const projects = await db.Project.findAll({where});
+    console.log('Server IP should be: ', serverIp, ' IP from env value is: ', process.env.PUBLIC_IP, ' npm thinks it is:', ip.address());
 
-  const promises = projects.map(async (project) => {
-    // Todo: skip the projects with hostStatus.status === true?
+    const projects = await db.Project.findAll({where});
 
-    let hostStatus = project.hostStatus;
-    //ensure it's an object so we dont have to worry about checks later
-    hostStatus = hostStatus ? hostStatus : {};          //
+    const promises = projects.map(async (project) => {
+      // Todo: skip the projects with hostStatus.status === true?
 
-    const domainIp = getDomainIp(project.domain);
+      let hostStatus = project.hostStatus;
+      //ensure it's an object so we dont have to worry about checks later
+      hostStatus = hostStatus ? hostStatus : {};          //
 
-    hostStatus.ip = domainIp !== null && domainIp === serverIp ? true : false;
+      const domainIp = getDomainIp(project.domain);
 
-    if (isOnK8s) {
+      hostStatus.ip = domainIp !== null && domainIp === serverIp ? true : false;
+
       const k8sApi = getK8sApi();
 
       // get ingress config files
@@ -132,12 +133,13 @@ const checkHostStatus = async (conditions) => {
           console.error('Error deleting ingress for ', project.name, ' domain: ', project.domain, ' :', error);
         }
       }
-    }
 
-    return await project.update({hostStatus});
-  });
+      return await project.update({hostStatus});
+    });
 
-  await Promise.all(promises);
+    await Promise.all(promises);
+
+  }
 
   // Todo: some output?
   console.log('all projects checked');
