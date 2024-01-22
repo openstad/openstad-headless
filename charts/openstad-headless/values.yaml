@@ -246,7 +246,7 @@ auth:
   # Default email settings
   fromName:
   fromEmail:
-  
+
   # Cookie settings
   cookie:
     secureOff:
@@ -313,7 +313,7 @@ image:
   replicas: 1
 
   # Configure how the service is named and labeled
-  name: "image"
+  name: 'image'
   label: openstad-image-service
 
   # Service settings:
@@ -389,6 +389,62 @@ image:
       size: 1Gi
       mountPath: /opt/openstad-headless/apps/image-server/images
 
+cms:
+  name: cms
+  label: openstad-cms-service
+  service:
+    httpPort: 31490
+
+  # Deployment container is what is eventually run in the pod
+  deploymentContainer:
+    name: cms-container
+    # Docker image for this pod
+    image: ghcr.io/openstad/cms-server:latest
+
+  # Subdomain for the service:
+  # If filled it it will create a default url of: www.$subdomain.$baseurl
+  # If not filled in the base will be used instead: www.$baseurl
+  subdomain: cms
+
+  # Ingress settings:
+  # Configure how the service is accessed
+  ingress:
+    enabled: true # Whether there is a ingress for this service
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/proxy-body-size: 128m
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        more_set_headers "X-Content-Type-Options: nosniff";
+        more_set_headers "X-Frame-Options: SAMEORIGIN";
+        more_set_headers "X-Xss-Protection: 1";
+        more_set_headers "Referrer-Policy: same-origin";
+    extraLabels: {}
+    hosts: []
+    tls:
+      secretName: openstad-tls-cms
+      hosts: []
+
+  # Inject extra environment variables
+  extraEnvVars: []
+
+  # Resources:
+  resources:
+    # Max resources
+    limits:
+      cpu: "1"
+      memory: 2Gi
+    # Min resources
+    requests:
+      cpu: 250m
+      memory: 500M
+
+  # Check whether the service is healthy:
+  # First time after $(initialDelaySeconds) seconds.
+  # After that every $(periodSeconds) seconds
+  probe:
+    liveness:
+      initialDelaySeconds: 30
+      periodSeconds: 60
 
 # Overwrite Secrets
 
@@ -403,9 +459,13 @@ secrets:
     clientSecret:
     nextauthSecret:
     imageApiToken:
-  
+
   api:
     jwtSecret:
+
+  cms:
+    apiKey:
+    mongodbUri:
 
   database:
     ### These values are for the MySQL db
@@ -463,10 +523,10 @@ secrets:
   ### Mail server secretes
   mail:
     host: smtp.localhost
-    port: "25"
+    port: '25'
     username: user
     password: password
-    
+
     auth:
       emailAssetsUrl:
       secure: 'yes'

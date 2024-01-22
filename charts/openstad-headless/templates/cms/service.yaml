@@ -1,0 +1,14 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ template "openstad.cms.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: {{ .Values.cms.label }}
+  ports:
+  - name: http
+    protocol: TCP
+    port: {{ .Values.cms.service.httpPort }}
+  type: ClusterIP
