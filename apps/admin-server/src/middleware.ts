@@ -7,9 +7,9 @@ export default withAuth(
     if (req.nextUrl.pathname.startsWith('/api/openstad')) {
 
       // deze afvanging moet op user role gaan werken denk ik maar waar vind ik de inglogde user data?
-      if (!req.isUserAdmin) {
-        logger.error('No admin user found');
-        return NextResponse.json({ error: 'No admin user found' }, { status: 401 });
+      if (!req.nextauth.token?.accessToken) {
+        logger.error('No access token in JWT');
+        return NextResponse.json({ error: 'No access token' }, { status: 401 });
       }
 
       logger.debug(
