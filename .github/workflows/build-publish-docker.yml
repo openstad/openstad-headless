@@ -10,7 +10,7 @@ jobs:
   build-and-push-docker-image:
     strategy:
       matrix:
-        app: [admin-server, api-server, auth-server, image-server]
+        app: [admin-server, api-server, auth-server, image-server, cms-server]
         include:
           - app: api-server
             build-target: release-with-packages
@@ -79,5 +79,6 @@ jobs:
           |---|---|
           | admin-server | \`ghcr.io/${{ github.repository_owner}}/admin-server:${{ needs.build-and-push-docker-image.outputs.image_tag }}\` |
           | api-server | \`ghcr.io/${{ github.repository_owner}}/api-server:${{ needs.build-and-push-docker-image.outputs.image_tag }}\` |
+          | cms-server | \`ghcr.io/${{ github.repository_owner}}/cms-server:${{ needs.build-and-push-docker-image.outputs.image_tag }}\` |
           | auth-server | \`ghcr.io/${{ github.repository_owner}}/auth-server:${{ needs.build-and-push-docker-image.outputs.image_tag }}\` |
           | image-server | \`ghcr.io/${{ github.repository_owner}}/image-server:${{ needs.build-and-push-docker-image.outputs.image_tag }}\` |" >> $GITHUB_STEP_SUMMARY

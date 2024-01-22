@@ -43,6 +43,13 @@ If release name contains chart name it will be used as a full name.
 {{- printf "%s-auth-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "openstad.cms.fullname" -}}
+{{- printf "%s-%s" (include "openstad.fullname" .) .Values.cms.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- define "openstad.cms.secret.fullname" -}}
+{{- printf "%s-cms-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{- define "openstad.admin.fullname" -}}
 {{- printf "%s-%s" (include "openstad.fullname" .) .Values.admin.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
@@ -132,19 +139,19 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 {{- end -}}
 
-{{- define "openstad.frontend.url" -}}
-{{- if .Values.frontend.subdomain -}}
-{{- if .Values.host.usewww -}}www.{{- end -}}{{ .Values.frontend.subdomain }}.{{ .Values.host.base }}
+{{- define "openstad.cms.url" -}}
+{{- if .Values.cms.subdomain -}}
+{{- if .Values.host.usewww -}}www.{{- end -}}{{ .Values.cms.subdomain }}.{{ .Values.host.base }}
 {{- else -}}
 {{- if .Values.host.usewww -}}www.{{- end -}}{{ .Values.host.base }}
 {{- end -}}
 {{- end -}}
 
-{{- define "openstad.frontend.urlwithWww" -}}
+{{- define "openstad.cms.urlwithWww" -}}
 www.{{ .Values.host.base }}
 {{- end -}}
 
-{{- define "openstad.frontend.urlwithoutWww" -}}
+{{- define "openstad.cms.urlwithoutWww" -}}
 {{ .Values.host.base }}
 {{- end -}}
 
