@@ -35,6 +35,7 @@ const fs = require('fs').promises;
   }
 
   const config = require('./config');
+  await config.create();
 
   try {
     let configfile = `
