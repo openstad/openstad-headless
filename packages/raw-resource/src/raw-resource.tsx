@@ -26,14 +26,12 @@ function RawResource(props: RawResourceWidgetProps) {
   return (
     <div className="osc">
       <Spacer size={2} />
-      <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
-        <article className="osc-resource-detail-content-items">
-          {props.stylingClasses && (
-            <div className={stylingClasses}>
-              {props?.rawInput || 'Ingevulde tekst komt hier'}
-            </div>
-          )}
-        </article>
+      <section className="osc-raw-resource-container">
+        {props.stylingClasses && (
+          <div className={stylingClasses}>
+            {props?.rawInput || 'Ingevulde tekst komt hier'}
+          </div>
+        )}
       </section>
     </div>
   );
