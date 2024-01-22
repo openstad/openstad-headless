@@ -38,7 +38,7 @@ export default function ProjectTagCreate() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const tags = await createTag(values.name, values.type, values.seqnr);
-    if (tags) {
+    if (tags && tags.status !== 500) {
       toast.success('Tag aangemaakt!');
       router.push(`/projects/${project}/tags`);
     } else {
