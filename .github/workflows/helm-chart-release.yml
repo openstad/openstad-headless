@@ -2,10 +2,11 @@ name: Release Helm Charts
 
 on:
   push:
-    # branches:
+    branches:
+      - '**'
     #   - main
-    paths:
-      - 'charts/**'
+    # paths:
+    #   - 'charts/**'
 
 jobs:
   release:
@@ -33,7 +34,7 @@ jobs:
       - name: Helm Deps
         run: |
           for dir in $(ls -d charts/*); do
-            helm dependency update $dir;
+          helm dependency update $dir;
           done
 
       - name: Run chart-releaser
