@@ -5,4 +5,4 @@ export const withApiUrl = (async () => {
   }) satisfies GetServerSideProps<{ apiUrl: string }>;
 
 
-export type InferredServerSideProps = InferGetServerSidePropsType<typeof withApiUrl>
+export type WithApiUrlProps = InferGetServerSidePropsType<typeof withApiUrl>

@@ -13,14 +13,14 @@ import WidgetResourcesMapCounter from './counter';
 import WidgetResourcesMapContent from './content';
 import { useRouter } from 'next/router';
 import Preview from '@/components/widget-preview';
-import { InferredServerSideProps, withApiUrl } from '@/lib/server-side-props-definition';
+import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
 import WidgetPublish from '@/components/widget-publish';
 
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetResourcesMap({
   apiUrl,
-}:InferredServerSideProps) {
+}:WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;

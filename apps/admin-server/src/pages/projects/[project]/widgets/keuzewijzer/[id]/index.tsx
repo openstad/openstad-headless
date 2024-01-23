@@ -9,13 +9,13 @@ import {
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
 import Preview from '@/components/widget-preview';
-import { InferredServerSideProps, withApiUrl } from '@/lib/server-side-props-definition';
+import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
 import WidgetPublish from '@/components/widget-publish';
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetKeuzewijzer({
   apiUrl,
-}: InferredServerSideProps) {
+}: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;

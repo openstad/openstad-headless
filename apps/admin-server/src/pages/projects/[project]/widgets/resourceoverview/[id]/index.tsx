@@ -21,13 +21,13 @@ import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { InferredServerSideProps, withApiUrl } from '@/lib/server-side-props-definition';
+import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
 
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetResourceOverview({
   apiUrl,
-}:InferredServerSideProps) {
+}:WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
