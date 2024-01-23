@@ -16,14 +16,13 @@ import WidgetMapFilter from './filter';
 import WidgetMapReaction from './reaction';
 import { useRouter } from 'next/router';
 import Preview from '@/components/widget-preview';
-import { InferGetServerSidePropsType } from 'next';
-import { withApiUrl } from '@/lib/server-side-props-definition';
+import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
 import WidgetPublish from '@/components/widget-publish';
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetMap({
   apiUrl,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+}: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
