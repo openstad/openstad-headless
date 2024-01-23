@@ -187,10 +187,10 @@ services:
       - CLIENT_SECRET=${AUTH_ADMIN_CLIENT_SECRET}
       - OAUTH_URL=${AUTH_APP_URL}
       - OAUTH_URL_INTERNAL=http://openstad-auth-server:${AUTH_PORT}
+      - API_URL=${API_URL}
       - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}
       - API_FIXED_AUTH_KEY=${API_FIXED_AUTH_KEY}
       - PORT=${ADMIN_PORT}
-      - API_URL=${API_URL}
     ports:
       - '${ADMIN_PORT}:${ADMIN_PORT}'
     volumes:
