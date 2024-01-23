@@ -16,8 +16,14 @@ import WidgetMapFilter from './filter';
 import WidgetMapReaction from './reaction';
 import { useRouter } from 'next/router';
 import Preview from '@/components/widget-preview';
+import { InferGetServerSidePropsType } from 'next';
+import { withApiUrl } from '@/lib/server-side-props-definition';
+import WidgetPublish from '@/components/widget-publish';
+export const getServerSideProps = withApiUrl;
 
-export default function WidgetMap() {
+export default function WidgetMap({
+  apiUrl,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
@@ -52,6 +58,7 @@ export default function WidgetMap() {
               <TabsTrigger value="details">Resource details</TabsTrigger>
               <TabsTrigger value="filter">Filterbalk</TabsTrigger>
               <TabsTrigger value="reaction">Reacties</TabsTrigger>
+              <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
               {/* <Preview type="map" /> */}
@@ -79,6 +86,9 @@ export default function WidgetMap() {
             </TabsContent>
             <TabsContent value="reaction" className="p-0">
               <WidgetMapReaction />
+            </TabsContent>
+            <TabsContent value="publish" className="p-0">
+              <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
           </Tabs>
         </div>

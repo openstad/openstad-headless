@@ -14,8 +14,13 @@ import WidgetPreview from '@/components/widget-preview';
 import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-
-export default function WidgetArguments() {
+import { InferredServerSideProps, withApiUrl } from '@/lib/server-side-props-definition';
+import WidgetPublish from '@/components/widget-publish';
+export const getServerSideProps = withApiUrl
+ 
+export default function WidgetArguments({
+  apiUrl
+}: InferredServerSideProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
@@ -51,6 +56,7 @@ export default function WidgetArguments() {
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="list">Lijst</TabsTrigger>
               <TabsTrigger value="form">Formulier</TabsTrigger>
+              <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig ? (
@@ -105,6 +111,9 @@ export default function WidgetArguments() {
                   }}
                 />
               ) : null}
+            </TabsContent>
+            <TabsContent value="publish" className="p-0">
+              <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
           </Tabs>
 

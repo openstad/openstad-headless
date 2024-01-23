@@ -8,15 +8,13 @@ import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { InferredServerSideProps, withApiUrl } from '@/lib/server-side-props-definition';
 
-export const getServerSideProps = (async () => {
-  return { props: { apiUrl: process.env.API_URL } };
-}) satisfies GetServerSideProps<{ apiUrl: string }>;
+export const getServerSideProps = withApiUrl;
 
 export default function WidgetLikes({
   apiUrl,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+}:InferredServerSideProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;

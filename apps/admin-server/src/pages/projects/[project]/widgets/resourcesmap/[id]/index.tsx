@@ -13,8 +13,14 @@ import WidgetResourcesMapCounter from './counter';
 import WidgetResourcesMapContent from './content';
 import { useRouter } from 'next/router';
 import Preview from '@/components/widget-preview';
+import { InferredServerSideProps, withApiUrl } from '@/lib/server-side-props-definition';
+import WidgetPublish from '@/components/widget-publish';
 
-export default function WidgetResourcesMap() {
+export const getServerSideProps = withApiUrl;
+
+export default function WidgetResourcesMap({
+  apiUrl,
+}:InferredServerSideProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
@@ -45,6 +51,7 @@ export default function WidgetResourcesMap() {
               <TabsTrigger value="button">Call-To-Action knop</TabsTrigger>
               <TabsTrigger value="counter">Teller</TabsTrigger>
               <TabsTrigger value="content">Content</TabsTrigger>
+              <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
               {/* <Preview type="resourcesmap" /> */}
@@ -61,7 +68,11 @@ export default function WidgetResourcesMap() {
             <TabsContent value="content" className="p-0">
               <WidgetResourcesMapContent />
             </TabsContent>
+            <TabsContent value="publish" className="p-0">
+              <WidgetPublish apiUrl={apiUrl} />
+            </TabsContent>
           </Tabs>
+
         </div>
       </PageLayout>
     </div>

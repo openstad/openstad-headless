@@ -13,8 +13,13 @@ import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import { ResourceDetailWidgetProps } from '@openstad/resource-detail/src/resource-detail';
 import WidgetPreview from '@/components/widget-preview';
-
-export default function WidgetResourceDetail() {
+import { InferredServerSideProps, withApiUrl } from '@/lib/server-side-props-definition';
+import WidgetPublish from '@/components/widget-publish';
+export const getServerSideProps = withApiUrl
+ 
+export default function WidgetResourceDetail({
+  apiUrl,
+}:InferredServerSideProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project as string;
@@ -49,6 +54,7 @@ export default function WidgetResourceDetail() {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="display">Display</TabsTrigger>
+              <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig && (
@@ -85,6 +91,9 @@ export default function WidgetResourceDetail() {
                   }}
                 />
               )}
+            </TabsContent>
+            <TabsContent value="publish" className="p-0">
+              <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
           </Tabs>
 
