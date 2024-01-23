@@ -28,7 +28,7 @@ NODE_ENV=development npm run init-databases
 
 ### Database migration
 
-Updates to the database, that is: changes in the models, should be done through a file in the `./migrations` directory; look at a file there to see the required structure.
+Updates to the database, that is: changes in the models, should be done through a file in the `./migrations` directory.
 
 The command 
 ```
@@ -36,4 +36,30 @@ npm run migrate-database
 ```
 can be run to update your cureent database to the newer version.
 
+A boilerplate migration file could look like this:
+```
+const { Sequelize } = require('sequelize');
 
+module.exports = {
+  async up ({ context: queryInterface }) {
+    await queryInterface.addColumn( 'resources', 'example1', {
+      type: Sequelize.JSON,
+      defaultValue: {},
+      allowNull: false,
+      after: 'extraData'
+    });
+    await queryInterface.addColumn( 'resources', 'example2', {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      after: 'example1'
+    });
+  },
+
+  async down ({ context: queryInterface }) {
+    queryInterface.removeColumn( 'resources', 'example1' );
+    queryInterface.removeColumn( 'resources', 'example2' );
+  }
+};
+```
+
+Filename convention is: sequence number + short description, e.g. `030-add-resource-example-fields`.

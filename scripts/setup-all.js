@@ -26,6 +26,8 @@ let modules = [
 
 async function init() {
 
+  await config.create();
+
   let actions = {
     'create config': true,
     'npm install': true,

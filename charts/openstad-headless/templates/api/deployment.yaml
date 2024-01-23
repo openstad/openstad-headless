@@ -47,6 +47,12 @@ spec:
               secretKeyRef:
                 name: openstad-db-credentials
                 key: hostname
+            
+          - name: DB_PORT
+            valueFrom:
+              secretKeyRef:
+                name: openstad-db-credentials
+                key: hostport
 
           - name: DB_NAME
             valueFrom:
@@ -157,9 +163,9 @@ spec:
       initContainers:
         - command: ["/bin/bash", "-c"]
           args:
-            # - nc $API_DATABASE_HOST 3306 -z -w1 && npm run --prefix apps/api-server migrate-database
-            - npm run --prefix apps/api-server init-database
-            # - echo "done"
+            # - nc $DB_HOST $DB_PORT -z -w1 && npm run --prefix apps/api-server migrate-database
+            # - npm run --prefix apps/api-server init-database
+            - echo "done"
           env:
             - name: URL
               value: https://{{ template "openstad.api.url" . }}
@@ -185,6 +191,12 @@ spec:
                 secretKeyRef:
                   name: openstad-db-credentials
                   key: hostname
+
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: openstad-db-credentials
+                  key: hostport
 
             - name: DB_NAME
               valueFrom:
