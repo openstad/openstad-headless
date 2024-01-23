@@ -70,6 +70,7 @@ function parseAuthHeader(authorizationHeader) {
   }
 
   if (fixedAuthTokens) {
+    console.log({fixedAuthTokens: btoa(fixedAuthTokens)})
     const token = fixedAuthTokens.find(token => token.token === authorizationHeader);
     if (token) {
       return { userId: token.userId, isFixed: true, authProvider: token.authProvider }
