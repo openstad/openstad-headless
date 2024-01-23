@@ -1,5 +1,14 @@
 // @todo: add all widgets
 module.exports = {
+  agenda: {
+    js: ['@openstad-headless/agenda/dist/agenda.iife.js'],
+    css: ['@openstad-headless/agenda/dist/style.css'],
+    functionName: 'OpenstadHeadlessAgenda',
+    componentName: 'Agenda',
+    defaultConfig: {
+      resourceId: null,
+    },
+  },
   likes: {
     js: ['@openstad-headless/likes/dist/likes.iife.js'],
     css: ['@openstad-headless/likes/dist/style.css'],
