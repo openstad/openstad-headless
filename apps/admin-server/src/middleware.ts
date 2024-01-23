@@ -16,7 +16,7 @@ export default withAuth(
 
       const searchParams = req.nextUrl?.searchParams?.toString();
       const rewrittenUrl = `${
-        process.env.API_URL
+        process.env.API_URL_INTERNAL
       }${req.nextUrl.pathname.replace('/api/openstad', '')}${
         searchParams ? '?' + searchParams : ''
       }`;

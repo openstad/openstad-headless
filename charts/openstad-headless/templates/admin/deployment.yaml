@@ -49,10 +49,10 @@ spec:
             value: https://{{ template "openstad.auth.url" . }}
           - name: OAUTH_URL_INTERNAL
             value: http://{{ printf "%s.%s.svc.cluster.local:%d" (include "openstad.auth.fullname" .) .Release.Namespace (.Values.auth.service.httpPort | int) }}
-          - name: API_URL
+          - name: API_URL_INTERNAL
             value: https://{{ template "openstad.api.url" . }}
             # value: http://{{ printf "%s.%s.svc.cluster.local:%d" (include "openstad.api.fullname" .) .Release.Namespace (.Values.api.service.httpPort | int) }}
-          - name: NEXT_PUBLIC_API_URL
+          - name: API_URL
             value: https://{{ template "openstad.api.url" . }}
           # Inject extra environment variables
           {{- if .Values.admin.extraEnvVars }}

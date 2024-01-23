@@ -187,9 +187,9 @@ services:
       - CLIENT_SECRET=${AUTH_ADMIN_CLIENT_SECRET}
       - OAUTH_URL=${AUTH_APP_URL}
       - OAUTH_URL_INTERNAL=http://openstad-auth-server:${AUTH_PORT}
-      - API_URL=http://openstad-api-server:${API_PORT}
+      - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}
       - PORT=${ADMIN_PORT}
-      - NEXT_PUBLIC_API_URL=${API_URL}
+      - API_URL=${API_URL}
     ports:
       - '${ADMIN_PORT}:${ADMIN_PORT}'
     volumes:

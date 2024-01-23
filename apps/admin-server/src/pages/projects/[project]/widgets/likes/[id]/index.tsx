@@ -8,8 +8,15 @@ import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 
-export default function WidgetLikes() {
+export const getServerSideProps = (async () => {
+  return { props: { apiUrl: process.env.API_URL } };
+}) satisfies GetServerSideProps<{ apiUrl: string }>;
+
+export default function WidgetLikes({
+  apiUrl,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
@@ -20,7 +27,7 @@ export default function WidgetLikes() {
     resourceId: '2',
     api: {
       url: '/api/openstad',
-    }
+    },
   });
 
   return (
@@ -66,7 +73,7 @@ export default function WidgetLikes() {
               ) : null}
             </TabsContent>
             <TabsContent value="publish" className="p-0">
-              <WidgetPublish />
+              <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
           </Tabs>
 
