@@ -6,10 +6,11 @@ export default withAuth(
   function middleware(req) {
     if (req.nextUrl.pathname.startsWith('/api/openstad')) {
 
-      // deze afvanging moet op user role gaan werken denk ik maar waar vind ik de inglogde user data?
+      // deze afvanging zou op user role moeten werken maar die lijkt niet beschikbeer;
+      // voorlopig lijkt dit acceptabel omdat je alleen met role admin kunt inloggen op deze server
       if (!req.nextauth.token?.accessToken) {
-        logger.error('No access token in JWT');
-        return NextResponse.json({ error: 'No access token' }, { status: 401 });
+        logger.error('No admin user found');
+        return NextResponse.json({ error: 'No admin user found' }, { status: 401 });
       }
 
       logger.debug(
