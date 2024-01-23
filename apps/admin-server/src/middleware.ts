@@ -26,7 +26,7 @@ export default withAuth(
 
       return NextResponse.rewrite(rewrittenUrl, {
         headers: {
-          Authorization: '' + process.env.API_FIXED_AUTH_KEY, // '' + because of types...
+          Authorization: '' + process.env.API_FIXED_AUTH_KEY
         },
       });
     }
