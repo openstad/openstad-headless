@@ -60,10 +60,13 @@ export default function WidgetRawGeneral(
             name="rawInput"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Templates (templating: nunjucks. variables is the data object:
-                  idea, ideas etc.)
-                </FormLabel>
+                <FormLabel>Template</FormLabel>
+                <div className="text-xs pb-4">
+                  <h2>Te gebruiken variabelen:</h2>
+                  <ul className="list-disc">
+                    <li className="ml-4">{`{{projectId}}`}</li>
+                  </ul>
+                </div>
                 <FormControl>
                   <Textarea
                     rows={5}

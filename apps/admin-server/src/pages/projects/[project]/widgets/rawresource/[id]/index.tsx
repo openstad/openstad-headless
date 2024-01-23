@@ -17,6 +17,7 @@ export default function WidgetRawResource() {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project as string;
+  console.log(router.query);
 
   const { data: widget, updateConfig } = useWidgetConfig();
   const { previewConfig, updatePreview } =

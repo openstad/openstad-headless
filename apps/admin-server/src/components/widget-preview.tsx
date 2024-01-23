@@ -49,7 +49,6 @@ export default function WidgetPreview({ type, config, projectId }: Props) {
         },
       })
         .then((v) => {
-          console.log(v);
           if (v.ok) {
             v.text().then((script) => {
               while (previewContainer.firstChild) {
