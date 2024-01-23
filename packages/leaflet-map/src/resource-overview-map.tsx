@@ -25,12 +25,10 @@ export function ResourceOverviewMap({
   markers = undefined,
   markerIcon = undefined,
   center = undefined,
+  categorize = undefined,
 
   ...props
 }: PropsWithChildren<ResourceOverviewMapWidgetProps>) {
-
-  props.clustering = props.clustering || {};
-  props.clustering.isActive = typeof props.clustering?.isActive == 'undefined' ? false : props.clustering.isActive;
 
   const datastore = new DataStore({
     projectId: props.projectId,
@@ -42,17 +40,42 @@ export function ResourceOverviewMap({
     projectId: props.projectId,
   });
 
-  let currentMarkers = resources?.map( resource => ({
-    location: resource.location? {
-	    lat: resource.location.lat,
-	    lng: resource.location.lng,
-    } : undefined,
-  }));
+  let categorizeByField = categorize?.categorizeByField
+  let categories;
+  if (categorizeByField) {
+    const [tags] = datastore.useTags({
+      projectId: props.projectId,
+      type: categorizeByField,
+    });
+    if (tags.length) {
+      categories = {};
+      tags.map(tag =>{
+        categories[ tag.name ] = {
+          color: tag.backgroundColor,
+          icon: tag.mapIcon,
+        }
+      });
+    }
+  }
+
+  let currentMarkers = resources?.map( resource => {
+    let marker = {
+      location: resource.location? {
+	      lat: resource.location.lat,
+	      lng: resource.location.lng,
+      } : undefined,
+    }
+    if (marker.location && categorizeByField && categories) {
+      let tag = resource.tags?.find( tag => tag.type == categorizeByField );
+      if (tag) {
+        marker.data = { [categorizeByField]: tag.name };
+      }
+    }
+    return marker;
+  });
 
   return (
-    <>
-      <BaseMap {...props} markers={currentMarkers}/>
-    </>
+    <BaseMap {...props} markers={currentMarkers} categorize={{ categorizeByField, categories }}/>
   );
 
 }

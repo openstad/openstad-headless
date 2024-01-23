@@ -3,6 +3,7 @@ import { MarkerProps } from './marker-props';
 import { MarkerClusterGroupProps } from './marker-cluster-group-props';
 import { MarkerIcon } from './marker-icon';
 import { Location } from './location';
+import { Categorize } from './categorize';
 
 export type BaseMapProps = {
   markers?: MarkerProps[],
@@ -17,5 +18,6 @@ export type BaseMapProps = {
   zoomposition: string,
 	disableDefaultUI: boolean,
   clustering: MarkerClusterGroupProps,
+  categorize: Categorize,
 };
 

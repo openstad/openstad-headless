@@ -49,6 +49,8 @@ export function BaseMap({
   tiles = undefined,
   minZoom = 0,
   maxZoom = 25,
+
+  categorize = undefined,
   
   // ToDo: search = false,
 	zoomposition = 'bottomleft',
@@ -101,6 +103,8 @@ export function BaseMap({
   // markers
   useEffect(() => {
 
+    if (markers.length == 0 && currentMarkers.length == 0) return;
+
     let result = [...markers];
 
     result.map((marker, i) => {
@@ -108,17 +112,32 @@ export function BaseMap({
       // add
       let markerData: MarkerProps = {...marker};
       markerData.markerId = `${parseInt(Math.random() * 1e8 as any as string)}`;
+
+      // iconCreateFunction
       markerData.iconCreateFunction = markerData.iconCreateFunction || iconCreateFunction;
-      // ToDo: verder uitwerken iconen
-      // if (!markerData.icon && this.config.categorize) {
-      //   let category = markerData.data && eval(`markerData.data.${this.config.categorize.categorizeByField}`);
-      //   let icon = ( this.config.categorize.categories[ category ] && this.config.categorize.categories[ category ].icon );
-      //   if (icon) markerData.icon = icon;
-      // }
+
+      // categorize
+      if (categorize?.categorizeByField && markerData.data?.[categorize.categorizeByField]) {
+        let type = markerData.data?.[categorize.categorizeByField];
+        let category = categorize.categories?.[type];
+        if (category) {
+          if (!markerData.icon) {
+            let icon = category.icon;
+            if (!icon && category.color) {
+              icon = {...defaultIcon, color: category.color};
+            }
+            if (icon) {
+              markerData.icon = icon;
+            }
+          }
+        }
+      }
+
+      // fallback on defaultIcon
       if (!markerData.icon && defaultIcon) {
         markerData.icon = defaultIcon;
       }
-      
+
       markerData.onClick = markerData.onClick ? [ ...markerData.onClick, onMarkerClick ] : [ onMarkerClick ];
 
       // ToDo
@@ -199,7 +218,7 @@ export function BaseMap({
         }
       })}
 
-      <MarkerClusterGroup { ...clustering } markers={clusterMarkers}/>
+      <MarkerClusterGroup {...props} categorize={categorize} {...clustering} markers={clusterMarkers}/>
 
       <MapEventsListener onClick={onClick} area={area}/>
 

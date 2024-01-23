@@ -1,7 +1,8 @@
-import { Icon, divIcon, LeafletMouseEvent } from 'leaflet';
-import { addToClassname, removeFromClassName } from '../../lib/class-name.js';
+import { LeafletMouseEvent } from 'leaflet';
 import { Marker as LeafletMarker, useMap } from 'react-leaflet'
 import { MarkerProps } from './types/marker-props';
+import { addToClassname, removeFromClassName } from '../../lib/class-name.js';
+import Icon from './icon';
 
 export default function Marker({
   location = undefined,
@@ -9,13 +10,9 @@ export default function Marker({
 	lng = undefined,
   isFaded = false,
   isVisible = true,
-  icon = {
-    iconUrl : '/img/marker-icon.svg',
-    shadowUrl : '/img/marker-shadow.png',
-    iconSize : [32,40],
-    iconAnchor : [8,40],
-  },
-  iconCreateFunction = null,
+  icon = undefined,
+  iconCreateFunction = undefined,
+  defaultIcon = undefined,
   href = undefined,
   onClick = undefined,
   onMouseDown = undefined,
@@ -28,27 +25,14 @@ export default function Marker({
   const map = useMap();
 
   // icon
-	if (!icon) {
-		if (iconCreateFunction && typeof iconCreateFunction == 'string') {
-			iconCreateFunction = eval(iconCreateFunction);
-		}
-		if (iconCreateFunction && typeof iconCreateFunction == 'function') {
-			icon = iconCreateFunction();
-		}
-	}
   if (icon) {
     try {
-      icon = JSON.parse(icon as string);
+      icon = JSON.parse(icon as string)
     } catch(err) {}
-
-    if (!icon.iconSize && icon.width && icon.height) icon.iconSize = [icon.width, icon.height]
-    if (!icon.iconAnchor && icon.anchor) icon.iconAnchor = icon.anchor
-
     addToClassname(icon, 'osc-map-marker', { before: true })
     isFaded ? addToClassname(icon, 'osc-map-marker-faded') : removeFromClassName(icon, 'osc-map-marker-faded');
-    if (icon.iconUrl) icon = new Icon(icon);
-    if (icon.html) icon = divIcon(icon);
   }
+  icon = Icon({ icon, iconCreateFunction, defaultIcon });
 
   // events
   let eventHandlers = {};

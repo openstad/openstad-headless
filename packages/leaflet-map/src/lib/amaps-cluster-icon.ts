@@ -3,7 +3,7 @@ import { divIcon, point, MarkerCluster } from 'leaflet';
 export default function amapsCreateClusterIcon(
   cluster: MarkerCluster,
   categorize = {
-    categorizeByField: 'indeling',
+    categorizeByField: 'nocategorization',
     categories: {
     },
 }) {
@@ -16,8 +16,10 @@ export default function amapsCreateClusterIcon(
   clusterMarkers.forEach((clusterMarker) => {
     let marker = clusterMarker.options
     if (!marker) return console.log('Marker not found:', clusterMarker)
-    let category = marker && marker.data && eval(`marker.data.${categorize.categorizeByField}`);
-    let color = ( categorize.categories[ category ] && categorize.categories[ category ].color ) || '#164995';
+    let category = marker && marker.data && eval(`marker.data.${categorize.categorizeByField}`) || 'nocategoryfound';
+    // console.log({ category });
+    let color = ( categorize?.categories?.[ category ] && categorize?.categories?.[ category ].color ) || '#164995';
+    // console.log({ color });
     if ( !colors[color] ) colors[color] = 0;
     colors[color]++;
     if ( !(marker && marker.isFaded) ) isFaded = false;
@@ -42,13 +44,13 @@ export default function amapsCreateClusterIcon(
     soFar = soFar + perc;
   });
 
+  // TODO: classnames
   let count = cluster.getChildCount();
   html += '<text x="18" y="21" text-anchor="middle" class="openstad-component-ideas-on-map-icon openstad-component-ideas-on-map-icon-text">' + count + '</text>';
 
   html += '</svg>';
 
   let className = 'osc-map-marker-cluster';
-  className += ' openstad-component-ideas-on-map-icon-cluster'; // backwards compatibility; should be added by ideas-on-map
   if (isFaded) className += ' osc-map-marker-cluster-faded'
 
   return divIcon({ html: html, className, iconSize: point(36, 36), iconAnchor: [18, 18] });
