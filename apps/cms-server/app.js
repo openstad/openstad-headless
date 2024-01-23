@@ -81,7 +81,7 @@ async function run(id, projectData, options, callback) {
   };
 
   if (process.env.MONGODB_URI) {
-    project.mongo.uri = process.env.MONGODB_URI + '/' + project.shortName;
+    project.mongo.uri = process.env.MONGODB_URI.replace("{database}", project.shortName);
   }
 
   const config = project;
