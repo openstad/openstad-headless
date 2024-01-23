@@ -2,7 +2,7 @@ declare namespace NodeJS {
   export interface ProcessEnv {
     /**
      * The URL of the Admin portal application. Oauth callbacks will be sent to this url.
-     * In development this is often http://localhost:3000
+     * In development this is often http://localhost:31470
      */
     NEXTAUTH_URL: string;
     /**
@@ -18,16 +18,20 @@ declare namespace NodeJS {
      */
     CLIENT_SECRET: string;
     /**
-     * Internal URL of the Openstad OAuth server. In development this is often http://localhost:4000.
+     * Internal URL of the Openstad OAuth server. In development this is often http://localhost:31430.
      */
     OAUTH_URL_INTERNAL: string;
     /**
-     * Public URL of the Openstad OAuth server. In development this is often http://localhost:4000.
+     * Public URL of the Openstad OAuth server. In development this is often http://localhost:31430.
      */
     OAUTH_URL: string;
     /**
-     * The URL of the Openstad API server. In development this is often http://localhost:8111.
+     * The URL of the Openstad API server. In development this is often http://localhost:31410.
      */
     API_URL: string;
+    /**
+     * A fixed key in the API server that can be used as an admin login
+     */
+    API_FIXED_AUTH_KEY: string;
   }
 }
