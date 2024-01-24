@@ -10,7 +10,7 @@ import {
 import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import { DateDropdownBarWidgetProps } from '@openstad/date-countdown-bar/src/date-countdown-bar';
+import { DateCountdownBarWidgetProps } from '@openstad/date-countdown-bar/src/date-countdown-bar';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
@@ -26,17 +26,17 @@ export default function WidgetDateCountdownBar({
 
   const { data: widget, updateConfig } = useWidgetConfig();
   const { previewConfig, updatePreview } =
-    useWidgetPreview<DateDropdownBarWidgetProps>({
+    useWidgetPreview<DateCountdownBarWidgetProps>({
       projectId,
       resourceId: '2',
     });
 
   const totalPropPackage = {
     ...widget?.config,
-    updateConfig: (config: DateDropdownBarWidgetProps) =>
+    updateConfig: (config: DateCountdownBarWidgetProps) =>
       updateConfig({ ...widget.config, ...config }),
 
-    onFieldChanged: (key: keyof DateDropdownBarWidgetProps, value: any) => {
+    onFieldChanged: (key: keyof DateCountdownBarWidgetProps, value: any) => {
       if (previewConfig) {
         updatePreview({
           ...previewConfig,

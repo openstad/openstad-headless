@@ -6,17 +6,17 @@ import { differenceInDays, parse } from 'date-fns';
 import { zonedTimeToUtc } from 'date-fns-tz';
 import { Spacer, Card } from '@openstad-headless/ui/src';
 
-export type DateDropdownBarWidgetProps = {
+export type DateCountdownBarWidgetProps = {
   beforeText?: string;
   afterText?: string;
   date: string;
 };
 
-function DateDropdownBar({
+function DateCountdownBar({
   beforeText = '',
   date,
   afterText = '',
-}: DateDropdownBarWidgetProps) {
+}: DateCountdownBarWidgetProps) {
   const [daysLeft, setDaysLeft] = useState<number>(0);
   const urlParams = new URLSearchParams(window.location.search);
   const [dateParam] = useState<string>(urlParams.get('date') || date);
@@ -79,5 +79,5 @@ function DateDropdownBar({
   );
 }
 
-DateDropdownBar.loadWidget = loadWidget;
-export { DateDropdownBar };
+DateCountdownBar.loadWidget = loadWidget;
+export { DateCountdownBar };
