@@ -641,7 +641,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
       includeTags: {
         include: [{model: db.Tag,
-          attributes: ['id', 'name'],
+          attributes: ['id', 'type', 'name'],
           through: {attributes: []},
         }]
       },
