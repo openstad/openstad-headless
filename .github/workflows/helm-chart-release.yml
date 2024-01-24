@@ -3,10 +3,9 @@ name: Release Helm Charts
 on:
   push:
     branches:
-      - '**'
-    #   - main
-    # paths:
-    #   - 'charts/**'
+      - main
+    paths:
+      - 'charts/**'
 
 jobs:
   release:
@@ -43,4 +42,3 @@ jobs:
           CR_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         with:
           charts_dir: charts
-          packages_with_index: true
