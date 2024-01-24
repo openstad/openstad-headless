@@ -29,7 +29,7 @@ echo "Changing context to $CONTEXT..."
 kubectl config set current-context $CONTEXT
 
 echo "Decrypting files..."
-sh $ROOT_DIR/operations/scripts/decrypt.sh
+bash $ROOT_DIR/operations/scripts/decrypt.sh
 
 echo "Starting deployment..."
 # Temp for local chart testing
