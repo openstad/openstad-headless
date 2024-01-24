@@ -29,9 +29,11 @@ function DateCountdownBar({
         const zone = 'Europe/Berlin';
         const parsedDate = parse(
           dateParam,
-          'dd-mm-yyyy',
+          'dd-MM-yyyy',
           zonedTimeToUtc(new Date(), zone)
         );
+
+        console.log({parsedDate})
 
         const givenDate = zonedTimeToUtc(parsedDate, zone);
         givenDate.setHours(0, 0, 0, 0);
@@ -61,12 +63,12 @@ function DateCountdownBar({
           daysLeft > 10
             ? daysLeft.toString()
             : daysLeft.toString().padStart(2, '0')
-        ).map((nr) => (
-          <>
+        ).map((nr,index) => (
+          <React.Fragment key={`card-id-${nr}-${index}`}>
           <Card>
             <p>{nr}</p>
           </Card>
-          </>
+          </React.Fragment>
         ))}
       </>
       {afterTextParam.length > 0 ? (

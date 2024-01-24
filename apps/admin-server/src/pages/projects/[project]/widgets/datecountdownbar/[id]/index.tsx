@@ -14,6 +14,7 @@ import { DateCountdownBarWidgetProps } from '@openstad/date-countdown-bar/src/da
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
+import CountdownBarGeneral from './general';
 
 export const getServerSideProps = withApiUrl;
 
@@ -72,7 +73,7 @@ export default function WidgetDateCountdownBar({
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
-              {/* <WidgetResourceOverviewGeneral {...totalPropPackage} /> */}
+              <CountdownBarGeneral {...totalPropPackage} />
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
