@@ -33,8 +33,6 @@ function DateCountdownBar({
           zonedTimeToUtc(new Date(), zone)
         );
 
-        console.log({parsedDate})
-
         const givenDate = zonedTimeToUtc(parsedDate, zone);
         givenDate.setHours(0, 0, 0, 0);
 
