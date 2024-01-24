@@ -21,7 +21,6 @@ export default function MarkerClusterGroup({
     return iconCreateFunction(cluster, categorize); // 
   }
 
-  //  onClick={e => self.onClusterClick(e)} onAnimationEnd={e => self.onClusterAnimationEnd(e)}
   return (
     <LeafletMarkerClusterGroup {...props} maxClusterRadius={maxClusterRadius} showCoverageOnHover={showCoverageOnHover} iconCreateFunction={useIconCreateFunction}>
       {markers.map((data, i: number) => 
@@ -31,3 +30,5 @@ export default function MarkerClusterGroup({
   );
 
 }
+
+

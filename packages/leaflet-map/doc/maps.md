@@ -1,5 +1,3 @@
-todo: icons, events en de specifieke maps
-
 # Kaarten
 
 Deze componenten omvatten een basiskaart, en drie typen specifieke kaarten.
@@ -12,9 +10,9 @@ De basiskaart, en daarmee de specifieke kaarten, kennen de volgende configuratie
 
 De volgende opties worden op project niveau gezet en zijn in in de standaard headless opzet altijd beschikbaar:
 ```
-area: Location[]
+area: LocationType[]
 ```
-Een set van lat/lmg waarden wordt getekend als polyline, waarbij het gebied buiten de line wordt verdonkerd.
+Een set van lat/lng waarden wordt getekend als polyline, waarbij het gebied buiten de line wordt verdonkerd.
 
 ```
 areaPolygonStyle?: any,
@@ -107,14 +105,20 @@ doNotCluster?: boolean
 ```
 
 ![clusterimage](./img/cluster-icon.png)
-De default `iconCreateFunction` is afgeleid van de kaarten van de Gemeente Amsterdam. Daar worden clusters getekent als een cirkel met daaarin het aantal elementen in het cluster. De kleuren van de cirkel tonen de cetagorieën van die icons, wanneer van toepassing. Zie [resource types](#resource-types) voor meer informatie daarover.
+De default `iconCreateFunction` is afgeleid van de kaarten van de Gemeente Amsterdam. Daar worden clusters getekent als een cirkel met daaarin het aantal elementen in het cluster. De kleuren van de cirkel tonen de [cetagorieën](#categorizering) van die icons, wanneer van toepassing.
 
+### categorizering
 
-### Resource types
-
-Een voorstel staat in [Trello]()
-
-
+```
+{
+  categorize: {
+    categorizeByField: string,
+    categories: any,
+    ...
+  }
+}
+```
+Categorisering wordt op twee niveaus gebruikt: het kan bepalen welke marker-icons worden gebruikt, en bepaalt de kleuren in een [cluster icon](#cluster-opties). Voor categorizering wordt het de inhoud van het `data` veld in een marker vergeleken met de waarde van `categorizeByField`.
 
 ## Events
 
@@ -127,21 +131,42 @@ osc-map-is-ready
   onMarkerClick?: (e: Event, map: any) => void,
 ```
 
+## De resource-details-map
 
+De `resource-details-map` is een basis kaart die alleen een projectId en een resourceId nodig heeft om de locatie van die resource te tonen.
+
+## De editor-map
+
+De `editor-map` is een form field waarop een gebruiker een locatie kan kiezen. Het resultaat wordt als hidden input toegevoegd, waarin de gekozen locatie als `{"lat" x, "lmg": y}` string wordt geplaatst.
 
 ## De resource-overview-map
 
-## De resource-details-map
+De `resource-overview-map` is een basis kaart die alleen een projectId nodig heeft om de locaties van alle die resources op een kaart te tonen.
 
-## De editor-map
+Daarnaast gebruikt deze kaart tags als categorieen voor [categorizering](#categorizering). Daarmee is het heel eenvoudig om een kaart te maken waar alle ingezonden resources worden weergegeven op basis van een type. Bijvoorbeeld:
+
+```
+categorize: {
+  categorizeByField: 'theme'
+}
+```
+toont een kaart waarin alle inzendingen op basis van hun gekoppelde thema worden getoond.
 
 
 
 ## ToDo
+
+- Clustering in resource overview gebruikt geen kleuren. De issue hier lijkt te zijn dat hij de meegestuurde categorizering niet update na de eerste initialisatie. Misschien een closure issue?
+- Error handling wacht nog op een generieke oplossing
+- Tag is nog niet getyped; die moet een niveau hoger.
+- Resource is nog niet getyped; die moet een niveau hoger.
+- Cetagorize typing moet nog uitgewerkt
+- Wat te doen met het typen van AreaStlying
+- MarkerIcon typing eindigt nog in any
+- onClick typing klopt werkt nog niet
 - De ideas-on-map versie is een combinatie van de resource map en de editor map
 - Voor ideas on map: faden van markers; iVisible doet ook nog niet veel
-- search opties
+- Search opties: adressen en filters
 - De editor map is een input field, en moet gekoppeld worden aan de stndaard forms als die er zijn
-- Uitwerken [resource types](#resource-types)
-- Default iconen
 - Meer events?
+

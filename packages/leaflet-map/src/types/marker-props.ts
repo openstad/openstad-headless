@@ -1,17 +1,17 @@
 import { LeafletMouseEvent } from 'leaflet';
-import { Location } from './location';
-import { MarkerIcon } from './marker-icon';
+import { LocationType } from './location';
+import { MarkerIconType } from './marker-icon';
 
 export type MarkerProps = {
   markerId?: string,
   lat?: number,
   lng?: number,
-  location?: Location,
+  location?: LocationType,
   isFaded?: boolean,
   isVisible?: boolean,
-  icon?: MarkerIcon,
+  icon?: MarkerIconType,
   iconCreateFunction?: () => any, // TODO
-  defaultIcon?: MarkerIcon,
+  defaultIcon?: MarkerIconType,
   href?: string,
   onClick?: any, // ToDo: ik krijg dit niet werkend in de basemap: ((e: LeafletMouseEvent, map: any) => void) | ((e: LeafletMouseEvent, map: any) => void)[],
   doNotCluster?: boolean,

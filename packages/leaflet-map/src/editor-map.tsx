@@ -8,7 +8,7 @@ import './css/base-map.less';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 import { MarkerProps } from './types/marker-props';
-import { MarkerIcon } from './types/marker-icon';
+import { MarkerIconType } from './types/marker-icon';
 import { MapPropsType } from './types/index';
 
 import { BaseMap } from './base-map';
@@ -18,7 +18,7 @@ export type EditorMapWidgetProps =
   ProjectSettingProps &
   MapPropsType & {
     fieldName: string,
-    markerIcon: MarkerIcon,
+    markerIcon: MarkerIconType,
     editorMarker: MarkerProps,
     centerOnEditorMarker: boolean,
   };

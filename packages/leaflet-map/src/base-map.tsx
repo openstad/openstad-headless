@@ -13,7 +13,7 @@ import MarkerClusterGroup from './marker-cluster-group';
 import 'leaflet/dist/leaflet.css';
 import './css/base-map.less';
 
-import { Location } from './types/location';
+import { LocationType } from './types/location';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 import { MarkerProps } from './types/marker-props';
@@ -230,7 +230,7 @@ export function BaseMap({
 }
 
 type MapEventsListenerProps = {
-  area: Location[],
+  area: LocationType[],
   onClick: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void,
 };
 

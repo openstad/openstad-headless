@@ -1,10 +1,10 @@
-import { useState, useEffect, useImperativeHandle } from 'react';
+import { useState, useEffect } from 'react';
 import { polygon } from 'leaflet';
 import { Polygon } from 'react-leaflet';
 import { AreaProps } from './types/area-props';
-import { Location } from './types/location';
+import { LocationType } from './types/location';
 
-function createCutoutPolygon(area: Location[]) {
+function createCutoutPolygon(area: LocationType[]) {
 
 	// polygon must defined from the south west corner to work with the outer box
 	let bounds = polygon(area).getBounds();
@@ -12,7 +12,7 @@ function createCutoutPolygon(area: Location[]) {
 
 	let smallest = 0; let index = 0;
 
-	area.forEach(function( point: Location, i: number ) {
+	area.forEach(function( point: LocationType, i: number ) {
 		let y = Math.sin(point.lng-center.lng) * Math.cos(point.lat);
 		let x = Math.cos(center.lat)*Math.sin(point.lat) - Math.sin(center.lat)*Math.cos(point.lat)*Math.cos(point.lng-center.lng);
 		let bearing = Math.atan2(y, x) * 180 / Math.PI;
@@ -30,7 +30,7 @@ function createCutoutPolygon(area: Location[]) {
 	// TODO: should be calculated dynamically from the center point
 	let delta1: number = 0.01;
 	let delta2: number = 5;
-	let outerBox: Location[] = [
+	let outerBox: LocationType[] = [
 		{lat: -90 + delta2, lng:  -180 + delta1 },
 		{lat: -90 + delta2, lng:     0          },
 		{lat: -90 + delta2, lng:   180 - delta1 },
@@ -51,7 +51,7 @@ function createCutoutPolygon(area: Location[]) {
 
 }
 
-export function isPointInArea(area: Location[], point: Location) {
+export function isPointInArea(area: LocationType[], point: LocationType) {
 
   if (!point) return false;
   if (!area) return true;
@@ -98,4 +98,5 @@ export function Area({
 }
 
 export default Area;
+
 

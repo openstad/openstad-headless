@@ -5,9 +5,9 @@ export type MarkerClusterGroupProps = {
   isActive?: boolean,
   maxClusterRadius?: number,
   showCoverageOnHover?: boolean,
-  categorize?: { // ToDo: nog uit te werken
+  categorize?: {
     categorizeByField: string,
-    categories: any,
+    categories: any, // ToDo: nog uit te werken
   },
   iconCreateFunction?: ( cluster: MarkerCluster, categorize: any ) => any, // TODO
   markers?: MarkerProps[],

@@ -8,7 +8,7 @@ import './css/base-map.less';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 import { MarkerProps } from './types/marker-props';
-import { MarkerIcon } from './types/marker-icon';
+import { MarkerIconType } from './types/marker-icon';
 import { MapPropsType } from './types/index';
 
 import { BaseMap } from './base-map';
@@ -18,7 +18,7 @@ export type ResourceOverviewMapWidgetProps =
   ProjectSettingProps &
   MapPropsType & {
     marker: MarkerProps,
-    markerIcon: MarkerIcon,
+    markerIcon: MarkerIconType,
   };
 
 export function ResourceOverviewMap({
@@ -58,15 +58,15 @@ export function ResourceOverviewMap({
     }
   }
 
-  let currentMarkers = resources?.map( resource => {
-    let marker = {
+  let currentMarkers = resources?.map( resource => { // TODO: resource typing
+    let marker:MarkerProps = {
       location: resource.location? {
 	      lat: resource.location.lat,
 	      lng: resource.location.lng,
       } : undefined,
     }
     if (marker.location && categorizeByField && categories) {
-      let tag = resource.tags?.find( tag => tag.type == categorizeByField );
+      let tag = resource.tags?.find( tag => tag.type == categorizeByField ); // // TODO: tag typing
       if (tag) {
         marker.data = { [categorizeByField]: tag.name };
       }

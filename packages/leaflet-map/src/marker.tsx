@@ -2,7 +2,7 @@ import { LeafletMouseEvent } from 'leaflet';
 import { Marker as LeafletMarker, useMap } from 'react-leaflet'
 import { MarkerProps } from './types/marker-props';
 import { addToClassname, removeFromClassName } from '../../lib/class-name.js';
-import Icon from './icon';
+import MarkerIcon from './marker-icon';
 
 export default function Marker({
   location = undefined,
@@ -32,7 +32,7 @@ export default function Marker({
     addToClassname(icon, 'osc-map-marker', { before: true })
     isFaded ? addToClassname(icon, 'osc-map-marker-faded') : removeFromClassName(icon, 'osc-map-marker-faded');
   }
-  icon = Icon({ icon, iconCreateFunction, defaultIcon });
+  icon = MarkerIcon({ icon, iconCreateFunction, defaultIcon });
 
   // events
   let eventHandlers = {};
@@ -71,3 +71,4 @@ export default function Marker({
   ) : null;
   
 }
+
