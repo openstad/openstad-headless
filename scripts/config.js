@@ -145,8 +145,6 @@ async function writeEnvFile() {
   try {
     let configfile = `
 #base values
-AUTH_FIRST_LOGIN_CODE=${process.env.AUTH_FIRST_LOGIN_CODE}
-
 BASE_DOMAIN=${process.env.BASE_DOMAIN}
 BASE_PORT=${process.env.BASE_PORT}
 
