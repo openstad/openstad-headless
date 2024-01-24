@@ -68,7 +68,6 @@ const formSchema = z.object({
   modBreakDate: z.date().optional(),
 
   location: z.string().optional(),
-  images: z.string().array().default([]),
 
   extraData: z
     .object({
@@ -120,7 +119,6 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         : undefined,
 
       location: existingData?.location || '',
-      images: existingData?.images || [],
       extraData: {
         originalId: existingData?.extraData?.originalId || undefined,
       },
