@@ -1,0 +1,63 @@
+name: "Deploy"
+
+on:
+  push:
+    branches:
+      - '**'
+    #   - 'main'
+
+jobs:    
+  deploy-acc:
+    name: "Deploy openstad-headless to acc"
+    runs-on: "ubuntu-latest"
+    env:
+      SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+      SOPS_AGE_KEY_FILE: headless.agekey
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    # Checkout the repository to the GitHub Actions runner
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # setup helm
+      - uses: azure/setup-helm@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} # only needed if version is 'latest'
+          version: 'v3.6.3'
+        id: install_helm
+
+      # setup kubernetes + config
+      - uses: azure/setup-kubectl@v3
+        id: install_kubectl
+
+      # setup sops
+      - name: Sops Binary Installer
+        uses: mdgreenwald/mozilla-sops-action@v1.5.0
+        id: install_sops
+        with:
+          version: "v3.7.3"
+
+      - name: Create age key file
+        run: |
+          echo $SOPS_AGE_KEY > $SOPS_AGE_KEY_FILE
+
+      # setup doctl
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      # setup kubeconfig
+      - name: Setup kubeconfig
+        run: |
+          doctl kubernetes cluster kubeconfig save openstad-ams-acc
+
+      # run deployment scripts
+      - name: Run ACC deployment script
+        run: ./operations/deployments/openstad-headless/deploy-acc.sh
+  
