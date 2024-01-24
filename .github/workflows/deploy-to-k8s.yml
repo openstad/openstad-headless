@@ -13,6 +13,7 @@ jobs:
     env:
       SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
       SOPS_AGE_KEY_FILE: headless.agekey
+      SOPS_AGE_RECIPIENTS: age1pnz2leuqnfhyt9qpxjjcjs9xe9ys8xjkjn9m656wygy3ndfxya0q6kthy8
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
