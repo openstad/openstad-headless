@@ -9,8 +9,13 @@ import {
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
 import Preview from '@/components/widget-preview';
+import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
+import WidgetPublish from '@/components/widget-publish';
+export const getServerSideProps = withApiUrl;
 
-export default function WidgetKeuzewijzer() {
+export default function WidgetKeuzewijzer({
+  apiUrl,
+}: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
@@ -37,12 +42,16 @@ export default function WidgetKeuzewijzer() {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="form">Form</TabsTrigger>
+              <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="form" className="p-0">
               <ChoicesSelectorForm />
             </TabsContent>
             <TabsContent value="preview" className="p-0">
               {/* <Preview type="keuzewijzer" /> */}
+            </TabsContent>
+            <TabsContent value="publish" className="p-0">
+              <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
           </Tabs>
         </div>

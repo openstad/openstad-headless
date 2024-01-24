@@ -6,10 +6,10 @@ import { useRouter } from 'next/router';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-hot-toast';
 
-export default function WidgetPublish() {
+export default function WidgetPublish({ apiUrl }: { apiUrl: string }) {
   const router = useRouter();
   const id = router.query.id;
-  const widgetScriptTag = `<script src="${process.env.NEXT_PUBLIC_API_URL}/widget/${id}" type="text/javascript"></script>`;
+  const widgetScriptTag = `<script src="${apiUrl}/widget/${id}" type="text/javascript"></script>`;
 
   const onCopy = () => {
     navigator.clipboard.writeText(widgetScriptTag);
