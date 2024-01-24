@@ -30,7 +30,9 @@ export default function WidgetAgendaGeneral(
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: {},
+    defaultValues: {
+      title: props?.title || '',
+    },
   });
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
