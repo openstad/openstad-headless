@@ -27,13 +27,11 @@ export default function WidgetDateCountdownBar({
 
   const { data: widget, updateConfig } = useWidgetConfig();
   const { previewConfig, updatePreview } =
-    useWidgetPreview<DateCountdownBarWidgetProps>({
-      projectId,
-      resourceId: '2',
-    });
+    useWidgetPreview<DateCountdownBarWidgetProps>({beforeText:""});
 
   const totalPropPackage = {
     ...widget?.config,
+    ...previewConfig,
     updateConfig: (config: DateCountdownBarWidgetProps) =>
       updateConfig({ ...widget.config, ...config }),
 

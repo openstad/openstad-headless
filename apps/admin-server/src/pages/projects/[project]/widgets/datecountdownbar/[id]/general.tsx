@@ -21,6 +21,7 @@ const formSchema = z.object({
   beforeText: z.string().optional(),
   afterText:z.string().optional(),
   date: z.string().optional()
+
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -34,9 +35,9 @@ export default function CountdownBarGeneral(props: DateCountdownBarWidgetProps &
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      beforeText: "",
-      afterText: "",
-      date:""
+      beforeText: props.beforeText || "",
+      afterText: props.afterText || "",
+      date: props.date
     },
   });
 
@@ -57,6 +58,7 @@ export default function CountdownBarGeneral(props: DateCountdownBarWidgetProps &
               <FormLabel>Text links van de dagen kaart(en)</FormLabel>
               <FormControl>
                 <Input
+                  placeholder='Bijv: Het is voorbij over'
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
@@ -76,12 +78,14 @@ export default function CountdownBarGeneral(props: DateCountdownBarWidgetProps &
               <FormLabel>Text rechts van de dagen kaart(en)</FormLabel>
               <FormControl>
                 <Input
+                  placeholder='Bijv: dagen'
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
                     onFieldChange(field.name, e.target.value);
                   }}
                 />
+
               </FormControl>
             </FormItem>
           )}
@@ -94,13 +98,16 @@ export default function CountdownBarGeneral(props: DateCountdownBarWidgetProps &
             <FormItem>
               <FormLabel>Datum</FormLabel>
               <FormControl>
+                <>  
                 <Input
+                  placeholder='Bijv: 24-01-2024'
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
                     onFieldChange(field.name, e.target.value);
                   }}
                 />
+                </>
               </FormControl>
             </FormItem>
           )}
