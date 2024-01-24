@@ -1,0 +1,15 @@
+
+.osc.date-countdown-bar-container {
+  display: flex;
+  gap: .5rem;
+  padding: .5rem 0rem;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--osc-primary);
+}
+
+.osc.date-countdown-bar-container p {
+  color: var(--osc-primary-foreground);
+  margin: 0;
+  font-size: 1rem;
+}
