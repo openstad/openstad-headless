@@ -15,7 +15,7 @@ export default defineConfig(({command}) => {
             build: {
                 lib: {
                     formats: ['iife'],
-                    entry: 'src/likes.tsx',
+                    entry: 'src/date-countdown-bar.tsx',
                     name: 'OpenstadHeadlessDateCountdownBar',
                 },
                 rollupOptions: {
@@ -30,5 +30,4 @@ export default defineConfig(({command}) => {
             },
         }
     }
-
 })

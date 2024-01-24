@@ -5,7 +5,7 @@ import { DateDropdownBarWidgetProps, DateDropdownBar } from './date-countdown-ba
 const config: DateDropdownBarWidgetProps = {
   date: '27-01-2024',
   beforeText: 'Het is nog niet geweest',
-  afterText:"Het is al geweest yo"
+  afterText:"Het is al geweest"
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
