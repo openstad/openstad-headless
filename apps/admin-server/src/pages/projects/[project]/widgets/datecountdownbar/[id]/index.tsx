@@ -27,11 +27,10 @@ export default function WidgetDateCountdownBar({
 
   const { data: widget, updateConfig } = useWidgetConfig();
   const { previewConfig, updatePreview } =
-    useWidgetPreview<DateCountdownBarWidgetProps>({beforeText:""});
+    useWidgetPreview<DateCountdownBarWidgetProps>({});
 
   const totalPropPackage = {
     ...widget?.config,
-    ...previewConfig,
     updateConfig: (config: DateCountdownBarWidgetProps) =>
       updateConfig({ ...widget.config, ...config }),
 
@@ -71,7 +70,9 @@ export default function WidgetDateCountdownBar({
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
-              <CountdownBarGeneral {...totalPropPackage} />
+                {previewConfig?
+                    <CountdownBarGeneral {...totalPropPackage} {...previewConfig} />
+                :null}
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
