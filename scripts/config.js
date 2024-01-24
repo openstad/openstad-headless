@@ -117,6 +117,7 @@ async function setupEnvVars() {
   process.env.IMAGE_APP_URL = IMAGE_APP_URL || '';
   process.env.IMAGE_PORT_API = IMAGE_PORT_API || '';
   process.env.IMAGE_PORT_IMAGE_SERVER = IMAGE_PORT_IMAGE_SERVER || '';
+  process.env.IMAGE_VERIFICATION_TOKEN = IMAGE_VERIFICATION_TOKEN || generateRandomToken({ length: 32 });
 
   process.env.IMAGE_IMAGES_DIR = process.env.IMAGE_IMAGES_DIR || '';
   process.env.IMAGE_THROTTLE = process.env.IMAGE_THROTTLE || true;
@@ -143,7 +144,7 @@ async function setupEnvVars() {
 async function writeEnvFile() {
   try {
     let configfile = `
-// base values
+#base values
 AUTH_FIRST_LOGIN_CODE=${process.env.AUTH_FIRST_LOGIN_CODE}
 
 BASE_DOMAIN=${process.env.BASE_DOMAIN}
@@ -176,15 +177,21 @@ SMTP_PASSWORD=PASSWORD
 
 FORCE_HTTP=${process.env.FORCE_HTTP}
 
-// api server
+MYSQL_USER=${process.env.DB_USERNAME}
+MYSQL_PASSWORD=${process.env.DB_PASSWORD}
+MYSQL_ROOT_PASSWORD=${process.env.DB_PASSWORD}
+
+#api server
 API_URL=${process.env.API_URL}
 API_DOMAIN=${process.env.API_DOMAIN}
 API_PORT=${process.env.API_PORT}
+API_HOSTNAME=${process.env.API_DOMAIN}
 
-API_DB_HOST=${process.env.API_DB_HOST}
-API_DB_USERNAME=${process.env.API_DB_USERNAME}
-API_DB_PASSWORD=${process.env.API_DB_PASSWORD}
+API_DATABASE_HOST=${process.env.API_DB_HOST || 'openstad-mysql'}
+API_DATABASE_USER=${process.env.API_DB_USERNAME}
+API_DATABASE_PASSWORD=${process.env.API_DB_PASSWORD}
 API_DB_NAME=${process.env.API_DB_NAME}
+API_DATABASE_DATABASE=${process.env.API_DB_NAME}
 API_DB_DIALECT=${process.env.API_DB_DIALECT}
 
 API_FROM_EMAIL_ADDRESS=${process.env.API_FROM_EMAIL_ADDRESS}
@@ -196,18 +203,18 @@ API_SMTP_PASSWORD=${process.env.API_SMTP_PASSWORD}
 
 API_COOKIE_SECRET=${process.env.API_COOKIE_SECRET}
 API_COOKIE_ONLY_SECURE=${process.env.API_COOKIE_ONLY_SECURE}
-API_JWT_SECRET=${process.env.API_JWT_SECRET}
+API_AUTH_JWTSECRET=${process.env.API_JWT_SECRET}
 
 API_FIXED_AUTH_KEY=${process.env.API_FIXED_AUTH_KEY}
 API_AUTH_FIXEDAUTHTOKENS=${process.env.API_AUTH_FIXEDAUTHTOKENS}
 
-// auth server
+#auth server
 AUTH_APP_URL=${process.env.AUTH_APP_URL}
 AUTH_PORT=${process.env.AUTH_PORT}
 AUTH_DOMAIN=${process.env.AUTH_DOMAIN}
 
-AUTH_DB_HOST=${process.env.AUTH_DB_HOST}
-AUTH_DB_USERNAME=${process.env.AUTH_DB_USERNAME}
+AUTH_DB_HOST=${process.env.AUTH_DB_HOST || 'openstad-mysql'}
+AUTH_DB_USER=${process.env.AUTH_DB_USERNAME}
 AUTH_DB_PASSWORD=${process.env.AUTH_DB_PASSWORD}
 AUTH_DB_NAME=${process.env.AUTH_DB_NAME}
 
@@ -229,14 +236,15 @@ AUTH_FIRST_CLIENT_ID=${process.env.AUTH_FIRST_CLIENT_ID}
 AUTH_FIRST_CLIENT_SECRET=${process.env.AUTH_FIRST_CLIENT_SECRET}
 AUTH_FIRST_LOGIN_CODE=${process.env.AUTH_FIRST_LOGIN_CODE}
 
-// KPN_CLIENT_ID=${process.env.KPN_CLIENT_ID}
-// KPN_CLIENT_SECRET=${process.env.KPN_CLIENT_SECRET}
+#KPN_CLIENT_ID=${process.env.KPN_CLIENT_ID}
+#KPN_CLIENT_SECRET=${process.env.KPN_CLIENT_SECRET}
 
-// image server
+#image server
 IMAGE_DOMAIN=${process.env.IMAGE_DOMAIN}
 IMAGE_APP_URL=${process.env.IMAGE_APP_URL}
 IMAGE_PORT_API=${process.env.IMAGE_PORT_API}
 IMAGE_PORT_IMAGE_SERVER=${process.env.IMAGE_PORT_IMAGE_SERVER}
+IMAGE_VERIFICATION_TOKEN=${process.env.IMAGE_VERIFICATION_TOKEN}
 
 IMAGE_IMAGES_DIR=${process.env.IMAGE_IMAGES_DIR}
 IMAGE_THROTTLE=${process.env.IMAGE_THROTTLE}
@@ -244,17 +252,17 @@ IMAGE_THROTTLE_CC_PROCESSORS=${process.env.IMAGE_THROTTLE_CC_PROCESSORS}
 IMAGE_THROTTLE_CC_PREFETCHER=${process.env.IMAGE_THROTTLE_CC_PREFETCHER}
 IMAGE_THROTTLE_CC_REQUESTS=${process.env.IMAGE_THROTTLE_CC_REQUESTS}
 
-// admin server
+#admin server
 ADMIN_URL=${process.env.ADMIN_URL}
 ADMIN_DOMAIN=${process.env.ADMIN_DOMAIN}
 ADMIN_PORT=${process.env.ADMIN_PORT}
 ADMIN_SECRET=${process.env.ADMIN_SECRET}
 ADMIN_PORT=${process.env.ADMIN_PORT}
 
-// cms server
-CMS_URI=${process.env.CMS_URI}
+#cms server
+CMS_URL=${process.env.CMS_URL}
 CMS_PORT=${process.env.CMS_PORT}
-CMS_OVERWRITE_URI=${process.env.CMS_OVERWRITE_URI}
+CMS_OVERWRITE_URL=${process.env.CMS_OVERWRITE_URL}
 CMS_MONGODB_URI=${process.env.CMS_MONGODB_URI}
 CMS_DEFAULT_SETTINGS=${process.env.CMS_DEFAULT_SETTINGS}
 `;
