@@ -13,7 +13,6 @@ jobs:
       SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
       SOPS_AGE_KEY_FILE: headless.agekey
       SOPS_AGE_RECIPIENTS: age1pnz2leuqnfhyt9qpxjjcjs9xe9ys8xjkjn9m656wygy3ndfxya0q6kthy8
-      KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
@@ -49,9 +48,10 @@ jobs:
 
       # setup kubeconfig
       - name: Setup kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo $KUBE_CONFIG > ~/.kube/config
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG}}
 
       # run deployment scripts
       - name: Run ACC deployment script
