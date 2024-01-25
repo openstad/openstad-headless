@@ -180,8 +180,7 @@ spec:
         image: {{ .Values.auth.deploymentContainer.image }}
         command: ["/bin/bash", "-c"]
         args:
-          # - nc $DB_HOST $DB_PORT -z -w1 && npm run --prefix apps/auth-server migrate-database
-          - echo "done"
+          - nc $DB_HOST $DB_PORT -z -w1 && npm run --prefix apps/auth-server migrate-database
         env:
           - name: DB_USER
             valueFrom:
