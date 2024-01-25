@@ -10,13 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@openstad-headless/data-store": "^1.0.0",
-    "@openstad-headless/ui": "^1.0.0",
+    "@openstad-headless/ui": "file:../ui",
+    "@openstad-headless/data-store": "file:../data-store",
+    "@openstad-headless/lib": "file:../lib",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "rooks": "^7.14.1"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@next/eslint-plugin-next": "^12.3.4",
+    "eslint-config-custom": "*",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
