@@ -36,4 +36,13 @@ module.exports = {
       projectId: null,
     },
   },
+  counter: {
+    js: ['@openstad-headless/counter/dist/counter.iife.js'],
+    css: ['@openstad-headless/counter/dist/style.css'],
+    functionName: 'OpenstadHeadlessCounter',
+    componentName: 'Counter',
+    defaultConfig: {
+      projectId: null
+    }
+  }
 };

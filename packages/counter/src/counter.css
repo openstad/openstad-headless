@@ -1,0 +1,15 @@
+.osc.counter-container {
+  display: flex;
+  gap: .5rem;
+  padding: .5rem 0rem;
+  justify-content: left;
+  align-items: left;
+  background-color: #213196;
+}
+
+.osc.counter-container p {
+  color: white;
+  margin: 0;
+  font-size: 1rem;
+  float: left;
+}
