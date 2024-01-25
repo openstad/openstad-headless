@@ -18,7 +18,7 @@ COPY --chown=node:node package*.json .
 COPY --chown=node:node packages/ ./packages
 COPY --chown=node:node apps/$APP ./apps/$APP
 
-RUN npm install --prefix=$WORKSPACE
+RUN npm install -w $WORKSPACE
 
 RUN npm run build-packages --if-present --prefix=$WORKSPACE
 
@@ -41,7 +41,8 @@ CMD ["npm", "run", "dev", "--prefix=${WORKSPACE}"]
 FROM builder as prepare-production
 ARG APP
 ENV WORKSPACE apps/${APP}
-RUN npm --prefix=apps/${APP} prune --production
+RUN npm --prefix=apps/${APP} run build --if-present && \
+    npm --prefix=apps/${APP} prune --production
 
 # Release image
 FROM node:18-slim as release
@@ -50,6 +51,11 @@ ARG PORT
 ENV WORKSPACE apps/${APP}
 
 WORKDIR /opt/openstad-headless
+
+RUN apt-get update && \
+    apt-get install -y netcat-traditional && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # copy files
 COPY --from=prepare-production --chown=node:node /opt/openstad-headless/apps/${APP} ./apps/${APP}

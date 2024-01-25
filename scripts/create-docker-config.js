@@ -35,6 +35,7 @@ const fs = require('fs').promises;
   }
 
   const config = require('./config');
+  await config.create();
 
   try {
     let configfile = `
@@ -93,7 +94,7 @@ AUTH_COOKIE_SECURE_OFF=${process.env.AUTH_COOKIE_SECURE_OFF}
 IMAGE_APP_URL=${process.env.IMAGE_APP_URL}
 IMAGE_PORT_API=${process.env.IMAGE_PORT_API}
 IMAGE_PORT_IMAGE_SERVER=${process.env.IMAGE_PORT_IMAGE_SERVER}
-IMAGE_IMAGES_DIR=${process.env.IMAGE_IMAGES_DIR || '/opt/image-server/images'}
+IMAGE_IMAGES_DIR=${process.env.IMAGE_IMAGES_DIR || '/opt/openstad-headless/apps/image-server/images'}
 IMAGE_THROTTLE=${process.env.IMAGE_THROTTLE}
 IMAGE_THROTTLE_CC_PROCESSORS=${process.env.IMAGE_THROTTLE_CC_PROCESSORS}
 IMAGE_THROTTLE_CC_PREFETCHER=${process.env.IMAGE_THROTTLE_CC_PREFETCHER}
@@ -109,7 +110,7 @@ NEXT_PUBLIC_API_URL=${process.env.API_URL}
 CMS_URL=${process.env.CMS_URL}
 CMS_PORT=${process.env.CMS_PORT}
 CMS_OVERWRITE_URL=${process.env.CMS_OVERWRITE_URL}
-CMS_MONGODB_URI=${process.env.CMS_MONGODB_URI || 'mongodb://openstad-mongo:27017'}
+CMS_MONGODB_URI=${process.env.CMS_MONGODB_URI || 'mongodb://openstad-mongo:27017/{database}'}
 CMS_DEFAULT_SETTINGS=${process.env.CMS_DEFAULT_SETTINGS}
 `;
 

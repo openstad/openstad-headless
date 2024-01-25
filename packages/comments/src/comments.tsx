@@ -2,12 +2,12 @@ import React from 'react';
 import './index.css';
 import { useState } from 'react';
 import DataStore from '@openstad-headless/data-store/src';
-import { Spacer } from '@openstad-headless/ui/src';
 import { Banner } from '@openstad-headless/ui/src';
+import { Spacer } from '@openstad-headless/ui/src';
 import Comment from './parts/comment.js';
 import CommentForm from './parts/comment-form.js';
 import { CommentPropsType } from './types/index';
-import loadWidget from '@openstad-headless/lib/load-widget';
+import {loadWidget} from '../../lib/load-widget';
 
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
@@ -42,7 +42,7 @@ function Comments({
 
   const datastore = new DataStore({
     projectId: props.projectId,
-    config: { api: props.api },
+    api: props.api,
   });
 
   const [currentUser, currentUserError, currentUserIsLoading] =

@@ -21,7 +21,7 @@ import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
 const sorting = [
   {
@@ -83,10 +83,13 @@ export default function BegrootmoduleSorting() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    sorting: widget?.config?.[category]?.options || [],
-    defaultSorting: widget?.config?.[category]?.defaultSorting || 'newest',
-  });
+  const defaults = useCallback(
+    () => ({
+      sorting: widget?.config?.[category]?.options || [],
+      defaultSorting: widget?.config?.[category]?.defaultSorting || 'newest',
+    }),
+    [widget?.config]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -95,7 +98,7 @@ export default function BegrootmoduleSorting() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     updateConfig({ [category]: values });

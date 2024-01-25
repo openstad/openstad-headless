@@ -20,7 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -43,14 +43,17 @@ export default function WidgetResourceFormTip() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    tipLabel: widget?.config?.[category]?.tipLabel || '',
-    tipInfo: widget?.config?.[category]?.tipInfo || '',
-    tipDisplayed: widget?.config?.[category]?.tipDisplayed || false,
-    tipRequired: widget?.config?.[category]?.tipRequired || false,
-    tipMinimumChars: widget?.config?.[category]?.tipMinimumChars || 0,
-    tipMaximumChars: widget?.config?.[category]?.tipMaximumChars || 0,
-  });
+  const defaults = useCallback(
+    () => ({
+      tipLabel: widget?.config?.[category]?.tipLabel || '',
+      tipInfo: widget?.config?.[category]?.tipInfo || '',
+      tipDisplayed: widget?.config?.[category]?.tipDisplayed || false,
+      tipRequired: widget?.config?.[category]?.tipRequired || false,
+      tipMinimumChars: widget?.config?.[category]?.tipMinimumChars || 0,
+      tipMaximumChars: widget?.config?.[category]?.tipMaximumChars || 0,
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -67,7 +70,7 @@ export default function WidgetResourceFormTip() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">

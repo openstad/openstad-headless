@@ -33,4 +33,13 @@ module.exports = {
       projectId: null,
     },
   },
+  resourcedetail: {
+    js: ['@openstad-headless/resource-detail/dist/resource-detail.iife.js'],
+    css: ['@openstad-headless/resource-detail/dist/style.css'],
+    functionName: 'OpenstadHeadlessResourceDetail',
+    componentName: 'ResourceDetail',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
 };

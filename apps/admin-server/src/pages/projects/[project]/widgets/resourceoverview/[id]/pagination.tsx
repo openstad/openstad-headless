@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -31,10 +31,13 @@ export default function WidgetResourceOverviewPagination() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    itemsPerPage: widget?.config?.[category]?.itemsPerPage || 24,
-    textResults: widget?.config?.[category]?.textResults || '',
-  });
+  const defaults = useCallback(
+    () => ({
+      itemsPerPage: widget?.config?.[category]?.itemsPerPage || 24,
+      textResults: widget?.config?.[category]?.textResults || '',
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -51,7 +54,7 @@ export default function WidgetResourceOverviewPagination() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">

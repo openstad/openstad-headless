@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: openstad-secrets-sa
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "10"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: secret-creator
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "20"
+rules:
+  - apiGroups: ['']
+    resources: ['secrets']
+    verbs: ["create", "update", "patch", "delete", "get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: secret-creator-role-to-openstad-secrets-sa
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "30"
+roleRef:
+  apiGroup: ''
+  kind: Role
+  name: secret-creator
+subjects:
+  - kind: ServiceAccount
+    name: openstad-secrets-sa
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Release.Name }}"
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "40"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    metadata:
+      name: "{{ .Release.Name }}-batch"
+    spec:
+      serviceAccountName: openstad-secrets-sa
+      volumes:
+        - name: keys-volume
+      containers:
+        - image: bitnami/kubectl
+          imagePullPolicy: IfNotPresent
+          name: kubectl-init-auth-certificates-container
+          volumeMounts:
+            - mountPath: /home/keys
+              name: keys-volume
+              readOnly: false
+          command: ["/bin/sh", "-c"]
+          args:
+            - echo "Generating certificates";
+              cd /home/keys;
+              openssl genrsa -out ./privatekey.pem 2048;
+              openssl req -new -key ./privatekey.pem -out ./certrequest.csr -subj "/C=NL/ST=All/L=Amsterdam/O=openstad/CN=www.{{ .Values.host.base}}";
+              openssl x509 -req -in ./certrequest.csr -signkey ./privatekey.pem -days 3650 -out ./certificate.pem;
+              ls -ltra;
+              echo "Creating keys in namespace {{ .Release.Namespace }}";
+              kubectl -n "{{ .Release.Namespace }}" delete secret openstad-auth-certificates;
+              kubectl -n "{{ .Release.Namespace }}" create secret generic openstad-auth-certificates --from-file ./privatekey.pem --from-file ./certrequest.csr --from-file ./certificate.pem;
+              echo "Secrets are stored";
+      restartPolicy: Never

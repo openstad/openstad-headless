@@ -1,13 +1,13 @@
 import 'remixicon/fonts/remixicon.css';
 import { ProgressBar } from '@openstad-headless/ui/src';
 import { SessionStorage } from '@openstad-headless/lib/session-storage';
-import loadWidget from '@openstad-headless/lib/load-widget';
-import { hasRole } from '@openstad-headless/lib/has-role';
+import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { hasRole } from '@openstad-headless/lib';
 import DataStore from '@openstad-headless/data-store/src';
 import React, { useState, useEffect } from 'react';
 import './likes.css';
-import { BaseProps } from '../../types/base-props';
-import { ProjectSettingProps } from '../../types/project-setting-props';
+import type { BaseProps } from '../../types/base-props.js';
+import type { ProjectSettingProps } from '../../types/project-setting-props.js';
 
 export type LikeWidgetProps = BaseProps &
   LikeProps &
@@ -32,16 +32,18 @@ function Likes({
   ...props
 }: LikeWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);
-  const resourceId = urlParams.get('openstadResourceId') || props.resourceId;
-  const necessaryVotes = props?.resources?.minimumYesVotes || 50;
+  const resourceId =
+    urlParams.get('openstadResourceId') || props.resourceId || '';
+  const necessaryVotes = props.resources.minimumYesVotes || 50;
 
   // Pass explicitely because datastore is not ts, we will not get a hint if the props have changed
-  const datastore = new DataStore({
+
+  const datastore: any = new DataStore({
     projectId: props.projectId,
-    config: { api: props.api },
+    api: props.api,
   });
 
-  const session = new SessionStorage(props);
+  const session = new SessionStorage({ projectId: props.projectId });
 
   const [currentUser] = datastore.useCurrentUser(props);
   const [resource] = datastore.useResource({
@@ -63,13 +65,16 @@ function Likes({
     let pending = session.get('osc-resource-vote-pending');
     if (pending && pending[resource.id]) {
       if (currentUser && currentUser.role) {
-        doVote(null, pending[resource.id])
+        doVote(null, pending[resource.id]);
         session.remove('osc-resource-vote-pending');
       }
     }
   }, [resource, currentUser]);
 
-  async function doVote(e, value) {
+  async function doVote(
+    e: React.MouseEvent<HTMLElement, MouseEvent> | null,
+    value: string
+  ) {
     if (e) e.stopPropagation();
 
     if (isBusy) return;
@@ -89,7 +94,7 @@ function Likes({
       return (document.location.href = props?.login?.url);
     }
 
-    let change = {};
+    let change: { [key: string]: any } = {};
     if (resource.userVote) change[resource.userVote.opinion] = -1;
 
     await resource.submitLike({

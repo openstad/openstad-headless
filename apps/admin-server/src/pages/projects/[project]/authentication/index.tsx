@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -26,6 +26,7 @@ import { Separator } from '@/components/ui/separator';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
+import toast from 'react-hot-toast';
 
 const availableAuthentication = [
   {
@@ -125,22 +126,25 @@ export default function ProjectAuthentication() {
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading, updateProject } = useProject();
-  const defaults = () => ({
-    availableAuthentication: data?.config?.[category]
-      ?.availableAuthentication || ['code'],
-    twoFactorRoles: data?.config?.[category]?.twoFactorRoles || [
-      'admin',
-      'member',
-    ],
-    requiredFields: data?.config?.[category]?.requiredFields || [],
-    emailAddressOutgoing:
-      data?.config?.[category]?.emailAddressOutgoing || null,
-    emailAddressOutgoingUser:
-      data?.config?.[category]?.emailAddressOutgoingUser || null,
-    contactEmail: data?.config?.[category]?.contactEmail || null,
-    defaultRole: data?.config?.[category]?.defaultRole || null,
-    // emailHeader: data?.config?.[category]?.emailHeader || null,
-  });
+  const defaults = useCallback(
+    () => ({
+      availableAuthentication: data?.config?.[category]
+        ?.availableAuthentication || ['code'],
+      twoFactorRoles: data?.config?.[category]?.twoFactorRoles || [
+        'admin',
+        'member',
+      ],
+      requiredFields: data?.config?.[category]?.requiredFields || [],
+      emailAddressOutgoing:
+        data?.config?.[category]?.emailAddressOutgoing || null,
+      emailAddressOutgoingUser:
+        data?.config?.[category]?.emailAddressOutgoingUser || null,
+      contactEmail: data?.config?.[category]?.contactEmail || null,
+      defaultRole: data?.config?.[category]?.defaultRole || null,
+      // emailHeader: data?.config?.[category]?.emailHeader || null,
+    }),
+    [data?.config]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -149,11 +153,11 @@ export default function ProjectAuthentication() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [data?.config]);
+  }, [form, defaults]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await updateProject({
+      const project = await updateProject({
         [category]: {
           availableAuthentication: values.availableAuthentication,
           twoFactorRoles: values.twoFactorRoles,
@@ -165,6 +169,9 @@ export default function ProjectAuthentication() {
           // emailHeader: values.emailHeader
         },
       });
+      if (project) {
+        toast.success('Het project is succesvol aangepast!')
+      }
     } catch (error) {
       console.error('could not update', error);
     }

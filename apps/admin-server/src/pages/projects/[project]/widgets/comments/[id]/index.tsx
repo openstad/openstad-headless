@@ -11,11 +11,16 @@ import ArgumentsList from './list';
 import ArgumentsForm from './form';
 import { useRouter } from 'next/router';
 import WidgetPreview from '@/components/widget-preview';
-import { CommentsWidgetProps } from '@openstad/comments/src/comments';
+import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-
-export default function WidgetArguments() {
+import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
+import WidgetPublish from '@/components/widget-publish';
+export const getServerSideProps = withApiUrl
+ 
+export default function WidgetArguments({
+  apiUrl
+}: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
@@ -25,11 +30,6 @@ export default function WidgetArguments() {
     useWidgetPreview<CommentsWidgetProps>({
       projectId,
       resourceId: '2',
-      api: {
-        url: '/api/openstad',
-      },
-      title: 'Vind je dit een goed idee?',
-      variant: 'medium',
     });
 
   return (
@@ -47,7 +47,7 @@ export default function WidgetArguments() {
           },
           {
             name: 'Argumenten',
-            url: `/projects/${projectId}/widgets/arguments/${id}`,
+            url: `/projects/${projectId}/widgets/comments/${id}`,
           },
         ]}>
         <div className="container py-6">
@@ -56,11 +56,12 @@ export default function WidgetArguments() {
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="list">Lijst</TabsTrigger>
               <TabsTrigger value="form">Formulier</TabsTrigger>
+              <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
-              {widget?.config ? (
+              {previewConfig ? (
                 <ArgumentsGeneral
-                  {...widget?.config}
+                  {...previewConfig}
                   updateConfig={(config) =>
                     updateConfig({ ...widget.config, ...config })
                   }
@@ -76,9 +77,9 @@ export default function WidgetArguments() {
               ) : null}
             </TabsContent>
             <TabsContent value="list" className="p-0">
-              {widget?.config ? (
+              {previewConfig ? (
                 <ArgumentsList
-                  {...widget?.config}
+                  {...previewConfig}
                   updateConfig={(config) =>
                     updateConfig({ ...widget.config, ...config })
                   }
@@ -94,9 +95,9 @@ export default function WidgetArguments() {
               ) : null}
             </TabsContent>
             <TabsContent value="form" className="p-0">
-              {widget?.config ? (
+              {previewConfig ? (
                 <ArgumentsForm
-                  {...widget?.config}
+                  {...previewConfig}
                   updateConfig={(config) =>
                     updateConfig({ ...widget.config, ...config })
                   }
@@ -110,6 +111,9 @@ export default function WidgetArguments() {
                   }}
                 />
               ) : null}
+            </TabsContent>
+            <TabsContent value="publish" className="p-0">
+              <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
           </Tabs>
 

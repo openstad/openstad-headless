@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -42,12 +42,15 @@ export default function WidgetMapGeneral() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    display: widget?.config?.[category]?.display || 'full',
-    name: widget?.config?.[category]?.name || 'Inzending',
-    submissionField: widget?.config?.[category]?.submissionField || 'theme',
-    filterLabel: widget?.config?.[category]?.filterLabel || "Alle thema's",
-  });
+  const defaults = useCallback(
+    () => ({
+      display: widget?.config?.[category]?.display || 'full',
+      name: widget?.config?.[category]?.name || 'Inzending',
+      submissionField: widget?.config?.[category]?.submissionField || 'theme',
+      filterLabel: widget?.config?.[category]?.filterLabel || "Alle thema's",
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -64,7 +67,7 @@ export default function WidgetMapGeneral() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -150,7 +153,9 @@ export default function WidgetMapGeneral() {
                 <FormLabel>
                   Opent op mobiel de lijst van resources over de kaart heen?
                 </FormLabel>
-                <Select onValueChange={(e: string) => field.onChange(e === 'false')} value={field.value ? 'true' : 'false'}>
+                <Select
+                  onValueChange={(e: string) => field.onChange(e === 'false')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Nee" />

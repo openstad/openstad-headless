@@ -1,0 +1,35 @@
+/*
+    This file is a workaround so we can use both npm run build and npm run lint command. 
+
+    For some reason the npm run lint command works with the "include" files as specified below. But the build command then will fail with these paths, saying that type cron is missing implicitely.
+    
+    The other way around, if we just include the ts and tsx files like *.tsx and *.ts then the build succeeds, but the linter complains that our tsconfig does not have the widget file (src/likes.tsx).
+*/
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "useDefineForClassFields": true,
+        "lib": ["ES2020", "DOM", "DOM.Iterable"],
+        "module": "NodeNext",
+        "skipLibCheck": true,
+    
+        /* Bundler mode */
+        "moduleResolution": "NodeNext",
+        // "allowImportingTsExtensions": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "jsx": "react-jsx",
+        "allowJs": true,
+        /* Linting */
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+    },
+    "include": [
+      "../**/*.ts",
+      "../**/*.tsx",
+    ],
+    "exclude": ["main.tsx", "node_modules", "next-env.d.ts"]
+  }

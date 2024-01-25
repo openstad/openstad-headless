@@ -24,8 +24,13 @@ import WidgetResourceFormInfo from './info';
 import WidgetResourceFormConfirmation from './confirmation';
 import { useRouter } from 'next/router';
 import Preview from '@/components/widget-preview';
+import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
+import WidgetPublish from '@/components/widget-publish';
 
-export default function WidgetResourceForm() {
+export const getServerSideProps = withApiUrl;
+export default function WidgetResourceForm({
+  apiUrl,
+}:WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
@@ -68,6 +73,7 @@ export default function WidgetResourceForm() {
               <TabsTrigger value="budget">Budget</TabsTrigger>
               <TabsTrigger value="confirmation">Bevestiging</TabsTrigger>
               <TabsTrigger value="info">Info</TabsTrigger>
+              <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
               {/* <Preview type="resourceform" /> */}
@@ -119,6 +125,9 @@ export default function WidgetResourceForm() {
             </TabsContent>
             <TabsContent value="info" className="p-0">
               <WidgetResourceFormInfo />
+            </TabsContent>
+            <TabsContent value="publish" className="p-0">
+              <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
           </Tabs>
         </div>

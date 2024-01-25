@@ -3,14 +3,15 @@ import { useState } from 'react';
 export default function useResources(props) {
   let self = this;
 
-  const projectId = props.projectId || props.config?.projectId;
-  const resourceId = props.resourceId || props.config?.resourceId;
-  const sentiment = props.sentiment || props.config?.sentiment || null;
+  const projectId = props.projectId;
+  const resourceId = props.resourceId;
+  const sentiment = props.sentiment;
 
   const { data, error, isLoading } = self.useSWR(
     { projectId },
     'resources.fetch'
   );
+
 
   // add functionality
   let resources = data || [];

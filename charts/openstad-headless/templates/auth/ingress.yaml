@@ -1,0 +1,64 @@
+---
+{{- if .Values.auth.ingress.enabled -}}
+{{ $serviceName := include "openstad.auth.fullname" . }}
+{{ $servicePort := .Values.auth.service.httpPort }}
+{{ $tls := .Values.auth.ingress.tls }}
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+
+{{- if .Values.auth.ingress.annotations }}
+  annotations:
+    nginx.ingress.kubernetes.io/x-forwarded-proto: https
+    {{- if .Values.clusterIssuer.enabled }}
+    cert-manager.io/cluster-issuer: {{ template "openstad.clusterIssuer.name" . }}
+    {{- end }}
+{{ toYaml .Values.auth.ingress.annotations | indent 4 }}
+{{- end }}
+
+  labels:
+  {{- include "openstad.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ template "openstad.auth.fullname" . }}-ingress
+{{- range $key, $value := .Values.auth.ingress.extraLabels }}
+  {{ $key }}: {{ $value }}
+{{- end }}
+
+  name: {{ template "openstad.auth.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+
+spec:
+  rules:
+{{- range $host := .Values.auth.ingress.hosts }}
+    - host: {{ 1 }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $serviceName }}
+                port:
+                  number: {{ $servicePort }}
+{{- end }}
+    - host: {{ template "openstad.auth.url" . }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $serviceName }}
+                port:
+                  number: {{ $servicePort }}
+
+  tls:
+    - secretName: {{ .Values.auth.ingress.tls.secretName }}
+      hosts:
+        - {{ template "openstad.auth.url" . }}
+  {{- range $value := .Values.auth.ingress.tls.hosts -}}
+        - {{ $value }}
+  {{- end -}}
+
+{{- end -}}

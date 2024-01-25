@@ -6,10 +6,15 @@ import { useRouter } from 'next/router';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { LikeWidgetProps } from '@openstad/likes/src/likes';
+import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
 
-export default function WidgetLikes() {
+export const getServerSideProps = withApiUrl;
+
+export default function WidgetLikes({
+  apiUrl,
+}:WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
@@ -21,8 +26,6 @@ export default function WidgetLikes() {
     api: {
       url: '/api/openstad',
     },
-    title: 'Vind je dit een goed idee?',
-    variant: 'medium',
   });
 
   return (
@@ -50,9 +53,9 @@ export default function WidgetLikes() {
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="display" className="p-0">
-              {widget?.config ? (
+              {previewConfig ? (
                 <LikesDisplay
-                  {...widget?.config}
+                  {...previewConfig}
                   updateConfig={(config) =>
                     updateConfig({ ...widget.config, ...config })
                   }
@@ -68,7 +71,7 @@ export default function WidgetLikes() {
               ) : null}
             </TabsContent>
             <TabsContent value="publish" className="p-0">
-              <WidgetPublish />
+              <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
           </Tabs>
 

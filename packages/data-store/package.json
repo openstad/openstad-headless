@@ -1,6 +1,7 @@
 {
   "name": "@openstad-headless/data-store",
   "version": "1.0.0",
+  "private": true,
   "description": "Data layer for the base components used in openstad headless",
   "scripts": {
     "rollup": "rollup -c",

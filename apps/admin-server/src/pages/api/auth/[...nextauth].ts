@@ -31,7 +31,7 @@ export const authOptions: NextAuthOptions = {
        // each request: validate jwt
        if ( token?.accessToken ) {
          try {
-           let url = `${process.env.API_URL}/auth/project/1/me`
+           let url = `${process.env.API_URL_INTERNAL}/auth/project/1/me`
            let response = await fetch(url, {
              headers: { Authorization: `Bearer ${token.accessToken}` },
            })
@@ -82,7 +82,7 @@ export const authOptions: NextAuthOptions = {
           );
           // @todo: make project id and useAuth dynamic
           const tokenResponse = await fetch(
-            `${process.env.API_URL}/auth/project/1/connect-user`,
+            `${process.env.API_URL_INTERNAL}/auth/project/1/connect-user`,
             {
               method: 'POST',
               headers: {

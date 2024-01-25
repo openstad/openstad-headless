@@ -229,27 +229,8 @@ module.exports = function (db, sequelize, DataTypes) {
     extraData: getExtraDataConfig(DataTypes.JSON,  'resources'),
 
     location: {
-      type: DataTypes.GEOMETRY('POINT'),
+      type: DataTypes.JSON,
       allowNull: !(config.resources && config.resources.location && config.resources.location.isMandatory),
-      set: function (location) {
-        location = location ? location : null
-        this.setDataValue('location', location);
-      }
-    },
-
-    position: {
-      type: DataTypes.VIRTUAL,
-      get: function () {
-        var location = this.get('location');
-        var position;
-        if (location && location.type && location.type == 'Point') {
-          position = {
-            lat: location.coordinates[0],
-            lng: location.coordinates[1],
-          };
-        }
-        return position
-      }
     },
 
     modBreak: {
@@ -591,7 +572,6 @@ module.exports = function (db, sequelize, DataTypes) {
           'id',
           'status',
           'location',
-          'position'
         ]
         ,
         where: sequelize.or(
@@ -661,7 +641,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
       includeTags: {
         include: [{model: db.Tag,
-          attributes: ['id', 'name'],
+          attributes: ['id', 'type', 'name'],
           through: {attributes: []},
         }]
       },

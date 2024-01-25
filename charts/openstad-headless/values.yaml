@@ -1,0 +1,541 @@
+# Optional Dependencies
+
+##
+## In this block you can toggle all optional dependencies.
+## If you want to use an existing database(s) or services, disable
+## the chart database(s) here.
+##
+## - To enable a dependency, set the enabled value of the relevant
+##   dependency to true.
+##
+## - To disable a dependency, set the enabled value of the relevant
+##   dependency to false.
+##
+## Note: If you use an existing database, please change the
+##      relevant credentials in secrets.database for MySQL and/or
+##      secrets.mongodb for MongoDB
+##
+dependencies:
+  ## Database
+  mongodb:
+    enabled: false
+  mysql:
+    enabled: false
+
+  ## SSL
+  cert-manager:
+    enabled: false
+
+cert-manager:
+  # Whether we want to install CRDs.
+  installCRDs: false
+
+## Settings for MongoDB
+mongodb:
+  image:
+    tag: 5.0.13-debian-11-r5
+  auth:
+    enabled: false
+
+## Settings for MySQL
+mysql:
+  db:
+    # Credentials for both MongoDB and MySQL
+    # NOTE: Also change this in secrets
+    user: openstad
+    password: examplePass2146
+
+    # The following databases will be created additionally
+    # during initialization:
+    additionalDbNames:
+      - api
+      - auth
+
+  # DB initialization scripts are put in this config map:
+  initdbScriptsConfigMap: extra-db-map
+
+  # Secret which can be controlled by us
+  auth:
+    username: openstad
+    database: image
+    existingSecret: mysql-secret
+
+  primary:
+    extraEnvVars:
+      # Use the older authentication plugin
+      - name: MYSQL_AUTHENTICATION_PLUGIN
+        value: mysql_native_password
+
+# Internal config
+public:
+  name: openstad
+
+# Settings
+
+##
+## Settings for when you use one or more dependencies from above
+##
+
+## Settings for Cert-Manager/Cluster issuer
+clusterIssuer:
+  enabled: false # Whether this issuer is created
+  acme: # Email used for requesting the certificates
+    email: info@openstad.org
+
+  ### If you want to use a production issuer set the following to true
+  useProdIssuer: false
+
+  ### Name of the production issuer
+  prodIssuerName: openstad-letsencrypt-prod
+  ### Name of the staging issuer
+  stagingIssuerName: openstad-letsencrypt-staging
+
+##
+## All base settings can be changed in this block.
+##
+
+## Settings for DNS
+host:
+  ### Base URL of the web app
+  ### subdomains will be prefixed with a .
+  ### to this url
+  ### e.g. subdomain.example.com
+  base: openstad.softwaredepartment.net
+  ### publicIp is used to check if DNS is set properly
+  publicIp:
+
+  ### Whether we should append www to the domains
+  usewww: false
+
+## Settings for persistent volumes
+
+persistence:
+  #configure the cloud-specific storageClassName, will use the clouds default if not specified
+  storageClassName:
+  annotations: '{}'
+
+admin:
+  # Configure how many replicas exists of this service
+  replicas: 1
+
+  # Configure how the service is named and labeled
+  name: 'admin'
+  label: openstad-admin-service
+
+  url:
+  oauthUrl:
+  oauthInternalUrl:
+  apiUrl:
+
+  # Secret values
+  secrets:
+    nextAuthSecret:
+
+  # Service settings:
+  # Primarily port configuration
+  service:
+    httpPort: 31470
+
+  # Deployment container is what is eventually run in the pod
+  deploymentContainer:
+    name: admin
+    # Docker image for this pod
+    image: ghcr.io/openstad/admin-server:latest
+
+  # Subdomain for the service:
+  # If filled it it will create a default url of: www.$subdomain.$baseurl
+  # If not filled in the base will be used instead: www.$baseurl
+  subdomain: admin
+
+  # Ingress settings:
+  # Configure how the service is accessed
+  ingress:
+    enabled: true # Whether there is a ingress for this service
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/proxy-body-size: 128m
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        more_set_headers "X-Content-Type-Options: nosniff";
+        more_set_headers "X-Frame-Options: SAMEORIGIN";
+        more_set_headers "X-Xss-Protection: 1";
+        more_set_headers "Referrer-Policy: same-origin";
+    extraLabels: {}
+    hosts: []
+    tls:
+      secretName: openstad-tls-admin
+      hosts: []
+
+  # Inject extra environment variables
+  extraEnvVars: []
+
+  # Resources:
+  resources:
+    # Max resources
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    # Min resources
+    requests:
+      cpu: 100m
+      memory: 500M
+
+  # Check whether the service is healthy:
+  # First time after $(initialDelaySeconds) seconds.
+  # After that every $(periodSeconds) seconds
+  probe:
+    liveness:
+      initialDelaySeconds: 30
+      periodSeconds: 60
+
+auth:
+  label: openstad-auth-service
+  name: auth
+
+  # Subdomain for the service:
+  # If filled it it will create a default url of: www.$subdomain.$baseurl
+  # If not filled in the base will be used instead: www.$baseurl
+  subdomain: auth
+  service:
+    httpPort: 31430
+
+  # Deployment container is what is eventually run in the pod
+  deploymentContainer:
+    name: auth
+    # Docker image for this pod
+    image: ghcr.io/openstad/auth-server:latest
+
+  # Ingress settings:
+  # Configure how the service is accessed
+  ingress:
+    enabled: true # Whether there is a ingress for this service
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        more_set_headers "X-Content-Type-Options: nosniff";
+        more_set_headers "X-Frame-Options: SAMEORIGIN";
+        more_set_headers "X-Xss-Protection: 1";
+        more_set_headers "Referrer-Policy: same-origin";
+    extraLabels: {}
+    hosts: []
+    tls:
+      secretName: openstad-tls-auth
+      hosts: []
+
+  # Inject extra environment variables
+  extraEnvVars: []
+
+  # Resources:
+  resources:
+    # Max resources
+    limits:
+      cpu: 300m
+      memory: 1Gi
+    # Min resources
+    requests:
+      cpu: 100m
+      memory: 500M
+
+  # Check whether the service is healthy:
+  # First time after $(initialDelaySeconds) seconds.
+  # After that every $(periodSeconds) seconds
+  probe:
+    liveness:
+      initialDelaySeconds: 30
+      periodSeconds: 60
+
+  # Default email settings
+  fromName:
+  fromEmail:
+
+  # Cookie settings
+  cookie:
+    secureOff:
+
+api:
+  name: api
+  label: openstad-api-service
+  service:
+    httpPort: 31410
+
+  # Deployment container is what is eventually run in the pod
+  deploymentContainer:
+    name: api-container
+    # Docker image for this pod
+    image: ghcr.io/openstad/api-server:latest
+
+  # Subdomain for the service:
+  # If filled it it will create a default url of: www.$subdomain.$baseurl
+  # If not filled in the base will be used instead: www.$baseurl
+  subdomain: api
+
+  # Ingress settings:
+  # Configure how the service is accessed
+  ingress:
+    enabled: true # Whether there is a ingress for this service
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/proxy-body-size: 128m
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        more_set_headers "X-Content-Type-Options: nosniff";
+        more_set_headers "X-Frame-Options: SAMEORIGIN";
+        more_set_headers "X-Xss-Protection: 1";
+        more_set_headers "Referrer-Policy: same-origin";
+    extraLabels: {}
+    hosts: []
+    tls:
+      secretName: openstad-tls-api
+      hosts: []
+
+  # Inject extra environment variables
+  extraEnvVars: []
+
+  # Resources:
+  resources:
+    # Max resources
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    # Min resources
+    requests:
+      cpu: 250m
+      memory: 500M
+
+  # Check whether the service is healthy:
+  # First time after $(initialDelaySeconds) seconds.
+  # After that every $(periodSeconds) seconds
+  probe:
+    liveness:
+      initialDelaySeconds: 30
+      periodSeconds: 60
+
+image:
+  # Configure how many replicas exists of this service
+  replicas: 1
+
+  # Configure how the service is named and labeled
+  name: 'image'
+  label: openstad-image-service
+
+  # Service settings:
+  # Primarily port configuration
+  service:
+    httpPort: 31450
+
+  # Deployment container is what is eventually run in the pod
+  deploymentContainer:
+    name: image
+    # Docker image for this pod
+    image: ghcr.io/openstad/image-server:latest
+
+  # Subdomain for the service:
+  # If filled it it will create a default url of: www.$subdomain.$baseurl
+  # If not filled in the base will be used instead: www.$baseurl
+  subdomain: img
+
+  # Ingress settings:
+  # Configure how the service is accessed
+  ingress:
+    enabled: true # Whether there is a ingress for this service
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/proxy-body-size: 128m
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        more_set_headers "X-Content-Type-Options: nosniff";
+        more_set_headers "X-Frame-Options: SAMEORIGIN";
+        more_set_headers "X-Xss-Protection: 1";
+        more_set_headers "Referrer-Policy: same-origin";
+    extraLabels: {}
+    hosts: []
+    tls:
+      secretName: openstad-tls-image
+      hosts: []
+
+  # parameters to enable throttling: https://github.com/asilvas/node-image-steam?tab=readme-ov-file#throttle-options
+  throttle:
+    enabled: true
+    # Number of concurrent storage request operations. This helps prevent saturation of your storage and/or networking interfaces to provide the optimal experience
+    ccProcessors: 4
+    # Number of concurrent storage request operations. This helps prevent saturation of your storage and/or networking interfaces to provide the optimal experience
+    ccPrefetcher: 20
+    # Number of concurrent http requests. Anything to exceed this value will result in a 503 (too busy), to avoid an indefinite pileup
+    ccRequests: 100
+
+  # Inject extra environment variables
+  extraEnvVars: []
+
+  # Resources:
+  resources:
+    # Max resources
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    # Min resources
+    requests:
+      cpu: 100m
+      memory: 500M
+
+  # Check whether the service is healthy:
+  # First time after $(initialDelaySeconds) seconds.
+  # After that every $(periodSeconds) seconds
+  probe:
+    liveness:
+      initialDelaySeconds: 30
+      periodSeconds: 60
+
+  # Volumes:
+  # Configure the persistent volumes for this service
+  volumes:
+    data:
+      size: 1Gi
+      mountPath: /opt/openstad-headless/apps/image-server/images
+
+cms:
+  name: cms
+  label: openstad-cms-service
+  service:
+    httpPort: 31490
+
+  # Deployment container is what is eventually run in the pod
+  deploymentContainer:
+    name: cms-container
+    # Docker image for this pod
+    image: ghcr.io/openstad/cms-server:latest
+
+  # Subdomain for the service:
+  # If filled it it will create a default url of: www.$subdomain.$baseurl
+  # If not filled in the base will be used instead: www.$baseurl
+  subdomain: cms
+
+  # Ingress settings:
+  # Configure how the service is accessed
+  ingress:
+    enabled: true # Whether there is a ingress for this service
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/proxy-body-size: 128m
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        more_set_headers "X-Content-Type-Options: nosniff";
+        more_set_headers "X-Frame-Options: SAMEORIGIN";
+        more_set_headers "X-Xss-Protection: 1";
+        more_set_headers "Referrer-Policy: same-origin";
+    extraLabels: {}
+    hosts: []
+    tls:
+      secretName: openstad-tls-cms
+      hosts: []
+
+  # Inject extra environment variables
+  extraEnvVars: []
+
+  # Resources:
+  resources:
+    # Max resources
+    limits:
+      cpu: "1"
+      memory: 2Gi
+    # Min resources
+    requests:
+      cpu: 250m
+      memory: 500M
+
+  # Check whether the service is healthy:
+  # First time after $(initialDelaySeconds) seconds.
+  # After that every $(periodSeconds) seconds
+  probe:
+    liveness:
+      initialDelaySeconds: 30
+      periodSeconds: 60
+
+# Overwrite Secrets
+
+##
+## In this block you can choose to overwrite
+## the default values of the secrets.
+##
+
+secrets:
+  admin:
+    clientId:
+    clientSecret:
+    nextauthSecret:
+    imageApiToken:
+
+  api:
+    jwtSecret:
+
+  cms:
+    apiKey:
+    mongodbUri:
+
+  database:
+    ### These values are for the MySQL db
+    username:
+    password:
+    type:
+    dbName:
+    hostname:
+    hostport:
+    # Max connections used in connection pool
+    maxPoolSize: 30
+
+    # If you want to force an SSL connection to MySQL, provide a CA cert here
+    # This should be the content of the CA cert, including `-----BEGIN CERTIFICATE-----`
+    # Most cloud providers will provide this CA cert in their documentation;
+    # Amazon: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html
+    # Azure: https://docs.microsoft.com/en-us/azure/mysql/single-server/how-to-configure-ssl
+    # Google Cloud Platform: https://cloud.google.com/sql/docs/mysql/configure-ssl-instance
+    caCert:
+
+    ### Default db passwords for when you use the dependency
+    rootPassword:
+    replicationPassword:
+
+    ### Overwrites for auth db
+    auth:
+      dbName: auth
+      credentials:
+        clientId:
+        clientSecret:
+        fixedUserId:
+        fixedToken:
+        firstLoginToken:
+        adminClientId:
+        adminClientSecret:
+        imageApiToken:
+
+    ### Overwrites for API db
+    api:
+      dbName: api
+
+  ### Local references to services:
+  hosts:
+    api:
+    auth:
+    frontend:
+    image:
+
+  ### Cookie secrets
+  cookies:
+    cookieName:
+    onlySecure:
+    jwtSecret:
+
+  ### Mail server secretes
+  mail:
+    host: smtp.localhost
+    port: '25'
+    username: user
+    password: password
+
+    auth:
+      emailAssetsUrl:
+      secure: 'yes'
+
+    api:
+      host:
+      port:
+      user:
+      password:
+      emailFrom:
+      adminEmailFrom:
+      requireSsl:

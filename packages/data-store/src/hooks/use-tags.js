@@ -4,8 +4,8 @@ export default function useTags(props) {
 
   let self = this;
 
-  const projectId = props.projectId || props.config.projectId;
-  const type = props.type || props.config.type;
+  const projectId = props.projectId;
+  const type = props.type;
 
   const { data, error, isLoading } = self.useSWR({ projectId, type }, 'tags.fetch');
 

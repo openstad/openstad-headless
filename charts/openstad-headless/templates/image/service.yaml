@@ -1,0 +1,14 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ template "openstad.image.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: {{ .Values.image.label }}
+  ports:
+  - name: http
+    protocol: TCP
+    port: {{ .Values.image.service.httpPort }}
+  type: ClusterIP
