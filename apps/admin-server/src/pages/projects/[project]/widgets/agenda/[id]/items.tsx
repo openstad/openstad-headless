@@ -14,7 +14,7 @@ import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AgendaWidgetProps } from '@openstad/agenda/src/agenda';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -110,16 +110,13 @@ export default function WidgetAgendaItems(
     }
   }
 
-  const defaults = useCallback(
-    () => ({
-      trigger: '0',
-      title: '',
-      description: '',
-      active: true,
-      links: [],
-    }),
-    []
-  );
+  const defaults = () => ({
+    trigger: '0',
+    title: '',
+    description: '',
+    active: true,
+    links: [],
+  });
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
@@ -181,32 +178,29 @@ export default function WidgetAgendaItems(
     }
   }, [selectedLink, form, links]);
 
-  const handleAction = useCallback(
-    (
-      actionType: 'moveUp' | 'moveDown' | 'delete',
-      clickedTrigger: string,
-      isItemAction: boolean // Determines if the action is for items or links
-    ) => {
-      if (isItemAction) {
-        setItems((currentItems) => {
-          return handleMovementOrDeletion(
-            currentItems,
-            actionType,
-            clickedTrigger
-          ) as Item[];
-        });
-      } else {
-        setLinks((currentLinks) => {
-          return handleMovementOrDeletion(
-            currentLinks,
-            actionType,
-            clickedTrigger
-          ) as Link[];
-        });
-      }
-    },
-    [] // No dependencies needed if items and links are not used directly within this callback
-  );
+  const handleAction = (
+    actionType: 'moveUp' | 'moveDown' | 'delete',
+    clickedTrigger: string,
+    isItemAction: boolean // Determines if the action is for items or links
+  ) => {
+    if (isItemAction) {
+      setItems((currentItems) => {
+        return handleMovementOrDeletion(
+          currentItems,
+          actionType,
+          clickedTrigger
+        ) as Item[];
+      });
+    } else {
+      setLinks((currentLinks) => {
+        return handleMovementOrDeletion(
+          currentLinks,
+          actionType,
+          clickedTrigger
+        ) as Link[];
+      });
+    }
+  };
 
   // This is a helper function to handle moving up, moving down, or deleting an entry
   function handleMovementOrDeletion(
