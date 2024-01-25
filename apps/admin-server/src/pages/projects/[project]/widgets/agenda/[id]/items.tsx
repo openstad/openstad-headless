@@ -45,6 +45,7 @@ export default function WidgetAgendaItems(
   const [selectedLink, setLink] = useState<Link | null>(null);
   const [settingLinks, setSettingLinks] = useState<boolean>(false);
 
+  // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
     if (selectedItem) {
       setItems((currentItems) =>
@@ -69,10 +70,11 @@ export default function WidgetAgendaItems(
         },
       ]);
     }
-    form.reset();
+    form.reset(defaults);
     setLinks([]);
   }
 
+  // adds link to links array if no link is selected, otherwise updates the selected link
   function handleAddLink(values: FormData) {
     if (selectedLink) {
       setLinks((currentLinks) =>
@@ -108,15 +110,20 @@ export default function WidgetAgendaItems(
     }
   }
 
-  const form = useForm<FormData>({
-    resolver: zodResolver<any>(formSchema),
-    defaultValues: {
+  const defaults = useCallback(
+    () => ({
       trigger: '0',
       title: '',
       description: '',
       active: true,
       links: [],
-    },
+    }),
+    []
+  );
+
+  const form = useForm<FormData>({
+    resolver: zodResolver<any>(formSchema),
+    defaultValues: defaults(),
   });
 
   type Item = {
@@ -144,6 +151,7 @@ export default function WidgetAgendaItems(
     props.onFieldChanged('items', items);
   }, [items]);
 
+  // Sets form to selected item values when item is selected
   useEffect(() => {
     if (selectedItem) {
       form.reset({
@@ -155,101 +163,86 @@ export default function WidgetAgendaItems(
       });
       setLinks(selectedItem.links || []);
     }
-  }, [selectedItem]);
+  }, [selectedItem, form]);
 
   useEffect(() => {
     if (selectedLink) {
-      // Update the last link in the array with values from selectedLink
       const updatedLinks = [...links];
       const index = links.findIndex(
         (link) => link.trigger === selectedLink.trigger
       );
-      updatedLinks[index] = {
-        trigger: selectedLink.trigger,
-        title: selectedLink.title || '',
-        url: selectedLink.url,
-        openInNewWindow: selectedLink.openInNewWindow,
-      };
+      updatedLinks[index] = { ...selectedLink };
 
       // Use form.reset to update the entire form state
       form.reset({
         ...form.getValues(), // Retains the current values of other fields
         links: updatedLinks,
       });
-      console.log(updatedLinks);
     }
-  }, [selectedLink]);
+  }, [selectedLink, form, links]);
 
-  const handleItemAction = useCallback(
+  const handleAction = useCallback(
     (
       actionType: 'moveUp' | 'moveDown' | 'delete',
-      clickedItemTrigger: string
+      clickedTrigger: string,
+      isItemAction: boolean // Determines if the action is for items or links
     ) => {
-      setItems((currentItems) => {
-        const index = currentItems.findIndex(
-          (item) => item.trigger === clickedItemTrigger
-        );
-
-        if (actionType === 'delete') {
-          return currentItems.filter(
-            (item) => item.trigger !== clickedItemTrigger
-          );
-        }
-
-        if (
-          (actionType === 'moveUp' && index > 0) ||
-          (actionType === 'moveDown' && index < currentItems.length - 1)
-        ) {
-          const newItemList = [...currentItems];
-          const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
-          let tempTrigger = newItemList[swapIndex].trigger;
-          newItemList[swapIndex].trigger = newItemList[index].trigger;
-          newItemList[index].trigger = tempTrigger;
-          return newItemList;
-        }
-
-        return currentItems;
-      });
+      if (isItemAction) {
+        setItems((currentItems) => {
+          return handleMovementOrDeletion(
+            currentItems,
+            actionType,
+            clickedTrigger
+          ) as Item[];
+        });
+      } else {
+        setLinks((currentLinks) => {
+          return handleMovementOrDeletion(
+            currentLinks,
+            actionType,
+            clickedTrigger
+          ) as Link[];
+        });
+      }
     },
-    [items]
+    [] // No dependencies needed if items and links are not used directly within this callback
   );
 
-  const handleLinkAction = useCallback(
-    (
-      actionType: 'moveUp' | 'moveDown' | 'delete',
-      clickedLinkTrigger: string
-    ) => {
-      setLinks((currentLinks) => {
-        const index = currentLinks.findIndex(
-          (link) => link.trigger === clickedLinkTrigger
-        );
+  // This is a helper function to handle moving up, moving down, or deleting an entry
+  function handleMovementOrDeletion(
+    list: Array<Item | Link>,
+    actionType: 'moveUp' | 'moveDown' | 'delete',
+    trigger: string
+  ) {
+    const index = list.findIndex((entry) => entry.trigger === trigger);
 
-        if (actionType === 'delete') {
-          return currentLinks.filter(
-            (link) => link.trigger !== clickedLinkTrigger
-          );
-        }
+    if (actionType === 'delete') {
+      return list.filter((entry) => entry.trigger !== trigger);
+    }
 
-        if (
-          (actionType === 'moveUp' && index > 0) ||
-          (actionType === 'moveDown' && index < currentLinks.length - 1)
-        ) {
-          const newLinkList = [...currentLinks];
-          const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
-          let tempTrigger = newLinkList[swapIndex].trigger;
-          newLinkList[swapIndex].trigger = newLinkList[index].trigger;
-          newLinkList[index].trigger = tempTrigger;
-          return newLinkList;
-        }
+    if (
+      (actionType === 'moveUp' && index > 0) ||
+      (actionType === 'moveDown' && index < list.length - 1)
+    ) {
+      const newItemList = [...list];
+      const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
+      let tempTrigger = newItemList[swapIndex].trigger;
+      newItemList[swapIndex].trigger = newItemList[index].trigger;
+      newItemList[index].trigger = tempTrigger;
+      return newItemList;
+    }
 
-        return [...currentLinks];
-      });
-    },
-    [links]
-  );
+    return list; // If no action is performed, return the original list
+  }
 
   function handleSaveItems() {
     props.updateConfig({ ...props, items });
+  }
+
+  function resetForm() {
+    form.reset(defaults());
+    setLinks([]);
+    setItem(null);
   }
 
   function handleSaveLinks() {
@@ -263,140 +256,133 @@ export default function WidgetAgendaItems(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="w-full grid gap-4">
-          <div
-            className={`lg:w-full grid grid-cols-1 gap-x-6 ${
-              settingLinks ? 'lg:grid-cols-3' : 'lg:grid-cols-2'
-            }`}>
+          <div className="lg:w-full grid grid-cols-1 gap-x-6 lg:grid-cols-3">
             <div className="p-6 bg-white rounded-md flex flex-col justify-between">
               <div>
-                <Heading size="xl">Agenda items</Heading>
+                <Heading size="xl">Lijst van huidige items</Heading>
                 <Separator className="my-4" />
-                <FormField
-                  control={form.control}
-                  name="trigger"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Input {...field} />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Titel</FormLabel>
-                      <Input {...field} />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Beschrijving</FormLabel>
-                      <Input {...field} />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="active"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Actief</FormLabel>
-                      {YesNoSelect(field, props)}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormItem>
-                  <Button
-                    className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                    type="button"
-                    onClick={() => setSettingLinks(!settingLinks)}>
-                    {`Pas website links (${links.length}) aan`}
-                  </Button>
-                  <FormMessage />
-                </FormItem>
+                <div className="flex flex-col gap-1">
+                  {items.length > 0
+                    ? items
+                        .sort(
+                          (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
+                        )
+                        .map((item, index) => (
+                          <div
+                            key={index}
+                            className={`flex cursor-pointer justify-between border border-secondary ${
+                              item.trigger == selectedItem?.trigger &&
+                              'bg-secondary'
+                            }`}>
+                            <span className="flex gap-2 py-3 px-2">
+                              <ArrowUp
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleAction('moveUp', item.trigger, true)
+                                }
+                              />
+                              <ArrowDown
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleAction('moveDown', item.trigger, true)
+                                }
+                              />
+                            </span>
+                            <span
+                              className="gap-2 py-3 px-2 w-full"
+                              onClick={() => setItem(item)}>
+                              {item.title}
+                            </span>
+                            <span className="gap-2 py-3 px-2">
+                              <X
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleAction('delete', item.trigger, true)
+                                }
+                              />
+                            </span>
+                          </div>
+                        ))
+                    : 'Geen items'}
+                </div>
               </div>
               <div className="flex gap-2">
                 <Button
-                  className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                  className="w-fit mt-4"
                   type="button"
-                  onClick={() => {
-                    form.reset(), setItem(null);
-                  }}>
-                  Annuleer aanpassingen
-                </Button>
-                <Button className="w-fit mt-4" type="submit">
-                  Sla item op in lijst
+                  onClick={() => handleSaveItems()}>
+                  Configuratie opslaan
                 </Button>
               </div>
             </div>
 
-            {settingLinks && (
-              <div className="p-6 bg-white rounded-md flex flex-col justify-between">
-                <div>
-                  <Heading size="xl">Links</Heading>
-                  <Separator className="my-4" />
-                  <FormField
-                    control={form.control}
-                    name={`links.${links.length - 1}.title`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Link titel</FormLabel>
-                        <Input {...field} />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`links.${links.length - 1}.url`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Link URL</FormLabel>
-                        <Input {...field} />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`links.${links.length - 1}.openInNewWindow`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Open in nieuw venster</FormLabel>
-                        {YesNoSelect(field, props)}
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                    type="button"
-                    onClick={() => setSettingLinks(() => !settingLinks)}>
-                    Annuleer
-                  </Button>
-                  <Button
-                    className="w-fit mt-4"
-                    type="button"
-                    onClick={() => handleAddLink(form.getValues())}>
-                    Sla link op in lijst
-                  </Button>
-                </div>
-              </div>
-            )}
             {settingLinks ? (
-              <div className="p-6 bg-white rounded-md flex flex-col justify-between">
+              <div className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
+                <div className="flex flex-col justify-between">
+                  <div>
+                    <Heading size="xl">Links</Heading>
+                    <Separator className="my-4" />
+                    <FormField
+                      control={form.control}
+                      name={`links.${links.length - 1}.title`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Link titel</FormLabel>
+                          <Input {...field} />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`links.${links.length - 1}.url`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Link URL</FormLabel>
+                          <Input {...field} />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`links.${links.length - 1}.openInNewWindow`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Open in nieuw venster</FormLabel>
+                          {YesNoSelect(field, props)}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      className="w-full bg-secondary text-black hover:text-white mt-4"
+                      type="button"
+                      onClick={() => handleAddLink(form.getValues())}>
+                      {selectedLink
+                        ? 'Sla wijzigingen op'
+                        : 'Voeg link toe aan lijst'}
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                      type="button"
+                      onClick={() => {
+                        setSettingLinks(() => !settingLinks),
+                          setLink(null),
+                          setLinks([]);
+                      }}>
+                      Annuleer
+                    </Button>
+                    <Button
+                      className="w-fit mt-4"
+                      type="button"
+                      onClick={() => handleSaveLinks()}>
+                      Sla links op
+                    </Button>
+                  </div>
+                </div>
                 <div>
                   <Heading size="xl">Lijst van huidige links</Heading>
                   <Separator className="my-4" />
@@ -417,13 +403,17 @@ export default function WidgetAgendaItems(
                                 <ArrowUp
                                   className="cursor-pointer"
                                   onClick={() =>
-                                    handleLinkAction('moveUp', link.trigger)
+                                    handleAction('moveUp', link.trigger, false)
                                   }
                                 />
                                 <ArrowDown
                                   className="cursor-pointer"
                                   onClick={() =>
-                                    handleLinkAction('moveDown', link.trigger)
+                                    handleAction(
+                                      'moveDown',
+                                      link.trigger,
+                                      false
+                                    )
                                   }
                                 />
                               </span>
@@ -436,7 +426,7 @@ export default function WidgetAgendaItems(
                                 <X
                                   className="cursor-pointer"
                                   onClick={() =>
-                                    handleLinkAction('delete', link.trigger)
+                                    handleAction('delete', link.trigger, false)
                                   }
                                 />
                               </span>
@@ -445,69 +435,85 @@ export default function WidgetAgendaItems(
                       : 'Geen links'}
                   </div>
                 </div>
-                <Button
-                  className="w-fit mt-4"
-                  type="button"
-                  onClick={() => handleSaveLinks()}>
-                  Sla links op
-                </Button>
               </div>
             ) : (
-              <div className="p-6 bg-white rounded-md flex flex-col justify-between">
+              <div className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
                 <div>
-                  <Heading size="xl">Lijst van huidige items</Heading>
+                  <Heading size="xl">Agenda items</Heading>
                   <Separator className="my-4" />
-                  <div className="flex flex-col gap-1">
-                    {items.length > 0
-                      ? items
-                          .sort(
-                            (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
-                          )
-                          .map((item, index) => (
-                            <div
-                              key={index}
-                              className={`flex cursor-pointer justify-between border border-secondary ${
-                                item.trigger == selectedItem?.trigger &&
-                                'bg-secondary'
-                              }`}>
-                              <span className="flex gap-2 py-3 px-2">
-                                <ArrowUp
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    handleItemAction('moveUp', item.trigger)
-                                  }
-                                />
-                                <ArrowDown
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    handleItemAction('moveDown', item.trigger)
-                                  }
-                                />
-                              </span>
-                              <span
-                                className="gap-2 py-3 px-2 w-full"
-                                onClick={() => setItem(item)}>
-                                {item.title}
-                              </span>
-                              <span className="gap-2 py-3 px-2">
-                                <X
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    handleItemAction('delete', item.trigger)
-                                  }
-                                />
-                              </span>
-                            </div>
-                          ))
-                      : 'Geen items'}
+                  <div className="w-2/3">
+                    <FormField
+                      control={form.control}
+                      name="trigger"
+                      render={({ field }) => (
+                        <FormItem>
+                          <Input type="hidden" {...field} />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Titel</FormLabel>
+                          <Input {...field} />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Beschrijving</FormLabel>
+                          <Input {...field} />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="active"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Actief</FormLabel>
+                          {YesNoSelect(field, props)}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormItem>
+                      <Button
+                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                        type="button"
+                        onClick={() => setSettingLinks(!settingLinks)}>
+                        {`Pas website links (${links.length}) aan`}
+                      </Button>
+                      <FormMessage />
+                    </FormItem>
                   </div>
                 </div>
-                <Button
-                  className="w-fit mt-4"
-                  type="button"
-                  onClick={() => handleSaveItems()}>
-                  Opslaan
-                </Button>
+                <div className="flex gap-2">
+                  {selectedItem && (
+                    <Button
+                      className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                      type="button"
+                      onClick={() => {
+                        resetForm();
+                      }}>
+                      Annuleer
+                    </Button>
+                  )}
+                  <Button className="w-fit mt-4" type="submit">
+                    {selectedItem
+                      ? 'Sla wijzigingen op'
+                      : 'Voeg item toe aan lijst'}
+                  </Button>
+                </div>
               </div>
             )}
           </div>

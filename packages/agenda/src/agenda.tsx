@@ -29,30 +29,33 @@ function Agenda(props: AgendaWidgetProps) {
   return (
     <div className="osc">
       <Spacer size={2} />
-      <section className="osc-agenda-content">
-        {props.displayTitle && props.title && <h3>{props.title}</h3>}
+      {props.displayTitle && props.title && <h3>{props.title}</h3>}
+      <section className="osc-agenda">
         {props?.items &&
           props?.items?.length > 0 &&
           props.items
             ?.sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger))
             .map((item) => (
               <div key={item.trigger} className="osc-agenda-item">
-                <h4>{item.title}</h4>
-                <p>{item.description}</p>
-                {item.links && item.links?.length > 0 && (
-                  <ul className="osc-agenda-list">
-                    {item.links?.map((link) => (
-                      <li className="osc-agenda-link">
-                        <a
-                          key={link.title}
-                          href={link.url}
-                          target={link.openInNewWindow ? '_blank' : '_self'}>
-                          {link.title}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                <div className="osc-date-circle"></div>
+                <div className="osc-agenda-content">
+                  <h4>{item.title}</h4>
+                  <p>{item.description}</p>
+                  {item.links && item.links?.length > 0 && (
+                    <ul className="osc-agenda-list">
+                      {item.links?.map((link) => (
+                        <li className="osc-agenda-link">
+                          <a
+                            key={link.title}
+                            href={link.url}
+                            target={link.openInNewWindow ? '_blank' : '_self'}>
+                            {link.title}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
             ))}
       </section>
