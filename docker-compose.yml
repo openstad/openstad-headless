@@ -215,7 +215,7 @@ services:
     restart: unless-stopped
     environment:
       - PORT=${CMS_PORT}
-      - OVERWRITE_URL=${CMS_URL}
+      - OVERWRITE_URL=${CMS_OVERWRITE_URL}
       - MONGODB_URI=${CMS_MONGODB_URI}
       - CMS_DEFAULTS=${CMS_DEFAULTS}
       - API_URL=${API_URL}
