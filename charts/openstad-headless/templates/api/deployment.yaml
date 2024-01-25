@@ -130,7 +130,7 @@ spec:
             value: development
           
           - name: CMS_URL
-            value: TODO
+            value: https://{{ template "openstad.cms.url" . }}
 
           - name: BASE_DOMAIN
             value: {{ .Values.host.base }}
@@ -163,9 +163,7 @@ spec:
       initContainers:
         - command: ["/bin/bash", "-c"]
           args:
-            # - nc $DB_HOST $DB_PORT -z -w1 && npm run --prefix apps/api-server migrate-database
-            # - npm run --prefix apps/api-server init-database
-            - echo "done"
+            - nc $DB_HOST $DB_PORT -z -w1 && npm run --prefix apps/api-server migrate-database
           env:
             - name: URL
               value: https://{{ template "openstad.api.url" . }}
@@ -274,7 +272,7 @@ spec:
               value: development
 
             - name: CMS_URL
-              value: TODO
+              value: https://{{ template "openstad.cms.url" . }}
 
             - name: BASE_DOMAIN
               value: {{ .Values.host.base }}

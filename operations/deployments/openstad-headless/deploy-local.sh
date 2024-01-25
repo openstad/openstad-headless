@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -e
 
@@ -29,19 +29,23 @@ echo "Changing context to $CONTEXT..."
 kubectl config set current-context $CONTEXT
 
 echo "Decrypting files..."
-sh $ROOT_DIR/operations/scripts/decrypt.sh
+bash $ROOT_DIR/operations/scripts/decrypt.sh
 
 echo "Starting deployment..."
+# Temp for local chart testing
 current_folder=$(pwd)
 cd $chart_dir
-helm template "$STACK" "$CHART" \
-  --atomic \
+# end temp
+helm upgrade "$STACK" "$CHART" \
   --create-namespace \
+  --install \
   --namespace "$NAMESPACE" \
   -f "$values" \
   -f "$secrets" \
   -f "$images"
+# Temp for local chart testing
 #   --version "$CHART_VERSION"
-
 cd $current_folder
+# end temp
+
 kubectl config set current-context $PREVIOUS_CONTEXT

@@ -112,7 +112,7 @@ export default function ProjectSettings() {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Projectinformatie</TabsTrigger>
               <TabsTrigger value="advanced">
-                Geadvanceerde instellingen
+                Geavanceerde instellingen
               </TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
