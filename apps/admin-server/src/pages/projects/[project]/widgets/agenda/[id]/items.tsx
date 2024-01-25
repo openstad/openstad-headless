@@ -14,7 +14,7 @@ import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AgendaWidgetProps } from '@openstad/agenda/src/agenda';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -39,25 +39,73 @@ export default function WidgetAgendaItems(
   props: AgendaWidgetProps & EditFieldProps<AgendaWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
-  const [items, setItems] = useState(props?.items || []);
+  const [items, setItems] = useState<Item[]>([]);
   const [links, setLinks] = useState<Link[]>([]);
+  const [selectedItem, setItem] = useState<Item | null>(null);
+  const [selectedLink, setLink] = useState<Link | null>(null);
   const [settingLinks, setSettingLinks] = useState<boolean>(false);
 
   async function onSubmit(values: FormData) {
-    const newItem = {
-      trigger: `${
-        items.length > 0 ? parseInt(items[items.length - 1].trigger) + 1 : 0
-      }`,
-      title: values.title,
-      description: values.description,
-      active: values.active,
-      links: values.links || [],
-    };
-
-    const updatedItems = [...(props.items || []), newItem];
-    setItems(updatedItems);
+    if (selectedItem) {
+      setItems((currentItems) =>
+        currentItems.map((item) =>
+          item.trigger === selectedItem.trigger ? { ...item, ...values } : item
+        )
+      );
+      setItem(null);
+    } else {
+      setItems((currentItems) => [
+        ...currentItems,
+        {
+          trigger: `${
+            currentItems.length > 0
+              ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
+              : 0
+          }`,
+          title: values.title,
+          description: values.description,
+          active: values.active,
+          links: values.links || [],
+        },
+      ]);
+    }
     form.reset();
     setLinks([]);
+  }
+
+  function handleAddLink(values: FormData) {
+    if (selectedLink) {
+      setLinks((currentLinks) =>
+        currentLinks.map((link) =>
+          link.trigger === selectedLink.trigger
+            ? {
+                ...link,
+                title:
+                  values.links?.find((l) => l.trigger === link.trigger)
+                    ?.title || '',
+                url:
+                  values.links?.find((l) => l.trigger === link.trigger)?.url ||
+                  '',
+                openInNewWindow:
+                  values.links?.find((l) => l.trigger === link.trigger)
+                    ?.openInNewWindow || false,
+              }
+            : link
+        )
+      );
+      setLink(null);
+    } else {
+      const newLink = {
+        trigger: `${
+          links.length > 0 ? parseInt(links[links.length - 1].trigger) + 1 : 0
+        }`,
+        title: values.links?.[values.links.length - 1].title || '',
+        url: values.links?.[values.links.length - 1].url || '',
+        openInNewWindow:
+          values.links?.[values.links.length - 1].openInNewWindow || false,
+      };
+      setLinks((currentLinks) => [...currentLinks, newLink]);
+    }
   }
 
   const form = useForm<FormData>({
@@ -71,17 +119,13 @@ export default function WidgetAgendaItems(
     },
   });
 
-  // type Item = {
-  //   trigger: string;
-  //   title?: string;
-  //   description: string;
-  //   active: boolean;
-  //   links?: Array<{
-  //     title: string;
-  //     url: string;
-  //     openInNewWindow: boolean;
-  //   }>;
-  // };
+  type Item = {
+    trigger: string;
+    title?: string;
+    description: string;
+    active: boolean;
+    links?: Array<Link>;
+  };
 
   type Link = {
     trigger: string;
@@ -100,87 +144,109 @@ export default function WidgetAgendaItems(
     props.onFieldChanged('items', items);
   }, [items]);
 
-  function handleItemAction(
-    actionType: 'moveUp' | 'moveDown' | 'delete',
-    clickedItemTrigger: string
-  ) {
-    setItems((currentItems) => {
-      const index = currentItems.findIndex(
-        (item) => item.trigger === clickedItemTrigger
-      );
+  useEffect(() => {
+    if (selectedItem) {
+      form.reset({
+        trigger: selectedItem.trigger,
+        title: selectedItem.title || '',
+        description: selectedItem.description,
+        active: selectedItem.active,
+        links: selectedItem.links || [],
+      });
+      setLinks(selectedItem.links || []);
+    }
+  }, [selectedItem]);
 
-      switch (actionType) {
-        case 'moveUp':
-          if (index > 0) {
-            let prevTrigger = currentItems[index - 1].trigger;
-            currentItems[index - 1].trigger = currentItems[index].trigger;
-            currentItems[index].trigger = prevTrigger;
-          }
-          break;
-        case 'moveDown':
-          if (index < currentItems.length - 1) {
-            let nextTrigger = currentItems[index + 1].trigger;
-            currentItems[index + 1].trigger = currentItems[index].trigger;
-            currentItems[index].trigger = nextTrigger;
-          }
-          break;
-        case 'delete':
+  useEffect(() => {
+    if (selectedLink) {
+      // Update the last link in the array with values from selectedLink
+      const updatedLinks = [...links];
+      const index = links.findIndex(
+        (link) => link.trigger === selectedLink.trigger
+      );
+      updatedLinks[index] = {
+        trigger: selectedLink.trigger,
+        title: selectedLink.title || '',
+        url: selectedLink.url,
+        openInNewWindow: selectedLink.openInNewWindow,
+      };
+
+      // Use form.reset to update the entire form state
+      form.reset({
+        ...form.getValues(), // Retains the current values of other fields
+        links: updatedLinks,
+      });
+      console.log(updatedLinks);
+    }
+  }, [selectedLink]);
+
+  const handleItemAction = useCallback(
+    (
+      actionType: 'moveUp' | 'moveDown' | 'delete',
+      clickedItemTrigger: string
+    ) => {
+      setItems((currentItems) => {
+        const index = currentItems.findIndex(
+          (item) => item.trigger === clickedItemTrigger
+        );
+
+        if (actionType === 'delete') {
           return currentItems.filter(
             (item) => item.trigger !== clickedItemTrigger
           );
-      }
+        }
 
-      return [...currentItems];
-    });
-  }
+        if (
+          (actionType === 'moveUp' && index > 0) ||
+          (actionType === 'moveDown' && index < currentItems.length - 1)
+        ) {
+          const newItemList = [...currentItems];
+          const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
+          let tempTrigger = newItemList[swapIndex].trigger;
+          newItemList[swapIndex].trigger = newItemList[index].trigger;
+          newItemList[index].trigger = tempTrigger;
+          return newItemList;
+        }
 
-  function handleLinkAction(
-    actionType: 'moveUp' | 'moveDown' | 'delete',
-    clickedLinkTrigger: string
-  ) {
-    setLinks((currentLinks) => {
-      const index = currentLinks.findIndex(
-        (link) => link.trigger === clickedLinkTrigger
-      );
+        return currentItems;
+      });
+    },
+    [items]
+  );
 
-      switch (actionType) {
-        case 'moveUp':
-          if (index > 0) {
-            let prevTrigger = currentLinks[index - 1].trigger;
-            currentLinks[index - 1].trigger = currentLinks[index].trigger;
-            currentLinks[index].trigger = prevTrigger;
-          }
-          break;
-        case 'moveDown':
-          if (index < currentLinks.length - 1) {
-            let nextTrigger = currentLinks[index + 1].trigger;
-            currentLinks[index + 1].trigger = currentLinks[index].trigger;
-            currentLinks[index].trigger = nextTrigger;
-          }
-          break;
-        case 'delete':
+  const handleLinkAction = useCallback(
+    (
+      actionType: 'moveUp' | 'moveDown' | 'delete',
+      clickedLinkTrigger: string
+    ) => {
+      setLinks((currentLinks) => {
+        const index = currentLinks.findIndex(
+          (link) => link.trigger === clickedLinkTrigger
+        );
+
+        if (actionType === 'delete') {
           return currentLinks.filter(
-            (item) => item.trigger !== clickedLinkTrigger
+            (link) => link.trigger !== clickedLinkTrigger
           );
-      }
+        }
 
-      return [...currentLinks];
-    });
-  }
+        if (
+          (actionType === 'moveUp' && index > 0) ||
+          (actionType === 'moveDown' && index < currentLinks.length - 1)
+        ) {
+          const newLinkList = [...currentLinks];
+          const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
+          let tempTrigger = newLinkList[swapIndex].trigger;
+          newLinkList[swapIndex].trigger = newLinkList[index].trigger;
+          newLinkList[index].trigger = tempTrigger;
+          return newLinkList;
+        }
 
-  function handleAddLink(values: FormData) {
-    const newLink = {
-      trigger: `${
-        links.length > 0 ? parseInt(links[links.length - 1].trigger) + 1 : 0
-      }`,
-      title: values.links?.[values.links.length - 1].title || '',
-      url: values.links?.[values.links.length - 1].url || '',
-      openInNewWindow:
-        values.links?.[values.links.length - 1].openInNewWindow || false,
-    };
-    console.log(newLink);
-    setLinks([...(links || []), newLink]);
-  }
+        return [...currentLinks];
+      });
+    },
+    [links]
+  );
 
   function handleSaveItems() {
     props.updateConfig({ ...props, items });
@@ -188,7 +254,6 @@ export default function WidgetAgendaItems(
 
   function handleSaveLinks() {
     form.setValue('links', links);
-    console.log(form.getValues());
     setSettingLinks(false);
   }
 
@@ -208,10 +273,20 @@ export default function WidgetAgendaItems(
                 <Separator className="my-4" />
                 <FormField
                   control={form.control}
+                  name="trigger"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Input {...field} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Titel (Bijvoorbeeld "19 April")</FormLabel>
+                      <FormLabel>Titel</FormLabel>
                       <Input {...field} />
                       <FormMessage />
                     </FormItem>
@@ -242,17 +317,27 @@ export default function WidgetAgendaItems(
 
                 <FormItem>
                   <Button
-                    className="w-fit mt-4 bg-secondary text-black"
+                    className="w-fit mt-4 bg-secondary text-black hover:text-white"
                     type="button"
                     onClick={() => setSettingLinks(!settingLinks)}>
-                    {`Voeg link toe (${links.length})`}
+                    {`Pas website links (${links.length}) aan`}
                   </Button>
                   <FormMessage />
                 </FormItem>
               </div>
-              <Button className="w-fit mt-4" type="submit">
-                Voeg item toe
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                  type="button"
+                  onClick={() => {
+                    form.reset(), setItem(null);
+                  }}>
+                  Annuleer aanpassingen
+                </Button>
+                <Button className="w-fit mt-4" type="submit">
+                  Sla item op in lijst
+                </Button>
+              </div>
             </div>
 
             {settingLinks && (
@@ -296,7 +381,7 @@ export default function WidgetAgendaItems(
                 </div>
                 <div className="flex gap-2">
                   <Button
-                    className="w-fit mt-4 bg-secondary text-black"
+                    className="w-fit mt-4 bg-secondary text-black hover:text-white"
                     type="button"
                     onClick={() => setSettingLinks(() => !settingLinks)}>
                     Annuleer
@@ -305,7 +390,7 @@ export default function WidgetAgendaItems(
                     className="w-fit mt-4"
                     type="button"
                     onClick={() => handleAddLink(form.getValues())}>
-                    Voeg link toe
+                    Sla link op in lijst
                   </Button>
                 </div>
               </div>
@@ -324,14 +409,11 @@ export default function WidgetAgendaItems(
                           .map((link, index) => (
                             <div
                               key={index}
-                              className="flex py-3 px-2 bg-secondary">
-                              <span className="flex gap-2 mr-2">
-                                <X
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    handleLinkAction('delete', link.trigger)
-                                  }
-                                />
+                              className={`flex cursor-pointer justify-between border border-secondary ${
+                                link.trigger == selectedLink?.trigger &&
+                                'bg-secondary'
+                              }`}>
+                              <span className="flex gap-2 py-3 px-2">
                                 <ArrowUp
                                   className="cursor-pointer"
                                   onClick={() =>
@@ -345,7 +427,19 @@ export default function WidgetAgendaItems(
                                   }
                                 />
                               </span>
-                              <span>{link.title}</span>
+                              <span
+                                className="py-3 px-2 w-full"
+                                onClick={() => setLink(link)}>
+                                {link.title}
+                              </span>
+                              <span className="py-3 px-2">
+                                <X
+                                  className="cursor-pointer"
+                                  onClick={() =>
+                                    handleLinkAction('delete', link.trigger)
+                                  }
+                                />
+                              </span>
                             </div>
                           ))
                       : 'Geen links'}
@@ -372,14 +466,11 @@ export default function WidgetAgendaItems(
                           .map((item, index) => (
                             <div
                               key={index}
-                              className="flex py-3 px-2 bg-secondary">
-                              <span className="flex gap-2 mr-2">
-                                <X
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    handleItemAction('delete', item.trigger)
-                                  }
-                                />
+                              className={`flex cursor-pointer justify-between border border-secondary ${
+                                item.trigger == selectedItem?.trigger &&
+                                'bg-secondary'
+                              }`}>
+                              <span className="flex gap-2 py-3 px-2">
                                 <ArrowUp
                                   className="cursor-pointer"
                                   onClick={() =>
@@ -393,7 +484,19 @@ export default function WidgetAgendaItems(
                                   }
                                 />
                               </span>
-                              <span>{item.title}</span>
+                              <span
+                                className="gap-2 py-3 px-2 w-full"
+                                onClick={() => setItem(item)}>
+                                {item.title}
+                              </span>
+                              <span className="gap-2 py-3 px-2">
+                                <X
+                                  className="cursor-pointer"
+                                  onClick={() =>
+                                    handleItemAction('delete', item.trigger)
+                                  }
+                                />
+                              </span>
                             </div>
                           ))
                       : 'Geen items'}
