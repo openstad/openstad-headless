@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useWidgetConfig } from './use-widget-config';
 
-export function useWidgetPreview<T extends {}>(widgetSettings: {
-  [key: string]: any;
-}): {
+export function useWidgetPreview<T extends {[key:string]:any}>(widgetSettings: Partial<{
+  [key in keyof T]: T[key];
+}>): {
   previewConfig: T | undefined;
   updatePreview: (arg: T) => void;
 } {
