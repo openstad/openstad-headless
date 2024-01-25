@@ -2,9 +2,17 @@ import 'remixicon/fonts/remixicon.css';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import React, { useEffect, useState } from 'react';
 import './date-countdown-bar.css';
-import { differenceInDays, parse } from 'date-fns';
+import {
+  differenceInDays,
+  differenceInHours,
+  differenceInMinutes,
+  parse,
+  isValid,
+} from 'date-fns';
+import useInterval from '@rooks/use-interval';
+
 import { zonedTimeToUtc } from 'date-fns-tz';
-import { Spacer, Card } from '@openstad-headless/ui/src';
+import { Spacer } from '@openstad-headless/ui/src';
 
 export type DateCountdownBarWidgetProps = {
   beforeText?: string;
@@ -17,62 +25,113 @@ function DateCountdownBar({
   date,
   afterText = '',
 }: DateCountdownBarWidgetProps) {
+  const zone = 'Europe/Berlin';
+
   const [daysLeft, setDaysLeft] = useState<number>(0);
+  const [hoursLeft, setHoursLeft] = useState<number>(0);
+  const [minutesLeft, setMinutesLeft] = useState<number>(0);
+
+  const [parsedDate, setParsedDate] = useState<Date>();
+
   const urlParams = new URLSearchParams(window.location.search);
   const [dateParam] = useState<string>(urlParams.get('date') || date);
-  const [beforeTextParam] = useState<string>(urlParams.get('beforeText') || beforeText);
-  const [afterTextParam] = useState<string>(urlParams.get('afterText') || afterText);
+  const [beforeTextParam] = useState<string>(
+    urlParams.get('beforeText') || beforeText
+  );
+  const [afterTextParam] = useState<string>(
+    urlParams.get('afterText') || afterText
+  );
 
+  // Parse the received datestring
   useEffect(() => {
-    if (dateParam) {
-      try {
-        const zone = 'Europe/Berlin';
-        const parsedDate = parse(
-          dateParam,
-          'dd-MM-yyyy',
-          zonedTimeToUtc(new Date(), zone)
-        );
+    const parsedDate = parse(
+      dateParam,
+      'dd-MM-yyyy',
+      zonedTimeToUtc(new Date(), zone)
+    );
 
-        const givenDate = zonedTimeToUtc(parsedDate, zone);
-        givenDate.setHours(0, 0, 0, 0);
-
-        const currentDate = zonedTimeToUtc(new Date(), zone);
-        currentDate.setHours(0, 0, 0, 0);
-
-        const difference = differenceInDays(givenDate, currentDate);
-        setDaysLeft(difference < 0 ? 0 : difference);
-      } catch (e) {
-        console.error('Calculating the difference in days failed');
-      }
+    if (isValid(parsedDate)) {
+      setParsedDate(parsedDate);
     }
   }, [dateParam]);
+
+  // First time render
+  useEffect(() => {
+    if (parsedDate) {
+      calculateTime(parsedDate);
+    }
+  }, [parsedDate]);
+
+  // Every second update the calculated days, hours and minutes
+  useInterval(
+    () => {
+      if (parsedDate) {
+        calculateTime(parsedDate);
+      }
+    },
+    60000,
+    true
+  );
+
+  const calculateTime = (date: Date): void => {
+    try {
+      const givenDate = zonedTimeToUtc(date, zone);
+      const currentDate = zonedTimeToUtc(new Date(), zone);
+
+      const daysDifference = differenceInDays(givenDate, currentDate);
+      setDaysLeft(Math.max(0, daysDifference));
+
+      const hoursDifference =
+        differenceInHours(givenDate, currentDate, {
+          roundingMethod: 'ceil',
+        }) % 24;
+      setHoursLeft(Math.max(0, hoursDifference));
+
+      const minutesDifference =
+        differenceInMinutes(givenDate, currentDate, {
+          roundingMethod: 'ceil',
+        }) % 60;
+      setMinutesLeft(Math.max(0, minutesDifference));
+    } catch (e) {
+      console.error('Calculating the difference in days failed');
+    }
+  };
+
+  const padNumber = (nr: number): string => {
+    return nr > 10 ? nr.toString() : nr.toString().padStart(2, '0');
+  };
 
   return (
     <div className="osc date-countdown-bar-container">
       {beforeTextParam.length > 0 ? (
         <>
-          <p>{beforeTextParam}</p>
+          <p className="osc-countdown-bar-text">{beforeTextParam}</p>
           <Spacer />
         </>
       ) : null}
 
       <>
-        {Array.from(
-          daysLeft > 10
-            ? daysLeft.toString()
-            : daysLeft.toString().padStart(2, '0')
-        ).map((nr,index) => (
-          <React.Fragment key={`card-id-${nr}-${index}`}>
-          <Card>
-            <p>{nr}</p>
-          </Card>
-          </React.Fragment>
-        ))}
+        <div className="osc-countdown-bar-nr-left">
+          <p className="nr-left-title">{padNumber(daysLeft)}</p>
+          <p className="nr-left-label">Dagen</p>
+        </div>
+
+        <div className="osc-countdown-bar-nr-left">
+          <p className="nr-left-title">{padNumber(hoursLeft)}</p>
+          <p className="nr-left-label">Uren</p>
+        </div>
+
+        {minutesLeft > 0 ? (
+          <div className="osc-countdown-bar-nr-left">
+            <p className="nr-left-title">{padNumber(minutesLeft)}</p>
+            <p className="nr-left-label">Minuten</p>
+          </div>
+        ) : null}
       </>
       {afterTextParam.length > 0 ? (
         <>
           <Spacer />
-          <p>{afterTextParam}</p>
+          <p className="osc-countdown-bar-text">{afterTextParam}</p>
         </>
       ) : null}
     </div>

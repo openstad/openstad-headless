@@ -1,15 +1,39 @@
 
 .osc.date-countdown-bar-container {
   display: flex;
+  background-color: var(--osc-card);
   gap: .5rem;
   padding: .5rem 0rem;
   justify-content: center;
   align-items: center;
-  background-color: var(--osc-primary);
 }
 
 .osc.date-countdown-bar-container p {
-  color: var(--osc-primary-foreground);
   margin: 0;
+  color: var(--osc-card-foreground);
+}
+
+.osc-countdown-bar-text {
+  font-weight: 600;
+  line-height: 1.5rem;
   font-size: 1rem;
+}
+
+.osc.date-countdown-bar-container p.nr-left-title {
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+.osc.date-countdown-bar-container p.nr-left-label {
+  font-weight: 400;
+  font-size: .75rem;
+  line-height: 1rem;
+}
+
+.osc-countdown-bar-nr-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
