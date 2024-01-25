@@ -130,7 +130,7 @@ spec:
             value: development
           
           - name: CMS_URL
-            value: TODO
+            value: https://{{ template "openstad.cms.url" . }}
 
           - name: BASE_DOMAIN
             value: {{ .Values.host.base }}
@@ -272,7 +272,7 @@ spec:
               value: development
 
             - name: CMS_URL
-              value: TODO
+              value: https://{{ template "openstad.cms.url" . }}
 
             - name: BASE_DOMAIN
               value: {{ .Values.host.base }}
