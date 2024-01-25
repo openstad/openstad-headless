@@ -15,7 +15,7 @@ import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-import { DateCountdownBarWidgetProps } from '@openstad/date-countdown-bar/src/date-countdown-bar';
+import type { DateCountdownBarWidgetProps } from '@openstad/date-countdown-bar/src/date-countdown-bar';
 
 const formSchema = z.object({
   beforeText: z.string().optional(),
