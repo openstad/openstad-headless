@@ -27,9 +27,11 @@ function DateCountdownBar({
 }: DateCountdownBarWidgetProps) {
   const zone = 'Europe/Berlin';
 
-  const [daysLeft, setDaysLeft] = useState<number>(0);
-  const [hoursLeft, setHoursLeft] = useState<number>(0);
-  const [minutesLeft, setMinutesLeft] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+  }>({ days: 0, hours: 0, minutes: 0 });
 
   const [parsedDate, setParsedDate] = useState<Date>();
 
@@ -77,21 +79,23 @@ function DateCountdownBar({
     try {
       const givenDate = zonedTimeToUtc(date, zone);
       const currentDate = zonedTimeToUtc(new Date(), zone);
-
       const daysDifference = differenceInDays(givenDate, currentDate);
-      setDaysLeft(Math.max(0, daysDifference));
 
       const hoursDifference =
         differenceInHours(givenDate, currentDate, {
           roundingMethod: 'ceil',
         }) % 24;
-      setHoursLeft(Math.max(0, hoursDifference));
 
       const minutesDifference =
         differenceInMinutes(givenDate, currentDate, {
           roundingMethod: 'ceil',
         }) % 60;
-      setMinutesLeft(Math.max(0, minutesDifference));
+
+      setTimeLeft({
+        days: Math.max(0, daysDifference),
+        hours: Math.max(0, hoursDifference),
+        minutes: Math.max(0, minutesDifference),
+      });
     } catch (e) {
       console.error('Calculating the difference in days failed');
     }
@@ -112,18 +116,18 @@ function DateCountdownBar({
 
       <>
         <div className="osc-countdown-bar-nr-left">
-          <p className="nr-left-title">{padNumber(daysLeft)}</p>
+          <p className="nr-left-title">{padNumber(timeLeft.days)}</p>
           <p className="nr-left-label">Dagen</p>
         </div>
 
         <div className="osc-countdown-bar-nr-left">
-          <p className="nr-left-title">{padNumber(hoursLeft)}</p>
+          <p className="nr-left-title">{padNumber(timeLeft.hours)}</p>
           <p className="nr-left-label">Uren</p>
         </div>
 
-        {minutesLeft > 0 ? (
+        {timeLeft.minutes > 0 ? (
           <div className="osc-countdown-bar-nr-left">
-            <p className="nr-left-title">{padNumber(minutesLeft)}</p>
+            <p className="nr-left-title">{padNumber(timeLeft.minutes)}</p>
             <p className="nr-left-label">Minuten</p>
           </div>
         ) : null}
