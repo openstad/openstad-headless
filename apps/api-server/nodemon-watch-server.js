@@ -8,6 +8,8 @@ const {
 } = require('./scripts/lib/build-package');
 const getHeadlessDependencyTree = require('./scripts/get-headless-dependency-tree');
 const { resolve } = require('path');
+const { hashElement } = require('folder-hash');
+const fs = require('fs');
 
 // Get directories based on current directory
 const currentDirectory = process.cwd();
@@ -74,6 +76,24 @@ nodemon({
       buildDependents.forEach((package) => {
         buildPackageByDirectory(package);
       });
+
+      // Calculate a new hash, so we dont have to rebuild upon new start
+      const hashFile = '../../.packages-build-hash';
+
+      const currentHash = await hashElement('../../packages', {
+        folders: {
+          exclude: [
+            '.*',
+            'node_modules',
+            'dist',
+            'build',
+            'coverage',
+            'public',
+          ],
+        },
+      });
+
+      fs.writeFileSync(hashFile, currentHash.hash);
     }
 
     packagesBuilt = true;
