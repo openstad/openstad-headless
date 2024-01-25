@@ -1,8 +1,9 @@
 import './raw-resource.css';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
+import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { Spacer } from '@openstad-headless/ui/src';
-//@ts-ignore nunjucks def missing, will disappear when datastore is ts
+//@ts-ignore
 import nunjucks from 'nunjucks';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
@@ -11,11 +12,20 @@ export type RawResourceWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
   } & {
+    resourceId?: string;
     rawInput?: string;
     stylingClasses?: { label: string; value: string }[];
   };
 
 function RawResource(props: RawResourceWidgetProps) {
+  const datastore = new DataStore({
+    projectId: props.projectId,
+    resourceId: props.resourceId,
+    api: props.api,
+  });
+  const [resource] = datastore.useResource(props);
+  if (!resource) return null;
+
   const stylingClasses =
     props.stylingClasses?.map((stylingClass) => stylingClass.value).join(' ') ||
     '';

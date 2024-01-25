@@ -7,18 +7,28 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import useResources from '@/hooks/use-resources';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RawResourceWidgetProps } from '@openstad/raw-resource/src/raw-resource';
+import { useRouter } from 'next/router';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
+  resourceId: z.string(),
   rawInput: z.string(),
 });
 
@@ -29,10 +39,15 @@ export default function WidgetRawGeneral(
   async function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
   }
+  const router = useRouter();
+
+  const projectId = router.query.project as string;
+  const { data, error, isLoading, remove } = useResources(projectId as string);
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   const defaults = useCallback(
     () => ({
+      resourceId: props?.resourceId || '',
       rawInput: props?.rawInput || '',
     }),
     [props?.rawInput]
@@ -54,7 +69,36 @@ export default function WidgetRawGeneral(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          className="flex flex-col gap-4 w-full lg:w-2/3">
+          <FormField
+            control={form.control}
+            name="resourceId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Resource</FormLabel>
+                <Select
+                  onValueChange={(e) => {
+                    field.onChange(e);
+                    props.onFieldChanged(field.name, e);
+                  }}
+                  value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecteer een resource." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {data?.map((resource: any) => (
+                      <SelectItem key={resource.id} value={`${resource.id}`}>
+                        {resource.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="rawInput"
