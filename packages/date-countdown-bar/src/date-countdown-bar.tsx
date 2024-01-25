@@ -25,7 +25,7 @@ function DateCountdownBar({
   date,
   afterText = '',
 }: DateCountdownBarWidgetProps) {
-  const zone = 'Europe/Berlin';
+  const zone = 'Europe/Amsterdam';
 
   const [timeLeft, setTimeLeft] = useState<{
     days: number;
