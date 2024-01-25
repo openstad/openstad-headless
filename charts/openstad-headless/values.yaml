@@ -130,6 +130,7 @@ admin:
   # Secret values
   secrets:
     nextAuthSecret:
+    apiKey:
 
   # Service settings:
   # Primarily port configuration
