@@ -13,6 +13,7 @@ jobs:
       SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
       SOPS_AGE_KEY_FILE: headless.agekey
       SOPS_AGE_RECIPIENTS: age1pnz2leuqnfhyt9qpxjjcjs9xe9ys8xjkjn9m656wygy3ndfxya0q6kthy8
+      KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
@@ -46,16 +47,11 @@ jobs:
         run: |
           echo $SOPS_AGE_KEY > $SOPS_AGE_KEY_FILE
 
-      # setup doctl
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-
       # setup kubeconfig
       - name: Setup kubeconfig
         run: |
-          doctl kubernetes cluster kubeconfig save openstad-ams-acc
+          mkdir -p ~/.kube
+          echo $KUBE_CONFIG > ~/.kube/config
 
       # run deployment scripts
       - name: Run ACC deployment script
