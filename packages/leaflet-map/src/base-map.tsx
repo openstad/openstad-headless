@@ -80,7 +80,7 @@ export function BaseMap({
   useEffect(() => {
     if (!mapRef) return;
 	  if (autoZoomAndCenter) {
-		  let centerOn = ( autoZoomAndCenter == 'area' && area ) || ( currentMarkers && currentMarkers.length && currentMarkers );
+		  let centerOn = ( autoZoomAndCenter == 'area' && area ) || ( currentMarkers?.length && currentMarkers );
       if (!centerOn) {
 				centerOn = area;
       }
