@@ -12,6 +12,7 @@
   "dependencies": {
     "@openstad-headless/data-store": "file:../data-store",
     "@openstad-headless/ui": "file:../ui",
+    "@openstad-headless/lib": "file:../lib",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rooks": "^7.14.1"
