@@ -1,15 +1,23 @@
 .osc.counter-container {
   display: flex;
+  border-radius: .25rem;
   gap: .5rem;
   padding: .5rem 0rem;
   justify-content: left;
   align-items: left;
-  background-color: #213196;
+  background-color: #f0f4f8;
 }
 
 .osc.counter-container p {
-  color: white;
+  color: black;
   margin: 0;
-  font-size: 1rem;
+  font-size: .875rem;
+  float: left;
+}
+
+.osc.counter-container-amount {
+  color: black;
+  margin: 0;
+  font-size: 1.5rem;
   float: left;
 }

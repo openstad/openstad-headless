@@ -123,12 +123,12 @@ export default function CounterDisplay(props: CounterWidgetProps & EditFieldProp
                 <FormLabel>Gewenste ID</FormLabel>
                 <FormControl>
                   <Input
-                  type="number"
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value)
-                  }}
+                    type="number"
+                    defaultValue={field.value}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      onFieldChange(field.name, e.target.value)
+                    }}
                   />
                 </FormControl>
               </FormItem>
