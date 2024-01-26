@@ -49,8 +49,6 @@ function Counter({
     resourceId,
   });
 
-  console.log(resource)
-
   if (counterType === 'resource') {
     amountDisplayed = resources.length;
   }
