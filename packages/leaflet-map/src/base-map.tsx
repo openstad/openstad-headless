@@ -65,7 +65,6 @@ export function BaseMap({
   ...props
 }: PropsWithChildren<BaseMapWidgetProps>) {
 
-  let [, setMapIsReady] = useState(false);
   let [currentMarkers, setCurrentMarkers] = useState(markers);
 
   let [mapId] = useState(`${parseInt(Math.random() * 1e8 as any as string)}`);
@@ -73,7 +72,6 @@ export function BaseMap({
 
   // map is ready
   useEffect(() => {
-		setMapIsReady(true);
 		let event = new CustomEvent('osc-map-is-ready', { detail: { id: mapId } });
 		window.dispatchEvent(event);
   }, []);
@@ -96,7 +94,7 @@ export function BaseMap({
   useEffect(() => {
     if (!mapRef) return;
 		if (center) {
-			setBoundsAndCenter(center);
+			setBoundsAndCenter([center]);
 		}
   }, [center]);
 
@@ -155,11 +153,11 @@ export function BaseMap({
 
   }, [markers]);
 
-  async function setBoundsAndCenter(points: Object) {
+  async function setBoundsAndCenter(points: LocationType[] | MarkerProps[]) {
 
 	  let poly = [];
     if (points && Array.isArray(points)) {
-	    points.forEach(function(point) {
+	    points.forEach(function(point: any) {
 		    if (point._latlng) {
 			    point = point._latlng;
 		    } else if (point.location) {
