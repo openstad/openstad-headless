@@ -160,17 +160,7 @@ module.exports = {
           "minimalBudgetSpent": {type: 'int', default: 0},
         }
       },
-      automaticallyUpdateStatus: {
-        isActive: {
-          type: 'boolean',
-          default: false,
-        },
-        afterXDays: {
-          type: 'int',
-          default: 90,
-        },
-      },
-    }
+    },
   },
 
   comments: {

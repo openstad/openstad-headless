@@ -76,33 +76,6 @@ module.exports = function (db, sequelize, DataTypes) {
       }
     },
 
-    endDate: {
-      type: DataTypes.VIRTUAL(DataTypes.DATE, ['startDate']),
-      get: function () {
-        var _config = merge.recursive(true, config, this.project.config);
-        var duration =
-          (_config &&
-            _config.resources &&
-            _config.resources.duration) ||
-          90;
-        if (
-          this.project &&
-          this.project.config &&
-          this.project.config.resources &&
-          this.project.config.resources.automaticallyUpdateStatus &&
-          this.project.config.resources.automaticallyUpdateStatus.isActive
-        ) {
-          duration =
-            this.project.config.resources.automaticallyUpdateStatus.afterXDays || 0;
-        }
-        var endDate = moment(this.getDataValue('startDate'))
-          .add(duration, 'days')
-          .toDate();
-
-        return endDate
-      },
-    },
-
     sort: {
       type: DataTypes.INTEGER,
       auth:  {
