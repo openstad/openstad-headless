@@ -540,19 +540,6 @@ module.exports = function (db, sequelize, DataTypes) {
 
       api: {},
 
-      // vergelijk getRunning()
-      selectRunning: {
-        where: sequelize.or(
-          {
-            status: ['OPEN', 'CLOSED', 'ACCEPTED', 'BUSY']
-          },
-          sequelize.and(
-            {status: 'DENIED'},
-            sequelize.literal(`DATEDIFF(NOW(), resource.updatedAt) <= 7`)
-          )
-        )
-      },
-
       includeComments: function (userId) {
         return {
           include: [{
@@ -685,7 +672,6 @@ module.exports = function (db, sequelize, DataTypes) {
         }
       },
 
-      // vergelijk getRunning()
       sort: function (sort) {
 
         let result = {};
@@ -716,22 +702,11 @@ module.exports = function (db, sequelize, DataTypes) {
           case 'budget_desc':
             order = [['createdAt', 'DESC']];
             break;
-
           case 'date_asc':
             order = [['startDate', 'ASC']];
-            break;
           case 'date_desc':
           default:
-            order = sequelize.literal(`
-							CASE status
-								WHEN 'ACCEPTED' THEN 4
-								WHEN 'OPEN'     THEN 3
-								WHEN 'BUSY'     THEN 2
-								WHEN 'DENIED'   THEN 0
-								                ELSE 1
-							END DESC,
-							startDate DESC
-						`);
+            order = [['startDate', 'DESC']];
 
         }
 
@@ -842,105 +817,6 @@ module.exports = function (db, sequelize, DataTypes) {
     this.belongsToMany(models.Tag, {through: 'resource_tags', constraints: false, onDelete: 'CASCADE' });
   }
 
-  Resource.getRunning = function (sort, extraScopes) {
-
-    var order;
-    switch (sort) {
-      case 'votes_desc':
-        // TODO: zou dat niet op diff moeten, of eigenlijk configureerbaar
-        order = sequelize.literal('yes DESC');
-        break;
-      case 'votes_asc':
-        // TODO: zou dat niet op diff moeten, of eigenlijk configureerbaar
-        order = sequelize.literal('yes ASC');
-        break;
-      case 'createdate_asc':
-        order = [['createdAt', 'ASC']];
-        break;
-      case 'createdate_desc':
-        order = [['createdAt', 'DESC']];
-        break;
-      case 'date_asc':
-        order = [['startDate', 'ASC']];
-        break;
-      case 'date_desc':
-      default:
-        order = sequelize.literal(`
-							CASE status
-								WHEN 'ACCEPTED' THEN 4
-								WHEN 'OPEN'     THEN 3
-								WHEN 'BUSY'     THEN 2
-								WHEN 'DENIED'   THEN 0
-								                ELSE 1
-							END DESC,
-							startDate DESC
-						`);
-    }
-
-    // Get all running resources.
-    // TODO: Resources with status CLOSED should automatically
-    //       become DENIED at a certain point.
-    let scopes = ['summary'];
-    if (extraScopes) {
-      scopes = scopes.concat(extraScopes);
-    }
-
-    let where = sequelize.or(
-      {
-        status: ['OPEN', 'CLOSED', 'ACCEPTED', 'BUSY', 'DONE']
-      },
-      sequelize.and(
-        {status: 'DENIED'},
-        sequelize.literal(`DATEDIFF(NOW(), resource.updatedAt) <= 7`)
-      )
-    );
-
-    // todo: dit kan mooier
-    if (config.projectId && typeof config.projectId == 'number') {
-      where = {
-        $and: [
-          {projectId: config.projectId},
-          ...where,
-        ]
-      }
-    }
-
-    return this.scope(...scopes).findAll({
-      where,
-      order: order,
-    }).then((resources) => {
-      // add ranking
-      let ranked = resources.slice();
-      ranked.forEach(resource => {
-        resource.ranking = resource.status == 'DENIED' ? -10000 : resource.yes - resource.no;
-      });
-      ranked.sort((a, b) => b.ranking - a.ranking);
-      let rank = 1;
-      ranked.forEach(resource => {
-        resource.ranking = rank;
-        rank++;
-      });
-      return sort == 'ranking' ? ranked : (sort == 'rankinginverse' ? ranked.reverse() : resources);
-    }).then((resources) => {
-      if (sort != 'random') return resources;
-      let randomized = resources.slice();
-      randomized.forEach(resource => {
-        resource.random = Math.random();
-      });
-      randomized.sort((a, b) => b.random - a.random);
-      return randomized;
-    })
-  }
-
-  Resource.getHistoric = function () {
-    return this.scope('summary').findAll({
-      where: {
-        status: {[Sequelize.Op.not]: ['OPEN', 'CLOSED']}
-      },
-      order: 'updatedAt DESC'
-    });
-  }
-
   Resource.prototype.getUserVote = function (user) {
     return db.Vote.findOne({
       attributes: ['opinion'],
@@ -949,17 +825,6 @@ module.exports = function (db, sequelize, DataTypes) {
         userId: user.id
       }
     });
-  }
-
-  Resource.prototype.isOpen = function () {
-    return this.status === 'OPEN';
-  }
-
-  Resource.prototype.isRunning = function () {
-    return this.status === 'OPEN' ||
-      this.status === 'CLOSED' ||
-      this.status === 'ACCEPTED' ||
-      this.status === 'BUSY'
   }
 
   // standaard stemvan
