@@ -18,12 +18,16 @@ export type RawResourceWidgetProps = BaseProps &
   };
 
 function RawResource(props: RawResourceWidgetProps) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const resourceId =
+    urlParams.get('openstadResourceId') || props.resourceId || '';
+
   const datastore = new DataStore({
     projectId: props.projectId,
-    resourceId: props.resourceId,
+    resourceId: resourceId,
     api: props.api,
   });
-  const [resource] = props.resourceId ? datastore.useResource(props) : [null];
+  const [resource] = resourceId ? datastore.useResource(props) : [null];
 
   const stylingClasses =
     props.stylingClasses?.map((stylingClass) => stylingClass.value).join(' ') ||
@@ -31,7 +35,7 @@ function RawResource(props: RawResourceWidgetProps) {
 
   const render = (() => {
     if (props.rawInput) {
-      if (props.resourceId) {
+      if (resourceId) {
         return nunjucks.renderString(props.rawInput, {
           // here you can add variables that are available in the template
           projectId: props.projectId,
@@ -63,7 +67,7 @@ function RawResource(props: RawResourceWidgetProps) {
     <div className="osc">
       <Spacer size={2} />
       <section className="osc-raw-resource-container">
-        {props.stylingClasses && render && (
+        {render && (
           // this sets innerHTML, input is sanitized in widget.js
           <div
             className={stylingClasses}
