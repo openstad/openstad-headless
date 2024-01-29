@@ -42,7 +42,6 @@ export default function WidgetRawGeneral(
   const router = useRouter();
 
   const projectId = router.query.project as string;
-  // const resourceId =
   const { data, error, isLoading, remove } = useResources(projectId as string);
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
@@ -51,7 +50,7 @@ export default function WidgetRawGeneral(
       resourceId: props?.resourceId || '',
       rawInput: props?.rawInput || '',
     }),
-    [props?.rawInput]
+    [props?.resourceId, props?.rawInput]
   );
 
   const form = useForm<FormData>({
