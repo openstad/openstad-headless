@@ -1,4 +1,5 @@
 export const WidgetDefinitions = {
+  agenda: 'Agenda',
   comments: 'Argumenten',
   begrootmodule: 'Begrootmodule',
   resourcesmap: 'Resource map',
