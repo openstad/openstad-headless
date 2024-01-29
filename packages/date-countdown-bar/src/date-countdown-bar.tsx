@@ -46,18 +46,22 @@ function DateCountdownBar({
 
   // Parse the received datestring
   useEffect(() => {
-    const parsedDate = parse(
-      dateParam,
-      'dd-MM-yyyy',
-      zonedTimeToUtc(new Date(), zone)
-    );
+    if(dateParam?.length > 0) {
+      try {
+        const parsedDate = parse(
+          dateParam,
+          'dd-MM-yyyy',
+          zonedTimeToUtc(new Date(), zone)
+        );
 
-    if (isValid(parsedDate)) {
-      setParsedDate(parsedDate);
+        setParsedDate(parsedDate);
+      } catch (e) {
+        console.error(`Parsing the given date ${dateParam} failed`);
+      }
     }
   }, [dateParam]);
 
-  // First time render
+  // Set the time left, used for the first time
   useEffect(() => {
     if (parsedDate) {
       calculateTime(parsedDate);
@@ -75,30 +79,27 @@ function DateCountdownBar({
     true
   );
 
+  // Calculate the time left for the day/hour/minutes until the given date
   const calculateTime = (date: Date): void => {
-    try {
-      const givenDate = zonedTimeToUtc(date, zone);
-      const currentDate = zonedTimeToUtc(new Date(), zone);
-      const daysDifference = differenceInDays(givenDate, currentDate);
+    const givenDate = zonedTimeToUtc(date, zone);
+    const currentDate = zonedTimeToUtc(new Date(), zone);
+    const daysDifference = differenceInDays(givenDate, currentDate);
 
-      const hoursDifference =
-        differenceInHours(givenDate, currentDate, {
-          roundingMethod: 'ceil',
-        }) % 24;
+    const hoursDifference =
+      differenceInHours(givenDate, currentDate, {
+        roundingMethod: 'ceil',
+      }) % 24;
 
-      const minutesDifference =
-        differenceInMinutes(givenDate, currentDate, {
-          roundingMethod: 'ceil',
-        }) % 60;
+    const minutesDifference =
+      differenceInMinutes(givenDate, currentDate, {
+        roundingMethod: 'ceil',
+      }) % 60;
 
-      setTimeLeft({
-        days: Math.max(0, daysDifference),
-        hours: Math.max(0, hoursDifference),
-        minutes: Math.max(0, minutesDifference),
-      });
-    } catch (e) {
-      console.error('Calculating the difference in days failed');
-    }
+    setTimeLeft({
+      days: Math.max(0, daysDifference),
+      hours: Math.max(0, hoursDifference),
+      minutes: Math.max(0, minutesDifference),
+    });
   };
 
   const padNumber = (nr: number): string => {

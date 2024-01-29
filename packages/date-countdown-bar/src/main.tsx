@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { DateCountdownBarWidgetProps, DateCountdownBar } from './date-countdown-bar.js';
 
 const config: DateCountdownBarWidgetProps = {
-  date: '27-01-2024',
+  date: '27-05-2024',
   beforeText: 'Het is nog niet geweest',
   afterText:"Het is al geweest"
 };
