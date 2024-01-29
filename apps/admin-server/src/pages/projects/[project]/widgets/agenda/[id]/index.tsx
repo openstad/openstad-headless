@@ -1,6 +1,11 @@
 import WidgetPreview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
 import { AgendaWidgetProps } from '@openstad/agenda/src/agenda';
 import { useRouter } from 'next/router';
 import { PageLayout } from '../../../../../../components/ui/page-layout';
@@ -14,7 +19,8 @@ import WidgetAgendaDisplay from './display';
 import WidgetAgendaGeneral from './general';
 import WidgetAgendaItems from './items';
 
-export default function WidgetAgenda() {
+export const getServerSideProps = withApiUrl;
+export default function WidgetAgenda({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project as string;
@@ -48,6 +54,7 @@ export default function WidgetAgenda() {
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="items">Items</TabsTrigger>
               <TabsTrigger value="display">Display</TabsTrigger>
+              <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig && (
@@ -102,6 +109,9 @@ export default function WidgetAgenda() {
                   }}
                 />
               )}
+            </TabsContent>
+            <TabsContent value="publish" className="p-0">
+              <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
           </Tabs>
 

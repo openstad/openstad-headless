@@ -2,6 +2,7 @@ import './agenda.css';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { Spacer } from '@openstad-headless/ui/src';
+import Link from 'next/link';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 export type AgendaWidgetProps = BaseProps &
@@ -26,6 +27,9 @@ export type AgendaWidgetProps = BaseProps &
   };
 
 function Agenda(props: AgendaWidgetProps) {
+  console.log(
+    props.items?.flatMap((item) => item.links?.map((link) => link.url))
+  );
   return (
     <div className="osc">
       <Spacer size={2} />
@@ -43,14 +47,14 @@ function Agenda(props: AgendaWidgetProps) {
                   <p>{item.description}</p>
                   {item.links && item.links?.length > 0 && (
                     <ul className="osc-agenda-list">
-                      {item.links?.map((link) => (
-                        <li className="osc-agenda-link">
-                          <a
-                            key={link.title}
+                      {item.links?.map((link, index) => (
+                        <li className="osc-agenda-link" key={index}>
+                          <Link
                             href={link.url}
-                            target={link.openInNewWindow ? '_blank' : '_self'}>
+                            target={link.openInNewWindow ? '_blank' : '_self'}
+                            passHref={true}>
                             {link.title}
-                          </a>
+                          </Link>
                         </li>
                       ))}
                     </ul>
