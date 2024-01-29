@@ -1,0 +1,14 @@
+.osc-card {
+    display: inline-block;
+    margin: 0;
+    padding: .25rem .35rem;
+    border-radius: 3px;
+    background: #e8e8e8;
+    background: linear-gradient(#e8e8e8 50%, #ffffff 50%);
+}
+
+.osc-card p {
+    color: black !important;
+    font-weight: 800;
+    font-size: 1rem;
+}

@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@openstad-headless/comments": "file:../../packages/comments",
+    "@openstad-headless/date-countdown-bar": "file:../../packages/date-countdown-bar",
     "@openstad-headless/likes": "file:../../packages/likes",
     "@openstad-headless/ui": "file:../../packages/ui",
     "@hookform/resolvers": "^3.3.1",

@@ -1,4 +1,5 @@
 export const WidgetDefinitions = {
+  agenda: 'Agenda',
   comments: 'Argumenten',
   begrootmodule: 'Begrootmodule',
   resourcesmap: 'Resource map',
@@ -8,6 +9,7 @@ export const WidgetDefinitions = {
   resourceform: 'Resource form',
   resourceoverview: 'Resource overview',
   resourcedetail: 'Resource detail',
+  datecountdownbar: 'Date countdown bar'
 };
 
 export type WidgetDefinition = keyof typeof WidgetDefinitions;
