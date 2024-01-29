@@ -8,7 +8,7 @@ import { Image } from '@openstad-headless/ui/src';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 import { Filters } from './filters/filters';
-import {loadWidget} from '@openstad-headless/lib/load-widget';
+import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { elipsize } from '../../lib/ui-helpers';
 
 export type ResourceOverviewWidgetProps = BaseProps &
@@ -20,6 +20,13 @@ export type ResourceOverviewWidgetProps = BaseProps &
       resource: any,
       props: ResourceOverviewWidgetProps
     ) => React.JSX.Element;
+    resourceType?:
+      | 'resource'
+      | 'article'
+      | 'activeUser'
+      | 'resourceUser'
+      | 'submission';
+    displayType?: 'cardrow' | 'cardgrid' | 'raw';
     allowFiltering?: boolean;
     displayTitle?: boolean;
     titleMaxLength?: number;
@@ -37,9 +44,9 @@ export type ResourceOverviewWidgetProps = BaseProps &
     summaryCharLength?: number;
     displaySorting?: boolean;
     defaultSorting?: string;
-
     displaySearch?: boolean;
     textActiveSearch?: string;
+    itemLink?: string;
     sorting: Array<{ value: string; label: string }>;
 
     displayTagFilters?: boolean;
@@ -67,11 +74,20 @@ const defaultItemRenderer = (
   resource: any,
   props: ResourceOverviewWidgetProps
 ) => {
+  console.log({props})
   return (
-    <article>
+    <article
+      onClick={() => {
+        if (props.displayType === 'cardrow') {
+          if (!props.itemLink) {
+            console.error('Link to child resource is not set');
+          } else {
+            const childUrl = props.itemLink.replaceAll('[id]', resource.id);
+          }
+        }
+      }}>
       <Image
         src={resource.images?.at(0)?.src || ''}
-        onClick={() => console.log({ resource })}
         imageFooter={
           <div>
             <p className="osc-resource-overview-content-item-status">
@@ -115,11 +131,13 @@ const defaultItemRenderer = (
 };
 
 function ResourceOverview({
+
   renderHeader = defaultHeaderRenderer,
   renderItem = defaultItemRenderer,
   allowFiltering = true,
   ...props
 }: ResourceOverviewWidgetProps) {
+  console.log({p: props});
   const datastore = new DataStore({
     projectId: props.projectId,
     api: props.api,

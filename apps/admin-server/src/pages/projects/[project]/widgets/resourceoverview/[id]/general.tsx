@@ -21,9 +21,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { Input } from '@/components/ui/input';
+import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 
 const formSchema = z.object({
-  resource: z.enum([
+  resourceType: z.enum([
     'resource',
     'article',
     'activeUser',
@@ -31,42 +35,28 @@ const formSchema = z.object({
     'submission',
   ]),
   displayType: z.enum(['cardrow', 'cardgrid', 'raw']),
+  itemLink: z.string(),
 });
 
-export default function WidgetResourceOverviewGeneral() {
+export default function WidgetResourceOverviewGeneral(
+  props: ResourceOverviewWidgetProps &
+    EditFieldProps<ResourceOverviewWidgetProps>
+) {
   type FormData = z.infer<typeof formSchema>;
-  const category = 'general';
-
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig();
-
-  const defaults = useCallback(
-    () => ({
-      resource: widget?.config?.[category]?.resource || 'resource',
-      displayType: widget?.config?.[category]?.displayType || 'cardrow',
-    }),
-    [widget?.config]
-  );
-
   async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could falset update', error);
-    }
+    props.updateConfig({ ...props, ...values });
   }
+
+  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      resourceType: props?.resourceType || 'resource',
+      displayType: props?.displayType || 'cardrow',
+      itemLink: props?.itemLink || '/resources/[id]'
+    },
   });
-
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -78,7 +68,7 @@ export default function WidgetResourceOverviewGeneral() {
           className="lg:w-1/2 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="resource"
+            name="resourceType"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Resource type</FormLabel>
@@ -132,6 +122,31 @@ export default function WidgetResourceOverviewGeneral() {
               </FormItem>
             )}
           />
+          
+          <FormField
+            control={form.control}
+            name="itemLink"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Link (relatief) naar de specifieke resource
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder='Bijv: /resources/[id]'
+                    type="text"
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>
