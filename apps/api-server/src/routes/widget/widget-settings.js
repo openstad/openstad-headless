@@ -27,6 +27,15 @@ module.exports = {
       resourceId: null,
     },
   },
+  enquete: {
+    js: ['@openstad-headless/enquete/dist/enquete.iife.js'],
+    css: ['@openstad-headless/enquete/dist/style.css'],
+    functionName: 'OpenstadHeadlessEnquete',
+    componentName: 'Enquete',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
   resourceoverview: {
     js: ['@openstad-headless/resource-overview/dist/resource-overview.iife.js'],
     css: ['@openstad-headless/resource-overview/dist/style.css'],
