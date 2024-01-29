@@ -202,7 +202,13 @@ module.exports = function( db, sequelize, DataTypes ) {
 				return {
 					include: [{
 						model      : db.Resource,
-						attributes : ['id', 'projectId', 'title', 'status', 'viewableByRole']
+						attributes : ['id', 'projectId', 'title', 'viewableByRole'],
+            include: {
+              model: db.Tag,
+              attributes: ['id', 'type', 'name'],
+              where: { type: 'status' },
+              required: false,
+            },
 					}]
 				}
 			},

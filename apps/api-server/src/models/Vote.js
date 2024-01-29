@@ -75,7 +75,13 @@ module.exports = function( db, sequelize, DataTypes ) {
 				return {
 					include: [{
 						model      : db.Resource,
-						attributes : ['id', 'title', 'projectId', 'status', 'viewableByRole']
+						attributes : ['id', 'title', 'projectId', 'viewableByRole'],
+            include: {
+              model: db.Tag,
+              attributes: ['id', 'type', 'name'],
+              where: { type: 'status' },
+              required: false,
+            },
 					}]
 				}
 			},
