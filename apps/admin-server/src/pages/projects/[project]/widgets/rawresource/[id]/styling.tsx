@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RawResourceWidgetProps } from '@openstad/raw-resource/src/raw-resource';
@@ -90,7 +89,6 @@ export default function WidgetRawStylingClasses(
   props: RawResourceWidgetProps & EditFieldProps<RawResourceWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
-  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   async function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
@@ -145,7 +143,7 @@ export default function WidgetRawStylingClasses(
                                     value: choice.value,
                                   },
                                 ]);
-                                onFieldChange(field.name, [
+                                props.onFieldChanged(field.name, [
                                   ...fieldValue,
                                   {
                                     label: choice.label,
@@ -158,7 +156,7 @@ export default function WidgetRawStylingClasses(
                                     (el) => el.value !== choice.value
                                   )
                                 );
-                                onFieldChange(
+                                props.onFieldChanged(
                                   field.name,
                                   fieldValue.filter(
                                     (el) => el.value !== choice.value
