@@ -68,7 +68,14 @@ module.exports = function( db, sequelize, DataTypes ) {
 			allowNull    : true,
     },
 
-		extraData: getExtraDataConfig(DataTypes.JSON, 'tags')
+    extraFunctionality: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: {},
+    },
+
+		extraData: getExtraDataConfig(DataTypes.JSON, 'tags'),
+
 	}, {
 
 		defaultScope: {

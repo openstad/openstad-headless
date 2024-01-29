@@ -940,8 +940,9 @@ module.exports = function (db, sequelize, DataTypes) {
       return true;
     }
 
-    if( !self.isOpen() ) {
-      return false;
+    let status = self.tags.find( type => 'status' ); // was: status == 'OPEN' - is this what we want?
+    if (typeof status?.extraFunctionality?.editableByUser != 'boolean' || status.extraFunctionality.editableByUser) {
+      return true;
     }
 
     if (userHasRole(user, 'owner', self.userId)) {
@@ -972,6 +973,17 @@ module.exports = function (db, sequelize, DataTypes) {
     canUpdate: canMutate,
     canDelete: canMutate,
     canAddPoll: canMutate,
+    canComment: function canComment(self) {
+      if (!self) return false;
+      // project config: comments is closed
+      if (typeof self?.project?.config?.comments?.isClosed != 'boolean' || self.project.config.comments.isClosed) return false;
+      // published
+      if (!self.publishDate) return false;
+      // status
+      let status = self.tags.find( type => 'status' );
+      if (typeof status?.extraFunctionality?.noComment == 'boolean' && status.extraFunctionality.noComment) return false;
+      return true;
+    },
     toAuthorizedJSON: function(user, data, self) {
 
       if (!self.auth.canView(user, self)) {
