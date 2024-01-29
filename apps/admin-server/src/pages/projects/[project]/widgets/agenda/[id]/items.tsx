@@ -148,7 +148,6 @@ export default function WidgetAgendaItems(
     props.onFieldChanged('items', items);
   }, [items]);
 
-  // Sets form to selected item values when item is selected
   useEffect(() => {
     if (selectedItem) {
       form.reset({
@@ -170,9 +169,8 @@ export default function WidgetAgendaItems(
       );
       updatedLinks[index] = { ...selectedLink };
 
-      // Use form.reset to update the entire form state
       form.reset({
-        ...form.getValues(), // Retains the current values of other fields
+        ...form.getValues(),
         links: updatedLinks,
       });
     }
