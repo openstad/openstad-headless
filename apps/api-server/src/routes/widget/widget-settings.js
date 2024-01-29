@@ -45,4 +45,13 @@ module.exports = {
       projectId: null,
     },
   },
+  datecountdownbar: {
+    js: ['@openstad-headless/date-countdown-bar/dist/date-countdown-bar.iife.js'],
+    css: ['@openstad-headless/date-countdown-bar/dist/style.css'],
+    functionName: 'OpenstadHeadlessDateCountdownBar',
+    componentName: 'DateCountdownBar',
+    defaultConfig: {
+      projectId: null,
+    },
+  }
 };

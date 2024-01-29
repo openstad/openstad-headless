@@ -20,17 +20,22 @@ import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
 import WidgetPreview from '@/components/widget-preview';
+import WidgetPublish from '@/components/widget-publish';
+import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
 
-export default function WidgetResourceOverview() {
+export const getServerSideProps = withApiUrl;
+
+export default function WidgetResourceOverview({
+  apiUrl,
+}:WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
-  const projectId = router.query.project;
+  const projectId = router.query.project as string;
 
   const { data: widget, updateConfig } = useWidgetConfig();
   const { previewConfig, updatePreview } =
     useWidgetPreview<ResourceOverviewWidgetProps>({
       projectId,
-      resourceId: '2',
     });
 
   const totalPropPackage = {
@@ -80,6 +85,7 @@ export default function WidgetResourceOverview() {
               <TabsTrigger value="pagination">Pagination</TabsTrigger>
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
               <TabsTrigger value="info">Info</TabsTrigger>
+              <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               <WidgetResourceOverviewGeneral {...totalPropPackage} />
@@ -107,6 +113,9 @@ export default function WidgetResourceOverview() {
             </TabsContent>
             <TabsContent value="info" className="p-0">
               <WidgetResourceOverviewInfo {...totalPropPackage} />
+            </TabsContent>
+            <TabsContent value="publish" className="p-0">
+              <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
           </Tabs>
 
