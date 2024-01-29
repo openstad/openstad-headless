@@ -134,6 +134,18 @@ spec:
 
           - name: BASE_DOMAIN
             value: {{ .Values.host.base }}
+
+          - name: AUTH_ADMIN_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                key: admin_client_id
+                name: {{ template "openstad.auth.secret.fullname" . }}
+
+          - name: AUTH_ADMIN_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: admin_client_secret
+                name: {{ template "openstad.auth.secret.fullname" . }}
         
           {{- if .Values.api.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.api.extraEnvVars "context" $) | nindent 10 }}
