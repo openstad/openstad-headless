@@ -23,8 +23,7 @@ function RawResource(props: RawResourceWidgetProps) {
     resourceId: props.resourceId,
     api: props.api,
   });
-  const [resource] = datastore.useResource(props);
-  if (!resource) return null;
+  const [resource] = props.resourceId ? datastore.useResource(props) : [null];
 
   const stylingClasses =
     props.stylingClasses?.map((stylingClass) => stylingClass.value).join(' ') ||
@@ -32,8 +31,28 @@ function RawResource(props: RawResourceWidgetProps) {
 
   const render = (() => {
     if (props.rawInput) {
+      if (props.resourceId) {
+        return nunjucks.renderString(props.rawInput, {
+          // here you can add variables that are available in the template
+          projectId: props.projectId,
+          user: resource.user,
+          startDateHumanized: resource.startDateHumanized,
+          status: resource.status,
+          title: resource.title,
+          summary: resource.summary,
+          description: resource.description,
+          images: resource.images,
+          budget: resource.budget,
+          extraData: resource.extraData,
+          location: resource.location,
+          modBreak: resource.modBreak,
+          modBreakDateHumanized: resource.modBreakDateHumanized,
+          progress: resource.progress,
+          createDateHumanized: resource.createDateHumanized,
+          publishDateHumanized: resource.publishDateHumanized,
+        });
+      }
       return nunjucks.renderString(props.rawInput, {
-        // here you can add variables that are available in the template
         projectId: props.projectId,
       });
     }

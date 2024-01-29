@@ -42,6 +42,7 @@ export default function WidgetRawGeneral(
   const router = useRouter();
 
   const projectId = router.query.project as string;
+  // const resourceId =
   const { data, error, isLoading, remove } = useResources(projectId as string);
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
@@ -109,6 +110,21 @@ export default function WidgetRawGeneral(
                   <h2>Te gebruiken variabelen:</h2>
                   <ul className="list-disc">
                     <li className="ml-4">{`{{projectId}}`}</li>
+                    <li className="ml-4">{`{{user}} -> Bijvoorbeeld {{user.name}}`}</li>
+                    <li className="ml-4">{`{{startDateHumanized}}`}</li>
+                    <li className="ml-4">{`{{status}}`}</li>
+                    <li className="ml-4">{`{{title}}`}</li>
+                    <li className="ml-4">{`{{summary}}`}</li>
+                    <li className="ml-4">{`{{description}}`}</li>
+                    <li className="ml-4">{`{{images}} -> Bijvoorbeeld {{images[nummer].src}}`}</li>
+                    <li className="ml-4">{`{{budget}}`}</li>
+                    <li className="ml-4">{`{{extraData}}`}</li>
+                    <li className="ml-4">{`{{location}}`}</li>
+                    <li className="ml-4">{`{{modBreak}}`}</li>
+                    <li className="ml-4">{`{{modBreakDateHumanized}}`}</li>
+                    <li className="ml-4">{`{{progress}}`}</li>
+                    <li className="ml-4">{`{{createDateHumanized}}`}</li>
+                    <li className="ml-4">{`{{publishDateHumanized}}`}</li>
                   </ul>
                 </div>
                 <FormControl>
