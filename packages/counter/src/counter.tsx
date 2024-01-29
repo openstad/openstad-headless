@@ -49,15 +49,16 @@ function Counter({
     resourceId,
   });
 
-  const [comments] = datastore.useComments({
+  const [comments] = datastore.useCommentsByProject({
     projectId: props.projectId,
-    resourceId: resourceId || props.resourceId,
-    sentiment: opinion,
+    sentiment: opinion
   })
 
   const [submissions] = datastore.useSubmissions({
     projectId: props.projectId
   });
+
+  console.log(opinion)
 
   if (counterType === 'resource') {
     amountDisplayed = resources.length;
@@ -82,13 +83,7 @@ function Counter({
   }
 
   if (counterType === 'argument') {
-    if (opinion === 'for') {
-      amountDisplayed = 51;
-    } else if (opinion === 'against') {
-      amountDisplayed = 52;
-    } else {
-      amountDisplayed = 50;
-    }
+    amountDisplayed = comments.length;
   }
 
   if (counterType === 'submission') {

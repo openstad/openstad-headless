@@ -35,7 +35,8 @@ export default function CounterDisplay(props: CounterWidgetProps & EditFieldProp
       counterType: props?.counterType || 'resource',
       label: props?.label || 'Hoeveelheid',
       url: props?.url || '',
-      opinion: props?.opinion || ''
+      opinion: props?.opinion || '',
+      id: props?.id || 0
     }
   })
 
@@ -120,7 +121,7 @@ export default function CounterDisplay(props: CounterWidgetProps & EditFieldProp
             name="id"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Gewenste ID</FormLabel>
+                <FormLabel>Gewenste ID (Vul een 0 in om alle instanties te gebruiken)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"

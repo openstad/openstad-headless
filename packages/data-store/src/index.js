@@ -10,6 +10,7 @@ import useTags from './hooks/use-tags.js';
 import useCurrentUser from './hooks/use-current-user.js';
 import useUserVote from './hooks/use-user-vote.js';
 import useSubmissions from './hooks/use-submissions';
+import useCommentsByProject from './hooks/use-comments-by-project';
 
 const windowGlobal = typeof window !== 'undefined' ? window : {};
 
@@ -28,6 +29,7 @@ function DataStore(props = {}) {
   self.useCurrentUser = useCurrentUser.bind(self);
   self.useUserVote = useUserVote.bind(self);
   self.useSubmissions = useSubmissions.bind(self);
+  self.useCommentsByProject = useCommentsByProject.bind(self);
 
   // current user
   const [currentUser, currentUserError, currentUserIsLoading] =

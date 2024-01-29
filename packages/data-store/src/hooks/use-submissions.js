@@ -2,7 +2,7 @@ export default function useSubmissions(props) {
 
   let self = this;
 
-  const projectId = props.projectId
+  const projectId = props.projectId;
 
   const { data, error, isLoading } = self.useSWR({ projectId }, 'submissions.fetch');
 

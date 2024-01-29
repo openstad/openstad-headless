@@ -6,6 +6,7 @@ import tags from './tags';
 import user from './user';
 import userVote from './user-vote';
 import submissions from './submissions';
+import commentsByProject from './commentsByProject';
 
 const windowGlobal = typeof window !== "undefined" ? window : {};
 
@@ -30,6 +31,10 @@ function API(props = {}) {
     submitLike: comments.submitLike.bind(self),
   };
 
+  self.commentsByProject = {
+    fetch: commentsByProject.fetch.bind(self)
+  }
+
   self.resource = {
     fetch: resource.fetch.bind(self),
     update: resource.update.bind(self),
@@ -39,6 +44,10 @@ function API(props = {}) {
   self.resources = {
     fetch: resources.fetch.bind(self),
   };
+
+  self.submissions = {
+    fetch: submissions.fetch.bind(self)
+  }
 
   self.tags = {
     fetch: tags.fetch.bind(self),
@@ -57,8 +66,4 @@ function API(props = {}) {
     fetch: userVote.fetch.bind(self),
     submitVote: userVote.submitVote.bind(self),
   };
-
-  self.submissions = {
-    fetch: submissions.fetch.bind(self)
-  }
 }
