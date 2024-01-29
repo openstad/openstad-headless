@@ -110,15 +110,6 @@ module.exports = function (db, sequelize, DataTypes) {
       },
     },
 
-    status: {
-      type: DataTypes.ENUM('OPEN', 'CLOSED', 'ACCEPTED', 'DENIED', 'BUSY', 'DONE'),
-      auth:  {
-        updateableBy: 'moderator',
-      },
-      defaultValue: 'OPEN',
-      allowNull: false
-    },
-
     viewableByRole: {
       type: DataTypes.ENUM('admin', 'editor', 'moderator', 'member', 'anonymous', 'all'),
       defaultValue: 'all',
@@ -929,10 +920,6 @@ module.exports = function (db, sequelize, DataTypes) {
       modBreakUserId: user.id,
       modBreakDate: new Date()
     });
-  }
-
-  Resource.prototype.setStatus = function (status) {
-    return this.update({status: status});
   }
 
   let canMutate = function(user, self) {
