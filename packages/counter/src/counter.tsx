@@ -49,6 +49,16 @@ function Counter({
     resourceId,
   });
 
+  const [comments] = datastore.useComments({
+    projectId: props.projectId,
+    resourceId: resourceId || props.resourceId,
+    sentiment: opinion,
+  })
+
+  const [submissions] = datastore.useSubmissions({
+    projectId: props.projectId
+  });
+
   if (counterType === 'resource') {
     amountDisplayed = resources.length;
   }
@@ -82,7 +92,7 @@ function Counter({
   }
 
   if (counterType === 'submission') {
-    amountDisplayed = 60;
+    amountDisplayed = submissions.length;
   }
 
   return (

@@ -49,12 +49,12 @@ export default function ProjectSettings() {
   const { data, isLoading, updateProject } = useProject();
   const defaults = useCallback(
     () => ({
-      name: data?.name || null,
+      name: data?.name || '',
       endDate: data?.config?.project?.endDate
         ? new Date(data?.config?.project?.endDate)
         : new Date(),
-      enableLikes: data?.config?.resources?.enableLikes || null,
-      enableReactions: data?.config?.resources?.enableReactions || null,
+      enableLikes: data?.config?.resources?.enableLikes || false,
+      enableReactions: data?.config?.resources?.enableReactions || false,
     }),
     [data?.name, data?.config]
   );
@@ -84,7 +84,7 @@ export default function ProjectSettings() {
         name
       );
       if (project) {
-        toast.success('Codes aangemaakt!');
+        toast.success('Project aangepast!');
       } else {
         toast.error('Er is helaas iets mis gegaan.')
       }

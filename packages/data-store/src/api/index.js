@@ -5,6 +5,7 @@ import resources from './resources';
 import tags from './tags';
 import user from './user';
 import userVote from './user-vote';
+import submissions from './submissions';
 
 const windowGlobal = typeof window !== "undefined" ? window : {};
 
@@ -56,4 +57,8 @@ function API(props = {}) {
     fetch: userVote.fetch.bind(self),
     submitVote: userVote.submitVote.bind(self),
   };
+
+  self.submissions = {
+    fetch: submissions.fetch.bind(self)
+  }
 }
