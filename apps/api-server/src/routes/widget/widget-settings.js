@@ -27,6 +27,15 @@ module.exports = {
       resourceId: null,
     },
   },
+  rawresource: {
+    js: ['@openstad-headless/raw-resource/dist/raw-resource.iife.js'],
+    css: ['@openstad-headless/raw-resource/dist/style.css'],
+    functionName: 'OpenstadHeadlessRawResource',
+    componentName: 'RawResource',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
   resourceoverview: {
     js: ['@openstad-headless/resource-overview/dist/resource-overview.iife.js'],
     css: ['@openstad-headless/resource-overview/dist/style.css'],

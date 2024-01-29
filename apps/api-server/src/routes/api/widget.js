@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router({mergeParams: true});
 const auth        = require('../../middleware/sequelize-authorization-middleware');
 const db          = require('../../db');
+const sanitize = require('../../util/sanitize');
 
 
 router.all('*', function(req, res, next) {
@@ -83,6 +84,10 @@ router.route('/:id') //(\\d+)
         const config = {...widget.config, ...(req.body?.config || {})}; 
 
         if(config) {
+            // sanitize rawInput by user
+            if (widget.dataValues.type === 'rawresource') {
+                widget.dataValues.config.rawInput = sanitize.content(widget.dataValues.config.rawInput);
+            }            
             widget.update({config}).then(result => res.json(result))
         }
 	})

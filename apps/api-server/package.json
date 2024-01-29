@@ -57,6 +57,7 @@
     "@openstad-headless/datastore": "file:../../packages/data-store",
     "@openstad-headless/comments": "file:../../packages/comments",
     "@openstad-headless/likes": "file:../../packages/likes",
+    "@openstad-headless/raw-resource": "file:../../packages/raw-resource",
     "@openstad-headless/resource-overview": "file:../../packages/resource-overview",
     "@openstad-headless/date-countdown-bar": "file:../../packages/date-countdown-bar",
     "@openstad-headless/resource-detail": "file:../../packages/resource-detail"

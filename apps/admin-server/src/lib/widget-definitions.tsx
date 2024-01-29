@@ -6,6 +6,7 @@ export const WidgetDefinitions = {
   keuzewijzer: 'Keuzewijzer',
   likes: 'Like',
   map: 'Map',
+  rawresource: 'Raw Resource',
   resourceform: 'Resource form',
   resourceoverview: 'Resource overview',
   resourcedetail: 'Resource detail',
