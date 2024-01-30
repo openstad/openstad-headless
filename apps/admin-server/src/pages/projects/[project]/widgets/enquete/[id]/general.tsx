@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -8,6 +9,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
@@ -18,6 +20,7 @@ import * as z from 'zod';
 
 const formSchema = z.object({
   title: z.string(),
+  description: z.string(),
 });
 
 export default function WidgetEnqueteGeneral(
@@ -32,6 +35,7 @@ export default function WidgetEnqueteGeneral(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       title: props?.title || '',
+      description: props?.description || '',
     },
   });
 
@@ -44,13 +48,13 @@ export default function WidgetEnqueteGeneral(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          className="flex flex-col gap-y-2 w-full lg:w-1/3">
           <FormField
             control={form.control}
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Titel</FormLabel>
+                <FormLabel>Enquête titel</FormLabel>
                 <Input
                   {...field}
                   onChange={(e) => {
@@ -58,6 +62,26 @@ export default function WidgetEnqueteGeneral(
                     onFieldChange(field.name, e.target.value);
                   }}
                 />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Enquête beschrijving</FormLabel>
+                <FormControl>
+                  <Textarea
+                    rows={6}
+                    {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      onFieldChange(field.name, e.target.value);
+                    }}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

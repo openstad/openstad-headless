@@ -1,57 +1,28 @@
 
-.osc-agenda {
+.osc-enquete {
   display: flex;
   justify-content: space-between;
+  max-width: 40vw;
   flex-direction: column;
   gap: 0.7rem;
   margin-top: 1rem;
 }
 
-.osc-agenda-item {
+.osc-enquete-item {
   background-color: var(--osc-card);
   color:var(--osc-card-foreground);
   padding: 0.5rem 0.8rem;
   display: flex;
   position: relative;
-
 }
 
-.osc-agenda-item::before {
-  content: '';
-  width: 0.3rem;
-  background-color: var(--osc-card-foreground);
-  position: absolute;
-  top: 1rem;
-  height: calc(100% + 1rem);
-  left: 1.7rem;
-  transform: translateX(-50%);
-  z-index: 1;
+.osc-enquete-item:first-of-type  {
+  background-color: var(--osc-background);
+  padding: 0;
 }
 
-.osc-agenda-content {
+.osc-enquete-content {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-}
-
-.osc-date-circle {
-  width: 1.8rem;
-  height: 1.8rem;
-  background-color: var(--osc-card-foreground);
-  border: 1px solid var(--osc-ring);
-  outline: 2px solid var(--osc-card);
-  border-radius: 50%;
-  margin-right: 0.8rem;
-  margin-top: 0.2rem;
-  z-index: 2;
-}
-
-
-/* The last item should not have a line extending down */
-.osc-agenda > .osc-agenda-item:last-child::before {
-  content: none;
-}
-
-.osc-agenda-link {
-  color:var(--osc-secondary);
+  gap: 1rem;
 }

@@ -32,6 +32,10 @@ module.exports = {
     css: ['@openstad-headless/enquete/dist/style.css'],
     functionName: 'OpenstadHeadlessEnquete',
     componentName: 'Enquete',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
   rawresource: {
     js: ['@openstad-headless/raw-resource/dist/raw-resource.iife.js'],
     css: ['@openstad-headless/raw-resource/dist/style.css'],

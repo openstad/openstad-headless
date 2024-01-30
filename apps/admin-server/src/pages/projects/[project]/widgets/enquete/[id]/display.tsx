@@ -17,6 +17,7 @@ import * as z from 'zod';
 
 const formSchema = z.object({
   displayTitle: z.boolean(),
+  displayDescription: z.boolean(),
 });
 
 export default function WidgetEnqueteDisplay(
@@ -48,7 +49,18 @@ export default function WidgetEnqueteDisplay(
             name="displayTitle"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Titel weergeven</FormLabel>
+                <FormLabel>Enquête titel weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="displayDescription"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Enquête bechrijving weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

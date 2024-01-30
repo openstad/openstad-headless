@@ -17,6 +17,7 @@ import {
 } from '../../../../../../components/ui/tabs';
 import WidgetEnqueteDisplay from './display';
 import WidgetEnqueteGeneral from './general';
+import WidgetEnqueteItems from './items';
 
 export const getServerSideProps = withApiUrl;
 export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
@@ -34,7 +35,7 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        pageHeader="Project naam"
+        pageHeader="Enquête"
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -45,7 +46,7 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Enquete',
+            name: 'Enquête',
             url: `/projects/${projectId}/widgets/enquete/${id}`,
           },
         ]}>
@@ -53,12 +54,31 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
+              <TabsTrigger value="items">Items</TabsTrigger>
               <TabsTrigger value="display">Display</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig && (
                 <WidgetEnqueteGeneral
+                  {...previewConfig}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
+                  }
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                />
+              )}
+            </TabsContent>
+            <TabsContent value="items" className="p-0">
+              {previewConfig && (
+                <WidgetEnqueteItems
                   {...previewConfig}
                   updateConfig={(config) =>
                     updateConfig({ ...widget.config, ...config })
