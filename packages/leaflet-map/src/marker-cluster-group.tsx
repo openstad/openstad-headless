@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import LeafletMarkerClusterGroup from 'react-leaflet-cluster'
 import type { MarkerCluster } from 'leaflet';
 import type { MarkerClusterGroupProps } from './types/marker-cluster-group-props';
@@ -16,7 +16,9 @@ export default function MarkerClusterGroup({
 }: MarkerClusterGroupProps) {
 
   let categorizeRef = useRef(categorize);
-  categorizeRef.current = categorize;
+  useEffect(() => {
+    categorizeRef.current = categorize;
+  });
 
 	function useIconCreateFunction(cluster: MarkerCluster) {
     // TODO: uitwerken default voor andere varianten dan amaps
