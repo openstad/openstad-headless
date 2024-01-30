@@ -927,7 +927,7 @@ module.exports = function (db, sequelize, DataTypes) {
       return true;
     }
 
-    let status = self.tags.find( type => 'status' ); // was: status == 'OPEN' - is this what we want?
+    let status = self.tags.find( type => 'status' );
     if (typeof status?.extraFunctionality?.editableByUser != 'boolean' || status.extraFunctionality.editableByUser) {
       return true;
     }

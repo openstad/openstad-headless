@@ -61,6 +61,16 @@ module.exports = {
     },
   },
 
+  statusses: {
+    type: 'object',
+    subset: {
+      defaultStatusId: {
+        type: 'int',
+        default: null,
+      },
+    },
+  },
+
   resources: {
     type: 'object',
     subset: {

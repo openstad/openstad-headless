@@ -162,21 +162,30 @@ router
     return next();
   })
   .post(function (req, res, next) {
-    if (
-      !(
-        req.project.config &&
-        req.project.config.resources &&
-        req.project.config.resources.canAddNewResources
-      )
-    )
+    if (!req.project?.config?.resources?.canAddNewResources) {
       return next(createError(401, 'Inzenden is gesloten'));
+    }
+    return next();
+  })
+  .post(async function (req, res, next) {
+    // status tags
+    try {
+      req.body.tags = req.body.tags ? JSON.parse(req.body.tags) : [];
+    } catch (err) {}
+    let existingTags = await db.Tag.findAll({ where: { id: req.body.tags.map( t => t.id ) } });
+    if (existingTags.find(t => t.type == 'status')) return next(); // request already contains a status tag
+    let statusId = req.project?.config?.statusses?.defaultStatusId;
+    if (statusId) {
+      let found = req.body.tags.find( t => t.id == statusId );
+      if (!found) {
+        req.body.tags.push({ id: statusId });
+      }
+    }
     return next();
   })
   .post(function (req, res, next) {
     try {
-      req.body.location = req.body.location
-        ? JSON.parse(req.body.location)
-        : null;
+      req.body.location = req.body.location ? JSON.parse(req.body.location) : null;
     } catch (err) {}
 
     if (
