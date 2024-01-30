@@ -1,15 +1,15 @@
-import { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
 import {loadWidget} from '../../lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
 
 import 'leaflet/dist/leaflet.css';
 import './css/base-map.less';
 
-import { BaseProps } from '../../types/base-props';
-import { ProjectSettingProps } from '../../types/project-setting-props';
-import { MarkerProps } from './types/marker-props';
-import { MarkerIconType } from './types/marker-icon';
-import { MapPropsType } from './types/index';
+import type { BaseProps } from '../../types/base-props';
+import type { ProjectSettingProps } from '../../types/project-setting-props';
+import type { MarkerProps } from './types/marker-props';
+import type { MarkerIconType } from './types/marker-icon';
+import type { MapPropsType } from './types/index';
 
 import { BaseMap } from './base-map';
 
@@ -45,7 +45,8 @@ export function ResourceDetailMap({
     resourceId: resourceId,
   });
 
-  let currentMarker = {
+  let currentMarker: MarkerProps;
+  currentMarker = {
     ...marker,
     location: resource.location? {
 	    lat: resource.location.lat,
@@ -61,7 +62,7 @@ export function ResourceDetailMap({
 
   return (
     <>
-      <BaseMap {...props} markers={[currentMarker]} center={currentCenter}/>
+      <BaseMap {...props} center={currentCenter} markers={[currentMarker]}/>
     </>
   );
 

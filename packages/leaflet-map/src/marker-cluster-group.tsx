@@ -1,12 +1,11 @@
 import LeafletMarkerClusterGroup from 'react-leaflet-cluster'
-import { MarkerCluster } from 'leaflet';
-import { MarkerClusterGroupProps } from './types/marker-cluster-group-props';
+import type { MarkerCluster } from 'leaflet';
+import type { MarkerClusterGroupProps } from './types/marker-cluster-group-props';
 
 import Marker from './marker.jsx';
 import amapsCreateClusterIcon from './lib/amaps-cluster-icon.js';
 
 export default function MarkerClusterGroup({
-  isActive = true,
   maxClusterRadius = 40,
   showCoverageOnHover = false,
   iconCreateFunction = amapsCreateClusterIcon,
@@ -22,9 +21,9 @@ export default function MarkerClusterGroup({
   }
 
   return (
-    <LeafletMarkerClusterGroup {...props} maxClusterRadius={maxClusterRadius} showCoverageOnHover={showCoverageOnHover} iconCreateFunction={useIconCreateFunction}>
-      {markers.map((data, i: number) => 
-        <Marker {...data} key={`marker-${i}`}/>
+    <LeafletMarkerClusterGroup {...props} iconCreateFunction={useIconCreateFunction} maxClusterRadius={maxClusterRadius} showCoverageOnHover={showCoverageOnHover}>
+      {markers.map((data) => 
+        <Marker {...data} key={`marker-${data.markerId}`}/>
         )}
     </LeafletMarkerClusterGroup>
   );

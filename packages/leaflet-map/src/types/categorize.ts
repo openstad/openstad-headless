@@ -1,8 +1,8 @@
 export type CategorizeByFieldType = string;
 
-export type CategoriesType = {}; // TODO
+export type CategoriesType = any; // TODO
 
 export type CategorizeType = {
-  categorizeByField: CategorizeByFieldType,
-  categories: CategoriesType,
+  categorizeByField?: CategorizeByFieldType,
+  categories?: CategoriesType,
 };

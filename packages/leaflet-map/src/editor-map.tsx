@@ -1,15 +1,16 @@
-import { useState, useEffect, PropsWithChildren } from 'react';
-import { LeafletMouseEvent } from 'leaflet';
+import { useState, useEffect } from 'react';
+import type { PropsWithChildren } from 'react';
+import type { LeafletMouseEvent } from 'leaflet';
 import {loadWidget} from '../../lib/load-widget';
 
 import 'leaflet/dist/leaflet.css';
 import './css/base-map.less';
 
-import { BaseProps } from '../../types/base-props';
-import { ProjectSettingProps } from '../../types/project-setting-props';
-import { MarkerProps } from './types/marker-props';
-import { MarkerIconType } from './types/marker-icon';
-import { MapPropsType } from './types/index';
+import type { BaseProps } from '../../types/base-props';
+import type { ProjectSettingProps } from '../../types/project-setting-props';
+import type { MarkerProps } from './types/marker-props';
+import type { MarkerIconType } from './types/marker-icon';
+import type { MapPropsType } from './types/index';
 
 import { BaseMap } from './base-map';
 
@@ -49,12 +50,12 @@ export function EditorMap({
   let [currentCenter, setCurrentCenter] = useState(center)
 
   useEffect(() => {
-    if (currentEditorMarker?.location?.lat) {
+    if (centerOnEditorMarker && currentEditorMarker?.location?.lat) {
       setCurrentCenter({ ...currentEditorMarker.location })
     } else {
       setCurrentCenter(center)
     }
-  }, [currentEditorMarker])
+  }, [currentEditorMarker, center, centerOnEditorMarker])
 
   function updateLocation(e: LeafletMouseEvent & { isInArea: boolean }, map: any) {
     if (map && e.isInArea) {
@@ -67,8 +68,8 @@ export function EditorMap({
 
   return (
     <>
-      <BaseMap {...props} markers={[...markers, currentEditorMarker]} center={currentCenter} onClick={updateLocation}/>
-      <input type="hidden" name={fieldName} value={`{"lat":${currentEditorMarker.location.lat},"lng":${currentEditorMarker.location.lng}}`}/>
+      <BaseMap {...props} center={currentCenter} markers={[...markers, currentEditorMarker]} onClick={updateLocation}/>
+      <input name={fieldName} type="hidden" value={`{"lat":${currentEditorMarker.location.lat},"lng":${currentEditorMarker.location.lng}}`}/>
     </>
   );
 

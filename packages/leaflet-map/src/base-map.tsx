@@ -1,6 +1,8 @@
-import { useState, useEffect, PropsWithChildren } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import type { PropsWithChildren } from 'react';
 import {loadWidget} from '../../lib/load-widget';
-import { LatLng, latLngBounds, LeafletMouseEvent } from 'leaflet';
+import { LatLng, latLngBounds } from 'leaflet';
+import type { LeafletMouseEvent } from 'leaflet';
 import { MapContainer, useMapEvents } from 'react-leaflet';
 import { MapConsumer, useMapRef } from './map-consumer';
 import TileLayer from './tile-layer';
@@ -13,11 +15,12 @@ import MarkerClusterGroup from './marker-cluster-group';
 import 'leaflet/dist/leaflet.css';
 import './css/base-map.less';
 
-import { LocationType } from './types/location';
-import { BaseProps } from '../../types/base-props';
-import { ProjectSettingProps } from '../../types/project-setting-props';
-import { MarkerProps } from './types/marker-props';
-import { MapPropsType } from './types/index';
+import type { BaseProps } from '../../types/base-props';
+import type { ProjectSettingProps } from '../../types/project-setting-props';
+import type { MarkerProps } from './types/marker-props';
+import type { MapPropsType } from './types/index';
+import type { LocationType } from './types/location';
+import type { BoundsParams } from './types/bounds';
 
 export type BaseMapWidgetProps =
   BaseProps &
@@ -53,8 +56,7 @@ export function BaseMap({
   categorize = undefined,
   
   // ToDo: search = false,
-	zoomposition = 'bottomleft',
-	disableDefaultUI = true,
+
   clustering = {
     isActive: true,
   },
@@ -70,24 +72,58 @@ export function BaseMap({
   let [mapId] = useState(`${parseInt(Math.random() * 1e8 as any as string)}`);
   let [mapRef] = useMapRef(mapId);
 
+  const setBoundsAndCenter = useCallback( (points: BoundsParams) => {
+
+	  let poly = [];
+    if (points && Array.isArray(points)) {
+	    points.forEach(function(point: any) {
+		    if (point._latlng) {
+			    point = point._latlng;
+		    } else if (point.location) {
+			    point = point.location.coordinates ? { lat: point.location.coordinates[0], lng: point.location.coordinates[1] }  : point.location;
+		    } else if (point.position) {
+			    point = point.position.coordinates ? { lat: point.position.coordinates[0], lng: point.position.coordinates[1] }  : point.position;
+		    }
+        if (point.lat) {
+		      poly.push(point);
+        }
+	    })
+    }
+
+    if (poly.length == 0) {
+      mapRef.panTo(new LatLng(center.lat, center.lng));
+      return;
+    }
+
+    if (poly.length == 1) {
+      mapRef.panTo(new LatLng(poly[0].lat, poly[0].lng));
+      return;
+    }
+
+	  let bounds = latLngBounds(poly);
+	  mapRef.fitBounds(bounds);
+
+  }, [center, mapRef]);
+
   // map is ready
   useEffect(() => {
 		let event = new CustomEvent('osc-map-is-ready', { detail: { id: mapId } });
 		window.dispatchEvent(event);
-  }, []);
+  }, [mapId]);
 
 	// auto zoom and center on init
   useEffect(() => {
     if (!mapRef) return;
 	  if (autoZoomAndCenter) {
-		  let centerOn = ( autoZoomAndCenter == 'area' && area ) || ( currentMarkers?.length && currentMarkers );
-      if (!centerOn) {
-				centerOn = area;
+      if(autoZoomAndCenter == 'area' && area) {
+        return setBoundsAndCenter(area);
       }
-		  if (centerOn) {
-			  setBoundsAndCenter( centerOn );
-		  }
+      if(currentMarkers?.length) {
+			  return setBoundsAndCenter(currentMarkers);
+      }
+      return setBoundsAndCenter(area);
 	  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapRef]);
 
   // update center
@@ -96,7 +132,7 @@ export function BaseMap({
 		if (center) {
 			setBoundsAndCenter([center]);
 		}
-  }, [center]);
+  }, [center, setBoundsAndCenter, mapRef]);
 
   // markers
   useEffect(() => {
@@ -151,40 +187,8 @@ export function BaseMap({
 
     setCurrentMarkers(result);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [markers]);
-
-  async function setBoundsAndCenter(points: LocationType[] | MarkerProps[]) {
-
-	  let poly = [];
-    if (points && Array.isArray(points)) {
-	    points.forEach(function(point: any) {
-		    if (point._latlng) {
-			    point = point._latlng;
-		    } else if (point.location) {
-			    point = point.location.coordinates ? { lat: point.location.coordinates[0], lng: point.location.coordinates[1] }  : point.location;
-		    } else if (point.position) {
-			    point = point.position.coordinates ? { lat: point.position.coordinates[0], lng: point.position.coordinates[1] }  : point.position;
-		    }
-        if (point.lat) {
-		      poly.push(point);
-        }
-	    })
-    }
-
-    if (poly.length == 0) {
-      mapRef.panTo(new LatLng(center.lat, center.lng));
-      return;
-    }
-
-    if (poly.length == 1) {
-      mapRef.panTo(new LatLng(poly[0].lat, poly[0].lng));
-      return;
-    }
-
-	  let bounds = latLngBounds(poly);
-	  mapRef.fitBounds(bounds);
-
-  }
 
   let clusterMarkers = [];
 
@@ -200,7 +204,7 @@ export function BaseMap({
   return (
 
 
-    <MapContainer id={`osc-base-map-${mapId}`} className="osc-base-map-widget-container" center={[center.lat, center.lng]} zoom={zoom} scrollWheelZoom={scrollWheelZoom}>
+    <MapContainer center={[center.lat, center.lng]} className="osc-base-map-widget-container" id={`osc-base-map-${mapId}`} scrollWheelZoom={scrollWheelZoom} zoom={zoom}>
 
       <MapConsumer mapId={mapId}/>
 
@@ -208,17 +212,17 @@ export function BaseMap({
 
       { area && area.length ? <Area area={area} areaPolygonStyle={areaPolygonStyle}/> : null }
 
-      {currentMarkers.map((data, i) => {
+      {currentMarkers.map((data) => {
         if (data.isClustered) {
           clusterMarkers.push(data);
         } else {
-          return (<Marker {...props} {...data} key={`marker-${i}`}/>);
+          return (<Marker {...props} {...data} key={`marker-${data.markerId || data.lat+data.lng}`}/>);
         }
       })}
 
-      <MarkerClusterGroup {...props} categorize={categorize} {...clustering} markers={clusterMarkers}/>
+      <MarkerClusterGroup {...props} {...clustering} categorize={categorize} markers={clusterMarkers}/>
 
-      <MapEventsListener onClick={onClick} area={area}/>
+      <MapEventsListener area={area} onClick={onClick} />
 
       {props.children}
 
@@ -228,8 +232,8 @@ export function BaseMap({
 }
 
 type MapEventsListenerProps = {
-  area: LocationType[],
-  onClick: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void,
+  area?: Array<LocationType>,
+  onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void,
 };
 
 function MapEventsListener({

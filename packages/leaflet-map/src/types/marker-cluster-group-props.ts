@@ -1,15 +1,13 @@
-import { MarkerCluster } from 'leaflet';
-import { MarkerProps } from './marker-props';
+import type { MarkerCluster } from 'leaflet';
+import type { MarkerProps } from './marker-props';
+import type { CategorizeType } from './categorize';
 
 export type MarkerClusterGroupProps = {
   isActive?: boolean,
   maxClusterRadius?: number,
   showCoverageOnHover?: boolean,
-  categorize?: {
-    categorizeByField: string,
-    categories: any, // ToDo: nog uit te werken
-  },
+  categorize?: CategorizeType,
   iconCreateFunction?: ( cluster: MarkerCluster, categorize: any ) => any, // TODO
-  markers?: MarkerProps[],
+  markers?: Array<MarkerProps>,
 };
 

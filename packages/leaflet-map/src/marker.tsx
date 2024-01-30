@@ -1,6 +1,6 @@
-import { LeafletMouseEvent } from 'leaflet';
+import type { LeafletMouseEvent } from 'leaflet';
 import { Marker as LeafletMarker, useMap } from 'react-leaflet'
-import { MarkerProps } from './types/marker-props';
+import type { MarkerProps } from './types/marker-props';
 import { addToClassname, removeFromClassName } from '../../lib/class-name.js';
 import MarkerIcon from './marker-icon';
 
@@ -63,10 +63,10 @@ export default function Marker({
   return isVisible && ( location?.lat || lat ) ? (
     <LeafletMarker
     {...props}
-    position={location ? [ location.lat, location.lng ] : [ lat, lng ]}
-    icon={icon}
     draggable={!!draggable}
     eventHandlers={eventHandlers}
+    icon={icon}
+    position={location ? [ location.lat, location.lng ] : [ lat, lng ]}
     />
   ) : null;
   

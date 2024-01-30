@@ -1,7 +1,7 @@
-import { LocationType } from './location';
+import type { LocationType } from './location';
 
 export type AreaProps = {
-  area: LocationType[],
+  area: Array<LocationType>,
   areaPolygonStyle?: any,
 };
 

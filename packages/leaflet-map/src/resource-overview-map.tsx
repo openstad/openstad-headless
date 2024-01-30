@@ -1,15 +1,16 @@
-import { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
 import {loadWidget} from '../../lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
 
 import 'leaflet/dist/leaflet.css';
 import './css/base-map.less';
 
-import { BaseProps } from '../../types/base-props';
-import { ProjectSettingProps } from '../../types/project-setting-props';
-import { MarkerProps } from './types/marker-props';
-import { MarkerIconType } from './types/marker-icon';
-import { MapPropsType } from './types/index';
+import type { BaseProps } from '../../types/base-props';
+import type { ProjectSettingProps } from '../../types/project-setting-props';
+import type { MarkerProps } from './types/marker-props';
+import type { MarkerIconType } from './types/marker-icon';
+import type { MapPropsType } from './types/index';
+import type { CategoriesType } from './types/categorize';
 
 import { BaseMap } from './base-map';
 
@@ -22,11 +23,7 @@ export type ResourceOverviewMapWidgetProps =
   };
 
 export function ResourceOverviewMap({
-  markers = undefined,
-  markerIcon = undefined,
-  center = undefined,
   categorize = undefined,
-
   ...props
 }: PropsWithChildren<ResourceOverviewMapWidgetProps>) {
 
@@ -40,8 +37,8 @@ export function ResourceOverviewMap({
     projectId: props.projectId,
   });
 
-  let categorizeByField = categorize?.categorizeByField
-  let categories;
+  let categorizeByField = categorize?.categorizeByField;;
+  let categories: CategoriesType;
   if (categorizeByField) {
     const [tags] = datastore.useTags({
       projectId: props.projectId,
@@ -49,7 +46,7 @@ export function ResourceOverviewMap({
     });
     if (tags.length) {
       categories = {};
-      tags.map(tag =>{
+      tags.map((tag:any) => { // TODO: types/Tag does not exist yet
         categories[ tag.name ] = {
           color: tag.backgroundColor,
           icon: tag.mapIcon,
@@ -58,7 +55,7 @@ export function ResourceOverviewMap({
     }
   }
 
-  let currentMarkers = resources?.map( resource => { // TODO: resource typing
+  let currentMarkers = resources?.map( (resource:any) => { // TODO: types/resource does not exist yet
     let marker:MarkerProps = {
       location: resource.location? {
 	      lat: resource.location.lat,
@@ -66,7 +63,7 @@ export function ResourceOverviewMap({
       } : undefined,
     }
     if (marker.location && categorizeByField && categories) {
-      let tag = resource.tags?.find( tag => tag.type == categorizeByField ); // // TODO: tag typing
+      let tag = resource.tags?.find( (t:any) => t.type == categorizeByField ); // TODO: types/Tag does not exist yet
       if (tag) {
         marker.data = { [categorizeByField]: tag.name };
       }
@@ -75,7 +72,7 @@ export function ResourceOverviewMap({
   });
 
   return (
-    <BaseMap {...props} markers={currentMarkers} categorize={{ categorizeByField, categories }}/>
+    <BaseMap {...props} categorize={{ categories, categorizeByField }} markers={currentMarkers}/>
   );
 
 }

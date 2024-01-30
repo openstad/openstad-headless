@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { polygon } from 'leaflet';
 import { Polygon } from 'react-leaflet';
-import { AreaProps } from './types/area-props';
-import { LocationType } from './types/location';
+import type { AreaProps } from './types/area-props';
+import type { LocationType } from './types/location';
 
-function createCutoutPolygon(area: LocationType[]) {
+function createCutoutPolygon(area: Array<LocationType>) {
 
 	// polygon must defined from the south west corner to work with the outer box
 	let bounds = polygon(area).getBounds();
@@ -30,7 +30,7 @@ function createCutoutPolygon(area: LocationType[]) {
 	// TODO: should be calculated dynamically from the center point
 	let delta1: number = 0.01;
 	let delta2: number = 5;
-	let outerBox: LocationType[] = [
+	let outerBox: Array<LocationType> = [
 		{lat: -90 + delta2, lng:  -180 + delta1 },
 		{lat: -90 + delta2, lng:     0          },
 		{lat: -90 + delta2, lng:   180 - delta1 },
@@ -51,7 +51,7 @@ function createCutoutPolygon(area: LocationType[]) {
 
 }
 
-export function isPointInArea(area: LocationType[], point: LocationType) {
+export function isPointInArea(area: Array<LocationType>, point: LocationType) {
 
   if (!point) return false;
   if (!area) return true;
@@ -87,12 +87,13 @@ export function Area({
   let [currentArea, setCurrentArea] = useState(area);
   
   useEffect(() => {
-    let polygon = createCutoutPolygon(currentArea);
-    setCurrentArea(polygon)
+    let poly = createCutoutPolygon(currentArea);
+    setCurrentArea(poly)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [area]);
   
   return (
-    <Polygon {...props} positions={currentArea} pathOptions={areaPolygonStyle}/>
+    <Polygon {...props} pathOptions={areaPolygonStyle} positions={currentArea}/>
   );
 
 }

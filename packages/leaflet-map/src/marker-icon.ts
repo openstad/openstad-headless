@@ -1,5 +1,5 @@
 import { Icon as LeafletIcon, divIcon as LeafletDivIcon } from 'leaflet';
-import { MarkerIconType } from './types/marker-icon';
+import type { MarkerIconType } from './types/marker-icon';
 
 export default function MarkerIcon({
   icon = undefined,

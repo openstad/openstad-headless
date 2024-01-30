@@ -1,4 +1,5 @@
-import { divIcon, point, MarkerCluster } from 'leaflet';
+import { divIcon, point } from 'leaflet';
+import type { MarkerCluster } from 'leaflet';
 
 export default function amapsCreateClusterIcon(
   cluster: MarkerCluster,

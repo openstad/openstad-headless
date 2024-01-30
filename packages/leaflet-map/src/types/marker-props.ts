@@ -1,6 +1,6 @@
-import { LeafletMouseEvent } from 'leaflet';
-import { LocationType } from './location';
-import { MarkerIconType } from './marker-icon';
+import type { LeafletMouseEvent } from 'leaflet';
+import type { LocationType } from './location';
+import type { MarkerIconType } from './marker-icon';
 
 export type MarkerProps = {
   markerId?: string,
