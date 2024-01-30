@@ -85,11 +85,11 @@ module.exports = function( db, sequelize, DataTypes ) {
 		hooks: {
 
       afterCreate: function (instance, options) {
-        seqnr.renumber({ model: db.Tag, where: { type: instance.type } });
+        seqnr.renumber({ model: db.Tag, where: { type: instance.type, projectId: instance.projectId } });
       },
 
       afterUpdate: function (instance, options) {
-        seqnr.renumber({ model: db.Tag, where: { type: instance.type } });
+        seqnr.renumber({ model: db.Tag, where: { type: instance.type, projectId: instance.projectId } });
       },
 
 		},
