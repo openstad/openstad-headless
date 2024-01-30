@@ -10,3 +10,5 @@ export { Icon } from './icon';
 export { Select } from './select';
 export { MultiSelect } from './multiselect';
 export { Card } from './card';
+export { Dialog } from './dialog';
+export { Carousel } from './carousel';

@@ -1,10 +1,11 @@
 import './resource-overview.css';
-import React from 'react';
-import { Banner, Icon } from '@openstad-headless/ui/src';
+import React, { useRef, useCallback } from 'react';
+import { Banner, Carousel, Icon } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import { Image } from '@openstad-headless/ui/src';
+import { Dialog } from '@openstad-headless/ui/src';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 import { Filters } from './filters/filters';
@@ -18,7 +19,8 @@ export type ResourceOverviewWidgetProps = BaseProps &
     renderHeader?: (resources?: Array<any>) => React.JSX.Element;
     renderItem?: (
       resource: any,
-      props: ResourceOverviewWidgetProps
+      props: ResourceOverviewWidgetProps,
+      onItemClick?: () => void
     ) => React.JSX.Element;
     resourceType?:
       | 'resource'
@@ -48,7 +50,6 @@ export type ResourceOverviewWidgetProps = BaseProps &
     textActiveSearch?: string;
     itemLink?: string;
     sorting: Array<{ value: string; label: string }>;
-
     displayTagFilters?: boolean;
     tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     displayTagGroupName?: boolean;
@@ -72,20 +73,11 @@ const defaultHeaderRenderer = (resources?: any) => {
 
 const defaultItemRenderer = (
   resource: any,
-  props: ResourceOverviewWidgetProps
+  props: ResourceOverviewWidgetProps,
+  onItemClick?: () => void
 ) => {
-  console.log({props})
   return (
-    <article
-      onClick={() => {
-        if (props.displayType === 'cardrow') {
-          if (!props.itemLink) {
-            console.error('Link to child resource is not set');
-          } else {
-            const childUrl = props.itemLink.replaceAll('[id]', resource.id);
-          }
-        }
-      }}>
+    <article onClick={() => onItemClick && onItemClick()}>
       <Image
         src={resource.images?.at(0)?.src || ''}
         imageFooter={
@@ -131,50 +123,90 @@ const defaultItemRenderer = (
 };
 
 function ResourceOverview({
-
   renderHeader = defaultHeaderRenderer,
   renderItem = defaultItemRenderer,
   allowFiltering = true,
   ...props
 }: ResourceOverviewWidgetProps) {
-  console.log({p: props});
   const datastore = new DataStore({
     projectId: props.projectId,
     api: props.api,
   });
+  const [open, setOpen] = React.useState(false);
   const [resources] = datastore.useResources({ ...props });
 
+ 
+
+  const onResourceClick = useCallback(
+    (resource: any) => {
+      if (props.displayType === 'cardrow') {
+        if (!props.itemLink) {
+          console.error('Link to child resource is not set');
+        } else {
+          location.href = props.itemLink.replaceAll('[id]', resource.id);
+        }
+      }
+
+      if (props.displayType === 'cardgrid') {
+        setOpen(true);
+      }
+    },
+    [props.displayType, props.itemLink]
+  );
+
+  const filterNeccesary =
+    allowFiltering &&
+    (props.displaySearch || props.displaySorting || props.displayTagFilters);
+
   return (
-    <div className="osc">
-      {renderHeader()}
+    <>
+      <Dialog
+        open={open}
+        onOpenChange={setOpen}
+        children={
+          <Carousel items={resources && resources.length > 0? resources: []} itemRenderer={(item) =>  <>
+            <h1>{item.title}</h1>
+            <p>{item.summary}</p>
+            <p>{item.description}</p>
+          </>}>
 
-      <Spacer size={2} />
+          </Carousel>
+        }
+      />
 
-      <section
-        className={`osc-resource-overview-content ${
-          !allowFiltering ? 'full' : ''
-        }`}>
-        {allowFiltering && datastore ? (
-          <Filters
-            {...props}
-            projectId={props.projectId}
-            resources={resources}
-            onUpdateFilter={resources.filter}
-          />
-        ) : null}
+      <div className="osc">
+        {renderHeader()}
 
-        <section className="osc-resource-overview-resource-collection">
-          {resources &&
-            resources.map((resource: any) => {
-              return (
-                <React.Fragment key={`resource-item-${resource.title}`}>
-                  {renderItem(resource, props)}
-                </React.Fragment>
-              );
-            })}
+        <Spacer size={2} />
+
+        <section
+          className={`osc-resource-overview-content ${
+            !filterNeccesary ? 'full' : ''
+          }`}>
+          {filterNeccesary && datastore ? (
+            <Filters
+              {...props}
+              projectId={props.projectId}
+              resources={resources}
+              onUpdateFilter={resources.filter}
+            />
+          ) : null}
+
+          <section className="osc-resource-overview-resource-collection">
+            {resources &&
+              resources.map((resource: any) => {
+                return (
+                  <React.Fragment key={`resource-item-${resource.title}`}>
+                    {renderItem(resource, props, () => {
+                      onResourceClick(resource);
+                    })}
+                  </React.Fragment>
+                );
+              })}
+          </section>
         </section>
-      </section>
-    </div>
+      </div>
+    </>
   );
 }
 
