@@ -38,6 +38,7 @@ function Agenda(props: AgendaWidgetProps) {
         {props?.items &&
           props?.items?.length > 0 &&
           props.items
+            .filter((item) => item.active)
             ?.sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger))
             .map((item) => (
               <div key={item.trigger} className="osc-agenda-item">

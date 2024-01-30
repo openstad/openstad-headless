@@ -1,12 +1,10 @@
 import './resource-detail.css';
-import React from 'react';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
-import { Spacer } from '@openstad-headless/ui/src';
-import { Image } from '@openstad-headless/ui/src';
+import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { Image, Spacer } from '@openstad-headless/ui/src';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
-import { loadWidget } from '@openstad-headless/lib/load-widget';
 export type ResourceDetailWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
@@ -75,13 +73,13 @@ function ResourceDetail(props: ResourceDetailWidgetProps) {
                   </span>
                 </div>
               )}
-              {props.displayDate && resource.publishDateHumanized && (
+              {props.displayDate && resource.startDateHumanized && (
                 <div>
                   <h6 className="osc-resource-detail-content-item-title">
                     Datum
                   </h6>
                   <span className="osc-resource-detail-content-item-text">
-                    {resource.publishDateHumanized}
+                    {resource.startDateHumanized}
                   </span>
                 </div>
               )}

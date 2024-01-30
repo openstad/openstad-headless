@@ -567,24 +567,6 @@ module.exports = function (db, sequelize, DataTypes) {
 
       api: {},
 
-      mapMarkers: {
-        attributes: [
-          'id',
-          'status',
-          'location',
-        ]
-        ,
-        where: sequelize.or(
-          {
-            status: ['OPEN', 'ACCEPTED', 'BUSY']
-          },
-          sequelize.and(
-            {status: 'CLOSED'},
-            sequelize.literal(`DATEDIFF(NOW(), resource.updatedAt) <= 90`)
-          )
-        )
-      },
-
       // vergelijk getRunning()
       selectRunning: {
         where: sequelize.or(

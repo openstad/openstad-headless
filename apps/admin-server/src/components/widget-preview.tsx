@@ -10,6 +10,7 @@ type Props = {
     | 'likes'
     | 'comments'
     | 'enquete'
+    | 'rawresource'
     | 'resourceoverview'
     | 'resourcedetail'
     | 'resourceform'
