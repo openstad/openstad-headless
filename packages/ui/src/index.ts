@@ -1,4 +1,5 @@
 export { Button, SecondaryButton, GhostButton } from './button';
+export { IconButton } from './iconbutton';
 export { Banner } from './banner';
 export { Input } from './input';
 export { Checkbox } from './checkbox';

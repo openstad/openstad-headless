@@ -4,8 +4,12 @@ import './index.css';
 import React, { PropsWithChildren } from 'react';
 import { GhostButton } from '../button';
 import { Icon } from '../icon';
+import { IconButton } from '../iconbutton';
 
-export const Dialog = ({ children, ...props }: PropsWithChildren<RadixDialog.DialogProps>) => (
+export const Dialog = ({
+  children,
+  ...props
+}: PropsWithChildren<RadixDialog.DialogProps>) => (
   <RadixDialog.Root {...props}>
     {/* <RadixDialog.Trigger asChild>
       <button className="Button violet">Edit profile</button>
@@ -13,13 +17,17 @@ export const Dialog = ({ children, ...props }: PropsWithChildren<RadixDialog.Dia
     <RadixDialog.Portal>
       <RadixDialog.Overlay className="osc-DialogOverlay" />
       <RadixDialog.Content className="osc osc-DialogContent">
-      <RadixDialog.Close asChild>
-          <GhostButton className="osc-IconButton" aria-label="Close">
-          <Icon icon="ri-thumb-down-line" variant="small" />
-          </GhostButton>
-        </RadixDialog.Close>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <RadixDialog.Close asChild>
+            <IconButton
+              className="ghost secondary"
+              icon="ri-close-line"
+              aria-label="Close"
+            />
+          </RadixDialog.Close>
+        </div>
+
         {children}
-    
       </RadixDialog.Content>
     </RadixDialog.Portal>
   </RadixDialog.Root>

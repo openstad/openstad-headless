@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../index.css';
 import './index.css';
-import { Icon } from '../icon';
+import { IconButton } from '../iconbutton';
 
 type Props = {
   items: Array<any>;
@@ -23,15 +23,23 @@ export function Carousel({
 
   return (
     <div {...props} className={`osc ${props.className} osc-carousel`}>
-      <button disabled={index === 0} onClick={() => setIndex(index - 1)}>
-        Vorige
-      </button>
+      <div className="osc-carousel-navigation-button-wrapper">
+        <IconButton
+          className='secondary round'
+          icon="ri-arrow-left-s-line"
+          disabled={index === 0}
+          onClick={() => setIndex(index - 1)}
+        />
+      </div>
+
       <div>{itemRenderer(items.at(index))}</div>
-      <button
-        disabled={index === items.length - 1}
-        onClick={() => setIndex(index + 1)}>
-        Volgende
-      </button>
+
+      <IconButton
+          className='secondary round'
+          icon="ri-arrow-right-s-line"
+          disabled={index === items.length - 1}
+          onClick={() => setIndex(index + 1)}
+        />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import './resource-overview.css';
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useState } from 'react';
 import { Banner, Carousel, Icon } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
@@ -11,6 +11,7 @@ import { ProjectSettingProps } from '../../types/project-setting-props';
 import { Filters } from './filters/filters';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { elipsize } from '../../lib/ui-helpers';
+import { GridderResourceDetail } from './gridder-resource-detail';
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -126,6 +127,7 @@ function ResourceOverview({
   renderHeader = defaultHeaderRenderer,
   renderItem = defaultItemRenderer,
   allowFiltering = true,
+  displayType = 'cardrow',
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -134,24 +136,25 @@ function ResourceOverview({
   });
   const [open, setOpen] = React.useState(false);
   const [resources] = datastore.useResources({ ...props });
-
- 
+  const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
 
   const onResourceClick = useCallback(
-    (resource: any) => {
-      if (props.displayType === 'cardrow') {
+    (resource: any, index: number) => {
+      if (displayType === 'cardrow') {
         if (!props.itemLink) {
           console.error('Link to child resource is not set');
         } else {
-          location.href = props.itemLink.replaceAll('[id]', resource.id);
+          console.log('Test');
+          location.href = props.itemLink.replace('[id]', resource.id);
         }
       }
 
-      if (props.displayType === 'cardgrid') {
+      if (displayType === 'cardgrid') {
+        setResourceDetailIndex(index);
         setOpen(true);
       }
     },
-    [props.displayType, props.itemLink]
+    [displayType, props.itemLink]
   );
 
   const filterNeccesary =
@@ -164,13 +167,12 @@ function ResourceOverview({
         open={open}
         onOpenChange={setOpen}
         children={
-          <Carousel items={resources && resources.length > 0? resources: []} itemRenderer={(item) =>  <>
-            <h1>{item.title}</h1>
-            <p>{item.summary}</p>
-            <p>{item.description}</p>
-          </>}>
-
-          </Carousel>
+          <Carousel
+            startIndex={resourceDetailIndex}
+            items={resources && resources.length > 0 ? resources : []}
+            itemRenderer={(item) => (
+              <GridderResourceDetail resource={item} />
+            )}></Carousel>
         }
       />
 
@@ -194,11 +196,11 @@ function ResourceOverview({
 
           <section className="osc-resource-overview-resource-collection">
             {resources &&
-              resources.map((resource: any) => {
+              resources.map((resource: any, index: number) => {
                 return (
                   <React.Fragment key={`resource-item-${resource.title}`}>
                     {renderItem(resource, props, () => {
-                      onResourceClick(resource);
+                      onResourceClick(resource, index);
                     })}
                   </React.Fragment>
                 );

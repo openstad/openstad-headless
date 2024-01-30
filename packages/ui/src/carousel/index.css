@@ -1,7 +1,11 @@
 .osc-carousel {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
-
     gap: 1rem;
+}
+
+.osc-carousel-navigation-button-wrapper {
+    flex-grow: 0;
+    flex-basis: 0;
 }
