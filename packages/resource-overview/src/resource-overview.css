@@ -33,7 +33,36 @@
 .osc-resource-overview-content.full .osc-resource-overview-resource-collection {  
   grid-column-start: span 3;
   grid-template-columns: 1fr 1fr 1fr;
+}
 
+@media only screen and (max-width: 768px) {
+  .osc-resource-overview-content {
+    grid-template-columns: 1fr;
+    gap: 2rem 0rem;
+  }
+
+  .osc-resource-overview-content .osc-resource-overview-resource-collection {
+    grid-template-columns: 1fr;
+  }
+  
+  .osc-resource-overview-content.full .osc-resource-overview-resource-collection {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1360px) {
+  .osc-resource-overview-content {
+    grid-template-columns: 1fr;
+    gap: 2rem 0rem;
+  }
+
+  .osc-resource-overview-content .osc-resource-overview-resource-collection {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .osc-resource-overview-content.full .osc-resource-overview-resource-collection {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .osc-resource-overview-content-item-status {
