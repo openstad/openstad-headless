@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import DropdownList from '@/components/dropdown-list';
 import { Button } from '@/components/ui/button';
 import useIdpUser from '@/hooks/use-idpuser'
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   email: z.string().email().optional(),
@@ -26,7 +27,7 @@ export default function CreateUserProjects() {
   let projectRolesEdited: Array<ProjectRole> = [];
   const { data, isLoading } = projectListSwr();
   const { data:user, isLoading:userLoading } = useUser();
-  const {data: rolesByProject, createUser, updateUser} = useIdpUser(user.idpUser.identifier, user.idpUser.provider)
+  const { data: rolesByProject, createUser, updateUser } = useIdpUser(user?.idpUser?.identifier, user?.idpUser?.provider)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -58,15 +59,18 @@ export default function CreateUserProjects() {
   };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log({projectRolesNewlyAdded})
     
-    projectRolesEdited.forEach(rbp => {
-      updateUser(rbp.id, rbp.projectId, rbp.role)
-    })
-
-    projectRolesNewlyAdded.forEach(rbp => {
-      createUser(user.email, rbp.projectId, rbp.role)
-    })
+    try {
+      projectRolesEdited.forEach(rbp => {
+        updateUser(rbp.id, rbp.projectId, rbp.role)
+      })
+  
+      projectRolesNewlyAdded.forEach(rbp => {
+        createUser(user.email, rbp.projectId, rbp.role)
+      })
+    } catch (error) {
+      toast.error('Er is iets mis gegaan...')
+    }
   }
 
   if (!data || !rolesByProject) return null;

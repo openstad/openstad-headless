@@ -18,6 +18,9 @@ export default function useUsers() {
         email: email,
       }),
     });
+    const data = await res.json();
+    usersSwr.mutate([...usersSwr.data, data]);
+    return data;
   }
 
   return { ...usersSwr, createUser };

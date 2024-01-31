@@ -33,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -56,8 +57,17 @@ export function CreateUserDialog() {
 
   if (!data) return null;
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    createUser(values.email, values.projectId);
+  async function onSubmit(values: FormData) {
+    try {
+      const user = await createUser(values.email, values.projectId);
+      setOpen(false);
+      if (user) {
+        toast.success('Gebruiker aangemaakt!');
+        router.push(router.asPath + `/${user.id}`);
+      }
+    } catch (error) {
+      toast.error('Gebruiker kon niet worden aangemaakt!');
+    }
   }
 
   return (
