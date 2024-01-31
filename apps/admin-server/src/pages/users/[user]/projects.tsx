@@ -34,8 +34,8 @@ export default function CreateUserProjects() {
   });
 
   const addProject = (projectId: string, role: string) => {
-    const roleByProject = rolesByProject.find((obj) => obj.projectId == projectId);
-    const existingInEditedProjectIndex = rolesByProject.findIndex((obj) => obj.projectId == projectId)
+    const roleByProject = rolesByProject.find((obj: { projectId: string; }) => obj.projectId == projectId);
+    const existingInEditedProjectIndex = rolesByProject.findIndex((obj: { projectId: string; }) => obj.projectId == projectId)
 
     if (existingInEditedProjectIndex >= 0) {
       if (role === '0') {
@@ -84,7 +84,7 @@ export default function CreateUserProjects() {
             </div>
             <ul>
               {data.map((project: any) => {
-                const roleByProject = rolesByProject.find(r => r.projectId === project.id)
+                const roleByProject = rolesByProject.find((r: { projectId: any; }) => r.projectId === project.id)
                 return (
                   <li key={project.id} className="grid grid-cols-1 lg:grid-cols-2 items-center py-3 h-fit hover:bg-secondary-background hover:cursor-pointer border-b border-border">
                     <Paragraph className="truncate">{project.name}</Paragraph>
