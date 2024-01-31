@@ -10,8 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@openstad-headless/data-store": "^1.0.0",
-    "@openstad-headless/ui": "^1.0.0",
+    "@openstad-headless/data-store": "file:../data-store",
+    "@openstad-headless/ui": "file:../ui",
+    "@openstad-headless/lib": "file:../lib",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rooks": "^7.14.1"

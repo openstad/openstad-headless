@@ -1,13 +1,15 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
-import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
 
 // Can we type config better? Or should we define types for all widgetConfigs and use them as seperate props. A.k.a. likeConifg?:LikeConfig, argConfig?: ArgConfig
 type Props = {
   type:
+    | 'agenda'
     | 'likes'
     | 'comments'
+    | 'rawresource'
     | 'resourceoverview'
     | 'resourcedetail'
     | 'resourceform'
@@ -15,7 +17,8 @@ type Props = {
     | 'resourcesmap'
     | 'map'
     | 'keuzewijzer'
-    | 'counter';
+    | 'counter'
+    | 'datecountdownbar'
   config?: any;
   projectId: string;
 };
