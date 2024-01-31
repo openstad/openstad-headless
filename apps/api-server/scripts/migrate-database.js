@@ -25,7 +25,6 @@ const umzug = new Umzug({
 		  console.log('No migrations found');
 	  }
   } else {
-    console.log('UP');
     let migrations = await umzug.up();
     if( !migrations.length ) {
 		  console.log('No new migrations');
