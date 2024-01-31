@@ -19,6 +19,7 @@ export type CounterProps = {
   opinion?: string;
   amount?: number;
   id?: number;
+  choiceGuideId?: string;
 }
 
 function Counter({
@@ -28,6 +29,7 @@ function Counter({
   opinion = '',
   amount = 0,
   id = 0,
+  choiceGuideId = '1',
   ...props
 }: CounterWidgetProps) {
   let amountDisplayed = 0;
@@ -60,11 +62,10 @@ function Counter({
     sentiment: opinion
   })
 
-  const [submissions] = datastore.useSubmissions({
-    projectId: props.projectId
+  const [results] = datastore.useChoiceGuideResults({
+    projectId: props.projectId,
+    choiceGuideId: choiceGuideId
   });
-
-  console.log(opinion)
 
   if (counterType === 'resource') {
     amountDisplayed = resources.length;
@@ -97,7 +98,7 @@ function Counter({
   }
 
   if (counterType === 'submission') {
-    amountDisplayed = submissions.length;
+    amountDisplayed = results.length;
   }
 
   return (

@@ -7,6 +7,7 @@ import user from './user';
 import userVote from './user-vote';
 import submissions from './submissions';
 import commentsByProject from './commentsByProject';
+import choiceGuideResults from './choiceGuideResults';
 
 const windowGlobal = typeof window !== "undefined" ? window : {};
 
@@ -22,6 +23,10 @@ function API(props = {}) {
   self.projectId = props.projectId || 0;
 
   self.fetch = fetchx.bind(self);
+
+  self.choiceGuideResults = {
+    fetch: choiceGuideResults.fetch.bind(self)
+  }
 
   self.comments = {
     fetch: comments.fetch.bind(self),

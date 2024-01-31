@@ -11,6 +11,8 @@ import { Separator } from '@/components/ui/separator';
 import { CounterWidgetProps } from '@openstad/counter/src/counter';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useRouter } from 'next/router';
+import useChoiceGuides from '@/hooks/use-choiceguides';
 
 const formSchema = z.object({
   label: z.string(),
@@ -18,15 +20,22 @@ const formSchema = z.object({
   counterType: z.enum(['resource', 'vote', 'votedUsers', 'static', 'argument', 'submission']),
   opinion: z.string().optional(),
   amount: z.number().optional(),
-  id: z.number().optional()
+  id: z.coerce.number().optional(),
+  choiceGuideId: z.string()
 })
 type Formdata = z.infer<typeof formSchema>
 
 export default function CounterDisplay(props: CounterWidgetProps & EditFieldProps<CounterWidgetProps>) {
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
+  const router = useRouter();
+
+  const projectId = router.query.project as string;
+  const { data } = useChoiceGuides(projectId as string);
+
   function onSubmit(values: Formdata) {
-    props.updateConfig({...props, ...values})
+    console.log(data)
+    // props.updateConfig({...props, ...values})
   }
 
   const form = useForm<Formdata>({
@@ -36,7 +45,8 @@ export default function CounterDisplay(props: CounterWidgetProps & EditFieldProp
       label: props?.label || 'Hoeveelheid',
       url: props?.url || '',
       opinion: props?.opinion || '',
-      id: props?.id || 0
+      id: props?.id || 0,
+      choiceGuideId: props?.choiceGuideId || '1'
     }
   })
 
@@ -58,7 +68,7 @@ export default function CounterDisplay(props: CounterWidgetProps & EditFieldProp
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
-                    onFieldChange(field.name, e.target.value)
+                    onFieldChange(field.name, e.target.value);
                   }}
                 />
               </FormControl>
@@ -115,7 +125,7 @@ export default function CounterDisplay(props: CounterWidgetProps & EditFieldProp
           )}
         />
 
-        { props?.counterType === "argument" || props.counterType === "submission" ? (
+        { props?.counterType === "argument" ? (
           <FormField
             control={form.control}
             name="id"
@@ -188,7 +198,37 @@ export default function CounterDisplay(props: CounterWidgetProps & EditFieldProp
           />
         ) : null }
 
-        <Button type='submit'>Opslaan</Button>
+        { props.counterType === "submission" ? (
+          <FormField
+            control={form.control}
+            name="choiceGuideId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gewenste keuzewijzer</FormLabel>
+                <Select onValueChange={(e) => {
+                  field.onChange(e);
+                  props.onFieldChanged(field.name, e);
+                }} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecteer uw gewenste keuzewijzer" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {data?.map((result: any) => (
+                      <SelectItem key={result.id} value={`${result.id}`}>
+                        {result.id}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+        ) : null }
+        <Button className='w-fit col-span-full' type='submit'>
+          Opslaan
+        </Button>
       </form>
     </Form>
   )
