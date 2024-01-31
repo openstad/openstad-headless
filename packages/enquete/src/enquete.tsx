@@ -24,8 +24,6 @@ export type EnqueteWidgetProps = BaseProps &
       trigger: string;
       title?: string;
       description?: string;
-      question?: string;
-      questionSubtitle?: string;
       questionType?: string;
       images?: Array<{
         src: string;
@@ -65,7 +63,7 @@ function Enquete(props: EnqueteWidgetProps) {
               <div key={item.trigger} className="osc-enquete-item">
                 <div className="osc-enquete-item-content">
                   {item.title && <h5>{item.title}</h5>}
-                  <p>{item.description}</p>
+                  {item.description && <p>{item.description}</p>}
                   {item.images && item.images?.length > 0 && (
                     <Image
                       src={item.images?.at(0)?.src || ''}
@@ -88,10 +86,6 @@ function Enquete(props: EnqueteWidgetProps) {
                   {item.questionType === 'open' && (
                     <textarea title={item.title} rows={5} />
                   )}
-                  <>
-                    {item.question && <h5>{item.question}</h5>}
-                    {item.questionSubtitle && <p>{item.questionSubtitle}</p>}
-                  </>
                   {item.options &&
                     item.options?.length > 0 &&
                     item.questionType === 'images' && (

@@ -30,8 +30,6 @@ const formSchema = z.object({
   trigger: z.string(),
   title: z.string().optional(),
   description: z.string().optional(),
-  question: z.string().optional(),
-  questionSubtitle: z.string().optional(),
   questionType: z.string(),
   options: z
     .array(
@@ -75,8 +73,6 @@ export default function WidgetEnqueteItems(
           }`,
           title: values.title,
           description: values.description,
-          question: values.question,
-          questionSubtitle: values.questionSubtitle,
           questionType: values.questionType,
           options: values.options || [],
         },
@@ -142,8 +138,6 @@ export default function WidgetEnqueteItems(
     trigger: string;
     title?: string;
     description?: string;
-    question?: string;
-    questionSubtitle?: string;
     questionType?: string;
     images?: Array<{
       src: string;
@@ -177,8 +171,6 @@ export default function WidgetEnqueteItems(
         trigger: selectedItem.trigger,
         title: selectedItem.title || '',
         description: selectedItem.description || '',
-        question: selectedItem.question || '',
-        questionSubtitle: selectedItem.questionSubtitle || '',
         questionType: selectedItem.questionType || '',
         options: selectedItem.options || [],
       });
@@ -333,7 +325,7 @@ export default function WidgetEnqueteItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => setItem(item)}>
-                              {`${item.title || item.question}`}
+                              {`${item.title || 'Geen titel'}`}
                             </span>
                             <span className="gap-2 py-3 px-2">
                               <X
@@ -529,7 +521,7 @@ export default function WidgetEnqueteItems(
                       name="title"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Titel/Hoofdvraag</FormLabel>
+                          <FormLabel>Titel/Vraag</FormLabel>
                           <Input {...field} />
                           <FormMessage />
                         </FormItem>
@@ -542,28 +534,6 @@ export default function WidgetEnqueteItems(
                         <FormItem>
                           <FormLabel>Beschrijving</FormLabel>
                           <Textarea rows={6} {...field} />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="question"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Vraag</FormLabel>
-                          <Input {...field} />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="questionSubtitle"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Vraag extra tekst</FormLabel>
-                          <Input {...field} />
                           <FormMessage />
                         </FormItem>
                       )}
@@ -583,6 +553,9 @@ export default function WidgetEnqueteItems(
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
+                              <SelectItem value="none">
+                                Geen antwoordopties
+                              </SelectItem>
                               <SelectItem value="images">
                                 Twee antwoordopties met afbeeldingen
                               </SelectItem>
