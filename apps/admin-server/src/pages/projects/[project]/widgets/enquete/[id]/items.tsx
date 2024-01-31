@@ -37,7 +37,7 @@ const formSchema = z.object({
         trigger: z.string(),
         key: z.string(),
         titles: z.array(z.string()),
-        images: z.array(z.object({ src: z.string() })),
+        images: z.array(z.object({ image: z.any(), src: z.string() })),
       })
     )
     .optional(),
@@ -52,6 +52,7 @@ export default function WidgetEnqueteItems(
   const [selectedItem, setItem] = useState<Item | null>(null);
   const [selectedOption, setOption] = useState<Option | null>(null);
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
+  const [file, setFile] = useState<File>();
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
@@ -360,11 +361,45 @@ export default function WidgetEnqueteItems(
                       <>
                         <FormField
                           control={form.control}
+                          name={`options.${options.length - 1}.images.0.image`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Afbeelding 1</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="file"
+                                  {...field}
+                                  onChange={(e) => setFile(e.target.files?.[0])}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
                           name={`options.${options.length - 1}.titles.0`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Titel afbeelding 1</FormLabel>
                               <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`options.${options.length - 1}.images.1.image`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Afbeelding 2</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="file"
+                                  {...field}
+                                  onChange={(e) => setFile(e.target.files?.[0])} // Dit moet nog aangepast worden naar een array van files
+                                />
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}

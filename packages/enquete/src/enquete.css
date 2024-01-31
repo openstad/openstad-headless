@@ -48,24 +48,21 @@
   padding-left: 0.2rem;
 }
 .osc .osc-enquete-item-checkbox {
-  /* width: initial; */
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-
-  /* Custom checkbox styling */
-  width: 1rem; /* Width of the checkbox */
-  height: 1rem; /* Height of the checkbox */
-  background-color: var(--osc-card); /* Background color of the checkbox */
-  border: 1px solid var(--osc-foreground); /* Border of the checkbox */
+  width: 1rem;
+  height: 1rem;
+  background-color: var(--osc-card);
+  border: 1px solid var(--osc-foreground);
   border-radius: 0;
-  cursor: pointer; /* Change cursor to pointer on hover */
-  display: inline-block; /* Allows setting width and height */
+  cursor: pointer;
+  display: inline-block;
   border-color:  var(--osc-foreground); 
 }
 .osc .osc-enquete-item-checkbox:checked {
-  background-color:  var(--osc-secondary); /* Background color when checked */
-  border-color:  var(--osc-secondary); /* Border color when checked */
+  background-color:  var(--osc-secondary);
+  border-color:  var(--osc-secondary);
 }
 
 .osc .osc-enquete-item-radio {
@@ -76,11 +73,7 @@
   border: none;
 }
 
-/* .osc input[type="radio"].osc-enquete-item-radio{
-  display: none;
-} */
 .osc .osc-enquete-item-radio::before {
-  /* Custom checkbox styling */
   display: flex;
   align-items: center;
   content: "";
@@ -93,13 +86,22 @@
 }
 .osc .osc-enquete-item-radio:checked::before {
   content: "✓";
-  /* font-family: 'lucida grande'; */
   color: white;
-  background-color:  var(--osc-secondary); /* Background color when checked */
-  border-color: var(--osc-secondary); /* Border color when checked */
+  background-color:  var(--osc-secondary); 
+  border-color: var(--osc-secondary);
   font-size: 0.7rem;
-  /* line-height: 1rem; */
   justify-content: center;
   display: flex;
   align-items: center;
+}
+
+.osc .osc-enquete-submit {
+  width: -moz-fit-content;
+  width: fit-content;
+  background-color: var(--osc-secondary);
+  align-self: flex-end;
+}
+
+.osc .osc-enquete-submit:hover {
+  background-color: var(--osc-secondary-hover);
 }

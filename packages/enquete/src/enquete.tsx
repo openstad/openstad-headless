@@ -1,7 +1,10 @@
 import './enquete.css';
+import { EnquetePropsType } from './types/';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import {
+  Banner,
+  Button,
   Icon,
   Image,
   ImageSelect,
@@ -13,40 +16,28 @@ import { useState } from 'react';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 export type EnqueteWidgetProps = BaseProps &
-  ProjectSettingProps & {
-    projectId?: string;
-  } & {
-    displayTitle?: boolean;
-    title?: string;
-    displayDescription?: boolean;
-    description?: string;
-    items?: Array<{
-      trigger: string;
-      title?: string;
-      description?: string;
-      questionType?: string;
-      images?: Array<{
-        src: string;
-      }>;
-      options: Array<{
-        trigger: string;
-        key: string;
-        titles: Array<string>;
-        images: Array<{
-          src: string;
-        }>;
-      }>;
-    }>;
-  };
+  ProjectSettingProps &
+  EnquetePropsType;
 
 function Enquete(props: EnqueteWidgetProps) {
   const [value, setValue] = useState<string>('3');
 
   return (
     <div className="osc">
-      <Spacer size={2} />
-
       <section className="osc-enquete">
+        <Banner className="big">
+          <h6>Inloggen om deel te nemen.</h6>
+          <Spacer size={1} />
+          <Button
+            type="button"
+            onClick={() => {
+              document.location.href = props.login?.url || '';
+            }}>
+            Inloggen
+          </Button>
+        </Banner>
+        <Spacer size={2} />
+
         <div className="osc-enquete-item-content">
           {props.displayTitle && props.title && <h4>{props.title}</h4>}
           <div className="osc-enquete-item-description">
@@ -134,6 +125,10 @@ function Enquete(props: EnqueteWidgetProps) {
                 </div>
               </div>
             ))}
+        <Spacer size={2} />
+        <Button type="button" className="osc-enquete-submit">
+          Versturen
+        </Button>
       </section>
     </div>
   );
