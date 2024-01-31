@@ -54,7 +54,7 @@ export default function WidgetResourceOverviewGeneral(
     defaultValues: {
       resourceType: props?.resourceType || 'resource',
       displayType: props?.displayType || 'cardrow',
-      itemLink: props?.itemLink || '/resources/[id]'
+      itemLink: props?.itemLink || '/resources/[id]',
     },
   });
 
@@ -72,7 +72,12 @@ export default function WidgetResourceOverviewGeneral(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Resource type</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    props.onFieldChanged(field.name, value);
+                  }}
+                  value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Resource" />
@@ -100,7 +105,12 @@ export default function WidgetResourceOverviewGeneral(
             render={({ field }) => (
               <FormItem className="col-span-full">
                 <FormLabel>Display type</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    props.onFieldChanged(field.name, value);
+                  }}
+                  value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Cards op een row - Linkt naar items op een andere pagina." />
@@ -122,7 +132,7 @@ export default function WidgetResourceOverviewGeneral(
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="itemLink"
@@ -133,7 +143,7 @@ export default function WidgetResourceOverviewGeneral(
                 </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder='Bijv: /resources/[id]'
+                    placeholder="Bijv: /resources/[id]"
                     type="text"
                     {...field}
                     onChange={(e) => {

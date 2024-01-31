@@ -1,5 +1,5 @@
 import './resource-overview.css';
-import React, { useRef, useCallback, useState } from 'react';
+import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { Banner, Carousel, Icon } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
@@ -55,6 +55,9 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayTagFilters?: boolean;
     tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     displayTagGroupName?: boolean;
+    displayBanner?: boolean;
+    itemsPerPage?: number;
+    textResults?: string;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -125,25 +128,31 @@ const defaultItemRenderer = (
 };
 
 function ResourceOverview({
-  renderHeader = defaultHeaderRenderer,
   renderItem = defaultItemRenderer,
   allowFiltering = true,
   displayType = 'cardrow',
+  displayBanner = true,
+  renderHeader = defaultHeaderRenderer,
+  itemsPerPage = 20,
+  textResults = 'Dit zijn de zoekresultaten voor [search]',
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
     projectId: props.projectId,
     api: props.api,
   });
-  const [open, setOpen] = React.useState(false);
-  const [resources] = datastore.useResources({ ...props });
-  const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
-  
-  const [currentUser, currentUserError, currentUserIsLoading] =
-  datastore.useCurrentUser({ ...props });
-  const isModerator = hasRole(currentUser, 'moderator');
 
-  console.log({currentUser})
+  const [open, setOpen] = React.useState(false);
+  const [resourcesWithPagination] = datastore.useResources({
+    ...props,
+    itemsPerPage,
+  });
+
+  const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
+  const resources = resourcesWithPagination.records || [];
+
+  const [currentUser] = datastore.useCurrentUser({ ...props });
+  const isModerator = hasRole(currentUser, 'moderator');
 
   const onResourceClick = useCallback(
     (resource: any, index: number) => {
@@ -151,7 +160,6 @@ function ResourceOverview({
         if (!props.itemLink) {
           console.error('Link to child resource is not set');
         } else {
-          console.log('Test');
           location.href = props.itemLink.replace('[id]', resource.id);
         }
       }
@@ -186,9 +194,7 @@ function ResourceOverview({
                   try {
                     resource
                       .delete(resource.id)
-                      .then(() => {
-                        setOpen(false);
-                      })
+                      .then(() => setOpen(false))
                       .catch((e: any) => {
                         console.error(e);
                       });
@@ -202,8 +208,7 @@ function ResourceOverview({
       />
 
       <div className="osc">
-        {renderHeader()}
-
+        {displayBanner ? renderHeader() : null}
         <Spacer size={2} />
 
         <section
@@ -213,6 +218,7 @@ function ResourceOverview({
           {filterNeccesary && datastore ? (
             <Filters
               {...props}
+              itemsPerPage={itemsPerPage}
               projectId={props.projectId}
               resources={resources}
               onUpdateFilter={resources.filter}

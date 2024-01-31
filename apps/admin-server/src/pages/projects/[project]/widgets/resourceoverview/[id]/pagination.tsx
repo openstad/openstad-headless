@@ -11,50 +11,37 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  itemsPerPage: z.number(),
+  itemsPerPage: z.coerce.number(),
   textResults: z.string(),
 });
 
-export default function WidgetResourceOverviewPagination() {
+export default function WidgetResourceOverviewPagination(
+  props: ResourceOverviewWidgetProps &
+    EditFieldProps<ResourceOverviewWidgetProps>
+) {
   type FormData = z.infer<typeof formSchema>;
-  const category = 'pagination';
-
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig();
-
-  const defaults = useCallback(
-    () => ({
-      itemsPerPage: widget?.config?.[category]?.itemsPerPage || 24,
-      textResults: widget?.config?.[category]?.textResults || '',
-    }),
-    [widget?.config]
-  );
-
   async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could falset update', error);
-    }
+    props.updateConfig({ ...props, ...values });
   }
+
+  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      itemsPerPage: props?.itemsPerPage || 30,
+      textResults: props?.textResults || 'Dit zijn de zoekresultaten voor [search]',
+    },
   });
-
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -71,7 +58,13 @@ export default function WidgetResourceOverviewPagination() {
               <FormItem>
                 <FormLabel>Hoeveelheid items per pagina</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} />
+                  <Input type="number" {...field} 
+                    placeholder="30"
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -84,7 +77,14 @@ export default function WidgetResourceOverviewPagination() {
               <FormItem>
                 <FormLabel>Tekst voor de hoeveelheid van resultaten</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input 
+                   placeholder="Bijv: Resultaat voor de zoek opdracht [search]"
+                   type="text"
+                   {...field}
+                   onChange={(e) => {
+                     onFieldChange(field.name, e.target.value);
+                     field.onChange(e);
+                   }}/>
                 </FormControl>
                 <FormMessage />
               </FormItem>

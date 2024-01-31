@@ -9,11 +9,11 @@ import { ResourceOverviewWidgetProps } from '../resource-overview';
 //Todo correctly type resources. Will be possible when the datastore is correctly typed
 
 type Filter = {
-  tags: {};
-  search: {
-    text: string;
-  };
+  tags: { [key: string]: any };
+  search: { text: string };
   sort: string;
+  page: number;
+  pageSize: number;
 };
 
 type Props = {
@@ -25,7 +25,6 @@ export function Filters({
   resources,
   sorting = [],
   tagGroups = [],
-
   onUpdateFilter,
   ...props
 }: Props) {
@@ -34,16 +33,13 @@ export function Filters({
     api: props.api,
   });
 
-  const defaultFilter: {
-    tags: { [key: string]: any };
-    search: { text: string };
-    sort: string;
-  } = { tags: {}, search: { text: '' }, sort: '' };
+  const defaultFilter: Filter = { tags: {}, search: { text: '' }, sort: '', page: 0, pageSize: props.itemsPerPage || 20};
+
   tagGroups.forEach((tGroup) => {
     defaultFilter.tags[tGroup.type] = null;
   });
 
-  const [filter, setFilter] = useState(defaultFilter);
+  const [filter, setFilter] = useState<Filter>(defaultFilter);
   const [selectedOptions, setSelected] = useState<{ [key: string]: any }>({});
 
   // Standard and dynamic refs used for resetting

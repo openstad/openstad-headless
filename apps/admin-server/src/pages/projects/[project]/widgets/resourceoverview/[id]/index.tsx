@@ -20,13 +20,14 @@ import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
 
 export const getServerSideProps = withApiUrl;
 
-export default function WidgetResourceOverview({
-  apiUrl,
-}:WithApiUrlProps) {
+export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project as string;
@@ -39,6 +40,7 @@ export default function WidgetResourceOverview({
 
   const totalPropPackage = {
     ...widget?.config,
+    ...previewConfig,
     updateConfig: (config: ResourceOverviewWidgetProps) =>
       updateConfig({ ...widget.config, ...config }),
 
@@ -85,33 +87,37 @@ export default function WidgetResourceOverview({
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
-            <TabsContent value="general" className="p-0">
-              <WidgetResourceOverviewGeneral {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="display" className="p-0">
-              <WidgetResourceOverviewDisplay {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="button" className="p-0">
-              <WidgetResourceOverviewButton {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="sorting" className="p-0">
-              <WidgetResourceOverviewSorting {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="pagination" className="p-0">
-              <WidgetResourceOverviewPagination {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="search" className="p-0">
-              <WidgetResourceOverviewSearch {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="tags" className="p-0">
-              <WidgetResourceOverviewTags {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="include" className="p-0">
-              <WidgetResourceOverviewInclude {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="publish" className="p-0">
-              <WidgetPublish apiUrl={apiUrl} />
-            </TabsContent>
+            {previewConfig ? (
+              <>
+                <TabsContent value="general" className="p-0">
+                  <WidgetResourceOverviewGeneral {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="display" className="p-0">
+                  <WidgetResourceOverviewDisplay {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="button" className="p-0">
+                  <WidgetResourceOverviewButton {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="sorting" className="p-0">
+                  <WidgetResourceOverviewSorting {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="pagination" className="p-0">
+                  <WidgetResourceOverviewPagination {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="search" className="p-0">
+                  <WidgetResourceOverviewSearch {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="tags" className="p-0">
+                  <WidgetResourceOverviewTags {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="include" className="p-0">
+                  <WidgetResourceOverviewInclude {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="publish" className="p-0">
+                  <WidgetPublish apiUrl={apiUrl} />
+                </TabsContent>
+              </>
+            ) : null}
           </Tabs>
 
           <div className="py-6 mt-6 bg-white rounded-md">

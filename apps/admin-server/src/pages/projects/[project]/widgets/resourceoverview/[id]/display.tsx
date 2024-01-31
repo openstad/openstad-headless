@@ -19,6 +19,7 @@ import * as z from 'zod';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 
 const formSchema = z.object({
+  displayBanner: z.boolean(),
   displayTitle: z.boolean(),
   titleMaxLength: z.coerce.number(),
   displayDescription: z.boolean(),
@@ -50,6 +51,7 @@ export default function WidgetResourceOverviewDisplay(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
+      displayBanner: props?.displayBanner || false,
       displayTitle: props?.displayTitle || false,
       titleMaxLength: props?.titleMaxLength || 20,
       displayDescription: props?.displayDescription || false,
@@ -74,6 +76,18 @@ export default function WidgetResourceOverviewDisplay(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="displayBanner"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Banner weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="displayTitle"
@@ -229,7 +243,7 @@ export default function WidgetResourceOverviewDisplay(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Hoeveelheid stemmen weergeven (voor Gridder)
+                  Hoeveelheid stemmen weergeven
                 </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />

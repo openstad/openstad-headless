@@ -7,9 +7,7 @@ import {
 
 const config: ResourceOverviewWidgetProps = {
   displayType: 'cardgrid',
-  tagGroups: [
-    { type: 'theme', label: 'Thema', multiple: false },
-  ],
+  tagGroups: [{ type: 'theme', label: 'Thema', multiple: false }],
   displayTitle: true,
   displayDescription: true,
   displaySummary: true,
@@ -22,7 +20,8 @@ const config: ResourceOverviewWidgetProps = {
   displayTagFilters: true,
   displaySearch: true,
   displaySorting: true,
-  allowFiltering:true,
+  allowFiltering: true,
+  displayBanner: true,
   api: {
     url: import.meta.env.VITE_API_URL,
   },
