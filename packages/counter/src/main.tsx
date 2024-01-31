@@ -4,7 +4,7 @@ import { CounterWidgetProps, Counter } from './counter.js';
 
 const config: CounterWidgetProps = {
   counterType: 'submission',
-  label: 'Counter 1',
+  label: 'Hoeveelheid',
   url: 'https://www.google.com',
   opinion: '',
 };

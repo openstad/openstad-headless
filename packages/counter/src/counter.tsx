@@ -4,7 +4,6 @@ import './counter.css'
 import DataStore from '@openstad-headless/data-store/src'
 import { BaseProps } from '../../types/base-props'
 import { ProjectSettingProps } from '../../types/project-setting-props'
-import SessionStorage from '@openstad-headless/lib/session-storage'
 
 export type CounterWidgetProps = BaseProps &
   CounterProps &
@@ -24,7 +23,7 @@ export type CounterProps = {
 
 function Counter({
   counterType = 'vote',
-  label = 'Counter 1',
+  label = 'Hoeveelheid',
   url = 'https://www.google.com',
   opinion = '',
   amount = 0,

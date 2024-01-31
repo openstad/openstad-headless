@@ -19,7 +19,7 @@ const formSchema = z.object({
   url: z.string(),
   counterType: z.enum(['resource', 'vote', 'votedUsers', 'static', 'argument', 'submission']),
   opinion: z.string().optional(),
-  amount: z.number().optional(),
+  amount: z.coerce.number().optional(),
   id: z.coerce.number().optional(),
   choiceGuideId: z.string()
 })
@@ -34,8 +34,7 @@ export default function CounterDisplay(props: CounterWidgetProps & EditFieldProp
   const { data } = useChoiceGuides(projectId as string);
 
   function onSubmit(values: Formdata) {
-    console.log(data)
-    // props.updateConfig({...props, ...values})
+    props.updateConfig({...props, ...values})
   }
 
   const form = useForm<Formdata>({
@@ -43,7 +42,7 @@ export default function CounterDisplay(props: CounterWidgetProps & EditFieldProp
     defaultValues: {
       counterType: props?.counterType || 'resource',
       label: props?.label || 'Hoeveelheid',
-      url: props?.url || '',
+      url: props?.url || 'https://www.google.com',
       opinion: props?.opinion || '',
       id: props?.id || 0,
       choiceGuideId: props?.choiceGuideId || '1'
@@ -193,6 +192,7 @@ export default function CounterDisplay(props: CounterWidgetProps & EditFieldProp
                     }}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
