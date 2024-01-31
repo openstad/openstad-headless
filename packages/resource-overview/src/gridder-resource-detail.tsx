@@ -65,6 +65,7 @@ export const GridderResourceDetail = ({
                 if(!isModerator) {
                     document.location.href = loginUrl;
                 } else {
+                    if(confirm("Deze actie verwijderd de resource"))
                     onRemoveClick && onRemoveClick(resource);
                 }
               }}>
