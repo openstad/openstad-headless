@@ -20,8 +20,8 @@ router
 
       try {
 
-        console.log(req.body);
-        console.log(req.authConfig);
+        // console.log(req.body);
+        // console.log(req.authConfig);
 
         let iss = req.body.iss;
         if (iss !== req.authConfig.serverUrl) throw Error('Unknown auth server');
@@ -222,7 +222,8 @@ router
 
     let returnTo = req.query.returnTo;
     returnTo = returnTo || '/?jwt=[[jwt]]';
-    let redirectUrl = returnTo ? returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]' : false;
+    if (!returnTo.match(/\[\[jwt\]\]/) ) returnTo = returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]';
+    let redirectUrl = returnTo;
     redirectUrl = redirectUrl || (req.query.returnTo ? req.query.returnTo + (req.query.returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]' : false);
     redirectUrl = redirectUrl || '/';
 

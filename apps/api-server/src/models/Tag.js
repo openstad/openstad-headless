@@ -35,6 +35,39 @@ module.exports = function( db, sequelize, DataTypes ) {
       default: 10,
 		},
 
+		type: {
+			type         : DataTypes.STRING,
+			allowNull    : true,
+			set          : function( text ) {
+				this.setDataValue('type', text?sanitize.safeTags(text.trim()):null);
+			}
+		},
+
+    label: {
+			type         : DataTypes.STRING,
+			allowNull    : true,
+    },
+
+    color: {
+			type         : DataTypes.STRING,
+			allowNull    : true,
+    },
+
+    backgroundColor: {
+			type         : DataTypes.STRING,
+			allowNull    : true,
+    },
+
+    mapIcon: {
+			type         : DataTypes.TEXT,
+			allowNull    : true,
+    },
+
+    listIcon: {
+			type         : DataTypes.TEXT,
+			allowNull    : true,
+    },
+
 		extraData: getExtraDataConfig(DataTypes.JSON, 'tags')
 	}, {
 
@@ -88,7 +121,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 	}
 
 	Tag.associate = function( models ) {
-		this.belongsToMany(models.Idea, { through: 'idea_tags', constraints: false });
+		this.belongsToMany(models.Resource, { through: 'resource_tags', constraints: false });
 		this.belongsTo(models.Project, { onDelete: 'CASCADE' });
 	}
 

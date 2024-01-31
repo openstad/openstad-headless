@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -32,11 +32,14 @@ export default function WidgetResourceOverviewButton() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    textHoverImage: widget?.config?.[category]?.textHoverImage || '',
-    textVoteButton: widget?.config?.[category]?.textVoteButton || '',
-    fieldUsedForTitle: widget?.config?.[category]?.fieldUsedForTitle || '',
-  });
+  const defaults = useCallback(
+    () => ({
+      textHoverImage: widget?.config?.[category]?.textHoverImage || '',
+      textVoteButton: widget?.config?.[category]?.textVoteButton || '',
+      fieldUsedForTitle: widget?.config?.[category]?.fieldUsedForTitle || '',
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -53,7 +56,7 @@ export default function WidgetResourceOverviewButton() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -86,7 +89,7 @@ export default function WidgetResourceOverviewButton() {
               <FormItem>
                 <FormLabel>
                   Tekst die weergegeven wordt in de stem knoppen van een open
-                  idee
+                  resource
                 </FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -100,7 +103,7 @@ export default function WidgetResourceOverviewButton() {
             name="fieldUsedForTitle"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Titel tekst van een idee</FormLabel>
+                <FormLabel>Titel tekst van een resource</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>

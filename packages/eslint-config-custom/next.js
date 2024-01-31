@@ -23,7 +23,7 @@ module.exports = {
     'eslint-config-turbo',
   ].map(require.resolve),
   parserOptions: {
-    project,
+    project: ['../configs/tsconfig.eslint.json'],
   },
   globals: {
     React: true,
@@ -32,7 +32,7 @@ module.exports = {
   settings: {
     'import/resolver': {
       typescript: {
-        project,
+        project: ['../configs/tsconfig.eslint.json'],
       },
     },
   },

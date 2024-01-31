@@ -19,14 +19,14 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
   display: z.enum(['simple', 'full']),
   name: z.string(),
-  submissionField: z.enum(['ideaType', 'theme']),
+  submissionField: z.enum(['resourceType', 'theme']),
   filterLabel: z.string(),
   mobileCase: z.boolean(),
 });
@@ -42,12 +42,15 @@ export default function WidgetMapGeneral() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    display: widget?.config?.[category]?.display || 'full',
-    name: widget?.config?.[category]?.name || 'Inzending',
-    submissionField: widget?.config?.[category]?.submissionField || 'theme',
-    filterLabel: widget?.config?.[category]?.filterLabel || "Alle thema's",
-  });
+  const defaults = useCallback(
+    () => ({
+      display: widget?.config?.[category]?.display || 'full',
+      name: widget?.config?.[category]?.name || 'Inzending',
+      submissionField: widget?.config?.[category]?.submissionField || 'theme',
+      filterLabel: widget?.config?.[category]?.filterLabel || "Alle thema's",
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -64,7 +67,7 @@ export default function WidgetMapGeneral() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -100,7 +103,7 @@ export default function WidgetMapGeneral() {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Naam van het idee</FormLabel>
+                <FormLabel>Naam van het resource</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -121,7 +124,7 @@ export default function WidgetMapGeneral() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="ideaType">Idee type</SelectItem>
+                    <SelectItem value="resourceType">Resource type</SelectItem>
                     <SelectItem value="theme">Thema</SelectItem>
                   </SelectContent>
                 </Select>
@@ -148,9 +151,11 @@ export default function WidgetMapGeneral() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Opent op mobiel de lijst van ideeën over de kaart heen?
+                  Opent op mobiel de lijst van resources over de kaart heen?
                 </FormLabel>
-                <Select onValueChange={(e: string) => field.onChange(e === 'false')} value={field.value ? 'true' : 'false'}>
+                <Select
+                  onValueChange={(e: string) => field.onChange(e === 'false')}
+                  value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Nee" />

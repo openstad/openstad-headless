@@ -18,7 +18,7 @@ module.exports = async function seed(config, db) {
       name: 'Admin',
       title: 'Admin',
       config: {
-        ideas: {
+        resources: {
           extraData: {
             images: {
               type: 'arrayOfStrings',

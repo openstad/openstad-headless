@@ -247,7 +247,10 @@ service.createClient = async function({ authConfig, project }) {
 service.updateClient = async function({ authConfig, project }) {
 
   let clientId = authConfig.clientId;
-  if (!clientId) throw Error('OpenStad.service.updateClient: clientId not found');
+  if (!clientId) {
+    console.log('OpenStad.service.updateClient: clientId not found')
+    return; // this step is optional; log but do not throw errors
+  }
 
   // sync only configuration that is used by the OpenStad auth server
   let newConfig = {

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
@@ -31,15 +31,18 @@ const formSchema = z.object({
 export default function CreateUserGeneral() {
   const { data, isLoading, updateUser } = useUser();
 
-  const defaults = () => ({
-    email: data?.email,
-    nickName: data?.nickName || '',
-    name: data?.name || '',
-    phoneNumber: data?.phoneNumber || '',
-    address: data?.address || '',
-    city: data?.city || '',
-    postcode: data?.postcode || '',
-  });
+  const defaults = useCallback(
+    () => ({
+      email: data?.email,
+      nickName: data?.nickName || '',
+      name: data?.name || '',
+      phoneNumber: data?.phoneNumber || '',
+      address: data?.address || '',
+      city: data?.city || '',
+      postcode: data?.postcode || '',
+    }),
+    [data]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -48,7 +51,7 @@ export default function CreateUserGeneral() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [data]);
+  }, [form, defaults]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     updateUser(values);

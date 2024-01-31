@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -43,16 +43,19 @@ export default function WidgetMapReaction() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    reactionsAvailable:
-      widget?.config?.[category]?.reactionsAvailable || 'open',
-    displayReactions: widget?.config?.[category]?.displayReactions || false,
-    title: widget?.config?.[category]?.title || '',
-    textEmptyInput: widget?.config?.[category]?.textEmptyInput || '',
-    textAboveInput: widget?.config?.[category]?.textAboveInput || '',
-    idNonActiveReactions:
-      widget?.config?.[category]?.idNonActiveReactions || '',
-  });
+  const defaults = useCallback(
+    () => ({
+      reactionsAvailable:
+        widget?.config?.[category]?.reactionsAvailable || 'open',
+      displayReactions: widget?.config?.[category]?.displayReactions || false,
+      title: widget?.config?.[category]?.title || '',
+      textEmptyInput: widget?.config?.[category]?.textEmptyInput || '',
+      textAboveInput: widget?.config?.[category]?.textAboveInput || '',
+      idNonActiveReactions:
+        widget?.config?.[category]?.idNonActiveReactions || '',
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -69,7 +72,7 @@ export default function WidgetMapReaction() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -149,7 +152,7 @@ export default function WidgetMapReaction() {
             render={({ field }) => (
               <FormItem className="col-span-full">
                 <FormLabel>
-                  IDs van ideeën waar reacties niet actief voor zijn.
+                  IDs van resources waar reacties niet actief voor zijn.
                 </FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -167,18 +170,18 @@ export default function WidgetMapReaction() {
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="... open voor alle ideeën" />
+                      <SelectValue placeholder="... open voor alle resources" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="open">
-                      ... open voor alle ideeën.
+                      ... open voor alle resources.
                     </SelectItem>
                     <SelectItem value="closed">
-                      ... gesloten voor alle ideeën.
+                      ... gesloten voor alle resources.
                     </SelectItem>
                     <SelectItem value="limited">
-                      ... open voor sommige ideeën.
+                      ... open voor sommige resources.
                     </SelectItem>
                   </SelectContent>
                 </Select>

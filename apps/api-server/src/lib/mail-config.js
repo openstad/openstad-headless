@@ -22,7 +22,7 @@ class MailConfig {
       self.config = merge.recursive(true, defaultProjectConfig, config || {});
 
       // Exceptions from local config because field names don't match
-      self.config.cms.hostname = self.config.hostname || self.config.title;
+      self.config.hostname = self.config.hostname || self.config.title;
       self.config.title = self.config.projectName || self.config.title;
 
       self.config = merge.recursive(self.config, project.config || {});
@@ -42,50 +42,50 @@ class MailConfig {
   }
 
   getCmsUrl() {
-    return this.config.cms.url;
+    return this.config.url;
   }
 
   getCmsHostname() {
-    return this.config.cms.hostname;
+    return this.config.hostname;
   }
 
-  getResourceConfig(resourceType) {
-    return this.config[resourceType] || {};
+  getResourceConfig() {
+    console.log(self.config);
+    return this.config.resources || {};
   }
 
-  getResourceFeedbackEmail(resourceType) {
-    return this.getResourceConfig(resourceType).feedbackEmail || {};
+  getResourceFeedbackEmail() {
+    return this.getResourceConfig().feedbackEmail || {};
   }
 
-  getResourceConceptEmail(resourceType) {
-    return this.getResourceConfig(resourceType).conceptEmail || {};
+  getResourceConceptEmail() {
+    return this.getResourceConfig().conceptEmail || {};
   }
 
-  getResourceConceptToPublishedEmail(resourceType) {
-    return this.getResourceConfig(resourceType).conceptToPublishedEmail || {};
+  getResourceConceptToPublishedEmail() {
+    return this.getResourceConfig().conceptToPublishedEmail || {};
   }
 
-  getFeedbackEmailFrom(resourceType) {
-    resourceType = resourceType || 'ideas';
-    return this.getResourceFeedbackEmail(resourceType).from || config.mail.from;
+  getFeedbackEmailFrom() {
+    return this.getResourceFeedbackEmail().from || config.mail.from;
   }
 
-  getFeedbackEmailInzendingPath(resourceType) {
-    return this.getResourceFeedbackEmail(resourceType).inzendingPath;
+  getFeedbackEmailInzendingPath() {
+    return this.getResourceFeedbackEmail().inzendingPath;
   }
 
-  getResourceFeedbackEmailTemplate(resourceType) {
+  getResourceFeedbackEmailTemplate() {
     return (
-      this.getResourceFeedbackEmail(resourceType).template || 'No template'
+      this.getResourceFeedbackEmail().template || 'No template'
     );
   }
 
-  getResourceFeedbackEmailAttachments(resourceType) {
-    return this.getResourceFeedbackEmail(resourceType).attachments;
+  getResourceFeedbackEmailAttachments() {
+    return this.getResourceFeedbackEmail().attachments;
   }
 
-  getResourceFeedbackEmailSubject(resourceType) {
-    return this.getResourceFeedbackEmail(resourceType).subject;
+  getResourceFeedbackEmailSubject() {
+    return this.getResourceFeedbackEmail().subject;
   }
 
   getMailMethod() {

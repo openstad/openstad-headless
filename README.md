@@ -11,6 +11,7 @@ __All__
 - [Getting started (dockerized)](doc/getting-started.md)
 - [Setup](doc/setup.md)
 - [About databases](doc/databases.md)
+- [Deployment](doc/deployment.md)
 
 __API__
 - [API configuration](apps/api-server/doc/config.md)

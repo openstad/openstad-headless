@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import ResourceOverview from './resource-overview.js';
+import { ResourceOverview } from './resource-overview.js';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -19,7 +19,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           url: import.meta.env.VITE_API_URL,
         },
         projectId: import.meta.env.VITE_PROJECT_ID,
-        ideaId: import.meta.env.VITE_IDEA_ID,
+        resourceId: import.meta.env.VITE_RESOURCE_ID,
       }}
     />
   </React.StrictMode>

@@ -1,0 +1,213 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "openstad.auth.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "openstad.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ template "openstad.auth.fullname" . }}-deployment
+spec:
+  replicas: {{ .Values.auth.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.auth.label }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.auth.label }}
+    spec:
+      volumes:
+        - name: certs
+          secret:
+            secretName: openstad-auth-certificates
+      containers:
+      - name: {{ template "openstad.auth.fullname" . }}
+        image: {{ .Values.auth.deploymentContainer.image }}
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - mountPath: "/opt/openstad-headless/apps/auth-server/certs"
+            name: certs
+            readOnly: true
+        ports:
+            - name: http
+              containerPort: {{ .Values.auth.service.httpPort }}
+        env:
+          # HOSTING
+          - name: APP_URL
+            value: https://{{ template "openstad.auth.url" . }}
+
+          - name: PORT
+            value: "{{ .Values.auth.service.httpPort }}"
+
+          # MySQL DATABASE
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: openstad-db-credentials
+                key: username
+
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secret
+                key: mysql-password
+
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: openstad-db-credentials
+                key: hostname
+
+          - name: DB_PORT
+            valueFrom:
+              secretKeyRef:
+                name: openstad-db-credentials
+                key: hostport
+          
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: openstad-auth-db
+                key: database
+
+          # SMTP MAIL
+          - name: MAIL_SERVER_URL
+            valueFrom:
+              secretKeyRef:
+                key: host
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_SERVER_PORT
+            valueFrom:
+              secretKeyRef:
+                key: port
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_SERVER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: password
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_SERVER_USER_NAME
+            valueFrom:
+              secretKeyRef:
+                key: username
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_SERVER_SECURE
+            value: "{{ .Values.secrets.mail.auth.secure | default "yes" }}"
+
+          - name: EMAIL_ASSETS_URL
+            value: https://{{ template "openstad.auth.url" . }}/email
+
+          - name: FROM_NAME
+            value: {{ default .Values.auth.fromName "Openstad api" }}
+
+          - name: FROM_EMAIL
+            value: {{ or .Values.auth.fromEmail .Values.secrets.mail.auth.user }}
+
+          - name: AUTH_ADMIN_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                key: admin_client_id
+                name: {{ template "openstad.auth.secret.fullname" . }}
+
+          - name: AUTH_ADMIN_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: admin_client_secret
+                name: {{ template "openstad.auth.secret.fullname" . }}
+
+          - name: AUTH_FIRST_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                key: client_id
+                name: {{ template "openstad.auth.secret.fullname" . }}
+
+          - name: AUTH_FIRST_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: client_secret
+                name: {{ template "openstad.auth.secret.fullname" . }}
+
+          - name: AUTH_FIRST_LOGIN_CODE
+            valueFrom:
+              secretKeyRef:
+                key: first_login_token
+                name: {{ template "openstad.auth.secret.fullname" . }}
+
+          - name: SESSION_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: secret
+                name: openstad-session-secret
+          
+          - name: COOKIE_SECURE_OFF
+            value: "{{ .Values.auth.cookie.secureOff | default "no" }}"
+
+          - name: API_URL
+            value: https://{{ template "openstad.api.url" . }}
+
+          - name: ADMIN_URL
+            value: https://{{ template  "openstad.admin.url" . }}
+
+          - name: ALLOWED_ADMIN_DOMAINS
+            value: '["{{ template  "openstad.admin.url" . }}"]'
+
+          - name: NODE_ENV
+            value: production
+
+          {{- if .Values.auth.extraEnvVars }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.auth.extraEnvVars "context" $) | nindent 10 }}
+          {{- end }}
+
+        resources:
+{{ toYaml .Values.auth.resources | indent 12 }}
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.auth.service.httpPort }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.auth.service.httpPort }}
+          initialDelaySeconds: {{ .Values.auth.probe.liveness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.auth.probe.liveness.periodSeconds }}
+      initContainers:
+      - name: init-db-ready
+        image: {{ .Values.auth.deploymentContainer.image }}
+        command: ["/bin/bash", "-c"]
+        args:
+          - nc $DB_HOST $DB_PORT -z -w1 && npm run --prefix apps/auth-server migrate-database
+        env:
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: openstad-db-credentials
+                key: username
+
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secret
+                key: mysql-password
+
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: openstad-db-credentials
+                key: hostname
+
+          - name: DB_PORT
+            valueFrom:
+              secretKeyRef:
+                name: openstad-db-credentials
+                key: hostport
+
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: openstad-auth-db
+                key: database

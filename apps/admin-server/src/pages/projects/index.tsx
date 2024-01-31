@@ -6,21 +6,39 @@ import React from 'react';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { useRouter } from 'next/router';
 import projectListSwr from '../../hooks/use-project-list';
+import { signOut } from 'next-auth/react';
 
 export default function Projects() {
   const { data, isLoading, error } = projectListSwr();
   const router = useRouter();
 
-  if (!data) return null;
+  if (!data) return (
+    <div>
+      <PageLayout
+        pageHeader="Projects"
+        breadcrumbs={[
+          {
+            name: 'Projects',
+            url: '/projects',
+          },
+        ]}
+        action={
+          <Link href="/projects/create">
+            <Button variant="default" className="flex w-fit">
+              <Plus size="20" className="hidden lg:flex" />
+              Project toevoegen
+            </Button>
+          </Link>
+        }>
+      </PageLayout>
+    </div>
+  );
 
   const headers = [
     'Projectnaam',
-    'Data',
     'Issues',
-    'Status',
-    'Reacties',
     'Likes',
-    'Indiener',
+    'Reacties',
     'Resources',
     'Stemmen',
     'Einddatum',
@@ -64,28 +82,19 @@ export default function Projects() {
                     }}>
                     <Paragraph className="truncate">{project.name}</Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
-                      Data
+                      Geen
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
-                      Issues
+                      {project?.config?.resource?.enableLikes === true ? 'Aan' : 'Uit'}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
-                      Status
+                      {project?.config?.resource?.enableReactions === true ? 'Aan' : 'Uit'}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
-                      Reacties
+                      Open
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
-                      Likes
-                    </Paragraph>
-                    <Paragraph className="hidden lg:flex truncate">
-                      Indiener
-                    </Paragraph>
-                    <Paragraph className="hidden lg:flex truncate">
-                      Resources
-                    </Paragraph>
-                    <Paragraph className="hidden lg:flex truncate">
-                      Stemmen
+                      {project?.config?.votes?.isActive === true ? 'Aan' : 'Uit'}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate -mr-16">
                       {project?.config?.project?.endDate}

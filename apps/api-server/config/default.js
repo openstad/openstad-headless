@@ -16,7 +16,7 @@ let AUTH_PROVIDER_DEFAULT = process.env.AUTH_PROVIDER_DEFAULT; try { AUTH_PROVID
 let AUTH_PROVIDER_OPENSTAD = process.env.AUTH_PROVIDER_OPENSTAD; try { AUTH_PROVIDER_OPENSTAD = JSON.parse(AUTH_PROVIDER_OPENSTAD); } catch(err) {}
 let AUTH_PROVIDER_ANONYMOUS = process.env.AUTH_PROVIDER_ANONYMOUS; try { AUTH_PROVIDER_ANONYMOUS = JSON.parse(AUTH_PROVIDER_ANONYMOUS); } catch(err) {}
 let AUTH_FIXEDAUTHTOKENS = process.env.AUTH_FIXEDAUTHTOKENS  || process.env.API_AUTHORIZATION_FIXEDAUTHTOKENS; try { AUTH_FIXEDAUTHTOKENS = JSON.parse(AUTH_FIXEDAUTHTOKENS); } catch(err) {}
-let IDEAS_LOCATION = process.env.IDEAS_LOCATION; try { IDEAS_LOCATION = JSON.parse(IDEAS_LOCATION); } catch(err) {}
+let RESOURCES_LOCATION = process.env.RESOURCES_LOCATION; try { RESOURCES_LOCATION = JSON.parse(RESOURCES_LOCATION); } catch(err) {}
 
 // this value can be derived
 if (!process.env.DOMAIN && !process.env.API_DOMAIN) {
@@ -139,16 +139,16 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
   templateSource: process.env.TEMPLATE_SOURCE || 'https://cdn.jsdelivr.net/gh/Amsterdam/openstad-ecosystem-templates/site/index.json',
   ignoreBruteForceIPs: process.env.IGNORE_BRUTE_FORCE_IPS || ( process.env.IGNORE_BRUTE_FORCE_IP ? [process.env.IGNORE_BRUTE_FORCE_IP] : [] ),
   
-	ideas: {
-		descriptionMinLength: process.env.IDEAS_DESCRIPTION_MIN_LENGTH || 140,
-		descriptionMaxength: process.env.IDEAS_DESCRIPTION_MAXENGTH || 5000,
-		addNewIdeas: process.env.IDEAS_ADD_NEW_IDEAS || "open",
-		duration: process.env.IDEAS_DURATION || 90,
-		minimumYesVotes: process.env.IDEAS_MINIMUM_YES_VOTES || 100,
-		anonymizeThreshold: process.env.IDEAS_ANONYMIZE_THRESHOLD || 180,
-		commentVoteThreshold: process.env.IDEAS_COMMENT_VOTE_THRESHOLD || 0,
-    location: IDEAS_LOCATION || {
-      isMandatory: process.env.IDEAS_LOCATION_IS_MANDATORY || false,
+	resources: {
+		descriptionMinLength: process.env.RESOURCES_DESCRIPTION_MIN_LENGTH || 140,
+		descriptionMaxength: process.env.RESOURCES_DESCRIPTION_MAXENGTH || 5000,
+		addNewResources: process.env.RESOURCES_ADD_NEW_RESOURCES || "open",
+		duration: process.env.RESOURCES_DURATION || 90,
+		minimumYesVotes: process.env.RESOURCES_MINIMUM_YES_VOTES || 100,
+		anonymizeThreshold: process.env.RESOURCES_ANONYMIZE_THRESHOLD || 180,
+		commentVoteThreshold: process.env.RESOURCES_COMMENT_VOTE_THRESHOLD || 0,
+    location: RESOURCES_LOCATION || {
+      isMandatory: process.env.RESOURCES_LOCATION_IS_MANDATORY || false,
     },
 	},
 

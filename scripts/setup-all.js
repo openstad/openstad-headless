@@ -4,6 +4,7 @@ const initApi = require('./setup-api');
 const initImageServer = require('./setup-image');
 const initAuthServer = require('./setup-auth');
 const initAdminServer = require('./setup-admin');
+const initCmsServer = require('./setup-cms');
 const createNginxConfigExample = require('./create-nginx-config-example');
 
 let modules = [
@@ -11,6 +12,7 @@ let modules = [
   initImageServer,
   initAuthServer,
   initAdminServer,
+  initCmsServer,
   createNginxConfigExample,
   function() {
     return new Promise((resolve, reject) => {
@@ -23,6 +25,8 @@ let modules = [
 ];
 
 async function init() {
+
+  await config.create();
 
   let actions = {
     'create config': true,

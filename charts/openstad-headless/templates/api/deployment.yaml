@@ -1,0 +1,298 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "openstad.api.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "openstad.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ template "openstad.api.fullname" . }}-deployment
+spec:
+  replicas: {{ .Values.api.replicas }}
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: {{ .Values.api.label }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.api.label }}
+    spec:
+      containers:
+        - command: ["/bin/bash", "-c"]
+          args:
+            - cd apps/api-server && node server.js
+          env:
+          - name: URL
+            value: https://{{ template "openstad.api.url" . }}
+
+          - name: HOSTNAME
+            value: www.{{ .Values.host.base}}
+
+          # MySQL DATABASE
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: openstad-db-credentials
+                key: username
+
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secret
+                key: mysql-password
+
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: openstad-db-credentials
+                key: hostname
+            
+          - name: DB_PORT
+            valueFrom:
+              secretKeyRef:
+                name: openstad-db-credentials
+                key: hostport
+
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "openstad.api.secret.fullname" . }}
+                key: database
+          
+          - name: EMAILADDRESS
+            value: {{ .Values.api.emailAddress }}
+
+          - name: PORT
+            value: "{{ .Values.api.service.httpPort }}"
+
+          - name: MAIL_FROM
+            value: {{ .Values.secrets.mail.api.emailFrom | default "Openstad" }}
+          
+          - name: MAIL_TRANSPORT_SMTP_PORT
+            valueFrom:
+              secretKeyRef:
+                key: port
+                name: {{ template "openstad.email.secret.fullname" . }}
+          
+          - name: MAIL_TRANSPORT_SMTP_HOST
+            valueFrom:
+              secretKeyRef:
+                key: host
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: MAIL_TRANSPORT_SMTP_REQUIRESSL
+            value: "true"
+          
+          - name: MAIL_TRANSPORT_SMTP_AUTH_USER
+            valueFrom:
+              secretKeyRef:
+                key: username
+                name: {{ template "openstad.email.secret.fullname" . }}
+          
+          - name: MAIL_TRANSPORT_SMTP_AUTH_PASS
+            valueFrom:
+              secretKeyRef:
+                key: password
+                name: {{ template "openstad.email.secret.fullname" . }}
+
+          - name: NOTIFICATIONS_ADMIN_EMAILADDRESS
+            value: {{ .Values.api.emailAddress }}
+
+          - name: AUTH_JWTSECRET
+            valueFrom:
+              secretKeyRef:
+                key: jwtSecret
+                name: {{ template "openstad.api.secret.fullname" . }}
+          
+          - name: AUTH_FIXEDAUTHTOKENS
+            valueFrom:
+              secretKeyRef:
+                key: fixedAuthTokens
+                name: {{ template "openstad.api.secret.fullname" . }}
+          
+          - name: AUTH_ADAPTER_OPENSTAD_SERVERURL
+            value: https://{{ template "openstad.auth.url" . }}
+          
+          - name: AUTH_ADAPTER_OPENSTAD_SERVERURL_INTERNAL
+            value: http://{{ template "openstad.auth.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.auth.service.httpPort }}
+
+          - name: IMAGE_APP_URL
+            value: {{ template "openstad.image.url" . }}
+
+          - name: IMAGE_VERIFICATION_TOKEN
+            valueFrom:
+              secretKeyRef:
+                key: verificationToken
+                name: {{ template "openstad.image.secret.fullname" . }}
+          
+          - name: NODE_ENV
+            value: development
+          
+          - name: CMS_URL
+            value: https://{{ template "openstad.cms.url" . }}
+
+          - name: BASE_DOMAIN
+            value: {{ .Values.host.base }}
+
+          - name: AUTH_ADMIN_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                key: admin_client_id
+                name: {{ template "openstad.auth.secret.fullname" . }}
+
+          - name: AUTH_ADMIN_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: admin_client_secret
+                name: {{ template "openstad.auth.secret.fullname" . }}
+        
+          {{- if .Values.api.extraEnvVars }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.api.extraEnvVars "context" $) | nindent 10 }}
+          {{- end }}
+          image: {{ .Values.api.deploymentContainer.image }}
+          imagePullPolicy: IfNotPresent
+          name: {{ template "openstad.api.fullname" . }}
+          ports:
+            - containerPort: {{ .Values.api.service.httpPort }}
+              name: http
+              protocol: TCP
+          resources:
+{{ toYaml .Values.api.resources | indent 12 }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.api.service.httpPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.api.service.httpPort }}
+            initialDelaySeconds: {{ .Values.api.probe.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.api.probe.liveness.periodSeconds }}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      initContainers:
+        - command: ["/bin/bash", "-c"]
+          args:
+            - nc $DB_HOST $DB_PORT -z -w1 && npm run --prefix apps/api-server migrate-database
+          env:
+            - name: URL
+              value: https://{{ template "openstad.api.url" . }}
+
+            - name: HOSTNAME
+              value: www.{{ .Values.host.base}}
+
+            # MySQL DATABASE
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: openstad-db-credentials
+                  key: username
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: mysql-password
+
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: openstad-db-credentials
+                  key: hostname
+
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: openstad-db-credentials
+                  key: hostport
+
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "openstad.api.secret.fullname" . }}
+                  key: database
+            
+            - name: EMAILADDRESS
+              value: {{ .Values.api.emailAddress }}
+
+            - name: PORT
+              value: "{{ .Values.api.service.httpPort }}"
+
+            - name: MAIL_FROM
+              value: {{ .Values.secrets.mail.api.emailFrom | default "Openstad" }}
+            
+            - name: MAIL_TRANSPORT_SMTP_PORT
+              valueFrom:
+                secretKeyRef:
+                  key: port
+                  name: {{ template "openstad.email.secret.fullname" . }}
+            
+            - name: MAIL_TRANSPORT_SMTP_HOST
+              valueFrom:
+                secretKeyRef:
+                  key: host
+                  name: {{ template "openstad.email.secret.fullname" . }}
+
+            - name: MAIL_TRANSPORT_SMTP_REQUIRESSL
+              value: "true"
+            
+            - name: MAIL_TRANSPORT_SMTP_AUTH_USER
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: {{ template "openstad.email.secret.fullname" . }}
+            
+            - name: MAIL_TRANSPORT_SMTP_AUTH_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: {{ template "openstad.email.secret.fullname" . }}
+
+            - name: NOTIFICATIONS_ADMIN_EMAILADDRESS
+              value: {{ .Values.api.emailAddress }}
+
+            - name: AUTH_JWTSECRET
+              valueFrom:
+                secretKeyRef:
+                  key: jwtSecret
+                  name: {{ template "openstad.api.secret.fullname" . }}
+            
+            - name: AUTH_FIXEDAUTHTOKENS
+              valueFrom:
+                secretKeyRef:
+                  key: fixedAuthTokens
+                  name: {{ template "openstad.api.secret.fullname" . }}
+            
+            - name: AUTH_ADAPTER_OPENSTAD_SERVERURL
+              value: https://{{ template "openstad.auth.url" . }}
+            
+            - name: AUTH_ADAPTER_OPENSTAD_SERVERURL_INTERNAL
+              value: http://{{ template "openstad.auth.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.auth.service.httpPort }}
+
+            - name: IMAGE_APP_URL
+              value: {{ template "openstad.image.url" . }}
+
+            - name: IMAGE_VERIFICATION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: verificationToken
+                  name: {{ template "openstad.image.secret.fullname" . }}
+            
+            - name: NODE_ENV
+              value: development
+
+            - name: CMS_URL
+              value: https://{{ template "openstad.cms.url" . }}
+
+            - name: BASE_DOMAIN
+              value: {{ .Values.host.base }}
+          image: {{ .Values.api.deploymentContainer.image }}
+          imagePullPolicy: IfNotPresent
+          name: init-db-ready
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30

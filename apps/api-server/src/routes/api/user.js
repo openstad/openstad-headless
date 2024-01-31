@@ -284,7 +284,7 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
     if (!(req.targetUser && req.targetUser.can && req.targetUser.can('update', req.user))) return next(new Error('You cannot update this User'));
     if (req.onlyUserIds && !req.onlyUserIds.includes(req.targetUser.id)) {
       req.results = {
-        "ideas": [],
+        "resources": [],
         "comments": [],
         "votes": [],
         "users": [],
@@ -323,7 +323,7 @@ router.route('/:userId(\\d+)/:willOrDo(will|do)-anonymize(:all(all)?)')
           }
           req.results.users.push(result.user);
           req.results.projects.push(result.project);
-          req.results.ideas = req.results.ideas.concat(result.ideas || []);
+          req.results.resources = req.results.resources.concat(result.resources || []);
           req.results.comments = req.results.comments.concat(result.comments || []);
           req.results.votes = req.results.votes.concat(result.votes || []);
         }
@@ -494,10 +494,10 @@ router.route('/:userId(\\d+)')
     }
     
     /**
-     * Delete all connected comments, votes and ideas created by the user
+     * Delete all connected comments, votes and resources created by the user
      * TODO: dit is niet meer nodig als we paranoid er uit halen
      */
-    await db.Idea.destroy({where: {userId: req.results.id}});
+    await db.Resource.destroy({where: {userId: req.results.id}});
     await db.Comment.destroy({where: {userId: req.results.id}});
     await db.Vote.destroy({where: {userId: req.results.id}});
     

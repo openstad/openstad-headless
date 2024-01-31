@@ -1,0 +1,20 @@
+host:
+  base: openstad-headless-acc.savvy.codes
+
+clusterIssuer:
+  enabled: true
+  useProdIssuer: true
+  prodIssuerName: openstad-letsencrypt-prod
+
+admin:
+  extraEnvVars:
+    - name: LOG_LEVEL
+      value: debug
+
+api:
+  emailFrom: Openstad Headless (Acc)
+  emailAddress: openstad-headless-no-reply@savvy.codes
+
+auth:
+  fromName: Openstad Headless (Acc)
+  fromEmail: openstad-headless-no-reply@savvy.codes

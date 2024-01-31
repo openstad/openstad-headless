@@ -23,9 +23,10 @@ import {
 } from '@/components/ui/select';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   isViewable: z.boolean(),
@@ -39,8 +40,8 @@ const formSchema = z.object({
     'countPerTheme',
     'budgetingPerTheme',
   ]),
-  minIdeas: z.coerce.number().gt(0),
-  maxIdeas: z.coerce.number(),
+  minResources: z.coerce.number().gt(0),
+  maxResources: z.coerce.number(),
 });
 
 export default function ProjectSettingsVoting() {
@@ -49,15 +50,18 @@ export default function ProjectSettingsVoting() {
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading, updateProject } = useProject();
-  const defaults = () => ({
-    isViewable: data?.config?.[category]?.isViewable || null,
-    isActive: data?.config?.[category]?.isActive || false,
-    withExisting: data?.config?.[category]?.withExisting || null,
-    requiredUserRole: data?.config?.[category]?.requiredUserRole || null,
-    voteType: data?.config?.[category]?.voteType || null,
-    minIdeas: data?.config?.[category]?.minIdeas || null,
-    maxIdeas: data?.config?.[category]?.maxIdeas || null,
-  });
+  const defaults = useCallback(
+    () => ({
+      isViewable: data?.config?.[category]?.isViewable || false,
+      isActive: data?.config?.[category]?.isActive || false,
+      withExisting: data?.config?.[category]?.withExisting || null,
+      requiredUserRole: data?.config?.[category]?.requiredUserRole || null,
+      voteType: data?.config?.[category]?.voteType || null,
+      minResources: data?.config?.[category]?.minResources || null,
+      maxResources: data?.config?.[category]?.maxResources || null,
+    }),
+    [data?.config]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -66,21 +70,26 @@ export default function ProjectSettingsVoting() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [data]);
+  }, [form, defaults]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await updateProject({
+      const project = await updateProject({
         [category]: {
           isViewable: values.isViewable,
           isActive: values.isActive,
           withExisting: values.withExisting,
           requiredUserRole: values.requiredUserRole,
           voteType: values.voteType,
-          minIdeas: values.minIdeas,
-          maxIdeas: values.maxIdeas,
+          minResources: values.minResources,
+          maxResources: values.maxResources,
         },
       });
+      if (project) {
+        toast.success('Codes aangemaakt!');
+      } else {
+        toast.error('Er is helaas iets mis gegaan.')
+      }
     } catch (error) {
       console.error('could not update', error);
     }
@@ -248,11 +257,11 @@ export default function ProjectSettingsVoting() {
               />
               <FormField
                 control={form.control}
-                name="minIdeas"
+                name="minResources"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>
-                      Wat is de minimum hoeveelheid ideeën waar iemand op kan
+                      Wat is de minimum hoeveelheid resources waar iemand op kan
                       stemmen?
                     </FormLabel>
                     <FormControl>
@@ -264,11 +273,11 @@ export default function ProjectSettingsVoting() {
               />
               <FormField
                 control={form.control}
-                name="maxIdeas"
+                name="maxResources"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>
-                      Wat is de maximum hoeveelheid ideeën waar iemand op kan
+                      Wat is de maximum hoeveelheid resources waar iemand op kan
                       stemmen?
                     </FormLabel>
                     <FormControl>

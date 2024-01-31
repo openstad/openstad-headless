@@ -28,7 +28,7 @@ jest.mock('../src/models/ChoicesGuideResult', () => () => {
     return new SequelizeMock();
 });
 
-jest.mock('../src/models/Idea', () => () => {
+jest.mock('../src/models/Resource', () => () => {
     const SequelizeMock = require("sequelize-mock");
     return new SequelizeMock();
 });

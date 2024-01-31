@@ -14,8 +14,13 @@ import BegrootmoduleAuthentication from './authentication';
 import BegrootmoduleLabels from './label';
 import { useRouter } from 'next/router';
 import Preview from '@/components/widget-preview';
+import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
+import WidgetPublish from '@/components/widget-publish';
+export const getServerSideProps = withApiUrl
 
-export default function WidgetBegrootmodule() {
+export default function WidgetBegrootmodule({
+  apiUrl,
+}: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
@@ -48,9 +53,10 @@ export default function WidgetBegrootmodule() {
               <TabsTrigger value="explanation">Uitleg</TabsTrigger>
               <TabsTrigger value="authentication">Authenticatie</TabsTrigger>
               <TabsTrigger value="labels">Labels</TabsTrigger>
+              <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
-              <Preview type="begrootmodule" />
+              {/* <Preview type="begrootmodule" /> */}
             </TabsContent>
             <TabsContent value="voting" className="p-0">
               <BegrootmoduleVoting />
@@ -69,6 +75,9 @@ export default function WidgetBegrootmodule() {
             </TabsContent>
             <TabsContent value="labels" className="p-0">
               <BegrootmoduleLabels />
+            </TabsContent>
+            <TabsContent value="publish" className="p-0">
+              <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
           </Tabs>
         </div>

@@ -3,7 +3,7 @@ const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 
 module.exports = function( db, sequelize, DataTypes ) {
 	var Vote = sequelize.define('vote', {
-		ideaId: {
+		resourceId: {
 			type         : DataTypes.INTEGER,
 			allowNull    : false
 		},
@@ -42,14 +42,14 @@ module.exports = function( db, sequelize, DataTypes ) {
 		}
 	}, {
 		indexes: [{
-			fields : ['ideaId', 'userId', 'deletedAt'],
+			fields : ['resourceId', 'userId', 'deletedAt'],
 			unique : true
 		}],
 		// paranoid: false,
 	});
 
 	Vote.associate = function( models ) {
-		Vote.belongsTo(models.Idea, { onDelete: 'CASCADE' });
+		Vote.belongsTo(models.Resource, { onDelete: 'CASCADE' });
 		Vote.belongsTo(models.User, { onDelete: 'CASCADE' });
 	}
 
@@ -59,10 +59,10 @@ module.exports = function( db, sequelize, DataTypes ) {
 			forProjectId: function( projectId ) {
 				return {
 					// where: {
-					//  	ideaId: [ sequelize.literal(`select id FROM ideas WHERE projectId = ${projectId}`) ]
+					//  	resourceId: [ sequelize.literal(`select id FROM resources WHERE projectId = ${projectId}`) ]
 					// }
 					include: [{
-						model      : db.Idea,
+						model      : db.Resource,
 						attributes : ['id', 'projectId'],
 						required: true,
 						where: {
@@ -71,10 +71,10 @@ module.exports = function( db, sequelize, DataTypes ) {
 					}],
 				};
 			},
-			withIdea: function() {
+			withResource: function() {
 				return {
 					include: [{
-						model      : db.Idea,
+						model      : db.Resource,
 						attributes : ['id', 'title', 'projectId', 'status', 'viewableByRole']
 					}]
 				}

@@ -1,12 +1,16 @@
 export const WidgetDefinitions = {
-  arguments: 'Argumenten',
+  agenda: 'Agenda',
+  comments: 'Argumenten',
   begrootmodule: 'Begrootmodule',
-  ideasmap: 'Ideeën map',
+  resourcesmap: 'Resource map',
   keuzewijzer: 'Keuzewijzer',
-  like: 'Like',
+  likes: 'Like',
   map: 'Map',
+  rawresource: 'Raw Resource',
   resourceform: 'Resource form',
   resourceoverview: 'Resource overview',
+  resourcedetail: 'Resource detail',
+  datecountdownbar: 'Date countdown bar'
 };
 
 export type WidgetDefinition = keyof typeof WidgetDefinitions;

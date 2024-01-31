@@ -2,7 +2,7 @@ import { CreateWidgetDialog } from '@/components/dialog-widget-create';
 import { PageLayout } from '@/components/ui/page-layout';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { Widget, useWidgetsHook } from '@/hooks/use-widgets';
-import { WidgetDefinition, WidgetDefinitions } from '@/lib/widget-definitions';
+import { WidgetDefinitions } from '@/lib/widget-definitions';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -10,7 +10,6 @@ import { useRouter } from 'next/router';
 export default function ProjectWidgets() {
   const router = useRouter();
   const { project } = router.query;
-  const types = WidgetDefinitions;
 
   const { data: widgets, isLoading: isLoadingWidgets } = useWidgetsHook(
     project as string

@@ -5,7 +5,6 @@ const fs = require('fs');
 const config = require('config');
 const path = require('path');
 const createError = require('http-errors');
-const flattenObject = require('../../util/flatten-object');
 const widgetSettingsMapping = require('./widget-settings');
 const reactCheck = require('../../util/react-check');
 
@@ -38,26 +37,66 @@ router
 
     return next();
   })
-  .get((req, res, next) => {
+  .get(async (req, res, next) => {
+    const projectId = req.query.projectId;
     const widgetId = Math.floor(Math.random() * 1000000);
     const randomId = Math.floor(Math.random() * 1000000);
     const componentId = `osc-component-${widgetId}-${randomId}`;
     const widgetType = req.widgetConfig.widgetType;
-    const widgetSettings = widgetSettingsMapping[widgetType];
+    let widgetSettings = widgetSettingsMapping[widgetType];
+
+    if (!widgetSettings) {
+      return next(
+        createError(400, 'Invalid widget type given for fetching settings')
+      );
+    }
 
     // Remove widgetType from config, but pass all other keys to the widget
     delete req.widgetConfig.widgetType;
-    const widgetConfig = JSON.stringify(req.widgetConfig);
+    let projectConfig = {};
+    let defaultConfig = {};
 
-    let output = getWidgetJavascriptOutput(
-      widgetSettings,
-      widgetType,
-      componentId,
-      widgetConfig
-    );
+    if (projectId) {
+      try {
+        const project = await db.Project.findOne({
+          where: {
+            id: projectId,
+          },
+        });
 
-    res.header('Content-Type', 'application/javascript');
-    res.send(output);
+        if (project) {
+          projectConfig = project.safeConfig;
+        } else {
+          createError(404, 'Could not find the project belonging to given id');
+        }
+        defaultConfig = getDefaultConfig(projectId);
+      } catch (e) {
+        return next(createError(500, 'Could not fetch the project'));
+      }
+    }
+
+    try {
+      const output = setConfigsToOutput(
+        widgetType,
+        componentId,
+        widgetSettings,
+        defaultConfig,
+        projectConfig,
+        req.widgetConfig
+      );
+
+      res.header('Content-Type', 'application/javascript');
+      res.send(output);
+    } catch (e) {
+      // Temp log for use in k9s
+      console.error({widgetBuildError: e});
+      return next(
+        createError(
+          500,
+          'Something went wrong when trying to create the widget script '
+        )
+      );
+    }
   });
 
 router
@@ -78,46 +117,41 @@ router
       })
       .catch(next);
   })
-  .get((req, res) => {
+  .get((req, res, next) => {
     const widgetId = req.params.widgetId;
     const randomId = Math.floor(Math.random() * 1000000);
     const componentId = `osc-component-${widgetId}-${randomId}`;
     const widget = req.widget;
     const widgetSettings = widgetSettingsMapping[widget.type];
 
-    const loginUrl = `${config.url}/auth/project/${widget.project.id}/login?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
-    const logoutUrl = `${config.url}/auth/project/${widget.project.id}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
+    if (!widgetSettings) {
+      return next(
+        createError(400, 'Invalid widget type given for fetching settings')
+      );
+    }
 
-    const defaultConfig = {
-      // @todo: filter out sensitive data from `widget.project.config`
-      ...widget.project.config,
-      api: {
-        url: config.url,
-      },
-      login: {
-        url: loginUrl,
-      },
-      logout: {
-        url: logoutUrl,
-      },
-      projectId: widget.project.id,
-      ...widgetSettings.defaultConfig,
-    };
+    const defaultConfig = getDefaultConfig(widget.project.id);
 
-    const widgetConfig = JSON.stringify({
-      ...defaultConfig,
-      ...flattenObject(widget.config),
-    });
+    try {
+      const output = setConfigsToOutput(
+        widget.type,
+        componentId,
+        widgetSettings,
+        defaultConfig,
+        widget.project.safeConfig,
+        widget.config
+      );
 
-    let output = getWidgetJavascriptOutput(
-      widgetSettings,
-      widget.type,
-      componentId,
-      widgetConfig
-    );
-
-    res.header('Content-Type', 'application/javascript');
-    res.send(output);
+      res.header('Content-Type', 'application/javascript');
+      res.send(output);
+    } catch (e) {
+      return next(
+        createError(
+          500,
+          'Something went wrong when trying to create the widget script'
+        )
+      );
+    }
   });
 
 // Add a static route for the images used in the CSS in each of the widgets
@@ -135,9 +169,57 @@ Object.keys(widgetSettingsMapping).forEach((widget) => {
       )
     );
   } catch (e) {
-    console.log (`Could not find CSS file [${widgetSettingsMapping[widget].css[0]}] for widget [${widget}]. You might need to run \`npm run build\` in the widget's directory.`);
+    console.log(
+      `Could not find CSS file [${widgetSettingsMapping[widget].css[0]}] for widget [${widget}]. You might need to run \`npm run build\` in the widget's directory.`
+    );
   }
 });
+
+function getDefaultConfig(projectId) {
+  const loginUrl = `${config.url}/auth/project/${projectId}/login?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
+  const logoutUrl = `${config.url}/auth/project/${projectId}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
+
+  return {
+    api: {
+      url: config.url,
+    },
+    login: {
+      url: loginUrl,
+    },
+    logout: {
+      url: logoutUrl,
+    },
+    projectId: projectId,
+  };
+}
+
+function setConfigsToOutput(
+  widgetType,
+  componentId,
+  widgetSettings,
+  defaultConfig,
+  projectConfig,
+  widgetConfig
+) {
+  let config = {
+    ...widgetSettings.Config,
+    ...defaultConfig,
+    ...projectConfig,
+    ...widgetConfig,
+  };
+
+  config = JSON.stringify(config)
+    .replaceAll('\\', '\\\\')
+    .replaceAll("'", "\\'")
+    .replaceAll('`', '\\`');
+
+  return getWidgetJavascriptOutput(
+    widgetSettings,
+    widgetType,
+    componentId,
+    config
+  );
+}
 
 function getWidgetJavascriptOutput(
   widgetSettings,
@@ -173,30 +255,31 @@ function getWidgetJavascriptOutput(
   // The process.env.NODE_ENV is set to production, otherwise some React dependencies will not work correctly
   // @todo: find a way around this so we don't have to provide the `process` variable
   output += `
-    let process = { env: { NODE_ENV: 'production' } };
     (function () {
-      const currentScript = document.currentScript;
-      window.addEventListener('load', function (e) {
-        currentScript.insertAdjacentHTML('afterend', \`<div id="${componentId}"></div>\`);
-        
-        document.querySelector('head').innerHTML += \`
-          <style>${css}</style>
-          <link href="${remixIconCss}" rel="stylesheet">
-        \`;
-        
-        const redirectUri = encodeURI(window.location.href);
-        const config = JSON.parse(\`${widgetConfig}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
-        
-        function renderWidget () {
-          ${widgetOutput}
+      try {
+        let process = { env: { NODE_ENV: 'production' } };
+
+        const currentScript = document.currentScript;
+          currentScript.insertAdjacentHTML('afterend', \`<div id="${componentId}"></div>\`);
           
-          ${widgetSettings.functionName}.${widgetSettings.componentName}.loadWidget('${componentId}', { config });
-        }
-        
-        ${reactCheck}
-        
-        currentScript.remove();
-      });
+          document.querySelector('head').innerHTML += \`
+            <style>${css}</style>
+            <link href="${remixIconCss}" rel="stylesheet">
+          \`;
+          
+          const redirectUri = encodeURI(window.location.href);
+          const config = JSON.parse(\`${widgetConfig}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
+          
+          function renderWidget () {
+            ${widgetOutput}
+            ${widgetSettings.functionName}.${widgetSettings.componentName}.loadWidget('${componentId}', config);
+          }
+          
+          ${reactCheck}
+          currentScript.remove();
+      } catch(e) {
+        console.error("Could not place widget", e);
+      }
     })();
     `;
   return output;

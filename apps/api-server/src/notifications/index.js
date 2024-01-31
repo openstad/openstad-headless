@@ -34,9 +34,9 @@ Notifications.processQueue = function(type) {
             self.sendNewContentMessage({projectId, type: 'comment', action: 'create', content: self.queue[type][projectId] });
             break;
 
-          case 'idea':
+          case 'resource':
             self.queue[type][projectId].forEach((entry) => {
-              self.sendNewContentMessage({projectId, type: 'idea', action: entry.action, content: [entry] });
+              self.sendNewContentMessage({projectId, type: 'resource', action: entry.action, content: [entry] });
             });
             break;
             
@@ -77,14 +77,14 @@ Notifications.sendNewContentMessage = function({ projectId, type, action, conten
       let instanceIds = content.map( entry => entry.instanceId );
       let model = type.charAt(0).toUpperCase() + type.slice(1);
 
-      let scope = type == 'idea' ? ['withUser', 'includeProject'] : ['withUser', 'withIdea'];
+      let scope = type == 'resource' ? ['withUser', 'includeProject'] : ['withUser', 'withResource'];
       db[model].scope(scope).findAll({ where: { id: instanceIds }})
         .then( found => {
           data.data = {};
           data.data[type] = found.map( entry => {
             let json = entry.toJSON();
-            if ( type == 'idea' ) {
-              let inzendingPath = ( myConfig.ideas && myConfig.ideas.feedbackEmail && myConfig.ideas.feedbackEmail.inzendingPath && myConfig.ideas.feedbackEmail.inzendingPath.replace(/\[\[ideaId\]\]/, entry.id) ) || "/";
+            if ( type == 'resource' ) {
+              let inzendingPath = ( myConfig.resources && myConfig.resources.feedbackEmail && myConfig.resources.feedbackEmail.inzendingPath && myConfig.resources.feedbackEmail.inzendingPath.replace(/\[\[resourceId\]\]/, entry.id) ) || "/";
               json.inzendingURL = data.URL + inzendingPath;
             }
             return json;

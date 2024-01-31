@@ -1,6 +1,11 @@
+// This should be typed from the datastore, not here.
 type Comment = {
+  id: number;
+  delete: (arg: number) => void;
+  submitLike: () => void;
+} & Partial<{
   parentId: number;
-  ideaId: number;
+  resourceId: number;
   userId: number;
   sentiment: string;
   description: string;
@@ -8,8 +13,17 @@ type Comment = {
   yes: number;
   hasUserVoted: boolean;
   createDateHumanized: string;
-};
 
-export {
-  Comment as default,
-}
+  replies: Array<Comment>;
+
+  user?: { displayName: string };
+  submitLike: () => void;
+
+  can?: {
+    reply: boolean;
+    delete: boolean;
+    edit: boolean;
+  };
+}>;
+
+export default Comment;

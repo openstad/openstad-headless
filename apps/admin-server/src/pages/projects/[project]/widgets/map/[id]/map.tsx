@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -44,17 +44,20 @@ export default function WidgetMapMap() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    variant: widget?.config?.[category]?.variant || 'NLMaps',
-    zoom: widget?.config?.[category]?.zoom || 'none',
-    defaultLocation: widget?.config?.[category]?.defaultLocation || '',
-    clustering: widget?.config?.[category]?.clustering || false,
-    clusteringSensitivity:
-      widget?.config?.[category]?.clusteringSensitivity || 40,
-    clickingChoosesLocation:
-      widget?.config?.[category]?.clickingChoosesLocation || false,
-    mapIcon: widget?.config?.[category]?.mapIcon || 'select',
-  });
+  const defaults = useCallback(
+    () => ({
+      variant: widget?.config?.[category]?.variant || 'NLMaps',
+      zoom: widget?.config?.[category]?.zoom || 'none',
+      defaultLocation: widget?.config?.[category]?.defaultLocation || '',
+      clustering: widget?.config?.[category]?.clustering || false,
+      clusteringSensitivity:
+        widget?.config?.[category]?.clusteringSensitivity || 40,
+      clickingChoosesLocation:
+        widget?.config?.[category]?.clickingChoosesLocation || false,
+      mapIcon: widget?.config?.[category]?.mapIcon || 'select',
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -71,7 +74,7 @@ export default function WidgetMapMap() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -211,12 +214,16 @@ export default function WidgetMapMap() {
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecteert een idee" />
+                      <SelectValue placeholder="Selecteert een resource" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="select">Selecteert een idee</SelectItem>
-                    <SelectItem value="details">Toon idee details</SelectItem>
+                    <SelectItem value="select">
+                      Selecteert een resource
+                    </SelectItem>
+                    <SelectItem value="details">
+                      Toon resource details
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

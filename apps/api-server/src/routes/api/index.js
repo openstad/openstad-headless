@@ -17,14 +17,14 @@ router.use(sorting);
 router.use( '/project', require('./project') );
 
 // comments
-router.use( '/project/:projectId(\\d+)(/idea/:ideaId(\\d+))?/comment', require('./comment') );
+router.use( '/project/:projectId(\\d+)(/resource/:resourceId(\\d+))?/comment', require('./comment') );
 
-// ideas
-router.use( '/project/:projectId(\\d+)/idea', require('./idea') );
-//router.use( '/project/:projectId(\\d+)/idea', require('./idea.old') );
+// resources
+router.use( '/project/:projectId(\\d+)/resource', require('./resource') );
+//router.use( '/project/:projectId(\\d+)/resource', require('./resource.old') );
 
 // polls
-router.use( '/project/:projectId(\\d+)(/idea/:ideaId(\\d+))?/poll', require('./poll') );
+router.use( '/project/:projectId(\\d+)(/resource/:resourceId(\\d+))?/poll', require('./poll') );
 
 // tags
 router.use( '/project/:projectId(\\d+)/tag', require('./tag') );
@@ -59,14 +59,13 @@ router.use( '/lock', require('./lock') );
 // To do test and fix log API
 //router.use( '/project/:projectId(\\d+)/log', require('./log') );
 
-// openstad-map
-router.use( '/project/:projectId(\\d+)/openstad-map', require('./openstad-map') );
+router.use( '/image', require('./image-verification-link') );
 
 // area on project and no project route, system wide the same
 router.use( '/project/:projectId(\\d+)/area', require('./area') );
 router.use( '/area', require('./area') );
 
-router.use( '/repo', require('./template') ); // backwards conpatibility
+router.use( '/repo', require('./template') ); // backwards compatibility
 router.use( '/template', require('./template') );
 
 module.exports = router;

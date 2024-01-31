@@ -1,0 +1,53 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "openstad.cms.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "openstad.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ template "openstad.cms.fullname" . }}-deployment
+spec:
+  replicas: {{ .Values.cms.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.cms.label }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.cms.label }}
+    spec:
+      containers:
+      - name: {{ template "openstad.cms.fullname" . }}
+        image: {{ .Values.cms.deploymentContainer.image }}
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: {{ .Values.cms.service.httpPort }}
+            name: http
+        env:
+          - name: PORT
+            value: "{{ .Values.cms.service.httpPort }}"
+          - name: API_URL
+            value: https://{{ template "openstad.api.url" . }}
+          - name: API_URL_INTERNAL
+            value: http://{{ printf "%s.%s.svc.cluster.local:%d" (include "openstad.api.fullname" .) .Release.Namespace (.Values.api.service.httpPort | int) }}
+          - name: API_KEY
+            valueFrom:
+              secretKeyRef:
+                key: apiKey
+                name: {{ template "openstad.cms.secret.fullname" . }}
+          - name: OVERWRITE_URL
+            value: https://{{ template "openstad.cms.url" . }}
+          - name: MONGODB_URI
+            valueFrom:
+              secretKeyRef:
+                key: mongodbUri
+                name: {{ template "openstad.cms.secret.fullname" . }}
+          - name: CMS_DEFAULTS
+            value: "{}"
+          # Inject extra environment variables
+          {{- if .Values.cms.extraEnvVars }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.cms.extraEnvVars "context" $) | nindent 10 }}
+          {{- end }}
+        resources:
+{{ toYaml .Values.cms.resources | indent 12 }}

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
@@ -21,6 +21,14 @@ import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
 import { SimpleCalendar } from '@/components/simple-calender-popup';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -29,6 +37,8 @@ const formSchema = z.object({
   endDate: z.date().min(new Date(), {
     message: 'De datum moet nog niet geweest zijn!',
   }),
+  enableLikes: z.boolean(),
+  enableReactions: z.boolean(),
 });
 
 export default function ProjectSettings() {
@@ -37,12 +47,17 @@ export default function ProjectSettings() {
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading, updateProject } = useProject();
-  const defaults = () => ({
-    name: data?.name || null,
-    endDate: data?.config?.[category]?.endDate
-      ? new Date(data?.config?.[category]?.endDate)
-      : new Date(),
-  });
+  const defaults = useCallback(
+    () => ({
+      name: data?.name || null,
+      endDate: data?.config?.project?.endDate
+        ? new Date(data?.config?.project?.endDate)
+        : new Date(),
+      enableLikes: data?.config?.resources?.enableLikes || null,
+      enableReactions: data?.config?.resources?.enableReactions || null,
+    }),
+    [data?.name, data?.config]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -50,20 +65,29 @@ export default function ProjectSettings() {
   });
 
   useEffect(() => {
-    form.reset(defaults());
-  }, [data?.config]);
+    form.reset();
+  }, [form, defaults]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const name = values.name;
     try {
-      await updateProject(
+      const project = await updateProject(
         {
-          [category]: {
+          project: {
             endDate: values.endDate,
+          },
+          resources: {
+            enableLikes: values.enableLikes,
+            enableReactions: values.enableReactions,
           },
         },
         name
       );
+      if (project) {
+        toast.success('Codes aangemaakt!');
+      } else {
+        toast.error('Er is helaas iets mis gegaan.')
+      }
     } catch (error) {
       console.error('could not update', error);
     }
@@ -88,7 +112,7 @@ export default function ProjectSettings() {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Projectinformatie</TabsTrigger>
               <TabsTrigger value="advanced">
-                Geadvanceerde instellingen
+                Geavanceerde instellingen
               </TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -116,6 +140,60 @@ export default function ProjectSettings() {
                       form={form}
                       fieldName="endDate"
                       label="Einddatum"
+                    />
+                    <FormField
+                      control={form.control}
+                      name="enableLikes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Is het mogelijk om likes te plaatsen?
+                          </FormLabel>
+                          <Select
+                            onValueChange={(e: string) =>
+                              field.onChange(e === 'true')
+                            }
+                            value={field.value ? 'true' : 'false'}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Nee" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="true">Ja</SelectItem>
+                              <SelectItem value="false">Nee</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="enableReactions"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Is het mogelijk om reacties te plaatsen?
+                          </FormLabel>
+                          <Select
+                            onValueChange={(e: string) =>
+                              field.onChange(e === 'true')
+                            }
+                            value={field.value ? 'true' : 'false'}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Nee" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="true">Ja</SelectItem>
+                              <SelectItem value="false">Nee</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                     <Button className="w-fit col-span-full" type="submit">
                       Opslaan

@@ -12,7 +12,7 @@ router
    // scopes
 	.all('*', function(req, res, next) {
 
-		req.scope = ['defaultScope', 'withIdea'];
+		req.scope = ['defaultScope', 'withResource'];
 		req.scope.push({method: ['forProjectId', req.params.projectId]});
 
 		if (req.query.withVoteCount) {
@@ -40,10 +40,10 @@ router.route('/')
 	.get(pagination.init)
 	.get(function(req, res, next) {
 
-		let ideaId = parseInt(req.params.ideaId) || 0;
+		let resourceId = parseInt(req.params.resourceId) || 0;
 		let where = {};
-		if (ideaId) {
-			where.ideaId = ideaId;
+		if (resourceId) {
+			where.resourceId = resourceId;
 		}
 
 		return db.Poll
@@ -72,13 +72,13 @@ router.route('/')
 // ---------------
   .post(auth.can('Poll', 'create'))
 	.post(function(req, res, next) {
-		// find idea
-		let ideaId = parseInt(req.params.ideaId) || 0;
-		if (!ideaId) return next(createError(404, 'Idea not found'));
-		db.Idea.findByPk(ideaId)
-			.then( idea => {
-				if (!idea || idea.projectId != req.params.projectId) return next(createError(400, 'Idea not found'));
-				req.idea = idea;
+		// find resource
+		let resourceId = parseInt(req.params.resourceId) || 0;
+		if (!resourceId) return next(createError(404, 'Resource not found'));
+		db.Resource.findByPk(resourceId)
+			.then( resource => {
+				if (!resource || resource.projectId != req.params.projectId) return next(createError(400, 'Resource not found'));
+				req.resource = resource;
 				return next();
 			})
 	})
@@ -86,14 +86,14 @@ router.route('/')
 	.post(function(req, res, next) {
     // validations
     if (!req.project.config.polls || req.project.config.polls.canAddPolls != true) return next( createError(400, 'Poll toevoegen is niet toegestaan') );
-    if (!req.idea.auth.canAddPoll(req.user, req.idea)) return next( createError(400, 'Poll toevoegen is niet toegestaan 2') );
+    if (!req.resource.auth.canAddPoll(req.user, req.resource)) return next( createError(400, 'Poll toevoegen is niet toegestaan 2') );
 		next();
 	})
 	.post(function(req, res, next) {
 
 		let data = {
       ...req.body,
-			ideaId: req.idea.id,
+			resourceId: req.resource.id,
 			userId: req.user.id,
       status: 'OPEN',
 		}
@@ -106,7 +106,7 @@ router.route('/')
 				db.Poll
           .scope(
 					  'defaultScope',
-            'withIdea',
+            'withResource',
 					  {method: ['withUserVote', 'poll', req.user.id]},
 				  )
 					.findByPk(result.id)
@@ -130,7 +130,7 @@ router.route('/:pollId(\\d+)')
 		db.Poll
 			.scope(scope)
 			.findOne({
-				where: { id: pollId, ideaId: req.params.ideaId }
+				where: { id: pollId, resourceId: req.params.resourceId }
 			})
 			.then(found => {
 				if ( !found ) throw new Error('Poll not found');
@@ -191,7 +191,7 @@ router.route('/:pollId(\\d+)/vote')
 		db.Poll
 			.scope(...req.scope)
 			.findOne({
-				where: { id: pollId, ideaId: req.params.ideaId }
+				where: { id: pollId, resourceId: req.params.resourceId }
 			})
 			.then(found => {
 				if ( !found ) throw new Error('Poll not found');

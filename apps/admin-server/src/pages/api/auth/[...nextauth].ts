@@ -26,7 +26,47 @@ export const authOptions: NextAuthOptions = {
       }
       return true;
     },
+    async session({ session, token }) {
+
+       // each request: validate jwt
+       if ( token?.accessToken ) {
+         try {
+           let url = `${process.env.API_URL_INTERNAL}/auth/project/1/me`
+           let response = await fetch(url, {
+             headers: { Authorization: `Bearer ${token.accessToken}` },
+           })
+           if (!response.ok) {
+             throw new Error('TokenValidationFailed')
+           }
+
+           let result = await response.json();
+           if (!result.id) {
+             return {
+               ...session,
+               error: 'TokenValidationFailed',
+             };
+           }
+
+           return session;
+
+         } catch(err) {
+           console.log(err);
+           return {
+             ...session,
+             error: 'TokenValidationFailed',
+           };
+         }
+
+       } else {
+         console.log('Error: token has no accessToken');
+         return {
+           ...session,
+           error: 'TokenValidationFailed',
+         };
+       }
+     },
     async jwt({ token, account, profile }) {
+      // once, on login: fetch jwt from api
       if (account?.provider === 'openstad' && account?.access_token) {
         if (token.accessToken) {
           logger.debug('Next-auth JWT token already has an access token');
@@ -42,7 +82,7 @@ export const authOptions: NextAuthOptions = {
           );
           // @todo: make project id and useAuth dynamic
           const tokenResponse = await fetch(
-            `${process.env.API_URL}/auth/project/1/connect-user`,
+            `${process.env.API_URL_INTERNAL}/auth/project/1/connect-user`,
             {
               method: 'POST',
               headers: {

@@ -9,7 +9,6 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - AUTH_DB_NAME=${AUTH_DB_NAME}
       - API_DB_NAME=${API_DB_NAME}
-      - IMAGE_DB_NAME=${IMAGE_DB_NAME}
     command:
       - mysqld
       - --default-authentication-plugin=mysql_native_password
@@ -25,6 +24,12 @@ services:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
       timeout: 20s
       retries: 10
+
+  openstad-mongo:
+    image: mongo
+    restart: always
+    volumes:
+      - openstad-mongo-data:/var/lib/mongo
 
   openstad-mailhog:
     image: mailhog/mailhog
@@ -67,7 +72,11 @@ services:
       - AUTH_FIXEDAUTHTOKENS=${API_AUTH_FIXEDAUTHTOKENS}
       - AUTH_ADAPTER_OPENSTAD_SERVERURL=${AUTH_APP_URL}
       - AUTH_ADAPTER_OPENSTAD_SERVERURL_INTERNAL=http://openstad-auth-server:${AUTH_PORT}
+      - IMAGE_APP_URL=${IMAGE_APP_URL}
+      - IMAGE_VERIFICATION_TOKEN=${IMAGE_VERIFICATION_TOKEN}
       - NODE_ENV=development
+      - CMS_URL=${CMS_URL}
+      - BASE_DOMAIN=${BASE_DOMAIN}
     ports:
       - '${API_PORT}:${API_PORT}'
     volumes:
@@ -145,16 +154,13 @@ services:
       - APP_URL=${IMAGE_APP_URL}
       - PORT_API=${IMAGE_PORT_API}
       - PORT_IMAGE_SERVER=${IMAGE_PORT_IMAGE_SERVER}
-      - DB_HOST=${IMAGE_DB_HOST}
-      - DB_USER=${IMAGE_DB_USER}
-      - DB_PASSWORD=${IMAGE_DB_PASSWORD}
-      - DB_NAME=${IMAGE_DB_NAME}
       - IMAGES_DIR=${IMAGE_IMAGES_DIR}
       - THROTTLE=${IMAGE_THROTTLE}
       - THROTTLE_CC_PROCESSORS=${IMAGE_THROTTLE_CC_PROCESSORS}
       - THROTTLE_CC_PREFETCHER=${IMAGE_THROTTLE_CC_PREFETCHER}
       - THROTTLE_CC_REQUESTS=${IMAGE_THROTTLE_CC_REQUESTS}
       - NODE_ENV=development
+      - IMAGE_VERIFICATION_TOKEN=${IMAGE_VERIFICATION_TOKEN}
     ports:
       - '${IMAGE_PORT_API}:${IMAGE_PORT_API}'
     volumes:
@@ -181,16 +187,50 @@ services:
       - CLIENT_SECRET=${AUTH_ADMIN_CLIENT_SECRET}
       - OAUTH_URL=${AUTH_APP_URL}
       - OAUTH_URL_INTERNAL=http://openstad-auth-server:${AUTH_PORT}
-      - API_URL=http://openstad-api-server:${API_PORT}
+      - API_URL=${API_URL}
+      - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}
+      - API_FIXED_AUTH_KEY=${API_FIXED_AUTH_KEY}
       - PORT=${ADMIN_PORT}
     ports:
       - '${ADMIN_PORT}:${ADMIN_PORT}'
     volumes:
       - ./apps/admin-server:/opt/openstad-headless/apps/admin-server
       - openstad-admin-server-node_modules:/opt/openstad-headless/apps/admin-server/node_modules
+      - ./packages:/opt/openstad-headless/packages
+
+  openstad-cms-server:
+    build:
+      target: development
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - APP=cms-server
+        - PORT=${CMS_PORT}
+    image: openstad/headless-cms-server:${RELEASE_VERSION:-latest}
+    # TODO: dit moet conditional: alleen als we deze db gebruiken
+    # depends_on:
+    #   openstad-mongo:
+    #     condition: service_healthy
+    container_name: openstad-cms-server
+    restart: unless-stopped
+    environment:
+      - PORT=${CMS_PORT}
+      - OVERWRITE_URL=${CMS_URL}
+      - MONGODB_URI=${CMS_MONGODB_URI}
+      - CMS_DEFAULTS=${CMS_DEFAULTS}
+      - API_URL=${API_URL}
+      - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}
+      - API_KEY=${API_FIXED_AUTH_KEY}
+    ports:
+      - '${CMS_PORT}:${CMS_PORT}'
+    volumes:
+      - ./apps/cms-server:/opt/openstad-headless/apps/cms-server
+      - openstad-cms-server-node_modules:/opt/openstad-headless/apps/cms-server/node_modules
+      - openstad-cms-server-init:/opt/openstad-headless/apps/cms-server/init
 
 volumes:
   openstad-mysql-data: {}
+  openstad-mongo-data: {}
   openstad-api-server-node_modules: {}
   openstad-api-server-init: {}
   openstad-auth-server-node_modules: {}
@@ -200,3 +240,5 @@ volumes:
   openstad-image-server-images: {}
   openstad-image-server-init: {}
   openstad-admin-server-node_modules: {}
+  openstad-cms-server-node_modules: {}
+  openstad-cms-server-init: {}

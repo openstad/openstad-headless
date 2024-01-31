@@ -1,0 +1,30 @@
+{% if not (data.query.layout === 'none') %}
+{% if not data.page.hideFooter %}
+<footer>
+  <div class="container">
+    <div class="row">
+      {% for column in data.global.footer %}
+      <div class="col-sm-3 col-xs-12">
+        <h2>{{column.title}}</h2>
+        <p>
+          {{column.description}}
+        </p>
+        <ul>
+          {% for link in column.links %}
+          <li>
+            <a href="{{link.url | safeRelativeUrl}}" {% if link.targetBlank %} target="_blank" {% endif %}>
+              {{link.label}}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</footer>
+{% endif %}
+<div class="body-background" style="display: none;"></div>
+<div id="openstad-toast" class="toast-container initial-width">
+</div>
+{% endif %}

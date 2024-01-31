@@ -20,12 +20,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  summaryCharLength: z.coerce.number(),
   step1: z.string(),
   step2: z.string(),
   step2ButtonFeedback: z.string(),
@@ -55,45 +54,48 @@ export default function WidgetResourceOverviewInfo() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    excludeTheme: widget?.config?.[category]?.excludeTheme || '',
-    filterTheme: widget?.config?.[category]?.filterTheme || '',
-    filterResource: widget?.config?.[category]?.filterResource || '',
+  const defaults = useCallback(
+    () => ({
+      excludeTheme: widget?.config?.[category]?.excludeTheme || '',
+      filterTheme: widget?.config?.[category]?.filterTheme || '',
+      filterResource: widget?.config?.[category]?.filterResource || '',
+      step1:
+        widget?.config?.[category]?.step1 ||
+        "Kies uit onderstaand overzicht jouw favoriete ontwerp voor de muurtekst 'Zorg goed voor onze stad en voor elkaar', en vul in de volgende stap je gegevens in.",
+      step2:
+        widget?.config?.[category]?.step2 ||
+        'Via onderstaande knop kun je op een aparte pagina je e-mailadres invullen. Ter controle krijg je een mail om je e-mailadres te bevestigen. Als dat lukt kom je terug op deze pagina.',
+      step2ButtonFeedback:
+        widget?.config?.[category]?.step2ButtonFeedback || 'Gevalideerd',
+      step2Authenticated:
+        widget?.config?.[category]?.step2Authenticated ||
+        'Het controleren van je e-mailadres is gelukt!<br/>Je bent bijna klaar. Klik op onderstaande knop om je stem te versturen.',
 
-    summaryCharLength: widget?.config?.[category]?.summaryCharLength || 30,
-    step1:
-      widget?.config?.[category]?.step1 ||
-      "Kies uit onderstaand overzicht jouw favoriete ontwerp voor de muurtekst 'Zorg goed voor onze stad en voor elkaar', en vul in de volgende stap je gegevens in.",
-    step2:
-      widget?.config?.[category]?.step2 ||
-      'Via onderstaande knop kun je op een aparte pagina je e-mailadres invullen. Ter controle krijg je een mail om je e-mailadres te bevestigen. Als dat lukt kom je terug op deze pagina.',
-    step2ButtonFeedback:
-      widget?.config?.[category]?.step2ButtonFeedback || 'Gevalideerd',
-    step2Authenticated:
-      widget?.config?.[category]?.step2Authenticated ||
-      'Het controleren van je e-mailadres is gelukt!<br/>Je bent bijna klaar. Klik op onderstaande knop om je stem te versturen.',
-
-    authenticateButtonText:
-      widget?.config?.[category]?.authenticateButtonText ||
-      'Vul je email-adres in',
-    authFormEmbedded: widget?.config?.[category]?.authFormEmbedded || false,
-    placeholder: widget?.config?.[category]?.placeholder || 'Kies een ontwerp',
-    error:
-      widget?.config?.[category]?.error || 'Je hebt nog geen selectie gemaakt.',
-    successTitle:
-      widget?.config?.[category]?.successTitle ||
-      'Gelukt, je stem is opgeslagen!',
-    successDescription:
-      widget?.config?.[category]?.successDescription ||
-      'Bedankt voor het stemmen. Hou deze website<br/> in de gaten voor de uitslag.',
-    siteId: widget?.config?.[category]?.siteId || '',
-    authCodeLabel: widget?.config?.[category]?.authCodeLabel || '',
-    authUniqueButton: widget?.config?.[category]?.authUniqueButton || '',
-    authSms: widget?.config?.[category]?.authSms || '',
-    authSmsButton: widget?.config?.[category]?.authSmsButton || '',
-    authMail: widget?.config?.[category]?.authMail || '',
-    authMailButton: widget?.config?.[category]?.authMailButton || '',
-  });
+      authenticateButtonText:
+        widget?.config?.[category]?.authenticateButtonText ||
+        'Vul je email-adres in',
+      authFormEmbedded: widget?.config?.[category]?.authFormEmbedded || false,
+      placeholder:
+        widget?.config?.[category]?.placeholder || 'Kies een ontwerp',
+      error:
+        widget?.config?.[category]?.error ||
+        'Je hebt nog geen selectie gemaakt.',
+      successTitle:
+        widget?.config?.[category]?.successTitle ||
+        'Gelukt, je stem is opgeslagen!',
+      successDescription:
+        widget?.config?.[category]?.successDescription ||
+        'Bedankt voor het stemmen. Hou deze website<br/> in de gaten voor de uitslag.',
+      siteId: widget?.config?.[category]?.siteId || '',
+      authCodeLabel: widget?.config?.[category]?.authCodeLabel || '',
+      authUniqueButton: widget?.config?.[category]?.authUniqueButton || '',
+      authSms: widget?.config?.[category]?.authSms || '',
+      authSmsButton: widget?.config?.[category]?.authSmsButton || '',
+      authMail: widget?.config?.[category]?.authMail || '',
+      authMailButton: widget?.config?.[category]?.authMailButton || '',
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -110,7 +112,7 @@ export default function WidgetResourceOverviewInfo() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -120,21 +122,6 @@ export default function WidgetResourceOverviewInfo() {
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-1/2 grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="summaryCharLength"
-            render={({ field }) => (
-              <FormItem className="col-span-full">
-                <FormLabel>
-                  Hoeveelheid karakters waar de samenvatting uit mag bestaan
-                </FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
             name="step1"

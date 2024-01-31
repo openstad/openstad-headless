@@ -1,8 +1,8 @@
 ## Tags
 
-Tags are used for categorizing ideas.
+Tags are used for categorizing resources.
 
-Tags belong to a project. An idea can have multiple tags. Tags can be grouped by their type. Tags have sequence numbers for ordening them in lists.
+Tags belong to a project. An resource can have multiple tags. Tags can be grouped by their type. Tags have sequence numbers for ordening them in lists.
 
 #### List all tags for a project
 ```
@@ -13,27 +13,27 @@ Or by type
 GET :HOSTNAME/api/project/:PROJECT_ID/tag?type=theme
 ```
 ---
-### Ideas and tags
+### Resources and tags
 
-Tags can be used to group ideas by a common descriptor. Obvious examples are themes or areas, but any other type is possible.
+Tags can be used to group resources by a common descriptor. Obvious examples are themes or areas, but any other type is possible.
 
-Grouping ideas like this has two main goals: presenting filtered lists of ideas, and the application of certain voting methods.
+Grouping resources like this has two main goals: presenting filtered lists of resources, and the application of certain voting methods.
 
 More about voting in the [voting docs](./voting.md) (yet to be written).
 
-#### To list all ideas, with their tags
+#### To list all resources, with their tags
 ```
-GET :HOSTNAME/api/project/:PROJECT_ID/idea?includeTags=true
-```
-
-#### List ideas filtered by tag(s)
-```
-GET :HOSTNAME/api/project/:PROJECT_ID/idea?tags=:TAG_ID1&tags=:TAG_ID2
+GET :HOSTNAME/api/project/:PROJECT_ID/resource?includeTags=true
 ```
 
-#### Update tags on an idea
+#### List resources filtered by tag(s)
 ```
-PUT :HOSTNAME/api/project/:PROJECT_ID/idea/:IDEA_ID
+GET :HOSTNAME/api/project/:PROJECT_ID/resource?tags=:TAG_ID1&tags=:TAG_ID2
+```
+
+#### Update tags on an resource
+```
+PUT :HOSTNAME/api/project/:PROJECT_ID/resource/:RESOURCE_ID
 Content-Type: application/json
 Authorization: XXX
 

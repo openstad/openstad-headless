@@ -18,19 +18,18 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
   resource: z.enum([
-    'idea',
+    'resource',
     'article',
     'activeUser',
     'resourceUser',
     'submission',
   ]),
-  enableVoting: z.boolean(),
   displayType: z.enum(['cardrow', 'cardgrid', 'raw']),
 });
 
@@ -44,11 +43,13 @@ export default function WidgetResourceOverviewGeneral() {
     updateConfig,
   } = useWidgetConfig();
 
-  const defaults = () => ({
-    resource: widget?.config?.[category]?.resource || 'idea',
-    enableVoting: widget?.config?.[category]?.enableVoting || false,
-    displayType: widget?.config?.[category]?.displayType || 'cardrow',
-  });
+  const defaults = useCallback(
+    () => ({
+      resource: widget?.config?.[category]?.resource || 'resource',
+      displayType: widget?.config?.[category]?.displayType || 'cardrow',
+    }),
+    [widget?.config]
+  );
 
   async function onSubmit(values: FormData) {
     try {
@@ -65,7 +66,7 @@ export default function WidgetResourceOverviewGeneral() {
 
   useEffect(() => {
     form.reset(defaults());
-  }, [widget]);
+  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -84,11 +85,11 @@ export default function WidgetResourceOverviewGeneral() {
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Idee" />
+                      <SelectValue placeholder="Resource" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="idea">Idee</SelectItem>
+                    <SelectItem value="resource">Resource</SelectItem>
                     <SelectItem value="article">Artikel</SelectItem>
                     <SelectItem value="activeUser">
                       Actieve gebruiker
@@ -97,29 +98,6 @@ export default function WidgetResourceOverviewGeneral() {
                       Gebruiker van de resource
                     </SelectItem>
                     <SelectItem value="submission">Oplevering</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="enableVoting"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Toestaan van stemmen</FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Nee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
