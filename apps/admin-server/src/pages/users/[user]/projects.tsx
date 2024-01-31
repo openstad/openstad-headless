@@ -65,7 +65,7 @@ export default function CreateUserProjects() {
     })
 
     projectRolesNewlyAdded.forEach(rbp => {
-      createUser(user.email. rbp.projectId, rbp.role)
+      createUser(user.email, rbp.projectId, rbp.role)
     })
   }
 

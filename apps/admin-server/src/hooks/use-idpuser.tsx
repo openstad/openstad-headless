@@ -8,7 +8,7 @@ export default function useIdpUser(identifier: string, provider: string) {
     projectId?: string,
     role?: string
   ) {
-    let url = `/api/openstad/api/project${projectId}/user`;
+    let url = `/api/openstad/api/project/${projectId}/user`;
 
     const res = await fetch(url, {
       method: 'POST',
