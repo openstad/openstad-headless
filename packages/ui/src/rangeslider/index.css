@@ -1,8 +1,3 @@
-
-.osc .range-slider {
-    margin: 1rem 0;
-  }
-  
 .osc .range-slider input[type="range"] {
     -webkit-appearance: none;
     appearance: none; 
@@ -37,16 +32,10 @@
     /*  rotate thumb  */
   }
   
-  .osc .range-slider datalist#range-slider-list {
-    display: flex;
-    justify-content: space-between;
-    color: black;
-    width: 100%;
-  }
-
   .osc .range-slider .range-slider-labels {
     display: flex;
     justify-content: space-between;
+    padding: 0 0.5rem;
     color: black;
     width: 100%;
   }

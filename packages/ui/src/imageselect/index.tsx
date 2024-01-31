@@ -16,7 +16,7 @@ export const ImageSelect = forwardRef<HTMLInputElement, Props>(
 
     return (
       <div className="osc-imageselect">
-        {props.items.map((title, index) => (
+        {props.items?.map((title, index) => (
           <div
             key={index}
             className={`osc-imageselect-item ${

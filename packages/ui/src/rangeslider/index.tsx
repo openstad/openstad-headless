@@ -25,7 +25,6 @@ const RangeSlider = forwardRef<HTMLInputElement, Props>(
           type="range"
           min="1"
           max={props.labels?.length || '5'}
-          value="3"
           id="fader"
           step="1"
         />
