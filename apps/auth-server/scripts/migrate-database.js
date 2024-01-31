@@ -16,9 +16,20 @@ const umzug = new Umzug({
 });
 
 (async () => {
-  let migrations = await umzug.up();
-  if( !migrations.length ) {
-		console.log('No new migrations');
-	}
+  const args = process.argv.slice(2);
+  if (args.find(arg => arg == 'down')) {
+    let step = args.find(arg => arg.match('step='));
+    if (step) step = parseInt( step.replace(/^step=(\d+)$/, '$1') );
+    let migrations = await umzug.down({ step: step || 1 });
+    if( !migrations.length ) {
+		  console.log('No migrations found');
+	  }
+  } else {
+    console.log('UP');
+    let migrations = await umzug.up();
+    if( !migrations.length ) {
+		  console.log('No new migrations');
+	  }
+  }
   process.exit();
 })();
