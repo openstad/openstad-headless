@@ -1,12 +1,20 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
@@ -24,13 +32,14 @@ const formSchema = z.object({
   description: z.string().optional(),
   question: z.string().optional(),
   questionSubtitle: z.string().optional(),
+  questionType: z.string(),
   options: z
     .array(
       z.object({
         trigger: z.string(),
         key: z.string(),
-        title: z.string(),
-        description: z.string(),
+        titles: z.array(z.string()),
+        images: z.array(z.object({ src: z.string() })),
       })
     )
     .optional(),
@@ -62,12 +71,13 @@ export default function WidgetEnqueteItems(
           trigger: `${
             currentItems.length > 0
               ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
-              : 0
+              : 1
           }`,
           title: values.title,
           description: values.description,
           question: values.question,
           questionSubtitle: values.questionSubtitle,
+          questionType: values.questionType,
           options: values.options || [],
         },
       ]);
@@ -77,7 +87,7 @@ export default function WidgetEnqueteItems(
   }
 
   // adds link to options array if no option is selected, otherwise updates the selected option
-  function handleAddLink(values: FormData) {
+  function handleAddOption(values: FormData) {
     if (selectedOption) {
       setOptions((currentOptions) =>
         currentOptions.map((option) =>
@@ -87,12 +97,12 @@ export default function WidgetEnqueteItems(
                 key:
                   values.options?.find((o) => o.trigger === option.trigger)
                     ?.key || '',
-                title:
+                titles:
                   values.options?.find((o) => o.trigger === option.trigger)
-                    ?.title || '',
-                description:
+                    ?.titles || [],
+                images:
                   values.options?.find((o) => o.trigger === option.trigger)
-                    ?.description || '',
+                    ?.images || [],
               }
             : option
         )
@@ -106,9 +116,8 @@ export default function WidgetEnqueteItems(
             : 0
         }`,
         key: values.options?.[values.options.length - 1].key || '',
-        title: values.options?.[values.options.length - 1].title || '',
-        description:
-          values.options?.[values.options.length - 1].description || '',
+        titles: values.options?.[values.options.length - 1].titles || [],
+        images: values.options?.[values.options.length - 1].images || [],
       };
       setOptions((currentOptions) => [...currentOptions, newOption]);
     }
@@ -119,7 +128,8 @@ export default function WidgetEnqueteItems(
     title: '',
     description: '',
     question: '',
-    quiestionSubtitle: '',
+    questionSubtitle: '',
+    questionType: '',
     options: [],
   });
 
@@ -134,14 +144,20 @@ export default function WidgetEnqueteItems(
     description?: string;
     question?: string;
     questionSubtitle?: string;
+    questionType?: string;
+    images?: Array<{
+      src: string;
+    }>;
     options: Array<Option>;
   };
 
   type Option = {
     trigger: string;
     key: string;
-    title: string;
-    description: string;
+    titles: Array<string>;
+    images: Array<{
+      src: string;
+    }>;
   };
 
   useEffect(() => {
@@ -163,6 +179,7 @@ export default function WidgetEnqueteItems(
         description: selectedItem.description || '',
         question: selectedItem.question || '',
         questionSubtitle: selectedItem.questionSubtitle || '',
+        questionType: selectedItem.questionType || '',
         options: selectedItem.options || [],
       });
       setOptions(selectedItem.options || []);
@@ -240,6 +257,30 @@ export default function WidgetEnqueteItems(
     props.updateConfig({ ...props, items });
   }
 
+  const hasOptions = () => {
+    switch (form.watch('questionType')) {
+      case 'images':
+        return true;
+      case 'multiplechoice':
+        return true;
+      case 'multiple':
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  const hasList = () => {
+    switch (form.watch('questionType')) {
+      case 'multiplechoice':
+        return true;
+      case 'multiple':
+        return true;
+      default:
+        return false;
+    }
+  };
+
   function resetForm() {
     form.reset(defaults());
     setOptions([]);
@@ -292,7 +333,7 @@ export default function WidgetEnqueteItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => setItem(item)}>
-                              {`${item.trigger}. ${item.title}`}
+                              {`${item.title || item.question}`}
                             </span>
                             <span className="gap-2 py-3 px-2">
                               <X
@@ -323,43 +364,62 @@ export default function WidgetEnqueteItems(
                   <div className="flex flex-col gap-y-2">
                     <Heading size="xl">Antwoordopties</Heading>
                     <Separator className="mt-2" />
-                    <FormField
-                      control={form.control}
-                      name={`options.${options.length - 1}.title`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Titel</FormLabel>
-                          <Input {...field} />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`options.${options.length - 1}.description`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Beschrijving</FormLabel>
-                          <Input {...field} />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`options.${options.length - 1}.key`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Key</FormLabel>
-                          <Input {...field} />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {form.watch('questionType') === 'images' && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name={`options.${options.length - 1}.titles.0`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Titel afbeelding 1</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`options.${options.length - 1}.titles.1`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Titel afbeelding 2</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    )}
+                    {hasList() && (
+                      <FormField
+                        control={form.control}
+                        name={`options.${options.length - 1}.titles.0`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Optie</FormLabel>
+                            <Input {...field} />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {/* <FormField
+                          control={form.control}
+                          name={`options.${options.length - 1}.key`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Key</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        /> */}
+
                     <Button
                       className="w-full bg-secondary text-black hover:text-white mt-4"
                       type="button"
-                      onClick={() => handleAddLink(form.getValues())}>
+                      onClick={() => handleAddOption(form.getValues())}>
                       {selectedOption
                         ? 'Sla wijzigingen op'
                         : 'Voeg optie toe aan lijst'}
@@ -384,66 +444,69 @@ export default function WidgetEnqueteItems(
                     </Button>
                   </div>
                 </div>
-                <div>
-                  <Heading size="xl">Lijst van antwoordopties</Heading>
-                  <Separator className="my-4" />
-                  <div className="flex flex-col gap-1">
-                    {options.length > 0
-                      ? options
-                          .sort(
-                            (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
-                          )
-                          .map((option, index) => (
-                            <div
-                              key={index}
-                              className={`flex cursor-pointer justify-between border border-secondary ${
-                                option.trigger == selectedOption?.trigger &&
-                                'bg-secondary'
-                              }`}>
-                              <span className="flex gap-2 py-3 px-2">
-                                <ArrowUp
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    handleAction(
-                                      'moveUp',
-                                      option.trigger,
-                                      false
-                                    )
-                                  }
-                                />
-                                <ArrowDown
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    handleAction(
-                                      'moveDown',
-                                      option.trigger,
-                                      false
-                                    )
-                                  }
-                                />
-                              </span>
-                              <span
-                                className="py-3 px-2 w-full"
-                                onClick={() => setOption(option)}>
-                                {option.title}
-                              </span>
-                              <span className="py-3 px-2">
-                                <X
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    handleAction(
-                                      'delete',
-                                      option.trigger,
-                                      false
-                                    )
-                                  }
-                                />
-                              </span>
-                            </div>
-                          ))
-                      : 'Geen options'}
+                {hasList() && (
+                  <div>
+                    <Heading size="xl">Lijst van antwoordopties</Heading>
+                    <Separator className="my-4" />
+                    <div className="flex flex-col gap-1">
+                      {options.length > 0
+                        ? options
+                            .sort(
+                              (a, b) =>
+                                parseInt(a.trigger) - parseInt(b.trigger)
+                            )
+                            .map((option, index) => (
+                              <div
+                                key={index}
+                                className={`flex cursor-pointer justify-between border border-secondary ${
+                                  option.trigger == selectedOption?.trigger &&
+                                  'bg-secondary'
+                                }`}>
+                                <span className="flex gap-2 py-3 px-2">
+                                  <ArrowUp
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      handleAction(
+                                        'moveUp',
+                                        option.trigger,
+                                        false
+                                      )
+                                    }
+                                  />
+                                  <ArrowDown
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      handleAction(
+                                        'moveDown',
+                                        option.trigger,
+                                        false
+                                      )
+                                    }
+                                  />
+                                </span>
+                                <span
+                                  className="py-3 px-2 w-full"
+                                  onClick={() => setOption(option)}>
+                                  {option?.titles?.[0]}
+                                </span>
+                                <span className="py-3 px-2">
+                                  <X
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      handleAction(
+                                        'delete',
+                                        option.trigger,
+                                        false
+                                      )
+                                    }
+                                  />
+                                </span>
+                              </div>
+                            ))
+                        : 'Geen options'}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             ) : (
               <div className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
@@ -466,7 +529,7 @@ export default function WidgetEnqueteItems(
                       name="title"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Titel</FormLabel>
+                          <FormLabel>Titel/Hoofdvraag</FormLabel>
                           <Input {...field} />
                           <FormMessage />
                         </FormItem>
@@ -505,16 +568,49 @@ export default function WidgetEnqueteItems(
                         </FormItem>
                       )}
                     />
-
-                    <FormItem>
-                      <Button
-                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                        type="button"
-                        onClick={() => setSettingOptions(!settingOptions)}>
-                        {`Pas antwoord opties (${options.length}) aan`}
-                      </Button>
-                      <FormMessage />
-                    </FormItem>
+                    <FormField
+                      control={form.control}
+                      name="questionType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Type antwoorden</FormLabel>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Kies type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="images">
+                                Twee antwoordopties met afbeeldingen
+                              </SelectItem>
+                              <SelectItem value="multiplechoice">
+                                Multiplechoice
+                              </SelectItem>
+                              <SelectItem value="open">Open vraag</SelectItem>
+                              <SelectItem value="multiple">
+                                Meerkeuze
+                              </SelectItem>
+                              <SelectItem value="scale">Schaal</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {hasOptions() && (
+                      <FormItem>
+                        <Button
+                          className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                          type="button"
+                          onClick={() => setSettingOptions(!settingOptions)}>
+                          {`Antwoordopties (${options.length}) aanpassen`}
+                        </Button>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-2">
