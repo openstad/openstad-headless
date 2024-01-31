@@ -14,7 +14,6 @@ import WidgetResourceOverviewPagination from './pagination';
 import WidgetResourceOverviewSearch from './search';
 import WidgetResourceOverviewTags from './tags';
 import WidgetResourceOverviewInclude from './include';
-import WidgetResourceOverviewInfo from './info';
 import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
@@ -84,7 +83,6 @@ export default function WidgetResourceOverview({
               <TabsTrigger value="sorting">Sorteren</TabsTrigger>
               <TabsTrigger value="pagination">Pagination</TabsTrigger>
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
-              <TabsTrigger value="info">Info</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -110,9 +108,6 @@ export default function WidgetResourceOverview({
             </TabsContent>
             <TabsContent value="include" className="p-0">
               <WidgetResourceOverviewInclude {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="info" className="p-0">
-              <WidgetResourceOverviewInfo {...totalPropPackage} />
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />

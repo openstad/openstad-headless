@@ -16,7 +16,7 @@ export const Dialog = ({
     </RadixDialog.Trigger> */}
     <RadixDialog.Portal>
       <RadixDialog.Overlay className="osc-DialogOverlay" />
-      <RadixDialog.Content className="osc osc-DialogContent">
+      <RadixDialog.Content style={{zIndex:1000}} className="osc osc-DialogContent">
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <RadixDialog.Close asChild>
             <IconButton
