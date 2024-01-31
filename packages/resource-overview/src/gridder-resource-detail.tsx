@@ -11,10 +11,12 @@ export const GridderResourceDetail = ({
   resource,
   onRemoveClick,
   isModerator = false,
+  loginUrl = '',
 }: {
   resource: any;
   onRemoveClick?: (resource: any) => void;
   isModerator?: boolean;
+  loginUrl?: string;
 }) => {
   // When resource is correctly typed the we will not need :any
   const theme = resource.tags?.filter((t: any) => t.type === 'theme')?.at(0);
@@ -55,10 +57,18 @@ export const GridderResourceDetail = ({
             </div>
           </div>
           <div className="osc-gridder-resource-detail-actions">
+            {}
+
             <SecondaryButton
-              disabled={!isModerator}
-              onClick={() => onRemoveClick && onRemoveClick(resource)}>
-              Verwijder
+              disabled={!isModerator && !loginUrl}
+              onClick={() => {
+                if(!isModerator) {
+                    document.location.href = loginUrl;
+                } else {
+                    onRemoveClick && onRemoveClick(resource);
+                }
+              }}>
+              {isModerator?'Verwijder' : 'Inloggen'}
             </SecondaryButton>
             <div className="osc-gridder-resource-detail-share-actions">
               <p className="strong">Deel dit:</p>

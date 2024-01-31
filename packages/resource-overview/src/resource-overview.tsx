@@ -141,7 +141,9 @@ function ResourceOverview({
   
   const [currentUser, currentUserError, currentUserIsLoading] =
   datastore.useCurrentUser({ ...props });
-  const isModerator = hasRole(currentUser, 'moderator')
+  const isModerator = hasRole(currentUser, 'moderator');
+
+  console.log({currentUser})
 
   const onResourceClick = useCallback(
     (resource: any, index: number) => {
@@ -179,6 +181,7 @@ function ResourceOverview({
               <GridderResourceDetail
                 resource={item}
                 isModerator={isModerator}
+                loginUrl={props.login?.url}
                 onRemoveClick={(resource) => {
                   try {
                     resource
