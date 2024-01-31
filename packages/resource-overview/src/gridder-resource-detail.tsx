@@ -41,10 +41,9 @@ export const GridderResourceDetail = ({
               <h5>&euro; {resource.budget || 0}</h5>
               <div>
                 <p className="strong">Thema:</p>
-                <p>{theme.name}</p>
-
+                <p>{theme?.name || 'Geen thema'}</p>
                 <p className="strong">Gebied:</p>
-                <p> {area.name}</p>
+                <p> {area?.name || 'Geen gebied'}</p>
               </div>
             </div>
 
