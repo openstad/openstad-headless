@@ -26,6 +26,14 @@ export default {
 
   },
 
+  delete: async function({ projectId, resourceId }, data) {
+    let url = `/api/project/${projectId}/resource/${resourceId}`;
+    let method = 'delete';
+
+    let newData = await this.fetch(url, { method })
+    return { id: data.id };
+  },
+
   submitLike: async function({ projectId, resourceId }, data) {
 
     let url = `/api/project/${projectId}/vote`;

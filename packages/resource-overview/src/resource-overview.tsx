@@ -12,6 +12,7 @@ import { Filters } from './filters/filters';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { elipsize } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
+import { hasRole } from '@openstad-headless/lib';
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -137,6 +138,10 @@ function ResourceOverview({
   const [open, setOpen] = React.useState(false);
   const [resources] = datastore.useResources({ ...props });
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
+  
+  const [currentUser, currentUserError, currentUserIsLoading] =
+  datastore.useCurrentUser({ ...props });
+  const isModerator = hasRole(currentUser, 'moderator')
 
   const onResourceClick = useCallback(
     (resource: any, index: number) => {
@@ -171,7 +176,24 @@ function ResourceOverview({
             startIndex={resourceDetailIndex}
             items={resources && resources.length > 0 ? resources : []}
             itemRenderer={(item) => (
-              <GridderResourceDetail resource={item} />
+              <GridderResourceDetail
+                resource={item}
+                isModerator={isModerator}
+                onRemoveClick={(resource) => {
+                  try {
+                    resource
+                      .delete(resource.id)
+                      .then(() => {
+                        setOpen(false);
+                      })
+                      .catch((e: any) => {
+                        console.error(e);
+                      });
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }}
+              />
             )}></Carousel>
         }
       />

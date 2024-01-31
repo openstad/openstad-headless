@@ -32,7 +32,7 @@ export default function useResources(props) {
         action: 'update',
       });
     };
-    resource.delete = function (newData) {
+    resource.delete = function () {
       return self.mutate({ projectId }, 'resources.delete', resource, {
         action: 'delete',
       });

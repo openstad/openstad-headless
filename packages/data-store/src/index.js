@@ -1,5 +1,4 @@
 import mergeData from './merge-data';
-import { useEffect } from 'react';
 import { useSWRConfig } from 'swr';
 import useSWR from 'swr';
 import API from './api';

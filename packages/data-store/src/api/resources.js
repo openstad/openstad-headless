@@ -31,4 +31,11 @@ export default {
     let url = `/api/project/${projectId}/resource?includeUser=1&includeUserVote=1&includeVoteCount=1&includeTags=1&${params.toString()}`;
     return this.fetch(url);
   },
+
+  delete: async function({ projectId, resourceId }, data) {
+    let url = `/api/project/${projectId}/resource/${data.id}`;
+    let method = 'delete';
+    let newData = await this.fetch(url, { method })
+    return { id: data.id };
+  },
 };
