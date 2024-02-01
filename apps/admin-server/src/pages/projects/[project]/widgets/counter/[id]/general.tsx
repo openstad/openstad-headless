@@ -13,6 +13,7 @@ import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { useRouter } from 'next/router';
 import useChoiceGuides from '@/hooks/use-choiceguides';
+import useResources from '@/hooks/use-resources';
 
 const formSchema = z.object({
   label: z.string(),
@@ -32,6 +33,7 @@ export default function CounterDisplay(props: CounterWidgetProps & EditFieldProp
 
   const projectId = router.query.project as string;
   const { data } = useChoiceGuides(projectId as string);
+  const { data: resourceList } = useResources(projectId as string);
 
   function onSubmit(values: Formdata) {
     props.updateConfig({...props, ...values})
@@ -44,7 +46,6 @@ export default function CounterDisplay(props: CounterWidgetProps & EditFieldProp
       label: props?.label || 'Hoeveelheid',
       url: props?.url || 'https://www.google.com',
       opinion: props?.opinion || '',
-      id: props?.id || '1',
       choiceGuideId: props?.choiceGuideId || '1'
     }
   })
@@ -141,9 +142,9 @@ export default function CounterDisplay(props: CounterWidgetProps & EditFieldProp
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {data?.map((result: any) => (
-                      <SelectItem key={result.id} value={`${result.id}`}>
-                        {result.id}
+                    {resourceList?.map((resource: any) => (
+                      <SelectItem key={resource.id} value={`${resource.id}`}>
+                        {resource.id}
                       </SelectItem>
                     ))}
                   </SelectContent>

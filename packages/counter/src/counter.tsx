@@ -4,6 +4,7 @@ import './counter.css'
 import DataStore from '@openstad-headless/data-store/src'
 import { BaseProps } from '../../types/base-props'
 import { ProjectSettingProps } from '../../types/project-setting-props'
+import { Spacer } from '@openstad-headless/ui/src';
 
 export type CounterWidgetProps = BaseProps &
   CounterProps &
@@ -12,12 +13,11 @@ export type CounterWidgetProps = BaseProps &
   }
 
 export type CounterProps = {
-  counterType?: 'resource' | 'vote' | 'votedUsers' | 'static' | 'argument' | 'submission';
-  label?: string;
-  url?: string;
+  counterType: 'resource' | 'vote' | 'votedUsers' | 'static' | 'argument' | 'submission';
+  label: string;
+  url: string;
   opinion?: string;
   amount?: number;
-  id?: string;
   choiceGuideId?: string;
 }
 
@@ -27,8 +27,6 @@ function Counter({
   url = 'https://www.google.com',
   opinion = '',
   amount = 0,
-  id = '1',
-  choiceGuideId = '1',
   ...props
 }: CounterWidgetProps) {
   let amountDisplayed = 0;
@@ -52,13 +50,13 @@ function Counter({
 
   const [comment] = datastore.useComments({
     projectId: props.projectId,
-    resourceId: id,
+    resourceId: resourceId,
     sentiment: opinion
   })
 
   const [results] = datastore.useChoiceGuideResults({
     projectId: props.projectId,
-    choiceGuideId: choiceGuideId
+    choiceGuideId: props.choiceGuideId
   });
 
   if (counterType === 'resource') {
@@ -94,7 +92,8 @@ function Counter({
   return (
     <div className='osc counter-container' onClick={() => document.location.href = url}>
       <p>{label}:</p>
-      <p className='osc counter-container-amount'>{amountDisplayed}</p>
+      <Spacer size={0}/>
+      <h6>{amountDisplayed}</h6>
     </div>
   )
 }

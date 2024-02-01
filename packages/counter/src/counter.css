@@ -1,21 +1,25 @@
 .osc.counter-container {
   display: flex;
   border-radius: .25rem;
-  gap: .5rem;
-  padding: .5rem 0rem;
+  gap: .25rem;
+  padding: .5rem .5rem;
   justify-content: left;
   align-items: left;
   background-color: var(--osc-card);
 }
 
 .osc.counter-container p {
+  color: var(--osc-card-foreground);
   margin: 0;
   font-size: .875rem;
   float: left;
+  align-items: center;
 }
 
-.osc.counter-container-amount {
+.osc.counter-container h6 {
+  color: var(--osc-card-foreground);
   margin: 0;
   font-size: 1.5rem;
   float: left;
+  font-weight: 700;
 }
