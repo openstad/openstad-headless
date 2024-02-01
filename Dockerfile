@@ -33,8 +33,6 @@ ENV WORKSPACE apps/${APP}
 # Create app directory
 WORKDIR /opt/openstad-headless
 
-RUN npm i -g nodemon
-
 CMD ["npm", "run", "dev", "--prefix=${WORKSPACE}"]
 
 # Prepare production
