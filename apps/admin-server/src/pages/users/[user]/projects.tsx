@@ -69,7 +69,7 @@ export default function CreateUserProjects() {
         createUser(user.email, rbp.projectId, rbp.role)
       })
     } catch (error) {
-      toast.error('Er is iets mis gegaan...')
+      toast.error('Er is iets mis gegaan...' + error)
     }
   }
 

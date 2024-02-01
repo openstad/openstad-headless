@@ -182,7 +182,7 @@ router.route('/')
       ...req.body,
       ...req.oAuthUser,
       projectId: req.project.id,
-      role: req.oAuthUser.role || 'member',
+      role: req.body.role || 'member',
       lastLogin: Date.now(),
     };
     

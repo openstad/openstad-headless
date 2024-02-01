@@ -88,19 +88,6 @@ export function CreateUserDialog() {
               </DialogDescription>
               <FormField
                 control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-mail van de gebruiker</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="E-mail van de gebruiker" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="projectId"
                 render={({ field }) => (
                   <FormItem>
@@ -122,6 +109,19 @@ export function CreateUserDialog() {
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>E-mail van de gebruiker</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="E-mail van de gebruiker" />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
