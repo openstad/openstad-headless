@@ -239,11 +239,11 @@ function getWidgetJavascriptOutput(
   let css = '';
 
   widgetSettings.js.forEach((file) => {
-    widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.directory}/${file}`), 'utf8');
+    widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
   });
 
   widgetSettings.css.forEach((file) => {
-    css += fs.readFileSync(require.resolve(`${widgetSettings.directory}/${file}`), 'utf8');
+    css += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
   });
 
   // Rewrite the url to the images that we serve statically

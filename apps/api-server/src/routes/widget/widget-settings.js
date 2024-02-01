@@ -36,8 +36,8 @@ module.exports = {
   rawresource: {
     packageName: '@openstad-headless/raw-resource',
     directory: 'raw-resource',
-    js: ['@dist/raw-resource.iife.js'],
-    css: ['@dist/style.css'],
+    js: ['dist/raw-resource.iife.js'],
+    css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessRawResource',
     componentName: 'RawResource',
     defaultConfig: {
@@ -67,8 +67,10 @@ module.exports = {
     },
   },
   datecountdownbar: {
-    js: ['@openstad-headless/date-countdown-bar/dist/date-countdown-bar.iife.js'],
-    css: ['@openstad-headless/date-countdown-bar/dist/style.css'],
+    packageName: '@openstad-headless/date-countdown-bar',
+    directory: 'date-countdown-bar',
+    js: ['dist/date-countdown-bar.iife.js'],
+    css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessDateCountdownBar',
     componentName: 'DateCountdownBar',
     defaultConfig: {
