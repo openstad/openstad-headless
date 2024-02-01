@@ -1,5 +1,4 @@
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-// @ts-ignore
 import useInterval from '@rooks/use-interval';
 import {
   differenceInDays,
