@@ -1,5 +1,14 @@
 // @todo: add all widgets
 module.exports = {
+  agenda: {
+    js: ['@openstad-headless/agenda/dist/agenda.iife.js'],
+    css: ['@openstad-headless/agenda/dist/style.css'],
+    functionName: 'OpenstadHeadlessAgenda',
+    componentName: 'Agenda',
+    defaultConfig: {
+      resourceId: null,
+    },
+  },
   likes: {
     packageName: '@openstad-headless/likes',
     directory: 'likes',
@@ -22,6 +31,15 @@ module.exports = {
       resourceId: null,
     },
   },
+  rawresource: {
+    js: ['@openstad-headless/raw-resource/dist/raw-resource.iife.js'],
+    css: ['@openstad-headless/raw-resource/dist/style.css'],
+    functionName: 'OpenstadHeadlessRawResource',
+    componentName: 'RawResource',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
   resourceoverview: {
     packageName: '@openstad-headless/resource-overview',
     directory: 'resource-overview',
@@ -42,4 +60,13 @@ module.exports = {
       projectId: null,
     },
   },
+  datecountdownbar: {
+    js: ['@openstad-headless/date-countdown-bar/dist/date-countdown-bar.iife.js'],
+    css: ['@openstad-headless/date-countdown-bar/dist/style.css'],
+    functionName: 'OpenstadHeadlessDateCountdownBar',
+    componentName: 'DateCountdownBar',
+    defaultConfig: {
+      projectId: null,
+    },
+  }
 };

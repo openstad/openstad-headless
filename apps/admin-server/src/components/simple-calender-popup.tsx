@@ -1,4 +1,9 @@
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { CalendarIcon, RotateCcw } from 'lucide-react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
+import { Button } from './ui/button';
 import {
   FormControl,
   FormField,
@@ -7,12 +12,6 @@ import {
   FormMessage,
 } from './ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Button } from './ui/button';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { CalendarIcon, RotateCcw, XCircleIcon } from 'lucide-react';
-import { Calendar } from '@/components/ui/calendar';
-import { Delete } from 'lucide-react';
 
 // Would like to use a generic solution <T> to enable hinting in the using file
 // Now to remove the errors UseFormReturn<any> has to be used
@@ -22,7 +21,8 @@ export const SimpleCalendar: React.FC<{
   label: string;
   placeholder?: string;
   withReset?: boolean;
-}> = ({ form, fieldName, label, placeholder, withReset }) => {
+  allowPast?: boolean;
+}> = ({ form, fieldName, label, placeholder, withReset, allowPast }) => {
   return (
     <FormField
       control={form.control}
@@ -58,7 +58,12 @@ export const SimpleCalendar: React.FC<{
                       ? field.onChange(new Date(value.toDateString()))
                       : field.onChange(value);
                   }}
-                  disabled={(date) => date < new Date()}
+                  disabled={
+                    allowPast
+                      ? false
+                      : (date) =>
+                          date < new Date(new Date().setHours(0, 0, 0, 0))
+                  }
                   initialFocus
                 />
                 {withReset && (

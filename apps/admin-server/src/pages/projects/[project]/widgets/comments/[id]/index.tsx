@@ -23,13 +23,13 @@ export default function WidgetArguments({
 }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
-  const projectId = router.query.project;
+  const projectId = router.query.project as string;
 
   const { data: widget, updateConfig } = useWidgetConfig();
   const { previewConfig, updatePreview } =
     useWidgetPreview<CommentsWidgetProps>({
       projectId,
-      resourceId: '2',
+      resourceId: 2,
     });
 
   return (

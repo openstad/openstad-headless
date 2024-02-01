@@ -63,10 +63,6 @@ router.all('*', function (req, res, next) {
     req.canIncludeVoteCount = true; // scope.push(undefined) would be easier but creates an error
   }
 
-  if (req.query.mapMarkers) {
-    req.scope.push('mapMarkers');
-  }
-
   if (req.query.running) {
     req.scope.push('selectRunning');
   }

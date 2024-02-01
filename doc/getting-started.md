@@ -57,7 +57,7 @@ There are a few steps to follow when trying to get a new widget rendered for the
     js: ['@openstad-headless/resource-overview/dist/resource-overview.iife.js'],
     css: ['@openstad-headless/resource-overview/dist/style.css'],
     functionName: 'OpenstadHeadlessResourceOverview',
-    componentName: 'ResourceOverview',
+    componentName: 'ResourceOverview', //naam moet gelijk zijn aan de daadwerkelijke component naam
     defaultConfig: {
       projectId: null,
     },

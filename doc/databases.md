@@ -63,3 +63,12 @@ module.exports = {
 ```
 
 Filename convention is: sequence number + short description, e.g. `030-add-resource-example-fields`.
+
+To revert migrations use
+```
+npm run migrate-database -- down
+```
+or
+```
+npm run migrate-database -- down step=2
+```

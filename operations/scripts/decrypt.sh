@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -e
 
@@ -8,16 +8,21 @@ ROOT_DIR=$(git rev-parse --show-toplevel)
 if ! command -v sops &> /dev/null
 then
     echo "Sops could not be found, this is needed to decrypt secrets. Please install sops and try again."
-    exit
+    exit 1
 fi
 
 # check if SOPS_AGE_KEY_FILE is set
 if [ -z "$SOPS_AGE_KEY_FILE" ]
 then
   echo "SOPS_AGE_KEY_FILE env var is not set, please set it to the path of your private key file."
-  exit
+  exit 1
 fi
-export SOPS_AGE_RECIPIENTS=$(cat $SOPS_AGE_KEY_FILE | ggrep -oP "public key: \K(.*)")
+
+# Check if SOPS_AGE_RECIPIENTS is set, if not set it to the public key of the private key file 
+if [ -z "$SOPS_AGE_RECIPIENTS" ]
+then
+    export SOPS_AGE_RECIPIENTS=$(cat $SOPS_AGE_KEY_FILE | ggrep -oP "public key: \K(.*)")
+fi
 
 if [ $# -eq 0 ]
 then
