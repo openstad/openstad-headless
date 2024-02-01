@@ -5,18 +5,16 @@
   padding: .5rem 0rem;
   justify-content: left;
   align-items: left;
-  background-color: #f0f4f8;
+  background-color: var(--osc-card);
 }
 
 .osc.counter-container p {
-  color: black;
   margin: 0;
   font-size: .875rem;
   float: left;
 }
 
 .osc.counter-container-amount {
-  color: black;
   margin: 0;
   font-size: 1.5rem;
   float: left;

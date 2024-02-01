@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { CounterWidgetProps, Counter } from './counter.js';
 
 const config: CounterWidgetProps = {
-  counterType: 'submission',
+  counterType: 'resource',
   label: 'Hoeveelheid',
   url: 'https://www.google.com',
   opinion: '',

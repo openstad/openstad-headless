@@ -20,7 +20,7 @@ const formSchema = z.object({
   counterType: z.enum(['resource', 'vote', 'votedUsers', 'static', 'argument', 'submission']),
   opinion: z.string().optional(),
   amount: z.coerce.number().optional(),
-  id: z.coerce.number().optional(),
+  id: z.string(),
   choiceGuideId: z.string()
 })
 type Formdata = z.infer<typeof formSchema>
@@ -44,7 +44,7 @@ export default function CounterDisplay(props: CounterWidgetProps & EditFieldProp
       label: props?.label || 'Hoeveelheid',
       url: props?.url || 'https://www.google.com',
       opinion: props?.opinion || '',
-      id: props?.id || 0,
+      id: props?.id || '1',
       choiceGuideId: props?.choiceGuideId || '1'
     }
   })
@@ -124,23 +124,30 @@ export default function CounterDisplay(props: CounterWidgetProps & EditFieldProp
           )}
         />
 
-        { props?.counterType === "argument" ? (
+        { props.counterType === "argument" ? (
           <FormField
             control={form.control}
             name="id"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Gewenste ID (Vul een 0 in om alle instanties te gebruiken)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    defaultValue={field.value}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      onFieldChange(field.name, e.target.value)
-                    }}
-                  />
-                </FormControl>
+                <FormLabel>Gewenste resource</FormLabel>
+                <Select onValueChange={(e) => {
+                  field.onChange(e);
+                  props.onFieldChanged(field.name, e);
+                }} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecteer uw gewenste resource" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {data?.map((result: any) => (
+                      <SelectItem key={result.id} value={`${result.id}`}>
+                        {result.id}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormItem>
             )}
           />

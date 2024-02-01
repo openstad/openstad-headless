@@ -17,17 +17,17 @@ export type CounterProps = {
   url?: string;
   opinion?: string;
   amount?: number;
-  id?: number;
+  id?: string;
   choiceGuideId?: string;
 }
 
 function Counter({
-  counterType = 'vote',
+  counterType = 'resource',
   label = 'Hoeveelheid',
   url = 'https://www.google.com',
   opinion = '',
   amount = 0,
-  id = 0,
+  id = '1',
   choiceGuideId = '1',
   ...props
 }: CounterWidgetProps) {
@@ -49,11 +49,6 @@ function Counter({
     projectId: props.projectId,
     resourceId,
   });
-
-  const [comments] = datastore.useCommentsByProject({
-    projectId: props.projectId,
-    sentiment: opinion
-  })
 
   const [comment] = datastore.useComments({
     projectId: props.projectId,
@@ -89,11 +84,7 @@ function Counter({
   }
 
   if (counterType === 'argument') {
-    if (id > 0) {
-      amountDisplayed = comment.length;
-    } else {
-      amountDisplayed = comments.length;
-    }
+    amountDisplayed = comment.length
   }
 
   if (counterType === 'submission') {
@@ -101,7 +92,7 @@ function Counter({
   }
 
   return (
-    <div className='osc counter-container'>
+    <div className='osc counter-container' >
       <p>{label}:</p>
       <p className='osc counter-container-amount'>{amountDisplayed}</p>
     </div>
