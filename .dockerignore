@@ -1,4 +1,5 @@
 .env
-node_modules/
 .DS_Store
 nginx.config.example
+packages/**/dist/
+**/node_modules
