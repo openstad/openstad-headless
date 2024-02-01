@@ -43,7 +43,7 @@ const formSchema = z.object({
   minResources: z.coerce.number().gt(0),
   maxResources: z.coerce.number().gt(0),
 }).refine((data) => data.maxResources > data.minResources, {
-  message: "De max waarde moet groter zijn dan de minimale waarde.",
+  message: "De maximale hoeveelheid resources moet groter zijn dan de minimale hoeveelheid.",
   path: ["maxResources"]
 });
 
