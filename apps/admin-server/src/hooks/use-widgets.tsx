@@ -19,7 +19,27 @@ export function useWidgetsHook(projectId?: string) {
     return data;
   }
 
-  return { ...widgetsSwr, createWidget };
+  async function remove(id: number) {
+    const deleteUrl = `/api/openstad/api/project/${projectId}/widgets/${id}`;
+
+    const res = await fetch(deleteUrl, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (res.ok) {
+      const existingData = [...widgetsSwr.data];
+      const updatedList = existingData.filter((ed) => ed.id !== id);
+      widgetsSwr.mutate(updatedList);
+      return updatedList;
+    } else {
+      throw new Error('Could not remove the widget');
+    }
+  }
+
+  return { ...widgetsSwr, createWidget, remove };
 }
 
 export type Widget = {
