@@ -10,18 +10,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
-import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  itemsPerPage: z.coerce.number(),
-  textResults: z.string(),
+  itemsPerPage: z.coerce.number()
 });
 
 export default function WidgetResourceOverviewPagination(
@@ -39,7 +36,6 @@ export default function WidgetResourceOverviewPagination(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       itemsPerPage: props?.itemsPerPage || 30,
-      textResults: props?.textResults || 'Dit zijn de zoekresultaten voor [search]',
     },
   });
 
@@ -65,26 +61,6 @@ export default function WidgetResourceOverviewPagination(
                       onFieldChange(field.name, e.target.value);
                       field.onChange(e);
                     }} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="textResults"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tekst voor de hoeveelheid van resultaten</FormLabel>
-                <FormControl>
-                  <Input 
-                   placeholder="Bijv: Resultaat voor de zoek opdracht [search]"
-                   type="text"
-                   {...field}
-                   onChange={(e) => {
-                     onFieldChange(field.name, e.target.value);
-                     field.onChange(e);
-                   }}/>
                 </FormControl>
                 <FormMessage />
               </FormItem>

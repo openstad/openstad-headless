@@ -16,9 +16,7 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Input } from '@/components/ui/input';
@@ -28,11 +26,7 @@ import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 
 const formSchema = z.object({
   resourceType: z.enum([
-    'resource',
-    'article',
-    'activeUser',
-    'resourceUser',
-    'submission',
+    'resource'
   ]),
   displayType: z.enum(['cardrow', 'cardgrid', 'raw']),
   itemLink: z.string(),
@@ -85,14 +79,6 @@ export default function WidgetResourceOverviewGeneral(
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="resource">Resource</SelectItem>
-                    <SelectItem value="article">Artikel</SelectItem>
-                    <SelectItem value="activeUser">
-                      Actieve gebruiker
-                    </SelectItem>
-                    <SelectItem value="resourceUser">
-                      Gebruiker van de resource
-                    </SelectItem>
-                    <SelectItem value="submission">Oplevering</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

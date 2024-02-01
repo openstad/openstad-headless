@@ -1,5 +1,5 @@
 import './resource-overview.css';
-import React, { useRef, useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Banner, Carousel, Icon } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
@@ -24,12 +24,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
       props: ResourceOverviewWidgetProps,
       onItemClick?: () => void
     ) => React.JSX.Element;
-    resourceType?:
-      | 'resource'
-      | 'article'
-      | 'activeUser'
-      | 'resourceUser'
-      | 'submission';
+    resourceType?: 'resource'
     displayType?: 'cardrow' | 'cardgrid' | 'raw';
     allowFiltering?: boolean;
     displayTitle?: boolean;
