@@ -88,7 +88,7 @@ export default function ProjectSettingsAnonymization() {
         [category]: values,
       });
       if (project) {
-        toast.success('Codes aangemaakt!');
+        toast.success('Project aangepast!');
       } else {
         toast.error('Er is helaas iets mis gegaan.')
       }

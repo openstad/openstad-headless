@@ -103,7 +103,7 @@ function Likes({
 
     setIsBusy(false);
   }
-
+  
   return (
     <div className="osc">
       <div className={`like-widget-container ${variant}`}>

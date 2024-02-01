@@ -510,7 +510,7 @@ module.exports = async function seed(config, db) {
 
     console.log('    a choices-guide');
     await db.ChoicesGuide.create({
-      projectId: 4,
+      projectId: 2,
       title: 'Niels\' zn test keuzes',
       description: 'Basis keuzewijzer voor het testen van van alles',
       config: '{"isActive":true,"submissionType":"form","requiredUserRole":"member","withExisting":"error"}',
