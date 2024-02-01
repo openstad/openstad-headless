@@ -17,6 +17,7 @@ const headlessDirectory = resolve(currentDirectory, '../../');
 const packageDirectory = resolve(headlessDirectory, 'packages');
 
 let packagesBuilt = false;
+let restarting = null;
 
 nodemon({
   script: 'server.js',
@@ -24,7 +25,10 @@ nodemon({
   ignore: [`${packageDirectory}/**/dist/*`],
   watch: [headlessDirectory],
 })
-  .on('start', () => {
+  .on('start', async () => {
+    if (restarting) {
+      await restarting;
+    }
     if (packagesBuilt) return;
     console.log(
       '[!!!] first start, building all packages... [npm run build-packages]'
@@ -33,6 +37,11 @@ nodemon({
     console.log(output.toString());
   })
   .on('restart', async (changedFiles) => {
+    // Because this function is async, the `start` function will start straight away
+    // we use a promise on the `restarting` variable to block starting the server until after we resolve it
+    let resolveRestart;
+    restarting = new Promise((resolve) => {resolveRestart = resolve});
+    
     const basePath = resolve(process.cwd(), '../../');
     const packagesPath = resolve(basePath, 'packages');
 
@@ -97,4 +106,5 @@ nodemon({
     }
 
     packagesBuilt = true;
+    resolveRestart();
   });
