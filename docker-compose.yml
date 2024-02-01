@@ -84,6 +84,19 @@ services:
       - openstad-api-server-node_modules:/opt/openstad-headless/apps/api-server/node_modules
       - openstad-api-server-init:/opt/openstad-headless/apps/api-server/init
       - ./packages:/opt/openstad-headless/packages
+      - /opt/openstad-headless/packages/agenda/node_modules
+      - /opt/openstad-headless/packages/comments/node_modules
+      - /opt/openstad-headless/packages/configs/node_modules
+      - /opt/openstad-headless/packages/data-store/node_modules
+      - /opt/openstad-headless/packages/date-countdown-bar/node_modules
+      - /opt/openstad-headless/packages/eslint-config-custom/node_modules
+      - /opt/openstad-headless/packages/lib/node_modules
+      - /opt/openstad-headless/packages/likes/node_modules
+      - /opt/openstad-headless/packages/raw-resource/node_modules
+      - /opt/openstad-headless/packages/resource-detail/node_modules
+      - /opt/openstad-headless/packages/resource-overview/node_modules
+      - /opt/openstad-headless/packages/types/node_modules
+      - /opt/openstad-headless/packages/ui/node_modules
 
   openstad-auth-server:
     build:
