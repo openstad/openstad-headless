@@ -7,7 +7,7 @@ import {
 
 const config: ResourceOverviewWidgetProps = {
   displayType: 'cardgrid',
-  tagGroups: [{ type: 'theme', label: 'Thema', multiple: false }],
+  tagGroups: [{ type: 'theme', label: 'Thema', multiple: true }],
   displayTitle: true,
   displayDescription: true,
   displaySummary: true,

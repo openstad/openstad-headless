@@ -53,6 +53,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayBanner?: boolean;
     itemsPerPage?: number;
     textResults?: string;
+    onlyIncludeTagIds?: string;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -130,6 +131,7 @@ function ResourceOverview({
   renderHeader = defaultHeaderRenderer,
   itemsPerPage = 20,
   textResults = 'Dit zijn de zoekresultaten voor [search]',
+  onlyIncludeTagIds='',
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -137,15 +139,21 @@ function ResourceOverview({
     api: props.api,
   });
 
+  // const recourceTagsInclude = only
+  const tagIdsToLimitResourcesTo = onlyIncludeTagIds.trim().split(",").filter(t =>!isNaN(+t)).map(t=>Number.parseInt(t));
+
+
+
   const [open, setOpen] = React.useState(false);
   const [resourcesWithPagination] = datastore.useResources({
     ...props,
     itemsPerPage,
+    tags: tagIdsToLimitResourcesTo
   });
 
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
   const resources = resourcesWithPagination.records || [];
-
+  
   const [currentUser] = datastore.useCurrentUser({ ...props });
   const isModerator = hasRole(currentUser, 'moderator');
 
@@ -213,10 +221,12 @@ function ResourceOverview({
           {filterNeccesary && datastore ? (
             <Filters
               {...props}
+              tagsLimitation={tagIdsToLimitResourcesTo}
               itemsPerPage={itemsPerPage}
               projectId={props.projectId}
               resources={resources}
               onUpdateFilter={resources.filter}
+
             />
           ) : null}
 

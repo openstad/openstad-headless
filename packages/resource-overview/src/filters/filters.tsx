@@ -19,6 +19,7 @@ type Filter = {
 type Props = {
   resources: any;
   onUpdateFilter?: (filter: Filter) => void;
+  tagsLimitation?: number[];
 } & ResourceOverviewWidgetProps;
 
 export function Filters({
@@ -26,6 +27,7 @@ export function Filters({
   sorting = [],
   tagGroups = [],
   onUpdateFilter,
+  tagsLimitation = [],
   ...props
 }: Props) {
   const dataStore = new DataStore({
@@ -77,13 +79,14 @@ export function Filters({
   }
 
   function setTags(type: string, values: any[]) {
-    updateFilter({
+    const updatedFilter:Filter = {
       ...filter,
       tags: {
         ...filter.tags,
         [type]: values,
       },
-    });
+    };
+    updateFilter(updatedFilter);
   }
 
   const search = useDebounce(setSearch, 300);
@@ -151,6 +154,7 @@ export function Filters({
                     onUpdateFilter={(updatedTag) =>
                       updateTagList(tagGroup.type, updatedTag)
                     }
+                    onlyIncludeIds={tagsLimitation}
                   />
                 );
               } else {
@@ -165,6 +169,7 @@ export function Filters({
                     onUpdateFilter={(updatedTag) =>
                       updateTagList(tagGroup.type, updatedTag)
                     }
+                    onlyIncludeIds={tagsLimitation}
                   />
                 );
               }
