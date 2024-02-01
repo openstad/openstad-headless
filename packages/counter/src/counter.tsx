@@ -92,7 +92,7 @@ function Counter({
   }
 
   return (
-    <div className='osc counter-container' >
+    <div className='osc counter-container' onClick={() => document.location.href = url}>
       <p>{label}:</p>
       <p className='osc counter-container-amount'>{amountDisplayed}</p>
     </div>
