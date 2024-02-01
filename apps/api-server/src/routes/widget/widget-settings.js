@@ -10,8 +10,10 @@ module.exports = {
     },
   },
   likes: {
-    js: ['@openstad-headless/likes/dist/likes.iife.js'],
-    css: ['@openstad-headless/likes/dist/style.css'],
+    packageName: '@openstad-headless/likes',
+    directory: 'likes',
+    js: ['dist/likes.iife.js'],
+    css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessLikes',
     componentName: 'Likes',
     defaultConfig: {
@@ -19,8 +21,10 @@ module.exports = {
     },
   },
   comments: {
-    js: ['@openstad-headless/comments/dist/comments.iife.js'],
-    css: ['@openstad-headless/comments/dist/style.css'],
+    packageName: '@openstad-headless/comments',
+    directory: 'comments',
+    js: ['dist/comments.iife.js'],
+    css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessComments',
     componentName: 'Comments',
     defaultConfig: {
@@ -37,8 +41,10 @@ module.exports = {
     },
   },
   resourceoverview: {
-    js: ['@openstad-headless/resource-overview/dist/resource-overview.iife.js'],
-    css: ['@openstad-headless/resource-overview/dist/style.css'],
+    packageName: '@openstad-headless/resource-overview',
+    directory: 'resource-overview',
+    js: ['dist/resource-overview.iife.js'],
+    css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessResourceOverview',
     componentName: 'ResourceOverview',
     defaultConfig: {

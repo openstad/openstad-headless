@@ -88,6 +88,7 @@ router
       res.header('Content-Type', 'application/javascript');
       res.send(output);
     } catch (e) {
+      
       // Temp log for use in k9s
       console.error({widgetBuildError: e});
       return next(
@@ -163,14 +164,14 @@ Object.keys(widgetSettingsMapping).forEach((widget) => {
       `/${widget}-images`,
       express.static(
         path.resolve(
-          require.resolve(widgetSettingsMapping[widget].css[0]),
+          require.resolve(`${widgetSettingsMapping[widget].packageName}/package.json`),
           '../../images/'
         )
       )
     );
   } catch (e) {
     console.log(
-      `Could not find CSS file [${widgetSettingsMapping[widget].css[0]}] for widget [${widget}]. You might need to run \`npm run build\` in the widget's directory.`
+      `Could not find package.json [${widgetSettingsMapping[widget].packageName}/package.json] for widget [${widget}].`
     );
   }
 });
@@ -238,11 +239,11 @@ function getWidgetJavascriptOutput(
   let css = '';
 
   widgetSettings.js.forEach((file) => {
-    widgetOutput += fs.readFileSync(require.resolve(file), 'utf8');
+    widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.directory}/${file}`), 'utf8');
   });
 
   widgetSettings.css.forEach((file) => {
-    css += fs.readFileSync(require.resolve(file), 'utf8');
+    css += fs.readFileSync(require.resolve(`${widgetSettings.directory}/${file}`), 'utf8');
   });
 
   // Rewrite the url to the images that we serve statically

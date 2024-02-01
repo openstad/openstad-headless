@@ -32,6 +32,7 @@ ARG APP
 ENV WORKSPACE apps/${APP}
 # Create app directory
 WORKDIR /opt/openstad-headless
+
 CMD ["npm", "run", "dev", "--prefix=${WORKSPACE}"]
 
 # Prepare production
