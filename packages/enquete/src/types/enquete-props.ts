@@ -6,22 +6,29 @@ export type EnqueteProps = {
   items?: Array<Item>;
 };
 
-type Item = {
+export type Item = {
   trigger: string;
   title?: string;
+  key: string;
   description?: string;
   questionType?: string;
   images?: Array<{
+    image?: any;
     src: string;
   }>;
-  options: Array<Option>;
+  options?: Array<Option>;
 };
 
-type Option = {
+export type Option = {
   trigger: string;
-  key: string;
-  titles: Array<string>;
-  images: Array<{
+  titles: Array<Title>;
+  images?: Array<{
+    image?: any;
     src: string;
   }>;
+};
+
+export type Title = {
+  text: string;
+  key: string;
 };

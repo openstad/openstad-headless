@@ -1,3 +1,4 @@
+import ImageUploader from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -21,6 +22,7 @@ import { Heading } from '@/components/ui/typography';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad/enquete/src/enquete';
+import { Item, Option } from '@openstad/enquete/src/types/enquete-props';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -29,15 +31,20 @@ import * as z from 'zod';
 const formSchema = z.object({
   trigger: z.string(),
   title: z.string().optional(),
+  key: z.string(),
   description: z.string().optional(),
-  questionType: z.string(),
+  questionType: z.string().optional(),
+  images: z
+    .array(z.object({ image: z.any().optional(), src: z.string() }))
+    .optional(),
   options: z
     .array(
       z.object({
         trigger: z.string(),
-        key: z.string(),
-        titles: z.array(z.string()),
-        images: z.array(z.object({ image: z.any(), src: z.string() })),
+        titles: z.array(z.object({ text: z.string(), key: z.string() })),
+        images: z
+          .array(z.object({ image: z.any().optional(), src: z.string() }))
+          .optional(),
       })
     )
     .optional(),
@@ -73,6 +80,7 @@ export default function WidgetEnqueteItems(
               : 1
           }`,
           title: values.title,
+          key: values.key,
           description: values.description,
           questionType: values.questionType,
           options: values.options || [],
@@ -91,9 +99,6 @@ export default function WidgetEnqueteItems(
           option.trigger === selectedOption.trigger
             ? {
                 ...option,
-                key:
-                  values.options?.find((o) => o.trigger === option.trigger)
-                    ?.key || '',
                 titles:
                   values.options?.find((o) => o.trigger === option.trigger)
                     ?.titles || [],
@@ -112,7 +117,6 @@ export default function WidgetEnqueteItems(
             ? parseInt(options[options.length - 1].trigger) + 1
             : 0
         }`,
-        key: values.options?.[values.options.length - 1].key || '',
         titles: values.options?.[values.options.length - 1].titles || [],
         images: values.options?.[values.options.length - 1].images || [],
       };
@@ -123,6 +127,7 @@ export default function WidgetEnqueteItems(
   const defaults = () => ({
     trigger: '0',
     title: '',
+    key: '',
     description: '',
     question: '',
     questionSubtitle: '',
@@ -134,26 +139,6 @@ export default function WidgetEnqueteItems(
     resolver: zodResolver<any>(formSchema),
     defaultValues: defaults(),
   });
-
-  type Item = {
-    trigger: string;
-    title?: string;
-    description?: string;
-    questionType?: string;
-    images?: Array<{
-      src: string;
-    }>;
-    options: Array<Option>;
-  };
-
-  type Option = {
-    trigger: string;
-    key: string;
-    titles: Array<string>;
-    images: Array<{
-      src: string;
-    }>;
-  };
 
   useEffect(() => {
     if (props?.items && props?.items?.length > 0) {
@@ -183,7 +168,7 @@ export default function WidgetEnqueteItems(
     if (selectedOption) {
       const updatedOptions = [...options];
       const index = options.findIndex(
-        (option) => option.key === selectedOption.key
+        (option) => option.trigger === selectedOption.trigger
       );
       updatedOptions[index] = { ...selectedOption };
 
@@ -287,6 +272,7 @@ export default function WidgetEnqueteItems(
 
   return (
     <div>
+      <ImageUploader />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -359,7 +345,7 @@ export default function WidgetEnqueteItems(
                     <Separator className="mt-2" />
                     {form.watch('questionType') === 'images' && (
                       <>
-                        <FormField
+                        {/* <FormField
                           control={form.control}
                           name={`options.${options.length - 1}.images.0.image`}
                           render={({ field }) => (
@@ -375,10 +361,21 @@ export default function WidgetEnqueteItems(
                               <FormMessage />
                             </FormItem>
                           )}
+                        /> */}
+                        <FormField
+                          control={form.control}
+                          name={`options.${options.length - 1}.titles.0.key`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Key afbeelding 1</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
                         <FormField
                           control={form.control}
-                          name={`options.${options.length - 1}.titles.0`}
+                          name={`options.${options.length - 1}.titles.0.text`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Titel afbeelding 1</FormLabel>
@@ -406,7 +403,18 @@ export default function WidgetEnqueteItems(
                         />
                         <FormField
                           control={form.control}
-                          name={`options.${options.length - 1}.titles.1`}
+                          name={`options.${options.length - 1}.titles.1.key`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Key afbeelding 2</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`options.${options.length - 1}.titles.1.text`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Titel afbeelding 2</FormLabel>
@@ -418,17 +426,30 @@ export default function WidgetEnqueteItems(
                       </>
                     )}
                     {hasList() && (
-                      <FormField
-                        control={form.control}
-                        name={`options.${options.length - 1}.titles.0`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Optie</FormLabel>
-                            <Input {...field} />
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <>
+                        <FormField
+                          control={form.control}
+                          name={`options.${options.length - 1}.titles.0.key`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Optie key</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`options.${options.length - 1}.titles.0.text`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Optie tekst</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
                     )}
 
                     {/* <FormField
@@ -514,7 +535,7 @@ export default function WidgetEnqueteItems(
                                 <span
                                   className="py-3 px-2 w-full"
                                   onClick={() => setOption(option)}>
-                                  {option?.titles?.[0]}
+                                  {option?.titles?.[0].text}
                                 </span>
                                 <span className="py-3 px-2">
                                   <X

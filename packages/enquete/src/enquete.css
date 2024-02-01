@@ -24,6 +24,11 @@
   border-radius: 4px;
 }
 
+.osc-enquete-item-image {
+  max-height: 15rem;
+  object-fit: cover;
+}
+
 .osc-enquete-item-description {
   padding-bottom: 1rem;
 }
@@ -47,6 +52,19 @@
   align-items: center;
   padding-left: 0.2rem;
 }
+
+.osc .osc-enquete-item-textarea {
+  border-radius: 4px;
+  border: 1px solid var(--osc-border);
+  padding: 0.5rem;
+  background-color: white;
+}
+
+.osc .osc-enquete-item-textarea:disabled {
+  background-color: white;
+  cursor: not-allowed;
+}
+
 .osc .osc-enquete-item-checkbox {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -60,6 +78,11 @@
   display: inline-block;
   border-color:  var(--osc-foreground); 
 }
+
+.osc .osc-enquete-item-checkbox-container p {
+  margin: 0;
+}
+
 .osc .osc-enquete-item-checkbox:checked {
   background-color:  var(--osc-secondary);
   border-color:  var(--osc-secondary);

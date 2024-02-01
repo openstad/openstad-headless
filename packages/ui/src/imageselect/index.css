@@ -12,7 +12,6 @@
 .osc .osc-imageselect-item {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     background: white;
     width: 50%;
     gap: 0.5rem;
@@ -33,3 +32,8 @@ input[type="radio"].osc-imageselect-radio  {
     appearance: none;
     display: none;
   }
+
+.osc-imageselect-image {
+    object-fit: cover;
+    border-radius: 0px;
+}
