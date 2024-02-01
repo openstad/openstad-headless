@@ -71,9 +71,9 @@ export default function CreateProject() {
       const data = JSON.parse(file);
       const project = await importProject(
         values.importedProjectName,
-        data.projectData.title,
-        data.projectData.config,
-        data.projectData.emailConfig
+        data.title,
+        data.config,
+        data.emailConfig
       );
       if (project) {
         toast.success('Project aangemaakt!');

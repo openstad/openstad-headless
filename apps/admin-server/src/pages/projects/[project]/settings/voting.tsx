@@ -41,7 +41,10 @@ const formSchema = z.object({
     'budgetingPerTheme',
   ]),
   minResources: z.coerce.number().gt(0),
-  maxResources: z.coerce.number(),
+  maxResources: z.coerce.number().gt(0),
+}).refine((data) => data.maxResources > data.minResources, {
+  message: "De max waarde moet groter zijn dan de minimale waarde.",
+  path: ["maxResources"]
 });
 
 export default function ProjectSettingsVoting() {

@@ -143,7 +143,7 @@ export default function ProjectSettingsAnonymization() {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Algemene instellingen</TabsTrigger>
               <TabsTrigger value="advanced">
-                Geadvanceerde instellingen
+                Geavanceerde instellingen
               </TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -176,8 +176,8 @@ export default function ProjectSettingsAnonymization() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Na hoeveel dagen aan inactiviteit gebruikers
-                            waarschuwen?
+                            Na hoeveel dagen aan inactiviteit worden gebruikers
+                            gewaarschuwd?
                           </FormLabel>
                           <FormControl>
                             <Input type="number" placeholder="180" {...field} />
@@ -192,8 +192,8 @@ export default function ProjectSettingsAnonymization() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Na hoeveel dagen aan inactiviteit gebruikers
-                            anonimiseren?
+                            Na hoeveel dagen aan inactiviteit worden gebruikers
+                            geanonimiseerd?
                           </FormLabel>
                           <FormControl>
                             <Input type="number" placeholder="200" {...field} />

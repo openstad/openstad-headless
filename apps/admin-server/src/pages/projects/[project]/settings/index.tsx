@@ -39,10 +39,10 @@ const formSchema = z.object({
   }),
   enableLikes: z.boolean(),
   enableReactions: z.boolean(),
+  url: z.string().url()
 });
 
 export default function ProjectSettings() {
-  const category = 'project';
 
   const router = useRouter();
   const { project } = router.query;
@@ -55,6 +55,7 @@ export default function ProjectSettings() {
         : new Date(),
       enableLikes: data?.config?.resources?.enableLikes || false,
       enableReactions: data?.config?.resources?.enableReactions || false,
+      url: data?.url || '',
     }),
     [data?.name, data?.config]
   );
@@ -65,11 +66,10 @@ export default function ProjectSettings() {
   });
 
   useEffect(() => {
-    form.reset();
+    form.reset(defaults());
   }, [form, defaults]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const name = values.name;
     try {
       const project = await updateProject(
         {
@@ -81,7 +81,8 @@ export default function ProjectSettings() {
             enableReactions: values.enableReactions,
           },
         },
-        name
+        values.name,
+        values.url
       );
       if (project) {
         toast.success('Project aangepast!');
@@ -191,6 +192,19 @@ export default function ProjectSettings() {
                               <SelectItem value="false">Nee</SelectItem>
                             </SelectContent>
                           </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="url"
+                      render={({ field }) => (
+                        <FormItem className="col-span-full md:col-span-1 flex flex-col">
+                          <FormLabel>Projectnaam</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Url" {...field} />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
