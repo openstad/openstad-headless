@@ -51,3 +51,11 @@ spec:
           {{- end }}
         resources:
 {{ toYaml .Values.cms.resources | indent 12 }}
+        volumeMounts:
+          - mountPath: {{ .Values.cms.volumes.data.mountPath | default "/opt/openstad-headless/apps/cms-server/public/uploads/attachments" }}
+            name: data-vol
+      volumes:
+        - name: data-vol
+          persistentVolumeClaim:
+            claimName: cms-data-claim
+
