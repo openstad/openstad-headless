@@ -83,3 +83,15 @@
   display: flex;
   gap: 1rem;
 }
+
+.osc-resourceoverview-search-container {
+  display: flex;
+  justify-content: center;
+}
+
+p.osc-searchtext {
+  display: inline-block;
+  padding: .5rem;
+  border-radius: 4px;
+  background-color: var(--osc-card);
+}

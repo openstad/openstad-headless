@@ -45,6 +45,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displaySorting?: boolean;
     defaultSorting?: string;
     displaySearch?: boolean;
+    displaySearchText?: boolean;
     textActiveSearch?: string;
     itemLink?: string;
     sorting: Array<{ value: string; label: string }>;
@@ -55,7 +56,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     itemsPerPage?: number;
     textResults?: string;
     onlyIncludeTagIds?: string;
-    rawInput?:string;
+    rawInput?: string;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -79,32 +80,34 @@ const defaultItemRenderer = (
   props: ResourceOverviewWidgetProps,
   onItemClick?: () => void
 ) => {
-  if(props.displayType === 'raw') {
-    if(!props.rawInput) {
-      return <p>Template is nog niet ingesteld</p>
+  if (props.displayType === 'raw') {
+    if (!props.rawInput) {
+      return <p>Template is nog niet ingesteld</p>;
     }
-   return <div
-    dangerouslySetInnerHTML={{
-      __html: nunjucks.renderString(props.rawInput, {
-        // here you can add variables that are available in the template
-        projectId: props.projectId,
-        user: resource.user,
-        startDateHumanized: resource.startDateHumanized,
-        status: resource.status,
-        title: resource.title,
-        summary: resource.summary,
-        description: resource.description,
-        images: resource.images,
-        budget: resource.budget,
-        extraData: resource.extraData,
-        location: resource.location,
-        modBreak: resource.modBreak,
-        modBreakDateHumanized: resource.modBreakDateHumanized,
-        progress: resource.progress,
-        createDateHumanized: resource.createDateHumanized,
-        publishDateHumanized: resource.publishDateHumanized,
-      })
-    }}></div>
+    return (
+      <div
+        dangerouslySetInnerHTML={{
+          __html: nunjucks.renderString(props.rawInput, {
+            // here you can add variables that are available in the template
+            projectId: props.projectId,
+            user: resource.user,
+            startDateHumanized: resource.startDateHumanized,
+            status: resource.status,
+            title: resource.title,
+            summary: resource.summary,
+            description: resource.description,
+            images: resource.images,
+            budget: resource.budget,
+            extraData: resource.extraData,
+            location: resource.location,
+            modBreak: resource.modBreak,
+            modBreakDateHumanized: resource.modBreakDateHumanized,
+            progress: resource.progress,
+            createDateHumanized: resource.createDateHumanized,
+            publishDateHumanized: resource.publishDateHumanized,
+          }),
+        }}></div>
+    );
   }
 
   return (
@@ -175,8 +178,10 @@ function ResourceOverview({
     .split(',')
     .filter((t) => t && !isNaN(+t.trim()))
     .map((t) => Number.parseInt(t));
-  
+
   const [open, setOpen] = React.useState(false);
+  const [search, setSearchText] = useState<string>('');
+
   const [resourcesWithPagination] = datastore.useResources({
     ...props,
     itemsPerPage,
@@ -250,6 +255,18 @@ function ResourceOverview({
           className={`osc-resource-overview-content ${
             !filterNeccesary ? 'full' : ''
           }`}>
+          {props.displaySearchText ? (
+            <div className="osc-resourceoverview-search-container col-span-full">
+              {props.textActiveSearch && search ? (
+                <p className="osc-searchtext">
+                  {props.textActiveSearch
+                    .replace('[search]', search)
+                    .replace('[zoekterm]', search)}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
           {filterNeccesary && datastore ? (
             <Filters
               {...props}
@@ -257,7 +274,10 @@ function ResourceOverview({
               itemsPerPage={itemsPerPage}
               projectId={props.projectId}
               resources={resources}
-              onUpdateFilter={resources.filter}
+              onUpdateFilter={(f) => {
+                setSearchText(f.search.text);
+                resources.filter(f);
+              }}
             />
           ) : null}
 
@@ -266,7 +286,7 @@ function ResourceOverview({
               resources.map((resource: any, index: number) => {
                 return (
                   <React.Fragment key={`resource-item-${resource.title}`}>
-                    {renderItem(resource, {...props, displayType}, () => {
+                    {renderItem(resource, { ...props, displayType }, () => {
                       onResourceClick(resource, index);
                     })}
                   </React.Fragment>

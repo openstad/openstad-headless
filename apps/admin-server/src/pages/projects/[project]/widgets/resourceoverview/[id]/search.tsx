@@ -8,27 +8,19 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
   displaySearch: z.boolean(),
+  displaySearchText: z.boolean(),
   textActiveSearch: z.string(),
 });
 
@@ -46,6 +38,7 @@ export default function WidgetResourceOverviewSearch(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       displaySearch: props.displaySearch || false,
+      displaySearchText: props.displaySearchText || false,
       textActiveSearch:
         props.textActiveSearch || 'Je ziet hier zoekresultaten voor [zoekterm]',
     },
@@ -72,6 +65,19 @@ export default function WidgetResourceOverviewSearch(
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="displaySearchText"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Zoektext weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="textActiveSearch"
