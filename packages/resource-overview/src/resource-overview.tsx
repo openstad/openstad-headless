@@ -13,6 +13,7 @@ import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { elipsize } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
 import { hasRole } from '@openstad-headless/lib';
+import nunjucks from 'nunjucks';
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -54,6 +55,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     itemsPerPage?: number;
     textResults?: string;
     onlyIncludeTagIds?: string;
+    rawInput?:string;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -77,6 +79,34 @@ const defaultItemRenderer = (
   props: ResourceOverviewWidgetProps,
   onItemClick?: () => void
 ) => {
+  if(props.displayType === 'raw') {
+    if(!props.rawInput) {
+      return <p>Template is nog niet ingesteld</p>
+    }
+   return <div
+    dangerouslySetInnerHTML={{
+      __html: nunjucks.renderString(props.rawInput, {
+        // here you can add variables that are available in the template
+        projectId: props.projectId,
+        user: resource.user,
+        startDateHumanized: resource.startDateHumanized,
+        status: resource.status,
+        title: resource.title,
+        summary: resource.summary,
+        description: resource.description,
+        images: resource.images,
+        budget: resource.budget,
+        extraData: resource.extraData,
+        location: resource.location,
+        modBreak: resource.modBreak,
+        modBreakDateHumanized: resource.modBreakDateHumanized,
+        progress: resource.progress,
+        createDateHumanized: resource.createDateHumanized,
+        publishDateHumanized: resource.publishDateHumanized,
+      })
+    }}></div>
+  }
+
   return (
     <article onClick={() => onItemClick && onItemClick()}>
       <Image
@@ -236,7 +266,7 @@ function ResourceOverview({
               resources.map((resource: any, index: number) => {
                 return (
                   <React.Fragment key={`resource-item-${resource.title}`}>
-                    {renderItem(resource, props, () => {
+                    {renderItem(resource, {...props, displayType}, () => {
                       onResourceClick(resource, index);
                     })}
                   </React.Fragment>

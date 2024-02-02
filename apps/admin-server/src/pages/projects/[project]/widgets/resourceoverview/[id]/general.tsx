@@ -23,13 +23,13 @@ import { Input } from '@/components/ui/input';
 import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { Textarea } from '@/components/ui/textarea';
 
 const formSchema = z.object({
-  resourceType: z.enum([
-    'resource'
-  ]),
+  resourceType: z.enum(['resource']),
   displayType: z.enum(['cardrow', 'cardgrid', 'raw']),
   itemLink: z.string(),
+  rawInput: z.string().optional(),
 });
 
 export default function WidgetResourceOverviewGeneral(
@@ -49,6 +49,7 @@ export default function WidgetResourceOverviewGeneral(
       resourceType: props?.resourceType || 'resource',
       displayType: props?.displayType || 'cardrow',
       itemLink: props?.itemLink || '/resources/[id]',
+      rawInput: props?.rawInput || '',
     },
   });
 
@@ -135,6 +136,50 @@ export default function WidgetResourceOverviewGeneral(
                     onChange={(e) => {
                       onFieldChange(field.name, e.target.value);
                       field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="rawInput"
+            render={({ field }) => (
+              <FormItem className="col-span-full">
+                <FormLabel>
+                  Template voor display: &quot; Creëer je eigen template.&quot;
+                </FormLabel>
+                <div className="text-xs pb-4">
+                  <h2>Te gebruiken variabelen:</h2>
+                  <ul className="list-disc">
+                    <li className="ml-4">{`{{projectId}}`}</li>
+                    <li className="ml-4">{`{{user}} -> Bijvoorbeeld {{user.name}}`}</li>
+                    <li className="ml-4">{`{{startDateHumanized}}`}</li>
+                    <li className="ml-4">{`{{status}}`}</li>
+                    <li className="ml-4">{`{{title}}`}</li>
+                    <li className="ml-4">{`{{summary}}`}</li>
+                    <li className="ml-4">{`{{description}}`}</li>
+                    <li className="ml-4">{`{{images}} -> Bijvoorbeeld {{images[nummer].src}}`}</li>
+                    <li className="ml-4">{`{{budget}}`}</li>
+                    <li className="ml-4">{`{{extraData}}`}</li>
+                    <li className="ml-4">{`{{location}}`}</li>
+                    <li className="ml-4">{`{{modBreak}}`}</li>
+                    <li className="ml-4">{`{{modBreakDateHumanized}}`}</li>
+                    <li className="ml-4">{`{{progress}}`}</li>
+                    <li className="ml-4">{`{{createDateHumanized}}`}</li>
+                    <li className="ml-4">{`{{publishDateHumanized}}`}</li>
+                  </ul>
+                </div>
+                <FormControl>
+                  <Textarea
+                    rows={5}
+                    {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      onFieldChange(field.name, e.target.value);
                     }}
                   />
                 </FormControl>
