@@ -50,12 +50,6 @@ export default function ProjectAreas() {
                   <Paragraph className="flex truncate -mr-16">
                     {area.name}
                   </Paragraph>
-                  <Paragraph className="flex">
-                    <ChevronRight
-                      strokeWidth={1.5}
-                      className="w-5 h-5 my-auto ml-auto"
-                    />
-                  </Paragraph>
                 </li>
               ))}
             </ul>
