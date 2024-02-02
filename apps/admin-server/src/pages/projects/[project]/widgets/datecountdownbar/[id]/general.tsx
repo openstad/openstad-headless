@@ -1,4 +1,12 @@
-import React from 'react';
+import { Calendar } from '@/components/ui/calendar';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { DateCountdownBarWidgetProps } from '@openstad/date-countdown-bar/src/date-countdown-bar';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
@@ -8,36 +16,30 @@ import {
   FormLabel,
 } from '../../../../../../components/ui/form';
 import { Input } from '../../../../../../components/ui/input';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { Heading } from '@/components/ui/typography';
-import { Separator } from '@/components/ui/separator';
-import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-import type { DateCountdownBarWidgetProps } from '@openstad/date-countdown-bar/src/date-countdown-bar';
 
 const formSchema = z.object({
   beforeText: z.string().optional(),
-  afterText:z.string().optional(),
-  date: z.string().optional()
-
+  afterText: z.string().optional(),
+  date: z.string().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
 
-export default function CountdownBarGeneral(props: DateCountdownBarWidgetProps & EditFieldProps<DateCountdownBarWidgetProps>) {
+export default function CountdownBarGeneral(
+  props: DateCountdownBarWidgetProps &
+    EditFieldProps<DateCountdownBarWidgetProps>
+) {
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   function onSubmit(values: FormData) {
-    props.updateConfig({...props, ...values});
+    props.updateConfig({ ...props, ...values });
   }
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      beforeText: props.beforeText || "",
-      afterText: props.afterText || "",
-      date: props.date
+      beforeText: props.beforeText || '',
+      afterText: props.afterText || '',
+      date: props.date,
     },
   });
 
@@ -58,7 +60,7 @@ export default function CountdownBarGeneral(props: DateCountdownBarWidgetProps &
               <FormLabel>Text links van de dagen kaart(en)</FormLabel>
               <FormControl>
                 <Input
-                  placeholder='Bijv: Het is voorbij over'
+                  placeholder="Bijv: Het is voorbij over"
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
@@ -78,14 +80,13 @@ export default function CountdownBarGeneral(props: DateCountdownBarWidgetProps &
               <FormLabel>Text rechts van de dagen kaart(en)</FormLabel>
               <FormControl>
                 <Input
-                  placeholder='Bijv: dagen'
+                  placeholder="Bijv: dagen"
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
                     onFieldChange(field.name, e.target.value);
                   }}
                 />
-
               </FormControl>
             </FormItem>
           )}
@@ -96,17 +97,15 @@ export default function CountdownBarGeneral(props: DateCountdownBarWidgetProps &
           name="date"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Datum</FormLabel>
+              <FormLabel>Einddatum</FormLabel>
               <FormControl>
-                <>  
-                <Input
-                  placeholder='Bijv: 24-01-2024'
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
-                  }}
-                />
+                <>
+                  <Calendar
+                    onDayClick={(day) => {
+                      field.onChange(day.toISOString());
+                      onFieldChange(field.name, day.toISOString());
+                    }}
+                  />
                 </>
               </FormControl>
             </FormItem>

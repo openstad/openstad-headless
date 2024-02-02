@@ -9,6 +9,7 @@ type Props = {
     | 'agenda'
     | 'likes'
     | 'comments'
+    | 'rawresource'
     | 'resourceoverview'
     | 'resourcedetail'
     | 'resourceform'
@@ -16,7 +17,8 @@ type Props = {
     | 'resourcesmap'
     | 'map'
     | 'keuzewijzer'
-    | 'datecountdownbar';
+    | 'counter'
+    | 'datecountdownbar'
   config?: any;
   projectId: string;
 };

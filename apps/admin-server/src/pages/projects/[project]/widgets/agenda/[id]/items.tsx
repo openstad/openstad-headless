@@ -148,7 +148,6 @@ export default function WidgetAgendaItems(
     props.onFieldChanged('items', items);
   }, [items]);
 
-  // Sets form to selected item values when item is selected
   useEffect(() => {
     if (selectedItem) {
       form.reset({
@@ -170,9 +169,8 @@ export default function WidgetAgendaItems(
       );
       updatedLinks[index] = { ...selectedLink };
 
-      // Use form.reset to update the entire form state
       form.reset({
-        ...form.getValues(), // Retains the current values of other fields
+        ...form.getValues(),
         links: updatedLinks,
       });
     }
@@ -313,9 +311,9 @@ export default function WidgetAgendaItems(
             {settingLinks ? (
               <div className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
                 <div className="flex flex-col justify-between">
-                  <div>
+                  <div className="flex flex-col gap-y-2">
                     <Heading size="xl">Links</Heading>
-                    <Separator className="my-4" />
+                    <Separator className="mt-2" />
                     <FormField
                       control={form.control}
                       name={`links.${links.length - 1}.title`}
@@ -435,17 +433,17 @@ export default function WidgetAgendaItems(
                 <div>
                   <Heading size="xl">Agenda items</Heading>
                   <Separator className="my-4" />
-                  <div className="w-2/3">
-                    <FormField
-                      control={form.control}
-                      name="trigger"
-                      render={({ field }) => (
-                        <FormItem>
-                          <Input type="hidden" {...field} />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <FormField
+                    control={form.control}
+                    name="trigger"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Input type="hidden" {...field} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="w-full lg:w-2/3 flex flex-col gap-y-2">
                     <FormField
                       control={form.control}
                       name="title"
