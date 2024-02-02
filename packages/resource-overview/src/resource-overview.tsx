@@ -84,30 +84,37 @@ const defaultItemRenderer = (
     if (!props.rawInput) {
       return <p>Template is nog niet ingesteld</p>;
     }
-    return (
-      <div
-        dangerouslySetInnerHTML={{
-          __html: nunjucks.renderString(props.rawInput, {
-            // here you can add variables that are available in the template
-            projectId: props.projectId,
-            user: resource.user,
-            startDateHumanized: resource.startDateHumanized,
-            status: resource.status,
-            title: resource.title,
-            summary: resource.summary,
-            description: resource.description,
-            images: resource.images,
-            budget: resource.budget,
-            extraData: resource.extraData,
-            location: resource.location,
-            modBreak: resource.modBreak,
-            modBreakDateHumanized: resource.modBreakDateHumanized,
-            progress: resource.progress,
-            createDateHumanized: resource.createDateHumanized,
-            publishDateHumanized: resource.publishDateHumanized,
-          }),
-        }}></div>
-    );
+
+    try {
+      const render = nunjucks.renderString(props.rawInput, {
+        // here you can add variables that are available in the template
+        projectId: props.projectId,
+        user: resource.user,
+        startDateHumanized: resource.startDateHumanized,
+        status: resource.status,
+        title: resource.title,
+        summary: resource.summary,
+        description: resource.description,
+        images: resource.images,
+        budget: resource.budget,
+        extraData: resource.extraData,
+        location: resource.location,
+        modBreak: resource.modBreak,
+        modBreakDateHumanized: resource.modBreakDateHumanized,
+        progress: resource.progress,
+        createDateHumanized: resource.createDateHumanized,
+        publishDateHumanized: resource.publishDateHumanized,
+      });
+      return (
+        <div
+          dangerouslySetInnerHTML={{
+            __html: render,
+          }}></div>
+      );
+    }catch(e) {
+      console.error("De template kon niet worden geparse: ", e)
+    }
+    return <p>Er is een fout in de template</p>;
   }
 
   return (
@@ -180,12 +187,21 @@ function ResourceOverview({
     .map((t) => Number.parseInt(t));
 
   const [open, setOpen] = React.useState(false);
-  const [search, setSearchText] = useState<string>('');
 
+  // Filters that when changed reupdate the useResources value automatically
+  const [search, setSearch] = useState<string>('');
+  const [tags, setTags] = useState<number[]>(tagIdsToLimitResourcesTo || []);
+  const [page, setPage] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(itemsPerPage || 10);
+  const [sort, setSort] = useState<string | undefined>(props.defaultSorting || undefined);
+ 
   const [resourcesWithPagination] = datastore.useResources({
     ...props,
-    itemsPerPage,
-    tags: tagIdsToLimitResourcesTo,
+    page,
+    pageSize,
+    search,
+    tags,
+    sort
   });
 
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
@@ -275,8 +291,13 @@ function ResourceOverview({
               projectId={props.projectId}
               resources={resources}
               onUpdateFilter={(f) => {
-                setSearchText(f.search.text);
-                resources.filter(f);
+                if(f.tags.length === 0) {
+                  setTags(tagIdsToLimitResourcesTo);
+                }else {
+                  setTags(f.tags);
+                }
+                setSort(f.sort);
+                setSearch(f.search.text);
               }}
             />
           ) : null}

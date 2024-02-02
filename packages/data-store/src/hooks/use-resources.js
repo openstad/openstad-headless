@@ -1,14 +1,16 @@
-export default function useResources(props) {
+export default function useResources({ 
+  projectId,
+  page = 0,
+  pageSize = 20,
+  search = '',
+  tags = [],
+  sort = 'createdAt_desc'
+}) {
   let self = this;
-
-  const projectId = props.projectId;
-  const pageSize = props.itemsPerPage || 20;
-  const theseTagsOnly = props.tags || [];
-
 
   // If you add a prop here, the also do it for filter
   const { data, error, isLoading } = self.useSWR(
-    { projectId, pageSize, tags:theseTagsOnly },
+    { projectId, page, pageSize, search, tags, sort },
     'resources.fetch',
   );
 
@@ -32,12 +34,6 @@ export default function useResources(props) {
   resources.records.create = function (newData) {
     return self.mutate({ projectId }, 'resources.create', newData, {
       action: 'create',
-    });
-  };
-  resources.records.filter = function (filter) {
-    return self.mutate({ projectId, pageSize, tags:theseTagsOnly }, 'resources.fetch', null, {
-      action: 'fetch',
-      filter,
     });
   };
 

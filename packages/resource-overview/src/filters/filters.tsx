@@ -37,7 +37,7 @@ export function Filters({
   const defaultFilter: Filter = {
     tags: [],
     search: { text: '' },
-    sort: '',
+    sort: props.defaultSorting || 'createdAt_desc',
     page: 0,
     pageSize: props.itemsPerPage || 20,
   };
