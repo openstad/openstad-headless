@@ -13,7 +13,7 @@ const Paginator = ({
   totalPages: number;
   onPageChange: (page: number) => void;
 }) => {
-  const pages = [...Array(totalPages).keys()];
+  const pages = Array.from({length:totalPages}, (_, index) => index);
 
   return (
     <div className="osc-paginator">
