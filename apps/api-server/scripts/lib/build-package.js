@@ -31,7 +31,7 @@ function buildPackageByDirectory (directory) {
   execSync(`npm i --prefix=packages/${directory}`, {cwd: `../../`});
   execSync(`npm run build --if-present --prefix=packages/${directory}`, {cwd: `../../`});
   
-  console.log(`Done building packagein path: ${directory}`)
+  console.log(`Done building package in path: ${directory}`)
 }
 
 module.exports = { buildPackage, buildPackageByDirectory, getDependencyPackages };
