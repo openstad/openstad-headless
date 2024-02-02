@@ -21,46 +21,28 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
     ref
   ) => {
     // The useTags function should not need the  config and such anymore, because it should get that from the datastore object. Perhaps a rewrite of the hooks is needed
+    
     const [tags] = dataStore.useTags({
-      ...props,
+      projectId: props.projectId,
       type: tagType,
+      onlyIncludeIds,
     });
 
-    if (onlyIncludeIds.length > 0) {
-      return (
-        <Select
-          ref={ref}
-          options={(tags || [])
-            .filter((t: TagDefinition) => onlyIncludeIds.includes(t.id))
-            .map((tag: TagDefinition) => ({
-              value: tag.id,
-              label: tag.name,
-            }))}
-          onValueChange={(value) => {
-            onUpdateFilter && onUpdateFilter(value);
-          }}>
-          {props.placeholder ? (
-            <option value={''}>{props.placeholder}</option>
-          ) : null}
-        </Select>
-      );
-    } else {
-      return (
-        <Select
-          ref={ref}
-          options={(tags || []).map((tag: { id: string; name: string }) => ({
-            value: tag.id,
-            label: tag.name,
-          }))}
-          onValueChange={(value) => {
-            onUpdateFilter && onUpdateFilter(value);
-          }}>
-          {props.placeholder ? (
-            <option value={''}>{props.placeholder}</option>
-          ) : null}
-        </Select>
-      );
-    }
+    return (
+      <Select
+        ref={ref}
+        options={(tags || []).map((tag:TagDefinition) => ({
+          value: tag.id,
+          label: tag.name,
+        }))}
+        onValueChange={(value) => {
+          onUpdateFilter && onUpdateFilter(value);
+        }}>
+        {props.placeholder ? (
+          <option value={''}>{props.placeholder}</option>
+        ) : null}
+      </Select>
+    );
   }
 );
 

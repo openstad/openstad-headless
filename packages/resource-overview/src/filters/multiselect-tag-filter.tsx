@@ -13,6 +13,8 @@ type Props = {
   onlyIncludeIds?: number[];
 };
 
+type TagDefinition = { id: number; name: string };
+
 const MultiSelectTagFilter = ({
   dataStore,
   tagType,
@@ -25,39 +27,21 @@ const MultiSelectTagFilter = ({
   const [tags] = dataStore.useTags({
     ...props,
     type: tagType,
+    onlyIncludeIds,
   });
 
-  type TagDefinition = { id: number; name: string };
-  if (onlyIncludeIds.length > 0) {
-    return (
-      <MultiSelect
-        label={props.placeholder || ''}
-        onItemSelected={(value) => {
-          onUpdateFilter && onUpdateFilter(value);
-        }}
-        options={(tags || [])
-          .filter((t: TagDefinition) => onlyIncludeIds.includes(t.id))
-          .map((tag: TagDefinition) => ({
-            value: tag.id,
-            label: tag.name,
-            checked: selected.includes(tag.id),
-          }))}
-      />
-    );
-  } else {
-      return (
-        <MultiSelect
-          label={props.placeholder || ''}
-          onItemSelected={(value) => {
-            onUpdateFilter && onUpdateFilter(value);
-          }}
-          options={(tags || []).map((tag: TagDefinition) => ({
-            value: tag.id,
-            label: tag.name,
-            checked: selected.includes(tag.id),
-          }))}
-        />
-      );
-  }
+  return (
+    <MultiSelect
+      label={props.placeholder || ''}
+      onItemSelected={(value) => {
+        onUpdateFilter && onUpdateFilter(value);
+      }}
+      options={(tags || []).map((tag: TagDefinition) => ({
+        value: tag.id,
+        label: tag.name,
+        checked: selected.includes(tag.id),
+      }))}
+    />
+  );
 };
 export { MultiSelectTagFilter };

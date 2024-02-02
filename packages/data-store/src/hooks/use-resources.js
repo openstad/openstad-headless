@@ -3,10 +3,12 @@ export default function useResources(props) {
 
   const projectId = props.projectId;
   const pageSize = props.itemsPerPage || 20;
+  const theseTagsOnly = props.tags || [];
+
 
   // If you add a prop here, the also do it for filter
   const { data, error, isLoading } = self.useSWR(
-    { projectId, pageSize },
+    { projectId, pageSize, tags:theseTagsOnly },
     'resources.fetch',
   );
 
@@ -33,7 +35,7 @@ export default function useResources(props) {
     });
   };
   resources.records.filter = function (filter) {
-    return self.mutate({ projectId, pageSize }, 'resources.fetch', null, {
+    return self.mutate({ projectId, pageSize, tags:theseTagsOnly }, 'resources.fetch', null, {
       action: 'fetch',
       filter,
     });

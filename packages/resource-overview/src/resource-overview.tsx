@@ -24,7 +24,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
       props: ResourceOverviewWidgetProps,
       onItemClick?: () => void
     ) => React.JSX.Element;
-    resourceType?: 'resource'
+    resourceType?: 'resource';
     displayType?: 'cardrow' | 'cardgrid' | 'raw';
     allowFiltering?: boolean;
     displayTitle?: boolean;
@@ -131,7 +131,7 @@ function ResourceOverview({
   renderHeader = defaultHeaderRenderer,
   itemsPerPage = 20,
   textResults = 'Dit zijn de zoekresultaten voor [search]',
-  onlyIncludeTagIds='',
+  onlyIncludeTagIds = '',
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -140,20 +140,22 @@ function ResourceOverview({
   });
 
   // const recourceTagsInclude = only
-  const tagIdsToLimitResourcesTo = onlyIncludeTagIds.trim().split(",").filter(t =>!isNaN(+t)).map(t=>Number.parseInt(t));
-
-
-
+  const tagIdsToLimitResourcesTo = onlyIncludeTagIds
+    .trim()
+    .split(',')
+    .filter((t) => t && !isNaN(+t.trim()))
+    .map((t) => Number.parseInt(t));
+  
   const [open, setOpen] = React.useState(false);
   const [resourcesWithPagination] = datastore.useResources({
     ...props,
     itemsPerPage,
-    tags: tagIdsToLimitResourcesTo
+    tags: tagIdsToLimitResourcesTo,
   });
 
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
   const resources = resourcesWithPagination.records || [];
-  
+
   const [currentUser] = datastore.useCurrentUser({ ...props });
   const isModerator = hasRole(currentUser, 'moderator');
 
@@ -226,7 +228,6 @@ function ResourceOverview({
               projectId={props.projectId}
               resources={resources}
               onUpdateFilter={resources.filter}
-
             />
           ) : null}
 

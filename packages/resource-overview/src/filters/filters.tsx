@@ -6,10 +6,9 @@ import { MultiSelectTagFilter } from './multiselect-tag-filter';
 import { SelectTagFilter } from './select-tag-filter';
 import { ResourceOverviewWidgetProps } from '../resource-overview';
 
-//Todo correctly type resources. Will be possible when the datastore is correctly typed
 
 type Filter = {
-  tags: { [key: string]: any };
+  tags: Array<number>;
   search: { text: string };
   sort: string;
   page: number;
@@ -35,18 +34,22 @@ export function Filters({
     api: props.api,
   });
 
-  const defaultFilter: Filter = { tags: {}, search: { text: '' }, sort: '', page: 0, pageSize: props.itemsPerPage || 20};
+  const defaultFilter: Filter = {
+    tags: [],
+    search: { text: '' },
+    sort: '',
+    page: 0,
+    pageSize: props.itemsPerPage || 20,
+  };
 
-  tagGroups.forEach((tGroup) => {
-    defaultFilter.tags[tGroup.type] = null;
-  });
-
+  const [tagState, setTagState] = useState<{ [key: string]: Array<number> }>();
   const [filter, setFilter] = useState<Filter>(defaultFilter);
   const [selectedOptions, setSelected] = useState<{ [key: string]: any }>({});
 
   // Standard and dynamic refs used for resetting
   const searchRef = useRef<HTMLInputElement>(null);
   const sortingRef = useRef<HTMLSelectElement>(null);
+  const search = useDebounce(setSearch, 300);
 
   // These dynamic refs are only applicable on single item selects <select>
   // The multiselect is a controlled custom component and is managed by the this component
@@ -73,23 +76,15 @@ export function Filters({
     }
   }, []);
 
+
   function updateFilter(newFilter: Filter) {
     setFilter(newFilter);
     onUpdateFilter && onUpdateFilter(newFilter);
   }
 
   function setTags(type: string, values: any[]) {
-    const updatedFilter:Filter = {
-      ...filter,
-      tags: {
-        ...filter.tags,
-        [type]: values,
-      },
-    };
-    updateFilter(updatedFilter);
+    setTagState({ ...tagState, [type]: values });
   }
-
-  const search = useDebounce(setSearch, 300);
 
   function setSearch(value: string) {
     updateFilter({
@@ -107,25 +102,42 @@ export function Filters({
     });
   }
 
-  const updateTagList = (tagType: string, updatedTag: string) => {
+  const updateTagListMultiple = (tagType: string, updatedTag: string) => {
     const existingTags = selectedOptions[tagType];
     let selected = [...(existingTags || [])];
 
-    if (updatedTag === '') {
-      // Only a regular select kan return a "".
-      // Remove the selection from the list
-      selected = [];
+    if (selected.includes(updatedTag)) {
+      selected = selected.filter((o) => o != updatedTag);
     } else {
-      if (selected.includes(updatedTag)) {
-        selected = selected.filter((o) => o != updatedTag);
-      } else {
-        selected.push(updatedTag);
-      }
+      selected.push(updatedTag);
     }
 
     setSelected({ ...selectedOptions, [tagType]: selected });
     setTags(tagType, selected);
   };
+
+  const updateTagListSingle = (tagType: string, updatedTag: string) => {
+    const existingTags = selectedOptions[tagType];
+    let selected = [...(existingTags || [])];
+
+    if (updatedTag === '') {
+      selected = [];
+    } else {
+      selected = [updatedTag];
+    }
+    setSelected({ ...selectedOptions, [tagType]: selected });
+    setTags(tagType, selected);
+  };
+
+  useEffect(() => {
+    if (tagState) {
+      const tags = Object.values(tagState).flat();
+      updateFilter({
+        ...filter,
+        tags,
+      });
+    }
+  }, [tagState]);
 
   return (
     <section>
@@ -152,7 +164,7 @@ export function Filters({
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
                     onUpdateFilter={(updatedTag) =>
-                      updateTagList(tagGroup.type, updatedTag)
+                      updateTagListMultiple(tagGroup.type, updatedTag)
                     }
                     onlyIncludeIds={tagsLimitation}
                   />
@@ -167,7 +179,7 @@ export function Filters({
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
                     onUpdateFilter={(updatedTag) =>
-                      updateTagList(tagGroup.type, updatedTag)
+                      updateTagListSingle(tagGroup.type, updatedTag)
                     }
                     onlyIncludeIds={tagsLimitation}
                   />
