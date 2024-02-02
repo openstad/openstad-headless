@@ -1,6 +1,6 @@
 import './resource-overview.css';
 import React, { useCallback, useState } from 'react';
-import { Banner, Carousel, Icon } from '@openstad-headless/ui/src';
+import { Banner, Carousel, Icon, Paginator } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { Spacer } from '@openstad-headless/ui/src';
@@ -111,8 +111,8 @@ const defaultItemRenderer = (
             __html: render,
           }}></div>
       );
-    }catch(e) {
-      console.error("De template kon niet worden geparse: ", e)
+    } catch (e) {
+      console.error('De template kon niet worden geparsed: ', e);
     }
     return <p>Er is een fout in de template</p>;
   }
@@ -193,15 +193,17 @@ function ResourceOverview({
   const [tags, setTags] = useState<number[]>(tagIdsToLimitResourcesTo || []);
   const [page, setPage] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(itemsPerPage || 10);
-  const [sort, setSort] = useState<string | undefined>(props.defaultSorting || undefined);
- 
+  const [sort, setSort] = useState<string | undefined>(
+    props.defaultSorting || undefined
+  );
+
   const [resourcesWithPagination] = datastore.useResources({
     ...props,
     page,
     pageSize,
     search,
     tags,
-    sort
+    sort,
   });
 
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
@@ -291,9 +293,9 @@ function ResourceOverview({
               projectId={props.projectId}
               resources={resources}
               onUpdateFilter={(f) => {
-                if(f.tags.length === 0) {
+                if (f.tags.length === 0) {
                   setTags(tagIdsToLimitResourcesTo);
-                }else {
+                } else {
                   setTags(f.tags);
                 }
                 setSort(f.sort);
@@ -315,6 +317,14 @@ function ResourceOverview({
               })}
           </section>
         </section>
+        <Spacer size={4} />
+        <div className="osc-resource-overview-paginator col-span-full">
+          <Paginator
+            page={resourcesWithPagination?.metadata?.page || 0}
+            totalPages={resourcesWithPagination?.metadata?.pageCount || 1}
+            onPageChange={(page) => setPage(page)}
+          />
+        </div>
       </div>
     </>
   );

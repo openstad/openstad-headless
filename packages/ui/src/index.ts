@@ -13,3 +13,4 @@ export { MultiSelect } from './multiselect';
 export { Card } from './card';
 export { Dialog } from './dialog';
 export { Carousel } from './carousel';
+export { Paginator } from './paginator'

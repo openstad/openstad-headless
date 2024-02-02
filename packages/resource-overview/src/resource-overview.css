@@ -95,3 +95,8 @@ p.osc-searchtext {
   border-radius: 4px;
   background-color: var(--osc-card);
 }
+
+.osc-resource-overview-paginator {
+  display: flex;
+  justify-content: center;
+}

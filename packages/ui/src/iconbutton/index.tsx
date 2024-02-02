@@ -15,6 +15,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         {...props}
         className={`osc-icon-button ${props.className}`}>
         {props.icon ? <Icon icon={props.icon} /> : null}
+        {props.children}
       </button>
     );
   }
