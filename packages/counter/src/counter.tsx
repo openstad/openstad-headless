@@ -54,13 +54,13 @@ function Counter({
     sentiment: opinion
   })
 
-  const [results] = datastore.useChoiceGuideResults({
+  const {data:results, error, isLoading} = datastore.useChoiceGuideResults({
     projectId: props.projectId,
-    choiceGuideId: props.choiceGuideId
-  });
+    choiceGuideId: props.choiceGuideId,
+  }); 
 
   if (counterType === 'resource') {
-    amountDisplayed = resources.length;
+    amountDisplayed = resources?.metadata?.totalCount || 0;
   }
 
   if (counterType === 'vote') {
