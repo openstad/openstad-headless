@@ -91,7 +91,7 @@ router
     }            
       widget.update({ config }).then((result) => res.json(result));
     }
-  });
+  })
 
   // delete widget
   // ---------
