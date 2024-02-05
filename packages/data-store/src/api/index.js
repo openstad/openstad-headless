@@ -43,11 +43,13 @@ function API(props = {}) {
   self.resource = {
     fetch: resource.fetch.bind(self),
     update: resource.update.bind(self),
+    delete: resource.delete.bind(self),
     submitLike: resource.submitLike.bind(self),
   };
 
   self.resources = {
     fetch: resources.fetch.bind(self),
+    delete: resources.delete.bind(self)
   };
 
   self.submissions = {
