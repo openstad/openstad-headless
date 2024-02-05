@@ -4,6 +4,8 @@ import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { Spacer } from '@openstad-headless/ui/src';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
+import React from 'react';
+
 export type AgendaWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
