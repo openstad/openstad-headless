@@ -16,57 +16,42 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { Input } from '@/components/ui/input';
+import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { Textarea } from '@/components/ui/textarea';
 
 const formSchema = z.object({
-  resource: z.enum([
-    'resource',
-    'article',
-    'activeUser',
-    'resourceUser',
-    'submission',
-  ]),
+  resourceType: z.enum(['resource']),
   displayType: z.enum(['cardrow', 'cardgrid', 'raw']),
+  itemLink: z.string(),
+  rawInput: z.string().optional(),
 });
 
-export default function WidgetResourceOverviewGeneral() {
+export default function WidgetResourceOverviewGeneral(
+  props: ResourceOverviewWidgetProps &
+    EditFieldProps<ResourceOverviewWidgetProps>
+) {
   type FormData = z.infer<typeof formSchema>;
-  const category = 'general';
-
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig();
-
-  const defaults = useCallback(
-    () => ({
-      resource: widget?.config?.[category]?.resource || 'resource',
-      displayType: widget?.config?.[category]?.displayType || 'cardrow',
-    }),
-    [widget?.config]
-  );
-
   async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could falset update', error);
-    }
+    props.updateConfig({ ...props, ...values });
   }
+
+  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      resourceType: props?.resourceType || 'resource',
+      displayType: props?.displayType || 'cardrow',
+      itemLink: props?.itemLink || '/resources/[id]',
+      rawInput: props?.rawInput || '',
+    },
   });
-
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -78,11 +63,16 @@ export default function WidgetResourceOverviewGeneral() {
           className="lg:w-1/2 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="resource"
+            name="resourceType"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Resource type</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    props.onFieldChanged(field.name, value);
+                  }}
+                  value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Resource" />
@@ -90,14 +80,6 @@ export default function WidgetResourceOverviewGeneral() {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="resource">Resource</SelectItem>
-                    <SelectItem value="article">Artikel</SelectItem>
-                    <SelectItem value="activeUser">
-                      Actieve gebruiker
-                    </SelectItem>
-                    <SelectItem value="resourceUser">
-                      Gebruiker van de resource
-                    </SelectItem>
-                    <SelectItem value="submission">Oplevering</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -110,7 +92,12 @@ export default function WidgetResourceOverviewGeneral() {
             render={({ field }) => (
               <FormItem className="col-span-full">
                 <FormLabel>Display type</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    props.onFieldChanged(field.name, value);
+                  }}
+                  value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Cards op een row - Linkt naar items op een andere pagina." />
@@ -132,6 +119,75 @@ export default function WidgetResourceOverviewGeneral() {
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="itemLink"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Link (relatief) naar de specifieke resource
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Bijv: /resources/[id]"
+                    type="text"
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="rawInput"
+            render={({ field }) => (
+              <FormItem className="col-span-full">
+                <FormLabel>
+                  Template voor display: &quot; Creëer je eigen template.&quot;
+                </FormLabel>
+                <div className="text-xs pb-4">
+                  <h2>Te gebruiken variabelen:</h2>
+                  <ul className="list-disc">
+                    <li className="ml-4">{`{{projectId}}`}</li>
+                    <li className="ml-4">{`{{user}} -> Bijvoorbeeld {{user.name}}`}</li>
+                    <li className="ml-4">{`{{startDateHumanized}}`}</li>
+                    <li className="ml-4">{`{{status}}`}</li>
+                    <li className="ml-4">{`{{title}}`}</li>
+                    <li className="ml-4">{`{{summary}}`}</li>
+                    <li className="ml-4">{`{{description}}`}</li>
+                    <li className="ml-4">{`{{images}} -> Bijvoorbeeld {{images[nummer].src}}`}</li>
+                    <li className="ml-4">{`{{budget}}`}</li>
+                    <li className="ml-4">{`{{extraData}}`}</li>
+                    <li className="ml-4">{`{{location}}`}</li>
+                    <li className="ml-4">{`{{modBreak}}`}</li>
+                    <li className="ml-4">{`{{modBreakDateHumanized}}`}</li>
+                    <li className="ml-4">{`{{progress}}`}</li>
+                    <li className="ml-4">{`{{createDateHumanized}}`}</li>
+                    <li className="ml-4">{`{{publishDateHumanized}}`}</li>
+                  </ul>
+                </div>
+                <FormControl>
+                  <Textarea
+                    rows={5}
+                    {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      onFieldChange(field.name, e.target.value);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

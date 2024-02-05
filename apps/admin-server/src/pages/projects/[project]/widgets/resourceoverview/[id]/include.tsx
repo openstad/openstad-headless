@@ -10,53 +10,34 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
+import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  excludeTheme: z.string(),
-  filterTheme: z.string(),
-  filterResource: z.string(),
+  onlyIncludeTagIds: z.string(),
 });
 
-export default function WidgetResourceOverviewInclude() {
+export default function WidgetResourceOverviewInclude(
+  props: ResourceOverviewWidgetProps &
+    EditFieldProps<ResourceOverviewWidgetProps>
+) {
   type FormData = z.infer<typeof formSchema>;
-  const category = 'include';
-
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig();
-
-  const defaults = useCallback(
-    () => ({
-      excludeTheme: widget?.config?.[category]?.excludeTheme || '',
-      filterTheme: widget?.config?.[category]?.filterTheme || '',
-      filterResource: widget?.config?.[category]?.filterResource || '',
-    }),
-    [widget?.config]
-  );
-
   async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could falset update', error);
-    }
+    props.updateConfig({ ...props, ...values });
   }
+
+  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      onlyIncludeTagIds: props?.onlyIncludeTagIds || '',
+    },
   });
-
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -66,35 +47,29 @@ export default function WidgetResourceOverviewInclude() {
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-1/3 grid grid-cols-1 gap-4">
+      
           <FormField
             control={form.control}
-            name="excludeTheme"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Geef resources met dit thema niet weer:</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="filterTheme"
+            name="onlyIncludeTagIds"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Geef enkel resources weer met dit specifieke thema:
+                  Geef enkel resources weer met dit specifieke tag id:
                 </FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input  
+                  type="text"
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <FormField
+          {/* <FormField
             control={form.control}
             name="filterResource"
             render={({ field }) => (
@@ -106,7 +81,7 @@ export default function WidgetResourceOverviewInclude() {
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

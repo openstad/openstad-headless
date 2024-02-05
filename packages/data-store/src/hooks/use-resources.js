@@ -1,38 +1,49 @@
-import { useState } from 'react';
-
-export default function useResources(props) {
+export default function useResources({ 
+  projectId,
+  page = 0,
+  pageSize = 20,
+  search = '',
+  tags = [],
+  sort = 'createdAt_desc'
+}) {
   let self = this;
 
-  const projectId = props.projectId;
-  const resourceId = props.resourceId;
-  const sentiment = props.sentiment;
-
+  // If you add a prop here, the also do it for filter
   const { data, error, isLoading } = self.useSWR(
-    { projectId },
-    'resources.fetch'
+    { projectId, page, pageSize, search, tags, sort },
+    'resources.fetch',
   );
-
 
   // add functionality
   let resources = data || [];
-  resources.create = function (newData) {
+
+  // Resource where probably called without page and itemsPerPage
+  if (Array.isArray(resources)) {
+    resources = {
+      metadata: {
+        page: 0,
+        pageSize: resources.length,
+        pageCount: 1,
+        totalCount: resources.length
+      },
+      records: resources,
+    };
+  }
+
+
+  resources.records.create = function (newData) {
     return self.mutate({ projectId }, 'resources.create', newData, {
       action: 'create',
     });
   };
-  resources.filter = function (filter) {
-    return self.mutate({ projectId }, 'resources.fetch', null, {
-      action: 'fetch',
-      filter,
-    });
-  };
-  resources.map(async (resource) => {
+
+  resources.records.forEach(async (resource) => {
     resource.update = function (newData) {
       return self.mutate({ projectId }, 'resources.update', newData, {
         action: 'update',
       });
     };
-    resource.delete = function (newData) {
+    resource.delete = function () {
       return self.mutate({ projectId }, 'resources.delete', resource, {
         action: 'delete',
       });

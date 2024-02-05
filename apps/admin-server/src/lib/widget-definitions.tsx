@@ -4,14 +4,15 @@ export const WidgetDefinitions = {
   begrootmodule: 'Begrootmodule',
   enquete: 'Enquete',
   resourcesmap: 'Resource map',
+  counter: 'Counter',
+  datecountdownbar: 'Date countdown bar',
   keuzewijzer: 'Keuzewijzer',
   likes: 'Like',
   map: 'Map',
-  rawresource: 'Raw Resource',
-  resourceform: 'Resource form',
-  resourceoverview: 'Resource overview',
+  rawresource: 'Raw resource',
   resourcedetail: 'Resource detail',
-  datecountdownbar: 'Date countdown bar',
+  resourceform: 'Resource form',
+  resourceoverview: 'Resource overview'
 };
 
 export type WidgetDefinition = keyof typeof WidgetDefinitions;

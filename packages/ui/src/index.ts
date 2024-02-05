@@ -1,6 +1,6 @@
+export { Button, SecondaryButton, GhostButton } from './button';
+export { IconButton } from './iconbutton';
 export { Banner } from './banner';
-export { Button, GhostButton, SecondaryButton } from './button';
-export { Card } from './card';
 export { Checkbox } from './checkbox';
 export { DropDownMenu } from './dropdown';
 export { Icon } from './icon';
@@ -12,3 +12,7 @@ export { ProgressBar } from './progressbar';
 export { RangeSlider } from './rangeslider';
 export { Select } from './select';
 export { Spacer } from './spacer';
+export { Card } from './card';
+export { Dialog } from './dialog';
+export { Carousel } from './carousel';
+export { Paginator } from './paginator'
