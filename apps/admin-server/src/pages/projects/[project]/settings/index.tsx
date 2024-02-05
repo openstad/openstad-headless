@@ -201,7 +201,7 @@ export default function ProjectSettings() {
                       name="url"
                       render={({ field }) => (
                         <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                          <FormLabel>Projectnaam</FormLabel>
+                          <FormLabel>Project URL</FormLabel>
                           <FormControl>
                             <Input placeholder="Url" {...field} />
                           </FormControl>

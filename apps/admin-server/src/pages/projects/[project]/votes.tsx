@@ -10,8 +10,6 @@ export default function ProjectResources() {
   const { project } = router.query;
   const { data } = useVotes(project as string);
 
-  if (!data) return null;
-
   return (
     <div>
       <PageLayout
