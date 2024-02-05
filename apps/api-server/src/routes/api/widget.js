@@ -93,4 +93,20 @@ router
     }
   });
 
+  // delete widget
+  // ---------
+  .delete(auth.useReqUser)
+  .delete(function (req, res, next) {
+      const widget = req.results;
+      if (!(widget && widget.can && widget.can('delete')))
+          return next(new Error('You cannot delete this widget'));
+
+      widget
+          .destroy()
+          .then(() => {
+              res.json({ widget: 'deleted' });
+          })
+          .catch(next);
+  });
+
 module.exports = router;

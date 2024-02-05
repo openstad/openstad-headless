@@ -67,12 +67,6 @@ export default function ProjectCodes() {
                   <Paragraph className="hidden lg:flex truncate">{code.id || null}</Paragraph>
                   <Paragraph className="hidden lg:flex truncate">{code.code || null}</Paragraph>
                   <Paragraph className="flex truncate -mr-16">{code.used}</Paragraph>
-                  <Paragraph className="flex">
-                    <ChevronRight
-                      strokeWidth={1.5}
-                      className="w-5 h-5 my-auto ml-auto"
-                    />
-                  </Paragraph>
                 </li>
               ))}  
             </ul>

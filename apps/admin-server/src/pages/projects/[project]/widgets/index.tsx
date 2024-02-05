@@ -1,3 +1,4 @@
+import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { CreateWidgetDialog } from '@/components/dialog-widget-create';
 import { PageLayout } from '@/components/ui/page-layout';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
@@ -6,12 +7,13 @@ import { WidgetDefinitions } from '@/lib/widget-definitions';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import toast from 'react-hot-toast';
 
 export default function ProjectWidgets() {
   const router = useRouter();
   const { project } = router.query;
 
-  const { data: widgets, isLoading: isLoadingWidgets } = useWidgetsHook(
+  const { data: widgets, isLoading: isLoadingWidgets, remove } = useWidgetsHook(
     project as string
   );
 
@@ -33,31 +35,48 @@ export default function ProjectWidgets() {
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
             <div className="grid grid-cols-2 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
-              <ListHeading className="hidden md:flex">Widget</ListHeading>
-              <ListHeading className="hidden md:flex">
+              <ListHeading className="hidden lg:flex">Widget</ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1">
                 Toegevoegd op
               </ListHeading>
-              <ListHeading className="hidden md:flex">Gewijzigd op</ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1">Gewijzigd op</ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
             </div>
-
             <ul>
               {(widgets as Widget[])?.map((widget) => (
                 <Link
                   key={widget.id}
                   href={`/projects/${project}/widgets/${widget.type}/${widget.id}`}>
-                  <li className="grid grid-cols-2 lg:grid-cols-4 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                  <li className="grid grid-cols-2 lg:grid-cols-6 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                     <div className="">
                       <strong className="">
                         {WidgetDefinitions[widget.type]}
                       </strong>
-                      <Paragraph>{widget.description}</Paragraph>
+                      <Paragraph className="my-auto -mr-16 lg:mr-0">{widget.description}</Paragraph>
                     </div>
-                    <Paragraph className="hidden md:flex truncate my-auto">
+                    <Paragraph className="hidden lg:flex truncate my-auto">
                       {widget.createdAt}
                     </Paragraph>
-                    <Paragraph className="hidden md:flex truncate my-auto -mr-16">
+                    <Paragraph className="hidden lg:flex truncate my-auto lg:-mr-16">
                       {widget.updatedAt}
                     </Paragraph>
+                    <div
+                      className="hidden lg:flex ml-auto"
+                      onClick={(e) => e.preventDefault()}>
+                      <RemoveResourceDialog
+                        header="Widget verwijderen"
+                        message="Weet je zeker dat je deze widget wilt verwijderen?"
+                        onDeleteAccepted={() =>
+                          remove(widget.id)
+                            .then(() =>
+                              toast.success('Widget successvol verwijderd')
+                            )
+                            .catch((e) =>
+                              toast.error('Widget kon niet worden verwijderd')
+                            )
+                        }
+                      />
+                    </div>
                     <Paragraph className="flex">
                       <ChevronRight
                         strokeWidth={1.5}
