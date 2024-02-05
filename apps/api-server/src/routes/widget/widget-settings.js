@@ -78,8 +78,10 @@ module.exports = {
     },
   },
   counter: {
-    js: ['@openstad-headless/counter/dist/counter.iife.js'],
-    css: ['@openstad-headless/counter/dist/style.css'],
+    packageName: '@openstad-headless/counter',
+    directory: 'counter',
+    js: ['dist/counter.iife.js'],
+    css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessCounter',
     componentName: 'Counter',
     defaultConfig: {

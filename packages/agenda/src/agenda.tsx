@@ -5,6 +5,7 @@ import { Spacer } from '@openstad-headless/ui/src';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 import React from 'react';
+
 export type AgendaWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
@@ -27,6 +28,9 @@ export type AgendaWidgetProps = BaseProps &
   };
 
 function Agenda(props: AgendaWidgetProps) {
+  console.log(
+    props.items?.flatMap((item) => item.links?.map((link) => link.url))
+  );
   return (
     <div className="osc">
       <Spacer size={2} />
