@@ -29,8 +29,5 @@
     "@trivago/prettier-plugin-sort-imports": "4.2.0",
     "prettier": "3.0.3",
     "promise-mysql": "^5.2.0"
-  },
-  "dependencies": {
-    "leaflet-geosearch": "^3.11.0"
   }
 }
