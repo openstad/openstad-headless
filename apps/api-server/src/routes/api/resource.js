@@ -9,6 +9,7 @@ const mail = require('../../lib/mail');
 const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
 const c = require('config');
+const { Op } = require("sequelize");
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
@@ -116,6 +117,7 @@ router
       projectId: req.params.projectId,
       ...req.queryConditions,
       ...dbQuery.where,
+      deletedAt: null      
     };
 
     if (dbQuery.hasOwnProperty('order')) {

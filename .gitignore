@@ -5,6 +5,7 @@ nginx.config.example
 /apps/auth-server/certificate.pem
 /apps/auth-server/privatekey.pem
 /apps/auth-server/certrequest.csr
+.packages-build-hash
 secrets.yml
 secrets.yaml
 

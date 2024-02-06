@@ -1,17 +1,15 @@
-import 'remixicon/fonts/remixicon.css';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import React, { useEffect, useState } from 'react';
-import './date-countdown-bar.css';
+import useInterval from '@rooks/use-interval';
 import {
   differenceInDays,
   differenceInHours,
   differenceInMinutes,
-  parse,
-  isValid,
+  parseISO,
 } from 'date-fns';
-import useInterval from '@rooks/use-interval';
+import { useEffect, useState } from 'react';
+import 'remixicon/fonts/remixicon.css';
+import './date-countdown-bar.css';
 
-import { zonedTimeToUtc } from 'date-fns-tz';
 import { Spacer } from '@openstad-headless/ui/src';
 
 export type DateCountdownBarWidgetProps = {
@@ -33,7 +31,7 @@ function DateCountdownBar({
     minutes: number;
   }>({ days: 0, hours: 0, minutes: 0 });
 
-  const [parsedDate, setParsedDate] = useState<Date>();
+  const [selectedDateISO, setDateISO] = useState<string>(date || '');
 
   const urlParams = new URLSearchParams(window.location.search);
   const [dateParam] = useState<string>(urlParams.get('date') || date);
@@ -46,33 +44,27 @@ function DateCountdownBar({
 
   // Parse the received datestring
   useEffect(() => {
-    if(dateParam?.length > 0) {
+    if (dateParam?.length > 0) {
       try {
-        const parsedDate = parse(
-          dateParam,
-          'dd-MM-yyyy',
-          zonedTimeToUtc(new Date(), zone)
-        );
-
-        setParsedDate(parsedDate);
+        setDateISO(dateParam);
       } catch (e) {
-        console.error(`Parsing the given date ${dateParam} failed`);
+        console.error(`Setting the given date: ${dateParam} failed`);
       }
     }
   }, [dateParam]);
 
   // Set the time left, used for the first time
   useEffect(() => {
-    if (parsedDate) {
-      calculateTime(parsedDate);
+    if (selectedDateISO) {
+      calculateTime(selectedDateISO);
     }
-  }, [parsedDate]);
+  }, [selectedDateISO]);
 
   // Every second update the calculated days, hours and minutes
   useInterval(
     () => {
-      if (parsedDate) {
-        calculateTime(parsedDate);
+      if (selectedDateISO) {
+        calculateTime(selectedDateISO);
       }
     },
     60000,
@@ -80,20 +72,14 @@ function DateCountdownBar({
   );
 
   // Calculate the time left for the day/hour/minutes until the given date
-  const calculateTime = (date: Date): void => {
-    const givenDate = zonedTimeToUtc(date, zone);
-    const currentDate = zonedTimeToUtc(new Date(), zone);
-    const daysDifference = differenceInDays(givenDate, currentDate);
+  const calculateTime = (eventDate: string): void => {
+    // const today = new Date().toISOString().replace();
+    const startDate: Date = new Date();
+    const endDate: Date = parseISO(eventDate);
 
-    const hoursDifference =
-      differenceInHours(givenDate, currentDate, {
-        roundingMethod: 'ceil',
-      }) % 24;
-
-    const minutesDifference =
-      differenceInMinutes(givenDate, currentDate, {
-        roundingMethod: 'ceil',
-      }) % 60;
+    const daysDifference = differenceInDays(endDate, startDate);
+    const hoursDifference = differenceInHours(endDate, startDate) % 24;
+    const minutesDifference = differenceInMinutes(endDate, startDate) % 60;
 
     setTimeLeft({
       days: Math.max(0, daysDifference),

@@ -1,5 +1,5 @@
 host:
-  base: openstad-headless-acc.savvy.codes
+  base: openstad.dev
 
 clusterIssuer:
   enabled: true
@@ -13,8 +13,8 @@ admin:
 
 api:
   emailFrom: Openstad Headless (Acc)
-  emailAddress: openstad-headless-no-reply@savvy.codes
+  emailAddress: openstad-headless-no-reply@openstad.dev
 
 auth:
   fromName: Openstad Headless (Acc)
-  fromEmail: openstad-headless-no-reply@savvy.codes
+  fromEmail: openstad-headless-no-reply@openstad.dev

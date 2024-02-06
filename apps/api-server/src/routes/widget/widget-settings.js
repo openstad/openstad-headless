@@ -1,8 +1,10 @@
 // @todo: add all widgets
 module.exports = {
   agenda: {
-    js: ['@openstad-headless/agenda/dist/agenda.iife.js'],
-    css: ['@openstad-headless/agenda/dist/style.css'],
+    packageName: '@openstad-headless/agenda',
+    directory: 'agenda',
+    js: ['dist/agenda.iife.js'],
+    css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessAgenda',
     componentName: 'Agenda',
     defaultConfig: {
@@ -10,8 +12,10 @@ module.exports = {
     },
   },
   likes: {
-    js: ['@openstad-headless/likes/dist/likes.iife.js'],
-    css: ['@openstad-headless/likes/dist/style.css'],
+    packageName: '@openstad-headless/likes',
+    directory: 'likes',
+    js: ['dist/likes.iife.js'],
+    css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessLikes',
     componentName: 'Likes',
     defaultConfig: {
@@ -19,8 +23,10 @@ module.exports = {
     },
   },
   comments: {
-    js: ['@openstad-headless/comments/dist/comments.iife.js'],
-    css: ['@openstad-headless/comments/dist/style.css'],
+    packageName: '@openstad-headless/comments',
+    directory: 'comments',
+    js: ['dist/comments.iife.js'],
+    css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessComments',
     componentName: 'Comments',
     defaultConfig: {
@@ -28,8 +34,10 @@ module.exports = {
     },
   },
   rawresource: {
-    js: ['@openstad-headless/raw-resource/dist/raw-resource.iife.js'],
-    css: ['@openstad-headless/raw-resource/dist/style.css'],
+    packageName: '@openstad-headless/raw-resource',
+    directory: 'raw-resource',
+    js: ['dist/raw-resource.iife.js'],
+    css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessRawResource',
     componentName: 'RawResource',
     defaultConfig: {
@@ -37,8 +45,10 @@ module.exports = {
     },
   },
   resourceoverview: {
-    js: ['@openstad-headless/resource-overview/dist/resource-overview.iife.js'],
-    css: ['@openstad-headless/resource-overview/dist/style.css'],
+    packageName: '@openstad-headless/resource-overview',
+    directory: 'resource-overview',
+    js: ['dist/resource-overview.iife.js'],
+    css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessResourceOverview',
     componentName: 'ResourceOverview',
     defaultConfig: {
@@ -46,8 +56,10 @@ module.exports = {
     },
   },
   resourcedetail: {
-    js: ['@openstad-headless/resource-detail/dist/resource-detail.iife.js'],
-    css: ['@openstad-headless/resource-detail/dist/style.css'],
+    packageName: '@openstad-headless/resource-detail',
+    directory: 'resource-detail',
+    js: ['dist/resource-detail.iife.js'],
+    css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessResourceDetail',
     componentName: 'ResourceDetail',
     defaultConfig: {
@@ -55,12 +67,25 @@ module.exports = {
     },
   },
   datecountdownbar: {
-    js: ['@openstad-headless/date-countdown-bar/dist/date-countdown-bar.iife.js'],
-    css: ['@openstad-headless/date-countdown-bar/dist/style.css'],
+    packageName: '@openstad-headless/date-countdown-bar',
+    directory: 'date-countdown-bar',
+    js: ['dist/date-countdown-bar.iife.js'],
+    css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessDateCountdownBar',
     componentName: 'DateCountdownBar',
     defaultConfig: {
       projectId: null,
     },
+  },
+  counter: {
+    packageName: '@openstad-headless/counter',
+    directory: 'counter',
+    js: ['dist/counter.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessCounter',
+    componentName: 'Counter',
+    defaultConfig: {
+      projectId: null
+    }
   }
 };

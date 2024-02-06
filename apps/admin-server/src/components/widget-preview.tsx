@@ -17,7 +17,8 @@ type Props = {
     | 'resourcesmap'
     | 'map'
     | 'keuzewijzer'
-    | 'datecountdownbar';
+    | 'counter'
+    | 'datecountdownbar'
   config?: any;
   projectId: string;
 };
