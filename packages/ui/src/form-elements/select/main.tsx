@@ -13,46 +13,28 @@ const SelectField: FC<SelectFieldProps> = ({
       title,
       description,
       choices = [],
-      fieldName,
+      fieldKey,
       defaultOption = 'Selecteer een optie',
       fieldRequired= false,
-      requiredWarning= 'Dit veld is verplicht.'
+      onChange
 }) => {
-    const randomID =
-        Math.random().toString(36).substring(2, 15) +
-        Math.random().toString(36).substring(2, 15);
-
-    const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-
-    const isValid = (selectedValue: string): boolean => {
-        if (fieldRequired && selectedValue.trim() === '') {
-            setErrorMessage(requiredWarning);
-            return false;
-        }
-
-        setErrorMessage(undefined);
-        return true;
-    };
-
-    const handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
-        const selectedValue = event.target.value;
-        isValid(selectedValue);
-    };
-
     return (
-        <FormField invalid={!!errorMessage} type="text">
+        <FormField type="text">
             <Paragraph className="utrecht-form-field__label">
-                <FormLabel htmlFor={randomID}>{title}</FormLabel>
+                <FormLabel htmlFor={fieldKey}>{title}</FormLabel>
                 <FormFieldDescription>{description}</FormFieldDescription>
             </Paragraph>
             <Paragraph className="utrecht-form-field__input">
                 <Select
                     className="form-item"
-                    name={fieldName}
+                    name={fieldKey}
                     required={fieldRequired}
-                    onChange={handleChange}
+                    onChange={(e) => onChange({
+                        name: fieldKey,
+                        value: e.target.value
+                    })}
                 >
-                    <SelectOption disabled value="">
+                    <SelectOption value="">
                         {defaultOption}
                     </SelectOption>
                     {choices?.map((value, index) => (
@@ -61,9 +43,6 @@ const SelectField: FC<SelectFieldProps> = ({
                         </SelectOption>
                     ))}
                 </Select>
-                {errorMessage && (
-                    <p className="error-message">{errorMessage}</p>
-                )}
             </Paragraph>
         </FormField>
     );

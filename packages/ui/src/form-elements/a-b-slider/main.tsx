@@ -13,13 +13,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
     fieldRequired= false,
     fieldKey,
     showLabels = true,
-    minCharacters = 1,
-    maxCharacters = 100
+    onChange
 }) => {
-    const defaultValue = Math.ceil(maxCharacters / 2).toString();
-    const [value, setValue] = useState<string>(defaultValue);
-    const [isAnswered, setIsAnswered] = useState<boolean>(false);
-
     return (
         <div className="a-b-slider-container">
             {question && (
@@ -46,18 +41,17 @@ const RangeSlider: FC<RangeSliderProps> = ({
             </div>
             <input
                 type="range"
-                min={minCharacters}
-                max={maxCharacters}
-                value={value}
+                min="0"
+                max="100"
                 step="1"
                 id="a-to-b-range"
                 name={fieldKey}
                 required={fieldRequired}
                 onChange={(e) => {
-                    setValue(e.target.value);
-                    if (!isAnswered) {
-                        setIsAnswered(true);
-                    }
+                    onChange({
+                        name: fieldKey,
+                        value: e.target.value,
+                    });
                 }}
                 aria-label={`Selecteer een waarde tussen 1 en 100 voor ${titleA} en ${titleB}`}
             />

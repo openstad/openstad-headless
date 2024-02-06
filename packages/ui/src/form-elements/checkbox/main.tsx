@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, {FC, useEffect, useState} from "react";
 import {
     Fieldset,
     FieldsetLegend,
@@ -14,24 +14,17 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        description,
        choices,
        fieldRequired = false,
-       requiredWarning = "Dit veld is verplicht.",
+       fieldKey,
+       onChange
 }) => {
-    const randomID =
-        Math.random().toString(36).substring(2, 15) +
-        Math.random().toString(36).substring(2, 15);
-
     const [selectedChoices, setSelectedChoices] = useState<string[]>([]);
-    const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
-    const isValid = (): boolean => {
-        if (fieldRequired && selectedChoices.length === 0) {
-            setErrorMessage(requiredWarning);
-            return false;
-        }
-
-        setErrorMessage(undefined);
-        return true;
-    };
+    useEffect(() => {
+        onChange({
+            name: fieldKey,
+            value: JSON.stringify(selectedChoices)
+        });
+    } , [selectedChoices]);
 
     const handleChoiceChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
         const choiceValue = event.target.value;
@@ -40,12 +33,11 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
         } else {
             setSelectedChoices(selectedChoices.filter((choice) => choice !== choiceValue));
         }
-        isValid();
     };
 
     return (
         <div className="question">
-            <Fieldset id={randomID}>
+            <Fieldset>
                 <FieldsetLegend>
                     {question}
                     {description && <p>{description}</p>}
@@ -54,11 +46,11 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                 {choices.map((choice, index) => (
                     <FormField type="checkbox" key={index}>
                         <Paragraph className="checkbox-field-label">
-                            <FormLabel htmlFor={`${randomID}_${index}`} type="checkbox">
+                            <FormLabel htmlFor={`${fieldKey}_${index}`} type="checkbox">
                                 <Checkbox
                                     className="checkbox-field-input"
-                                    id={`${randomID}_${index}`}
-                                    name={randomID}
+                                    id={`${fieldKey}_${index}`}
+                                    name={fieldKey}
                                     value={choice}
                                     required={fieldRequired}
                                     checked={selectedChoices.includes(choice)}
@@ -70,9 +62,6 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                     </FormField>
                 ))}
             </Fieldset>
-            {errorMessage && (
-                <p className="utrecht-form-field__error-message">{errorMessage}</p>
-            )}
         </div>
     );
 };

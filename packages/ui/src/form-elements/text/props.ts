@@ -7,6 +7,6 @@ export interface TextInputProps {
     maxCharactersWarning?: string;
     fieldRequired?: boolean;
     requiredWarning?: string;
-    fieldName?: string;
+    fieldKey: string;
     variant?: 'text input' | 'textarea';
 }

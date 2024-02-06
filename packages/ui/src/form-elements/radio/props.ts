@@ -1,8 +1,7 @@
-export interface CheckboxFieldProps {
-    id: string;
+export interface RadioboxFieldProps {
     question: string;
-    description?: string;
     choices: string[];
     fieldRequired?: boolean;
     requiredWarning?: string;
+    fieldKey: string;
 }

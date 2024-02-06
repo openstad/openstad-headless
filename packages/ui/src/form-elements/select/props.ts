@@ -4,5 +4,5 @@ export interface SelectFieldProps {
     choices?: string[];
     fieldRequired?: boolean;
     requiredWarning?: string;
-    fieldName: string;
+    fieldKey: string;
 }
