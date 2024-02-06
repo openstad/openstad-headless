@@ -2,6 +2,15 @@ import { z } from "zod";
 import { FieldProps } from "./props.ts";
 
 export const getSchemaForField = (field: FieldProps) => {
+    const fileSchema = z.object({
+        name: z.string(),
+        type: z.string(),
+        size: z.number(),
+        lastModified: z.number(),
+        lastModifiedDate: z.date(),
+        webkitRelativePath: z.string(),
+    });
+
     switch (field.type) {
         case 'text':
             const min = field.minCharacters || 0;
@@ -17,6 +26,12 @@ export const getSchemaForField = (field: FieldProps) => {
         case 'checkbox':
             if (typeof (field.fieldRequired) !== 'undefined' && field.fieldRequired) {
                 return z.string().min(3, field.customWarning || 'Dit veld is verplicht');
+            } else {
+                return undefined;
+            }
+        case 'upload':
+            if (typeof (field.fieldRequired) !== 'undefined' && field.fieldRequired) {
+                return z.array(fileSchema).min(1, field.customWarning || 'Dit veld is verplicht');
             } else {
                 return undefined;
             }
