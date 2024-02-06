@@ -36,6 +36,7 @@ export const getSchemaForField = (field: FieldProps) => {
                 return undefined;
             }
         case 'range':
+        case 'map':
         case 'radiobox':
         case 'select':
         case 'tickmark-slider':

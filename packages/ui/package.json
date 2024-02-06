@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "leaflet-geosearch": "^3.11.0",
+    "react-leaflet": "^4.2.1",
     "remixicon": "^3.5.0"
   },
   "devDependencies": {

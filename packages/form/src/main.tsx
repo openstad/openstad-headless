@@ -80,6 +80,13 @@ const fields = [
         variant: 'multiple',
         allowedTypes: 'image/png, image/jpeg',
     },
+    {
+        type: 'map',
+        title: 'Kies je plekje',
+        fieldRequired: true,
+        requiredWarning: "Dit veld is verplicht",
+        fieldKey: "map_1",
+    },
 ];
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
