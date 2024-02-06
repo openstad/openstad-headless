@@ -8,7 +8,7 @@ import {
     Paragraph,
 } from "@utrecht/component-library-react";
 
-type CheckboxFieldProps = {
+export type CheckboxFieldProps = {
     question: string;
     description?: string;
     choices: string[];

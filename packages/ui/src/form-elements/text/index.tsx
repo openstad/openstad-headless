@@ -1,7 +1,7 @@
 import React, { FC, useState } from "react";
 import { FormField, FormFieldDescription, FormLabel, Paragraph, Textarea, Textbox } from "@utrecht/component-library-react";
 
-type TextInputProps = {
+export type TextInputProps = {
     title: string;
     description?: string;
     minCharacters?: number;

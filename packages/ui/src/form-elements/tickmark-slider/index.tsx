@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 
-type TickmarkSliderProps = {
+export type TickmarkSliderProps = {
     question: string;
     fieldOptions: { value: string; label: string }[];
     fieldRequired: boolean;

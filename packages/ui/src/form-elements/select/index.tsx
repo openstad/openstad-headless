@@ -8,7 +8,7 @@ import {
 } from "@utrecht/component-library-react";
 import {FC} from "react";
 
-type SelectFieldProps = {
+export type SelectFieldProps = {
     title?: string;
     description?: string;
     choices?: string[];

@@ -1,6 +1,6 @@
 import React, {FC} from 'react';
 
-type RangeSliderProps = {
+export type RangeSliderProps = {
     question: string;
     description?: string;
     labelA: string;

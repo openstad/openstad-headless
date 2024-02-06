@@ -6,7 +6,7 @@ import {
     Paragraph,
 } from "@utrecht/component-library-react";
 
-type FileUploadProps = {
+export type FileUploadProps = {
     title: string;
     description?: string;
     fieldRequired?: boolean;

@@ -8,7 +8,7 @@ import {
     Paragraph,
 } from "@utrecht/component-library-react";
 
-type RadioboxFieldProps = {
+export type RadioboxFieldProps = {
     question: string;
     choices: string[];
     fieldRequired?: boolean;
