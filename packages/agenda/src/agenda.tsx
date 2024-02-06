@@ -28,9 +28,6 @@ export type AgendaWidgetProps = BaseProps &
   };
 
 function Agenda(props: AgendaWidgetProps) {
-  console.log(
-    props.items?.flatMap((item) => item.links?.map((link) => link.url))
-  );
   return (
     <div className="osc">
       <Spacer size={2} />
