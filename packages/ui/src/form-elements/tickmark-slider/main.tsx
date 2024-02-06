@@ -10,10 +10,10 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
      imageSrc = '',
      imageAlt = '',
      imageDescription = '',
+     onChange
 }) => {
     const defaultValue = Math.ceil(fieldOptions.length / 2).toString();
     const [value, setValue] = useState<string>(defaultValue);
-    const [isAnswered, setIsAnswered] = useState<boolean>(false);
 
     const maxCharacters = fieldOptions.length > 0 ? fieldOptions.length.toString() : "1";
 
@@ -45,9 +45,10 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 required={fieldRequired}
                 onChange={(e) => {
                     setValue(e.target.value);
-                    if (!isAnswered) {
-                        setIsAnswered(true);
-                    }
+                    onChange({
+                        name: fieldKey,
+                        value: e.target.value,
+                    });
                 }}
                 aria-label={`Selecteer een waarde tussen 1 en ${fieldOptions.length}`}
             />

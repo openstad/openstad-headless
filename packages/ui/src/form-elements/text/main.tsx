@@ -8,7 +8,6 @@ const TextInput: FC<TextInputProps> = ({
     variant,
     fieldKey,
     fieldRequired= false,
-    value,
     onChange
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -26,9 +25,11 @@ const TextInput: FC<TextInputProps> = ({
                     name={fieldKey}
                     required={fieldRequired}
                     type="text"
-                    value={value}
                     onChange={(e) => {
-                        onChange(e);
+                        onChange({
+                            name: fieldKey,
+                            value: e.target.value,
+                        });
                     }}
                 />
             </div>

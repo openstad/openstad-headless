@@ -14,13 +14,13 @@ export const getSchemaForField = (field: FieldProps) => {
 
             return z.string().min(min, minWarning).max(max, maxWarning);
 
-        case 'range':
         case 'checkbox':
             if (typeof (field.fieldRequired) !== 'undefined' && field.fieldRequired) {
                 return z.string().min(3, field.customWarning || 'Dit veld is verplicht');
             } else {
                 return undefined;
             }
+        case 'range':
         case 'radiobox':
         case 'select':
         case 'tickmark-slider':
