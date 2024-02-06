@@ -1,12 +1,12 @@
 import { TextInputProps } from '@openstad-headless/ui/src/form-elements/text/props';
-import { TickmarkSliderProps } from "@openstad-headless/ui/src/form-elements/tickmark-slider/props.js";
-import { RangeSliderProps } from "@openstad-headless/ui/src/form-elements/a-b-slider/props.js";
-import { CheckboxFieldProps } from "@openstad-headless/ui/src/form-elements/checkbox/props.js";
-import { SelectFieldProps } from "@openstad-headless/ui/src/form-elements/select/props.js";
-import { RadioboxFieldProps } from "@openstad-headless/ui/src/form-elements/radio/props.js";
-import { FileUploadProps} from "@openstad-headless/ui/src/form-elements/file-upload/props.js";
+import { TickmarkSliderProps } from "@openstad-headless/ui/src/form-elements/tickmark-slider";
+import { RangeSliderProps } from "@openstad-headless/ui/src/form-elements/a-b-slider";
+import { CheckboxFieldProps } from "@openstad-headless/ui/src/form-elements/checkbox";
+import { SelectFieldProps } from "@openstad-headless/ui/src/form-elements/select";
+import { RadioboxFieldProps } from "@openstad-headless/ui/src/form-elements/radio";
+import { FileUploadProps} from "@openstad-headless/ui/src/form-elements/file-upload";
 
-export interface FormProps {
+export type FormProps = {
     title?: string;
     fields: CombinedFieldProps[];
     submitText?: string;
