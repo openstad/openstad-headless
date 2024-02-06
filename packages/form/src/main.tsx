@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import Form from './form.js';
-import './form.css';
 
 const fields = [
     {
