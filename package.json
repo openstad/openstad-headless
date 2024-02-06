@@ -31,8 +31,6 @@
     "promise-mysql": "^5.2.0"
   },
   "dependencies": {
-    "@utrecht/component-library-react": "^2.0.0",
-    "@utrecht/design-tokens": "^1.0.0-alpha.607",
     "leaflet-geosearch": "^3.11.0"
   }
 }
