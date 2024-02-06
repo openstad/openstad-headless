@@ -66,6 +66,14 @@ Search is done in textfields of the object. That would e.g. be `title`, `summary
 
 Searching is done using the [fuzzysort](https://github.com/farzher/fuzzysort) module. This will add scores; the results are ordered by that score.
 
+### List resources filtered by tag(s)
+
+See [tags documentation](./tags.md):
+```
+GET :HOSTNAME/api/project/:PROJECT_ID/resource?tags=:TAG_ID1&tags=:TAG_ID2
+```
+
+
 ## TODO
 - Testen fuzzy search: voldoet dit?
 - Bepalen van de minimum score om in de resultaten terrecht te komen; wellicht configureerbaar.

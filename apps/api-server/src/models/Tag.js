@@ -37,18 +37,7 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: false,
         default: 10,
       },
-
-      type: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        set: function (text) {
-          this.setDataValue(
-            'type',
-            text ? sanitize.safeTags(text.trim()) : null
-          );
-        },
-      },
-
+      
       label: {
         type: DataTypes.STRING,
         allowNull: true,
@@ -74,9 +63,16 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: true,
       },
 
-      extraData: getExtraDataConfig(DataTypes.JSON, 'tags'),
-    },
-    {
+      extraFunctionality: {
+        type: DataTypes.JSON,
+        allowNull: false,
+        defaultValue: {},
+      },
+
+		  extraData: getExtraDataConfig(DataTypes.JSON, 'tags'),
+
+	  }, {
+
       defaultScope: {
         order: ['seqnr'],
       },
