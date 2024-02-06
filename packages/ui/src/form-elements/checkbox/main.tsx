@@ -7,7 +7,15 @@ import {
     Checkbox,
     Paragraph,
 } from "@utrecht/component-library-react";
-import { CheckboxFieldProps } from "./props";
+
+type CheckboxFieldProps = {
+    question: string;
+    description?: string;
+    choices: string[];
+    fieldRequired?: boolean;
+    requiredWarning?: string;
+    fieldKey: string;
+}
 
 const CheckboxField: FC<CheckboxFieldProps> = ({
        question,

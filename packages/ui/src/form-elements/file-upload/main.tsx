@@ -5,7 +5,16 @@ import {
     FormLabel,
     Paragraph,
 } from "@utrecht/component-library-react";
-import { FileUploadProps } from "./props";
+
+type FileUploadProps = {
+    title: string;
+    description?: string;
+    fieldRequired?: boolean;
+    requiredWarning?: string;
+    fieldKey: string;
+    variant?: 'multiple' | 'single';
+    allowedTypes?: string;
+}
 
 const FileUploadField: FC<FileUploadProps> = ({
     title,

@@ -1,6 +1,18 @@
 import React, { FC, useState } from "react";
 import { FormField, FormFieldDescription, FormLabel, Paragraph, Textarea, Textbox } from "@utrecht/component-library-react";
-import { TextInputProps } from "./props";
+
+type TextInputProps = {
+    title: string;
+    description?: string;
+    minCharacters?: number;
+    minCharactersWarning?: string;
+    maxCharacters?: number;
+    maxCharactersWarning?: string;
+    fieldRequired?: boolean;
+    requiredWarning?: string;
+    fieldKey: string;
+    variant?: 'text input' | 'textarea';
+}
 
 const TextInput: FC<TextInputProps> = ({
     title,

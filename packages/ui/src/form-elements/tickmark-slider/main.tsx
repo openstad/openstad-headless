@@ -1,5 +1,15 @@
 import React, { FC, useState } from 'react';
-import { TickmarkSliderProps } from "./props";
+
+type TickmarkSliderProps = {
+    question: string;
+    fieldOptions: { value: string; label: string }[];
+    fieldRequired: boolean;
+    fieldKey: string;
+    imageSrc?: string;
+    imageAlt?: string;
+    imageDescription?: string;
+    description?: string;
+}
 
 const TickmarkSlider: FC<TickmarkSliderProps> = ({
      question= '',

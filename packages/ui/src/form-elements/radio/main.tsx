@@ -7,7 +7,14 @@ import {
     RadioButton,
     Paragraph,
 } from "@utrecht/component-library-react";
-import { RadioboxFieldProps } from "./props";
+
+type RadioboxFieldProps = {
+    question: string;
+    choices: string[];
+    fieldRequired?: boolean;
+    requiredWarning?: string;
+    fieldKey: string;
+}
 
 const RadioboxField: FC<RadioboxFieldProps> = ({
     question,

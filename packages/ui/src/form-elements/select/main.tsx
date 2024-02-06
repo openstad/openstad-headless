@@ -6,8 +6,16 @@ import {
     Select,
     SelectOption
 } from "@utrecht/component-library-react";
-import { SelectFieldProps } from "./props";
-import {FC, useState} from "react";
+import {FC} from "react";
+
+type SelectFieldProps = {
+    title?: string;
+    description?: string;
+    choices?: string[];
+    fieldRequired?: boolean;
+    requiredWarning?: string;
+    fieldKey: string;
+}
 
 const SelectField: FC<SelectFieldProps> = ({
       title,
@@ -19,7 +27,7 @@ const SelectField: FC<SelectFieldProps> = ({
       onChange
 }) => {
     return (
-        <FormField type="text">
+        <FormField type="select">
             <Paragraph className="utrecht-form-field__label">
                 <FormLabel htmlFor={fieldKey}>{title}</FormLabel>
                 <FormFieldDescription>{description}</FormFieldDescription>

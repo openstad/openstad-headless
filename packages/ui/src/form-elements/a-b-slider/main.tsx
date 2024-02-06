@@ -1,5 +1,20 @@
-import React, {FC, useState} from 'react';
-import { RangeSliderProps } from "./props";
+import React, {FC} from 'react';
+
+type RangeSliderProps = {
+    question: string;
+    description?: string;
+    labelA: string;
+    labelB: string;
+    titleA: string;
+    titleB: string;
+    descriptionA?: string;
+    descriptionB?: string;
+    fieldRequired?: boolean;
+    fieldKey: string;
+    showLabels?: boolean;
+    minCharacters?: number;
+    maxCharacters?: number;
+}
 
 const RangeSlider: FC<RangeSliderProps> = ({
     question= '',
