@@ -34,8 +34,9 @@ module.exports = {
     },
   },
   enquete: {
-    js: ['@openstad-headless/enquete/dist/enquete.iife.js'],
-    css: ['@openstad-headless/enquete/dist/style.css'],
+    packageName: '@openstad-headless/enquete',
+    js: ['dist/enquete.iife.js'],
+    css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessEnquete',
     componentName: 'Enquete',
     defaultConfig: {

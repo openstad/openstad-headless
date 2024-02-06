@@ -8,7 +8,7 @@ import useResources from './hooks/use-resources.js';
 import useTags from './hooks/use-tags.js';
 import useCurrentUser from './hooks/use-current-user.js';
 import useUserVote from './hooks/use-user-vote.js';
-import useSubmissions from './hooks/use-submissions';
+import useSubmissions from './hooks/use-submissions.js';
 import useCommentsByProject from './hooks/use-comments-by-project';
 import useChoiceGuideResults from './hooks/use-choiceguide-results';
 

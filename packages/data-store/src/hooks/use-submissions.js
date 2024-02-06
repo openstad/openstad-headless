@@ -1,18 +1,30 @@
-export default function useSubmissions(props) {
-
+export default function useSubmissions({ projectId }) {
   let self = this;
 
-  const projectId = props.projectId;
-
-  const { data, error, isLoading } = self.useSWR({ projectId }, 'submissions.fetch');
+  const { data, error, isLoading } = self.useSWR(
+    { projectId },
+    'submissions.fetch'
+  );
 
   let submissions = data || [];
 
   if (error) {
-    let error = new Error(error);
-    let event = new window.CustomEvent('osc-error', { detail: error });
+    const event = new window.CustomEvent('osc-error', {
+      detail: new Error(error),
+    });
     document.dispatchEvent(event);
   }
 
-  return [ submissions, error, isLoading ]
+  const create = function (submittedData, widgetId) {
+    return self.mutate(
+      { projectId },
+      'submissions.create',
+      { submittedData, widgetId },
+      {
+        action: 'create',
+      }
+    );
+  };
+
+  return { data: submissions, error, isLoading, create };
 }

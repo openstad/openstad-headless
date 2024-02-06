@@ -64,9 +64,8 @@
     "@openstad-headless/date-countdown-bar": "file:../../packages/date-countdown-bar",
     "@openstad-headless/resource-detail": "file:../../packages/resource-detail",
     "@openstad-headless/agenda": "file:../../packages/agenda",
-    "@openstad-headless/counter": "file:../../packages/counter"
-
-
+    "@openstad-headless/counter": "file:../../packages/counter",
+    "@openstad-headless/enquete": "file:../../packages/enquete"
   },
   "devDependencies": {
     "@types/cron": "^2.4.0",

@@ -153,6 +153,7 @@ const config: EnqueteWidgetProps = {
       questionType: 'open',
     },
   ],
+  afterSubmitUrl: "http://localhost:5173/enquetes/[id]"
 };
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

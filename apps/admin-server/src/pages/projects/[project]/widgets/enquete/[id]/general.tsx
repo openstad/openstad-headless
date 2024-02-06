@@ -21,6 +21,7 @@ import * as z from 'zod';
 const formSchema = z.object({
   title: z.string(),
   description: z.string(),
+  afterSubmitUrl: z.string().optional(),
 });
 
 export default function WidgetEnqueteGeneral(
@@ -36,6 +37,7 @@ export default function WidgetEnqueteGeneral(
     defaultValues: {
       title: props?.title || '',
       description: props?.description || '',
+      afterSubmitUrl: props.afterSubmitUrl || '',
     },
   });
 
@@ -86,6 +88,28 @@ export default function WidgetEnqueteGeneral(
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="afterSubmitUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Url voor redirecten na opslaan (optioneel)</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder='bijvoorbeeld /enquetes/[id] of laat leeg voor geen redirect'
+                    onChange={(e) => {
+                      field.onChange(e);
+                      onFieldChange(field.name, e.target.value);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

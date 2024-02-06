@@ -17,25 +17,60 @@ import { useState } from 'react';
 import hasRole from '../../lib/has-role';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
+import React from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 
 export type EnqueteWidgetProps = BaseProps &
   ProjectSettingProps &
   EnquetePropsType;
 
 function Enquete(props: EnqueteWidgetProps) {
+  const notifyCreate = () =>
+    toast.success('Enquete ingedient', { position: 'bottom-center' });
+
   const [value, setValue] = useState<string>('3');
+
+  const datastore = new DataStore(props);
+
+  const [currentUser, currentUserError, currentUserIsLoading] =
+    datastore.useCurrentUser({ ...props });
+
+  const { data, create: createSubmission } = datastore.useSubmissions({
+    projectId: props.projectId,
+  });
+
+  const [alreadySubmitted, setAlreadySubmitted] = useState<boolean>(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     let formData = new FormData(e.currentTarget);
-    console.log(Array.from(formData.entries()));
 
-    // Hier gaan we wat doen met de data. via useSubmission.
+    const object: { [key: string]: any } = {};
+
+    formData.forEach(function (value, key, parent) {
+      if (parent.getAll(key).length > 1) {
+        if (!object[key]) {
+          object[key] = [value];
+        } else {
+          object[key] = [...object[key], value];
+        }
+      } else {
+        object[key] = value;
+      }
+    });
+
+    const result = await createSubmission(object, props.widgetId);
+
+    if (result) {
+      setAlreadySubmitted(true);
+      
+      if(props.afterSubmitUrl) {
+        location.href = props.afterSubmitUrl.replace("[id]", result.id)
+      } else {
+        notifyCreate();
+      }
+    }
   }
-
-  const datastore = new DataStore(props);
-  const [currentUser, currentUserError, currentUserIsLoading] =
-    datastore.useCurrentUser({ ...props });
 
   return (
     <div className="osc">
@@ -166,11 +201,15 @@ function Enquete(props: EnqueteWidgetProps) {
             ))}
         <Spacer size={2} />
         {hasRole(currentUser, 'member') && (
-          <Button type="submit" className="osc-enquete-submit">
+          <Button
+            disabled={alreadySubmitted}
+            type="submit"
+            className="osc-enquete-submit">
             Versturen
           </Button>
         )}
       </form>
+      <Toaster />
     </div>
   );
 }
