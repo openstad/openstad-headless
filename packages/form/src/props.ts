@@ -4,6 +4,7 @@ import { RangeSliderProps } from "@openstad-headless/ui/src/form-elements/a-b-sl
 import { CheckboxFieldProps } from "@openstad-headless/ui/src/form-elements/checkbox/props.js";
 import { SelectFieldProps } from "@openstad-headless/ui/src/form-elements/select/props.js";
 import { RadioboxFieldProps } from "@openstad-headless/ui/src/form-elements/radio/props.js";
+import { FileUploadProps} from "@openstad-headless/ui/src/form-elements/file-upload/props.js";
 
 export interface FormProps {
     title?: string;
@@ -18,7 +19,8 @@ type CombinedFieldProps = (
     RangeSliderProps |
     CheckboxFieldProps |
     SelectFieldProps |
-    RadioboxFieldProps
+    RadioboxFieldProps |
+    FileUploadProps
 );
 
 export { CombinedFieldProps as FieldProps };

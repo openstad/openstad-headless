@@ -71,6 +71,15 @@ const fields = [
         fieldRequired: true,
         requiredWarning: "Dit veld is verplicht",
     },
+    {
+        type: 'upload',
+        title: 'Upload je foto',
+        fieldRequired: true,
+        requiredWarning: "Dit veld is verplicht",
+        fieldKey: "image_1",
+        variant: 'multiple',
+        allowedTypes: 'image/png, image/jpeg',
+    },
 ];
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

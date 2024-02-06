@@ -6,6 +6,7 @@ import CheckboxField from "@openstad-headless/ui/src/form-elements/checkbox/main
 import RadioboxField from "@openstad-headless/ui/src/form-elements/radio/main";
 import SelectField from "@openstad-headless/ui/src/form-elements/select/main";
 import TickmarkSlider from "@openstad-headless/ui/src/form-elements/tickmark-slider/main";
+import FileUploadField from "@openstad-headless/ui/src/form-elements/file-upload/main";
 import { handleSubmit } from "./submit.js";
 
 const Form: FC<FormProps> = ({
@@ -74,6 +75,13 @@ const Form: FC<FormProps> = ({
             case 'tickmark-slider':
                 return (
                     <TickmarkSlider
+                        {...field}
+                        onChange={handleInputChange}
+                    />
+                );
+            case 'upload':
+                return (
+                    <FileUploadField
                         {...field}
                         onChange={handleInputChange}
                     />
