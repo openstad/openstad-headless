@@ -55,7 +55,7 @@ Each new Project wil be created with 4 status tags: `open`, `closed`, `accepted`
 ## Tag administration
 
 ### List tags by type
-dered by seqnr.
+Ordered by seqnr.
 ```
 GET :HOSTNAME/api/project/:PROJECT_ID/tag?type=:TYPE
 ```
