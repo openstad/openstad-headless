@@ -12,14 +12,15 @@ async function getDependencyPackages () {
 
 function buildPackage (package) {
   
-  const widgetSettings = require('../../src/routes/widget/widget-settings');
+  const getWidgetSettings = require('../../src/routes/widget/widget-settings');
+  const widgetDefinitions = getWidgetSettings();
 
-  if (!widgetSettings[package].directory) {
+  if (!widgetDefinitions[package].directory) {
     console.log(`No directory found for package ${package}, skipping...`);
     return;
   }
   
-  let packagePath = widgetSettings[package].directory;
+  let packagePath = widgetDefinitions[package].directory;
   
   buildPackageByDirectory(packagePath);
   
