@@ -33,6 +33,16 @@ module.exports = {
       resourceId: null,
     },
   },
+  enquete: {
+    packageName: '@openstad-headless/enquete',
+    js: ['dist/enquete.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessEnquete',
+    componentName: 'Enquete',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
   rawresource: {
     packageName: '@openstad-headless/raw-resource',
     directory: 'raw-resource',

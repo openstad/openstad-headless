@@ -2,6 +2,8 @@ export const WidgetDefinitions = {
   agenda: 'Agenda',
   comments: 'Argumenten',
   begrootmodule: 'Begrootmodule',
+  enquete: 'Enquete',
+  resourcesmap: 'Resource map',
   counter: 'Counter',
   datecountdownbar: 'Date countdown bar',
   keuzewijzer: 'Keuzewijzer',
@@ -10,7 +12,6 @@ export const WidgetDefinitions = {
   rawresource: 'Raw resource',
   resourcedetail: 'Resource detail',
   resourceform: 'Resource form',
-  resourcesmap: 'Resource map',
   resourceoverview: 'Resource overview'
 };
 

@@ -140,7 +140,8 @@ router
         widgetSettings,
         defaultConfig,
         widget.project.safeConfig,
-        widget.config
+        widget.config,
+        widgetId
       );
 
       res.header('Content-Type', 'application/javascript');
@@ -200,13 +201,15 @@ function setConfigsToOutput(
   widgetSettings,
   defaultConfig,
   projectConfig,
-  widgetConfig
+  widgetConfig,
+  widgetId
 ) {
   let config = {
     ...widgetSettings.Config,
     ...defaultConfig,
     ...projectConfig,
     ...widgetConfig,
+    widgetId
   };
 
   config = JSON.stringify(config)

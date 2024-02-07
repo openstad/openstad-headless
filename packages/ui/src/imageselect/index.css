@@ -1,0 +1,39 @@
+
+.osc .osc-imageselect {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.osc .osc-imageselect p {
+    color: black !important;
+  }
+
+.osc .osc-imageselect-item {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    width: 50%;
+    gap: 0.5rem;
+    padding: 0.2rem;
+    border-radius: 4px;
+    border: 2px solid transparent;
+    cursor: pointer;
+  }
+
+.osc .osc-imageselect-item-selected {
+  border: 2px solid var(--osc-secondary);
+}
+
+
+input[type="radio"].osc-imageselect-radio  {
+    /* hide radio button */
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+  }
+
+.osc-imageselect-image {
+    object-fit: cover;
+    border-radius: 0px;
+}

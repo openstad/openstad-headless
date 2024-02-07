@@ -9,6 +9,7 @@ type Props = {
     | 'agenda'
     | 'likes'
     | 'comments'
+    | 'enquete'
     | 'rawresource'
     | 'resourceoverview'
     | 'resourcedetail'
