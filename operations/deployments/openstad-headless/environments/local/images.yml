@@ -1,0 +1,12 @@
+admin:
+  deploymentContainer:
+    image: openstad/headless-admin-server:local-release
+api:
+  deploymentContainer:
+    image: openstad/headless-api-server:local-release
+auth:
+  deploymentContainer:
+    image: openstad/headless-auth-server:local-release
+image:
+  deploymentContainer:
+    image: openstad/headless-image-server:local-release

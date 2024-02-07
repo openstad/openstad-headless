@@ -1,0 +1,62 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "openstad.admin.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "openstad.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ template "openstad.admin.fullname" . }}-deployment
+spec:
+  replicas: {{ .Values.admin.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.admin.label }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.admin.label }}
+    spec:
+      serviceAccountName: openstad-headless-ingress-sa
+      containers:
+      - name: {{ template "openstad.admin.fullname" . }}
+        image: {{ .Values.admin.deploymentContainer.image }}
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: {{ .Values.admin.service.httpPort }}
+            name: http
+        env:
+          - name: PORT
+            value: "{{ .Values.admin.service.httpPort }}"
+          - name: NEXTAUTH_URL
+            value: https://{{ template "openstad.admin.url" . }}
+          - name: NEXTAUTH_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: nextAuthSecret
+                name: {{ template "openstad.admin.secret.fullname" . }}
+          - name: CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                key: admin_client_id
+                name: {{ template "openstad.auth.secret.fullname" . }}
+          - name: CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: admin_client_secret
+                name: {{ template "openstad.auth.secret.fullname" . }}
+          - name: OAUTH_URL
+            value: https://{{ template "openstad.auth.url" . }}
+          - name: OAUTH_URL_INTERNAL
+            value: http://{{ printf "%s.%s.svc.cluster.local:%d" (include "openstad.auth.fullname" .) .Release.Namespace (.Values.auth.service.httpPort | int) }}
+          - name: API_URL
+            value: https://{{ template "openstad.api.url" . }}
+            # value: http://{{ printf "%s.%s.svc.cluster.local:%d" (include "openstad.api.fullname" .) .Release.Namespace (.Values.api.service.httpPort | int) }}
+          - name: NEXT_PUBLIC_API_URL
+            value: https://{{ template "openstad.api.url" . }}
+          # Inject extra environment variables
+          {{- if .Values.admin.extraEnvVars }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.admin.extraEnvVars "context" $) | nindent 10 }}
+          {{- end }}
+        resources:
+{{ toYaml .Values.admin.resources | indent 12 }}

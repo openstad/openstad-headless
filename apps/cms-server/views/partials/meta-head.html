@@ -1,0 +1,238 @@
+{% if data.idea %}
+{% set activeResource = data.idea %}
+{% else %}
+{% set activeResource = data.activeResource %}
+{% endif %}
+{# Automatically extends the right outer layout and also handles AJAX siutations #}
+{% extends data.outerLayout %}
+{% import 'apostrophe-palette-widgets:macros.html' as palette %}
+{% block locale %}{{ data.global.locale }}{% endblock %}
+{% block title %}
+{# Create a useful, SEO-friendly title tag based on what we have #}
+{% if data.piece %}
+{{ data.piece.title }} | {{data.global.siteTitle}}
+{% elseif data.page %}
+
+{% if data.page.metaTitle %}
+{{data.page.metaTitle}}
+{% elif activeResource and activeResource.title %}
+{{ activeResource.title }} | {{data.global.siteTitle}}
+{% else %}
+{{ data.page.title }} | {{data.global.siteTitle}}
+{% endif %}
+{% else %}
+{{ apos.log('Looks like you forgot to override the title block in a template that does not have access to an Apostrophe page or piece.') }}
+{% endif %}
+{% endblock %}
+
+{% block standardHead %}
+{% if data.page.metaWidth %}
+<meta name="viewport" content="width={{data.page.metaWidth}}, initial-scale=1">
+{% else %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+{% endif %}
+{% endblock %}
+
+{% block extraHead %}
+{{ palette.stylesheetLink(data.global) }}
+{{ palette.stylesheetTag() }}
+
+{% if data.page.extraMetaTags %}
+{{data.page.extraMetaTags | safe}}
+{% endif %}
+
+{{ apos.logger.renderClientProvider() | safe }}
+
+<!--
+<script src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+!-->
+
+{% if data.envStyleSheets %}
+{% for stylesheet in data.envStyleSheets %}
+<link rel="stylesheet" href="{{stylesheet}}?{{data.assetsGeneration}}">
+{% endfor %}
+{% endif %}
+
+{% if data.global.stylesheets and not data.dontAddExternalCSS %}
+{% for stylesheet in data.global.stylesheets %}
+<link rel="stylesheet" href="{{stylesheet.url}}?{{data.assetsGeneration}}">
+{% endfor %}
+{% endif %}
+
+{% if data.global.stylesheets and not data.dontAddExternalCSS %}
+{% for stylesheet in data.global.stylesheets %}
+<link rel="stylesheet" href="{{stylesheet.url}}?{{data.assetsGeneration}}">
+{% endfor %}
+{% endif %}
+
+
+{% if data.global.styling.stylesheets and not data.dontAddExternalCSS %}
+{% for stylesheet in data.global.styling.stylesheets %}
+<link rel="stylesheet" href="{{stylesheet.url}}?{{data.assetsGeneration}}">
+{% endfor %}
+{% endif %}
+
+{% if data.global.favicon %}
+<link rel="icon" href="{{apos.attachments.url(data.global.favicon)}}">
+{% endif %}
+
+{% if data.recaptchaKey %}
+<script src="https://www.google.com/recaptcha/api.js?render={{data.recaptchaKey}}"></script>
+{% endif %}
+
+{% if activeResource %}
+<meta property="og:title" content="{{activeResource.title}}">
+<meta property="og:type" content="website">
+<meta property="og:description" content="{{activeResource.summary}}">
+<meta property="og:locale" content="nl_NL">
+
+{% if activeResource.extraData.images[0] %}
+<meta property="og:image" content="{{activeResource.extraData.images[0]}}/:/rs=w:600,h:315">
+<meta property="og:image:width" content="600">
+<meta property="og:image:height" content="315">
+{% endif %}
+
+{% else %}
+{% if data.global.fbImage %}
+<meta property="og:image" content="{{apos.settings.getOption('appUrl')}}{{apos.attachments.url(data.global.fbImage)}}">
+{% endif %}
+{% endif %}
+
+<script>
+  // global variables!
+  var authServerLogoutUrl = '{{apos.settings.getOption('apiLogoutUrl')}}';
+  var openstadUserRole = '{{data.openstadUser.role}}';
+  var hasModeratorRights = {{'true' if data.hasModeratorRights else  'false'}};
+  var loggedIn = {{'true' if data.loggedIn else 'false'}};
+  var siteUrl = '{{data.siteUrl}}';
+
+  var currentPath = '{{data.currentPath}}';
+  var currentPathname = '{{data.currentPathname}}';
+  var ideaFormToSubmit;
+	{% if data.formToSubmit %}
+	ideaFormToSubmit = 'idea-vote-form-{{data.formToSubmit.opinion}}';
+	{% endif %}
+  {# will be defined later, but will cause errors otherwise #}
+  var doShowImage;
+
+  {% if data.recaptchaKey %}
+  var recaptchaKey = '{{data.recaptchaKey}}';
+  {% endif %}
+</script>
+
+{% if data.global.siteConfig.public.fbPixel %}
+<!-- Facebook Pixel Code -->
+<script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '{{data.global.siteConfig.public.fbPixel}}');
+  fbq('track', 'PageView');
+</script>
+<noscript>
+  <img height="1" width="1" style="display:none" 
+       src="https://www.facebook.com/tr?id={{data.global.siteConfig.public.fbPixel}}&ev=PageView&noscript=1"/>
+</noscript>
+<!-- End Facebook Pixel Code -->
+{% endif %}
+
+{% if data.global.siteConfig.ideas.minimumYesVotes %}
+{# for now like this, this is old solution, better to just output as html#}
+<style>
+ .ideaProgress:after {
+   content: '{{data.global.siteConfig.ideas.minimumYesVotes}}';
+ }
+</style>
+{% endif %}
+
+
+{% if data.global.styling.accentColor %}
+<style>
+#mainMenu .menu-cta-button { background-color: {{data.global.styling.accentColor}}; }
+#mainMenu .menu-cta-button { border-color: {{data.global.styling.accentColor}}; }
+a.page-button-flag { background-color: {{data.global.styling.accentColor}}; }
+.filled-button { background-color: {{data.global.styling.accentColor}}; }
+.btn-primary { background-color: {{data.global.styling.accentColor}}; }
+.btn--blue { background-color: {{data.global.styling.accentColor}}; }
+.begroot-container .button-add-idea-to-budget { background-color: {{data.global.styling.accentColor}}; }
+#map-with-buttons-container .no-of-locations-content { background-color: {{data.global.styling.accentColor}}; }
+.no-of-locations-content { background-color: {{data.global.styling.accentColor}}; }
+#title .secondary .controls .vote button { background-color: {{data.global.styling.accentColor}}; }
+#title .secondary .controls .vote button.idea-status-OPEN:disabled { background-color: {{data.global.styling.accentColor}}; }
+#title .secondary .controls .no-of-votes-for-content { background-color: {{data.global.styling.accentColor}}; }
+#title .secondary .controls .no-of-votes-against-content { background-color: {{data.global.styling.accentColor}}; }
+a.page-button-flag { border-color: {{data.global.styling.accentColor}}; }.filled-button { border-color: {{data.global.styling.accentColor}}; }
+.btn-primary { border-color: {{data.global.styling.accentColor}}; }.btn--blue { border-color: {{data.global.styling.accentColor}}; }
+.begroot-container .button-add-idea-to-budget { border-color: {{data.global.styling.accentColor}}; }
+#map-with-buttons-container .no-of-locations-content { border-color: {{data.global.styling.accentColor}}; }
+.no-of-locations-content { border-color: {{data.global.styling.accentColor}}; }
+#title .secondary .controls .vote button { border-color: {{data.global.styling.accentColor}}; }
+#title .secondary .controls .vote button.idea-status-OPEN:disabled { border-color: {{data.global.styling.accentColor}}; }
+#title .secondary .controls .no-of-votes-for-content { border-color: {{data.global.styling.accentColor}}; }
+#title .secondary .controls .no-of-votes-against-content { border-color: {{data.global.styling.accentColor}}; }
+a.page-button-flag:hover { background-color: {{data.global.styling.accentColor}}; }
+.filled-button:hover { background-color: {{data.global.styling.accentColor}}; }
+.btn-primary:hover { background-color: {{data.global.styling.accentColor}}; }
+.btn--blue:hover { background-color: {{data.global.styling.accentColor}}; }
+.begroot-container .button-add-idea-to-budget:hover { background-color: {{data.global.styling.accentColor}}; }
+#title .secondary .controls .vote button:hover { background-color: {{data.global.styling.accentColor}}; }
+#title .secondary .controls .vote button.idea-status-OPEN:disabled:hover { background-color: {{data.global.styling.accentColor}}; }
+a.page-button-flag:hover { border-color: {{data.global.styling.accentColor}}; }
+.filled-button:hover { border-color: {{data.global.styling.accentColor}}; }
+.btn-primary:hover { border-color: {{data.global.styling.accentColor}}; }
+.btn--blue:hover { border-color: {{data.global.styling.accentColor}}; }
+.begroot-container .button-add-idea-to-budget:hover { border-color: {{data.global.styling.accentColor}}; }
+#title .secondary .controls .vote button:hover { border-color: {{data.global.styling.accentColor}}; }
+#title .secondary .controls .vote button.idea-status-OPEN:disabled:hover { border-color: {{data.global.styling.accentColor}}; }
+.outlined-button { color: {{data.global.styling.accentColor}}; }
+.outlined-button:hover { color: {{data.global.styling.accentColor}}; }
+.outlined-button:visited { color: {{data.global.styling.accentColor}}; }
+.begroot-container .button-add-idea-to-budget.added { color: {{data.global.styling.accentColor}}; }
+.begroot-container .button-add-idea-to-budget.added:hover { color: {{data.global.styling.accentColor}}; }
+.outlined-button { border-color: {{data.global.styling.accentColor}}; }.outlined-button:hover { border-color: {{data.global.styling.accentColor}}; }
+.outlined-button:visited { border-color: {{data.global.styling.accentColor}}; }
+.begroot-container .button-add-idea-to-budget.added { border-color: {{data.global.styling.accentColor}}; }
+.begroot-container .button-add-idea-to-budget.added:hover { border-color: {{data.global.styling.accentColor}}; }
+.outlined-button { outline-color: {{data.global.styling.accentColor}}; }
+.outlined-button:hover { outline-color: {{data.global.styling.accentColor}}; }
+.outlined-button:visited { outline-color: {{data.global.styling.accentColor}}; }
+.begroot-container .button-add-idea-to-budget.added { outline-color: {{data.global.styling.accentColor}}; }
+.begroot-container .button-add-idea-to-budget.added:hover { outline-color: {{data.global.styling.accentColor}}; }
+</style>
+{% endif %}
+
+{% if data.global.inlineCss %}
+<style>
+ {{data.global.inlineCss | safe}}
+</style>
+{% endif %}
+
+{% include 'partials/analytics.html' %}
+{% endblock %}
+{% block beforeMain %}
+
+{% if data.cookieConsent and data.global.tagmanager %}
+<!-- Google Tag Manager -->
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id={{data.global.tagmanager}}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager -->
+{% endif %}
+{% if data.user %} <!-- be sure to somehow safeguard against non-editor situations, as performance could unnecessarily suffer -->
+{{ palette.palette(data.global, 'palette') }}
+{% endif %}
+{% if not (data.query.layout === 'none') %}
+{% if data.global.logoLink %}
+{% set logoLink = data.global.logoLink %}
+{% else %}
+{% set logoLink = appUrl %}
+{% endif %}
+
+{% if data.global.iconTheme %}
+{% set iconTheme = '-' + data.global.iconTheme %}
+{% endif %}
+{{ apos.cookieWarning.renderCookieWarning() | safe }}

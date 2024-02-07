@@ -1,0 +1,18 @@
+architecture: standalone
+
+initdbScripts:
+  1_create_databases.sql: |
+      CREATE DATABASE IF NOT EXISTS api DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_unicode_ci;
+      CREATE DATABASE IF NOT EXISTS auth DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_unicode_ci;
+      GRANT ALL PRIVILEGES ON api.* TO 'openstad'@'%';
+      GRANT ALL PRIVILEGES ON auth.* TO 'openstad'@'%';
+
+primary:
+  extraEnvVars:
+    - name: MYSQL_AUTHENTICATION_PLUGIN
+      value: mysql_native_password
+  persistence:
+    size: 8Gi
+
+metrics:
+  enabled: true

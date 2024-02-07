@@ -1,0 +1,61 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "openstad.image.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "openstad.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ template "openstad.image.fullname" . }}-deployment
+spec:
+  replicas: {{ .Values.image.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.image.label }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.image.label }}
+    spec:
+      containers:
+      - name: {{ template "openstad.image.fullname" . }}
+        image: {{ .Values.image.deploymentContainer.image }}
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: {{ .Values.image.service.httpPort }}
+            name: http
+        env:
+          - name: APP_URL
+            value: https://{{ template "openstad.image.url" . }}
+          - name: PORT_API
+            value: "{{ .Values.image.service.httpPort }}"
+          - name: PORT_IMAGE_SERVER
+            value: "31451"
+          - name: IMAGES_DIR
+            value: {{ .Values.image.volumes.data.mountPath | default "/opt/openstad-headless/apps/image-server/images" }}
+          - name: THROTTLE
+            value: "{{ .Values.image.throttle.enabled | default true }}"
+          - name: THROTTLE_CC_PROCESSORS
+            value: "{{ .Values.image.throttle.ccProcessors | default 4 }}"
+          - name: THROTTLE_CC_PREFETCHER
+            value: "{{ .Values.image.throttle.ccPrefetcher | default 20 }}"
+          - name: THROTTLE_CC_REQUESTS
+            value: "{{ .Values.image.throttle.ccRequests | default 100 }}"
+          - name: IMAGE_VERIFICATION_TOKEN
+            valueFrom:
+              secretKeyRef:
+                key: verificationToken
+                name: {{ template "openstad.image.secret.fullname" . }}
+          # Inject extra environment variables
+          {{- if .Values.image.extraEnvVars }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.image.extraEnvVars "context" $) | nindent 10 }}
+          {{- end }}
+        resources:
+{{ toYaml .Values.image.resources | indent 12 }}
+        volumeMounts:
+          - mountPath: {{ .Values.image.volumes.data.mountPath | default "/opt/openstad-headless/apps/image-server/images" }}
+            name: data-vol
+      volumes:
+        - name: data-vol
+          persistentVolumeClaim:
+            claimName: image-data-claim

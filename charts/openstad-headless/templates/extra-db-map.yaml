@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: extra-db-map
+  namespace: {{ .Release.Namespace }}
+data:
+  extra_dbs.sql: |-
+    {{- $root := . -}}
+    {{ range .Values.mysql.db.additionalDbNames }}
+    CREATE DATABASE IF NOT EXISTS {{ . }} DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+    GRANT ALL PRIVILEGES ON {{ . }}.* TO '{{ $root.Values.mysql.db.user }}'@'%';
+    {{ end }}
