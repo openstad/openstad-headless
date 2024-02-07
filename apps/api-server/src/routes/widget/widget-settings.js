@@ -1,5 +1,6 @@
 // @todo: add all widgets
-module.exports = {
+
+let moduleDefinitions = {
   agenda: {
     packageName: '@openstad-headless/agenda',
     directory: 'agenda',
@@ -35,6 +36,7 @@ module.exports = {
   },
   enquete: {
     packageName: '@openstad-headless/enquete',
+    directory: 'enquete',
     js: ['dist/enquete.iife.js'],
     css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessEnquete',
@@ -95,7 +97,41 @@ module.exports = {
     functionName: 'OpenstadHeadlessCounter',
     componentName: 'Counter',
     defaultConfig: {
-      projectId: null
-    }
-  }
+      projectId: null,
+    },
+  },
 };
+
+const requiredKeys = [
+  'packageName',
+  'directory',
+  'js',
+  'css',
+  'functionName',
+  'componentName',
+  'defaultConfig',
+];
+
+const getWidgetSettings = function () {
+  const badDefinitions = {};
+
+  Object.entries(moduleDefinitions).forEach(([widgetKey, definition]) => {
+    const keysInDefinition = Object.keys(definition);
+
+    const missingKeys = requiredKeys.filter(
+      (requiredKey) => !keysInDefinition.includes(requiredKey)
+    );
+
+    if (missingKeys.length > 0) {
+      badDefinitions[widgetKey] = missingKeys;
+    }
+  });
+
+  if (Object.keys(badDefinitions).length > 0) {
+    console.error('MISSING FIELDS IN WIDGET DEFINITIONS', badDefinitions);
+  }
+
+  return moduleDefinitions;
+};
+
+module.exports = getWidgetSettings;

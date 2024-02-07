@@ -5,7 +5,10 @@ const fs = require('fs');
 const config = require('config');
 const path = require('path');
 const createError = require('http-errors');
-const widgetSettingsMapping = require('./widget-settings');
+
+const getWidgetSettings = require('./widget-settings');
+const widgetDefinitions = getWidgetSettings();
+
 const reactCheck = require('../../util/react-check');
 
 let router = express.Router({ mergeParams: true });
@@ -15,7 +18,7 @@ router.use(bruteForce.globalMiddleware);
 
 // Configured route allows us to send a widget config through the `Widget-Config` header
 // This route is used to show a preview of a widget in the admin
-// The `Widget-Config` header must include a `widgetType` key, matching a widget type in the `widgetSettingsMapping` object
+// The `Widget-Config` header must include a `widgetType` key, matching a widget type in the `widgetDefinitions` object
 // All keys except for `widgetType` will be passed to the widget as config
 router
   .route('/preview')
@@ -43,7 +46,9 @@ router
     const randomId = Math.floor(Math.random() * 1000000);
     const componentId = `osc-component-${widgetId}-${randomId}`;
     const widgetType = req.widgetConfig.widgetType;
-    let widgetSettings = widgetSettingsMapping[widgetType];
+
+    const widgetDefinitions = getWidgetSettings();
+    let widgetSettings = widgetDefinitions[widgetType];
 
     if (!widgetSettings) {
       return next(
@@ -123,7 +128,8 @@ router
     const randomId = Math.floor(Math.random() * 1000000);
     const componentId = `osc-component-${widgetId}-${randomId}`;
     const widget = req.widget;
-    const widgetSettings = widgetSettingsMapping[widget.type];
+    const widgetDefinitions = getWidgetSettings();
+    const widgetSettings = widgetDefinitions[widget.type];
 
     if (!widgetSettings) {
       return next(
@@ -157,22 +163,22 @@ router
   });
 
 // Add a static route for the images used in the CSS in each of the widgets
-Object.keys(widgetSettingsMapping).forEach((widget) => {
-  if (!widgetSettingsMapping[widget].css) return;
+Object.keys(widgetDefinitions).forEach((widget) => {
+  if (!widgetDefinitions[widget].css) return;
 
   try {
     router.use(
       `/${widget}-images`,
       express.static(
         path.resolve(
-          require.resolve(`${widgetSettingsMapping[widget].packageName}/package.json`),
+          require.resolve(`${widgetDefinitions[widget].packageName}/package.json`),
           '../../images/'
         )
       )
     );
   } catch (e) {
     console.log(
-      `Could not find package.json [${widgetSettingsMapping[widget].packageName}/package.json] for widget [${widget}].`
+      `Could not find package.json [${widgetDefinitions[widget].packageName}/package.json] for widget [${widget}].`
     );
   }
 });
