@@ -90,6 +90,10 @@ router.all('*', function (req, res, next) {
     req.scope.push('includeTags');
   }
 
+  if (req.query.includeStatus) {
+    req.scope.push('includeStatus');
+  }
+
   if (req.query.includeUser) {
     req.scope.push('includeUser');
   }

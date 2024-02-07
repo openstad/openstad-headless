@@ -97,5 +97,16 @@ module.exports = {
     defaultConfig: {
       projectId: null
     }
+  },
+  stembegroot: {
+    packageName: '@openstad-headless/stem-begroot',
+    directory: 'stem-begroot',
+    js: ['dist/stem-begroot.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessStemBegroot',
+    componentName: 'StemBegroot',
+    defaultConfig: {
+      projectId: null
+    }
   }
 };

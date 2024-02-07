@@ -1,0 +1,16 @@
+.osc-listview {
+    display: grid;
+    gap: 2rem;
+  }
+
+.osc-listview-template-columns-1 {
+    grid-template-columns: 1fr;
+}
+
+.osc-listview-template-columns-2 {
+    grid-template-columns: 1fr 1fr;
+}
+
+.osc-listview-template-columns-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+}

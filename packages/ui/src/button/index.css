@@ -23,6 +23,12 @@
     cursor: pointer;
 }
 
+.osc .osc-button.osc-plain {
+    background-color: var(--osc-background);
+    border: 1px solid var(--osc-border);
+    color: var(--osc-muted);
+}
+
 .osc .osc-button.ghost.active i{
     color: var(--osc-primary);
 }
@@ -41,6 +47,11 @@
 
 .osc .osc-button.ghost:hover {
     color: var(--osc-muted);
+    background-color: var(--osc-background);
+}
+
+.osc .osc-button.osc-plain:hover {
+    color: var(--osc-foreground);
     background-color: var(--osc-background);
 }
 

@@ -123,9 +123,11 @@ const defaultItemRenderer = (
         src={resource.images?.at(0)?.src || ''}
         imageFooter={
           <div>
-            <p className="osc-resource-overview-content-item-status">
-              {resource.status === 'OPEN' ? 'Open' : 'Gesloten'}
-            </p>
+            {resource.statuses?.map((statusTag: any) => (
+              <p className="osc-resource-overview-content-item-status">
+                {statusTag.label === 'OPEN' ? 'Open' : 'Gesloten'}
+              </p>
+            ))}
           </div>
         }
       />
@@ -151,7 +153,7 @@ const defaultItemRenderer = (
         {props.displayVote ? (
           <>
             <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} />
-            <Icon icon="ri-thumb-down-line" variant="big" text={resource.yes} />
+            <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} />
           </>
         ) : null}
 

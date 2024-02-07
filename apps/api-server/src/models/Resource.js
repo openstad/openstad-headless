@@ -575,6 +575,11 @@ module.exports = function (db, sequelize, DataTypes) {
       includeTags: {
         include: [{
           model: db.Tag,
+          where: {
+            type: {
+              [Op.not]:'status'
+            }
+          },
           attributes: ['id', 'type', 'name'],
           through: {attributes: []},
         }]
@@ -583,11 +588,12 @@ module.exports = function (db, sequelize, DataTypes) {
       includeStatus: {
         include: [{
           model: db.Tag,
-          attributes: ['id', 'type', 'name'],
+          as: "statuses",
+          attributes: ['id', 'type', 'name', 'label'],
           through: {attributes: []},
           where: {type: 'status'},
           required: false,
-        }]
+        }],
       },
 
       selectTags: function (tags) {
@@ -817,6 +823,8 @@ module.exports = function (db, sequelize, DataTypes) {
     this.hasOne(models.Poll, {as: 'poll', foreignKey: 'resourceId', onDelete: 'CASCADE' });
     this.hasOne(models.Vote, {as: 'userVote', foreignKey: 'resourceId', onDelete: 'CASCADE' });
     this.belongsToMany(models.Tag, {through: 'resource_tags', constraints: false, onDelete: 'CASCADE' });
+    this.belongsToMany(models.Tag, {as: "statuses", through: 'resource_tags', constraints: false, onDelete: 'CASCADE' });
+
   }
 
   Resource.prototype.getUserVote = function (user) {

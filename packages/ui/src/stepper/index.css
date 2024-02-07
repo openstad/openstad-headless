@@ -1,0 +1,52 @@
+.stepper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.step-container {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+}   
+
+.step-container > .step-icon {    
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: .5rem;
+    height: .5rem;
+    padding: .5rem;
+    margin-right: .5rem;
+    border: 1px solid var(--osc-secondary);
+    border-radius: 50%;
+}
+
+.stepper > .step-divider {
+    height: 1px;
+    width: 100%;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    background-color: var(--osc-border);
+}
+
+.step-icon > p {
+    color: var(--osc-secondary);
+}
+
+.step-icon.active {
+    background-color: var(--osc-secondary);
+}
+
+.step-icon.done {
+    background-color: var(--osc-primary);
+    border-color: var(--osc-primary);
+}
+
+.step-container.done {
+    color: var(--osc-primary);
+}
+
+.step-icon.active > p, .step-icon.done  > p{
+    color: var(--osc-secondary-foreground);
+}

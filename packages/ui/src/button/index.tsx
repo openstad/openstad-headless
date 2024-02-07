@@ -35,3 +35,11 @@ export const GhostButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     );
   }
 );
+
+export const PlainButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (props, ref) => {
+    return (
+      <Button ref={ref} {...props} className={`osc-plain ${props.className}`} />
+    );
+  }
+);

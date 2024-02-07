@@ -20,6 +20,7 @@ type Props = {
     | 'keuzewijzer'
     | 'counter'
     | 'datecountdownbar'
+    | 'stembegroot'
   config?: any;
   projectId: string;
 };

@@ -65,7 +65,8 @@
     "@openstad-headless/resource-detail": "file:../../packages/resource-detail",
     "@openstad-headless/agenda": "file:../../packages/agenda",
     "@openstad-headless/counter": "file:../../packages/counter",
-    "@openstad-headless/enquete": "file:../../packages/enquete"
+    "@openstad-headless/enquete": "file:../../packages/enquete",
+    "@openstad-headless/stem-begroot": "file:../../packages/stem-begroot"
   },
   "devDependencies": {
     "@types/cron": "^2.4.0",
