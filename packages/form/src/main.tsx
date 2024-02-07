@@ -82,7 +82,7 @@ const fields = [
     },
     {
         type: 'map',
-        title: 'Kies je plekje',
+        title: 'Kies je locatie',
         fieldRequired: true,
         requiredWarning: "Dit veld is verplicht",
         fieldKey: "map_1",
