@@ -44,12 +44,9 @@ router.route('/')
 		const data = {
 			submittedData     : req.body.submittedData,
 			projectId      			: req.params.projectId,
+			widgetId      			: req.body.widgetId || null,
 			userId      			: req.user.id,
 		};
-
-		if (req.body.formName) {
-			data.formName = req.body.formName
-		}
 
 		db.Submission
 			.authorizeData(data, 'create', req.user)

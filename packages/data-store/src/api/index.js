@@ -5,6 +5,9 @@ import resources from './resources';
 import tags from './tags';
 import user from './user';
 import userVote from './user-vote';
+import submissions from './submissions';
+import commentsByProject from './commentsByProject';
+import choiceGuideResults from './choiceGuideResults';
 
 const windowGlobal = typeof window !== "undefined" ? window : {};
 
@@ -21,6 +24,10 @@ function API(props = {}) {
 
   self.fetch = fetchx.bind(self);
 
+  self.choiceGuideResults = {
+    fetch: choiceGuideResults.fetch.bind(self)
+  }
+
   self.comments = {
     fetch: comments.fetch.bind(self),
     create: comments.create.bind(self),
@@ -29,15 +36,26 @@ function API(props = {}) {
     submitLike: comments.submitLike.bind(self),
   };
 
+  self.commentsByProject = {
+    fetch: commentsByProject.fetch.bind(self)
+  }
+
   self.resource = {
     fetch: resource.fetch.bind(self),
     update: resource.update.bind(self),
+    delete: resource.delete.bind(self),
     submitLike: resource.submitLike.bind(self),
   };
 
   self.resources = {
     fetch: resources.fetch.bind(self),
+    delete: resources.delete.bind(self)
   };
+
+  self.submissions = {
+    fetch: submissions.fetch.bind(self),
+    create: submissions.create.bind(self)
+  }
 
   self.tags = {
     fetch: tags.fetch.bind(self),

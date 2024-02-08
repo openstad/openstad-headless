@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import './index.css';
-import { Icon } from '../icon';
 import { Checkbox } from '../checkbox';
+import { Icon } from '../icon';
+import './index.css';
 
 export function MultiSelect({
   label,

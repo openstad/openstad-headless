@@ -34,7 +34,9 @@ router
     // todo: ik denk momenteel alleen nog gebruikt door create; dus zet hem daar neer
     let resourceId = parseInt(req.params.resourceId) || 0;
     if (!resourceId) return next();
-    db.Resource.findByPk(resourceId)
+    db.Resource
+      .scope('includeStatus', 'includeProject')
+      .findByPk(resourceId)
       .then(resource => {
         if (!resource || resource.projectId != req.params.projectId) return next(createError(400, 'Resource not found'));
         req.resource = resource;
@@ -118,10 +120,8 @@ router.route('/')
   .post(function(req, res, next) {
 
     if (!req.resource) return next(createError(400, 'Inzending niet gevonden'));
-    if (!req.resource.publishDate) return next(createError(400, 'Kan geen comment toevoegen aan een concept plan'));
-    // todo: dit moet een can functie worden
-    if (req.user.role != 'admin' && req.resource.status != 'OPEN') return next(createError(400, 'Reactie toevoegen is niet mogelijk bij planen met status: ' + req.resource.status));
-    next();
+    if (!req.resource.auth.canComment(req.resource)) return next(createError(400, 'Je kunt niet reageren op deze inzending'));
+    return next();
   })
   .post(function(req, res, next) {
     if (!req.body.parentId) return next();

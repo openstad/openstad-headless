@@ -69,7 +69,7 @@ router.route('/')
 	.get(function(req, res, next) {
 		let hasModeratorRights = userhasModeratorRights(req.user);
 
-		if (!(req.project.config.votes.isViewable || hasModeratorRights)) {
+		if (!(req.project.config.votes.isViewable || hasModeratorRights || req.user.dataValues.role === 'admin')) {
 			return next(createError(403, 'Stemmen zijn niet zichtbaar'));
 		}
 		return next();

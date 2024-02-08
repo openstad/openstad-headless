@@ -5,7 +5,10 @@ const fs = require('fs');
 const config = require('config');
 const path = require('path');
 const createError = require('http-errors');
-const widgetSettingsMapping = require('./widget-settings');
+
+const getWidgetSettings = require('./widget-settings');
+const widgetDefinitions = getWidgetSettings();
+
 const reactCheck = require('../../util/react-check');
 
 let router = express.Router({ mergeParams: true });
@@ -15,7 +18,7 @@ router.use(bruteForce.globalMiddleware);
 
 // Configured route allows us to send a widget config through the `Widget-Config` header
 // This route is used to show a preview of a widget in the admin
-// The `Widget-Config` header must include a `widgetType` key, matching a widget type in the `widgetSettingsMapping` object
+// The `Widget-Config` header must include a `widgetType` key, matching a widget type in the `widgetDefinitions` object
 // All keys except for `widgetType` will be passed to the widget as config
 router
   .route('/preview')
@@ -43,7 +46,9 @@ router
     const randomId = Math.floor(Math.random() * 1000000);
     const componentId = `osc-component-${widgetId}-${randomId}`;
     const widgetType = req.widgetConfig.widgetType;
-    let widgetSettings = widgetSettingsMapping[widgetType];
+
+    const widgetDefinitions = getWidgetSettings();
+    let widgetSettings = widgetDefinitions[widgetType];
 
     if (!widgetSettings) {
       return next(
@@ -88,6 +93,9 @@ router
       res.header('Content-Type', 'application/javascript');
       res.send(output);
     } catch (e) {
+      
+      // Temp log for use in k9s
+      console.error({widgetBuildError: e});
       return next(
         createError(
           500,
@@ -120,7 +128,8 @@ router
     const randomId = Math.floor(Math.random() * 1000000);
     const componentId = `osc-component-${widgetId}-${randomId}`;
     const widget = req.widget;
-    const widgetSettings = widgetSettingsMapping[widget.type];
+    const widgetDefinitions = getWidgetSettings();
+    const widgetSettings = widgetDefinitions[widget.type];
 
     if (!widgetSettings) {
       return next(
@@ -137,7 +146,8 @@ router
         widgetSettings,
         defaultConfig,
         widget.project.safeConfig,
-        widget.config
+        widget.config,
+        widgetId
       );
 
       res.header('Content-Type', 'application/javascript');
@@ -154,22 +164,22 @@ router
   });
 
 // Add a static route for the images used in the CSS in each of the widgets
-Object.keys(widgetSettingsMapping).forEach((widget) => {
-  if (!widgetSettingsMapping[widget].css) return;
+Object.keys(widgetDefinitions).forEach((widget) => {
+  if (!widgetDefinitions[widget].css) return;
 
   try {
     router.use(
       `/${widget}-images`,
       express.static(
         path.resolve(
-          require.resolve(widgetSettingsMapping[widget].css[0]),
+          require.resolve(`${widgetDefinitions[widget].packageName}/package.json`),
           '../../images/'
         )
       )
     );
   } catch (e) {
     console.log(
-      `Could not find CSS file [${widgetSettingsMapping[widget].css[0]}] for widget [${widget}]. You might need to run \`npm run build\` in the widget's directory.`
+      `Could not find package.json [${widgetDefinitions[widget].packageName}/package.json] for widget [${widget}].`
     );
   }
 });
@@ -198,13 +208,15 @@ function setConfigsToOutput(
   widgetSettings,
   defaultConfig,
   projectConfig,
-  widgetConfig
+  widgetConfig,
+  widgetId
 ) {
   let config = {
     ...widgetSettings.Config,
     ...defaultConfig,
     ...projectConfig,
     ...widgetConfig,
+    widgetId
   };
 
   config = JSON.stringify(config)
@@ -237,11 +249,11 @@ function getWidgetJavascriptOutput(
   let css = '';
 
   widgetSettings.js.forEach((file) => {
-    widgetOutput += fs.readFileSync(require.resolve(file), 'utf8');
+    widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
   });
 
   widgetSettings.css.forEach((file) => {
-    css += fs.readFileSync(require.resolve(file), 'utf8');
+    css += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
   });
 
   // Rewrite the url to the images that we serve statically

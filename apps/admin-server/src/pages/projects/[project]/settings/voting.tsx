@@ -41,7 +41,10 @@ const formSchema = z.object({
     'budgetingPerTheme',
   ]),
   minResources: z.coerce.number().gt(0),
-  maxResources: z.coerce.number(),
+  maxResources: z.coerce.number().gt(0),
+}).refine((data) => data.maxResources > data.minResources, {
+  message: "De maximale hoeveelheid resources moet groter zijn dan de minimale hoeveelheid.",
+  path: ["maxResources"]
 });
 
 export default function ProjectSettingsVoting() {
@@ -86,7 +89,7 @@ export default function ProjectSettingsVoting() {
         },
       });
       if (project) {
-        toast.success('Codes aangemaakt!');
+        toast.success('Project aangepast!');
       } else {
         toast.error('Er is helaas iets mis gegaan.')
       }

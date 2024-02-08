@@ -2,90 +2,78 @@ const config = require('config');
 const eventService = require('../services/eventService');
 
 module.exports = function (db, sequelize, DataTypes) {
-  const Submission = sequelize.define('submission', {
-
-    projectId: {
-      type: DataTypes.INTEGER,
-      defaultValue: config.projectId && typeof config.projectId == 'number' ? config.projectId : 0,
-    },
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-
-    formName: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    status: {
-      type: DataTypes.ENUM('approved', 'pending', 'unapproved'),
-      defaultValue: 'pending',
-      allowNull: false
-    },
-		formId: {
-			type         : DataTypes.TEXT,
-			allowNull    : true
-		},
-    submittedData: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-      defaultValue: {},
-      get: function () {
-        // for some reason this is not always done automatically
-        let value = this.getDataValue('submittedData');
-        try {
-          if (typeof value == 'string') {
-            value = JSON.parse(value);
-          }
-        } catch (err) {
-        }
-        return value;
+  const Submission = sequelize.define(
+    'submission',
+    {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
       },
-      set: function (value) {
-        try {
-          if (typeof value == 'string') {
-            value = JSON.parse(value);
-          }
-        } catch (err) {
-        }
-        this.setDataValue('submittedData', JSON.stringify(value));
-      }
+      projectId: {
+        type: DataTypes.INTEGER,
+        defaultValue:
+          config.projectId && typeof config.projectId == 'number'
+            ? config.projectId
+            : 0,
+      },
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      status: {
+        type: DataTypes.ENUM('approved', 'pending', 'unapproved'),
+        defaultValue: 'pending',
+        allowNull: false,
+      },
+      submittedData: {
+        type: DataTypes.JSON,
+        default: {},
+        allowNull: false,
+      },
     },
-
-  }, { hooks: {
-    afterCreate: (instance, options) => {
-      const ruleSetData = {
-        resource: 'submission',
-        eventType: 'CREATE',
-        instance
-      }
-      try {
-        eventService.publish(db.NotificationRuleSet, parseInt(instance.projectId), ruleSetData);
-      } catch (error) {
-        console.error(error);
-      }
+    {
+      hooks: {
+        afterCreate: (instance, options) => {
+          const ruleSetData = {
+            resource: 'submission',
+            eventType: 'CREATE',
+            instance,
+          };
+          try {
+            eventService.publish(
+              db.NotificationRuleSet,
+              parseInt(instance.projectId),
+              ruleSetData
+            );
+          } catch (error) {
+            console.error(error);
+          }
+        },
+      },
     }
-  }
-  });
+  );
 
-	Submission.scopes = function scopes() {
-		return {
-			defaultScope: {},
-			withUser: {
-				include: [{
-					model      : db.User,
-					attributes : ['role', 'displayName', 'nickName', 'name', 'email']
-				}]
-			},
-            forProjectId: function (projectId) {
-                return {
-                    where: {
-                        projectId: projectId,
-                    }
-                };
-            },
-		};
-	}
+  Submission.scopes = function scopes() {
+    return {
+      defaultScope: {},
+      withUser: {
+        include: [
+          {
+            model: db.User,
+            attributes: ['role', 'displayName', 'nickName', 'name', 'email'],
+          },
+        ],
+      },
+      forProjectId: function (projectId) {
+        return {
+          where: {
+            projectId: projectId,
+          },
+        };
+      },
+    };
+  };
 
   Submission.auth = Submission.prototype.auth = {
     listableBy: 'admin',
@@ -93,7 +81,11 @@ module.exports = function (db, sequelize, DataTypes) {
     createableBy: 'all',
     updateableBy: 'admin',
     deleteableBy: 'admin',
-  }
+  };
+
+  Submission.associate = function (models) {
+    this.belongsTo(models.Widget);
+  };
 
   return Submission;
 };

@@ -61,6 +61,16 @@ module.exports = {
     },
   },
 
+  statusses: {
+    type: 'object',
+    subset: {
+      defaultStatusId: {
+        type: 'int',
+        default: null,
+      },
+    },
+  },
+
   resources: {
     type: 'object',
     subset: {
@@ -160,17 +170,7 @@ module.exports = {
           "minimalBudgetSpent": {type: 'int', default: 0},
         }
       },
-      automaticallyUpdateStatus: {
-        isActive: {
-          type: 'boolean',
-          default: false,
-        },
-        afterXDays: {
-          type: 'int',
-          default: 90,
-        },
-      },
-    }
+    },
   },
 
   comments: {

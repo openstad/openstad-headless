@@ -1,0 +1,59 @@
+.osc-icon-button {
+    display: flex;
+    height: 24px;
+    width: 24px;
+    padding: 1rem;
+
+    justify-content: center;
+    align-items: center;
+   
+    outline: none;
+    border: none;
+
+    background-color: var(--osc-primary);
+    color: var(--osc-primary-foreground);
+}
+
+.osc-icon-button:hover {
+    background-color: var(--osc-primary-hover);
+}
+
+
+.osc-icon-button.secondary {
+    background-color: var(--osc-secondary);
+    color: var(--osc-secondary-foreground);
+}
+
+.osc-icon-button.secondary:hover {
+    background-color: var(--osc-secondary-hover);
+}
+
+
+.osc-icon-button.ghost {
+    background-color: transparent;
+    color: var(--osc-foreground);
+} 
+
+.osc-icon-button.ghost:hover {
+    background-color: transparent;
+}
+
+.osc-icon-button.plain {
+    background-color: transparent;
+    color: var(--osc-foreground);
+    border: 1px solid var(--osc-border);
+} 
+
+.osc-icon-button.plain:hover {
+    background-color: var(--osc-border);
+}
+
+.osc-icon-button.round {
+    border-radius: 50%;
+}
+
+
+.osc-icon-button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}

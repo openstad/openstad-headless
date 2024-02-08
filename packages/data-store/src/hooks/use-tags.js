@@ -6,8 +6,10 @@ export default function useTags(props) {
 
   const projectId = props.projectId;
   const type = props.type;
+  const onlyIncludeIds = props.onlyIncludeIds;
 
-  const { data, error, isLoading } = self.useSWR({ projectId, type }, 'tags.fetch');
+
+  const { data, error, isLoading } = self.useSWR({ projectId, type, onlyIncludeIds }, 'tags.fetch');
 
   // add functionality
   let tags = data || [];

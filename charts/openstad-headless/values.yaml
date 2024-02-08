@@ -130,6 +130,7 @@ admin:
   # Secret values
   secrets:
     nextAuthSecret:
+    apiKey:
 
   # Service settings:
   # Primarily port configuration
@@ -445,6 +446,13 @@ cms:
     liveness:
       initialDelaySeconds: 30
       periodSeconds: 60
+
+  # Volumes:
+  # Configure the persistent volumes for this service
+  volumes:
+    data:
+      size: 1Gi
+      mountPath: /opt/openstad-headless/apps/cms-server/public/uploads/attachments
 
 # Overwrite Secrets
 

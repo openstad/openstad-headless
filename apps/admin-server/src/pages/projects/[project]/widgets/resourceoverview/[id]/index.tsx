@@ -14,33 +14,33 @@ import WidgetResourceOverviewPagination from './pagination';
 import WidgetResourceOverviewSearch from './search';
 import WidgetResourceOverviewTags from './tags';
 import WidgetResourceOverviewInclude from './include';
-import WidgetResourceOverviewInfo from './info';
 import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
 
 export const getServerSideProps = withApiUrl;
 
-export default function WidgetResourceOverview({
-  apiUrl,
-}:WithApiUrlProps) {
+export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
-  const projectId = router.query.project;
+  const projectId = router.query.project as string;
 
   const { data: widget, updateConfig } = useWidgetConfig();
   const { previewConfig, updatePreview } =
     useWidgetPreview<ResourceOverviewWidgetProps>({
       projectId,
-      resourceId: '2',
     });
 
   const totalPropPackage = {
     ...widget?.config,
+    ...previewConfig,
     updateConfig: (config: ResourceOverviewWidgetProps) =>
       updateConfig({ ...widget.config, ...config }),
 
@@ -85,39 +85,39 @@ export default function WidgetResourceOverview({
               <TabsTrigger value="sorting">Sorteren</TabsTrigger>
               <TabsTrigger value="pagination">Pagination</TabsTrigger>
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
-              <TabsTrigger value="info">Info</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
-            <TabsContent value="general" className="p-0">
-              <WidgetResourceOverviewGeneral {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="display" className="p-0">
-              <WidgetResourceOverviewDisplay {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="button" className="p-0">
-              <WidgetResourceOverviewButton {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="sorting" className="p-0">
-              <WidgetResourceOverviewSorting {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="pagination" className="p-0">
-              <WidgetResourceOverviewPagination {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="search" className="p-0">
-              <WidgetResourceOverviewSearch {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="tags" className="p-0">
-              <WidgetResourceOverviewTags {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="include" className="p-0">
-              <WidgetResourceOverviewInclude {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="info" className="p-0">
-              <WidgetResourceOverviewInfo {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="publish" className="p-0">
-              <WidgetPublish apiUrl={apiUrl} />
-            </TabsContent>
+            {previewConfig ? (
+              <>
+                <TabsContent value="general" className="p-0">
+                  <WidgetResourceOverviewGeneral {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="display" className="p-0">
+                  <WidgetResourceOverviewDisplay {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="button" className="p-0">
+                  <WidgetResourceOverviewButton {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="sorting" className="p-0">
+                  <WidgetResourceOverviewSorting {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="pagination" className="p-0">
+                  <WidgetResourceOverviewPagination {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="search" className="p-0">
+                  <WidgetResourceOverviewSearch {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="tags" className="p-0">
+                  <WidgetResourceOverviewTags {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="include" className="p-0">
+                  <WidgetResourceOverviewInclude {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="publish" className="p-0">
+                  <WidgetPublish apiUrl={apiUrl} />
+                </TabsContent>
+              </>
+            ) : null}
           </Tabs>
 
           <div className="py-6 mt-6 bg-white rounded-md">

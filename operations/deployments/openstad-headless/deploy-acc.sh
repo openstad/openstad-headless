@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -e
 
@@ -19,7 +19,7 @@ chart_dir="$ROOT_DIR/charts"
 
 STACK="openstad-headless"
 CHART="openstad-headless/openstad-headless"
-CHART_VERSION="0.0.1"
+CHART_VERSION="0.0.6"
 NAMESPACE="headless-acc-2024"
 CONTEXT="do-ams3-openstad-ams-acc"
 PREVIOUS_CONTEXT=$(kubectl config current-context)
@@ -28,7 +28,7 @@ echo "Changing context to $CONTEXT..."
 kubectl config set current-context $CONTEXT
 
 echo "Decrypting files..."
-sh $ROOT_DIR/operations/scripts/decrypt.sh
+bash $ROOT_DIR/operations/scripts/decrypt.sh
 
 echo "Starting deployment..."
 helm upgrade "$STACK" "$CHART" \

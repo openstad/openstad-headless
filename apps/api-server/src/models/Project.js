@@ -167,6 +167,25 @@ module.exports = function (db, sequelize, DataTypes) {
         return
       },
 
+      afterCreate: async function (instance, options) {
+        // create a default status
+        let defaultStatus = await db.Tag.create({
+          projectId: instance.id,
+          type: 'status',
+          name: 'open',
+          seqnr: 10,
+          noComment: false,
+          editableByUser: true,
+        });
+        await instance.update({
+          config: {
+            statusses: {
+              defaultStatusId: defaultStatus.id,
+            }
+          }
+        })
+      },
+
     },
 
   });

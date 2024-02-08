@@ -59,9 +59,6 @@ router.use( '/lock', require('./lock') );
 // To do test and fix log API
 //router.use( '/project/:projectId(\\d+)/log', require('./log') );
 
-// openstad-map
-router.use( '/project/:projectId(\\d+)/openstad-map', require('./openstad-map') );
-
 router.use( '/image', require('./image-verification-link') );
 
 // area on project and no project route, system wide the same
