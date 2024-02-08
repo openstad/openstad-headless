@@ -4,13 +4,12 @@
   width: 100%;
   height: 100%;
 
-  .osc-map-marker-faded {
-    opacity: .35;
-  }
-
-  .osc-map-marker-cluster-faded {
-    opacity: .35;
-  }
-
 }
 
+.osc-base-map-widget-container .osc-map-marker-faded {
+  opacity: .35;
+}
+
+.osc-base-map-widget-container .osc-map-marker-cluster-faded {
+  opacity: .35;
+}
