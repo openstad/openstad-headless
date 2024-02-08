@@ -2,9 +2,6 @@ import type { MarkerProps } from '../types/marker-props';
 import type { LocationType } from '../types/location';
 
 export default function parseLocation(point: LocationType | MarkerProps) {
-
-  console.log(point);
-  
   // location can be given in a range of different formats but should be translated to { lat, lng }
 	if (point._latlng) {
 		point.lat = point._latlng.lat;
