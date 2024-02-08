@@ -5,7 +5,6 @@ import { addToClassname, removeFromClassName } from '../../lib/class-name.js';
 import MarkerIcon from './marker-icon';
 
 export default function Marker({
-  location = undefined,
 	lat = undefined,
 	lng = undefined,
   isFaded = false,
@@ -60,13 +59,13 @@ export default function Marker({
 
   let draggable = eventHandlers['dragstart'] || eventHandlers['dragend'];
   
-  return isVisible && ( location?.lat || lat ) ? (
+  return isVisible && lat ? (
     <LeafletMarker
     {...props}
     draggable={!!draggable}
     eventHandlers={eventHandlers}
     icon={icon}
-    position={location ? [ location.lat, location.lng ] : [ lat, lng ]}
+    position={[ lat, lng ]}
     />
   ) : null;
   

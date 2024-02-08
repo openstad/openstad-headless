@@ -2,11 +2,9 @@ import type { LeafletMouseEvent } from 'leaflet';
 import type { LocationType } from './location';
 import type { MarkerIconType } from './marker-icon';
 
-export type MarkerProps = {
+export type MarkerProps =
+  LocationType & {
   markerId?: string,
-  lat?: number,
-  lng?: number,
-  location?: LocationType,
   isFaded?: boolean,
   isVisible?: boolean,
   icon?: MarkerIconType,

@@ -1,6 +1,7 @@
 import type { PropsWithChildren } from 'react';
 import {loadWidget} from '../../lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
+import parseLocation from './lib/parse-location';
 
 import 'leaflet/dist/leaflet.css';
 import './css/base-map.less';
@@ -48,12 +49,10 @@ export function ResourceDetailMap({
   let currentMarker: MarkerProps;
   currentMarker = {
     ...marker,
-    location: resource.location? {
-	    lat: resource.location.lat,
-	    lng: resource.location.lng,
-    } : undefined,
+    location: {...resource.location } || undefined,
     icon: marker?.icon || markerIcon,
   };
+  parseLocation(currentMarker) // unify location format
 
   let currentCenter = center;
   if (resource?.location) {

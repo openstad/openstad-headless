@@ -9,6 +9,7 @@ import TileLayer from './tile-layer';
 import { Area, isPointInArea } from './area';
 import Marker from './marker';
 import MarkerClusterGroup from './marker-cluster-group';
+import parseLocation from './lib/parse-location';
 
 // ToDo: import { searchAddressByLatLng, suggestAddresses, LookupLatLngByAddressId } from './lib/search.js';
 
@@ -20,7 +21,6 @@ import type { ProjectSettingProps } from '../../types/project-setting-props';
 import type { MarkerProps } from './types/marker-props';
 import type { MapPropsType } from './types/index';
 import type { LocationType } from './types/location';
-import type { BoundsParams } from './types/bounds';
 
 export type BaseMapWidgetProps =
   BaseProps &
@@ -43,10 +43,7 @@ export function BaseMap({
 
 	zoom = 14,
   scrollWheelZoom = true,
-	center = {
-		lat: 52.37104644463586,
-		lng: 4.900402911007405,
-	},
+	center = {},
 
   tilesVariant = 'nlmaps',
   tiles = undefined,
@@ -67,23 +64,22 @@ export function BaseMap({
   ...props
 }: PropsWithChildren<BaseMapWidgetProps>) {
 
+  if (!center.lat) {
+		center.lat = 52.37104644463586;
+		center.lng = 4.900402911007405;
+  }
+
   let [currentMarkers, setCurrentMarkers] = useState(markers);
 
   let [mapId] = useState(`${parseInt(Math.random() * 1e8 as any as string)}`);
   let [mapRef] = useMapRef(mapId);
 
-  const setBoundsAndCenter = useCallback( (points: BoundsParams) => {
+  const setBoundsAndCenter = useCallback( (points: Array<LocationType>) => {
 
 	  let poly = [];
     if (points && Array.isArray(points)) {
-	    points.forEach(function(point: any) {
-		    if (point._latlng) {
-			    point = point._latlng;
-		    } else if (point.location) {
-			    point = point.location.coordinates ? { lat: point.location.coordinates[0], lng: point.location.coordinates[1] }  : point.location;
-		    } else if (point.position) {
-			    point = point.position.coordinates ? { lat: point.position.coordinates[0], lng: point.position.coordinates[1] }  : point.position;
-		    }
+	    points.forEach(function(point:LocationType) {
+        parseLocation(point)
         if (point.lat) {
 		      poly.push(point);
         }
@@ -142,6 +138,9 @@ export function BaseMap({
     let result = [...markers];
 
     result.map((marker, i) => {
+
+      // unify location format
+      parseLocation(marker)
 
       // add
       let markerData: MarkerProps = {...marker};

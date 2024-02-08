@@ -1,6 +1,7 @@
 import type { PropsWithChildren } from 'react';
 import {loadWidget} from '../../lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
+import parseLocation from './lib/parse-location';
 
 import 'leaflet/dist/leaflet.css';
 import './css/base-map.less';
@@ -57,11 +58,10 @@ export function ResourceOverviewMap({
 
   let currentMarkers = resources?.map( (resource:any) => { // TODO: types/resource does not exist yet
     let marker:MarkerProps = {
-      location: resource.location? {
-	      lat: resource.location.lat,
-	      lng: resource.location.lng,
-      } : undefined,
+      location: {...resource.location } || undefined,
     }
+    parseLocation(marker) // unify location format
+    
     if (marker.location && categorizeByField && categories) {
       let tag = resource.tags?.find( (t:any) => t.type == categorizeByField ); // TODO: types/Tag does not exist yet
       if (tag) {

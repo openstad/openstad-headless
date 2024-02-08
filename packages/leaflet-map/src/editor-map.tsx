@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { PropsWithChildren } from 'react';
 import type { LeafletMouseEvent } from 'leaflet';
 import {loadWidget} from '../../lib/load-widget';
+import parseLocation from './lib/parse-location';
 
 import 'leaflet/dist/leaflet.css';
 import './css/base-map.less';
@@ -40,18 +41,17 @@ export function EditorMap({
 }: PropsWithChildren<EditorMapWidgetProps>) {
 
   let [currentEditorMarker, setCurrentEditorMarker] = useState<MarkerProps>({
-    location: editorMarker?.location || {
-		  lat: editorMarker?.lat,
-		  lng: editorMarker?.lng,
-    },
+    ...editorMarker,
     icon: editorMarker?.icon || markerIcon,
     doNotCluster: true,
   });
+  parseLocation(currentEditorMarker) // unify location format
+
   let [currentCenter, setCurrentCenter] = useState(center)
 
   useEffect(() => {
-    if (centerOnEditorMarker && currentEditorMarker?.location?.lat) {
-      setCurrentCenter({ ...currentEditorMarker.location })
+    if (centerOnEditorMarker && currentEditorMarker.lat) {
+      setCurrentCenter({ ...currentEditorMarker })
     } else {
       setCurrentCenter(center)
     }
@@ -61,7 +61,8 @@ export function EditorMap({
     if (map && e.isInArea) {
       setCurrentEditorMarker({
         ...currentEditorMarker,
-        location: e.latlng,
+        lat: e.latlng?.lat,
+        lng: e.latlng?.lng,
       })
     }
   }
@@ -69,7 +70,8 @@ export function EditorMap({
   return (
     <>
       <BaseMap {...props} center={currentCenter} markers={[...markers, currentEditorMarker]} onClick={updateLocation}/>
-      <input name={fieldName} type="hidden" value={`{"lat":${currentEditorMarker.location.lat},"lng":${currentEditorMarker.location.lng}}`}/>
+
+      <input name={fieldName} type="hidden" value={`{"lat":${currentEditorMarker.lat},"lng":${currentEditorMarker.lng}}`}/>
     </>
   );
 
