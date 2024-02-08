@@ -4,7 +4,7 @@ import DataStore from '@openstad-headless/data-store/src';
 import parseLocation from './lib/parse-location';
 
 import 'leaflet/dist/leaflet.css';
-import './css/base-map.less';
+import './css/base-map.css';
 
 import type { BaseProps } from '../../types/base-props';
 import type { ProjectSettingProps } from '../../types/project-setting-props';

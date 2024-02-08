@@ -14,7 +14,7 @@ import parseLocation from './lib/parse-location';
 // ToDo: import { searchAddressByLatLng, suggestAddresses, LookupLatLngByAddressId } from './lib/search.js';
 
 import 'leaflet/dist/leaflet.css';
-import './css/base-map.less';
+import './css/base-map.css';
 
 import type { BaseProps } from '../../types/base-props';
 import type { ProjectSettingProps } from '../../types/project-setting-props';
