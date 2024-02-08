@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { FormProps, FieldProps } from "./props.js";
+import { FormProps, FieldProps } from "./props";
 import TextInput from "@openstad-headless/ui/src/form-elements/text";
 import RangeSlider from "@openstad-headless/ui/src/form-elements/a-b-slider";
 import CheckboxField from "@openstad-headless/ui/src/form-elements/checkbox";
@@ -8,7 +8,7 @@ import SelectField from "@openstad-headless/ui/src/form-elements/select";
 import TickmarkSlider from "@openstad-headless/ui/src/form-elements/tickmark-slider";
 import FileUploadField from "@openstad-headless/ui/src/form-elements/file-upload";
 import MapField from "@openstad-headless/ui/src/form-elements/map";
-import { handleSubmit } from "./submit.js";
+import { handleSubmit } from "./submit";
 
 const Form: FC<FormProps> = ({
      title = 'Form Widget',
