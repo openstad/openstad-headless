@@ -153,6 +153,7 @@ router
       res.header('Content-Type', 'application/javascript');
       res.send(output);
     } catch (e) {
+      console.log(e);
       return next(
         createError(
           500,
@@ -270,7 +271,7 @@ function getWidgetJavascriptOutput(
         let process = { env: { NODE_ENV: 'production' } };
 
         const currentScript = document.currentScript;
-          currentScript.insertAdjacentHTML('afterend', \`<div id="${componentId}"></div>\`);
+          currentScript.insertAdjacentHTML('afterend', \`<div id="${componentId}" style="width: 100%; height: 100%;"></div>\`);
           
           document.querySelector('head').innerHTML += \`
             <style>${css}</style>

@@ -1,5 +1,4 @@
 // @todo: add all widgets
-
 let moduleDefinitions = {
   agenda: {
     packageName: '@openstad-headless/agenda',
@@ -96,6 +95,50 @@ let moduleDefinitions = {
     css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessCounter',
     componentName: 'Counter',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
+  basemap: {
+    packageName: '@openstad-headless/base-map',
+    directory: 'leaflet-map',
+    js: ['dist/base-map.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessBaseMap',
+    componentName: 'BaseMap',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
+  editormap: {
+    packageName: '@openstad-headless/editor-map',
+    directory: 'leaflet-map',
+    js: ['dist/editor-map.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessEditorMap',
+    componentName: 'EditorMap',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
+  resourceoverviewmap: {
+    packageName: '@openstad-headless/resource-overview-map',
+    directory: 'leaflet-map',
+    js: ['dist/resource-overview-map.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessResourceOverviewMap',
+    componentName: 'ResourceOverviewMap',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
+  resourcedetailmap: {
+    packageName: '@openstad-headless/resource-detail-map',
+    directory: 'leaflet-map',
+    js: ['dist/resource-detail-map.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessResourceDetailMap',
+    componentName: 'ResourceDetailMap',
     defaultConfig: {
       projectId: null,
     },
