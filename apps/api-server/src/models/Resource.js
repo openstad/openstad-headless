@@ -927,7 +927,7 @@ module.exports = function (db, sequelize, DataTypes) {
       return true;
     }
 
-    let status = self.tags.find( type => 'status' );
+    let status = self.tags?.find( type => 'status' );
     if (typeof status?.extraFunctionality?.editableByUser != 'boolean' || status.extraFunctionality.editableByUser) {
       return true;
     }
