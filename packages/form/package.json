@@ -10,8 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@openstad-headless/data-store": "^1.0.0",
-    "@openstad-headless/ui": "^1.0.0",
+    "@openstad-headless/data-store": "file:../data-store",
+    "@openstad-headless/ui": "file:../ui",
     "@utrecht/component-library-css": "^2.0.0",
     "leaflet": "^1.9.4",
     "react": "^18.2.0",
