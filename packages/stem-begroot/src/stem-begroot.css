@@ -1,0 +1,30 @@
+.begroot-step-panel {
+  padding: 1.5rem;
+  background-color: var(--osc-card);
+}
+
+.stembegroot-content-item-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.stembegroot-content-item-header-taglist {
+  display: flex;
+  gap: 1rem;
+}
+
+.osc-stem-begroot-content-item-footer {
+  display: flex;
+  gap: 1rem;
+}
+
+.osc-stem-begroot-content-item-footer .osc-stem-begroot-item-action-btn {
+  flex-grow: 1;
+  padding: .75rem !important;
+}
+
+.begroot-step-panel-navigation-section {
+  display: flex;
+  justify-content: end;
+}

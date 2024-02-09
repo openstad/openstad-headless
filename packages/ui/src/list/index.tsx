@@ -6,7 +6,7 @@ import './index.css';
 type Props<T> = {
   items: Array<T>;
   renderHeader?: () => React.JSX.Element;
-  renderItem: (item: T) => React.JSX.Element;
+  renderItem: (item: T, index:number) => React.JSX.Element;
   columns?: 1 | 2 | 3;
 };
 
@@ -23,7 +23,7 @@ export const List = <T extends { [key: string]: any }>({
       <div className={`osc-listview osc-listview-template-columns-${columns}`}>
         {items.map((item, index) => (
           <React.Fragment key={`list-item-${index}`}>
-            {renderItem(item)}
+            {renderItem(item, index)}
           </React.Fragment>
         ))}
       </div>

@@ -4,6 +4,7 @@
     --osc-muted: #768391;
     --osc-muted-foreground:#ffffff;
     --osc-card: #F0F4F8;
+    --osc-card-dark:#DBDFE5;
     --osc-card-foreground:#010D0A;
     /* popover: */
     /* popover-foreground: */
@@ -78,7 +79,6 @@
     font-weight: 400;
     line-height: 1.5rem;
     letter-spacing: 0px;
-    text-align: left;
 }
 
 .osc p.strong {
