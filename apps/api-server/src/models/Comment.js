@@ -309,6 +309,7 @@ module.exports = function( db, sequelize, DataTypes ) {
       }
     },
     canReply: function(user, self) {
+	  if (user.role == "admin") return true;
       if (!self.resource) return false;
       if (self.resource.isRunning() && userHasRole(user, 'member') && self.id && !self.parentId) {
         return true;
