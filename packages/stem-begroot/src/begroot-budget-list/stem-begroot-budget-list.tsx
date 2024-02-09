@@ -1,13 +1,6 @@
 import './stem-begroot-budget-list.css';
 import React from 'react';
-import {
-  Banner,
-  Button,
-  Image,
-  PlainButton,
-  SecondaryButton,
-  Spacer,
-} from '@openstad-headless/ui/src';
+import { Button, Image, PlainButton, Spacer } from '@openstad-headless/ui/src';
 
 export const StemBegrootBudgetList = ({
   allResources = [],
@@ -33,15 +26,17 @@ export const StemBegrootBudgetList = ({
         <div className="stem-begroot-budget-list-used-budgets">
           <div className="budget-used-list">
             {selectedResources.map((resource) => (
-              <Button style={{ flex: maxBudget % resource.budget }}>
-                &euro;{resource.budget || 0}
-              </Button>
+              <div
+                className="budget-badge budget-badge-primary"
+                style={{ flex: maxBudget % resource.budget }}>
+                <p>&euro;{resource.budget || 0}</p>
+              </div>
             ))}
-            <PlainButton
+            <div
               style={{ flex: selectedResources.length === 0 ? 1 : 0 }}
-              className="osc-stem-begroot-budget-list-budget-left-indication">
-              &euro;{Math.max(maxBudget - budgetUsed, 0)}
-            </PlainButton>
+              className="osc-stem-begroot-budget-list-budget-left-indication budget-badge budget-badge-plain">
+              <p>&euro;{Math.max(maxBudget - budgetUsed, 0)}</p>
+            </div>
           </div>
 
           <div className="stem-begroot-helptext-and-budget-section-helptext">
@@ -85,6 +80,7 @@ export const StemBegrootBudgetList = ({
             <div className="budget-list-selection-indicaction-container">
               {selectedResources.map((resource) => (
                 <Image
+                key={`resource-detail-image-${resource.id}`}
                   className="budget-list-selection-indicaction"
                   src={resource.images?.at(0)?.src || ''}
                 />
@@ -94,7 +90,9 @@ export const StemBegrootBudgetList = ({
 
           {!canAddMore ? (
             <div className="budget-list-status-container">
-              <p className="budget-list-status-text strong">Kan niet meer toevoegen</p>
+              <p className="budget-list-status-text strong">
+                Kan niet meer toevoegen
+              </p>
               <p className="budget-list-status-text">Onvoldoende budget</p>
             </div>
           ) : null}

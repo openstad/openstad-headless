@@ -92,3 +92,34 @@
     border-radius: 4px;
     background-color: var(--osc-border);
 }
+
+
+.budget-badge {
+    border: 1px solid var(--osc-border);
+    border-radius: 4px;
+}
+
+.budget-badge p {
+    padding: 0 1rem;
+    text-align: center;
+}
+
+.budget-badge-primary {
+  background-color: var(--osc-primary);
+  border-color: var(--osc-primary);
+}
+
+.budget-badge-primary > p {
+    color: var(--osc-primary-foreground);
+}
+
+.budget-badge-plain {
+    background-color: var(--osc-card-dark);
+    border-color: var(--osc-card-dark);
+}
+
+.budget-badge-plain > p {
+    color: var(--osc-card-foreground);
+
+   
+}
