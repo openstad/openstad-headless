@@ -1,6 +1,8 @@
 import './stem-begroot-budget-list.css';
 import React from 'react';
-import { Button, Image, PlainButton, Spacer } from '@openstad-headless/ui/src';
+import { BudgetUsedList } from '../reuseables/used-budget-component';
+import { BudgetStatusPanel } from '../reuseables/budget-status-panel';
+import { Image, Spacer } from '@openstad-headless/ui/src';
 
 export const StemBegrootBudgetList = ({
   allResources = [],
@@ -24,20 +26,11 @@ export const StemBegrootBudgetList = ({
     <>
       <section className="stem-begroot-budget-list">
         <div className="stem-begroot-budget-list-used-budgets">
-          <div className="budget-used-list">
-            {selectedResources.map((resource) => (
-              <div
-                className="budget-badge budget-badge-primary"
-                style={{ flex: maxBudget % resource.budget }}>
-                <p>&euro;{resource.budget || 0}</p>
-              </div>
-            ))}
-            <div
-              style={{ flex: selectedResources.length === 0 ? 1 : 0 }}
-              className="osc-stem-begroot-budget-list-budget-left-indication budget-badge budget-badge-plain">
-              <p>&euro;{Math.max(maxBudget - budgetUsed, 0)}</p>
-            </div>
-          </div>
+          <BudgetUsedList
+            budgetUsed={budgetUsed}
+            maxBudget={maxBudget}
+            selectedResources={selectedResources}
+          />
 
           <div className="stem-begroot-helptext-and-budget-section-helptext">
             <p>
@@ -49,20 +42,7 @@ export const StemBegrootBudgetList = ({
           </div>
         </div>
 
-        <aside className="stem-begroot-helptext-and-budget-section-budget">
-          <h5>Totaal budget</h5>
-          <Spacer size={0.5} />
-
-          <div className="info-budget-label">
-            <p>Budget gekozen:</p>
-            <p className="strong">&euro;{budgetUsed}</p>
-          </div>
-          <Spacer size={0.5} />
-          <div className="info-budget-label">
-            <p>Budget over:</p>
-            <p className="strong">&euro;{maxBudget}</p>
-          </div>
-        </aside>
+        <BudgetStatusPanel budgetUsed={budgetUsed} maxBudget={maxBudget} />
       </section>
       <Spacer size={2} />
       <section className="stem-begroot-helptext-and-budget-section"></section>
@@ -80,7 +60,7 @@ export const StemBegrootBudgetList = ({
             <div className="budget-list-selection-indicaction-container">
               {selectedResources.map((resource) => (
                 <Image
-                key={`resource-detail-image-${resource.id}`}
+                  key={`resource-detail-image-${resource.id}`}
                   className="budget-list-selection-indicaction"
                   src={resource.images?.at(0)?.src || ''}
                 />

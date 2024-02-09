@@ -58,13 +58,13 @@
 }
 .osc h4 {
     font-size: 1.5rem;
-    font-weight: bold;
-    line-height: auto;
+    font-weight: 700;
+    line-height: 2rem;
 }
 .osc h5 {
     font-size: 1.25rem;
-    font-weight: bold;
-    line-height: auto;
+    font-weight: 700;
+    line-height: 1.75rem;
 }
 
 .osc h6 {
@@ -75,7 +75,7 @@
 
 .osc p { 
     color: var(--osc-muted, black);
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 400;
     line-height: 1.5rem;
     letter-spacing: 0px;
@@ -84,7 +84,6 @@
 .osc p.strong {
     color: var(--osc-foreground, black);
     letter-spacing: 0px;
-    font-size: 0.875rem;
     font-weight: 600;
     line-height: 1.5rem;
     letter-spacing: 0px;

@@ -14,6 +14,10 @@
   gap: 1rem;
 }
 
+.stembegroot-content-item-header-taglist p {
+  margin: 0;
+}
+
 .osc-stem-begroot-content-item-footer {
   display: flex;
   gap: 1rem;
@@ -26,5 +30,32 @@
 
 .begroot-step-panel-navigation-section {
   display: flex;
+  gap: 1rem;
   justify-content: end;
+}
+
+
+.begroot-step-2-instruction-budget-status-panel {
+  display: grid;
+  grid-template-columns: 10fr 2fr;
+}
+
+.budget-two-text-row-spaced {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.budget-overview-panel {
+  background-color: var(--osc-card-dark);
+  padding: 1rem;
+}
+
+.budget-two-text-row-spaced > * {
+  margin: 0;
+}
+
+.budget-unused-panel-step-2 {
+  padding: 1rem;
+  background-color: var(--osc-muted);
 }
