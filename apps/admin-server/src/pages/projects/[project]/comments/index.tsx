@@ -9,7 +9,7 @@ export default function ProjectComments() {
   const router = useRouter();
   const { project } = router.query;
   const { data } = useComments(project as string);
-  const [comments, setComments] = useState([])
+  const [comments, setComments] = useState<{ [key: string]: any }>({})
 
   useEffect(() => {
     if (data) {
