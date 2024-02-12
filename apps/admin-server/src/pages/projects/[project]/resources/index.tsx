@@ -16,6 +16,23 @@ export default function ProjectResources() {
 
   if (!data) return null;
 
+  const exportData = (data: BlobPart, fileName: string, type: string) => {
+    // Create a link and download the file
+    const blob = new Blob([data], { type });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+
+  function transform() {
+    const jsonData = JSON.stringify(data);
+    exportData(jsonData, `resources.json`, "application/json");
+  }
+
   return (
     <div>
       <PageLayout
@@ -31,14 +48,18 @@ export default function ProjectResources() {
           },
         ]}
         action={
-          <Link
-            href={`/projects/${project}/resources/create`}
-            className="flex w-fit">
-            <Button variant="default">
-              <Plus size="20" className="hidden lg:flex" />
-              Resource toevoegen
+          <div className='flex flex-row w-full md:w-auto my-auto'>
+            <Link
+              href={`/projects/${project}/resources/create`}>
+              <Button variant="default" className='text-xs p-2 w-fit'>
+                <Plus size="20" className="hidden lg:flex" />
+                Resource toevoegen
+              </Button>
+            </Link>
+            <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
+              Exporteer resources
             </Button>
-          </Link>
+          </div>
         }>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">

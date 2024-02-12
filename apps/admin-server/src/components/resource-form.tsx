@@ -20,6 +20,7 @@ import { useRouter } from 'next/router';
 import { SimpleCalendar } from '@/components/simple-calender-popup';
 import useResource from '@/hooks/use-resource';
 import toast from 'react-hot-toast';
+import ImageUploader from './image-uploader';
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -340,7 +341,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               withReset
             />
           </div>
-
+          <ImageUploader />
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>
