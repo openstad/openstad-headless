@@ -20,7 +20,8 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
      imageSrc = '',
      imageAlt = '',
      imageDescription = '',
-     onChange
+     onChange,
+     index
 }) => {
     const defaultValue = Math.ceil(fieldOptions.length / 2).toString();
     const [value, setValue] = useState<string>(defaultValue);
@@ -49,8 +50,8 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 max={maxCharacters}
                 value={value}
                 step="1"
-                list="tickmarks"
-                id="a-to-b-range"
+                list={`form-field-tickmarks-${index}`}
+                id={`a-to-b-range--${index}`}
                 name={fieldKey}
                 required={fieldRequired}
                 onChange={(e) => {
@@ -62,7 +63,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 }}
                 aria-label={`Selecteer een waarde tussen 1 en ${fieldOptions.length}`}
             />
-            <datalist id="tickmarks">
+            <datalist id={`form-field-tickmarks-${index}`}>
                 {fieldOptions.map((option, key) => (
                     <option key={key} value={option.value}>
                         {option.label}

@@ -27,7 +27,7 @@ const MapField: FC<MapProps> = ({
               <FormFieldDescription>{description}</FormFieldDescription>
           </Paragraph>
           <div
-            className="map-container"
+            className="form-field-map-container"
             id={`map`}
           >
               {/*<EditorMap fieldName={fieldKey}/> TODO: Uncomment this line when the EditorMap component is implemented*/}
