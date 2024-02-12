@@ -15,6 +15,8 @@ const Form: FC<FormProps> = ({
      fields = [],
      submitText = 'Verzenden',
      submitHandler = () => {},
+     saveAsConceptLabel = '',
+     saveAsConceptHandler = () => {},
  }) => {
     const initialFormValues: { [key: string]: any } = {};
     fields.forEach((field) => {
@@ -36,67 +38,28 @@ const Form: FC<FormProps> = ({
         setFormValues({ ...formValues, [name]: value });
     };
 
-    const renderField = (field: FieldProps) => {
-        switch (field.type) {
-            case 'text':
-                return (
-                    <TextInput
-                        {...field}
-                        onChange={handleInputChange}
-                    />
-                );
-            case 'range':
-                return (
-                    <RangeSlider
-                        {...field}
-                        onChange={handleInputChange}
-                    />
-                );
-            case 'checkbox':
-                return (
-                    <CheckboxField
-                        {...field}
-                        onChange={handleInputChange}
-                    />
-                );
-            case 'radiobox':
-                return (
-                    <RadioboxField
-                        {...field}
-                        onChange={handleInputChange}
-                    />
-                );
-            case 'select':
-                return (
-                    <SelectField
-                        {...field}
-                        onChange={handleInputChange}
-                    />
-                );
-            case 'tickmark-slider':
-                return (
-                    <TickmarkSlider
-                        {...field}
-                        onChange={handleInputChange}
-                    />
-                );
-            case 'upload':
-                return (
-                    <FileUploadField
-                        {...field}
-                        onChange={handleInputChange}
-                    />
-                );
-            case 'map':
-                return (
-                    <MapField
-                        {...field}
-                        onChange={handleInputChange}
-                    />
-                );
-            default:
-                return null;
-        }
+    const componentMap: { [key: string]: React.ComponentType<FieldProps> } = {
+        text: TextInput,
+        range: RangeSlider,
+        checkbox: CheckboxField,
+        radiobox: RadioboxField,
+        select: SelectField,
+        'tickmark-slider': TickmarkSlider,
+        upload: FileUploadField,
+        map: MapField,
+    };
+
+    const renderField = (field: FieldProps, index: number) => {
+      const Component = componentMap[field.type];
+      if (Component) {
+        return (
+          <Component
+            {...field}
+            index={index}
+            onChange={handleInputChange}
+          />
+        );
+      }
     };
 
     return (
@@ -107,12 +70,15 @@ const Form: FC<FormProps> = ({
                 <form onSubmit={handleFormSubmit} className="form-container" noValidate>
                     {fields.map((field: FieldProps, index: number) => (
                         <div key={index}>
-                            {renderField(field)}
+                            {renderField(field, index)}
                             <div className="error-message">
                                 {formErrors[field.fieldKey] && <span>{formErrors[field.fieldKey]}</span>}
                             </div>
                         </div>
                     ))}
+                    {saveAsConceptLabel && (
+                        <button type="button" onClick={() => saveAsConceptHandler(formValues)}>{saveAsConceptLabel}</button>
+                    )}
                     <button type="submit">{submitText}</button>
                 </form>
             </div>

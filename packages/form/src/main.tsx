@@ -94,6 +94,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <Form
         fields={fields}
         submitHandler={(data) => console.log(data)}
+        saveAsConceptLabel="Opslaan als concept"
+        saveAsConceptHandler={(data) => console.log(data)}
     />
   </React.StrictMode>
 );
