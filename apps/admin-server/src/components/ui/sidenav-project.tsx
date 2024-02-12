@@ -212,7 +212,7 @@ export function SidenavProject({ className }: { className?: string }) {
             variant={location.includes('/areas') ? 'secondary' : 'ghost'}
             className="w-full flex justify-start"
             onClick={(e) => {}}>
-            <span className="truncate">Gebieden</span>
+            <span className="truncate">Polygonen</span>
           </Button>
         </Link>
         <Link href={`/projects/${project}/tags`}>
