@@ -36,7 +36,7 @@ export default function ProjectAreaEdit() {
   const defaults = useCallback(
     () => ({
       name: data?.name || null,
-      geoJSON: JSON.stringify(data?.geoJSON) || null,
+      geoJSON: JSON.stringify(data?.geoJSON),
     }),
     [data]
   );
@@ -58,7 +58,6 @@ export default function ProjectAreaEdit() {
 
   useEffect(() => {
     form.reset(defaults());
-    console.log(defaults());
   }, [form, defaults]);
 
   return (
