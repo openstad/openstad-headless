@@ -182,6 +182,7 @@ router.route('/*')
 	.post(function(req, res, next) {
 		let votes = req.body || [];
 		if (!Array.isArray(votes)) votes = [votes];
+
 		votes = votes.map((entry) => {
 			return {
 				resourceId: parseInt(entry.resourceId, 10),
@@ -332,12 +333,16 @@ router.route('/*')
 		let transaction = res.locals.transaction
 		if (req.project.config.votes.voteType != 'budgeting') return next();
 		let budget = 0;
+		console.log({votes: req.votes});
 		req.votes.forEach((vote) => {
 			let resource = req.resources.find(resource => resource.id == vote.resourceId);
 			budget += resource.budget;
 		});
 		let err;
 		if (!( budget >= req.project.config.votes.minBudget && budget <= req.project.config.votes.maxBudget )) {
+			console.log({budget});
+			console.log({minBudget: req.project.config.votes.minBudget});
+			console.log({maxBudget: req.project.config.votes.maxBudget});
 		  err = createError(400, 'Budget klopt niet');
 		}
 		if (!( req.votes.length >= req.project.config.votes.minResources && req.votes.length <= req.project.config.votes.maxResources )) {

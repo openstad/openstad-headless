@@ -31,7 +31,7 @@ import toast from 'react-hot-toast';
 const formSchema = z.object({
   isViewable: z.boolean(),
   isActive: z.boolean(),
-  withExisting: z.enum(['error', 'replace']),
+  withExisting: z.enum(['error', 'replace', 'merge']),
   requiredUserRole: z.enum(['anonymous', 'member']),
   voteType: z.enum([
     'likes',

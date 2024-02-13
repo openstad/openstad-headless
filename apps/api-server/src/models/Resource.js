@@ -486,6 +486,18 @@ module.exports = function (db, sequelize, DataTypes) {
     }
 
     return {
+      defaultScope: {
+        include: [
+          {
+            model: db.Tag,
+            as: 'statuses',
+            attributes: ['id', 'type', 'name', 'label', 'extraFunctionality'],
+            through: { attributes: [] },
+            where: { type: 'status' },
+            required: false,
+          },
+        ],
+      },
 
       // nieuwe scopes voor de api
       // -------------------------
@@ -523,10 +535,6 @@ module.exports = function (db, sequelize, DataTypes) {
             }
           };
         }
-      },
-
-      // defaults
-      default: {
       },
 
       api: {},
@@ -571,7 +579,6 @@ module.exports = function (db, sequelize, DataTypes) {
           ]
         };
       },
-
       includeTags: {
         include: [{
           model: db.Tag,
@@ -580,20 +587,9 @@ module.exports = function (db, sequelize, DataTypes) {
               [Op.not]:'status'
             }
           },
-          attributes: ['id', 'type', 'name'],
+          attributes: ['id', 'type', 'name', 'label','extraFunctionality'],
           through: {attributes: []},
         }]
-      },
-
-      includeStatus: {
-        include: [{
-          model: db.Tag,
-          as: "statuses",
-          attributes: ['id', 'type', 'name', 'label'],
-          through: {attributes: []},
-          where: {type: 'status'},
-          required: false,
-        }],
       },
 
       selectTags: function (tags) {
@@ -934,8 +930,11 @@ module.exports = function (db, sequelize, DataTypes) {
     if (userHasRole(user, 'editor', self.userId) || userHasRole(user, 'admin', self.userId) || userHasRole(user, 'moderator', self.userId)) {
       return true;
     }
+    
+    let status = self.statuses;
+    console.log({status});
+    console.log({self:self.dataValues});
 
-    let status = self.tags.find( type => 'status' );
     if (typeof status?.extraFunctionality?.editableByUser != 'boolean' || status.extraFunctionality.editableByUser) {
       return true;
     }
@@ -975,7 +974,7 @@ module.exports = function (db, sequelize, DataTypes) {
       // published
       if (!self.publishDate) return false;
       // status
-      let status = self.tags.find( type => 'status' );
+      let status = self.tags.find( tag => tag.type === 'status');
       if (typeof status?.extraFunctionality?.noComment == 'boolean' && status.extraFunctionality.noComment) return false;
       return true;
     },

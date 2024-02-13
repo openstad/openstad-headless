@@ -35,7 +35,6 @@ export default {
   },
 
   submitLike: async function({ projectId, resourceId }, data) {
-
     let url = `/api/project/${projectId}/vote`;
     let headers = {
       'Content-Type': 'application/json'

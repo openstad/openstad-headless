@@ -1,5 +1,5 @@
 import './stem-begroot.css';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   PlainButton,
   SecondaryButton,
@@ -9,7 +9,7 @@ import {
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { hasRole } from '@openstad-headless/lib';
+import { SessionStorage, hasRole } from '@openstad-headless/lib';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 import { StemBegrootBudgetList } from './begroot-budget-list/stem-begroot-budget-list';
@@ -34,17 +34,65 @@ function StemBegroot({ maxBudget = 0, ...props }: StemBegrootWidgetProps) {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [currentUser] = datastore.useCurrentUser({ ...props });
   const isModerator = hasRole(currentUser, 'moderator');
-  const [resources] = datastore.useResources({
+  const { resources, error, submitLike } = datastore.useResources({
     projectId: props.projectId,
   });
 
   // Replace with type when available from datastore
   const [selectedResources, setSelectedResources] = useState<any[]>([]);
+  const session = new SessionStorage({ projectId: props.projectId });
+  const [isBusy, setIsBusy] = useState<boolean>(false);
 
   const budgetUsed: number = selectedResources.reduce(
     (total, cv) => total + cv.budget,
     0
   );
+
+  function prepareForVote(e: React.MouseEvent<HTMLElement, MouseEvent> | null) {
+    if (e) e.stopPropagation();
+    const resourcesToVoteFor: { [key: string]: any } = {};
+    (selectedResources.length ? selectedResources : []).forEach(
+      (resource: any) => {
+        resourcesToVoteFor[resource.id] = 'yes';
+      }
+    );
+    session.set('osc-resource-vote-pending', resourcesToVoteFor);
+  }
+
+  async function doVote(
+    e: React.MouseEvent<HTMLElement, MouseEvent> | null,
+    resources: Array<any>
+  ) {
+    if (e) e.stopPropagation();
+
+    if (isBusy) return;
+    setIsBusy(true);
+
+    if (!props.votes.isActive) {
+      return;
+    }
+
+    if (resources.length > 0) {
+      const recordsToLike = resources.map(
+        (r: { id: string; opinion: string }) => ({
+          resourceId: r.id,
+          opinion: 'yes',
+        })
+      );
+      await submitLike(recordsToLike);
+      session.remove('osc-resource-vote-pending');
+    }
+    setIsBusy(false);
+  }
+
+  // Check if voting is going on
+  useEffect(() => {
+    let pending = session.get('osc-resource-vote-pending');
+
+    const resourcesThatArePending =
+      resources?.records?.filter((r: any) => pending && r.id in pending) || [];
+    doVote(null, resourcesThatArePending);
+  }, [resources?.records, currentUser]);
 
   return (
     <>
@@ -109,12 +157,15 @@ function StemBegroot({ maxBudget = 0, ...props }: StemBegrootWidgetProps) {
               <Spacer size={1.5} />
               <div className="budget-overview-panel">
                 <h5>Overzicht van mijn selectie</h5>
-
+                <Spacer size={2} />
                 {selectedResources.map((resource) => (
-                  <div className="budget-two-text-row-spaced">
-                    <p>{resource.title}</p>
-                    <p className="strong">&euro;{resource.budget}</p>
-                  </div>
+                  <>
+                    <div className="budget-two-text-row-spaced">
+                      <p>{resource.title}</p>
+                      <p className="strong">&euro;{resource.budget}</p>
+                    </div>
+                    <Spacer size={1} />
+                  </>
                 ))}
 
                 <Spacer size={2} />
@@ -137,7 +188,7 @@ function StemBegroot({ maxBudget = 0, ...props }: StemBegrootWidgetProps) {
                 maxBudget={maxBudget}
                 selectedResources={selectedResources}
               />
-              <Spacer size={1.5}/>
+              <Spacer size={1.5} />
               <h5>Controleer stemcode</h5>
               <p>
                 Via onderstaande knop kun je op een aparte pagina je
@@ -146,7 +197,17 @@ function StemBegroot({ maxBudget = 0, ...props }: StemBegrootWidgetProps) {
                 je kunt stemmen. Alle bewoners van 12 jaar en ouder hebben per
                 post een stemcode ontvangen.
               </p>
-              <SecondaryButton>Vul je stemcode in</SecondaryButton>
+              <SecondaryButton
+                onClick={(e) => {
+                  prepareForVote(e);
+
+                  if (props.login?.url) {
+                    const loginUrl = new URL(props.login.url);
+                    document.location.href = loginUrl.toString();
+                  }
+                }}>
+                Vul je stemcode in
+              </SecondaryButton>
             </>
           ) : null}
 
@@ -159,11 +220,14 @@ function StemBegroot({ maxBudget = 0, ...props }: StemBegrootWidgetProps) {
               </PlainButton>
             ) : null}
 
-            <SecondaryButton
-              onClick={() => setCurrentStep(currentStep + 1)}
-              disabled={selectedResources.length === 0}>
-              Volgende
-            </SecondaryButton>
+            {/* Dont show on voting step */}
+            {currentStep !== 2 ? (
+              <SecondaryButton
+                onClick={() => setCurrentStep(currentStep + 1)}
+                disabled={selectedResources.length === 0}>
+                Volgende
+              </SecondaryButton>
+            ) : null}
           </div>
         </section>
         <Spacer size={4} />

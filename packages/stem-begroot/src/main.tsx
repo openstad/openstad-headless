@@ -12,9 +12,14 @@ const config: StemBegrootWidgetProps = {
   login: {
     url: `${import.meta.env.VITE_API_URL}/auth/project/${
       import.meta.env.VITE_PROJECT_ID
-    }/login?forceNewLogin=1&useAuth=default&redirectUri=${document.location}`,
+    }/login?forceNewLogin=1&useAuth=default&redirectUri=${encodeURIComponent(document.location.toString())}`,
   },
-  maxBudget:43241
+  maxBudget:43241,
+  votes:{
+    isActive:true, 
+    voteType:'budgeting', 
+    withExisting: 'error'
+  }
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
