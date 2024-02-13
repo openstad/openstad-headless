@@ -11,7 +11,6 @@ import BegrootmoduleDisplay from './display';
 import BegrootmoduleSorting from './sorting';
 import BegrootmoduleExplanation from './explanation';
 import BegrootmoduleAuthentication from './authentication';
-import BegrootmoduleLabels from './label';
 import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
@@ -31,6 +30,24 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   const { previewConfig, updatePreview } = useWidgetPreview<StemBegrootWidgetProps>({
     projectId,
   });
+
+  const totalPropPackage = {
+    ...widget?.config,
+    ...previewConfig,
+    updateConfig: (config: StemBegrootWidgetProps) =>
+      updateConfig({ ...widget.config, ...config }),
+
+    onFieldChanged: (key: keyof StemBegrootWidgetProps, value: any) => {
+      if (previewConfig) {
+        updatePreview({
+          ...previewConfig,
+          [key]: value,
+        });
+      }
+    },
+    projectId,
+  };
+  
   return (
     <div>
       <PageLayout
@@ -50,37 +67,29 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="preview">
+          <Tabs defaultValue="voting">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
-              <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="voting">Stem opties</TabsTrigger>
               <TabsTrigger value="display">Weergave opties</TabsTrigger>
               <TabsTrigger value="sorting">Sorteer opties</TabsTrigger>
               <TabsTrigger value="explanation">Uitleg</TabsTrigger>
               <TabsTrigger value="authentication">Authenticatie</TabsTrigger>
-              <TabsTrigger value="labels">Labels</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
-            <TabsContent value="preview" className="p-0">
-              {/* <Preview type="begrootmodule" /> */}
-            </TabsContent>
             <TabsContent value="voting" className="p-0">
-              <BegrootmoduleVoting />
+              <BegrootmoduleVoting {...totalPropPackage}/>
             </TabsContent>
             <TabsContent value="display" className="p-0">
-              <BegrootmoduleDisplay />
+              <BegrootmoduleDisplay {...totalPropPackage}/>
             </TabsContent>
             <TabsContent value="sorting" className="p-0">
-              <BegrootmoduleSorting />
+              <BegrootmoduleSorting {...totalPropPackage}/>
             </TabsContent>
             <TabsContent value="explanation" className="p-0">
-              <BegrootmoduleExplanation />
+              <BegrootmoduleExplanation {...totalPropPackage} />
             </TabsContent>
             <TabsContent value="authentication" className="p-0">
-              <BegrootmoduleAuthentication />
-            </TabsContent>
-            <TabsContent value="labels" className="p-0">
-              <BegrootmoduleLabels />
+              <BegrootmoduleAuthentication {...totalPropPackage}/>
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />

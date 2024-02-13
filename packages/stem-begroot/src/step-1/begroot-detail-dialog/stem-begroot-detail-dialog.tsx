@@ -117,28 +117,3 @@ export const StemBegrootResourceDetailDialog = ({
     }
   />
 );
-
-//   canUseButton={
-//     selectedResources.find((r) => r.id === item.id) ||
-//     (!selectedResources.find((r) => r.id === item.id) &&
-//       item.budget < maxBudget - budgetUsed)
-//   }
-//   isInSelectedResources={
-//     selectedResources.find((r) => r.id === item.id) !== undefined
-//   }
-//   resource={item}
-//   isModerator={isModerator}
-//   loginUrl={props.login?.url}
-//   onPrimaryButtonClick={(resource) => {
-//     const resourceInBudgetList = selectedResources.find(
-//       (r) => r.id === resource.id
-//     );
-
-//     if (resourceInBudgetList) {
-//       setSelectedResources(
-//         selectedResources.filter((r) => r.id !== resource.id)
-//       );
-//     } else {
-//       setSelectedResources([...selectedResources, resource]);
-//     }
-//   }}

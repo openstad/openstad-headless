@@ -199,7 +199,7 @@ function ResourceOverview({
     props.defaultSorting || undefined
   );
 
-  const [resourcesWithPagination] = datastore.useResources({
+  const {resources:resourcesWithPagination} = datastore.useResources({
     ...props,
     page,
     pageSize,

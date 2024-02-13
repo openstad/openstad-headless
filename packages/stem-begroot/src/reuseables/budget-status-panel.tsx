@@ -20,7 +20,7 @@ export const BudgetStatusPanel = ({
       <Spacer size={0.5} />
       <div className="info-budget-label">
         <p>Budget over:</p>
-        <p className="strong">&euro;{maxBudget}</p>
+        <p className="strong">&euro;{Math.max(maxBudget - budgetUsed, 0)}</p>
       </div>
     </aside>
   );

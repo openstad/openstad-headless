@@ -1,10 +1,10 @@
 import './stem-begroot-budget-list.css';
 import React from 'react';
-import { BudgetUsedList } from '../reuseables/used-budget-component';
-import { BudgetStatusPanel } from '../reuseables/budget-status-panel';
+import { BudgetStatusPanel } from '../../reuseables/budget-status-panel';
 import { Image, Spacer } from '@openstad-headless/ui/src';
 
 export const StemBegrootBudgetList = ({
+  introText = '',
   allResources = [],
   selectedResources = [],
   maxBudget,
@@ -12,6 +12,7 @@ export const StemBegrootBudgetList = ({
   selectedResources: Array<any>;
   allResources: Array<any>;
   maxBudget: number;
+  introText?: string;
 }) => {
   const budgetUsed = selectedResources.reduce(
     (total, cv) => total + cv.budget,
@@ -19,26 +20,15 @@ export const StemBegrootBudgetList = ({
   );
 
   const canAddMore = allResources.some(
-    (r) => r.budget < maxBudget - budgetUsed
+    (r) => r.budget <= maxBudget - budgetUsed
   );
 
   return (
     <>
       <section className="stem-begroot-budget-list">
         <div className="stem-begroot-budget-list-used-budgets">
-          <BudgetUsedList
-            budgetUsed={budgetUsed}
-            maxBudget={maxBudget}
-            selectedResources={selectedResources}
-          />
-
           <div className="stem-begroot-helptext-and-budget-section-helptext">
-            <p>
-              Kies uit onderstaand overzicht jouw favoriete plannen. Selecteer
-              voor maximaal €{maxBudget},- aan plannen. In stap 3 vul je ter
-              controle de stemcode in die je per post hebt ontvangen. Tot slot
-              verstuur je in stap 4 je stem.
-            </p>
+            <p>{introText}</p>
           </div>
         </div>
 

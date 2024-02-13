@@ -8,74 +8,38 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
+import { StemBegrootWidgetProps } from '@openstad/stem-begroot/src/stem-begroot';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  allowVoting: z.boolean(),
-  votingType: z.enum([
-    'budgeting',
-    'budgetingPerTheme',
-    'count',
-    'countPerTheme',
-  ]),
-  maximumSelectableResources: z.coerce
-    .number()
-    .gt(0, 'Nummer moet groter zijn dan 0'),
-  minimumSelectableResources: z.coerce
-    .number()
-    .gte(0, 'Nummer moet groter of gelijk zijn aan 0'),
   budget: z.coerce.number().gt(0, 'Nummer moet groter zijn dan 0'),
   minimumBudget: z.coerce.number().gt(0, 'Nummer moet groter zijn dan 0'),
 });
 
-export default function BegrootmoduleVoting() {
-  const category = 'voting';
+type Formdata = z.infer<typeof formSchema>;
 
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig();
+export default function BegrootmoduleVoting(
+  props: StemBegrootWidgetProps & EditFieldProps<StemBegrootWidgetProps>
+) {
+  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
-  const defaults = useCallback(
-    () => ({
-      allowVoting: widget?.config?.[category]?.allowVoting || false,
-      votingType: widget?.config?.[category]?.votingType || 'budgeting',
-      maximumSelectableResources:
-        widget?.config?.[category]?.maximumSelectableResources || 1000,
-      minimumSelectableResources:
-        widget?.config?.[category]?.minimumSelectableResources || 0,
-      minimumBudget: widget?.config?.[category]?.minimumBudget || 0,
-      budget: widget?.config?.[category]?.budget || 0,
-    }),
-    [widget?.config]
-  );
+  function onSubmit(values: Formdata) {
+    props.updateConfig({ ...props, ...values });
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      minimumBudget: props?.budget || 0,
+      budget: props?.budget || 0,
+    },
   });
-
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ [category]: values });
-  }
 
   return (
     <Form {...form} className="p-6 bg-white rounded-md">
@@ -86,90 +50,19 @@ export default function BegrootmoduleVoting() {
         className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
         <FormField
           control={form.control}
-          name="allowVoting"
-          render={({ field }) => (
-            <FormItem className="col-span-1">
-              <FormLabel>
-                Sta stemmen toe (werkt momenteel alleen met Gridder)
-              </FormLabel>
-              <Select
-                onValueChange={(e: string) => field.onChange(e === 'true')}
-                value={field.value ? 'true' : 'false'}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Nee" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="true">Ja</SelectItem>
-                  <SelectItem value="false">Nee</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="votingType"
-          render={({ field }) => (
-            <FormItem className="col-span-1">
-              <FormLabel>Stem types</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Budgeting" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="budgeting">Budgeting</SelectItem>
-                  <SelectItem value="budgetingPerTheme">
-                    Budgeting per thema
-                  </SelectItem>
-                  <SelectItem value="count">Hoeveelheid</SelectItem>
-                  <SelectItem value="countPerTheme">
-                    Hoeveelheid per thema
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="minimumSelectableResources"
-          render={({ field }) => (
-            <FormItem className="col-span-1">
-              <FormLabel>Minimum hoeveelheid selecteerbare resources</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="maximumSelectableResources"
-          render={({ field }) => (
-            <FormItem className="col-span-1">
-              <FormLabel>Maximum hoeveelheid selecteerbare resources</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
           name="minimumBudget"
           render={({ field }) => (
             <FormItem className="col-span-1">
               <FormLabel>Minimum budget om te selecteren</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
+                <Input
+                  type="number"
+                  {...field}
+                  onChange={(e) => {
+                    onFieldChange(field.name, e.target.value);
+                    field.onChange(e);
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -182,7 +75,14 @@ export default function BegrootmoduleVoting() {
             <FormItem className="col-span-1">
               <FormLabel>Beschikbaar budget</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
+                <Input
+                  type="number"
+                  {...field}
+                  onChange={(e) => {
+                    onFieldChange(field.name, e.target.value);
+                    field.onChange(e);
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

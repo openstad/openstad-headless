@@ -39,8 +39,6 @@ export default {
   },
 
   submitLike: async function ({ projectId }, resources) {
-    console.log(resources);
-
     if (!Array.isArray(resources)) throw new Error('Resources is geen array');
     if(resources.some(r => !'resourceId' in r || !'opinion' in r)) throw new Error("Ontbrekende velden resourceId of opinion");
 
