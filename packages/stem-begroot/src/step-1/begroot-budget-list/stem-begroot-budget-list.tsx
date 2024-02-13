@@ -19,8 +19,12 @@ export const StemBegrootBudgetList = ({
     0
   );
 
-  const canAddMore = allResources.some(
-    (r) => r.budget <= maxBudget - budgetUsed
+  let notUsedResources = allResources.filter(
+    (allR) => !selectedResources.find((selectedR) => allR.id === selectedR.id)
+  );
+
+  const canAddMore = notUsedResources.some(
+    (r) => r.budget < maxBudget - budgetUsed
   );
 
   return (

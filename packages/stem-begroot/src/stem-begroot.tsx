@@ -29,10 +29,9 @@ export type StemBegrootWidgetProps = BaseProps &
     voteMessage: string;
     thankMessage: string;
     showNewsletterButton: boolean;
-    budget: number;
   };
 
-function StemBegroot({ budget:maxBudget, ...props }: StemBegrootWidgetProps) {
+function StemBegroot(props: StemBegrootWidgetProps) {
   const datastore = new DataStore({
     projectId: props.projectId,
     api: props.api,
@@ -57,6 +56,14 @@ function StemBegroot({ budget:maxBudget, ...props }: StemBegrootWidgetProps) {
   const budgetUsed: number = selectedResources.reduce(
     (total, cv) => total + cv.budget,
     0
+  );
+
+  const usedBudgetList = (
+    <BudgetUsedList
+      budgetUsed={budgetUsed}
+      maxBudget={props.votes.maxBudget}
+      selectedBudgets={selectedBudgets}
+    />
   );
 
   const notifyVoteMessage = (message: string, isError: boolean = false) => {
@@ -134,7 +141,7 @@ function StemBegroot({ budget:maxBudget, ...props }: StemBegrootWidgetProps) {
         }}
         resourceDetailIndex={resourceDetailIndex}
         budgetUsed={budgetUsed}
-        maxBudget={maxBudget}
+        maxBudget={props.votes.maxBudget}
       />
 
       <div className="osc">
@@ -145,15 +152,11 @@ function StemBegroot({ budget:maxBudget, ...props }: StemBegrootWidgetProps) {
         <section className="begroot-step-panel">
           {currentStep === 0 ? (
             <>
-              <BudgetUsedList
-                budgetUsed={budgetUsed}
-                maxBudget={maxBudget}
-                selectedBudgets={selectedResources.map((r) => r.budget)}
-              />
+              {usedBudgetList}
               <Spacer size={1.5} />
               <StemBegrootBudgetList
                 introText={props.step1}
-                maxBudget={maxBudget}
+                maxBudget={props.votes.maxBudget}
                 allResources={resources?.records || []}
                 selectedResources={selectedResources}
               />
@@ -162,16 +165,12 @@ function StemBegroot({ budget:maxBudget, ...props }: StemBegrootWidgetProps) {
 
           {currentStep === 1 ? (
             <>
-              <BudgetUsedList
-                budgetUsed={budgetUsed}
-                maxBudget={maxBudget}
-                selectedBudgets={selectedBudgets}
-              />
+              {usedBudgetList}
               <Spacer size={1.5} />
               <BegrotenSelectedOverview
                 introText={props.step2}
                 budgetUsed={budgetUsed}
-                maxBudget={maxBudget}
+                maxBudget={props.votes.maxBudget}
                 selectedResources={selectedResources}
               />
             </>
@@ -179,11 +178,7 @@ function StemBegroot({ budget:maxBudget, ...props }: StemBegrootWidgetProps) {
 
           {currentStep === 2 ? (
             <>
-              <BudgetUsedList
-                budgetUsed={budgetUsed}
-                maxBudget={maxBudget}
-                selectedBudgets={selectedBudgets}
-              />
+              {usedBudgetList}
               <Spacer size={1.5} />
               <h5>Controleer stemcode</h5>
               <p>{props.step3}</p>
@@ -202,11 +197,7 @@ function StemBegroot({ budget:maxBudget, ...props }: StemBegrootWidgetProps) {
 
           {currentStep === 3 ? (
             <>
-              <BudgetUsedList
-                budgetUsed={budgetUsed}
-                maxBudget={maxBudget}
-                selectedBudgets={selectedBudgets}
-              />
+              {usedBudgetList}
               <Spacer size={1.5} />
               <h5>{props.step3success}</h5>
               <Spacer size={1.5} />
@@ -225,11 +216,7 @@ function StemBegroot({ budget:maxBudget, ...props }: StemBegrootWidgetProps) {
 
           {currentStep === 4 ? (
             <>
-              <BudgetUsedList
-                budgetUsed={budgetUsed}
-                maxBudget={maxBudget}
-                selectedBudgets={selectedBudgets}
-              />
+              {usedBudgetList}
               <Spacer size={1.5} />
               <h5>{props.voteMessage}</h5>
               <p>{props.thankMessage}</p>
@@ -289,7 +276,7 @@ function StemBegroot({ budget:maxBudget, ...props }: StemBegrootWidgetProps) {
         {currentStep === 0 ? (
           <StemBegrootResourceList
             budgetUsed={budgetUsed}
-            maxBudget={maxBudget}
+            maxBudget={props.votes.maxBudget}
             resources={resources?.records?.length ? resources?.records : []}
             selectedResources={selectedResources}
             onResourcePlainClicked={(resource, index) => {

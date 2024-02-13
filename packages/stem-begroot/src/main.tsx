@@ -14,8 +14,16 @@ const config: StemBegrootWidgetProps = {
       import.meta.env.VITE_PROJECT_ID
     }/login?forceNewLogin=1&useAuth=default&redirectUri=${encodeURIComponent(document.location.toString())}`,
   },
-  maxBudget:43241,
+
   votes:{
+    isViewable: true,
+    mustConfirm: false,
+    requiredUserRole:'member',
+    voteValues:[],
+    maxResources:100,
+    minResources:1,
+    minBudget: 100,
+    maxBudget: 80000,
     isActive:true, 
     voteType:'budgeting', 
     withExisting: 'error'
