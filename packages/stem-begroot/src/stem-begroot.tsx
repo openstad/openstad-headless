@@ -85,10 +85,19 @@ function StemBegroot(props: StemBegrootWidgetProps) {
 
   // Force the logged in user to skip step 2: first time entering 'stemcode'
   useEffect(() => {
-    if (hasRole(currentUser, 'member') && currentStep === 2) {
+    if (
+      props.votes.requiredUserRole &&
+      hasRole(currentUser, props.votes.requiredUserRole) &&
+      currentStep === 2
+    ) {
       setCurrentStep(3);
     }
-  }, [resources?.records, currentUser, currentStep]);
+  }, [
+    resources?.records,
+    currentUser,
+    currentStep,
+    props?.votes?.requiredUserRole,
+  ]);
 
   function prepareForVote(e: React.MouseEvent<HTMLElement, MouseEvent> | null) {
     if (e) e.stopPropagation();

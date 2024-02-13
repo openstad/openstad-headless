@@ -17,6 +17,23 @@ import { StemBegrootWidgetProps } from '@openstad/stem-begroot/src/stem-begroot'
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
+// allowVoting: z.boolean(),
+// votingType: z.enum([
+//   'budgeting',
+//   'budgetingPerTheme',
+//   'count',
+//   'countPerTheme',
+// ]),
+// maximumSelectableResources: z.coerce
+//   .number()
+//   .gt(0, 'Nummer moet groter zijn dan 0'),
+// minimumSelectableResources: z.coerce
+//   .number()
+//   .gte(0, 'Nummer moet groter of gelijk zijn aan 0'),
+// budget: z.coerce.number().gt(0, 'Nummer moet groter zijn dan 0'),
+// minimumBudget: z.coerce.number().gt(0, 'Nummer moet groter zijn dan 0'),
+
+
 const formSchema = z.object({
   budget: z.coerce.number().gt(0, 'Nummer moet groter zijn dan 0'),
   minimumBudget: z.coerce.number().gt(0, 'Nummer moet groter zijn dan 0'),
@@ -36,8 +53,8 @@ export default function BegrootmoduleVoting(
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      minimumBudget: props?.budget || 0,
-      budget: props?.budget || 0,
+      minBudget: props?.votes?.minBudget || 0,
+      maxBudget: props?.votes?.maxBudget || 0,
     },
   });
 
@@ -50,7 +67,7 @@ export default function BegrootmoduleVoting(
         className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
         <FormField
           control={form.control}
-          name="minimumBudget"
+          name="minBudget"
           render={({ field }) => (
             <FormItem className="col-span-1">
               <FormLabel>Minimum budget om te selecteren</FormLabel>
@@ -70,7 +87,7 @@ export default function BegrootmoduleVoting(
         />
         <FormField
           control={form.control}
-          name="budget"
+          name="maxBudget"
           render={({ field }) => (
             <FormItem className="col-span-1">
               <FormLabel>Beschikbaar budget</FormLabel>
