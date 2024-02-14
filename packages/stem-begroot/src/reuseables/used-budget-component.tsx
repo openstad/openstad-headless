@@ -11,8 +11,9 @@ export const BudgetUsedList = ({
 }) => {
   return (
     <div className="budget-used-list">
-      {selectedBudgets.map((budget) => (
+      {selectedBudgets.map((budget,index) => (
         <div
+        key={`budget-item-${budget}-${index}`}
           className="budget-badge budget-badge-primary"
           style={{ flex: budget }}>
           <p>&euro;{budget || 0}</p>
