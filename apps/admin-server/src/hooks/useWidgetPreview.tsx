@@ -18,9 +18,6 @@ export function useWidgetPreview<T extends {[key:string]:any}>(widgetSettings: P
       if (config) {
         setPreviewConfig({
           ...config,
-          api: {
-            url: '/api/openstad',
-          },
           ...widgetSettings,
         });
       }
