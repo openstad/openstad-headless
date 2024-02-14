@@ -5,7 +5,7 @@ import { ChevronRight, Plus } from 'lucide-react';
 import React from 'react';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
-import useArea from '@/hooks/use-area';
+import useArea from '@/hooks/use-areas';
 
 export default function ProjectAreas() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function ProjectAreas() {
             url: '/projects',
           },
           {
-            name: 'Gebieden',
+            name: 'Polygonen',
             url: `/projects/${project}/areas`,
           },
         ]}
@@ -30,7 +30,7 @@ export default function ProjectAreas() {
           <Link href={`/projects/${project}/areas/create`}>
             <Button variant="default" className="flex w-fit">
               <Plus size="20" className="hidden lg:flex" />
-              Gebied toevoegen
+              Polygon toevoegen
             </Button>
           </Link>
         }>
@@ -43,14 +43,24 @@ export default function ProjectAreas() {
 
             <ul>
               {data?.map((area: any) => (
-                <li key={area.id} className="grid grid-cols-2 lg:grid-cols-3 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
-                  <Paragraph className="hidden lg:flex truncate">
-                    {area.id}
-                  </Paragraph>
-                  <Paragraph className="flex truncate -mr-16">
-                    {area.name}
-                  </Paragraph>
-                </li>
+                <Link
+                  href={`/projects/${project}/areas/${area.id}`}
+                  key={area.id}>
+                  <li key={area.id} className="grid grid-cols-2 lg:grid-cols-3 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                    <Paragraph className="hidden lg:flex truncate">
+                      {area.id}
+                    </Paragraph>
+                    <Paragraph className="flex truncate -mr-16">
+                      {area.name}
+                    </Paragraph>
+                    <Paragraph className="flex">
+                      <ChevronRight
+                        strokeWidth={1.5}
+                        className="w-5 h-5 my-auto ml-auto"
+                      />
+                    </Paragraph>
+                  </li>
+                </Link>
               ))}
             </ul>
           </div>
