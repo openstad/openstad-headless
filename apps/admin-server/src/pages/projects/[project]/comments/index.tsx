@@ -9,7 +9,9 @@ export default function ProjectComments() {
   const router = useRouter();
   const { project } = router.query;
   const { data } = useComments(project as string);
-  const [comment, setComments] = useState<{ [key: string]: any }>({})
+  const [comments, setComments] = useState<any[]>([])
+
+  let resourceArray = []
 
   useEffect(() => {
     if (data) {
@@ -25,6 +27,7 @@ export default function ProjectComments() {
             comments.push(data[i]?.commentsAgainst[k])
           }
         }
+
         setComments(comments)
       }
     }
@@ -61,8 +64,8 @@ export default function ProjectComments() {
               </ListHeading>
             </div>
             <ul>
-              {comment?.map((comment: any) => (
-               <Link href={`/projects/${project}/comments/${comment.id}`} key={comment.id}>
+              {comments?.map((comment: any) => (
+               <Link href={`/projects/${project}/comments/${comment.id}`}>
                   <li key={comment.id} className="grid grid-cols-3 lg:grid-cols-7 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                     <div className="col-span-2 truncate">
                       <Paragraph>{comment.id}</Paragraph>
