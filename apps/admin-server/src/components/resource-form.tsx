@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
@@ -20,7 +20,7 @@ import { useRouter } from 'next/router';
 import { SimpleCalendar } from '@/components/simple-calender-popup';
 import useResource from '@/hooks/use-resource';
 import toast from 'react-hot-toast';
-import ImageUploader from './image-uploader';
+import {ImageUploader} from './image-uploader';
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -94,6 +94,9 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     id as string
   );
 
+  const [imageArray, setImageArray]= useState<any[]>([]);
+  const [loaded, setLoaded] = useState(false)
+
   const defaults = useCallback(
     (): FormType => ({
       userId: existingData?.userId || undefined,
@@ -133,7 +136,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   });
 
   function onSubmit(values: FormType) {
-    onFormSubmit(values)
+    onFormSubmit(values, )
       .then(() => {
         toast.success(`Plan successvol ${id ? 'aangepast' : 'aangemaakt'}`);
         router.push(`/projects/${project}/resources`);
@@ -148,6 +151,14 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       form.reset(defaults());
     }
   }, [existingData, form, defaults]);
+
+  useEffect(() => {
+    if (existingData && !loaded) {
+      console.log(existingData?.images)
+      setImageArray(existingData?.images)
+      setLoaded(true)
+    }
+  }, [existingData]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -165,7 +176,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 <FormLabel>User id van het plan (optioneel)</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Laat leeg om jezelf te koppellen"
+                    placeholder="Laat leeg om jezelf te koppelen"
                     {...field}
                   />
                 </FormControl>
@@ -341,7 +352,16 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               withReset
             />
           </div>
-          <ImageUploader />
+          <ImageUploader
+            form={form}
+            fieldName="image"
+            onImageUploaded={(imageResult) => {
+              let array = [...imageArray]
+              array.push(imageResult)
+              setImageArray(array)
+              console.log(imageArray)
+            }}
+          />
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>
