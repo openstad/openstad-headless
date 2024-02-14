@@ -32,6 +32,8 @@ export default function WidgetArguments({
       resourceId: 2,
     });
 
+
+    console.log({widget})
   return (
     <div>
       <PageLayout

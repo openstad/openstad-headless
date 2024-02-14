@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Icon,
   Image,
   List,
   PlainButton,
@@ -11,18 +12,27 @@ import { elipsize } from '@openstad-headless/lib/ui-helpers';
 
 export const StemBegrootResourceList = ({
   resources,
-  selectedResources,
   onResourcePlainClicked,
   onResourcePrimaryClicked,
-  maxBudget,
-  budgetUsed,
+  resourceBtnEnabled,
+  resourceBtnTextHandler,
+  defineOriginalUrl,
+  displayPriceLabel = true,
+  displayRanking = true,
+  showVoteCount = true,
 }: {
   resources: Array<any>;
   selectedResources: Array<any>;
   onResourcePlainClicked: (resource: any, index: number) => void;
   onResourcePrimaryClicked: (resource: any) => void;
-  maxBudget: number;
-  budgetUsed: number;
+  resourceBtnTextHandler: (resource: any) => string;
+  resourceBtnEnabled: (resource: any) => boolean;
+  defineOriginalUrl: (resource: any) => string | null;
+  displayPriceLabel?: boolean;
+  displayRanking?: boolean;
+  showVoteCount?: boolean;
+  showOriginalResource?: boolean;
+  originalResourceUrl?: string;
 }) => {
   return (
     <List
@@ -34,11 +44,9 @@ export const StemBegrootResourceList = ({
         </>
       )}
       renderItem={(resource, index) => {
-        const btnPrimaryText = selectedResources.find(
-          (r) => r.id === resource.id
-        )
-          ? 'Verwijder'
-          : 'Voeg toe';
+        const primaryBtnText = resourceBtnTextHandler(resource);
+        const primaryBtnDisabled = !resourceBtnEnabled(resource);
+        const originalUrl = defineOriginalUrl(resource);
 
         const theme = resource.tags
           ?.filter((t: any) => t.type === 'theme')
@@ -46,6 +54,8 @@ export const StemBegrootResourceList = ({
         const area = resource.tags
           ?.filter((t: any) => t.type === 'area')
           ?.at(0);
+
+
         return (
           <>
             <article>
@@ -54,8 +64,9 @@ export const StemBegrootResourceList = ({
               <div>
                 <Spacer size={1} />
                 <section className="stembegroot-content-item-header">
-                  <h5>&euro;{resource.budget || 0}</h5>
-
+                  {displayPriceLabel ? (
+                    <h5>&euro;{resource.budget || 0}</h5>
+                  ) : null}
                   <div className="stembegroot-content-item-header-taglist">
                     <p className="strong">Thema:</p>
                     <p>{theme?.name || 'Geen thema'}</p>
@@ -71,6 +82,41 @@ export const StemBegrootResourceList = ({
                 <Spacer size={1} />
               </div>
 
+              {originalUrl ? (
+                <>
+                  <p className="strong">
+                    Dit een vervolg op plan:&nbsp;
+                    <a target="_blank" href={originalUrl}>
+                      {originalUrl}
+                    </a>
+                  </p>
+                </>
+              ) : null}
+
+              {showVoteCount ? (
+                <div className="osc-stem-begroot-content-item-footer">
+                  <>
+                    <Icon
+                      icon="ri-thumb-up-line"
+                      variant="regular"
+                      text={resource.yes}
+                    />
+                    <Icon
+                      icon="ri-thumb-down-line"
+                      variant="regular"
+                      text={resource.no}
+                    />
+                    {displayRanking && resource.extraData?.ranking ? (
+                      <Icon
+                        icon="ri-trophy-line"
+                        variant="regular"
+                        text={resource.extraData?.ranking}
+                      />
+                    ) : null}
+                  </>
+                </div>
+              ) : null}
+
               <div className="osc-stem-begroot-content-item-footer">
                 <PlainButton
                   className="osc-stem-begroot-item-action-btn"
@@ -80,15 +126,12 @@ export const StemBegrootResourceList = ({
                   Lees meer
                 </PlainButton>
                 <SecondaryButton
-                  disabled={
-                    !selectedResources.find((r) => r.id === resource.id) &&
-                    !(resource.budget <= maxBudget - budgetUsed)
-                  }
+                  disabled={primaryBtnDisabled}
                   className="osc-stem-begroot-item-action-btn"
                   onClick={() => {
                     onResourcePrimaryClicked(resource);
                   }}>
-                  {btnPrimaryText}
+                  {primaryBtnText}
                 </SecondaryButton>
               </div>
             </article>

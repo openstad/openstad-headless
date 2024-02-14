@@ -2,6 +2,7 @@ import './stem-begroot-detail-dialog.css';
 
 import React from 'react';
 import {
+  Icon,
   IconButton,
   Image,
   SecondaryButton,
@@ -17,19 +18,29 @@ export const StemBegrootResourceDetailDialog = ({
   setOpenDetailDialog,
   resourceDetailIndex,
   resources,
-  selectedResources,
   onPrimaryButtonClick,
-  maxBudget,
-  budgetUsed,
+  resourceBtnTextHandler,
+  resourceBtnEnabled,
+  defineOriginalUrl,
+  displayPriceLabel,
+  displayRanking,
+  showVoteCount,
+  showOriginalResource,
+  originalResourceUrl,
 }: {
   openDetailDialog: boolean;
-  setOpenDetailDialog: (condition:boolean) => void;
+  setOpenDetailDialog: (condition: boolean) => void;
   resources: Array<any>;
-  selectedResources: Array<any>;
   onPrimaryButtonClick: (resource: any) => void;
-  maxBudget: number;
-  budgetUsed: number;
   resourceDetailIndex: number;
+  defineOriginalUrl: (resource: any) => string | null;
+  resourceBtnTextHandler: (resource: any) => string;
+  resourceBtnEnabled: (resource: any) => boolean;
+  displayPriceLabel: boolean;
+  displayRanking: boolean;
+  showVoteCount: boolean;
+  showOriginalResource: boolean;
+  originalResourceUrl?: string;
 }) => (
   <Dialog
     open={openDetailDialog}
@@ -46,14 +57,9 @@ export const StemBegrootResourceDetailDialog = ({
             ?.filter((t: any) => t.type === 'area')
             ?.at(0);
 
-          const itemIsInSelectedList = selectedResources.find(
-            (r) => r.id === resource.id
-          );
-
-          const canUseButton =
-            itemIsInSelectedList ||
-            (!selectedResources.find((r) => r.id === resource.id) &&
-              resource.budget < maxBudget - budgetUsed);
+          const canUseButton = resourceBtnEnabled(resource);
+          const primaryButtonText = resourceBtnTextHandler(resource);
+          const originalUrl = defineOriginalUrl(resource);
 
           return (
             <>
@@ -71,7 +77,10 @@ export const StemBegrootResourceDetailDialog = ({
                 <section className="osc-begrootmodule-resource-detail-texts-and-actions-container">
                   <div>
                     <div className="osc-begrootmodule-resource-detail-budget-theme-bar">
-                      <h5>&euro; {resource.budget || 0}</h5>
+                      {displayPriceLabel ? (
+                        <h5>&euro; {resource.budget || 0}</h5>
+                      ) : null}
+
                       <div>
                         <p className="strong">Thema:</p>
                         <p>{theme?.name || 'Geen thema'}</p>
@@ -86,6 +95,45 @@ export const StemBegrootResourceDetailDialog = ({
                       <p className="strong">{resource.summary}</p>
                       <Spacer size={1} />
                       <p>{resource.description}</p>
+
+                      <Spacer size={1} />
+
+                      {originalUrl ? (
+                        <>
+                          <p className="strong">
+                            Dit een vervolg op het volgende plan:&nbsp;
+                            <a target="_blank" href={originalUrl}>
+                            {originalUrl}
+                          </a>
+                          </p>
+                         
+                        </>
+                      ) : null}
+
+                      <div className="osc-stem-begroot-content-item-footer">
+                        {showVoteCount ? (
+                          <>
+                            <Icon
+                              icon="ri-thumb-up-line"
+                              variant="regular"
+                              text={resource.yes}
+                            />
+                            <Icon
+                              icon="ri-thumb-down-line"
+                              variant="regular"
+                              text={resource.no}
+                            />
+                          </>
+                        ) : null}
+
+                        {displayRanking ? (
+                          <Icon
+                            icon="ri-trophy-line"
+                            variant="regular"
+                            text={resource.extraData?.ranking || 0}
+                          />
+                        ) : null}
+                      </div>
                     </div>
                   </div>
                   <div className="osc-begrootmodule-resource-detail-actions">
@@ -95,9 +143,7 @@ export const StemBegrootResourceDetailDialog = ({
                         onPrimaryButtonClick;
                         onPrimaryButtonClick && onPrimaryButtonClick(resource);
                       }}>
-                      {itemIsInSelectedList
-                        ? 'Verwijderen uit budget lijst'
-                        : 'Toevoegen'}
+                      {primaryButtonText}
                     </SecondaryButton>
                     <div className="osc-begrootmodule-resource-detail-share-actions">
                       <p className="strong">Deel dit:</p>

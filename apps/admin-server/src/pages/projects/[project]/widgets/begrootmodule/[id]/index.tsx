@@ -14,12 +14,14 @@ import BegrootmoduleAuthentication from './authentication';
 import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
 import WidgetPublish from '@/components/widget-publish';
-export const getServerSideProps = withApiUrl
+export const getServerSideProps = withApiUrl;
 import { StemBegrootWidgetProps } from '@openstad/stem-begroot/src/stem-begroot';
 import WidgetPreview from '@/components/widget-preview';
-
 
 export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
@@ -27,9 +29,10 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   const projectId = router.query.project as string;
 
   const { data: widget, updateConfig } = useWidgetConfig();
-  const { previewConfig, updatePreview } = useWidgetPreview<StemBegrootWidgetProps>({
-    projectId,
-  });
+  const { previewConfig, updatePreview } =
+    useWidgetPreview<StemBegrootWidgetProps>({
+      projectId,
+    });
 
   const totalPropPackage = {
     ...widget?.config,
@@ -47,7 +50,7 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
     },
     projectId,
   };
-  
+
   return (
     <div>
       <PageLayout
@@ -74,18 +77,23 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="explanation">Uitleg</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
-            <TabsContent value="display" className="p-0">
-              <BegrootmoduleDisplay {...totalPropPackage}/>
-            </TabsContent>
-            <TabsContent value="sorting" className="p-0">
-              <BegrootmoduleSorting {...totalPropPackage}/>
-            </TabsContent>
-            <TabsContent value="explanation" className="p-0">
-              <BegrootmoduleExplanation {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="publish" className="p-0">
-              <WidgetPublish apiUrl={apiUrl} />
-            </TabsContent>
+
+            {previewConfig ? (
+              <>
+                <TabsContent value="display" className="p-0">
+                  <BegrootmoduleDisplay {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="sorting" className="p-0">
+                  <BegrootmoduleSorting {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="explanation" className="p-0">
+                  <BegrootmoduleExplanation {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="publish" className="p-0">
+                  <WidgetPublish apiUrl={apiUrl} />
+                </TabsContent>
+              </>
+            ) : null}
           </Tabs>
 
           <div className="container py-6 mt-6 bg-white rounded-md">

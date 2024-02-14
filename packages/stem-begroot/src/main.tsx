@@ -25,6 +25,10 @@ const config: StemBegrootWidgetProps = {
   thankMessage:
     'Bedankt voor het stemmen! De stemperiode loopt van 9 september t/m 6 oktober 2019. Wil je weten welke plannen het vaakst zijn gekozen en uitgevoerd worden? De uitslag wordt op 15 oktober 2019 gepubliceerd op centrumbegroot.amsterdam.nl.',
   voteMessage: 'Gelukt, je hebt gestemd!',
+  showOriginalResource: true,
+  originalResourceUrl: '/test/[id]',
+  displayPriceLabel: true,
+  showVoteCount: true,
 
   votes: {
     isViewable: true,

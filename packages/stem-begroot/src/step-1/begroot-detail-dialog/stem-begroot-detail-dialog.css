@@ -1,5 +1,6 @@
 .osc-begrootmodule-resource-detail {
   display: flex;
+  align-items: start;
   gap: 2rem;
 }
 

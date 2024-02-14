@@ -29,9 +29,18 @@ export type StemBegrootWidgetProps = BaseProps &
     voteMessage: string;
     thankMessage: string;
     showNewsletterButton: boolean;
+    notEnoughBudgetText?: string;
+    displayRanking: boolean;
+    displayPriceLabel: boolean;
+    showVoteCount: boolean;
+    showOriginalResource: boolean;
+    originalResourceUrl?: string;
   };
 
-function StemBegroot(props: StemBegrootWidgetProps) {
+function StemBegroot({
+  notEnoughBudgetText = 'Niet genoeg budget',
+  ...props
+}: StemBegrootWidgetProps) {
   const datastore = new DataStore({
     projectId: props.projectId,
     api: props.api,
@@ -126,11 +135,51 @@ function StemBegroot(props: StemBegrootWidgetProps) {
     }
   }
 
+  const isInSelected = (resource: { id: number }) =>
+    selectedResources.find((r) => r.id === resource.id);
+
+    const getOriginalResourceUrl = (resource: { extraData:{originalId:number|string}}) => {
+      return props.showOriginalResource &&
+      props.originalResourceUrl &&
+      resource.extraData?.originalId
+        ? props.originalResourceUrl.includes('[id]')
+          ? props.originalResourceUrl.replace(
+              '[id]',
+              `${resource.extraData?.originalId}`
+            )
+          : `${props.originalResourceUrl}/${resource.extraData?.originalId}`
+        : null;
+    };
+
+  const resourceSelectable = (resource: { id: number; budget: number }) => {
+    return (
+      isInSelected(resource) ||
+      (!isInSelected(resource) &&
+        resource.budget <= props.votes.maxBudget - budgetUsed)
+    );
+  };
+
+  const createItemBtnString = (resource: { id: number; budget: number }) => {
+    return !isInSelected(resource) &&
+      !(resource.budget <= props.votes.maxBudget - budgetUsed)
+      ? notEnoughBudgetText
+      : isInSelected(resource)
+      ? 'Verwijder'
+      : 'Voeg toe';
+  };
+
   return (
     <>
       <StemBegrootResourceDetailDialog
+        displayPriceLabel={props.displayPriceLabel}
+        displayRanking={props.displayRanking}
+        showVoteCount={props.showVoteCount}
+        showOriginalResource={props.showOriginalResource}
+        originalResourceUrl={props.originalResourceUrl}
         resources={resources?.records?.length ? resources.records : []}
-        selectedResources={selectedResources}
+        resourceBtnEnabled={resourceSelectable}
+        resourceBtnTextHandler={createItemBtnString}
+        defineOriginalUrl={getOriginalResourceUrl}
         openDetailDialog={openDetailDialog}
         setOpenDetailDialog={setOpenDetailDialog}
         onPrimaryButtonClick={(resource) => {
@@ -149,8 +198,6 @@ function StemBegroot(props: StemBegrootWidgetProps) {
           }
         }}
         resourceDetailIndex={resourceDetailIndex}
-        budgetUsed={budgetUsed}
-        maxBudget={props.votes.maxBudget}
       />
 
       <div className="osc">
@@ -284,14 +331,20 @@ function StemBegroot(props: StemBegrootWidgetProps) {
 
         {currentStep === 0 ? (
           <StemBegrootResourceList
-            budgetUsed={budgetUsed}
-            maxBudget={props.votes.maxBudget}
+            defineOriginalUrl={getOriginalResourceUrl}
+            resourceBtnEnabled={resourceSelectable}
+            resourceBtnTextHandler={createItemBtnString}
             resources={resources?.records?.length ? resources?.records : []}
             selectedResources={selectedResources}
             onResourcePlainClicked={(resource, index) => {
               setResourceDetailIndex(index);
               setOpenDetailDialog(true);
             }}
+            displayPriceLabel={props.displayPriceLabel}
+            displayRanking={props.displayRanking}
+            showVoteCount={props.showVoteCount}
+            showOriginalResource={props.showOriginalResource}
+            originalResourceUrl={props.originalResourceUrl}
             onResourcePrimaryClicked={(resource) => {
               session.remove('osc-resource-vote-pending');
 
