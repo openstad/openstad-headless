@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
@@ -18,7 +18,7 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
-import useArea from '@/hooks/use-areas';
+import useArea from '@/hooks/use-area';
 import toast from 'react-hot-toast';
 
 const formSchema = z.object({
@@ -26,10 +26,20 @@ const formSchema = z.object({
   geoJSON: z.string(),
 });
 
-export default function ProjectAreaCreate() {
+export default function ProjectAreaEdit() {
   const router = useRouter();
-  const projectId = router.query.project;
-  const { createArea } = useArea();
+  const { project, id } = router.query;
+  const { data, isLoading, updateArea } = useArea(
+    id as string
+  );
+
+  const defaults = useCallback(
+    () => ({
+      name: data?.name || null,
+      geoJSON: JSON.stringify(data?.geoJSON),
+    }),
+    [data]
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -37,14 +47,18 @@ export default function ProjectAreaCreate() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const area = await createArea(values.name, values.geoJSON);
+    const area = await updateArea(values.name, values.geoJSON);
     if (area) {
-      toast.success('Polygoon aangemaakt!');
-      router.push(`/projects/${projectId}/areas`);
+      toast.success('Polygoon aangepast!');
+      router.push(`/projects/${project}/areas`);
     } else {
       toast.error('De polygoon die is meegegeven lijkt niet helemaal te kloppen.')
     }
   }
+
+  useEffect(() => {
+    form.reset(defaults());
+  }, [form, defaults]);
 
   return (
     <div>
@@ -57,16 +71,16 @@ export default function ProjectAreaCreate() {
           },
           {
             name: 'Polygonen',
-            url: `/projects/${projectId}/areas`,
+            url: `/projects/${project}/areas`,
           },
           {
-            name: 'Polygon toevoegen',
-            url: `/projects/${projectId}/areas/create`,
+            name: 'Polygon aanpassen',
+            url: `/projects/${project}/areas/${id}`,
           },
         ]}>
         <div className="p-6 bg-white rounded-md">
           <Form {...form}>
-            <Heading size="xl">Toevoegen</Heading>
+            <Heading size="xl">Aanpassen</Heading>
             <Separator className="my-4" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -90,12 +104,6 @@ export default function ProjectAreaCreate() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Polygoon</FormLabel>
-                    <p>
-                      Je kan hier een polygoon aanmaken om een gebied op te
-                      geven waar je kaarten op zullen focussen. Voor deze
-                      polygoon kan je de waarden ophalen vanaf de volgende
-                      pagina: https://geojson.io
-                    </p>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>

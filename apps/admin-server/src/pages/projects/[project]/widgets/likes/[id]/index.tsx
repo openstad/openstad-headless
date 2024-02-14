@@ -23,9 +23,6 @@ export default function WidgetLikes({
   const { previewConfig, updatePreview } = useWidgetPreview<LikeWidgetProps>({
     projectId,
     resourceId: '2',
-    api: {
-      url: '/api/openstad',
-    },
   });
 
   return (

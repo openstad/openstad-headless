@@ -23,9 +23,6 @@ export default function WidgetCounter({
   const { previewConfig, updatePreview } = useWidgetPreview<CounterWidgetProps>({
     projectId,
     resourceId: '2',
-    api: {
-      url: '/api/openstad'
-    }
   });
 
   return (
