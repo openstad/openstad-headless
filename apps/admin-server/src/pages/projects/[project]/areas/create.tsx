@@ -18,19 +18,17 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
-import useArea from '@/hooks/use-area';
+import useArea from '@/hooks/use-areas';
 import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   name: z.string(),
-  polygon: z.string(),
+  geoJSON: z.string(),
 });
 
 export default function ProjectAreaCreate() {
   const router = useRouter();
   const projectId = router.query.project;
-  const exampleText =
-    '[{"lat":52.08526843203928,"lng":4.273874759674072},{"lat":52.086283702713075,"lng":4.276385307312012}, ...]';
   const { createArea } = useArea();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -39,9 +37,9 @@ export default function ProjectAreaCreate() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const area = await createArea(values.name, values.polygon);
+    const area = await createArea(values.name, values.geoJSON);
     if (area) {
-      toast.success('Gebied aangemaakt!');
+      toast.success('Polygoon aangemaakt!');
       router.push(`/projects/${projectId}/areas`);
     } else {
       toast.error('De polygoon die is meegegeven lijkt niet helemaal te kloppen.')
@@ -58,11 +56,11 @@ export default function ProjectAreaCreate() {
             url: '/projects',
           },
           {
-            name: 'Gebieden',
+            name: 'Polygonen',
             url: `/projects/${projectId}/areas`,
           },
           {
-            name: 'Gebied toevoegen',
+            name: 'Polygon toevoegen',
             url: `/projects/${projectId}/areas/create`,
           },
         ]}>
@@ -88,24 +86,15 @@ export default function ProjectAreaCreate() {
               />
               <FormField
                 control={form.control}
-                name="polygon"
+                name="geoJSON"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Polygoon</FormLabel>
                     <p>
                       Je kan hier een polygoon aanmaken om een gebied op te
-                      geven waar je kaarten op zullen focussen.
-                    </p>
-                    <p>
-                      Het polygoon veld verwacht een lijst met coördinaten die
-                      samen een gesloten polygoon vormen. Als het polygoon niet
-                      juist sluit, dan zal er een error terug worden gegeven.
-                      Het invullen van de polygoon verwacht voor nu een array
-                      met het volgende formaat (deze wordt hieronder meegegeven
-                      als voorbeeld):
-                    </p>
-                    <p>
-                      <code>{exampleText}</code>
+                      geven waar je kaarten op zullen focussen. Voor deze
+                      polygoon kan je de waarden ophalen vanaf de volgende
+                      pagina: https://geojson.io
                     </p>
                     <FormControl>
                       <Textarea placeholder="" {...field} />

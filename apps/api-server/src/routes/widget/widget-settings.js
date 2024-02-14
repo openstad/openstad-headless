@@ -1,5 +1,5 @@
 // @todo: add all widgets
-module.exports = {
+let moduleDefinitions = {
   agenda: {
     packageName: '@openstad-headless/agenda',
     directory: 'agenda',
@@ -35,6 +35,7 @@ module.exports = {
   },
   enquete: {
     packageName: '@openstad-headless/enquete',
+    directory: 'enquete',
     js: ['dist/enquete.iife.js'],
     css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessEnquete',
@@ -95,8 +96,52 @@ module.exports = {
     functionName: 'OpenstadHeadlessCounter',
     componentName: 'Counter',
     defaultConfig: {
-      projectId: null
-    }
+      projectId: null,
+    },
+  },
+  basemap: {
+    packageName: '@openstad-headless/base-map',
+    directory: 'leaflet-map',
+    js: ['dist/base-map.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessBaseMap',
+    componentName: 'BaseMap',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
+  editormap: {
+    packageName: '@openstad-headless/editor-map',
+    directory: 'leaflet-map',
+    js: ['dist/editor-map.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessEditorMap',
+    componentName: 'EditorMap',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
+  resourceoverviewmap: {
+    packageName: '@openstad-headless/resource-overview-map',
+    directory: 'leaflet-map',
+    js: ['dist/resource-overview-map.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessResourceOverviewMap',
+    componentName: 'ResourceOverviewMap',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
+  resourcedetailmap: {
+    packageName: '@openstad-headless/resource-detail-map',
+    directory: 'leaflet-map',
+    js: ['dist/resource-detail-map.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessResourceDetailMap',
+    componentName: 'ResourceDetailMap',
+    defaultConfig: {
+      projectId: null,
+    },
   },
   stembegroot: {
     packageName: '@openstad-headless/stem-begroot',
@@ -110,3 +155,37 @@ module.exports = {
     }
   }
 };
+
+const requiredKeys = [
+  'packageName',
+  'directory',
+  'js',
+  'css',
+  'functionName',
+  'componentName',
+  'defaultConfig',
+];
+
+const getWidgetSettings = function () {
+  const badDefinitions = {};
+
+  Object.entries(moduleDefinitions).forEach(([widgetKey, definition]) => {
+    const keysInDefinition = Object.keys(definition);
+
+    const missingKeys = requiredKeys.filter(
+      (requiredKey) => !keysInDefinition.includes(requiredKey)
+    );
+
+    if (missingKeys.length > 0) {
+      badDefinitions[widgetKey] = missingKeys;
+    }
+  });
+
+  if (Object.keys(badDefinitions).length > 0) {
+    console.error('MISSING FIELDS IN WIDGET DEFINITIONS', badDefinitions);
+  }
+
+  return moduleDefinitions;
+};
+
+module.exports = getWidgetSettings;

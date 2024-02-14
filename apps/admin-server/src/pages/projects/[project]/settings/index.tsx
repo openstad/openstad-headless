@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import toast from 'react-hot-toast';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -39,7 +40,7 @@ const formSchema = z.object({
   }),
   enableLikes: z.boolean(),
   enableReactions: z.boolean(),
-  url: z.string().url()
+  url: z.string().optional()
 });
 
 export default function ProjectSettings() {
@@ -47,12 +48,17 @@ export default function ProjectSettings() {
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading, updateProject } = useProject();
+
+  let currentDate = new Date();
+  const [checkboxInitial, setCheckboxInitial] = useState(true);
+  const [showUrl, setShowUrl] = useState(false);
+
   const defaults = useCallback(
     () => ({
       name: data?.name || '',
       endDate: data?.config?.project?.endDate
         ? new Date(data?.config?.project?.endDate)
-        : new Date(),
+        : new Date(currentDate.getFullYear(), currentDate.getMonth()+3),
       enableLikes: data?.config?.resources?.enableLikes || false,
       enableReactions: data?.config?.resources?.enableReactions || false,
       url: data?.url || '',
@@ -68,6 +74,15 @@ export default function ProjectSettings() {
   useEffect(() => {
     form.reset(defaults());
   }, [form, defaults]);
+
+  useEffect(() => {
+    if (checkboxInitial) {
+      if (data?.url) {
+        setShowUrl(true)
+        setCheckboxInitial(false)
+      }
+    }
+  }, [data]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -113,7 +128,7 @@ export default function ProjectSettings() {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Projectinformatie</TabsTrigger>
               <TabsTrigger value="advanced">
-                Geavanceerde instellingen
+                Project archiveren
               </TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -196,7 +211,14 @@ export default function ProjectSettings() {
                         </FormItem>
                       )}
                     />
-                    <FormField
+                    <div>
+                      <Checkbox checked={showUrl} onClick={(e) => setShowUrl(!showUrl)} className='mr-2'/>
+                        <FormLabel>
+                          Wil je een CMS URL instellen?
+                        </FormLabel>
+                    </div>
+                    {showUrl ? (
+                      <FormField
                       control={form.control}
                       name="url"
                       render={({ field }) => (
@@ -209,6 +231,7 @@ export default function ProjectSettings() {
                         </FormItem>
                       )}
                     />
+                    ) : null}
                     <Button className="w-fit col-span-full" type="submit">
                       Opslaan
                     </Button>

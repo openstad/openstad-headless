@@ -8,5 +8,6 @@ nginx.config.example
 .packages-build-hash
 secrets.yml
 secrets.yaml
+/.idea
 
 *.agekey

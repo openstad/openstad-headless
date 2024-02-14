@@ -930,11 +930,7 @@ module.exports = function (db, sequelize, DataTypes) {
     if (userHasRole(user, 'editor', self.userId) || userHasRole(user, 'admin', self.userId) || userHasRole(user, 'moderator', self.userId)) {
       return true;
     }
-    
-    let status = self.statuses;
-    console.log({status});
-    console.log({self:self.dataValues});
-
+    let status = self.statuses?.find( tag => tag.type === 'status' );
     if (typeof status?.extraFunctionality?.editableByUser != 'boolean' || status.extraFunctionality.editableByUser) {
       return true;
     }

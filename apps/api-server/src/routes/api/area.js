@@ -45,7 +45,6 @@ router.route('/')
     if (req.body.geoJSON) {
       req.body.polygon = formatGeoJsonToPolygon(req.body.geoJSON);
     }
-
     next();
   })
   .post(function(req, res, next) {

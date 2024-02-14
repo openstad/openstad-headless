@@ -1,5 +1,7 @@
 const { execSync, exec } = require('child_process');
-const widgetSettings = require('../src/routes/widget/widget-settings');
+const getWidgetSettings = require('../src/routes/widget/widget-settings');
+const widgetDefinitions = getWidgetSettings();
+
 const {
   buildPackage,
   getDependencyPackages,
@@ -34,7 +36,7 @@ async function buildAllPackages() {
   // Write new hash to file
   fs.writeFileSync(hashFile, currentHash.hash);
 
-  const packages = Object.keys(widgetSettings);
+  const packages = Object.keys(widgetDefinitions);
   const dependencyPackages = await getDependencyPackages();
 
   // Build all dependency packages
