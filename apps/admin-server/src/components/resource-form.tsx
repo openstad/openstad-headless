@@ -162,10 +162,6 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     }
   }, [existingData]);
 
-  useEffect(() => {
-    console.log(imageArray)
-  }, [imageArray]);
-
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
@@ -365,7 +361,6 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               let array = [...imageArray]
               array.push(imageResult)
               setImageArray(array)
-              console.log(imageArray)
             }}
           />
           <Button className="w-fit col-span-full" type="submit">
