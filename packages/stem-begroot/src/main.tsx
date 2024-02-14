@@ -31,7 +31,7 @@ const config: StemBegrootWidgetProps = {
     mustConfirm: false,
     requiredUserRole: 'member',
     voteValues: [],
-    maxResources: 100,
+    maxResources: 10000,
     minResources: 1,
     minBudget: 100,
     maxBudget: 80000,

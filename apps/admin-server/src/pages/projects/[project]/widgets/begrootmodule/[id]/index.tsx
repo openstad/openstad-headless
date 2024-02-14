@@ -67,18 +67,13 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="voting">
+          <Tabs defaultValue="display">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
-              <TabsTrigger value="voting">Stem opties</TabsTrigger>
               <TabsTrigger value="display">Weergave opties</TabsTrigger>
               <TabsTrigger value="sorting">Sorteer opties</TabsTrigger>
               <TabsTrigger value="explanation">Uitleg</TabsTrigger>
-              <TabsTrigger value="authentication">Authenticatie</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
-            <TabsContent value="voting" className="p-0">
-              <BegrootmoduleVoting {...totalPropPackage}/>
-            </TabsContent>
             <TabsContent value="display" className="p-0">
               <BegrootmoduleDisplay {...totalPropPackage}/>
             </TabsContent>
@@ -87,9 +82,6 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
             </TabsContent>
             <TabsContent value="explanation" className="p-0">
               <BegrootmoduleExplanation {...totalPropPackage} />
-            </TabsContent>
-            <TabsContent value="authentication" className="p-0">
-              <BegrootmoduleAuthentication {...totalPropPackage}/>
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />

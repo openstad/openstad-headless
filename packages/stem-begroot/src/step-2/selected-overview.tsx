@@ -1,5 +1,4 @@
 import React from 'react';
-import { BudgetUsedList } from '../reuseables/used-budget-component';
 import { Spacer } from '@openstad-headless/ui/src';
 import { BudgetStatusPanel } from '../reuseables/budget-status-panel';
 
