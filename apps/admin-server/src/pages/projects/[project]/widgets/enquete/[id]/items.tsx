@@ -1,4 +1,4 @@
-import ImageUploader from '@/components/image-uploader';
+import { ImageUploader } from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -272,7 +272,7 @@ export default function WidgetEnqueteItems(
 
   return (
     <div>
-      <ImageUploader />
+      {/* <ImageUploader /> */}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
