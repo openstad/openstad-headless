@@ -41,7 +41,6 @@ router.route('/')
   // Persist an area
   .post(auth.can('Area', 'create'))
   .post(function(req, res, next) {
-    console.log(req.body)
     // if geodata is set transform to polygon format this api expects
     if (req.body.geoJSON) {
       req.body.polygon = formatGeoJsonToPolygon(req.body.geoJSON);
