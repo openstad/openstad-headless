@@ -69,6 +69,7 @@ const formSchema = z.object({
   modBreakDate: z.date().optional(),
 
   location: z.string().optional(),
+  images: z.any(),
 
   extraData: z
     .object({
@@ -95,7 +96,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   );
 
   const [imageArray, setImageArray]= useState<any[]>([]);
-  const [loaded, setLoaded] = useState(false)
+  const [loaded, setLoaded] = useState(false);
 
   const defaults = useCallback(
     (): FormType => ({
@@ -123,6 +124,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         : undefined,
 
       location: existingData?.location || '',
+      images: existingData?.images || [],
       extraData: {
         originalId: existingData?.extraData?.originalId || undefined,
       },
@@ -136,7 +138,8 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   });
 
   function onSubmit(values: FormType) {
-    onFormSubmit(values, )
+    values.images = imageArray
+    onFormSubmit(values)
       .then(() => {
         toast.success(`Plan successvol ${id ? 'aangepast' : 'aangemaakt'}`);
         router.push(`/projects/${project}/resources`);
@@ -154,11 +157,14 @@ export default function ResourceForm({ onFormSubmit }: Props) {
 
   useEffect(() => {
     if (existingData && !loaded) {
-      console.log(existingData?.images)
       setImageArray(existingData?.images)
       setLoaded(true)
     }
   }, [existingData]);
+
+  useEffect(() => {
+    console.log(imageArray)
+  }, [imageArray]);
 
   return (
     <div className="p-6 bg-white rounded-md">
