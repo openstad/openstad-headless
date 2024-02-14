@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Spacer } from '@openstad-headless/ui/src';
 import { BudgetStatusPanel } from '../reuseables/budget-status-panel';
 
@@ -27,13 +27,13 @@ export const BegrotenSelectedOverview = ({
         <h5>Overzicht van mijn selectie</h5>
         <Spacer size={2} />
         {selectedResources.map((resource) => (
-          <>
+          <Fragment key={`budget-overview-row-${resource.id}`}>
             <div className="budget-two-text-row-spaced">
               <p>{resource.title}</p>
               <p className="strong">&euro;{resource.budget}</p>
             </div>
             <Spacer size={1} />
-          </>
+          </Fragment>
         ))}
 
         <Spacer size={2} />

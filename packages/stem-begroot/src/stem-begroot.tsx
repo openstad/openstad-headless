@@ -20,6 +20,10 @@ import { BudgetUsedList } from './reuseables/used-budget-component';
 import { BegrotenSelectedOverview } from './step-2/selected-overview';
 import toast, { Toaster } from 'react-hot-toast';
 
+import { Step3Success } from './step-3-success';
+import { Step3 } from './step-3';
+import { Step4 } from './step-4';
+
 export type StemBegrootWidgetProps = BaseProps &
   ProjectSettingProps & {
     step1: string;
@@ -50,6 +54,9 @@ function StemBegroot({
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [currentUser] = datastore.useCurrentUser({ ...props });
+  const [navAfterLogin, setNavAfterLogin] = useState<boolean>();
+  const [shouldReloadSelectedResources, setReloadSelectedResources] =
+    useState<boolean>(false);
 
   const { resources, submitLike } = datastore.useResources({
     projectId: props.projectId,
@@ -81,32 +88,44 @@ function StemBegroot({
     }
   };
 
-  // If pending and no selectedResources recover the resources from session
+  const isAllowedToVote =
+    props.votes.requiredUserRole &&
+    hasRole(currentUser, props.votes.requiredUserRole);
+
+  // Check the pending state and if there are any resources, hint to  update the selected items
   useEffect(() => {
     let pending = session.get('osc-resource-vote-pending');
-    if (pending && resources?.records && selectedResources.length === 0) {
+    if (pending && resources?.records?.length > 0) {
+      setReloadSelectedResources(true);
+    }
+  }, [resources?.records]);
+
+  // if shouldReloadSelectedResources reload the selectedresources from the pendings
+  useEffect(() => {
+    let pending = session.get('osc-resource-vote-pending');
+    if (shouldReloadSelectedResources) {
       const resourcesThatArePending: Array<any> =
         resources?.records?.filter((r: any) => pending && r.id in pending) ||
         [];
       setSelectedResources(resourcesThatArePending);
+      setReloadSelectedResources(false);
     }
-  }, [resources?.records, selectedResources]);
+  }, [shouldReloadSelectedResources]);
 
   // Force the logged in user to skip step 2: first time entering 'stemcode'
   useEffect(() => {
+    if (selectedResources.length === 0) {
+      setNavAfterLogin(true);
+      return setCurrentStep(0);
+    }
     if (
-      props.votes.requiredUserRole &&
-      hasRole(currentUser, props.votes.requiredUserRole) &&
-      currentStep === 2
+      (isAllowedToVote && currentStep === 2 && !navAfterLogin) ||
+      (isAllowedToVote && navAfterLogin && currentStep === 2) ||
+      (isAllowedToVote && !navAfterLogin)
     ) {
       setCurrentStep(3);
     }
-  }, [
-    resources?.records,
-    currentUser,
-    currentStep,
-    props?.votes?.requiredUserRole,
-  ]);
+  }, [currentUser, currentStep, selectedResources]);
 
   function prepareForVote(e: React.MouseEvent<HTMLElement, MouseEvent> | null) {
     if (e) e.stopPropagation();
@@ -138,18 +157,20 @@ function StemBegroot({
   const isInSelected = (resource: { id: number }) =>
     selectedResources.find((r) => r.id === resource.id);
 
-    const getOriginalResourceUrl = (resource: { extraData:{originalId:number|string}}) => {
-      return props.showOriginalResource &&
+  const getOriginalResourceUrl = (resource: {
+    extraData: { originalId: number | string };
+  }) => {
+    return props.showOriginalResource &&
       props.originalResourceUrl &&
       resource.extraData?.originalId
-        ? props.originalResourceUrl.includes('[id]')
-          ? props.originalResourceUrl.replace(
-              '[id]',
-              `${resource.extraData?.originalId}`
-            )
-          : `${props.originalResourceUrl}/${resource.extraData?.originalId}`
-        : null;
-    };
+      ? props.originalResourceUrl.includes('[id]')
+        ? props.originalResourceUrl.replace(
+            '[id]',
+            `${resource.extraData?.originalId}`
+          )
+        : `${props.originalResourceUrl}/${resource.extraData?.originalId}`
+      : null;
+  };
 
   const resourceSelectable = (resource: { id: number; budget: number }) => {
     return (
@@ -233,59 +254,31 @@ function StemBegroot({
           ) : null}
 
           {currentStep === 2 ? (
-            <>
-              {usedBudgetList}
-              <Spacer size={1.5} />
-              <h5>Controleer stemcode</h5>
-              <p>{props.step3}</p>
-              <SecondaryButton
-                onClick={(e) => {
-                  prepareForVote(e);
-                  if (props.login?.url) {
-                    const loginUrl = new URL(props.login.url);
-                    document.location.href = loginUrl.toString();
-                  }
-                }}>
-                Vul je stemcode in
-              </SecondaryButton>
-            </>
+            <Step3
+              header={usedBudgetList}
+              loginUrl={`${props?.login?.url}`}
+              step3={props.step3}
+            />
           ) : null}
 
           {currentStep === 3 ? (
-            <>
-              {usedBudgetList}
-              <Spacer size={1.5} />
-              <h5>{props.step3success}</h5>
-              <Spacer size={1.5} />
-
-              <SecondaryButton
-                onClick={() => {
-                  const loginUrl = new URL(`${props?.login?.url}`);
-                  document.location.href = loginUrl.toString();
-                }}>
-                Vul een andere stemcode in
-              </SecondaryButton>
-            </>
+            <Step3Success
+              header={usedBudgetList}
+              loginUrl={`${props?.login?.url}`}
+              step3success={props.step3success}
+            />
           ) : null}
 
           <Spacer size={1} />
 
           {currentStep === 4 ? (
-            <>
-              {usedBudgetList}
-              <Spacer size={1.5} />
-              <h5>{props.voteMessage}</h5>
-              <p>{props.thankMessage}</p>
-
-              {props.showNewsletterButton ? (
-                <SecondaryButton
-                  onClick={() => {
-                    // What should happen here?
-                  }}>
-                  Hou mij op de hoogte
-                </SecondaryButton>
-              ) : null}
-            </>
+            <Step4
+              header={usedBudgetList}
+              loginUrl={`${props?.login?.url}`}
+              thankMessage={props.thankMessage}
+              voteMessage={props.voteMessage}
+              showNewsletterButton={props.showNewsletterButton}
+            />
           ) : null}
 
           <div className="begroot-step-panel-navigation-section">
@@ -293,6 +286,7 @@ function StemBegroot({
               <PlainButton
                 onClick={() => {
                   if (currentStep === 3) {
+                    setNavAfterLogin(true);
                     setCurrentStep(currentStep - 2);
                   } else {
                     setCurrentStep(currentStep - 1);
@@ -306,6 +300,14 @@ function StemBegroot({
             {currentStep !== 2 ? (
               <SecondaryButton
                 onClick={async () => {
+                  if (currentStep === 0) {
+                    prepareForVote(null);
+                  }
+
+                  if (isAllowedToVote) {
+                    setNavAfterLogin(true);
+                  }
+
                   if (currentStep === 3) {
                     try {
                       await doVote(selectedResources);
