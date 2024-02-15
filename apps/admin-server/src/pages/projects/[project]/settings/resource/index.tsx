@@ -4,7 +4,7 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { useRouter } from 'next/router';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProjectSettingsResourceGeneral from './general';
-import ProjectSettingsResourceLabels from './status';
+import ProjectSettingsResourceLabels from './tags';
 
 export default function ProjectSettingsResource() {
   const router = useRouter();
@@ -32,12 +32,12 @@ export default function ProjectSettingsResource() {
           <Tabs defaultValue="form">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="form">Resource instellingen</TabsTrigger>
-              <TabsTrigger value="label">Statussen</TabsTrigger>
+              <TabsTrigger value="tag">Tags</TabsTrigger>
             </TabsList>
             <TabsContent value="form" className="p-0">
               <ProjectSettingsResourceGeneral />
             </TabsContent>
-            <TabsContent value="label" className="p-0">
+            <TabsContent value="tag" className="p-0">
               <ProjectSettingsResourceLabels />
             </TabsContent>
           </Tabs>
