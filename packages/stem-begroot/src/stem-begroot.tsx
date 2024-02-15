@@ -172,17 +172,33 @@ function StemBegroot({
       : null;
   };
 
+  // for now only support budgeting and count
   const resourceSelectable = (resource: { id: number; budget: number }) => {
+    if (props.votes.voteType === 'budgeting') {
+      return (
+        isInSelected(resource) ||
+        (!isInSelected(resource) &&
+          resource.budget <= props.votes.maxBudget - budgetUsed)
+      );
+    }
     return (
       isInSelected(resource) ||
       (!isInSelected(resource) &&
-        resource.budget <= props.votes.maxBudget - budgetUsed)
+        (props.votes.maxResources || 0) > selectedResources.length)
     );
   };
 
   const createItemBtnString = (resource: { id: number; budget: number }) => {
+    if (props.votes.voteType === 'budgeting') {
+      return !isInSelected(resource) &&
+        !(resource.budget <= props.votes.maxBudget - budgetUsed)
+        ? notEnoughBudgetText
+        : isInSelected(resource)
+        ? 'Verwijder'
+        : 'Voeg toe';
+    }
     return !isInSelected(resource) &&
-      !(resource.budget <= props.votes.maxBudget - budgetUsed)
+      !((props.votes.maxResources || 0) > selectedResources.length)
       ? notEnoughBudgetText
       : isInSelected(resource)
       ? 'Verwijder'
@@ -236,6 +252,8 @@ function StemBegroot({
                 maxBudget={props.votes.maxBudget}
                 allResources={resources?.records || []}
                 selectedResources={selectedResources}
+                maxNrOfResources={props.votes.maxResources || 0}
+                typeIsBudgeting={props.votes.voteType === 'budgeting'}
               />
             </>
           ) : null}
@@ -247,8 +265,10 @@ function StemBegroot({
               <BegrotenSelectedOverview
                 introText={props.step2}
                 budgetUsed={budgetUsed}
-                maxBudget={props.votes.maxBudget}
                 selectedResources={selectedResources}
+                maxBudget={props.votes.maxBudget}
+                maxNrOfResources={props.votes.maxResources || 0}
+                typeIsBudgeting={props.votes.voteType === 'budgeting'}
               />
             </>
           ) : null}

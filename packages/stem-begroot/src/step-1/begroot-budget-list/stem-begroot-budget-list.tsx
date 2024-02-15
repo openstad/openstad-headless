@@ -8,10 +8,14 @@ export const StemBegrootBudgetList = ({
   allResources = [],
   selectedResources = [],
   maxBudget,
+  typeIsBudgeting,
+  maxNrOfResources,
 }: {
   selectedResources: Array<any>;
   allResources: Array<any>;
   maxBudget: number;
+  typeIsBudgeting: boolean;
+  maxNrOfResources: number;
   introText?: string;
 }) => {
   const budgetUsed = selectedResources.reduce(
@@ -23,9 +27,9 @@ export const StemBegrootBudgetList = ({
     (allR) => !selectedResources.find((selectedR) => allR.id === selectedR.id)
   );
 
-  const canAddMore = notUsedResources.some(
-    (r) => r.budget < maxBudget - budgetUsed
-  );
+  const canAddMore = typeIsBudgeting
+    ? notUsedResources.some((r) => r.budget < maxBudget - budgetUsed)
+    : Math.max(maxNrOfResources - allResources.length, 0) > 0;
 
   return (
     <>
@@ -36,7 +40,13 @@ export const StemBegrootBudgetList = ({
           </div>
         </div>
 
-        <BudgetStatusPanel budgetUsed={budgetUsed} maxBudget={maxBudget} />
+        <BudgetStatusPanel
+          typeIsBudgeting={typeIsBudgeting}
+          maxNrOfResources={maxNrOfResources}
+          nrOfResourcesSelected={selectedResources.length}
+          maxBudget={maxBudget}
+          budgetUsed={budgetUsed}
+        />
       </section>
       <Spacer size={2} />
       <section className="stem-begroot-helptext-and-budget-section"></section>
@@ -67,7 +77,12 @@ export const StemBegrootBudgetList = ({
               <p className="budget-list-status-text strong">
                 Kan niet meer toevoegen
               </p>
-              <p className="budget-list-status-text">Onvoldoende budget</p>
+
+              <p className="budget-list-status-text">
+                {typeIsBudgeting
+                  ? 'Onvoldoende budget'
+                  : 'Maximaal aantal plannen bereikt'}
+              </p>
             </div>
           ) : null}
         </div>

@@ -40,7 +40,8 @@ const config: StemBegrootWidgetProps = {
     minBudget: 100,
     maxBudget: 80000,
     isActive: true,
-    voteType: 'budgeting',
+    voteType: 'count',
+    // voteType: 'budgeting',
     withExisting: 'error',
   },
 };
