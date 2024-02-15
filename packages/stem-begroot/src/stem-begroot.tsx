@@ -1,6 +1,7 @@
 import './stem-begroot.css';
 import React, { useEffect, useState } from 'react';
 import {
+  Paginator,
   PlainButton,
   SecondaryButton,
   Spacer,
@@ -19,6 +20,7 @@ import { StemBegrootResourceList } from './step-1/begroot-resource-list/stem-beg
 import { BudgetUsedList } from './reuseables/used-budget-component';
 import { BegrotenSelectedOverview } from './step-2/selected-overview';
 import toast, { Toaster } from 'react-hot-toast';
+import { Filters } from './reuseables/filter';
 
 import { Step3Success } from './step-3-success';
 import { Step3 } from './step-3';
@@ -39,6 +41,12 @@ export type StemBegrootWidgetProps = BaseProps &
     showVoteCount: boolean;
     showOriginalResource: boolean;
     originalResourceUrl?: string;
+    displayTagFilters?: boolean;
+    tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
+    displayTagGroupName?: boolean;
+    defaultSorting?: string;
+    displaySorting?: boolean;
+    itemsPerPage?: number;
   };
 
 function StemBegroot({
@@ -58,8 +66,17 @@ function StemBegroot({
   const [shouldReloadSelectedResources, setReloadSelectedResources] =
     useState<boolean>(false);
 
+  const [tags, setTags] = useState<number[]>([]);
+  const [sort, setSort] = useState<string | undefined>();
+  const [page, setPage] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(props.itemsPerPage || 10);
+
   const { resources, submitLike } = datastore.useResources({
     projectId: props.projectId,
+    tags,
+    sort,
+    page,
+    pageSize
   });
 
   // Replace with type when available from datastore
@@ -95,7 +112,7 @@ function StemBegroot({
   // Check the pending state and if there are any resources, hint to  update the selected items
   useEffect(() => {
     let pending = session.get('osc-resource-vote-pending');
-    if (pending && resources?.records?.length > 0) {
+    if (pending && resources?.records?.length > 0 && selectedResources.length === 0) {
       setReloadSelectedResources(true);
     }
   }, [resources?.records]);
@@ -256,9 +273,8 @@ function StemBegroot({
                   session.remove('osc-resource-vote-pending');
                   setSelectedResources(
                     selectedResources.filter((resource) => resource.id !== r.id)
-                  )
-                }
-                }
+                  );
+                }}
                 decideCanAddMore={() => {
                   let notUsedResources = resources?.records.filter(
                     (allR: { id: number }) =>
@@ -377,37 +393,69 @@ function StemBegroot({
         <Spacer size={4} />
 
         {currentStep === 0 ? (
-          <StemBegrootResourceList
-            defineOriginalUrl={getOriginalResourceUrl}
-            resourceBtnEnabled={resourceSelectable}
-            resourceBtnTextHandler={createItemBtnString}
-            resources={resources?.records?.length ? resources?.records : []}
-            selectedResources={selectedResources}
-            onResourcePlainClicked={(resource, index) => {
-              setResourceDetailIndex(index);
-              setOpenDetailDialog(true);
-            }}
-            displayPriceLabel={props.displayPriceLabel}
-            displayRanking={props.displayRanking}
-            showVoteCount={props.showVoteCount}
-            showOriginalResource={props.showOriginalResource}
-            originalResourceUrl={props.originalResourceUrl}
-            onResourcePrimaryClicked={(resource) => {
-              session.remove('osc-resource-vote-pending');
+          <>
+            <StemBegrootResourceList
+              header={
+                <>
+                  <h3>Plannen</h3>
+                  <Spacer size={1} />
 
-              const resourceIndex = selectedResources.findIndex(
-                (r) => r.id === resource.id
-              );
-
-              if (resourceIndex === -1) {
-                setSelectedResources([...selectedResources, resource]);
-              } else {
-                const resources = [...selectedResources];
-                resources.splice(resourceIndex, 1);
-                setSelectedResources(resources);
+                  <Filters
+                    {...props}
+                    sorting={[]}
+                    displayTagFilters={props.displayTagFilters}
+                    tagGroups={props.tagGroups}
+                    projectId={props.projectId}
+                    // itemsPerPage={itemsPerPage}
+                    resources={resources}
+                    onUpdateFilter={(f) => {
+                      setTags(f.tags);
+                      setSort(f.sort);
+                    }}
+                  />
+                  <Spacer size={1} />
+                </>
               }
-            }}
-          />
+              defineOriginalUrl={getOriginalResourceUrl}
+              resourceBtnEnabled={resourceSelectable}
+              resourceBtnTextHandler={createItemBtnString}
+              resources={resources?.records?.length ? resources?.records : []}
+              selectedResources={selectedResources}
+              onResourcePlainClicked={(resource, index) => {
+                setResourceDetailIndex(index);
+                setOpenDetailDialog(true);
+              }}
+              displayPriceLabel={props.displayPriceLabel}
+              displayRanking={props.displayRanking}
+              showVoteCount={props.showVoteCount}
+              showOriginalResource={props.showOriginalResource}
+              originalResourceUrl={props.originalResourceUrl}
+              onResourcePrimaryClicked={(resource) => {
+                session.remove('osc-resource-vote-pending');
+
+                const resourceIndex = selectedResources.findIndex(
+                  (r) => r.id === resource.id
+                );
+
+                if (resourceIndex === -1) {
+                  setSelectedResources([...selectedResources, resource]);
+                } else {
+                  const resources = [...selectedResources];
+                  resources.splice(resourceIndex, 1);
+                  setSelectedResources(resources);
+                }
+              }}
+            />
+            <Spacer size={3} />
+            <div className="osc-stem-begroot-paginator">
+              <Paginator
+                page={resources?.metadata?.page || 0}
+                totalPages={resources?.metadata?.pageCount || 1}
+                onPageChange={(page) => setPage(page)}
+              />
+            </div>
+            <Spacer size={2} />
+          </>
         ) : null}
         <Toaster />
       </div>

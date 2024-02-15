@@ -6,11 +6,9 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
-import BegrootmoduleVoting from './voting';
 import BegrootmoduleDisplay from './display';
 import BegrootmoduleSorting from './sorting';
 import BegrootmoduleExplanation from './explanation';
-import BegrootmoduleAuthentication from './authentication';
 import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
@@ -22,6 +20,7 @@ import WidgetPublish from '@/components/widget-publish';
 export const getServerSideProps = withApiUrl;
 import { StemBegrootWidgetProps } from '@openstad/stem-begroot/src/stem-begroot';
 import WidgetPreview from '@/components/widget-preview';
+import WidgetStemBegrootOverviewTags from './tags';
 
 export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
@@ -75,6 +74,7 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="display">Weergave opties</TabsTrigger>
               <TabsTrigger value="sorting">Sorteer opties</TabsTrigger>
               <TabsTrigger value="explanation">Uitleg</TabsTrigger>
+              <TabsTrigger value="tags">Tags</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
 
@@ -88,6 +88,9 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
                 </TabsContent>
                 <TabsContent value="explanation" className="p-0">
                   <BegrootmoduleExplanation {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="tags" className="p-0">
+                  <WidgetStemBegrootOverviewTags {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="publish" className="p-0">
                   <WidgetPublish apiUrl={apiUrl} />

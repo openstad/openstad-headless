@@ -20,6 +20,7 @@ export const StemBegrootResourceList = ({
   displayPriceLabel = true,
   displayRanking = true,
   showVoteCount = true,
+  header
 }: {
   resources: Array<any>;
   selectedResources: Array<any>;
@@ -33,17 +34,14 @@ export const StemBegrootResourceList = ({
   showVoteCount?: boolean;
   showOriginalResource?: boolean;
   originalResourceUrl?: string;
+  header?: React.JSX.Element;
 }) => {
   return (
     <List
       id='stem-begroot-resource-selections-list'
       columns={3}
       items={resources || []}
-      renderHeader={() => (
-        <>
-          <h3>Plannen</h3> <Spacer size={1} />
-        </>
-      )}
+      renderHeader={() => header || <></>}
       renderItem={(resource, index) => {
         const primaryBtnText = resourceBtnTextHandler(resource);
         const primaryBtnDisabled = !resourceBtnEnabled(resource);

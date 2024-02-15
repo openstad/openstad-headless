@@ -35,7 +35,7 @@ const config: StemBegrootWidgetProps = {
     mustConfirm: false,
     requiredUserRole: 'member',
     voteValues: [],
-    maxResources: 10000,
+    maxResources: 4,
     minResources: 1,
     minBudget: 100,
     maxBudget: 80000,
@@ -43,6 +43,12 @@ const config: StemBegrootWidgetProps = {
     voteType: 'count',
     withExisting: 'error',
   },
+  displayTagFilters: true,
+  tagGroups: [
+    { type: 'status', label: 'Status', multiple: false },
+    { type: 'area', label: 'Gebied', multiple: false },
+    { type: 'theme', label: 'Thema', multiple: false },
+  ],
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

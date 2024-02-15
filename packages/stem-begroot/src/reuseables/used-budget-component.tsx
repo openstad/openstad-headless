@@ -9,9 +9,13 @@ export const BudgetUsedList = ({
   maxBudget: number;
   budgetUsed: number;
 }) => {
+
+  let sortedBudgets = [...selectedBudgets];
+  sortedBudgets = sortedBudgets.sort((r1, r2) => r2-r1);
+
   return (
     <div className="budget-used-list">
-      {selectedBudgets.map((budget,index) => (
+      {sortedBudgets.map((budget,index) => (
         <div
         key={`budget-item-${budget}-${index}`}
           className="budget-badge budget-badge-primary"

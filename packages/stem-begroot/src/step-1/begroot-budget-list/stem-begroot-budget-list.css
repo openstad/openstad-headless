@@ -11,13 +11,7 @@
     flex-direction: row;
     gap: .5rem;
   }
-  /* .budget-used-list * {
-   flex-grow: 2;
-  }
-  .budget-used-list .osc-stem-begroot-budget-list-budget-left-indication {
-    flex-grow: 1;
-   } */
-  
+
   .stem-begroot-helptext-and-budget-section {
     display: grid;
     grid-template-columns: 10fr 2fr;
@@ -26,7 +20,7 @@
 
   .budget-list-selections {
     display: grid;
-    grid-template-columns: 10fr 2fr;
+    grid-template-columns: 1fr;
     gap: .5rem;
   }
 

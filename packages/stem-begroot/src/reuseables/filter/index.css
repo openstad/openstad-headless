@@ -1,0 +1,7 @@
+.osc-stem-begroot-filters {
+    align-items: start;
+    display: flex;
+    padding: 1rem;
+    gap: 1rem;
+    background-color: var(--osc-card);
+}

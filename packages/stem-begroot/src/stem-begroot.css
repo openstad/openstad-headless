@@ -59,3 +59,15 @@
   padding: 1rem;
   background-color: var(--osc-muted);
 }
+
+.stem-begroot-filter-segment {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--osc-card);
+}
+
+.osc-stem-begroot-paginator {
+  display: flex;
+  justify-content: center;
+}
