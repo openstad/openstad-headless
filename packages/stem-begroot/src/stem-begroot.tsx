@@ -45,6 +45,7 @@ export type StemBegrootWidgetProps = BaseProps &
     tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     displayTagGroupName?: boolean;
     defaultSorting?: string;
+    sorting?: Array<{ label: string; value: string }>;
     displaySorting?: boolean;
     itemsPerPage?: number;
   };
@@ -76,7 +77,7 @@ function StemBegroot({
     tags,
     sort,
     page,
-    pageSize
+    pageSize,
   });
 
   // Replace with type when available from datastore
@@ -112,7 +113,11 @@ function StemBegroot({
   // Check the pending state and if there are any resources, hint to  update the selected items
   useEffect(() => {
     let pending = session.get('osc-resource-vote-pending');
-    if (pending && resources?.records?.length > 0 && selectedResources.length === 0) {
+    if (
+      pending &&
+      resources?.records?.length > 0 &&
+      selectedResources.length === 0
+    ) {
       setReloadSelectedResources(true);
     }
   }, [resources?.records]);
@@ -399,20 +404,23 @@ function StemBegroot({
                 <>
                   <h3>Plannen</h3>
                   <Spacer size={1} />
+                  {datastore ? (
+                    <Filters
+                      dataStore={datastore}
+                      sorting={props.sorting || []}
+                      displaySorting={props.displaySorting}
+                      defaultSorting={props.defaultSorting}
+                      displayTagFilters={props.displayTagFilters}
+                      tagGroups={props.tagGroups || []}
+                      // itemsPerPage={itemsPerPage}
+                      resources={resources}
+                      onUpdateFilter={(f) => {
+                        setTags(f.tags);
+                        setSort(f.sort);
+                      }}
+                    />
+                  ) : null}
 
-                  <Filters
-                    {...props}
-                    sorting={[]}
-                    displayTagFilters={props.displayTagFilters}
-                    tagGroups={props.tagGroups}
-                    projectId={props.projectId}
-                    // itemsPerPage={itemsPerPage}
-                    resources={resources}
-                    onUpdateFilter={(f) => {
-                      setTags(f.tags);
-                      setSort(f.sort);
-                    }}
-                  />
                   <Spacer size={1} />
                 </>
               }

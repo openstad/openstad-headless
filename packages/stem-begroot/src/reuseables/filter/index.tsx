@@ -16,25 +16,25 @@ type Filter = {
 };
 
 type Props = {
+  dataStore: typeof DataStore;
   resources: any;
   onUpdateFilter?: (filter: Filter) => void;
   sorting: Array<{ value: string; label: string }>;
+  displaySorting?: boolean;
   defaultSorting?: string;
   itemsPerPage?: number;
-} & StemBegrootWidgetProps;
+  displayTagFilters?: boolean;
+  tagGroups: Array<{ type: string; label?: string; multiple: boolean }>;
+};
 
 export function Filters({
+  dataStore,
   resources,
   sorting = [],
   tagGroups = [],
   onUpdateFilter,
   ...props
 }: Props) {
-  const dataStore = new DataStore({
-    projectId: props.projectId,
-    api: props.api,
-  });
-
   const defaultFilter: Filter = {
     tags: [],
     search: { text: '' },
@@ -130,7 +130,6 @@ export function Filters({
                 return (
                   <MultiSelectTagFilter
                     key={`tag-select-${tagGroup.type}`}
-                    {...props}
                     selected={selectedOptions[tagGroup.type] || []}
                     dataStore={dataStore}
                     tagType={tagGroup.type}
@@ -159,26 +158,28 @@ export function Filters({
           </>
         ) : null}
 
-        <Select ref={sortingRef} onValueChange={setSort} options={sorting}>
-          <option value={''}>Sorteer op</option>
-        </Select>
+        {props.displaySorting ? (
+          <Select ref={sortingRef} onValueChange={setSort} options={sorting}>
+            <option value={''}>Sorteer op</option>
+          </Select>
+        ) : null}
 
         <SecondaryButton
           onClick={() => {
             const filterParent = document.querySelector('#stem-begroot-filter');
 
-            const singleSelects:NodeListOf<HTMLSelectElement>| undefined =
+            const singleSelects: NodeListOf<HTMLSelectElement> | undefined =
               filterParent?.querySelectorAll(':scope select');
-              const inputsInFilter:NodeListOf<HTMLInputElement>|undefined =
+            const inputsInFilter: NodeListOf<HTMLInputElement> | undefined =
               filterParent?.querySelectorAll(':scope input');
 
-              if(singleSelects) {
-                singleSelects.forEach((s) => (s.selectedIndex = 0));
-              }
+            if (singleSelects) {
+              singleSelects.forEach((s) => (s.selectedIndex = 0));
+            }
 
-              if(inputsInFilter) {
-                inputsInFilter.forEach(i => i.value = '')
-              }
+            if (inputsInFilter) {
+              inputsInFilter.forEach((i) => (i.value = ''));
+            }
             setSelected({});
             updateFilter(defaultFilter);
           }}>

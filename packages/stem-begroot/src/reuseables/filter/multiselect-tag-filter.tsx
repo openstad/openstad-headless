@@ -25,7 +25,6 @@ const MultiSelectTagFilter = ({
 }: Props) => {
   // The useTags function should not need the  config and such anymore, because it should get that from the datastore object. Perhaps a rewrite of the hooks is needed
   const [tags] = dataStore.useTags({
-    ...props,
     type: tagType,
     onlyIncludeIds,
   });
