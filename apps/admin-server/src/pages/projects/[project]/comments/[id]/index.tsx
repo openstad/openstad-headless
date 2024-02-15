@@ -57,7 +57,6 @@ export default function ProjectCommentEdit() {
   }
 
   useEffect(() => {
-    console.log(project, id)
     form.reset(defaults());
   }, [form, defaults]);
 
