@@ -1,10 +1,8 @@
 import { SecondaryButton, Select } from '@openstad-headless/ui/src';
 import React, { useState, useEffect, useRef } from 'react';
-import DataStore from '@openstad-headless/data-store/src';
 import { useDebounce } from 'rooks';
 import { MultiSelectTagFilter } from './multiselect-tag-filter';
 import { SelectTagFilter } from './select-tag-filter';
-import { StemBegrootWidgetProps } from '../../stem-begroot';
 import './index.css';
 
 type Filter = {
@@ -16,7 +14,7 @@ type Filter = {
 };
 
 type Props = {
-  dataStore: typeof DataStore;
+  dataStore: any;
   resources: any;
   onUpdateFilter?: (filter: Filter) => void;
   sorting: Array<{ value: string; label: string }>;

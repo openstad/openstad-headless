@@ -20,7 +20,7 @@ import { StemBegrootResourceList } from './step-1/begroot-resource-list/stem-beg
 import { BudgetUsedList } from './reuseables/used-budget-component';
 import { BegrotenSelectedOverview } from './step-2/selected-overview';
 import toast, { Toaster } from 'react-hot-toast';
-import { Filters } from './reuseables/filter';
+import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter'
 
 import { Step3Success } from './step-3-success';
 import { Step3 } from './step-3';
@@ -70,14 +70,14 @@ function StemBegroot({
   const [tags, setTags] = useState<number[]>([]);
   const [sort, setSort] = useState<string | undefined>();
   const [page, setPage] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(props.itemsPerPage || 10);
+  const [itemsPerPage, setPageSize] = useState<number>(props.itemsPerPage || 10);
 
   const { resources, submitLike } = datastore.useResources({
     projectId: props.projectId,
     tags,
     sort,
     page,
-    pageSize,
+    itemsPerPage,
   });
 
   // Replace with type when available from datastore
@@ -412,7 +412,7 @@ function StemBegroot({
                       defaultSorting={props.defaultSorting}
                       displayTagFilters={props.displayTagFilters}
                       tagGroups={props.tagGroups || []}
-                      // itemsPerPage={itemsPerPage}
+                      itemsPerPage={itemsPerPage}
                       resources={resources}
                       onUpdateFilter={(f) => {
                         setTags(f.tags);
