@@ -54,9 +54,14 @@
 
 
   .budget-list-action-hint-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background-color: var(--osc-background);
     border: 1px dashed var(--osc-border);
     border-radius: 4px;
+    aspect-ratio: 16 / 9;
+    cursor: pointer;
   }
 
   .budget-list-action-hint-container p {
@@ -66,12 +71,9 @@
   .budget-list-selection-indicaction-container {
     display: grid;
     flex-grow: 1;
+    align-items: end;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: .5rem;
-  }
-
-  .budget-list-selection-indicaction-container > .image-container {
-    height: 5em;
   }
 
   .budget-list-status-container {
@@ -87,12 +89,10 @@
     text-align: center;
   }
 
-
 .begroot-placeholder-no-resources-selected {
     border-radius: 4px;
     background-color: var(--osc-border);
 }
-
 
 .budget-badge {
     border: 1px solid var(--osc-border);

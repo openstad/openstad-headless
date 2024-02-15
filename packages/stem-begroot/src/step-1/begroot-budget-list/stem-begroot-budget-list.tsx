@@ -1,35 +1,31 @@
 import './stem-begroot-budget-list.css';
 import React from 'react';
 import { BudgetStatusPanel } from '../../reuseables/budget-status-panel';
-import { Image, Spacer } from '@openstad-headless/ui/src';
+import { IconButton, Image, Spacer } from '@openstad-headless/ui/src';
 
 export const StemBegrootBudgetList = ({
   introText = '',
-  allResources = [],
   selectedResources = [],
   maxBudget,
   typeIsBudgeting,
   maxNrOfResources,
+  decideCanAddMore,
+  onSelectedResourceRemove
 }: {
   selectedResources: Array<any>;
-  allResources: Array<any>;
   maxBudget: number;
   typeIsBudgeting: boolean;
   maxNrOfResources: number;
   introText?: string;
+  decideCanAddMore: () => boolean;
+  onSelectedResourceRemove:(resource:{id:number}) =>void;
 }) => {
   const budgetUsed = selectedResources.reduce(
     (total, cv) => total + cv.budget,
     0
   );
 
-  let notUsedResources = allResources.filter(
-    (allR) => !selectedResources.find((selectedR) => allR.id === selectedR.id)
-  );
-
-  const canAddMore = typeIsBudgeting
-    ? notUsedResources.some((r) => r.budget < maxBudget - budgetUsed)
-    : Math.max(maxNrOfResources - allResources.length, 0) > 0;
+  const canAddMore = decideCanAddMore();
 
   return (
     <>
@@ -54,23 +50,39 @@ export const StemBegrootBudgetList = ({
         <h5>Uw selecties</h5>
         <Spacer size={1} />
         <div className="budget-list-selections">
-          {selectedResources.length === 0 ? (
-            <div className="budget-list-action-hint-container">
-              <p className="budget-list-status-text strong">
-                Selecteer een plan
-              </p>
-            </div>
-          ) : (
-            <div className="budget-list-selection-indicaction-container">
-              {selectedResources.map((resource) => (
-                <Image
-                  key={`resource-detail-image-${resource.id}`}
-                  className="budget-list-selection-indicaction"
-                  src={resource.images?.at(0)?.src || ''}
-                />
-              ))}
-            </div>
-          )}
+          <div className="budget-list-selection-indicaction-container">
+            {selectedResources.map((resource) => (
+              <Image
+              imageHeader={<div style={{width:'100%',display:'flex', justifyContent:'end', alignItems:'center'}}><IconButton 
+                onClick={() => {
+                  onSelectedResourceRemove(resource);
+                }} 
+              className='ghost negative' icon='ri-close-line'/></div>}
+                key={`resource-detail-image-${resource.id}`}
+                className="budget-list-selection-indicaction"
+                src={resource.images?.at(0)?.src || ''}
+              />
+            ))}
+
+            {canAddMore ? (
+              <div
+                className="budget-list-action-hint-container"
+                onClick={() => {
+                  const list = document.querySelector(
+                    '#stem-begroot-resource-selections-list'
+                  );
+                  if (list) {
+                    list.scrollIntoView({
+                      behavior: 'smooth',
+                    });
+                  }
+                }}>
+                <p className="budget-list-status-text strong">
+                  Selecteer een plan
+                </p>
+              </div>
+            ) : null}
+          </div>
 
           {!canAddMore ? (
             <div className="budget-list-status-container">

@@ -136,6 +136,7 @@ export const StemBegrootResourceDetailDialog = ({
                       </div>
                     </div>
                   </div>
+                  <Spacer size={1}/>
                   <div className="osc-begrootmodule-resource-detail-actions">
                     <SecondaryButton
                       disabled={!canUseButton}
@@ -145,13 +146,13 @@ export const StemBegrootResourceDetailDialog = ({
                       }}>
                       {primaryButtonText}
                     </SecondaryButton>
-                    <div className="osc-begrootmodule-resource-detail-share-actions">
+                    {/* <div className="osc-begrootmodule-resource-detail-share-actions">
                       <p className="strong">Deel dit:</p>
                       <IconButton className="plain" icon="ri-facebook-fill" />
                       <IconButton className="plain" icon="ri-whatsapp-fill" />
                       <IconButton className="plain" icon="ri-mail-fill" />
                       <IconButton className="plain" icon="ri-twitter-x-fill" />
-                    </div>
+                    </div> */}
                   </div>
                 </section>
               </div>

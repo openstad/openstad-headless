@@ -19,7 +19,7 @@
     border-radius: 4px;
 }
 
-.osc .image-container > .image-footer {
+.osc .image-container > .osc-image-footer {
     display: flex;
     width: 100%;
     position: absolute;
@@ -29,6 +29,16 @@
     padding: 1rem 1rem;
 }
 
-.osc .image-footer > * {
+.osc .image-container > .osc-image-header {
+    display: flex;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    gap: 1rem;
+    box-sizing: border-box;
+    padding: .5rem .5rem;
+}
+
+.osc .osc-image-footer > * {
     flex-grow: 1;
 }

@@ -114,14 +114,13 @@ function StemBegroot({
 
   // Force the logged in user to skip step 2: first time entering 'stemcode'
   useEffect(() => {
-    if (selectedResources.length === 0) {
-      setNavAfterLogin(true);
-      return setCurrentStep(0);
-    }
+    let pending = session.get('osc-resource-vote-pending');
+
     if (
-      (isAllowedToVote && currentStep === 2 && !navAfterLogin) ||
-      (isAllowedToVote && navAfterLogin && currentStep === 2) ||
-      (isAllowedToVote && !navAfterLogin)
+      pending &&
+      ((isAllowedToVote && currentStep === 2 && !navAfterLogin) ||
+        (isAllowedToVote && navAfterLogin && currentStep === 2) ||
+        (isAllowedToVote && !navAfterLogin))
     ) {
       setCurrentStep(3);
     }
@@ -172,7 +171,7 @@ function StemBegroot({
       : null;
   };
 
-  // for now only support budgeting and count
+  // For now only support budgeting and count
   const resourceSelectable = (resource: { id: number; budget: number }) => {
     if (props.votes.voteType === 'budgeting') {
       return (
@@ -250,10 +249,36 @@ function StemBegroot({
               <StemBegrootBudgetList
                 introText={props.step1}
                 maxBudget={props.votes.maxBudget}
-                allResources={resources?.records || []}
                 selectedResources={selectedResources}
                 maxNrOfResources={props.votes.maxResources || 0}
                 typeIsBudgeting={props.votes.voteType === 'budgeting'}
+                onSelectedResourceRemove={(r) => {
+                  session.remove('osc-resource-vote-pending');
+                  setSelectedResources(
+                    selectedResources.filter((resource) => resource.id !== r.id)
+                  )
+                }
+                }
+                decideCanAddMore={() => {
+                  let notUsedResources = resources?.records.filter(
+                    (allR: { id: number }) =>
+                      !selectedResources.find(
+                        (selectedR) => allR.id === selectedR.id
+                      )
+                  );
+
+                  const canAddMore =
+                    props.votes.voteType === 'budgeting'
+                      ? notUsedResources.some(
+                          (r: { budget: number }) =>
+                            r.budget < props.votes.maxBudget - budgetUsed
+                        )
+                      : Math.max(
+                          props.votes.maxResources - selectedResources.length,
+                          0
+                        ) > 0;
+                  return canAddMore;
+                }}
               />
             </>
           ) : null}

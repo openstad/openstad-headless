@@ -36,6 +36,7 @@ export const StemBegrootResourceList = ({
 }) => {
   return (
     <List
+      id='stem-begroot-resource-selections-list'
       columns={3}
       items={resources || []}
       renderHeader={() => (

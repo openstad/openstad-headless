@@ -8,16 +8,17 @@ type Props<T> = {
   renderHeader?: () => React.JSX.Element;
   renderItem: (item: T, index:number) => React.JSX.Element;
   columns?: 1 | 2 | 3;
-};
+} & React.HTMLAttributes<HTMLDivElement>;
 
 export const List = <T extends { [key: string]: any }>({
   items,
   renderItem,
   renderHeader,
   columns = 1,
+  ...props
 }: Props<T>) => {
   return (
-    <>
+    <section id={props.id}>
       {renderHeader && renderHeader()}
 
       <div className={`osc-listview osc-listview-template-columns-${columns}`}>
@@ -27,6 +28,6 @@ export const List = <T extends { [key: string]: any }>({
           </React.Fragment>
         ))}
       </div>
-    </>
+    </section>
   );
 };
