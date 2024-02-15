@@ -114,7 +114,7 @@ const formSchema = z.object({
   defaultRole: z.enum(['member', 'anon']),
 });
 
-export default function ProjectSettingsAnonymization() {
+export default function ProjectAuthentication() {
   const category = 'auth';
 
   const router = useRouter();
