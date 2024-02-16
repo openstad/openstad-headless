@@ -143,7 +143,7 @@ let moduleDefinitions = {
       projectId: null,
     },
   },
-  stembegroot: {
+  begrootmodule: {
     packageName: '@openstad-headless/stem-begroot',
     directory: 'stem-begroot',
     js: ['dist/stem-begroot.iife.js'],
