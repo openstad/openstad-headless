@@ -14,13 +14,12 @@ type Props = {
     | 'resourceoverview'
     | 'resourcedetail'
     | 'resourceform'
-    | 'begrootmodule'
     | 'resourcesmap'
     | 'map'
     | 'keuzewijzer'
     | 'counter'
     | 'datecountdownbar'
-    | 'stembegroot'
+    | 'begrootmodule'
   config?: any;
   projectId: string;
 };
