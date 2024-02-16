@@ -22,7 +22,6 @@ export default function WidgetLikes({
   const { data: widget, updateConfig } = useWidgetConfig();
   const { previewConfig, updatePreview } = useWidgetPreview<LikeWidgetProps>({
     projectId,
-    resourceId: '2',
   });
 
   return (

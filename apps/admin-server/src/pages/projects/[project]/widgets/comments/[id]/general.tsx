@@ -21,8 +21,11 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
+import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
+import useResources from '@/hooks/use-resources';
 
 const formSchema = z.object({
+  resourceId: z.string().optional(),
   sentiment: z.string(),
   isReplyingEnabled: z.boolean(),
   isVotingEnabled: z.boolean(),
@@ -34,6 +37,7 @@ export default function ArgumentsGeneral(
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
+      resourceId: props.resourceId,
       sentiment: props.sentiment || 'for',
       isReplyingEnabled: props.isReplyingEnabled || false,
       isVotingEnabled: props.isVotingEnabled || false,
@@ -44,6 +48,9 @@ export default function ArgumentsGeneral(
     props.updateConfig({ ...props, ...values });
   }
 
+  const { data } = useResources(props.projectId);
+  const resources: Array<{ id: string | number; title: string }> = data || [];
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
@@ -53,6 +60,18 @@ export default function ArgumentsGeneral(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4 lg:w-1/2">
+
+          <FormObjectSelectField
+            form={form}
+            fieldName="resourceId"
+            fieldLabel="Koppel aan een specifieke resource"
+            items={resources}
+            keyForValue="id"
+            label={(resource) => `${resource.id} ${resource.title}`}
+            onFieldChanged={props.onFieldChanged}
+            noSelection="Niet koppelen (gebruik queryparam openstadResourceId)"
+          />
+
           <FormField
             control={form.control}
             name="sentiment"
