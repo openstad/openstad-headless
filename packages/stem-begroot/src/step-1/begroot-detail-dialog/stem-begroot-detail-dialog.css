@@ -1,0 +1,51 @@
+.osc-begrootmodule-resource-detail {
+  display: flex;
+  align-items: start;
+  gap: 2rem;
+}
+
+.osc-begrootmodule-resource-detail-budget-theme-bar {
+  display: flex;
+  justify-content: space-between;
+}
+
+.osc-begrootmodule-resource-detail-budget-theme-bar > div {
+  display: flex;
+  justify-content: center;
+  gap: .5rem;
+}
+
+.osc-begrootmodule-resource-detail-photo {
+  display: flex;
+  flex: 2;
+  gap: 1rem;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.osc-begrootmodule-resource-detail-texts-and-actions-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 3;
+}
+
+.osc-begrootmodule-resource-detail-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: end;
+  justify-content: space-between;
+  flex: 3;
+}
+
+.osc-begrootmodule-resource-detail-share-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.osc-begrootmodule-load-map-button {
+  height: 5rem;
+  width: 5rem;
+  background-color: black !important;
+}

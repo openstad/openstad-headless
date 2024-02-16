@@ -4,8 +4,9 @@ import DataStore from '@openstad-headless/data-store/src';
 
 //Todo correctly type resources. Will be possible when the datastore is correctly typed
 
+// Nasty but make datastore an any type so we can use it without needing an import from a different workspace 
 type Props = {
-  dataStore: typeof DataStore;
+  dataStore:any;
   tagType: string;
   placeholder?: string;
   selected?: number[];
@@ -23,9 +24,12 @@ const MultiSelectTagFilter = ({
   onlyIncludeIds = [],
   ...props
 }: Props) => {
-  // The useTags function should not need the  config and such anymore, because it should get that from the datastore object. Perhaps a rewrite of the hooks is needed
+
+  if(!dataStore || !dataStore.useTags) {
+    return <p>Cannot render tagfilter, missing data source</p>
+  }
+  
   const [tags] = dataStore.useTags({
-    ...props,
     type: tagType,
     onlyIncludeIds,
   });

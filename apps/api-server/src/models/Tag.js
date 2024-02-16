@@ -132,6 +132,7 @@ module.exports = function (db, sequelize, DataTypes) {
       through: 'resource_tags',
       constraints: false,
     });
+
     this.belongsTo(models.Project, { onDelete: 'CASCADE' });
   };
 

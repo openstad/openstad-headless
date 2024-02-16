@@ -56,8 +56,6 @@ export const GridderResourceDetail = ({
             </div>
           </div>
           <div className="osc-gridder-resource-detail-actions">
-            {}
-
             <SecondaryButton
               disabled={!isModerator && !loginUrl}
               onClick={() => {
@@ -70,13 +68,6 @@ export const GridderResourceDetail = ({
               }}>
               {isModerator?'Verwijder' : 'Inloggen'}
             </SecondaryButton>
-            <div className="osc-gridder-resource-detail-share-actions">
-              <p className="strong">Deel dit:</p>
-              <IconButton className="plain" icon="ri-facebook-fill" />
-              <IconButton className="plain" icon="ri-whatsapp-fill" />
-              <IconButton className="plain" icon="ri-mail-fill" />
-              <IconButton className="plain" icon="ri-twitter-x-fill" />
-            </div>
           </div>
         </section>
       </div>

@@ -23,7 +23,7 @@ const userhasModeratorRights = (user) => {
 
 // scopes: for all get requests
 router.all('*', function (req, res, next) {
-  req.scope = ['api', { method: ['onlyVisible', req.user.id, req.user.role] }];
+  req.scope = ['defaultScope', 'api' , { method: ['onlyVisible', req.user.id, req.user.role] }];
 
   // in case the votes are archived don't use these queries
   // this means they can be cleaned up from the main table for performance reason

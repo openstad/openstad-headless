@@ -50,6 +50,8 @@ export type ProjectSettingProps = {
     voteValues: Array<{ label: string; value: string }>;
     maxResources: number;
     minResources: number;
+    minBudget: number;
+    maxBudget: number;
   };
   polls: {
     canAddPolls: boolean;

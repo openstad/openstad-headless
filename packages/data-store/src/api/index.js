@@ -49,7 +49,8 @@ function API(props = {}) {
 
   self.resources = {
     fetch: resources.fetch.bind(self),
-    delete: resources.delete.bind(self)
+    delete: resources.delete.bind(self),
+    submitLike: resources.submitLike.bind(self)
   };
 
   self.submissions = {

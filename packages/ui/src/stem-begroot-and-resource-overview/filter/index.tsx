@@ -1,11 +1,9 @@
 import { Input, SecondaryButton, Select } from '@openstad-headless/ui/src';
-import React, { useState, useEffect, useRef, createRef } from 'react';
-import DataStore from '@openstad-headless/data-store/src';
+import React, { useState, useEffect, useRef } from 'react';
 import { useDebounce } from 'rooks';
 import { MultiSelectTagFilter } from './multiselect-tag-filter';
 import { SelectTagFilter } from './select-tag-filter';
-import { ResourceOverviewWidgetProps } from '../resource-overview';
-
+import './index.css';
 
 type Filter = {
   tags: Array<number>;
@@ -16,24 +14,30 @@ type Filter = {
 };
 
 type Props = {
+  className?:string;
+  dataStore: any;
   resources: any;
   onUpdateFilter?: (filter: Filter) => void;
-  tagsLimitation?: number[];
-} & ResourceOverviewWidgetProps;
+  sorting: Array<{ value: string; label: string }>;
+  displaySorting: boolean;
+  defaultSorting: string;
+  displaySearch: boolean;
+  itemsPerPage?: number;
+  displayTagFilters: boolean;
+  tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
+  tagsLimitation?: Array<number>;
+};
 
 export function Filters({
+  dataStore,
   resources,
   sorting = [],
   tagGroups = [],
-  onUpdateFilter,
   tagsLimitation = [],
+  onUpdateFilter,
+  className='',
   ...props
 }: Props) {
-  const dataStore = new DataStore({
-    projectId: props.projectId,
-    api: props.api,
-  });
-
   const defaultFilter: Filter = {
     tags: [],
     search: { text: '' },
@@ -46,36 +50,7 @@ export function Filters({
   const [filter, setFilter] = useState<Filter>(defaultFilter);
   const [selectedOptions, setSelected] = useState<{ [key: string]: any }>({});
 
-  // Standard and dynamic refs used for resetting
-  const searchRef = useRef<HTMLInputElement>(null);
-  const sortingRef = useRef<HTMLSelectElement>(null);
   const search = useDebounce(setSearch, 300);
-
-  // These dynamic refs are only applicable on single item selects <select>
-  // The multiselect is a controlled custom component and is managed by the this component
-  const [elRefs, setElRefs] = React.useState<
-    React.RefObject<HTMLSelectElement>[]
-  >([]);
-
-  useEffect(() => {
-    // add or remove refs
-    setElRefs((elRefs) =>
-      Array(tagGroups.length)
-        .fill(undefined)
-        .map((_, i) => elRefs[i] || createRef<HTMLSelectElement>())
-    );
-  }, [tagGroups]);
-
-  useEffect(() => {
-    if (sortingRef.current && props.defaultSorting) {
-      const index = sorting.findIndex((s) => s.value === props.defaultSorting);
-      if (index > -1) {
-        // + 1 for the placeholder option
-        sortingRef.current.selectedIndex = index + 1;
-      }
-    }
-  }, []);
-
 
   function updateFilter(newFilter: Filter) {
     setFilter(newFilter);
@@ -140,17 +115,15 @@ export function Filters({
   }, [tagState]);
 
   return (
-    <section>
-      <div className="osc-resource-overview-filters">
+    <section id="stem-begroot-filter">
+      <div className={`osc-resources-filter ${className}`}>
         {props.displaySearch ? (
           <Input
-            ref={searchRef}
             onChange={(e) => search(e.target.value)}
-            className="osc-resource-overview-search"
+            className="osc-filter-search-bar"
             placeholder="Zoeken"
           />
         ) : null}
-
         {props.displayTagFilters ? (
           <>
             {tagGroups.map((tagGroup, index) => {
@@ -158,30 +131,28 @@ export function Filters({
                 return (
                   <MultiSelectTagFilter
                     key={`tag-select-${tagGroup.type}`}
-                    {...props}
                     selected={selectedOptions[tagGroup.type] || []}
                     dataStore={dataStore}
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
+                    onlyIncludeIds={tagsLimitation}
                     onUpdateFilter={(updatedTag) =>
                       updateTagListMultiple(tagGroup.type, updatedTag)
                     }
-                    onlyIncludeIds={tagsLimitation}
                   />
                 );
               } else {
                 return (
                   <SelectTagFilter
-                    ref={elRefs[index]}
                     key={`tag-select-${tagGroup}`}
                     {...props}
                     dataStore={dataStore}
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
+                    onlyIncludeIds={tagsLimitation}
                     onUpdateFilter={(updatedTag) =>
                       updateTagListSingle(tagGroup.type, updatedTag)
                     }
-                    onlyIncludeIds={tagsLimitation}
                   />
                 );
               }
@@ -190,27 +161,27 @@ export function Filters({
         ) : null}
 
         {props.displaySorting ? (
-          <Select ref={sortingRef} onValueChange={setSort} options={sorting}>
+          <Select onValueChange={setSort} options={sorting}>
             <option value={''}>Sorteer op</option>
           </Select>
         ) : null}
 
         <SecondaryButton
           onClick={() => {
-            if (searchRef.current) {
-              searchRef.current.value = '';
+            const filterParent = document.querySelector('#stem-begroot-filter');
+
+            const singleSelects: NodeListOf<HTMLSelectElement> | undefined =
+              filterParent?.querySelectorAll(':scope select');
+            const inputsInFilter: NodeListOf<HTMLInputElement> | undefined =
+              filterParent?.querySelectorAll(':scope input');
+
+            if (singleSelects) {
+              singleSelects.forEach((s) => (s.selectedIndex = 0));
             }
 
-            if (sortingRef.current) {
-              sortingRef.current.selectedIndex = 0;
+            if (inputsInFilter) {
+              inputsInFilter.forEach((i) => (i.value = ''));
             }
-
-            elRefs.forEach((ref) => {
-              if (ref.current?.selectedIndex) {
-                ref.current.selectedIndex = 0;
-              }
-            });
-
             setSelected({});
             updateFilter(defaultFilter);
           }}>

@@ -486,6 +486,18 @@ module.exports = function (db, sequelize, DataTypes) {
     }
 
     return {
+      defaultScope: {
+        include: [
+          {
+            model: db.Tag,
+            as: 'statuses',
+            attributes: ['id', 'type', 'name', 'label', 'extraFunctionality'],
+            through: { attributes: [] },
+            where: { type: 'status' },
+            required: false,
+          },
+        ],
+      },
 
       // nieuwe scopes voor de api
       // -------------------------
@@ -523,10 +535,6 @@ module.exports = function (db, sequelize, DataTypes) {
             }
           };
         }
-      },
-
-      // defaults
-      default: {
       },
 
       api: {},
@@ -571,22 +579,16 @@ module.exports = function (db, sequelize, DataTypes) {
           ]
         };
       },
-
       includeTags: {
         include: [{
           model: db.Tag,
-          attributes: ['id', 'type', 'name'],
+          where: {
+            type: {
+              [Op.not]:'status'
+            }
+          },
+          attributes: ['id', 'type', 'name', 'label','extraFunctionality'],
           through: {attributes: []},
-        }]
-      },
-
-      includeStatus: {
-        include: [{
-          model: db.Tag,
-          attributes: ['id', 'type', 'name'],
-          through: {attributes: []},
-          where: {type: 'status'},
-          required: false,
         }]
       },
 
@@ -817,6 +819,8 @@ module.exports = function (db, sequelize, DataTypes) {
     this.hasOne(models.Poll, {as: 'poll', foreignKey: 'resourceId', onDelete: 'CASCADE' });
     this.hasOne(models.Vote, {as: 'userVote', foreignKey: 'resourceId', onDelete: 'CASCADE' });
     this.belongsToMany(models.Tag, {through: 'resource_tags', constraints: false, onDelete: 'CASCADE' });
+    this.belongsToMany(models.Tag, {as: "statuses", through: 'resource_tags', constraints: false, onDelete: 'CASCADE' });
+
   }
 
   Resource.prototype.getUserVote = function (user) {
@@ -926,8 +930,7 @@ module.exports = function (db, sequelize, DataTypes) {
     if (userHasRole(user, 'editor', self.userId) || userHasRole(user, 'admin', self.userId) || userHasRole(user, 'moderator', self.userId)) {
       return true;
     }
-
-    let status = self.tags?.find( type => 'status' );
+    let status = self.statuses?.find( tag => tag.type === 'status' );
     if (typeof status?.extraFunctionality?.editableByUser != 'boolean' || status.extraFunctionality.editableByUser) {
       return true;
     }
@@ -967,7 +970,7 @@ module.exports = function (db, sequelize, DataTypes) {
       // published
       if (!self.publishDate) return false;
       // status
-      let status = self.tags.find( type => 'status' );
+      let status = self.statuses.find( tag => tag.type === 'status');
       if (typeof status?.extraFunctionality?.noComment == 'boolean' && status.extraFunctionality.noComment) return false;
       return true;
     },

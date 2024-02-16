@@ -1,4 +1,4 @@
-export { Button, SecondaryButton, GhostButton } from './button';
+export { Button, SecondaryButton, GhostButton, PlainButton } from './button';
 export { IconButton } from './iconbutton';
 export { Banner } from './banner';
 export { Checkbox } from './checkbox';
@@ -15,4 +15,6 @@ export { Spacer } from './spacer';
 export { Card } from './card';
 export { Dialog } from './dialog';
 export { Carousel } from './carousel';
-export { Paginator } from './paginator'
+export { Paginator } from './paginator';
+export {List} from './list';
+export {Stepper} from './stepper';

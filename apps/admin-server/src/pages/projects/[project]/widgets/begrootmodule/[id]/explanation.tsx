@@ -11,18 +11,13 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useCallback, useEffect } from 'react';
+import { StemBegrootWidgetProps } from '@openstad/stem-begroot/src/stem-begroot';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
 
 const formSchema = z.object({
   step1: z.string(),
@@ -34,52 +29,39 @@ const formSchema = z.object({
   showNewsletterButton: z.boolean(),
 });
 
-export default function BegrootmoduleExplanation() {
-  const category = 'explanations';
+type Formdata = z.infer<typeof formSchema>;
 
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig();
+export default function BegrootmoduleExplanation(
+  props: StemBegrootWidgetProps & EditFieldProps<StemBegrootWidgetProps>
+) {
+  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
-  const defaults = useCallback(
-    () => ({
-      step1:
-        widget?.config?.[category]?.step1 ||
-        'Kies uit onderstaand overzicht jouw favoriete plannen. Selecteer voor maximaal € 200.000 aan plannen. In stap 3 vul je ter controle de stemcode in die je per post hebt ontvangen. Tot slot verstuur je in stap 4 je stem.',
-      step2:
-        widget?.config?.[category]?.step2 ||
-        'Bekijk hieronder je selectie. Ben je tevreden? Klik dan onderaan door naar stap 3 om jouw stemcode in te vullen.',
-      step3:
-        widget?.config?.[category]?.step3 ||
-        'Via onderstaande knop kun je op een aparte pagina je persoonlijke stemcode invullen. Wij controleren de stemcode op geldigheid. Als dat gelukt is kom je terug op deze pagina waarna je kunt stemmen. Alle bewoners van Centrum hebben per post een stemcode ontvangen.',
-      step3success:
-        widget?.config?.[category]?.step3success ||
-        'Het controleren van je stemcode is gelukt! Je bent bijna klaar. Klik op onderstaande knop om je stem te versturen.',
-      voteMessage:
-        widget?.config?.[category]?.voteMessage || 'Gelukt, je hebt gestemd!',
-      thankMessage:
-        widget?.config?.[category]?.thankMessage ||
-        'Bedankt voor het stemmen! De stemperiode loopt van 9 september t/m 6 oktober 2019. Wil je weten welke plannen het vaakst zijn gekozen en uitgevoerd worden? De uitslag wordt op 15 oktober 2019 gepubliceerd op centrumbegroot.amsterdam.nl.',
-      showNewsletterButton:
-        widget?.config?.[category]?.showNewsletterButton || false,
-    }),
-    [widget?.config]
-  );
+  function onSubmit(values: Formdata) {
+    props.updateConfig({ ...props, ...values });
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      step1:
+        props.step1 ||
+        'Kies uit onderstaand overzicht jouw favoriete plannen. Selecteer voor maximaal € 200.000 aan plannen. In stap 3 vul je ter controle de stemcode in die je per post hebt ontvangen. Tot slot verstuur je in stap 4 je stem.',
+      step2:
+        props.step2 ||
+        'Bekijk hieronder je selectie. Ben je tevreden? Klik dan onderaan door naar stap 3 om jouw stemcode in te vullen.',
+      step3:
+        props.step3 ||
+        'Via onderstaande knop kun je op een aparte pagina je persoonlijke stemcode invullen. Wij controleren de stemcode op geldigheid. Als dat gelukt is kom je terug op deze pagina waarna je kunt stemmen. Alle bewoners van Centrum hebben per post een stemcode ontvangen.',
+      step3success:
+        props.step3success ||
+        'Het controleren van je stemcode is gelukt! Je bent bijna klaar. Klik op onderstaande knop om je stem te versturen.',
+      voteMessage: props.voteMessage || 'Gelukt, je hebt gestemd!',
+      thankMessage:
+        props.thankMessage ||
+        'Bedankt voor het stemmen! De stemperiode loopt van 9 september t/m 6 oktober 2019. Wil je weten welke plannen het vaakst zijn gekozen en uitgevoerd worden? De uitslag wordt op 15 oktober 2019 gepubliceerd op centrumbegroot.amsterdam.nl.',
+      showNewsletterButton: props.showNewsletterButton || false,
+    },
   });
-
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ [category]: values });
-  }
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -96,7 +78,14 @@ export default function BegrootmoduleExplanation() {
               <FormItem>
                 <FormLabel>Stap 1: Intro</FormLabel>
                 <FormControl>
-                  <Textarea rows={5} {...field} />
+                  <Textarea
+                    rows={5}
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -109,7 +98,14 @@ export default function BegrootmoduleExplanation() {
               <FormItem>
                 <FormLabel>Stap 2: Intro</FormLabel>
                 <FormControl>
-                  <Textarea rows={5} {...field} />
+                  <Textarea
+                    rows={5}
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -122,7 +118,14 @@ export default function BegrootmoduleExplanation() {
               <FormItem>
                 <FormLabel>Stap 3: Intro</FormLabel>
                 <FormControl>
-                  <Textarea rows={5} {...field} />
+                  <Textarea
+                    rows={5}
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -135,7 +138,14 @@ export default function BegrootmoduleExplanation() {
               <FormItem>
                 <FormLabel>Succesvolle authenticatie</FormLabel>
                 <FormControl>
-                  <Textarea rows={5} {...field} />
+                  <Textarea
+                    rows={5}
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -148,7 +158,13 @@ export default function BegrootmoduleExplanation() {
               <FormItem>
                 <FormLabel>Succesvol gestemd bericht</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -161,7 +177,14 @@ export default function BegrootmoduleExplanation() {
               <FormItem>
                 <FormLabel>Bedankt bericht</FormLabel>
                 <FormControl>
-                  <Textarea rows={5} {...field} />
+                  <Textarea
+                    rows={5}
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -175,19 +198,7 @@ export default function BegrootmoduleExplanation() {
                 <FormLabel>
                   Wordt de nieuwsbrief knop weergegeven na het stemmen?
                 </FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Nee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}

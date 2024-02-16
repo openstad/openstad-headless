@@ -5,14 +5,19 @@ import './index.css';
 
 export function Image({
   imageFooter,
+  imageHeader,
   ...props
-}: React.ImgHTMLAttributes<HTMLImageElement> & { imageFooter?: ReactNode }) {
+}: React.ImgHTMLAttributes<HTMLImageElement> & {
+  imageFooter?: ReactNode;
+  imageHeader?: ReactNode;
+}) {
   return (
     <figure
       onClick={props.onClick}
       className={`image-container ${props.className}`}>
+      {imageHeader?<div className='osc-image-header'>{imageHeader}</div> :null}
       <img alt={props.alt} {...props} />
-      <figcaption className="image-footer">{imageFooter}</figcaption>
+      <figcaption className="osc-image-footer">{imageFooter}</figcaption>
     </figure>
   );
 }

@@ -15,6 +15,7 @@
 }
 
 .osc-icon-button:hover {
+    cursor: pointer;
     background-color: var(--osc-primary-hover);
 }
 
@@ -32,6 +33,16 @@
 .osc-icon-button.ghost {
     background-color: transparent;
     color: var(--osc-foreground);
+} 
+
+.osc-icon-button.ghost.negative {
+    background-color: transparent;
+    color: var(--osc-muted);
+} 
+
+.osc-icon-button.ghost.negative:hover{
+    background-color: transparent;
+    color: white;
 } 
 
 .osc-icon-button.ghost:hover {

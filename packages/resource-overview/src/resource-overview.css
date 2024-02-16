@@ -19,10 +19,6 @@
   background-color: var(--osc-card);
 }
 
-.osc-resource-overview-search {
-  padding: .75rem;
-}
-
 .osc-resource-overview-resource-collection {
   display: grid;
   grid-column-start: span 2;

@@ -1,17 +1,17 @@
 import { Select } from '@openstad-headless/ui/src';
 import React, { forwardRef } from 'react';
-import DataStore from '@openstad-headless/data-store/src';
-import { BaseProps } from '../../../types/base-props';
 
 //Todo correctly type resources. Will be possible when the datastore is correctly typed
 
+// Nasty but make datastore an any type so we can use it without needing an import from a different workspace 
+
 type Props = {
-  dataStore: typeof DataStore;
+  dataStore: any;
   tagType: string;
   placeholder?: string;
   onlyIncludeIds?: number[];
   onUpdateFilter?: (filter: string) => void;
-} & BaseProps;
+};
 
 type TagDefinition = { id: number; name: string };
 
@@ -23,10 +23,13 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
     // The useTags function should not need the  config and such anymore, because it should get that from the datastore object. Perhaps a rewrite of the hooks is needed
     
     const [tags] = dataStore.useTags({
-      projectId: props.projectId,
       type: tagType,
       onlyIncludeIds,
     });
+
+    if(!dataStore || !dataStore.useTags) {
+      return <p>Cannot render tagfilter, missing data source</p>
+    }  
 
     return (
       <Select

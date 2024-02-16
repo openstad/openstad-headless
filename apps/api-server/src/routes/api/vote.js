@@ -182,6 +182,7 @@ router.route('/*')
 	.post(function(req, res, next) {
 		let votes = req.body || [];
 		if (!Array.isArray(votes)) votes = [votes];
+
 		votes = votes.map((entry) => {
 			return {
 				resourceId: parseInt(entry.resourceId, 10),

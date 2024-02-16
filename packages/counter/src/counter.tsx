@@ -39,7 +39,7 @@ function Counter({
     api: props.api
   })
 
-  const [resources] = datastore.useResources({
+  const {resources} = datastore.useResources({
     projectId: props.projectId,
   })
 
