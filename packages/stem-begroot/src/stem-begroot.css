@@ -60,7 +60,7 @@
   background-color: var(--osc-muted);
 }
 
-.stem-begroot-filter-segment {
+.stem-begroot-filter {
   display: flex;
   gap: 1rem;
   padding: 1rem;

@@ -44,6 +44,7 @@ export interface HeadingProps
   extends React.HTMLAttributes<HTMLHeadingElement>,
     VariantProps<typeof headingVariants> {
   asChild?: boolean;
+  size?: string;
 }
 
 const Heading = React.forwardRef<HTMLButtonElement, HeadingProps>(

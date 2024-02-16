@@ -22,6 +22,8 @@ import WidgetPreview from '@/components/widget-preview';
 import WidgetStemBegrootOverviewTags from './tags';
 import WidgetStemBegrootSorting from './sorting';
 import WidgetStemBegrootPagination from './pagination';
+import WidgetStemBegrootInclude from './include';
+import WidgetStemBegrootSearch from './search';
 
 export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
@@ -74,9 +76,11 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="display">Weergave opties</TabsTrigger>
               <TabsTrigger value="explanation">Uitleg</TabsTrigger>
+              <TabsTrigger value="search">Zoeken</TabsTrigger>
               <TabsTrigger value="tags">Tags</TabsTrigger>
               <TabsTrigger value="sorting">Sorteer opties</TabsTrigger>
               <TabsTrigger value="pagination">Pagination</TabsTrigger>
+              <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
 
@@ -88,6 +92,9 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
                 <TabsContent value="explanation" className="p-0">
                   <BegrootmoduleExplanation {...totalPropPackage} />
                 </TabsContent>
+                <TabsContent value="search" className="p-0">
+                  <WidgetStemBegrootSearch {...totalPropPackage} />
+                </TabsContent>
                 <TabsContent value="tags" className="p-0">
                   <WidgetStemBegrootOverviewTags {...totalPropPackage} />
                 </TabsContent>
@@ -96,6 +103,9 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
                 </TabsContent>
                 <TabsContent value="pagination" className="p-0">
                   <WidgetStemBegrootPagination {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="include" className="p-0">
+                  <WidgetStemBegrootInclude {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="publish" className="p-0">
                   <WidgetPublish apiUrl={apiUrl} />

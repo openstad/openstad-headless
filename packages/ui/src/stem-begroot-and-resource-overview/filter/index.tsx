@@ -1,4 +1,4 @@
-import { SecondaryButton, Select } from '@openstad-headless/ui/src';
+import { Input, SecondaryButton, Select } from '@openstad-headless/ui/src';
 import React, { useState, useEffect, useRef } from 'react';
 import { useDebounce } from 'rooks';
 import { MultiSelectTagFilter } from './multiselect-tag-filter';
@@ -14,15 +14,18 @@ type Filter = {
 };
 
 type Props = {
+  className?:string;
   dataStore: any;
   resources: any;
   onUpdateFilter?: (filter: Filter) => void;
   sorting: Array<{ value: string; label: string }>;
-  displaySorting?: boolean;
-  defaultSorting?: string;
+  displaySorting: boolean;
+  defaultSorting: string;
+  displaySearch: boolean;
   itemsPerPage?: number;
-  displayTagFilters?: boolean;
-  tagGroups: Array<{ type: string; label?: string; multiple: boolean }>;
+  displayTagFilters: boolean;
+  tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
+  tagsLimitation?: Array<number>;
 };
 
 export function Filters({
@@ -30,7 +33,9 @@ export function Filters({
   resources,
   sorting = [],
   tagGroups = [],
+  tagsLimitation = [],
   onUpdateFilter,
+  className='',
   ...props
 }: Props) {
   const defaultFilter: Filter = {
@@ -45,16 +50,7 @@ export function Filters({
   const [filter, setFilter] = useState<Filter>(defaultFilter);
   const [selectedOptions, setSelected] = useState<{ [key: string]: any }>({});
 
-  // Standard and dynamic refs used for resetting
-  const searchRef = useRef<HTMLInputElement>(null);
-  const sortingRef = useRef<HTMLSelectElement>(null);
   const search = useDebounce(setSearch, 300);
-
-  // These dynamic refs are only applicable on single item selects <select>
-  // The multiselect is a controlled custom component and is managed by the this component
-  const [elRefs, setElRefs] = React.useState<
-    React.RefObject<HTMLSelectElement>[]
-  >([]);
 
   function updateFilter(newFilter: Filter) {
     setFilter(newFilter);
@@ -120,7 +116,14 @@ export function Filters({
 
   return (
     <section id="stem-begroot-filter">
-      <div className="osc-stem-begroot-filters">
+      <div className={`osc-resources-filter ${className}`}>
+        {props.displaySearch ? (
+          <Input
+            onChange={(e) => search(e.target.value)}
+            className="osc-filter-search-bar"
+            placeholder="Zoeken"
+          />
+        ) : null}
         {props.displayTagFilters ? (
           <>
             {tagGroups.map((tagGroup, index) => {
@@ -132,6 +135,7 @@ export function Filters({
                     dataStore={dataStore}
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
+                    onlyIncludeIds={tagsLimitation}
                     onUpdateFilter={(updatedTag) =>
                       updateTagListMultiple(tagGroup.type, updatedTag)
                     }
@@ -140,12 +144,12 @@ export function Filters({
               } else {
                 return (
                   <SelectTagFilter
-                    ref={elRefs[index]}
                     key={`tag-select-${tagGroup}`}
                     {...props}
                     dataStore={dataStore}
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
+                    onlyIncludeIds={tagsLimitation}
                     onUpdateFilter={(updatedTag) =>
                       updateTagListSingle(tagGroup.type, updatedTag)
                     }
@@ -157,7 +161,7 @@ export function Filters({
         ) : null}
 
         {props.displaySorting ? (
-          <Select ref={sortingRef} onValueChange={setSort} options={sorting}>
+          <Select onValueChange={setSort} options={sorting}>
             <option value={''}>Sorteer op</option>
           </Select>
         ) : null}

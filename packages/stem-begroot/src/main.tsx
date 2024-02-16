@@ -44,6 +44,7 @@ const config: StemBegrootWidgetProps = {
     withExisting: 'error',
   },
   displayTagFilters: true,
+  displaySearch:true,
   tagGroups: [
     { type: 'status', label: 'Status', multiple: false },
     { type: 'area', label: 'Gebied', multiple: false },

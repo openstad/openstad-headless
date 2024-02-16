@@ -20,7 +20,7 @@ import { StemBegrootResourceList } from './step-1/begroot-resource-list/stem-beg
 import { BudgetUsedList } from './reuseables/used-budget-component';
 import { BegrotenSelectedOverview } from './step-2/selected-overview';
 import toast, { Toaster } from 'react-hot-toast';
-import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter'
+import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 
 import { Step3Success } from './step-3-success';
 import { Step3 } from './step-3';
@@ -47,11 +47,16 @@ export type StemBegrootWidgetProps = BaseProps &
     defaultSorting?: string;
     sorting?: Array<{ label: string; value: string }>;
     displaySorting?: boolean;
+    displaySearch?: boolean;
+    displaySearchText?: boolean;
+    textActiveSearch?: string;
     itemsPerPage?: number;
+    onlyIncludeTagIds: string;
   };
 
 function StemBegroot({
   notEnoughBudgetText = 'Niet genoeg budget',
+  onlyIncludeTagIds = '',
   ...props
 }: StemBegrootWidgetProps) {
   const datastore = new DataStore({
@@ -67,15 +72,25 @@ function StemBegroot({
   const [shouldReloadSelectedResources, setReloadSelectedResources] =
     useState<boolean>(false);
 
-  const [tags, setTags] = useState<number[]>([]);
+  const tagIdsToLimitResourcesTo = onlyIncludeTagIds
+    .trim()
+    .split(',')
+    .filter((t) => t && !isNaN(+t.trim()))
+    .map((t) => Number.parseInt(t));
+
+  const [tags, setTags] = useState<number[]>(tagIdsToLimitResourcesTo);
   const [sort, setSort] = useState<string | undefined>();
+  const [search, setSearch] = useState<string | undefined>();
   const [page, setPage] = useState<number>(0);
-  const [itemsPerPage, setPageSize] = useState<number>(props.itemsPerPage || 10);
+  const [itemsPerPage, setPageSize] = useState<number>(
+    props.itemsPerPage || 10
+  );
 
   const { resources, submitLike } = datastore.useResources({
     projectId: props.projectId,
     tags,
     sort,
+    search,
     page,
     itemsPerPage,
   });
@@ -406,17 +421,24 @@ function StemBegroot({
                   <Spacer size={1} />
                   {datastore ? (
                     <Filters
+                      tagsLimitation={tagIdsToLimitResourcesTo}
                       dataStore={datastore}
                       sorting={props.sorting || []}
-                      displaySorting={props.displaySorting}
-                      defaultSorting={props.defaultSorting}
-                      displayTagFilters={props.displayTagFilters}
+                      defaultSorting={props.defaultSorting || ''}
+                      displaySorting={props.displaySorting || false}
+                      displaySearch={props.displaySearch || false}
+                      displayTagFilters={props.displayTagFilters || false}
                       tagGroups={props.tagGroups || []}
                       itemsPerPage={itemsPerPage}
                       resources={resources}
                       onUpdateFilter={(f) => {
-                        setTags(f.tags);
+                        if (f.tags.length === 0) {
+                          setTags(tagIdsToLimitResourcesTo);
+                        } else {
+                          setTags(f.tags);
+                        }
                         setSort(f.sort);
+                        setSearch(f.search.text);
                       }}
                     />
                   ) : null}

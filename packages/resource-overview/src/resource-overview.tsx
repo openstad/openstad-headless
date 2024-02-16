@@ -8,7 +8,7 @@ import { Image } from '@openstad-headless/ui/src';
 import { Dialog } from '@openstad-headless/ui/src';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
-import { Filters } from './filters/filters';
+import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { elipsize } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
@@ -287,24 +287,32 @@ function ResourceOverview({
             </div>
           ) : null}
 
-          {filterNeccesary && datastore ? (
-            <Filters
-              {...props}
-              tagsLimitation={tagIdsToLimitResourcesTo}
-              itemsPerPage={itemsPerPage}
-              projectId={props.projectId}
-              resources={resources}
-              onUpdateFilter={(f) => {
-                if (f.tags.length === 0) {
-                  setTags(tagIdsToLimitResourcesTo);
-                } else {
-                  setTags(f.tags);
-                }
-                setSort(f.sort);
-                setSearch(f.search.text);
-              }}
-            />
-          ) : null}
+
+{filterNeccesary && datastore ? (
+
+<Filters
+  className='osc-flex-columned'
+  tagsLimitation={tagIdsToLimitResourcesTo}
+  dataStore={datastore}
+  sorting={props.sorting || []}
+  displaySorting={props.displaySorting || false}
+  defaultSorting={props.defaultSorting || ''}
+  displayTagFilters={props.displayTagFilters || false}
+  displaySearch={props.displaySearch || false}
+  tagGroups={props.tagGroups || []}
+  itemsPerPage={itemsPerPage}
+  resources={resources}
+  onUpdateFilter={(f) => {
+    if (f.tags.length === 0) {
+      setTags(tagIdsToLimitResourcesTo);
+    } else {
+      setTags(f.tags);
+    }
+    setSort(f.sort);
+    setSearch(f.search.text);
+  }}
+/>
+        ) : null}
 
           <section className="osc-resource-overview-resource-collection">
             {resources &&
