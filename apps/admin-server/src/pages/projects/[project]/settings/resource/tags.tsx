@@ -19,6 +19,8 @@ import router from 'next/router';
 import useTags from '@/hooks/use-tags';
 import _ from 'lodash';
 import { Checkbox } from '@/components/ui/checkbox';
+import toast from 'react-hot-toast';
+import { useProject } from '@/hooks/use-project';
 
 type Tag = {
   id: number;
@@ -27,22 +29,14 @@ type Tag = {
 };
 
 const formSchema = z.object({
-  tagGroups: z
-    .array(
-      z.object({
-        type: z.string(),
-        label: z.string().optional(),
-        multiple: z.boolean(),
-      })
-    )
-    .refine((value) => value.some((item) => item), {
-      message: 'You have to select at least one item.',
-    }),
+  tagGroups: z.any(),
 });
 
 export default function ProjectSettingsResourceLabels() {
   const { project } = router.query;
+  const category = 'resources';
 
+  const { data: projectData, updateProject } = useProject();
   const { data, isLoading } = useTags(project as string);
   const [tagGroupNames, setGroupedNames] = React.useState<string[]>([]);
 
@@ -56,9 +50,17 @@ export default function ProjectSettingsResourceLabels() {
     }
   }, [data]);
 
+  const defaults = React.useCallback(
+    () => ({
+      tagGroups: projectData?.config?.resource
+        ?.tags || [],
+    }),
+    [data?.config]
+  );
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: {},
+    defaultValues: defaults(),
   });
 
   useEffect(() => {
@@ -66,7 +68,20 @@ export default function ProjectSettingsResourceLabels() {
   }, [form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    try {
+      const project = await updateProject({
+        [category]: {
+          tags: values.tagGroups,
+        },
+      });
+      if (project) {
+        toast.success('Project aangepast!');
+      } else {
+        toast.error('Er is helaas iets mis gegaan.')
+      }
+    } catch (error) {
+      console.error('could not update', error);
+    }
   }
 
   return (
@@ -91,24 +106,74 @@ export default function ProjectSettingsResourceLabels() {
                       <p>{groupName}</p>
                       {data?.map((item: any) => (
                         item?.type === 'status' && item?.type === groupName ? (
-                            <FormItem
-                              key={item.id}
-                              className="flex flex-row items-start space-x-3 space-y-0">
-                              <Checkbox/>
-                              <FormLabel className="font-normal">
-                                {item.name}
-                              </FormLabel>
-                            </FormItem>
+                          <FormField
+                          key={item.name}
+                          control={form.control}
+                          name="tagGroups"
+                          render={({ field }) => {
+                            return (
+                              <FormItem
+                                key={item.name}
+                                className="flex flex-row items-start space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(item.name)}
+                                    onCheckedChange={(checked: any) => {
+                                      return checked
+                                        ? field.onChange([
+                                            ...field.value,
+                                            item.name,
+                                          ])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                              (value: any) => value !== item.name
+                                            )
+                                          );
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                  {item.name}
+                                </FormLabel>
+                              </FormItem>
+                            );
+                          }}
+                        />
                           ) : null || 
                           item?.type !== 'status' && item?.type === groupName ? (
-                          <FormItem
-                            key={item.id}
-                            className="flex flex-row items-start space-x-3 space-y-0">
-                            <Checkbox/>
-                            <FormLabel className="font-normal">
-                              {item.name}
-                            </FormLabel>
-                          </FormItem>
+                            <FormField
+                            key={item.name}
+                            control={form.control}
+                            name="tagGroups"
+                            render={({ field }) => {
+                              return (
+                                <FormItem
+                                  key={item.name}
+                                  className="flex flex-row items-start space-x-3 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(item.name)}
+                                      onCheckedChange={(checked: any) => {
+                                        return checked
+                                          ? field.onChange([
+                                              ...field.value,
+                                              item.name,
+                                            ])
+                                          : field.onChange(
+                                              field.value?.filter(
+                                                (value: any) => value !== item.name
+                                              )
+                                            );
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    {item.name}
+                                  </FormLabel>
+                                </FormItem>
+                              );
+                            }}
+                          />
                         ) : null
                       ))}
                     </>
