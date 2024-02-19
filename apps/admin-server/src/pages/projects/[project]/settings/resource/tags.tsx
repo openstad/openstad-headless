@@ -15,7 +15,7 @@ import {
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useEffect } from 'react';
-import router from 'next/router';
+import { useRouter } from 'next/router';
 import useTags from '@/hooks/use-tags';
 import _ from 'lodash';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -33,11 +33,12 @@ const formSchema = z.object({
 });
 
 export default function ProjectSettingsResourceLabels() {
-  //const { project } = router.query;
+  const router = useRouter();
+  const { project } = router.query;
   const category = 'resources'; 
 
   const { data: projectData, updateProject } = useProject();
-  const { data, isLoading } = useTags("2");
+  const { data, isLoading } = useTags(project as string);
   const [tagGroupNames, setGroupedNames] = React.useState<string[]>([]);
 
   useEffect(() => {
