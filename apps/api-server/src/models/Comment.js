@@ -311,7 +311,7 @@ module.exports = function( db, sequelize, DataTypes ) {
     canReply: function(user, self) {
 	  if (user.role == "admin") return true;
       if (!self.resource) return false;
-      if (self.resource.canComment() && userHasRole(user, 'member') && self.id && !self.parentId) {
+      if (self.resource.auth.canComment() && userHasRole(user, 'member') && self.id && !self.parentId) {
         return true;
       } else {
         return false;
