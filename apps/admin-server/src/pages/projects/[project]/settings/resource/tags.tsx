@@ -33,11 +33,11 @@ const formSchema = z.object({
 });
 
 export default function ProjectSettingsResourceLabels() {
-  const { project } = router.query;
+  //const { project } = router.query;
   const category = 'resources'; 
 
   const { data: projectData, updateProject } = useProject();
-  const { data, isLoading } = useTags(project as string);
+  const { data, isLoading } = useTags("2");
   const [tagGroupNames, setGroupedNames] = React.useState<string[]>([]);
 
   useEffect(() => {
