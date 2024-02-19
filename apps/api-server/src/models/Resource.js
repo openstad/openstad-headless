@@ -1041,15 +1041,6 @@ module.exports = function (db, sequelize, DataTypes) {
       });
   };
 
-  // Based on the statuses tag array check if the resource isRunning based on the name of the coupled tags
-  Resource.prototype.isRunning = function () {
-    return this.statuses.some(
-      (tag) =>
-        (tag.name === 'Open') | (tag.name === 'Closed') ||
-        (tag.name == 'Accepted') | (tag.name === 'Busy')
-    );
-  };
-
   // stemtool stijl, voor eberhard3 - TODO: werkt nu alleen voor maxChoices = 1;
   Resource.prototype.setUserVote = function (user, opinion, ip) {
     let self = this;
@@ -1132,6 +1123,10 @@ module.exports = function (db, sequelize, DataTypes) {
     canUpdate: canMutate,
     canDelete: canMutate,
     canAddPoll: canMutate,
+    canVoteOnPoll: function canVoteOnPoll(self) {
+      // was isRunning, maar voor poll votes is dat niet logisch; ik heb deze functie laten staan voor als er alsnog een afvanging nofig blijkt
+      return true;
+    },
     canComment: function canComment(self) {
       if (!self) return false;
       // project config: comments is closed
@@ -1147,8 +1142,9 @@ module.exports = function (db, sequelize, DataTypes) {
       if (
         typeof status?.extraFunctionality?.noComment == 'boolean' &&
         status.extraFunctionality.noComment
-      )
+      ) {
         return false;
+      }
       return true;
     },
     toAuthorizedJSON: function (user, data, self) {

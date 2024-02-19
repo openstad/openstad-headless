@@ -245,7 +245,7 @@ module.exports = function (db, sequelize, DataTypes) {
     canVote: function (user, self) {
       if (!self.resource) return false;
       if (
-        self.resource.isRunning() &&
+        self.resource.canVoteOnPoll() &&
         userHasRole(user, 'member') &&
         self.id &&
         self.status == 'OPEN'
