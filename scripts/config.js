@@ -66,11 +66,18 @@ async function setupEnvVars() {
   process.env.API_DB_DIALECT = process.env.API_DB_DIALECT || process.env.DB_DIALECT || 'mariadb';
 
   process.env.API_FROM_EMAIL_ADDRESS = process.env.API_FROM_EMAIL_ADDRESS || process.env.FROM_EMAIL_ADDRESS;
-  process.env.API_SMTP_REQUIRESSL = process.env.API_SMTP_REQUIRESSL || process.env.SMTP_REQUIRESSL;
+  process.env.API_SMTP_SECURE = process.env.API_SMTP_SECURE || process.env.SMTP_SECURE;
   process.env.API_SMTP_PORT = process.env.API_SMTP_PORT || process.env.SMTP_PORT;
   process.env.API_SMTP_HOST = process.env.API_SMTP_HOST || process.env.SMTP_HOST;
   process.env.API_SMTP_USERNAME = process.env.API_SMTP_USERNAME || process.env.SMTP_USERNAME;
   process.env.API_SMTP_PASSWORD = process.env.API_SMTP_PASSWORD || process.env.SMTP_PASSWORD;
+
+  process.env.FROM_EMAIL_ADDRESS = process.env.FROM_EMAIL_ADDRESS || process.env.API_FROM_EMAIL_ADDRESS;
+  process.env.SMTP_SECURE = process.env.SMTP_SECURE || process.env.API_SMTP_SECURE;
+  process.env.SMTP_PORT = process.env.SMTP_PORT || process.env.API_SMTP_PORT;
+  process.env.SMTP_HOST = process.env.SMTP_HOST || process.env.API_SMTP_HOST;
+  process.env.SMTP_USERNAME = process.env.SMTP_USERNAME || process.env.API_SMTP_USERNAME;
+  process.env.SMTP_PASSWORD = process.env.SMTP_PASSWORD || process.env.API_SMTP_PASSWORD;
 
   process.env.API_COOKIE_SECRET = process.env.API_COOKIE_SECRET || generateRandomToken({ length: 32 });
   process.env.API_COOKIE_ONLY_SECURE = process.env.API_COOKIE_ONLY_SECURE || process.env.API_COOKIE_ONLY_SECURE != 'false' ? true : false;
@@ -159,6 +166,7 @@ BASIC_AUTH_PASSWORD=${process.env.BASIC_AUTH_PASSWORD}
 FROM_EMAIL_ADDRESS=${process.env.FROM_EMAIL_ADDRESS}
 SMTP_PORT=${process.env.SMTP_PORT}
 SMTP_HOST=${process.env.SMTP_HOST}
+SMTP_SECURE=${process.env.SMTP_SECURE || ''}
 SMTP_USERNAME=${process.env.SMTP_USERNAME}
 SMTP_PASSWORD=${process.env.SMTP_PASSWORD}
 
@@ -166,12 +174,6 @@ MONGO_HOST=localhost
 
 BASIC_AUTH_USER=openstad
 BASIC_AUTH_PASSWORD=openstad
-
-FROM_EMAIL_ADDRESS=user@example.xx
-SMTP_PORT=465
-SMTP_HOST=smtp.example.xx
-SMTP_USERNAME=USERNAME
-SMTP_PASSWORD=PASSWORD
 
 FORCE_HTTP=${process.env.FORCE_HTTP}
 
@@ -193,7 +195,7 @@ API_DATABASE_DATABASE=${process.env.API_DB_NAME}
 API_DB_DIALECT=${process.env.API_DB_DIALECT}
 
 API_FROM_EMAIL_ADDRESS=${process.env.API_FROM_EMAIL_ADDRESS}
-API_SMTP_REQUIRESSL=${process.env.API_SMTP_REQUIRESSL}
+API_SMTP_SECURE=${process.env.API_SMTP_SECURE}
 API_SMTP_PORT=${process.env.API_SMTP_PORT}
 API_SMTP_HOST=${process.env.API_SMTP_HOST}
 API_SMTP_USERNAME=${process.env.API_SMTP_USERNAME}

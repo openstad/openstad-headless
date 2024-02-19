@@ -1,5 +1,4 @@
 const config = require('config');
-const eventService = require('../services/eventService');
 
 module.exports = function (db, sequelize, DataTypes) {
   const Submission = sequelize.define(
@@ -35,17 +34,14 @@ module.exports = function (db, sequelize, DataTypes) {
     {
       hooks: {
         afterCreate: (instance, options) => {
-          const ruleSetData = {
-            resource: 'submission',
-            eventType: 'CREATE',
-            instance,
-          };
           try {
-            eventService.publish(
-              db.NotificationRuleSet,
-              parseInt(instance.projectId),
-              ruleSetData
-            );
+            db.Notification.create({
+              type: "submission",
+			        projectId: instance.projectId,
+              data: {
+                submissionId: instance.id
+              }
+					  })
           } catch (error) {
             console.error(error);
           }
