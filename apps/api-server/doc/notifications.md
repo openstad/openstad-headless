@@ -3,15 +3,37 @@
 The OpenStad system sends out a range of different notifications, mostly throught email.
 
 The notification system works with types. These are defined by [hardcoded strings](#types).
+Notifications can have `subject`, `body`, and `from` and `to` fields set.
 
-When a new notification is created 
+It also has a `data` field, that can data that is used in the creation of a notification message. If this field contains a key 'resourceId' then the resource with that id is used during message creation, which means that any field from that reource can be used in the message. The same goes for project, user and submission.
 
+When a new notification is created it automagically creates a NotificationMessage. When a NotificationMessage is created is automagically sent to the receiver defined in the `to` field.
 
+The method of sending is defined in the `engine` field and can, at the time of writing, be either `email` of `sms`.
 
+Each type of message can have a corresponding template defined. If no template is defined the default template for from the directory `src/notofications/default-templates` is used.
 
+Templates combine mjml and nunjucks, and the aforementioned `data` field, which allows for someting like
 
+```
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text>
+          Beste {{user.name}},<br/>
+          <br/>
+          Bedankt voor je plan "{{reource.title}}".
+          <br/>
+          Groeten van het OpenStad team
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
+```
 
-
+Note: some types (currently 'new or updated comment - admin update') are saved with status queued; the above message creating and sending is then done from a cron job.
 
 ### Types
 
@@ -135,5 +157,5 @@ Authorization: XXX
 - sms doet het nog niet
 - default templates moeten nog gemaakt
 - the dir for default templates could be configurable, to facilitate easy replacement
-- types are hardcoded, which is fine for now, but a more abstracted use should move types to a databse
+- types are hardcoded, which is fine for now, but a more abstracted use should move types to a data store
 - this setup should make it simple to move to a seperate notification service
