@@ -1138,7 +1138,7 @@ module.exports = function (db, sequelize, DataTypes) {
       // published
       if (!self.publishDate) return false;
       // status
-      let status = self.statuses.find((tag) => tag.type === 'status');
+      let status = self.statuses?.find((tag) => tag.type === 'status');
       if (
         typeof status?.extraFunctionality?.noComment == 'boolean' &&
         status.extraFunctionality.noComment
