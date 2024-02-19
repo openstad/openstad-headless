@@ -29,7 +29,6 @@ export default function WidgetArguments({
   const { previewConfig, updatePreview } =
     useWidgetPreview<CommentsWidgetProps>({
       projectId,
-      resourceId: 2,
     });
 
   return (

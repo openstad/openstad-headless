@@ -21,9 +21,12 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { LikeProps, LikeWidgetProps } from '@openstad/likes/src/likes';
+import { LikeWidgetProps } from '@openstad/likes/src/likes';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { ObjectListSelect } from '@/components/ui/object-select';
+import useResources from '@/hooks/use-resources';
+import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 
 const formSchema = z.object({
   title: z.string(),
@@ -31,19 +34,26 @@ const formSchema = z.object({
   yesLabel: z.string(),
   noLabel: z.string(),
   hideCounters: z.boolean(),
+  resourceId: z.string().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
 
-export default function LikesDisplay(props: LikeWidgetProps & EditFieldProps<LikeWidgetProps>) {
+export default function LikesDisplay(
+  props: LikeWidgetProps & EditFieldProps<LikeWidgetProps>
+) {
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
+  const { data, error } = useResources(props.projectId);
+  // Force at least minimal typehinting
+  const resources: Array<{ id: string | number; title: string }> = data || [];
 
   function onSubmit(values: FormData) {
-    props.updateConfig({...props, ...values});
+    props.updateConfig({ ...props, ...values });
   }
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
+      resourceId: props?.resourceId,
       title: props?.title || 'Wat vindt u van dit plan',
       variant: props?.variant || 'medium',
       yesLabel: props?.yesLabel || 'Ja',
@@ -61,6 +71,17 @@ export default function LikesDisplay(props: LikeWidgetProps & EditFieldProps<Lik
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 lg:w-1/2">
+        <FormObjectSelectField
+          form={form}
+          fieldName="resourceId"
+          fieldLabel="Koppel aan een specifieke resource"
+          items={resources}
+          keyForValue="id"
+          label={(resource) => `${resource.id} ${resource.title}`}
+          onFieldChanged={props.onFieldChanged}
+          noSelection="Niet koppelen (gebruik queryparam openstadResourceId)"
+        />
+
         <FormField
           control={form.control}
           name="title"
