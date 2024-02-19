@@ -244,9 +244,15 @@ function getWidgetJavascriptOutput(
     process.env.REMIX_ICON_CDN ||
     'https://unpkg.com/remixicon@3.5.0/fonts/remixicon.css';
 
+  // config = JSON.parse(widgetConfig);
+  // console.log(config.title)
+
   let output = '';
   let widgetOutput = '';
   let css = '';
+
+  let data = JSON.parse(widgetConfig)
+  let cssUrl = data.project.cssUrl;
 
   widgetSettings.js.forEach((file) => {
     widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
@@ -272,14 +278,15 @@ function getWidgetJavascriptOutput(
 
         const currentScript = document.currentScript;
           currentScript.insertAdjacentHTML('afterend', \`<div id="${componentId}" style="width: 100%; height: 100%;"></div>\`);
+
+          const redirectUri = encodeURI(window.location.href);
+          const config = JSON.parse(\`${widgetConfig}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
           
           document.querySelector('head').innerHTML += \`
             <style>${css}</style>
             <link href="${remixIconCss}" rel="stylesheet">
+            <link href="${cssUrl}" rel="stylesheet">
           \`;
-          
-          const redirectUri = encodeURI(window.location.href);
-          const config = JSON.parse(\`${widgetConfig}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
           
           function renderWidget () {
             ${widgetOutput}
