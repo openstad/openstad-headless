@@ -107,26 +107,26 @@ export default function ProjectSettingsResourceLabels() {
                       {data?.map((item: any) => (
                         item?.type === 'status' && item?.type === groupName ? (
                           <FormField
-                          key={item.name}
+                          key={item.id}
                           control={form.control}
                           name="tagGroups"
                           render={({ field }) => {
                             return (
                               <FormItem
-                                key={item.name}
+                                key={item.id}
                                 className="flex flex-row items-start space-x-3 space-y-0">
                                 <FormControl>
                                   <Checkbox
-                                    checked={field.value?.includes(item.name)}
+                                    checked={field.value?.includes(item.id)}
                                     onCheckedChange={(checked: any) => {
                                       return checked
                                         ? field.onChange([
                                             ...field.value,
-                                            item.name,
+                                            item.id,
                                           ])
                                         : field.onChange(
                                             field.value?.filter(
-                                              (value: any) => value !== item.name
+                                              (value: any) => value !== item.id
                                             )
                                           );
                                     }}
@@ -142,26 +142,26 @@ export default function ProjectSettingsResourceLabels() {
                           ) : null || 
                           item?.type !== 'status' && item?.type === groupName ? (
                             <FormField
-                            key={item.name}
+                            key={item.id}
                             control={form.control}
                             name="tagGroups"
                             render={({ field }) => {
                               return (
                                 <FormItem
-                                  key={item.name}
+                                  key={item.id}
                                   className="flex flex-row items-start space-x-3 space-y-0">
                                   <FormControl>
                                     <Checkbox
-                                      checked={field.value?.includes(item.name)}
+                                      checked={field.value?.includes(item.id)}
                                       onCheckedChange={(checked: any) => {
                                         return checked
                                           ? field.onChange([
                                               ...field.value,
-                                              item.name,
+                                              item.id,
                                             ])
                                           : field.onChange(
                                               field.value?.filter(
-                                                (value: any) => value !== item.name
+                                                (value: any) => value !== item.id
                                               )
                                             );
                                       }}
