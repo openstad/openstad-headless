@@ -14,6 +14,7 @@ export default function useComments(props) {
 
   // add functionality
   let comments = data || [];
+  
   comments.create = function (newData) {
     return self.mutate(
       { projectId, resourceId, sentiment },
