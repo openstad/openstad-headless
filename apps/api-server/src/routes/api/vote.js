@@ -12,7 +12,7 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const router = express.Router({mergeParams: true});
 
 const userhasModeratorRights = (user) => {
-  hasRole( user, 'admin' )
+  return hasRole( user, 'admin' )
 }
 
 // basis validaties
