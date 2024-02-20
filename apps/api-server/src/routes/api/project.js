@@ -80,6 +80,7 @@ router.route('/')
       let project = record.toJSON()
 			if (!( req.user && req.user.role && req.user.role == 'admin' )) {
         project.config = undefined;
+        project.safeConfig = undefined;
 			}
       records[i] = project;
     });

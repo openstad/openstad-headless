@@ -49,6 +49,8 @@ module.exports = async function setupApi(actions) {
       doCreateDBTables = true;
     }
 
+    let fixed_auth_tokens = process.env.API_AUTH_FIXEDAUTHTOKENS || '[{"token":"${process.env.API_FIXED_AUTH_KEY}","userId":"1","authProvider":"openstad"}]';
+
     // create local config
     let apiConfig = `
 URL=${process.env.API_URL}
@@ -70,7 +72,7 @@ SMTP_PASSWORD=${process.env.API_SMTP_PASSWORD}
 
 AUTH_JWTSECRET=${process.env.API_JWT_SECRET}
 AUTH_ADAPTER_OPENSTAD_SERVERURL=${process.env.AUTH_APP_URL}
-AUTH_FIXEDAUTHTOKENS='[{"token":"${process.env.API_FIXED_AUTH_KEY}","userId":"1","authProvider":"openstad"}]'
+AUTH_FIXEDAUTHTOKENS='${fixed_auth_tokens}'
 
 IMAGE_APP_URL=${process.env.IMAGE_APP_URL}
 `
