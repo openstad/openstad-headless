@@ -86,7 +86,7 @@ function StemBegroot({
     props.itemsPerPage || 10
   );
 
-  const { resources, submitLike } = datastore.useResources({
+  const { resources, submitVotes } = datastore.useResources({
     projectId: props.projectId,
     tags,
     sort,
@@ -186,7 +186,7 @@ function StemBegroot({
           opinion: 'yes',
         })
       );
-      return await submitLike(recordsToLike);
+      return await submitVotes(recordsToLike);
     }
   }
 

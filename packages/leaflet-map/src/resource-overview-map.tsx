@@ -34,7 +34,7 @@ export function ResourceOverviewMap({
     config: { api: props.api },
   });
 
-  const [resources] = datastore.useResources({
+  const {resources} = datastore.useResources({
     projectId: props.projectId,
   });
 
