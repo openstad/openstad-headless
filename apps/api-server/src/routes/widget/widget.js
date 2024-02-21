@@ -244,9 +244,6 @@ function getWidgetJavascriptOutput(
     process.env.REMIX_ICON_CDN ||
     'https://unpkg.com/remixicon@3.5.0/fonts/remixicon.css';
 
-  // config = JSON.parse(widgetConfig);
-  // console.log(config.title)
-
   let output = '';
   let widgetOutput = '';
   let css = '';
