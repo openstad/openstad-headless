@@ -255,7 +255,7 @@ router
 
     resourceInstance.setTags(tagIds).then((tags) => {
       // refetch. now with tags
-      let scope = [...req.scope];
+      let scope = [...req.scope, 'includeTags'];
       if (req.canIncludeVoteCount) scope.push('includeVoteCount');
 
       return db.Resource.scope(...scope)

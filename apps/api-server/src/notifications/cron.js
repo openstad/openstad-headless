@@ -64,6 +64,6 @@ module.exports = async function processQueuedNotifications() {
 
   } catch(err) {
     console.log('Error: Send queued NotificationMessages failed');
-    console.log(err);;
+    console.log(err);
   }
 }
