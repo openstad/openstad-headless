@@ -247,8 +247,8 @@ function getWidgetJavascriptOutput(
   let widgetOutput = '';
   let css = '';
 
-  let data = JSON.parse(widgetConfig)
-  let extraCss = data.project?.cssUrl ? `<link href="${data.project.cssUrl}" rel="stylesheet">` : '';
+  const data = JSON.parse(widgetConfig)
+  const extraCss = data.project?.cssUrl ? `<link href="${data.project.cssUrl}" rel="stylesheet">` : '';
   
   widgetSettings.js.forEach((file) => {
     widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
