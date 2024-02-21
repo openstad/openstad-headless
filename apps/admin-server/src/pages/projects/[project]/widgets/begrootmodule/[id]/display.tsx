@@ -8,18 +8,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
+import { StemBegrootWidgetProps } from '@openstad/stem-begroot/src/stem-begroot';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -27,45 +22,33 @@ const formSchema = z.object({
   displayRanking: z.boolean(),
   displayPriceLabel: z.boolean(),
   showVoteCount: z.boolean(),
-  unavailableButton: z.string(),
-  originalResource: z.boolean(),
+  notEnoughBudgetText: z.string(),
+  showOriginalResource: z.boolean(),
   originalResourceUrl: z.string().url(),
 });
 
-export default function BegrootmoduleDisplay() {
-  const category = 'display';
+type Formdata = z.infer<typeof formSchema>;
 
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig();
-  const defaults = useCallback(
-    () => ({
-      displayRanking: widget?.config?.[category]?.displayRanking || false,
-      displayPriceLabel: widget?.config?.[category]?.displayPriceLabel || false,
-      showVoteCount: widget?.config?.[category]?.showVoteCount || false,
-      unavailableButton:
-        widget?.config?.[category]?.unavailableButton || 'Geen ruimte',
-      originalResource: widget?.config?.[category]?.originalResource || false,
-      originalResourceUrl:
-        widget?.config?.[category]?.originalResourceUrl || '',
-    }),
-    [widget?.config]
-  );
+export default function BegrootmoduleDisplay(
+  props: StemBegrootWidgetProps & EditFieldProps<StemBegrootWidgetProps>
+) {
+  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
+
+  function onSubmit(values: Formdata) {
+    props.updateConfig({ ...props, ...values });
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      displayRanking: props.displayRanking || false,
+      displayPriceLabel: props.displayPriceLabel || false,
+      showVoteCount: props.showVoteCount || false,
+      notEnoughBudgetText: props.notEnoughBudgetText || 'Niet genoeg budget',
+      showOriginalResource: props.showOriginalResource || false,
+      originalResourceUrl: props.originalResourceUrl || '',
+    },
   });
-
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ [category]: values });
-  }
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -81,19 +64,7 @@ export default function BegrootmoduleDisplay() {
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Weergeef de ranking</FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Nee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
@@ -104,19 +75,7 @@ export default function BegrootmoduleDisplay() {
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Weergeef de prijslabel</FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Ja" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
@@ -127,31 +86,25 @@ export default function BegrootmoduleDisplay() {
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Weergeef de hoeveelheid stemmen</FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Nee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="unavailableButton"
+            name="notEnoughBudgetText"
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Onbeschikbare buttons</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -159,23 +112,11 @@ export default function BegrootmoduleDisplay() {
           />
           <FormField
             control={form.control}
-            name="originalResource"
+            name="showOriginalResource"
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Display de URL van het originele resource</FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Ja" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
@@ -189,7 +130,13 @@ export default function BegrootmoduleDisplay() {
                   URL waar het resource oorspronkelijk vandaan is gehaald
                 </FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

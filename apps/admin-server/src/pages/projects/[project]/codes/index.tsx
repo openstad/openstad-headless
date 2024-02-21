@@ -66,7 +66,7 @@ export default function ProjectCodes() {
                 <li key={code.id} className="grid grid-cols-2 lg:grid-cols-4 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                   <Paragraph className="hidden lg:flex truncate">{code.id || null}</Paragraph>
                   <Paragraph className="hidden lg:flex truncate">{code.code || null}</Paragraph>
-                  <Paragraph className="flex truncate -mr-16">{code.used}</Paragraph>
+                  <Paragraph className="flex truncate -mr-16">{!!code.userId?"Al gebruikt":""}</Paragraph>
                 </li>
               ))}  
             </ul>

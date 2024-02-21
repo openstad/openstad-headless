@@ -5,8 +5,8 @@ export default {
     options
   ) {
     const params = new URLSearchParams();
-    
-    if(Array.isArray(tags) && tags.length > 0) {
+
+    if (Array.isArray(tags) && tags.length > 0) {
       tags.forEach((tag) => params.append('tags', tag));
     }
 
@@ -36,5 +36,23 @@ export default {
     let method = 'delete';
     let newData = await this.fetch(url, { method });
     return { id: data.id };
+  },
+
+  submitLike: async function ({ projectId }, resources) {
+    if (!Array.isArray(resources)) throw new Error('Resources is geen array');
+    if(resources.some(r => !'resourceId' in r || !'opinion' in r)) throw new Error("Ontbrekende velden resourceId of opinion");
+
+    let url = `/api/project/${projectId}/vote`;
+    let headers = {
+      'Content-Type': 'application/json',
+    };
+
+    let json = await this.fetch(url, {
+      headers,
+      method: 'POST',
+      body: JSON.stringify(resources),
+    });
+
+    return json;
   },
 };

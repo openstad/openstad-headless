@@ -1,0 +1,33 @@
+.osc-resources-filter {
+    align-items: start;
+    display: flex;
+    padding: 1rem;
+    gap: 1rem;
+    background-color: var(--osc-card);
+}
+
+.osc-resources-filter.osc-flex-columned {
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+    padding: 1rem;
+    gap: 1rem;
+    background-color: var(--osc-card);
+}
+
+.osc-filter-search-bar {
+    max-width: 20rem;
+    padding: .5rem;
+}
+
+.osc-resources-filter.osc-flex-columned > .osc-filter-search-bar{
+    max-width: unset;
+}
+
+.osc-resources-filter.osc-flex-columned > select {
+    width: 100%;
+}
+
+.osc-resources-filter.osc-flex-columned > .multi-select {
+    width: 100%;
+}

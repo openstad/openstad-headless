@@ -1,5 +1,5 @@
 export type CommentsProps = {
-  resourceId: number;
+  resourceId: string;
   requiredUserRole: string;
   title?: string;
   sentiment?: string;

@@ -8,7 +8,7 @@ import { Image } from '@openstad-headless/ui/src';
 import { Dialog } from '@openstad-headless/ui/src';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
-import { Filters } from './filters/filters';
+import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { elipsize } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
@@ -123,9 +123,11 @@ const defaultItemRenderer = (
         src={resource.images?.at(0)?.src || ''}
         imageFooter={
           <div>
-            <p className="osc-resource-overview-content-item-status">
-              {resource.status === 'OPEN' ? 'Open' : 'Gesloten'}
-            </p>
+            {resource.statuses?.map((statusTag: any) => (
+              <p className="osc-resource-overview-content-item-status">
+                {statusTag.label === 'OPEN' ? 'Open' : 'Gesloten'}
+              </p>
+            ))}
           </div>
         }
       />
@@ -151,7 +153,7 @@ const defaultItemRenderer = (
         {props.displayVote ? (
           <>
             <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} />
-            <Icon icon="ri-thumb-down-line" variant="big" text={resource.yes} />
+            <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} />
           </>
         ) : null}
 
@@ -197,7 +199,7 @@ function ResourceOverview({
     props.defaultSorting || undefined
   );
 
-  const [resourcesWithPagination] = datastore.useResources({
+  const {resources:resourcesWithPagination} = datastore.useResources({
     ...props,
     page,
     pageSize,
@@ -285,24 +287,32 @@ function ResourceOverview({
             </div>
           ) : null}
 
-          {filterNeccesary && datastore ? (
-            <Filters
-              {...props}
-              tagsLimitation={tagIdsToLimitResourcesTo}
-              itemsPerPage={itemsPerPage}
-              projectId={props.projectId}
-              resources={resources}
-              onUpdateFilter={(f) => {
-                if (f.tags.length === 0) {
-                  setTags(tagIdsToLimitResourcesTo);
-                } else {
-                  setTags(f.tags);
-                }
-                setSort(f.sort);
-                setSearch(f.search.text);
-              }}
-            />
-          ) : null}
+
+{filterNeccesary && datastore ? (
+
+<Filters
+  className='osc-flex-columned'
+  tagsLimitation={tagIdsToLimitResourcesTo}
+  dataStore={datastore}
+  sorting={props.sorting || []}
+  displaySorting={props.displaySorting || false}
+  defaultSorting={props.defaultSorting || ''}
+  displayTagFilters={props.displayTagFilters || false}
+  displaySearch={props.displaySearch || false}
+  tagGroups={props.tagGroups || []}
+  itemsPerPage={itemsPerPage}
+  resources={resources}
+  onUpdateFilter={(f) => {
+    if (f.tags.length === 0) {
+      setTags(tagIdsToLimitResourcesTo);
+    } else {
+      setTags(f.tags);
+    }
+    setSort(f.sort);
+    setSearch(f.search.text);
+  }}
+/>
+        ) : null}
 
           <section className="osc-resource-overview-resource-collection">
             {resources &&

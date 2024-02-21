@@ -143,6 +143,17 @@ let moduleDefinitions = {
       projectId: null,
     },
   },
+  begrootmodule: {
+    packageName: '@openstad-headless/stem-begroot',
+    directory: 'stem-begroot',
+    js: ['dist/stem-begroot.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessStemBegroot',
+    componentName: 'StemBegroot',
+    defaultConfig: {
+      projectId: null
+    }
+  }
 };
 
 const requiredKeys = [

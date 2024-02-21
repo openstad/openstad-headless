@@ -31,7 +31,7 @@ import toast from 'react-hot-toast';
 const formSchema = z.object({
   isViewable: z.boolean(),
   isActive: z.boolean(),
-  withExisting: z.enum(['error', 'replace']),
+  withExisting: z.enum(['error', 'replace', 'merge']),
   requiredUserRole: z.enum(['anonymous', 'member']),
   voteType: z.enum([
     'likes',
@@ -42,9 +42,14 @@ const formSchema = z.object({
   ]),
   minResources: z.coerce.number().gt(0),
   maxResources: z.coerce.number().gt(0),
+  minBudget: z.coerce.number().gt(0),
+  maxBudget: z.coerce.number().gt(0)
 }).refine((data) => data.maxResources > data.minResources, {
   message: "De maximale hoeveelheid resources moet groter zijn dan de minimale hoeveelheid.",
   path: ["maxResources"]
+}).refine(data => data.maxBudget > data.minBudget, {
+  message: "De maximale budget moet groter zijn dan het minimale budget.",
+  path: ["maxBudget"]
 });
 
 export default function ProjectSettingsVoting() {
@@ -60,8 +65,10 @@ export default function ProjectSettingsVoting() {
       withExisting: data?.config?.[category]?.withExisting || null,
       requiredUserRole: data?.config?.[category]?.requiredUserRole || null,
       voteType: data?.config?.[category]?.voteType || null,
-      minResources: data?.config?.[category]?.minResources || null,
-      maxResources: data?.config?.[category]?.maxResources || null,
+      minResources: data?.config?.[category]?.minResources || 0,
+      maxResources: data?.config?.[category]?.maxResources || 0,
+      minBudget: data?.config?.[category]?.minBudget || 0,
+      maxBudget: data?.config?.[category]?.maxBudget || 0,
     }),
     [data?.config]
   );
@@ -86,6 +93,8 @@ export default function ProjectSettingsVoting() {
           voteType: values.voteType,
           minResources: values.minResources,
           maxResources: values.maxResources,
+          minBudget: values.minBudget,
+          maxBudget: values.maxBudget,
         },
       });
       if (project) {
@@ -282,6 +291,36 @@ export default function ProjectSettingsVoting() {
                     <FormLabel>
                       Wat is de maximum hoeveelheid resources waar iemand op kan
                       stemmen?
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="100" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="minBudget"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>
+                      Wat is het minimum budget?
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="1" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="maxBudget"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>
+                      Wat is het maximum budget?
                     </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="100" {...field} />

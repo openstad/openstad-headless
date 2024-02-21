@@ -1,6 +1,9 @@
-import { PageLayout } from '@/components/ui/page-layout';
+import * as React from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { useForm } from 'react-hook-form';
+
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -10,23 +13,15 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import React, { useCallback } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
-import { Separator } from '@/components/ui/separator';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
+import { Separator } from '@/components/ui/separator';
 import toast from 'react-hot-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const availableAuthentication = [
   {
@@ -117,7 +112,6 @@ const formSchema = z.object({
   emailAddressOutgoingUser: z.string(),
   contactEmail: z.string().email(),
   defaultRole: z.enum(['member', 'anon']),
-  // emailHeader: z.string().optional()
 });
 
 export default function ProjectAuthentication() {
@@ -125,7 +119,11 @@ export default function ProjectAuthentication() {
 
   const router = useRouter();
   const { project } = router.query;
-  const { data, isLoading, updateProject } = useProject();
+  const {
+    data,
+    isLoading,
+    updateProject,
+  } = useProject();
   const defaults = useCallback(
     () => ({
       availableAuthentication: data?.config?.[category]
@@ -141,7 +139,6 @@ export default function ProjectAuthentication() {
         data?.config?.[category]?.emailAddressOutgoingUser || null,
       contactEmail: data?.config?.[category]?.contactEmail || null,
       defaultRole: data?.config?.[category]?.defaultRole || null,
-      // emailHeader: data?.config?.[category]?.emailHeader || null,
     }),
     [data?.config]
   );
@@ -158,22 +155,15 @@ export default function ProjectAuthentication() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const project = await updateProject({
-        [category]: {
-          availableAuthentication: values.availableAuthentication,
-          twoFactorRoles: values.twoFactorRoles,
-          requiredFields: values.requiredFields,
-          emailAddressOutgoing: values.emailAddressOutgoing,
-          emailAddressOutgoingUser: values.emailAddressOutgoingUser,
-          contactEmail: values.contactEmail,
-          defaultRole: values.defaultRole,
-          // emailHeader: values.emailHeader
-        },
+        [category]: values,
       });
       if (project) {
-        toast.success('Het project is succesvol aangepast!')
+        toast.success('Project aangepast!');
+      } else {
+        toast.error('Er is helaas iets mis gegaan.')
       }
     } catch (error) {
-      console.error('could not update', error);
+      console.error('Could not update', error);
     }
   }
 
@@ -191,14 +181,15 @@ export default function ProjectAuthentication() {
             url: `/projects/${project}/authentication`,
           },
         ]}>
-        <div className="container">
-          <Form {...form} className="p-6 bg-white rounded-md my-6">
-            <Heading size="xl">Algemeen</Heading>
-            <Separator className="my-4" />
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4 lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <FormField
+        <div className="container py-6">
+          <div className="p-6 bg-white rounded-md">
+            <Form {...form}>
+              <Heading size="xl">Anonimiseer gebruikers</Heading>
+              <Separator className="my-4" />
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4 lg:w-1/2">
+                <FormField
                 control={form.control}
                 name="availableAuthentication"
                 render={() => (
@@ -347,7 +338,7 @@ export default function ProjectAuthentication() {
                   </FormItem>
                 )}
               />
-              <FormField
+                <FormField
                 control={form.control}
                 name="emailAddressOutgoing"
                 render={({ field }) => (
@@ -415,25 +406,10 @@ export default function ProjectAuthentication() {
                   </FormItem>
                 )}
               />
-              {/* <FormField
-                              control={form.control}
-                              name="contactEmail"
-                              render={({ field }) => (
-                                  <FormItem>
-                                      <FormLabel>Header afbeelding voor emails</FormLabel>
-                                      <FormControl>
-                                          <Input type="file" {...field} />
-                                      </FormControl>
-                                      <FormMessage />
-                                  </FormItem>
-                              )}
-                              /> */}
-
-              <Button type="button" className="w-fit mt-4">
-                Opslaan
-              </Button>
-            </form>
-          </Form>
+                <Button type="submit">Opslaan</Button>
+              </form>
+            </Form>
+          </div>
         </div>
       </PageLayout>
     </div>

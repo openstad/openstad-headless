@@ -1,7 +1,6 @@
 const { Sequelize, Op } = require('sequelize');
 const log = require('debug')('app:cron');
 const config = require('config');
-const Notifications = require('../notifications');
 const db = require('../db');
 const UseLock = require('../lib/use-lock');
 
@@ -74,16 +73,15 @@ module.exports = {
           if (!project.config.project.endDateNotificationSent) { // todo: the where clause above does not work for reasons I do not have time for now
 
             // send notification
-            let data = {
-              from: project.config.notifications.fromAddress,
-              to: project.config.notifications.projectmanagerAddress,
-              subject:  endDateConfig.subject,
-              template:  endDateConfig.template,
-              endDate: new Date(project.config.project.endDate).toLocaleDateString("nl-NL"),
-              webmasterEmail: project.config.notifications.projectadminAddress, 
-            };
             console.log('CRON send-enddate-notifications: send email to projectmanager');
-            await Notifications.sendMessage({ project, data });
+            await db.Notification.create({
+              type: "project issues warning",
+			        projectId: project.id,
+              data: {
+                messages: [{content: 'de einddatum van je project nadert'}]
+              }
+			      })
+
             project.update({ config: { project: { endDateNotificationSent: true } } });
 
           }

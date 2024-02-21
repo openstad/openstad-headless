@@ -1,7 +1,6 @@
 const { Sequelize, Op } = require('sequelize');
 const log = require('debug')('app:cron');
 const config = require('config');
-const Notifications = require('../notifications');
 const db = require('../db');
 const UseLock = require('../lib/use-lock');
 const projectsWithIssues = require('../services/projects-with-issues');
@@ -45,18 +44,19 @@ module.exports = {
           if (!notificationsToBeSent[ project.id ]) notificationsToBeSent[ project.id ] = { project, messages: [] };
           notificationsToBeSent[ project.id ].messages.push(`Project ${ project.title } (${ project.domain }) has ended but is not yet anonymized.`);
         }
-
+        
         // send notifications
-        Object.keys(notificationsToBeSent).forEach(id => {
-          let target = notificationsToBeSent[ id ];
-          let data = {
-            from: target.project.config.notifications.fromAddress,
-            to: target.project.config.notifications.projectadminAddress,
-            subject: 'Projects with issues',
-            template: target.messages.join('\r\n'),
-          };
-          Notifications.sendMessage({ project: target.project, data });
-        });
+        let projectIds = Object.keys(notificationsToBeSent);
+        for (let projectId of projectIds) {
+          let target = notificationsToBeSent[projectId];
+          await db.Notification.create({
+            type: "new or updated comment - admin update",
+			      projectId,
+            data: {
+              messages: target.messages.map( message => ({ content: message }) ),
+            }
+          })
+        }
         
         return next();
 
@@ -69,4 +69,3 @@ module.exports = {
   })
 
 };
-

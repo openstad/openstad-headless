@@ -35,7 +35,7 @@ router
     let resourceId = parseInt(req.params.resourceId) || 0;
     if (!resourceId) return next();
     db.Resource
-      .scope('includeStatus', 'includeProject')
+      .scope('includeProject')
       .findByPk(resourceId)
       .then(resource => {
         if (!resource || resource.projectId != req.params.projectId) return next(createError(400, 'Resource not found'));

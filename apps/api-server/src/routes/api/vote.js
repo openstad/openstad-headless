@@ -12,7 +12,7 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const router = express.Router({mergeParams: true});
 
 const userhasModeratorRights = (user) => {
-  hasRole( user, 'admin' )
+  return hasRole( user, 'admin' )
 }
 
 // basis validaties
@@ -182,6 +182,7 @@ router.route('/*')
 	.post(function(req, res, next) {
 		let votes = req.body || [];
 		if (!Array.isArray(votes)) votes = [votes];
+
 		votes = votes.map((entry) => {
 			return {
 				resourceId: parseInt(entry.resourceId, 10),

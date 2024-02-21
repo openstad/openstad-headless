@@ -31,6 +31,12 @@ export default function useResources({
   }
 
 
+  const submitVotes = function (resourcesToLike) {
+    return self.mutate({ projectId }, 'resources.submitLike', resourcesToLike, {
+      action: 'update',
+    });
+  };
+
   resources.records.create = function (newData) {
     return self.mutate({ projectId }, 'resources.create', newData, {
       action: 'create',
@@ -48,12 +54,7 @@ export default function useResources({
         action: 'delete',
       });
     };
-    resource.submitLike = function () {
-      return self.mutate({ projectId }, 'resources.submitLike', resource, {
-        action: 'update',
-      });
-    };
   });
 
-  return [resources, error, isLoading];
+  return {resources, error, isLoading, submitVotes};
 }

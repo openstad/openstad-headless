@@ -41,6 +41,11 @@ module.exports = async function seed(config, db) {
           requiredUserRole: 'anonymous',
           isViewable: true,
           withExisting: 'replace',
+          maxResources: 10000,
+          minResources: 1,
+          minBudget: 100,
+          maxBudget: 80000,
+          voteType: 'likes',
           voteValues: [
             {
               label: 'I like',
@@ -55,6 +60,13 @@ module.exports = async function seed(config, db) {
               value: 'no'
             }
           ]
+        },
+      },
+      emailConfig: {
+        notifications: {
+          fromAddress: 'nobody@openstad.dev',
+          projectmanagerAddress: 'unknown@nowhere',
+          projectadminAddress: 'unknown@nowhere',
         },
       },
     });
@@ -92,10 +104,22 @@ module.exports = async function seed(config, db) {
         },
         votes: {
           isActive: true,
-          withExisting: 'replace',
           requiredUserRole: 'anonymous',
           isViewable: true,
+          maxResources: 10000,
+          minResources: 1,
+          minBudget: 100,
+          maxBudget: 80000,
+          voteType: 'budgeting',
+          withExisting: 'error',
         }
+      },
+      emailConfig: {
+        notifications: {
+          fromAddress: 'nobody@openstad.dev',
+          projectmanagerAddress: 'unknown@nowhere',
+          projectadminAddress: 'unknown@nowhere',
+        },
       },
     });
 
@@ -120,6 +144,24 @@ module.exports = async function seed(config, db) {
               clientSecret: 'anonymous123'
             },
           }
+        },
+        votes: {
+          isActive: true,
+          requiredUserRole: 'anonymous',
+          isViewable: true,
+          maxResources: 10000,
+          minResources: 1,
+          minBudget: 100,
+          maxBudget: 80000,
+          voteType: 'budgeting',
+          withExisting: 'error',
+        }
+      },
+      emailConfig: {
+        notifications: {
+          fromAddress: 'nobody@openstad.dev',
+          projectmanagerAddress: 'unknown@nowhere',
+          projectadminAddress: 'unknown@nowhere',
         },
       },
     });
