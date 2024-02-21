@@ -5,7 +5,6 @@ const createError = require('http-errors');
 const config = require('config');
 const db = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
-const mail = require('../../lib/mail');
 const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
 const c = require('config');
@@ -258,12 +257,13 @@ router
       // refetch. now with tags
       let scope = [...req.scope, 'includeTags'];
       if (req.canIncludeVoteCount) scope.push('includeVoteCount');
+
       return db.Resource.scope(...scope)
         .findOne({
           where: { id: resourceInstance.id, projectId: req.params.projectId },
         })
         .then((found) => {
-          if (!found) throw new Error('Resource not found');
+          if (!found) throw new Error(`Resource not found:', { id: ${resourceInstance.id}, projectId: ${req.params.projectId} }`);
           found.project = req.project;
           req.results = found;
           return next();
@@ -274,9 +274,31 @@ router
   .post(function (req, res, next) {
     res.json(req.results);
     if (!req.query.nomail && req.body['publishDate']) {
-      mail.sendThankYouMail(req.results, req.project, req.user);
+      db.Notification.create({
+        type: "new published resource - admin update",
+			  projectId: req.project.id,
+        data: {
+          userId: req.user.id,
+          resourceId: req.results.id
+        }
+		  })
+      db.Notification.create({
+        type: "new published resource - user feedback",
+			  projectId: req.project.id,
+        data: {
+          userId: req.user.id,
+          resourceId: req.results.id
+        }
+			})
     } else if (!req.query.nomail && !req.body['publishDate']) {
-      mail.sendConceptEmail(req.results, req.project, req.user);
+      db.Notification.create({
+        type: "new concept resource - user feedback",
+			  projectId: req.project.id,
+        data: {
+          userId: req.user.id,
+          resourceId: req.results.id
+        }
+			})
     }
   });
 
@@ -430,8 +452,23 @@ router
     });
   })
   .put(function (req, res, next) {
+    db.Notification.create({
+      type: "updated resource - admin update",
+			projectId: req.project.id,
+      data: {
+        userId: req.user.id,
+        resourceId: req.results.id
+      }
+		})
     if (req.changedToPublished) {
-      mail.sendConceptEmail(req.results, req.project, req.user);
+      db.Notification.create({
+        type: "new published resource - user feedback",
+			  projectId: req.project.id,
+        data: {
+          userId: req.user.id,
+          resourceId: req.results.id
+        }
+			})
     }
     next();
   })

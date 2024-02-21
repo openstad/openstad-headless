@@ -54,6 +54,7 @@ let defaultConfig = {
 			"./middleware/log",
 			{ "route": "/api", "router": "./routes/api" },
 			{ "route": "/auth", "router": "./routes/auth" },
+			{ "route": "/notification", "router": "./routes/notification" },
       { "route": "/stats", "router": "./routes/stats" },
       { "route": "/widget", "router": "./routes/widget" },
 		]
@@ -61,14 +62,14 @@ let defaultConfig = {
 
 	mail: {
 	  from: process.env.FROM_EMAIL_ADDRESS || process.env.API_EMAILADDRESS || 'info@openstad.org',
-    host: process.env.SMTP_HOST || process.env.API_MAIL_TRANSPORT_SMTP_HOST || null,
-    port: process.env.SMTP_PORT || process.env.API_MAIL_TRANSPORT_SMTP_PORT || null,
-    requireSSL: process.env.SMTP_REQUIRESSL || process.env.API_MAIL_TRANSPORT_SMTP_REQUIRESSL || null,
 		method: 'smtp',
 		transport: {
 			smtp: {
 				pool: false,
 				direct: false,
+        host: process.env.SMTP_HOST || process.env.API_MAIL_TRANSPORT_SMTP_HOST || null,
+        port: process.env.SMTP_PORT || process.env.API_MAIL_TRANSPORT_SMTP_PORT || null,
+        secure: JSON.parse(process.env.SMTP_SECURE || process.env.API_MAIL_TRANSPORT_SMTP_SECURE || null),
 				auth: {
           user: process.env.SMTP_USERNAME || process.env.API_MAIL_TRANSPORT_SMTP_AUTH_USER || null,
           pass: process.env.SMTP_PASSWORD || process.env.API_MAIL_TRANSPORT_SMTP_AUTH_PASS || null,

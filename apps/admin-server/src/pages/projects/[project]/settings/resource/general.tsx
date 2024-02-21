@@ -264,7 +264,7 @@ export default function ProjectSettingsResourceGeneral() {
                   resource-formulier?
                 </FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === 'false')}
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
                   value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
@@ -290,7 +290,7 @@ export default function ProjectSettingsResourceGeneral() {
                   resource-formulier?
                 </FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === 'false')}
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
                   value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
@@ -316,7 +316,7 @@ export default function ProjectSettingsResourceGeneral() {
                   resource-formulier?
                 </FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === 'false')}
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
                   value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>
@@ -342,7 +342,7 @@ export default function ProjectSettingsResourceGeneral() {
                   weergegeven in het resource-formulier?
                 </FormLabel>
                 <Select
-                  onValueChange={(e: string) => field.onChange(e === 'false')}
+                  onValueChange={(e: string) => field.onChange(e === 'true')}
                   value={field.value ? 'true' : 'false'}>
                   <FormControl>
                     <SelectTrigger>

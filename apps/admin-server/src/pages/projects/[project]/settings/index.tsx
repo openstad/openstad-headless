@@ -40,6 +40,7 @@ const formSchema = z.object({
   }),
   enableLikes: z.boolean(),
   enableReactions: z.boolean(),
+  cssUrl: z.string().optional(),
   url: z.string().optional()
 });
 
@@ -61,6 +62,7 @@ export default function ProjectSettings() {
         : new Date(currentDate.getFullYear(), currentDate.getMonth()+3),
       enableLikes: data?.config?.resources?.enableLikes || false,
       enableReactions: data?.config?.resources?.enableReactions || false,
+      cssUrl: data?.config?.project?.cssUrl || '',
       url: data?.url || '',
     }),
     [data?.name, data?.config]
@@ -90,6 +92,7 @@ export default function ProjectSettings() {
         {
           project: {
             endDate: values.endDate,
+            cssUrl: values.cssUrl,
           },
           resources: {
             enableLikes: values.enableLikes,
@@ -207,6 +210,19 @@ export default function ProjectSettings() {
                               <SelectItem value="false">Nee</SelectItem>
                             </SelectContent>
                           </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="cssUrl"
+                      render={({ field }) => (
+                        <FormItem className="col-span-full md:col-span-1 flex flex-col">
+                          <FormLabel>URL voor CSS imports (optioneel)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Url" {...field} />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
