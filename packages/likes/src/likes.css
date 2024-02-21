@@ -4,7 +4,7 @@
   padding: var(--nlds-likewidget-container-padding, 1.5rem);
   gap: var(--nlds-likewidget-container-gap, 0.5rem);
   margin: var(--nlds-likewidget-container-margin, 0);
-  background: var(--nlds-likewidget-container-background, var(--osc-card, revert));
+  background: var(--nlds-likewidget-container-background, #F0F4F8);
 }
 
 .like-option-container {
@@ -13,7 +13,6 @@
 }
 
 .like-widget-container.medium .like-option-container {
-  display: grid;
   grid-template-columns: 1fr 1fr;
 }
 
