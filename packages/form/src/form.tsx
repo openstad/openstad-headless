@@ -9,6 +9,7 @@ import TickmarkSlider from "@openstad-headless/ui/src/form-elements/tickmark-sli
 import FileUploadField from "@openstad-headless/ui/src/form-elements/file-upload";
 import MapField from "@openstad-headless/ui/src/form-elements/map";
 import { handleSubmit } from "./submit";
+import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden/index.js";
 
 const Form: FC<FormProps> = ({
      title = 'Form Widget',
@@ -21,7 +22,7 @@ const Form: FC<FormProps> = ({
     const initialFormValues: { [key: string]: any } = {};
     fields.forEach((field) => {
         if (field.fieldKey) {
-            initialFormValues[field.fieldKey] = '';
+            initialFormValues[field.fieldKey] = typeof field.defaultValue !== 'undefined' ? field.defaultValue :'';
         }
     });
 
@@ -47,6 +48,7 @@ const Form: FC<FormProps> = ({
         'tickmark-slider': TickmarkSlider,
         upload: FileUploadField,
         map: MapField,
+        hidden: HiddenInput,
     };
 
     const renderField = (field: FieldProps, index: number) => {
@@ -65,7 +67,7 @@ const Form: FC<FormProps> = ({
     return (
         <div className="form-widget">
             <div className="form-widget-container">
-                {title ? <h5 className="like-widget-title">{title}</h5> : null}
+                {title ? <h5 className="form-widget-title">{title}</h5> : null}
 
                 <form onSubmit={handleFormSubmit} className="form-container" noValidate>
                     {fields.map((field: FieldProps, index: number) => (

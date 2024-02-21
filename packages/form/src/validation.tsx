@@ -45,6 +45,8 @@ export const getSchemaForField = (field: FieldProps) => {
             } else {
                 return undefined;
             }
+        case 'hidden':
+            return undefined;
 
         default:
             return undefined;

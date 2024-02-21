@@ -5,6 +5,7 @@ import { CheckboxFieldProps } from "@openstad-headless/ui/src/form-elements/chec
 import { SelectFieldProps } from "@openstad-headless/ui/src/form-elements/select";
 import { RadioboxFieldProps } from "@openstad-headless/ui/src/form-elements/radio";
 import { FileUploadProps} from "@openstad-headless/ui/src/form-elements/file-upload";
+import { HiddenInputProps } from "@openstad-headless/ui/src/form-elements/hidden/index.js";
 
 export type FormProps = {
     title?: string;
@@ -22,7 +23,8 @@ type CombinedFieldProps = (
     CheckboxFieldProps |
     SelectFieldProps |
     RadioboxFieldProps |
-    FileUploadProps
+    FileUploadProps |
+    HiddenInputProps
 );
 
 export { CombinedFieldProps as FieldProps };
