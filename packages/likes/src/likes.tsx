@@ -1,4 +1,7 @@
 import 'remixicon/fonts/remixicon.css';
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Heading5, Heading6, Button } from "@utrecht/component-library-react";
 import { ProgressBar } from '@openstad-headless/ui/src';
 import { SessionStorage } from '@openstad-headless/lib/session-storage';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
@@ -34,7 +37,7 @@ function Likes({
   const urlParams = new URLSearchParams(window.location.search);
   const resourceId =
     urlParams.get('openstadResourceId') || props.resourceId || '';
-  const necessaryVotes = props.resources.minimumYesVotes || 50;
+  const necessaryVotes = props.resources?.minimumYesVotes || 50;
 
   // Pass explicitely because datastore is not ts, we will not get a hint if the props have changed
 
@@ -107,7 +110,7 @@ function Likes({
   return (
     <div className="osc">
       <div className={`like-widget-container ${variant}`}>
-        {title ? <h5 className="like-widget-title">{title}</h5> : null}
+        {title ? <Heading5 className="like-widget-title">{title}</Heading5> : null}
 
         <div className={`like-option-container`}>
           {supportedLikeTypes.map((likeVariant, index) => (
@@ -118,16 +121,16 @@ function Likes({
                   ? 'selected'
                   : ''
               } ${hideCounters ? 'osc-no-counter' : ''}`}>
-              <section
+              <Button
                 className="like-kind"
                 onClick={(e) => doVote(e, likeVariant.type)}>
                 <i className={likeVariant.icon}></i>
                 {variant === 'small' ? null : (
-                  <h6 className="osc-like-variant-label">
+                  <Heading6 className="osc-like-variant-label">
                     {likeVariant.label}
-                  </h6>
+                  </Heading6>
                 )}
-              </section>
+              </Button>
 
               {!hideCounters ? (
                 <section className="like-counter">
