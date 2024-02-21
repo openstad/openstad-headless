@@ -1,9 +1,10 @@
 import React from 'react';
-import { Banner, Input, Spacer } from '@openstad-headless/ui/src';
-import { SecondaryButton, Button } from '@openstad-headless/ui/src/button';
+import { Banner, Spacer } from '@openstad-headless/ui/src';
+import { Button } from '@openstad-headless/ui/src/button';
 import { CommentPropsType } from '../types/index';
 import DataStore from '@openstad-headless/data-store/src';
 import hasRole from '../../../lib/has-role';
+import Form from "@openstad-headless/form/src/form.js";
 
 function CommentForm({
   comment,
@@ -26,28 +27,45 @@ function CommentForm({
   const [currentUser, currentUserError, currentUserIsLoading] =
     datastore.useCurrentUser({ ...args });
 
-  function canSubmit() {
-    return true;
+  const formFields = [
+      {
+        type: 'text',
+        title: '',
+        minCharacters: 1,
+        maxCharacters: 300,
+        fieldRequired: true,
+        requiredWarning: "Dit veld is verplicht",
+        fieldKey: "description",
+        placeholder: args.placeholder,
+        defaultValue: args.comment?.description,
+    },
+    {
+        type: 'hidden',
+        fieldKey: "sentiment",
+        defaultValue: args.sentiment,
+    }
+  ];
+
+  if (typeof (args.comment) !== 'undefined' &&  typeof (args.comment.parentId) !== 'undefined' ) {
+    formFields.push({
+        type: 'hidden',
+        fieldKey: "parentId",
+        defaultValue: args.comment.parentId,
+    });
+  }
+
+  if (typeof (args.comment) !== 'undefined' &&  typeof (args.comment.id) !== 'undefined' ) {
+    formFields.push({
+        type: 'hidden',
+        fieldKey: "id",
+        defaultValue: args.comment.id,
+    });
   }
 
   return (
     <div className="reaction-input-container">
-      <form onSubmit={args.submitComment}>
         {args.formIntro ? <p>{args.formIntro}</p> : null}
         <Spacer size={1} />
-        {args.comment?.parentId ? (
-          <input
-            type="hidden"
-            defaultValue={args.comment.parentId}
-            name="parentId"
-          />
-        ) : null}
-
-        {args.comment?.id ? (
-          <input type="hidden" defaultValue={args.comment.id} name="id" />
-        ) : null}
-
-        <input type="hidden" defaultValue={args.sentiment} name="sentiment" />
 
         {!hasRole(currentUser, 'member') ? ( // todo: args.requiredUserRole \
           <Banner className="big">
@@ -94,18 +112,8 @@ function CommentForm({
 
         {(hasRole(currentUser, 'member') && props.isReplyingEnabled) ||
         hasRole(currentUser, 'moderator') ? (
-          <>
-            <Input
-              className="comment-description-inputfield"
-              name="description"
-              placeholder={args.placeholder}
-              defaultValue={args.comment?.description}
-            />
-            <Spacer size={0.5} />
-            <SecondaryButton disabled={!canSubmit()}>Verstuur</SecondaryButton>
-          </>
+          <Form fields={formFields} submitHandler={args.submitComment} submitText="Verstuur" title=""/>
         ) : null}
-      </form>
     </div>
   );
 }
