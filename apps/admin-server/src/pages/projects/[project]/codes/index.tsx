@@ -73,15 +73,15 @@ export default function ProjectCodes() {
                     className="hidden lg:flex ml-auto"
                     onClick={(e) => e.preventDefault()}>
                     <RemoveResourceDialog
-                      header="Stem verwijderen"
-                      message="Weet je zeker dat je deze stem wilt verwijderen?"
+                      header="Stemcode verwijderen"
+                      message="Weet je zeker dat je deze stemcode wilt verwijderen?"
                       onDeleteAccepted={() =>
                         removeCode(code.id)
                           .then(() =>
-                            toast.success('Stem successvol verwijderd')
+                            toast.success('Stemcode successvol verwijderd')
                           )
                           .catch((e) =>
-                            toast.error('Stem kon niet worden verwijderd')
+                            toast.error('Stemcode kon niet worden verwijderd')
                           )
                       }
                     />
