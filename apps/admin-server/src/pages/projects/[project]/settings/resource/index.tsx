@@ -23,7 +23,6 @@ import {
 } from '@/components/ui/select';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useCallback, useEffect } from 'react';
 import { useProject } from '../../../../../hooks/use-project';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -32,6 +31,7 @@ import toast from 'react-hot-toast';
 import { useRouter } from 'next/router';
 import useTags from '@/hooks/use-tags';
 import _ from 'lodash';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
 
 const reactions = [
   {
@@ -189,19 +189,7 @@ export default function ProjectSettingsResource() {
                   <FormLabel>
                     Is het mogelijk om een resource in te sturen?
                   </FormLabel>
-                  <Select
-                    onValueChange={(e: string) => field.onChange(e === 'true')}
-                    value={field.value ? 'true' : 'false'}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Ja" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="true">Ja</SelectItem>
-                      <SelectItem value="false">Nee</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  {YesNoSelect(field, {})}
                   <FormMessage />
                 </FormItem>
               )}
@@ -308,19 +296,7 @@ export default function ProjectSettingsResource() {
                     Wordt het invoerveld voor de locatie weergegeven in het
                     resource-formulier?
                   </FormLabel>
-                  <Select
-                    onValueChange={(e: string) => field.onChange(e === 'true')}
-                    value={field.value ? 'true' : 'false'}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Nee" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="true">Ja</SelectItem>
-                      <SelectItem value="false">Nee</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  {YesNoSelect(field, {})}
                   <FormMessage />
                 </FormItem>
               )}
@@ -334,19 +310,7 @@ export default function ProjectSettingsResource() {
                     Wordt het invoerveld voor het thema weergegeven in het
                     resource-formulier?
                   </FormLabel>
-                  <Select
-                    onValueChange={(e: string) => field.onChange(e === 'true')}
-                    value={field.value ? 'true' : 'false'}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Nee" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="true">Ja</SelectItem>
-                      <SelectItem value="false">Nee</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  {YesNoSelect(field, {})}
                   <FormMessage />
                 </FormItem>
               )}
@@ -360,19 +324,7 @@ export default function ProjectSettingsResource() {
                     Wordt het invoerveld voor de buurt weergegeven in het
                     resource-formulier?
                   </FormLabel>
-                  <Select
-                    onValueChange={(e: string) => field.onChange(e === 'true')}
-                    value={field.value ? 'true' : 'false'}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Nee" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="true">Ja</SelectItem>
-                      <SelectItem value="false">Nee</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  {YesNoSelect(field, {})}
                   <FormMessage />
                 </FormItem>
               )}
@@ -386,19 +338,7 @@ export default function ProjectSettingsResource() {
                     Wordt het invoerveld voor de auteur van de modbreak
                     weergegeven in het resource-formulier?
                   </FormLabel>
-                  <Select
-                    onValueChange={(e: string) => field.onChange(e === 'true')}
-                    value={field.value ? 'true' : 'false'}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Nee" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="true">Ja</SelectItem>
-                      <SelectItem value="false">Nee</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  {YesNoSelect(field, {})}
                   <FormMessage />
                 </FormItem>
               )}
