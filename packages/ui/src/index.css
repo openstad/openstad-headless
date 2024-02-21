@@ -61,14 +61,6 @@
     line-height: 2rem;
 }
 
-.osc p { 
-    color: var(--osc-muted, black);
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.5rem;
-    letter-spacing: 0px;
-}
-
 .osc p.strong {
     color: var(--osc-foreground, black);
     letter-spacing: 0px;
@@ -110,4 +102,18 @@
     --utrecht-heading-6-font-weight: 400;
     --utrecht-heading-6-line-height: 24px;
 
+    /* Paragraph */
+    --utrecht-paragraph-font-family: inherit;
+    --utrecht-paragraph-font-size: 1rem;
+    --utrecht-paragraph-font-weight: 400;
+    --utrecht-paragraph-line-height: 1.5rem;
+
+
+    /* subtle button */
+    
+    /* --nlds-likewidget-button-background: red;
+    --nlds-likewidget-button-color: #fff;
+    --nlds-likewidget-button-hover-background: blue;
+    --nlds-likewidget-button-hover-color: #fff;  */
+   
 }

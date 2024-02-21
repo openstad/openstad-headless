@@ -1,7 +1,7 @@
 import 'remixicon/fonts/remixicon.css';
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Heading5, Heading6, Button } from "@utrecht/component-library-react";
+import { Heading5, Heading6, Paragraph, Button } from "@utrecht/component-library-react";
 import { ProgressBar } from '@openstad-headless/ui/src';
 import { SessionStorage } from '@openstad-headless/lib/session-storage';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
@@ -114,45 +114,46 @@ function Likes({
 
         <div className={`like-option-container`}>
           {supportedLikeTypes.map((likeVariant, index) => (
-            <div
+            <Button
+              appearance="subtle-button"
               key={`${likeVariant.type}-${index}`}
+              onClick={(e) => doVote(e, likeVariant.type)}
               className={`like-option ${
                 resource?.userVote?.opinion === likeVariant.type
                   ? 'selected'
                   : ''
               } ${hideCounters ? 'osc-no-counter' : ''}`}>
-              <Button
-                className="like-kind"
-                onClick={(e) => doVote(e, likeVariant.type)}>
+              <section
+                className="like-kind">
                 <i className={likeVariant.icon}></i>
                 {variant === 'small' ? null : (
                   <Heading6 className="osc-like-variant-label">
                     {likeVariant.label}
                   </Heading6>
                 )}
-              </Button>
+              </section>
 
               {!hideCounters ? (
                 <section className="like-counter">
-                  <p>
+                  <Paragraph>
                     {resource[likeVariant.type] &&
                     resource[likeVariant.type] < 10
                       ? resource[likeVariant.type].toString().padStart(2, '0')
                       : resource[likeVariant.type] ||
                         (0).toString().padStart(2, '0')}
-                  </p>
+                  </Paragraph>
                 </section>
               ) : null}
-            </div>
+            </Button>
           ))}
         </div>
 
         {!props?.resources?.minimumYesVotes ? null : (
           <div className="progressbar-container">
             <ProgressBar progress={(resource.yes / necessaryVotes) * 100} />
-            <p className="progressbar-counter">
+            <Paragraph className="progressbar-counter">
               {resource.yes || 0} /{necessaryVotes}
-            </p>
+            </Paragraph>
           </div>
         )}
       </div>
