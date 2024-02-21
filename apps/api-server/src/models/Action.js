@@ -8,41 +8,8 @@ const moment = require('moment')
 
 const Url = require('url');
 
-var dateFilter = require('../lib/nunjucks-date-filter');
-
 var sanitize = require('../util/sanitize');
-var nunjucks = require('nunjucks');
-var env = nunjucks.configure('email');
 const htmlToText = require('html-to-text');
-
-env.addFilter('date', dateFilter);
-// Global variables.
-env.addGlobal('HOSTNAME', config.get('domain'));
-env.addGlobal('PROJECTNAME', config.get('projectName'));
-//env.addGlobal('PAGENAME_POSTFIX', config.get('pageNamePostfix'));
-env.addGlobal('EMAIL', config.get('mail.from'));
-env.addGlobal('GLOBALS', config.get('express.rendering.globals'));
-env.addGlobal('config', config);
-
-const mailTransporter = require('../lib/mailTransporter');
-
-// Default options for a single email.
-
-const sendMail = (options, project) => {
-    return Promise((resolve, reject) => {
-        mailTransporter.getTransporter(project).sendMail(
-            options,
-            function (error, info) {
-                if (error) {
-                    reject(error.message);
-                } else {
-                    resolve(info.response);
-                }
-            }
-        );
-    });
-}
-
 
 module.exports = function (db, sequelize, DataTypes) {
     var Action = sequelize.define('action', {
