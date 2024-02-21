@@ -33,8 +33,12 @@ function DataStore(props = {}) {
   self.useChoiceGuideResults = useChoiceGuideResults.bind(self);
 
   // current user
-  const [currentUser, currentUserError, currentUserIsLoading] =
-    self.useCurrentUser({ ...props, projectId: self.projectId });
+  const {
+    data: currentUser,
+    error: currentUserError,
+    isLoadingLcurrentUserIsLoading,
+  } = self.useCurrentUser({ ...props, projectId: self.projectId });
+
   self.currentUser = currentUser;
 
   // swr

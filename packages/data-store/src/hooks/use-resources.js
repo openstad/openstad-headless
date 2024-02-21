@@ -55,6 +55,5 @@ export default function useResources({
       });
     };
   });
-
   return {data:resources, error, isLoading, submitVotes};
 }
