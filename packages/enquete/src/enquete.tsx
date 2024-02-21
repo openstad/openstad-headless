@@ -32,8 +32,11 @@ function Enquete(props: EnqueteWidgetProps) {
 
   const datastore = new DataStore(props);
 
-  const [currentUser, currentUserError, currentUserIsLoading] =
-    datastore.useCurrentUser({ ...props });
+  const {
+    data: currentUser,
+    error: currentUserError,
+    isLoading: currentUserIsLoading,
+  } = datastore.useCurrentUser({ ...props });
 
   const { data, create: createSubmission } = datastore.useSubmissions({
     projectId: props.projectId,
@@ -63,9 +66,9 @@ function Enquete(props: EnqueteWidgetProps) {
 
     if (result) {
       setAlreadySubmitted(true);
-      
-      if(props.afterSubmitUrl) {
-        location.href = props.afterSubmitUrl.replace("[id]", result.id)
+
+      if (props.afterSubmitUrl) {
+        location.href = props.afterSubmitUrl.replace('[id]', result.id);
       } else {
         notifyCreate();
       }

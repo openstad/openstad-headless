@@ -41,7 +41,7 @@ export function ResourceDetailMap({
 
   const urlParams = new URLSearchParams(window.location.search);
   resourceId = resourceId || parseInt( urlParams.get('openstadResourceId') );
-  const [resource, resourceError, resourceIsLoading] = datastore.useResource({  // TODO: error handling
+  const {data:resource, error, isLoading} = datastore.useResource({
     projectId: props.projectId,
     resourceId: resourceId,
   });

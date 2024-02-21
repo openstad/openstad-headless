@@ -39,16 +39,16 @@ function Counter({
     api: props.api
   })
 
-  const {resources} = datastore.useResources({
+  const {data:resources} = datastore.useResources({
     projectId: props.projectId,
   })
 
-  const [resource] = datastore.useResource({
+  const {data:resource} = datastore.useResource({
     projectId: props.projectId,
     resourceId,
   });
 
-  const [comment] = datastore.useComments({
+  const {data:comment} = datastore.useComments({
     projectId: props.projectId,
     resourceId: resourceId,
     sentiment: opinion

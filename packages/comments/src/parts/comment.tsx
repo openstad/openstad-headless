@@ -38,8 +38,11 @@ function Comment({
   } as CommentPropsType;
 
   const datastore = new DataStore(args);
-  const [currentUser, currentUserError, currentUserIsLoading] =
-    datastore.useCurrentUser({ ...args });
+  const {
+    data: currentUser,
+    error: currentUserError,
+    isLoading: currentUserIsLoading,
+  } = datastore.useCurrentUser({ ...args });
 
   const [isReplyFormActive, setIsReplyFormActive] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);

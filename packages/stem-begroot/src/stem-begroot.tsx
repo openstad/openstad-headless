@@ -67,7 +67,7 @@ function StemBegroot({
   const [openDetailDialog, setOpenDetailDialog] = React.useState(false);
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const [currentUser] = datastore.useCurrentUser({ ...props });
+  const { data: currentUser } = datastore.useCurrentUser({ ...props });
   const [navAfterLogin, setNavAfterLogin] = useState<boolean>();
   const [shouldReloadSelectedResources, setReloadSelectedResources] =
     useState<boolean>(false);
@@ -86,7 +86,7 @@ function StemBegroot({
     props.itemsPerPage || 10
   );
 
-  const { resources, submitVotes } = datastore.useResources({
+  const { data: resources, submitVotes } = datastore.useResources({
     projectId: props.projectId,
     tags,
     sort,

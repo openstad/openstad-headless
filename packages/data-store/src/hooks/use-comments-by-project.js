@@ -15,5 +15,5 @@ export default function useCommentsByProject(props) {
     document.dispatchEvent(event);
   }
   
-  return [ comments, error, isLoading ]
+  return {data:comments, error, isLoading}
 }

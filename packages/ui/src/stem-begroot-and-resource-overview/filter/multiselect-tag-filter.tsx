@@ -29,7 +29,7 @@ const MultiSelectTagFilter = ({
     return <p>Cannot render tagfilter, missing data source</p>
   }
   
-  const [tags] = dataStore.useTags({
+  const {data:tags} = dataStore.useTags({
     type: tagType,
     onlyIncludeIds,
   });
