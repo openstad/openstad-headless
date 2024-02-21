@@ -1,0 +1,19 @@
+<!-- template: system issues warning -->
+<subject>system issues</subject>
+<body>
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text>
+          Beste {{user.name}},<br/>
+          <br/>
+          Hier zou een default template moeten staan voor het notificatietype 'system issues', maar die is nooit gemaakt. Toch jammer.<br/>
+          <br/>
+          Groeten van het OpenStad team
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
+</body>

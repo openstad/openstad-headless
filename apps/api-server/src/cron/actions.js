@@ -1,5 +1,4 @@
 var log           = require('debug')('app:cron');
-var notifications = require('../notifications');
 const db = require('../db');
 
 // -------

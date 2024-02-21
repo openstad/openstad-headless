@@ -1,25 +1,39 @@
 module.exports = ( db, sequelize, DataTypes ) => {
   const NotificationTemplate = sequelize.define('notification_template', {
+
+    projectId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+
+    engine: {
+      type: DataTypes.ENUM('email', 'sms', 'carrier pigeon'),
+      allowNull: false,
+      default: 'email',
+    },
+
+    type: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
     label: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
+
     subject: {
       type: DataTypes.STRING,
       allowNull: true,
-      unique: false,
+      default: '',
     },
-    text: {
+
+    body: {
       type: DataTypes.TEXT,
       allowNull: true,
-      unique: false,
+      default: '',
     },
-    templateFile: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      unique: false,
-    }
+
   }, {});
 
   NotificationTemplate.auth = NotificationTemplate.prototype.auth = {
@@ -30,5 +44,11 @@ module.exports = ( db, sequelize, DataTypes ) => {
     deleteableBy: 'admin'
   };
 
+  NotificationTemplate.associate = function (models) {
+    this.belongsTo(models.Project, { onDelete: 'CASCADE' });
+  }
+
   return NotificationTemplate;
+
 };
+

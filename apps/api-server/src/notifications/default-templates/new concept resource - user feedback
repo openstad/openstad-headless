@@ -1,0 +1,19 @@
+<!-- template: new concept resource - user feedback -->
+<subject>new concept</subject>
+<body>
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text>
+          Beste {{user.name}},<br/>
+          <br/>
+          Hier zou een default template moeten staan voor het notificatietype 'new concept', maar die is nooit gemaakt. Toch jammer.<br/>
+          <br/>
+          Groeten van het OpenStad team
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
+</body>
