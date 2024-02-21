@@ -12,6 +12,8 @@ export type TextInputProps = {
     requiredWarning?: string;
     fieldKey: string;
     variant?: 'text input' | 'textarea';
+    placeholder?: string;
+    defaultValue?: string;
 }
 
 const TextInput: FC<TextInputProps> = ({
@@ -20,6 +22,8 @@ const TextInput: FC<TextInputProps> = ({
     variant,
     fieldKey,
     fieldRequired= false,
+    placeholder = '',
+    defaultValue= '',
     onChange
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -37,6 +41,8 @@ const TextInput: FC<TextInputProps> = ({
                     name={fieldKey}
                     required={fieldRequired}
                     type="text"
+                    placeholder={placeholder}
+                    defaultValue={defaultValue}
                     onChange={(e) => {
                         onChange({
                             name: fieldKey,
