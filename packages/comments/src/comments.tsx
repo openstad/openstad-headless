@@ -44,9 +44,7 @@ function Comments({
     api: props.api,
   });
 
-  const [currentUser, currentUserError, currentUserIsLoading] =
-    datastore.useCurrentUser({ ...args });
-  const [comments, commentsError, commentsIsLoading] = datastore.useComments({
+  const { data: comments } = datastore.useComments({
     projectId: props.projectId,
     resourceId: resourceId || props.resourceId,
     sentiment: props.sentiment,

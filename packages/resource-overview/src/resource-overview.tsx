@@ -199,7 +199,7 @@ function ResourceOverview({
     props.defaultSorting || undefined
   );
 
-  const {resources:resourcesWithPagination} = datastore.useResources({
+  const { data: resourcesWithPagination } = datastore.useResources({
     ...props,
     page,
     pageSize,
@@ -211,7 +211,7 @@ function ResourceOverview({
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
   const resources = resourcesWithPagination.records || [];
 
-  const [currentUser] = datastore.useCurrentUser({ ...props });
+  const { data: currentUser } = datastore.useCurrentUser({ ...props });
   const isModerator = hasRole(currentUser, 'moderator');
 
   const onResourceClick = useCallback(
@@ -287,32 +287,30 @@ function ResourceOverview({
             </div>
           ) : null}
 
-
-{filterNeccesary && datastore ? (
-
-<Filters
-  className='osc-flex-columned'
-  tagsLimitation={tagIdsToLimitResourcesTo}
-  dataStore={datastore}
-  sorting={props.sorting || []}
-  displaySorting={props.displaySorting || false}
-  defaultSorting={props.defaultSorting || ''}
-  displayTagFilters={props.displayTagFilters || false}
-  displaySearch={props.displaySearch || false}
-  tagGroups={props.tagGroups || []}
-  itemsPerPage={itemsPerPage}
-  resources={resources}
-  onUpdateFilter={(f) => {
-    if (f.tags.length === 0) {
-      setTags(tagIdsToLimitResourcesTo);
-    } else {
-      setTags(f.tags);
-    }
-    setSort(f.sort);
-    setSearch(f.search.text);
-  }}
-/>
-        ) : null}
+          {filterNeccesary && datastore ? (
+            <Filters
+              className="osc-flex-columned"
+              tagsLimitation={tagIdsToLimitResourcesTo}
+              dataStore={datastore}
+              sorting={props.sorting || []}
+              displaySorting={props.displaySorting || false}
+              defaultSorting={props.defaultSorting || ''}
+              displayTagFilters={props.displayTagFilters || false}
+              displaySearch={props.displaySearch || false}
+              tagGroups={props.tagGroups || []}
+              itemsPerPage={itemsPerPage}
+              resources={resources}
+              onUpdateFilter={(f) => {
+                if (f.tags.length === 0) {
+                  setTags(tagIdsToLimitResourcesTo);
+                } else {
+                  setTags(f.tags);
+                }
+                setSort(f.sort);
+                setSearch(f.search.text);
+              }}
+            />
+          ) : null}
 
           <section className="osc-resource-overview-resource-collection">
             {resources &&

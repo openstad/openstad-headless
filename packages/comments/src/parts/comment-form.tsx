@@ -23,8 +23,11 @@ function CommentForm({
   } as CommentPropsType;
 
   const datastore = new DataStore(args);
-  const [currentUser, currentUserError, currentUserIsLoading] =
-    datastore.useCurrentUser({ ...args });
+  const {
+    data: currentUser,
+    error: currentUserError,
+    isLoading: currentUserIsLoading,
+  } = datastore.useCurrentUser({ ...args });
 
   function canSubmit() {
     return true;

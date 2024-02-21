@@ -83,10 +83,10 @@ export default function useCurrentUser(props) {
     }
   }
 
-  return [
+  return {
     data,
-    () => console.log('setUser not (yet) implemented'),
+    setUser: () => console.log('setUser not (yet) implemented'),
     error,
     isLoading,
-  ];
+  };
 }
