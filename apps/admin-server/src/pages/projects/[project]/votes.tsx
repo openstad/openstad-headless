@@ -4,11 +4,13 @@ import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useVotes from '@/hooks/use-votes';
 import { ChevronRight } from 'lucide-react';
+import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
+import toast from 'react-hot-toast';
 
 export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
-  const { data } = useVotes(project as string);
+  const { data, removeVote } = useVotes(project as string);
 
   return (
     <div>
@@ -55,6 +57,23 @@ export default function ProjectResources() {
                   <Paragraph className="hidden lg:flex truncate lg:col-span-1 -mr-16">
                     {vote.userId}
                   </Paragraph>
+                  <div
+                      className="hidden lg:flex ml-auto"
+                      onClick={(e) => e.preventDefault()}>
+                      <RemoveResourceDialog
+                        header="Stem verwijderen"
+                        message="Weet je zeker dat je deze stem wilt verwijderen?"
+                        onDeleteAccepted={() =>
+                          removeVote(vote.id)
+                            .then(() =>
+                              toast.success('Stem successvol verwijderd')
+                            )
+                            .catch((e) =>
+                              toast.error('Stem kon niet worden verwijderd')
+                            )
+                        }
+                      />
+                    </div>
                 </li>
               ))}
             </ul>

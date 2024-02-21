@@ -5,5 +5,25 @@ export default function useComments(projectId?: string) {
 
   const commentListSwr = useSWR(projectId ? url : null);
 
-  return {...commentListSwr}
+  async function removeComment(id: number) {
+    const deleteUrl = `/api/openstad/api/project/${projectId}/comment/${id}`;
+
+    const res = await fetch(deleteUrl, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (res.ok) {
+      const existingData = [...commentListSwr.data];
+      const updatedList = existingData.filter((ed) => ed.id !== id);
+      commentListSwr.mutate(updatedList);
+      return updatedList;
+    } else {
+      throw new Error('Could not remove this comment');
+    }
+  }
+
+  return {...commentListSwr, removeComment}
 }

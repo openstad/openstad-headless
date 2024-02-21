@@ -7,7 +7,9 @@ import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { CSVLink } from 'react-csv';
 import { useProject } from '@/hooks/use-project';
-import useSWR from 'swr';
+import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
+import toast from 'react-hot-toast';
+import useCodes from '@/hooks/use-codes';
 
 const headers = [
   {label: "ID", key: "id"},
@@ -19,7 +21,7 @@ export default function ProjectCodes() {
   const { project } = router.query;
 
   const { data, isLoading } = useProject();
-  const { data:codes, isLoading:loadingCodes } = useSWR(() => '/api/oauth/api/admin/unique-codes?clientId=' + data.config.auth.provider.openstad.clientId);
+  const { data:codes, isLoading:loadingCodes, removeCode} = useCodes(data?.config?.auth?.provider?.openstad?.clientId);
 
   if(!codes?.data) return null;
 
@@ -67,6 +69,23 @@ export default function ProjectCodes() {
                   <Paragraph className="hidden lg:flex truncate">{code.id || null}</Paragraph>
                   <Paragraph className="hidden lg:flex truncate">{code.code || null}</Paragraph>
                   <Paragraph className="flex truncate -mr-16">{!!code.userId?"Al gebruikt":""}</Paragraph>
+                  <div
+                    className="hidden lg:flex ml-auto"
+                    onClick={(e) => e.preventDefault()}>
+                    <RemoveResourceDialog
+                      header="Stem verwijderen"
+                      message="Weet je zeker dat je deze stem wilt verwijderen?"
+                      onDeleteAccepted={() =>
+                        removeCode(code.id)
+                          .then(() =>
+                            toast.success('Stem successvol verwijderd')
+                          )
+                          .catch((e) =>
+                            toast.error('Stem kon niet worden verwijderd')
+                          )
+                      }
+                    />
+                  </div>
                 </li>
               ))}  
             </ul>

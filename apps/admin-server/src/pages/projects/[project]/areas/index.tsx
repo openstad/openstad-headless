@@ -6,11 +6,13 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useArea from '@/hooks/use-areas';
+import toast from 'react-hot-toast';
+import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 
 export default function ProjectAreas() {
   const router = useRouter();
   const { project } = router.query;
-  const { data } = useArea(project as string);
+  const { data, removeArea } = useArea(project as string);
 
   return (
     <div>
@@ -53,6 +55,23 @@ export default function ProjectAreas() {
                     <Paragraph className="flex truncate -mr-16">
                       {area.name}
                     </Paragraph>
+                    <div
+                      className="hidden lg:flex ml-auto"
+                      onClick={(e) => e.preventDefault()}>
+                      <RemoveResourceDialog
+                        header="Stem verwijderen"
+                        message="Weet je zeker dat je deze stem wilt verwijderen?"
+                        onDeleteAccepted={() =>
+                          removeArea(area.id)
+                            .then(() =>
+                              toast.success('Stem successvol verwijderd')
+                            )
+                            .catch((e) =>
+                              toast.error('Stem kon niet worden verwijderd')
+                            )
+                        }
+                      />
+                    </div>
                     <Paragraph className="flex">
                       <ChevronRight
                         strokeWidth={1.5}
