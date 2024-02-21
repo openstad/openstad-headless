@@ -249,8 +249,8 @@ function getWidgetJavascriptOutput(
   let css = '';
 
   let data = JSON.parse(widgetConfig)
-  let cssUrl = data.project.cssUrl;
-
+  let extraCss = data.project?.cssUrl ? `<link href="${data.project.cssUrl}" rel="stylesheet">` : '';
+  
   widgetSettings.js.forEach((file) => {
     widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
   });
@@ -282,7 +282,7 @@ function getWidgetJavascriptOutput(
           document.querySelector('head').innerHTML += \`
             <style>${css}</style>
             <link href="${remixIconCss}" rel="stylesheet">
-            <link href="${cssUrl}" rel="stylesheet">
+            ${extraCss}
           \`;
           
           function renderWidget () {
