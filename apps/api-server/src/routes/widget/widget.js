@@ -221,7 +221,6 @@ function setConfigsToOutput(
 
   config = JSON.stringify(config)
     .replaceAll('\\', '\\\\')
-    .replaceAll("'", "\\'")
     .replaceAll('`', '\\`');
 
   return getWidgetJavascriptOutput(
