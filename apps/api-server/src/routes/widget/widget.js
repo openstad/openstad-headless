@@ -221,7 +221,6 @@ function setConfigsToOutput(
 
   config = JSON.stringify(config)
     .replaceAll('\\', '\\\\')
-    .replaceAll("'", "\\'")
     .replaceAll('`', '\\`');
 
   return getWidgetJavascriptOutput(
@@ -248,9 +247,9 @@ function getWidgetJavascriptOutput(
   let widgetOutput = '';
   let css = '';
 
-  let data = JSON.parse(widgetConfig)
-  let cssUrl = data.project.cssUrl;
-
+  const data = JSON.parse(widgetConfig)
+  const extraCss = data.project?.cssUrl ? `<link href="${data.project.cssUrl}" rel="stylesheet">` : '';
+  
   widgetSettings.js.forEach((file) => {
     widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
   });
@@ -282,7 +281,7 @@ function getWidgetJavascriptOutput(
           document.querySelector('head').innerHTML += \`
             <style>${css}</style>
             <link href="${remixIconCss}" rel="stylesheet">
-            <link href="${cssUrl}" rel="stylesheet">
+            ${extraCss}
           \`;
           
           function renderWidget () {
