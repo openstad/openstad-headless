@@ -15,6 +15,7 @@ export type SelectFieldProps = {
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
+    disabled?: boolean;
 }
 
 const SelectField: FC<SelectFieldProps> = ({
@@ -24,7 +25,8 @@ const SelectField: FC<SelectFieldProps> = ({
       fieldKey,
       defaultOption = 'Selecteer een optie',
       fieldRequired= false,
-      onChange
+      onChange,
+      disabled = false,
 }) => {
     return (
         <FormField type="select">
@@ -41,6 +43,7 @@ const SelectField: FC<SelectFieldProps> = ({
                         name: fieldKey,
                         value: e.target.value
                     })}
+                    disabled={disabled}
                 >
                     <SelectOption value="">
                         {defaultOption}

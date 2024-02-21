@@ -14,6 +14,7 @@ export type RangeSliderProps = {
     showLabels?: boolean;
     minCharacters?: number;
     maxCharacters?: number;
+    disabled?: boolean;
 }
 
 const RangeSlider: FC<RangeSliderProps> = ({
@@ -28,7 +29,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
     fieldRequired= false,
     fieldKey,
     showLabels = true,
-    onChange
+    onChange,
+    disabled = false,
 }) => {
     return (
         <div className="a-b-slider-container">
@@ -69,6 +71,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                     });
                 }}
                 aria-label={`Selecteer een waarde tussen 1 en 100 voor ${titleA} en ${titleB}`}
+                disabled={disabled}
             />
             <p id="a-b-description" className="a-b-description visually-hidden">
                 Deze slider vertegenwoordigt de waarde voor {titleA} aan de linkerkant en de waarde voor {titleB} aan de rechterkant.

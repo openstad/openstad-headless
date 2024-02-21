@@ -14,6 +14,7 @@ export type FileUploadProps = {
     fieldKey: string;
     variant?: 'multiple' | 'single';
     allowedTypes?: string;
+    disabled?: boolean;
 }
 
 const FileUploadField: FC<FileUploadProps> = ({
@@ -24,6 +25,7 @@ const FileUploadField: FC<FileUploadProps> = ({
     variant = "single",
     onChange,
     allowedTypes = "",
+    disabled = false,
 }) => {
     const randomID =
         Math.random().toString(36).substring(2, 15) +
@@ -76,6 +78,7 @@ const FileUploadField: FC<FileUploadProps> = ({
                         handleFileUpload(e);
                     }}
                     accept={acceptAttribute}
+                    disabled={disabled}
                 />
             </div>
         </FormField>

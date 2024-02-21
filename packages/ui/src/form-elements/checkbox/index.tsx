@@ -15,6 +15,7 @@ export type CheckboxFieldProps = {
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
+    disabled?: boolean;
 }
 
 const CheckboxField: FC<CheckboxFieldProps> = ({
@@ -23,7 +24,8 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        choices,
        fieldRequired = false,
        fieldKey,
-       onChange
+       onChange,
+       disabled = false,
 }) => {
     const [selectedChoices, setSelectedChoices] = useState<string[]>([]);
 
@@ -63,6 +65,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                                     required={fieldRequired}
                                     checked={selectedChoices.includes(choice)}
                                     onChange={handleChoiceChange}
+                                    disabled={disabled}
                                 />
                                 {choice}
                             </FormLabel>

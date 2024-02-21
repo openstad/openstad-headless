@@ -14,6 +14,7 @@ export type RadioboxFieldProps = {
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
+    disabled?: boolean;
 }
 
 const RadioboxField: FC<RadioboxFieldProps> = ({
@@ -21,7 +22,8 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     choices,
     fieldRequired = false,
     fieldKey,
-    onChange
+    onChange,
+    disabled = false,
 }) => {
     return (
         <div className="question">
@@ -41,6 +43,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                                         name: fieldKey,
                                         value: choice
                                     })}
+                                    disabled={disabled}
                                 />
                                 {choice}
                             </FormLabel>

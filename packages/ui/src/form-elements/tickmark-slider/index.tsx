@@ -9,6 +9,7 @@ export type TickmarkSliderProps = {
     imageAlt?: string;
     imageDescription?: string;
     description?: string;
+    disabled?: boolean;
 }
 
 const TickmarkSlider: FC<TickmarkSliderProps> = ({
@@ -21,7 +22,8 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
      imageAlt = '',
      imageDescription = '',
      onChange,
-     index
+     index,
+     disabled = false,
 }) => {
     const defaultValue = Math.ceil(fieldOptions.length / 2).toString();
     const [value, setValue] = useState<string>(defaultValue);
@@ -62,6 +64,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                     });
                 }}
                 aria-label={`Selecteer een waarde tussen 1 en ${fieldOptions.length}`}
+                disabled={disabled}
             />
             <datalist id={`form-field-tickmarks-${index}`}>
                 {fieldOptions.map((option, key) => (

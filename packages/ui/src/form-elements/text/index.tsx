@@ -14,6 +14,7 @@ export type TextInputProps = {
     variant?: 'text input' | 'textarea';
     placeholder?: string;
     defaultValue?: string;
+    disabled?: boolean;
 }
 
 const TextInput: FC<TextInputProps> = ({
@@ -24,7 +25,8 @@ const TextInput: FC<TextInputProps> = ({
     fieldRequired= false,
     placeholder = '',
     defaultValue= '',
-    onChange
+    onChange,
+    disabled = false,
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const InputComponent = variant === 'textarea' ? Textarea : Textbox;
@@ -49,6 +51,7 @@ const TextInput: FC<TextInputProps> = ({
                             value: e.target.value,
                         });
                     }}
+                    disabled={disabled}
                 />
             </div>
         </FormField>
