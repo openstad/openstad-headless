@@ -59,15 +59,15 @@ export default function ProjectAreas() {
                       className="hidden lg:flex ml-auto"
                       onClick={(e) => e.preventDefault()}>
                       <RemoveResourceDialog
-                        header="Stem verwijderen"
-                        message="Weet je zeker dat je deze stem wilt verwijderen?"
+                        header="Gebied verwijderen"
+                        message="Weet je zeker dat je deze gebied wilt verwijderen?"
                         onDeleteAccepted={() =>
                           removeArea(area.id)
                             .then(() =>
-                              toast.success('Stem successvol verwijderd')
+                              toast.success('Gebied successvol verwijderd')
                             )
                             .catch((e) =>
-                              toast.error('Stem kon niet worden verwijderd')
+                              toast.error('Gebied kon niet worden verwijderd')
                             )
                         }
                       />
