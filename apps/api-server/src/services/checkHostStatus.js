@@ -6,7 +6,7 @@ const ip = require('ip');
 const getK8sApi = () => {
   const kc = new k8s.KubeConfig();
   kc.loadFromCluster();
-  return kc.makeApiClient(k8s.NetworkingV1beta1Api);
+  return kc.makeApiClient(k8s.NetworkingV1Api);
 };
 
 const lookupPromise = async (domain) => {

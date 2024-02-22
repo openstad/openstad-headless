@@ -674,15 +674,19 @@ module.exports = function (db, sequelize, DataTypes) {
         };
       },
       includeTags: {
-        include: [{
-          model: db.Tag,
-          // where: {
-          //   type: {
-          //     [Op.not]:'status'
-          //   }
-          // },
-          attributes: ['id', 'type', 'name', 'label','extraFunctionality'],
-        }]
+        include: [
+          {
+            model: db.Tag,
+            where: {
+              type: {
+                [Op.not]: 'status',
+              },
+            },
+            attributes: ['id', 'type', 'name', 'label', 'extraFunctionality'],
+            through: { attributes: [] },
+            required: false
+          },
+        ],
       },
 
       selectTags: function (tags) {

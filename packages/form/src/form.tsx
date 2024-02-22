@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { FormProps, FieldProps } from "./props";
+import {FormProps, FieldProps, CombinedFieldPropsWithType, ComponentFieldProps} from "./props";
 import TextInput from "@openstad-headless/ui/src/form-elements/text";
 import RangeSlider from "@openstad-headless/ui/src/form-elements/a-b-slider";
 import CheckboxField from "@openstad-headless/ui/src/form-elements/checkbox";
@@ -9,19 +9,23 @@ import TickmarkSlider from "@openstad-headless/ui/src/form-elements/tickmark-sli
 import FileUploadField from "@openstad-headless/ui/src/form-elements/file-upload";
 import MapField from "@openstad-headless/ui/src/form-elements/map";
 import { handleSubmit } from "./submit";
+import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden/index.js";
+import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choice/index.js";
 
 const Form: FC<FormProps> = ({
      title = 'Form Widget',
      fields = [],
      submitText = 'Verzenden',
      submitHandler = () => {},
-     saveAsConceptLabel = '',
-     saveAsConceptHandler = () => {},
+     submitDisabled = false,
+     secondaryLabel = '',
+     secondaryHandler = () => {},
  }) => {
     const initialFormValues: { [key: string]: any } = {};
     fields.forEach((field) => {
         if (field.fieldKey) {
-            initialFormValues[field.fieldKey] = '';
+            //@ts-ignore
+            initialFormValues[field.fieldKey] = typeof field.defaultValue !== 'undefined' ? field.defaultValue :'';
         }
     });
 
@@ -33,23 +37,28 @@ const Form: FC<FormProps> = ({
         handleSubmit(fields, formValues, setFormErrors, submitHandler);
     };
 
-    const handleInputChange = (event) => {
+    const handleInputChange = (event: {name: string, value: string | []}) => {
         const { name, value } = event;
         setFormValues({ ...formValues, [name]: value });
     };
 
-    const componentMap: { [key: string]: React.ComponentType<FieldProps> } = {
-        text: TextInput,
-        range: RangeSlider,
-        checkbox: CheckboxField,
-        radiobox: RadioboxField,
-        select: SelectField,
-        'tickmark-slider': TickmarkSlider,
-        upload: FileUploadField,
-        map: MapField,
+    const componentMap: { [key: string]: React.ComponentType<ComponentFieldProps> } = {
+        text: TextInput as React.ComponentType<ComponentFieldProps>,
+        range: RangeSlider as React.ComponentType<ComponentFieldProps>,
+        checkbox: CheckboxField as React.ComponentType<ComponentFieldProps>,
+        radiobox: RadioboxField as React.ComponentType<ComponentFieldProps>,
+        select: SelectField as React.ComponentType<ComponentFieldProps>,
+        'tickmark-slider': TickmarkSlider as React.ComponentType<ComponentFieldProps>,
+        upload: FileUploadField as React.ComponentType<ComponentFieldProps>,
+        map: MapField as React.ComponentType<ComponentFieldProps>,
+        hidden: HiddenInput as React.ComponentType<ComponentFieldProps>,
+        imageChoice: ImageChoiceField as React.ComponentType<ComponentFieldProps>,
     };
 
-    const renderField = (field: FieldProps, index: number) => {
+    const renderField = (field: CombinedFieldPropsWithType, index: number) => {
+        if (!field.type) {
+            return null;
+        }
       const Component = componentMap[field.type];
       if (Component) {
         return (
@@ -65,21 +74,23 @@ const Form: FC<FormProps> = ({
     return (
         <div className="form-widget">
             <div className="form-widget-container">
-                {title ? <h5 className="like-widget-title">{title}</h5> : null}
+                {title ? <h5 className="form-widget-title">{title}</h5> : null}
 
                 <form onSubmit={handleFormSubmit} className="form-container" noValidate>
-                    {fields.map((field: FieldProps, index: number) => (
-                        <div key={index}>
+                    {fields.map((field: CombinedFieldPropsWithType, index: number) => (
+                        <div key={index} className={`question-type-${field.type}`}>
                             {renderField(field, index)}
                             <div className="error-message">
                                 {formErrors[field.fieldKey] && <span>{formErrors[field.fieldKey]}</span>}
                             </div>
                         </div>
                     ))}
-                    {saveAsConceptLabel && (
-                        <button type="button" onClick={() => saveAsConceptHandler(formValues)}>{saveAsConceptLabel}</button>
+                    {secondaryLabel && (
+                        <button type="button" onClick={() => secondaryHandler(formValues)}>{secondaryLabel}</button>
                     )}
-                    <button type="submit">{submitText}</button>
+                    <button type="submit" disabled={submitDisabled}>
+                        {submitText}
+                    </button>
                 </form>
             </div>
         </div>

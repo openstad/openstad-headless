@@ -21,7 +21,6 @@ export default function useUserVote(props) {
 	  document.dispatchEvent(event);
   }
 
-  return [ userVote, error, isLoading ];
-
+  return {data:userVote, error, isLoading};
 }
 

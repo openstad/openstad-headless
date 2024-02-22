@@ -7,6 +7,7 @@ export type MapProps = {
     description: string;
     fieldKey: string;
     fieldRequired: boolean;
+    onChange?: (e: {name: string, value: string | []}) => void;
 }
 
 const MapField: FC<MapProps> = ({

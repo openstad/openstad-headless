@@ -14,6 +14,8 @@ export type FileUploadProps = {
     fieldKey: string;
     variant?: 'multiple' | 'single';
     allowedTypes?: string;
+    disabled?: boolean;
+    onChange?: (e: {name: string, value: string | []}) => void;
 }
 
 const FileUploadField: FC<FileUploadProps> = ({
@@ -24,6 +26,7 @@ const FileUploadField: FC<FileUploadProps> = ({
     variant = "single",
     onChange,
     allowedTypes = "",
+    disabled = false,
 }) => {
     const randomID =
         Math.random().toString(36).substring(2, 15) +
@@ -32,10 +35,12 @@ const FileUploadField: FC<FileUploadProps> = ({
     const [files, setFiles] = useState<[]>([]);
 
     useEffect(() => {
-        onChange({
-            name: fieldKey,
-            value: files,
-        });
+        if (onChange) {
+            onChange({
+                name: fieldKey,
+                value: files,
+            });
+        }
     }, [files]);
 
     const handleFileUpload = (
@@ -44,15 +49,18 @@ const FileUploadField: FC<FileUploadProps> = ({
         const files = event.target.files;
         const filesArray = [];
 
-        if (files.length > 0) {
-            for (const i in files) {
-                if (files[i] instanceof File) {
-                    filesArray.push(files[i]);
+        if (files) {
+            if (files.length > 0) {
+                for (const i in files) {
+                    if (files[i] instanceof File) {
+                        filesArray.push(files[i]);
+                    }
                 }
             }
         }
 
-        setFiles(filesArray);
+        setFiles(filesArray as []);
+
     };
 
     const acceptAttribute = allowedTypes
@@ -76,6 +84,7 @@ const FileUploadField: FC<FileUploadProps> = ({
                         handleFileUpload(e);
                     }}
                     accept={acceptAttribute}
+                    disabled={disabled}
                 />
             </div>
         </FormField>

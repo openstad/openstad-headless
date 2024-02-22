@@ -48,8 +48,8 @@ function Likes({
 
   const session = new SessionStorage({ projectId: props.projectId });
 
-  const [currentUser] = datastore.useCurrentUser(props);
-  const [resource] = datastore.useResource({
+  const {data:currentUser} = datastore.useCurrentUser(props);
+  const {data:resource} = datastore.useResource({
     projectId: props.projectId,
     resourceId,
   });

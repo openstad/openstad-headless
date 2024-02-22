@@ -12,6 +12,11 @@ export type TextInputProps = {
     requiredWarning?: string;
     fieldKey: string;
     variant?: 'text input' | 'textarea';
+    placeholder?: string;
+    defaultValue?: string;
+    disabled?: boolean;
+    rows?: TextInputProps['variant'] extends 'textarea' ? number : undefined;
+    onChange?: (e: {name: string, value: string | []}) => void;
 }
 
 const TextInput: FC<TextInputProps> = ({
@@ -20,7 +25,11 @@ const TextInput: FC<TextInputProps> = ({
     variant,
     fieldKey,
     fieldRequired= false,
-    onChange
+    placeholder = '',
+    defaultValue= '',
+    onChange,
+    disabled = false,
+    rows,
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const InputComponent = variant === 'textarea' ? Textarea : Textbox;
@@ -37,12 +46,18 @@ const TextInput: FC<TextInputProps> = ({
                     name={fieldKey}
                     required={fieldRequired}
                     type="text"
+                    placeholder={placeholder}
+                    defaultValue={defaultValue}
                     onChange={(e) => {
-                        onChange({
-                            name: fieldKey,
-                            value: e.target.value,
-                        });
+                        if (onChange) {
+                            onChange({
+                                name: fieldKey,
+                                value: e.target.value,
+                            });
+                        }
                     }}
+                    disabled={disabled}
+                    rows={rows}
                 />
             </div>
         </FormField>

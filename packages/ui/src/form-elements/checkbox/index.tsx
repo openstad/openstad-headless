@@ -5,33 +5,38 @@ import {
     FormField,
     FormLabel,
     Checkbox,
-    Paragraph,
+    Paragraph, FormFieldDescription,
 } from "@utrecht/component-library-react";
 
 export type CheckboxFieldProps = {
-    question: string;
+    title: string;
     description?: string;
     choices: string[];
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
+    disabled?: boolean;
+    onChange?: (e: {name: string, value: string | []}) => void;
 }
 
 const CheckboxField: FC<CheckboxFieldProps> = ({
-       question,
+       title,
        description,
        choices,
        fieldRequired = false,
        fieldKey,
-       onChange
+       onChange,
+       disabled = false,
 }) => {
     const [selectedChoices, setSelectedChoices] = useState<string[]>([]);
 
     useEffect(() => {
-        onChange({
-            name: fieldKey,
-            value: JSON.stringify(selectedChoices)
-        });
+        if (onChange) {
+            onChange({
+                name: fieldKey,
+                value: JSON.stringify(selectedChoices)
+            });
+        }
     } , [selectedChoices]);
 
     const handleChoiceChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -47,11 +52,16 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
         <div className="question">
             <Fieldset>
                 <FieldsetLegend>
-                    {question}
-                    {description && <p>{description}</p>}
+                    {title}
                 </FieldsetLegend>
 
-                {choices.map((choice, index) => (
+                {description &&
+                    <FormFieldDescription>
+                        {description}
+                    </FormFieldDescription>
+                }
+
+                {choices?.map((choice, index) => (
                     <FormField type="checkbox" key={index}>
                         <Paragraph className="checkbox-field-label">
                             <FormLabel htmlFor={`${fieldKey}_${index}`} type="checkbox">
@@ -63,6 +73,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                                     required={fieldRequired}
                                     checked={selectedChoices.includes(choice)}
                                     onChange={handleChoiceChange}
+                                    disabled={disabled}
                                 />
                                 {choice}
                             </FormLabel>

@@ -5,6 +5,7 @@ import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { DateCountdownBarWidgetProps } from '@openstad/date-countdown-bar/src/date-countdown-bar';
+import { parseISO } from 'date-fns';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Button } from '../../../../../../components/ui/button';
@@ -16,6 +17,7 @@ import {
   FormLabel,
 } from '../../../../../../components/ui/form';
 import { Input } from '../../../../../../components/ui/input';
+import { useState, useEffect } from 'react';
 
 const formSchema = z.object({
   beforeText: z.string().optional(),
@@ -28,7 +30,16 @@ export default function CountdownBarGeneral(
   props: DateCountdownBarWidgetProps &
     EditFieldProps<DateCountdownBarWidgetProps>
 ) {
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
+
+  useEffect(() => {
+    if (!selectedDate && props.date) {
+      setSelectedDate(parseISO(props.date));
+    } else if(props && (!props.date && !selectedDate)) {
+      setSelectedDate(new Date());
+    }
+  }, [selectedDate, props.date]);
 
   function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
@@ -100,12 +111,18 @@ export default function CountdownBarGeneral(
               <FormLabel>Einddatum</FormLabel>
               <FormControl>
                 <>
-                  <Calendar
-                    onDayClick={(day) => {
-                      field.onChange(day.toISOString());
-                      onFieldChange(field.name, day.toISOString());
-                    }}
-                  />
+                  {selectedDate ? (
+                    <Calendar
+                      selected={selectedDate}
+                      fromDate={new Date()}
+                      defaultMonth={selectedDate}
+                      onDayClick={(day) => {
+                        setSelectedDate(day);
+                        field.onChange(day.toISOString());
+                        onFieldChange(field.name, day.toISOString());
+                      }}
+                    />
+                  ) : null}
                 </>
               </FormControl>
             </FormItem>

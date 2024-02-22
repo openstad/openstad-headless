@@ -3,14 +3,13 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useVotes from '@/hooks/use-votes';
-import toast from 'react-hot-toast';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
+import toast from 'react-hot-toast';
 
 export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
   const { data, remove } = useVotes(project as string);
-  const [openVoteDeleteDialog, setOpenVoteDeleteDialog] = useState<boolean>();
 
   return (
     <div>

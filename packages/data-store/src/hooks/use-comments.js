@@ -76,5 +76,5 @@ export default function useComments(props) {
     });
   });
 
-  return [comments, error, isLoading];
+  return {data:comments, error, isLoading};
 }

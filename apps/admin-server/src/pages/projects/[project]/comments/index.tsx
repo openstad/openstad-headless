@@ -4,14 +4,14 @@ import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useComments from '@/hooks/use-comments';
 import Link from 'next/link';
+import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
+import toast from 'react-hot-toast';
 
 export default function ProjectComments() {
   const router = useRouter();
   const { project } = router.query;
-  const { data } = useComments(project as string);
+  const { data, removeComment } = useComments(project as string);
   const [comments, setComments] = useState<any[]>([])
-
-  let resourceArray = []
 
   useEffect(() => {
     if (data) {
@@ -79,6 +79,23 @@ export default function ProjectComments() {
                     <Paragraph className="hidden lg:flex truncate lg:col-span-1">
                       {comment.sentiment}
                     </Paragraph>
+                    <div
+                      className="hidden lg:flex ml-auto"
+                      onClick={(e) => e.preventDefault()}>
+                      <RemoveResourceDialog
+                        header="Argument verwijderen"
+                        message="Weet je zeker dat je deze argument wilt verwijderen?"
+                        onDeleteAccepted={() =>
+                          removeComment(comment.id)
+                            .then(() =>
+                              toast.success('Argument successvol verwijderd')
+                            )
+                            .catch((e) =>
+                              toast.error('Argument kon niet worden verwijderd')
+                            )
+                        }
+                      />
+                    </div>
                   </li>
                </Link>
               ))}
