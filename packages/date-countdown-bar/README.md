@@ -1,27 +1,29 @@
-# React + TypeScript + Vite
+# Design tokens
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<!-- Countdown Container -->
+--nlds-countdownbar-border-radius
+--nlds-countdownbar-background-color
+--nlds-countdownbar-gap
+--nlds-countdownbar-padding
+--nlds-countdownbar-height
 
-Currently, two official plugins are available:
+<!-- Countdown Number Container -->
+--nlds-countdownbar-nr-container-gap
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+<!-- Countdown Text -->
+--nlds-countdownbar-title-text-color
+--nlds-countdownbar-title-font-weight
+--nlds-countdownbar-title-font-size
+--nlds-countdownbar-title-line-height
 
-## Expanding the ESLint configuration
+<!-- Countdown Title -->
+--nlds-countdownbar-label-number-color
+--nlds-countdownbar-label-number-font-weight
+--nlds-countdownbar-label-number-font-size
+--nlds-countdownbar-label-number-line-height
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
-```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+<!-- Countdown Label -->
+--nlds-countdownbar-label-title-color
+--nlds-countdownbar-label-title-font-weight
+--nlds-countdownbar-label-title-font-size
+--nlds-countdownbar-label-title-line-height
