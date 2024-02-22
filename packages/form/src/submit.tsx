@@ -1,7 +1,9 @@
 import { ZodType } from "zod";
 import {getSchemaForField} from "./validation.js";
+import {CombinedFieldPropsWithType} from "./props";
+import {Dispatch, SetStateAction} from "react";
 
-export const handleSubmit = (fields, formValues, setFormErrors, submitHandler) => {
+export const handleSubmit = (fields: CombinedFieldPropsWithType[], formValues: {[key: string]: string}, setFormErrors: Dispatch<SetStateAction<{ [key: string]: string | null; }>>, submitHandler: (values: {[key: string]: string}) => void) => {
     const errors: { [key: string]: string | null } = {};
     fields.forEach((field) => {
         if (field.fieldKey) {
@@ -14,11 +16,13 @@ export const handleSubmit = (fields, formValues, setFormErrors, submitHandler) =
                 } catch (error) {
                     let errorMessage = null;
 
-                    if (typeof error.message === 'string') {
-                        const parsedErrors = JSON.parse(error.message);
-                        if (Array.isArray(parsedErrors) && parsedErrors.length > 0) {
-                            const firstError = parsedErrors[0];
-                            errorMessage = firstError.message;
+                    if (typeof error === 'object' && error !== null && 'message' in error) {
+                        if (typeof error.message === 'string') {
+                            const parsedErrors = JSON.parse(error.message);
+                            if (Array.isArray(parsedErrors) && parsedErrors.length > 0) {
+                                const firstError = parsedErrors[0];
+                                errorMessage = firstError.message;
+                            }
                         }
                     }
 

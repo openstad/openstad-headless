@@ -15,6 +15,7 @@ export type FileUploadProps = {
     variant?: 'multiple' | 'single';
     allowedTypes?: string;
     disabled?: boolean;
+    onChange?: (e: {name: string, value: string | []}) => void;
 }
 
 const FileUploadField: FC<FileUploadProps> = ({
@@ -34,10 +35,12 @@ const FileUploadField: FC<FileUploadProps> = ({
     const [files, setFiles] = useState<[]>([]);
 
     useEffect(() => {
-        onChange({
-            name: fieldKey,
-            value: files,
-        });
+        if (onChange) {
+            onChange({
+                name: fieldKey,
+                value: files,
+            });
+        }
     }, [files]);
 
     const handleFileUpload = (
@@ -46,15 +49,18 @@ const FileUploadField: FC<FileUploadProps> = ({
         const files = event.target.files;
         const filesArray = [];
 
-        if (files.length > 0) {
-            for (const i in files) {
-                if (files[i] instanceof File) {
-                    filesArray.push(files[i]);
+        if (files) {
+            if (files.length > 0) {
+                for (const i in files) {
+                    if (files[i] instanceof File) {
+                        filesArray.push(files[i]);
+                    }
                 }
             }
         }
 
-        setFiles(filesArray);
+        setFiles(filesArray as []);
+
     };
 
     const acceptAttribute = allowedTypes

@@ -16,6 +16,7 @@ export type CheckboxFieldProps = {
     requiredWarning?: string;
     fieldKey: string;
     disabled?: boolean;
+    onChange?: (e: {name: string, value: string | []}) => void;
 }
 
 const CheckboxField: FC<CheckboxFieldProps> = ({
@@ -30,10 +31,12 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
     const [selectedChoices, setSelectedChoices] = useState<string[]>([]);
 
     useEffect(() => {
-        onChange({
-            name: fieldKey,
-            value: JSON.stringify(selectedChoices)
-        });
+        if (onChange) {
+            onChange({
+                name: fieldKey,
+                value: JSON.stringify(selectedChoices)
+            });
+        }
     } , [selectedChoices]);
 
     const handleChoiceChange = (event: React.ChangeEvent<HTMLInputElement>): void => {

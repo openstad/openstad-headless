@@ -13,7 +13,8 @@ import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 import React from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-import Form from "@openstad-headless/form/src/form.tsx";
+import Form from "@openstad-headless/form/src/form";
+import { FieldProps } from '@openstad-headless/form/src/props';
 
 export type EnqueteWidgetProps = BaseProps &
     ProjectSettingProps &
@@ -47,14 +48,13 @@ function Enquete(props: EnqueteWidgetProps) {
         }
     }
 
-    const formFields = [];
+    const formFields : FieldProps[] = [];
     if ( typeof(props) !== 'undefined'
         && typeof(props.items) === 'object'
         && props.items.length > 0
     ) {
         for (const item of props.items) {
-            const fieldData = {
-                type: item.questionType,
+            const fieldData : any = {
                 title: item.title,
                 description: item.description,
                 fieldKey: item.key,

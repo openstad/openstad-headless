@@ -15,6 +15,7 @@ export type RangeSliderProps = {
     minCharacters?: number;
     maxCharacters?: number;
     disabled?: boolean;
+    onChange?: (e: {name: string, value: string | []}) => void;
 }
 
 const RangeSlider: FC<RangeSliderProps> = ({
@@ -65,10 +66,12 @@ const RangeSlider: FC<RangeSliderProps> = ({
                 name={fieldKey}
                 required={fieldRequired}
                 onChange={(e) => {
-                    onChange({
-                        name: fieldKey,
-                        value: e.target.value,
-                    });
+                    if (onChange) {
+                        onChange({
+                            name: fieldKey,
+                            value: e.target.value,
+                        });
+                    }
                 }}
                 aria-label={`Selecteer een waarde tussen 1 en 100 voor ${titleA} en ${titleB}`}
                 disabled={disabled}

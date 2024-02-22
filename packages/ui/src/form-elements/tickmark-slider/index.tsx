@@ -1,6 +1,7 @@
 import React, { FC, useState } from 'react';
 
 export type TickmarkSliderProps = {
+    index: number;
     title: string;
     fieldOptions: { value: string; label: string }[];
     fieldRequired: boolean;
@@ -10,6 +11,7 @@ export type TickmarkSliderProps = {
     imageDescription?: string;
     description?: string;
     disabled?: boolean;
+    onChange?: (e: {name: string, value: string}) => void;
 }
 
 const TickmarkSlider: FC<TickmarkSliderProps> = ({
@@ -58,10 +60,12 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 required={fieldRequired}
                 onChange={(e) => {
                     setValue(e.target.value);
-                    onChange({
-                        name: fieldKey,
-                        value: e.target.value,
-                    });
+                    if (onChange) {
+                        onChange({
+                            name: fieldKey,
+                            value: e.target.value,
+                        });
+                    }
                 }}
                 aria-label={`Selecteer een waarde tussen 1 en ${fieldOptions.length}`}
                 disabled={disabled}
