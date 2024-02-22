@@ -10,12 +10,14 @@ import FileUploadField from "@openstad-headless/ui/src/form-elements/file-upload
 import MapField from "@openstad-headless/ui/src/form-elements/map";
 import { handleSubmit } from "./submit";
 import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden/index.js";
+import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choice/index.js";
 
 const Form: FC<FormProps> = ({
      title = 'Form Widget',
      fields = [],
      submitText = 'Verzenden',
      submitHandler = () => {},
+     submitDisabled = false,
      saveAsConceptLabel = '',
      saveAsConceptHandler = () => {},
  }) => {
@@ -49,6 +51,7 @@ const Form: FC<FormProps> = ({
         upload: FileUploadField,
         map: MapField,
         hidden: HiddenInput,
+        imageChoice: ImageChoiceField,
     };
 
     const renderField = (field: FieldProps, index: number) => {
@@ -71,7 +74,7 @@ const Form: FC<FormProps> = ({
 
                 <form onSubmit={handleFormSubmit} className="form-container" noValidate>
                     {fields.map((field: FieldProps, index: number) => (
-                        <div key={index}>
+                        <div key={index} className={`question-type-${field.type}`}>
                             {renderField(field, index)}
                             <div className="error-message">
                                 {formErrors[field.fieldKey] && <span>{formErrors[field.fieldKey]}</span>}
@@ -81,7 +84,9 @@ const Form: FC<FormProps> = ({
                     {saveAsConceptLabel && (
                         <button type="button" onClick={() => saveAsConceptHandler(formValues)}>{saveAsConceptLabel}</button>
                     )}
-                    <button type="submit">{submitText}</button>
+                    <button type="submit" disabled={submitDisabled}>
+                        {submitText}
+                    </button>
                 </form>
             </div>
         </div>

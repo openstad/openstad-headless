@@ -40,6 +40,7 @@ export const getSchemaForField = (field: FieldProps) => {
         case 'radiobox':
         case 'select':
         case 'tickmark-slider':
+        case 'imageChoice':
             if (typeof (field.fieldRequired) !== 'undefined' && field.fieldRequired) {
                 return z.string().nonempty(field.customWarning || 'Dit veld is verplicht');
             } else {

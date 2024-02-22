@@ -6,12 +6,14 @@ import { SelectFieldProps } from "@openstad-headless/ui/src/form-elements/select
 import { RadioboxFieldProps } from "@openstad-headless/ui/src/form-elements/radio";
 import { FileUploadProps} from "@openstad-headless/ui/src/form-elements/file-upload";
 import { HiddenInputProps } from "@openstad-headless/ui/src/form-elements/hidden/index.js";
+import {ImageChoiceFieldProps} from "@openstad-headless/ui/src/form-elements/image-choice/index.js";
 
 export type FormProps = {
     title?: string;
     fields: CombinedFieldProps[];
     submitText?: string;
     submitHandler: (data: any) => void;
+    submitDisabled?: boolean;
     saveAsConceptLabel?: string;
     saveAsConceptHandler?: (data: any) => void;
 }
@@ -24,7 +26,8 @@ type CombinedFieldProps = (
     SelectFieldProps |
     RadioboxFieldProps |
     FileUploadProps |
-    HiddenInputProps
+    HiddenInputProps |
+    ImageChoiceFieldProps
 );
 
 export { CombinedFieldProps as FieldProps };
