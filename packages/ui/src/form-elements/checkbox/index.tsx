@@ -5,11 +5,11 @@ import {
     FormField,
     FormLabel,
     Checkbox,
-    Paragraph,
+    Paragraph, FormFieldDescription,
 } from "@utrecht/component-library-react";
 
 export type CheckboxFieldProps = {
-    question: string;
+    title: string;
     description?: string;
     choices: string[];
     fieldRequired?: boolean;
@@ -19,7 +19,7 @@ export type CheckboxFieldProps = {
 }
 
 const CheckboxField: FC<CheckboxFieldProps> = ({
-       question,
+       title,
        description,
        choices,
        fieldRequired = false,
@@ -49,11 +49,16 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
         <div className="question">
             <Fieldset>
                 <FieldsetLegend>
-                    {question}
-                    {description && <p>{description}</p>}
+                    {title}
                 </FieldsetLegend>
 
-                {choices.map((choice, index) => (
+                {description &&
+                    <FormFieldDescription>
+                        {description}
+                    </FormFieldDescription>
+                }
+
+                {choices?.map((choice, index) => (
                     <FormField type="checkbox" key={index}>
                         <Paragraph className="checkbox-field-label">
                             <FormLabel htmlFor={`${fieldKey}_${index}`} type="checkbox">

@@ -1,7 +1,7 @@
 import React, {FC} from 'react';
 
 export type RangeSliderProps = {
-    question: string;
+    title: string;
     description?: string;
     labelA: string;
     labelB: string;
@@ -18,7 +18,7 @@ export type RangeSliderProps = {
 }
 
 const RangeSlider: FC<RangeSliderProps> = ({
-    question= '',
+    title= '',
     description= '',
     labelA,
     labelB,
@@ -34,8 +34,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
 }) => {
     return (
         <div className="a-b-slider-container">
-            {question && (
-                <h3 className="a-b-question">{question}</h3>
+            {title && (
+                <h3 className="a-b-question">{title}</h3>
             )}
             {description && (
                 <p>{description}</p>

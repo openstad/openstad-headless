@@ -5,11 +5,12 @@ import {
     FormField,
     FormLabel,
     RadioButton,
-    Paragraph,
+    Paragraph, FormFieldDescription,
 } from "@utrecht/component-library-react";
 
 export type RadioboxFieldProps = {
-    question: string;
+    title: string;
+    description?: string;
     choices: string[];
     fieldRequired?: boolean;
     requiredWarning?: string;
@@ -18,7 +19,8 @@ export type RadioboxFieldProps = {
 }
 
 const RadioboxField: FC<RadioboxFieldProps> = ({
-    question,
+    title,
+    description,
     choices,
     fieldRequired = false,
     fieldKey,
@@ -28,9 +30,17 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     return (
         <div className="question">
             <Fieldset>
-                <FieldsetLegend>{question}</FieldsetLegend>
+                <FieldsetLegend>
+                    {title}
+                </FieldsetLegend>
 
-                {choices.map((choice, index) => (
+                {description &&
+                    <FormFieldDescription>
+                        {description}
+                    </FormFieldDescription>
+                }
+
+                {choices?.map((choice, index) => (
                     <FormField type="radio" key={index}>
                         <Paragraph className="radio-field-label">
                             <FormLabel htmlFor={`${fieldKey}_${index}`} type="radio">
