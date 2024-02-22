@@ -11,8 +11,11 @@
 .osc.counter-container.--link:hover{
   background-color: var(--nlds-counter-hover-background-color, #E1E8F0);
 }
+.osc.counter-container.--link:hover p > * {
+  color: var(--nlds-counter-hover-color, unset);
+}
 
-.osc.counter-container.--link:active > *{
+.osc.counter-container.--link:active p > * {
   color: var(--nlds-counter-active-color, #0061c2);
 }
 
@@ -30,12 +33,15 @@
   justify-content: var(--nlds-counter-justify-content, left);
   align-items: var(--nlds-counter-align-items, center);
 
-  font-size: var(--nlds-counter-font-size, var(--utrecht-paragraph-font-size, 16px));
+  font-size: var(--nlds-counter-font-size, var(--utrecht-paragraph-font-size, 1rem));
   font-weight: var(--nlds-counter-font-weight, var(--utrecht-paragraph-font-weight, 400));
+  font-family: var(--nlds-counter-font-family, var(--utrecht-paragraph-font-family, var(--utrecht-document-font-family, inherit)));
   color: var(--nlds-counter-color, var(--utrecht-paragraph-color, #000));
 }
 
 .osc.counter-container .amount {
   font-size: var(--nlds-counter-amount-font-size, 1.5em);
   font-weight: var(--nlds-counter-amount-font-weight, 700);
+  font-family: var(--nlds-counter-amount-font-family, var(--utrecht-paragraph-font-family, var(--utrecht-document-font-family, inherit)));
+  color: var(--nlds-counter-amount-color, #000);
 }
