@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react';
 
 export type TickmarkSliderProps = {
-    question: string;
+    title: string;
     fieldOptions: { value: string; label: string }[];
     fieldRequired: boolean;
     fieldKey: string;
@@ -13,7 +13,7 @@ export type TickmarkSliderProps = {
 }
 
 const TickmarkSlider: FC<TickmarkSliderProps> = ({
-     question= '',
+     title= '',
      description = '',
      fieldOptions = [],
      fieldRequired = false,
@@ -32,8 +32,8 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
 
     return (
         <div className="a-b-slider-container">
-            {question && (
-                <h3 className="a-b-question">{question}</h3>
+            {title && (
+                <h3 className="a-b-question">{title}</h3>
             )}
             {description && (
                 <p>{description}</p>
@@ -73,6 +73,13 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                     </option>
                 ))}
             </datalist>
+            <div className="range-slider-labels">
+                {fieldOptions.map((option, key) => (
+                    <label key={key} htmlFor={`a-to-b-range--${index}`} className={value === option.value ? 'active' : ''}>
+                        {option.label}
+                    </label>
+                ))}
+            </div>
         </div>
     );
 }
