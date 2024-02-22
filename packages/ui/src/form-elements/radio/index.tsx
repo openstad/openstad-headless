@@ -16,6 +16,7 @@ export type RadioboxFieldProps = {
     requiredWarning?: string;
     fieldKey: string;
     disabled?: boolean;
+    onChange?: (e: {name: string, value: string | []}) => void;
 }
 
 const RadioboxField: FC<RadioboxFieldProps> = ({
@@ -49,10 +50,10 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                                     id={`${fieldKey}_${index}`}
                                     name={fieldKey}
                                     required={fieldRequired}
-                                    onChange={() => onChange({
+                                    onChange={() => onChange ? onChange({
                                         name: fieldKey,
                                         value: choice
-                                    })}
+                                    }) : null}
                                     disabled={disabled}
                                 />
                                 {choice}

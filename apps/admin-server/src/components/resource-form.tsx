@@ -20,7 +20,7 @@ import { useRouter } from 'next/router';
 import { SimpleCalendar } from '@/components/simple-calender-popup';
 import useResource from '@/hooks/use-resource';
 import toast from 'react-hot-toast';
-import {ImageUploader} from './image-uploader';
+import { ImageUploader } from './image-uploader';
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -49,6 +49,9 @@ const formSchema = z.object({
     .max(5000, maxError('Beschrijving', 5000))
     .default(''),
 
+  budget: z.coerce
+    .number({ invalid_type_error: onlyNumbersMessage })
+    .default(0),
   budgetMin: z.coerce
     .number({ invalid_type_error: onlyNumbersMessage })
     .optional(),
@@ -95,8 +98,18 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     id as string
   );
 
-  const [imageArray, setImageArray]= useState<any[]>([]);
+  const [imageArray, setImageArray] = useState<any[]>([]);
   const [loaded, setLoaded] = useState(false);
+
+  const budgetFallback = (existingData: any, key: string = '') => {
+    if (!existingData) return 0;
+
+    if (typeof existingData?.budget === 'number') {
+      return existingData.budget;
+    }
+
+    return existingData[key] || 0;
+  };
 
   const defaults = useCallback(
     (): FormType => ({
@@ -105,10 +118,10 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       title: existingData?.title || '',
       summary: existingData?.summary || '',
       description: existingData?.description || '',
-
-      budgetMin: existingData?.budget?.min || undefined,
-      budgetMax: existingData?.budget?.max || undefined,
-      budgetInterval: existingData?.budget?.interval || undefined,
+      budget: budgetFallback(existingData),
+      budgetMin: budgetFallback(existingData, 'min'),
+      budgetMax: budgetFallback(existingData, 'max'),
+      budgetInterval: budgetFallback(existingData, 'interval'),
 
       startDate: existingData?.startDate
         ? new Date(existingData?.startDate)
@@ -123,7 +136,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         ? new Date(existingData.modBreakDate)
         : undefined,
 
-      location: existingData?.location || '',
+      location: existingData?.location?JSON.stringify(existingData?.location):'',
       images: existingData?.images || [],
       extraData: {
         originalId: existingData?.extraData?.originalId || undefined,
@@ -138,7 +151,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   });
 
   function onSubmit(values: FormType) {
-    values.images = imageArray
+    values.images = imageArray;
     onFormSubmit(values)
       .then(() => {
         toast.success(`Plan successvol ${id ? 'aangepast' : 'aangemaakt'}`);
@@ -157,8 +170,8 @@ export default function ResourceForm({ onFormSubmit }: Props) {
 
   useEffect(() => {
     if (existingData && !loaded) {
-      setImageArray(existingData?.images)
-      setLoaded(true)
+      setImageArray(existingData?.images);
+      setLoaded(true);
     }
   }, [existingData]);
 
@@ -248,6 +261,20 @@ export default function ResourceForm({ onFormSubmit }: Props) {
 
           <FormField
             control={form.control}
+            name="budget"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Budget</FormLabel>
+                <FormControl>
+                  <Input placeholder="" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* <FormField
+            control={form.control}
             name="budgetMin"
             render={({ field }) => (
               <FormItem className="col-span-1">
@@ -286,7 +313,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
 
           <FormField
             control={form.control}
@@ -358,9 +385,9 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             form={form}
             fieldName="image"
             onImageUploaded={(imageResult) => {
-              let array = [...imageArray]
-              array.push(imageResult)
-              setImageArray(array)
+              let array = [...imageArray];
+              array.push(imageResult);
+              setImageArray(array);
             }}
           />
           <Button className="w-fit col-span-full" type="submit">

@@ -1,7 +1,6 @@
 const { Sequelize, Op } = require('sequelize');
 const log = require('debug')('app:cron');
 const config = require('config');
-const mail = require('../lib/mail');
 const db = require('../db');
 const UseLock = require('../lib/use-lock');
 
@@ -56,7 +55,13 @@ module.exports = {
                 // send notification
                 if (user.email) {
                   console.log('CRON anonymize-inactive-users: send warning email to user', user.email, user.lastLogin);
-                  await mail.sendInactiveWarningEmail(project, user);
+                  db.Notification.create({
+                    type: "user account about to expire",
+			              projectId: project.id,
+                    data: {
+                      userId: user.id,
+                    }
+			            })
                   user.update({ isNotifiedAboutAnonymization: new Date() });
                 }
               }

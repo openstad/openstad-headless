@@ -4,7 +4,8 @@ import { Button } from '@openstad-headless/ui/src/button';
 import { CommentPropsType } from '../types/index';
 import DataStore from '@openstad-headless/data-store/src';
 import hasRole from '../../../lib/has-role';
-import Form from "../../../form/src/form.tsx";
+import Form from "@openstad-headless/form/src/form";
+import {CombinedFieldPropsWithType, FieldProps} from "@openstad-headless/form/src/props";
 
 function CommentForm({
   comment,
@@ -24,10 +25,13 @@ function CommentForm({
   } as CommentPropsType;
 
   const datastore = new DataStore(args);
-  const [currentUser, currentUserError, currentUserIsLoading] =
-    datastore.useCurrentUser({ ...args });
+  const {
+    data: currentUser,
+    error: currentUserError,
+    isLoading: currentUserIsLoading,
+  } = datastore.useCurrentUser({ ...args });
 
-  const formFields = [
+  const formFields : CombinedFieldPropsWithType[] = [
       {
         type: 'text',
         title: '',
@@ -50,7 +54,7 @@ function CommentForm({
     formFields.push({
         type: 'hidden',
         fieldKey: "parentId",
-        defaultValue: args.comment.parentId,
+        defaultValue: args.comment.parentId.toString(),
     });
   }
 
@@ -58,7 +62,7 @@ function CommentForm({
     formFields.push({
         type: 'hidden',
         fieldKey: "id",
-        defaultValue: args.comment.id,
+        defaultValue: args.comment.id.toString(),
     });
   }
 

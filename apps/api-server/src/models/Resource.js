@@ -7,7 +7,6 @@ const co = require('co'),
   pick = require('lodash/pick');
 
 const sanitize = require('../util/sanitize');
-const notifications = require('../notifications');
 
 const merge = require('merge');
 
@@ -329,10 +328,12 @@ module.exports = function (db, sequelize, DataTypes) {
           }
         },
       },
+
       publishDate: {
         type: DataTypes.DATE,
         allowNull: true,
       },
+
       publishDateHumanized: {
         type: DataTypes.VIRTUAL,
         get: function () {
@@ -345,6 +346,7 @@ module.exports = function (db, sequelize, DataTypes) {
           }
         },
       },
+
     },
     {
       hooks: {
@@ -353,22 +355,11 @@ module.exports = function (db, sequelize, DataTypes) {
         beforeDestroy: beforeValidateHook,
 
         afterCreate: function (instance, options) {
-          notifications.addToQueue({
-            type: 'resource',
-            action: 'create',
-            projectId: instance.projectId,
-            instanceId: instance.id,
-          });
         },
 
         afterUpdate: function (instance, options) {
-          notifications.addToQueue({
-            type: 'resource',
-            action: 'update',
-            projectId: instance.projectId,
-            instanceId: instance.id,
-          });
         },
+        
       },
 
       individualHooks: true,
@@ -693,6 +684,7 @@ module.exports = function (db, sequelize, DataTypes) {
             },
             attributes: ['id', 'type', 'name', 'label', 'extraFunctionality'],
             through: { attributes: [] },
+            required: false
           },
         ],
       },

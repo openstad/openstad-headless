@@ -221,7 +221,6 @@ function setConfigsToOutput(
 
   config = JSON.stringify(config)
     .replaceAll('\\', '\\\\')
-    .replaceAll("'", "\\'")
     .replaceAll('`', '\\`');
 
   return getWidgetJavascriptOutput(
@@ -248,6 +247,9 @@ function getWidgetJavascriptOutput(
   let widgetOutput = '';
   let css = '';
 
+  const data = JSON.parse(widgetConfig)
+  const extraCss = data.project?.cssUrl ? `<link href="${data.project.cssUrl}" rel="stylesheet">` : '';
+  
   widgetSettings.js.forEach((file) => {
     widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
   });
@@ -272,14 +274,15 @@ function getWidgetJavascriptOutput(
 
         const currentScript = document.currentScript;
           currentScript.insertAdjacentHTML('afterend', \`<div id="${componentId}" style="width: 100%; height: 100%;"></div>\`);
+
+          const redirectUri = encodeURI(window.location.href);
+          const config = JSON.parse(\`${widgetConfig}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
           
           document.querySelector('head').innerHTML += \`
             <style>${css}</style>
             <link href="${remixIconCss}" rel="stylesheet">
+            ${extraCss}
           \`;
-          
-          const redirectUri = encodeURI(window.location.href);
-          const config = JSON.parse(\`${widgetConfig}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
           
           function renderWidget () {
             ${widgetOutput}

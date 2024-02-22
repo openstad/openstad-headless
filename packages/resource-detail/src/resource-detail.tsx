@@ -27,7 +27,7 @@ function ResourceDetail(props: ResourceDetailWidgetProps) {
     resourceId: props.resourceId,
     api: props.api,
   });
-  const [resource] = datastore.useResource(props);
+  const {data:resource} = datastore.useResource(props);
   if (!resource) return null;
 
   return (

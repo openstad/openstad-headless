@@ -31,7 +31,7 @@ export default function useResources({
   }
 
 
-  const submitLike = function (resourcesToLike) {
+  const submitVotes = function (resourcesToLike) {
     return self.mutate({ projectId }, 'resources.submitLike', resourcesToLike, {
       action: 'update',
     });
@@ -55,6 +55,5 @@ export default function useResources({
       });
     };
   });
-
-  return {resources, error, isLoading, submitLike};
+  return {data:resources, error, isLoading, submitVotes};
 }

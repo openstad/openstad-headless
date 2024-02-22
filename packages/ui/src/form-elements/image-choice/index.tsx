@@ -11,16 +11,17 @@ import {
 export type ImageChoiceFieldProps = {
     title: string;
     description?: string;
-    choices: string[ChoiceItem];
+    choices: ChoiceItem[];
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
     disabled?: boolean;
+    onChange?: (e: {name: string, value: string | []}) => void;
 }
 
 export type ChoiceItem = {
-    name: string;
-    key: string;
+    label: string;
+    value: string;
     imageSrc: string;
     imageDescription: string;
     imageAlt: string;
@@ -58,10 +59,10 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                                         id={`${fieldKey}_${index}`}
                                         name={fieldKey}
                                         required={fieldRequired}
-                                        onChange={() => onChange({
+                                        onChange={() => onChange ? onChange({
                                             name: fieldKey,
                                             value: choice.value
-                                        })}
+                                        }) : null}
                                         disabled={disabled}
                                     />
                                     <figure>

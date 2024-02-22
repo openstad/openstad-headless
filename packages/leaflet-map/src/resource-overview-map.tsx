@@ -34,14 +34,14 @@ export function ResourceOverviewMap({
     config: { api: props.api },
   });
 
-  const [resources] = datastore.useResources({
+  const {data:resources} = datastore.useResources({
     projectId: props.projectId,
   });
 
   let categorizeByField = categorize?.categorizeByField;;
   let categories: CategoriesType;
   if (categorizeByField) {
-    const [tags] = datastore.useTags({
+    const {data:tags} = datastore.useTags({
       projectId: props.projectId,
       type: categorizeByField,
     });

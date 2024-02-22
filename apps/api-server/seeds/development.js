@@ -62,6 +62,13 @@ module.exports = async function seed(config, db) {
           ]
         },
       },
+      emailConfig: {
+        notifications: {
+          fromAddress: 'nobody@openstad.dev',
+          projectmanagerAddress: 'unknown@nowhere',
+          projectadminAddress: 'unknown@nowhere',
+        },
+      },
     });
     project = await project.update({
       'config': {
@@ -107,6 +114,13 @@ module.exports = async function seed(config, db) {
           withExisting: 'error',
         }
       },
+      emailConfig: {
+        notifications: {
+          fromAddress: 'nobody@openstad.dev',
+          projectmanagerAddress: 'unknown@nowhere',
+          projectadminAddress: 'unknown@nowhere',
+        },
+      },
     });
 
     console.log('    add keuzewijzer project');
@@ -142,6 +156,13 @@ module.exports = async function seed(config, db) {
           voteType: 'budgeting',
           withExisting: 'error',
         }
+      },
+      emailConfig: {
+        notifications: {
+          fromAddress: 'nobody@openstad.dev',
+          projectmanagerAddress: 'unknown@nowhere',
+          projectadminAddress: 'unknown@nowhere',
+        },
       },
     });
 

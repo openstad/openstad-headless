@@ -16,6 +16,7 @@ export type TextInputProps = {
     defaultValue?: string;
     disabled?: boolean;
     rows?: TextInputProps['variant'] extends 'textarea' ? number : undefined;
+    onChange?: (e: {name: string, value: string | []}) => void;
 }
 
 const TextInput: FC<TextInputProps> = ({
@@ -48,10 +49,12 @@ const TextInput: FC<TextInputProps> = ({
                     placeholder={placeholder}
                     defaultValue={defaultValue}
                     onChange={(e) => {
-                        onChange({
-                            name: fieldKey,
-                            value: e.target.value,
-                        });
+                        if (onChange) {
+                            onChange({
+                                name: fieldKey,
+                                value: e.target.value,
+                            });
+                        }
                     }}
                     disabled={disabled}
                     rows={rows}
