@@ -16,7 +16,7 @@
 }
 
 .osc.date-countdown-bar-container .osc-countdown-bar-text {
-  color: var(--nlds-countdownbar-text-color, var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit)));
+  color: var(--nlds-countdownbar-title-text-color, var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit)));
   font-weight: var(--nlds-countdownbar-title-font-weight, 700);
   font-size: var(--nlds-countdownbar-title-font-size, var(--utrecht-paragraph-font-size, var(--utrecht-document-font-size, inherit)));
   line-height: var(--nlds-countdownbar-title-line-height,var(--utrecht-paragraph-line-height, var(--utrecht-document-line-height, inherit)));
@@ -32,13 +32,15 @@
 }
 
 .osc.date-countdown-bar-container .nr-left-title {
-  font-weight: var(--nlds-countdownbar-label-font-weight, 700);
-  font-size: var(--nlds-countdownbar-label-font-size, 1.5rem);
-  line-height: var(--nlds-countdownbar-label-line-height, 2rem);
+  color: var(--nlds-countdownbar-label-number-color, var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit)));
+  font-weight: var(--nlds-countdownbar-label-number-font-weight, 700);
+  font-size: var(--nlds-countdownbar-label-number-font-size, 1.5rem);
+  line-height: var(--nlds-countdownbar-label-number-line-height, 2rem);
 }
 
 .osc.date-countdown-bar-container .nr-left-label {
-  font-weight: var(--nlds-countdownbar-label-font-weight, 400);
-  font-size: var(--nlds-countdownbar-label-font-size, .75rem);
-  line-height: var(--nlds-countdownbar-label-line-height, 1rem);
+  color: var(--nlds-countdownbar-label-title-color, var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit)));
+  font-weight: var(--nlds-countdownbar-label-title-font-weight, 400);
+  font-size: var(--nlds-countdownbar-label-title-font-size, .75rem);
+  line-height: var(--nlds-countdownbar-label-title-line-height, 1rem);
 }
