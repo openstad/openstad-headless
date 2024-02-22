@@ -1,27 +1,52 @@
-# React + TypeScript + Vite
+# Design tokens
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<!-- Widget Container  -->
+--nlds-likewidget-container-padding
+--nlds-likewidget-container-gap
+--nlds-likewidget-container-margin
+--nlds-likewidget-container-background-color
 
-Currently, two official plugins are available:
+<!-- Widget title -->
+--nlds-likewidget-title-font-size
+--nlds-likewidget-title-line-height
+--nlds-likewidget-title-font-weight
+--nlds-likewidget-title-color
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+<!-- Option trigger: Default state -->
+--nlds-likewigdet-button-display
+--nlds-likewidget-button-background-color
+--nlds-likewidget-button-text-align
+--nlds-likewidget-button-grid-template-columns
+--nlds-likewidget-button-gap
+--nlds-likewidget-button-border-color
+--nlds-likewidget-button-border-width
+--nlds-likewidget-button-padding
+--nlds-likewidget-button-color
 
-## Expanding the ESLint configuration
+<!-- Option trigger: Hover state -->
+--nlds-likewidget-button-hover-background-color
+--nlds-likewidget-button-hover-border-color
+--nlds-likewidget-button-hover-border-width
+--nlds-likewidget-button-hover-color
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+<!-- Option trigger: Active state -->
+--nlds-likewidget-button-active-background-color
+--nlds-likewidget-button-active-border-color
+--nlds-likewidget-button-active-border-width
+--nlds-likewidget-button-active-color
 
-- Configure the top-level `parserOptions` property like this:
+<!-- Option trigger: Selected -->
+--nlds-likewidget-button-selected-background-color
+--nlds-likewidget-button-selected-color
 
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
-```
+<!-- Option Label -->
+--nlds-likewidget-label-font-size
+--nlds-likewidget-label-line-height
+--nlds-likewidget-label-font-weight
+--nlds-likewidget-label-color
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+<!-- Option label: Selected -->
+--nlds-likewidget-label-selected-color
+
+<!-- Option counter -->
+--nlds-likewidget-counter-color

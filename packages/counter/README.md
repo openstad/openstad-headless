@@ -1,27 +1,35 @@
-# React + TypeScript + Vite
+# Design tokens
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<!-- Counter container -->
+--nlds-counter-border-radius
+--nlds-counter-padding, .5rem .5rem
+--nlds-counter-height, auto
 
-Currently, two official plugins are available:
+<!-- Counter link: Hover state -->
+--nlds-counter-hover-background-color
+--nlds-counter-hover-color
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+<!-- Counter link: Active state -->
+--nlds-counter-active-color
 
-## Expanding the ESLint configuration
+<!-- Counter Link: Focus state -->
+--nlds-counter-focus-background-color
+--nlds-counter-focus-outline-color
+--nlds-counter-focus-outline-offset
+--nlds-counter-focus-outline-style
+--nlds-counter-focus-outline-width
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+<!-- Counter text -->
+--nlds-counter-gap
+--nlds-counter-justify-content
+--nlds-counter-align-items
+--nlds-counter-font-size
+--nlds-counter-font-weight
+--nlds-counter-font-family
+--nlds-counter-color
 
-- Configure the top-level `parserOptions` property like this:
-
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
-```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+<!-- Counter text: Amount label -->
+--nlds-counter-amount-font-size
+--nlds-counter-amount-font-weight
+--nlds-counter-amount-font-family
+--nlds-counter-amount-color

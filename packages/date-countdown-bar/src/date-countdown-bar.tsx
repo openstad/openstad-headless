@@ -1,5 +1,8 @@
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import useInterval from '@rooks/use-interval';
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Paragraph } from "@utrecht/component-library-react";
 import {
   differenceInDays,
   differenceInHours,
@@ -10,7 +13,7 @@ import { useEffect, useState } from 'react';
 import 'remixicon/fonts/remixicon.css';
 import './date-countdown-bar.css';
 
-import { Spacer } from '@openstad-headless/ui/src';
+import React from 'react';
 
 export type DateCountdownBarWidgetProps = {
   beforeText?: string;
@@ -95,35 +98,35 @@ function DateCountdownBar({
   return (
     <div className="osc date-countdown-bar-container">
       {beforeTextParam.length > 0 ? (
-        <>
-          <p className="osc-countdown-bar-text">{beforeTextParam}</p>
-          <Spacer />
-        </>
+          <Paragraph className="osc-countdown-bar-text">{beforeTextParam}</Paragraph>
       ) : null}
 
-      <>
+      <div className="osc-countdown-bar-nr-container">
         <div className="osc-countdown-bar-nr-left">
-          <p className="nr-left-title">{padNumber(timeLeft.days)}</p>
-          <p className="nr-left-label">Dagen</p>
+          <Paragraph>
+            <span className="nr-left-title">{padNumber(timeLeft.days)}</span>
+            <span className="nr-left-label">Dagen</span>
+          </Paragraph>
         </div>
 
         <div className="osc-countdown-bar-nr-left">
-          <p className="nr-left-title">{padNumber(timeLeft.hours)}</p>
-          <p className="nr-left-label">Uren</p>
+          <Paragraph>
+            <span className="nr-left-title">{padNumber(timeLeft.hours)}</span>
+            <span className="nr-left-label">Uren</span>
+          </Paragraph>
         </div>
 
         {timeLeft.minutes > 0 ? (
           <div className="osc-countdown-bar-nr-left">
-            <p className="nr-left-title">{padNumber(timeLeft.minutes)}</p>
-            <p className="nr-left-label">Minuten</p>
+            <Paragraph>
+              <span className="nr-left-title">{padNumber(timeLeft.minutes)}</span>
+              <span className="nr-left-label">Minuten</span>
+            </Paragraph>
           </div>
         ) : null}
-      </>
+      </div>
       {afterTextParam.length > 0 ? (
-        <>
-          <Spacer />
-          <p className="osc-countdown-bar-text">{afterTextParam}</p>
-        </>
+          <Paragraph className="osc-countdown-bar-text">{afterTextParam}</Paragraph>
       ) : null}
     </div>
   );
