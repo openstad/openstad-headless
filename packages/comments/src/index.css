@@ -1,63 +1,52 @@
 .comments-title {
   margin-bottom: 1rem;
- 
  }
- .comments-container {
+
+ .form-container {
    font-family: 'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
- 
    display: grid;
-   grid-template-columns: 1fr 1fr;
-   grid-gap: 2rem;
-   justify-content: initial;
+   grid-gap: 1rem;
  }
- 
- .input-container {
-   margin-bottom: 2.5rem;
- }
- 
- p.reaction-name { 
-   color: var(--osc-foreground, black);
- }
- .comment-item-header {
+
+ .utrecht-form-field {
    display: flex;
-   justify-content: space-between;
+   flex-direction: column;
  }
- 
- .comment-item-footer {
+
+ .utrecht-form-field__label {
+   margin-bottom: 0.5rem;
+ }
+
+ .utrecht-form-field__input {
    display: flex;
-   gap: 1rem;
-   align-items: center;
- }
- 
- .reaction-name {
-  margin: 0px;
-  padding: 0px;
+   flex-direction: column;
  }
 
- .reaction-container {
-   padding-left: 1.5rem;
-   border-left: 1px solid var(--osc-border);
+ .error-message {
+     color: red;
  }
 
- .osc p.comment-reaction-text {
-  font-size: .75rem;
-  margin: 0;
-  overflow-wrap: break-word;
- }
-
- .osc p.comment-reaction-strong-text {
-  font-size: .75rem;
-  font-weight: 600;
-  margin: 0;
-  color: var(--osc-foreground)
+ .comment-description-inputfield {
+     padding: 0.75rem;
  }
 
  .reaction-input-container {
     text-align: right;
  }
 
- .comment-description-inputfield {
-  padding: .75rem;
+ button[type="submit"] {
+     padding: 0.5rem 1rem;
+     font-size: 1rem;
+     border: none;
+     border-radius: 0.25rem;
+     background-color: var(--osc-primary);
+     color: white;
+     cursor: pointer;
+     transition: background-color 0.3s ease;
+ }
+
+ button[type="submit"]:hover {
+     background-color: var(--osc-primary-hover);
  }
 
  hr {
