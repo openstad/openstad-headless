@@ -26,7 +26,8 @@ function RawResource(props: RawResourceWidgetProps) {
     resourceId: resourceId,
     api: props.api,
   });
-  const [resource] = resourceId ? datastore.useResource(props) : [null];
+  
+  const {data: resource} = resourceId ? datastore.useResource(props) : {data:null};
 
   const stylingClasses =
     props.stylingClasses?.map((stylingClass) => stylingClass.value).join(' ') ||

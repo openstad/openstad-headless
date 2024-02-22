@@ -7,7 +7,6 @@ const merge = require('merge');
 var emailBlackList = require('../../config/mail_blacklist')
   , emailDomain    = /^.+@(.+)$/;
 
-var notifications = require('../notifications');
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 
 module.exports = function( db, sequelize, DataTypes ) {
@@ -125,14 +124,28 @@ module.exports = function( db, sequelize, DataTypes ) {
 			afterCreate: function(instance, options) {
 				db.Resource.findByPk(instance.resourceId)
 					.then( resource => {
-						notifications.addToQueue({ type: 'comment', action: 'create', projectId: resource.projectId, instanceId: instance.id });
+            db.Notification.create({
+              type: "new or updated comment - admin update",
+			        projectId: resource.projectId,
+              data: {
+                "resourceId": resource.id,
+                "commentId": instance.id
+              }
+					  })
 					})
 			},
 
 			afterUpdate: function(instance, options) {
 				db.Resource.findByPk(instance.resourceId)
 					.then( resource => {
-						notifications.addToQueue({ type: 'comment', action: 'update', projectId: resource.projectId, instanceId: instance.id });
+            db.Notification.create({
+              type: "new or updated comment - admin update",
+			        projectId: resource.projectId,
+              data: {
+                "resourceId": resource.id,
+                "commentId": instance.id
+              }
+					  })
 					})
 			},
 

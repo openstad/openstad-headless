@@ -37,9 +37,6 @@ router.use( '/user', require('./user') );
 // submissions
 router.use( '/project/:projectId(\\d+)/submission', require('./submission') );
 
-// notification
-router.use( '/project/:projectId(\\d+)/notification', require('./notification') );
-
 // vote
 router.use( '/project/:projectId(\\d+)/vote', require('./vote') );
 

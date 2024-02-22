@@ -16,5 +16,25 @@ export default function useAreas(projectId?: string) {
     return await res.json();
   }
 
-  return { ...areasSwr, createArea };
+  async function removeArea(id: number) {
+    const deleteUrl = `/api/openstad/api/project/${projectId}/area/${id}`;
+
+    const res = await fetch(deleteUrl, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (res.ok) {
+      const existingData = [...areasSwr.data];
+      const updatedList = existingData.filter((ed) => ed.id !== id);
+      areasSwr.mutate(updatedList);
+      return updatedList;
+    } else {
+      throw new Error('Could not remove this area');
+    }
+  }
+
+  return { ...areasSwr, createArea, removeArea };
 }

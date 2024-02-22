@@ -25,12 +25,15 @@ function Enquete(props: EnqueteWidgetProps) {
 
     const datastore = new DataStore(props);
 
-    const [currentUser, currentUserError, currentUserIsLoading] =
-        datastore.useCurrentUser({ ...props });
-
     const { data, create: createSubmission } = datastore.useSubmissions({
         projectId: props.projectId,
     });
+
+    const {
+      data: currentUser,
+      error: currentUserError,
+      isLoading: currentUserIsLoading,
+    } = datastore.useCurrentUser({ ...props });
 
     async function onSubmit(formData: any) {
         const result = await createSubmission(formData, props.widgetId);
@@ -104,8 +107,6 @@ function Enquete(props: EnqueteWidgetProps) {
                     ];
                     break;
             }
-
-            formFields.push(fieldData);
         }
     }
 

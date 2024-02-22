@@ -41,5 +41,5 @@ export default function useTags(props) {
     document.dispatchEvent(event);
   }
 
-  return [tags, error, isLoading];
+  return {data:tags, error, isLoading};
 }
