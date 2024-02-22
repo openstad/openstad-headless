@@ -13,7 +13,7 @@ import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 import React from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-import Form from "@openstad-headless/form/src/form.tsx";
+import Form from "../../form/src/form.tsx";
 
 export type EnqueteWidgetProps = BaseProps &
     ProjectSettingProps &

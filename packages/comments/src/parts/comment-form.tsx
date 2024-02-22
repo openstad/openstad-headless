@@ -4,7 +4,7 @@ import { Button } from '@openstad-headless/ui/src/button';
 import { CommentPropsType } from '../types/index';
 import DataStore from '@openstad-headless/data-store/src';
 import hasRole from '../../../lib/has-role';
-import Form from "@openstad-headless/form/src/form.tsx";
+import Form from "../../../form/src/form.tsx";
 
 function CommentForm({
   comment,
