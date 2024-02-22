@@ -107,6 +107,8 @@ function Enquete(props: EnqueteWidgetProps) {
                     ];
                     break;
             }
+
+            formFields.push(fieldData);
         }
     }
 
