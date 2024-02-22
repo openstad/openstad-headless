@@ -1,7 +1,8 @@
 import React, { FC, useState } from 'react';
 
 export type TickmarkSliderProps = {
-    question: string;
+    index: number;
+    title: string;
     fieldOptions: { value: string; label: string }[];
     fieldRequired: boolean;
     fieldKey: string;
@@ -9,10 +10,12 @@ export type TickmarkSliderProps = {
     imageAlt?: string;
     imageDescription?: string;
     description?: string;
+    disabled?: boolean;
+    onChange?: (e: {name: string, value: string}) => void;
 }
 
 const TickmarkSlider: FC<TickmarkSliderProps> = ({
-     question= '',
+     title= '',
      description = '',
      fieldOptions = [],
      fieldRequired = false,
@@ -21,7 +24,8 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
      imageAlt = '',
      imageDescription = '',
      onChange,
-     index
+     index,
+     disabled = false,
 }) => {
     const defaultValue = Math.ceil(fieldOptions.length / 2).toString();
     const [value, setValue] = useState<string>(defaultValue);
@@ -30,8 +34,8 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
 
     return (
         <div className="a-b-slider-container">
-            {question && (
-                <h3 className="a-b-question">{question}</h3>
+            {title && (
+                <h3 className="a-b-question">{title}</h3>
             )}
             {description && (
                 <p>{description}</p>
@@ -56,12 +60,15 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 required={fieldRequired}
                 onChange={(e) => {
                     setValue(e.target.value);
-                    onChange({
-                        name: fieldKey,
-                        value: e.target.value,
-                    });
+                    if (onChange) {
+                        onChange({
+                            name: fieldKey,
+                            value: e.target.value,
+                        });
+                    }
                 }}
                 aria-label={`Selecteer een waarde tussen 1 en ${fieldOptions.length}`}
+                disabled={disabled}
             />
             <datalist id={`form-field-tickmarks-${index}`}>
                 {fieldOptions.map((option, key) => (
@@ -70,6 +77,13 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                     </option>
                 ))}
             </datalist>
+            <div className="range-slider-labels">
+                {fieldOptions.map((option, key) => (
+                    <label key={key} htmlFor={`a-to-b-range--${index}`} className={value === option.value ? 'active' : ''}>
+                        {option.label}
+                    </label>
+                ))}
+            </div>
         </div>
     );
 }

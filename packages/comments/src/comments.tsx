@@ -1,6 +1,5 @@
 import React from 'react';
 import './index.css';
-import { useState } from 'react';
 import DataStore from '@openstad-headless/data-store/src';
 import { Banner } from '@openstad-headless/ui/src';
 import { Spacer } from '@openstad-headless/ui/src';
@@ -50,12 +49,8 @@ function Comments({
     sentiment: props.sentiment,
   });
 
-  async function submitComment(e: any) {
-    setSubmitError(undefined);
-    e.preventDefault();
-
-    let formData = new FormData(e.target);
-    const formDataCopy = Object.fromEntries(formData.entries());
+  async function submitComment(formData: any) {
+    const formDataCopy = { ...formData }
 
     formDataCopy.resourceId = `${resourceId}`;
 
@@ -72,11 +67,8 @@ function Comments({
       }
     } catch (err: any) {
       console.log(err);
-      setSubmitError(err);
     }
   }
-
-  let [submitError, setSubmitError] = useState<any>();
 
   return (
     <section className="osc">

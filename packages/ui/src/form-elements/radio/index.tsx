@@ -5,30 +5,43 @@ import {
     FormField,
     FormLabel,
     RadioButton,
-    Paragraph,
+    Paragraph, FormFieldDescription,
 } from "@utrecht/component-library-react";
 
 export type RadioboxFieldProps = {
-    question: string;
+    title: string;
+    description?: string;
     choices: string[];
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
+    disabled?: boolean;
+    onChange?: (e: {name: string, value: string | []}) => void;
 }
 
 const RadioboxField: FC<RadioboxFieldProps> = ({
-    question,
+    title,
+    description,
     choices,
     fieldRequired = false,
     fieldKey,
-    onChange
+    onChange,
+    disabled = false,
 }) => {
     return (
         <div className="question">
             <Fieldset>
-                <FieldsetLegend>{question}</FieldsetLegend>
+                <FieldsetLegend>
+                    {title}
+                </FieldsetLegend>
 
-                {choices.map((choice, index) => (
+                {description &&
+                    <FormFieldDescription>
+                        {description}
+                    </FormFieldDescription>
+                }
+
+                {choices?.map((choice, index) => (
                     <FormField type="radio" key={index}>
                         <Paragraph className="radio-field-label">
                             <FormLabel htmlFor={`${fieldKey}_${index}`} type="radio">
@@ -37,10 +50,11 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                                     id={`${fieldKey}_${index}`}
                                     name={fieldKey}
                                     required={fieldRequired}
-                                    onChange={() => onChange({
+                                    onChange={() => onChange ? onChange({
                                         name: fieldKey,
                                         value: choice
-                                    })}
+                                    }) : null}
+                                    disabled={disabled}
                                 />
                                 {choice}
                             </FormLabel>

@@ -345,7 +345,7 @@ export default function WidgetEnqueteItems(
                     <Separator className="mt-2" />
                     {form.watch('questionType') === 'images' && (
                       <>
-                        {/* <FormField
+                        <FormField
                           control={form.control}
                           name={`options.${options.length - 1}.images.0.image`}
                           render={({ field }) => (
@@ -361,7 +361,7 @@ export default function WidgetEnqueteItems(
                               <FormMessage />
                             </FormItem>
                           )}
-                        /> */}
+                        />
                         <FormField
                           control={form.control}
                           name={`options.${options.length - 1}.titles.0.key`}

@@ -1,7 +1,7 @@
 import React, {FC} from 'react';
 
 export type RangeSliderProps = {
-    question: string;
+    title: string;
     description?: string;
     labelA: string;
     labelB: string;
@@ -14,10 +14,12 @@ export type RangeSliderProps = {
     showLabels?: boolean;
     minCharacters?: number;
     maxCharacters?: number;
+    disabled?: boolean;
+    onChange?: (e: {name: string, value: string | []}) => void;
 }
 
 const RangeSlider: FC<RangeSliderProps> = ({
-    question= '',
+    title= '',
     description= '',
     labelA,
     labelB,
@@ -28,12 +30,13 @@ const RangeSlider: FC<RangeSliderProps> = ({
     fieldRequired= false,
     fieldKey,
     showLabels = true,
-    onChange
+    onChange,
+    disabled = false,
 }) => {
     return (
         <div className="a-b-slider-container">
-            {question && (
-                <h3 className="a-b-question">{question}</h3>
+            {title && (
+                <h3 className="a-b-question">{title}</h3>
             )}
             {description && (
                 <p>{description}</p>
@@ -63,12 +66,15 @@ const RangeSlider: FC<RangeSliderProps> = ({
                 name={fieldKey}
                 required={fieldRequired}
                 onChange={(e) => {
-                    onChange({
-                        name: fieldKey,
-                        value: e.target.value,
-                    });
+                    if (onChange) {
+                        onChange({
+                            name: fieldKey,
+                            value: e.target.value,
+                        });
+                    }
                 }}
                 aria-label={`Selecteer een waarde tussen 1 en 100 voor ${titleA} en ${titleB}`}
+                disabled={disabled}
             />
             <p id="a-b-description" className="a-b-description visually-hidden">
                 Deze slider vertegenwoordigt de waarde voor {titleA} aan de linkerkant en de waarde voor {titleB} aan de rechterkant.
