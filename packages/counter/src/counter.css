@@ -1,25 +1,41 @@
 .osc.counter-container {
   display: flex;
-  border-radius: .25rem;
-  gap: .25rem;
-  padding: .5rem .5rem;
-  justify-content: left;
-  align-items: left;
-  background-color: var(--osc-card);
+  text-decoration: none;
+  border-radius: var(--nlds-counter-border-radius, 0);
+  padding: var(--nlds-counter-padding, .5rem .5rem);
+  height: var(--nlds-counter-height, auto);
+
+  background-color: var(--nlds-counter-background-color, #F0F4F8);
+}
+
+.osc.counter-container.--link:hover{
+  background-color: var(--nlds-counter-hover-background-color, #E1E8F0);
+}
+
+.osc.counter-container.--link:active > *{
+  color: var(--nlds-counter-active-color, #0061c2);
+}
+
+.osc.counter-container.--link:focus-within{
+  background-color: var(--nlds-counter-focus-background-color, #E1E8F0);
+  outline-color: var(--nlds-counter-focus-outline-color, var(--utrecht-focus-outline-color, revert));
+  outline-offset: var(--nlds-counter-focus-outline-offset, var(--utrecht-focus-outline-offset, revert));
+  outline-style: var(--nlds-counter-focus-outline-style, var(--utrecht-focus-outline-style, revert));
+  outline-width: var(--nlds-counter-focus-outline-width, var(--utrecht-focus-outline-width, revert));
 }
 
 .osc.counter-container p {
-  color: var(--osc-card-foreground);
-  margin: 0;
-  font-size: .875rem;
-  float: left;
-  align-items: center;
+  display: flex;
+  gap: var(--nlds-counter-gap, .25rem);
+  justify-content: var(--nlds-counter-justify-content, left);
+  align-items: var(--nlds-counter-align-items, center);
+
+  font-size: var(--nlds-counter-font-size, var(--utrecht-paragraph-font-size, 16px));
+  font-weight: var(--nlds-counter-font-weight, var(--utrecht-paragraph-font-weight, 400));
+  color: var(--nlds-counter-color, var(--utrecht-paragraph-color, #000));
 }
 
-.osc.counter-container h6 {
-  color: var(--osc-card-foreground);
-  margin: 0;
-  font-size: 1.5rem;
-  float: left;
-  font-weight: 700;
+.osc.counter-container .amount {
+  font-size: var(--nlds-counter-amount-font-size, 1.5em);
+  font-weight: var(--nlds-counter-amount-font-weight, 700);
 }

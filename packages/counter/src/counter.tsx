@@ -1,4 +1,7 @@
 import { loadWidget } from '@openstad-headless/lib/load-widget'
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Paragraph } from "@utrecht/component-library-react";
 import React, { useEffect, useState } from 'react'
 import './counter.css'
 import DataStore from '@openstad-headless/data-store/src'
@@ -39,7 +42,7 @@ function Counter({
     api: props.api
   })
 
-  const {resources} = datastore.useResources({
+  const { resources } = datastore.useResources({
     projectId: props.projectId,
   })
 
@@ -54,10 +57,10 @@ function Counter({
     sentiment: opinion
   })
 
-  const {data:results, error, isLoading} = datastore.useChoiceGuideResults({
+  const { data: results, error, isLoading } = datastore.useChoiceGuideResults({
     projectId: props.projectId,
     choiceGuideId: props.choiceGuideId,
-  }); 
+  });
 
   if (counterType === 'resource') {
     amountDisplayed = resources?.metadata?.totalCount || 0;
@@ -89,12 +92,25 @@ function Counter({
     amountDisplayed = results.length;
   }
 
+  const content = () => {
+    return (
+      <Paragraph>
+        <span className="label">{label}:</span>
+        <span className="amount">{amountDisplayed}</span>
+      </Paragraph>
+    )
+  }
   return (
-    <div className='osc counter-container' onClick={() => document.location.href = url}>
-      <p>{label}:</p>
-      <Spacer size={0}/>
-      <h6>{amountDisplayed}</h6>
-    </div>
+    url.length > 0 ? (
+      <a className='osc counter-container --link' href={url}>
+        {content()}
+      </a>
+    ) : (
+      <div className='osc counter-container'>
+        {content()}
+      </div>
+    )
+
   )
 }
 

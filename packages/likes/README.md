@@ -4,7 +4,7 @@
 --nlds-likewidget-container-padding
 --nlds-likewidget-container-gap
 --nlds-likewidget-container-margin
---nlds-likewidget-container-background
+--nlds-likewidget-container-background-color
 
 <!-- Widget title -->
 --nlds-likewidget-title-font-size
@@ -14,7 +14,7 @@
 
 <!-- Option trigger: Default state -->
 --nlds-likewigdet-button-display
---nlds-likewidget-button-background
+--nlds-likewidget-button-background-color
 --nlds-likewidget-button-text-align
 --nlds-likewidget-button-grid-template-columns
 --nlds-likewidget-button-gap
@@ -24,19 +24,19 @@
 --nlds-likewidget-button-color
 
 <!-- Option trigger: Hover state -->
---nlds-likewidget-button-hover-background
+--nlds-likewidget-button-hover-background-color
 --nlds-likewidget-button-hover-border-color
 --nlds-likewidget-button-hover-border-width
 --nlds-likewidget-button-hover-color
 
 <!-- Option trigger: Active state -->
---nlds-likewidget-button-active-background
+--nlds-likewidget-button-active-background-color
 --nlds-likewidget-button-active-border-color
 --nlds-likewidget-button-active-border-width
 --nlds-likewidget-button-active-color
 
 <!-- Option trigger: Selected -->
---nlds-likewidget-button-selected-background
+--nlds-likewidget-button-selected-background-color
 --nlds-likewidget-button-selected-color
 
 <!-- Option Label -->
