@@ -31,8 +31,8 @@ function CommentForm({
       {
         type: 'text',
         title: '',
-        minCharacters: 1,
-        maxCharacters: 300,
+        minCharacters: descriptionMinLength,
+        maxCharacters: descriptionMaxLength,
         fieldRequired: true,
         requiredWarning: "Dit veld is verplicht",
         fieldKey: "description",
