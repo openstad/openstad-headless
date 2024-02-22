@@ -4,214 +4,149 @@ import { EnquetePropsType } from './types/';
 import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import {
-  Banner,
-  Button,
-  Icon,
-  Image,
-  ImageSelect,
-  Input,
-  RangeSlider,
-  Spacer,
+    Banner,
+    Button, Icon,
+    Spacer,
 } from '@openstad-headless/ui/src';
-import { useState } from 'react';
 import hasRole from '../../lib/has-role';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 import React from 'react';
 import toast, { Toaster } from 'react-hot-toast';
+import Form from "@openstad-headless/form/src/form.js";
 
 export type EnqueteWidgetProps = BaseProps &
-  ProjectSettingProps &
-  EnquetePropsType;
+    ProjectSettingProps &
+    EnquetePropsType;
 
 function Enquete(props: EnqueteWidgetProps) {
-  const notifyCreate = () =>
-    toast.success('Enquete ingedient', { position: 'bottom-center' });
+    const notifyCreate = () =>
+        toast.success('Enquete ingedient', { position: 'bottom-center' });
 
-  const [value, setValue] = useState<string>('3');
+    const datastore = new DataStore(props);
 
-  const datastore = new DataStore(props);
+    const [currentUser, currentUserError, currentUserIsLoading] =
+        datastore.useCurrentUser({ ...props });
 
-  const [currentUser, currentUserError, currentUserIsLoading] =
-    datastore.useCurrentUser({ ...props });
-
-  const { data, create: createSubmission } = datastore.useSubmissions({
-    projectId: props.projectId,
-  });
-
-  const [alreadySubmitted, setAlreadySubmitted] = useState<boolean>(false);
-
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    let formData = new FormData(e.currentTarget);
-
-    const object: { [key: string]: any } = {};
-
-    formData.forEach(function (value, key, parent) {
-      if (parent.getAll(key).length > 1) {
-        if (!object[key]) {
-          object[key] = [value];
-        } else {
-          object[key] = [...object[key], value];
-        }
-      } else {
-        object[key] = value;
-      }
+    const { data, create: createSubmission } = datastore.useSubmissions({
+        projectId: props.projectId,
     });
 
-    const result = await createSubmission(object, props.widgetId);
+    async function onSubmit(formData: any) {
+        const result = await createSubmission(formData, props.widgetId);
 
-    if (result) {
-      setAlreadySubmitted(true);
-      
-      if(props.afterSubmitUrl) {
-        location.href = props.afterSubmitUrl.replace("[id]", result.id)
-      } else {
-        notifyCreate();
-      }
+        if (result) {
+            if(props.afterSubmitUrl) {
+                location.href = props.afterSubmitUrl.replace("[id]", result.id)
+            } else {
+                notifyCreate();
+            }
+        }
     }
-  }
 
-  return (
-    <div className="osc">
-      <form className="osc-enquete" onSubmit={onSubmit}>
-        {!hasRole(currentUser, 'member') && (
-          <>
-            <Banner className="big">
-              <h6>Inloggen om deel te nemen.</h6>
-              <Spacer size={1} />
-              <Button
-                type="button"
-                onClick={() => {
-                  document.location.href = props.login?.url || '';
-                }}>
-                Inloggen
-              </Button>
-            </Banner>
-            <Spacer size={2} />
-          </>
-        )}
+    const formFields = [];
+    if ( typeof(props) !== 'undefined'
+        && typeof(props.items) === 'object'
+        && props.items.length > 0
+    ) {
+        for (const item of props.items) {
+            const fieldData = {
+                type: item.questionType,
+                title: item.title,
+                description: item.description,
+                fieldKey: item.key,
+                disabled: hasRole(currentUser, 'member') ? false : true,
+            };
 
-        <div className="osc-enquete-item-content">
-          {props.displayTitle && props.title && <h4>{props.title}</h4>}
-          <div className="osc-enquete-item-description">
-            {props.displayDescription && props.description && (
-              <p>{props.description}</p>
+            switch (item.questionType) {
+                case 'open':
+                    fieldData['type'] = 'text';
+                    fieldData['variant'] = 'textarea';
+                    fieldData['rows'] = 5;
+                    break;
+                case 'multiplechoice':
+                case 'multiple':
+                    fieldData['type'] = item.questionType === 'multiplechoice' ? 'radiobox' : 'checkbox';
+
+                    if (
+                        item.options &&
+                        item.options.length > 0
+                    ) {
+                        fieldData['choices'] = item.options.map((option) => {
+                            return option.titles[0].key
+                        });
+                    }
+                    break;
+                case 'images':
+                    fieldData['type'] = 'imageChoice';
+
+                    if (item.options &&
+                    item.options?.length > 0 &&
+                    item.options[0].titles &&
+                    item.options[0].titles.length > 0) {
+                        fieldData['choices'] = item.options[0].titles.map((option, index) => {
+                            return {
+                                label: option.text,
+                                value: option.key,
+                                imageSrc: item.options?.at(0)?.images?.at(index)?.src || '',
+                            };
+                        });
+                    }
+                    break;
+                case 'scale':
+                    fieldData['type'] = 'tickmark-slider';
+                    fieldData['fieldOptions'] = [
+                        { value: 'Sad', label: <Icon icon="ri-emotion-sad-line" /> },
+                        { value: 'Unhappy', label: <Icon icon="ri-emotion-unhappy-line" /> },
+                        { value: 'Normal', label: <Icon icon="ri-emotion-normal-line" /> },
+                        { value: 'Happy', label: <Icon icon="ri-emotion-happy-line" /> },
+                        { value: 'Laugh', label: <Icon icon="ri-emotion-laugh-line" /> },
+                    ];
+                    break;
+            }
+
+            formFields.push(fieldData);
+        }
+    }
+
+    return (
+        <div className="osc">
+            {!hasRole(currentUser, 'member') && (
+                <>
+                    <Banner className="big">
+                        <h6>Inloggen om deel te nemen.</h6>
+                        <Spacer size={1} />
+                        <Button
+                            type="button"
+                            onClick={() => {
+                                document.location.href = props.login?.url || '';
+                            }}>
+                            Inloggen
+                        </Button>
+                    </Banner>
+                    <Spacer size={2} />
+                </>
             )}
-          </div>
-        </div>
-        {props?.items &&
-          props?.items?.length > 0 &&
-          props.items
-            ?.sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger))
-            .map((item, index) => (
-              <div key={`${item.key}-${index}`} className="osc-enquete-item">
-                <div className="osc-enquete-item-content">
-                  {item.title && <h5>{item.title}</h5>}
-                  {item.description && <p>{item.description}</p>}
-                  {item.images && item.images?.length > 0 && (
-                    <Image
-                      className="osc-enquete-item-image"
-                      src={item.images?.at(0)?.src || ''}
-                    />
-                  )}
-                  {item.questionType === 'scale' && (
-                    <RangeSlider
-                      onValueChange={(value) => setValue(value)}
-                      value={value}
-                      initialvalue="3"
-                      min="1"
-                      max="5"
-                      step="1"
-                      id={item.trigger}
-                      name={item.key}
-                      disabled={hasRole(currentUser, 'member') ? false : true}
-                      labels={[
-                        <Icon icon="ri-emotion-sad-line" />,
-                        <Icon icon="ri-emotion-unhappy-line" />,
-                        <Icon icon="ri-emotion-normal-line" />,
-                        <Icon icon="ri-emotion-happy-line" />,
-                        <Icon icon="ri-emotion-laugh-line" />,
-                      ]}
-                    />
-                  )}
-                  {item.questionType === 'open' && (
-                    <textarea
-                      title={item.title}
-                      rows={5}
-                      name={item.key}
-                      disabled={hasRole(currentUser, 'member') ? false : true}
-                      className="osc-enquete-item-textarea"
-                    />
-                  )}
-                  {item.questionType === 'images' &&
-                    item.options &&
-                    item.options?.length > 0 && (
-                      <ImageSelect
-                        disabled={hasRole(currentUser, 'member') ? false : true}
-                        items={item.options[0].titles}
-                        name={item.key}
-                        images={[
-                          item.options.at(0)?.images?.at(0)?.src || '',
-                          item.options.at(0)?.images?.at(0)?.src || '',
-                        ]}
-                      />
-                    )}
-                  {(item.questionType === 'multiple' ||
-                    item.questionType === 'multiplechoice') &&
-                    item.options &&
-                    item.options?.length > 0 && (
-                      <div className="osc-enquete-column">
-                        {item.options.map((option, index) => (
-                          <div
-                            className="osc-enquete-item-checkbox-container"
-                            key={`${item.key}-${index}`}>
-                            {item.questionType === 'multiple' ? (
-                              <Input
-                                id={option.titles[0].key}
-                                type="checkbox"
-                                name={item.key}
-                                value={option.titles[0].key}
-                                disabled={
-                                  hasRole(currentUser, 'member') ? false : true
-                                }
-                                className="osc-enquete-item-checkbox"
-                              />
-                            ) : (
-                              <Input
-                                id={option.titles[0].key}
-                                type="radio"
-                                value={option.titles[0].key}
-                                name={item.key}
-                                className="osc-enquete-item-radio"
-                                disabled={
-                                  hasRole(currentUser, 'member') ? false : true
-                                }
-                              />
-                            )}
-                            <label htmlFor={option.titles[0].key}>
-                              <p>{option.titles[0].text}</p>
-                            </label>
-                          </div>
-                        ))}
-                      </div>
+
+            <div className="osc-enquete-item-content">
+                {props.displayTitle && props.title && <h4>{props.title}</h4>}
+                <div className="osc-enquete-item-description">
+                    {props.displayDescription && props.description && (
+                        <p>{props.description}</p>
                     )}
                 </div>
-              </div>
-            ))}
-        <Spacer size={2} />
-        {hasRole(currentUser, 'member') && (
-          <Button
-            disabled={alreadySubmitted}
-            type="submit"
-            className="osc-enquete-submit">
-            Versturen
-          </Button>
-        )}
-      </form>
-      <Toaster />
-    </div>
-  );
+                <Form
+                    fields={formFields}
+                    submitHandler={onSubmit}
+                    title=""
+                    submitText="Versturen"
+                    submitDisabled={hasRole(currentUser, 'member') ? false : true}
+                />
+            </div>
+
+            <Toaster />
+        </div>
+    );
 }
 
 Enquete.loadWidget = loadWidget;
