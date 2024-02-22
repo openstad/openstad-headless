@@ -18,8 +18,8 @@ const Form: FC<FormProps> = ({
      submitText = 'Verzenden',
      submitHandler = () => {},
      submitDisabled = false,
-     saveAsConceptLabel = '',
-     saveAsConceptHandler = () => {},
+     secondaryLabel = '',
+     secondaryHandler = () => {},
  }) => {
     const initialFormValues: { [key: string]: any } = {};
     fields.forEach((field) => {
@@ -85,8 +85,8 @@ const Form: FC<FormProps> = ({
                             </div>
                         </div>
                     ))}
-                    {saveAsConceptLabel && (
-                        <button type="button" onClick={() => saveAsConceptHandler(formValues)}>{saveAsConceptLabel}</button>
+                    {secondaryLabel && (
+                        <button type="button" onClick={() => secondaryHandler(formValues)}>{secondaryLabel}</button>
                     )}
                     <button type="submit" disabled={submitDisabled}>
                         {submitText}

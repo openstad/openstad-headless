@@ -14,8 +14,8 @@ export type FormProps = {
     submitText?: string;
     submitHandler: (data: any) => void;
     submitDisabled?: boolean;
-    saveAsConceptLabel?: string;
-    saveAsConceptHandler?: (data: any) => void;
+    secondaryLabel?: string;
+    secondaryHandler?: (data: any) => void;
 }
 
 type CombinedFieldPropsWithType = (
