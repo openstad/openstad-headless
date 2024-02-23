@@ -4,20 +4,25 @@
 --nlds-counter-border-radius
 --nlds-counter-padding, .5rem .5rem
 --nlds-counter-height, auto
+--nlds-counter-background-color
+
+<!-- Counter link-->
+--nlds-counter-button-background-color
+--nlds-counter-button-border-color
+--nlds-counter-button-border-width
+--nlds-counter-button-color
 
 <!-- Counter link: Hover state -->
---nlds-counter-hover-background-color
---nlds-counter-hover-color
+--nlds-counter-button-hover-background-color
+--nlds-counter-button-hover-border-color
+--nlds-counter-button-hover-border-width
+--nlds-counter-button-hover-color
 
 <!-- Counter link: Active state -->
---nlds-counter-active-color
-
-<!-- Counter Link: Focus state -->
---nlds-counter-focus-background-color
---nlds-counter-focus-outline-color
---nlds-counter-focus-outline-offset
---nlds-counter-focus-outline-style
---nlds-counter-focus-outline-width
+--nlds-counter-button-active-background-color
+--nlds-counter-button-active-border-color
+--nlds-counter-button-active-border-width
+--nlds-counter-button-active-color
 
 <!-- Counter text -->
 --nlds-counter-gap
