@@ -28,7 +28,7 @@ export default function ProjectResources() {
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
             <div className="grid grid-cols-1 lg:grid-cols-7 items-center py-2 px-2 border-b border-border">
-              <ListHeading className="hidden lg:flex lg:col-span-2">
+              <ListHeading className="hidden lg:flex lg:col-span-1">
                 Stem ID
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-2">
@@ -40,6 +40,9 @@ export default function ProjectResources() {
               <ListHeading className="hidden lg:flex lg:col-span-1">
                 Gebruiker ID
               </ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1">
+                Voorkeur
+              </ListHeading>
             </div>
             <ul>
               {data?.map((vote: any) => {
@@ -47,7 +50,7 @@ export default function ProjectResources() {
                   <li
                     key={vote.id}
                     className="grid grid-cols-3 lg:grid-cols-7 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
-                    <div className="col-span-2 truncate">
+                    <div className="col-span-1 truncate">
                       <Paragraph>{vote.id}</Paragraph>
                     </div>
                     <Paragraph className="hidden lg:flex truncate lg:col-span-2">
@@ -56,8 +59,11 @@ export default function ProjectResources() {
                     <Paragraph className="hidden lg:flex truncate lg:col-span-1">
                       {vote.resourceId}
                     </Paragraph>
-                    <Paragraph className="hidden lg:flex truncate lg:col-span-1 -mr-16">
+                    <Paragraph className="hidden lg:flex truncate lg:col-span-1">
                       {vote.userId}
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate lg:col-span-1 -mr-16">
+                      {vote.opinion}
                     </Paragraph>
                     <div
                       onClick={(e) => e.preventDefault()}
