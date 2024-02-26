@@ -78,7 +78,7 @@
   display: flex;
   gap: 1rem;
   padding: 1rem;
-  background-color: var(--osc-card);
+  background-color: #F0F4F8;
 }
 
 .osc-stem-begroot-paginator {

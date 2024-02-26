@@ -24,7 +24,7 @@ const Input = forwardRef<HTMLInputElement, Props>((props, ref) => {
 
   return (
     <FormField
-      invalid={false}
+      invalid={props.errors ? true : false}
       type="search"
     >
       {props.label ? (
@@ -37,10 +37,10 @@ const Input = forwardRef<HTMLInputElement, Props>((props, ref) => {
         <Textbox
           ref={ref}
           id={inputID}
-          invalid={false}
+          invalid={props.errors ? true : false}
           name="search"
-          placeholder={props.placeholder}
           {...props}
+          type={'text'}
         />
 
       {props.errors ? (
