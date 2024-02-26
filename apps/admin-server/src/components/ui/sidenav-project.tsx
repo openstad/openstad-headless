@@ -237,63 +237,10 @@ export function SidenavProject({ className }: { className?: string }) {
               location.includes('/notifications') ? 'secondary' : 'ghost'
             }
             size="default"
-            className="w-full flex justify-between">
+            className="w-full flex justify-start">
             <span className="truncate">Notificaties</span>
-            <ChevronDown
-              size={16}
-            />
           </Button>
         </Link>
-        {location.includes('/notifications') ? (
-          <>
-            <Link href={`/projects/${project}/notifications`}>
-              <Button
-                variant={
-                  location.endsWith('/notifications') ? 'secondary' : 'ghost'
-                }
-                size="default"
-                className="w-full flex justify-start pl-8">
-                <span className="truncate">Login e-mail</span>
-              </Button>
-            </Link>
-            <Link href={`/projects/${project}/notifications/smsverification`}>
-              <Button
-                variant={
-                  location.includes('/notifications/smsverification')
-                    ? 'secondary'
-                    : 'ghost'
-                }
-                size="default"
-                className="w-full flex justify-start pl-8">
-                <span className="truncate">SMS verificatie</span>
-              </Button>
-            </Link>
-            <Link href={`/projects/${project}/notifications/createresource`}>
-              <Button
-                variant={
-                  location.includes('/notifications/createresource')
-                    ? 'secondary'
-                    : 'ghost'
-                }
-                size="default"
-                className="w-full flex justify-start pl-8">
-                <span className="truncate">Resource aangemaakt</span>
-              </Button>
-            </Link>
-            <Link href={`/projects/${project}/notifications/updateresource`}>
-              <Button
-                variant={
-                  location.includes('/notifications/updateresource')
-                    ? 'secondary'
-                    : 'ghost'
-                }
-                size="default"
-                className="w-full flex justify-start pl-8">
-                <span className="truncate">Resource aangepast</span>
-              </Button>
-            </Link>
-          </>
-        ) : null}
         <Link href={`/projects/${project}/duplicate`}>
           <Button
             variant={location.includes("/duplicate") ? "secondary" : "ghost"}

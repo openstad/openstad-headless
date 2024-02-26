@@ -70,7 +70,7 @@ export default function ProjectNotifications() {
         ]}>
         <div className="container py-6">
           {value?.map((type: any) => (
-            typeof type === "object" ? <NotificationForm type={type.type} engine={'email'} id={type.id} label={type.label} subject={type.subject} body={type.body}/> : <NotificationForm type={type} engine={'email'}/>
+            typeof type === "object" ? <NotificationForm type={type.type} engine={'email'} id={type.id} label={type.label} subject={type.subject} body={type.body} key={type.id}/> : <NotificationForm type={type} engine={'email'} key={type}/>
             ))}
         </div>
       </PageLayout>
