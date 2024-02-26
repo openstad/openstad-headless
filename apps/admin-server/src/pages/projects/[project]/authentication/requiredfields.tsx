@@ -2,7 +2,8 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useProject } from '../../../../hooks/use-project';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -13,62 +14,71 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import toast from 'react-hot-toast';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
-import { useCallback, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { useProject } from '../../../../hooks/use-project';
 import { Separator } from '@/components/ui/separator';
-import toast from 'react-hot-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 
-const authTypes = [
+const requiredUserFields = [
   {
-    id: 'UniqueCode',
-    label: 'Unieke code',
+    id: 'name',
+    label: 'Naam',
   },
   {
-    id: 'Url',
-    label: 'E-mail een inloglink',
+    id: 'email',
+    label: 'E-mailadres',
   },
   {
-    id: 'Phonenumber',
-    label: 'SMS verificatie',
+    id: 'phoneNumber',
+    label: 'Telefoonnummer',
   },
   {
-    id: 'Local',
-    label: 'Wachtwoord',
+    id: 'streetName',
+    label: 'Straatnaam',
+  },
+  {
+    id: 'suffix',
+    label: 'Tussenvoegsel',
+  },
+  {
+    id: 'houseNumber',
+    label: 'Huisnummer',
+  },
+  {
+    id: 'city',
+    label: 'Stad',
+  },
+  {
+    id: 'postcode',
+    label: 'Postcode',
   },
 ];
 
 const formSchema = z.object({
-  authTypes: z.string().array().default([]),
-  fromEmail: z.string().email().optional(),
-  fromName: z.string().optional(),
-  contactEmail: z.string().email().optional(),
-  defaultRoleId: z.enum(['2', '3']).optional(),
+  requiredUserFields: z.string().array().default([]),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  buttonText: z.string().optional(),
+  info: z.string().optional(),
 });
 
-export default function ProjectAuthentication() {
-  const category = 'auth';
+export default function ProjectAuthenticationRequiredFields() {
 
-  const router = useRouter();
-  const { project } = router.query;
   const {
     data,
-    isLoading,
     updateProject,
   } = useProject();
 
   const defaults = useCallback(
     () => ({
-      authTypes: data?.config?.auth?.provider?.openstad?.authTypes,
-      fromEmail: data?.config?.auth?.provider?.openstad?.config?.fromEmail,
-      fromName: data?.config?.auth?.provider?.openstad?.config?.fromName,
-      contactEmail: data?.config?.auth?.provider?.openstad?.config?.contactEmail,
-      defaultRoleId: data?.config?.auth?.provider?.openstad?.config?.defaultRoleId,
+      requiredUserFields: data?.config?.auth?.provider?.openstad?.requiredUserFields || [],
+      title: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.title || [],
+      description: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.description || [],
+      buttonText: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.buttonText || [],
+      info: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.info || [],
     }),
     [data?.config]
   );
@@ -81,19 +91,21 @@ export default function ProjectAuthentication() {
   useEffect(() => {
     form.reset(defaults());
   }, [form, defaults]);
-
+  
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const project = await updateProject({
         auth: {
           provider: {
             openstad: {
-              authTypes: values.authTypes,
+              requiredUserFields: values.requiredUserFields,
               config: {
-                fromEmail: values.fromEmail,
-                fromName: values.fromName,
-                contactEmail: values.contactEmail,
-                defaultRoleId: values.defaultRoleId,
+                requiredFields: {
+                  title: values.title,
+                  description: values.description,
+                  buttonText: values.buttonText,
+                  info: values.info,
+                }
               },
             }
           }
@@ -109,12 +121,12 @@ export default function ProjectAuthentication() {
     }
   }
 
-  const [showEmailFields, setShowEmailFields] = useState(false)
+  const [showPageFields, setShowPageFields] = useState(false)
   useEffect(() => {
     // data is not available right away
-    setShowEmailFields(data?.config?.auth?.provider?.openstad?.authTypes?.includes('Url'));
+    setShowPageFields(data?.config?.auth?.provider?.openstad?.requiredUserFields?.length > 0);
   }, [data]);
-
+  
   return (
     <div>
       <PageLayout
@@ -126,33 +138,37 @@ export default function ProjectAuthentication() {
           },
           {
             name: 'Authenticatie',
-            url: `/projects/${project}/authentication`,
+            url: '/projects/1/authentication',
+          },
+          {
+            name: 'Verplichte velden',
+            url: '/projects/1/authentication/requiredfields',
           },
         ]}>
         <div className="container py-6">
-          <div className="p-6 bg-white rounded-md">
-            <Form {...form}>
-              <Heading size="xl">Authenticatie instellingen</Heading>
-              <Separator className="my-4" />
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4 lg:w-1/2">
-                <FormField
+          <Form {...form} className="p-6 bg-white rounded-md">
+            <Heading size="xl">Verplichte velden</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 lg:w-1/2">
+              <div>
+                <FormLabel>
+                  Een nieuwe gebruiker moet de volgende velden invullen:
+                </FormLabel>
+              </div>
+
+              <FormField
                 control={form.control}
-                name="authTypes"
+                name="requiredUserFields"
                 render={() => (
                   <FormItem className="col-span-full">
-                    <div>
-                      <FormLabel>
-                        Toegestaande authenticatie methoden
-                      </FormLabel>
-                    </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      {authTypes.map((item) => (
+                      {requiredUserFields.map((item) => (
                         <FormField
                           key={item.id}
                           control={form.control}
-                          name="authTypes"
+                          name="requiredUserFields"
                           render={({ field }) => {
                             return (
                               <FormItem
@@ -162,7 +178,7 @@ export default function ProjectAuthentication() {
                                   <Checkbox
                                     checked={field.value?.includes(item.id)}
                                     onCheckedChange={(checked: any) => {
-                                      if (item.id == 'Url') setShowEmailFields(checked)
+                                      setShowPageFields(field.value.length > 1 || checked)
                                       return checked
                                         ? field.onChange([
                                             ...field.value,
@@ -188,71 +204,22 @@ export default function ProjectAuthentication() {
                   </FormItem>
                 )}
               />
-              <Separator className="my-4" />
-              <div>
-                <FormLabel>
-                  Een nieuwe gebruiker moet de volgende velden invullen:
-                </FormLabel>
-              </div>
 
-              <FormField
-                control={form.control}
-                name="contactEmail"
-                render={({ field }) => (
-                  <FormItem className="col-span-full">
-                    <FormLabel>E-mailadres voor contact en hulpvragen</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="defaultRoleId"
-                render={({ field }) => (
-                  <FormItem className="col-span-full">
-                    <FormLabel>
-                      Welke rol krijgt een nieuwe gebruiker toegewezen?
-                    </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Standaard gebruiker" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="3">Anoniem</SelectItem>
-                        <SelectItem value="2">
-                          Standaard gebruiker
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {showEmailFields ? (
+              {showPageFields ? (
               <>
-
               <Separator className="my-4" />
               <div>
                 <FormLabel>
-                  Extra instellingen voor email login:
+                  Als een gebruiker één of meer ven deze verplichte velden moet invullen dan doet die dat op een pagina met deze teksten:
                 </FormLabel>
               </div>
 
               <FormField
                 control={form.control}
-                name="fromEmail"
+                name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Afzender adres van login e-mails
-                    </FormLabel>
+                    <FormLabel>Titel</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
@@ -263,12 +230,23 @@ export default function ProjectAuthentication() {
 
               <FormField
                 control={form.control}
-                name="fromName"
+                name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Naam van de afzender van login e-mails
-                    </FormLabel>
+                    <FormLabel>Beschrijving</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="buttonText"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Knoptekst</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
@@ -276,16 +254,29 @@ export default function ProjectAuthentication() {
                   </FormItem>
                 )}
               />
-
+              <FormField
+                control={form.control}
+                name="info"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Infotekst</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               </>
               ) : null}
 
-                <Button type="submit">Opslaan</Button>
-              </form>
-            </Form>
-          </div>
+              <Button type="submit">Opslaan</Button>
+            </form>
+          </Form>
         </div>
       </PageLayout>
     </div>
   );
 }
+
+

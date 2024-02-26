@@ -2,7 +2,8 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useProject } from '../../../../hooks/use-project';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -13,62 +14,62 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import toast from 'react-hot-toast';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
-import { useCallback, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { useProject } from '../../../../hooks/use-project';
 import { Separator } from '@/components/ui/separator';
-import toast from 'react-hot-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 
-const authTypes = [
+
+const twoFactorRoles = [
   {
-    id: 'UniqueCode',
-    label: 'Unieke code',
+    id: 'admin',
+    label: 'Administrator',
   },
   {
-    id: 'Url',
-    label: 'E-mail een inloglink',
+    id: 'member',
+    label: 'Member',
   },
   {
-    id: 'Phonenumber',
-    label: 'SMS verificatie',
+    id: 'moderator',
+    label: 'Moderator',
   },
   {
-    id: 'Local',
-    label: 'Wachtwoord',
+    id: 'editor',
+    label: 'Editor',
   },
 ];
 
 const formSchema = z.object({
-  authTypes: z.string().array().default([]),
-  fromEmail: z.string().email().optional(),
-  fromName: z.string().optional(),
-  contactEmail: z.string().email().optional(),
-  defaultRoleId: z.enum(['2', '3']).optional(),
+  twoFactorRoles: z.string().array().default([]),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  buttonText: z.string().optional(),
+  info: z.string().optional(),
+  configTitle: z.string().optional(),
+  configDescription: z.string().optional(),
+  configButtonText: z.string().optional(),
 });
 
-export default function ProjectAuthentication() {
-  const category = 'auth';
+export default function ProjectAuthentication2FA() {
 
-  const router = useRouter();
-  const { project } = router.query;
   const {
     data,
-    isLoading,
     updateProject,
   } = useProject();
 
   const defaults = useCallback(
     () => ({
-      authTypes: data?.config?.auth?.provider?.openstad?.authTypes,
-      fromEmail: data?.config?.auth?.provider?.openstad?.config?.fromEmail,
-      fromName: data?.config?.auth?.provider?.openstad?.config?.fromName,
-      contactEmail: data?.config?.auth?.provider?.openstad?.config?.contactEmail,
-      defaultRoleId: data?.config?.auth?.provider?.openstad?.config?.defaultRoleId,
+      twoFactorRoles: data?.config?.auth?.provider?.openstad?.twoFactorRoles || ['admin'],
+      title: data?.config?.auth?.provider?.openstad?.config?.twoFactor?.title || [],
+      description: data?.config?.auth?.provider?.openstad?.config?.twoFactor?.description || [],
+      buttonText: data?.config?.auth?.provider?.openstad?.config?.twoFactor?.buttonText || [],
+      info: data?.config?.auth?.provider?.openstad?.config?.twoFactor?.info || [],
+      configTitle: data?.config?.auth?.provider?.openstad?.config?.configureTwoFactor?.title || [],
+      configDescription: data?.config?.auth?.provider?.openstad?.config?.configureTwoFactor?.description || [],
+      configButtonText: data?.config?.auth?.provider?.openstad?.config?.configureTwoFactor?.buttonText || [],
     }),
     [data?.config]
   );
@@ -81,19 +82,26 @@ export default function ProjectAuthentication() {
   useEffect(() => {
     form.reset(defaults());
   }, [form, defaults]);
-
+  
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const project = await updateProject({
         auth: {
           provider: {
             openstad: {
-              authTypes: values.authTypes,
+              twoFactorRoles: values.twoFactorRoles,
               config: {
-                fromEmail: values.fromEmail,
-                fromName: values.fromName,
-                contactEmail: values.contactEmail,
-                defaultRoleId: values.defaultRoleId,
+                twoFactor: {
+                  title: values.title,
+                  description: values.description,
+                  buttonText: values.buttonText,
+                  info: values.info,
+                },
+                configureTwoFactor: {
+                  title: values.configTitle,
+                  description: values.configDescription,
+                  buttonText: values.configButtonText,
+                }
               },
             }
           }
@@ -109,12 +117,12 @@ export default function ProjectAuthentication() {
     }
   }
 
-  const [showEmailFields, setShowEmailFields] = useState(false)
+  const [showPageFields, setShowPageFields] = useState(false)
   useEffect(() => {
     // data is not available right away
-    setShowEmailFields(data?.config?.auth?.provider?.openstad?.authTypes?.includes('Url'));
+    setShowPageFields(data?.config?.auth?.provider?.openstad?.twoFactorRoles?.length > 0);
   }, [data]);
-
+  
   return (
     <div>
       <PageLayout
@@ -126,33 +134,37 @@ export default function ProjectAuthentication() {
           },
           {
             name: 'Authenticatie',
-            url: `/projects/${project}/authentication`,
+            url: '/projects/1/authentication',
+          },
+          {
+            name: 'Two Factor Authentication',
+            url: '/projects/1/authentication/2fa',
           },
         ]}>
         <div className="container py-6">
-          <div className="p-6 bg-white rounded-md">
-            <Form {...form}>
-              <Heading size="xl">Authenticatie instellingen</Heading>
-              <Separator className="my-4" />
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4 lg:w-1/2">
-                <FormField
+          <Form {...form} className="p-6 bg-white rounded-md">
+            <Heading size="xl">Two Factor Authentication</Heading>
+            <Separator className="my-4" />
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 lg:w-1/2">
+              <div>
+                <FormLabel>
+                  Gebruikers met de onderstaande rollen moeten inloggen met Two Factor Authentication:
+                </FormLabel>
+              </div>
+
+              <FormField
                 control={form.control}
-                name="authTypes"
+                name="twoFactorRoles"
                 render={() => (
                   <FormItem className="col-span-full">
-                    <div>
-                      <FormLabel>
-                        Toegestaande authenticatie methoden
-                      </FormLabel>
-                    </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      {authTypes.map((item) => (
+                      {twoFactorRoles.map((item) => (
                         <FormField
                           key={item.id}
                           control={form.control}
-                          name="authTypes"
+                          name="twoFactorRoles"
                           render={({ field }) => {
                             return (
                               <FormItem
@@ -162,7 +174,7 @@ export default function ProjectAuthentication() {
                                   <Checkbox
                                     checked={field.value?.includes(item.id)}
                                     onCheckedChange={(checked: any) => {
-                                      if (item.id == 'Url') setShowEmailFields(checked)
+                                      setShowPageFields(field.value.length > 1 || checked)
                                       return checked
                                         ? field.onChange([
                                             ...field.value,
@@ -188,71 +200,23 @@ export default function ProjectAuthentication() {
                   </FormItem>
                 )}
               />
-              <Separator className="my-4" />
-              <div>
-                <FormLabel>
-                  Een nieuwe gebruiker moet de volgende velden invullen:
-                </FormLabel>
-              </div>
 
-              <FormField
-                control={form.control}
-                name="contactEmail"
-                render={({ field }) => (
-                  <FormItem className="col-span-full">
-                    <FormLabel>E-mailadres voor contact en hulpvragen</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="defaultRoleId"
-                render={({ field }) => (
-                  <FormItem className="col-span-full">
-                    <FormLabel>
-                      Welke rol krijgt een nieuwe gebruiker toegewezen?
-                    </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Standaard gebruiker" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="3">Anoniem</SelectItem>
-                        <SelectItem value="2">
-                          Standaard gebruiker
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {showEmailFields ? (
+              {showPageFields ? (
               <>
 
               <Separator className="my-4" />
               <div>
                 <FormLabel>
-                  Extra instellingen voor email login:
+                  Als een gebruiker Two Factor Authentication moet invullen dan doet die dat op een pagina met deze teksten:
                 </FormLabel>
               </div>
 
               <FormField
                 control={form.control}
-                name="fromEmail"
+                name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Afzender adres van login e-mails
-                    </FormLabel>
+                    <FormLabel>Titel</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
@@ -263,12 +227,86 @@ export default function ProjectAuthentication() {
 
               <FormField
                 control={form.control}
-                name="fromName"
+                name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Naam van de afzender van login e-mails
-                    </FormLabel>
+                    <FormLabel>Beschrijving</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="buttonText"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Knoptekst</FormLabel>
+                    <FormControl>
+                      <Input placeholder="" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="info"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Infotekst</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Separator className="my-4" />
+              <div>
+                <FormLabel>
+                  Als een gebruiker Two Factor Authentication moet configureren dan doet die dat op een pagina met deze teksten:
+                </FormLabel>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="configTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Titel</FormLabel>
+                    <FormControl>
+                      <Input placeholder="" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="configDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Beschrijving</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="configButtonText"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Knoptekst</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
@@ -280,12 +318,13 @@ export default function ProjectAuthentication() {
               </>
               ) : null}
 
-                <Button type="submit">Opslaan</Button>
-              </form>
-            </Form>
-          </div>
+              <Button type="submit">Opslaan</Button>
+            </form>
+          </Form>
         </div>
       </PageLayout>
     </div>
   );
 }
+
+
