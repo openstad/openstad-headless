@@ -4,7 +4,7 @@
   justify-content: center;
   align-items: center;
   border-radius: var(--nlds-countdownbar-border-radius, 0);
-  background-color: var(--nlds-countdownbar-background-color, #F0F4F8);
+  background-color: var(--nlds-countdownbar-background-color, var(--nlds-background-color));
   gap: var(--nlds-countdownbar-gap, .5rem);
   padding: var(--nlds-countdownbar-padding, .5rem 0rem);
   height: var(--nlds-countdownbar-height, auto);

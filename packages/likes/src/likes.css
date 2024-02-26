@@ -4,7 +4,7 @@
   padding: var(--nlds-likewidget-container-padding, 1.5rem);
   gap: var(--nlds-likewidget-container-gap, 0.5rem);
   margin: var(--nlds-likewidget-container-margin, 0);
-  background-color: var(--nlds-likewidget-container-background-color, #F0F4F8);
+  background-color: var(--nlds-likewidget-container-background-color, var(--nlds-background-color));
 }
 
 .like-option-container {
@@ -15,60 +15,9 @@
 .like-widget-container.medium .like-option-container {
   grid-template-columns: 1fr 1fr;
 }
-
-.like-widget-title {
-  margin: 0;
-  font-size: var(--nlds-likewidget-title-font-size, var(--utrecht-heading-5-font-size, revert));
-  line-height: var(--nlds-likewidget-title-line-height, var(--utrecht-heading-5-line-height, revert));
-  font-weight: var(--nlds-likewidget-title-font-weight, var(--utrecht-heading-5-font-weight, revert));
-  color: var(--nlds-likewidget-title-color, var(--utrecht-heading-5-color, inherit));
-}
-
 .like-option {
   max-width: unset;
-  border-style: solid;
-
-  display: var(--nlds-likewigdet-button-display, grid);
-  background-color: var(--nlds-likewidget-button-background-color, var(--utrecht-button-subtle-hover-background-color, revert));
-  text-align: var(--nlds-likewidget-button-text-align, left);
-  grid-template-columns: var(--nlds-likewidget-button-grid-template-columns, 1fr 4rem);
-  gap: var(--nlds-likewidget-button-gap, 0);
-  border-color: var(--nlds-likewidget-button-border-color, var(--utrecht-button-subtle-border-color, transparent));
-  border-width: var(--nlds-likewidget-button-border-width, var(--utrecht-button-subtle-border-width, 1px));
-  padding: var(--nlds-likewidget-button-padding, 0);
-  color: var(--nlds-likewidget-button-color, var(--utrecht-button-subtle-color, inherit));
 }
-
-.like-option:hover:not(:disabled, [aria-disabled=true]){
-  background-color: var(--nlds-likewidget-button-hover-background-color, var(--utrecht-button-subtle-hover-background-color, revert));
-  border-color: var(--nlds-likewidget-button-hover-border-color, var(--utrecht-button-hover-subtle-border-color, transparent));
-  border-width: var(--nlds-likewidget-button-hover-border-width, var(--utrecht-button-hover-subtle-border-width, 1px));
-  color: var(--nlds-likewidget-button-hover-color, var(--utrecht-button-subtle-hover-color, revert));
-}
-
-.like-option:active:not(:disabled, [aria-disabled=true]){
-  background-color: var(--nlds-likewidget-button-active-background-color, var(--utrecht-button-subtle-active-background-color, revert));
-  border-color: var(--nlds-likewidget-button-active-border-color, var(--utrecht-button-active-subtle-border-color, transparent));
-  border-width: var(--nlds-likewidget-button-active-border-width, var(--utrecht-button-active-subtle-border-width, 1px));
-  color: var(--nlds-likewidget-button-active-color, var(--utrecht-button-subtle-active-color, revert));
-}
-
-.like-option.selected {
-  background-color: var(--nlds-likewidget-button-selected-background-color, inherit);
-  color: var(--nlds-likewidget-button-selected-color, inherit);
-}
-
-.like-option .osc-like-variant-label {
-  font-size: var(--nlds-likewidget-label-font-size, var(--utrecht-heading-6-font-size, revert));
-  line-height: var(--nlds-likewidget-label-line-height, var(--utrecht-heading-6-line-height, revert));
-  font-weight: var(--nlds-likewidget-label-font-weight, var(--utrecht-heading-6-font-weight, revert));
-  color: var(--nlds-likewidget-label-color, inherit);
-}
-
-.like-option.selected .osc-like-variant-label {
-  color: var(--nlds-likewidget-label-selected-color, inherit);
-}
-
 
 
 .like-option.osc-no-counter {
@@ -96,14 +45,6 @@
 .like-widget-container.small .like-option > .like-kind {
   justify-content: center;
   align-items: center;
-}
-
-.like-counter {
-  padding: 0.5rem 1rem;
-  color: var(--nlds-likewidget-label-selected-color, inherit);
-}
-.like-counter p{
-  color: inherit;
 }
 
 .progressbar-container {

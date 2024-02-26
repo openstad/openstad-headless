@@ -100,7 +100,7 @@ function Counter({
   }
   return (
     url.length > 0 ? (
-      <ButtonLink appearance="subtle-button" className='osc counter-container --link' href={url}>
+      <ButtonLink appearance="secondary-action-button" className='osc counter-container --link' href={url}>
         {content()}
       </ButtonLink>
     ) : (

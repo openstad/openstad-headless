@@ -1,6 +1,6 @@
 .begroot-step-panel {
   padding: 1.5rem;
-  background-color: var(--nlds-budget-background-color, #F0F4F8);
+  background-color: var(--nlds-budget-background-color, var(--nlds-background-color));
 }
 
 .begroot-step-panel + *{
@@ -78,7 +78,7 @@
   display: flex;
   gap: 1rem;
   padding: 1rem;
-  background-color: #F0F4F8;
+  background-color: var(--nlds-background-color);
 }
 
 .osc-stem-begroot-paginator {

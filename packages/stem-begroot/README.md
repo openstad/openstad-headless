@@ -18,10 +18,6 @@
 <!-- Begroot budget list Paragraph -->
 --nlds-budget-price-margin
 --nlds-budget-price-padding
---nlds-budget-price-color
---nlds-budget-price-font-size
---nlds-budget-price-font-weight
---nlds-budget-price-line-height
 
 <!-- Begroot aside Container-->
 --nlds-budget-aside-column-width
@@ -31,17 +27,9 @@
 --nlds-budget-aside-margin
 
 <!-- Begroot aside Heading -->
---nlds-budget-aside-heading-font-size
---nlds-budget-aside-heading-color
---nlds-budget-aside-heading-font-weight
---nlds-budget-aside-heading-line-height
 --nlds-budget-aside-heading-margin
 
 <!-- Begroot aside Paragraph -->
---nlds-budget-aside-paragraph-font-size
---nlds-budget-aside-paragraph-color
---nlds-budget-aside-paragraph-font-weight
---nlds-budget-aside-paragraph-line-height
 --nlds-budget-aside-paragraph-margin
 
 <!-- Begroot aside Amount -->

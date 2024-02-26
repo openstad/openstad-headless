@@ -1,4 +1,4 @@
-.osc.counter-container {
+.osc.counter-container:not(.--link) {
   display: flex;
   text-decoration: none;
   border-radius: var(--nlds-counter-border-radius, 0);
@@ -10,23 +10,9 @@
 }
 
 .osc.counter-container.--link{
-  background-color: var(--nlds-counter-button-background-color, var(--utrecht-button-subtle-background-color, revert));
-  border-color: var(--nlds-counter-button-border-color, var(--utrecht-button-subtle-border-color, transparent));
-  border-width: var(--nlds-counter-button-border-width, var(--utrecht-button-subtle-border-width, 1px));
-  color: var(--nlds-counter-button-color, var(--utrecht-button-subtle-color, revert));
-}
-.osc.counter-container.--link:hover:not(:disabled, [aria-disabled=true]){
-  background-color: var(--nlds-counter-button-hover-background-color, var(--utrecht-button-subtle-hover-background-color, revert));
-  border-color: var(--nlds-counter-button-hover-border-color, var(--utrecht-button-hover-subtle-border-color, transparent));
-  border-width: var(--nlds-counter-button-hover-border-width, var(--utrecht-button-hover-subtle-border-width, 1px));
-  color: var(--nlds-counter-button-hover-color, var(--utrecht-button-subtle-hover-color, revert));
-}
-
-.osc.counter-container.--link:active:not(:disabled, [aria-disabled=true]){
-  background-color: var(--nlds-counter-button-active-background-color, var(--utrecht-button-subtle-active-background-color, revert));
-  border-color: var(--nlds-counter-button-active-border-color, var(--utrecht-button-active-subtle-border-color, transparent));
-  border-width: var(--nlds-counter-button-active-border-width, var(--utrecht-button-active-subtle-border-width, 1px));
-  color: var(--nlds-counter-button-active-color, var(--utrecht-button-subtle-active-color, revert));
+  max-width: none;
+  width: 100%;
+  justify-content: start;
 }
 
 .osc.counter-container p {
@@ -34,16 +20,12 @@
   gap: var(--nlds-counter-gap, .25rem);
   justify-content: var(--nlds-counter-justify-content, left);
   align-items: var(--nlds-counter-align-items, center);
+  color: inherit;
 
-  font-size: var(--nlds-counter-font-size, var(--utrecht-paragraph-font-size, 1rem));
-  font-weight: var(--nlds-counter-font-weight, var(--utrecht-paragraph-font-weight, 400));
-  font-family: var(--nlds-counter-font-family, var(--utrecht-paragraph-font-family, var(--utrecht-document-font-family, inherit)));
-  color: var(--nlds-counter-color, var(--utrecht-paragraph-color, inherit));
 }
 
 .osc.counter-container .amount {
   font-size: var(--nlds-counter-amount-font-size, 1.5em);
   font-weight: var(--nlds-counter-amount-font-weight, 700);
-  font-family: var(--nlds-counter-amount-font-family, var(--utrecht-paragraph-font-family, var(--utrecht-document-font-family, inherit)));
   color: var(--nlds-counter-amount-color, inherit);
 }

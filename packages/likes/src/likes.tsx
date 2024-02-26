@@ -115,7 +115,7 @@ function Likes({
         <div className={`like-option-container`}>
           {supportedLikeTypes.map((likeVariant, index) => (
             <Button
-              appearance="subtle-button"
+            appearance='primary-action-button'
               key={`${likeVariant.type}-${index}`}
               onClick={(e) => doVote(e, likeVariant.type)}
               className={`like-option ${
@@ -127,21 +127,17 @@ function Likes({
                 className="like-kind">
                 <i className={likeVariant.icon}></i>
                 {variant === 'small' ? null : (
-                  <Heading6 className="osc-like-variant-label">
-                    {likeVariant.label}
-                  </Heading6>
+                    likeVariant.label
                 )}
               </section>
 
               {!hideCounters ? (
                 <section className="like-counter">
-                  <Paragraph>
                     {resource[likeVariant.type] &&
                     resource[likeVariant.type] < 10
                       ? resource[likeVariant.type].toString().padStart(2, '0')
                       : resource[likeVariant.type] ||
                         (0).toString().padStart(2, '0')}
-                  </Paragraph>
                 </section>
               ) : null}
             </Button>

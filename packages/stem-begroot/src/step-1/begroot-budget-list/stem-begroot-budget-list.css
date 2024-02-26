@@ -16,31 +16,6 @@
 .budget-used-list p {
   margin: var(--nlds--budget-price-margin, 1rem 0);
   padding: var(--nlds--budget-price-padding, 0);
-  color: var(
-    --nlds--budget-price-color,
-    var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit))
-  );
-  font-size: var(
-    --nlds--budget-price-font-size,
-    var(
-      --utrecht-paragraph-font-size,
-      var(--utrecht-document-font-size, inherit)
-    )
-  );
-  font-weight: var(
-    --nlds--budget-price-font-weight,
-    var(
-      --utrecht-paragraph-font-weight,
-      var(--utrecht-document-font-weight, inherit)
-    )
-  );
-  line-height: var(
-    --nlds--budget-price-line-height,
-    var(
-      --utrecht-paragraph-line-height,
-      var(--utrecht-document-line-height, inherit)
-    )
-  );
 }
 
 .stem-begroot-helptext-and-budget-section {
@@ -62,53 +37,9 @@
   margin: var(--nlds--budget-aside-margin, 0);
 }
 .stem-begroot-helptext-and-budget-section-budget h5 {
-  font-size: var(
-    --nlds--budget-aside-heading-font-size,
-    var(--utrecht-heading-5-font-size, revert)
-  );
-  color: var(
-    --nlds--budget-aside-heading-color,
-    var(
-      --utrecht-heading-5-color,
-      var(--utrecht-heading-color, var(--utrecht-document-color, inherit))
-    )
-  );
-  font-weight: var(
-    --nlds--budget-aside-heading-font-weight,
-    var(
-      --utrecht-heading-5-font-weight,
-      var(--utrecht-heading-font-weight, bold)
-    )
-  );
-  line-height: var(
-    --nlds--budget-aside-heading-line-height,
-    var(--utrecht-heading-5-line-height)
-  );
   margin: var(--nlds--budget-aside-heading-margin, 0 0 0.5rem 0);
 }
 .stem-begroot-helptext-and-budget-section-budget p {
-  font-size: var(
-    --nlds--budget-aside-paragraph-font-size,
-    var(--utrecht-paragraph-font-size, revert)
-  );
-  color: var(
-    --nlds--budget-aside-paragraph-color,
-    var(
-      --utrecht-paragraph-color,
-      var(--utrecht-heading-color, var(--utrecht-document-color, inherit))
-    )
-  );
-  font-weight: var(
-    --nlds--budget-aside-paragraph-font-weight,
-    var(--utrecht-paragraph-font-weight, inherit)
-  );
-  line-height: var(
-    --nlds--budget-aside-paragraph-line-height,
-    var(
-      --utrecht-paragraph-line-height,
-      var(--utrecht-document-line-height, inherit)
-    )
-  );
   margin: var(--nlds--budget-aside-paragraph-margin, 0 0 0.1rem 0);
   align-items: center;
 }
@@ -182,7 +113,7 @@
 .budget-badge {
   border-width: 1px;
   border-style: solid;
-  border-radius: var(--nlds-budget-badge-border-radius, 0);
+  border-radius: var(--nlds-budget-badge-border-radius, var(--utrecht-button-border-radius, 0));
   background-color: var(--nlds-budget-badge-background-color, #dbdfe5);
   border-color: var(--nlds-budget-badge-border-color, #dbdfe5);
 }
@@ -193,8 +124,8 @@
 }
 
 .budget-badge-primary {
-  background-color: var(--nlds-budget-badge-active-background-color, #12b886);
-  border-color: var(--nlds-budget-badge-active-border-color, #12b886);
+  background-color: var(--nlds-budget-badge-active-background-color, var(--utrecht-button-primary-action-background-color));
+  border-color: var(--nlds-budget-badge-active-border-color, var(--utrecht-button-primary-action-background-color));
 }
 
 .budget-badge-primary > p {

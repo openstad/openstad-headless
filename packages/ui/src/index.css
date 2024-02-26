@@ -86,3 +86,7 @@
 .osc p.helptext.error {
     color: var(--osc-destructive);
 }
+
+.osc{
+    --nlds-background-color: #F0F4F8;
+}
