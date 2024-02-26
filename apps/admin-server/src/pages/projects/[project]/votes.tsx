@@ -5,11 +5,28 @@ import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useVotes from '@/hooks/use-votes';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import toast from 'react-hot-toast';
+import { Button } from '@/components/ui/button';
 
 export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
   const { data, remove } = useVotes(project as string);
+
+  const exportData = (data: BlobPart, fileName: string, type: string) => {
+    // Create a link and download the file
+    const blob = new Blob([data], { type });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  function transform() {
+    const jsonData = JSON.stringify(data);
+    exportData(jsonData, `votes.json`, "application/json");
+  }
 
   return (
     <div>
@@ -24,7 +41,14 @@ export default function ProjectResources() {
             name: 'Stemmen',
             url: `/projects/${project}/votes`,
           },
-        ]}>
+        ]}
+        action={
+          <div className='flex flex-row w-full md:w-auto my-auto'>
+            <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
+              Exporteer stemmen
+            </Button>
+          </div>
+        }>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
             <div className="grid grid-cols-1 lg:grid-cols-7 items-center py-2 px-2 border-b border-border">
