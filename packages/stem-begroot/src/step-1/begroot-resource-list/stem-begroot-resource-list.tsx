@@ -120,6 +120,7 @@ export const StemBegrootResourceList = ({
 
               <div className="osc-stem-begroot-content-item-footer">
                 <Button
+                  appearance='secondary-action-button'
                   className="osc-stem-begroot-item-action-btn"
                   onClick={() => {
                     onResourcePlainClicked(resource, index);
