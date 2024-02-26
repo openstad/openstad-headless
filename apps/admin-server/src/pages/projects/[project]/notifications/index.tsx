@@ -20,6 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
 import useNotificationTemplate from '@/hooks/use-notification-template'
 import toast from 'react-hot-toast';
+import { NotificationForm } from '@/components/notification-form';
 
 const formSchema = z.object({
   label: z.string(),
@@ -27,57 +28,31 @@ const formSchema = z.object({
   body: z.string(),
 });
 
-export default function ProjectNotificationsLoginMail() {
+export default function ProjectNotifications() {
+  const type = ['login email', 'login sms', 'new resource', 'updated resource', 'user account about to expire']
   const router = useRouter();
   const project = router.query.project as string;
-  const [value, setValue] = React.useState<undefined | {id: any, label: any, subject: any, body: any}>();
-  const { data, create, update } = useNotificationTemplate(project as string)
-
-  const defaults = React.useCallback(
-    () => ({
-      label: value?.label || "Inlogmail aangevraagd",
-      subject: value?.subject || "Beste {{user}},",
-      body: value?.body || "Voor Admin panel is een inloglink aangevraagd voor dit emailadres. Klik op de knop hieronder om automatisch in te loggen. De knop is 10 minuten geldig.",
-    }),
-    [value]
-  )
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
-  });
-
-  React.useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
-
+  const { data } = useNotificationTemplate(project as string);
+  const [value, setValue] = React.useState<any[]>([]);
+  
   React.useEffect(() => {
     if (data !== undefined) {
-      for (let i = 0; i < data.length; i++) {
-        if (data[i]?.type === 'login email') {
-          setValue(data[i])
+      let test: any[] = [];
+      for (let i = 0; i < type.length; i++) {
+        let integer = 0;
+        for (let j = 0; j < data.length; j++) {
+          if (type[i] === data[j].type) {
+            integer++;
+            test.push(data[j])
+          }
+        }
+        if (!integer) {
+          test.push(type[i])
         }
       }
+      setValue(test)
     }
   }, [data]);
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (value !== undefined) {
-      const template = await update(value.id, values.label, values.subject, values.body)
-      if (template) {
-        toast.success('Template aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.')
-      }
-    } else {
-      const template = await create(project, 'email', 'login email', values.label, values.subject, values.body)
-      if (template) {
-        toast.success('Template aangemaakt!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.')
-      }
-    }
-  }
 
   return (
     <div>
@@ -94,54 +69,9 @@ export default function ProjectNotificationsLoginMail() {
           },
         ]}>
         <div className="container py-6">
-          <Form {...form} className="p-6 bg-white rounded-md">
-            <Heading size="xl">Login email instellingen</Heading>
-            <Separator className="my-4" />
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4 lg:w-1/2">
-              <FormField
-                control={form.control}
-                name="label"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mailonderwerp</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="subject"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Aanhef/introductie</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="body"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Body</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit">Opslaan</Button>
-            </form>
-          </Form>
+          {value?.map((type: any) => (
+            typeof type === "object" ? <NotificationForm type={type.type} engine={'email'} id={type.id} label={type.label} subject={type.subject} body={type.body}/> : <NotificationForm type={type} engine={'email'}/>
+            ))}
         </div>
       </PageLayout>
     </div>

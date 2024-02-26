@@ -14,12 +14,25 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
 import useNotificationTemplate from '@/hooks/use-notification-template'
 import toast from 'react-hot-toast';
+
+type Props = {
+  type:
+    | 'login mail'
+    | 'login sms'
+    | 'new resource'
+    | 'updated resource'
+    | 'user account about to expire';
+  engine: string;
+  id?: string;
+  label?: string;
+  subject?: string;
+  body?: string;
+}
 
 const formSchema = z.object({
   label: z.string(),
@@ -27,19 +40,18 @@ const formSchema = z.object({
   body: z.string(),
 });
 
-export default function ProjectNotificationsUpdateResource() {
+export function NotificationForm({ type, engine, id, label, subject, body }: Props) {
   const router = useRouter();
   const project = router.query.project as string;
-  const [value, setValue] = React.useState<undefined | {id: any, label: any, subject: any, body: any}>();
-  const { data, create, update } = useNotificationTemplate(project as string)
+  const { create, update } = useNotificationTemplate(project as string)
 
   const defaults = React.useCallback(
     () => ({
-      label: value?.label || "Resource aangepast",
-      subject: value?.subject || "Beste {{user}},",
-      body: value?.body || "Bedankt voor het aanpassen van een resource! Met deze link hieronder kunt u direct de resource in het portaal bekijken.",
+      label: label || "Titel van de mail...",
+      subject: subject || "Beste {{user}},",
+      body: body || "Inhoud van de mail...",
     }),
-    [value]
+    [label, subject, body]
   )
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -51,26 +63,16 @@ export default function ProjectNotificationsUpdateResource() {
     form.reset(defaults());
   }, [form, defaults]);
 
-  React.useEffect(() => {
-    if (data !== undefined) {
-      for (let i = 0; i < data.length; i++) {
-        if (data[i]?.type === 'updated resource') {
-          setValue(data[i])
-        }
-      }
-    }
-  }, [data]);
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (value !== undefined) {
-      const template = await update(value.id, values.label, values.subject, values.body)
+    if (label && subject && body !== undefined) {
+      const template = await update(id as string, values.label, values.subject, values.body)
       if (template) {
         toast.success('Template aangepast!');
       } else {
         toast.error('Er is helaas iets mis gegaan.')
       }
     } else {
-      const template = await create(project, 'email', 'updated resource', values.label, values.subject, values.body)
+      const template = await create(project, engine, type, values.label, values.subject, values.body)
       if (template) {
         toast.success('Template aangemaakt!');
       } else {
@@ -81,25 +83,9 @@ export default function ProjectNotificationsUpdateResource() {
 
   return (
     <div>
-      <PageLayout
-        pageHeader="Projecten"
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Notificaties',
-            url: `/projects/${project}/notifications`,
-          },
-          {
-            name: 'Aangepaste resource notificatie',
-            url: `/projects/${project}/notifications/updateresource`
-          }
-        ]}>
         <div className="container py-6">
           <Form {...form} className="p-6 bg-white rounded-md">
-            <Heading size="xl">Resource aanpassen notificatie instellingen</Heading>
+            <Heading size="xl">{type}</Heading>
             <Separator className="my-4" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -135,7 +121,7 @@ export default function ProjectNotificationsUpdateResource() {
                 name="body"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Beschrijving</FormLabel>
+                    <FormLabel>Body</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>
@@ -147,7 +133,6 @@ export default function ProjectNotificationsUpdateResource() {
             </form>
           </Form>
         </div>
-      </PageLayout>
     </div>
   );
 }
