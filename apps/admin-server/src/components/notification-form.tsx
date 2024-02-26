@@ -22,10 +22,10 @@ import toast from 'react-hot-toast';
 
 type Props = {
   type:
-    | 'login mail'
+    | 'login email'
     | 'login sms'
-    | 'new resource'
-    | 'updated resource'
+    | 'new published resource - user feedback'
+    | 'updated resource - user feedback'
     | 'user account about to expire';
   engine: string;
   id?: string;
@@ -47,8 +47,8 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
 
   const defaults = React.useCallback(
     () => ({
-      label: label || "Titel van de mail...",
-      subject: subject || "Beste {{user}},",
+      label: label || "Label van de mail",
+      subject: subject || "Onderwerp van de mail",
       body: body || "Inhoud van de mail...",
     }),
     [label, subject, body]
@@ -95,7 +95,7 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
                 name="label"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mailonderwerp</FormLabel>
+                    <FormLabel>Label (Type mail)</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
@@ -108,7 +108,7 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
                 name="subject"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Aanhef/introductie</FormLabel>
+                    <FormLabel>Onderwerp</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
@@ -121,7 +121,7 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
                 name="body"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Body</FormLabel>
+                    <FormLabel>Inhoud</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>
