@@ -1,4 +1,4 @@
-// @todo: add all widgets
+// @todo: add all widgets MUST confirm to widgetDefinition for key
 let moduleDefinitions = {
   agenda: {
     packageName: '@openstad-headless/agenda',
@@ -121,7 +121,7 @@ let moduleDefinitions = {
       projectId: null,
     },
   },
-  resourceoverviewmap: {
+  resourcesmap: {
     packageName: '@openstad-headless/resource-overview-map',
     directory: 'leaflet-map',
     js: ['dist/resource-overview-map.iife.js'],
