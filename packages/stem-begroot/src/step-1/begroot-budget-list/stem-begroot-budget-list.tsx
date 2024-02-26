@@ -2,6 +2,9 @@ import './stem-begroot-budget-list.css';
 import React from 'react';
 import { BudgetStatusPanel } from '../../reuseables/budget-status-panel';
 import { IconButton, Image, Spacer } from '@openstad-headless/ui/src';
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Heading5, Paragraph, Strong, Button } from "@utrecht/component-library-react";
 
 export const StemBegrootBudgetList = ({
   introText = '',
@@ -32,7 +35,7 @@ export const StemBegrootBudgetList = ({
       <section className="stem-begroot-budget-list">
         <div className="stem-begroot-budget-list-used-budgets">
           <div className="stem-begroot-helptext-and-budget-section-helptext">
-            <p>{introText}</p>
+            <Paragraph>{introText}</Paragraph>
           </div>
         </div>
 
@@ -44,15 +47,14 @@ export const StemBegrootBudgetList = ({
           budgetUsed={budgetUsed}
         />
       </section>
-      <Spacer size={2} />
       <section className="budget-list-container">
-        <h5>Uw selecties</h5>
+        <Heading5>Uw selecties</Heading5>
         {!canAddMore ? (
-          <p className="budget-list-status-text helptext error">
+          <Paragraph className="budget-list-status-text helptext error">
             {typeIsBudgeting
               ? 'Onvoldoende budget'
               : 'Maximaal aantal plannen bereikt'}
-          </p>
+          </Paragraph>
         ) : null}
 
         <Spacer size={1} />
@@ -72,7 +74,7 @@ export const StemBegrootBudgetList = ({
                       onClick={() => {
                         onSelectedResourceRemove(resource);
                       }}
-                      className="ghost negative"
+                      className="subtle-button"
                       icon="ri-close-line"
                     />
                   </div>
@@ -84,7 +86,7 @@ export const StemBegrootBudgetList = ({
             ))}
 
             {canAddMore ? (
-              <div
+              <Button
                 className="budget-list-action-hint-container"
                 onClick={() => {
                   const list = document.querySelector(
@@ -96,10 +98,8 @@ export const StemBegrootBudgetList = ({
                     });
                   }
                 }}>
-                <p className="budget-list-status-text strong">
                   Selecteer een plan
-                </p>
-              </div>
+              </Button>
             ) : null}
           </div>
         </div>

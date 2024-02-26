@@ -2,6 +2,10 @@ import React, { Fragment } from 'react';
 import { Spacer } from '@openstad-headless/ui/src';
 import { BudgetStatusPanel } from '../reuseables/budget-status-panel';
 
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Heading5, Paragraph, Strong } from "@utrecht/component-library-react";
+
 type Props = {
   selectedResources: Array<any>;
   budgetUsed: number;
@@ -22,7 +26,7 @@ export const BegrotenSelectedOverview = ({
   return (
     <>
       <div className="begroot-step-2-instruction-budget-status-panel">
-        <p>{introText}</p>
+        <Paragraph>{introText}</Paragraph>
         <BudgetStatusPanel
           typeIsBudgeting={typeIsBudgeting}
           maxNrOfResources={maxNrOfResources}
@@ -34,15 +38,15 @@ export const BegrotenSelectedOverview = ({
 
       <Spacer size={1.5} />
       <div className="budget-overview-panel">
-        <h5>Overzicht van mijn selectie</h5>
+        <Heading5>Overzicht van mijn selectie</Heading5>
         <Spacer size={2} />
 
         {selectedResources.map((resource) => (
           <Fragment key={`budget-overview-row-${resource.id}`}>
             <div className="budget-two-text-row-spaced">
-              <p>{resource.title}</p>
+              <Paragraph>{resource.title}</Paragraph>
               {typeIsBudgeting ? (
-                <p className="strong">{resource.budget}</p>
+                <Paragraph><Strong>{resource.budget}</Strong></Paragraph>
               ) : null}
             </div>
             <Spacer size={1} />
@@ -52,29 +56,31 @@ export const BegrotenSelectedOverview = ({
         <Spacer size={2} />
         <div className="budget-two-text-row-spaced">
           {typeIsBudgeting ? (
-            <h5>Totaal gebruikt budget</h5>
+            <Heading5>Totaal gebruikt budget</Heading5>
           ) : (
-            <h5>Aantal gekozen plannen</h5>
+            <Heading5>Aantal gekozen plannen</Heading5>
           )}
           {typeIsBudgeting ? (
-            <h5>&euro;{budgetUsed}</h5>
+            <Heading5>&euro;{budgetUsed}</Heading5>
           ) : (
-            <h5>{selectedResources.length}</h5>
+            <Heading5>{selectedResources.length}</Heading5>
           )}
         </div>
       </div>
 
       {typeIsBudgeting ? (
         <div className="budget-unused-panel-step-2 budget-two-text-row-spaced">
-          <p className="strong">Ongebruikt budget:</p>
-          <p className="strong">&euro;{maxBudget - budgetUsed}</p>
+          <Paragraph className="strong">Ongebruikt budget:</Paragraph>
+          <Paragraph className="strong">&euro;{maxBudget - budgetUsed}</Paragraph>
         </div>
       ) : (
         <div className="budget-unused-panel-step-2 budget-two-text-row-spaced">
-          <p className="strong">Aantal beschikbare plannen</p>
-          <p className="strong">
-            {Math.max(maxNrOfResources - selectedResources.length, 0)}
-          </p>
+          <Paragraph><Strong>Aantal beschikbare plannen</Strong></Paragraph>
+          <Paragraph>
+            <Strong>
+              {Math.max(maxNrOfResources - selectedResources.length, 0)}
+            </Strong>
+          </Paragraph>
         </div>
       )}
     </>

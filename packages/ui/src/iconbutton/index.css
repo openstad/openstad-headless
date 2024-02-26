@@ -1,4 +1,4 @@
-.osc-icon-button {
+/* .osc-icon-button {
     display: flex;
     height: 24px;
     width: 24px;
@@ -67,4 +67,12 @@
 .osc-icon-button:disabled {
     opacity: .5;
     cursor: not-allowed;
+} */
+
+.osc-carousel .utrecht-button{
+    flex-shrink: 0;
+}
+
+.osc-paginator{
+    align-items: center;
 }

@@ -25,7 +25,7 @@ export function Carousel({
     <div {...props} className={`osc ${props.className} osc-carousel`}>
       <div className="osc-carousel-navigation-button-wrapper">
         <IconButton
-          className='secondary round'
+          className='primary-action-button'
           icon="ri-arrow-left-s-line"
           disabled={index === 0}
           onClick={() => setIndex(index - 1)}
@@ -35,7 +35,7 @@ export function Carousel({
       <div>{itemRenderer(items.at(index))}</div>
 
       <IconButton
-          className='secondary round'
+          className='primary-action-button'
           icon="ri-arrow-right-s-line"
           disabled={index === items.length - 1}
           onClick={() => setIndex(index + 1)}

@@ -1,6 +1,10 @@
 import React, { forwardRef } from 'react';
 import './index.css';
 
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Select as NLDS_Select, SelectOption } from "@utrecht/component-library-react";
+
 type Props = {
   onValueChange?: (resource: any) => void;
   options?: Array<{ value: string; label: string }>;
@@ -11,7 +15,7 @@ const Select = forwardRef<HTMLSelectElement, Props>(
     const selectOptions = props.options ?? [];
 
     return (
-      <select
+      <NLDS_Select
         ref={ref}
         {...props}
         className={`select ${props.className}`}
@@ -23,12 +27,12 @@ const Select = forwardRef<HTMLSelectElement, Props>(
 
         {selectOptions.map((option) => (
           <React.Fragment key={`select-item-${option.label}`}>
-            <option className="select-item" value={option.value}>
+            <SelectOption className="select-item" value={option.value}>
               {option.label}
-            </option>
+            </SelectOption>
           </React.Fragment>
         ))}
-      </select>
+      </NLDS_Select>
     );
   }
 );
