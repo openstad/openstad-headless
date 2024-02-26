@@ -189,6 +189,7 @@ service.createClient = async function({ authConfig, project }) {
 
   // sync only configuration that is used by the OpenStad auth server - compare updateConfig below
   let newConfig = {
+    // requiredUserFields: project.config.usersrequiredUserFields
     users: {
       canCreateNewUsers: project.config.users?.canCreateNewUsers
     },
@@ -209,6 +210,8 @@ service.createClient = async function({ authConfig, project }) {
     // create client
     let authTypes = authConfig.authTypes || ( authConfig.provider == 'openstad' && 'Url' ) || ( authConfig.provider == 'anonymous' && 'Anonymous' );
     if (!Array.isArray(authTypes)) authTypes = [ authTypes ];
+    let twoFactorRoles = authConfig.twoFactorRoles || ( authConfig.provider == 'openstad' && ['admin'] );
+    if (!Array.isArray(twoFactorRoles)) twoFactorRoles = [ authTypes ];
     let requiredUserFields = authConfig.requiredUserFields || ( authConfig.provider == 'openstad' && 'name' ) || ( authConfig.provider == 'anonymous' && 'postcode' )
     if (!Array.isArray(requiredUserFields)) requiredUserFields = [ requiredUserFields ];
     let url = `${adminAuthConfig.serverUrlInternal}/api/admin/client`;
@@ -221,6 +224,7 @@ service.createClient = async function({ authConfig, project }) {
       body: JSON.stringify({
         authTypes,
         requiredUserFields,
+        twoFactorRoles,
         siteUrl: `${project.url}`,
         redirectUrl: `${config.url}`,
         allowedDomains: [ config.domain ],
@@ -252,48 +256,6 @@ service.updateClient = async function({ authConfig, project }) {
     return; // this step is optional; log but do not throw errors
   }
 
-  // sync only configuration that is used by the OpenStad auth server
-  let newConfig = {
-    users: {
-      canCreateNewUsers: project.config.users?.canCreateNewUsers
-    },
-    styling: {
-      logo: project.config.styling?.logo,
-      favicon: project.config.styling?.favicon,
-      inlineCSS: project.config.styling?.inlineCSS,
-      displayClientName: project.config.styling?.displayClientName,
-    }
-  };
-
-  // onderstaande worden gebruikt door de auth server maar zaten niet in de sync; moet dat nu wel?
-
-  // res.locals.clientProjectUrl = clientConfig.projectUrl;
-  // res.locals.clientEmail = clientConfig.contactEmail;
-  // res.locals.clientDisclaimerUrl = clientConfig.clientDisclaimerUrl;
-  // res.locals.clientStylesheets = clientConfig.clientStylesheets;
-  //
-  // const transporterConfig = clientConfig.smtpTransport ? clientConfig.smtpTransport : {};
-  //
-  // emailLogo = clientConfig.emailLogo;
-  // fromEmail: clientConfig.fromEmail,
-  // fromName: clientConfig.fromName,
-  //
-  // clientConfig.emailRedirectUrl
-  // title: configAuthType.title ? configAuthType.title : authLocalConfig.title,
-  // description: configAuthType.description ?  configAuthType.description : authLocalConfig.description,
-  // emailLabel: configAuthType.emailLabel ?  configAuthType.emailLabel : authLocalConfig.emailLabel,
-  // passwordLabel: configAuthType.passwordLabel ?  configAuthType.passwordLabel : authLocalConfig.passwordLabel,
-  // helpText: configAuthType.helpText ? configAuthType.helpText : authLocalConfig.helpText,
-  // buttonText: configAuthType.buttonText ? configAuthType.buttonText : authLocalConfig.buttonText,
-  // forgotPasswordText: configAuthType.forgotPasswordText ? configAuthType.forgotPasswordText : authLocalConfig.forgotPasswordText,
-  // displaySidebar: configAuthType.displaySidebar ? configAuthType.displaySidebar : authCodeConfig.displaySidebar,
-  // subtitle: configAuthType.loginSubtitle || authPhonenumberConfig.loginSubtitle,
-  // label: configAuthType.label ?  configAuthType.label : authCodeConfig.label,
-  // backUrl: authCodeConfig.displayBackbutton ? backUrl : false,
-  //
-  // config.requiredUserFields
-  // config.twoFactor
-
   try {
 
     // fetch client
@@ -307,10 +269,55 @@ service.updateClient = async function({ authConfig, project }) {
       console.log(response);
       throw new Error('OpenStad.service.updateClient: fetch client failed')
     }
-
     let client = await response.json();
+
+    let authTypes = authConfig.authTypes || client.authTypes;
+    if (!Array.isArray(authTypes)) authTypes = [ authTypes ];
+
+    let requiredUserFields = authConfig.requiredUserFields || client.requiredUserFields;
+    if (!Array.isArray(requiredUserFields)) requiredUserFields = [ requiredUserFields ];
+
+    let twoFactorRoles = authConfig.twoFactorRoles || client.twoFactorRoles;
+    if (!Array.isArray(twoFactorRoles)) twoFactorRoles = [ twoFactorRoles ];
+
+    let data = {
+      authTypes,
+      requiredUserFields,
+      twoFactorRoles,
+      redirectUrl: `${config.url}`,
+      allowedDomains: [ config.domain ],
+      name: `${project.name}`,
+      description: `Client for API project ${project.name} (${project.id})`,
+    }
+
+    // client config: sync only configuration that is used by the OpenStad auth server
+    let newClientConfig = {
+      users: {
+        canCreateNewUsers: project.config.users?.canCreateNewUsers
+      },
+      styling: {
+        logo: project.config.styling?.logo,
+        favicon: project.config.styling?.favicon,
+        inlineCSS: project.config.styling?.inlineCSS,
+        displayClientName: project.config.styling?.displayClientName,
+      },
+      fromEmail: authConfig.config.fromEmail,
+      fromName: authConfig.config.fromName,
+      contactEmail: authConfig.config.contactEmail,
+      defaultRoleId: authConfig.config.defaultRoleId,
+      requiredFields: authConfig.config.requiredFields,
+      twoFactor: authConfig.config.twoFactor,
+      configureTwoFactor: authConfig.config.configureTwoFactor,
+      authTypes: {
+        UniqueCode: authConfig.config.UniqueCode,
+        Url: authConfig.config.Url,
+        Phonenumber: authConfig.config.Phonenumber,
+        Local: authConfig.config.Local,
+      }
+    };
+
     let clientConfig = client.config;
-    let config = merge.recursive({}, clientConfig, newConfig);
+    data.config = merge.recursive({}, clientConfig, newClientConfig);
 
     // update client
     response = await fetch(url, {
@@ -319,7 +326,7 @@ service.updateClient = async function({ authConfig, project }) {
         'Content-type': 'application/json',
       },
       method: 'post',
-      body: JSON.stringify({ config }),
+      body: JSON.stringify(data),
     })
     if (!response.ok) {
       console.log(response);

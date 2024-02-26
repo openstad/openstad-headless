@@ -133,10 +133,22 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Algemeen</span>
               </Button>
             </Link>
-            <Link href={`/projects/${project}/authentication/requiredfield`}>
+            <Link href={`/projects/${project}/authentication/2fa`}>
               <Button
                 variant={
-                  location.includes('/authentication/requiredfield')
+                  location.includes('/authentication/2fa')
+                    ? 'secondary'
+                    : 'ghost'
+                }
+                size="default"
+                className="w-full flex justify-start pl-8">
+                <span className="truncate">Two Factor Authenticatie</span>
+              </Button>
+            </Link>
+            <Link href={`/projects/${project}/authentication/requiredfields`}>
+              <Button
+                variant={
+                  location.includes('/authentication/requiredfields')
                     ? 'secondary'
                     : 'ghost'
                 }
@@ -145,40 +157,16 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Verplichte velden</span>
               </Button>
             </Link>
-            <Link href={`/projects/${project}/authentication/uniquecode`}>
+            <Link href={`/projects/${project}/authentication/loginpaginas `}>
               <Button
                 variant={
-                  location.includes('/authentication/uniquecode')
+                  location.includes('/authentication/loginpaginas')
                     ? 'secondary'
                     : 'ghost'
                 }
                 size="default"
                 className="w-full flex justify-start pl-8">
-                <span className="truncate">Unieke codes</span>
-              </Button>
-            </Link>
-            <Link href={`/projects/${project}/authentication/loginmail`}>
-              <Button
-                variant={
-                  location.includes('/authentication/loginmail')
-                    ? 'secondary'
-                    : 'ghost'
-                }
-                size="default"
-                className="w-full flex justify-start pl-8">
-                <span className="truncate">Login mail</span>
-              </Button>
-            </Link>
-            <Link href={`/projects/${project}/authentication/smsverification`}>
-              <Button
-                variant={
-                  location.includes('/authentication/smsverification')
-                    ? 'secondary'
-                    : 'ghost'
-                }
-                size="default"
-                className="w-full flex justify-start pl-8">
-                <span className="truncate">SMS verificatie</span>
+                <span className="truncate">Login pagina&apos;s</span>
               </Button>
             </Link>
           </>
