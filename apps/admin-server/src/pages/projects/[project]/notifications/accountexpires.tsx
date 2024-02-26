@@ -27,7 +27,7 @@ const formSchema = z.object({
   body: z.string(),
 });
 
-export default function ProjectNotificationsLoginSms() {
+export default function ProjectNotificationsAccountExpires() {
   const router = useRouter();
   const project = router.query.project as string;
   const [value, setValue] = React.useState<undefined | {id: any, label: any, subject: any, body: any}>();
@@ -35,9 +35,9 @@ export default function ProjectNotificationsLoginSms() {
 
   const defaults = React.useCallback(
     () => ({
-      label: value?.label || "Inlog SMS aangevraagd",
+      label: value?.label || "Account verloopt",
       subject: value?.subject || "Beste {{user}},",
-      body: value?.body || "Voor Admin panel is een inloglink aangevraagd voor dit emailadres. Gebruik de code die hieronder is meegestuurd om in te loggen. De code is 10 minuten geldig.",
+      body: value?.body || "Uw account voor de resource {{resource}} dreigt binnenkort te verlopen. Via de onderstaande link kunt u opnieuw inloggen, om te zorgen dat uw account behouden wordt.",
     }),
     [value]
   )
@@ -54,7 +54,7 @@ export default function ProjectNotificationsLoginSms() {
   React.useEffect(() => {
     if (data !== undefined) {
       for (let i = 0; i < data.length; i++) {
-        if (data[i]?.type === 'login sms') {
+        if (data[i]?.type === 'user account about to expire') {
           setValue(data[i])
         }
       }
@@ -70,7 +70,7 @@ export default function ProjectNotificationsLoginSms() {
         toast.error('Er is helaas iets mis gegaan.')
       }
     } else {
-      const template = await create(project, 'sms', 'login sms', values.label, values.subject, values.body)
+      const template = await create(project, 'email', 'user account about to expire', values.label, values.subject, values.body)
       if (template) {
         toast.success('Template aangemaakt!');
       } else {
@@ -93,13 +93,13 @@ export default function ProjectNotificationsLoginSms() {
             url: `/projects/${project}/notifications`,
           },
           {
-            name: 'SMS Verificatie',
-            url: `/projects/${project}/notifications/smsverification`,
-          },
+            name: 'Account verloopt',
+            url: `/projects${project}/notifications/accountexpires`
+          }
         ]}>
         <div className="container py-6">
           <Form {...form} className="p-6 bg-white rounded-md">
-            <Heading size="xl">Login sms instellingen</Heading>
+            <Heading size="xl">Account verloopt instellingen</Heading>
             <Separator className="my-4" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -109,7 +109,7 @@ export default function ProjectNotificationsLoginSms() {
                 name="label"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>SMS onderwerp</FormLabel>
+                    <FormLabel>Mailonderwerp</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>

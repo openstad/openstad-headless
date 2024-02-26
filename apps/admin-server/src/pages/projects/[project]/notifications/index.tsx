@@ -18,8 +18,8 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
-import { useProject } from '@/hooks/use-project';
 import useNotificationTemplate from '@/hooks/use-notification-template'
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   label: z.string(),
@@ -30,18 +30,16 @@ const formSchema = z.object({
 export default function ProjectNotificationsLoginMail() {
   const router = useRouter();
   const project = router.query.project as string;
-  const [value, setValue] = React.useState();
-
-  const { data } = useProject();
-  const { data: templateData, create } = useNotificationTemplate(project as string)
+  const [value, setValue] = React.useState<undefined | {id: any, label: any, subject: any, body: any}>();
+  const { data, create, update } = useNotificationTemplate(project as string)
 
   const defaults = React.useCallback(
     () => ({
-      label: data?.config?.email?.label || "Inlogmail aangevraagd",
-      subject: data?.config?.email?.subject || "Beste {{user}},",
-      body: data?.config?.email?.body || "Voor Admin panel is een inloglink aangevraagd voor dit emailadres. Klik op de knop hieronder om automatisch in te loggen. De knop is 10 minuten geldig.",
+      label: value?.label || "Inlogmail aangevraagd",
+      subject: value?.subject || "Beste {{user}},",
+      body: value?.body || "Voor Admin panel is een inloglink aangevraagd voor dit emailadres. Klik op de knop hieronder om automatisch in te loggen. De knop is 10 minuten geldig.",
     }),
-    [data?.config]
+    [value]
   )
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,17 +52,31 @@ export default function ProjectNotificationsLoginMail() {
   }, [form, defaults]);
 
   React.useEffect(() => {
-    if (templateData !== undefined) {
-      for (let i = 0; i < templateData.length; i++) {
-        if (templateData[i]?.type === 'login sms') {
-          setValue(templateData[i])
+    if (data !== undefined) {
+      for (let i = 0; i < data.length; i++) {
+        if (data[i]?.type === 'login email') {
+          setValue(data[i])
         }
       }
     }
-  }, [templateData]);
+  }, [data]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const template = await create(project, 'email', 'login email', values.label, values.subject, values.body)
+    if (value !== undefined) {
+      const template = await update(value.id, values.label, values.subject, values.body)
+      if (template) {
+        toast.success('Template aangepast!');
+      } else {
+        toast.error('Er is helaas iets mis gegaan.')
+      }
+    } else {
+      const template = await create(project, 'email', 'login email', values.label, values.subject, values.body)
+      if (template) {
+        toast.success('Template aangemaakt!');
+      } else {
+        toast.error('Er is helaas iets mis gegaan.')
+      }
+    }
   }
 
   return (
@@ -106,7 +118,7 @@ export default function ProjectNotificationsLoginMail() {
                 name="subject"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Aanname/introductie</FormLabel>
+                    <FormLabel>Aanhef/introductie</FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
@@ -119,7 +131,7 @@ export default function ProjectNotificationsLoginMail() {
                 name="body"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Beschrijving</FormLabel>
+                    <FormLabel>Body</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>

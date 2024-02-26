@@ -11,8 +11,6 @@ export default function ProjectComments() {
   const { data } = useComments(project as string);
   const [comments, setComments] = useState<any[]>([])
 
-  let resourceArray = []
-
   useEffect(() => {
     if (data) {
       let comments = []
