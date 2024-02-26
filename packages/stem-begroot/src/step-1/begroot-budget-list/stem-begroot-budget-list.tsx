@@ -87,6 +87,7 @@ export const StemBegrootBudgetList = ({
 
             {canAddMore ? (
               <Button
+                appearance="secondary-action-button"
                 className="budget-list-action-hint-container"
                 onClick={() => {
                   const list = document.querySelector(

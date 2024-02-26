@@ -1,7 +1,7 @@
 import 'remixicon/fonts/remixicon.css';
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Heading5, Heading6, Paragraph, Button } from "@utrecht/component-library-react";
+import { Heading5, Paragraph, Button } from "@utrecht/component-library-react";
 import { ProgressBar } from '@openstad-headless/ui/src';
 import { SessionStorage } from '@openstad-headless/lib/session-storage';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
