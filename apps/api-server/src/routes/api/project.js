@@ -11,6 +11,7 @@ const searchInResults = require('../../middleware/search-in-results');
 const checkHostStatus = require('../../services/checkHostStatus')
 const projectsWithIssues = require('../../services/projects-with-issues');
 const authSettings = require('../../util/auth-settings');
+const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 let router = express.Router({mergeParams: true});
 
@@ -107,6 +108,7 @@ router.route('/')
             project.config.auth.provider[authConfig.provider].clientId = client.clientId;
             project.config.auth.provider[authConfig.provider].clientSecret = client.clientSecret;
             delete project.config.auth.provider[authConfig.provider].authTypes;
+            delete project.config.auth.provider[authConfig.provider].twoFactorRoles;
             delete project.config.auth.provider[authConfig.provider].requiredUserFields;
           }
           providersDone[authConfig.provider] = true;
@@ -203,11 +205,8 @@ router.route('/:projectId') //(\\d+)
 // -----------
 	.put(auth.useReqUser)
 	.put(async function(req, res, next) {
-
 		const project = await db.Project.findOne({ where: { id: req.results.id} });
-    
     if (!( project && project.can && project.can('update') )) return next( new Error('You cannot update this project') );
-
 		project
 			.authorizeData(req.body, 'update')
 			.update(req.body)
@@ -224,18 +223,22 @@ router.route('/:projectId') //(\\d+)
 				next();
         return null;
 			});
-
 	})
 	.put(async function (req, res, next) {
     // update certain parts of config to the oauth client
-    // mainly styling settings are synched so in line with the CMS
+    if (!hasRole( req.user, 'admin')) return next();
     try {
       let providers = await authSettings.providers({ project: req.results });
       for (let provider of providers) {
+        let authData = req.body.config?.auth?.provider?.[provider];
+        if (!authData) continue;
         let authConfig = await authSettings.config({ project: req.results, useAuth: provider });
         let adapter = await authSettings.adapter({ authConfig });
         if (adapter.service.updateClient) {
           await adapter.service.updateClient({ authConfig, project: req.results });
+          delete req.results.config?.auth?.provider?.[authConfig.provider]?.authTypes;
+          delete req.results.config?.auth?.provider?.[authConfig.provider]?.twoFactorRoles;
+          delete req.results.config?.auth?.provider?.[authConfig.provider]?.requiredUserFields;
         }
       }
       return next();
