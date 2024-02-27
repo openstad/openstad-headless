@@ -19,8 +19,8 @@ const timestampFilter             = require('./nunjucks/timestamp');
 const replaceResourceVariablesFilter  = require('./nunjucks/replaceResourceVariables');
 const flash                       = require('express-flash');
 const expressSession              = require('express-session');
-// const MemoryStore = expressSession.MemoryStore;
-const MySQLStore                  = require('express-mysql-session')(expressSession);
+const MemoryStore = expressSession.MemoryStore;
+//const MySQLStore                  = require('express-mysql-session')(expressSession);
 
 // Express configuration
 const app = express();
@@ -36,12 +36,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const sessionStore = new MySQLStore({
-    port:     3306,
-    host:     process.env.DB_HOST,
-    database: process.env.DB_NAME || process.env.DB_SESSIONS,
-    user:     process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
+const sessionStore = new MemoryStore({
 });
 
 let sessionCookieConfig;

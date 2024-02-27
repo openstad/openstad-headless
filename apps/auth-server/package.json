@@ -46,6 +46,7 @@
     "passport-oauth2-client-password": "^0.1.x",
     "passport-url": "^1.0.4",
     "qrcode": "^1.5.3",
+    "pg": "^8.11.3",
     "sanitize-html": "^2.7.0",
     "sequelize": "^6.28.0",
     "session-file-store": "^1.2.0",

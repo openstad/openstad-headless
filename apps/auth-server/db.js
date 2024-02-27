@@ -15,17 +15,14 @@ let sequelize = new Sequelize({
 
   host:     process.env.DB_HOST,
   database: process.env.DB_NAME,
-  username: process.env.DB_USER,
+  username: process.env.DB_USER || process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   port:     process.env.DB_PORT || '3306',
 
   dialect: process.env.DB_DIALECT || 'mysql',
   dialectOptions,
 
-  dialectModule: require('mysql2'),
-
   logging: null,
-  // logging: console.log,
 
   pool: {
     max: process.env.maxPoolSize || 5,

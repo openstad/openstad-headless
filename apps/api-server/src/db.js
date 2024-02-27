@@ -1,27 +1,11 @@
-var Sequelize = require('sequelize');
-var _         = require('lodash');
-var util      = require('./util');
+'use strict';
 
-var config    = require('config');
-var dbConfig  = config.get('database');
+const Sequelize = require('sequelize');
+const _         = require('lodash');
+const util      = require('./util');
 
-// newer versions of mysql (8+) have changed GeomFromText to ST_GeomFromText
-// this is a fix for sequalize
-if (dbConfig.mysqlSTGeoMode == 'on') {
-	const wkx = require('wkx')
-	Sequelize.GEOMETRY.prototype._stringify = function _stringify(value, options) {
-	  return `ST_GeomFromText(${options.escape(wkx.Geometry.parseGeoJSON(value).toWkt())})`;
-	}
-	Sequelize.GEOMETRY.prototype._bindParam = function _bindParam(value, options) {
-	  return `ST_GeomFromText(${options.bindParam(wkx.Geometry.parseGeoJSON(value).toWkt())})`;
-	}
-	Sequelize.GEOGRAPHY.prototype._stringify = function _stringify(value, options) {
-	  return `ST_GeomFromText(${options.escape(wkx.Geometry.parseGeoJSON(value).toWkt())})`;
-	}
-	Sequelize.GEOGRAPHY.prototype._bindParam = function _bindParam(value, options) {
-	  return `ST_GeomFromText(${options.bindParam(wkx.Geometry.parseGeoJSON(value).toWkt())})`;
-	}
-}
+const config    = require('config');
+const dbConfig  = config.get('database');
 
 const dialectOptions = {
 	charset            : 'utf8',
@@ -36,7 +20,7 @@ if (dbConfig.MYSQL_CA_CERT && dbConfig.MYSQL_CA_CERT.trim && dbConfig.MYSQL_CA_C
 	}
 }
 
-var sequelize = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.password, {
+let sequelize = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.password, {
 	dialect        : dbConfig.dialect,
 	host           : dbConfig.host,
 	port					 : dbConfig.port || 3306,
