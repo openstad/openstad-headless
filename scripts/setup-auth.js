@@ -8,70 +8,123 @@ module.exports = async function setupAuthServer(actions) {
   console.log('==============================');
   console.log('Setup auth server');
 
-  let connection;
+  let doCreateDBTables;
+  if (process.env.AUTH_DB_DIALECT == 'postgres') {
 
-  let doCreateDB;
-  try {
-    
-    connection = await authDb.createConnection({
-      host     : process.env.AUTH_DB_HOST,
-      user     : process.env.AUTH_DB_USERNAME,
-      password : process.env.AUTH_DB_PASSWORD,
-      dialect  : process.env.AUTH_DB_DIALECT,
-    });
+    let connection;
+    const pg = require('pg');
+    try {
+      connection = new pg.Pool({
+        host     : process.env.AUTH_DB_HOST,
+        user     : process.env.AUTH_DB_USERNAME,
+        password : process.env.AUTH_DB_PASSWORD,
+      });
+      await connection.query(`CREATE DATABASE ${process.env.AUTH_DB_NAME};`)
+    } catch(err) {}
 
-    await connection.query(`USE \`${process.env.AUTH_DB_NAME}\`;`);
+    try {
+      connection = new pg.Pool({
+        host     : process.env.AUTH_DB_HOST,
+        user     : process.env.AUTH_DB_USERNAME,
+        password : process.env.AUTH_DB_PASSWORD,
+        database : process.env.AUTH_DB_NAME,
+      });
 
-  } catch(err) {
-    doCreateDB = true;
+      // check database
+      let doCreateDBTables = false;
+      let rows = await connection.query("SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';")
+      if (!(rows && rows.length)) {
+        doCreateDBTables = true;
+      }
+
+    } catch(err) {
+      console.log('------------------------------');
+      console.log('AUTH database error');
+      console.log(err);
+      process.exit();
+    }
+
+  } else {
+
+    let connection;
+    let doCreateDB;
+    try {
+      
+      const authDb = require('promise-mysql');
+      connection = await authDb.createConnection({
+        host     : process.env.AUTH_DB_HOST,
+        user     : process.env.AUTH_DB_USERNAME,
+        password : process.env.AUTH_DB_PASSWORD,
+        dialect  : process.env.AUTH_DB_DIALECT,
+      });
+      
+      await connection.query(`USE \`${process.env.AUTH_DB_NAME}\`;`);
+
+    } catch(err) {
+      doCreateDB = true;
+    }
+
+    try {
+
+      // create database?
+      if (doCreateDB) {
+
+        console.log('------------------------------');
+        console.log('Create database');
+
+        await connection.query(`CREATE DATABASE ${process.env.AUTH_DB_NAME};`)
+        console.log(2);
+        // await connection.query(`USE \`${process.env.AUTH_DB_NAME}\`;`);
+        console.log(3);
+        
+      } else {
+        console.log('------------------------------');
+        console.log('Database exists');
+      }
+
+      // check database
+      let doCreateDBTables = false;
+      let rows = await connection.query('SHOW TABLES;')
+      if (!(rows && rows.length)) {
+        doCreateDBTables = true;
+      }
+
+    } catch(err) {
+      console.log('------------------------------');
+      console.log('AUTH database error');
+      console.log(err);
+      process.exit();
+    }
+
   }
 
   try {
 
-    // create database?
-    if (doCreateDB) {
-
-      console.log('------------------------------');
-      console.log('Create database');
-
-      await connection.query(`CREATE DATABASE \`${process.env.AUTH_DB_NAME}\`;`)
-      await connection.query(`USE \`${process.env.AUTH_DB_NAME}\`;`);
-      
-    } else {
-      console.log('------------------------------');
-      console.log('Database exists');
-    }
-
-    // check database
-    let doCreateDBTables = false;
-    let rows = await connection.query('SHOW TABLES;');
-    if (!(rows && rows.length)) {
-      doCreateDBTables = true;
-    }
-
     // create local config
     let authConfig = `
-APP_URL=${process.env.AUTH_APP_URL}
-PORT=${process.env.AUTH_PORT}
+APP_URL=${process.env.AUTH_APP_URL || ''}
+PORT=${process.env.AUTH_PORT || ''}
 
-DB_HOST=${process.env.AUTH_DB_HOST}
-DB_USER=${process.env.AUTH_DB_USERNAME}
-DB_PASSWORD=${process.env.AUTH_DB_PASSWORD}
-DB_NAME=${process.env.AUTH_DB_NAME}
+DB_HOST=${process.env.AUTH_DB_HOST || ''}
+DB_PORT=${process.env.AUTH_DB_PORT || ''}
+DB_USER=${process.env.AUTH_DB_USERNAME || ''}
+DB_PASSWORD=${process.env.AUTH_DB_PASSWORD || ''}
+DB_NAME=${process.env.AUTH_DB_NAME || ''}
+DB_DIALECT=${process.env.AUTH_DB_DIALECT || ''}
 
-MAIL_SERVER_URL=${process.env.AUTH_MAIL_SERVER_URL}
-MAIL_SERVER_PORT=${process.env.AUTH_MAIL_SERVER_PORT}
-MAIL_SERVER_SECURE=${process.env.AUTH_MAIL_SERVER_SECURE}
-MAIL_SERVER_PASSWORD=${process.env.AUTH_MAIL_SERVER_PASSWORD}
-MAIL_SERVER_USER_NAME=${process.env.AUTH_MAIL_SERVER_USER_NAME}
-FROM_NAME=${process.env.AUTH_FROM_NAME}
-FROM_EMAIL=${process.env.AUTH_FROM_EMAIL}
-EMAIL_ASSETS_URL=${process.env.AUTH_EMAIL_ASSETS_URL}
+MAIL_SERVER_URL=${process.env.AUTH_MAIL_SERVER_URL || ''}
+MAIL_SERVER_PORT=${process.env.AUTH_MAIL_SERVER_PORT || ''}
+MAIL_SERVER_SECURE=${process.env.AUTH_MAIL_SERVER_SECURE || ''}
+MAIL_SERVER_PASSWORD=${process.env.AUTH_MAIL_SERVER_PASSWORD || ''}
+MAIL_SERVER_USER_NAME=${process.env.AUTH_MAIL_SERVER_USER_NAME || ''}
+FROM_NAME=${process.env.AUTH_FROM_NAME || ''}
+FROM_EMAIL=${process.env.AUTH_FROM_EMAIL || ''}
+EMAIL_ASSETS_URL=${process.env.AUTH_EMAIL_ASSETS_URL || ''}
 
-ADMIN_REDIRECT_URL=${process.env.AUTH_ADMIN_REDIRECT_URL}
+ADMIN_REDIRECT_URL=${process.env.AUTH_ADMIN_REDIRECT_URL || ''}
 
-COOKIE_SECURE_OFF=${process.env.AUTH_COOKIE_SECURE_OFF}
-SESSION_SECRET=${process.env.AUTH_SESSION_SECRET}
+COOKIE_SECURE_OFF=${process.env.AUTH_COOKIE_SECURE_OFF || ''}
+SESSION_SECRET=${process.env.AUTH_SESSION_SECRET || ''}
 `
     if (actions['create config']) {
       console.log('------------------------------');

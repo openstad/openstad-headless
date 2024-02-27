@@ -41,14 +41,14 @@ module.exports = async function seed(config, db) {
     }
 
     // map polygons
-    console.log('  creating map polygons');
-    const polygons = require('./polygons');
-    for (let key in polygons) {
-      await db.Area.create({
-        name: key,
-        polygon: polygons[ key ],
-      });
-    }
+    // console.log('  creating map polygons');
+    // const polygons = require('./polygons');
+    // for (let key in polygons) {
+    //   await db.Area.create({
+    //     name: key,
+    //     polygon: polygons[ key ],
+    //   });
+    // }
 
   } catch (err) {
     console.log(err);

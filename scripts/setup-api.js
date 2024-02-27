@@ -1,6 +1,5 @@
 const fs = require('fs');
 const util = require('util');
-const apiDb = require('promise-mysql');
 const execute = require('./execute');
 
 module.exports = async function setupApi(actions) {
@@ -8,46 +7,97 @@ module.exports = async function setupApi(actions) {
   console.log('==============================');
   console.log('Setup API');
 
-  let connection;
+  let doCreateDBTables;
+  if (process.env.API_DB_DIALECT == 'postgres') {
 
-  let doCreateDB;
-  try {
-    
-    connection = await apiDb.createConnection({
-      host     : process.env.API_DB_HOST,
-      user     : process.env.API_DB_USERNAME,
-      password : process.env.API_DB_PASSWORD,
-      dialect  : process.env.API_DB_DIALECT,
-    });
-    
-    await connection.query(`USE \`${process.env.API_DB_NAME}\`;`);
+    let connection;
+    const pg = require('pg');
+    try {
+      connection = new pg.Pool({
+        host     : process.env.API_DB_HOST,
+        user     : process.env.API_DB_USERNAME,
+        password : process.env.API_DB_PASSWORD,
+      });
+      await connection.query(`CREATE DATABASE ${process.env.API_DB_NAME};`)
+    } catch(err) {}
 
-  } catch(err) {
-    doCreateDB = true;
+    try {
+      connection = new pg.Pool({
+        host     : process.env.API_DB_HOST,
+        user     : process.env.API_DB_USERNAME,
+        password : process.env.API_DB_PASSWORD,
+        database : process.env.API_DB_NAME,
+      });
+
+      // check database
+      let doCreateDBTables = false;
+      let rows = await connection.query("SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';")
+      if (!(rows && rows.length)) {
+        doCreateDBTables = true;
+      }
+
+    } catch(err) {
+      console.log('------------------------------');
+      console.log('API database error');
+      console.log(err);
+      process.exit();
+    }
+
+  } else {
+
+    let connection;
+    let doCreateDB;
+    try {
+      
+      const apiDb = require('promise-mysql');
+      connection = await apiDb.createConnection({
+        host     : process.env.API_DB_HOST,
+        user     : process.env.API_DB_USERNAME,
+        password : process.env.API_DB_PASSWORD,
+        dialect  : process.env.API_DB_DIALECT,
+      });
+      
+      await connection.query(`USE \`${process.env.API_DB_NAME}\`;`);
+
+    } catch(err) {
+      doCreateDB = true;
+    }
+
+    try {
+
+      // create database?
+      if (doCreateDB) {
+
+        console.log('------------------------------');
+        console.log('Create database');
+
+        await connection.query(`CREATE DATABASE ${process.env.API_DB_NAME};`)
+        console.log(2);
+        // await connection.query(`USE \`${process.env.API_DB_NAME}\`;`);
+        console.log(3);
+        
+      } else {
+        console.log('------------------------------');
+        console.log('Database exists');
+      }
+
+      // check database
+      let doCreateDBTables = false;
+      let rows = await connection.query('SHOW TABLES;')
+      if (!(rows && rows.length)) {
+        doCreateDBTables = true;
+      }
+
+    } catch(err) {
+      console.log('------------------------------');
+      console.log('API database error');
+      console.log(err);
+      process.exit();
+    }
+
   }
 
   try {
-
-    // create database?
-    if (doCreateDB) {
-
-      console.log('------------------------------');
-      console.log('Create database');
-
-      await connection.query(`CREATE DATABASE \`${process.env.API_DB_NAME}\`;`)
-      await connection.query(`USE \`${process.env.API_DB_NAME}\`;`);
-      
-    } else {
-      console.log('------------------------------');
-      console.log('Database exists');
-    }
-
-    // check database
-    let doCreateDBTables = false;
-    let rows = await connection.query('SHOW TABLES;')
-    if (!(rows && rows.length)) {
-      doCreateDBTables = true;
-    }
 
     let fixed_auth_tokens = process.env.API_AUTH_FIXEDAUTHTOKENS || '[{"token":"${process.env.API_FIXED_AUTH_KEY}","userId":"1","authProvider":"openstad"}]';
 

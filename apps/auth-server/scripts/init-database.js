@@ -22,7 +22,11 @@ const umzug = new Umzug({
   try {
 
     console.log('Create database...');
-    await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true })
+    if ( db.sequelize.options.dialect == 'postgres' ) {
+      await db.sequelize.query('SET session_replication_role = "replica";', { raw: true })
+    } else {
+      await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true })
+    }
     await db.sequelize.sync({ force: true });
 
     console.log('Marking migrations as done...');
