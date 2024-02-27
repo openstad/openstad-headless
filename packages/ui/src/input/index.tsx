@@ -14,13 +14,7 @@ type Props = React.InputHTMLAttributes<HTMLInputElement> & {
 
 
 const Input = forwardRef<HTMLInputElement, Props>((props, ref) => {
-  const [inputID, setInputID] = useState<string>('');
-
-  useEffect(() => {
-    if (inputID.length === 0) {
-      setInputID(Math.random().toString(36).substring(7));
-    }
-  }, []);
+  const inputID = Math.random().toString(36).substring(7);
 
   return (
     <FormField
