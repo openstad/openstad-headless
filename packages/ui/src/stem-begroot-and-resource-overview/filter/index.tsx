@@ -5,6 +5,10 @@ import { MultiSelectTagFilter } from './multiselect-tag-filter';
 import { SelectTagFilter } from './select-tag-filter';
 import './index.css';
 
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Button } from "@utrecht/component-library-react";
+
 type Filter = {
   tags: Array<number>;
   search: { text: string };
@@ -166,7 +170,8 @@ export function Filters({
           </Select>
         ) : null}
 
-        <SecondaryButton
+        <Button
+          appearance='primary-action-button'
           onClick={() => {
             const filterParent = document.querySelector('#stem-begroot-filter');
 
@@ -186,7 +191,7 @@ export function Filters({
             updateFilter(defaultFilter);
           }}>
           Wis alles
-        </SecondaryButton>
+        </Button>
       </div>
     </section>
   );

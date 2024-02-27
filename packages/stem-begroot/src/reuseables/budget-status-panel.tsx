@@ -1,5 +1,8 @@
 import { Spacer } from '@openstad-headless/ui/src';
 import React from 'react';
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Heading5, Paragraph, Strong } from "@utrecht/component-library-react";
 
 export const BudgetStatusPanel = ({
   budgetUsed,
@@ -18,37 +21,33 @@ export const BudgetStatusPanel = ({
     <aside className="stem-begroot-helptext-and-budget-section-budget">
       {typeIsBudgeting ? (
         <>
-          <h5>Totaal budget</h5>
-          <Spacer size={0.5} />
+          <Heading5>Totaal budget</Heading5>
 
-          <div className="info-budget-label">
-            <p>Budget gekozen:</p>
-            <p className="strong">&euro;{budgetUsed}</p>
-          </div>
-          <Spacer size={0.5} />
-          <div className="info-budget-label">
-            <p>Budget over:</p>
-            <p className="strong">
-              &euro;{Math.max(maxBudget - budgetUsed, 0)}
-            </p>
-          </div>
+          <Paragraph className="info-budget-label">
+            <span>Budget gekozen:</span>
+            <span><Strong>&euro;{budgetUsed}</Strong></span>
+          </Paragraph>
+          <Paragraph className="info-budget-label">
+            <span>Budget over:</span>
+            <span className="strong">
+              <Strong>&euro;{Math.max(maxBudget - budgetUsed, 0)} </Strong>
+            </span>
+          </Paragraph>
         </>
       ) : (
         <>
-          <h5>Totaal aantal plannen</h5>
-          <Spacer size={0.5} />
+          <Heading5>Totaal aantal plannen</Heading5>
 
-          <div className="info-budget-label">
-            <p>Gekozen plannen:</p>
-            <p className="strong">{nrOfResourcesSelected}</p>
-          </div>
-          <Spacer size={0.5} />
-          <div className="info-budget-label">
-            <p>Beschikbare plannen:</p>
-            <p className="strong">
-              {Math.max(maxNrOfResources - nrOfResourcesSelected, 0)}
-            </p>
-          </div>
+          <Paragraph className="info-budget-label">
+            <span>Gekozen plannen:</span>
+            <span><Strong>{nrOfResourcesSelected}</Strong></span>
+          </Paragraph>
+          <Paragraph className="info-budget-label">
+            <span>Beschikbare plannen:</span>
+            <span>
+              <Strong>{Math.max(maxNrOfResources - nrOfResourcesSelected, 0)}</Strong>
+            </span>
+          </Paragraph>
         </>
       )}
     </aside>

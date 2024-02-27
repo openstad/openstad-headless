@@ -20,7 +20,7 @@ export const Dialog = ({
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <RadixDialog.Close asChild>
             <IconButton
-              className="ghost secondary"
+              className="subtle-button"
               icon="ri-close-line"
               aria-label="Close"
             />

@@ -10,8 +10,11 @@ import {
 } from '@openstad-headless/ui/src';
 
 import { Carousel } from '@openstad-headless/ui/src';
-
 import { Dialog } from '@openstad-headless/ui/src';
+
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Button, Paragraph, Strong, Link, Heading5, Heading4 } from "@utrecht/component-library-react";
 
 export const StemBegrootResourceDetailDialog = ({
   openDetailDialog,
@@ -70,7 +73,7 @@ export const StemBegrootResourceDetailDialog = ({
                     style={{ aspectRatio: 16 / 9 }}
                   />
                   <div>
-                    <button className="osc-begrootmodule-load-map-button"></button>
+                    <Button className="osc-begrootmodule-load-map-button"></Button>
                   </div>
                 </section>
 
@@ -78,34 +81,35 @@ export const StemBegrootResourceDetailDialog = ({
                   <div>
                     <div className="osc-begrootmodule-resource-detail-budget-theme-bar">
                       {displayPriceLabel ? (
-                        <h5>&euro; {resource.budget || 0}</h5>
+                        <Heading5><Strong>&euro; {resource.budget || 0}</Strong></Heading5>
                       ) : null}
 
                       <div>
-                        <p className="strong">Thema:</p>
-                        <p>{theme?.name || 'Geen thema'}</p>
-                        <p className="strong">Gebied:</p>
-                        <p> {area?.name || 'Geen gebied'}</p>
+                        <Paragraph><Strong>Thema:</Strong></Paragraph>
+                        <Paragraph>{theme?.name || 'Geen thema'}</Paragraph>
+                        <Paragraph><Strong>Thema:</Strong></Paragraph>
+                        <Paragraph> {area?.name || 'Geen gebied'}</Paragraph>
                       </div>
                     </div>
 
                     <div>
-                      <h4>{resource.title}</h4>
+                      <Spacer size={2} />
+                      <Heading4>{resource.title}</Heading4>
                       <Spacer size={1} />
-                      <p className="strong">{resource.summary}</p>
+                      <Paragraph><Strong>{resource.summary}</Strong></Paragraph>
                       <Spacer size={1} />
-                      <p>{resource.description}</p>
+                      <Paragraph>{resource.description}</Paragraph>
 
                       <Spacer size={1} />
 
                       {originalUrl ? (
                         <>
-                          <p className="strong">
+                          <Paragraph className="strong">
                             Dit een vervolg op het volgende plan:&nbsp;
-                            <a target="_blank" href={originalUrl}>
-                            {originalUrl}
-                          </a>
-                          </p>
+                            <Link target="_blank" href={originalUrl}>
+                              {originalUrl}
+                            </Link>
+                          </Paragraph>
                          
                         </>
                       ) : null}
@@ -138,19 +142,19 @@ export const StemBegrootResourceDetailDialog = ({
                   </div>
                   <Spacer size={1}/>
                   <div className="osc-begrootmodule-resource-detail-actions">
-                    <SecondaryButton
+                    <Button
+                      appearance='primary-action-button'
                       disabled={!canUseButton}
                       onClick={() => {
                         onPrimaryButtonClick;
                         onPrimaryButtonClick && onPrimaryButtonClick(resource);
                       }}>
                       {primaryButtonText}
-                    </SecondaryButton>
+                    </Button>
                   </div>
                 </section>
               </div>
 
-              <Spacer size={2} />
             </>
           );
         }}></Carousel>

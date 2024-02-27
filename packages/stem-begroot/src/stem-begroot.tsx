@@ -2,8 +2,6 @@ import './stem-begroot.css';
 import React, { useEffect, useState } from 'react';
 import {
   Paginator,
-  PlainButton,
-  SecondaryButton,
   Spacer,
   Stepper,
 } from '@openstad-headless/ui/src';
@@ -25,6 +23,10 @@ import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-ove
 import { Step3Success } from './step-3-success';
 import { Step3 } from './step-3';
 import { Step4 } from './step-4';
+
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Button, Heading3 } from "@utrecht/component-library-react";
 
 export type StemBegrootWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -278,6 +280,9 @@ function StemBegroot({
           currentStep={currentStep}
           steps={['Kies', 'Overzicht', 'Stemcode', 'Stem']}
         />
+    
+      <Spacer size={1} />
+
         <section className="begroot-step-panel">
           {currentStep === 0 ? (
             <>
@@ -364,7 +369,8 @@ function StemBegroot({
 
           <div className="begroot-step-panel-navigation-section">
             {currentStep > 0 && currentStep < 4 ? (
-              <PlainButton
+              <Button
+                appearance='secondary-action-button'
                 onClick={() => {
                   if (currentStep === 3) {
                     setNavAfterLogin(true);
@@ -374,12 +380,13 @@ function StemBegroot({
                   }
                 }}>
                 Vorige
-              </PlainButton>
+              </Button>
             ) : null}
 
             {/* Dont show on voting step if you are on step 2 your not logged in*/}
             {currentStep !== 2 ? (
-              <SecondaryButton
+              <Button
+                appearance='primary-action-button'
                 onClick={async () => {
                   if (currentStep === 0) {
                     prepareForVote(null);
@@ -406,19 +413,17 @@ function StemBegroot({
                 {currentStep < 3 ? 'Volgende' : null}
                 {currentStep === 3 ? 'Stem indienen' : null}
                 {currentStep === 4 ? 'Klaar' : null}
-              </SecondaryButton>
+              </Button>
             ) : null}
           </div>
         </section>
-        <Spacer size={4} />
 
         {currentStep === 0 ? (
           <>
             <StemBegrootResourceList
               header={
                 <>
-                  <h3>Plannen</h3>
-                  <Spacer size={1} />
+                  <Heading3>Plannen</Heading3>
                   {datastore ? (
                     <Filters
                       tagsLimitation={tagIdsToLimitResourcesTo}
