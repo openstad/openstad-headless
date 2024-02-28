@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 
-export default function useNotificationTemplate(projectId?: string, type?: string) {
+export default function useNotificationTemplate(projectId?: string) {
   let url = `/api/openstad/notification/project/${projectId}/template`;
 
   const notificationTemplateSwr = useSWR(projectId ? url : null);
@@ -30,7 +30,7 @@ export default function useNotificationTemplate(projectId?: string, type?: strin
     }
   }
   
-  async function update(id: string, label: string, subject: string, body: string, engine?: string) {
+  async function update(id: string, label: string, subject: string, body: string) {
     let url = `/api/openstad/notification/project/${projectId}/template/${id}`;
     const res = await fetch(url, {
       method: 'PUT',
@@ -38,7 +38,6 @@ export default function useNotificationTemplate(projectId?: string, type?: strin
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ 
-        engine: engine,
         label: label,
         subject: subject,
         body: body

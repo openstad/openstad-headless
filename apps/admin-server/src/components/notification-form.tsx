@@ -27,7 +27,7 @@ type Props = {
     | 'new published resource - user feedback'
     | 'updated resource - user feedback'
     | 'user account about to expire';
-  engine: string;
+  engine: 'email' | 'sms';
   id?: string;
   label?: string;
   subject?: string;
@@ -35,8 +35,13 @@ type Props = {
 }
 
 const formSchema = z.object({
-  label: z.string(),
-  subject: z.string(),
+  engine: z.enum(['email', 'sms']),
+  label: z.string().max(255, {
+    message: 'De label mag niet langer dan 255 karakters zijn!',
+  }),
+  subject: z.string().max(255, {
+    message: 'Het onderwerp mag niet langer dan 255 karakters zijn!',
+  }),
   body: z.string(),
 });
 
@@ -47,11 +52,12 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
 
   const defaults = React.useCallback(
     () => ({
+      engine: engine || "email",
       label: label || "Label van de mail",
       subject: subject || "Onderwerp van de mail",
       body: body || "Inhoud van de mail...",
     }),
-    [label, subject, body]
+    [engine, label, subject, body]
   )
 
   const form = useForm<z.infer<typeof formSchema>>({

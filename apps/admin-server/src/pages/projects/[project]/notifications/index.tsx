@@ -1,23 +1,18 @@
 import * as React from 'react';
-import * as z from 'zod';
 import { PageLayout } from '@/components/ui/page-layout';
 import { useRouter } from 'next/router';
 import useNotificationTemplate from '@/hooks/use-notification-template'
 import { NotificationForm } from '@/components/notification-form';
 import { Separator } from '@/components/ui/separator';
 
-const formSchema = z.object({
-  label: z.string(),
-  subject: z.string(),
-  body: z.string(),
-});
-
 export default function ProjectNotifications() {
-  const type = ['login email', 'login sms', 'new published resource - user feedback', 'updated resource - user feedback', 'user account about to expire']
+  type NotificationType = 'login email' | 'login sms' | 'new published resource - user feedback' | 'updated resource - user feedback' | 'user account about to expire';
+  const defaultDefinitions: { [type in NotificationType]: any[] } = { "login email": [], "login sms": [], "new published resource - user feedback": [], "updated resource - user feedback": [], "user account about to expire": [] };
+  const [typeDefinitions, setTypeDefinitions] = React.useState<{ [type in NotificationType]: any[] }>(defaultDefinitions);
+
   const router = useRouter();
   const project = router.query.project as string;
   const { data } = useNotificationTemplate(project as string);
-  const [value, setValue] = React.useState<any[]>([]);
   const text = `<mjml>
                   <mj-body>
                     <mj-section>
@@ -29,25 +24,19 @@ export default function ProjectNotifications() {
                     </mj-section>
                   </mj-body>
                 </mjml>`;
-  
+
+
   React.useEffect(() => {
-    if (data !== undefined) {
-      let test: any[] = [];
-      for (let i = 0; i < type.length; i++) {
-        let integer = 0;
-        for (let j = 0; j < data.length; j++) {
-          if (type[i] === data[j].type) {
-            integer++;
-            test.push(data[j])
-          }
-        }
-        if (!integer) {
-          test.push(type[i])
-        }
-      }
-      setValue(test)
+    if (Array.isArray(data)) {
+      const currentTypeDefinitions = Object.assign({}, defaultDefinitions);
+
+      data.forEach(template => {
+        currentTypeDefinitions[template.type as NotificationType].push(template);
+      });
+
+      setTypeDefinitions(currentTypeDefinitions);
     }
-  }, [data]);
+  }, data)
 
   return (
     <div>
@@ -70,21 +59,21 @@ export default function ProjectNotifications() {
               Hieronder geven we een link naar de documentatie van MJML,
               een voorbeeld van hoe MJML is opgezet en de bruikbare variabelen.
             </p>
-            <br/>
+            <br />
             <p>
               https://documentation.mjml.io
             </p>
-            <br/>
-              <code>{text}</code>
-            <br/>
-            <br/>
+            <br />
+            <code>{text}</code>
+            <br />
+            <br />
             <p>
               Variabelen van gekoppelde onderdelen kunnen gebruikt worden binnen de mail.
               Als je bijvoorbeeld de naam van een gebruiker wilt gebruiken,
               dan wordt deze toegevoegd via de variabele user.name .
               Hieronder worden per bruikbaar onderdeel alle variabelen opgenoemd.
             </p>
-            <br/>
+            <br />
             <p>
               user:
               -name
@@ -96,7 +85,7 @@ export default function ProjectNotifications() {
               -fullName
               -postcode
             </p>
-            <br/>
+            <br />
             <p>
               resource:
               -startDateHumanized
@@ -108,7 +97,7 @@ export default function ProjectNotifications() {
               -modBreakDateHumanized
               -publishDateHumanized
             </p>
-            <br/>
+            <br />
             <p>
               comment:
               -sentiment
@@ -116,25 +105,31 @@ export default function ProjectNotifications() {
               -label
               -createDateHumanized
             </p>
-            <br/>
+            <br />
             <p>
               submission:
               -status
               -submittedData
             </p>
-            <br/>
-            {value?.map((type: any) => (
-              typeof type === "object" ? 
-              <div key={type.id}>
-                <Separator/>
-                <NotificationForm type={type.type} engine={'email'} id={type.id} label={type.label} subject={type.subject} body={type.body}/>
+            <br />
+
+            {Object.entries(typeDefinitions).map(([type, templateList]) => {
+
+              if(templateList.length === 0) {
+                return <div key={type}>
+                <Separator />
+                <NotificationForm type={type as NotificationType} engine={'email'} />
               </div>
-              : 
-              <div key={type}>
-                <Separator/>
-                <NotificationForm type={type} engine={'email'}/>
-              </div>
-            ))}
+              }
+              return <>
+                {templateList.map(template => {
+                  return <div key={template.id}>
+                  <Separator />
+                  <NotificationForm type={template.type} engine={'email'} id={template.id} label={template.label} subject={template.subject} body={template.body} />
+                </div>
+                })}
+              </>
+            })}
           </div>
         </div>
       </PageLayout>
