@@ -1,7 +1,7 @@
-import type { LocationType } from './location';
+import { LatLng } from 'leaflet';
 
 export type AreaProps = {
-  area: Array<LocationType>,
+  area: Array<LatLng>,
   areaPolygonStyle?: any,
 };
 

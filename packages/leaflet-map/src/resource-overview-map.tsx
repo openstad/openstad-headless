@@ -64,9 +64,11 @@ const ResourceOverviewMap = ({
       let marker: MarkerProps = {
         location: { ...resource.location } || undefined,
       };
-      parseLocation(marker); // unify location format
+      const markerLatLng = parseLocation(marker); // unify location format
+      marker.lat = markerLatLng.lat;
+      marker.lng = markerLatLng.lng;
 
-      if (marker.location && categorizeByField && categories) {
+      if (marker.lat && marker.lng && categorizeByField && categories) {
         let tag = resource.tags?.find((t: any) => t.type == categorizeByField); // TODO: types/Tag does not exist yet
         if (tag) {
           marker.data = { [categorizeByField]: tag.name };
@@ -75,7 +77,7 @@ const ResourceOverviewMap = ({
       return marker;
     }) || [];
 
-
+    console.log(currentMarkers);
   return (
     <BaseMap
       {...props}
