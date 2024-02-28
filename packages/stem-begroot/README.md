@@ -47,7 +47,6 @@
 <!-- Begroot resources Filter: Heading -->
 --nlds-budget-resources-filter-heading-margin-bottom
 --nlds-budget-resources-filter-heading-font-size
---utrecht-heading-3-font-weight
 --nlds-budget-resources-filter-heading-color
 
 <!-- Begroot overview panel -->

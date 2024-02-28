@@ -6,6 +6,10 @@ import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 import React from 'react';
 
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Heading4, Heading3, Paragraph, LinkListLink, LinkList } from "@utrecht/component-library-react";
+
 export type AgendaWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
@@ -28,40 +32,36 @@ export type AgendaWidgetProps = BaseProps &
   };
 
 function Agenda(props: AgendaWidgetProps) {
-  console.log(
-    props.items?.flatMap((item) => item.links?.map((link) => link.url))
-  );
   return (
     <div className="osc">
       <Spacer size={2} />
-      {props.displayTitle && props.title && <h3>{props.title}</h3>}
+      {props.displayTitle && props.title && <Heading3>{props.title}</Heading3>}
       <section className="osc-agenda">
         {props?.items &&
           props?.items?.length > 0 &&
           props.items
-            .filter((item) => item.active)
             ?.sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger))
             .map((item) => (
-              <div key={item.trigger} className="osc-agenda-item">
-                <div className="osc-date-circle"></div>
-                <div className="osc-agenda-content">
-                  <h4>{item.title}</h4>
-                  <p>{item.description}</p>
-                  {item.links && item.links?.length > 0 && (
-                    <ul className="osc-agenda-list">
-                      {item.links?.map((link, index) => (
-                        <li className="osc-agenda-link" key={index}>
-                          <a
+              <>
+                <div key={item.trigger} className={`osc-agenda-item ${item.active ? '--active-item' : ''}`}>
+                  <div className="osc-date-circle"></div>
+                  <div className="osc-agenda-content">
+                    <Heading4>{item.title}</Heading4>
+                    <Paragraph>{item.description}</Paragraph>
+                    {item.links && item.links?.length > 0 && (
+                      <LinkList className="osc-agenda-list">
+                        {item.links?.map((link, index) => (
+                          <LinkListLink
                             href={link.url}
                             target={link.openInNewWindow ? '_blank' : '_self'}>
                             {link.title}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                          </LinkListLink>
+                        ))}
+                      </LinkList>
+                    )}
+                  </div>
                 </div>
-              </div>
+              </>
             ))}
       </section>
     </div>
