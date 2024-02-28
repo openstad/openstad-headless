@@ -1,3 +1,5 @@
+<!-- template: new published resource - admin update -->
+<subject>new published resource - admin update</subject>
 <subject>Nieuwe resource op {{project.title}}</subject>
 <body>
   <mjml>
