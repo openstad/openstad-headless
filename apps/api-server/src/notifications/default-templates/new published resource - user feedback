@@ -1,3 +1,5 @@
+<!-- template: new published resource - user feedback -->
+<subject>Nieuwe resource op {{project.title}}</subject>
 <body>
   <mjml>
     <mj-body>

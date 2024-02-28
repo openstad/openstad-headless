@@ -60,10 +60,11 @@ module.exports = ( db, sequelize, DataTypes ) => {
       beforeValidate: async function (instance, options) {
         if (options.data) { // create subject and body
 
+          let template, templateData;
           try {
             
             // template
-            let template = await db.NotificationTemplate.findOne({
+            template = await db.NotificationTemplate.findOne({
               where: {
                 projectId: instance.projectId,
                 type: instance.type,
@@ -80,8 +81,8 @@ module.exports = ( db, sequelize, DataTypes ) => {
             if (!template) throw new Error('Notification template not found');
 
             // fetch data
-            let fetched = {};
-            fetched.project = await db.Project.scope('includeConfig', 'includeEmailConfig').findByPk(instance.projectId);
+            templateData = {};
+            templateData.project = await db.Project.scope('includeConfig', 'includeEmailConfig').findByPk(instance.projectId);
             let keys = ['resource', 'user', 'comment', 'submission'];
             for (let key of keys) {
               let idkey = key + 'Id';
@@ -89,22 +90,29 @@ module.exports = ( db, sequelize, DataTypes ) => {
               if (options.data[idkey]) {
                 if (Array.isArray(options.data[idkey]) && options.data[idkey].length == 1) options.data[idkey] = options.data[idkey][0];
                 if (Array.isArray(options.data[idkey])) {
-                  fetched[`${key}s`] = await db[model].findAll({where: { id: options.data[idkey] }});
+                  templateData[`${key}s`] = await db[model].findAll({where: { id: options.data[idkey] }});
                 } else {
-                  fetched[key] = await db[model].findByPk( options.data[idkey] );
+                  templateData[key] = await db[model].findByPk( options.data[idkey] );
                 }
               }
             }
 
-            // parse template
-            instance.subject = nunjucks.renderString(template.subject, {...fetched});
+          } catch(err) {
+            throw err;
+          }
 
-            let body = nunjucks.renderString(template.body, {...fetched});
+          try {
+
+            // parse template
+            instance.subject = nunjucks.renderString(template.subject, {...templateData});
+
+            let body = nunjucks.renderString(template.body, {...templateData});
             body = mjml2html(body);
             instance.body = body.html;
 
           } catch(err) {
-            throw err;
+            // do not crash on a render error
+            console.log(err);
           }
           
         }
