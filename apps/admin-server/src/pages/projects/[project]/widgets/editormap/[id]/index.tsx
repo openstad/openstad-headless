@@ -20,7 +20,7 @@ import { EditorMapWidgetProps } from '@openstad/leaflet-map/src/editor-map';
 
 export const getServerSideProps = withApiUrl;
 
-export default function WidgetBaseMap({ apiUrl }: WithApiUrlProps) {
+export default function WidgetEditorMap({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project as string;

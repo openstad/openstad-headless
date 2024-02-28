@@ -17,7 +17,7 @@ import { ResourceDetailMapWidgetProps } from '@openstad/leaflet-map/src/resource
 
 export const getServerSideProps = withApiUrl;
 
-export default function WidgetBaseMap({
+export default function WidgetResourceDetailMap({
   apiUrl,
 }:WithApiUrlProps) {
   const router = useRouter();
