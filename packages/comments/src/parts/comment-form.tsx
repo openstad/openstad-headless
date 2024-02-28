@@ -1,11 +1,14 @@
 import React from 'react';
 import { Banner, Spacer } from '@openstad-headless/ui/src';
-import { Button } from '@openstad-headless/ui/src/button';
 import { CommentPropsType } from '../types/index';
 import DataStore from '@openstad-headless/data-store/src';
 import hasRole from '../../../lib/has-role';
 import Form from "@openstad-headless/form/src/form";
 import {CombinedFieldPropsWithType, FieldProps} from "@openstad-headless/form/src/props";
+
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Heading6, Button } from "@utrecht/component-library-react";
 
 function CommentForm({
   comment,
@@ -35,6 +38,7 @@ function CommentForm({
       {
         type: 'text',
         title: '',
+        variant: 'textarea',
         minCharacters: descriptionMinLength,
         maxCharacters: descriptionMaxLength,
         fieldRequired: true,
@@ -50,7 +54,7 @@ function CommentForm({
     }
   ];
 
-  if (typeof (args.comment) !== 'undefined' &&  typeof (args.comment.parentId) !== 'undefined' ) {
+  if (typeof (args.comment) !== 'undefined' &&  typeof (args.comment.parentId) !== 'undefined' && args.comment.parentId !== null  ) {
     formFields.push({
         type: 'hidden',
         fieldKey: "parentId",
@@ -73,14 +77,15 @@ function CommentForm({
 
         {!hasRole(currentUser, 'member') ? ( // todo: args.requiredUserRole \
           <Banner className="big">
-            <h6>Inloggen om deel te nemen aan de discussie.</h6>
+            <Heading6>Inloggen om deel te nemen aan de discussie.</Heading6>
             <Spacer size={1} />
             <Button
-              type="button"
               onClick={() => {
                 // login
                 document.location.href = args.login.url;
-              }}>
+              }}
+              appearance="primary-action-button"
+              type="button">
               Inloggen
             </Button>
           </Banner>
@@ -89,9 +94,9 @@ function CommentForm({
             {!hasRole(currentUser, 'moderator') && !props.isReplyingEnabled ? (
               <Banner className="big">
                 <Spacer size={2} />
-                <h6>
+                <Heading6>
                   De reactiemogelijkheid is gesloten, u kunt niet meer reageren
-                </h6>
+                </Heading6>
                 <Spacer size={2} />
               </Banner>
             ) : null}
@@ -102,10 +107,10 @@ function CommentForm({
               <>
                 <Banner>
                   <Spacer size={2} />
-                  <h6>
+                  <Heading6>
                     Reageren is gesloten, maar je kunt nog reageren vanwege je
                     rol als moderator
-                  </h6>
+                  </Heading6>
                   <Spacer size={2} />
                 </Banner>
                 <Spacer size={2} />

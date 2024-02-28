@@ -3,7 +3,7 @@
     display: var(--nlds-budget-resources-filter-display, flex);    
     padding: var(--nlds-budget-resources-filter-padding, 1rem);
     gap: var(--nlds-budget-resources-filter-gap, 1rem);
-    background-color: var(--nlds-budget-resources-filter-background-color, var(--nlds-background-color, #F0F4F8));
+    background-color: var(--nlds-budget-resources-filter-background-color, var(--nlds-default-background-color, #F0F4F8));
 }
 
 .osc-resources-filter > .utrecht-form-field,
