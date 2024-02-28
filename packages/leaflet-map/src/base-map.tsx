@@ -254,7 +254,7 @@ const BaseMap = ({
           <MapEventsListener
             area={area}
             onClick={(e, map) =>
-              onClick({ ...e, isInArea: isPointInArea(area, e.latlng) }, map)
+              onClick({ ...e, isInArea: e.isInArea}, map)
             }
           />
 
