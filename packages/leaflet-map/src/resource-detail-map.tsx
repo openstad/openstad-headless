@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react';
-import {loadWidget} from '../../lib/load-widget';
+import { loadWidget } from '../../lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
 import parseLocation from './lib/parse-location';
 
@@ -14,25 +14,23 @@ import type { MapPropsType } from './types/index';
 
 import { BaseMap } from './base-map';
 
-export type ResourceDetailMapWidgetProps =
-  BaseProps &
+export type ResourceDetailMapWidgetProps = BaseProps &
   ProjectSettingProps &
   MapPropsType & {
-    resourceId: number,
-    marker: MarkerProps,
-    markerIcon: MarkerIconType,
+    resourceId?: number;
+    marker?: MarkerProps;
+    markerIcon: MarkerIconType;
   };
 
-export function ResourceDetailMap({
+const ResourceDetailMap = ({
   resourceId = undefined,
   marker = undefined,
   markerIcon = undefined,
   center = undefined,
   ...props
-}: PropsWithChildren<ResourceDetailMapWidgetProps>) {
-
+}: PropsWithChildren<ResourceDetailMapWidgetProps>) => {
   props.zoom ||= 15;
-  
+
   const datastore = new DataStore({
     projectId: props.projectId,
     api: props.api,
@@ -40,8 +38,16 @@ export function ResourceDetailMap({
   });
 
   const urlParams = new URLSearchParams(window.location.search);
-  resourceId = resourceId || parseInt( urlParams.get('openstadResourceId') );
-  const {data:resource, error, isLoading} = datastore.useResource({
+  resourceId =
+    resourceId || urlParams.get('openstadResourceId')
+      ? parseInt(urlParams.get('openstadResourceId') as string)
+      : undefined;
+      
+  const {
+    data: resource,
+    error,
+    isLoading,
+  } = datastore.useResource({
     projectId: props.projectId,
     resourceId: resourceId,
   });
@@ -49,24 +55,23 @@ export function ResourceDetailMap({
   let currentMarker: MarkerProps;
   currentMarker = {
     ...marker,
-    location: {...resource.location } || undefined,
+    location: { ...resource.location } || undefined,
     icon: marker?.icon || markerIcon,
   };
-  parseLocation(currentMarker) // unify location format
+  parseLocation(currentMarker); // unify location format
 
   let currentCenter = center;
   if (resource?.location) {
-    currentCenter = { ...resource.location }
+    currentCenter = { ...resource.location };
   }
 
   return (
     <>
-      <BaseMap {...props} center={currentCenter} markers={[currentMarker]}/>
+      <BaseMap {...props} center={currentCenter} markers={[currentMarker]} />
     </>
   );
-
-}
+};
 
 ResourceDetailMap.loadWidget = loadWidget;
 
-export default ResourceDetailMap;
+export { ResourceDetailMap };

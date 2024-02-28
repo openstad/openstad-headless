@@ -27,7 +27,7 @@ export type BaseMapWidgetProps = BaseProps &
     resourceId?: string;
   } & MapPropsType;
 
-export function BaseMap({
+const BaseMap = ({
   iconCreateFunction = undefined,
   defaultIcon = undefined,
 
@@ -62,14 +62,13 @@ export function BaseMap({
   onMarkerClick = undefined,
 
   ...props
-}: PropsWithChildren<BaseMapWidgetProps>) {
+}: PropsWithChildren<BaseMapWidgetProps>) => {
   const definedCenterPoint =
     center.lat && center.lng
       ? { lat: center.lat, lng: center.lng }
       : { lat: 52.37104644463586, lng: 4.900402911007405 };
 
   let [currentMarkers, setCurrentMarkers] = useState(markers);
-
   let [mapId] = useState(`${parseInt((Math.random() * 1e8) as any as string)}`);
   let [mapRef] = useMapRef(mapId);
 
@@ -216,47 +215,51 @@ export function BaseMap({
   };
 
   return (
-    <MapContainer
-      center={[definedCenterPoint.lat, definedCenterPoint.lng]}
-      className="osc-base-map-widget-container"
-      id={`osc-base-map-${mapId}`}
-      scrollWheelZoom={scrollWheelZoom}
-      zoom={zoom}>
-      <MapConsumer mapId={mapId} />
+    <>
+      <div style={{ width: '100%', aspectRatio: 16 / 9 }}>
+        <MapContainer
+          center={[definedCenterPoint.lat, definedCenterPoint.lng]}
+          className="osc-base-map-widget-container"
+          id={`osc-base-map-${mapId}`}
+          scrollWheelZoom={scrollWheelZoom}
+          zoom={zoom}>
+          <MapConsumer mapId={mapId} />
 
-      <TileLayer {...tileLayerProps} />
+          <TileLayer {...tileLayerProps} />
 
-      {area && area.length ? (
-        <Area area={area} areaPolygonStyle={areaPolygonStyle} />
-      ) : null}
+          {area && area.length ? (
+            <Area area={area} areaPolygonStyle={areaPolygonStyle} />
+          ) : null}
 
-      {currentMarkers.map((data) => {
-        if (data.isClustered) {
-          clusterMarkers.push(data);
-        } else if (data.lat && data.lng) {
-          return (
-            <Marker
-              {...props}
-              {...data}
-              key={`marker-${data.markerId || data.lat + data.lng}`}
-            />
-          );
-        }
-      })}
+          {currentMarkers.map((data) => {
+            if (data.isClustered) {
+              clusterMarkers.push(data);
+            } else if (data.lat && data.lng) {
+              return (
+                <Marker
+                  {...props}
+                  {...data}
+                  key={`marker-${data.markerId || data.lat + data.lng}`}
+                />
+              );
+            }
+          })}
 
-      <MarkerClusterGroup
-        {...props}
-        {...clustering}
-        categorize={categorize}
-        markers={clusterMarkers}
-      />
+          <MarkerClusterGroup
+            {...props}
+            {...clustering}
+            categorize={categorize}
+            markers={clusterMarkers}
+          />
 
-      <MapEventsListener area={area} onClick={onClick} />
+          <MapEventsListener area={area} onClick={onClick} />
 
-      {props.children}
-    </MapContainer>
+          {props.children}
+        </MapContainer>
+      </div>
+    </>
   );
-}
+};
 
 type MapEventsListenerProps = {
   area?: Array<LocationType>;
@@ -289,3 +292,4 @@ function MapEventsListener({
 }
 
 BaseMap.loadWidget = loadWidget;
+export { BaseMap };

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { PropsWithChildren } from 'react';
 import type { LeafletMouseEvent } from 'leaflet';
-import {loadWidget} from '../../lib/load-widget';
+import { loadWidget } from '../../lib/load-widget';
 import parseLocation from './lib/parse-location';
 
 import 'leaflet/dist/leaflet.css';
@@ -14,67 +14,78 @@ import type { MarkerIconType } from './types/marker-icon';
 import type { MapPropsType } from './types/index';
 
 import { BaseMap } from './base-map';
+import React from 'react';
 
-export type EditorMapWidgetProps =
-  BaseProps &
+export type EditorMapWidgetProps = BaseProps &
   ProjectSettingProps &
   MapPropsType & {
-    fieldName: string,
-    markerIcon: MarkerIconType,
-    editorMarker: MarkerProps,
-    centerOnEditorMarker: boolean,
+    fieldName: string;
+    markerIcon: MarkerIconType;
+    editorMarker?: MarkerProps;
+    centerOnEditorMarker: boolean;
   };
 
-export function EditorMap({
+const EditorMap = ({
   fieldName = 'location',
   centerOnEditorMarker = true,
   editorMarker = undefined,
   markerIcon = {
-    iconUrl : '/img/editor-marker-icon.svg',
-    shadowUrl : '/img/marker-shadow.png',
-    iconSize : [32,40],
-    iconAnchor : [8,40],
+    iconUrl: '/img/editor-marker-icon.svg',
+    shadowUrl: '/img/marker-shadow.png',
+    iconSize: [32, 40],
+    iconAnchor: [8, 40],
   },
   center = undefined,
   markers = [],
   ...props
-}: PropsWithChildren<EditorMapWidgetProps>) {
-
+}: PropsWithChildren<EditorMapWidgetProps>) => {
   let [currentEditorMarker, setCurrentEditorMarker] = useState<MarkerProps>({
     ...editorMarker,
     icon: editorMarker?.icon || markerIcon,
     doNotCluster: true,
   });
-  parseLocation(currentEditorMarker) // unify location format
+  parseLocation(currentEditorMarker); // unify location format
 
-  let [currentCenter, setCurrentCenter] = useState(center)
+  let [currentCenter, setCurrentCenter] = useState(center);
 
   useEffect(() => {
     if (centerOnEditorMarker && currentEditorMarker.lat) {
-      setCurrentCenter({ ...currentEditorMarker })
+      setCurrentCenter({ ...currentEditorMarker });
     } else {
-      setCurrentCenter(center)
+      setCurrentCenter(center);
     }
-  }, [currentEditorMarker, center, centerOnEditorMarker])
+  }, [currentEditorMarker, center, centerOnEditorMarker]);
 
-  function updateLocation(e: LeafletMouseEvent & { isInArea: boolean }, map: any) {
+  function updateLocation(
+    e: LeafletMouseEvent & { isInArea: boolean },
+    map: any
+  ) {
     if (map && e.isInArea) {
       setCurrentEditorMarker({
         ...currentEditorMarker,
         lat: e.latlng?.lat,
         lng: e.latlng?.lng,
-      })
+      });
     }
   }
 
   return (
     <>
-      <BaseMap {...props} center={currentCenter} markers={[...markers, currentEditorMarker]} onClick={updateLocation}/>
+      <BaseMap
+        {...props}
+        center={currentCenter}
+        markers={[...markers, currentEditorMarker]}
+        onClick={updateLocation}
+      />
 
-      <input name={fieldName} type="hidden" value={`{"lat":${currentEditorMarker.lat},"lng":${currentEditorMarker.lng}}`}/>
+      <input
+        name={fieldName}
+        type="hidden"
+        value={`{"lat":${currentEditorMarker.lat},"lng":${currentEditorMarker.lng}}`}
+      />
     </>
   );
-
-}
+};
 
 EditorMap.loadWidget = loadWidget;
+export { EditorMap };
