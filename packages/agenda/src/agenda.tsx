@@ -42,7 +42,6 @@ function Agenda(props: AgendaWidgetProps) {
           props.items
             ?.sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger))
             .map((item) => (
-              <>
                 <div key={item.trigger} className={`osc-agenda-item ${item.active ? '--active-item' : ''}`}>
                   <div className="osc-date-circle"></div>
                   <div className="osc-agenda-content">
@@ -61,7 +60,6 @@ function Agenda(props: AgendaWidgetProps) {
                     )}
                   </div>
                 </div>
-              </>
             ))}
       </section>
     </div>
