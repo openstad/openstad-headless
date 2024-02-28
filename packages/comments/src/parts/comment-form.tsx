@@ -41,7 +41,7 @@ function CommentForm({
         variant: 'textarea',
         minCharacters: descriptionMinLength,
         maxCharacters: descriptionMaxLength,
-        fieldRequired: true,
+        fieldRequired: false,
         requiredWarning: "Dit veld is verplicht",
         fieldKey: "description",
         placeholder: args.placeholder,
