@@ -1,5 +1,7 @@
 import React from 'react';
-
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Paragraph } from "@utrecht/component-library-react";
 export const BudgetUsedList = ({
   maxBudget,
   budgetUsed,
@@ -20,13 +22,13 @@ export const BudgetUsedList = ({
         key={`budget-item-${budget}-${index}`}
           className="budget-badge budget-badge-primary"
           style={{ flex: budget }}>
-          <p>&euro;{budget || 0}</p>
+          <Paragraph>&euro;{budget || 0}</Paragraph>
         </div>
       ))}
       <div
         style={{ flex: Math.max(maxBudget - budgetUsed, 0)}}
         className="osc-stem-begroot-budget-list-budget-left-indication budget-badge budget-badge-plain">
-        <p>&euro;{Math.max(maxBudget - budgetUsed, 0)}</p>
+        <Paragraph>&euro;{Math.max(maxBudget - budgetUsed, 0)}</Paragraph>
       </div>
     </div>
   );

@@ -2,6 +2,10 @@ import React from 'react';
 import '../index.css';
 import './index.css';
 
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Paragraph } from "@utrecht/component-library-react";
+
 type Props = {
   steps: Array<string>;
   currentStep?: number;
@@ -18,9 +22,9 @@ const Stepper = (props: Props) => {
               className={`step-icon ${currentStep === index ? 'active' : ''} ${
                 currentStep > index ? 'done' : ''
               }`}>
-              <p>{index + 1}</p>
+              <Paragraph>{index + 1}</Paragraph>
             </div>
-            <p> {step}</p>
+            <Paragraph> {step}</Paragraph>
           </div>
           <div className="step-divider"></div>
         </React.Fragment>

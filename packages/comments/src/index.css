@@ -34,21 +34,36 @@
     text-align: right;
  }
 
- button[type="submit"] {
-     padding: 0.5rem 1rem;
-     font-size: 1rem;
-     border: none;
-     border-radius: 0.25rem;
-     background-color: var(--osc-primary);
-     color: white;
-     cursor: pointer;
-     transition: background-color 0.3s ease;
- }
-
- button[type="submit"]:hover {
-     background-color: var(--osc-primary-hover);
- }
-
  hr {
   border-top: 1px solid var(--osc-border);
+ }
+
+.form-container button,
+.form-container input{
+  max-width: none;
+}
+
+ .comment-item{
+  background-color: var(--nlds-comment-item-background-color, var(--nlds-default-background-color, #F0F4F8));
+  padding: 1rem;
+ }
+ .comment-item+.comment-item{
+  margin-top: 1rem;
+ }
+ .comment-item-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: solid 1px var(--nlds-comment-item-header-border-color, --nlds-default-border-color, #A9B2BA);
+  margin-bottom: 0.5rem;
+ }
+
+ .comment-item .utrecht-button-group{
+  margin-top: 1rem;
+ }
+
+
+ .osc .utrecht-textarea{
+  max-width: unset;
+  width: 100%;
  }

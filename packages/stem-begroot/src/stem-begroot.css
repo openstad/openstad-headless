@@ -1,6 +1,18 @@
 .begroot-step-panel {
   padding: 1.5rem;
-  background-color: var(--osc-card);
+  background-color: var(--nlds-budget-background-color, var(--nlds-default-background-color, #F0F4F8));
+}
+
+.begroot-step-panel + *{
+  margin-top: var(--nlds-budget-spacing, 4rem);
+}
+
+#stem-begroot-resource-selections-list h3{
+  margin-bottom: var(--nlds-budget-resources-filter-heading-margin-bottom, 1rem);
+  font-size: var(--nlds-budget-resources-filter-heading-font-size, var(--utrecht-heading-3-font-size, revert));
+  font-weight: var(--utrecht-heading-3-font-weight, var(--utrecht-heading-font-weight, bold));
+  color: var(--nlds-budget-resources-filter-heading-color, var(--utrecht-heading-3-color, var(--utrecht-heading-color, var(--utrecht-document-color, inherit))));
+  
 }
 
 .stembegroot-content-item-header {
@@ -25,7 +37,8 @@
 
 .osc-stem-begroot-content-item-footer .osc-stem-begroot-item-action-btn {
   flex-grow: 1;
-  padding: .75rem !important;
+  width: 100%;
+  max-width: none;
 }
 
 .begroot-step-panel-navigation-section {
@@ -37,7 +50,7 @@
 
 .begroot-step-2-instruction-budget-status-panel {
   display: grid;
-  grid-template-columns: 10fr 2fr;
+  grid-template-columns: var(--nlds--budget-budget-columns, 1fr auto);
 }
 
 .budget-two-text-row-spaced {
@@ -47,8 +60,8 @@
 }
 
 .budget-overview-panel {
-  background-color: var(--osc-card-dark);
-  padding: 1rem;
+  background-color: var(--nlds-budget-overview-panel-background-color, #DBDFE5);
+  padding: var(--nlds-budget-overview-panel-padding, 1rem);
 }
 
 .budget-two-text-row-spaced > * {
@@ -56,15 +69,16 @@
 }
 
 .budget-unused-panel-step-2 {
-  padding: 1rem;
-  background-color: var(--osc-muted);
+  background-color: var(--nlds-budget-overview-panel-total-background-color, #768391);
+  padding: var(--nlds-budget-overview-panel-total-padding, 1rem);
+
 }
 
 .stem-begroot-filter {
   display: flex;
   gap: 1rem;
   padding: 1rem;
-  background-color: var(--osc-card);
+  background-color: var(--nlds-default-background-color, #F0F4F8);
 }
 
 .osc-stem-begroot-paginator {

@@ -1,29 +1,18 @@
-.osc.counter-container {
+.osc.counter-container:not(.--link) {
   display: flex;
   text-decoration: none;
   border-radius: var(--nlds-counter-border-radius, 0);
   padding: var(--nlds-counter-padding, .5rem .5rem);
   height: var(--nlds-counter-height, auto);
-  background-color: var(--nlds-counter-background-color, #F0F4F8);
+  background-color: var(--nlds-counter-background-color, transparent);
+  max-width: none;
+  justify-content: left;
 }
 
-.osc.counter-container.--link:hover{
-  background-color: var(--nlds-counter-hover-background-color, #E1E8F0);
-}
-.osc.counter-container.--link:hover p > * {
-  color: var(--nlds-counter-hover-color, unset);
-}
-
-.osc.counter-container.--link:active p > * {
-  color: var(--nlds-counter-active-color, #0061c2);
-}
-
-.osc.counter-container.--link:focus-within{
-  background-color: var(--nlds-counter-focus-background-color, #E1E8F0);
-  outline-color: var(--nlds-counter-focus-outline-color, var(--utrecht-focus-outline-color, revert));
-  outline-offset: var(--nlds-counter-focus-outline-offset, var(--utrecht-focus-outline-offset, revert));
-  outline-style: var(--nlds-counter-focus-outline-style, var(--utrecht-focus-outline-style, revert));
-  outline-width: var(--nlds-counter-focus-outline-width, var(--utrecht-focus-outline-width, revert));
+.osc.counter-container.--link{
+  max-width: none;
+  width: 100%;
+  justify-content: start;
 }
 
 .osc.counter-container p {
@@ -31,16 +20,12 @@
   gap: var(--nlds-counter-gap, .25rem);
   justify-content: var(--nlds-counter-justify-content, left);
   align-items: var(--nlds-counter-align-items, center);
+  color: inherit;
 
-  font-size: var(--nlds-counter-font-size, var(--utrecht-paragraph-font-size, 1rem));
-  font-weight: var(--nlds-counter-font-weight, var(--utrecht-paragraph-font-weight, 400));
-  font-family: var(--nlds-counter-font-family, var(--utrecht-paragraph-font-family, var(--utrecht-document-font-family, inherit)));
-  color: var(--nlds-counter-color, var(--utrecht-paragraph-color, #000));
 }
 
 .osc.counter-container .amount {
   font-size: var(--nlds-counter-amount-font-size, 1.5em);
   font-weight: var(--nlds-counter-amount-font-weight, 700);
-  font-family: var(--nlds-counter-amount-font-family, var(--utrecht-paragraph-font-family, var(--utrecht-document-font-family, inherit)));
-  color: var(--nlds-counter-amount-color, #000);
+  color: var(--nlds-counter-amount-color, inherit);
 }

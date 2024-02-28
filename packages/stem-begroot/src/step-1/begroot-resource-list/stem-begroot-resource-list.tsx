@@ -3,12 +3,14 @@ import {
   Icon,
   Image,
   List,
-  PlainButton,
-  SecondaryButton,
   Spacer,
 } from '@openstad-headless/ui/src';
 
 import { elipsize } from '@openstad-headless/lib/ui-helpers';
+
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Button, Paragraph, Strong, Link } from "@utrecht/component-library-react";
 
 export const StemBegrootResourceList = ({
   resources,
@@ -67,71 +69,74 @@ export const StemBegrootResourceList = ({
                     <h5>&euro;{resource.budget || 0}</h5>
                   ) : null}
                   <div className="stembegroot-content-item-header-taglist">
-                    <p className="strong">Thema:</p>
-                    <p>{theme?.name || 'Geen thema'}</p>
-                    <p className="strong">Gebied:</p>
-                    <p> {area?.name || 'Geen gebied'}</p>
+                    <Paragraph className="strong">Thema:</Paragraph>
+                    <Paragraph>{theme?.name || 'Geen thema'}</Paragraph>
+                    <Paragraph><Strong>Gebied:</Strong></Paragraph>
+                    <Paragraph> {area?.name || 'Geen gebied'}</Paragraph>
                   </div>
                 </section>
-
-                <Spacer size={0.5} />
-
-                <p>{elipsize(resource.description, 200)}</p>
-
+                <Spacer size={1} />
+                <Paragraph>{elipsize(resource.description, 200)}</Paragraph>
                 <Spacer size={1} />
               </div>
 
               {originalUrl ? (
                 <>
-                  <p className="strong">
+                  <Paragraph className="strong">
                     Dit een vervolg op plan:&nbsp;
-                    <a target="_blank" href={originalUrl}>
+                    <Link target="_blank" href={originalUrl}>
                       {originalUrl}
-                    </a>
-                  </p>
+                    </Link>
+                  </Paragraph>
                 </>
               ) : null}
 
               {showVoteCount ? (
-                <div className="osc-stem-begroot-content-item-footer">
-                  <>
-                    <Icon
-                      icon="ri-thumb-up-line"
-                      variant="regular"
-                      text={resource.yes}
-                    />
-                    <Icon
-                      icon="ri-thumb-down-line"
-                      variant="regular"
-                      text={resource.no}
-                    />
-                    {displayRanking && resource.extraData?.ranking ? (
+                <>
+                  <div className="osc-stem-begroot-content-item-footer">
+                    <>
                       <Icon
-                        icon="ri-trophy-line"
+                        icon="ri-thumb-up-line"
                         variant="regular"
-                        text={resource.extraData?.ranking}
+                        text={resource.yes}
                       />
-                    ) : null}
-                  </>
-                </div>
+                      <Icon
+                        icon="ri-thumb-down-line"
+                        variant="regular"
+                        text={resource.no}
+                      />
+                      {displayRanking && resource.extraData?.ranking ? (
+                        <Icon
+                          icon="ri-trophy-line"
+                          variant="regular"
+                          text={resource.extraData?.ranking}
+                        />
+                      ) : null}
+                    </>
+                  </div>
+                  <Spacer size={.5} />
+                </>
               ) : null}
 
               <div className="osc-stem-begroot-content-item-footer">
-                <PlainButton
+                <Button
+                  appearance='secondary-action-button'
                   className="osc-stem-begroot-item-action-btn"
                   onClick={() => {
                     onResourcePlainClicked(resource, index);
                   }}>
                   Lees meer
-                </PlainButton>
-                <SecondaryButton
+                </Button>
+                <Button
                   disabled={primaryBtnDisabled}
                   className="osc-stem-begroot-item-action-btn"
                   onClick={() => {
                     onResourcePrimaryClicked(resource);
-                  }}>
+                  }}
+                  appearance='primary-action-button'
+                  >
                   {primaryBtnText}
-                </SecondaryButton>
+                </Button>
               </div>
             </article>
           </>

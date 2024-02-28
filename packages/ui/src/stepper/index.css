@@ -14,39 +14,40 @@
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    width: .5rem;
-    height: .5rem;
-    padding: .5rem;
-    margin-right: .5rem;
-    border: 1px solid var(--osc-secondary);
-    border-radius: 50%;
+    width: var(--nlds-stepper-icon-width, .5rem);
+    height: var(--nlds-stepper-icon-height, .5rem);
+    padding: var(--nlds-stepper-icon-padding, .5rem);
+    margin-right: var(--nlds-stepper-icon-margin-right, .5rem);
+    border-width: var(--nlds-stepper-icon-border-width, 1px);
+    border-style: solid;
+    border-color: var(--nlds-stepper-icon-border-color, var(--utrecht-button-primary-action-background-color));
+    border-radius: var(--nlds-stepper-icon-border-radius, 50%);
 }
 
 .stepper > .step-divider {
-    height: 1px;
+    height: var(--nlds-stepper-divider-height, 1px);
     width: 100%;
-    margin-left: 1rem;
-    margin-right: 1rem;
-    background-color: var(--osc-border);
+    margin-left: var(--nlds-stepper-divider-margin-left, 1rem);
+    margin-right: var(--nlds-stepper-divider-margin-right, 1rem);
+    background-color: var(--nlds-stepper-divider-color, #A9B2BA);
 }
 
 .step-icon > p {
-    color: var(--osc-secondary);
+    color: var(--nlds-stepper-icon-color, var(--utrecht-button-primary-action-background-color));
 }
 
 .step-icon.active {
-    background-color: var(--osc-secondary);
+    background-color: var(--nlds-stepper-icon-active-background-color, var(--utrecht-button-primary-action-background-color));
 }
 
 .step-icon.done {
-    background-color: var(--osc-primary);
-    border-color: var(--osc-primary);
+    background-color: var(--nlds-stepper-icon-done-background-color, var(--utrecht-button-secondary-action-background-color));
+    border-color: var(--nlds-stepper-icon-done-border-color, var(--utrecht-button-secondary-action-background-color));
 }
 
-.step-container.done {
-    color: var(--osc-primary);
+.step-icon.active > p{
+    color: var(--nlds-stepper-icon-active-color, var(--utrecht-button-primary-action-color));
 }
-
-.step-icon.active > p, .step-icon.done  > p{
-    color: var(--osc-secondary-foreground);
+ .step-icon.done  > p{
+    color: var(--nlds-stepper-icon-active-color, var(--utrecht-button-secondary-action-color));
 }

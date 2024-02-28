@@ -50,11 +50,11 @@
     line-height: auto;
 }
 
-.osc h3 {
+/* .osc h3 {
     font-size: 2.125rem;
     font-weight: bold;
     line-height: auto;
-}
+} */
 .osc h4 {
     font-size: 1.5rem;
     font-weight: 700;
@@ -87,33 +87,13 @@
     color: var(--osc-destructive);
 }
 
-:root{
-    /* Heading 5 */
-    --utrecht-heading-5-color: #000;
-    --utrecht-heading-5-font-family: inherit;
-    --utrecht-heading-5-font-size: 1.25rem;
-    --utrecht-heading-5-font-weight: 700;
-    --utrecht-heading-5-line-height: 1.75rem;
-
-    /* Heading 6 */
-    --utrecht-heading-6-color: #000;
-    --utrecht-heading-6-font-family: inherit;
-    --utrecht-heading-6-font-size: 1rem;
-    --utrecht-heading-6-font-weight: 400;
-    --utrecht-heading-6-line-height: 24px;
-
-    /* Paragraph */
-    --utrecht-paragraph-font-family: inherit;
-    --utrecht-paragraph-font-size: 1rem;
-    --utrecht-paragraph-font-weight: 400;
-    --utrecht-paragraph-line-height: 1.5rem;
-
-
-    /* subtle button */
-    
-    /* --nlds-likewidget-button-background: red;
-    --nlds-likewidget-button-color: #fff;
-    --nlds-likewidget-button-hover-background: blue;
-    --nlds-likewidget-button-hover-color: #fff;  */
-   
+.osc{
+    --nlds-default-background-color: #F0F4F8;
+    --nlds-default-border-color: #A9B2BA;
+}
+.osc .sr-only{
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    display: block;
 }

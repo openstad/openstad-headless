@@ -1,5 +1,6 @@
 import { SecondaryButton, Spacer } from '@openstad-headless/ui/src';
 import React from 'react';
+import { Heading5, Paragraph, Button } from "@utrecht/component-library-react";
 
 type Props = {
   loginUrl: string;
@@ -18,16 +19,20 @@ export const Step4 = ({
     <>
       {header}
       <Spacer size={1.5} />
-      <h5>{voteMessage}</h5>
-      <p>{thankMessage}</p>
+      <Heading5>{voteMessage}</Heading5>
+      <Paragraph>{thankMessage}</Paragraph>
 
       {showNewsletterButton ? (
-        <SecondaryButton
-          onClick={() => {
-            // What should happen here?
-          }}>
-          Hou mij op de hoogte
-        </SecondaryButton>
+        <>
+          <Spacer size={2} />
+          <Button
+            appearance='primary-action-button'
+            onClick={() => {
+              // What should happen here?
+            }}>
+            Hou mij op de hoogte
+          </Button>
+        </>
       ) : null}
     </>
   );

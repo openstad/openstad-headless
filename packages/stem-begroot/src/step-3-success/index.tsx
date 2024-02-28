@@ -1,5 +1,6 @@
 import { SecondaryButton, Spacer } from '@openstad-headless/ui/src';
 import React, { ReactNode } from 'react';
+import { Heading5, Button } from "@utrecht/component-library-react";
 
 type Props = {
   loginUrl: string;
@@ -11,16 +12,17 @@ export const Step3Success = ({ step3success, header, ...props }: Props) => {
     <>
       {header}
       <Spacer size={1.5} />
-      <h5>{step3success}</h5>
-      <Spacer size={1.5} />
+      <Heading5>{step3success}</Heading5>
+      <Spacer size={2} />
 
-      <SecondaryButton
+      <Button
+        appearance='primary-action-button'
         onClick={() => {
           const loginUrl = new URL(`${props.loginUrl}`);
           document.location.href = loginUrl.toString();
         }}>
         Vul een andere stemcode in
-      </SecondaryButton>
+      </Button>
     </>
   );
 };

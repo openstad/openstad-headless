@@ -1,10 +1,12 @@
 import { loadWidget } from '@openstad-headless/lib/load-widget'
-import React, { useEffect, useState } from 'react'
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Paragraph, ButtonLink } from "@utrecht/component-library-react";
+import React from 'react'
 import './counter.css'
 import DataStore from '@openstad-headless/data-store/src'
 import { BaseProps } from '../../types/base-props'
 import { ProjectSettingProps } from '../../types/project-setting-props'
-import { Spacer } from '@openstad-headless/ui/src';
 
 export type CounterWidgetProps = BaseProps &
   CounterProps &
@@ -39,25 +41,25 @@ function Counter({
     api: props.api
   })
 
-  const {data:resources} = datastore.useResources({
+  const { data: resources } = datastore.useResources({
     projectId: props.projectId,
   })
 
-  const {data:resource} = datastore.useResource({
+  const { data: resource } = datastore.useResource({
     projectId: props.projectId,
     resourceId,
   });
 
-  const {data:comment} = datastore.useComments({
+  const { data: comment } = datastore.useComments({
     projectId: props.projectId,
     resourceId: resourceId,
     sentiment: opinion
   })
 
-  const {data:results, error, isLoading} = datastore.useChoiceGuideResults({
+  const { data: results, error, isLoading } = datastore.useChoiceGuideResults({
     projectId: props.projectId,
     choiceGuideId: props.choiceGuideId,
-  }); 
+  });
 
   if (counterType === 'resource') {
     amountDisplayed = resources?.metadata?.totalCount || 0;
@@ -88,13 +90,25 @@ function Counter({
   if (counterType === 'submission') {
     amountDisplayed = results.length;
   }
-
+  const content = () => {
+    return (
+      <Paragraph>
+        <span className="label">{label}:</span>
+        <span className="amount">{amountDisplayed}</span>
+      </Paragraph>
+    )
+  }
   return (
-    <div className='osc counter-container' onClick={() => document.location.href = url}>
-      <p>{label}:</p>
-      <Spacer size={0}/>
-      <h6>{amountDisplayed}</h6>
-    </div>
+    url.length > 0 ? (
+      <ButtonLink appearance="secondary-action-button" className='osc counter-container --link' href={url}>
+        {content()}
+      </ButtonLink>
+    ) : (
+      <div className='osc counter-container'>
+        <>{content()}</>
+      </div>
+    )
+
   )
 }
 

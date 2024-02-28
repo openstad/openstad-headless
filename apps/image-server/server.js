@@ -46,7 +46,19 @@ const imageSteamConfig = {
   },
   log: {
     errors: true
-  }
+  },
+  router: {
+    originalSteps: {
+      metadata: {
+        enabled: 'false',
+      },
+    },
+    hqOriginalSteps: {
+      metadata: {
+        enabled: 'false',
+      },
+    },
+  },
 };
 
 multerConfig.dest = process.env.IMAGES_DIR || 'images/';

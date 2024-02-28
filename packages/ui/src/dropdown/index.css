@@ -5,11 +5,12 @@
 .DropdownMenuSubContent {
   background-color: white;
   border-radius: 6px;
-  padding: 5px;
+  padding: 1rem;
   box-shadow: 0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2);
   animation-duration: 400ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity;
+  margin: 10px;
 }
 .DropdownMenuContent[data-side='top'],
 .DropdownMenuSubContent[data-side='top'] {
@@ -165,4 +166,12 @@
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+
+
+.DropdownMenuContent button,
+.DropdownMenuSubContent button{
+  width: 100%;
+  max-width: unset;
 }

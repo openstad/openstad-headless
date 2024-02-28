@@ -1,19 +1,19 @@
 .osc .progressbar {
-      height: .5rem;
+      height: var(--nlds-progressbar-height, .5rem);
       width: 100%;
-      background-color: var(--osc-border);
-      border-radius: 50px;
+      background-color: var(--nlds-progressbar-background-color,#A9B2BA);
+      border-radius: var(--nlds-progressbar-border-radius, 50px);
       overflow-x: hidden;
 }
 
 .osc .progressbar-tracker {
   height: 100%;
-  background-color: var(--osc-primary);
+  background-color: var(--nlds-progressbar-fill-background-color, var(--utrecht-button-primary-action-background-color));
   border-radius: inherit;
 }
 
 .osc .progressbar-counter {
   font-weight: 600;
   text-align: center;
-  color: var(--osc-foreground)
+  color: var(--nlds-progressbar-color, #010D0A);
 }
