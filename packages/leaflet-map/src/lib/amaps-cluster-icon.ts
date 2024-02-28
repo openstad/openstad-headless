@@ -1,4 +1,5 @@
 import { divIcon, point } from 'leaflet';
+import LeafletMarkerClusterGroup from 'react-leaflet-cluster'
 import type { MarkerCluster } from 'leaflet';
 
 export default function amapsCreateClusterIcon(
