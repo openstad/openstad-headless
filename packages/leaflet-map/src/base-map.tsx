@@ -251,7 +251,12 @@ const BaseMap = ({
             markers={clusterMarkers}
           />
 
-          <MapEventsListener area={area} onClick={onClick} />
+          <MapEventsListener
+            area={area}
+            onClick={(e, map) =>
+              onClick({ ...e, isInArea: isPointInArea(area, e.latlng) }, map)
+            }
+          />
 
           {props.children}
         </MapContainer>
