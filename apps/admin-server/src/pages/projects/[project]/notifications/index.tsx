@@ -125,14 +125,14 @@ export default function ProjectNotifications() {
             <br/>
             {value?.map((type: any) => (
               typeof type === "object" ? 
-              <div>
+              <div key={type.id}>
                 <Separator/>
-                <NotificationForm type={type.type} engine={'email'} id={type.id} label={type.label} subject={type.subject} body={type.body} key={type.id}/>
+                <NotificationForm type={type.type} engine={'email'} id={type.id} label={type.label} subject={type.subject} body={type.body}/>
               </div>
               : 
-              <div>
+              <div key={type}>
                 <Separator/>
-                <NotificationForm type={type} engine={'email'} key={type}/>
+                <NotificationForm type={type} engine={'email'}/>
               </div>
             ))}
           </div>
