@@ -4,7 +4,7 @@
   padding: var(--nlds-likewidget-container-padding, 1.5rem);
   gap: var(--nlds-likewidget-container-gap, 0.5rem);
   margin: var(--nlds-likewidget-container-margin, 0);
-  background-color: var(--nlds-likewidget-container-background-color, var(--nlds-background-color, #F0F4F8));
+  background-color: var(--nlds-likewidget-container-background-color, var(--nlds-default-background-color, #F0F4F8));
 }
 
 .like-option-container {

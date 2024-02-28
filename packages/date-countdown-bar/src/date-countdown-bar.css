@@ -3,7 +3,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: var(--nlds-countdownbar-background-color, var(--nlds-background-color, #F0F4F8));
+  background-color: var(--nlds-countdownbar-background-color, var(--nlds-default-background-color, #F0F4F8));
   gap: var(--nlds-countdownbar-gap, .5rem);
   padding: var(--nlds-countdownbar-padding, .5rem 0rem);
   height: var(--nlds-countdownbar-height, auto);

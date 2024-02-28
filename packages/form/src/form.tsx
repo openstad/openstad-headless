@@ -12,6 +12,10 @@ import { handleSubmit } from "./submit";
 import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden/index.js";
 import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choice/index.js";
 
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Button } from "@utrecht/component-library-react";
+
 const Form: FC<FormProps> = ({
      title = 'Form Widget',
      fields = [],
@@ -74,7 +78,7 @@ const Form: FC<FormProps> = ({
     return (
         <div className="form-widget">
             <div className="form-widget-container">
-                {title ? <h5 className="form-widget-title">{title}</h5> : null}
+                {title && <h5 className="form-widget-title">{title}</h5>}
 
                 <form onSubmit={handleFormSubmit} className="form-container" noValidate>
                     {fields.map((field: CombinedFieldPropsWithType, index: number) => (
@@ -86,11 +90,13 @@ const Form: FC<FormProps> = ({
                         </div>
                     ))}
                     {secondaryLabel && (
-                        <button type="button" onClick={() => secondaryHandler(formValues)}>{secondaryLabel}</button>
+                        <Button appearance='primary-action-button' type="button" onClick={() => secondaryHandler(formValues)}>{secondaryLabel}</Button>
                     )}
-                    <button type="submit" disabled={submitDisabled}>
+                    <Button 
+                    appearance='primary-action-button'
+                    type="submit" disabled={submitDisabled}>
                         {submitText}
-                    </button>
+                    </Button>
                 </form>
             </div>
         </div>

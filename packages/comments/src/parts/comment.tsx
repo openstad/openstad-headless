@@ -1,12 +1,16 @@
 import React from 'react';
 import '../index.css';
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import DataStore from '@openstad-headless/data-store/src';
 import { GhostButton, Spacer } from '@openstad-headless/ui/src';
 import { CommentPropsType } from '../types/index';
 import CommentForm from './comment-form.js';
 import { DropDownMenu } from '@openstad-headless/ui/src';
 import hasRole from '../../../lib/has-role';
+
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Paragraph, Heading6, Button, ButtonGroup } from "@utrecht/component-library-react";
 
 function Comment({
   comment = {
@@ -82,11 +86,11 @@ function Comment({
   }
 
   return (
-    <Fragment>
+    <article className='comment-item'>
       <section className="comment-item-header">
-        <h6 className="reaction-name">
+        <Heading6 className="reaction-name">
           {args.comment.user && args.comment.user.displayName}{' '}
-        </h6>
+        </Heading6>
         {canEdit() || canDelete() ? (
           <DropDownMenu
             items={[
@@ -99,7 +103,12 @@ function Comment({
                 },
               },
             ]}>
-            <GhostButton icon="ri-more-fill"></GhostButton>
+            <Button appearance="subtle-button">
+              <div>
+                <i className="ri-more-fill"></i>
+                <span className="sr-only"></span>
+              </div>
+            </Button>
           </DropDownMenu>
         ) : null}
       </section>
@@ -115,48 +124,49 @@ function Comment({
       ) : (
         <>
           <Spacer size={0.25} />
-          <p className="comment-reaction-text">{args.comment.description}</p>
+          <Paragraph className="comment-reaction-text">{args.comment.description}</Paragraph>
           <Spacer size={0.25} />
-          {showDateSeperately ? (
-            <p className="comment-reaction-strong-text">
+          {showDateSeperately && (
+            <Paragraph className="comment-reaction-strong-text">
               {args.comment.createDateHumanized}
-            </p>
-          ) : null}
+            </Paragraph>
+          )}
         </>
       )}
-
-      {!args.comment.parentId ? (
+      {!args.comment.parentId && (
         <section className="comment-item-footer">
-          <p className="comment-reaction-strong-text">
+          <Paragraph className="comment-reaction-strong-text">
             {args.comment.createDateHumanized}
-          </p>
-          {isVotingEnabled ? (
-            canLike() ? (
-              <GhostButton
-                className={args.comment.hasUserVoted ? `active` : ''}
-                icon={
-                  args.comment.hasUserVoted
-                    ? 'ri-thumb-up-fill'
-                    : 'ri-thumb-up-line'
-                }
-                onClick={() => args.comment.submitLike()}>
-                Mee eens (<span>{args.comment.yes || 0}</span>)
-              </GhostButton>
+          </Paragraph>
+          <ButtonGroup>
+            {isVotingEnabled && (
+              canLike() ? (
+                <Button
+                  appearance='secondary-action-button'
+                  className={args.comment.hasUserVoted ? `active` : ''}
+                  onClick={() => args.comment.submitLike()}>
+                  <i className={args.comment.hasUserVoted ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
+                  Mee eens (<span>{args.comment.yes || 0}</span>)
+                </Button>
+              ) : (
+                <Button disabled>
+                  <i className="ri-thumb-up-line"></i>
+                  Mee eens (<span>{args.comment.yes || 0}</span>)
+                </Button>
+              )
+            )}
+            {canReply() ? (
+              <Button 
+                appearance='primary-action-button'
+                onClick={() => toggleReplyForm()}>
+                Reageren
+              </Button>
             ) : (
-              <GhostButton disabled icon="ri-thumb-up-line">
-                Mee eens (<span>{args.comment.yes || 0}</span>)
-              </GhostButton>
-            )
-          ) : null}
-          {canReply() ? (
-            <GhostButton onClick={() => toggleReplyForm()}>
-              Reageren
-            </GhostButton>
-          ) : (
-            <GhostButton disabled>Reageren</GhostButton>
-          )}
+              <Button disabled>Reageren</Button>
+            )}
+          </ButtonGroup>
         </section>
-      ) : null}
+      )}
 
       <Spacer size={1} />
 
@@ -185,7 +195,7 @@ function Comment({
           </div>
         </div>
       ) : null}
-    </Fragment>
+    </article>
   );
 }
 

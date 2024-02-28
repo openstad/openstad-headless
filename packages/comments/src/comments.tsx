@@ -10,6 +10,10 @@ import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Paragraph, Heading4 } from "@utrecht/component-library-react";
+
 export type CommentsWidgetProps = BaseProps &
   ProjectSettingProps &
   CommentPropsType;
@@ -72,9 +76,9 @@ function Comments({
 
   return (
     <section className="osc">
-      <h4 className="comments-title">
+      <Heading4 className="comments-title">
         {title.replace(/\[\[nr\]\]/, comments.length)}
-      </h4>
+      </Heading4>
 
       {args.isClosed ? (
         <Banner>
@@ -90,7 +94,7 @@ function Comments({
       <Spacer size={1} />
 
       {Array.isArray(comments) && comments.length === 0 ? (
-        <p>{emptyListText}</p>
+        <Paragraph>{emptyListText}</Paragraph>
       ) : null}
       {(comments || []).map((comment: any, index: number) => {
         let attributes = { ...args, comment, submitComment };
