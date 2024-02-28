@@ -144,7 +144,6 @@ const BaseMap = ({
     if (markers.length == 0 && currentMarkers.length == 0) return;
 
     let result = [...markers];
-    console.log({ result });
     result.map((marker, i) => {
       // unify location format
       parseLocation(marker);
@@ -214,7 +213,6 @@ const BaseMap = ({
     ...props,
   };
 
-  console.log({ currentMarkers });
   return (
     <>
       <div style={{ width: '100%', aspectRatio: 16 / 9 }}>
