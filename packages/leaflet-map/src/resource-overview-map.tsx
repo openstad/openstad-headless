@@ -61,7 +61,6 @@ const ResourceOverviewMap = ({
   let currentMarkers =
     allResources.map((resource: any) => {
       // TODO: types/resource does not exist yet
-      console.log(resource.location)
       let marker: MarkerProps = {
         location: { ...resource.location } || undefined,
       };
