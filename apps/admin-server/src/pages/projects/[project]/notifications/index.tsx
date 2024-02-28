@@ -118,14 +118,14 @@ export default function ProjectNotifications() {
               if(templateList.length === 0) {
                 return <div key={type}>
                 <Separator />
-                <NotificationForm type={type as NotificationType} engine={'email'} />
+                <NotificationForm type={type as NotificationType} />
               </div>
               }
               return <>
                 {templateList.map(template => {
                   return <div key={template.id}>
                   <Separator />
-                  <NotificationForm type={template.type} engine={'email'} id={template.id} label={template.label} subject={template.subject} body={template.body} />
+                  <NotificationForm type={template.type} engine={template.engine} id={template.id} label={template.label} subject={template.subject} body={template.body} />
                 </div>
                 })}
               </>

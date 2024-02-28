@@ -19,15 +19,16 @@ import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
 import useNotificationTemplate from '@/hooks/use-notification-template'
 import toast from 'react-hot-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 type Props = {
   type:
-    | 'login email'
-    | 'login sms'
-    | 'new published resource - user feedback'
-    | 'updated resource - user feedback'
-    | 'user account about to expire';
-  engine: 'email' | 'sms';
+  | 'login email'
+  | 'login sms'
+  | 'new published resource - user feedback'
+  | 'updated resource - user feedback'
+  | 'user account about to expire';
+  engine?: 'email' | 'sms';
   id?: string;
   label?: string;
   subject?: string;
@@ -36,26 +37,32 @@ type Props = {
 
 const formSchema = z.object({
   engine: z.enum(['email', 'sms']),
-  label: z.string().max(255, {
+  label: z.string().min(1, {
+    message: 'De label mag niet leeg zijn!',
+  }).max(255, {
     message: 'De label mag niet langer dan 255 karakters zijn!',
   }),
-  subject: z.string().max(255, {
+  subject: z.string().min(1, {
+    message: 'Het onderwerp mag niet leeg zijn!',
+  }).max(255, {
     message: 'Het onderwerp mag niet langer dan 255 karakters zijn!',
   }),
-  body: z.string(),
+  body: z.string().min(1, {
+    message: 'De inhoud mag niet leeg zijn!',
+  }),
 });
 
 export function NotificationForm({ type, engine, id, label, subject, body }: Props) {
   const router = useRouter();
   const project = router.query.project as string;
-  const { create, update } = useNotificationTemplate(project as string)
+  const { data, create, update } = useNotificationTemplate(project as string)
 
   const defaults = React.useCallback(
     () => ({
       engine: engine || "email",
-      label: label || "Label van de mail",
-      subject: subject || "Onderwerp van de mail",
-      body: body || "Inhoud van de mail...",
+      label: label || "",
+      subject: subject || "",
+      body: body || "",
     }),
     [engine, label, subject, body]
   )
@@ -78,7 +85,7 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
         toast.error('Er is helaas iets mis gegaan.')
       }
     } else {
-      const template = await create(project, engine, type, values.label, values.subject, values.body)
+      const template = await create(project, values.engine, type, values.label, values.subject, values.body)
       if (template) {
         toast.success('Template aangemaakt!');
       } else {
@@ -89,56 +96,85 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
 
   return (
     <div>
-        <div className="container py-6">
-          <Form {...form} className="p-6 bg-white rounded-md">
-            <Heading size="xl">{type}</Heading>
-            <Separator className="my-4" />
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4 lg:w-1/2">
+      <div className="container py-6">
+        <Form {...form} className="p-6 bg-white rounded-md">
+          <Heading size="xl">{type}</Heading>
+          <Separator className="my-4" />
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 lg:w-1/2">
+            {label && subject && body !== undefined ? null :
               <FormField
                 control={form.control}
-                name="label"
+                name="engine"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Label (Type mail)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
+                  <FormItem className="col-span-1">
+                    <FormLabel>
+                      Wat voor client gaat gebruikt worden voor dit onderdeel?
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="email" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="email">
+                          Email
+                        </SelectItem>
+                        <SelectItem value="sms">
+                          SMS
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="subject"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Onderwerp</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="body"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Inhoud</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit">Opslaan</Button>
-            </form>
-          </Form>
-        </div>
+            }
+            <FormField
+              control={form.control}
+              name="label"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Label (Type bericht)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Label van de mail" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="subject"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Onderwerp</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Onderwerp van de mail" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="body"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Inhoud</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Inhoud van de mail..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit">Opslaan</Button>
+          </form>
+        </Form>
+      </div>
     </div>
   );
 }

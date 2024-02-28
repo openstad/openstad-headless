@@ -23,6 +23,7 @@ export default function useNotificationTemplate(projectId?: string) {
 
     if (res.ok) {
       const data = await res.json();
+      console.log(data)
       notificationTemplateSwr.mutate([...notificationTemplateSwr.data, data]);
       return data;
     } else {
