@@ -18,6 +18,7 @@ spec:
       labels:
         app: {{ .Values.api.label }}
     spec:
+      serviceAccountName: openstad-headless-ingress-sa
       containers:
         - command: ["/bin/bash", "-c"]
           args:
