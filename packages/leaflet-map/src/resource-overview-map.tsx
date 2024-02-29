@@ -66,7 +66,6 @@ const ResourceOverviewMap = ({
       return marker;
     }) || [];
 
-    console.log(currentMarkers);
   return (
     <BaseMap
       {...props}
