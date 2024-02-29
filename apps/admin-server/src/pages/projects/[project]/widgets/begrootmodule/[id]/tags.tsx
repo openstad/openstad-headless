@@ -20,7 +20,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useEffect, useState } from 'react';
 import _ from 'lodash';
-import { StemBegrootWidgetProps } from '@openstad/stem-begroot/src/stem-begroot';
+import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
 
 const formSchema = z.object({
   displayTagFilters: z.boolean(),

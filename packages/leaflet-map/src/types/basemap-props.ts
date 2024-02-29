@@ -13,7 +13,7 @@ export type BaseMapProps = {
 	center?: LocationType,
   defaultIcon?: MarkerIconType,
   iconCreateFunction?: () => string,
-  onClick?: (e: LeafletMouseEvent, map: any) => void,
+  onClick?: (e: LeafletMouseEvent & {isInArea:boolean}, map: any) => void,
   onMarkerClick?: (e: LeafletMouseEvent, map: any) => void,
   zoomposition?: string,
 	disableDefaultUI?: boolean,

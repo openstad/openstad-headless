@@ -12,7 +12,7 @@ import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AgendaWidgetProps } from '@openstad/agenda/src/agenda';
+import { AgendaWidgetProps } from '@openstad-headless/agenda/src/agenda';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 

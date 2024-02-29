@@ -21,7 +21,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useRouter } from 'next/router';
 import useResources from '@/hooks/use-resources';
-import { ResourceDetailWidgetProps } from '@openstad/resource-detail/src/resource-detail';
+import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useCallback, useEffect } from 'react';
 

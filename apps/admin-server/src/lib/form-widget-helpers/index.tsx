@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@openstad/ui/src';
 
 // Simple yes/no selector that uses a props.onFieldchanged method to emit changes
 export function YesNoSelect(

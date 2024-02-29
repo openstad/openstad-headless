@@ -17,7 +17,8 @@ import {
 } from '@/lib/server-side-props-definition';
 import WidgetPublish from '@/components/widget-publish';
 export const getServerSideProps = withApiUrl;
-import { StemBegrootWidgetProps } from '@openstad/stem-begroot/src/stem-begroot';
+import type { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
+
 import WidgetPreview from '@/components/widget-preview';
 import WidgetStemBegrootOverviewTags from './tags';
 import WidgetStemBegrootSorting from './sorting';

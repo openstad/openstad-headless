@@ -1,4 +1,4 @@
-// @todo: add all widgets
+// @todo: add all widgets MUST confirm to widgetDefinition for key
 let moduleDefinitions = {
   agenda: {
     packageName: '@openstad-headless/agenda',
@@ -100,10 +100,10 @@ let moduleDefinitions = {
     },
   },
   basemap: {
-    packageName: '@openstad-headless/base-map',
+    packageName: '@openstad-headless/leaflet-map',
     directory: 'leaflet-map',
-    js: ['dist/base-map.iife.js'],
-    css: ['dist/style.css'],
+    js: ['dist/base-map/base-map.iife.js'],
+    css: ['dist/base-map/style.css'],
     functionName: 'OpenstadHeadlessBaseMap',
     componentName: 'BaseMap',
     defaultConfig: {
@@ -111,21 +111,21 @@ let moduleDefinitions = {
     },
   },
   editormap: {
-    packageName: '@openstad-headless/editor-map',
+    packageName: '@openstad-headless/leaflet-map',
     directory: 'leaflet-map',
-    js: ['dist/editor-map.iife.js'],
-    css: ['dist/style.css'],
+    js: ['dist/editor-map/editor-map.iife.js'],
+    css: ['dist/editor-map/style.css'],
     functionName: 'OpenstadHeadlessEditorMap',
     componentName: 'EditorMap',
     defaultConfig: {
       projectId: null,
     },
   },
-  resourceoverviewmap: {
-    packageName: '@openstad-headless/resource-overview-map',
+  resourcesmap: {
+    packageName: '@openstad-headless/leaflet-map',
     directory: 'leaflet-map',
-    js: ['dist/resource-overview-map.iife.js'],
-    css: ['dist/style.css'],
+    js: ['dist/resource-overview-map/resource-overview-map.iife.js'],
+    css: ['dist/resource-overview-map/style.css'],
     functionName: 'OpenstadHeadlessResourceOverviewMap',
     componentName: 'ResourceOverviewMap',
     defaultConfig: {
@@ -133,10 +133,10 @@ let moduleDefinitions = {
     },
   },
   resourcedetailmap: {
-    packageName: '@openstad-headless/resource-detail-map',
+    packageName: '@openstad-headless/leaflet-map',
     directory: 'leaflet-map',
-    js: ['dist/resource-detail-map.iife.js'],
-    css: ['dist/style.css'],
+    js: ['dist/resource-detail-map/resource-detail-map.iife.js'],
+    css: ['dist/resource-detail-map/style.css'],
     functionName: 'OpenstadHeadlessResourceDetailMap',
     componentName: 'ResourceDetailMap',
     defaultConfig: {

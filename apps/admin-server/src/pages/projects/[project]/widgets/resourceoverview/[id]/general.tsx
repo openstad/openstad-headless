@@ -20,7 +20,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Input } from '@/components/ui/input';
-import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
+import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { Textarea } from '@/components/ui/textarea';

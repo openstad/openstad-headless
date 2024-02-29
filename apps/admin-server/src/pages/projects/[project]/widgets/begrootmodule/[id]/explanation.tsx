@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { StemBegrootWidgetProps } from '@openstad/stem-begroot/src/stem-begroot';
+import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
