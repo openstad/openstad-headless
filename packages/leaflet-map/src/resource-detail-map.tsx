@@ -6,21 +6,9 @@ import parseLocation from './lib/parse-location';
 import 'leaflet/dist/leaflet.css';
 import './css/base-map.css';
 
-import type { BaseProps } from '../../types/base-props';
-import type { ProjectSettingProps } from '../../types/project-setting-props';
 import type { MarkerProps } from './types/marker-props';
-import type { MarkerIconType } from './types/marker-icon';
-import type { MapPropsType } from './types/index';
-
+import type {ResourceDetailMapWidgetProps} from './types/resource-detail-map-widget-props';
 import { BaseMap } from './base-map';
-
-export type ResourceDetailMapWidgetProps = BaseProps &
-  ProjectSettingProps &
-  MapPropsType & {
-    resourceId?: number;
-    marker?: MarkerProps;
-    markerIcon: MarkerIconType;
-  };
 
 const ResourceDetailMap = ({
   resourceId = undefined,
@@ -42,7 +30,7 @@ const ResourceDetailMap = ({
     resourceId || urlParams.get('openstadResourceId')
       ? parseInt(urlParams.get('openstadResourceId') as string)
       : undefined;
-      
+
   const {
     data: resource,
     error,

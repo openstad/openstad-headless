@@ -10,22 +10,16 @@ import { Area, isPointInArea } from './area';
 import Marker from './marker';
 import MarkerClusterGroup from './marker-cluster-group';
 import parseLocation from './lib/parse-location';
-
+import type {BaseMapWidgetProps} from './types/basemap-widget-props'
 // ToDo: import { searchAddressByLatLng, suggestAddresses, LookupLatLngByAddressId } from './lib/search.js';
 
 import 'leaflet/dist/leaflet.css';
 import './css/base-map.css';
 
-import type { BaseProps } from '../../types/base-props';
-import type { ProjectSettingProps } from '../../types/project-setting-props';
 import type { MarkerProps } from './types/marker-props';
-import type { MapPropsType } from './types/index';
 import type { LocationType } from './types/location';
 
-export type BaseMapWidgetProps = BaseProps &
-  ProjectSettingProps & {
-    resourceId?: string;
-  } & MapPropsType;
+
 
 const BaseMap = ({
   iconCreateFunction = undefined,

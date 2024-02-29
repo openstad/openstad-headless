@@ -12,7 +12,7 @@ import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import WidgetPreview from '@/components/widget-preview';
-import type { ResourceDetailMapWidgetProps } from '@openstad/leaflet-map/src/resource-detail-map';
+import type { ResourceDetailMapWidgetProps } from '@openstad/leaflet-map/src/types/resource-detail-map-widget-props';
 
 
 export const getServerSideProps = withApiUrl;

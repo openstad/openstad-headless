@@ -16,7 +16,7 @@ import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import WidgetPreview from '@/components/widget-preview';
-import type { EditorMapWidgetProps } from '@openstad/leaflet-map/src/editor-map';
+import type { EditorMapWidgetProps } from '@openstad/leaflet-map/src/types/editormap-widget-props';
 
 export const getServerSideProps = withApiUrl;
 

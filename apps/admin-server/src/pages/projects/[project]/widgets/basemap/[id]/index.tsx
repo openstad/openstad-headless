@@ -12,7 +12,7 @@ import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import WidgetPreview from '@/components/widget-preview';
-import type { BaseMapWidgetProps } from '@openstad/leaflet-map/src/base-map';
+import type { BaseMapWidgetProps } from '@openstad/leaflet-map/src/types/basemap-widget-props';
 
 
 export const getServerSideProps = withApiUrl;

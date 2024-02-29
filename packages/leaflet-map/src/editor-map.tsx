@@ -7,23 +7,11 @@ import parseLocation from './lib/parse-location';
 import 'leaflet/dist/leaflet.css';
 import './css/base-map.css';
 
-import type { BaseProps } from '../../types/base-props';
-import type { ProjectSettingProps } from '../../types/project-setting-props';
 import type { MarkerProps } from './types/marker-props';
-import type { MarkerIconType } from './types/marker-icon';
-import type { MapPropsType } from './types/index';
-
+import type {EditorMapWidgetProps} from './types/editormap-widget-props';
 import { BaseMap } from './base-map';
 import React from 'react';
 
-export type EditorMapWidgetProps = BaseProps &
-  ProjectSettingProps &
-  MapPropsType & {
-    fieldName: string;
-    markerIcon: MarkerIconType;
-    editorMarker?: MarkerProps;
-    centerOnEditorMarker: boolean;
-  };
 
 const EditorMap = ({
   fieldName = 'location',

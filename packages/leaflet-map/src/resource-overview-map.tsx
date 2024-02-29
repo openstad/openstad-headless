@@ -6,21 +6,10 @@ import parseLocation from './lib/parse-location';
 import 'leaflet/dist/leaflet.css';
 import './css/base-map.css';
 
-import type { BaseProps } from '../../types/base-props';
-import type { ProjectSettingProps } from '../../types/project-setting-props';
 import type { MarkerProps } from './types/marker-props';
-import type { MarkerIconType } from './types/marker-icon';
-import type { MapPropsType } from './types/index';
 import type { CategoriesType } from './types/categorize';
-
+import type {ResourceOverviewMapWidgetProps} from './types/resource-overview-map-widget-props'
 import { BaseMap } from './base-map';
-
-export type ResourceOverviewMapWidgetProps = BaseProps &
-  ProjectSettingProps &
-  MapPropsType & {
-    marker: MarkerProps;
-    markerIcon: MarkerIconType;
-  };
 
 const ResourceOverviewMap = ({
   categorize = undefined,
