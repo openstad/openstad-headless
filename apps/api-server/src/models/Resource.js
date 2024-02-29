@@ -684,7 +684,6 @@ module.exports = function (db, sequelize, DataTypes) {
             },
             attributes: ['id', 'type', 'name', 'label', 'extraFunctionality'],
             through: { attributes: [] },
-            required: false
           },
         ],
       },
