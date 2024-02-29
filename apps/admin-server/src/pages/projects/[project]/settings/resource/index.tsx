@@ -33,21 +33,21 @@ import useTags from '@/hooks/use-tags';
 import _ from 'lodash';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 
-const reactions = [
+const comments = [
   {
-    id: 'showReactions',
+    id: 'showComments',
     label: 'Laat de comments voor en tegen zien.',
   },
   {
-    id: 'showReactionsWithoutSentiment',
+    id: 'showCommentsWithoutSentiment',
     label: 'Laat de comments zonder sentiment zien.',
   },
   {
-    id: 'allowReactions',
+    id: 'allowComments',
     label: 'Laat gebruikers reageren op comments van anderen.',
   },
   {
-    id: 'likeReactions',
+    id: 'likeComments',
     label: 'Laat gebruikers de comments van andere gebruikers liken.',
   },
 ];
@@ -71,7 +71,7 @@ const formSchema = z.object({
   displayTheme: z.boolean(),
   displayNeighbourhood: z.boolean(),
   displayModbreak: z.boolean(),
-  reactionSettings: z.string().array(),
+  commentSettings: z.string().array(),
   tagGroups: z.any(),
 });
 
@@ -111,7 +111,7 @@ export default function ProjectSettingsResource() {
       displayNeighbourhood:
         data?.config?.[category]?.displayNeighbourhood || false,
       displayModbreak: data?.config?.[category]?.displayModbreak || false,
-      reactionSettings: data?.config?.[category]?.reactionSettings || [],
+      commentSettings: data?.config?.[category]?.commentSettings || [],
       tagGroups: data?.config?.resources?.tags || [],
     }),
     [data?.config]
@@ -142,7 +142,7 @@ export default function ProjectSettingsResource() {
           displayTheme: values.displayTheme,
           displayNeighbourhood: values.displayNeighbourhood,
           displayModbreak: values.displayModbreak,
-          reactionSettings: values.reactionSettings,
+          commentSettings: values.commentSettings,
           tags: values.tagGroups,
         },
       });
@@ -345,7 +345,7 @@ export default function ProjectSettingsResource() {
             />
             <FormField
               control={form.control}
-              name="reactionSettings"
+              name="commentSettings"
               render={() => (
                 <FormItem>
                   <div>
@@ -354,11 +354,11 @@ export default function ProjectSettingsResource() {
                     </FormLabel>
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-2 gap-x-4">
-                    {reactions.map((item) => (
+                    {comments.map((item) => (
                       <FormField
                         key={item.id}
                         control={form.control}
-                        name="reactionSettings"
+                        name="commentSettings"
                         render={({ field }) => {
                           return (
                             <FormItem

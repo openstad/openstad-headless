@@ -39,7 +39,7 @@ const formSchema = z.object({
     message: 'De datum moet nog niet geweest zijn!',
   }),
   enableLikes: z.boolean(),
-  enableReactions: z.boolean(),
+  enableComments: z.boolean(),
   cssUrl: z.string().optional(),
   url: z.string().optional()
 });
@@ -60,7 +60,7 @@ export default function ProjectSettings() {
       endDate: data?.config?.project?.endDate
         ? new Date(data?.config?.project?.endDate)
         : new Date(currentDate.getFullYear(), currentDate.getMonth()+3),
-      enableReactions: data?.config?.resources?.enableReactions || false,
+      enableComments: data?.config?.resources?.enableComments || false,
       cssUrl: data?.config?.project?.cssUrl || '',
       url: data?.url || '',
     }),
@@ -94,7 +94,7 @@ export default function ProjectSettings() {
             cssUrl: values.cssUrl,
           },
           resources: {
-            enableReactions: values.enableReactions,
+            enableComments: values.enableComments,
           },
         },
         values.name,
@@ -160,7 +160,7 @@ export default function ProjectSettings() {
                     />
                     <FormField
                       control={form.control}
-                      name="enableReactions"
+                      name="enableComments"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>

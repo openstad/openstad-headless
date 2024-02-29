@@ -88,7 +88,7 @@ export default function Projects() {
                       {project?.config?.resource?.enableLikes === true ? 'Aan' : 'Uit'}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
-                      {project?.config?.resource?.enableReactions === true ? 'Aan' : 'Uit'}
+                      {project?.config?.resource?.enableComments === true ? 'Aan' : 'Uit'}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate">
                       Open

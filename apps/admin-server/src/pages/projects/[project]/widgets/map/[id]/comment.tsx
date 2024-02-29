@@ -24,18 +24,18 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  displayReactions: z.boolean(),
+  displayComments: z.boolean(),
   title: z.string(),
   textEmptyInput: z.string(),
   textAboveInput: z.string(),
-  idNonActiveReactions: z.string(),
-  reactionsAvailable: z.enum(['open', 'closed', 'limited']),
+  idNonActiveComments: z.string(),
+  commentsAvailable: z.enum(['open', 'closed', 'limited']),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function WidgetMapReaction() {
-  const category = 'reaction';
+export default function WidgetMapComment() {
+  const category = 'comment';
 
   const {
     data: widget,
@@ -45,14 +45,14 @@ export default function WidgetMapReaction() {
 
   const defaults = useCallback(
     () => ({
-      reactionsAvailable:
-        widget?.config?.[category]?.reactionsAvailable || 'open',
-      displayReactions: widget?.config?.[category]?.displayReactions || false,
+      commentsAvailable:
+        widget?.config?.[category]?.commentsAvailable || 'open',
+      displayComments: widget?.config?.[category]?.displayComments || false,
       title: widget?.config?.[category]?.title || '',
       textEmptyInput: widget?.config?.[category]?.textEmptyInput || '',
       textAboveInput: widget?.config?.[category]?.textAboveInput || '',
-      idNonActiveReactions:
-        widget?.config?.[category]?.idNonActiveReactions || '',
+      idNonActiveComments:
+        widget?.config?.[category]?.idNonActiveComments || '',
     }),
     [widget?.config]
   );
@@ -86,7 +86,7 @@ export default function WidgetMapReaction() {
           className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-1/2">
           <FormField
             control={form.control}
-            name="displayReactions"
+            name="displayComments"
             render={({ field }) => (
               <FormItem className="col-span-full">
                 <FormLabel>Weergave</FormLabel>
@@ -148,7 +148,7 @@ export default function WidgetMapReaction() {
           />
           <FormField
             control={form.control}
-            name="idNonActiveReactions"
+            name="idNonActiveComments"
             render={({ field }) => (
               <FormItem className="col-span-full">
                 <FormLabel>
@@ -163,7 +163,7 @@ export default function WidgetMapReaction() {
           />
           <FormField
             control={form.control}
-            name="reactionsAvailable"
+            name="commentsAvailable"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Comments staan...</FormLabel>

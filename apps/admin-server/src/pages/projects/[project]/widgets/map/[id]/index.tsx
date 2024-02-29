@@ -13,7 +13,7 @@ import WidgetMapSort from './sort';
 import WidgetMapImage from './images';
 import WidgetMapDetails from './details';
 import WidgetMapFilter from './filter';
-import WidgetMapReaction from './reaction';
+import WidgetMapComment from './comment';
 import { useRouter } from 'next/router';
 import Preview from '@/components/widget-preview';
 import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
@@ -56,7 +56,7 @@ export default function WidgetMap({
               <TabsTrigger value="images">Resource afbeeldingen</TabsTrigger>
               <TabsTrigger value="details">Resource details</TabsTrigger>
               <TabsTrigger value="filter">Filterbalk</TabsTrigger>
-              <TabsTrigger value="reaction">Comments</TabsTrigger>
+              <TabsTrigger value="comment">Comments</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
@@ -83,8 +83,8 @@ export default function WidgetMap({
             <TabsContent value="filter" className="p-0">
               <WidgetMapFilter />
             </TabsContent>
-            <TabsContent value="reaction" className="p-0">
-              <WidgetMapReaction />
+            <TabsContent value="comment" className="p-0">
+              <WidgetMapComment />
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
