@@ -15,7 +15,6 @@
     "incremental": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@openstad/*": ["../../packages/*"],
       "react": [ "./node_modules/@types/react" ]
     },
     "types": [

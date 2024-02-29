@@ -14,7 +14,7 @@ import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { EnqueteWidgetProps } from '@openstad/enquete/src/enquete';
+import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 

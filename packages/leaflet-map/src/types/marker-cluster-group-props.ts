@@ -1,4 +1,6 @@
-import type { MarkerCluster } from 'leaflet';
+import 'leaflet.markercluster';
+
+import {MarkerCluster} from 'leaflet'
 import type { MarkerProps } from './marker-props';
 import type { CategorizeType } from './categorize';
 

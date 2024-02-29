@@ -1,5 +1,4 @@
 import 'leaflet';
-import 'leaflet.markercluster';
 
 import { useState, useEffect, useCallback } from 'react';
 import type { PropsWithChildren } from 'react';

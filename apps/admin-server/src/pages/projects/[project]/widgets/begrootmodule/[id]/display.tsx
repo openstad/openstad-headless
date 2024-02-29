@@ -14,7 +14,7 @@ import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { StemBegrootWidgetProps } from '@openstad/stem-begroot/src/stem-begroot';
+import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 

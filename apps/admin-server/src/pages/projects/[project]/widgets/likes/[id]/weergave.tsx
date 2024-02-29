@@ -21,7 +21,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { LikeWidgetProps } from '@openstad/likes/src/likes';
+import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { ObjectListSelect } from '@/components/ui/object-select';

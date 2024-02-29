@@ -18,7 +18,7 @@ import {
 } from '@/lib/server-side-props-definition';
 import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
-import type { ResourceOverviewMapWidgetProps } from '@openstad/leaflet-map/src/types/resource-overview-map-widget-props';
+import type { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import WidgetPreview from '@/components/widget-preview';
 

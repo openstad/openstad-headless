@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger} from '../../../../../../compo
 import WidgetPreview from '@/components/widget-preview';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import { CounterWidgetProps } from '@openstad/counter/src/counter'
+import { CounterWidgetProps } from '@openstad-headless/counter/src/counter';
 import WidgetPublish from '@/components/widget-publish';
 import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
 import CounterDisplay from './general';
