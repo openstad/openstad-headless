@@ -49,12 +49,12 @@ const sorting = [
     label: 'Minste likes',
   },
   {
-    id: 'mostReactions',
-    label: 'Meeste reacties',
+    id: 'mostComments',
+    label: 'Meeste commments',
   },
   {
-    id: 'leastReactions',
-    label: 'Minste reacties',
+    id: 'leastComments',
+    label: 'Minste comments',
   },
   {
     id: 'ranked',
@@ -73,8 +73,8 @@ const formSchema = z.object({
     'random',
     'mostLikes',
     'leastLikes',
-    'mostReactions',
-    'leastReactions',
+    'mostComments',
+    'leastComments',
     'ranked',
   ]),
 });
@@ -189,11 +189,11 @@ export default function WidgetMapSort() {
                     <SelectItem value="random">Willekeurig</SelectItem>
                     <SelectItem value="mostLikes">Meeste likes</SelectItem>
                     <SelectItem value="leastLikes">Minste likes</SelectItem>
-                    <SelectItem value="mostReactions">
-                      Meeste reacties
+                    <SelectItem value="mostComments">
+                      Meeste comments
                     </SelectItem>
-                    <SelectItem value="leastReactions">
-                      Minste reacties
+                    <SelectItem value="leastComments">
+                      Minste comments
                     </SelectItem>
                     <SelectItem value="ranked">Ranglijst</SelectItem>
                   </SelectContent>

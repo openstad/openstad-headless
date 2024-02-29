@@ -98,7 +98,7 @@ Inline images?
 
 ## Notificaties
 
-Notificaties worden verstuurd met elk nieuw plan, en periodiek met nieuwe reacties
+Notificaties worden verstuurd met elk nieuw plan, en periodiek met nieuwe comments
 
 #### Configuratie
 

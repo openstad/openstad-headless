@@ -28,7 +28,7 @@ export default function ArgumentsForm(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       formIntro: props.formIntro || 'Type hier de intro tekst',
-      placeholder: props?.placeholder || 'Type hier uw reactie.',
+      placeholder: props?.placeholder || 'Type hier uw comment.',
     },
   });
 

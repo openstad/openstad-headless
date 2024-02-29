@@ -205,7 +205,7 @@ module.exports = {
 
       closedText: {
         type: 'string',
-        default: 'De reactiemogelijkheid is gesloten, u kunt niet meer reageren',
+        default: 'De mogelijkheid om comments te plaatsen is gesloten, u kunt niet meer reageren',
       },
 
     }
