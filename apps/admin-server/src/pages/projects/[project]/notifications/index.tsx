@@ -13,7 +13,7 @@ export default function ProjectNotifications() {
   const router = useRouter();
   const project = router.query.project as string;
   const { data } = useNotificationTemplate(project as string);
-  const text = `<mjml>
+  const mjmlText = `<mjml>
                   <mj-body>
                     <mj-section>
                       <mj-column>
@@ -25,6 +25,10 @@ export default function ProjectNotifications() {
                   </mj-body>
                 </mjml>`;
 
+  const variableText = `Variabelen van gekoppelde onderdelen kunnen gebruikt worden binnen de mail.
+  Als je bijvoorbeeld de naam van een gebruiker wilt gebruiken,
+  dan wordt deze toegevoegd via de variabele {{user.name}}.
+  Hieronder worden per bruikbaar onderdeel alle variabelen opgenoemd.`
 
   React.useEffect(() => {
     if (Array.isArray(data)) {
@@ -54,63 +58,62 @@ export default function ProjectNotifications() {
         ]}>
         <div className="container py-6">
           <div className='p-6 bg-white rounded-md'>
-            <p>
-              De mails die worden gebruikt zijn volledig opgezet met behulp van MJML.
-              Hieronder geven we een link naar de documentatie van MJML,
-              een voorbeeld van hoe MJML is opgezet en de bruikbare variabelen.
-            </p>
-            <br />
-            <p>
-              https://documentation.mjml.io
-            </p>
-            <br />
-            <code>{text}</code>
-            <br />
-            <br />
-            <p>
-              Variabelen van gekoppelde onderdelen kunnen gebruikt worden binnen de mail.
-              Als je bijvoorbeeld de naam van een gebruiker wilt gebruiken,
-              dan wordt deze toegevoegd via de variabele user.name .
-              Hieronder worden per bruikbaar onderdeel alle variabelen opgenoemd.
-            </p>
-            <br />
-            <p>
-              user:
-              -name
-              -email
-              -nickName
-              -phoneNumber
-              -address
-              -city
-              -fullName
-              -postcode
-            </p>
-            <br />
-            <p>
-              resource:
-              -startDateHumanized
-              -title
-              -summary
-              -description
-              -budget
-              -location
-              -modBreakDateHumanized
-              -publishDateHumanized
-            </p>
-            <br />
-            <p>
-              comment:
-              -sentiment
-              -description
-              -label
-              -createDateHumanized
-            </p>
-            <br />
-            <p>
-              submission:
-              -status
-              -submittedData
-            </p>
+            <div className="space-y-4 lg:w-1/2">
+              <p>
+                De mails die worden gebruikt zijn volledig opgezet met behulp van MJML.
+                Hieronder geven we een link naar de documentatie van MJML,
+                een voorbeeld van hoe MJML is opgezet en de bruikbare variabelen.
+              </p>
+              <br />
+              <p>
+                <a href="https://documentation.mjml.io" className='text-blue-600'>MJML documentatie</a>
+              </p>
+              <br />
+              <code>{mjmlText}</code>
+              <br />
+              <br />
+              <p>
+                {variableText}
+              </p>
+              <br />
+              <p>
+                user:<br />
+                -name<br />
+                -email<br />
+                -nickName<br />
+                -phoneNumber<br />
+                -address<br />
+                -city<br />
+                -fullName<br />
+                -postcode
+              </p>
+              <br />
+              <p>
+                resource:<br />
+                -startDateHumanized<br />
+                -title<br />
+                -summary<br />
+                -description<br />
+                -budget<br />
+                -location<br />
+                -modBreakDateHumanized<br />
+                -publishDateHumanized
+              </p>
+              <br />
+              <p>
+                comment:<br />
+                -sentiment<br />
+                -description<br />
+                -label<br />
+                -createDateHumanized
+              </p>
+              <br />
+              <p>
+                submission:<br />
+                -status<br />
+                -submittedData
+              </p>
+            </div>
             <br />
 
             {Object.entries(typeDefinitions).map(([type, templateList]) => {
