@@ -35,6 +35,22 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
       projectId,
     });
 
+    const totalPropPackage = {
+      ...widget?.config,
+      updateConfig: (config: ResourceOverviewMapWidgetProps) =>
+        updateConfig({ ...widget.config, ...config }),
+  
+      onFieldChanged: (key: keyof ResourceOverviewMapWidgetProps, value: any) => {
+        if (previewConfig) {
+          updatePreview({
+            ...previewConfig,
+            [key]: value,
+          });
+        }
+      },
+      projectId,
+    };
+
   return (
     <div>
       <PageLayout
@@ -54,9 +70,8 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="preview">
+          <Tabs defaultValue="map">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
-              <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="map">Map</TabsTrigger>
               <TabsTrigger value="button">Call-To-Action knop</TabsTrigger>
               <TabsTrigger value="counter">Teller</TabsTrigger>
@@ -65,16 +80,16 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
             </TabsList>
 
             <TabsContent value="map" className="p-0">
-              <WidgetResourcesMapMaps />
+              <WidgetResourcesMapMaps {...totalPropPackage} />
             </TabsContent>
             <TabsContent value="button" className="p-0">
-              <WidgetResourcesMapButton />
+              <WidgetResourcesMapButton {...totalPropPackage}  />
             </TabsContent>
             <TabsContent value="counter" className="p-0">
-              <WidgetResourcesMapCounter />
+              <WidgetResourcesMapCounter {...totalPropPackage}  />
             </TabsContent>
             <TabsContent value="content" className="p-0">
-              <WidgetResourcesMapContent />
+              <WidgetResourcesMapContent {...totalPropPackage}  />
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />

@@ -16,9 +16,9 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
+import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -27,34 +27,20 @@ const formSchema = z.object({
   autoCenter: z.boolean(),
 });
 
-export default function WidgetResourcesMapMaps() {
-  const category = 'map';
-
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig();
-
-  const defaults = useCallback(
-    () => ({
-      link: widget?.config?.[category]?.link || false,
-      autoCenter: widget?.config?.[category]?.autoCenter || false,
-    }),
-    [widget?.config]
-  );
-
+export default function WidgetResourcesMapMaps(
+  props: ResourceOverviewMapWidgetProps &
+    EditFieldProps<ResourceOverviewMapWidgetProps>
+) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      link: props?.link || false,
+      autoCenter: props?.autoCenter || false,
+    },
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
-
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ [category]: values });
+    props.updateConfig({ ...props, ...values });
   }
 
   return (
@@ -65,6 +51,7 @@ export default function WidgetResourcesMapMaps() {
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4 lg:w-1/2">
+            
           <FormField
             control={form.control}
             name="link"
