@@ -50,11 +50,11 @@ const sorting = [
   },
   {
     id: 'mostReactions',
-    label: 'Meeste reacties',
+    label: 'Meeste commments',
   },
   {
     id: 'leastReactions',
-    label: 'Minste reacties',
+    label: 'Minste comments',
   },
   {
     id: 'ranked',
@@ -190,10 +190,10 @@ export default function WidgetMapSort() {
                     <SelectItem value="mostLikes">Meeste likes</SelectItem>
                     <SelectItem value="leastLikes">Minste likes</SelectItem>
                     <SelectItem value="mostReactions">
-                      Meeste reacties
+                      Meeste comments
                     </SelectItem>
                     <SelectItem value="leastReactions">
-                      Minste reacties
+                      Minste comments
                     </SelectItem>
                     <SelectItem value="ranked">Ranglijst</SelectItem>
                   </SelectContent>

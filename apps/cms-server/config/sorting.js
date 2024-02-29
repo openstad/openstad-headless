@@ -113,11 +113,11 @@ exports.ideasOnMapOptions = [
   },
   {
     value: 'args,desc',
-    label: 'Meeste reacties'
+    label: 'Meeste comments'
   },
   {
     value: 'args,asc',
-    label: 'Minste reacties'
+    label: 'Minste comments'
   },
   {
     value: 'ranking,asc',

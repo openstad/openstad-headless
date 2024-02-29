@@ -24,7 +24,7 @@ const activityConfig = {
     descriptionKey: 'description',
     type: {
       slug: 'comment',
-      label: 'reactie'
+      label: 'comment'
     }
   },
   'votes': {

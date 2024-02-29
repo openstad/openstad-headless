@@ -164,7 +164,7 @@ export default function ProjectSettings() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Is het mogelijk om reacties te plaatsen?
+                            Is het mogelijk om comments te plaatsen?
                           </FormLabel>
                           <Select
                             onValueChange={(e: string) =>

@@ -38,7 +38,7 @@ export default function Projects() {
     'Projectnaam',
     'Issues',
     'Likes',
-    'Reacties',
+    'Comments',
     'Resources',
     'Stemmen',
     'Einddatum',

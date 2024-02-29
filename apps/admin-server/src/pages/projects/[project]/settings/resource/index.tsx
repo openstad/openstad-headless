@@ -36,19 +36,19 @@ import { YesNoSelect } from '@/lib/form-widget-helpers';
 const reactions = [
   {
     id: 'showReactions',
-    label: 'Laat de reacties voor en tegen zien.',
+    label: 'Laat de comments voor en tegen zien.',
   },
   {
     id: 'showReactionsWithoutSentiment',
-    label: 'Laat de reacties zonder sentiment zien.',
+    label: 'Laat de comments zonder sentiment zien.',
   },
   {
     id: 'allowReactions',
-    label: 'Laat gebruikers reageren op reacties van anderen.',
+    label: 'Laat gebruikers reageren op comments van anderen.',
   },
   {
     id: 'likeReactions',
-    label: 'Laat gebruikers de reacties van andere gebruikers liken.',
+    label: 'Laat gebruikers de comments van andere gebruikers liken.',
   },
 ];
 
@@ -350,7 +350,7 @@ export default function ProjectSettingsResource() {
                 <FormItem>
                   <div>
                     <FormLabel>
-                      Selecteer uw gewenste reactie instellingen
+                      Selecteer uw gewenste comment instellingen
                     </FormLabel>
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-2 gap-x-4">

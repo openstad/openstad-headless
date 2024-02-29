@@ -28,7 +28,7 @@ export default function ArgumentsList(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       title: props?.title || 'Argumenten',
-      emptyListText: props?.emptyListText || 'Nog geen reacties geplaatst.',
+      emptyListText: props?.emptyListText || 'Nog geen comments geplaatst.',
     },
   });
 
@@ -72,7 +72,7 @@ export default function ArgumentsList(
                 <FormLabel>Placeholder</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Dit wordt weergegeven wanneer er geen reacties zijn."
+                    placeholder="Dit wordt weergegeven wanneer er geen comments zijn."
                     {...field}
                     onChange={(e) => {
                       onFieldChange(field.name, e.target.value);

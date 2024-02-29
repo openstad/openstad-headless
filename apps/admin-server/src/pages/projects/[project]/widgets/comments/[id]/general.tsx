@@ -105,7 +105,7 @@ export default function ArgumentsGeneral(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Is het toegestaan om te reageren op reacties?
+                  Is het toegestaan om te reageren op comments?
                 </FormLabel>
                 <Select
                   onValueChange={(e: string) => {
@@ -133,7 +133,7 @@ export default function ArgumentsGeneral(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Is het mogelijk om te stemmen op reacties?
+                  Is het mogelijk om te stemmen op comments?
                 </FormLabel>
                 <Select
                   value={field.value ? 'true' : 'false'}

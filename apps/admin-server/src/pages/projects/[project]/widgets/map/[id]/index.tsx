@@ -56,7 +56,7 @@ export default function WidgetMap({
               <TabsTrigger value="images">Resource afbeeldingen</TabsTrigger>
               <TabsTrigger value="details">Resource details</TabsTrigger>
               <TabsTrigger value="filter">Filterbalk</TabsTrigger>
-              <TabsTrigger value="reaction">Reacties</TabsTrigger>
+              <TabsTrigger value="reaction">Comments</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">

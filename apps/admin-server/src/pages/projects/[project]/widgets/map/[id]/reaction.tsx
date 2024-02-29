@@ -78,7 +78,7 @@ export default function WidgetMapReaction() {
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl" className="mb-4">
-          Reacties
+          Comments
         </Heading>
         <Separator className="mb-4" />
         <form
@@ -112,7 +112,7 @@ export default function WidgetMapReaction() {
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Titel boven de reacties</FormLabel>
+                <FormLabel>Titel boven de comments</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -152,7 +152,7 @@ export default function WidgetMapReaction() {
             render={({ field }) => (
               <FormItem className="col-span-full">
                 <FormLabel>
-                  IDs van resources waar reacties niet actief voor zijn.
+                  IDs van resources waar comments niet actief voor zijn.
                 </FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -166,7 +166,7 @@ export default function WidgetMapReaction() {
             name="reactionsAvailable"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Reacties staan...</FormLabel>
+                <FormLabel>Comments staan...</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>

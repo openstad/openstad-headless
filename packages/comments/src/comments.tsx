@@ -21,11 +21,11 @@ export type CommentsWidgetProps = BaseProps &
 function Comments({
   requiredUserRole = 'member',
   title = '[[nr]] comments',
-  emptyListText = 'Nog geen reacties',
+  emptyListText = 'Nog geen comments',
   isVotingEnabled = true,
   isReplyingEnabled = true,
   isClosed = false,
-  isClosedText = 'Het inzenden van reacties is niet langer mogelijk',
+  isClosedText = 'Het inzenden van comments is niet langer mogelijk',
   ...props
 }: CommentsWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);

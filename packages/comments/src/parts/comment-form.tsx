@@ -14,7 +14,7 @@ function CommentForm({
   comment,
   descriptionMinLength = 30,
   descriptionMaxLength = 500,
-  placeholder = 'Type hier je reactie',
+  placeholder = 'Type hier je comment',
   requiredUserRole = 'member',
   ...props
 }: CommentPropsType) {
@@ -95,7 +95,7 @@ function CommentForm({
               <Banner className="big">
                 <Spacer size={2} />
                 <Heading6>
-                  De reactiemogelijkheid is gesloten, u kunt niet meer reageren
+                  De mogelijkheid om comments te plaatsen is gesloten, u kunt niet meer reageren
                 </Heading6>
                 <Spacer size={2} />
               </Banner>
