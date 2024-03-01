@@ -5,7 +5,8 @@ export function useProject(scopes?: Array<string>) {
   const router = useRouter();
   const projectId = router.query.project;
 
-  let useScopes = ['includeConfig', 'includeEmailConfig'].concat(scopes);
+  let useScopes: Array<string> = ['includeConfig', 'includeEmailConfig']
+  if (scopes) useScopes = useScopes.concat(scopes);
 
   const projectSwr = useSWR(
     projectId
