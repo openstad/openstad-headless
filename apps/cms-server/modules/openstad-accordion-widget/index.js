@@ -5,9 +5,20 @@ module.exports = {
   },
   fields: {
     add: {
-      title: {
+      label: {
         type: 'string',
-        label: 'Accordion'
+        label: 'Titel'
+      },
+      content: {
+        type: 'string',
+        label: 'Content',
+        textarea: true,
+      }
+    },
+    group: {
+      generalGroup: {
+        label: 'General',
+        fields: [ 'title', 'content' ]
       }
     }
   }

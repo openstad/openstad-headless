@@ -7,5 +7,5 @@
     "allowSyntheticDefaultImports": true,
     "strict": true
   },
-  "include": ["../accordion/vite.config.ts"]
+  "include": ["vite.config.ts"]
 }

@@ -6,18 +6,17 @@ import "@utrecht/design-tokens/dist/root.css";
 import { AccordionProvider } from "@utrecht/component-library-react";
 
 interface Item {
-  body: string;
+  content: any;
   label: string;
-  expanded?: boolean | undefined;
 };
 
-function Accordion({body, label, expanded }: Item) {
+function Accordion({content, label }: Item) {
   return (
     <AccordionProvider
       sections={[
         {
-          body: body,
-          expanded: expanded,
+          body: <div dangerouslySetInnerHTML={{ __html: content }} />,
+          expanded: false,
           label: label
         }
       ]}

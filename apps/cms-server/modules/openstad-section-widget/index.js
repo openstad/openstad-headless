@@ -29,6 +29,7 @@ const contentWidgets = {
   'openstad-component': {},
   'openstad-section': {},
   'openstad-title': {},
+  'openstad-accordion': {},
   'openstad-timeline': {},
   'openstad-image': {},
 };
