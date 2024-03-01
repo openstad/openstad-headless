@@ -6,9 +6,9 @@ import "@utrecht/design-tokens/dist/root.css";
 import { Heading1, Heading2, Heading3, Heading4, } from "@utrecht/component-library-react";
 
 interface Item {
-  mode: string, 
-  title: string, 
-  customClass?: string
+  mode: string;
+  title: string; 
+  customClass?: string;
 }
 
 function Heading ({ mode, title, customClass }: Item ) {
