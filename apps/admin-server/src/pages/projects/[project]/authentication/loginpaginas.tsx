@@ -54,44 +54,46 @@ const formSchema = z.object({
   LocalForgotPasswordText: z.string().optional(),
 });
 
-export default function ProjectAuthentication2FA() {
+export default function ProjectAuthentication() {
 
   const {
     data,
     updateProject,
-  } = useProject();
+  } = useProject(['includeAuthConfig']);
+
+  
 
   const defaults = useCallback(
     () => ({
-      UniqueCodeTitle: data?.config?.auth?.provider?.openstad?.config?.UniqueCode?.title || '',
-      UniqueCodeDescription: data?.config?.auth?.provider?.openstad?.config?.UniqueCode?.description || '',
-      UniqueCodeLabel: data?.config?.auth?.provider?.openstad?.config?.UniqueCode?.label || '',
-      UniqueCodeButtonText: data?.config?.auth?.provider?.openstad?.config?.UniqueCode?.buttonText || '',
-      UniqueCodeHelpText: data?.config?.auth?.provider?.openstad?.config?.UniqueCode?.helpText || '',
-      UrlTitle: data?.config?.auth?.provider?.openstad?.config?.Url?.title || '',
-      UrlDescription: data?.config?.auth?.provider?.openstad?.config?.Url?.description || '',
-      UrlLabel: data?.config?.auth?.provider?.openstad?.config?.Url?.label || '',
-      UrlButtonText: data?.config?.auth?.provider?.openstad?.config?.Url?.buttonText || '',
-      UrlHelpText: data?.config?.auth?.provider?.openstad?.config?.Url?.helpText || '',
-      SMS1Title: data?.config?.auth?.provider?.openstad?.config?.Phonenumber?.loginTitle || '',
-      SMS1Subtitle: data?.config?.auth?.provider?.openstad?.config?.Phonenumber?.loginSubtitle || '',
-      SMS1Description: data?.config?.auth?.provider?.openstad?.config?.Phonenumber?.loginDescription || '',
-      SMS1Label: data?.config?.auth?.provider?.openstad?.config?.Phonenumber?.loginLabel || '',
-      SMS1ButtonText: data?.config?.auth?.provider?.openstad?.config?.Phonenumber?.loginButtonText || '',
-      SMS1HelpText: data?.config?.auth?.provider?.openstad?.config?.Phonenumber?.loginHelpText || '',
-      SMS2Title: data?.config?.auth?.provider?.openstad?.config?.Phonenumber?.smsCodeTitle || '',
-      SMS2Subtitle: data?.config?.auth?.provider?.openstad?.config?.Phonenumber?.smsCodeSubtitle || '',
-      SMS2Description: data?.config?.auth?.provider?.openstad?.config?.Phonenumber?.smsCodeDescription || '',
-      SMS2Label: data?.config?.auth?.provider?.openstad?.config?.Phonenumber?.smsCodeLabel || '',
-      SMS2ButtonText: data?.config?.auth?.provider?.openstad?.config?.Phonenumber?.smsCodeButtonText || '',
-      SMS2HelpText: data?.config?.auth?.provider?.openstad?.config?.Phonenumber?.smsCodeHelpText || '',
-      LocalTitle: data?.config?.auth?.provider?.openstad?.config?.Local?.title || '',
-      LocalDescription: data?.config?.auth?.provider?.openstad?.config?.Local?.description || '',
-      LocalEmailLabel: data?.config?.auth?.provider?.openstad?.config?.Local?.emailLabel || '',
-      LocalPasswordLabel: data?.config?.auth?.provider?.openstad?.config?.Local?.passwordLabel || '',
-      LocalButtonText: data?.config?.auth?.provider?.openstad?.config?.Local?.buttonText || '',
-      LocalHelpText: data?.config?.auth?.provider?.openstad?.config?.Local?.helpText || '',
-      LocalForgotPasswordText: data?.config?.auth?.provider?.openstad?.config?.Local?.forgotPasswordText || '',
+      UniqueCodeTitle: data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode?.title || '',
+      UniqueCodeDescription: data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode?.description || '',
+      UniqueCodeLabel: data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode?.label || '',
+      UniqueCodeButtonText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode?.buttonText || '',
+      UniqueCodeHelpText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.UniqueCode?.helpText || '',
+      UrlTitle: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url?.title || '',
+      UrlDescription: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url?.description || '',
+      UrlLabel: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url?.label || '',
+      UrlButtonText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url?.buttonText || '',
+      UrlHelpText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Url?.helpText || '',
+      SMS1Title: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.loginTitle || '',
+      SMS1Subtitle: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.loginSubtitle || '',
+      SMS1Description: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.loginDescription || '',
+      SMS1Label: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.loginLabel || '',
+      SMS1ButtonText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.loginButtonText || '',
+      SMS1HelpText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.loginHelpText || '',
+      SMS2Title: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.smsCodeTitle || '',
+      SMS2Subtitle: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.smsCodeSubtitle || '',
+      SMS2Description: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.smsCodeDescription || '',
+      SMS2Label: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.smsCodeLabel || '',
+      SMS2ButtonText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.smsCodeButtonText || '',
+      SMS2HelpText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber?.smsCodeHelpText || '',
+      LocalTitle: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local?.title || '',
+      LocalDescription: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local?.description || '',
+      LocalEmailLabel: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local?.emailLabel || '',
+      LocalPasswordLabel: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local?.passwordLabel || '',
+      LocalButtonText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local?.buttonText || '',
+      LocalHelpText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local?.helpText || '',
+      LocalForgotPasswordText: data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local?.forgotPasswordText || '',
     }),
     [data?.config]
   );
@@ -183,15 +185,15 @@ export default function ProjectAuthentication2FA() {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="general">
+          <Tabs defaultValue="UniqueCode">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
-              <TabsTrigger value="general">Unieke code</TabsTrigger>
+              <TabsTrigger value="UniqueCode">Unieke code</TabsTrigger>
               <TabsTrigger value="Url">E-mail een inloglink</TabsTrigger>
               <TabsTrigger value="Phonenumber">SMS</TabsTrigger>
               <TabsTrigger value="Local">Wachtwoord</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="general" className="p-0">
+            <TabsContent value="UniqueCode" className="p-0">
               <div className="p-6 bg-white rounded-md">
                 <Form {...form}>
                   <Heading size="xl">Login pagina voor Unieke code</Heading>
@@ -286,11 +288,11 @@ export default function ProjectAuthentication2FA() {
             <TabsContent value="Url" className="p-0">
               <div className="p-6 bg-white rounded-md">
                 <Form {...form}>
-                  <Heading size="xl">Login pagina voor Unieke code</Heading>
+                  <Heading size="xl">Login pagina voor E-mail een loginlink</Heading>
                   <Separator className="my-4" />
                   <div>
                     <FormLabel>
-                      Als een gebruiker inlogt met een unieke code dan doet die dat op een een pagina met deze teksten:
+                      Als een gebruiker inlogt via een loginlink in een e-mail dan doet die dat op een een pagina met deze teksten:
                     </FormLabel>
                   </div>
                   <form

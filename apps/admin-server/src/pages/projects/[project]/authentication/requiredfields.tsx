@@ -70,15 +70,15 @@ export default function ProjectAuthenticationRequiredFields() {
   const {
     data,
     updateProject,
-  } = useProject();
+  } = useProject(['includeAuthConfig']);
 
   const defaults = useCallback(
     () => ({
       requiredUserFields: data?.config?.auth?.provider?.openstad?.requiredUserFields || [],
-      title: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.title || [],
-      description: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.description || [],
-      buttonText: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.buttonText || [],
-      info: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.info || [],
+      title: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.title || '',
+      description: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.description || '',
+      buttonText: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.buttonText || '',
+      info: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.info || '',
     }),
     [data?.config]
   );
