@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "html-to-react": "^1.7.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
@@ -18,10 +19,10 @@
     "@types/react-dom": "^18.2.19",
     "@typescript-eslint/eslint-plugin": "^7.0.2",
     "@typescript-eslint/parser": "^7.0.2",
-    "@vitejs/plugin-react": "^4.2.1",
     "@utrecht/component-library-css": "^3.0.1-alpha.18",
     "@utrecht/component-library-react": "^3.0.1-alpha.18",
     "@utrecht/design-tokens": "^1.0.0-alpha.631",
+    "@vitejs/plugin-react": "^4.2.1",
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
