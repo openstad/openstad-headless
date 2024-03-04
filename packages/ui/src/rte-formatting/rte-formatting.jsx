@@ -115,5 +115,5 @@ export default function RenderContent(content) {
   const reactComponent = htmlToReactParser.parseWithInstructions(htmlInput, isValidNode,
     processingInstructions);
 
-  return ReactDOMServer.renderToStaticMarkup(reactComponent).split('<div>')[1].split('</div>')[0]
+  return ReactDOMServer.renderToStaticMarkup(reactComponent).substring(5, ReactDOMServer.renderToStaticMarkup(reactComponent).length - 6)
 }
