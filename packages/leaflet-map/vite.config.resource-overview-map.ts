@@ -17,7 +17,7 @@ export default defineConfig(({command}) => {
                 lib: {
                     formats: ['iife'],
                     entry: 'src/resource-overview-map.tsx',
-                    name: 'OpenstadHeadlessEditorMap',
+                    name: 'OpenstadHeadlessResourceOverviewMap',
                     fileName: 'resource-overview-map',
                 },
                 rollupOptions: {

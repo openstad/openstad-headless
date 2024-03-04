@@ -19,7 +19,7 @@ chart_dir="$ROOT_DIR/charts"
 
 STACK="openstad-headless"
 CHART="openstad-headless/openstad-headless"
-CHART_VERSION="0.0.6"
+CHART_VERSION="0.0.7"
 NAMESPACE="headless-acc-2024"
 CONTEXT="do-ams3-openstad-ams-acc"
 PREVIOUS_CONTEXT=$(kubectl config current-context)

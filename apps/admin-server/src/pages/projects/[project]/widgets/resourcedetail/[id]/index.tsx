@@ -11,7 +11,7 @@ import WidgetResourceDetailDisplay from './display';
 import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import { ResourceDetailWidgetProps } from '@openstad/resource-detail/src/resource-detail';
+import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
 import WidgetPreview from '@/components/widget-preview';
 import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
 import WidgetPublish from '@/components/widget-publish';

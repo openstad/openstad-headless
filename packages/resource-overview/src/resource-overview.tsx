@@ -169,7 +169,7 @@ function ResourceOverview({
   renderItem = defaultItemRenderer,
   allowFiltering = true,
   displayType = 'cardrow',
-  displayBanner = true,
+  displayBanner = false,
   renderHeader = defaultHeaderRenderer,
   itemsPerPage = 20,
   textResults = 'Dit zijn de zoekresultaten voor [search]',

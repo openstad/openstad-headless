@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Heading } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator';
-import { CounterWidgetProps } from '@openstad/counter/src/counter';
+import { CounterWidgetProps } from '@openstad-headless/counter/src/counter';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { useRouter } from 'next/router';

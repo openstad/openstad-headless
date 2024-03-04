@@ -6,7 +6,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
-import { RawResourceWidgetProps } from '@openstad/raw-resource/src/raw-resource';
+import { RawResourceWidgetProps } from '@openstad-headless/raw-resource/src/raw-resource';
 import { useRouter } from 'next/router';
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {

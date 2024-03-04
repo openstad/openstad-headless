@@ -6,7 +6,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
-import { EnqueteWidgetProps } from '@openstad/enquete/src/enquete';
+import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import { useRouter } from 'next/router';
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
