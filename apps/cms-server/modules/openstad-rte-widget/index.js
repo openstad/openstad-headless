@@ -17,6 +17,14 @@ const contentWidgets = {
         label: 'Paragraph (P)',
       },
       {
+        tag: 'h1',
+        label: 'Heading 1 (H1)',
+      },
+      {
+        tag: 'h2',
+        label: 'Heading 2 (H2)',
+      },
+      {
         tag: 'h3',
         label: 'Heading 3 (H3)',
       },

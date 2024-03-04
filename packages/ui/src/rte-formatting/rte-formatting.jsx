@@ -4,7 +4,7 @@ import { Parser as HtmlToReactParser, ProcessNodeDefinitions } from 'html-to-rea
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Heading3, Heading4, Paragraph, Link, Strong, OrderedList, OrderedListItem, UnorderedList, UnorderedListItem } from "@utrecht/component-library-react";
+import { Heading1, Heading2, Heading3, Heading4, Paragraph, Link, Strong, OrderedList, OrderedListItem, UnorderedList, UnorderedListItem } from "@utrecht/component-library-react";
 
 export default function RenderContent(content) {
   const htmlInput = `<div>${content}</div>`;
@@ -18,10 +18,26 @@ export default function RenderContent(content) {
   const processingInstructions = [
     {
       shouldProcessNode: function (node) {
+        return node && node.name && node.name === 'h1';
+      },
+      processNode: function (node, children, index) {
+        return <Heading1 key={index}>{children}</Heading1>;
+      }
+    },
+    {
+      shouldProcessNode: function (node) {
+        return node && node.name && node.name === 'h2';
+      },
+      processNode: function (node, children, index) {
+        return <Heading2 key={index}>{children}</Heading2>;
+      }
+    },
+    {
+      shouldProcessNode: function (node) {
         return node && node.name && node.name === 'h3';
       },
       processNode: function (node, children, index) {
-        return <Heading3 >{children}</Heading3>;
+        return <Heading3 key={index}>{children}</Heading3>;
       }
     },
     {
