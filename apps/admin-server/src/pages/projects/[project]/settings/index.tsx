@@ -38,7 +38,6 @@ const formSchema = z.object({
   endDate: z.date().min(new Date(), {
     message: 'De datum moet nog niet geweest zijn!',
   }),
-  enableLikes: z.boolean(),
   enableReactions: z.boolean(),
   cssUrl: z.string().optional(),
   url: z.string().optional()
