@@ -18,6 +18,7 @@ spec:
       labels:
         app: {{ .Values.api.label }}
     spec:
+      serviceAccountName: openstad-headless-ingress-sa
       containers:
         - command: ["/bin/bash", "-c"]
           args:
@@ -146,7 +147,13 @@ spec:
               secretKeyRef:
                 key: admin_client_secret
                 name: {{ template "openstad.auth.secret.fullname" . }}
-        
+
+          - name: KUBERNETES_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+
           {{- if .Values.api.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.api.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}
