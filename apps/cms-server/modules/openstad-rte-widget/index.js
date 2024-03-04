@@ -31,14 +31,10 @@ const contentWidgets = {
 module.exports = {
   extend: '@apostrophecms/widget-type',
   options: {
-    label: 'Accordion',
+    label: 'Rich Text Editor',
   },
   fields: {
     add: {
-      label: {
-        type: 'string',
-        label: 'Titel',
-      },
       text: {
         type: 'area',
         options: {

@@ -4,7 +4,7 @@ import { Parser as HtmlToReactParser, ProcessNodeDefinitions } from 'html-to-rea
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Heading3, Heading4, Paragraph, Link, Strong } from "@utrecht/component-library-react";
+import { Heading3, Heading4, Paragraph, Link, Strong, OrderedList, OrderedListItem, UnorderedList, UnorderedListItem } from "@utrecht/component-library-react";
 
 export default function RenderContent(content) {
   const htmlInput = `<div>${content}</div>`;
@@ -54,6 +54,38 @@ export default function RenderContent(content) {
       },
       processNode: function (node, children, index) {
         return <Strong key={index}>{children}</Strong>;
+      }
+    },
+    {
+      shouldProcessNode: function (node) {
+        return node && node.name && node.name === 'ol';
+      },
+      processNode: function (node, children, index) {
+        return <OrderedList key={index}>{children}</OrderedList>;
+      }
+    },
+    {
+      shouldProcessNode: function (node) {
+        return node && node.name && node.name === 'li' && node.parent.name === 'ol';
+      },
+      processNode: function (node, children, index) {
+        return <OrderedListItem key={index}>{children}</OrderedListItem>;
+      }
+    },
+    {
+      shouldProcessNode: function (node) {
+        return node && node.name && node.name === 'ul';
+      },
+      processNode: function (node, children, index) {
+        return <UnorderedList key={index}>{children}</UnorderedList>;
+      }
+    },
+    {
+      shouldProcessNode: function (node) {
+        return node && node.name && node.name === 'li' && node.parent.name === 'ul';
+      },
+      processNode: function (node, children, index) {
+        return <UnorderedListItem key={index}>{children}</UnorderedListItem>;
       }
     },
     {
