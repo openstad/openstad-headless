@@ -326,10 +326,10 @@ service.updateClient = async function({ authConfig, project }) {
       twoFactor: authConfig.config.twoFactor || client.config.twoFactor,
       configureTwoFactor: authConfig.config.configureTwoFactor || client.config.configureTwoFactor,
       authTypes: {
-        UniqueCode: authConfig.config?.UniqueCode || client.config?.authTypes?.UniqueCode,
-        Url: authConfig.config?.Url || client.config?.authTypes?.Url,
-        Phonenumber: authConfig.config?.Phonenumber || client.config?.authTypes?.Phonenumber,
-        Local: authConfig.config?.Local || client.config?.authTypes?.Local,
+        UniqueCode: merge({}, client.config?.authTypes?.UniqueCode, authConfig.config?.UniqueCode),
+        Url: merge({}, client.config?.authTypes?.Url, authConfig.config?.Url),
+        Phonenumber: merge({}, client.config?.authTypes?.Phonenumber, authConfig.config?.Phonenumber),
+        Local: merge({}, client.config?.authTypes?.Local, authConfig.config?.Local),
       }
     };
 
