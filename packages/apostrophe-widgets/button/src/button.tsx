@@ -7,10 +7,10 @@ import { ButtonLink, ButtonGroup } from "@utrecht/component-library-react";
 
 interface Item {
   direction: string;
-  buttons: any;
+  buttons: string;
 }
 
-const renderButtons = (buttons: any) => {
+const renderButtons = (buttons) => {
   return JSON.parse(buttons).map((element: any, index) => {
     return <ButtonLink key={index} appearance={element.appearance} href={element.href}>{element.label}</ButtonLink>;
   });
