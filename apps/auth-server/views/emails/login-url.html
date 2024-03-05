@@ -25,7 +25,7 @@
 <mj-section>
   <mj-column width="400px">
     <mj-text font-size="20px" font-family="Helvetica Neue">Inlogmail aangevraagd</mj-text>
-    <mj-text>Beste {{name}},</mj-text>
+    <mj-text>Beste {{name or 'bezoeker'}},</mj-text>
     <mj-text color="#525252">Voor {{clientName}} is een inloglink aangevraagd voor dit emailadres. Klik op de knop hieronder om automatisch in te loggen. De knop is 10 minuten geldig. </mj-text>
     <mj-button background-color="#EC0000" href="{{loginurl}}">Log in</mj-button>
   </mj-column>
