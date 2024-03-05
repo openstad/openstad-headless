@@ -7,6 +7,7 @@ const contentWidgets = {
   'openstad-button': {},
   'openstad-timeline': {},
   'openstad-image': {},
+  'openstad-iconSection': {},
 };
 
 module.exports = {

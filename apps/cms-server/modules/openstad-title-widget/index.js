@@ -36,56 +36,10 @@ module.exports = {
           }
         ]
       },
-      className: {
-        type: 'select',
-        label: 'Select HTML styling class',
-        def: 'headerDefault',
-        choices: [
-          {
-            label: 'Normaal',
-            value: 'header-default'
-          },
-          {
-            label: 'Extra vet',
-            value: 'heavy-bold'
-          }
-        ]
-      },
       classNameCustom: {
         type: 'string',
         label: 'CSS class'
       },
-      buttons: {
-        label: 'Buttons',
-        type: 'array',
-        fields: {
-          add: {
-            label: {
-              label: 'Label',
-              type: 'string'
-            },
-            href: {
-              label: 'Url',
-              type: 'string'
-            },
-            appearance: {
-              type: 'select',
-              label: 'Variant',
-              def: 'primary-action-button',
-              choices: [
-                {
-                  label: 'primary-action-button',
-                  value: 'primary-action-button'
-                },
-                {
-                  label: 'secondary-action-button',
-                  value: 'secondary-action-button'
-                }
-              ]
-            }
-          }
-        }
-      }
     },
     group: {
       generalGroup: {

@@ -9,6 +9,7 @@ module.exports = {
         options: {
           widgets: {
             'openstad-section': {},
+            'openstad-iconSection': {},
           }
         }
       }
