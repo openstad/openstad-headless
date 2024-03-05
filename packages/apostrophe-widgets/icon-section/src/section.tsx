@@ -20,15 +20,21 @@ const renderCards = (items) => {
 
         {items.map((item: any, index: number) => (
           <article className="icon-section-card" key={index}>
-            <Image
-              alt={item.imageAlt}
-              height={item.image.height}
-              width={item.image.width}
-              src={item.image._urls.full}
-            />
+            {item.image &&
+              <Image
+                alt={item.imageAlt}
+                height={item.image.height}
+                width={item.image.width}
+                src={item.image._urls.full}
+              />
+            }
             <div className="icon-section-content">
-              <Heading2>{item.title}</Heading2>
-              <Paragraph>{item.description}</Paragraph>
+              {item.title &&
+                <Heading2>{item.title}</Heading2>
+              }
+              {item.description && 
+                <Paragraph>{item.description}</Paragraph>
+              }
               {item.href && (
                 <div>
                   <Link href={item.href}>{item.linkText}</Link>
