@@ -10,6 +10,7 @@ module.exports = {
           widgets: {
             'openstad-section': {},
             'openstad-iconSection': {},
+            'openstad-image': {},
           }
         }
       }
