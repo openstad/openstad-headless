@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
 import { AccordionProvider } from "@utrecht/component-library-react";
-import RenderContent from '../../../ui/src/rte-formatting/rte-formatting.jsx'
+import RenderContent from '../../../ui/src/rte-formatting/rte-formatting'
 
 interface Item {
   content: any;
