@@ -24,7 +24,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
     url: {
       type: DataTypes.STRING(255),
-      allowNull: null,
+      allowNull: true,
       defaultValue: null,
     },
 

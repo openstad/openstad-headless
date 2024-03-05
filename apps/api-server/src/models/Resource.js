@@ -17,6 +17,16 @@ const roles = require('../lib/sequelize-authorization/lib/roles');
 const getExtraDataConfig = require('../lib/sequelize-authorization/lib/getExtraDataConfig');
 const htmlToText = require('html-to-text');
 
+let literalResourceId = 'resourceId';
+let literalDeletedAt = 'deletedAt';
+let literalTrue = '1';
+if (config.database.dialect == 'postgres') {
+  literalResourceId = '"resourceId"';
+  literalDeletedAt = '"deletedAt"';
+  literalTrue = 'true';
+}
+
+
 function hideEmailsForNormalUsers(comments) {
   return comments.map((comment) => {
     delete comment.user.email;
@@ -449,42 +459,23 @@ module.exports = function (db, sequelize, DataTypes) {
 
   Resource.scopes = function scopes() {
     function voteCount(opinion) {
-      if (config.votes && config.votes.confirmationRequired) {
-        return [
+      return [
           sequelize.literal(`
 				(SELECT
 					COUNT(*)
 				FROM
 					votes v
 				WHERE
-          v.confirmed = 1 AND
-					v.deletedAt IS NULL AND (
+          ${config.votes && config.votes.confirmationRequired && `v.confirmed = ${literalTrue} AND` || ''}
+					v.${literalDeletedAt} IS NULL AND (
 						v.checked IS NULL OR
-						v.checked  = 1
+						v.checked  = ${literalTrue}
 					) AND
-					v.resourceId     = resource.id AND
-					v.opinion    = "${opinion}")
+					v.${literalResourceId}     = resource.id AND
+					v.opinion    = '${opinion}')
 			`),
           opinion,
         ];
-      } else {
-        return [
-          sequelize.literal(`
-				(SELECT
-					COUNT(*)
-				FROM
-					votes v
-				WHERE
-					v.deletedAt IS NULL AND (
-						v.checked IS NULL OR
-						v.checked  = 1
-					) AND
-					v.resourceId     = resource.id AND
-					v.opinion    = "${opinion}")
-			`),
-          opinion,
-        ];
-      }
     }
 
     function commentCount(fieldName) {
@@ -495,8 +486,8 @@ module.exports = function (db, sequelize, DataTypes) {
 				FROM
 					comments a
 				WHERE
-					a.deletedAt IS NULL AND
-					a.resourceId = resource.id)
+					a.${literalDeletedAt} IS NULL AND
+					a.${literalResourceId} = resource.id)
 			`),
         fieldName,
       ];
@@ -535,7 +526,7 @@ module.exports = function (db, sequelize, DataTypes) {
                     { userId },
                     { viewableByRole: 'all' },
                     { viewableByRole: null },
-                    { viewableByRole: roles[userRole] || '' },
+                    { viewableByRole: roles[userRole] || 'all' },
                   ],
                   publishDate: { [Op.ne]: null },
                 },
@@ -552,7 +543,7 @@ module.exports = function (db, sequelize, DataTypes) {
               [Op.or]: [
                 { viewableByRole: 'all' },
                 { viewableByRole: null },
-                { viewableByRole: roles[userRole] || '' },
+                { viewableByRole: roles[userRole] || 'all' },
               ],
               [Op.not]: [{ publishDate: null }],
             },

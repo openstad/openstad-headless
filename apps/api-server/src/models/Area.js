@@ -11,7 +11,7 @@ module.exports = function( db, sequelize, DataTypes ) {
     },
 
     polygon: {
-      type: DataTypes.GEOMETRY,
+      type: DataTypes.JSON,
       allowNull: false,
       set: function (polygon) {
         polygon = polygon ? polygon.map(polygon => {
