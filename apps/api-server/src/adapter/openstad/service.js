@@ -34,7 +34,6 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
 	    headers,
     })
     if (!response.ok) {
-      console.log(response);
       throw new Error('Fetch failed')
     }
 
@@ -58,7 +57,6 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
     return mappedUserData;
 
   } catch(err) {
-    console.log(err);
     throw new Error('Cannot connect to auth server');
   }
 
@@ -90,7 +88,6 @@ service.createUser = async function({ authConfig, userData = {} }) {
       body,
     })
     if (!response.ok) {
-      console.log(response);
       throw new Error('Fetch failed')
     }
 
@@ -102,7 +99,6 @@ service.createUser = async function({ authConfig, userData = {} }) {
     return mappedUserData;
 
   } catch(err) {
-    console.log(err);
     throw new Error('Cannot connect to auth server');
   }
 
@@ -136,7 +132,6 @@ service.updateUser = async function({ authConfig, userData = {} }) {
       body,
     })
     if (!response.ok) {
-      console.log(response);
       throw new Error('Fetch failed')
     }
 
@@ -147,7 +142,6 @@ service.updateUser = async function({ authConfig, userData = {} }) {
     return mappedUserData;
 
   } catch(err) {
-    console.log(err);
     throw new Error('Cannot connect to auth server');
   }
 
@@ -172,14 +166,12 @@ service.deleteUser = async function({ authConfig, userData = {} }) {
       body: JSON.stringify({}),
     })
     if (!response.ok) {
-      console.log(response);
       throw new Error('Fetch failed')
     }
 
     return await response.json();
 
   } catch(err) {
-    console.log(err);
     throw new Error('Cannot connect to auth server');
   }
 
@@ -201,14 +193,12 @@ service.fetchClient = async function({ authConfig, project }) {
       },
     })
     if (!response.ok) {
-      console.log(response);
       throw new Error('OpenStad.service.updateClient: fetch client failed')
     }
     let client = await response.json();
     return client;
 
   } catch(err) {
-    console.log(err);
     throw new Error('Cannot connect to auth server');
   }
 }
@@ -262,7 +252,6 @@ service.createClient = async function({ authConfig, project }) {
       }),
     })
     if (!response.ok) {
-      console.log(response);
       throw new Error('OpenStad.service.createClient: create client failed')
     }
 
@@ -270,7 +259,6 @@ service.createClient = async function({ authConfig, project }) {
     return client;
 
   } catch(err) {
-    console.log(err);
     throw new Error('Cannot connect to auth server');
   }
 
@@ -347,12 +335,10 @@ service.updateClient = async function({ authConfig, project }) {
       body: JSON.stringify(data),
     })
     if (!response.ok) {
-      console.log(response);
       throw new Error('OpenStad.service.updateClient: update client failed')
     }
 
   } catch(err) {
-    console.log(err);
     throw new Error('Cannot connect to auth server');
   }
   
