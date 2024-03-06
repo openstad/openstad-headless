@@ -71,8 +71,8 @@ const FileUploadField: FC<FileUploadProps> = ({
         <FormField type="text">
             <Paragraph className="utrecht-form-field__label">
                 <FormLabel htmlFor={randomID}>{title}</FormLabel>
-                <FormFieldDescription>{description}</FormFieldDescription>
             </Paragraph>
+            <FormFieldDescription>{description}</FormFieldDescription>
             <div className="utrecht-form-field__input">
                 <input
                     id={randomID}

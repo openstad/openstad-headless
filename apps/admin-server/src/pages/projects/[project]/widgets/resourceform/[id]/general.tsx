@@ -34,7 +34,7 @@ const formSchema = z.object({
   formName: z.string(),
   redirectUrl: z.string().url(),
   hideAdmin: z.boolean(),
-  organiseForm: z.enum(['static', 'staticAppended', 'dynamic']),
+  // organiseForm: z.enum(['static', 'staticAppended', 'dynamic']),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -53,7 +53,7 @@ export default function WidgetResourceFormGeneral() {
       formName: widget?.config?.[category]?.formName || '',
       redirectUrl: widget?.config?.[category]?.redirectUrl || '',
       hideAdmin: widget?.config?.[category]?.hideAdmin || false,
-      organiseForm: widget?.config?.[category]?.organiseForm || 'static',
+      // organiseForm: widget?.config?.[category]?.organiseForm || 'static',
     }),
     [widget?.config]
   );
@@ -168,32 +168,32 @@ export default function WidgetResourceFormGeneral() {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="organiseForm"
-            render={({ field }) => (
-              <FormItem className="mt-auto">
-                <FormLabel>
-                  Hoe moeten de velden van het formulier opgesteld worden?
-                </FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Statisch (standaard)" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="static">Statisch (standaard)</SelectItem>
-                    <SelectItem value="staticAppended">
-                      Statisch, met dynamische velden toegevoegd
-                    </SelectItem>
-                    <SelectItem value="dynamic">Dynamisch</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/*<FormField*/}
+          {/*  control={form.control}*/}
+          {/*  name="organiseForm"*/}
+          {/*  render={({ field }) => (*/}
+          {/*    <FormItem className="mt-auto">*/}
+          {/*      <FormLabel>*/}
+          {/*        Hoe moeten de velden van het formulier opgesteld worden?*/}
+          {/*      </FormLabel>*/}
+          {/*      <Select onValueChange={field.onChange} value={field.value}>*/}
+          {/*        <FormControl>*/}
+          {/*          <SelectTrigger>*/}
+          {/*            <SelectValue placeholder="Statisch (standaard)" />*/}
+          {/*          </SelectTrigger>*/}
+          {/*        </FormControl>*/}
+          {/*        <SelectContent>*/}
+          {/*          <SelectItem value="static">Statisch (standaard)</SelectItem>*/}
+          {/*          <SelectItem value="staticAppended">*/}
+          {/*            Statisch, met dynamische velden toegevoegd*/}
+          {/*          </SelectItem>*/}
+          {/*          <SelectItem value="dynamic">Dynamisch</SelectItem>*/}
+          {/*        </SelectContent>*/}
+          {/*      </Select>*/}
+          {/*      <FormMessage />*/}
+          {/*    </FormItem>*/}
+          {/*  )}*/}
+          {/*/>*/}
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

@@ -11,6 +11,9 @@ import MapField from "@openstad-headless/ui/src/form-elements/map";
 import { handleSubmit } from "./submit";
 import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden/index.js";
 import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choice/index.js";
+import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
 
 const Form: FC<FormProps> = ({
      title = 'Form Widget',
@@ -80,17 +83,17 @@ const Form: FC<FormProps> = ({
                     {fields.map((field: CombinedFieldPropsWithType, index: number) => (
                         <div key={index} className={`question-type-${field.type}`}>
                             {renderField(field, index)}
-                            <div className="error-message">
+                            <FormFieldErrorMessage className="error-message">
                                 {formErrors[field.fieldKey] && <span>{formErrors[field.fieldKey]}</span>}
-                            </div>
+                            </FormFieldErrorMessage>
                         </div>
                     ))}
                     {secondaryLabel && (
                         <button type="button" onClick={() => secondaryHandler(formValues)}>{secondaryLabel}</button>
                     )}
-                    <button type="submit" disabled={submitDisabled}>
+                    <Button type="submit" disabled={submitDisabled}>
                         {submitText}
-                    </button>
+                    </Button>
                 </form>
             </div>
         </div>

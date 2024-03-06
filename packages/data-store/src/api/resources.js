@@ -38,6 +38,17 @@ export default {
     return { id: data.id };
   },
 
+  create: async function ({ projectId }, data) {
+    delete data.id;
+
+    let url = `/api/project/${projectId}/resource`;
+    let method = 'POST';
+
+    let body = JSON.stringify(data);
+
+    return await this.fetch(url, {method, body});
+  },
+
   submitLike: async function ({ projectId }, resources) {
     if (!Array.isArray(resources)) throw new Error('Resources is geen array');
     if(resources.some(r => !'resourceId' in r || !'opinion' in r)) throw new Error("Ontbrekende velden resourceId of opinion");
