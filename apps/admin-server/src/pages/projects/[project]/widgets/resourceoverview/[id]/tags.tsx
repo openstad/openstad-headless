@@ -130,7 +130,6 @@ export default function WidgetResourceOverviewTags(
                                       handleTagCheckboxGroupChange(
                                         groupName,
                                         checked,
-                                        checked,
                                         field.value,
                                         'type'
                                       );
@@ -215,7 +214,6 @@ export default function WidgetResourceOverviewTags(
                                   onCheckedChange={(checked: any) => {
                                     const groups = handleTagCheckboxGroupChange(
                                       groupName,
-                                      checked,
                                       checked,
                                       field.value,
                                       'multiple'

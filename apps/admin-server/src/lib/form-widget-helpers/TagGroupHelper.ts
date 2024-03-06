@@ -7,9 +7,8 @@ type Group = {
 export function handleTagCheckboxGroupChange(
   tagGroupName: string,
   checked: boolean,
-  value: boolean,
   groups: Array<Group>,
-  fieldToChange: keyof Pick<Group, "type" | "multiple">
+  fieldToChange: keyof Pick<Group, 'type' | 'multiple'>
 ) {
   const indexToChange = groups.findIndex((g) => g.type === tagGroupName);
 
@@ -28,12 +27,9 @@ export function handleTagCheckboxGroupChange(
     updatedFields = groups.filter((val) => val.type !== tagGroupName);
     return updatedFields;
   }
-
-  if (fieldToChange !== 'type') {
-    if (fieldToChange === 'multiple') {
-      existingGroup.multiple = value;
-      updatedFields[indexToChange] = existingGroup;
-    }
+  if (existingGroup && fieldToChange === 'multiple') {
+    existingGroup.multiple = checked;
+    updatedFields[indexToChange] = existingGroup;
   }
 
   return updatedFields;
