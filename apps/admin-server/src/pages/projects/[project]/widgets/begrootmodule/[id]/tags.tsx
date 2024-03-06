@@ -21,6 +21,7 @@ import * as z from 'zod';
 import { useEffect, useState } from 'react';
 import _ from 'lodash';
 import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
+import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
 
 const formSchema = z.object({
   displayTagFilters: z.boolean(),
@@ -121,30 +122,14 @@ export default function WidgetStemBegrootOverviewTags(
                                     ) > -1
                                   }
                                   onCheckedChange={(checked: any) => {
-                                    if (checked) {
-                                      const updatedFields = [
-                                        ...field.value,
-                                        {
-                                          type: groupName,
-                                          multiple: false,
-                                          label: '',
-                                        },
-                                      ];
-                                      field.onChange(updatedFields);
-                                      props.onFieldChanged(
-                                        field.name,
-                                        updatedFields
-                                      );
-                                    } else {
-                                      const updatedFields = field.value?.filter(
-                                        (val) => val.type !== groupName
-                                      );
-                                      field.onChange(updatedFields);
-                                      props.onFieldChanged(
-                                        field.name,
-                                        updatedFields
-                                      );
-                                    }
+                                    const groups = handleTagCheckboxGroupChange(
+                                      groupName,
+                                      checked,
+                                      field.value,
+                                      'type'
+                                    );
+                                    field.onChange(groups);
+                                    props.onFieldChanged(field.name, groups);
                                   }}
                                 />
                               </FormControl>
@@ -216,20 +201,14 @@ export default function WidgetStemBegrootOverviewTags(
                                     ) > -1
                                   }
                                   onCheckedChange={(checked: any) => {
-                                    const groups = field.value;
-                                    const existingGroup = groups[index];
-
-                                    // Safety check
-                                    if (!checked && existingGroup) {
-                                      existingGroup.multiple = checked;
-                                      groups[index] = existingGroup;
-                                      field.onChange(groups);
-                                      props.onFieldChanged(field.name, groups);
-                                    } else {
-                                      existingGroup.multiple = checked;
-                                      field.onChange(groups);
-                                      props.onFieldChanged(field.name, groups);
-                                    }
+                                    const groups = handleTagCheckboxGroupChange(
+                                      groupName,
+                                      checked,
+                                      field.value,
+                                      'multiple'
+                                    );
+                                    field.onChange(groups);
+                                    props.onFieldChanged(field.name, groups);
                                   }}
                                 />
                               </FormControl>
