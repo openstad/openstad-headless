@@ -9,7 +9,7 @@ module.exports = {
         type: 'area',
         options: {
           widgets: {
-            'openstad-section': {},
+            'openstad-section': {}
           }
         }
       }
