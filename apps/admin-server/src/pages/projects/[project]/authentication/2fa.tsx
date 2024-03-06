@@ -58,18 +58,18 @@ export default function ProjectAuthentication2FA() {
   const {
     data,
     updateProject,
-  } = useProject();
+  } = useProject(['includeAuthConfig']);
 
   const defaults = useCallback(
     () => ({
-      twoFactorRoles: data?.config?.auth?.provider?.openstad?.twoFactorRoles || ['admin'],
-      title: data?.config?.auth?.provider?.openstad?.config?.twoFactor?.title || [],
-      description: data?.config?.auth?.provider?.openstad?.config?.twoFactor?.description || [],
-      buttonText: data?.config?.auth?.provider?.openstad?.config?.twoFactor?.buttonText || [],
-      info: data?.config?.auth?.provider?.openstad?.config?.twoFactor?.info || [],
-      configTitle: data?.config?.auth?.provider?.openstad?.config?.configureTwoFactor?.title || [],
-      configDescription: data?.config?.auth?.provider?.openstad?.config?.configureTwoFactor?.description || [],
-      configButtonText: data?.config?.auth?.provider?.openstad?.config?.configureTwoFactor?.buttonText || [],
+      twoFactorRoles: data?.config?.auth?.provider?.openstad?.twoFactorRoles || [],
+      title: data?.config?.auth?.provider?.openstad?.config?.twoFactor?.title || '',
+      description: data?.config?.auth?.provider?.openstad?.config?.twoFactor?.description || '',
+      buttonText: data?.config?.auth?.provider?.openstad?.config?.twoFactor?.buttonText || '',
+      info: data?.config?.auth?.provider?.openstad?.config?.twoFactor?.info || '',
+      configTitle: data?.config?.auth?.provider?.openstad?.config?.configureTwoFactor?.title || '',
+      configDescription: data?.config?.auth?.provider?.openstad?.config?.configureTwoFactor?.description || '',
+      configButtonText: data?.config?.auth?.provider?.openstad?.config?.configureTwoFactor?.buttonText || '',
     }),
     [data?.config]
   );

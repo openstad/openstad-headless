@@ -15,19 +15,34 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 let router = express.Router({mergeParams: true});
 
-function getProject(req, res, next, include = []) {
+async function getProject(req, res, next, include = []) {
 	const projectId = req.params.projectId;
 	let query = { where: { id: parseInt(projectId) }, include: include };
-	db.Project
-		.scope(req.scope)
-		.findOne(query)
-		.then(found => {
-			if ( !found ) throw new Error('Project not found');
-			req.results = found;
-			req.project = req.results; // middleware expects this to exist
-			next();
-		})
-		.catch(next);
+  try {
+    let project = await db.Project.scope(req.scope).findOne(query);
+		if ( !project ) throw new Error('Project not found');
+		req.results = project;
+		req.project = req.results; // middleware expects this to exist
+    // include authconfig
+    if (req.query.includeAuthConfig && hasRole( req.user, 'admin')) {
+      let providers = await authSettings.providers({ project });
+      for (let provider of providers) {
+        if ( provider == 'default' ) continue;
+        let authConfig = await authSettings.config({ project, useAuth: provider });
+        let adapter = await authSettings.adapter({ authConfig });
+        if (adapter.service.fetchClient) {
+          let client = await adapter.service.fetchClient({authConfig, project})
+          project.config.auth.provider[provider].authTypes = client.authTypes;
+          project.config.auth.provider[provider].requiredUserFields = client.requiredUserFields;
+          project.config.auth.provider[provider].twoFactorRoles = client.twoFactorRoles;
+          project.config.auth.provider[provider].config = client.config;
+        }
+      }
+    }
+    return next();
+  } catch(err) {
+    return next(err);
+  }
 }
 
 // scopes
@@ -190,9 +205,10 @@ router.route('/issues')
 // -------------------------
 router.route('/:projectId') //(\\d+)
 	.all(auth.can('Project', 'view'))
-	.all(function(req, res, next) {
-		getProject(req, res, next)
+	.all(async function(req, res, next) {
+		await getProject(req, res, next)
 	})
+
 
 // view project
 // ---------
@@ -205,6 +221,31 @@ router.route('/:projectId') //(\\d+)
 // update project
 // -----------
 	.put(auth.useReqUser)
+	.put(async function (req, res, next) {
+    // update certain parts of config to the oauth client
+		const project = await db.Project.findOne({ where: { id: req.results.id} });
+    if (!hasRole( req.user, 'admin')) return next();
+    try {
+      let providers = await authSettings.providers({ project });
+      for (let provider of providers) {
+        let authData = req.body.config?.auth?.provider?.[provider];
+        if (!authData) continue;
+        let authConfig = await authSettings.config({ project, useAuth: provider });
+        let adapter = await authSettings.adapter({ authConfig });
+        if (adapter.service.updateClient) {
+          let merged = merge.recursive({}, authConfig, req.body.config?.auth?.provider?.[authConfig.provider])
+          await adapter.service.updateClient({ authConfig: merged, project });
+          delete req.body.config?.auth?.provider?.[authConfig.provider]?.authTypes;
+          delete req.body.config?.auth?.provider?.[authConfig.provider]?.twoFactorRoles;
+          delete req.body.config?.auth?.provider?.[authConfig.provider]?.requiredUserFields;
+          delete req.body.config?.auth?.provider?.[authConfig.provider]?.config;
+        }
+      }
+      return next();
+    } catch(err) {
+      return next(err);
+    }
+	})
 	.put(async function(req, res, next) {
 		const project = await db.Project.findOne({ where: { id: req.results.id} });
     if (!( project && project.can && project.can('update') )) return next( new Error('You cannot update this project') );
@@ -224,28 +265,6 @@ router.route('/:projectId') //(\\d+)
 				next();
         return null;
 			});
-	})
-	.put(async function (req, res, next) {
-    // update certain parts of config to the oauth client
-    if (!hasRole( req.user, 'admin')) return next();
-    try {
-      let providers = await authSettings.providers({ project: req.results });
-      for (let provider of providers) {
-        let authData = req.body.config?.auth?.provider?.[provider];
-        if (!authData) continue;
-        let authConfig = await authSettings.config({ project: req.results, useAuth: provider });
-        let adapter = await authSettings.adapter({ authConfig });
-        if (adapter.service.updateClient) {
-          await adapter.service.updateClient({ authConfig, project: req.results });
-          delete req.results.config?.auth?.provider?.[authConfig.provider]?.authTypes;
-          delete req.results.config?.auth?.provider?.[authConfig.provider]?.twoFactorRoles;
-          delete req.results.config?.auth?.provider?.[authConfig.provider]?.requiredUserFields;
-        }
-      }
-      return next();
-    } catch(err) {
-      return next(err);
-    }
 	})
 	.put(function (req, res, next) {
 		// when succesfull return project JSON
@@ -268,8 +287,8 @@ router.route('/:projectId') //(\\d+)
 // -------------------
 router.route('/:projectId(\\d+)/export')
 	.all(auth.can('Project', 'view'))
-	.all(function(req, res, next) {
-		getProject(req, res, next, [{model: db.Resource, include: [{model: db.Tag}, {model: db.Vote}, {model: db.Comment, as: 'commentsFor'}, {model: db.Comment, as: 'commentsAgainst'}, {model: db.Poll, as: 'poll'}]}, {model: db.Tag}])
+	.all(async function(req, res, next) {
+		await getProject(req, res, next, [{model: db.Resource, include: [{model: db.Tag}, {model: db.Vote}, {model: db.Comment, as: 'commentsFor'}, {model: db.Comment, as: 'commentsAgainst'}, {model: db.Poll, as: 'poll'}]}, {model: db.Tag}])
 	})
 
 	.get(auth.can('Project', 'view'))
