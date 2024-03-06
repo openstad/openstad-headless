@@ -4,8 +4,10 @@ const contentWidgets = {
   'openstad-section': {},
   'openstad-title': {},
   'openstad-accordion': {},
+  'openstad-button': {},
   'openstad-timeline': {},
   'openstad-image': {},
+  'openstad-iconSection': {},
 };
 
 module.exports = {
