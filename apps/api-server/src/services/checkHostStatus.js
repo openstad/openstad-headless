@@ -39,6 +39,38 @@ const getIngress = async (k8sApi, name, namespace) => {
   }
 };
 
+const updateIngress = async (ingress, k8sApi, name, domain, namespace) => {
+  // Check if domain is in the current ingress, otherwise
+  // if there is only one host, replace it
+  // if there are multiple hosts, add it
+  const hosts = ingress.spec.rules.map(rule => rule.host);
+  if (!hosts.includes(domain)) {
+    if (hosts.length === 1) {
+      ingress.spec.rules[0].host = domain;
+    } else {
+      ingress.spec.rules.push({
+        host: domain,
+        http: {
+          paths: [{
+            backend: {
+              service: {
+                name: process.env.KUBERNETES_FRONTEND_SERVICE_NAME || 'openstad-frontend',
+                port: {
+                  number: process.env.KUBERNETES_FRONTEND_SERVICE_PORT ? parseInt(process.env.KUBERNETES_FRONTEND_SERVICE_PORT) : 4444
+                }
+              }
+            },
+            path: '/',
+            pathType: 'Prefix',
+          }]
+        }
+      });
+    }
+  }
+  
+  return k8sApi.replaceNamespacedIngress(name, namespace, ingress);
+}
+
 const createIngress = async (k8sApi, name, domain, namespace) => {
   return k8sApi.createNamespacedIngress(namespace, {
     apiVersions: 'networking.k8s.io/v1',
@@ -111,16 +143,23 @@ const checkHostStatus = async (conditions) => {
       const k8sApi = getK8sApi();
 
       // get ingress config files
-      const ingress = getIngress(k8sApi, project.name, namespace);
+      const ingress = getIngress(k8sApi, project.config.uniqueId, namespace);
 
       // if ip issset but not ingress try to create one
       if (hostStatus.ip  && !ingress) {
         try {
-          const response = await createIngress(k8sApi, project.name, project.domain, namespace);
+          const response     = await createIngress(k8sApi, project.config.uniqueId, project.url, namespace);
           hostStatus.ingress = true;
-        } catch(error) {
+        } catch (error) {
           // don't set to false, an error might just be that it already exist and the read check failed
-          console.error('Error updating ingress for ', project.name, ' domain: ', project.domain, ' :', error);
+          console.error(`Error creating ingress for ${project.uniqueId} domain: ${project.url} : ${error}`);
+        }
+      } else if (hostStatus.ip  && ingress) {
+        try {
+          hostStatus.ingress = true;
+          const response = await updateIngress(ingress, k8sApi, project.config.uniqueId, project.url, namespace);
+        } catch (error) {
+          console.error(`Error updating ingress for ${project.uniqueId} domain: ${project.url} : ${error}`);
         }
       // else if ip is not set but ingress is set, remove the ingress file
       } else  if (!hostStatus.ip  && ingress) {
@@ -130,7 +169,7 @@ const checkHostStatus = async (conditions) => {
         } catch(error) {
           //@todo how to deal with error here?
           //most likely it doesn't exists anymore if delete doesnt work, but could also be forbidden /
-          console.error('Error deleting ingress for ', project.name, ' domain: ', project.domain, ' :', error);
+          console.error('Error deleting ingress for ', project.uniqueId, ' domain: ', project.url, ' :', error);
         }
       }
 
