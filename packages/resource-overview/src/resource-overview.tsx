@@ -15,6 +15,10 @@ import { GridderResourceDetail } from './gridder-resource-detail';
 import { hasRole } from '@openstad-headless/lib';
 import nunjucks from 'nunjucks';
 
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Heading4, Heading5, Paragraph, Link } from "@utrecht/component-library-react";
+
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
@@ -64,12 +68,9 @@ export type ResourceOverviewWidgetProps = BaseProps &
 const defaultHeaderRenderer = (resources?: any) => {
   return (
     <>
-      <Banner>
-        <Spacer size={12} />
-      </Banner>
+      <Banner></Banner>
       <section className="osc-resource-overview-title-container">
-        <Spacer size={2} />
-        <h4>Plannen</h4>
+        <Heading4>Plannen</Heading4>
       </section>
     </>
   );
@@ -82,7 +83,7 @@ const defaultItemRenderer = (
 ) => {
   if (props.displayType === 'raw') {
     if (!props.rawInput) {
-      return <p>Template is nog niet ingesteld</p>;
+      return <Paragraph>Template is nog niet ingesteld</Paragraph>;
     }
 
     try {
@@ -114,19 +115,19 @@ const defaultItemRenderer = (
     } catch (e) {
       console.error('De template kon niet worden geparsed: ', e);
     }
-    return <p>Er is een fout in de template</p>;
+    return <Paragraph>Er is een fout in de template</Paragraph>;
   }
 
   return (
-    <article onClick={() => onItemClick && onItemClick()}>
+    <Link className="resource-card--link" href="#" onClick={() => onItemClick && onItemClick()}>
       <Image
         src={resource.images?.at(0)?.src || ''}
         imageFooter={
           <div>
             {resource.statuses?.map((statusTag: any) => (
-              <p className="osc-resource-overview-content-item-status">
+              <Paragraph className="osc-resource-overview-content-item-status">
                 {statusTag.label === 'OPEN' ? 'Open' : 'Gesloten'}
-              </p>
+              </Paragraph>
             ))}
           </div>
         }
@@ -135,17 +136,17 @@ const defaultItemRenderer = (
       <div>
         <Spacer size={1} />
         {props.displayTitle ? (
-          <h6>{elipsize(resource.title, props.titleMaxLength || 20)}</h6>
+          <Heading5>{elipsize(resource.title, props.titleMaxLength || 20)}</Heading5>
         ) : null}
 
         {props.displaySummary ? (
-          <h6>{elipsize(resource.summary, props.summaryMaxLength || 20)}</h6>
+          <Heading5>{elipsize(resource.summary, props.summaryMaxLength || 20)}</Heading5>
         ) : null}
 
         {props.displayDescription ? (
-          <p className="osc-resource-overview-content-item-description">
+          <Paragraph className="osc-resource-overview-content-item-description">
             {elipsize(resource.description, props.descriptionMaxLength || 30)}
-          </p>
+          </Paragraph>
         ) : null}
       </div>
 
@@ -161,7 +162,7 @@ const defaultItemRenderer = (
           <Icon icon="ri-message-line" variant="big" text="0" />
         ) : null}
       </div>
-    </article>
+    </Link>
   );
 };
 
@@ -269,7 +270,6 @@ function ResourceOverview({
 
       <div className="osc">
         {displayBanner ? renderHeader() : null}
-        <Spacer size={2} />
 
         <section
           className={`osc-resource-overview-content ${
@@ -277,13 +277,13 @@ function ResourceOverview({
           }`}>
           {props.displaySearchText ? (
             <div className="osc-resourceoverview-search-container col-span-full">
-              {props.textActiveSearch && search ? (
-                <p className="osc-searchtext">
+              {props.textActiveSearch && search && (
+                <Paragraph className="osc-searchtext">
                   {props.textActiveSearch
                     .replace('[search]', search)
                     .replace('[zoekterm]', search)}
-                </p>
-              ) : null}
+                </Paragraph>
+              )}
             </div>
           ) : null}
 
