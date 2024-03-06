@@ -5,7 +5,7 @@ import './section.css';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Image, Heading2, Paragraph, Link, AccordionProvider } from "@utrecht/component-library-react";
+import { Image, Heading3, Paragraph, Link, AccordionProvider } from "@utrecht/component-library-react";
 
 interface Item {
   content: string;
@@ -30,7 +30,7 @@ const renderCards = (items) => {
             }
             <div className="icon-section-content">
               {item.title &&
-                <Heading2>{item.title}</Heading2>
+                <Heading3>{item.title}</Heading3>
               }
               {item.description && 
                 <Paragraph>{item.description}</Paragraph>
