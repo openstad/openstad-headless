@@ -17,6 +17,7 @@
     height: 100%;
     background: #212529;
     border-radius: 4px;
+    object-fit: cover;
 }
 
 .osc .image-container > .osc-image-footer {

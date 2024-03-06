@@ -1,13 +1,16 @@
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 
-export function useProject() {
+export function useProject(scopes?: Array<string>) {
   const router = useRouter();
   const projectId = router.query.project;
 
+  let useScopes: Array<string> = ['includeConfig', 'includeEmailConfig']
+  if (scopes) useScopes = useScopes.concat(scopes);
+
   const projectSwr = useSWR(
     projectId
-      ? `/api/openstad/api/project/${projectId}?includeConfig=1&includeEmailConfig=1`
+      ? `/api/openstad/api/project/${projectId}?${ useScopes.map(s => `${s}=1`).join('&') }`
       : null
   );
 

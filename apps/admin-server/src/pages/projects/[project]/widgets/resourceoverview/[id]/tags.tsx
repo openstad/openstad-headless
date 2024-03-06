@@ -16,11 +16,13 @@ import useTags from '@/hooks/use-tags';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ResourceOverviewWidgetProps } from '@openstad/resource-overview/src/resource-overview';
+import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useEffect, useState } from 'react';
 import _ from 'lodash';
+import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
+import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 
 const formSchema = z.object({
   displayTagFilters: z.boolean(),
@@ -51,6 +53,9 @@ export default function WidgetResourceOverviewTags(
   type FormData = z.infer<typeof formSchema>;
   const { data: tags } = useTags(props.projectId);
   const [tagGroupNames, setGroupedNames] = useState<string[]>([]);
+
+  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
+
 
   useEffect(() => {
     if (Array.isArray(tags)) {
@@ -121,30 +126,19 @@ export default function WidgetResourceOverviewTags(
                                     ) > -1
                                   }
                                   onCheckedChange={(checked: any) => {
-                                    if (checked) {
-                                      const updatedFields = [
-                                        ...field.value,
-                                        {
-                                          type: groupName,
-                                          multiple: false,
-                                          label: '',
-                                        },
-                                      ];
-                                      field.onChange(updatedFields);
-                                      props.onFieldChanged(
-                                        field.name,
-                                        updatedFields
+                                    const updatedFields =
+                                      handleTagCheckboxGroupChange(
+                                        groupName,
+                                        checked,
+                                        field.value,
+                                        'type'
                                       );
-                                    } else {
-                                      const updatedFields = field.value?.filter(
-                                        (val) => val.type !== groupName
-                                      );
-                                      field.onChange(updatedFields);
-                                      props.onFieldChanged(
-                                        field.name,
-                                        updatedFields
-                                      );
-                                    }
+
+                                    field.onChange(updatedFields);
+                                    props.onFieldChanged(
+                                      field.name,
+                                      updatedFields
+                                    );
                                   }}
                                 />
                               </FormControl>
@@ -177,14 +171,16 @@ export default function WidgetResourceOverviewTags(
                                   }
                                   onChange={(e) => {
                                     const groups = field.value;
-                                    const existingGroup = groups[index];
 
-                                    if (existingGroup) {
-                                      existingGroup.label = e.target.value;
-                                      groups[index] = existingGroup;
-                                      field.onChange(groups);
-                                      props.onFieldChanged(field.name, groups);
-                                    }
+                                    const groupIndex = groups.findIndex(
+                                      (g) => g.type === groupName
+                                    );
+
+                                    const existingGroup = groups[groupIndex];
+                                    existingGroup.label = e.target.value;
+                                    groups[groupIndex] = existingGroup;
+                                    field.onChange(groups);
+                                    onFieldChange(field.name, groups);
                                   }}
                                 />
                               </FormControl>
@@ -216,20 +212,14 @@ export default function WidgetResourceOverviewTags(
                                     ) > -1
                                   }
                                   onCheckedChange={(checked: any) => {
-                                    const groups = field.value;
-                                    const existingGroup = groups[index];
-
-                                    // Safety check
-                                    if (!checked && existingGroup) {
-                                      existingGroup.multiple = checked;
-                                      groups[index] = existingGroup;
-                                      field.onChange(groups);
-                                      props.onFieldChanged(field.name, groups);
-                                    } else {
-                                      existingGroup.multiple = checked;
-                                      field.onChange(groups);
-                                      props.onFieldChanged(field.name, groups);
-                                    }
+                                    const groups = handleTagCheckboxGroupChange(
+                                      groupName,
+                                      checked,
+                                      field.value,
+                                      'multiple'
+                                    );
+                                    field.onChange(groups);
+                                    props.onFieldChanged(field.name, groups);
                                   }}
                                 />
                               </FormControl>

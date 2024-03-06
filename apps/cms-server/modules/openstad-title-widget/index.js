@@ -36,25 +36,10 @@ module.exports = {
           }
         ]
       },
-      className: {
-        type: 'select',
-        label: 'Select HTML styling class',
-        def: 'headerDefault',
-        choices: [
-          {
-            label: 'Normaal',
-            value: 'header-default'
-          },
-          {
-            label: 'Extra vet',
-            value: 'heavy-bold'
-          }
-        ]
-      },
       classNameCustom: {
         type: 'string',
         label: 'CSS class'
-      }
+      },
     },
     group: {
       generalGroup: {

@@ -12,7 +12,7 @@ import { Heading } from '@/components/ui/typography';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AgendaWidgetProps } from '@openstad/agenda/src/agenda';
+import { AgendaWidgetProps } from '@openstad-headless/agenda/src/agenda';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';

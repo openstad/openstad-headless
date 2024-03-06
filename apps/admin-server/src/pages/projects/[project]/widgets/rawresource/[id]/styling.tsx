@@ -11,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { RawResourceWidgetProps } from '@openstad/raw-resource/src/raw-resource';
+import { RawResourceWidgetProps } from '@openstad-headless/raw-resource/src/raw-resource';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 

@@ -10,7 +10,7 @@ import {
 import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import type { DateCountdownBarWidgetProps } from '@openstad/date-countdown-bar/src/date-countdown-bar';
+import type { DateCountdownBarWidgetProps } from '@openstad-headless/date-countdown-bar/src/date-countdown-bar';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';

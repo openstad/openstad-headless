@@ -34,7 +34,6 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
 	    headers,
     })
     if (!response.ok) {
-      console.log(response);
       throw new Error('Fetch failed')
     }
 
@@ -58,7 +57,6 @@ service.fetchUserData = async function fetchUserData({ authConfig, userId, email
     return mappedUserData;
 
   } catch(err) {
-    console.log(err);
     throw new Error('Cannot connect to auth server');
   }
 
@@ -90,7 +88,6 @@ service.createUser = async function({ authConfig, userData = {} }) {
       body,
     })
     if (!response.ok) {
-      console.log(response);
       throw new Error('Fetch failed')
     }
 
@@ -102,7 +99,6 @@ service.createUser = async function({ authConfig, userData = {} }) {
     return mappedUserData;
 
   } catch(err) {
-    console.log(err);
     throw new Error('Cannot connect to auth server');
   }
 
@@ -136,7 +132,6 @@ service.updateUser = async function({ authConfig, userData = {} }) {
       body,
     })
     if (!response.ok) {
-      console.log(response);
       throw new Error('Fetch failed')
     }
 
@@ -147,7 +142,6 @@ service.updateUser = async function({ authConfig, userData = {} }) {
     return mappedUserData;
 
   } catch(err) {
-    console.log(err);
     throw new Error('Cannot connect to auth server');
   }
 
@@ -172,17 +166,41 @@ service.deleteUser = async function({ authConfig, userData = {} }) {
       body: JSON.stringify({}),
     })
     if (!response.ok) {
-      console.log(response);
       throw new Error('Fetch failed')
     }
 
     return await response.json();
 
   } catch(err) {
-    console.log(err);
     throw new Error('Cannot connect to auth server');
   }
 
+}
+
+service.fetchClient = async function({ authConfig, project }) {
+
+  let clientId = authConfig.clientId;
+  if (!clientId) {
+    throw new Error('OpenStad.service.updateClient: clientId not found')
+  }
+
+  try {
+
+    let url = `${authConfig.serverUrlInternal}/api/admin/client/${clientId}`;
+    let response = await fetch(url, {
+	    headers: {
+        Authorization: `Basic ${new Buffer(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+      },
+    })
+    if (!response.ok) {
+      throw new Error('OpenStad.service.updateClient: fetch client failed')
+    }
+    let client = await response.json();
+    return client;
+
+  } catch(err) {
+    throw new Error('Cannot connect to auth server');
+  }
 }
 
 service.createClient = async function({ authConfig, project }) {
@@ -234,7 +252,6 @@ service.createClient = async function({ authConfig, project }) {
       }),
     })
     if (!response.ok) {
-      console.log(response);
       throw new Error('OpenStad.service.createClient: create client failed')
     }
 
@@ -242,7 +259,6 @@ service.createClient = async function({ authConfig, project }) {
     return client;
 
   } catch(err) {
-    console.log(err);
     throw new Error('Cannot connect to auth server');
   }
 
@@ -258,18 +274,7 @@ service.updateClient = async function({ authConfig, project }) {
 
   try {
 
-    // fetch client
-    let url = `${authConfig.serverUrlInternal}/api/admin/client/${clientId}`;
-    let response = await fetch(url, {
-	    headers: {
-        Authorization: `Basic ${new Buffer(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
-      },
-    })
-    if (!response.ok) {
-      console.log(response);
-      throw new Error('OpenStad.service.updateClient: fetch client failed')
-    }
-    let client = await response.json();
+    let client = await service.fetchClient({ authConfig, project });
 
     let authTypes = authConfig.authTypes || client.authTypes;
     if (!Array.isArray(authTypes)) authTypes = [ authTypes ];
@@ -301,18 +306,18 @@ service.updateClient = async function({ authConfig, project }) {
         inlineCSS: project.config.styling?.inlineCSS,
         displayClientName: project.config.styling?.displayClientName,
       },
-      fromEmail: authConfig.config.fromEmail,
-      fromName: authConfig.config.fromName,
-      contactEmail: authConfig.config.contactEmail,
-      defaultRoleId: authConfig.config.defaultRoleId,
-      requiredFields: authConfig.config.requiredFields,
-      twoFactor: authConfig.config.twoFactor,
-      configureTwoFactor: authConfig.config.configureTwoFactor,
+      fromEmail: authConfig.config.fromEmail || client.config.fromEmail,
+      fromName: authConfig.config.fromName || client.config.fromName,
+      contactEmail: authConfig.config.contactEmail || client.config.contactEmail,
+      defaultRoleId: authConfig.config.defaultRoleId || client.config.defaultRoleId,
+      requiredFields: authConfig.config.requiredFields || client.config.requiredFields,
+      twoFactor: authConfig.config.twoFactor || client.config.twoFactor,
+      configureTwoFactor: authConfig.config.configureTwoFactor || client.config.configureTwoFactor,
       authTypes: {
-        UniqueCode: authConfig.config.UniqueCode,
-        Url: authConfig.config.Url,
-        Phonenumber: authConfig.config.Phonenumber,
-        Local: authConfig.config.Local,
+        UniqueCode: authConfig.config?.UniqueCode || client.config?.authTypes?.UniqueCode,
+        Url: authConfig.config?.Url || client.config?.authTypes?.Url,
+        Phonenumber: authConfig.config?.Phonenumber || client.config?.authTypes?.Phonenumber,
+        Local: authConfig.config?.Local || client.config?.authTypes?.Local,
       }
     };
 
@@ -320,7 +325,8 @@ service.updateClient = async function({ authConfig, project }) {
     data.config = merge.recursive({}, clientConfig, newClientConfig);
 
     // update client
-    response = await fetch(url, {
+    let url = `${authConfig.serverUrlInternal}/api/admin/client/${clientId}`;
+    let response = await fetch(url, {
 	    headers: {
         Authorization: `Basic ${new Buffer(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
         'Content-type': 'application/json',
@@ -329,12 +335,10 @@ service.updateClient = async function({ authConfig, project }) {
       body: JSON.stringify(data),
     })
     if (!response.ok) {
-      console.log(response);
       throw new Error('OpenStad.service.updateClient: update client failed')
     }
 
   } catch(err) {
-    console.log(err);
     throw new Error('Cannot connect to auth server');
   }
   

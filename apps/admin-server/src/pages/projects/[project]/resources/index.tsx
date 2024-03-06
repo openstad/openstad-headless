@@ -27,7 +27,6 @@ export default function ProjectResources() {
     window.URL.revokeObjectURL(url);
   };
 
-
   function transform() {
     const jsonData = JSON.stringify(data);
     exportData(jsonData, `resources.json`, "application/json");

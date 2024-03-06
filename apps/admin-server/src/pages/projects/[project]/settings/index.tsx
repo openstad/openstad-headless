@@ -38,7 +38,6 @@ const formSchema = z.object({
   endDate: z.date().min(new Date(), {
     message: 'De datum moet nog niet geweest zijn!',
   }),
-  enableLikes: z.boolean(),
   enableReactions: z.boolean(),
   cssUrl: z.string().optional(),
   url: z.string().optional()
@@ -60,7 +59,6 @@ export default function ProjectSettings() {
       endDate: data?.config?.project?.endDate
         ? new Date(data?.config?.project?.endDate)
         : new Date(currentDate.getFullYear(), currentDate.getMonth()+3),
-      enableLikes: data?.config?.resources?.enableLikes || false,
       enableReactions: data?.config?.resources?.enableReactions || false,
       cssUrl: data?.config?.project?.cssUrl || '',
       url: data?.url || '',
@@ -95,7 +93,6 @@ export default function ProjectSettings() {
             cssUrl: values.cssUrl,
           },
           resources: {
-            enableLikes: values.enableLikes,
             enableReactions: values.enableReactions,
           },
         },
@@ -159,33 +156,6 @@ export default function ProjectSettings() {
                       form={form}
                       fieldName="endDate"
                       label="Einddatum"
-                    />
-                    <FormField
-                      control={form.control}
-                      name="enableLikes"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            Is het mogelijk om likes te plaatsen?
-                          </FormLabel>
-                          <Select
-                            onValueChange={(e: string) =>
-                              field.onChange(e === 'true')
-                            }
-                            value={field.value ? 'true' : 'false'}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Nee" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="true">Ja</SelectItem>
-                              <SelectItem value="false">Nee</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
                     />
                     <FormField
                       control={form.control}

@@ -1,0 +1,9 @@
+
+{% set apostrophe3Content = data.widget.content | json | replace("'", "&#39;") %}
+
+<div data-openstad-iconSection 
+    data-expandable="{{ data.widget.expandable }}" 
+    data-expanded="{{ data.widget.expanded }}" 
+    data-expandablelabel="{{ data.widget.expandablelabel }}" 
+    data-content='{{ apostrophe3Content }}'>
+</div>

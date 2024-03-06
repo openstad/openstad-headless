@@ -12,18 +12,28 @@ import WidgetResourcesMapButton from './button';
 import WidgetResourcesMapCounter from './counter';
 import WidgetResourcesMapContent from './content';
 import { useRouter } from 'next/router';
-import Preview from '@/components/widget-preview';
-import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
 import WidgetPublish from '@/components/widget-publish';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import type { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
+import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import WidgetPreview from '@/components/widget-preview';
 
 export const getServerSideProps = withApiUrl;
 
-export default function WidgetResourcesMap({
-  apiUrl,
-}:WithApiUrlProps) {
+export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
-  const projectId = router.query.project;
+  const projectId = router.query.project as string;
+
+  const { data: widget, updateConfig } = useWidgetConfig();
+  const { previewConfig, updatePreview } =
+    useWidgetPreview<ResourceOverviewMapWidgetProps>({
+      projectId,
+    });
 
   return (
     <div>
@@ -53,9 +63,7 @@ export default function WidgetResourcesMap({
               <TabsTrigger value="content">Content</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
-            <TabsContent value="preview" className="p-0">
-              {/* <Preview type="resourcesmap" /> */}
-            </TabsContent>
+
             <TabsContent value="map" className="p-0">
               <WidgetResourcesMapMaps />
             </TabsContent>
@@ -73,6 +81,17 @@ export default function WidgetResourcesMap({
             </TabsContent>
           </Tabs>
 
+          <div className="container py-6 mt-6 bg-white rounded-md">
+            {previewConfig && (
+              <>
+                <WidgetPreview
+                  type="resourcesmap"
+                  config={previewConfig}
+                  projectId={projectId as string}
+                />
+              </>
+            )}
+          </div>
         </div>
       </PageLayout>
     </div>
