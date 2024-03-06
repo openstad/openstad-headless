@@ -17,6 +17,7 @@ const ResourceDetailMap = ({
   center = undefined,
   ...props
 }: PropsWithChildren<ResourceDetailMapWidgetProps>) => {
+
   props.zoom ||= 15;
 
   const datastore = new DataStore({
@@ -27,9 +28,9 @@ const ResourceDetailMap = ({
 
   const urlParams = new URLSearchParams(window.location.search);
   resourceId =
-    resourceId || urlParams.get('openstadResourceId')
+    resourceId || ( urlParams.get('openstadResourceId')
       ? parseInt(urlParams.get('openstadResourceId') as string)
-      : undefined;
+      : undefined );
 
   const {
     data: resource,
