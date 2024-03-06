@@ -8,9 +8,7 @@ module.exports = {
         type: 'area',
         options: {
           widgets: {
-            'openstad-section': {},
-            'openstad-iconSection': {},
-            'openstad-image': {},
+            'openstad-section': {}
           }
         }
       }
