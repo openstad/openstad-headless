@@ -22,7 +22,6 @@ export default function WidgetCounter({
   const { data: widget, updateConfig } = useWidgetConfig();
   const { previewConfig, updatePreview } = useWidgetPreview<CounterWidgetProps>({
     projectId,
-    resourceId: '2',
   });
 
   return (

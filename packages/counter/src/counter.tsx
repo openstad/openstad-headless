@@ -50,16 +50,18 @@ function Counter({
     resourceId,
   });
 
-  const { data: comment } = datastore.useComments({
+  const { data: comments } = datastore.useComments({
     projectId: props.projectId,
     resourceId: resourceId,
     sentiment: opinion
   })
 
+
   const { data: results, error, isLoading } = datastore.useChoiceGuideResults({
     projectId: props.projectId,
     choiceGuideId: props.choiceGuideId,
   });
+
 
   if (counterType === 'resource') {
     amountDisplayed = resources?.metadata?.totalCount || 0;
@@ -67,16 +69,16 @@ function Counter({
 
   if (counterType === 'vote') {
     if (opinion === 'for') {
-      amountDisplayed = resource.yes;
+      amountDisplayed = resource.yes || 0;
     } else if (opinion === 'against') {
-      amountDisplayed = resource.no;
+      amountDisplayed = resource.no || 0;
     } else {
-      amountDisplayed = resource.yes + resource.no;
+      amountDisplayed = (resource.yes || 0) + (resource.no || 0);
     }
   }
 
   if (counterType === 'votedUsers') {
-    amountDisplayed = resource.yes + resource.no;
+    amountDisplayed = (resource.yes || 0) + (resource.no || 0);
   }
 
   if (counterType === 'static') {
@@ -84,11 +86,11 @@ function Counter({
   }
 
   if (counterType === 'argument') {
-    amountDisplayed = comment.length
+    amountDisplayed = comments?.length || 0
   }
 
   if (counterType === 'submission') {
-    amountDisplayed = results.length;
+    amountDisplayed = results?.length || 0;
   }
   const content = () => {
     return (
