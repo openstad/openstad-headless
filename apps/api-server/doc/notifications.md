@@ -1,19 +1,19 @@
 # Notifications
 
-The OpenStad system sends out a range of different notifications, mostly throught email.
+The OpenStad system sends out a range of different notifications, mostly through email.
 
-The notification system works with types. These are defined by [hardcoded strings](#types).
+The notification system works with TypeScript based types. These are defined by [hardcoded strings](#types).
 Notifications can have `subject`, `body`, and `from` and `to` fields set.
 
-It also has a `data` field, that can data that is used in the creation of a notification message. If this field contains a key 'resourceId' then the resource with that id is used during message creation, which means that any field from that reource can be used in the message. The same goes for project, user and submission.
+It also has a `data` field, which contains data that is used in the creation of a notification message. If this field contains a 'resourceId' key, then the resource with that ID is used during message creation. Any field from the corresponding resource can be used in the message. The same goes for project, user and submission.
 
-When a new notification is created it automagically creates a NotificationMessage. When a NotificationMessage is created is automagically sent to the receiver defined in the `to` field.
+When a new notification is created, it automatically creates a NotificationMessage, which will then be sent toward the receiver defined in the `to` field.
 
-The method of sending is defined in the `engine` field and can, at the time of writing, be either `email` of `sms`.
+The method of sending a notification is defined in the `engine` field. At the moment, this can either be `email` of `sms`.
 
-Each type of message can have a corresponding template defined. If no template is defined the default template for from the directory `src/notofications/default-templates` is used.
+Each type of message can have a corresponding template defined. If no template is defined, then the default template for this type will be used. These default templates can be found in the directory `src/notifications/default-templates`.
 
-Templates combine mjml and nunjucks, and the aforementioned `data` field, which allows for someting like
+Templates combine mjml and nunjucks, and the aforementioned `data` field. Below is an example of how this is set up.
 
 ```
 <mjml>
@@ -23,7 +23,7 @@ Templates combine mjml and nunjucks, and the aforementioned `data` field, which 
         <mj-text>
           Beste {{user.name}},<br/>
           <br/>
-          Bedankt voor je plan "{{reource.title}}".
+          Bedankt voor je plan "{{resource.title}}".
           <br/>
           Groeten van het OpenStad team
         </mj-text>
@@ -69,7 +69,7 @@ Authorization: XXX
 }
 ```
 
-See above; this is the only really usefull notification endpoint.
+See above; this is the only truly useful notification endpoint.
 
 But for completeness the normal set of CRUD actions is available:
 
@@ -79,7 +79,7 @@ GET :HOSTNAME/notification/project/:PROJECT_ID/notification
 Authorization: XXX
 ```
 
-#### View one notifications
+#### View a single notification
 ```
 GET :HOSTNAME/notification/project/:PROJECT_ID/notification/:NOTIFICATION_ID
 Authorization: XXX
@@ -114,7 +114,7 @@ GET :HOSTNAME/notification/project/:PROJECT_ID/template
 Authorization: XXX
 ```
 
-#### View one templates
+#### View a single template
 ```
 GET :HOSTNAME/notification/project/:PROJECT_ID/template/:TEMPLATE_ID
 Authorization: XXX
