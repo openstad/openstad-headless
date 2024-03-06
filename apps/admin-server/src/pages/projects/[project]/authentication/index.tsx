@@ -52,15 +52,13 @@ const formSchema = z.object({
 });
 
 export default function ProjectAuthentication() {
-  const category = 'auth';
 
   const router = useRouter();
   const { project } = router.query;
   const {
     data,
-    isLoading,
     updateProject,
-  } = useProject();
+  } = useProject(['includeAuthConfig']);
 
   const defaults = useCallback(
     () => ({
