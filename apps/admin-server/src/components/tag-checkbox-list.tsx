@@ -115,7 +115,7 @@ export const TagCheckboxList = <T extends { [key: string]: any }>({
                       <FormField
                         key={item[keyForValue]}
                         control={form.control}
-                        name="tagGroups"
+                        name={fieldName}
                         render={({ field }) => {
                           return (
                             <FormItem
