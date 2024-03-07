@@ -21,6 +21,7 @@ import { SimpleCalendar } from '@/components/simple-calender-popup';
 import useResource from '@/hooks/use-resource';
 import toast from 'react-hot-toast';
 import { ImageUploader } from './image-uploader';
+import useTags from '@/hooks/use-tags';
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -97,6 +98,11 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     project as string,
     id as string
   );
+
+  const {data:tags, error:tagError, isLoading} = useTags(project as string);
+
+  console.log({existingData});
+  console.log({tags});
 
   const [imageArray, setImageArray] = useState<any[]>([]);
   const [loaded, setLoaded] = useState(false);
