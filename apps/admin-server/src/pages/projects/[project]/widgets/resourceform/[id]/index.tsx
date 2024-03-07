@@ -28,9 +28,9 @@ import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition'
 import WidgetPublish from '@/components/widget-publish';
 import WidgetResourceFormItems from "@/pages/projects/[project]/widgets/resourceform/[id]/items";
 import {useWidgetPreview} from "@/hooks/useWidgetPreview";
-import {EnqueteWidgetProps} from "@openstad/enquete/src/enquete";
 import {useWidgetConfig} from "@/hooks/use-widget-config";
 import WidgetPreview from "@/components/widget-preview";
+import {ResourceFormWidgetProps} from "@openstad-headless/resource-form/src/props";
 
 export const getServerSideProps = withApiUrl;
 export default function WidgetResourceForm({
@@ -38,10 +38,10 @@ export default function WidgetResourceForm({
 }:WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
-  const projectId = router.query.project;
+  const projectId = router.query.project as string;
 
   const { data: widget, updateConfig } = useWidgetConfig();
-  const { previewConfig, updatePreview } = useWidgetPreview<EnqueteWidgetProps>(
+  const { previewConfig, updatePreview } = useWidgetPreview<ResourceFormWidgetProps>(
       {
         projectId,
       }
