@@ -243,10 +243,10 @@ service.createClient = async function({ authConfig, project }) {
         authTypes,
         requiredUserFields,
         twoFactorRoles,
-        siteUrl: `${project.url}`,
-        redirectUrl: `${config.url}`,
+        siteUrl: project.url || '',
+        redirectUrl: config.url || '',
         allowedDomains: [ config.domain ],
-        name: `${project.name}`,
+        name: authConfig.name || project.name || '',
         description: `Client for API project ${project.name} (${project.id})`,
         config: newConfig
       }),
