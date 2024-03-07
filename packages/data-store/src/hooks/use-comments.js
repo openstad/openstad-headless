@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 export default function useComments(props) {
   let self = this;
 
@@ -7,14 +5,24 @@ export default function useComments(props) {
   const resourceId = props.resourceId;
   const sentiment = props.sentiment || null;
 
-  const { data, error, isLoading } = self.useSWR(
-    { projectId, resourceId, sentiment },
-    'comments.fetch'
-  );
+  let dataToReturn = [];
+  let errorToReturn = undefined;
+  let isLoadingToReturn = false;
+
+  if (resourceId) {
+    const { data, error, isLoading } = self.useSWR(
+      { projectId, resourceId, sentiment },
+      'comments.fetch'
+    );
+
+    dataToReturn = data;
+    errorToReturn = error;
+    isLoadingToReturn = isLoading;
+  }
 
   // add functionality
-  let comments = data || [];
-  
+  let comments = dataToReturn || [];
+
   comments.create = function (newData) {
     return self.mutate(
       { projectId, resourceId, sentiment },
@@ -76,5 +84,9 @@ export default function useComments(props) {
     });
   });
 
-  return {data:comments, error, isLoading};
+  return {
+    data: dataToReturn,
+    error: errorToReturn,
+    isLoading: isLoadingToReturn,
+  };
 }
