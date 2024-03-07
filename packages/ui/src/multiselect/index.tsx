@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
-import { Checkbox } from '../checkbox';
+// import { Checkbox } from '../checkbox';
 import { Icon } from '../icon';
 import './index.css';
+
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Button, Checkbox, FormLabel, Paragraph, FormField } from "@utrecht/component-library-react";
 
 export function MultiSelect({
   label,
@@ -14,37 +18,50 @@ export function MultiSelect({
   defaultOpen?: boolean;
   onItemSelected: (optionValue: string) => void;
 }) {
+
   const [isOpen, setOpen] = useState<boolean>(defaultOpen || false);
 
   return (
     <div className="multi-select">
-      <div
-        className="multi-select-header"
+      <Button
+        appearance='default-button'
         onClick={() => {
           setOpen(!isOpen);
-        }}>
-        <p>{label}</p>
+        }}
+      >
+        {label}
         <Icon icon={isOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'} />
-      </div>
+      </Button>
 
-      <section>
-        {isOpen
-          ? options.map((option) => {
-              return (
-                <div
-                  onClick={() => {
-                    const value = option.value;
-                    onItemSelected(value);
-                  }}
-                  className="multi-select-item"
-                  key={`multi-select-item-${option.label}`}>
-                  <Checkbox checked={option.checked} />
-                  <p>{option.label}</p>
-                </div>
-              );
-            })
-          : null}
-      </section>
+      {isOpen &&
+        <section className="multiselect-container">
+          {options.map((option, index) => {
+            return (
+              <div
+                onClick={() => {
+                  const value = option.value;
+                  onItemSelected(value);
+                }}
+                key={`multi-select-item-${option.label}`}>
+                <FormField type="checkbox">
+                  <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
+                    <Checkbox
+                      className="utrecht-form-field__input"
+                      checked={option.checked}
+                    />
+                    <FormLabel
+                      type="checkbox"
+                    >
+                      {option.label}
+                    </FormLabel>
+
+                  </Paragraph>
+                </FormField>
+              </div>
+            );
+          })}
+        </section>
+      }
     </div>
   );
 }
