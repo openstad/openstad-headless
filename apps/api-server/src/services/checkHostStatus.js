@@ -132,11 +132,16 @@ const checkHostStatus = async (conditions) => {
     const promises = projects.map(async (project) => {
       // Todo: skip the projects with hostStatus.status === true?
 
+      if (!project.url) {
+        console.error('No url found for project: ', project.id);
+        return;
+      }
+      
       let hostStatus = project.hostStatus;
       //ensure it's an object so we dont have to worry about checks later
       hostStatus = hostStatus ? hostStatus : {};          //
 
-      const domainIp = getDomainIp(project.domain);
+      const domainIp = getDomainIp(project.url);
 
       hostStatus.ip = domainIp !== null && domainIp === serverIp ? true : false;
 
