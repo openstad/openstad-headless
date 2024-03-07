@@ -10,6 +10,8 @@ import DataStore from '@openstad-headless/data-store/src';
 import Form from "@openstad-headless/form/src/form";
 
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
+    const { saveButton, submitButton, saveConceptButton } = props.submit;
+
     const notifyCreate = () =>
         toast.success('Idee ingedient', { position: 'bottom-center' });
 
@@ -73,9 +75,9 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                     <Form
                         fields={formFields}
                         title=""
-                        submitText={props.submitButton || ""}
+                        submitText={submitButton || ""}
                         submitHandler={onSubmit}
-                        secondaryLabel={props.saveConceptButton || ""}
+                        secondaryLabel={saveConceptButton || ""}
                     />
                 )}
 

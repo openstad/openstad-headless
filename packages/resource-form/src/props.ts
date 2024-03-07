@@ -12,9 +12,7 @@ export type ResourceFormWidget = {
     title?: string;
     displayDescription?: boolean;
     description?: string;
-    submitButton?: string;
-    saveButton?: string;
-    saveConceptButton?: string;
+    submit?: Submit;
     items?: Array<Item>;
 };
 
@@ -23,6 +21,12 @@ export type General = {
     formName?: string,
     redirectUrl?: string,
     hideAdmin?: boolean,
+};
+
+export type Submit = {
+    submitButton?: string;
+    saveButton?: string;
+    saveConceptButton?: string;
 };
 
 export type Confirmation = {
