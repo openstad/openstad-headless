@@ -107,6 +107,40 @@ router
 router
   .route('(/project/:projectId)?/digest-login')
   .get(async function (req, res, next) {
+    // check redirect first
+    let returnTo = req.query.returnTo;
+    returnTo = returnTo || '/?jwt=[[jwt]]';
+    if (!returnTo.match(/\[\[jwt\]\]/) ) returnTo = returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]';
+    let redirectUrl = returnTo;
+    redirectUrl = redirectUrl || (req.query.returnTo ? req.query.returnTo + (req.query.returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]' : false);
+    redirectUrl = redirectUrl || '/';
+
+    const isAllowedRedirectDomain = (url, project) => {
+      let allowedDomains = project?.config?.allowedDomains || [];
+      if (project.url) {
+        let projectDomain = new URL(project.url).hostname;
+        allowedDomains.push(projectDomain);
+      }
+      let redirectUrlHost = '';
+      try {
+        redirectUrlHost = new URL(url).hostname;
+      } catch (err) {
+      }
+      // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
+      return allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1;
+    }
+
+    // check if redirect domain is allowed
+    if (isAllowedRedirectDomain(redirectUrl, req.project)) {
+      req.redirectUrl = redirectUrl;
+      return next();
+    } else {
+      res.status(500).json({
+        status: 'Redirect domain not allowed'
+      });
+    }
+  })
+  .get(async function (req, res, next) {
     
     // get accesstoken for code
     let code = req.query.code;
@@ -219,45 +253,12 @@ router
       .catch(next)
   })
   .get(function (req, res, next) {
-
-    let returnTo = req.query.returnTo;
-    returnTo = returnTo || '/?jwt=[[jwt]]';
-    if (!returnTo.match(/\[\[jwt\]\]/) ) returnTo = returnTo + (returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]';
-    let redirectUrl = returnTo;
-    redirectUrl = redirectUrl || (req.query.returnTo ? req.query.returnTo + (req.query.returnTo.includes('?') ? '&' : '?') + 'jwt=[[jwt]]' : false);
-    redirectUrl = redirectUrl || '/';
-
-    // todo: deze afvanging moet veel eerder!!!
-    const isAllowedRedirectDomain = (url, allowedDomains) => {
-
-      let redirectUrlHost = '';
-      try {
-        redirectUrlHost = new URL(url).hostname;
-      } catch (err) {
-      }
-
-      // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
-      return allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1;
-    }
-
-    //check if redirect domain is allowed
-    if (isAllowedRedirectDomain(redirectUrl, req.project && req.project.config && req.project.config.allowedDomains)) {
-      if (redirectUrl.match('[[jwt]]')) {
-        jwt.sign({userId: req.userData.id, authProvider: req.authConfig.provider}, req.authConfig.jwtSecret, {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
-          if (err) return next(err)
-          req.redirectUrl = redirectUrl.replace('[[jwt]]', token);
-          return next();
-        });
-      } else {
-        req.redirectUrl = redirectUrl;
-        return next();
-      }
-    } else {
-      res.status(500).json({
-        status: 'Redirect domain not allowed'
-      });
-    }
-
+    if (!req.redirectUrl.match('[[jwt]]')) return next();
+    jwt.sign({userId: req.userData.id, authProvider: req.authConfig.provider}, req.authConfig.jwtSecret, {expiresIn: 182 * 24 * 60 * 60}, (err, token) => {
+      if (err) return next(err)
+      req.redirectUrl = req.redirectUrl.replace('[[jwt]]', token);
+      return next();
+    });
   })
   .get(function (req, res, next) {
     res.redirect(req.redirectUrl);
