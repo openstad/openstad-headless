@@ -1,17 +1,31 @@
-export default function useResources({ 
+export default function useResources({
   projectId,
   page = 0,
   pageSize = 20,
   search = '',
   tags = [],
-  sort = 'createdAt_desc'
+  sort = 'createdAt_desc',
 }) {
   let self = this;
+
+  if (!projectId) {
+    const data = {
+      metadata: {
+        page: 0,
+        pageSize: 0,
+        pageCount: 1,
+        totalCount: 0,
+      },
+      records: [],
+    };
+
+    return { data, error: 'No projectId given', isLoading: false };
+  }
 
   // If you add a prop here, the also do it for filter
   const { data, error, isLoading } = self.useSWR(
     { projectId, page, pageSize, search, tags, sort },
-    'resources.fetch',
+    'resources.fetch'
   );
 
   // add functionality
@@ -24,7 +38,7 @@ export default function useResources({
         page: 0,
         pageSize: resources.length,
         pageCount: 1,
-        totalCount: resources.length
+        totalCount: resources.length,
       },
       records: resources,
     };
@@ -40,7 +54,6 @@ export default function useResources({
         }
     );
   };
-
 
   const submitVotes = function (resourcesToLike) {
     return self.mutate({ projectId }, 'resources.submitLike', resourcesToLike, {
@@ -66,5 +79,5 @@ export default function useResources({
       });
     };
   });
-  return {data:resources, error, isLoading, submitVotes, create};
+  return {data :resources, error, isLoading, submitVotes, create};
 }

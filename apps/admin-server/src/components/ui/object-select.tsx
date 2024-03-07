@@ -41,7 +41,7 @@ export const ObjectListSelect = <T extends { [key: string]: any }>({
           <SelectValue placeholder="Selecteer een optie" />
         </SelectTrigger>
       </FormControl>
-      <SelectContent>
+      <SelectContent className='overflow-y-auto max-h-[16rem]'>
         {noSelection.length > 0 ? (
           <SelectItem
             key={`${field.name}-dynamic-select-option-no-choice`}

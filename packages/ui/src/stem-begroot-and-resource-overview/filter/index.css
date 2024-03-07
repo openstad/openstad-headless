@@ -13,6 +13,7 @@
 
 .osc-resources-filter input{
     height: 100%;
+    max-width: none;
 }
 
 .osc-resources-filter.osc-flex-columned {
@@ -24,19 +25,16 @@
     background-color: var(--osc-card);
 }
 
-.osc-filter-search-bar {
-    max-width: 20rem;
-    padding: .5rem;
-}
-
 .osc-resources-filter.osc-flex-columned > .osc-filter-search-bar{
     max-width: unset;
 }
 
 .osc-resources-filter.osc-flex-columned > select {
     width: 100%;
+    max-width: none;
 }
 
 .osc-resources-filter.osc-flex-columned > .multi-select {
     width: 100%;
+    max-width: none;
 }

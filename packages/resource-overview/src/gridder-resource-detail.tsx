@@ -7,6 +7,9 @@ import {
 } from '@openstad-headless/ui/src';
 import './gridder-resource-detail.css';
 
+import "@utrecht/component-library-css";
+import "@utrecht/design-tokens/dist/root.css";
+import { Button } from "@utrecht/component-library-react";
 export const GridderResourceDetail = ({
   resource,
   onRemoveClick,
@@ -56,7 +59,8 @@ export const GridderResourceDetail = ({
             </div>
           </div>
           <div className="osc-gridder-resource-detail-actions">
-            <SecondaryButton
+            <Button
+              appearance="primary-action-button"
               disabled={!isModerator && !loginUrl}
               onClick={() => {
                 if(!isModerator) {
@@ -67,7 +71,7 @@ export const GridderResourceDetail = ({
                 }
               }}>
               {isModerator?'Verwijder' : 'Inloggen'}
-            </SecondaryButton>
+            </Button>
           </div>
         </section>
       </div>
