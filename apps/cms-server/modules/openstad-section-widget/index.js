@@ -144,8 +144,9 @@ module.exports = {
       },
 
       backgroundColor: {
-        type: 'color',
-        label: 'Achtergrond',
+        type: 'boolean',
+        label: 'Achtergrond kleur toepassen',
+        def: false,
       },
 
     },

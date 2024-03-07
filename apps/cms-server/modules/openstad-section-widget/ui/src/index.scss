@@ -46,6 +46,10 @@
 .section.margin-up {
   margin-top: -70px;
 }
+.section.--solid {
+  background-color: var(--nlds-default-background-color, #F0F4F8);
+  padding: 24px 0;
+}
 
 // give standard margin bottom to columns in row, otherwise they are stacked
 .section>.container>.row>div {

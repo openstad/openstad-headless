@@ -14,6 +14,7 @@
   {% endif %}
   {{data.widget.htmlClass}}
   {% if data.widget.marginType === 'up' %} margin-up {% endif %}
+  {% if data.widget.backgroundColor %} --solid {% endif %}
 " style="
   {% if data.widget.backgroundImage %}
   background-image:url({{ apos.attachments.url(data.widget.backgroundImage) }});
@@ -22,7 +23,6 @@
   -o-background-size: cover;
   background-size: cover;
   {% endif %}
-  {% if data.widget.backgroundColor %} background-color: {{data.widget.backgroundColor}}; {% endif %}
   ">
   {% if data.widget.sectionToggle %}
   <a class="toggle-title"
