@@ -15,7 +15,7 @@ export type RangeSliderProps = {
     minCharacters?: number;
     maxCharacters?: number;
     disabled?: boolean;
-    onChange?: (e: {name: string, value: string | []}) => void;
+    onChange?: (e: {name: string, value: string | FileList | []}) => void;
 }
 
 const RangeSlider: FC<RangeSliderProps> = ({

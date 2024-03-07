@@ -33,14 +33,13 @@ export type Confirmation = {
 export type Item = {
     trigger: string;
     title?: string;
-    key: string;
     description?: string;
     type?: string;
     fieldKey: string;
     fieldRequired?: boolean;
-    minCharacters?: number;
-    maxCharacters?: number;
-    variant?: 'text input' | 'textarea';
+    minCharacters?: string;
+    maxCharacters?: string;
+    variant?: string;
     multiple?: boolean;
     images?: Array<{
         image?: any;

@@ -25,7 +25,7 @@ import {ArrowDown, ArrowUp, X} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import {Item, Option, ResourceFormWidgetProps} from "@openstad/resource-form/src/props";
+import {Item, Option, ResourceFormWidgetProps} from "@openstad-headless/resource-form/src/props";
 
 const formSchema = z.object({
     trigger: z.string(),
@@ -90,7 +90,7 @@ export default function WidgetResourceFormItems(
                     fieldRequired: values.fieldRequired || false,
                     minCharacters: values.minCharacters,
                     maxCharacters: values.maxCharacters,
-                    variant: values.variant,
+                    variant: values.variant || 'text input',
                     multiple: values.multiple || false,
                     options: values.options || [],
                 },

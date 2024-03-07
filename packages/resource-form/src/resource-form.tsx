@@ -2,12 +2,12 @@ import React from 'react';
 import hasRole from '../../lib/has-role';
 import {ResourceFormWidgetProps} from "./props.js";
 import {Banner, Button, Spacer} from "@openstad-headless/ui/src/index.js";
-import Form from "@openstad-headless/form/src/form";
 import {InitializeFormFields} from "./parts/init-fields.js";
 import toast, { Toaster } from 'react-hot-toast';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
+import Form from "@openstad-headless/form/src/form";
 
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const notifyCreate = () =>

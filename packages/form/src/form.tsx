@@ -1,5 +1,5 @@
-import React, { FC, useState } from 'react';
-import {FormProps, FieldProps, CombinedFieldPropsWithType, ComponentFieldProps} from "./props";
+import React, { useState } from 'react';
+import type {CombinedFieldPropsWithType, ComponentFieldProps, FormProps} from "./props";
 import TextInput from "@openstad-headless/ui/src/form-elements/text";
 import RangeSlider from "@openstad-headless/ui/src/form-elements/a-b-slider";
 import CheckboxField from "@openstad-headless/ui/src/form-elements/checkbox";
@@ -12,27 +12,24 @@ import { handleSubmit } from "./submit";
 import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden/index.js";
 import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choice/index.js";
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Button } from "@utrecht/component-library-react";
 
-const Form: FC<FormProps> = ({
-     title = 'Form Widget',
-     fields = [],
-     submitText = 'Verzenden',
-     submitHandler = () => {},
-     submitDisabled = false,
-     secondaryLabel = '',
-     secondaryHandler = () => {},
- }) => {
-    const initialFormValues: { [key: string]: any } = {};
+function Form({
+      title = 'Form Widget',
+      fields = [],
+      submitText = 'Verzenden',
+      submitHandler = () => {},
+      submitDisabled = false,
+      secondaryLabel = '',
+      secondaryHandler = () => {},
+}: FormProps) {
+    const initialFormValues: { [key: string]: string | FileList | [] } = {};
     fields.forEach((field) => {
         if (field.fieldKey) {
-            //@ts-ignore
-            initialFormValues[field.fieldKey] = typeof field.defaultValue !== 'undefined' ? field.defaultValue :'';
+            //@ts-expect-error
+            initialFormValues[field.fieldKey] = typeof field.defaultValue !== 'undefined' ? field.defaultValue : '';
         }
     });
 
@@ -41,12 +38,13 @@ const Form: FC<FormProps> = ({
 
     const handleFormSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        handleSubmit(fields, formValues, setFormErrors, submitHandler);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        handleSubmit(fields as unknown as Array<CombinedFieldPropsWithType>, formValues, setFormErrors, submitHandler);
     };
 
-    const handleInputChange = (event: {name: string, value: string | []}) => {
+    const handleInputChange = (event: { name: string, value: string | FileList | []}) => {
         const { name, value } = event;
-        setFormValues({ ...formValues, [name]: value });
+        setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
     };
 
     const componentMap: { [key: string]: React.ComponentType<ComponentFieldProps> } = {
@@ -66,16 +64,16 @@ const Form: FC<FormProps> = ({
         if (!field.type) {
             return null;
         }
-      const Component = componentMap[field.type];
-      if (Component) {
-        return (
-          <Component
-            {...field}
-            index={index}
-            onChange={handleInputChange}
-          />
-        );
-      }
+        const Component = componentMap[field.type];
+        if (Component) {
+            return (
+                <Component
+                    {...field}
+                    index={index}
+                    onChange={handleInputChange}
+                />
+            );
+        }
     };
 
     return (
@@ -83,9 +81,9 @@ const Form: FC<FormProps> = ({
             <div className="form-widget-container">
                 {title && <h5 className="form-widget-title">{title}</h5>}
 
-                <form onSubmit={handleFormSubmit} className="form-container" noValidate>
+                <form className="form-container" noValidate onSubmit={handleFormSubmit}>
                     {fields.map((field: CombinedFieldPropsWithType, index: number) => (
-                        <div key={index} className={`question-type-${field.type}`}>
+                        <div className={`question-type-${field.type}`} key={index}>
                             {renderField(field, index)}
                             <FormFieldErrorMessage className="error-message">
                                 {formErrors[field.fieldKey] && <span>{formErrors[field.fieldKey]}</span>}
@@ -93,9 +91,10 @@ const Form: FC<FormProps> = ({
                         </div>
                     ))}
                     {secondaryLabel && (
-                        <Button appearance='primary-action-button' type="button" onClick={() => secondaryHandler(formValues)}>{secondaryLabel}</Button>
+                        <Button appearance='primary-action-button' onClick={() => secondaryHandler(formValues)}
+                                type="button">{secondaryLabel}</Button>
                     )}
-                    <Button 
+                    <Button
                         appearance='primary-action-button'
                         type="submit"
                         disabled={submitDisabled}
@@ -106,6 +105,6 @@ const Form: FC<FormProps> = ({
             </div>
         </div>
     );
-};
+}
 
 export default Form;

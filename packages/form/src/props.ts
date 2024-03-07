@@ -1,34 +1,33 @@
-import { TextInputProps } from '@openstad-headless/ui/src/form-elements/text';
-import { TickmarkSliderProps } from "@openstad-headless/ui/src/form-elements/tickmark-slider";
-import { RangeSliderProps } from "@openstad-headless/ui/src/form-elements/a-b-slider";
-import { CheckboxFieldProps } from "@openstad-headless/ui/src/form-elements/checkbox";
-import { SelectFieldProps } from "@openstad-headless/ui/src/form-elements/select";
-import { RadioboxFieldProps } from "@openstad-headless/ui/src/form-elements/radio";
-import { FileUploadProps} from "@openstad-headless/ui/src/form-elements/file-upload";
-import { HiddenInputProps } from "@openstad-headless/ui/src/form-elements/hidden";
-import {ImageChoiceFieldProps} from "@openstad-headless/ui/src/form-elements/image-choice";
+import type { TextInputProps } from '@openstad-headless/ui/src/form-elements/text';
+import type { TickmarkSliderProps } from "@openstad-headless/ui/src/form-elements/tickmark-slider";
+import type { RangeSliderProps } from "@openstad-headless/ui/src/form-elements/a-b-slider";
+import type { CheckboxFieldProps } from "@openstad-headless/ui/src/form-elements/checkbox";
+import type { SelectFieldProps } from "@openstad-headless/ui/src/form-elements/select";
+import type { RadioboxFieldProps } from "@openstad-headless/ui/src/form-elements/radio";
+import type { FileUploadProps} from "@openstad-headless/ui/src/form-elements/file-upload";
+import type { HiddenInputProps } from "@openstad-headless/ui/src/form-elements/hidden";
+import type {ImageChoiceFieldProps} from "@openstad-headless/ui/src/form-elements/image-choice";
 
 export type FormProps = {
     title?: string;
-    fields: CombinedFieldProps[];
+    fields: Array<CombinedFieldProps>;
     submitText?: string;
-    submitHandler: (data: any) => void;
+    submitHandler: (values: { [p: string]: string | FileList | []}) => void;
     submitDisabled?: boolean;
     secondaryLabel?: string;
-    secondaryHandler?: (data: any) => void;
+    secondaryHandler?: (values: { [p: string]: string | FileList | []}) => void;
 }
 
-type CombinedFieldPropsWithType = (
-    ({type? : 'text'} & TextInputProps) |
-    ({type? : 'tickmark-slider'} & TickmarkSliderProps) |
-    ({type? : 'range'} & RangeSliderProps) |
-    ({type? : 'checkbox'} & CheckboxFieldProps) |
-    ({type? : 'select'} & SelectFieldProps) |
-    ({type? : 'radiobox'} & RadioboxFieldProps) |
-    ({type? : 'upload'} & FileUploadProps) |
-    ({type? : 'hidden'} & HiddenInputProps)|
-    ({type? : 'imageChoice'} & ImageChoiceFieldProps)
-);
+type CombinedFieldPropsWithType =
+    | ({ type?: 'text' } & TextInputProps)
+    | ({ type?: 'tickmark-slider' } & TickmarkSliderProps)
+    | ({ type?: 'range' } & RangeSliderProps)
+    | ({ type?: 'checkbox' } & CheckboxFieldProps)
+    | ({ type?: 'select' } & SelectFieldProps)
+    | ({ type?: 'radiobox' } & RadioboxFieldProps)
+    | ({ type?: 'upload' } & FileUploadProps)
+    | ({ type?: 'hidden' } & HiddenInputProps)
+    | ({ type?: 'imageChoice' } & ImageChoiceFieldProps);
 
 type ComponentFieldProps = (
     {

@@ -15,7 +15,7 @@ export type FileUploadProps = {
     variant?: 'multiple' | 'single';
     allowedTypes?: string;
     disabled?: boolean;
-    onChange?: (e: {name: string, value: string | []}) => void;
+    onChange?: (e: {name: string, value: string | FileList | []}) => void;
 }
 
 const FileUploadField: FC<FileUploadProps> = ({

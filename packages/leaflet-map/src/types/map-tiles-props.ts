@@ -6,7 +6,7 @@ type MapTiles = {
 
 export type MapTilesProps = {
   tilesVariant?: string,
-  tiles?: MapTiles,
+  tiles?: MapTiles | null,
 	minZoom?: number,
 	maxZoom?: number,
 };
