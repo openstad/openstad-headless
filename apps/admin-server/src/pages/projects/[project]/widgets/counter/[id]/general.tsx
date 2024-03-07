@@ -30,8 +30,8 @@ import useResources from '@/hooks/use-resources';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 
 const formSchema = z.object({
-  label: z.string(),
-  url: z.string(),
+  label: z.string().optional(),
+  url: z.string().optional(),
   counterType: z.enum([
     'resource',
     'vote',
@@ -140,7 +140,7 @@ export default function CounterDisplay(
                     <SelectValue placeholder="Hoeveelheid stemmen" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent className='overflow-y-auto max-h-[16rem]'>
                   <SelectItem value="resource">
                     Hoeveelheid resources
                   </SelectItem>

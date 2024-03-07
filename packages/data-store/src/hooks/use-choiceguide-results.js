@@ -1,21 +1,31 @@
-export default function useChoiceGuideResults(props) {
+export default function useChoiceGuideResults({
+  projectId,
+  choiceGuideId,
+}) {
+  let self = this;
 
-    let self = this;
-    
-    const projectId = props.projectId;
-    const choiceGuideId = props.choiceGuideId;
+  if (!choiceGuideId) {
+    return { data: [], error: 'No choiceGuideId given', isLoading: false };
+  }
 
-    if(!choiceGuideId) {
-      return {data: [], error: "No choiceGuideId given", isLoading:false }
-    }
-    
-    const { data, error, isLoading } = self.useSWR({ projectId, choiceGuideId }, 'choiceGuideResults.fetch');
-        
+  try {
+    const { data, error, isLoading } = self.useSWR(
+      { projectId, choiceGuideId },
+      'choiceGuideResults.fetch'
+    );
+
     if (error) {
       let error = new Error(error);
       let event = new window.CustomEvent('osc-error', { detail: error });
       document.dispatchEvent(event);
     }
-    
-    return {data: data || [], error, isLoading }
+    return { data: data || [], error, isLoading };
+  } catch (e) {
+    return {
+      data: [],
+      error:
+        'Er ging iets mis bij het ophalen van de resultaten, waarschijnlijk ontbreken er een aantal rechten',
+      isLoading: false,
+    };
   }
+}
