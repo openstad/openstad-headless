@@ -141,9 +141,13 @@ router.route('/')
 	.post(function(req, res, next) {
 		db.Project
 			.create(req.body)
-			.then((result) => {
-				req.results = result;
-				return next();
+			.then(result => {
+        req.results = result;
+				return checkHostStatus({id: result.id});
+			})
+			.then(() => {
+				next();
+        return null;
 			})
 			.catch(next)
 	})
@@ -322,12 +326,12 @@ router.route('/:projectId(\\d+)/:willOrDo(will|do)-anonymize-all-users')
 		result.message = 'Ok';
 
 		req.project.doAnonymizeAllUsers(
-			[...result.users], 
+			[...result.users],
 			[...result.externalUserIds],
 			req.query.useAuth
 
 		);
-      } 
+      }
       next();
     } catch (err) {
       return next(err);
