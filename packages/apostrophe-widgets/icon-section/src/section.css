@@ -1,5 +1,5 @@
 .icon-section{
-  background: var(--utrecht-color-grey-90, #eee);
+  background-color: var(--nlds-default-background-color, #F0F4F8);
 }
 
 .icon-section .utrecht-button.utrecht-button--subtle.utrecht-accordion__button{

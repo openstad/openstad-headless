@@ -8,13 +8,10 @@ import { Heading5, Paragraph, Button } from "@utrecht/component-library-react";
 type Props = {
   loginUrl: string;
   step3: string;
-  header: React.JSX.Element;
 };
-export const Step3 = ({ step3, header, ...props }: Props) => {
+export const Step3 = ({ step3, ...props }: Props) => {
   return (
     <>
-      {header}
-      <Spacer size={1.5} />
       <Heading5>Controleer stemcode</Heading5>
       <Paragraph>{step3}</Paragraph>
       <Spacer size={2} />

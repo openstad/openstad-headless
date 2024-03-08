@@ -5,12 +5,10 @@ import { Heading5, Button } from "@utrecht/component-library-react";
 type Props = {
   loginUrl: string;
   step3success: string;
-  header: React.JSX.Element;
 };
-export const Step3Success = ({ step3success, header, ...props }: Props) => {
+export const Step3Success = ({ step3success, ...props }: Props) => {
   return (
     <>
-      {header}
       <Spacer size={1.5} />
       <Heading5>{step3success}</Heading5>
       <Spacer size={2} />

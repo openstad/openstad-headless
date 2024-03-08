@@ -1,42 +1,44 @@
 {% extends 'emails/layout.html' %}
 
 {% block body %}
-<h2 style="margin-bottom: 4px; font-size: 25px;">Inloglink aangevraagd</h2>
+<mj-raw>
+  <!-- Company Header -->
+</mj-raw>
+<mj-section>
+  <mj-column>
+    <mj-image src="https://ci3.googleusercontent.com/meips/ADKq_NaAOJ8-rc0buYlKOzBv3PCsHUNMvL72LbsayLaMjJV_NdAiNiI8ops0z7dQRQeJhXS7I3kf5MSJS2Jdwq0y6rPFlgrtD7o7TD2otUGELpZQcCZmPA=s0-d-e1-ft#https://auth.openstad-ams-acc.savvy.codes/email/logo-small.png" height="70px" width="99px">
+    </mj-image>
+  </mj-column>
+</mj-section>
+<mj-raw>
+  <!-- Image Header -->
+</mj-raw>
+<mj-section>
+  <mj-column width="600px">
+    <mj-image src="https://ci3.googleusercontent.com/meips/ADKq_NbMV2Gxxrz-2nT553nqOZz4rd7vpAsjRCYed7jRt9tcjprZn4qFgaGsSGCJr3TmwbumBh8XAU11x9FdtsKXJtK11ML1ah5-FEDSiqGGIeLswLoekbQ=s0-d-e1-ft#https://auth.openstad-ams-acc.savvy.codes/email/mail-header.jpg"></mj-image>
+  </mj-column>
 
-{% if name %}
-<br />
-<b> Beste {{name}}, </b>
-<br />
-{% endif %}
-<br />
-
-Voor {{clientName}}
-is een inloglink aangevraagd voor dit emailadres.
-Klik op de knop hieronder om automatisch in te loggen.
-<br />
-De knop is 10 minuten geldig.
-<br />
-<br />
-<p align="middle" style="margin: 10px 0;">
-	<a
-    href="{{tokenUrl}}"
-    style="background-color: #ec0000; color:#fff; font-size: 15px; padding:15px 50px; text-decoration:none"
-    target="_blank"
-  >
-		<b>Log in</b>
-	</a>
-</p>
-
-<br />
-<p style="font-size:0.7em;font-style:italic;margin-bottom:5em; max-width:600px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" align="center">
-  Of gebruik deze link in je browser:
-	<br />
-  <a
-    href="{{tokenUrl}}"
-    style="color:#ec0000 xxx"
-    target="_blank"
-  >
-    {{tokenUrl}}
-  </a>
-</p>
+</mj-section>
+<mj-raw>
+  <!-- Mail context -->
+</mj-raw>
+<mj-section>
+  <mj-column width="400px">
+    <mj-text font-size="20px" font-family="Helvetica Neue">Inlogmail aangevraagd</mj-text>
+    <mj-text>Beste {{name or 'bezoeker'}},</mj-text>
+    <mj-text color="#525252">Voor {{clientName}} is een inloglink aangevraagd voor dit emailadres. Klik op de knop hieronder om automatisch in te loggen. De knop is 10 minuten geldig. </mj-text>
+    <mj-button background-color="#EC0000" href="{{loginurl}}">Log in</mj-button>
+  </mj-column>
+</mj-section>
+<mj-raw>
+  <!-- Alternate link -->
+</mj-raw>
+<mj-section>
+  <mj-column width="400px">
+    <mj-text>Of gebruik deze link in je browser:</mj-text>
+  </mj-column>
+  <mj-column>
+    <mj-text>{{loginurl}}</mj-text>
+  </mj-column>
+</mj-section>
 {% endblock %}

@@ -167,7 +167,6 @@ const config: ResourceFormWidgetProps = {
         saveButton: 'Opslaan',
         saveConceptButton: 'Opslaan als concept',
     },
-
     info: {
         loginText: 'Inloggen',
         nameInHeader: false,

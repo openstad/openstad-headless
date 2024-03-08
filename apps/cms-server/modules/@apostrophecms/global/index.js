@@ -64,7 +64,10 @@ module.exports = {
         def: '#logo-image {\n  max-height: 50px;\n}',
         label: 'Extra CSS',
       },
-
+      customCssLink: {
+        type: 'string',
+        label: 'URL voor CSS imports (optioneel)',
+      },
       analyticsType:   {
         type: 'select',
         permission: 'admin',
@@ -148,7 +151,7 @@ module.exports = {
       },
       css: {
         label: 'Vormgeving',
-        fields: [ 'cssExtras' ],
+        fields: [ 'cssExtras', 'customCssLink' ],
       },
       cookies: {
         label: 'Cookie instellingen',

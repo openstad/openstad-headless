@@ -11,6 +11,11 @@
   align-items: start;
   flex-direction: row;
   gap: 0.5rem;
+  position: sticky;
+  z-index: 99;
+  top: 0;
+  padding: .5rem 0;
+  background: #fff;
 }
 
 .budget-used-list p {
