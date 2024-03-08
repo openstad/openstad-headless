@@ -138,7 +138,6 @@ export default function WidgetResourceFormItems(
         title: '',
         description: '',
         type: '',
-        fieldKey: '',
         fieldRequired: true,
         minCharacters: '',
         maxCharacters: '',
