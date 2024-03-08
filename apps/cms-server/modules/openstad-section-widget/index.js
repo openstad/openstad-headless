@@ -144,8 +144,15 @@ module.exports = {
       },
 
       backgroundColor: {
-        type: 'color',
-        label: 'Achtergrond',
+        type: 'boolean',
+        label: 'Achtergrond kleur toepassen',
+        def: false,
+      },
+
+      negativeMargin: {
+        type: 'boolean',
+        label: 'Sectie over vorige element plaatsen',
+        def: false,
       },
 
     },

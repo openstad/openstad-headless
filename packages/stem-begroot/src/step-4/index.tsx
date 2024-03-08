@@ -7,17 +7,14 @@ type Props = {
   voteMessage: string;
   thankMessage: string;
   showNewsletterButton: boolean;
-  header: React.JSX.Element;
 };
 export const Step4 = ({
   showNewsletterButton,
   thankMessage,
   voteMessage,
-  header,
 }: Props) => {
   return (
     <>
-      {header}
       <Spacer size={1.5} />
       <Heading5>{voteMessage}</Heading5>
       <Paragraph>{thankMessage}</Paragraph>
