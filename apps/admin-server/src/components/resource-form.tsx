@@ -22,6 +22,7 @@ import useResource from '@/hooks/use-resource';
 import toast from 'react-hot-toast';
 import { ImageUploader } from './image-uploader';
 import useTags from '@/hooks/use-tags';
+import { TagCheckboxList } from './tag-checkbox-list';
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -82,6 +83,7 @@ const formSchema = z.object({
         .optional(),
     })
     .default({}),
+  tags: z.array(z.any()).default([]),
 });
 
 type FormType = z.infer<typeof formSchema>;
@@ -99,11 +101,9 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     id as string
   );
 
-  const {data:tags, error:tagError, isLoading} = useTags(project as string);
+  console.log({existingData, error})
 
-  console.log({existingData});
-  console.log({tags});
-
+  const { data: tags, error: tagError, isLoading } = useTags(project as string);
   const [imageArray, setImageArray] = useState<any[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -128,7 +128,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       budgetMin: budgetFallback(existingData, 'min'),
       budgetMax: budgetFallback(existingData, 'max'),
       budgetInterval: budgetFallback(existingData, 'interval'),
-
+      tags: existingData?.tags?.map((t:any)=>t.id) || [],
       startDate: existingData?.startDate
         ? new Date(existingData?.startDate)
         : new Date(),
@@ -142,7 +142,9 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         ? new Date(existingData.modBreakDate)
         : undefined,
 
-      location: existingData?.location?JSON.stringify(existingData?.location):'',
+      location: existingData?.location
+        ? JSON.stringify(existingData?.location)
+        : '',
       images: existingData?.images || [],
       extraData: {
         originalId: existingData?.extraData?.originalId || undefined,
@@ -395,6 +397,20 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               array.push(imageResult);
               setImageArray(array);
             }}
+          />
+
+          <TagCheckboxList
+            projectId={project as string}
+            items={
+              tags as Array<{ type: string; id: string | number; name: string }>
+            }
+            label={(t) => t.name}
+            keyForValue="id"
+            keyForGrouping="type"
+            form={form}
+            fieldLabel="Selecteer de gewenste tags die bij een resource weergegeven zullen
+                worden."
+            fieldName="tags"
           />
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
