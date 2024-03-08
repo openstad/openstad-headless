@@ -149,6 +149,12 @@ module.exports = {
         def: false,
       },
 
+      negativeMargin: {
+        type: 'boolean',
+        label: 'Sectie over vorige element plaatsen',
+        def: false,
+      },
+
     },
 
     group: {

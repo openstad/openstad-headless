@@ -15,6 +15,7 @@
   {{data.widget.htmlClass}}
   {% if data.widget.marginType === 'up' %} margin-up {% endif %}
   {% if data.widget.backgroundColor %} --solid {% endif %}
+  {% if data.widget.negativeMargin %} --negative {% endif %}
 " style="
   {% if data.widget.backgroundImage %}
   background-image:url({{ apos.attachments.url(data.widget.backgroundImage) }});

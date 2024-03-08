@@ -51,6 +51,10 @@
   padding: 24px 0;
 }
 
+.section.--negative{
+  margin-block-start: -5rem;
+}
+
 // give standard margin bottom to columns in row, otherwise they are stacked
 .section>.container>.row>div {
  /* @media @phone {
