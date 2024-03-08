@@ -24,12 +24,6 @@ export type General = {
     hideAdmin?: boolean,
 };
 
-export type Submit = {
-    submitButton?: string;
-    saveButton?: string;
-    saveConceptButton?: string;
-};
-
 export type Confirmation = {
     confirmationUser?: boolean,
     confirmationAdmin?: boolean,
