@@ -10,6 +10,9 @@ import DataStore from '@openstad-headless/data-store/src';
 import Form from "@openstad-headless/form/src/form";
 
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
+    const { submitButton, saveConceptButton} = props.submit  || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
+    const { loginText, loginButtonText, viewable} = props.info  || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
+
     const notifyCreate = () =>
         toast.success('Idee ingedient', { position: 'bottom-center' });
 
@@ -54,17 +57,17 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                     )}
                 </div>
 
-                {!hasRole(currentUser, 'member') ? (
+                {!hasRole(currentUser, 'member') && viewable === 'users' ? (
                     <>
                         <Banner className="big">
-                            <h6>Inloggen om deel te nemen.</h6>
+                            <h6>{loginText || 'Inloggen om deel te nemen.'}</h6>
                             <Spacer size={1} />
                             <Button
                                 type="button"
                                 onClick={() => {
                                     document.location.href = props.login?.url || '';
                                 }}>
-                                Inloggen
+                                {loginButtonText || 'Inloggen'}
                             </Button>
                         </Banner>
                         <Spacer size={2} />
@@ -73,9 +76,9 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                     <Form
                         fields={formFields}
                         title=""
-                        submitText={props.submitButton || ""}
+                        submitText={submitButton || "Versturen"}
                         submitHandler={onSubmit}
-                        secondaryLabel={props.saveConceptButton || ""}
+                        secondaryLabel={saveConceptButton || ""}
                     />
                 )}
 
