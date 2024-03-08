@@ -30,7 +30,7 @@ export function useProject(scopes?: Array<string>) {
                 adapter: 'openstad',
                 authTypes: 'Url',
               },
-              anoymous: {
+              anonymous: {
                 name: `${name} anonymous`,
                 adapter: 'openstad',
                 authTypes: 'Anonymous',

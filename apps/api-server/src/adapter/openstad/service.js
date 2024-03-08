@@ -181,7 +181,7 @@ service.fetchClient = async function({ authConfig, project }) {
 
   let clientId = authConfig.clientId;
   if (!clientId) {
-    throw new Error('OpenStad.service.updateClient: clientId not found')
+    throw new Error('OpenStad.service.fetchClient: clientId not found')
   }
 
   try {
@@ -193,7 +193,7 @@ service.fetchClient = async function({ authConfig, project }) {
       },
     })
     if (!response.ok) {
-      throw new Error('OpenStad.service.updateClient: fetch client failed')
+      throw new Error('OpenStad.service.fetchClient: fetch client failed')
     }
     let client = await response.json();
     return client;
