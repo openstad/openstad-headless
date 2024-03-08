@@ -14,6 +14,7 @@ export type ResourceFormWidget = {
     description?: string;
     submit?: Submit;
     items?: Array<Item>;
+    info?: Info;
 };
 
 export type General = {
@@ -23,15 +24,22 @@ export type General = {
     hideAdmin?: boolean,
 };
 
+export type Confirmation = {
+    confirmationUser?: boolean,
+    confirmationAdmin?: boolean,
+};
+
 export type Submit = {
     submitButton?: string;
     saveButton?: string;
     saveConceptButton?: string;
 };
 
-export type Confirmation = {
-    confirmationUser?: boolean,
-    confirmationAdmin?: boolean,
+export type Info = {
+    loginText?: string;
+    loginButtonText?: string;
+    nameInHeader?: boolean;
+    viewable?: 'users' | 'all';
 };
 
 export type Item = {

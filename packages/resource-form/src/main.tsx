@@ -167,6 +167,11 @@ const config: ResourceFormWidgetProps = {
         saveButton: 'Opslaan',
         saveConceptButton: 'Opslaan als concept',
     },
+    info: {
+        loginText: 'Inloggen',
+        nameInHeader: false,
+        viewable: 'all',
+    },
 };
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
