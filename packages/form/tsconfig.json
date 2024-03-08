@@ -1,4 +1,7 @@
 {
   "extends": "../configs/tsconfig",
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [{ "path": "./tsconfig.node.json" }],
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true
+    }
 }

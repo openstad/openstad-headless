@@ -143,6 +143,17 @@ let moduleDefinitions = {
       projectId: null,
     },
   },
+  resourceform: {
+    packageName: '@openstad-headless/resource-form',
+    directory: 'resource-form',
+    js: ['dist/resource-form.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessResourceForm',
+    componentName: 'ResourceFormWidget',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
   begrootmodule: {
     packageName: '@openstad-headless/stem-begroot',
     directory: 'stem-begroot',

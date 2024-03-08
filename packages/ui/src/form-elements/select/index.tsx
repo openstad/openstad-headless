@@ -34,8 +34,8 @@ const SelectField: FC<SelectFieldProps> = ({
         <FormField type="select">
             <Paragraph className="utrecht-form-field__label">
                 <FormLabel htmlFor={fieldKey}>{title}</FormLabel>
-                <FormFieldDescription>{description}</FormFieldDescription>
             </Paragraph>
+            <FormFieldDescription>{description}</FormFieldDescription>
             <Paragraph className="utrecht-form-field__input">
                 <Select
                     className="form-item"

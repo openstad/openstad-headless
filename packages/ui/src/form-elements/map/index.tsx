@@ -1,13 +1,14 @@
 import React, {FC} from "react";
 import {Paragraph, FormLabel, FormFieldDescription, FormField} from "@utrecht/component-library-react";
 import './map.css';
+// import {EditorMap} from "@openstad-headless/leaflet-map/src/editor-map";
 
 export type MapProps = {
     title: string;
     description: string;
     fieldKey: string;
     fieldRequired: boolean;
-    onChange?: (e: {name: string, value: string | []}) => void;
+    onChange?: (e: {name: string, value: string | FileList | []}) => void;
 }
 
 const MapField: FC<MapProps> = ({
@@ -25,13 +26,13 @@ const MapField: FC<MapProps> = ({
       <FormField type="text">
           <Paragraph className="utrecht-form-field__label">
               <FormLabel htmlFor={randomID}>{title}</FormLabel>
-              <FormFieldDescription>{description}</FormFieldDescription>
           </Paragraph>
+          <FormFieldDescription>{description}</FormFieldDescription>
           <div
             className="form-field-map-container"
             id={`map`}
           >
-              {/*<EditorMap fieldName={fieldKey}/> TODO: Uncomment this line when the EditorMap component is implemented*/}
+              {/*<EditorMap fieldName={fieldKey}/>*/}
           </div>
       </FormField>
     );

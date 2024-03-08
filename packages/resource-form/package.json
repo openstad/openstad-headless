@@ -1,33 +1,30 @@
 {
-  "name": "@openstad-headless/leaflet-map",
+  "name": "@openstad-headless/resource-form",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build --config vite.config.base-map.ts && vite build --config vite.config.editor-map.ts && vite build --config vite.config.resource-detail-map.ts && vite build --config vite.config.resource-overview-map.ts",
+    "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives",
     "preview": "vite preview"
   },
   "dependencies": {
     "@openstad-headless/data-store": "file:../data-store",
-    "@openstad-headless/lib": "file:../lib",
     "@openstad-headless/ui": "file:../ui",
+    "@utrecht/component-library-css": "^2.0.0",
     "leaflet": "^1.9.4",
-    "leaflet.markercluster": "^1.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",
-    "react-leaflet-cluster": "^2.1.0",
-    "remixicon": "^3.5.0"
+    "remixicon": "^3.5.0",
+    "swr": "^2.2.4",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^12.3.4",
-    "@types/leaflet": "^1.9.8",
-    "@types/leaflet.markercluster": "^1.5.4",
-    "@types/react": "^18.2.25",
+    "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
-    "@types/react-leaflet-markercluster": "^3.0.4",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.0.3",
