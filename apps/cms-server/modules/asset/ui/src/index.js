@@ -1,4 +1,9 @@
 export default () => {
-  // Your own project level JS may go here
-  console.log('Hello World');
+  apos.util.onReady(() => {
+    const el = document.querySelector('#navbar');
+    
+    if (typeof el !== 'undefined') {
+      NavBar.NavBar.loadWidgetOnElement(el, { ...el.dataset });
+    }
+  });
 };
