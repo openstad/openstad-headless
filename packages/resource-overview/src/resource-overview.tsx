@@ -17,7 +17,7 @@ import nunjucks from 'nunjucks';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Heading4, Heading5, Paragraph, Link } from "@utrecht/component-library-react";
+import { Heading4, Heading5, Paragraph, Button } from "@utrecht/component-library-react";
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -117,9 +117,9 @@ const defaultItemRenderer = (
     }
     return <Paragraph>Er is een fout in de template</Paragraph>;
   }
-
+  
   return (
-    <Link className="resource-card--link" href="#" onClick={() => onItemClick && onItemClick()}>
+    <Button className="resource-card--link" onClick={() => onItemClick && onItemClick()}>
       <Image
         src={resource.images?.at(0)?.src || ''}
         imageFooter={
@@ -162,7 +162,7 @@ const defaultItemRenderer = (
           <Icon icon="ri-message-line" variant="big" text="0" />
         ) : null}
       </div>
-    </Link>
+    </Button>
   );
 };
 

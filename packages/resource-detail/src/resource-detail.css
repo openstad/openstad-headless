@@ -14,13 +14,13 @@
 }
 
 .osc-resource-detail-content-item-row {
-  background-color: var(--osc-card);
-  color:var(--osc-muted);
+  background-color: var(--nlds-resource-detail-background-color, var(--nlds-default-background-color, #F0F4F8));
+  color:var(--nlds-resource-detail-color, var(--utrecht-paragraph-color));
   padding: 0.5rem 0.7rem;
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
-  align-items: center;
   gap: 1rem;
+  border-radius: 4px;
 }
 
 @media (min-width: 768px) { 
