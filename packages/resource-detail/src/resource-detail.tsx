@@ -103,7 +103,7 @@ function ResourceDetail(props: ResourceDetailWidgetProps) {
                     Budget
                   </Heading6>
                   <span className="osc-resource-detail-content-item-text">
-                    {`€ ${resource.budget}`}
+                    {`€ ${resource.budget.toLocaleString('nl-NL')}`}
                   </span>
                 </div>
               )}
