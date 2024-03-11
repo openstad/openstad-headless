@@ -27,12 +27,13 @@
     bottom: 0;
     gap: 1rem;
     box-sizing: border-box;
-    padding: 1rem 1rem;
     background: var(--nlds-figcaption-background-color, var(--utrecht-button-primary-action-background-color));
     color: var(--nlds-figcaption-color, var(--utrecht-button-primary-action-color));    
 }
+
 .osc .image-container > .osc-image-footer p{
     color: inherit;
+    padding: 1rem 1rem;
 }
 
 .osc .image-container > .osc-image-header {
