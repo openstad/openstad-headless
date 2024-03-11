@@ -60,7 +60,7 @@ export default function CreateProject() {
     const project = await createProject(values.projectName);
     if (project) {
       toast.success('Project aangemaakt!');
-      router.push(`/projects/${project.id}/widgets`);
+      router.push(`/projects/${project.id}/settings`);
     } else {
       toast.error('Er is helaas iets mis gegaan.')
     }
@@ -77,7 +77,7 @@ export default function CreateProject() {
       );
       if (project) {
         toast.success('Project aangemaakt!');
-        router.push(`/projects/${project.id}/widgets`);
+        router.push(`/projects/${project.id}/settings`);
       } else {
         toast.error('De file die geüpload is bevat onjuiste data.');
       }

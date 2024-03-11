@@ -22,6 +22,23 @@ export function useProject(scopes?: Array<string>) {
       },
       body: JSON.stringify({
         name,
+        config: {
+          auth: {
+            provider: {
+              openstad: {
+                name: `${name} normal`,
+                adapter: 'openstad',
+                authTypes: 'Url',
+              },
+              anonymous: {
+                name: `${name} anonymous`,
+                adapter: 'openstad',
+                authTypes: 'Anonymous',
+                requiredUserFields: 'postcode',
+              }
+            }
+          }
+        }
       }),
     });
     return await res.json();
