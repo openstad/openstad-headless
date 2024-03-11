@@ -31,6 +31,7 @@
     "@openstad-headless/likes": "file:../../packages/likes",
     "@openstad-headless/raw-resource": "file:../../packages/raw-resource",
     "@openstad-headless/resource-detail": "file:../../packages/resource-detail",
+    "@openstad-headless/resource-form": "file:../../packages/resource-form",
     "@openstad-headless/resource-overview": "file:../../packages/resource-overview",
     "@openstad-headless/leaflet-map":"file:../../packages/leaflet-map",
     "@openstad-headless/stem-begroot": "file:../../packages/stem-begroot",

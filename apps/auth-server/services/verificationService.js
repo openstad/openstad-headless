@@ -53,6 +53,8 @@ exports.sendVerification = async (user, client, redirectUrl, adminLoginRequest) 
       clientName: client.name,
       headerImage: emailHeaderImage,
       logo: emailLogo,
+      loginurl: generatedTokenUrl,
+      user,
     },
     transporterConfig
   });
@@ -98,7 +100,6 @@ exports.sendSMS = async (user, client, redirectUrl) => {
       ],
       "sender": sender
   };
-
 
   console.log('https://api-prd.kpn.com/messaging/sms-kpn/v1/send', {
     method: 'POST',
