@@ -22,20 +22,29 @@ export type ResourceDetailWidgetProps = BaseProps &
   };
 
 function ResourceDetail(props: ResourceDetailWidgetProps) {
+  const urlParams = new URLSearchParams(window.location.search);
+  var resourceId = (urlParams.get('openstadResourceId')
+  ? parseInt(urlParams.get('openstadResourceId') as string)
+  : 1);
+
   const datastore = new DataStore({
     projectId: props.projectId,
-    resourceId: props.resourceId,
+    resourceId: resourceId,
     api: props.api,
+  }); 
+  const { data: resource } = datastore.useResource({
+    projectId: props.projectId,
+    resourceId: resourceId,
   });
-  const {data:resource} = datastore.useResource(props);
-  if (!resource) return null;
 
+  if (!resource) return null;
   return (
     <div className="osc">
       <Spacer size={2} />
       <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
         {resource ? (
           <article className="osc-resource-detail-content-items">
+
             {props.displayImage && resource.images?.at(0)?.src && (
               <Image
                 src={resource.images?.at(0)?.src || ''}

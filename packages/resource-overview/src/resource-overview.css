@@ -16,7 +16,10 @@
   flex-direction: column;
   padding: 1rem;
   gap: 1rem;
-  background-color: var(--nlds-agenda-background-color,var(--nlds-default-background-color, #F0F4F8));
+  background-color: var(
+    --nlds-agenda-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
 }
 
 .osc-resource-overview-resource-collection {
@@ -26,7 +29,7 @@
   gap: 2rem;
 }
 
-.osc-resource-overview-content.full .osc-resource-overview-resource-collection {  
+.osc-resource-overview-content.full .osc-resource-overview-resource-collection {
   grid-column-start: span 3;
   grid-template-columns: 1fr 1fr 1fr;
 }
@@ -40,11 +43,12 @@
   .osc-resource-overview-content .osc-resource-overview-resource-collection {
     grid-template-columns: 1fr;
   }
-  
-  .osc-resource-overview-content.full .osc-resource-overview-resource-collection {
+
+  .osc-resource-overview-content.full
+    .osc-resource-overview-resource-collection {
     grid-template-columns: 1fr;
   }
-  #stem-begroot-filter{
+  #stem-begroot-filter {
     grid-column: 1 / -1;
   }
 }
@@ -59,13 +63,14 @@
     grid-template-columns: 1fr 1fr;
   }
 
-  .osc-resource-overview-content.full .osc-resource-overview-resource-collection {
+  .osc-resource-overview-content.full
+    .osc-resource-overview-resource-collection {
     grid-template-columns: 1fr 1fr;
   }
-  #stem-begroot-filter{
+  #stem-begroot-filter {
     grid-column: 1 / -1;
   }
-  #stem-begroot-filter .osc-resources-filter.osc-flex-columned{
+  #stem-begroot-filter .osc-resources-filter.osc-flex-columned {
     flex-direction: row;
   }
 }
@@ -73,9 +78,12 @@
 .osc-resource-overview-content-item-status {
   display: inline-block;
   margin: 0;
-  padding: .125rem .25rem;
+  padding: 0.125rem 0.25rem;
   border-radius: 2px;
-  background-color: var(--nlds-agenda-background-color,var(--nlds-default-background-color, #F0F4F8));
+  background-color: var(
+    --nlds-agenda-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
 }
 
 .osc-resource-overview-content-item-description {
@@ -96,9 +104,12 @@
 
 p.osc-searchtext {
   display: inline-block;
-  padding: .5rem;
+  padding: 0.5rem;
   border-radius: 4px;
-  background-color: var(--nlds-agenda-background-color,var(--nlds-default-background-color, #F0F4F8));
+  background-color: var(
+    --nlds-agenda-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
 }
 
 .osc-resource-overview-paginator {
@@ -109,14 +120,21 @@ p.osc-searchtext {
 .banner + .osc-resource-overview-title-container {
   margin-top: 2rem;
 }
-.osc-resource-overview-title-container{
+.osc-resource-overview-title-container {
   margin-bottom: 2rem;
 }
 
-.osc .col-span-full{
+.osc .col-span-full {
   grid-column: 1 / -1;
 }
 
-.resource-card--link{
+.utrecht-button.resource-card--link {
   --_utrecht-link-state-text-decoration: none;
+
+  flex-direction: column;
+  text-align: left;
+  align-items: flex-start;
+  padding: 0;
+  border: none;
+  max-width: revert;
 }
