@@ -33,3 +33,6 @@
 #navbar .container #main-menu.mobile-nav button{
   align-self: flex-start;
 }
+#navbar .container #main-menu.mobile-nav button{
+  margin: 10px 0;
+}
