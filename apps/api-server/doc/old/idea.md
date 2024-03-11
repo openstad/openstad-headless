@@ -47,12 +47,6 @@ Object is een special geval; dat verondersteld een subset van definities (zie vo
 
 Het verwijderen van velden doe je door ze mee te sturen met de waarde `null`.
 
-#### extraDataMustBeDefined
-
-Teneinde hier niet direct een breaking change van te maken kent de siteconfig een (tijdelijk en dus deprecated) veld extraDataMustBeDefined. De default daarvan is nu false.
-
-Die zou voor nieuwe sites naar true moeten worden gezet. Voor bestaande eigenlijk ook. En als we dan denken dat het overal goed staat zoyu de default waarde van dit veld naaar true moeten, of nog beter: het zou er helemaal uitgehaald moeten worden.
-
 #### Voorbeelden
 
 Voorbeeld definitie:
