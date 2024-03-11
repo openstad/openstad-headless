@@ -31,11 +31,7 @@ module.exports = async function getUser( req, res, next ) {
 
     let projectId = req.project && req.project.id;
 
-    let isSuperUserFunc = false;
-    if (req.path.match('^(/api/project/\\d+/user(?:/\\d+)?$)') && ( req.method == 'POST' || req.method == 'PUT' || req.method == 'DELETE' )) isSuperUserFunc = true;
-    if (req.path.match('^(/api/user$)') && req.method == 'GET' ) isSuperUserFunc = true;
-    
-    const userEntity = await getUserInstance({ authConfig, authProvider, userId, isFixed, isSuperUserFunc, projectId }) || {};
+    const userEntity = await getUserInstance({ authConfig, authProvider, userId, isFixed, projectId }) || {};
 
     req.user = userEntity
     
@@ -95,35 +91,35 @@ function parseJwt(authorizationHeader) {
  * @param projectConfig
  * @returns {Promise<{}|*>}
  */
-async function getUserInstance({ authConfig, authProvider, userId, isFixed, isSuperUserFunc, projectId }) {
+async function getUserInstance({ authConfig, authProvider, userId, isFixed, projectId }) {
 
   let dbUser;
   
   try {
 
     let where = { id: userId };
-    if (projectId && !isSuperUserFunc && !isFixed ) where.projectId = projectId;
-    if (isSuperUserFunc && !isFixed) {
-      // superuserfunc: admins mogen over projecten heen, mindere goden alleen binnen hun eigen project
+
+    if (!isFixed) {
       if (projectId) {
         where = Object.assign(where, {
           [db.Sequelize.Op.or]: [
             {
-              role: 'admin'
+              role: 'admin',
+              projectId: 1,
             }, {
               projectId: projectId
             }
           ]});
       } else {
-        where.role = 'admin'
+        where.projectId = 1;
+        where.role = 'admin';
       }
     }
-
-    if (!isSuperUserFunc && !isFixed) where.idpUser = { provider: authConfig.provider };
 
     dbUser = await db.User.findOne({ where });
 
     if (isFixed) {
+      if (!dbUser.projectId) dbUser.role = 'superuser';
       return dbUser;
     }
 
@@ -136,11 +132,12 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, isSu
     throw err;
   }
 
-  if (dbUser.projectId != projectId) {
-    let project = await db.Project.findOne({ where: { id: dbUser.projectId } });
-    authConfig = await authSettings.config({ project, useAuth: authProvider })
-  }    
-  
+  if (dbUser.projectId != projectId && dbUser.projectId == 1 ) {
+    // admin op project 1 = superuser; use the correct authConfig
+    let adminProject = await db.Project.findOne({ where: { id: 1 } });
+    authConfig = await authSettings.config({ project: adminProject, useAuth: 'default' });
+  }
+
   let adapter = authConfig.adapter || 'openstad';
   try {
     if (!adapters[adapter]) {
@@ -161,6 +158,11 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, isSu
     })
 
     let mergedUser = merge(dbUser, userData);
+    if (mergedUser.projectId == 1 && mergedUser.role == 'admin') {
+      // superusers mogen dingen over projecten heen, mindere goden alleen binnen hun eigen project
+      mergedUser.role = 'superuser';
+    }
+
     return mergedUser;
     
   } catch(err) {
