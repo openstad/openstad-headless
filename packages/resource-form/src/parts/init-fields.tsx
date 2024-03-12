@@ -1,7 +1,11 @@
 import {FieldProps} from "@openstad-headless/form/src/props.js";
 import {Icon} from "@openstad-headless/ui/src/index.js";
 
-export const InitializeFormFields = (items) => {
+const getMinMaxByField = (key, data) => {
+    return !!data && typeof data.resources !== 'undefined' && typeof data.resources[key] !== 'undefined' ? data.resources[key] : '';
+}
+
+export const InitializeFormFields = (items, data) => {
     const formFields: FieldProps[] = [];
     if (typeof (items) === 'object' && items.length > 0
     ) {
@@ -12,8 +16,8 @@ export const InitializeFormFields = (items) => {
                 description: item.description,
                 fieldKey: item.fieldKey,
                 fieldRequired: item.fieldRequired,
-                minCharacters: item.minCharacters,
-                maxCharacters: item.maxCharacters,
+                minCharacters: getMinMaxByField(`${item.fieldKey}MinLength`, data) || item.minCharacters || '',
+                maxCharacters: getMinMaxByField(`${item.fieldKey}MaxLength`, data) || item.maxCharacters || '',
                 variant: item.variant,
                 multiple: item.multiple,
                 options: item.options

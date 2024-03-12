@@ -39,7 +39,6 @@ export type Info = {
     loginText?: string;
     loginButtonText?: string;
     nameInHeader?: boolean;
-    viewable?: 'users' | 'all';
 };
 
 export type Item = {
