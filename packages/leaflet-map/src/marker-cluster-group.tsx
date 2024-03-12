@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import LeafletMarkerClusterGroup from 'react-leaflet-cluster'
 import type { MarkerCluster } from 'leaflet';
 import type { MarkerClusterGroupProps } from './types/marker-cluster-group-props';
@@ -20,17 +20,19 @@ export default function MarkerClusterGroup({
     categorizeRef.current = categorize;
   });
 
-	function useIconCreateFunction(cluster: MarkerCluster) {
-    // TODO: uitwerken default voor andere varianten dan amaps
-		if (iconCreateFunction && typeof iconCreateFunction == 'string') iconCreateFunction = eval(iconCreateFunction);
-    return iconCreateFunction(cluster, categorizeRef.current); // 
-  }
+  let useIconCreateFunction = useCallback(
+    function (cluster: MarkerCluster) {
+      // TODO: uitwerken default voor andere varianten dan amaps
+      if (iconCreateFunction && typeof iconCreateFunction == 'string') iconCreateFunction = eval(iconCreateFunction);
+      return iconCreateFunction(cluster, categorizeRef.current);
+    }, [markers]);
 
   return (
     <LeafletMarkerClusterGroup {...props} iconCreateFunction={useIconCreateFunction} maxClusterRadius={maxClusterRadius} showCoverageOnHover={showCoverageOnHover}>
-      {markers.map((data) => 
-        <Marker {...data} key={`marker-${data.markerId}`}/>
-        )}
+      {markers.map((data) => {
+        console.log(data);
+        return <Marker {...data} key={`marker-${data.markerId}`}/>
+        })}
     </LeafletMarkerClusterGroup>
   );
 
