@@ -6,6 +6,7 @@ const contentWidgets = {
   'openstad-accordion': {},
   'openstad-button': {},
   'openstad-alertbox': {},
+  'openstad-sharelinks': {},
   'openstad-timeline': {},
   'openstad-image': {},
   'openstad-iconSection': {},

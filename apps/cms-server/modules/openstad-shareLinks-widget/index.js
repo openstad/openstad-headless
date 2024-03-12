@@ -5,13 +5,13 @@
 module.exports = {
   extend: '@apostrophecms/widget-type',
   options: {
-    label: 'Alert Box'
+    label: 'Share Links'
   },
   fields: {
     add: {
-      message: {
+      title: {
         type: 'string',
-        label: 'Content'
+        label: 'Titel'
       },
   
     },
