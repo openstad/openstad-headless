@@ -13,7 +13,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const { submitButton, saveConceptButton} = props.submit  || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
     const { loginText, loginButtonText} = props.info  || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
 
-    const notifySucces = () =>
+    const notifySuccess = () =>
         toast.success('Idee indienen gelukt', { position: 'bottom-center' });
 
     const notifyFailed = () =>
@@ -50,7 +50,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         try {
             const result = await createResource(formData, props.widgetId);
             if (result) {
-                notifySucces();
+                notifySuccess();
             }
         } catch (e) {
             notifyFailed();
