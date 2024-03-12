@@ -1,5 +1,6 @@
 .utrecht-alert.alert-box{
     color: var(--nlds-alert-box-color, var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit)));
+    background-color: var(--nlds-alert-box-background-color, var(--_utrecht-alert-background-color, var(--utrecht-alert-background-color)));
     display: block;
     border: none;
 }
