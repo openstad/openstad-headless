@@ -159,7 +159,7 @@ const defaultItemRenderer = (
         ) : null}
 
         {props.displayArguments ? (
-          <Icon icon="ri-message-line" variant="big" text="0" />
+          <Icon icon="ri-message-line" variant="big" text={resource.commentCount} />
         ) : null}
       </div>
     </Button>
