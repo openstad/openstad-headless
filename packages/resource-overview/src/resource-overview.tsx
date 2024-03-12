@@ -221,7 +221,7 @@ function ResourceOverview({
         if (!props.itemLink) {
           console.error('Link to child resource is not set');
         } else {
-          location.href = props.itemLink.replace('[id]', resource.id);
+          location.href = location.href + props.itemLink.replace('[id]', resource.id);
         }
       }
 
