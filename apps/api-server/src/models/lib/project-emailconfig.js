@@ -39,7 +39,7 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
     subset: {
       fromAddress: {
         type: 'string', // todo: add type email/list of emails
-        default: 'EMAIL@NOT.DEFINED',
+        default: apiConfig.mail.from,
       },
       projectmanagerAddress: {
         type: 'string', // todo: add type email/list of emails
