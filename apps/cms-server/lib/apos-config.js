@@ -19,6 +19,7 @@ module.exports = {
     'openstad-iconSection-widget': { },
     'openstad-button-widget': { },
     'openstad-rte-widget': { },
+    'openstad-alertbox-widget': { },
     'openstad-timeline-widget': {
       options: {
         label: 'Een agenda'

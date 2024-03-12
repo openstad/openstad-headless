@@ -12,6 +12,10 @@
   gap: 0.5rem;
 }
 
+.like-option-container button{
+  max-width: revert;
+}
+
 .like-widget-container.medium .like-option-container {
   grid-template-columns: 1fr 1fr;
 }
