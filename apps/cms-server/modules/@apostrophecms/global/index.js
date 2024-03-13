@@ -146,6 +146,35 @@ module.exports = {
         },
       },
 
+      footerlinks: {
+        type: 'array',
+        label: 'Footer links',
+        inline: true,
+        fields: {
+          add: {
+            title: {
+              label: 'Column naam',
+              type: 'string'
+            },
+            items: {
+              type: 'array',
+              label: 'Links',
+              fields: {
+                add: {
+                  label: {
+                    label: 'Link tekst',
+                    type: 'string'
+                  },
+                  url: {
+                    label: 'Link url',
+                    type: 'string'
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     },
 
     group: {
@@ -165,6 +194,10 @@ module.exports = {
         label: 'Analitics',
         fields: [ 'analyticsType', 'analyticsIdentifier', 'analyticsCodeBlock' ],
       },
+      footer: {
+        label: 'Footer',
+        fields: [ 'footerlinks' ],      
+      }
     }
   }
 
