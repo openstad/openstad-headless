@@ -15,7 +15,7 @@ function ShareLinks({ title }: Item) {
 
   console.log('https://api.whatsapp.com/send?phone=&text='+ encodeURIComponent(location.href)+'&source=&data=')
   return (
-    <div>
+    <div className="share-links">
       <Heading4>{title}</Heading4>
       <LinkSocial
         external
