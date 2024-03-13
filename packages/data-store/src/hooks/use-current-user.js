@@ -19,7 +19,10 @@ export default function useCurrentUser(props) {
     }
 
     // get user from props
-    let initialUser = props.openStadUser || {};
+    let initialUser = {};
+    try {
+      initialUser = globalOpenStadUser || props.openStadUser || {};
+    } catch(err) {}
 
     if (initialUser.id && initialUser.projectId == self.projectId) {
       return initialUser;
@@ -30,15 +33,19 @@ export default function useCurrentUser(props) {
     // jwt in url: use and remove from url
     const params = new URLSearchParams(window.location.search);
     let jwt;
-    if (params.has('jwt')) {
-      jwt = params.get('jwt');
+    if (params.has('openstadlogintoken')) {
+      jwt = params.get('openstadlogintoken');
       session.set('openStadUser', { jwt });
       let url = window.location.href;
-      url = url.replace(new RegExp(`[?&]jwt=${jwt}`), '');
+      url = url.replace(new RegExp(`[?&]openstadlogintoken=${jwt}`), '');
       history.replaceState(null, '', url);
     }
 
-    const cmsUser = props.cmsUser || {};
+    let cmsUser = {};
+    try {
+      cmsUser = globalCmsUser || props.cmsUser || {};
+    } catch(err) {}
+
     // get cmsUser from session data - this is a fix for badly written cms logouts
     let sessionCmsUser = session.get('cmsUser') || {};
     if (sessionCmsUser && cmsUser) {
@@ -67,6 +74,7 @@ export default function useCurrentUser(props) {
 
     // fetch me for this jwt
     if (jwt) {
+
       self.api.currentUserJWT = jwt; // use current user in subsequent requests
 
       // refresh already fetched data, now with the current user
@@ -76,6 +84,7 @@ export default function useCurrentUser(props) {
       let openStadUser = await self.api.user.fetchMe({
         projectId: self.projectId,
       });
+
       session.set('openStadUser', { ...openStadUser, jwt });
       return openStadUser;
     } else {

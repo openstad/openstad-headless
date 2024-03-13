@@ -48,7 +48,7 @@ module.exports = {
           return self.apos.permissions.can(req, permission);
         };
 
-        if (req.query.logintoken) {
+        if (req.query.openstadlogintoken) {
           const thisHost = req.headers['x-forwarded-host'] || req.get('host');
           const protocol = req.headers['x-forwarded-proto'] || req.protocol;
           const fullUrl = protocol + '://' + thisHost + req.originalUrl;
@@ -56,12 +56,12 @@ module.exports = {
           const fullUrlPath = parsedUrl.path;
 
           // remove the JWT Parameter otherwise keeps redirecting
-          let returnTo = req.session && req.session.returnTo ? req.session.returnTo : removeURLParameter(fullUrlPath, 'logintoken');
+          let returnTo = req.session && req.session.returnTo ? req.session.returnTo : removeURLParameter(fullUrlPath, 'openstadlogintoken');
 
           // make sure references to external urls fail, only take the path
           returnTo = Url.parse(returnTo, true);
           returnTo = returnTo.path;
-          req.session.jwt = req.query.logintoken;
+          req.session.jwt = req.query.openstadlogintoken;
           req.session.returnTo = null;
 
           req.session.save(() => {
@@ -90,6 +90,7 @@ module.exports = {
               req.data.isEditor = user.role === 'editor'; // user;
               req.data.isModerator = user.role === 'moderator'; // user;
               req.data.jwt = jwt;
+              req.data.globalOpenStadUser = { id: user.id, role: user.role, jwt };
 
               if (req.data.isAdmin || req.data.isEditor || req.data.isModerator) {
                 req.data.hasModeratorRights = true;
