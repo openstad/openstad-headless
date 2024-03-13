@@ -1,0 +1,4 @@
+[data-openstad-button]{
+    margin-block-start: var(--nlds-button-group-margin-block-start, var(--nlds-default-margin-block-start, 1.5rem));
+    margin-block-end: var(--nlds-button-group-margin-block-end, var(--nlds-default-margin-block-end, 0));
+}

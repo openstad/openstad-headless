@@ -56,9 +56,9 @@
     line-height: auto;
 } */
 .osc h4 {
-    font-size: 1.5rem;
+    /* font-size: 1.5rem;
     font-weight: 700;
-    line-height: 2rem;
+    line-height: 2rem; */
 }
 
 .osc p.strong {
@@ -90,6 +90,12 @@
 .osc{
     --nlds-default-background-color: #F0F4F8;
     --nlds-default-border-color: #A9B2BA;
+
+    /* --nlds-default-margin-block-start: 1rem; */
+    /* --nlds-default-margin-block-end: 1rem; */
+
+    /* --nlds-default-padding-block-start: 1rem; */
+    /* --nlds-default-padding-block-end: 1rem; */
 }
 .osc .sr-only{
     width: 0;

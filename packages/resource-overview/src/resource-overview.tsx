@@ -119,7 +119,7 @@ const defaultItemRenderer = (
   }
   
   return (
-    <Button className="resource-card--link" onClick={() => onItemClick && onItemClick()}>
+    <Button appearance="subtle-button" className="resource-card--link" onClick={() => onItemClick && onItemClick()}>
       <Image
         src={resource.images?.at(0)?.src || ''}
         imageFooter={

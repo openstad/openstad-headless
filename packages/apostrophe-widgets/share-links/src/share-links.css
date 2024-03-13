@@ -1,3 +1,7 @@
+.share-links{
+    margin-block-start: var(--nlds-share-margin-block-start, var(--nlds-default-margin-block-start, 1.5rem));
+    margin-block-end: var(--nlds-share-margin-block-end, var(--nlds-default-margin-block-end, 1.5rem));
+}
 .share-links .icon{
     position: relative;
     width: 50px;
@@ -7,7 +11,7 @@
 .share-links .icon::before{
     content: '';
     inset: 0;
-    background: #fff;
+    background: var(--utrecht-link-social-color);
     position: absolute;
     mask-repeat: no-repeat;
     mask-position: center;

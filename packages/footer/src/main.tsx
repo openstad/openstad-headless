@@ -1,46 +1,24 @@
-<!-- <footer>
-  <div class="container">
-    <div class="row">
-      {% for column in data.global.footer %}
-      <div class="col-sm-3 col-xs-12">
-        <h2>{{column.title}}</h2>
-        <p>
-          {{column.description}}
-        </p>
-        <ul>
-          {% for link in column.links %}
-          <li>
-            <a href="{{link.url | safeRelativeUrl}}" {% if link.targetBlank %} target="_blank" {% endif %}>
-              {{link.label}}
-            </a>
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</footer>
-<div class="body-background" style="display: none;"></div>
-<div id="openstad-toast" class="toast-container initial-width">
-</div> -->
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import {Footer} from './footer.tsx'
 
-<div
-  id="footer-container"
-  data-content='[
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <Footer 
+      content='[
         {
           "title": "Over deze site",
           "items": [
             {
-              "url": "#",
+              "url": "https://www.utrecht.nl/privacy-statement/",
               "label": "Privacy"
             },
             {
-              "url": "#",
+              "url": "https://www.utrecht.nl/toegankelijkheid/",
               "label": "Toegankelijkheid"
             },
             {
-              "url": "#",
+              "url": "https://www.utrecht.nl/cookies/",
               "label": "Cookies"
             }
           ]
@@ -76,6 +54,6 @@
           ]
         }
       ]'
->
-  lote
-</div>
+    />
+  </React.StrictMode>,
+)
