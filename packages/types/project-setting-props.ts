@@ -26,7 +26,6 @@ export type ProjectSettingProps = {
     minimumYesVotes: number;
     showVoteButtons: boolean;
     canEditAfterFirstLikeOrComment: boolean;
-    extraDataMustBeDefined: boolean;
     types: Array<string>;
   };
 
@@ -36,7 +35,6 @@ export type ProjectSettingProps = {
     closedText: string;
   };
   users: {
-    extraDataMustBeDefined: boolean;
     canCreateNewUsers: boolean;
     allowUseOfNicknames: boolean;
   };

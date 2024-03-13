@@ -11,10 +11,13 @@ import Form from "@openstad-headless/form/src/form";
 
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const { submitButton, saveConceptButton} = props.submit  || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
-    const { loginText, loginButtonText, viewable} = props.info  || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
+    const { loginText, loginButtonText} = props.info  || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
 
-    const notifyCreate = () =>
-        toast.success('Idee ingedient', { position: 'bottom-center' });
+    const notifySuccess = () =>
+        toast.success('Idee indienen gelukt', { position: 'bottom-center' });
+
+    const notifyFailed = () =>
+        toast.error('Idee indienen mislukt', { position: 'bottom-center' });
 
     //
     const datastore: any = new DataStore({
@@ -33,19 +36,28 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     } = datastore.useCurrentUser({ ...props });
 
     async function onSubmit(formData: any) {
-        // const result = await data.records.create(formData);
-        const result = await createResource(formData, props.widgetId);
+        // TODO: Redirect user to afterSubmitUrl when set
+        // const result = await createResource(formData, props.widgetId);
 
-        if (result) {
-            if(props.afterSubmitUrl) {
-                location.href = props.afterSubmitUrl.replace("[id]", result.id)
-            } else {
-                notifyCreate();
+        // if (result) {
+        //     if(props.afterSubmitUrl) {
+        //         location.href = props.afterSubmitUrl.replace("[id]", result.id)
+        //     } else {
+        //         notifyCreate();
+        //     }
+        // }
+
+        try {
+            const result = await createResource(formData, props.widgetId);
+            if (result) {
+                notifySuccess();
             }
+        } catch (e) {
+            notifyFailed();
         }
     }
 
-    const formFields = InitializeFormFields(props.items);
+    const formFields = InitializeFormFields(props.items, props);
 
     return (
         <div className="osc">
@@ -57,7 +69,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                     )}
                 </div>
 
-                {!hasRole(currentUser, 'member') && viewable === 'users' ? (
+                {!hasRole(currentUser, 'member') ? (
                     <>
                         <Banner className="big">
                             <h6>{loginText || 'Inloggen om deel te nemen.'}</h6>

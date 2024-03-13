@@ -168,9 +168,9 @@ const config: ResourceFormWidgetProps = {
         saveConceptButton: 'Opslaan als concept',
     },
     info: {
-        loginText: 'Inloggen',
+        loginText: 'Inloggen om deel te nemen.',
+        loginButtonText: 'Inloggen',
         nameInHeader: false,
-        viewable: 'all',
     },
 };
 ReactDOM.createRoot(document.getElementById('root')!).render(

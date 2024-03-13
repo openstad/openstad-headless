@@ -115,10 +115,6 @@ module.exports = {
         type: 'boolean',
         default: false,
       },
-      extraDataMustBeDefined: {
-        type: 'boolean',
-        default: false,
-      },
       extraData: {
         type: 'object',
       },
@@ -214,10 +210,6 @@ module.exports = {
   users: {
     type: 'object',
     subset: {
-      extraDataMustBeDefined: {
-        type: 'boolean',
-        default: false,
-      },
       extraData: {
         type: 'object',
       },
