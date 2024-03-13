@@ -30,7 +30,6 @@ export default function MarkerClusterGroup({
   return (
     <LeafletMarkerClusterGroup {...props} iconCreateFunction={useIconCreateFunction} maxClusterRadius={maxClusterRadius} showCoverageOnHover={showCoverageOnHover}>
       {markers.map((data) => {
-        console.log(data);
         return <Marker {...data} key={`marker-${data.markerId}`}/>
         })}
     </LeafletMarkerClusterGroup>
