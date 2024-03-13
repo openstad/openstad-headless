@@ -68,6 +68,11 @@ module.exports = {
         type: 'string',
         label: 'URL voor CSS imports (optioneel)',
       },
+      compactMenu: {
+        type: 'boolean',
+        label: 'Compacte weergave van het hoofdmenu.',
+        def: false
+      },
       analyticsType:   {
         type: 'select',
         permission: 'admin',
@@ -150,7 +155,7 @@ module.exports = {
       },
       css: {
         label: 'Vormgeving',
-        fields: [ 'cssExtras', 'customCssLink' ],
+        fields: [ 'cssExtras', 'customCssLink', 'compactMenu' ],
       },
       cookies: {
         label: 'Cookie instellingen',

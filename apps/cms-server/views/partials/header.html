@@ -1,6 +1,6 @@
-<header class="{{ 'amsterdam-header' if data.global.siteLogo === 'amsterdam' }}">
-  <div class="container relative">
-    <div class="row">
+<header class="{{ 'amsterdam-header' if data.global.siteLogo === 'amsterdam' }} {{ '--compact' if data.global.compactMenu }}">
+  <div class="container relative main-header-container">
+    <div class="row ">
       <div class="col-xs-12">
         {% if data.global.siteLogo === 'amsterdam' %}
         <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-container">
@@ -73,6 +73,18 @@
         </div>
         {% endif %}
       </div>
-    </div>
+
+        {% if data.global.compactMenu %}
+          <nav id="navbar"
+            class="--compact"
+            data-home='
+            [{
+              "_url": "{{ data.home._url }}",
+              "title": "{{ data.home.title }}"
+            }]'
+            data-content='{{ data.home._children | json }}'
+          ></nav>
+        {% endif %}
+      </div>
   </div>
 </header>

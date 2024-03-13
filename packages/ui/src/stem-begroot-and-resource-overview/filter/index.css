@@ -22,7 +22,6 @@
     justify-content: stretch;
     padding: 1rem;
     gap: 1rem;
-    background-color: var(--osc-card);
 }
 
 .osc-resources-filter.osc-flex-columned > .osc-filter-search-bar{
