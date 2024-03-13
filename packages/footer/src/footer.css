@@ -1,0 +1,24 @@
+#footer-container{
+  background: #fff;
+}
+
+#footer-container footer{
+  background-color: var(--nlds-footer-background-color, var(--nlds-default-background-color, #F0F4F8));
+  padding: 1rem 0;
+  margin-block-start: var(--nlds-footer-margin-block-start, var(--nlds-default-margin-block-start, 3.5rem));
+}
+
+#footer-container footer .container{
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+#footer-container footer .container ul{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+#footer-container footer .container ul li{
+  padding: .2rem 0;
+}

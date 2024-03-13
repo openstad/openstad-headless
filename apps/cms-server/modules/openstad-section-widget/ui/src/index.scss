@@ -47,8 +47,9 @@
   margin-top: -70px;
 }
 .section.--solid {
-  background-color: var(--nlds-default-background-color, #F0F4F8);
-  padding: 24px 0;
+  background-color: var(--nlds-section-background-color, var(--nlds-default-background-color, #F0F4F8));
+  border-radius: var(--nlds-section-border-radius, 0);
+  padding: 2.5rem 1.5rem;
 }
 
 .section.--negative{

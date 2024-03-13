@@ -25,6 +25,11 @@
 
 }
 
+.osc.counter-container{
+  margin-block-start: var(--nlds-counter-margin-block-start, var(--nlds-default-margin-block-start, 1.5rem));
+  margin-block-end: var(--nlds-counter-margin-block-end, var(--nlds-default-margin-block-end, 1.5rem));
+}
+
 .osc.counter-container .amount {
   font-size: var(--nlds-counter-amount-font-size, 1.5em);
   font-weight: var(--nlds-counter-amount-font-weight, 700);
