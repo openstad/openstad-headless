@@ -37,7 +37,7 @@ $body-color: #111;
 body{
   max-width: 87.5rem;
   margin: 0 auto;
-  background-color: var(--nlds-default-background-color, #F0F4F8);
+  background-color: var(--nlds-body-background-color, var(--nlds-default-background-color, #F0F4F8));
 }
 [data-apos-refreshable], .bp-wrapper, main{
   background: #fff;
