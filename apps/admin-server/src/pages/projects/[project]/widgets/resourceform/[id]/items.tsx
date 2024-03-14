@@ -624,7 +624,7 @@ export default function WidgetResourceFormItems(
                                             render={({ field }) => {
                                                 const nonStaticType = ['none', 'radiobox', 'text', 'checkbox', 'map', 'upload'];
                                                 const type = form.watch('type');
-                                                const fieldKey = !nonStaticType.includes(type) ? type : '';
+                                                const fieldKey = !nonStaticType.includes(type || '') ? type : '';
 
                                                 return (
                                                     <FormItem>
@@ -647,7 +647,11 @@ export default function WidgetResourceFormItems(
                                                         form.setValue('fieldKey', `tags[${field.value || firstTagType}]`)
                                                     }
 
-                                                    if(!!allTags) return (
+                                                    if (!allTags || allTags.length === 0) {
+                                                        return <p style={{fontSize: '14px', margin: '20px 0', color: 'red'}}><strong>Geen tags gevonden om te selecteren. Maak dit aan onder het kopje &apos;Tags&apos;</strong></p>;
+                                                    }
+
+                                                    return (
                                                         <FormItem>
                                                             <FormLabel>Welk type tag moet als keuze in het formulier komen?</FormLabel>
                                                             <Select
@@ -687,7 +691,7 @@ export default function WidgetResourceFormItems(
                                             render={({ field }) => {
                                                 const staticType = ['title', 'summary', 'description'];
                                                 const type = form.watch('type');
-                                                const required = staticType.includes(type);
+                                                const required = staticType.includes(type || '');
 
                                                 return (
                                                     <FormItem>
@@ -854,7 +858,7 @@ export default function WidgetResourceFormItems(
                                             Annuleer
                                         </Button>
                                     )}
-                                    <Button className="w-fit mt-4" type="submit">
+                                    <Button className="w-fit mt-4" type="submit" disabled={form.watch('type') === 'tags' && allTags.length === 0}>
                                         {selectedItem
                                             ? 'Sla wijzigingen op'
                                             : 'Voeg item toe aan lijst'}
