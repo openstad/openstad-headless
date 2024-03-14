@@ -46,6 +46,8 @@ export type Item = {
     title?: string;
     description?: string;
     type?: string;
+    fieldType?: string;
+    tags?: string;
     fieldKey: string;
     fieldRequired?: boolean;
     minCharacters?: string;
