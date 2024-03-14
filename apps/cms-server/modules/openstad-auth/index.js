@@ -101,13 +101,13 @@ module.exports = {
               });
             };
 
-            const FIVE_MINUTES = 5 * 60 * 1000;
-            const date = new Date();
-            const dateToCheck = req.session.lastJWTCheck ? new Date(req.session.lastJWTCheck) : new Date();
+            const ONE_MINUTE = 60 * 1000;
+            const date = new Date().getTime();
+            const dateToCheck = req.session.openStadlastJWTCheck ? new Date(req.session.openStadlastJWTCheck) : new Date().getTime() - ONE_MINUTE - 1;
 
-            // IN V2 apostropheCMS does a lot calls on page load
-            // if user is a CMS user and last apicheck was within 5 seconds ago don't repeat
-            if (req.user && req.session.openstadUser && ((date - dateToCheck) < FIVE_MINUTES)) {
+            // apostropheCMS does a lot calls on page load
+            // if user is a CMS user and last apicheck was within one minute ago don't repeat
+            if (req.user && req.session.openstadUser && ((date - dateToCheck) < ONE_MINUTE)) {
               setUserData(req, next);
             } else {
 
@@ -128,9 +128,12 @@ module.exports = {
                 if (user && Object.keys(user).length > 0 && user.id) {
 
                   req.session.openstadUser = user;
-                  req.session.lastJWTCheck = new Date().toISOString();
+                  req.session.openStadlastJWTCheck = new Date().getTime();
 
-                  setUserData(req, next);
+                  req.session.save(() => {
+                    setUserData(req, next);
+                  });
+
 
                 } else {
                   // if not valid clear the JWT and redirect
