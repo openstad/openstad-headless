@@ -25,7 +25,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import {Item, Option, ResourceFormWidgetProps} from "@openstad-headless/resource-form/src/props";
-import {defaultFormValues} from "@openstad-headless/resource-form/src/parts/default-values.tsx";
+import {defaultFormValues} from "@openstad-headless/resource-form/src/parts/default-values";
 import useTags from "@/hooks/use-tags";
 import {useRouter} from "next/router";
 

@@ -7,19 +7,7 @@ import {
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
 import WidgetResourceFormGeneral from './general';
-import WidgetResourceFormTitle from './title';
-import WidgetResourceFormSummary from './summary';
-import WidgetResourceFormDescription from './description';
-import WidgetResourceFormImages from './images';
-import WidgetResourceFormThemes from './themes';
-import WidgetResourceFormAreas from './areas';
-import WidgetResourceFormLocation from './location';
-import WidgetResourceFormCosts from './costs';
-import WidgetResourceFormRole from './role';
-import WidgetResourceFormPhone from './phone';
-import WidgetResourceFormTip from './tip';
 import WidgetResourceFormSubmit from './submit';
-import WidgetResourceFormBudget from './budget';
 import WidgetResourceFormInfo from './info';
 import WidgetResourceFormConfirmation from './confirmation';
 import { useRouter } from 'next/router';

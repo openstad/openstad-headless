@@ -50,6 +50,7 @@ export type Item = {
     tags?: string;
     fieldKey: string;
     fieldRequired?: boolean;
+    onlyForModerator?: boolean;
     minCharacters?: string;
     maxCharacters?: string;
     variant?: string;
