@@ -12,6 +12,11 @@
         {% elif data.global.siteLogo %}
         <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-uploaded logo-main-container">
           <img src="{{apos.attachment.url(data.global.siteLogo)}}" alt="logo" id="logo-image">
+          {% if not data.global.hideSiteTitle %}
+          <h2 class="header-subtitle">
+            {{data.global.siteTitle}}
+          </h2>
+        {% endif %}
         </a>
         {% else %}
         <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-default logo-main-container">
@@ -20,13 +25,6 @@
         {% endif %}
         <div class="header-side-container {{ 'without-site-title' if data.global.hideSiteTitle}}">
           <div class="row">
-            {% if not data.global.hideSiteTitle %}
-            <div class="col-sm-7 col-md-6 col-xs-12">
-              <h2 class="header-subtitle">
-                {{data.global.siteTitle}}
-              </h2>
-            </div>
-            {% endif %}
             <div class="{{ 'col-xs-12' if data.global.hideSiteTitle else 'col-sm-5 col-md-6' }}  hidden-xs">
               {% if data.global.topLinks or data.global.displayLoginTopLink %}
               <ul class="top-links">
