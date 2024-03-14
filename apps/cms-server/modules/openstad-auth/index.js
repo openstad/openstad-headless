@@ -61,7 +61,7 @@ module.exports = {
           // make sure references to external urls fail, only take the path
           returnTo = Url.parse(returnTo, true);
           returnTo = returnTo.path;
-          req.session.jwt = req.query.openstadlogintoken;
+          req.session.openstadLoginToken = req.query.openstadlogintoken;
           req.session.returnTo = null;
 
           req.session.save(() => {
@@ -70,7 +70,7 @@ module.exports = {
 
         } else {
 
-          const jwt = req.session.jwt;
+          const jwt = req.session.openstadLoginToken;
           const apiUrl = process.env.API_URL_INTERNAL || process.env.API_URL;
 
           if (!jwt) {
@@ -101,13 +101,13 @@ module.exports = {
               });
             };
 
-            const FIVE_MINUTES = 5 * 60 * 1000;
-            const date = new Date();
-            const dateToCheck = req.session.lastJWTCheck ? new Date(req.session.lastJWTCheck) : new Date();
+            const ONE_MINUTE = 60 * 1000;
+            const date = new Date().getTime();
+            const dateToCheck = req.session.openStadlastJWTCheck ? new Date(req.session.openStadlastJWTCheck) : new Date().getTime() - ONE_MINUTE - 1;
 
-            // IN V2 apostropheCMS does a lot calls on page load
-            // if user is a CMS user and last apicheck was within 5 seconds ago don't repeat
-            if (req.user && req.session.openstadUser && ((date - dateToCheck) < FIVE_MINUTES)) {
+            // apostropheCMS does a lot calls on page load
+            // if user is a CMS user and last apicheck was within one minute ago don't repeat
+            if (req.user && req.session.openstadUser && ((date - dateToCheck) < ONE_MINUTE)) {
               setUserData(req, next);
             } else {
 
@@ -120,7 +120,6 @@ module.exports = {
                   },
                 })
                 if (!response.ok) {
-                  console.log(response);
                   throw new Error('Fetch failed')
                 }
 
@@ -129,9 +128,12 @@ module.exports = {
                 if (user && Object.keys(user).length > 0 && user.id) {
 
                   req.session.openstadUser = user;
-                  req.session.lastJWTCheck = new Date().toISOString();
+                  req.session.openStadlastJWTCheck = new Date().getTime();
 
-                  setUserData(req, next);
+                  req.session.save(() => {
+                    setUserData(req, next);
+                  });
+
 
                 } else {
                   // if not valid clear the JWT and redirect
@@ -141,7 +143,6 @@ module.exports = {
                 }
 
               } catch(err) {
-                console.log(err);
                 req.session.destroy(() => {
                   res.redirect('/');
                 });
@@ -160,6 +161,7 @@ module.exports = {
        * @returns
        */
       async aposAuthenticate(req, res, next) {
+
         // only login users into ApostropheCMS that are admin or editor
         if (!req.data.isAdmin && !req.data.isEditor) {
           return next();
@@ -179,7 +181,6 @@ module.exports = {
           return next();
           // logout CMS when apostropheUser is different then openstadUser
         } else if (req.user && req.user.email !== req.data.openstadUser.email) {
-          console.log('Logout apos');
           //req.apos.logout();
         };
 
@@ -192,7 +193,6 @@ module.exports = {
               .permission(false)
               .toObject();
           } catch (e) {
-            console.log('');
             return next(e);
           }
 
@@ -235,8 +235,18 @@ module.exports = {
             console.log('error', e);
           }
 
+          // session data gets cleared in the login; backup openstad values
+          let bak = {
+            openstadUser: req.session.openstadUser,
+            openstadLoginToken: req.session.openstadLoginToken,
+            openstadLastJWTCheck: req.session.openstadLastJWTCheck,
+          }
+
           try {
             await req.login(aposUser, () => {
+              req.session.openstadUser = bak.openstadUser;
+              req.session.openstadLoginToken = bak.openstadLoginToken;
+              req.session.openstadLastJWTCheck = bak.openstadLastJWTCheck;
               res.redirect(req.originalUrl);
             });
           } catch (e) {
