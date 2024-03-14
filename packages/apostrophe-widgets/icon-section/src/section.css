@@ -1,11 +1,17 @@
+[data-openstad-iconsection]{
+  margin-block-start: var(--nlds-iconsection-margin-block-start, var(--nlds-default-margin-block-start, 3.5rem));
+  margin-block-end: var(--nlds-iconsection-margin-block-end, var(--nlds-default-margin-block-end, 3.5rem));
+}
+
 .icon-section{
-  background: var(--utrecht-color-grey-90, #eee);
+  background-color: var(--nlds-default-background-color, #F0F4F8);
 }
 
 .icon-section .utrecht-button.utrecht-button--subtle.utrecht-accordion__button{
   background-color: var(--utrecht-button-primary-action-background-color);
   color: var(--utrecht-button-primary-action-color);
   display: block;
+  border-radius: var(--nlds-iconsection-border-radius, 0);
 }
 .icon-section .utrecht-accordion__button[aria-expanded]::after{
   background-color: var(--utrecht-button-primary-action-color);
@@ -19,19 +25,16 @@
 }
 
 .icon-section-container{
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 0;
+  padding-block-start: var(--nlds-iconsection-padding-block-start, var(--nlds-default-padding-block-start, 3.5rem));
+  padding-block-end: var(--nlds-iconsection-padding-block-end, var(--nlds-default-padding-block-start, 3.5rem));
 }
 
-.icon-section .icon-section-grid{
+.icon-section .icon-section-grid .container{
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, auto));
   grid-gap: 2rem;
 }
 
-.icon-section .icon-section-card{
-}
 
 .icon-section .icon-section-content{
   padding: 10px;

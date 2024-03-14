@@ -7,6 +7,7 @@ const currencyFilter    = require('../nunjucks/currency');
 const limitTo           = require('../nunjucks/limitTo');
 const jsonFilter        = require('../nunjucks/json');
 const timestampFilter   = require('../nunjucks/timestamp');
+const mjml2html         = require('mjml');
 
 
 const formatTransporter = function ({ host, port, secure, auth }) {
@@ -50,17 +51,17 @@ exports.send = function ({subject, toName, toEmail, templateString, template, va
     if (templateString.includes("{% extends 'emails/layout.html' %}")) {
       templateString  = nunjucks.renderString(templateString, variables)
     } else {
-      templateString = nunjucks.render('emails/blanco.html', Object.assign(variables, {
-        message: nunjucks.renderString(templateString, variables)
-      }));
+      templateString = nunjucks.renderString(templateString, variables)
     }
   }
-
 
   /**
    * Render email template
    */
-  const mail = templateString ? templateString : nunjucks.render(template, variables);
+  let mail = templateString ? templateString : nunjucks.render(template, variables);
+
+  //
+  mail = mjml2html(mail).html;
 
   /**
     * Format the to name

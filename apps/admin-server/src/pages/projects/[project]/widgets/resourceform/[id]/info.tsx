@@ -27,6 +27,7 @@ const formSchema = z.object({
   viewable: z.enum(['users', 'all']),
   nameInHeader: z.boolean(),
   loginText: z.string(),
+  loginButtonText: z.string(),
 });
 
 export default function WidgetResourceFormInfo() {
@@ -44,6 +45,7 @@ export default function WidgetResourceFormInfo() {
       viewable: widget?.config?.[category]?.viewable || 'users',
       nameInHeader: widget?.config?.[category]?.nameInHeader || false,
       loginText: widget?.config?.[category]?.loginText || '',
+      loginButtonText: widget?.config?.[category]?.loginButtonText || '',
     }),
     [widget?.config]
   );
@@ -128,6 +130,19 @@ export default function WidgetResourceFormInfo() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Login tekst</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="loginButtonText"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Login button tekst</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>

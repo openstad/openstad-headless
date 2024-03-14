@@ -200,7 +200,7 @@ app.get('/auth/login', (req, res, next) => {
     returnUrl = returnUrl + pathToReturnTo;
   }
 
-  returnUrl = encodeURIComponent(returnUrl + '?logintoken=[[jwt]]');
+  returnUrl = encodeURIComponent(returnUrl + '?openstadlogintoken=[[jwt]]');
 
   const apiUrl = process.env.API_URL;
   let url = `${apiUrl}/auth/project/${project.id}/login?redirectUri=${returnUrl}`;

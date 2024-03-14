@@ -1,16 +1,20 @@
-.map-container {
+.form-field-map-container {
     height: 485px;
     width: 100%;
     position: relative;
     z-index: 1;
 }
-.map-container .leaflet-bottom.leaflet-right {
+
+.form-field-map-container .osc-base-map-widget-container {
+    height: 100%;
+}
+.form-field-map-container .leaflet-bottom.leaflet-right {
     display: none;
 }
-.map-container[invalid="true"] {
+.form-field-map-container[invalid="true"] {
     background: #fff;
 }
-.map-container[invalid="true"]:before {
+.form-field-map-container[invalid="true"]:before {
     content: "";
     position: absolute;
     top: 0;
@@ -18,7 +22,7 @@
     bottom: 0;
     border-inline-start-style: solid;
 }
-.map-container ~ .map-search-container {
+.form-field-map-container ~ .map-search-container {
     left: 18px;
 }
 .map-input-hidden {
@@ -27,44 +31,4 @@
     position: absolute;
     padding: 0;
     margin-top: -10px;
-}
-.map-search-container {
-    background: #fff;
-    z-index: 2;
-    padding: 20px;
-}
-.map-search-container .search-field input {
-    height: 44px;
-    margin-right: -1px;
-    position: relative;
-}
-.map-search-container .search-field label {
-    font-size: 18px;
-    font-weight: bold;
-    line-height: 27px;
-    margin-right: 10px;
-}
-.map-search-container .map-search-results {
-    padding: 0;
-    list-style: none;
-    margin: 0;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background: #fff;
-    padding: 0;
-    box-shadow: 0 0 6px 3px rgba(0, 0, 0, 0.1);
-    width: 100%;
-}
-.map-search-container .map-search-results li {
-    width: 100%;
-}
-.map-search-container .map-search-results li + li {
-    border-top: solid 1px #efefef;
-}
-.map-search-container .map-search-results li button {
-    text-align: left;
-    width: 100%;
-    max-width: none;
-    justify-content: left;
 }

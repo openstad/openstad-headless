@@ -28,7 +28,7 @@ const ResourceOverviewMap = ({
   const allResources = resources?.records || [];
 
   let categorizeByField = categorize?.categorizeByField;
-  let categories: CategoriesType;
+  let categories: CategoriesType =  {};
 
   if (categorizeByField) {
     const { data: tags } = datastore.useTags({
