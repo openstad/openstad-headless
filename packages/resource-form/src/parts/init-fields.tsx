@@ -1,5 +1,6 @@
 import {FieldProps} from "@openstad-headless/form/src/props.js";
-import {Icon} from "@openstad-headless/ui/src/index.js";
+import React from "react";
+import DataStore from "@openstad-headless/data-store/src";
 
 const getMinMaxByField = (key, data) => {
     return !!data && typeof data.resources !== 'undefined' && typeof data.resources[key] !== 'undefined' ? data.resources[key] : '';
@@ -9,9 +10,33 @@ export const InitializeFormFields = (items, data) => {
     const formFields: FieldProps[] = [];
     if (typeof (items) === 'object' && items.length > 0
     ) {
+        const datastore = new DataStore({
+            projectId: data.projectId,
+            api: data.api,
+            config: { api: data.api },
+        });
         for (const item of items) {
+
+            if ( item.type === 'tags' ) {
+
+                const { data: tags } = datastore.useTags({
+                    projectId: data.projectId,
+                    type: item.tags,
+                });
+
+                item.options = !!tags ?
+                    tags
+                        .filter((tag: any) => tag.type === item.tags)
+                        .map((tag: any, index: number) => ({
+                            trigger: `${index}`,
+                            titles: [{text: tag.name, key: tag.name}],
+                            images: []
+                        }))
+                    : [];
+            }
+
             const fieldData: any = {
-                type: item.type,
+                type: item.fieldType,
                 title: item.title,
                 description: item.description,
                 fieldKey: item.fieldKey,
@@ -23,11 +48,12 @@ export const InitializeFormFields = (items, data) => {
                 options: item.options
             };
 
-            switch (item.type) {
+            switch (item.fieldType) {
                 case 'text':
                     fieldData['rows'] = 4;
                     break;
                 case 'checkbox':
+                case 'select':
                 case 'radiobox':
                     if (
                         item.options &&
