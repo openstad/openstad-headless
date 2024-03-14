@@ -14,6 +14,11 @@ export function useWidgetConfig() {
   );
 
   async function updateConfig(config: any) {
+
+    // these are added by the preview but should not be saved
+    if (config.login?.url) delete config.login?.url;
+    if (config.logout?.url) delete config.logout?.url;
+
     try {
       const res = await fetch(
         `/api/openstad/api/project/${projectId}/widgets/${id}?includeType=1`,

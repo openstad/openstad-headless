@@ -1,15 +1,15 @@
 admin:
   deploymentContainer:
-    image: ghcr.io/openstad/admin-server:main-88d08f8
+    image: ghcr.io/openstad/admin-server:main-b83d85d
 api:
   deploymentContainer:
-    image: ghcr.io/openstad/api-server:main-88d08f8
+    image: ghcr.io/openstad/api-server:main-b83d85d
 auth:
   deploymentContainer:
-    image: ghcr.io/openstad/auth-server:main-88d08f8
+    image: ghcr.io/openstad/auth-server:main-b83d85d
 image:
   deploymentContainer:
-    image: ghcr.io/openstad/image-server:main-88d08f8
+    image: ghcr.io/openstad/image-server:main-b83d85d
 cms:
   deploymentContainer:
-    image: ghcr.io/openstad/cms-server:main-88d08f8
+    image: ghcr.io/openstad/cms-server:main-b83d85d
