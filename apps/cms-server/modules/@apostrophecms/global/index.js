@@ -68,6 +68,11 @@ module.exports = {
         type: 'string',
         label: 'URL voor CSS imports (optioneel)',
       },
+      compactMenu: {
+        type: 'boolean',
+        label: 'Compacte weergave van het hoofdmenu.',
+        def: false
+      },
       analyticsType:   {
         type: 'select',
         permission: 'admin',
@@ -141,6 +146,35 @@ module.exports = {
         },
       },
 
+      footerlinks: {
+        type: 'array',
+        label: 'Footer links',
+        inline: true,
+        fields: {
+          add: {
+            title: {
+              label: 'Column naam',
+              type: 'string'
+            },
+            items: {
+              type: 'array',
+              label: 'Links',
+              fields: {
+                add: {
+                  label: {
+                    label: 'Link tekst',
+                    type: 'string'
+                  },
+                  url: {
+                    label: 'Link url',
+                    type: 'string'
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     },
 
     group: {
@@ -150,7 +184,7 @@ module.exports = {
       },
       css: {
         label: 'Vormgeving',
-        fields: [ 'cssExtras', 'customCssLink' ],
+        fields: [ 'cssExtras', 'customCssLink', 'compactMenu' ],
       },
       cookies: {
         label: 'Cookie instellingen',
@@ -160,6 +194,10 @@ module.exports = {
         label: 'Analitics',
         fields: [ 'analyticsType', 'analyticsIdentifier', 'analyticsCodeBlock' ],
       },
+      footer: {
+        label: 'Footer',
+        fields: [ 'footerlinks' ],      
+      }
     }
   }
 

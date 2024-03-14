@@ -36,3 +36,23 @@
 #navbar .container #main-menu.mobile-nav button{
   margin: 10px 0;
 }
+
+.main-header-container > .row{
+  justify-content: space-between;
+  align-items: center;
+}
+
+.main-header-container > .row > *{
+  width: revert;
+  max-width: revert;
+}
+
+#navbar.--compact{
+  padding: 0;
+  margin: 0;
+  background: none;
+}
+#navbar.--compact .container{
+  padding: 0;
+  margin: 0;
+}

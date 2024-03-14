@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -11,44 +11,10 @@ interface Item {
 };
 
 function NavBar({ home, content }: Item) {
-  const [mobile, setMobile] = useState(false);
-  const [menuVisible, setMenuvisible] = useState(true);
-
-
-  useEffect(() => {
-    const mainMenu = document.getElementById('main-menu');
-    const navBar = document.getElementById('navbar');
-
-    if (mainMenu && navBar) {
-      if (mainMenu.offsetWidth >= navBar.offsetWidth) {
-        setMobile(true);
-        setMenuvisible(false);
-      } else {
-        setMobile(false);
-        setMenuvisible(true);
-      }
-    }
-  }, []);
-
 
   return (
     <div className='container'>
-      {mobile && (
-        <Button
-          appearance="primary-action-button"
-          onClick={() => setMenuvisible(!menuVisible)}>
-          Menu
-        </Button>
-      )}
-      {menuVisible && (
-        <nav id="main-menu" className={mobile ? 'mobile-nav' : undefined}>
-          {mobile && (
-            <Button
-              appearance="primary-action-button"
-              onClick={() => setMenuvisible(!menuVisible)}>
-              Close
-            </Button>
-          )}
+        <nav id="main-menu">
           {home && (
             JSON.parse(home).map((item: any, index: number) => {
               return (
@@ -62,7 +28,6 @@ function NavBar({ home, content }: Item) {
             )
           })}
         </nav>
-      )}
     </div>
   )
 }
