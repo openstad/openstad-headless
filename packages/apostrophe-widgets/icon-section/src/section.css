@@ -4,7 +4,7 @@
 }
 
 .icon-section{
-  background-color: var(--nlds-default-background-color, #F0F4F8);
+  background-color: var(--nlds-iconsection-background-color, var(--nlds-default-background-color, #F0F4F8));
 }
 
 .icon-section .utrecht-button.utrecht-button--subtle.utrecht-accordion__button{
@@ -42,6 +42,30 @@
   grid-gap: 10px;
 }
 
+
+.icon-section .icon-section-content h3{
+  color: var(--nlds-iconsection-color,var(--utrecht-heading-3-color, var(--utrecht-heading-color, var(--utrecht-document-color, inherit))));
+}
+
+.icon-section .icon-section-content p{
+  color: var(--nlds-iconsection-color,var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit)));
+}
+
+.icon-section .icon-section-content a{
+  color: var(--nlds-iconsection-link-color, var(--_utrecht-link-state-color, var(--utrecht-link-color, var(--_utrecht-link-forced-colors-color))));
+  font-weight: 600;
+}
+
+.icon-section .icon-section-content a::before{
+  content: '';
+  aspect-ratio: 1;
+  width: 8px;
+  border: solid var(--nlds-iconsection-link-color, var(--_utrecht-link-state-color, var(--utrecht-link-color, var(--_utrecht-link-forced-colors-color))));
+  display: inline-block;
+  transform: rotate(45deg) translate(-1px, 0);
+  border-width: 2px 2px 0 0;
+  margin-right: 10px;
+}
 
 .icon-section .icon-section-card img{
   width: 100%;
