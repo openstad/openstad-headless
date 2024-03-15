@@ -105,8 +105,8 @@
 }
 
 .section {
-    margin-block-start: var(--nlds-section-margin-block-start, var(--nlds-default-margin-block-start, 3.5rem));
-    margin-block-end: var(--nlds-section-margin-block-end, var(--nlds-default-margin-block-end, 3.5rem));
+    margin-block-start: var(--nlds-section-margin-block-start, var(--nlds-default-margin-block-start, 2rem));
+    margin-block-end: var(--nlds-section-margin-block-end, var(--nlds-default-margin-block-end, 2rem));
 }
 
 *:first-child {

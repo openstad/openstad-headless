@@ -69,7 +69,7 @@ module.exports = {
       },
       banner: {
         type: 'boolean',
-        label: 'Weergave als banner',
+        label: 'Witruimte boven weghalen',
         def: false
       },
       
