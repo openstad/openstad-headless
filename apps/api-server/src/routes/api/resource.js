@@ -8,7 +8,7 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
 const c = require('config');
-const { Op } = require("sequelize");
+const { Op } = require('sequelize');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
@@ -22,7 +22,11 @@ const userhasModeratorRights = (user) => {
 
 // scopes: for all get requests
 router.all('*', function (req, res, next) {
-  req.scope = ['defaultScope', 'api' , { method: ['onlyVisible', req.user.id, req.user.role] }];
+  req.scope = [
+    'defaultScope',
+    'api',
+    { method: ['onlyVisible', req.user.id, req.user.role] },
+  ];
 
   // in case the votes are archived don't use these queries
   // this means they can be cleaned up from the main table for performance reason
@@ -36,7 +40,9 @@ router.all('*', function (req, res, next) {
         req.project.config.votes.isViewable) ||
         userhasModeratorRights(req.user))
     ) {
-      req.scope.push({ method: ['includeVoteCount', req.project.config.votes] });
+      req.scope.push({
+        method: ['includeVoteCount', req.project.config.votes],
+      });
     }
 
     if (
@@ -109,14 +115,14 @@ router
   // ----------
   .get(auth.can('Resource', 'list'))
   .get(pagination.init)
-  .get(function(req, res, next) {
+  .get(function (req, res, next) {
     let { dbQuery } = req;
 
     dbQuery.where = {
       projectId: req.params.projectId,
       ...req.queryConditions,
       ...dbQuery.where,
-      deletedAt: null      
+      deletedAt: null,
     };
 
     if (dbQuery.hasOwnProperty('order')) {
@@ -173,11 +179,13 @@ router
     try {
       req.body.tags = req.body.tags ? JSON.parse(req.body.tags) : [];
     } catch (err) {}
-    let existingTags = await db.Tag.findAll({ where: { id: req.body.tags.map( t => t.id ) } });
-    if (existingTags.find(t => t.type == 'status')) return next(); // request already contains a status tag
+    let existingTags = await db.Tag.findAll({
+      where: { id: req.body.tags.map((t) => t.id) },
+    });
+    if (existingTags.find((t) => t.type == 'status')) return next(); // request already contains a status tag
     let statusId = req.project?.config?.statusses?.defaultStatusId;
     if (statusId) {
-      let found = req.body.tags.find( t => t.id == statusId );
+      let found = req.body.tags.find((t) => t.id == statusId);
       if (!found) {
         req.body.tags.push({ id: statusId });
       }
@@ -186,7 +194,9 @@ router
   })
   .post(function (req, res, next) {
     try {
-      req.body.location = req.body.location ? JSON.parse(req.body.location) : null;
+      req.body.location = req.body.location
+        ? JSON.parse(req.body.location)
+        : null;
     } catch (err) {}
 
     if (
@@ -200,12 +210,12 @@ router
     let userId = req.user.id;
     if (req.user.role == 'admin' && req.body.userId) userId = req.body.userId;
 
-    if ( !!req.body.submittedData ) {
+    if (!!req.body.submittedData) {
       req.body = {
         ...req.body,
         ...req.body.submittedData,
-        extraData: req.body.submittedData
-      }
+        extraData: req.body.submittedData,
+      };
 
       delete req.body.submittedData;
     }
@@ -261,7 +271,13 @@ router
     const resourceInstance = req.results;
     const projectId = req.params.projectId;
 
+    const project = await db.Project.findOne({ where: { id: projectId } });
+    const projectTags = project?.config?.resources?.tags;
     let tagIds = Array.from(await getOrCreateTagIds(projectId, tags, req.user));
+
+    if(Array.isArray(projectTags) && projectTags.every(Number.isInteger)) {
+      tagIds = Array.from(new Set([...tagIds, ...projectTags]));
+    }
 
     resourceInstance.setTags(tagIds).then((tags) => {
       // refetch. now with tags
@@ -274,7 +290,9 @@ router
         })
         .then((found) => {
           if (!found) {
-            console.error(`Resource not found:', { id: ${resourceInstance.id}, projectId: ${req.params.projectId} }`);
+            console.error(
+              `Resource not found:', { id: ${resourceInstance.id}, projectId: ${req.params.projectId} }`
+            );
           } else {
             found.project = req.project;
             req.results = found;
@@ -291,29 +309,29 @@ router
     // if (!req.query.nomail && req.body['publishDate']) {
     //   db.Notification.create({
     //     type: "new published resource - admin update",
-	// 		  projectId: req.project.id,
+    // 		  projectId: req.project.id,
     //     data: {
     //       userId: req.user.id,
     //       resourceId: req.results.id
     //     }
-	// 	  })
+    // 	  })
     //   db.Notification.create({
     //     type: "new published resource - user feedback",
-	// 		  projectId: req.project.id,
+    // 		  projectId: req.project.id,
     //     data: {
     //       userId: req.user.id,
     //       resourceId: req.results.id
     //     }
-	// 		})
+    // 		})
     // } else if (!req.query.nomail && !req.body['publishDate']) {
     //   db.Notification.create({
     //     type: "new concept resource - user feedback",
-	// 		  projectId: req.project.id,
+    // 		  projectId: req.project.id,
     //     data: {
     //       userId: req.user.id,
     //       resourceId: req.results.id
     //     }
-	// 		})
+    // 		})
     // }
   });
 
@@ -468,22 +486,22 @@ router
   })
   .put(function (req, res, next) {
     db.Notification.create({
-      type: "updated resource - admin update",
-			projectId: req.project.id,
+      type: 'updated resource - admin update',
+      projectId: req.project.id,
       data: {
         userId: req.user.id,
-        resourceId: req.results.id
-      }
-		})
+        resourceId: req.results.id,
+      },
+    });
     if (req.changedToPublished) {
       db.Notification.create({
-        type: "new published resource - user feedback",
-			  projectId: req.project.id,
+        type: 'new published resource - user feedback',
+        projectId: req.project.id,
         data: {
           userId: req.user.id,
-          resourceId: req.results.id
-        }
-			})
+          resourceId: req.results.id,
+        },
+      });
     }
     next();
   })
