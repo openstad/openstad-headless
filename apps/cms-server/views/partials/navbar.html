@@ -5,6 +5,7 @@
 ></nav>
 {% else %}
 
+{% if not data.global.compactMenu %}
   <nav id="navbar"
     data-home='
     [{
@@ -12,6 +13,7 @@
       "title": "{{ data.home.title }}"
     }]'
     data-content='{{ data.home._children | json }}'
-></nav>
+  ></nav>
+{% endif %}
 
 {% endif %}

@@ -27,55 +27,5 @@
 
 <div
   id="footer-container"
-  data-content='[
-        {
-          "title": "Over deze site",
-          "items": [
-            {
-              "url": "#",
-              "label": "Privacy"
-            },
-            {
-              "url": "#",
-              "label": "Toegankelijkheid"
-            },
-            {
-              "url": "#",
-              "label": "Cookies"
-            }
-          ]
-        },
-        {
-          "title": "Taal",
-          "items": [
-            {
-              "url": "#",
-              "label": "NL Nederlands"
-            },
-            {
-              "url": "#",
-              "label": "EN English"
-            }
-          ]
-        },
-        {
-          "title": "Contact",
-          "items": [
-            {
-              "url": "#",
-              "label": "Veelgestelde vragen"
-            },
-            {
-              "url": "#",
-              "label": "Hou mij op de hoogte"
-            },
-            {
-              "url": "#",
-              "label": "Neem contact op"
-            }
-          ]
-        }
-      ]'
->
-  lote
-</div>
+  data-content='{{data.global.footerlinks | json}}'
+></div>

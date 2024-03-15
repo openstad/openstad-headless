@@ -214,7 +214,6 @@ router
       req.body = {
         ...req.body,
         ...req.body.submittedData,
-        extraData: req.body.submittedData,
       };
 
       delete req.body.submittedData;

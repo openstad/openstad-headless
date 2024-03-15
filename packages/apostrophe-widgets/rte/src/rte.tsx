@@ -8,7 +8,7 @@ interface Item {
 
 function RTE({ content }: Item) {
   return (
-    <div dangerouslySetInnerHTML={{ __html: RenderContent(content) }} />
+    <div className="rte" dangerouslySetInnerHTML={{ __html: RenderContent(content) }} />
   )
 }
 

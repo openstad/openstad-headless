@@ -644,12 +644,14 @@ module.exports = function (db, sequelize, DataTypes) {
           ],
         };
       },
+
       includeTags: {
         include: [
           {
             model: db.Tag,
             attributes: ['id', 'type', 'name', 'label', 'extraFunctionality'],
             through: { attributes: [] },
+            required: false,
           },
         ],
       },

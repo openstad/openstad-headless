@@ -4,7 +4,7 @@ import {ResourceFormWidgetProps} from "./props.js";
 import {Banner, Button, Spacer} from "@openstad-headless/ui/src/index.js";
 import {InitializeFormFields} from "./parts/init-fields.js";
 import toast, { Toaster } from 'react-hot-toast';
-//@ts-ignore D.type def missing, will disappear when datastore is ts
+//@ts-expect-error D.type def missing, will disappear when datastore is ts
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
 import Form from "@openstad-headless/form/src/form";
@@ -13,20 +13,9 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const { submitButton, saveConceptButton} = props.submit  || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
     const { loginText, loginButtonText} = props.info  || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
 
-    const notifySuccess = () =>
-        toast.success('Idee indienen gelukt', { position: 'bottom-center' });
-
-    const notifyFailed = () =>
-        toast.error('Idee indienen mislukt', { position: 'bottom-center' });
-
-    //
     const datastore: any = new DataStore({
         projectId: props.projectId,
         api: props.api,
-    });
-
-    const { data, create: createResource } = datastore.useResources({
-        projectId: props.projectId,
     });
 
     const {
@@ -35,9 +24,59 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         isLoading: currentUserIsLoading,
     } = datastore.useCurrentUser({ ...props });
 
+    const { create: createResource } = datastore.useResources({
+        projectId: props.projectId,
+    });
+
+    const formFields = InitializeFormFields(props.items, props);
+
+    const notifySuccess = () =>
+        toast.success('Idee indienen gelukt', { position: 'bottom-center' });
+
+    const notifyFailed = () =>
+        toast.error('Idee indienen mislukt', { position: 'bottom-center' });
+
+    const addTagsToFormData = (formData) => {
+        const tags = [];
+
+        for (const key in formData) {
+            if (formData.hasOwnProperty(key)) {
+                if (key.startsWith('tags[')) {
+                    tags.push(formData[key]);
+                    delete formData[key];
+                }
+            }
+        }
+
+        formData.tags = tags;
+
+        return formData;
+    };
+
+    const configureFormData = (formData, publish = false) => {
+        const dbFixedColumns = ['title', 'summary', 'description', 'budget', 'images', 'location', 'tags'];
+        const extraData = {};
+
+        formData = addTagsToFormData(formData);
+
+        for (const key in formData) {
+            if (formData.hasOwnProperty(key)) {
+                if (!dbFixedColumns.includes(key)) {
+                    extraData[key] = formData[key];
+                    delete formData[key];
+                }
+            }
+        }
+
+        formData.extraData = extraData;
+        formData.publishDate = publish ? new Date() : '';
+
+        return formData;
+    }
+
     async function onSubmit(formData: any) {
         // TODO: Redirect user to afterSubmitUrl when set
-        // const result = await createResource(formData, props.widgetId);
+        // const result = await createResource(formData, widgetId);
 
         // if (result) {
         //     if(props.afterSubmitUrl) {
@@ -47,8 +86,10 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         //     }
         // }
 
+        const finalFormData = configureFormData(formData, true);
+
         try {
-            const result = await createResource(formData, props.widgetId);
+            const result = await createResource(finalFormData, props.widgetId);
             if (result) {
                 notifySuccess();
             }
@@ -57,7 +98,6 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         }
     }
 
-    const formFields = InitializeFormFields(props.items, props);
 
     return (
         <div className="osc">

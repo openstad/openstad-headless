@@ -88,8 +88,8 @@
 }
 
 .osc{
-    --nlds-default-background-color: #F0F4F8;
-    --nlds-default-border-color: #A9B2BA;
+    /* --nlds-default-background-color: #F0F4F8; */
+    /* --nlds-default-border-color: #A9B2BA; */
 
     /* --nlds-default-margin-block-start: 1rem; */
     /* --nlds-default-margin-block-end: 1rem; */

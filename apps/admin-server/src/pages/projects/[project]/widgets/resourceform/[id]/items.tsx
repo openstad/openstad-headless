@@ -1,4 +1,3 @@
-import { ImageUploader } from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
 import {
     Form,
@@ -18,22 +17,28 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { Heading } from '@/components/ui/typography';
+import {Heading} from '@/components/ui/typography';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {ArrowDown, ArrowUp, X} from 'lucide-react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import {Item, Option, ResourceFormWidgetProps} from "@openstad-headless/resource-form/src/props";
+import {defaultFormValues} from "@openstad-headless/resource-form/src/parts/default-values";
+import useTags from "@/hooks/use-tags";
+import {useRouter} from "next/router";
 
 const formSchema = z.object({
     trigger: z.string(),
+    fieldType: z.string(),
     title: z.string().optional(),
     description: z.string().optional(),
     type: z.string().optional(),
+    tags: z.string().optional(),
     fieldKey: z.string(),
     fieldRequired: z.boolean().optional(),
+    onlyForModerator: z.boolean().optional(),
     minCharacters: z.string().optional(),
     maxCharacters: z.string().optional(),
     variant: z.string().optional(),
@@ -65,6 +70,12 @@ export default function WidgetResourceFormItems(
     const [settingOptions, setSettingOptions] = useState<boolean>(false);
     const [file, setFile] = useState<File>();
 
+    const router = useRouter();
+    const { project } = router.query;
+
+    const { data: allTags } = useTags(project as string);
+    const firstTagType = allTags?.[0]?.type ?? '';
+
     // adds item to items array if no item is selected, otherwise updates the selected item
     async function onSubmit(values: FormData) {
         if (selectedItem) {
@@ -86,8 +97,11 @@ export default function WidgetResourceFormItems(
                     title: values.title,
                     description: values.description,
                     type: values.type,
-                    fieldKey: values.fieldKey,
+                    tags: values.tags || firstTagType,
+                    fieldType: values.fieldType,
+                    fieldKey: values.fieldKey || '',
                     fieldRequired: values.fieldRequired || false,
+                    onlyForModerator: values.onlyForModerator || false,
                     minCharacters: values.minCharacters,
                     maxCharacters: values.maxCharacters,
                     variant: values.variant || 'text input',
@@ -138,12 +152,15 @@ export default function WidgetResourceFormItems(
         title: '',
         description: '',
         type: '',
+        tags: firstTagType,
+        fieldType: '',
         fieldKey: '',
-        fieldRequired: true,
+        fieldRequired: false,
+        onlyForModerator: false,
         minCharacters: '',
         maxCharacters: '',
         variant: 'text input',
-        multiple: true,
+        multiple: false,
         options: [],
     });
 
@@ -155,6 +172,8 @@ export default function WidgetResourceFormItems(
     useEffect(() => {
         if (props?.items && props?.items?.length > 0) {
             setItems(props?.items);
+        } else if ( !!props.items && props.items.length < 1 && items.length < 1 ) {
+            setItems(defaultFormValues);
         }
     }, [props?.items]);
 
@@ -170,9 +189,12 @@ export default function WidgetResourceFormItems(
                 title: selectedItem.title || '',
                 description: selectedItem.description || '',
                 type: selectedItem.type || '',
+                tags: selectedItem.tags || firstTagType,
+                fieldType: selectedItem.fieldType || '',
                 options: selectedItem.options || [],
                 fieldKey: selectedItem.fieldKey || '',
                 fieldRequired: selectedItem.fieldRequired || false,
+                onlyForModerator: selectedItem.onlyForModerator || false,
                 minCharacters: selectedItem.minCharacters || '',
                 maxCharacters: selectedItem.maxCharacters || '',
                 variant: selectedItem.variant || '',
@@ -256,10 +278,8 @@ export default function WidgetResourceFormItems(
 
     const hasOptions = () => {
         switch (form.watch('type')) {
-            case 'images':
-                return true;
             case 'checkbox':
-                return true;
+            case 'select':
             case 'radiobox':
                 return true;
             default:
@@ -270,7 +290,7 @@ export default function WidgetResourceFormItems(
     const hasList = () => {
         switch (form.watch('type')) {
             case 'checkbox':
-                return true;
+            case 'select':
             case 'radiobox':
                 return true;
             default:
@@ -288,6 +308,23 @@ export default function WidgetResourceFormItems(
         form.setValue('options', options);
         setSettingOptions(false);
     }
+
+    useEffect(() => {
+        const defaultFormItem = defaultFormValues.find((item) => item.type === form.watch('type'));
+
+        if (defaultFormItem) {
+            form.setValue('fieldKey', defaultFormItem.fieldKey || '');
+            form.setValue('title', defaultFormItem.title || '');
+            form.setValue('description', defaultFormItem.description || '');
+            form.setValue('fieldType', defaultFormItem.fieldType || '');
+
+            if (defaultFormItem.fieldType === 'text') {
+                const variant = (defaultFormItem.type === 'summary' || defaultFormItem.type === 'description') ? 'textarea' : 'text input';
+                form.setValue('variant', variant);
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [form.watch("type")]);
 
     return (
         <div>
@@ -362,88 +399,6 @@ export default function WidgetResourceFormItems(
                                     <div className="flex flex-col gap-y-2">
                                         <Heading size="xl">Antwoordopties</Heading>
                                         <Separator className="mt-2" />
-                                        {form.watch('type') === 'images' && (
-                                            <>
-                                                <FormField
-                                                    control={form.control}
-                                                    name={`options.${options.length - 1}.images.0.image`}
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Afbeelding 1</FormLabel>
-                                                            <FormControl>
-                                                                <Input
-                                                                    type="file"
-                                                                    {...field}
-                                                                    onChange={(e) => setFile(e.target.files?.[0])}
-                                                                />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name={`options.${options.length - 1}.titles.0.key`}
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Key afbeelding 1</FormLabel>
-                                                            <Input {...field} />
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name={`options.${options.length - 1}.titles.0.text`}
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Titel afbeelding 1</FormLabel>
-                                                            <Input {...field} />
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name={`options.${options.length - 1}.images.1.image`}
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Afbeelding 2</FormLabel>
-                                                            <FormControl>
-                                                                <Input
-                                                                    type="file"
-                                                                    {...field}
-                                                                    onChange={(e) => setFile(e.target.files?.[0])} // Dit moet nog aangepast worden naar een array van files
-                                                                />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name={`options.${options.length - 1}.titles.1.key`}
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Key afbeelding 2</FormLabel>
-                                                            <Input {...field} />
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name={`options.${options.length - 1}.titles.1.text`}
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Titel afbeelding 2</FormLabel>
-                                                            <Input {...field} />
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </>
-                                        )}
                                         {hasList() && (
                                             <>
                                                 <FormField
@@ -597,22 +552,43 @@ export default function WidgetResourceFormItems(
                                                         </FormControl>
                                                         <SelectContent>
                                                             <SelectItem value="none">Geen antwoordopties</SelectItem>
-                                                            {/*<SelectItem value="images">Twee antwoordopties met afbeeldingen</SelectItem>*/}
                                                             <SelectItem value="radiobox">Radio buttons</SelectItem>
                                                             <SelectItem value="text">Tekstveld</SelectItem>
                                                             <SelectItem value="checkbox">Checkboxes</SelectItem>
-                                                            {/*<SelectItem value="scale">Schaal</SelectItem>*/}
                                                             <SelectItem value="map">Locatie</SelectItem>
                                                             <SelectItem value="upload">Afbeelding upload</SelectItem>
+                                                            <SelectItem value="select">Dropdown</SelectItem>
+
+                                                            <SelectItem value="title">Resource: Titel</SelectItem>
+                                                            <SelectItem value="summary">Resource: Samenvatting</SelectItem>
+                                                            <SelectItem value="description">Resource: Beschrijving</SelectItem>
+                                                            <SelectItem value="images">Resource: Uploaden afbeeldingen</SelectItem>
+                                                            <SelectItem value="tags">Resource: Tags</SelectItem>
+                                                            <SelectItem value="location">Resource: Locatie</SelectItem>
+                                                            <SelectItem value="estimate">Resource: Geschatte kosten</SelectItem>
+                                                            <SelectItem value="role">Resource: Rol</SelectItem>
+                                                            <SelectItem value="phone">Resource: Telefoonnummer</SelectItem>
+                                                            <SelectItem value="advice">Resource: Tips</SelectItem>
+                                                            <SelectItem value="budget">Resource: Budget</SelectItem>
+
                                                         </SelectContent>
                                                     </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}></FormField>
+                                        <FormField
+                                            control={form.control}
+                                            name="trigger"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <Input type="hidden" {...field} />
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
                                         <FormField
                                             control={form.control}
-                                            name="trigger"
+                                            name="fieldType"
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <Input type="hidden" {...field} />
@@ -645,39 +621,106 @@ export default function WidgetResourceFormItems(
                                         <FormField
                                             control={form.control}
                                             name="fieldKey"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Key voor het opslaan, deze moet uniek zijn bijvoorbeeld: ‘samenvatting’
-                                                    </FormLabel>
-                                                    <Input {...field} />
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
+                                            render={({ field }) => {
+                                                const nonStaticType = ['none', 'radiobox', 'text', 'checkbox', 'map', 'upload'];
+                                                const type = form.watch('type');
+                                                const fieldKey = !nonStaticType.includes(type || '') ? type : '';
+
+                                                return (
+                                                    <FormItem>
+                                                        <FormLabel>Key voor het opslaan, deze moet uniek zijn
+                                                            bijvoorbeeld: ‘samenvatting’
+                                                        </FormLabel>
+                                                        <Input {...field} disabled={!!fieldKey}/>
+                                                        <FormMessage/>
+                                                    </FormItem>
+                                                )
+                                            }
+                                        }
                                         />
+                                        {form.watch('type') === 'tags' && (
+                                            <FormField
+                                                control={form.control}
+                                                name="tags"
+                                                render={({ field }) => {
+                                                    if (form.watch('fieldKey') !== `tags[${field.value || firstTagType}]`) {
+                                                        form.setValue('fieldKey', `tags[${field.value || firstTagType}]`)
+                                                    }
+
+                                                    if (!allTags || allTags.length === 0) {
+                                                        return <p style={{fontSize: '14px', margin: '20px 0', color: 'red'}}><strong>Geen tags gevonden om te selecteren. Maak dit aan onder het kopje &apos;Tags&apos;</strong></p>;
+                                                    }
+
+                                                    return (
+                                                        <FormItem>
+                                                            <FormLabel>Welk type tag moet als keuze in het formulier komen?</FormLabel>
+                                                            <Select
+                                                                value={field.value || firstTagType}
+                                                                onValueChange={(value) => {
+                                                                    field.onChange(value);
+                                                                    form.setValue('fieldKey', `tags[${value || firstTagType}]`)
+                                                                }}>
+                                                                    <SelectTrigger>
+                                                                        <SelectValue />
+                                                                    </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {allTags.reduce((uniqueTags: any[], tag: any) => {
+                                                                        if (!uniqueTags.some((t) => t.type === tag.type)) {
+                                                                            uniqueTags.push(tag);
+                                                                        }
+                                                                        return uniqueTags;
+                                                                    }, []).map((tag: any) => (
+                                                                        <SelectItem
+                                                                            key={tag.id}
+                                                                            value={tag.type}
+                                                                        >
+                                                                            {tag.type}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
+                                        )}
                                         <FormField
                                             control={form.control}
                                             name="fieldRequired"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Is dit veld verplicht?</FormLabel>
-                                                    <Select
-                                                        onValueChange={(e: string) => field.onChange(e === 'true')}
-                                                        value={field.value ? 'true' : 'false'}>
-                                                        <FormControl>
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Kies een optie" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            <SelectItem value="true">Ja</SelectItem>
-                                                            <SelectItem value="false">Nee</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
+                                            render={({ field }) => {
+                                                const staticType = ['title', 'summary', 'description'];
+                                                const type = form.watch('type');
+                                                const required = staticType.includes(type || '');
+
+                                                return (
+                                                    <FormItem>
+                                                        <FormLabel>Is dit veld verplicht?</FormLabel>
+                                                        <Select
+                                                            onValueChange={(e: string) => field.onChange(e === 'true')}
+                                                            value={
+                                                                required
+                                                                    ? 'true'
+                                                                    : (field.value ? 'true' : 'false')
+                                                            }
+                                                            disabled={required}
+                                                        >
+                                                            <FormControl>
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Kies een optie"/>
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                <SelectItem value="true">Ja</SelectItem>
+                                                                <SelectItem value="false">Nee</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage/>
+                                                    </FormItem>
+                                                )
+                                            }}
                                         />
-                                        {form.watch('type') === 'text' && (
+                                        {form.watch('fieldType') === 'text' && (
                                             <>
                                                 <FormField
                                                     control={form.control}
@@ -702,32 +745,36 @@ export default function WidgetResourceFormItems(
                                                         </FormItem>
                                                     )}
                                                 />
-                                                <FormField
-                                                    control={form.control}
-                                                    name="minCharacters"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Minimaal aantal tekens</FormLabel>
-                                                            <Input {...field} />
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name="maxCharacters"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Maximaal aantal tekens</FormLabel>
-                                                            <Input {...field} />
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
+                                                { form.watch('type') !== 'title' && form.watch('type') !== 'summary' && form.watch('type') !== 'description' && (
+                                                    <>
+                                                        <FormField
+                                                            control={form.control}
+                                                            name="minCharacters"
+                                                            render={({field}) => (
+                                                                <FormItem>
+                                                                    <FormLabel>Minimaal aantal tekens</FormLabel>
+                                                                    <Input {...field} />
+                                                                    <FormMessage/>
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                        <FormField
+                                                            control={form.control}
+                                                            name="maxCharacters"
+                                                            render={({field}) => (
+                                                                <FormItem>
+                                                                    <FormLabel>Maximaal aantal tekens</FormLabel>
+                                                                    <Input {...field} />
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                    </>
+                                                )}
                                             </>
                                         )}
 
-                                        {form.watch('type') === 'upload' && (
+                                        {form.watch('fieldType') === 'upload' && (
                                             <FormField
                                                 control={form.control}
                                                 name="multiple"
@@ -753,6 +800,40 @@ export default function WidgetResourceFormItems(
                                             />
                                         )}
 
+                                        <FormField
+                                            control={form.control}
+                                            name="onlyForModerator"
+                                            render={({ field }) => {
+                                                const type = form.watch('type');
+
+                                                return (
+                                                    <FormItem>
+                                                        <FormLabel>Is dit veld zichtbaar voor iedereen of alleen admin gebruikers?</FormLabel>
+                                                        <Select
+                                                            onValueChange={(e: string) => field.onChange(e === 'true')}
+                                                            value={
+                                                                type === 'budget'
+                                                                    ? 'true'
+                                                                    : (field.value ? 'true' : 'false')
+                                                            }
+                                                            disabled={type === 'budget'}
+                                                        >
+                                                            <FormControl>
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Kies een optie"/>
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                <SelectItem value="false">Iedereen</SelectItem>
+                                                                <SelectItem value="true">Alleen admin gebruikers</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage/>
+                                                    </FormItem>
+                                                )
+                                            }}
+                                        />
+
                                         {hasOptions() && (
                                             <FormItem>
                                                 <Button
@@ -777,7 +858,7 @@ export default function WidgetResourceFormItems(
                                             Annuleer
                                         </Button>
                                     )}
-                                    <Button className="w-fit mt-4" type="submit">
+                                    <Button className="w-fit mt-4" type="submit" disabled={form.watch('type') === 'tags' && allTags.length === 0}>
                                         {selectedItem
                                             ? 'Sla wijzigingen op'
                                             : 'Voeg item toe aan lijst'}

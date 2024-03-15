@@ -5,3 +5,8 @@ h1, h2, h3, h4 {
 .heavy-bold {
   font-weight: 900;
 }
+
+html body .rte > * {
+  margin-block-start: 1rem;
+  margin-block-end: 1rem;
+}
