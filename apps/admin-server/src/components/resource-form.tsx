@@ -21,12 +21,7 @@ import { SimpleCalendar } from '@/components/simple-calender-popup';
 import useResource from '@/hooks/use-resource';
 import toast from 'react-hot-toast';
 import { ImageUploader } from './image-uploader';
-<<<<<<< Updated upstream
-=======
-import useTags from '@/hooks/use-tags';
-import { CheckboxList } from './checkbox-list';
 import { X } from 'lucide-react';
->>>>>>> Stashed changes
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -91,10 +86,6 @@ const formSchema = z.object({
         .optional(),
     })
     .default({}),
-<<<<<<< Updated upstream
-=======
-  tags: z.number().array().default([]),
->>>>>>> Stashed changes
 });
 
 type FormType = z.infer<typeof formSchema>;
@@ -111,19 +102,6 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     project as string,
     id as string
   );
-
-<<<<<<< Updated upstream
-  const [imageArray, setImageArray] = useState<any[]>([]);
-  const [loaded, setLoaded] = useState(false);
-=======
-  const { data: tags, error: tagError, isLoading } = useTags(project as string);
-
-  const loadedTags = (tags || []) as {
-    id: number;
-    name: string;
-    type?: string;
-  }[];
->>>>>>> Stashed changes
 
   const budgetFallback = (existingData: any, key: string = '') => {
     if (!existingData) return 0;
@@ -160,14 +138,10 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         ? new Date(existingData.modBreakDate)
         : undefined,
 
-<<<<<<< Updated upstream
-      location: existingData?.location?JSON.stringify(existingData?.location):'',
-=======
       location: existingData?.location
         ? JSON.stringify(existingData?.location)
         : '',
       image:'',
->>>>>>> Stashed changes
       images: existingData?.images || [],
       extraData: {
         originalId: existingData?.extraData?.originalId || undefined,
@@ -428,8 +402,6 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               form.trigger('images');
             }}
           />
-<<<<<<< Updated upstream
-=======
 
           <section className="grid col-span-full grid-cols-3 gap-4 ">
             {imageFields.map(({ id, url }, index) => {
@@ -453,30 +425,6 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               );
             })}
           </section>
-
-          <CheckboxList
-            form={form}
-            fieldName="tags"
-            fieldLabel="Selecteer de gewenste tags die bij een resource weergegeven zullen
-               worden."
-            label={(t) => t.name}
-            keyForGrouping="type"
-            keyPerItem={(t) => `${t.id}`}
-            items={loadedTags}
-            selectedPredicate={(t) =>
-              form.getValues('tags').findIndex((tg) => tg === t.id) > -1
-            }
-            onValueChange={(tag, checked) => {
-              const values = form.getValues('tags');
-              form.setValue(
-                'tags',
-                checked
-                  ? [...values, tag.id]
-                  : values.filter((id) => id !== tag.id)
-              );
-            }}
-          />
->>>>>>> Stashed changes
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>
