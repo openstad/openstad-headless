@@ -7,6 +7,7 @@ const contentWidgets = {
   'openstad-button': {},
   'openstad-alertbox': {},
   'openstad-sharelinks': {},
+  'openstad-alertbox': {},
   'openstad-timeline': {},
   'openstad-image': {},
   'openstad-iconSection': {},
