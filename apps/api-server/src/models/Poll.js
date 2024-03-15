@@ -154,7 +154,7 @@ module.exports = function (db, sequelize, DataTypes) {
         };
       },
 
-      withResource: function () {
+      includeResource: function () {
         return {
           include: [
             {
@@ -165,7 +165,7 @@ module.exports = function (db, sequelize, DataTypes) {
         };
       },
 
-      withUser: {
+      includeUser: {
         include: [
           {
             model: db.User,
@@ -175,7 +175,7 @@ module.exports = function (db, sequelize, DataTypes) {
         ],
       },
 
-      withUserVote: function (tableName, userId) {
+      includeUserVote: function (tableName, userId) {
         userId = Number(userId);
         if (!userId) return {};
 
@@ -198,7 +198,7 @@ module.exports = function (db, sequelize, DataTypes) {
         };
       },
 
-      withVotes: function () {
+      includeVotes: function () {
         return {
           include: [
             {
