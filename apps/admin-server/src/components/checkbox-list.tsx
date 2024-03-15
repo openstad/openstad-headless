@@ -1,34 +1,35 @@
-import useTags from '@/hooks/use-tags';
-
-import React, { useEffect } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '../components/ui/form';
+} from './ui/form';
 
-import _ from 'lodash';
+import _, { uniqueId } from 'lodash';
 import { Checkbox } from './ui/checkbox';
 
 type Props<T> = {
-  projectId: string;
   form: any;
   fieldName: string;
   fieldLabel?: string;
-  keyForValue: keyof T;
-  keyForGrouping?: keyof T;
-  items: Array<T>;
   label?: (item: T) => string;
+  items: Array<T>;
+  selectedPredicate: (t: T) => boolean;
+  onValueChange: (value: T, checked: boolean) => void;
+  keyPerItem: (t:T) => string;
+    keyForGrouping?: keyof T;
 };
 
-export const TagCheckboxList = <T extends { [key: string]: any }>({
+export const CheckboxList = <T extends { [key: string]: any }>({
   form,
   fieldName,
   fieldLabel,
   items,
-  keyForValue,
+  keyPerItem,
+  selectedPredicate,
+  onValueChange,
   keyForGrouping,
   label,
 }: Props<T>) => {
@@ -51,29 +52,20 @@ export const TagCheckboxList = <T extends { [key: string]: any }>({
             <FormLabel>{fieldLabel}</FormLabel>
             {items?.map((item: any) => (
               <FormField
-                key={item[keyForValue]}
+                key={keyPerItem(item)}
                 control={form.control}
                 name={fieldName}
                 render={({ field }) => {
                   return (
                     <FormItem
-                      key={item[keyForValue]}
+                      key={`checkbox-${keyPerItem(item)}`}
                       className="flex space-x-3 space-y-0">
                       <FormControl>
                         <Checkbox
-                          checked={field.value?.includes(item[keyForValue])}
-                          onCheckedChange={(checked: any) => {
-                            return checked
-                              ? field.onChange([
-                                  ...field.value,
-                                  item[keyForValue],
-                                ])
-                              : field.onChange(
-                                  field.value?.filter(
-                                    (value: any) => value !== item[keyForValue]
-                                  )
-                                );
-                          }}
+                          checked={selectedPredicate(item)}
+                          onCheckedChange={(checked: any) =>
+                            onValueChange(item, checked)
+                          }
                         />
                       </FormControl>
                       <FormLabel className="font-normal">
@@ -101,7 +93,7 @@ export const TagCheckboxList = <T extends { [key: string]: any }>({
           <div className="gap-x-4 gap-y-4">
             {(groupNames || []).map((groupName, index) => {
               return (
-                <>
+                <Fragment key={`checklist-group-${groupName}`}>
                   <FormLabel className="font-normal">
                     {`${
                       groupName[0].toUpperCase() +
@@ -114,32 +106,23 @@ export const TagCheckboxList = <T extends { [key: string]: any }>({
                       .map((item: any) => {
                         return (
                           <FormField
-                            key={item[keyForValue]}
+                            key={keyPerItem(item)}
                             control={form.control}
                             name={fieldName}
                             render={({ field }) => {
                               return (
                                 <FormItem
-                                  key={item[keyForValue]}
-                                  className="inline-flex flex-row items-start space-x-3 space-y-1">
+                                key={`checkbox-${keyPerItem(item)}`}
+                                className="inline-flex flex-row items-start space-x-3 space-y-1">
                                   <FormControl>
                                     <Checkbox
-                                      checked={field.value?.includes(
-                                        item[keyForValue]
-                                      )}
-                                      onCheckedChange={(checked: any) => {
-                                        return checked
-                                          ? field.onChange([
-                                              ...field.value,
-                                              item[keyForValue],
-                                            ])
-                                          : field.onChange(
-                                              field.value?.filter(
-                                                (value: any) =>
-                                                  value !== item[keyForValue]
-                                              )
-                                            );
-                                      }}
+                                      checked={selectedPredicate(item)}
+                                      onCheckedChange={(checked: any) =>
+                                        onValueChange(
+                                          item,
+                                          checked,
+                                        )
+                                      }
                                     />
                                   </FormControl>
                                   <FormLabel className="font-normal">
@@ -152,7 +135,7 @@ export const TagCheckboxList = <T extends { [key: string]: any }>({
                         );
                       })}
                   </section>
-                </>
+                </Fragment>
               );
             })}
           </div>

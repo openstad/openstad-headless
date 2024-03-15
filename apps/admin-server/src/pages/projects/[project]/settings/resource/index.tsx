@@ -32,7 +32,7 @@ import { useRouter } from 'next/router';
 import useTags from '@/hooks/use-tags';
 import _ from 'lodash';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
-import { TagCheckboxList } from '@/components/tag-checkbox-list';
+import { CheckboxList } from '@/components/checkbox-list';
 
 const reactions = [
   {
@@ -73,7 +73,7 @@ const formSchema = z.object({
   displayNeighbourhood: z.boolean(),
   displayModbreak: z.boolean(),
   reactionSettings: z.string().array(),
-  tagGroups: z.any(),
+  tagGroups: z.number().array().optional().default([]),
 });
 
 export default function ProjectSettingsResource() {
@@ -83,8 +83,7 @@ export default function ProjectSettingsResource() {
 
   const { data, isLoading, updateProject } = useProject();
   const { data: tagData } = useTags(project as string);
-  const tags = tagData as Tag[];
-
+  const tags = (tagData || []) as Tag[];
 
   const defaults = React.useCallback(
     () => ({
@@ -135,7 +134,7 @@ export default function ProjectSettingsResource() {
           displayNeighbourhood: values.displayNeighbourhood,
           displayModbreak: values.displayModbreak,
           reactionSettings: values.reactionSettings,
-          tags: values.tagGroups,
+          tags: values.tagGroups || [],
         },
       });
       if (project) {
@@ -386,16 +385,29 @@ export default function ProjectSettingsResource() {
                 )}
               />
 
-              <TagCheckboxList
-                items={tags}
-                label={(t) => t.name}
-                keyForValue="id"
-                keyForGrouping="type"
-                projectId={project as string}
+              <CheckboxList
                 form={form}
-                fieldLabel="Selecteer de gewenste tags die bij een resource weergegeven zullen
-                worden."
                 fieldName="tagGroups"
+                fieldLabel="Selecteer de gewenste tags die bij een resource weergegeven zullen
+               worden."
+                label={(t) => t.name}
+                keyForGrouping="type"
+                keyPerItem={(t) => `${t.id}`}
+                items={tags}
+                selectedPredicate={(t) =>
+                  form.getValues('tagGroups').findIndex((tg) => tg === t.id) >
+                  -1
+                }
+                onValueChange={(tag, checked) => {
+                  const values = form.getValues('tagGroups');
+
+                  form.setValue(
+                    'tagGroups',
+                    checked
+                      ? [...values, tag.id]
+                      : values.filter((id) => id !== tag.id)
+                  );
+                }}
               />
 
               <Button type="submit" className="w-fit col-span-full">

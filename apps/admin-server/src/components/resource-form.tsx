@@ -22,7 +22,7 @@ import useResource from '@/hooks/use-resource';
 import toast from 'react-hot-toast';
 import { ImageUploader } from './image-uploader';
 import useTags from '@/hooks/use-tags';
-import { TagCheckboxList } from './tag-checkbox-list';
+import { CheckboxList } from './checkbox-list';
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -83,7 +83,9 @@ const formSchema = z.object({
         .optional(),
     })
     .default({}),
-  tags: z.array(z.any()).default([]),
+  tags: z.number()
+    .array()
+    .default([]),
 });
 
 type FormType = z.infer<typeof formSchema>;
@@ -101,9 +103,13 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     id as string
   );
 
-  console.log({existingData, error})
-
   const { data: tags, error: tagError, isLoading } = useTags(project as string);
+
+  const loadedTags = (tags || []) as {
+    id: number;
+    name: string;
+    type?: string;
+  }[];
   const [imageArray, setImageArray] = useState<any[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -128,7 +134,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       budgetMin: budgetFallback(existingData, 'min'),
       budgetMax: budgetFallback(existingData, 'max'),
       budgetInterval: budgetFallback(existingData, 'interval'),
-      tags: existingData?.tags?.map((t:any)=>t.id) || [],
+      tags: existingData?.tags?.map((t: any) => t.id) || [],
       startDate: existingData?.startDate
         ? new Date(existingData?.startDate)
         : new Date(),
@@ -399,18 +405,27 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             }}
           />
 
-          <TagCheckboxList
-            projectId={project as string}
-            items={
-              tags as Array<{ type: string; id: string | number; name: string }>
-            }
-            label={(t) => t.name}
-            keyForValue="id"
-            keyForGrouping="type"
+          <CheckboxList
             form={form}
-            fieldLabel="Selecteer de gewenste tags die bij een resource weergegeven zullen
-                worden."
             fieldName="tags"
+            fieldLabel="Selecteer de gewenste tags die bij een resource weergegeven zullen
+               worden."
+            label={(t) => t.name}
+            keyForGrouping="type"
+            keyPerItem={(t) => `${t.id}`}
+            items={loadedTags}
+            selectedPredicate={(t) =>
+              form.getValues('tags').findIndex((tg) => tg === t.id) > -1
+            }
+            onValueChange={(tag, checked) => {
+              const values = form.getValues('tags');
+              form.setValue(
+                'tags',
+                checked
+                  ? [...values, tag.id]
+                  : values.filter((id) => id !== tag.id)
+              );
+            }}
           />
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
