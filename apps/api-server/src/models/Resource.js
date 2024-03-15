@@ -648,11 +648,6 @@ module.exports = function (db, sequelize, DataTypes) {
         include: [
           {
             model: db.Tag,
-            where: {
-              type: {
-                [Op.not]: 'status',
-              },
-            },
             attributes: ['id', 'type', 'name', 'label', 'extraFunctionality'],
             through: { attributes: [] },
           },
