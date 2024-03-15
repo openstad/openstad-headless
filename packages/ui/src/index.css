@@ -103,3 +103,12 @@
     overflow: hidden;
     display: block;
 }
+
+.section {
+    margin-block-start: var(--nlds-section-margin-block-start, var(--nlds-default-margin-block-start, 3.5rem));
+    margin-block-end: var(--nlds-section-margin-block-end, var(--nlds-default-margin-block-end, 3.5rem));
+}
+
+*:first-child {
+    --nlds-counter-margin-block-start: 0;
+}

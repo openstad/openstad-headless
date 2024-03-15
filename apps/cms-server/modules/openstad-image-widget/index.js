@@ -67,6 +67,11 @@ module.exports = {
         ],
         required: true,
       },
+      banner: {
+        type: 'boolean',
+        label: 'Weergave als banner',
+        def: false
+      },
       
     },
   },

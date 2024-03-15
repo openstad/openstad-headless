@@ -1,5 +1,8 @@
 <style>
   {{data.widget.formattedImageStyles}}
+  .--negative {
+    margin-block-start: calc(var(--nlds-default-margin-block-start, 3.5rem) * -1);
+  }
 </style>
 
 <img
@@ -8,4 +11,5 @@
   style="width: {{data.widget.width}}; height: {{data.widget.height}}; object-fit: {{data.widget.objectFit}}; "
   title="{{data.widget.uploadedImageTitle}}"
   alt="{{data.widget.uploadedImageAlt}}"
+  class="{% if data.widget.banner %} --negative {% endif %}"
 />
