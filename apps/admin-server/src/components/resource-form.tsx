@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -21,6 +21,12 @@ import { SimpleCalendar } from '@/components/simple-calender-popup';
 import useResource from '@/hooks/use-resource';
 import toast from 'react-hot-toast';
 import { ImageUploader } from './image-uploader';
+<<<<<<< Updated upstream
+=======
+import useTags from '@/hooks/use-tags';
+import { CheckboxList } from './checkbox-list';
+import { X } from 'lucide-react';
+>>>>>>> Stashed changes
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -72,7 +78,11 @@ const formSchema = z.object({
   modBreakDate: z.date().optional(),
 
   location: z.string().optional(),
-  images: z.any(),
+  image: z.string().optional(),
+  images: z
+    .array(z.object({ url: z.string() }))
+    .optional()
+    .default([]),
 
   extraData: z
     .object({
@@ -81,6 +91,10 @@ const formSchema = z.object({
         .optional(),
     })
     .default({}),
+<<<<<<< Updated upstream
+=======
+  tags: z.number().array().default([]),
+>>>>>>> Stashed changes
 });
 
 type FormType = z.infer<typeof formSchema>;
@@ -98,8 +112,18 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     id as string
   );
 
+<<<<<<< Updated upstream
   const [imageArray, setImageArray] = useState<any[]>([]);
   const [loaded, setLoaded] = useState(false);
+=======
+  const { data: tags, error: tagError, isLoading } = useTags(project as string);
+
+  const loadedTags = (tags || []) as {
+    id: number;
+    name: string;
+    type?: string;
+  }[];
+>>>>>>> Stashed changes
 
   const budgetFallback = (existingData: any, key: string = '') => {
     if (!existingData) return 0;
@@ -136,7 +160,14 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         ? new Date(existingData.modBreakDate)
         : undefined,
 
+<<<<<<< Updated upstream
       location: existingData?.location?JSON.stringify(existingData?.location):'',
+=======
+      location: existingData?.location
+        ? JSON.stringify(existingData?.location)
+        : '',
+      image:'',
+>>>>>>> Stashed changes
       images: existingData?.images || [],
       extraData: {
         originalId: existingData?.extraData?.originalId || undefined,
@@ -151,7 +182,6 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   });
 
   function onSubmit(values: FormType) {
-    values.images = imageArray;
     onFormSubmit(values)
       .then(() => {
         toast.success(`Plan successvol ${id ? 'aangepast' : 'aangemaakt'}`);
@@ -168,12 +198,18 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     }
   }, [existingData, form, defaults]);
 
-  useEffect(() => {
-    if (existingData && !loaded) {
-      setImageArray(existingData?.images);
-      setLoaded(true);
-    }
-  }, [existingData]);
+  const {
+    fields: imageFields,
+    append,
+    prepend,
+    remove: removeImage,
+    swap,
+    move,
+    insert,
+  } = useFieldArray({
+    control: form.control,
+    name: 'images',
+  });
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -385,11 +421,62 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             form={form}
             fieldName="image"
             onImageUploaded={(imageResult) => {
-              let array = [...imageArray];
+              let array = [...(form.getValues('images') || [])];
               array.push(imageResult);
-              setImageArray(array);
+              form.setValue('images', array);
+              form.resetField('image');
+              form.trigger('images');
             }}
           />
+<<<<<<< Updated upstream
+=======
+
+          <section className="grid col-span-full grid-cols-3 gap-4 ">
+            {imageFields.map(({ id, url }, index) => {
+              return (
+                <div key={id} style={{ position: 'relative' }}>
+                  <img src={url} alt={url} />
+                  <Button
+                  color='red'
+                   onClick={() => {
+                    removeImage(index);
+                  }} 
+                   style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: 0,
+                    }}>
+                  <X size={24}/>
+                  </Button>
+                  
+                </div>
+              );
+            })}
+          </section>
+
+          <CheckboxList
+            form={form}
+            fieldName="tags"
+            fieldLabel="Selecteer de gewenste tags die bij een resource weergegeven zullen
+               worden."
+            label={(t) => t.name}
+            keyForGrouping="type"
+            keyPerItem={(t) => `${t.id}`}
+            items={loadedTags}
+            selectedPredicate={(t) =>
+              form.getValues('tags').findIndex((tg) => tg === t.id) > -1
+            }
+            onValueChange={(tag, checked) => {
+              const values = form.getValues('tags');
+              form.setValue(
+                'tags',
+                checked
+                  ? [...values, tag.id]
+                  : values.filter((id) => id !== tag.id)
+              );
+            }}
+          />
+>>>>>>> Stashed changes
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

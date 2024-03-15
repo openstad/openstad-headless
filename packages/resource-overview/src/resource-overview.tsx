@@ -121,7 +121,7 @@ const defaultItemRenderer = (
   return (
     <Button appearance="subtle-button" className="resource-card--link" onClick={() => onItemClick && onItemClick()}>
       <Image
-        src={resource.images?.at(0)?.src || ''}
+        src={resource.images?.at(0)?.url || ''}
         imageFooter={
           <div>
             {resource.statuses?.map((statusTag: any) => (

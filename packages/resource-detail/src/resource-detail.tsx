@@ -50,10 +50,10 @@ function ResourceDetail(props: ResourceDetailWidgetProps) {
         {resource ? (
           <article className="osc-resource-detail-content-items">
 
-            {props.displayImage && resource.images?.at(0)?.src && (
+            {props.displayImage && resource.images?.at(0)?.url && (
               <Image
-                src={resource.images?.at(0)?.src || ''}
-                onClick={() => console.log({ resource })}
+                src={resource.images?.at(0)?.url || ''}
+                onClick={() => {}}
                 imageFooter={
                   <div>
                     <Paragraph className="osc-resource-detail-content-item-status">

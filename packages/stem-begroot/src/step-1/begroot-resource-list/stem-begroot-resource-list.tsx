@@ -60,7 +60,7 @@ export const StemBegrootResourceList = ({
         return (
           <>
             <article>
-              <Image src={resource.images?.at(0)?.src || ''} />
+              <Image src={resource.images?.at(0)?.url || ''} />
 
               <div>
                 <Spacer size={1} />
