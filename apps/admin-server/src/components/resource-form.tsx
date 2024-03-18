@@ -163,7 +163,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         originalId: existingData?.extraData?.originalId || undefined,
       },
     }),
-    [existingData, projectData?.config?.resources?.tags]
+    [existingData]
   );
 
   const form = useForm<FormType>({
@@ -186,17 +186,21 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     if (existingData) {
       form.reset(defaults());
     }
-  }, [existingData, form, defaults]);
+    if (!existingData && projectData?.config?.resources?.tags) {
+      const selectedTags = form.getValues('tags') || [];
 
-  const {
-    fields: imageFields,
-    append,
-    prepend,
-    remove: removeImage,
-    swap,
-    move,
-    insert,
-  } = useFieldArray({
+      if (selectedTags.length === 0) {
+        const projectTags = Array.isArray(projectData?.config?.resources?.tags)
+          ? projectData?.config?.resources?.tags
+          : [];
+        form.reset({
+          tags: Array.from(new Set([...selectedTags, ...projectTags])),
+        });
+      }
+    }
+  }, [existingData, form, defaults, projectData?.config?.resources?.tags]);
+
+  const { fields: imageFields, remove: removeImage } = useFieldArray({
     control: form.control,
     name: 'images',
   });
