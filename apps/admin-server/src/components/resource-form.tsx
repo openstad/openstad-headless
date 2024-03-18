@@ -24,6 +24,7 @@ import { ImageUploader } from './image-uploader';
 import useTags from '@/hooks/use-tags';
 import { CheckboxList } from './checkbox-list';
 import { X } from 'lucide-react';
+import { useProject } from '@/hooks/use-project';
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -88,9 +89,7 @@ const formSchema = z.object({
         .optional(),
     })
     .default({}),
-  tags: z.number()
-    .array()
-    .default([]),
+  tags: z.number().array().default([]),
 });
 
 type FormType = z.infer<typeof formSchema>;
@@ -102,6 +101,7 @@ type Props = {
 export default function ResourceForm({ onFormSubmit }: Props) {
   const router = useRouter();
   const { project, id } = router.query;
+  const { data: projectData } = useProject();
 
   const { data: existingData, error } = useResource(
     project as string,
@@ -137,7 +137,10 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       budgetMin: budgetFallback(existingData, 'min'),
       budgetMax: budgetFallback(existingData, 'max'),
       budgetInterval: budgetFallback(existingData, 'interval'),
-      tags: existingData?.tags?.map((t: any) => t.id) || [],
+      tags:
+        existingData?.tags?.map((t: any) => t.id) ||
+        projectData?.config?.resources?.tags ||
+        [],
       startDate: existingData?.startDate
         ? new Date(existingData?.startDate)
         : new Date(),
@@ -154,7 +157,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       location: existingData?.location
         ? JSON.stringify(existingData?.location)
         : '',
-      image:'',
+      image: '',
       images: existingData?.images || [],
       extraData: {
         originalId: existingData?.extraData?.originalId || undefined,
@@ -183,17 +186,21 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     if (existingData) {
       form.reset(defaults());
     }
-  }, [existingData, form, defaults]);
+    if (!existingData && projectData?.config?.resources?.tags) {
+      const selectedTags = form.getValues('tags') || [];
 
-  const {
-    fields: imageFields,
-    append,
-    prepend,
-    remove: removeImage,
-    swap,
-    move,
-    insert,
-  } = useFieldArray({
+      if (selectedTags.length === 0) {
+        const projectTags = Array.isArray(projectData?.config?.resources?.tags)
+          ? projectData?.config?.resources?.tags
+          : [];
+        form.reset({
+          tags: Array.from(new Set([...selectedTags, ...projectTags])),
+        });
+      }
+    }
+  }, [existingData, form, defaults, projectData?.config?.resources?.tags]);
+
+  const { fields: imageFields, remove: removeImage } = useFieldArray({
     control: form.control,
     name: 'images',
   });
@@ -445,18 +452,17 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 <div key={id} style={{ position: 'relative' }}>
                   <img src={url} alt={url} />
                   <Button
-                  color='red'
-                   onClick={() => {
-                    removeImage(index);
-                  }} 
-                   style={{
+                    color="red"
+                    onClick={() => {
+                      removeImage(index);
+                    }}
+                    style={{
                       position: 'absolute',
                       right: 0,
                       top: 0,
                     }}>
-                  <X size={24}/>
+                    <X size={24} />
                   </Button>
-                  
                 </div>
               );
             })}
