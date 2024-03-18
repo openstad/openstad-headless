@@ -264,21 +264,30 @@ router
   })
   .post(async function (req, res, next) {
     // tags
-    let tags = req.body.tags;
-    if (!tags) return next();
+    let tags = req.body.tags || [];
+    if (!Array.isArray(tags)) return next();
 
-    const resourceInstance = req.results;
-    const projectId = req.params.projectId;
-
-    const project = await db.Project.findOne({ where: { id: projectId } });
-    const projectTags = project?.config?.resources?.tags;
-    let tagIds = await getOrCreateTagIds(projectId, tags, req.user);
-
-    if(Array.isArray(projectTags) && projectTags.every(Number.isInteger)) {
-      tagIds = Array.from(new Set([...tagIds, ...projectTags]));
+    if (!tags.every((t) => Number.isInteger(t))) {
+      next('Tags zijn niet gegeven in het juiste formaat');
     }
 
-    resourceInstance.setTags(tagIds).then((tags) => {
+    const projectId = req.params.projectId;
+    const project = await db.Project.findOne({ where: { id: projectId } });
+    const projectConfigTags = project?.config?.resources?.tags;
+    const projectTags =
+      Array.isArray(projectConfigTags) &&
+      projectConfigTags.every((tId) => Number.isInteger(tId))
+        ? projectConfigTags
+        : [];
+
+    const tagEntities = await getValidTags(
+      projectId,
+      [...projectTags, ...tags],
+      req.user
+    );
+
+    const resourceInstance = req.results;
+    resourceInstance.setTags(tagEntities).then((tags) => {
       // refetch. now with tags
       let scope = [...req.scope, 'includeTags'];
       if (req.canIncludeVoteCount) scope.push('includeVoteCount');
@@ -454,14 +463,17 @@ router
   .put(async function (req, res, next) {
     // tags
     let tags = req.body.tags;
-    if (!tags) return next();
+    if (!Array.isArray(tags)) return next();
 
-    const resourceInstance = req.results;
+    if (!tags.every((t) => Number.isInteger(t))) {
+      next('Tags zijn niet gegeven in het juiste formaat');
+    }
+
     const projectId = req.params.projectId;
-
-    let tagIds = await getOrCreateTagIds(projectId, tags, req.user);
-
-    resourceInstance.setTags(tagIds).then((result) => {
+    const tagEntities = await getValidTags(projectId, tags, req.user);
+    
+    const resourceInstance = req.results;
+    resourceInstance.setTags(tagEntities).then((result) => {
       // refetch. now with tags
       let scope = [...req.scope, 'includeTags'];
       if (req.canIncludeVoteCount) scope.push('includeVoteCount');
@@ -524,51 +536,15 @@ router
       .catch(next);
   });
 
-// when adding or updating resources parse the tags
-async function getOrCreateTagIds(projectId, tags, user) {
-  let result = [];
-  let tagsOfProject = await db.Tag.findAll({ where: { projectId } });
+// Get all valid tags of the project based on given ids
+async function getValidTags(projectId, tags) {
+  const uniqueIds = Array.from(new Set(tags));
 
-  for (let i = 0; i < tags.length; i++) {
-    let tag = tags[i];
+  const tagsOfProject = await db.Tag.findAll({
+    where: { projectId, id: { [Op.in]: uniqueIds } },
+  });
 
-    // tags may be sent as [id1, id2] or [name1, name2] or [ { id: id1, name: name1 }, { id: id2, name: name2 } ]
-    let tagId, tagName;
-    if (typeof tag === 'object') {
-      tagId = tag.id;
-      tagName = tag.name;
-    } else if (tag == parseInt(tag)) {
-      tagId = tag;
-    } else {
-      tagName = tag;
-    }
-
-    // find in project tags by id or name
-    let found = tagsOfProject.find((tag) => tag.id == tagId);
-    if (!found) found = tagsOfProject.find((tag) => tag.name == tagName);
-    if (found) {
-      result.push(found);
-    } else {
-      // or try to find this tag in another project
-      if (tagId) {
-        let tagOnOtherProject = await db.Tag.findOne({ where: { id: tagId } });
-        if (tagOnOtherProject) tagName = tagOnOtherProject.name; // use name to create a new tag
-      }
-
-      // create a new tag
-      if (tagName && userhasModeratorRights(user)) {
-        // else ignore
-        let newTag = await db.Tag.create({
-          projectId,
-          name: tagName,
-          extraData: {},
-        });
-        result.push(newTag);
-      }
-    }
-  }
-
-  return result.map(tag => tag.id);
+  return tagsOfProject;
 }
 
 module.exports = router;
