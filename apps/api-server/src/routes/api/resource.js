@@ -272,7 +272,7 @@ router
 
     const project = await db.Project.findOne({ where: { id: projectId } });
     const projectTags = project?.config?.resources?.tags;
-    let tagIds = Array.from(await getOrCreateTagIds(projectId, tags, req.user));
+    let tagIds = await getOrCreateTagIds(projectId, tags, req.user);
 
     if(Array.isArray(projectTags) && projectTags.every(Number.isInteger)) {
       tagIds = Array.from(new Set([...tagIds, ...projectTags]));
@@ -459,7 +459,7 @@ router
     const resourceInstance = req.results;
     const projectId = req.params.projectId;
 
-    let tagIds = Array.from(await getOrCreateTagIds(projectId, tags, req.user));
+    let tagIds = await getOrCreateTagIds(projectId, tags, req.user);
 
     resourceInstance.setTags(tagIds).then((result) => {
       // refetch. now with tags
@@ -568,7 +568,7 @@ async function getOrCreateTagIds(projectId, tags, user) {
     }
   }
 
-  return result;
+  return result.map(tag => tag.id);
 }
 
 module.exports = router;
