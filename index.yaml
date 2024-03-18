@@ -3,6 +3,20 @@ entries:
   openstad-headless:
   - apiVersion: v2
     appVersion: 0.0.1
+    created: "2024-03-18T15:12:15.643968415Z"
+    dependencies:
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      version: 2.0.3
+    description: Openstad Headless Helm chart for Kubernetes
+    digest: 97cd6ceade269a3827d3d41704879b4e5e24feadf522c4726cefa63f7910a654
+    name: openstad-headless
+    type: application
+    urls:
+    - https://github.com/openstad/openstad-headless/releases/download/openstad-headless-0.0.8/openstad-headless-0.0.8.tgz
+    version: 0.0.8
+  - apiVersion: v2
+    appVersion: 0.0.1
     created: "2024-03-04T08:45:28.120325752Z"
     dependencies:
     - name: common
@@ -99,4 +113,4 @@ entries:
     urls:
     - https://github.com/openstad/openstad-headless/releases/download/openstad-headless-0.0.1/openstad-headless-0.0.1.tgz
     version: 0.0.1
-generated: "2024-03-04T08:45:28.120358643Z"
+generated: "2024-03-18T15:12:15.644003331Z"
