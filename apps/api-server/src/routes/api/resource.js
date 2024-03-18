@@ -275,17 +275,13 @@ router
       ? project?.config?.resources?.tags
       : [];
 
-    let tagIds = await getOrCreateTags(
+    let tagEntities = await getOrCreateTags(
       projectId,
       [...tags, ...projectTags],
       req.user
     );
 
-    if (Array.isArray(projectTags) && projectTags.every(Number.isInteger)) {
-      tagIds = Array.from(new Set([...tagIds, ...projectTags]));
-    }
-
-    resourceInstance.setTags(tagIds).then((tags) => {
+    resourceInstance.setTags(tagEntities).then((tags) => {
       // refetch. now with tags
       let scope = [...req.scope, 'includeTags'];
       if (req.canIncludeVoteCount) scope.push('includeVoteCount');
