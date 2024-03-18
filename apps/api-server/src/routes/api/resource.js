@@ -264,7 +264,7 @@ router
   })
   .post(async function (req, res, next) {
     // tags
-    let tags = req.body.tags;
+    let tags = req.body.tags || [];
     if (!Array.isArray(tags)) return next();
 
     if (!tags.every((t) => Number.isInteger(t))) {
