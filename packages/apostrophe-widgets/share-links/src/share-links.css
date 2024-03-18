@@ -37,4 +37,5 @@
 .share-links .link-container{
     display: flex;
     grid-gap: 5px;
+    margin-top: 10px;
 }
