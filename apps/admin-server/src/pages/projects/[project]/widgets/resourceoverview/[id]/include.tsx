@@ -1,3 +1,4 @@
+import { CheckboxList } from '@/components/checkbox-list';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -10,6 +11,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -30,7 +32,12 @@ export default function WidgetResourceOverviewInclude(
     props.updateConfig({ ...props, ...values });
   }
 
-  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
+  const { data } = useTags(props.projectId);
+  const tags = (data || []) as Array<{
+    id: string;
+    name: string;
+    type?: string;
+  }>;
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
@@ -41,47 +48,37 @@ export default function WidgetResourceOverviewInclude(
 
   return (
     <div className="p-6 bg-white rounded-md">
-      <Form {...form}>
+      <Form {...form} className="p-6 bg-white rounded-md">
         <Heading size="xl">Inclusief/Exclusief</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-1/3 grid grid-cols-1 gap-4">
-      
-          <FormField
-            control={form.control}
-            name="onlyIncludeTagIds"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Geef enkel resources weer met dit specifieke tag id:
-                </FormLabel>
-                <FormControl>
-                  <Input  
-                  type="text"
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          className="grid gap-4">         
+          <CheckboxList
+            form={form}
+            fieldName="onlyIncludeTagIds"
+            fieldLabel="Geef enkel de resources met de volgende tags weer:"
+            label={(t) => t.name}
+            keyForGrouping="type"
+            keyPerItem={(t) => `${t.id}`}
+            items={tags}
+            selectedPredicate={(t) =>
+              form
+                .getValues('onlyIncludeTagIds')
+                .split(',')
+                .findIndex((tg) => tg === `${t.id}`) > -1
+            }
+            onValueChange={(tag, checked) => {
+              const ids = form.getValues('onlyIncludeTagIds').split(',');
+              const idsToSave = (checked
+                ? [...ids, tag.id]
+                : ids.filter((id) => id !== `${tag.id}`)).join(',');
+
+              form.setValue('onlyIncludeTagIds', idsToSave);
+              props.onFieldChanged("onlyIncludeTagIds", idsToSave);
+            }}
           />
-          {/* <FormField
-            control={form.control}
-            name="filterResource"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Geef enkel de volgende resources weer:</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
+          
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

@@ -21,6 +21,8 @@ import { SimpleCalendar } from '@/components/simple-calender-popup';
 import useResource from '@/hooks/use-resource';
 import toast from 'react-hot-toast';
 import { ImageUploader } from './image-uploader';
+import useTags from '@/hooks/use-tags';
+import { CheckboxList } from './checkbox-list';
 import { X } from 'lucide-react';
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
@@ -86,6 +88,9 @@ const formSchema = z.object({
         .optional(),
     })
     .default({}),
+  tags: z.number()
+    .array()
+    .default([]),
 });
 
 type FormType = z.infer<typeof formSchema>;
@@ -102,6 +107,14 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     project as string,
     id as string
   );
+
+  const { data: tags, error: tagError, isLoading } = useTags(project as string);
+
+  const loadedTags = (tags || []) as {
+    id: number;
+    name: string;
+    type?: string;
+  }[];
 
   const budgetFallback = (existingData: any, key: string = '') => {
     if (!existingData) return 0;
@@ -124,7 +137,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       budgetMin: budgetFallback(existingData, 'min'),
       budgetMax: budgetFallback(existingData, 'max'),
       budgetInterval: budgetFallback(existingData, 'interval'),
-
+      tags: existingData?.tags?.map((t: any) => t.id) || [],
       startDate: existingData?.startDate
         ? new Date(existingData?.startDate)
         : new Date(),
@@ -403,6 +416,29 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             }}
           />
 
+          <CheckboxList
+            form={form}
+            fieldName="tags"
+            fieldLabel="Selecteer de gewenste tags die bij een resource weergegeven zullen
+               worden."
+            label={(t) => t.name}
+            keyForGrouping="type"
+            keyPerItem={(t) => `${t.id}`}
+            items={loadedTags}
+            selectedPredicate={(t) =>
+              form.getValues('tags').findIndex((tg) => tg === t.id) > -1
+            }
+            onValueChange={(tag, checked) => {
+              const values = form.getValues('tags');
+              form.setValue(
+                'tags',
+                checked
+                  ? [...values, tag.id]
+                  : values.filter((id) => id !== tag.id)
+              );
+            }}
+          />
+
           <section className="grid col-span-full grid-cols-3 gap-4 ">
             {imageFields.map(({ id, url }, index) => {
               return (
@@ -425,6 +461,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               );
             })}
           </section>
+
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>
