@@ -271,10 +271,17 @@ router
     const projectId = req.params.projectId;
 
     const project = await db.Project.findOne({ where: { id: projectId } });
-    const projectTags = project?.config?.resources?.tags;
-    let tagIds = await getOrCreateTagIds(projectId, tags, req.user);
+    const projectTags = Array.isArray(project?.config?.resources?.tags)
+      ? project?.config?.resources?.tags
+      : [];
 
-    if(Array.isArray(projectTags) && projectTags.every(Number.isInteger)) {
+    let tagIds = await getOrCreateTags(
+      projectId,
+      [...tags, ...projectTags],
+      req.user
+    );
+
+    if (Array.isArray(projectTags) && projectTags.every(Number.isInteger)) {
       tagIds = Array.from(new Set([...tagIds, ...projectTags]));
     }
 
@@ -454,14 +461,14 @@ router
   .put(async function (req, res, next) {
     // tags
     let tags = req.body.tags;
-    if (!tags) return next();
+    if (!tags || !Array.isArray(tags)) return next();
 
     const resourceInstance = req.results;
     const projectId = req.params.projectId;
 
-    let tagIds = await getOrCreateTagIds(projectId, tags, req.user);
+    let tagsEntities = await getOrCreateTags(projectId, tags, req.user);
 
-    resourceInstance.setTags(tagIds).then((result) => {
+    resourceInstance.setTags(tagsEntities).then((result) => {
       // refetch. now with tags
       let scope = [...req.scope, 'includeTags'];
       if (req.canIncludeVoteCount) scope.push('includeVoteCount');
@@ -525,7 +532,7 @@ router
   });
 
 // when adding or updating resources parse the tags
-async function getOrCreateTagIds(projectId, tags, user) {
+async function getOrCreateTags(projectId, tags, user) {
   let result = [];
   let tagsOfProject = await db.Tag.findAll({ where: { projectId } });
 
@@ -568,7 +575,7 @@ async function getOrCreateTagIds(projectId, tags, user) {
     }
   }
 
-  return result.map(tag => tag.id);
+  return result;
 }
 
 module.exports = router;
