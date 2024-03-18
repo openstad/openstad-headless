@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -23,6 +23,7 @@ import toast from 'react-hot-toast';
 import { ImageUploader } from './image-uploader';
 import useTags from '@/hooks/use-tags';
 import { CheckboxList } from './checkbox-list';
+import { X } from 'lucide-react';
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -74,7 +75,11 @@ const formSchema = z.object({
   modBreakDate: z.date().optional(),
 
   location: z.string().optional(),
-  images: z.any(),
+  image: z.string().optional(),
+  images: z
+    .array(z.object({ url: z.string() }))
+    .optional()
+    .default([]),
 
   extraData: z
     .object({
@@ -110,8 +115,6 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     name: string;
     type?: string;
   }[];
-  const [imageArray, setImageArray] = useState<any[]>([]);
-  const [loaded, setLoaded] = useState(false);
 
   const budgetFallback = (existingData: any, key: string = '') => {
     if (!existingData) return 0;
@@ -151,6 +154,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       location: existingData?.location
         ? JSON.stringify(existingData?.location)
         : '',
+      image:'',
       images: existingData?.images || [],
       extraData: {
         originalId: existingData?.extraData?.originalId || undefined,
@@ -165,7 +169,6 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   });
 
   function onSubmit(values: FormType) {
-    values.images = imageArray;
     onFormSubmit(values)
       .then(() => {
         toast.success(`Plan successvol ${id ? 'aangepast' : 'aangemaakt'}`);
@@ -182,12 +185,18 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     }
   }, [existingData, form, defaults]);
 
-  useEffect(() => {
-    if (existingData && !loaded) {
-      setImageArray(existingData?.images);
-      setLoaded(true);
-    }
-  }, [existingData]);
+  const {
+    fields: imageFields,
+    append,
+    prepend,
+    remove: removeImage,
+    swap,
+    move,
+    insert,
+  } = useFieldArray({
+    control: form.control,
+    name: 'images',
+  });
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -399,9 +408,11 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             form={form}
             fieldName="image"
             onImageUploaded={(imageResult) => {
-              let array = [...imageArray];
+              let array = [...(form.getValues('images') || [])];
               array.push(imageResult);
-              setImageArray(array);
+              form.setValue('images', array);
+              form.resetField('image');
+              form.trigger('images');
             }}
           />
 
@@ -427,6 +438,30 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               );
             }}
           />
+
+          <section className="grid col-span-full grid-cols-3 gap-4 ">
+            {imageFields.map(({ id, url }, index) => {
+              return (
+                <div key={id} style={{ position: 'relative' }}>
+                  <img src={url} alt={url} />
+                  <Button
+                  color='red'
+                   onClick={() => {
+                    removeImage(index);
+                  }} 
+                   style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: 0,
+                    }}>
+                  <X size={24}/>
+                  </Button>
+                  
+                </div>
+              );
+            })}
+          </section>
+
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

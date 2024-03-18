@@ -69,7 +69,7 @@ export const StemBegrootResourceDetailDialog = ({
               <div className="osc-begrootmodule-resource-detail">
                 <section className="osc-begrootmodule-resource-detail-photo">
                   <Image
-                    src={resource.images?.at(0)?.src || ''}
+                    src={resource.images?.at(0)?.url || ''}
                     style={{ aspectRatio: 16 / 9 }}
                   />
                   <div>
