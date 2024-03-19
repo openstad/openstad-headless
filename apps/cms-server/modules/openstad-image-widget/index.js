@@ -67,6 +67,11 @@ module.exports = {
         ],
         required: true,
       },
+      banner: {
+        type: 'boolean',
+        label: 'Witruimte boven weghalen',
+        def: false
+      },
       
     },
   },

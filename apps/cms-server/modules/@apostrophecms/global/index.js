@@ -68,6 +68,19 @@ module.exports = {
         type: 'string',
         label: 'URL voor CSS imports (optioneel)',
       },
+      customCssLink: {
+        type: 'array',
+        label: 'URL voor CSS imports (optioneel)',
+        inline: true,
+        fields: {
+          add: {
+            item: {
+              type: 'string',
+              label: 'URL voor CSS imports (optioneel)',
+            },
+          }
+        }
+      },
       compactMenu: {
         type: 'boolean',
         label: 'Compacte weergave van het hoofdmenu.',

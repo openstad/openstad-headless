@@ -6,13 +6,14 @@
 {% else %}
 
 {% if not data.global.compactMenu %}
+  {% set menuData = data.home._children | json | replace("'", "&#39;") %}
   <nav id="navbar"
     data-home='
     [{
       "_url": "{{ data.home._url }}",
       "title": "{{ data.home.title }}"
     }]'
-    data-content='{{ data.home._children | json }}'
+    data-content='{{ menuData }}'
   ></nav>
 {% endif %}
 

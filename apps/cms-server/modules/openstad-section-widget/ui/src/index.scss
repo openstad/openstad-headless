@@ -53,7 +53,7 @@
 }
 
 .section.--negative{
-  margin-block-start: -5rem;
+  margin-block-start: calc((var(--nlds-default-margin-block-start, 3.5rem) + 5rem) * -1);
 }
 
 // give standard margin bottom to columns in row, otherwise they are stacked
