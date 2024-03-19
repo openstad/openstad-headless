@@ -38,22 +38,15 @@ async function logout(req, res, next) {
   if (req.session) {
     const destroySession = () => {
       return require('util').promisify(function(callback) {
-        // Be thorough, nothing in the session potentially related to the login should survive logout
         return req.session.destroy(callback);
       })();
     };
     const cookie = req.session.cookie;
     await destroySession();
-    // Session cookie expiration isn't automatic with `req.session.destroy`.
-    // Fix that to reduce challenges for those attempting to implement custom
-    // caching strategies at the edge
-    // https://github.com/expressjs/session/issues/241
     const expireCookie = new expressSession.Cookie(cookie);
     expireCookie.expires = new Date(0);
     const name = self.apos.modules['@apostrophecms/express'].sessionOptions.name;
     req.res.header('set-cookie', expireCookie.serialize(name, 'deleted'));
-
-    // TODO: get cookie name from config
     req.res.cookie(`${self.apos.shortName}.${loggedInCookieName}`, 'false');
   }
   next()
