@@ -63,6 +63,11 @@ async function logout(req, res, next) {
 module.exports = {
   middleware(self) {
     return {
+      async enrich(req, res, next) {
+        const projectId = req.project.id;
+        req.data.global.logoutUrl = `${process.env.API_URL}/auth/project/${projectId}/logout?useAuth=default&redirectUri=${req.protocol}://${req.host}${req.url}`;
+        return next();
+      },
       async authenticate (req, res, next) {
 
         if (!req.session) {
@@ -132,13 +137,13 @@ module.exports = {
               });
             };
 
-            const ONE_MINUTE = 1 * 1000;
+            const FIVE_SECONDS = 5 * 1000;
             const date = new Date().getTime();
-            const dateToCheck = req.session.openStadlastJWTCheck ? new Date(req.session.openStadlastJWTCheck) : new Date().getTime() - ONE_MINUTE - 1;
+            const dateToCheck = req.session.openStadlastJWTCheck ? new Date(req.session.openStadlastJWTCheck) : new Date().getTime() - FIVE_SECONDS - 1;
 
             // apostropheCMS does a lot calls on page load
             // if user is a CMS user and last apicheck was within one minute ago don't repeat
-            if (req.user && req.session.openstadUser && ((date - dateToCheck) < ONE_MINUTE)) {
+            if (req.user && req.session.openstadUser && ((date - dateToCheck) < FIVE_SECONDS)) {
               setUserData(req, next);
             } else {
 
