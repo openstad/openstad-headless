@@ -5,6 +5,8 @@
 
 const fetch = require('node-fetch');
 const Url = require('url');
+const expressSession = require('express-session');
+
 const generateRandomPassword = () => {
   return require('crypto').randomBytes(64).toString('hex');
 };
@@ -30,10 +32,39 @@ function removeURLParameter(url, parameter) {
   return url;
 };
 
+async function logout(req, res, next) {
+  // logout - ik kan het niet als functie aanroepen; daarom hier een kopie uit /node_modules/apostrophe/modules/@apostrophecms/login/index.js
+  const loggedInCookieName = 'loggedIn';
+  if (req.session) {
+    const destroySession = () => {
+      return require('util').promisify(function(callback) {
+        // Be thorough, nothing in the session potentially related to the login should survive logout
+        return req.session.destroy(callback);
+      })();
+    };
+    const cookie = req.session.cookie;
+    await destroySession();
+    // Session cookie expiration isn't automatic with `req.session.destroy`.
+    // Fix that to reduce challenges for those attempting to implement custom
+    // caching strategies at the edge
+    // https://github.com/expressjs/session/issues/241
+    const expireCookie = new expressSession.Cookie(cookie);
+    expireCookie.expires = new Date(0);
+    const name = self.apos.modules['@apostrophecms/express'].sessionOptions.name;
+    req.res.header('set-cookie', expireCookie.serialize(name, 'deleted'));
+
+    // TODO: get cookie name from config
+    req.res.cookie(`${self.apos.shortName}.${loggedInCookieName}`, 'false');
+  }
+  next()
+}
+
+
 module.exports = {
   middleware(self) {
     return {
       async authenticate (req, res, next) {
+
         if (!req.session) {
           next();
         }
@@ -101,7 +132,7 @@ module.exports = {
               });
             };
 
-            const ONE_MINUTE = 60 * 1000;
+            const ONE_MINUTE = 1 * 1000;
             const date = new Date().getTime();
             const dateToCheck = req.session.openStadlastJWTCheck ? new Date(req.session.openStadlastJWTCheck) : new Date().getTime() - ONE_MINUTE - 1;
 
@@ -138,7 +169,9 @@ module.exports = {
                 } else {
                   // if not valid clear the JWT and redirect
                   req.session.destroy(() => {
-                    res.redirect('/');
+                    logout(req, res, () => {
+                      res.redirect('/');
+                    });
                   });
                 }
 
@@ -181,7 +214,7 @@ module.exports = {
           return next();
           // logout CMS when apostropheUser is different then openstadUser
         } else if (req.user && req.user.email !== req.data.openstadUser.email) {
-          //req.apos.logout();
+          return logout(req, res, next)
         };
 
         if (self.apos && self.apos.user) {
