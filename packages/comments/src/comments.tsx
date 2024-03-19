@@ -77,7 +77,11 @@ function Comments({
   return (
     <section className="osc">
       <Heading4 className="comments-title">
-        {title.replace(/\[\[nr\]\]/, comments.length)}
+        {console.log(comments)}
+        {comments &&(
+          title.replace(/\[\[nr\]\]/, comments.length)
+        )}
+        {!comments && title}
       </Heading4>
 
       {args.isClosed ? (
