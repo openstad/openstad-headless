@@ -105,8 +105,6 @@ export default function WidgetResourceDetailGeneral(
             )}
           />
 
-          {/* location.href + props.itemLink.replace('[id]' */}
-
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>
