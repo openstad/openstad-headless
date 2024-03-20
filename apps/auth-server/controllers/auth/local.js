@@ -140,7 +140,7 @@ exports.logout = async (req, res) => {
   }
 
   if (!redirectURL) {
-    redirectURL =  config && config.logoutUrl ? config.logoutUrl : req.client.siteUrl
+    redirectURL =  config && config.logoutUrl ? config.logoutUrl : req.client.redirectUrl
   }
 
   res.redirect(redirectURL);

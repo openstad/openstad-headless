@@ -27,9 +27,6 @@ module.exports = async function seed(db) {
     ? process.env.AUTH_HEADLESS_CLIENT_SECRET
     : rack();
 
-  let siteUrl = process.env.FRONTEND_URL
-    ? process.env.FRONTEND_URL
-    : process.env.APP_URL;
   let adminUrl = process.env.ADMIN_URL
     ? process.env.ADMIN_URL
     : process.env.APP_URL;
@@ -58,7 +55,6 @@ module.exports = async function seed(db) {
   try {
     await db.Client.create({
       id: 1,
-      siteUrl: adminUrl,
       redirectUrl: "", // deprecated
       name: "Admin panel",
       description: "Client for managing the admin panel",
@@ -75,7 +71,6 @@ module.exports = async function seed(db) {
     console.log("      clientSecret:", clientSecret);
     await db.Client.create({
       id: 2,
-      siteUrl: siteUrl,
       redirectUrl: "", // deprecated
       name: "Default site",
       description: "Client for managing default site",

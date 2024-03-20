@@ -6,8 +6,6 @@ const removeProtocol = (url) => {
 
 module.exports = async function seed(db) {
 
-  let siteUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL : process.env.APP_URL;
-
   let allowedDomains = process.env.NODE_ENV === 'development' ? ['localhost', ] : [];
   let apiDomain = process.env.API_DOMAIN || removeProtocol(process.env.API_URL) || '';
   allowedDomains.push(apiDomain);
@@ -26,7 +24,6 @@ module.exports = async function seed(db) {
     console.log('      clientSecret:', 'uniquecode123');
     await db.Client.create({
       id: 3,
-      siteUrl: siteUrl,
       redirectUrl: '', // deprecated
       name: "Default site",
       description: 'Client for managing default site',
@@ -43,7 +40,6 @@ module.exports = async function seed(db) {
     console.log('      clientSecret:', 'anonymous123');
     await db.Client.create({
       id: 4,
-      siteUrl: siteUrl,
       redirectUrl: '', // deprecated
       name: "Default site",
       description: 'Client for managing default site',

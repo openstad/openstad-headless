@@ -12,7 +12,7 @@ const authCodeConfig    = require('../../config/auth').get(authType);
 
 exports.login = (req, res, next) => {
   const config = req.client.config ? req.client.config : {};
-  const backUrl = config && config.backUrl ? config.backUrl : req.client.siteUrl;
+  const backUrl = config && config.backUrl ? config.backUrl : req.client.redirectUrl;
   const configAuthType = config.authTypes && config.authTypes[authType] ? config.authTypes[authType] : {};
 
   res.render('auth/code/login', {

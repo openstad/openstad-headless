@@ -58,12 +58,12 @@ exports.edit = (req, res, next) => {
  * @return {[type]}        [description]
  */
 exports.create = (req, res, next) => {
-  const { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes } = req.body;
+  const { name, description, exposedUserFields, requiredUserFields, redirectUrl, authTypes } = req.body;
   const rack = hat.rack();
   const clientId = rack();
   const clientSecret = rack();
 
-  const values = { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes, clientId, clientSecret };
+  const values = { name, description, exposedUserFields, requiredUserFields, redirectUrl, authTypes, clientId, clientSecret };
 
   values.exposedUserFields = JSON.stringify(values.exposedUserFields);
   values.requiredUserFields = JSON.stringify(values.requiredUserFields);
@@ -81,13 +81,12 @@ exports.create = (req, res, next) => {
 }
 
 exports.update = (req, res, next) => {
-  const { name, description, exposedUserFields, requiredUserFields, redirectUrl, siteUrl, authTypes } = req.body;
+  const { name, description, exposedUserFields, requiredUserFields, redirectUrl, authTypes } = req.body;
 
   req.client
     .update({
       name,
       description,
-      siteUrl,
       redirectUrl,
       exposedUserFields,
       requiredUserFields,
