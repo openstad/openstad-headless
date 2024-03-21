@@ -192,9 +192,10 @@ module.exports = function (db, sequelize, DataTypes) {
 
   async function beforeUpdateOrCreate(instance, options) {
     // If a URL is provided, and no uniqueId is set, generate one
-    if (instance && instance.url && (!instance.config || !instance.config.uniqueId)) {
-      instance.config.uniqueId = Math.round(new Date().getTime() / 1000) + instance.url.replace(/\W/g, '').slice(0,40);
+    if (instance && instance.url && !instance.config.uniqueId) {
+      instance.config = {...instance.config, uniqueId: Math.round(new Date().getTime() / 1000) + instance.url.replace(/\W/g, '').slice(0,40)};
     }
+    return instance;
   }
 
   Project.scopes = function scopes() {
