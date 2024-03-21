@@ -16,7 +16,7 @@ export type RadioboxFieldProps = {
     requiredWarning?: string;
     fieldKey: string;
     disabled?: boolean;
-    onChange?: (e: {name: string, value: string | []}) => void;
+    onChange?: (e: {name: string, value: string | FileList | []}) => void;
 }
 
 const RadioboxField: FC<RadioboxFieldProps> = ({

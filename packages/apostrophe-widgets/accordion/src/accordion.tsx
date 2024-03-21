@@ -15,7 +15,7 @@ function Accordion({ content, label }: Item) {
     <AccordionProvider
       sections={[
         {
-          body: <div dangerouslySetInnerHTML={{ __html: RenderContent(content) }} />,
+          body: <div className="rte" dangerouslySetInnerHTML={{ __html: RenderContent(content) }} />,
           expanded: false,
           label: label
         }

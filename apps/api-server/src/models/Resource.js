@@ -465,35 +465,6 @@ module.exports = function (db, sequelize, DataTypes) {
                   validated[key] = true;
                 }
               });
-
-              Object.keys(value).forEach((key) => {
-                if (typeof validated[key] == 'undefined') {
-                  if (
-                    !(
-                      self.config &&
-                      self.config.resources &&
-                      self.config.resources.extraDataMustBeDefined === false
-                    )
-                  ) {
-                    errors.push(
-                      `${key} is niet gedefinieerd in project.config`
-                    );
-                  }
-                }
-              });
-            } else {
-              // extra data not defined in the config
-              if (
-                !(
-                  self.config &&
-                  self.config.resources &&
-                  self.config.resources.extraDataMustBeDefined === false
-                )
-              ) {
-                errors.push(
-                  `resource.extraData is not configured in project.config`
-                );
-              }
             }
           }
 
@@ -673,17 +644,14 @@ module.exports = function (db, sequelize, DataTypes) {
           ],
         };
       },
+
       includeTags: {
         include: [
           {
             model: db.Tag,
-            where: {
-              type: {
-                [Op.not]: 'status',
-              },
-            },
             attributes: ['id', 'type', 'name', 'label', 'extraFunctionality'],
             through: { attributes: [] },
+            required: false,
           },
         ],
       },

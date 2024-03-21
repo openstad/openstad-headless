@@ -1,4 +1,5 @@
 const express = require('express');
+const merge = require('merge');
 const bruteForce = require('../../middleware/brute-force');
 const db = require('../../db');
 const fs = require('fs');
@@ -185,7 +186,7 @@ Object.keys(widgetDefinitions).forEach((widget) => {
 });
 
 function getDefaultConfig(projectId) {
-  const loginUrl = `${config.url}/auth/project/${projectId}/login?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
+  const loginUrl = `${config.url}/auth/project/${projectId}/login?useAuth=default&forceNewLogin=1&redirectUri=[[REDIRECT_URI]]`;
   const logoutUrl = `${config.url}/auth/project/${projectId}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
 
   return {
@@ -211,13 +212,14 @@ function setConfigsToOutput(
   widgetConfig,
   widgetId
 ) {
-  let config = {
-    ...widgetSettings.Config,
-    ...defaultConfig,
-    ...projectConfig,
-    ...widgetConfig,
-    widgetId
-  };
+  let config = merge.recursive(
+    {},
+    widgetSettings.Config,
+    defaultConfig,
+    projectConfig,
+    widgetConfig,
+    { widgetId }
+  );
 
   config = JSON.stringify(config)
     .replaceAll('\\', '\\\\')

@@ -5,6 +5,8 @@
     border-radius: 4px;
     box-sizing: border-box;
     position: relative;
+    overflow: clip;
+    background: #212529;
 
 }
 
@@ -15,8 +17,6 @@
 .osc .image-container > img {
     width: 100%;
     height: 100%;
-    background: #212529;
-    border-radius: 4px;
     object-fit: cover;
 }
 
@@ -27,6 +27,12 @@
     bottom: 0;
     gap: 1rem;
     box-sizing: border-box;
+    background: var(--nlds-figcaption-background-color, var(--utrecht-button-primary-action-background-color));
+    color: var(--nlds-figcaption-color, var(--utrecht-button-primary-action-color));    
+}
+
+.osc .image-container > .osc-image-footer p{
+    color: inherit;
     padding: 1rem 1rem;
 }
 

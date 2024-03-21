@@ -62,7 +62,7 @@ const EditorMap = ({
       <BaseMap
         {...props}
         center={currentCenter}
-        markers={[...markers, currentEditorMarker]}
+        markers={[currentEditorMarker]}
         onClick={updateLocation}
       />
 

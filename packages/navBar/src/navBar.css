@@ -1,0 +1,58 @@
+#navbar .container{
+  height: 100%;
+}
+
+#navbar .container #main-menu{
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+}
+
+#navbar .container #main-menu a{
+  padding: 10px;
+  text-decoration: none;
+  color: var(--nlds-main-menu-item-color, #000);
+  border-bottom: solid 2px transparent;
+}
+#navbar .container #main-menu a:hover,
+#navbar .container #main-menu a:focus-visible{
+  color: var(--nlds-main-menu-item-color--hover, var(--utrecht-link-hover-color));
+  border-color: var(--nlds-main-menu-item-border-color--hover, var(--utrecht-link-hover-color));
+}
+
+#navbar .container #main-menu.mobile-nav{
+  position: fixed;
+  inset: 0;
+  flex-direction: column;
+  text-align: left;
+  background: #fff;
+  padding: 1.5rem;
+  z-index: 9999;
+}
+#navbar .container #main-menu.mobile-nav a,
+#navbar .container #main-menu.mobile-nav button{
+  align-self: flex-start;
+}
+#navbar .container #main-menu.mobile-nav button{
+  margin: 10px 0;
+}
+
+.main-header-container > .row{
+  justify-content: space-between;
+  align-items: center;
+}
+
+.main-header-container > .row > *{
+  width: revert;
+  max-width: revert;
+}
+
+#navbar.--compact{
+  padding: 0;
+  margin: 0;
+  background: none;
+}
+#navbar.--compact .container{
+  padding: 0;
+  margin: 0;
+}

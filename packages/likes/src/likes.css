@@ -1,15 +1,19 @@
 .like-widget-container {
   display: grid;
-
+  margin-block-start: var(--nlds-likewidget-margin-block-start, var(--nlds-default-margin-block-start, 1.5rem));
+  margin-block-end: var(--nlds-likewidget-margin-block-end, var(--nlds-default-margin-block-end, 1.5rem));
   padding: var(--nlds-likewidget-container-padding, 1.5rem);
   gap: var(--nlds-likewidget-container-gap, 0.5rem);
-  margin: var(--nlds-likewidget-container-margin, 0);
   background-color: var(--nlds-likewidget-container-background-color, var(--nlds-default-background-color, #F0F4F8));
 }
 
 .like-option-container {
   display: grid;
   gap: 0.5rem;
+}
+
+.like-option-container button{
+  max-width: revert;
 }
 
 .like-widget-container.medium .like-option-container {

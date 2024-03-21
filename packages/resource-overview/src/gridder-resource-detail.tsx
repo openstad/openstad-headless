@@ -30,7 +30,7 @@ export const GridderResourceDetail = ({
       <div className="osc-gridder-resource-detail">
         <section className="osc-gridder-resource-detail-photo">
           <Image
-            src={resource.images?.at(0)?.src || ''}
+            src={resource.images?.at(0)?.url || ''}
             style={{ aspectRatio: 16 / 9 }}
           />
           <div>

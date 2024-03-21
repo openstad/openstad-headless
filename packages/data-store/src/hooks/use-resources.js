@@ -44,6 +44,17 @@ export default function useResources({
     };
   }
 
+  const create = function (submittedData, widgetId) {
+    return self.mutate(
+        { projectId },
+        'resources.create',
+        { submittedData, widgetId },
+        {
+          action: 'create',
+        }
+    );
+  };
+
   const submitVotes = function (resourcesToLike) {
     return self.mutate({ projectId }, 'resources.submitLike', resourcesToLike, {
       action: 'update',
@@ -68,5 +79,5 @@ export default function useResources({
       });
     };
   });
-  return { data: resources, error, isLoading, submitVotes };
+  return {data :resources, error, isLoading, submitVotes, create};
 }

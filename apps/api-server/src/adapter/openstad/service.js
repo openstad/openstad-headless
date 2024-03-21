@@ -181,7 +181,7 @@ service.fetchClient = async function({ authConfig, project }) {
 
   let clientId = authConfig.clientId;
   if (!clientId) {
-    throw new Error('OpenStad.service.updateClient: clientId not found')
+    throw new Error('OpenStad.service.fetchClient: clientId not found')
   }
 
   try {
@@ -193,7 +193,7 @@ service.fetchClient = async function({ authConfig, project }) {
       },
     })
     if (!response.ok) {
-      throw new Error('OpenStad.service.updateClient: fetch client failed')
+      throw new Error('OpenStad.service.fetchClient: fetch client failed')
     }
     let client = await response.json();
     return client;
@@ -243,10 +243,10 @@ service.createClient = async function({ authConfig, project }) {
         authTypes,
         requiredUserFields,
         twoFactorRoles,
-        siteUrl: `${project.url}`,
-        redirectUrl: `${config.url}`,
+        siteUrl: project.url || '',
+        redirectUrl: config.url || '',
         allowedDomains: [ config.domain ],
-        name: `${project.name}`,
+        name: authConfig.name || project.name || '',
         description: `Client for API project ${project.name} (${project.id})`,
         config: newConfig
       }),
@@ -314,10 +314,10 @@ service.updateClient = async function({ authConfig, project }) {
       twoFactor: authConfig.config.twoFactor || client.config.twoFactor,
       configureTwoFactor: authConfig.config.configureTwoFactor || client.config.configureTwoFactor,
       authTypes: {
-        UniqueCode: authConfig.config?.UniqueCode || client.config?.authTypes?.UniqueCode,
-        Url: authConfig.config?.Url || client.config?.authTypes?.Url,
-        Phonenumber: authConfig.config?.Phonenumber || client.config?.authTypes?.Phonenumber,
-        Local: authConfig.config?.Local || client.config?.authTypes?.Local,
+        UniqueCode: merge({}, client.config?.authTypes?.UniqueCode, authConfig.config?.UniqueCode),
+        Url: merge({}, client.config?.authTypes?.Url, authConfig.config?.Url),
+        Phonenumber: merge({}, client.config?.authTypes?.Phonenumber, authConfig.config?.Phonenumber),
+        Local: merge({}, client.config?.authTypes?.Local, authConfig.config?.Local),
       }
     };
 

@@ -1,6 +1,6 @@
-<header class="{{ 'amsterdam-header' if data.global.siteLogo === 'amsterdam' }}">
-  <div class="container relative">
-    <div class="row">
+<header class="{{ 'amsterdam-header' if data.global.siteLogo === 'amsterdam' }} {{ '--compact' if data.global.compactMenu }}">
+  <div class="container relative main-header-container">
+    <div class="row ">
       <div class="col-xs-12">
         {% if data.global.siteLogo === 'amsterdam' %}
         <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-container">
@@ -12,6 +12,11 @@
         {% elif data.global.siteLogo %}
         <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-uploaded logo-main-container">
           <img src="{{apos.attachment.url(data.global.siteLogo)}}" alt="logo" id="logo-image">
+          {% if not data.global.hideSiteTitle %}
+          <h2 class="header-subtitle">
+            {{data.global.siteTitle}}
+          </h2>
+        {% endif %}
         </a>
         {% else %}
         <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-default logo-main-container">
@@ -20,13 +25,6 @@
         {% endif %}
         <div class="header-side-container {{ 'without-site-title' if data.global.hideSiteTitle}}">
           <div class="row">
-            {% if not data.global.hideSiteTitle %}
-            <div class="col-sm-7 col-md-6 col-xs-12">
-              <h2 class="header-subtitle">
-                {{data.global.siteTitle}}
-              </h2>
-            </div>
-            {% endif %}
             <div class="{{ 'col-xs-12' if data.global.hideSiteTitle else 'col-sm-5 col-md-6' }}  hidden-xs">
               {% if data.global.topLinks or data.global.displayLoginTopLink %}
               <ul class="top-links">
@@ -73,6 +71,18 @@
         </div>
         {% endif %}
       </div>
-    </div>
+
+        {% if data.global.compactMenu %}
+          <nav id="navbar"
+            class="--compact"
+            data-home='
+            [{
+              "_url": "{{ data.home._url }}",
+              "title": "{{ data.home.title }}"
+            }]'
+            data-content='{{ data.home._children | json }}'
+          ></nav>
+        {% endif %}
+      </div>
   </div>
 </header>

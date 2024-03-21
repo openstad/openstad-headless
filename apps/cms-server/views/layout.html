@@ -13,6 +13,7 @@ page or piece.') }}
 <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
 <script type="text/javascript">
+  let logoutUrl = '{{ data.global.logoutUrl | safe }}'
   if (typeof process == 'undefined') {
     process = { env: {NODE_ENV: 'production'} };
   }
@@ -20,6 +21,7 @@ page or piece.') }}
 {% endblock %}
 
 {% block beforeMain %}
+{% include 'partials/openstaduser.html' %}
 <div class="bp-wrapper">
   {% include 'partials/css.html' %}
   {% include 'partials/cookie-warning.html' %}

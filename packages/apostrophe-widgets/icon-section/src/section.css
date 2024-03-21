@@ -1,11 +1,17 @@
+[data-openstad-iconsection]{
+  margin-block-start: var(--nlds-iconsection-margin-block-start, var(--nlds-default-margin-block-start, 3.5rem));
+  margin-block-end: var(--nlds-iconsection-margin-block-end, var(--nlds-default-margin-block-end, 3.5rem));
+}
+
 .icon-section{
-  background: var(--utrecht-color-grey-90, #eee);
+  background-color: var(--nlds-iconsection-background-color, var(--nlds-default-background-color, #F0F4F8));
 }
 
 .icon-section .utrecht-button.utrecht-button--subtle.utrecht-accordion__button{
   background-color: var(--utrecht-button-primary-action-background-color);
   color: var(--utrecht-button-primary-action-color);
   display: block;
+  border-radius: var(--nlds-iconsection-border-radius, 0);
 }
 .icon-section .utrecht-accordion__button[aria-expanded]::after{
   background-color: var(--utrecht-button-primary-action-color);
@@ -19,19 +25,16 @@
 }
 
 .icon-section-container{
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 0;
+  padding-block-start: var(--nlds-iconsection-padding-block-start, var(--nlds-default-padding-block-start, 3.5rem));
+  padding-block-end: var(--nlds-iconsection-padding-block-end, var(--nlds-default-padding-block-start, 3.5rem));
 }
 
-.icon-section .icon-section-grid{
+.icon-section .icon-section-grid .container{
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, auto));
   grid-gap: 2rem;
 }
 
-.icon-section .icon-section-card{
-}
 
 .icon-section .icon-section-content{
   padding: 10px;
@@ -39,6 +42,30 @@
   grid-gap: 10px;
 }
 
+
+.icon-section .icon-section-content h3{
+  color: var(--nlds-iconsection-color,var(--utrecht-heading-3-color, var(--utrecht-heading-color, var(--utrecht-document-color, inherit))));
+}
+
+.icon-section .icon-section-content p{
+  color: var(--nlds-iconsection-color,var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit)));
+}
+
+.icon-section .icon-section-content a{
+  color: var(--nlds-iconsection-link-color, var(--_utrecht-link-state-color, var(--utrecht-link-color, var(--_utrecht-link-forced-colors-color))));
+  font-weight: 600;
+}
+
+.icon-section .icon-section-content a::before{
+  content: '';
+  aspect-ratio: 1;
+  width: 8px;
+  border: solid var(--nlds-iconsection-link-color, var(--_utrecht-link-state-color, var(--utrecht-link-color, var(--_utrecht-link-forced-colors-color))));
+  display: inline-block;
+  transform: rotate(45deg) translate(-1px, 0);
+  border-width: 2px 2px 0 0;
+  margin-right: 10px;
+}
 
 .icon-section .icon-section-card img{
   width: 100%;

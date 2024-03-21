@@ -81,7 +81,7 @@ export const StemBegrootBudgetList = ({
                 }
                 key={`resource-detail-image-${resource.id}`}
                 className="budget-list-selection-indicaction"
-                src={resource.images?.at(0)?.src || ''}
+                src={resource.images?.at(0)?.url || ''}
               />
             ))}
 

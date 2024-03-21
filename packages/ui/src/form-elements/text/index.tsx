@@ -16,7 +16,7 @@ export type TextInputProps = {
     defaultValue?: string;
     disabled?: boolean;
     rows?: TextInputProps['variant'] extends 'textarea' ? number : undefined;
-    onChange?: (e: {name: string, value: string | []}) => void;
+    onChange?: (e: {name: string, value: string | FileList | []}) => void;
 }
 
 const TextInput: FC<TextInputProps> = ({
@@ -38,8 +38,8 @@ const TextInput: FC<TextInputProps> = ({
         <FormField type="text">
             <Paragraph className="utrecht-form-field__label">
                 <FormLabel htmlFor={randomID}>{title}</FormLabel>
-                <FormFieldDescription>{description}</FormFieldDescription>
             </Paragraph>
+            <FormFieldDescription>{description}</FormFieldDescription>
             <div className="utrecht-form-field__input">
                 <InputComponent
                     id={randomID}

@@ -56,9 +56,9 @@
     line-height: auto;
 } */
 .osc h4 {
-    font-size: 1.5rem;
+    /* font-size: 1.5rem;
     font-weight: 700;
-    line-height: 2rem;
+    line-height: 2rem; */
 }
 
 .osc p.strong {
@@ -88,12 +88,38 @@
 }
 
 .osc{
-    --nlds-default-background-color: #F0F4F8;
-    --nlds-default-border-color: #A9B2BA;
+    /* --nlds-default-background-color: #F0F4F8; */
+    /* --nlds-default-border-color: #A9B2BA; */
+
+    /* --nlds-default-margin-block-start: 1rem; */
+    /* --nlds-default-margin-block-end: 1rem; */
+
+    /* --nlds-default-padding-block-start: 1rem; */
+    /* --nlds-default-padding-block-end: 1rem; */
 }
 .osc .sr-only{
     width: 0;
     height: 0;
     overflow: hidden;
     display: block;
+}
+
+.section {
+    margin-block-start: var(--nlds-section-margin-block-start, var(--nlds-default-margin-block-start, 2rem));
+    margin-block-end: var(--nlds-section-margin-block-end, var(--nlds-default-margin-block-end, 2rem));
+}
+
+*:first-child {
+    --nlds-counter-margin-block-start: 0;
+}
+
+.--negative {
+    margin-block-start: calc(var(--nlds-default-margin-block-start, 3.5rem) * -1);
+  }
+
+[lang="nl"] > *{
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
 }

@@ -1,6 +1,8 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
+import "./button.css";
+
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
 import { ButtonLink, ButtonGroup } from "@utrecht/component-library-react";

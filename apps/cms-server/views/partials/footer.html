@@ -1,6 +1,4 @@
-{% if not (data.query.layout === 'none') %}
-{% if not data.page.hideFooter %}
-<footer>
+<!-- <footer>
   <div class="container">
     <div class="row">
       {% for column in data.global.footer %}
@@ -23,8 +21,11 @@
     </div>
   </div>
 </footer>
-{% endif %}
 <div class="body-background" style="display: none;"></div>
 <div id="openstad-toast" class="toast-container initial-width">
-</div>
-{% endif %}
+</div> -->
+
+<div
+  id="footer-container"
+  data-content='{{data.global.footerlinks | json}}'
+></div>

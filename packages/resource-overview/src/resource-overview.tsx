@@ -17,7 +17,7 @@ import nunjucks from 'nunjucks';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Heading4, Heading5, Paragraph, Link } from "@utrecht/component-library-react";
+import { Heading4, Heading5, Paragraph, Button } from "@utrecht/component-library-react";
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -117,11 +117,11 @@ const defaultItemRenderer = (
     }
     return <Paragraph>Er is een fout in de template</Paragraph>;
   }
-
+  
   return (
-    <Link className="resource-card--link" href="#" onClick={() => onItemClick && onItemClick()}>
+    <Button appearance="subtle-button" className="resource-card--link" onClick={() => onItemClick && onItemClick()}>
       <Image
-        src={resource.images?.at(0)?.src || ''}
+        src={resource.images?.at(0)?.url || ''}
         imageFooter={
           <div>
             {resource.statuses?.map((statusTag: any) => (
@@ -159,10 +159,10 @@ const defaultItemRenderer = (
         ) : null}
 
         {props.displayArguments ? (
-          <Icon icon="ri-message-line" variant="big" text="0" />
+          <Icon icon="ri-message-line" variant="big" text={resource.commentCount} />
         ) : null}
       </div>
-    </Link>
+    </Button>
   );
 };
 
@@ -221,7 +221,7 @@ function ResourceOverview({
         if (!props.itemLink) {
           console.error('Link to child resource is not set');
         } else {
-          location.href = props.itemLink.replace('[id]', resource.id);
+          location.href = location.href + props.itemLink.replace('[id]', resource.id);
         }
       }
 

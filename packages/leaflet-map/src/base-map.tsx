@@ -58,7 +58,7 @@ const BaseMap = ({
   onMarkerClick = undefined,
 
   ...props
-}: PropsWithChildren<BaseMapWidgetProps>) => {
+}: PropsWithChildren<BaseMapWidgetProps & { onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void }>) => {
   const definedCenterPoint =
     center.lat && center.lng
       ? { lat: center.lat, lng: center.lng }
@@ -226,26 +226,28 @@ const BaseMap = ({
             <Area area={area} areaPolygonStyle={areaPolygonStyle} />
           ) : null}
 
-          {currentMarkers.map((data) => {
+          {!!currentMarkers && currentMarkers.length > 0 && currentMarkers.map((data) => {
             if (data.isClustered) {
               clusterMarkers.push(data);
             } else if (data.lat && data.lng) {
               return (
-                <Marker
-                  {...props}
-                  {...data}
-                  key={`marker-${data.markerId || data.lat + data.lng}`}
-                />
+                  <Marker
+                      {...props}
+                      {...data}
+                      key={`marker-${data.markerId || data.lat + data.lng}`}
+                  />
               );
             }
           })}
 
-          <MarkerClusterGroup
-            {...props}
-            {...clustering}
-            categorize={categorize}
-            markers={clusterMarkers}
-          />
+          {clusterMarkers.length > 0 && (
+              <MarkerClusterGroup
+                  {...props}
+                  {...clustering}
+                  categorize={categorize}
+                  markers={clusterMarkers}
+              />
+          )}
 
           <MapEventsListener
             area={area}

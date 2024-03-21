@@ -42,7 +42,7 @@ export const BegrotenSelectedOverview = ({
         <Spacer size={2} />
 
         {selectedResources.map((resource) => (
-          <Fragment key={`budget-overview-row-${resource.id}`}>
+          <div key={`budget-overview-row-${resource.id}`}>
             <div className="budget-two-text-row-spaced">
               <Paragraph>{resource.title}</Paragraph>
               {typeIsBudgeting ? (
@@ -50,7 +50,7 @@ export const BegrotenSelectedOverview = ({
               ) : null}
             </div>
             <Spacer size={1} />
-          </Fragment>
+          </div>
         ))}
 
         <Spacer size={2} />

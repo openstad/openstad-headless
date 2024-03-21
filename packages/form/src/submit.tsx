@@ -1,11 +1,15 @@
-import { ZodType } from "zod";
+import type { ZodType } from "zod";
 import {getSchemaForField} from "./validation.js";
-import {CombinedFieldPropsWithType} from "./props";
-import {Dispatch, SetStateAction} from "react";
+import type {CombinedFieldPropsWithType} from "./props";
 
-export const handleSubmit = (fields: CombinedFieldPropsWithType[], formValues: {[key: string]: string}, setFormErrors: Dispatch<SetStateAction<{ [key: string]: string | null; }>>, submitHandler: (values: {[key: string]: string}) => void) => {
+export const handleSubmit = (
+    fields: Array<CombinedFieldPropsWithType>,
+    formValues: { [p: string]: string | FileList | [] },
+    setFormErrors: React.Dispatch<React.SetStateAction<{ [p: string]: string | null }>>,
+    submitHandler: (values: { [p: string]: string | FileList | []}) => void
+) => {
     const errors: { [key: string]: string | null } = {};
-    fields.forEach((field) => {
+    fields?.forEach((field) => {
         if (field.fieldKey) {
             const fieldValue = formValues[field.fieldKey];
             const fieldSchema: ZodType<any> | undefined = getSchemaForField(field);

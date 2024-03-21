@@ -4,6 +4,7 @@ const nextConfig = {
   transpilePackages: [
     '@openstad-headless/*'
   ],
+  images: {domains: ['localhost', "localhost:31470"]}
 };
 
 module.exports = nextConfig;

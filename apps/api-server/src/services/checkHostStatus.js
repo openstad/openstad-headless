@@ -133,6 +133,7 @@ const checkHostStatus = async (conditions) => {
       // Todo: skip the projects with hostStatus.status === true?
 
       if (!project.url) {
+        console.error('No url found for project: ', project.id);
         return;
       }
       
@@ -143,11 +144,12 @@ const checkHostStatus = async (conditions) => {
       const domainIp = await getDomainIp(project.url);
 
       hostStatus.ip = domainIp !== null && domainIp === serverIp ? true : false;
-      
+
       const k8sApi = getK8sApi();
       
       let ingress = '';
       
+      // Create a uniqueId if for some reason it's not set yet
       if (!project.config.uniqueId) {
         project.config = {...project.config, uniqueId: Math.round(new Date().getTime() / 1000) + project.url.replace(/\W/g, '').slice(0,40)};
         await project.save();

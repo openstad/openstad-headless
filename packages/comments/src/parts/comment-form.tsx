@@ -1,10 +1,10 @@
 import React from 'react';
 import { Banner, Spacer } from '@openstad-headless/ui/src';
-import { CommentPropsType } from '../types/index';
+import type { CommentPropsType } from '../types/index';
 import DataStore from '@openstad-headless/data-store/src';
 import hasRole from '../../../lib/has-role';
 import Form from "@openstad-headless/form/src/form";
-import {CombinedFieldPropsWithType, FieldProps} from "@openstad-headless/form/src/props";
+import type { CombinedFieldPropsWithType } from "@openstad-headless/form/src/props";
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -34,41 +34,37 @@ function CommentForm({
     isLoading: currentUserIsLoading,
   } = datastore.useCurrentUser({ ...args });
 
-  const formFields : CombinedFieldPropsWithType[] = [
-      {
-        type: 'text',
-        title: '',
-        variant: 'textarea',
-        minCharacters: descriptionMinLength,
-        maxCharacters: descriptionMaxLength,
-        fieldRequired: false,
-        requiredWarning: "Dit veld is verplicht",
-        fieldKey: "description",
-        placeholder: args.placeholder,
-        defaultValue: args.comment?.description,
-    },
-    {
-        type: 'hidden',
-        fieldKey: "sentiment",
-        defaultValue: args.sentiment,
-    }
-  ];
+  const formFields: Array<CombinedFieldPropsWithType> = [];
 
-  if (typeof (args.comment) !== 'undefined' &&  typeof (args.comment.parentId) !== 'undefined' && args.comment.parentId !== null  ) {
+  formFields.push({
+    type: 'text',
+    title: '',
+    variant: 'textarea',
+    minCharacters: descriptionMinLength,
+    maxCharacters: descriptionMaxLength,
+    fieldRequired: false,
+    requiredWarning: "Dit veld is verplicht",
+    fieldKey: "description",
+    placeholder: args.placeholder,
+    defaultValue: args.comment?.description,
+  });
+
+  if (typeof (args.comment) !== 'undefined' && typeof (args.comment.parentId) !== 'undefined' && args.comment.parentId !== null) {
     formFields.push({
-        type: 'hidden',
-        fieldKey: "parentId",
-        defaultValue: args.comment.parentId.toString(),
+      type: 'hidden',
+      fieldKey: "parentId",
+      defaultValue: args.comment.parentId.toString(),
     });
   }
 
-  if (typeof (args.comment) !== 'undefined' &&  typeof (args.comment.id) !== 'undefined' ) {
+  if (typeof (args.comment) !== 'undefined' && typeof (args.comment.id) !== 'undefined') {
     formFields.push({
-        type: 'hidden',
-        fieldKey: "id",
-        defaultValue: args.comment.id.toString(),
+      type: 'hidden',
+      fieldKey: "id",
+      defaultValue: args.comment.id.toString(),
     });
   }
+
 
   return (
     <div className="reaction-input-container">
@@ -80,11 +76,11 @@ function CommentForm({
             <Heading6>Inloggen om deel te nemen aan de discussie.</Heading6>
             <Spacer size={1} />
             <Button
+              appearance="primary-action-button"
               onClick={() => {
                 // login
                 document.location.href = args.login.url;
               }}
-              appearance="primary-action-button"
               type="button">
               Inloggen
             </Button>

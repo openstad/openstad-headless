@@ -282,12 +282,12 @@ function StemBegroot({
         />
     
       <Spacer size={1} />
+      {usedBudgetList}
+      <Spacer size={1.5} />
 
         <section className="begroot-step-panel">
           {currentStep === 0 ? (
             <>
-              {usedBudgetList}
-              <Spacer size={1.5} />
               <StemBegrootBudgetList
                 introText={props.step1}
                 maxBudget={props.votes.maxBudget}
@@ -326,7 +326,6 @@ function StemBegroot({
 
           {currentStep === 1 ? (
             <>
-              {usedBudgetList}
               <Spacer size={1.5} />
               <BegrotenSelectedOverview
                 introText={props.step2}
@@ -341,7 +340,6 @@ function StemBegroot({
 
           {currentStep === 2 ? (
             <Step3
-              header={usedBudgetList}
               loginUrl={`${props?.login?.url}`}
               step3={props.step3}
             />
@@ -349,7 +347,6 @@ function StemBegroot({
 
           {currentStep === 3 ? (
             <Step3Success
-              header={usedBudgetList}
               loginUrl={`${props?.login?.url}`}
               step3success={props.step3success}
             />
@@ -359,7 +356,6 @@ function StemBegroot({
 
           {currentStep === 4 ? (
             <Step4
-              header={usedBudgetList}
               loginUrl={`${props?.login?.url}`}
               thankMessage={props.thankMessage}
               voteMessage={props.voteMessage}
