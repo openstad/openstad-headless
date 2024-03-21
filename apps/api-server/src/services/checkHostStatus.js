@@ -110,7 +110,7 @@ more_set_headers "Referrer-Policy: same-origin";`
         }
       }],
       tls: [{
-        secretName: dbName,
+        secretName: name,
         hosts: [domain]
       }]
     }
@@ -132,19 +132,32 @@ const checkHostStatus = async (conditions) => {
     const promises = projects.map(async (project) => {
       // Todo: skip the projects with hostStatus.status === true?
 
+      if (!project.url) {
+        return;
+      }
+      
       let hostStatus = project.hostStatus;
       //ensure it's an object so we dont have to worry about checks later
       hostStatus = hostStatus ? hostStatus : {};          //
 
-      const domainIp = getDomainIp(project.domain);
+      const domainIp = await getDomainIp(project.url);
 
       hostStatus.ip = domainIp !== null && domainIp === serverIp ? true : false;
-
+      
       const k8sApi = getK8sApi();
-
-      // get ingress config files
-      const ingress = getIngress(k8sApi, project.config.uniqueId, namespace);
-
+      
+      let ingress = '';
+      
+      if (!project.config.uniqueId) {
+        project.config = {...project.config, uniqueId: Math.round(new Date().getTime() / 1000) + project.url.replace(/\W/g, '').slice(0,40)};
+        await project.save();
+      }
+      
+      if (project && project.config && project.config.uniqueId) {
+        // get ingress config files
+        ingress = await getIngress(k8sApi, project.config.uniqueId, namespace);
+      }
+      
       // if ip issset but not ingress try to create one
       if (hostStatus.ip  && !ingress) {
         try {
