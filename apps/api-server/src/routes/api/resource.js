@@ -8,7 +8,7 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
 const c = require('config');
-const { Op } = require("sequelize");
+const { Op } = require('sequelize');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
@@ -22,7 +22,11 @@ const userhasModeratorRights = (user) => {
 
 // scopes: for all get requests
 router.all('*', function (req, res, next) {
-  req.scope = ['defaultScope', 'api' , { method: ['onlyVisible', req.user.id, req.user.role] }];
+  req.scope = [
+    'defaultScope',
+    'api',
+    { method: ['onlyVisible', req.user.id, req.user.role] },
+  ];
 
   // in case the votes are archived don't use these queries
   // this means they can be cleaned up from the main table for performance reason
@@ -36,7 +40,9 @@ router.all('*', function (req, res, next) {
         req.project.config.votes.isViewable) ||
         userhasModeratorRights(req.user))
     ) {
-      req.scope.push({ method: ['includeVoteCount', req.project.config.votes] });
+      req.scope.push({
+        method: ['includeVoteCount', req.project.config.votes],
+      });
     }
 
     if (
@@ -109,14 +115,14 @@ router
   // ----------
   .get(auth.can('Resource', 'list'))
   .get(pagination.init)
-  .get(function(req, res, next) {
+  .get(function (req, res, next) {
     let { dbQuery } = req;
 
     dbQuery.where = {
       projectId: req.params.projectId,
       ...req.queryConditions,
       ...dbQuery.where,
-      deletedAt: null      
+      deletedAt: null,
     };
 
     if (dbQuery.hasOwnProperty('order')) {
@@ -173,11 +179,13 @@ router
     try {
       req.body.tags = req.body.tags ? JSON.parse(req.body.tags) : [];
     } catch (err) {}
-    let existingTags = await db.Tag.findAll({ where: { id: req.body.tags.map( t => t.id ) } });
-    if (existingTags.find(t => t.type == 'status')) return next(); // request already contains a status tag
+    let existingTags = await db.Tag.findAll({
+      where: { id: req.body.tags.map((t) => t.id) },
+    });
+    if (existingTags.find((t) => t.type == 'status')) return next(); // request already contains a status tag
     let statusId = req.project?.config?.statusses?.defaultStatusId;
     if (statusId) {
-      let found = req.body.tags.find( t => t.id == statusId );
+      let found = req.body.tags.find((t) => t.id == statusId);
       if (!found) {
         req.body.tags.push({ id: statusId });
       }
@@ -186,7 +194,9 @@ router
   })
   .post(function (req, res, next) {
     try {
-      req.body.location = req.body.location ? JSON.parse(req.body.location) : null;
+      req.body.location = req.body.location
+        ? JSON.parse(req.body.location)
+        : null;
     } catch (err) {}
 
     if (
@@ -200,11 +210,11 @@ router
     let userId = req.user.id;
     if (req.user.role == 'admin' && req.body.userId) userId = req.body.userId;
 
-    if ( !!req.body.submittedData ) {
+    if (!!req.body.submittedData) {
       req.body = {
         ...req.body,
         ...req.body.submittedData,
-      }
+      };
 
       delete req.body.submittedData;
     }
@@ -254,15 +264,30 @@ router
   })
   .post(async function (req, res, next) {
     // tags
-    let tags = req.body.tags;
-    if (!tags) return next();
+    let tags = req.body.tags || [];
+    if (!Array.isArray(tags)) return next();
+
+    if (!tags.every((t) => Number.isInteger(t))) {
+      next('Tags zijn niet gegeven in het juiste formaat');
+    }
+
+    const projectId = req.params.projectId;
+    const project = await db.Project.findOne({ where: { id: projectId } });
+    const projectConfigTags = project?.config?.resources?.tags;
+    const projectTags =
+      Array.isArray(projectConfigTags) &&
+      projectConfigTags.every((tId) => Number.isInteger(tId))
+        ? projectConfigTags
+        : [];
+
+    const tagEntities = await getValidTags(
+      projectId,
+      [...projectTags, ...tags],
+      req.user
+    );
 
     const resourceInstance = req.results;
-    const projectId = req.params.projectId;
-
-    let tagIds = Array.from(await getOrCreateTagIds(projectId, tags, req.user));
-
-    resourceInstance.setTags(tagIds).then((tags) => {
+    resourceInstance.setTags(tagEntities).then((tags) => {
       // refetch. now with tags
       let scope = [...req.scope, 'includeTags'];
       if (req.canIncludeVoteCount) scope.push('includeVoteCount');
@@ -273,7 +298,9 @@ router
         })
         .then((found) => {
           if (!found) {
-            console.error(`Resource not found:', { id: ${resourceInstance.id}, projectId: ${req.params.projectId} }`);
+            console.error(
+              `Resource not found:', { id: ${resourceInstance.id}, projectId: ${req.params.projectId} }`
+            );
           } else {
             found.project = req.project;
             req.results = found;
@@ -290,29 +317,29 @@ router
     // if (!req.query.nomail && req.body['publishDate']) {
     //   db.Notification.create({
     //     type: "new published resource - admin update",
-	// 		  projectId: req.project.id,
+    // 		  projectId: req.project.id,
     //     data: {
     //       userId: req.user.id,
     //       resourceId: req.results.id
     //     }
-	// 	  })
+    // 	  })
     //   db.Notification.create({
     //     type: "new published resource - user feedback",
-	// 		  projectId: req.project.id,
+    // 		  projectId: req.project.id,
     //     data: {
     //       userId: req.user.id,
     //       resourceId: req.results.id
     //     }
-	// 		})
+    // 		})
     // } else if (!req.query.nomail && !req.body['publishDate']) {
     //   db.Notification.create({
     //     type: "new concept resource - user feedback",
-	// 		  projectId: req.project.id,
+    // 		  projectId: req.project.id,
     //     data: {
     //       userId: req.user.id,
     //       resourceId: req.results.id
     //     }
-	// 		})
+    // 		})
     // }
   });
 
@@ -436,14 +463,17 @@ router
   .put(async function (req, res, next) {
     // tags
     let tags = req.body.tags;
-    if (!tags) return next();
+    if (!Array.isArray(tags)) return next();
 
-    const resourceInstance = req.results;
+    if (!tags.every((t) => Number.isInteger(t))) {
+      next('Tags zijn niet gegeven in het juiste formaat');
+    }
+
     const projectId = req.params.projectId;
-
-    let tagIds = Array.from(await getOrCreateTagIds(projectId, tags, req.user));
-
-    resourceInstance.setTags(tagIds).then((result) => {
+    const tagEntities = await getValidTags(projectId, tags, req.user);
+    
+    const resourceInstance = req.results;
+    resourceInstance.setTags(tagEntities).then((result) => {
       // refetch. now with tags
       let scope = [...req.scope, 'includeTags'];
       if (req.canIncludeVoteCount) scope.push('includeVoteCount');
@@ -467,22 +497,22 @@ router
   })
   .put(function (req, res, next) {
     db.Notification.create({
-      type: "updated resource - admin update",
-			projectId: req.project.id,
+      type: 'updated resource - admin update',
+      projectId: req.project.id,
       data: {
         userId: req.user.id,
-        resourceId: req.results.id
-      }
-		})
+        resourceId: req.results.id,
+      },
+    });
     if (req.changedToPublished) {
       db.Notification.create({
-        type: "new published resource - user feedback",
-			  projectId: req.project.id,
+        type: 'new published resource - user feedback',
+        projectId: req.project.id,
         data: {
           userId: req.user.id,
-          resourceId: req.results.id
-        }
-			})
+          resourceId: req.results.id,
+        },
+      });
     }
     next();
   })
@@ -506,51 +536,15 @@ router
       .catch(next);
   });
 
-// when adding or updating resources parse the tags
-async function getOrCreateTagIds(projectId, tags, user) {
-  let result = [];
-  let tagsOfProject = await db.Tag.findAll({ where: { projectId } });
+// Get all valid tags of the project based on given ids
+async function getValidTags(projectId, tags) {
+  const uniqueIds = Array.from(new Set(tags));
 
-  for (let i = 0; i < tags.length; i++) {
-    let tag = tags[i];
+  const tagsOfProject = await db.Tag.findAll({
+    where: { projectId, id: { [Op.in]: uniqueIds } },
+  });
 
-    // tags may be sent as [id1, id2] or [name1, name2] or [ { id: id1, name: name1 }, { id: id2, name: name2 } ]
-    let tagId, tagName;
-    if (typeof tag === 'object') {
-      tagId = tag.id;
-      tagName = tag.name;
-    } else if (tag == parseInt(tag)) {
-      tagId = tag;
-    } else {
-      tagName = tag;
-    }
-
-    // find in project tags by id or name
-    let found = tagsOfProject.find((tag) => tag.id == tagId);
-    if (!found) found = tagsOfProject.find((tag) => tag.name == tagName);
-    if (found) {
-      result.push(found);
-    } else {
-      // or try to find this tag in another project
-      if (tagId) {
-        let tagOnOtherProject = await db.Tag.findOne({ where: { id: tagId } });
-        if (tagOnOtherProject) tagName = tagOnOtherProject.name; // use name to create a new tag
-      }
-
-      // create a new tag
-      if (tagName && userhasModeratorRights(user)) {
-        // else ignore
-        let newTag = await db.Tag.create({
-          projectId,
-          name: tagName,
-          extraData: {},
-        });
-        result.push(newTag);
-      }
-    }
-  }
-
-  return result;
+  return tagsOfProject;
 }
 
 module.exports = router;

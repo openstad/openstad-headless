@@ -119,7 +119,7 @@ spec:
             value: http://{{ template "openstad.auth.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.auth.service.httpPort }}
 
           - name: IMAGE_APP_URL
-            value: {{ template "openstad.image.url" . }}
+            value: https://{{ template "openstad.image.url" . }}
 
           - name: IMAGE_VERIFICATION_TOKEN
             valueFrom:

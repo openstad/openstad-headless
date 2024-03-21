@@ -28,7 +28,6 @@ export default function WidgetResourceDetail({
   const { previewConfig, updatePreview } =
     useWidgetPreview<ResourceDetailWidgetProps>({
       projectId,
-      resourceId: '11',
     });
 
   return (

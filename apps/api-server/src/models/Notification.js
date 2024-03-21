@@ -112,10 +112,9 @@ module.exports = ( db, sequelize, DataTypes ) => {
 
         } catch(err) {
           console.log('Error: Send NotificationMessage failed - id =', instance.id);
-          throw err;
+          console.error(err);
         }
       }
-
     },
 
   });

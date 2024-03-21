@@ -6,14 +6,21 @@ import { Image, Spacer } from '@openstad-headless/ui/src';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Paragraph, Heading4, Heading5, Heading6 } from "@utrecht/component-library-react";
+import '@utrecht/component-library-css';
+import '@utrecht/design-tokens/dist/root.css';
+import {
+  Paragraph,
+  Heading4,
+  Heading5,
+  Heading6,
+} from '@utrecht/component-library-react';
+import React from 'react';
 
 export type ResourceDetailWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
     resourceId?: string;
+    resourceIdRelativePath?: string;
   } & {
     displayImage?: boolean;
     displayTitle?: boolean;
@@ -28,15 +35,40 @@ export type ResourceDetailWidgetProps = BaseProps &
 
 function ResourceDetail(props: ResourceDetailWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);
-  var resourceId = (urlParams.get('openstadResourceId')
-  ? parseInt(urlParams.get('openstadResourceId') as string)
-  : 1);
+  let resourceId = props.resourceId;
+
+  if (!resourceId && props.resourceIdRelativePath) {
+    const currentUrl = location.pathname;
+    const currentUrlSegments = currentUrl.split('/');
+
+    const relativePathSegments = (
+      props.resourceIdRelativePath.startsWith('/')
+        ? props.resourceIdRelativePath
+        : `/${props.resourceIdRelativePath}`
+    ).split('/');
+    const indexContainingSegment = relativePathSegments.findIndex((segment) =>
+      segment.includes('[id]')
+    );
+
+    if (
+      indexContainingSegment > -1 &&
+      currentUrlSegments.at(indexContainingSegment)?.match(/^\d+$/)
+    ) {
+      resourceId = currentUrlSegments[indexContainingSegment];
+    }
+  } else if (!resourceId) {
+    resourceId = `${
+      urlParams.get('openstadResourceId')
+        ? parseInt(urlParams.get('openstadResourceId') as string)
+        : 0
+    }`;
+  }
 
   const datastore = new DataStore({
     projectId: props.projectId,
     resourceId: resourceId,
     api: props.api,
-  }); 
+  });
   const { data: resource } = datastore.useResource({
     projectId: props.projectId,
     resourceId: resourceId,
@@ -49,11 +81,9 @@ function ResourceDetail(props: ResourceDetailWidgetProps) {
       <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
         {resource ? (
           <article className="osc-resource-detail-content-items">
-
-            {props.displayImage && resource.images?.at(0)?.src && (
+            {props.displayImage && resource.images?.at(0)?.url && (
               <Image
-                src={resource.images?.at(0)?.src || ''}
-                onClick={() => console.log({ resource })}
+                src={resource.images?.at(0)?.url || ''}
                 imageFooter={
                   <div>
                     <Paragraph className="osc-resource-detail-content-item-status">
@@ -64,19 +94,10 @@ function ResourceDetail(props: ResourceDetailWidgetProps) {
               />
             )}
 
-            {props.displayTitle && resource.title && <Heading4>{resource.title}</Heading4>}
+            {props.displayTitle && resource.title && (
+              <Heading4>{resource.title}</Heading4>
+            )}
             <div className="osc-resource-detail-content-item-row">
-              {/* {props.displayBudgetDocuments &&
-              resource?.extraData?.budgetDocuments?.name && (
-                <div>
-                  <Heading6 className="osc-resource-detail-content-item-title">
-                    Bestanden
-                  </Heading6>
-                  <span className="osc-resource-detail-content-item-text">
-                    {resource.extraData.budgetDocuments.name}
-                  </span>
-                </div>
-              )} */}
               {props.displayUser && resource?.user?.name && (
                 <div>
                   <Heading6 className="osc-resource-detail-content-item-title">
@@ -110,7 +131,9 @@ function ResourceDetail(props: ResourceDetailWidgetProps) {
             </div>
             <div>
               {props.displaySummary && <Heading5>{resource.summary}</Heading5>}
-              {props.displayDescription && <Paragraph>{resource.description}</Paragraph>}
+              {props.displayDescription && (
+                <Paragraph>{resource.description}</Paragraph>
+              )}
             </div>
             {props.displayLocation && resource.position && (
               <>
