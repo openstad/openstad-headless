@@ -1,0 +1,46 @@
+.resourceOverviewWithMap-container{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 750px;
+}
+
+.resourceOverviewWithMap-container > div:first-child{
+    overflow: scroll;
+}
+
+.resourceOverviewWithMap-container .map-container{
+    aspect-ratio: unset !important;
+    height: 100%;
+}
+
+.resourceOverviewWithMap-container #map{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+
+.resourceOverviewWithMap-container .osc-resource-overview-content .osc-resource-overview-resource-collection{
+    grid-template-columns: 1fr !important;
+}
+.resourceOverviewWithMap-container .utrecht-button.resource-card--link{
+    display: grid;
+    grid-template-columns: 230px auto;
+    border-bottom: solid 1px var(--nlds-default-border-color, #A9B2BA);
+    padding-bottom: 1rem;
+    padding-inline-start: 1rem;
+    padding-inline-end: 1rem;
+    align-content: center;
+    grid-gap: 0 1.5rem;
+    margin-block-start: -1rem;
+}
+
+.resourceOverviewWithMap-container .osc .image-container{
+    grid-row: span 2;
+    align-self: center;
+}
+
+.resourceOverviewWithMap-container .osc-resource-overview-content-item-footer{
+    grid-column: 2;
+}

@@ -20,6 +20,7 @@ import './css/base-map.css';
 
 import type { MarkerProps } from './types/marker-props';
 import type { LocationType } from './types/location';
+import React from 'react';
 
 
 
@@ -211,7 +212,7 @@ const BaseMap = ({
 
   return (
     <>
-      <div style={{ width: '100%', aspectRatio: 16 / 9 }}>
+      <div className="map-container" style={{ width: '100%', aspectRatio: 16 / 9 }}>
         <MapContainer
           center={[definedCenterPoint.lat, definedCenterPoint.lng]}
           className="osc-base-map-widget-container"
@@ -227,7 +228,9 @@ const BaseMap = ({
           ) : null}
 
           {!!currentMarkers && currentMarkers.length > 0 && currentMarkers.map((data) => {
-            if (data.isClustered) {
+            // temp bug fix
+            // if (data.isClustered) {
+            if (0 && data.isClustered) {
               clusterMarkers.push(data);
             } else if (data.lat && data.lng) {
               return (
