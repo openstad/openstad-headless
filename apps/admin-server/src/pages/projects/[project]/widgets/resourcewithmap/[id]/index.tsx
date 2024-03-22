@@ -82,6 +82,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="resources">Resources</TabsTrigger>
               <TabsTrigger value="map">Kaart</TabsTrigger>
+              <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             {previewConfig ? (
               <>
@@ -95,7 +96,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                       <TabsTrigger value="sorting">Sorteren</TabsTrigger>
                       <TabsTrigger value="pagination">Pagination</TabsTrigger>
                       <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
-                      <TabsTrigger value="publish">Publiceren</TabsTrigger>
                     </TabsList>
                     <TabsContent value="general" className="p-0">
                       <WidgetResourceOverviewGeneral {...totalPropPackage} />
@@ -121,20 +121,15 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     <TabsContent value="include" className="p-0">
                       <WidgetResourceOverviewInclude {...totalPropPackage} />
                     </TabsContent>
-                    <TabsContent value="publish" className="p-0">
-                      <WidgetPublish apiUrl={apiUrl} />
-                    </TabsContent>
                   </Tabs>
                 </TabsContent>
                 <TabsContent value="map">
                   <Tabs defaultValue="preview">
                     <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
-                      <TabsTrigger value="preview">Preview</TabsTrigger>
                       <TabsTrigger value="map">Map</TabsTrigger>
                       <TabsTrigger value="button">Call-To-Action knop</TabsTrigger>
                       <TabsTrigger value="counter">Teller</TabsTrigger>
                       <TabsTrigger value="content">Content</TabsTrigger>
-                      <TabsTrigger value="publish">Publiceren</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="map" className="p-0">
@@ -149,10 +144,10 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     <TabsContent value="content" className="p-0">
                       <WidgetResourcesMapContent />
                     </TabsContent>
-                    <TabsContent value="publish" className="p-0">
-                      <WidgetPublish apiUrl={apiUrl} />
-                    </TabsContent>
                   </Tabs>
+                </TabsContent>
+                <TabsContent value="publish" className="p-0">
+                  <WidgetPublish apiUrl={apiUrl} />
                 </TabsContent>
 
               </>
