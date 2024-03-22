@@ -187,11 +187,6 @@ export default function ProjectAuthentication() {
                 )}
               />
               <Separator className="my-4" />
-              <div>
-                <FormLabel>
-                  Een nieuwe gebruiker moet de volgende velden invullen:
-                </FormLabel>
-              </div>
 
               <FormField
                 control={form.control}

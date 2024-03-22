@@ -210,7 +210,7 @@ export default function ProjectAuthenticationRequiredFields() {
               <Separator className="my-4" />
               <div>
                 <FormLabel>
-                  Als een gebruiker één of meer ven deze verplichte velden moet invullen dan doet die dat op een pagina met deze teksten:
+                  Als een gebruiker één of meer van deze verplichte velden moet invullen dan doet die dat op een pagina met deze teksten:
                 </FormLabel>
               </div>
 
