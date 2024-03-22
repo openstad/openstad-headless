@@ -61,7 +61,7 @@ let ResourceOverviewConfig:ResourceOverviewMapWidgetProps = {
   },
 }
 
-export const combinedConfig: ResourceOverviewWithMapWidgetProps = {
+export const ResourceOverviewWithMapWidgetProps = {
   ResourceOverviewConfig,
   resourceConfig
 };
@@ -69,8 +69,8 @@ export const combinedConfig: ResourceOverviewWithMapWidgetProps = {
 const ResourceOverviewWithMap = () => {
   return (
     <div className="resourceOverviewWithMap-container">
-      <ResourceOverview {...combinedConfig} />
-      <ResourceOverviewMap {...combinedConfig}/>
+      <ResourceOverview {...resourceConfig} />
+      <ResourceOverviewMap {...ResourceOverviewConfig}/>
     </div>
   );
 }

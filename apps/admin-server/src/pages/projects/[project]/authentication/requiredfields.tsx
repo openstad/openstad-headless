@@ -259,7 +259,7 @@ export default function ProjectAuthenticationRequiredFields() {
                 name="info"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Infotekst</FormLabel>
+                    <FormLabel>Help tekst</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>
