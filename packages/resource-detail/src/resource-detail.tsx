@@ -105,7 +105,7 @@ function ResourceDetail({
                         <Paragraph className="osc-resource-detail-content-item-status">
                           {resource.statuses
                             ?.map((s: { label: string }) => s.label)
-                            ?.join(',')}
+                            ?.join(', ')}
                         </Paragraph>
                       </div>
                     }
