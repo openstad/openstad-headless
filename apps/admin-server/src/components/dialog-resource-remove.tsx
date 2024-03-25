@@ -37,23 +37,12 @@ export function RemoveResourceDialog({
 
   return (
     <Dialog open={open} modal={true} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <DropdownMenu>
-          <DropdownMenuTrigger className="focus:outline-none">
-            <MoreHorizontal className="h-5 w-5" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="center">
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.preventDefault();
-                setOpen(true);
-              }}
-              className="text-xs">
-              <Trash className="mr-2 h-4 w-4" /> Verwijder
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </DialogTrigger>
+      <div className="flex items-center" onClick={(e) => {
+          e.preventDefault();
+          setOpen(true);
+        }}>
+        <Trash  className="mr-2 h-4 w-4" /> Verwijder
+      </div>
       <DialogContent
         onEscapeKeyDown={(e: KeyboardEvent) => {
           e.stopPropagation();

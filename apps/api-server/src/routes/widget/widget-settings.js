@@ -164,6 +164,17 @@ let moduleDefinitions = {
     defaultConfig: {
       projectId: null
     }
+  },
+  resourcewithmap: {
+    packageName: '@openstad-headless/resource-overview-with-map',
+    directory: 'resource-overview-with-map',
+    js: ['dist/resource-overview-with-map.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessResourceOverviewWithMap',
+    componentName: 'ResourceOverviewWithMap',
+    defaultConfig: {
+      projectId: null,
+    },
   }
 };
 

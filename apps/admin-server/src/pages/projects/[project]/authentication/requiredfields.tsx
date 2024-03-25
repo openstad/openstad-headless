@@ -210,7 +210,7 @@ export default function ProjectAuthenticationRequiredFields() {
               <Separator className="my-4" />
               <div>
                 <FormLabel>
-                  Als een gebruiker één of meer ven deze verplichte velden moet invullen dan doet die dat op een pagina met deze teksten:
+                  Als een gebruiker één of meer van deze verplichte velden moet invullen dan doet die dat op een pagina met deze teksten:
                 </FormLabel>
               </div>
 
@@ -259,7 +259,7 @@ export default function ProjectAuthenticationRequiredFields() {
                 name="info"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Infotekst</FormLabel>
+                    <FormLabel>Help tekst</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>

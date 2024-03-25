@@ -258,7 +258,7 @@ export default function ProjectAuthentication2FA() {
                 name="info"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Infotekst</FormLabel>
+                    <FormLabel>Help tekst</FormLabel>
                     <FormControl>
                       <Textarea placeholder="" {...field} />
                     </FormControl>
