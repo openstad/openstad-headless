@@ -2,7 +2,7 @@ import './resource-detail.css';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { Image, Spacer } from '@openstad-headless/ui/src';
+import { Carousel, Image, Spacer } from '@openstad-headless/ui/src';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 
@@ -75,22 +75,28 @@ function ResourceDetail(props: ResourceDetailWidgetProps) {
   });
 
   if (!resource) return null;
+  console.log(resource.images)
   return (
     <div className="osc">
       <Spacer size={2} />
       <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
         {resource ? (
           <article className="osc-resource-detail-content-items">
-            {props.displayImage && resource.images?.at(0)?.url && (
-              <Image
-                src={resource.images?.at(0)?.url || ''}
-                imageFooter={
-                  <div>
-                    <Paragraph className="osc-resource-detail-content-item-status">
-                      {resource.status === 'OPEN' ? 'Open' : 'Gesloten'}
-                    </Paragraph>
-                  </div>
-                }
+            {props.displayImage && (
+              <Carousel
+                items={resource.images}
+                itemRenderer={(i) => (
+                  <Image
+                    src={resource.images?.at(0)?.url || ''}
+                    imageFooter={
+                      <div>
+                        <Paragraph className="osc-resource-detail-content-item-status">
+                          {resource.status === 'OPEN' ? 'Open' : 'Gesloten'}
+                        </Paragraph>
+                      </div>
+                    }
+                  />
+                )}
               />
             )}
 
