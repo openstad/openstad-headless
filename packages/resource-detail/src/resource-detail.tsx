@@ -39,6 +39,7 @@ export type ResourceDetailWidgetProps = BaseProps &
     displayLocation?: boolean;
     displayBudgetDocuments?: boolean;
     displayLikes?: boolean;
+    likeWidgetProgressBarText?: string;
     displayTags?: boolean;
     displaySocials?: boolean;
   };
@@ -187,7 +188,10 @@ function ResourceDetail({
         <section className="resource-detail-side-column">
           {displayLikes ? (
             <>
-              <Likes {...props} />
+              <Likes
+                {...props}
+                progressBarDescription={props.likeWidgetProgressBarText}
+              />
               <Spacer size={1} />
             </>
           ) : null}
@@ -224,25 +228,25 @@ function ResourceDetail({
               <div className="resource-detail-side-section-socials">
                 <IconButton
                   onClick={() => {}}
-                  // className="subtle-button"
+                  className="secondary-action-button"
                   icon="ri-facebook-fill"
                 />
 
                 <IconButton
                   onClick={() => {}}
-                  // className="subtle-button"
+                  className="secondary-action-button"
                   icon="ri-whatsapp-fill"
                 />
 
                 <IconButton
                   onClick={() => {}}
-                  // className="subtle-button"
+                  className="secondary-action-button"
                   icon="ri-twitter-x-fill"
                 />
 
                 <IconButton
                   onClick={() => {}}
-                  // className="subtle-button"
+                  className="secondary-action-button"
                   icon="ri-mail-fill"
                 />
 
@@ -250,18 +254,19 @@ function ResourceDetail({
                   onClick={() => {
                     navigator.clipboard.writeText(location.href);
                   }}
-                  // className="subtle-button"
+                  className="secondary-action-button"
                   icon="ri-link"
                 />
 
                 <IconButton
                   onClick={() => {}}
-                  // className="subtle-button"
+                  className="secondary-action-button"
                   icon="ri-linkedin-fill"
                 />
               </div>
             </div>
           ) : null}
+          <Spacer size={1}/>
         </section>
       ) : null}
     </div>

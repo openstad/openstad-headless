@@ -6,6 +6,7 @@ import {
   Paragraph,
   Button,
   Heading4,
+  Heading6,
 } from '@utrecht/component-library-react';
 import { ProgressBar } from '@openstad-headless/ui/src';
 import { SessionStorage } from '@openstad-headless/lib/session-storage';
@@ -163,9 +164,9 @@ function Likes({
           {props?.resources?.minimumYesVotes &&
             showProgressBar &&
             props.progressBarDescription && (
-              <Paragraph style={{ textAlign: 'start' }}>
+              <Heading6 style={{ textAlign: 'start' }}>
                 {props.progressBarDescription}
-              </Paragraph>
+              </Heading6>
             )}
         </div>
       </div>

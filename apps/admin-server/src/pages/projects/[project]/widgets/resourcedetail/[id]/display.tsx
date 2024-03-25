@@ -1,11 +1,13 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
@@ -26,6 +28,7 @@ const formSchema = z.object({
   displayBudgetDocuments: z.boolean(),
   displayLocation: z.boolean(),
   displayLikes: z.boolean(),
+  likeWidgetProgressBarText: z.string().optional(),
   displayTags: z.boolean(),
   displaySocials: z.boolean(),
 });
@@ -52,6 +55,7 @@ export default function WidgetResourceDetailDisplay(
       displayBudgetDocuments: props?.displayBudgetDocuments || true,
       displayLocation: props?.displayLocation || true,
       displayLikes: props?.displayLikes || true,
+      likeWidgetProgressBarText: props?.likeWidgetProgressBarText || '',
       displayTags: props?.displayTags || true,
       displaySocials: props?.displaySocials || true,
     },
@@ -173,6 +177,28 @@ export default function WidgetResourceDetailDisplay(
               <FormItem>
                 <FormLabel>Like widget weergeven</FormLabel>
                 {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="likeWidgetProgressBarText"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Text onder de likewidget progressie balk
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      props.onFieldChanged(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

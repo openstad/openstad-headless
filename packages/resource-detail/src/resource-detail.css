@@ -1,6 +1,7 @@
 .osc-resource-detail-column-container {
   display: grid;
   grid-template-columns: 2fr 1fr;
+  align-items: start;
 }
 
 .resource-detail-side-column {
