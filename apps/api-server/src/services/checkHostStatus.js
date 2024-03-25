@@ -143,7 +143,7 @@ const checkHostStatus = async (conditions) => {
 
       const domainIp = await getDomainIp(project.url);
 
-      hostStatus.ip = domainIp !== null && domainIp === serverIp ? true : false;
+      hostStatus.dnsRecordIsSetToCorrectIp = domainIp !== null && domainIp === serverIp;
 
       const k8sApi = getK8sApi();
       
@@ -161,7 +161,7 @@ const checkHostStatus = async (conditions) => {
       }
       
       // if ip issset but not ingress try to create one
-      if (hostStatus.ip  && !ingress) {
+      if (hostStatus.dnsRecordIsSetToCorrectIp && !ingress) {
         try {
           const response     = await createIngress(k8sApi, project.config.uniqueId, project.url, namespace);
           hostStatus.ingress = true;
@@ -169,7 +169,7 @@ const checkHostStatus = async (conditions) => {
           // don't set to false, an error might just be that it already exist and the read check failed
           console.error(`Error creating ingress for ${project.uniqueId} domain: ${project.url} : ${error}`);
         }
-      } else if (hostStatus.ip  && ingress) {
+      } else if (hostStatus.dnsRecordIsSetToCorrectIp && ingress) {
         try {
           hostStatus.ingress = true;
           const response = await updateIngress(ingress, k8sApi, project.config.uniqueId, project.url, namespace);
@@ -177,7 +177,7 @@ const checkHostStatus = async (conditions) => {
           console.error(`Error updating ingress for ${project.uniqueId} domain: ${project.url} : ${error}`);
         }
       // else if ip is not set but ingress is set, remove the ingress file
-      } else  if (!hostStatus.ip  && ingress) {
+      } else  if (!hostStatus.dnsRecordIsSetToCorrectIp && ingress) {
         try {
     //      await k8sApi.deleteNamespacedIngress(project.name, namespace)
           hostStatus.ingress = false;
