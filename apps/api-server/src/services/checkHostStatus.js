@@ -110,7 +110,7 @@ more_set_headers "Referrer-Policy: same-origin";`
         }
       }],
       tls: [{
-        secretName: dbName,
+        secretName: name,
         hosts: [domain]
       }]
     }
@@ -141,47 +141,50 @@ const checkHostStatus = async (conditions) => {
       //ensure it's an object so we dont have to worry about checks later
       hostStatus = hostStatus ? hostStatus : {};          //
 
-      const domainIp = getDomainIp(project.url);
+      const domainIp = await getDomainIp(project.url);
 
-      hostStatus.ip = domainIp !== null && domainIp === serverIp ? true : false;
+      hostStatus.dnsRecordIsSetToCorrectIp = domainIp !== null && domainIp === serverIp;
 
       const k8sApi = getK8sApi();
-
-      const uniqueId = (project.config && project.config.uniqueId) ? project.config.uniqueId : null;
       
-      if (!uniqueId) {
-        console.error('No uniqueId found for project: ', project.id);
-        return;
+      let ingress = '';
+      
+      // Create a uniqueId if for some reason it's not set yet
+      if (!project.config.uniqueId) {
+        project.config = {...project.config, uniqueId: Math.round(new Date().getTime() / 1000) + project.url.replace(/\W/g, '').slice(0,40)};
+        await project.save();
       }
       
-      // get ingress config files
-      const ingress = getIngress(k8sApi, uniqueId, namespace);
-
+      if (project && project.config && project.config.uniqueId) {
+        // get ingress config files
+        ingress = await getIngress(k8sApi, project.config.uniqueId, namespace);
+      }
+      
       // if ip issset but not ingress try to create one
-      if (hostStatus.ip  && !ingress) {
+      if (hostStatus.dnsRecordIsSetToCorrectIp && !ingress) {
         try {
-          const response     = await createIngress(k8sApi, uniqueId, project.url, namespace);
+          const response     = await createIngress(k8sApi, project.config.uniqueId, project.url, namespace);
           hostStatus.ingress = true;
         } catch (error) {
           // don't set to false, an error might just be that it already exist and the read check failed
-          console.error(`Error creating ingress for ${uniqueId} domain: ${project.url} : ${error}`);
+          console.error(`Error creating ingress for ${project.uniqueId} domain: ${project.url} : ${error}`);
         }
-      } else if (hostStatus.ip  && ingress) {
+      } else if (hostStatus.dnsRecordIsSetToCorrectIp && ingress) {
         try {
           hostStatus.ingress = true;
-          const response = await updateIngress(ingress, k8sApi, uniqueId, project.url, namespace);
+          const response = await updateIngress(ingress, k8sApi, project.config.uniqueId, project.url, namespace);
         } catch (error) {
-          console.error(`Error updating ingress for ${uniqueId} domain: ${project.url} : ${error}`);
+          console.error(`Error updating ingress for ${project.uniqueId} domain: ${project.url} : ${error}`);
         }
       // else if ip is not set but ingress is set, remove the ingress file
-      } else  if (!hostStatus.ip  && ingress) {
+      } else  if (!hostStatus.dnsRecordIsSetToCorrectIp && ingress) {
         try {
     //      await k8sApi.deleteNamespacedIngress(project.name, namespace)
           hostStatus.ingress = false;
         } catch(error) {
           //@todo how to deal with error here?
           //most likely it doesn't exists anymore if delete doesnt work, but could also be forbidden /
-          console.error('Error deleting ingress for ', uniqueId, ' domain: ', project.url, ' :', error);
+          console.error('Error deleting ingress for ', project.uniqueId, ' domain: ', project.url, ' :', error);
         }
       }
 
