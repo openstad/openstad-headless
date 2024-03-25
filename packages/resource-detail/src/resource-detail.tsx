@@ -89,7 +89,6 @@ function ResourceDetail({
   });
 
   if (!resource) return null;
-
   return (
     <div className={`osc ${'osc-resource-detail-column-container'}`}>
       <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
