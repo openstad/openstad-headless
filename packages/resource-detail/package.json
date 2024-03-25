@@ -12,6 +12,7 @@
   "dependencies": {
     "@openstad-headless/ui": "file:../ui",
     "@openstad-headless/data-store": "file:../data-store",
+    "@openstad-headless/likes": "file:../likes",
     "@openstad-headless/lib": "file:../lib",
     "@utrecht/component-library-css": "^3.0.1-alpha.18",
     "@utrecht/component-library-react": "^3.0.1-alpha.18",

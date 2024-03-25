@@ -1,0 +1,19 @@
+.osc-pill {
+    padding: .25rem;
+    background-color: var(--osc-muted);
+    color: var(--osc-muted-foreground);
+    border-radius: .125rem;
+}
+
+.osc-pill-rounded {
+    border-radius: 1rem;
+}
+
+.osc-pill-light {
+    background-color: var(--osc-card-dark);
+    color: var(--osc-card-dark-foreground);
+}
+
+.osc-pill > p {
+    text-align: center;
+}

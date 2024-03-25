@@ -18,3 +18,4 @@ export { Carousel } from './carousel';
 export { Paginator } from './paginator';
 export {List} from './list';
 export {Stepper} from './stepper';
+export {Pill} from './pill';

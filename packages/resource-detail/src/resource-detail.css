@@ -1,3 +1,27 @@
+.osc-resource-detail-column-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+}
+
+.resource-detail-side-column {
+  background-color: var(--osc-card);
+}
+
+.resource-detail-side-section {
+  padding: 0rem 2rem;
+}
+
+.resource-detail-side-section-socials {
+  display: flex;
+  gap: .5rem;
+}
+
+.resource-detail-pil-list-content {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .5rem;
+}
+
 .osc-resource-detail-title-container {
   display: flex;
   flex-direction: column;

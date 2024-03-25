@@ -1,7 +1,12 @@
 import 'remixicon/fonts/remixicon.css';
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Heading5, Paragraph, Button } from "@utrecht/component-library-react";
+import '@utrecht/component-library-css';
+import '@utrecht/design-tokens/dist/root.css';
+import {
+  Heading5,
+  Paragraph,
+  Button,
+  Heading4,
+} from '@utrecht/component-library-react';
 import { ProgressBar } from '@openstad-headless/ui/src';
 import { SessionStorage } from '@openstad-headless/lib/session-storage';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
@@ -24,6 +29,8 @@ export type LikeProps = {
   yesLabel?: string;
   noLabel?: string;
   hideCounters?: boolean;
+  showProgressBar?: boolean;
+  progressBarDescription?: string;
 };
 
 function Likes({
@@ -32,6 +39,7 @@ function Likes({
   hideCounters,
   yesLabel = 'Voor',
   noLabel = 'Tegen',
+  showProgressBar = true,
   ...props
 }: LikeWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);
@@ -48,8 +56,8 @@ function Likes({
 
   const session = new SessionStorage({ projectId: props.projectId });
 
-  const {data:currentUser} = datastore.useCurrentUser(props);
-  const {data:resource} = datastore.useResource({
+  const { data: currentUser } = datastore.useCurrentUser(props);
+  const { data: resource } = datastore.useResource({
     projectId: props.projectId,
     resourceId,
   });
@@ -106,16 +114,18 @@ function Likes({
 
     setIsBusy(false);
   }
-  
+
   return (
     <div className="osc">
       <div className={`like-widget-container ${variant}`}>
-        {title ? <Heading5 className="like-widget-title">{title}</Heading5> : null}
+        {title ? (
+          <Heading4 className="like-widget-title">{title}</Heading4>
+        ) : null}
 
         <div className={`like-option-container`}>
           {supportedLikeTypes.map((likeVariant, index) => (
             <Button
-            appearance='primary-action-button'
+              appearance="primary-action-button"
               key={`${likeVariant.type}-${index}`}
               onClick={(e) => doVote(e, likeVariant.type)}
               className={`like-option ${
@@ -123,35 +133,41 @@ function Likes({
                   ? 'selected'
                   : ''
               } ${hideCounters ? 'osc-no-counter' : ''}`}>
-              <section
-                className="like-kind">
+              <section className="like-kind">
                 <i className={likeVariant.icon}></i>
-                {variant === 'small' ? null : (
-                    likeVariant.label
-                )}
+                {variant === 'small' ? null : likeVariant.label}
               </section>
 
               {!hideCounters ? (
                 <section className="like-counter">
-                    {resource[likeVariant.type] &&
-                    resource[likeVariant.type] < 10
-                      ? resource[likeVariant.type].toString().padStart(2, '0')
-                      : resource[likeVariant.type] ||
-                        (0).toString().padStart(2, '0')}
+                  {resource[likeVariant.type] && resource[likeVariant.type] < 10
+                    ? resource[likeVariant.type].toString().padStart(2, '0')
+                    : resource[likeVariant.type] ||
+                      (0).toString().padStart(2, '0')}
                 </section>
               ) : null}
             </Button>
           ))}
         </div>
 
-        {!props?.resources?.minimumYesVotes ? null : (
+        {props?.resources?.minimumYesVotes && showProgressBar ? (
           <div className="progressbar-container">
             <ProgressBar progress={(resource.yes / necessaryVotes) * 100} />
             <Paragraph className="progressbar-counter">
               {resource.yes || 0} /{necessaryVotes}
             </Paragraph>
           </div>
-        )}
+        ) : null}
+
+        <div>
+          {props?.resources?.minimumYesVotes &&
+            showProgressBar &&
+            props.progressBarDescription && (
+              <Paragraph style={{ textAlign: 'start' }}>
+                {props.progressBarDescription}
+              </Paragraph>
+            )}
+        </div>
       </div>
     </div>
   );

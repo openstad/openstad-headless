@@ -27,6 +27,7 @@ import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { ObjectListSelect } from '@/components/ui/object-select';
 import useResources from '@/hooks/use-resources';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
 
 const formSchema = z.object({
   title: z.string(),
@@ -34,6 +35,8 @@ const formSchema = z.object({
   yesLabel: z.string(),
   noLabel: z.string(),
   hideCounters: z.boolean(),
+  showProgressBar: z.boolean(),
+  progressBarDescription: z.string().optional(),
   resourceId: z.string().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
@@ -59,6 +62,8 @@ export default function LikesDisplay(
       yesLabel: props?.yesLabel || 'Ja',
       noLabel: props?.noLabel || 'Nee',
       hideCounters: props?.hideCounters || false,
+      showProgressBar: props?.showProgressBar || true,
+      progressBarDescription: props?.progressBarDescription || '',
     },
   });
 
@@ -192,6 +197,39 @@ export default function LikesDisplay(
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="showProgressBar"
+          render={({ field }) => (
+            <FormItem className="col-span-1">
+              <FormLabel>Weergeef progressie balk</FormLabel>
+              {YesNoSelect(field, props)}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="progressBarDescription"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Progress balk informatie</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder='Wat representeert de progressie balk?'
+                  defaultValue={field.value}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    onFieldChange(field.name, e.target.value);
+                  }}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
         <Button type="submit">Opslaan</Button>
       </form>
     </Form>

@@ -25,6 +25,9 @@ const formSchema = z.object({
   displayBudget: z.boolean(),
   displayBudgetDocuments: z.boolean(),
   displayLocation: z.boolean(),
+  displayLikes: z.boolean(),
+  displayTags: z.boolean(),
+  displaySocials: z.boolean(),
 });
 
 export default function WidgetResourceDetailDisplay(
@@ -39,15 +42,18 @@ export default function WidgetResourceDetailDisplay(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      displayImage: props?.displayImage || false,
-      displayTitle: props?.displayTitle || false,
-      displayDescription: props?.displayDescription || false,
-      displaySummary: props?.displaySummary || false,
-      displayUser: props?.displayUser || false,
-      displayDate: props?.displayDate || false,
-      displayBudget: props?.displayBudget || false,
-      displayBudgetDocuments: props?.displayBudgetDocuments || false,
-      displayLocation: props?.displayLocation || false,
+      displayImage: props?.displayImage || true,
+      displayTitle: props?.displayTitle || true,
+      displayDescription: props?.displayDescription || true,
+      displaySummary: props?.displaySummary || true,
+      displayUser: props?.displayUser || true,
+      displayDate: props?.displayDate || true,
+      displayBudget: props?.displayBudget || true,
+      displayBudgetDocuments: props?.displayBudgetDocuments || true,
+      displayLocation: props?.displayLocation || true,
+      displayLikes: props?.displayLikes || true,
+      displayTags: props?.displayTags || true,
+      displaySocials: props?.displaySocials || true,
     },
   });
 
@@ -159,6 +165,43 @@ export default function WidgetResourceDetailDisplay(
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="displayLikes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Like widget weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayTags"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gekoppelde tags weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displaySocials"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Social share opties weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>
