@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { FolderOpen, LogOut, Users, AlertTriangle } from 'lucide-react';
 import { Logo } from './logo';
-import { signOut, useSession } from "next-auth/react"
+import { signOut } from '../../auth';
 
 export function Sidenav({
   className,
@@ -17,7 +17,6 @@ export function Sidenav({
   className?: string;
   narrow?: boolean;
 }) {
-  const { data } = useSession()
   const router = useRouter();
   const [location, setLocation] = useState('');
 
@@ -25,11 +24,6 @@ export function Sidenav({
     setLocation(router.pathname);
   }, [router]);
 
-  useEffect(() => {
-    if (data?.error === "TokenFetchError" || data?.error === "TokenValidationFailed") {
-      signOut(); // Force sign in to hopefully resolve error
-    }
-  }, [data]);
 
   return (
     <nav
@@ -106,7 +100,7 @@ export function Sidenav({
         <Link href="/projects">
           <Button
             variant="ghost"
-            onClick={() => signOut()}
+            onClick={() => router.push('/signout')}
             className={cn(
               'w-full flex flex-row justify-start',
               narrow ? 'p-0 h-10 w-10 justify-center' : null

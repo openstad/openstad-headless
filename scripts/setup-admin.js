@@ -12,8 +12,8 @@ module.exports = async function setupAdminServer(actions) {
 
     // create local config
     let imgConfig = `
-NEXTAUTH_URL=${process.env.ADMIN_URL}
-NEXTAUTH_SECRET=openstad_headless
+URL=${process.env.ADMIN_URL}
+COOKIE_SECRET=${process.env.ADMIN_COOKIE_SECRET}
 CLIENT_ID=${process.env.AUTH_ADMIN_CLIENT_ID}
 CLIENT_SECRET=${process.env.AUTH_ADMIN_CLIENT_SECRET}
 OAUTH_URL=${process.env.AUTH_APP_URL}
@@ -21,6 +21,8 @@ API_URL=${process.env.API_URL}
 API_URL_INTERNAL=${process.env.API_URL}
 API_FIXED_AUTH_KEY=${process.env.API_FIXED_AUTH_KEY}
 PORT=${process.env.ADMIN_PORT}
+NEXT_PUBLIC_API_URL=${process.env.API_URL}
+NEXT_PUBLIC_URL=${process.env.ADMIN_URL}
 `
     if (actions['create config']) {
       console.log('------------------------------');

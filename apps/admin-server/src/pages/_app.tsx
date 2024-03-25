@@ -1,15 +1,14 @@
 import '@/styles/globals.css';
-import { SessionProvider } from 'next-auth/react';
 import type { AppProps } from 'next/app';
 import { Toaster } from 'react-hot-toast';
 import { SWRConfig } from 'swr';
 
 export default function App({
   Component,
-  pageProps: { session, ...pageProps },
+  pageProps,
 }: AppProps) {
   return (
-    <SessionProvider session={session}>
+    <>
       <SWRConfig
         value={{
           fetcher: (
@@ -32,6 +31,6 @@ export default function App({
         <Component {...pageProps} />
       </SWRConfig>
       <Toaster position="bottom-center" />
-    </SessionProvider>
+    </>
   );
 }
