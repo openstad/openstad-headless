@@ -54,6 +54,12 @@
   }
 }
 
+@media (max-width: 1366px) { 
+  .osc-resource-detail-column-container {
+    display: block;
+  }
+}
+
 h6.osc-resource-detail-content-item-title {
   font-weight: bold !important;
   color: var(--osc-card-foreground) !important;

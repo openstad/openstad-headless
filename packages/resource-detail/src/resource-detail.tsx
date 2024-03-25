@@ -22,6 +22,7 @@ import {
 } from '@utrecht/component-library-react';
 import React from 'react';
 import { Likes } from '@openstad-headless/likes/src/likes';
+import { Comments } from '@openstad-headless/comments/src/comments';
 
 export type ResourceDetailWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -102,10 +103,7 @@ function ResourceDetail({
   if (!resource) return null;
   const shouldHaveSideColumn = displayLikes || displayTags || displaySocials;
   return (
-    <div
-      className={`osc ${
-        shouldHaveSideColumn ? 'osc-resource-detail-column-container' : ''
-      }`}>
+    <div className={`osc ${'osc-resource-detail-column-container'}`}>
       <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
         {resource ? (
           <article className="osc-resource-detail-content-items">
@@ -133,13 +131,13 @@ function ResourceDetail({
               <Heading4>{resource.title}</Heading4>
             )}
             <div className="osc-resource-detail-content-item-row">
-              {displayUser && resource?.user?.name && (
+              {displayUser && resource?.user?.displayName && (
                 <div>
                   <Heading6 className="osc-resource-detail-content-item-title">
-                    Naam
+                    Gemaakt door
                   </Heading6>
                   <span className="osc-resource-detail-content-item-text">
-                    {resource.user.name}
+                    {resource.user.displayName}
                   </span>
                 </div>
               )}
@@ -266,9 +264,17 @@ function ResourceDetail({
               </div>
             </div>
           ) : null}
-          <Spacer size={1}/>
+          <Spacer size={1} />
         </section>
       ) : null}
+  
+      <section>
+      <Spacer size={2}/>
+
+        <Comments sentiment='for' {...props} />
+        <Comments sentiment='against' {...props} />
+
+      </section>
     </div>
   );
 }
