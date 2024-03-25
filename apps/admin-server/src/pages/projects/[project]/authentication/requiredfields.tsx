@@ -21,6 +21,7 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
+import {Spacer} from "@openstad-headless/ui/src";
 
 const requiredUserFields = [
   {
@@ -59,6 +60,7 @@ const requiredUserFields = [
 
 const formSchema = z.object({
   requiredUserFields: z.string().array().default([]),
+  requiredUserFieldsLabels: z.array(z.object({id: z.string(), label: z.string()})).default([]),
   title: z.string().optional(),
   description: z.string().optional(),
   buttonText: z.string().optional(),
@@ -75,6 +77,7 @@ export default function ProjectAuthenticationRequiredFields() {
   const defaults = useCallback(
     () => ({
       requiredUserFields: data?.config?.auth?.provider?.openstad?.requiredUserFields || [],
+      requiredUserFieldsLabels: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.requiredUserFieldsLabels || [],
       title: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.title || '',
       description: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.description || '',
       buttonText: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.buttonText || '',
@@ -105,6 +108,7 @@ export default function ProjectAuthenticationRequiredFields() {
                   description: values.description,
                   buttonText: values.buttonText,
                   info: values.info,
+                  requiredUserFieldsLabels: values.requiredUserFieldsLabels,
                 }
               },
             }
@@ -206,11 +210,82 @@ export default function ProjectAuthenticationRequiredFields() {
               />
 
               {showPageFields ? (
+                  <>
+                    <Spacer size="2" />
+                    <div>
+                      <FormLabel>
+                        Standaard staat de titel van de bovenstaande geselecteerde verplichte velden als de titel boven het invulveld. Hier kun je dit per verplicht veld aanpassen.
+                      </FormLabel>
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {requiredUserFields.map((item) => {
+                        const fieldValue = form.getValues('requiredUserFieldsLabels').find((label) => label.id === item.id)?.label || '';
+                          return form.watch('requiredUserFields').includes(item.id) ? (
+                              <FormField
+                                  key={item.id}
+                                  control={form.control}
+                                  name={`field_${item.id}`}
+                                  render={({field}) => (
+                                      <FormItem>
+                                        <FormLabel>{item.label}</FormLabel>
+                                        <FormControl>
+                                          <Input
+                                              placeholder={item.label}
+                                              defaultValue={fieldValue}
+                                              onChange={(e) => {
+                                                const updatedValue = e.target.value;
+                                                const labels = form.getValues('requiredUserFieldsLabels');
+                                                const index = labels.findIndex((label) => label.id === item.id);
+                                                const updatedLabel = { id: item.id, label: updatedValue };
+
+                                                if (updatedValue.trim() === '') {
+                                                  if (index !== -1) {
+                                                    labels.splice(index, 1);
+                                                    form.setValue('requiredUserFieldsLabels', labels);
+                                                  }
+                                                } else {
+                                                  if (index !== -1) {
+                                                    labels[index] = updatedLabel;
+                                                  } else {
+                                                    labels.push(updatedLabel);
+                                                  }
+
+                                                  form.setValue('requiredUserFieldsLabels', labels);
+                                                }
+
+                                                field.onChange(e);
+                                              }}
+                                          />
+
+                                        </FormControl>
+                                        <FormMessage/>
+                                      </FormItem>
+                                  )}
+                              />
+                          ) : null
+                      })}
+                      <FormField
+                          control={form.control}
+                          name="requiredUserFieldsLabels"
+                          render={({ field }) => (
+                              <FormItem>
+                                <Input type="hidden" {...field} />
+                                <FormMessage />
+                              </FormItem>
+                          )}
+                      />
+                    </div>
+                    <Spacer size="5" />
+                  </>
+              ) : null}
+
+
+              {showPageFields ? (
               <>
               <Separator className="my-4" />
               <div>
                 <FormLabel>
-                  Als een gebruiker één of meer ven deze verplichte velden moet invullen dan doet die dat op een pagina met deze teksten:
+                  Als een gebruiker één of meer een deze verplichte velden moet invullen dan doet die dat op een pagina met deze teksten:
                 </FormLabel>
               </div>
 

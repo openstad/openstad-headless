@@ -11,12 +11,16 @@ exports.index = (req, res, next) => {
 
   const config = req.client.config ? req.client.config : {};
   const configRequiredFields = config && config.requiredFields ? config.requiredFields : {};
-  
+
+  let requiredUserFieldsLabels = config && config.requiredFields && config.requiredFields.requiredUserFieldsLabels ? config.requiredFields.requiredUserFieldsLabels : [];
+
   // Replace field labels with labels defined in the client config (if provided)
-  if (configRequiredFields && configRequiredFields.labels) {
+  if (requiredUserFieldsLabels && requiredUserFieldsLabels.length > 0) {
     requiredUserFields = requiredUserFields.map((field) => {
-      if (configRequiredFields.labels[field.key]) {
-        field.label = configRequiredFields.labels[field.key];
+      const newLabel = requiredUserFieldsLabels.find((label) => label.id === field.id)?.label || '';
+
+      if (!!newLabel) {
+        field.label = newLabel;
       }
 
       return field;
