@@ -97,9 +97,9 @@ function ResourceDetail({
             {displayImage && (
               <Carousel
                 items={resource.images}
-                itemRenderer={(i) => (
+                itemRenderer={(item) => (
                   <Image
-                    src={resource.images?.at(0)?.url || ''}
+                    src={item?.url || ''}
                     imageFooter={
                       <div>
                         <Paragraph className="osc-resource-detail-content-item-status">
