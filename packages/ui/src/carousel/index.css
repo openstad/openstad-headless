@@ -1,11 +1,29 @@
 .osc-carousel {
     display: flex;
+    position: relative;
     flex-direction: row;
+    justify-content: center;
     align-items: center;
     gap: 1rem;
+}
+
+.carousel-items {
+    flex: 1;
 }
 
 .osc-carousel-navigation-button-wrapper {
     flex-grow: 0;
     flex-basis: 0;
+}
+
+.osc-carousel-previous {
+    position: absolute;
+    left: 1rem;
+    z-index: 1;
+}
+
+.osc-carousel-next {
+    position: absolute;
+    right: 1rem;
+    z-index: 1;
 }

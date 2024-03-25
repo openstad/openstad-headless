@@ -22,24 +22,29 @@ export function Carousel({
   if (items.length === 0) return null;
 
   return (
-    <div {...props} className={`osc ${props.className} osc-carousel`}>
-      <div className="osc-carousel-navigation-button-wrapper">
+    <div
+      {...props}
+      className={`osc ${props.className} osc-carousel`}
+      style={{ width: '100%' }}>
+      <div className="osc-carousel-navigation-button-wrapper osc-carousel-previous">
         <IconButton
-          className='primary-action-button'
+          className="primary-action-button"
           icon="ri-arrow-left-s-line"
           disabled={index === 0}
           onClick={() => setIndex(index - 1)}
         />
       </div>
 
-      <div>{itemRenderer(items.at(index))}</div>
+      <div className="carousel-items">{itemRenderer(items.at(index))}</div>
 
-      <IconButton
-          className='primary-action-button'
+      <div className="osc-carousel-navigation-button-wrapper osc-carousel-next">
+        <IconButton
+          className="primary-action-button"
           icon="ri-arrow-right-s-line"
           disabled={index === items.length - 1}
           onClick={() => setIndex(index + 1)}
         />
+      </div>
     </div>
   );
 }

@@ -2,7 +2,10 @@ import './resource-detail.css';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { Image, Spacer } from '@openstad-headless/ui/src';
+import {
+  Carousel,
+  Image,
+} from '@openstad-headless/ui/src';
 import { BaseProps } from '../../types/base-props';
 import { ProjectSettingProps } from '../../types/project-setting-props';
 
@@ -33,7 +36,18 @@ export type ResourceDetailWidgetProps = BaseProps &
     displayBudgetDocuments?: boolean;
   };
 
-function ResourceDetail(props: ResourceDetailWidgetProps) {
+function ResourceDetail({
+  displayImage = true,
+  displayTitle = true,
+  displaySummary = true,
+  displayDescription = true,
+  displayUser = true,
+  displayDate = true,
+  displayBudget = true,
+  displayLocation = true,
+  displayBudgetDocuments = true,
+  ...props
+}: ResourceDetailWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);
   let resourceId = props.resourceId;
 
@@ -75,40 +89,47 @@ function ResourceDetail(props: ResourceDetailWidgetProps) {
   });
 
   if (!resource) return null;
+
   return (
-    <div className="osc">
-      <Spacer size={2} />
+    <div className={`osc ${'osc-resource-detail-column-container'}`}>
       <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
         {resource ? (
           <article className="osc-resource-detail-content-items">
-            {props.displayImage && resource.images?.at(0)?.url && (
-              <Image
-                src={resource.images?.at(0)?.url || ''}
-                imageFooter={
-                  <div>
-                    <Paragraph className="osc-resource-detail-content-item-status">
-                      {resource.status === 'OPEN' ? 'Open' : 'Gesloten'}
-                    </Paragraph>
-                  </div>
-                }
+            {displayImage && (
+              <Carousel
+                items={resource.images}
+                itemRenderer={(i) => (
+                  <Image
+                    src={resource.images?.at(0)?.url || ''}
+                    imageFooter={
+                      <div>
+                        <Paragraph className="osc-resource-detail-content-item-status">
+                          {resource.statuses
+                            ?.map((s: { label: string }) => s.label)
+                            ?.join(',')}
+                        </Paragraph>
+                      </div>
+                    }
+                  />
+                )}
               />
             )}
 
-            {props.displayTitle && resource.title && (
+            {displayTitle && resource.title && (
               <Heading4>{resource.title}</Heading4>
             )}
             <div className="osc-resource-detail-content-item-row">
-              {props.displayUser && resource?.user?.name && (
+              {displayUser && resource?.user?.displayName && (
                 <div>
                   <Heading6 className="osc-resource-detail-content-item-title">
-                    Naam
+                    Gemaakt door
                   </Heading6>
                   <span className="osc-resource-detail-content-item-text">
-                    {resource.user.name}
+                    {resource.user.displayName}
                   </span>
                 </div>
               )}
-              {props.displayDate && resource.startDateHumanized && (
+              {displayDate && resource.startDateHumanized && (
                 <div>
                   <Heading6 className="osc-resource-detail-content-item-title">
                     Datum
@@ -118,7 +139,7 @@ function ResourceDetail(props: ResourceDetailWidgetProps) {
                   </span>
                 </div>
               )}
-              {props.displayBudget && resource.budget && (
+              {displayBudget && resource.budget && (
                 <div>
                   <Heading6 className="osc-resource-detail-content-item-title">
                     Budget
@@ -130,12 +151,12 @@ function ResourceDetail(props: ResourceDetailWidgetProps) {
               )}
             </div>
             <div>
-              {props.displaySummary && <Heading5>{resource.summary}</Heading5>}
-              {props.displayDescription && (
+              {displaySummary && <Heading5>{resource.summary}</Heading5>}
+              {displayDescription && (
                 <Paragraph>{resource.description}</Paragraph>
               )}
             </div>
-            {props.displayLocation && resource.position && (
+            {displayLocation && resource.position && (
               <>
                 <Heading4>Plaats</Heading4>
                 <Paragraph className="osc-resource-detail-content-item-location">
