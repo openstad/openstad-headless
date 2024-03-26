@@ -64,7 +64,7 @@ router
 
     if (projectId) {
       try {
-        const project = await db.Project.findOne({
+        const project = await db.Project.scope('includeAreas').findOne({
           where: {
             id: projectId,
           },
@@ -75,8 +75,9 @@ router
         } else {
           createError(404, 'Could not find the project belonging to given id');
         }
-        defaultConfig = getDefaultConfig(projectId);
+        defaultConfig = getDefaultConfig(project, widgetType);
       } catch (e) {
+        console.log(e);
         return next(createError(500, 'Could not fetch the project'));
       }
     }
@@ -115,7 +116,7 @@ router
 
     db.Widget.findOne({
       where: { id: req.params.widgetId },
-      include: ['project'],
+      include: [db.Project.scope('includeAreas')],
     })
       .then((found) => {
         if (!found) throw new Error('Widget not found');
@@ -138,7 +139,7 @@ router
       );
     }
 
-    const defaultConfig = getDefaultConfig(widget.project.id);
+    const defaultConfig = getDefaultConfig(widget.project, widget.type);
 
     try {
       const output = setConfigsToOutput(
@@ -185,11 +186,12 @@ Object.keys(widgetDefinitions).forEach((widget) => {
   }
 });
 
-function getDefaultConfig(projectId) {
-  const loginUrl = `${config.url}/auth/project/${projectId}/login?useAuth=default&forceNewLogin=1&redirectUri=[[REDIRECT_URI]]`;
-  const logoutUrl = `${config.url}/auth/project/${projectId}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
+function getDefaultConfig(project, widgetType) {
 
-  return {
+  const loginUrl = `${config.url}/auth/project/${project.id}/login?useAuth=default&forceNewLogin=1&redirectUri=[[REDIRECT_URI]]`;
+  const logoutUrl = `${config.url}/auth/project/${project.id}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
+
+  let result = {
     api: {
       url: config.url,
     },
@@ -199,8 +201,19 @@ function getDefaultConfig(projectId) {
     logout: {
       url: logoutUrl,
     },
-    projectId: projectId,
+    projectId: project.id,
   };
+
+  if (widgetType == 'resourcedetailmap' || widgetType ==  'resourcesmap' || widgetType ==  'editormap') {
+    result.area = project.area?.polygon
+  }
+
+  console.log('==========');
+  console.log(widgetType);
+  console.log(project);
+
+  return result;
+
 }
 
 function setConfigsToOutput(
