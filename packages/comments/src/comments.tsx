@@ -18,7 +18,8 @@ import { CommentFormProps } from './types/comment-form-props';
 export type CommentsWidgetProps = BaseProps &
   ProjectSettingProps & {
     resourceId: string;
-    requiredUserRole: string;
+    requiredUserRole?: string;
+    userNameFields?: Array<string>;
     title?: string;
     sentiment?: string;
     emptyListText?: string;
@@ -27,9 +28,8 @@ export type CommentsWidgetProps = BaseProps &
     isClosed?: boolean;
     isClosedText?: string;
     placeholder?: string;
-    userNameFields: Array<string>;
     hideReplyAsAdmin?: boolean;
-  } & Pick<CommentFormProps, 'formIntro' | 'placeholder'>;
+  } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
   CommentsWidgetProps | undefined
@@ -38,6 +38,7 @@ export const CommentWidgetContext = createContext<
 function Comments({
   title = '[[nr]] comments',
   requiredUserRole = 'member',
+  userNameFields = [],
   emptyListText = 'Nog geen reacties',
   isVotingEnabled = true,
   isReplyingEnabled = true,

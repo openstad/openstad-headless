@@ -67,7 +67,7 @@ function ResourceDetail({
   ...props
 }: ResourceDetailWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);
-  let resourceId = props.resourceId;
+  let resourceId = props.resourceId || '0';
 
   if (!resourceId && props.resourceIdRelativePath) {
     const currentUrl = location.pathname;
@@ -91,8 +91,8 @@ function ResourceDetail({
   } else if (!resourceId) {
     resourceId = `${
       urlParams.get('openstadResourceId')
-        ? parseInt(urlParams.get('openstadResourceId') as string)
-        : 0
+        ? `${parseInt(urlParams.get('openstadResourceId') as string)}`
+        : '0'
     }`;
   }
 
@@ -282,6 +282,7 @@ function ResourceDetail({
         <section className="resource-detail-comments-container">
           <Comments
             {...props}
+            resourceId={resourceId}
             sentiment="for"
             isVotingEnabled={props.commentsVotingEnabled || false}
             isReplyingEnabled={props.commentsReplyingEnabled || false}
@@ -289,6 +290,7 @@ function ResourceDetail({
           />
           <Comments
             {...props}
+            resourceId={resourceId}
             sentiment="against"
             isVotingEnabled={props.commentsVotingEnabled || false}
             isReplyingEnabled={props.commentsReplyingEnabled || false}

@@ -15,6 +15,8 @@ function CommentForm({
   comment,
   descriptionMinLength = 30,
   descriptionMaxLength = 500,
+  formIntro = 'Test',
+  placeholder = 'Type hier uw reactie',
   ...props
 }: CommentFormProps) {
   const commentsContext = useContext(CommentWidgetContext);
