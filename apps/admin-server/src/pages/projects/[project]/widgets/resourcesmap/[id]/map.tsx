@@ -34,7 +34,7 @@ type Tag = {
 
 const formSchema = z.object({
   markerHref: z.string().optional(),
-  autoZoomAndCenter: z.string().optional(),
+  autoZoomAndCenter: z.enum(['markers', 'area']).optional(),
   categorize: z.object({
     categorizeByField: z.string().optional(),
   }),

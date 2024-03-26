@@ -76,7 +76,7 @@ export default function WidgetResourcesMapButton(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Toon een 'Call To Action' knop
+                Toon een &apos;Call To Action&apos; knop
                 </FormLabel>
                 <Select
                   onValueChange={(value) => {
