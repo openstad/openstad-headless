@@ -40,7 +40,12 @@ const formSchema = z.object({
   }),
   enableReactions: z.boolean(),
   cssUrl: z.string().optional(),
-  url: z.string().optional()
+  // This URL regex is not perfect, but we don't want to restrict too much.
+  // The main thing is that we want some text and a dot in the URL, and that we
+  // don't want the protocol.
+  url: z.string().regex(/^([a-z0-9]+\.[a-z0-9.]+)$/g, {
+    message: 'De URL mag alleen kleine letters, cijfers en punten bevatten. Tip: gebruik geen https:// voor de URL'
+  }),
 });
 
 export default function ProjectSettings() {
@@ -210,6 +215,7 @@ export default function ProjectSettings() {
                       render={({ field }) => (
                         <FormItem className="col-span-full md:col-span-1 flex flex-col">
                           <FormLabel>Project URL</FormLabel>
+                          <em className="text-xs">Let op: voer de URL in zonder https:// ervoor, bijv. 'plannen.openstad.org'</em>
                           <FormControl>
                             <Input placeholder="Url" {...field} />
                           </FormControl>
