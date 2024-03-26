@@ -107,11 +107,13 @@ function Comment({
       {editMode ? (
         <CommentForm
           {...args}
-          placeholder=''
+          placeholder={widgetContext.placeholder}
           formIntro={widgetContext.formIntro}
-          
+          comment={args.comment}
           submitComment={(e) => {
-            // args.submitComment(e);
+            if(props.submitComment) {
+              props.submitComment(e);
+            }
             toggleEditForm();
           }}
         />
