@@ -215,7 +215,7 @@ export default function ProjectSettings() {
                       render={({ field }) => (
                         <FormItem className="col-span-full md:col-span-1 flex flex-col">
                           <FormLabel>Project URL</FormLabel>
-                          <em className="text-xs">Let op: voer de URL in zonder https:// ervoor, bijv. 'plannen.openstad.org'</em>
+                          <em className="text-xs">Let op: voer de URL in zonder https:// ervoor, bijv. &apos;plannen.openstad.org&apos;</em>
                           <FormControl>
                             <Input placeholder="Url" {...field} />
                           </FormControl>
