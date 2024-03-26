@@ -206,6 +206,7 @@ function ResourceDetail({
             ) : null}
 
             <div className="resource-detail-side-section">
+            <Spacer size={1} />
               <Heading4>Status</Heading4>
               <Spacer size={0.5} />
               <div className="resource-detail-pil-list-content">

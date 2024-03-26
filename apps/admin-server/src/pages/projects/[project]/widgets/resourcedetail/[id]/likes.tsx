@@ -40,7 +40,7 @@ export default function WidgetResourceLikesDisplay(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      displayLikes: props?.displayLikes || true,
+      displayLikes: props?.displayLikes || false,
       likeWidgetTitle: props?.likeWidgetTitle || '',
       likeWidgetProgressBarText: props?.likeWidgetProgressBarText || '',
       likeWidgetForText: props?.likeWidgetForText || '',
