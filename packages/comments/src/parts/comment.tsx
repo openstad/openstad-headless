@@ -38,34 +38,6 @@ function Comment({
   const [isReplyFormActive, setIsReplyFormActive] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);
 
-
-  const { data: comments } = datastore.useComments({
-    projectId: widgetContext?.projectId,
-    resourceId: widgetContext?.resourceId,
-    sentiment: widgetContext?.sentiment,
-  });
-
-  async function submitComment(formData: any) {
-    const formDataCopy = { ...formData };
-
-    formDataCopy.resourceId = `${widgetContext?.resourceId}`;
-
-    try {
-      if (formDataCopy.id) {
-        let comment = comments.find((c: any) => c.id == formDataCopy.id);
-        if (formDataCopy.parentId) {
-          let parent = comments.find((c: any) => c.id == formDataCopy.parentId);
-          comment = parent.replies.find((c: any) => c.id == formDataCopy.id);
-        }
-        await comment.update(formDataCopy);
-      } else {
-        await comments.create(formDataCopy);
-      }
-    } catch (err: any) {
-      console.log(err);
-    }
-  }
-
   function toggleReplyForm() {
     // todo: scrollto
     setIsReplyFormActive(!isReplyFormActive);
