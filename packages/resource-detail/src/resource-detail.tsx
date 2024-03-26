@@ -33,8 +33,6 @@ export type ResourceDetailWidgetProps = BaseProps &
     displayComments?: boolean;
     commentsVotingEnabled?: boolean;
     commentsReplyingEnabled?: boolean;
-
-    likesWidget?: LikeWidgetProps;
     displayImage?: boolean;
     displayTitle?: boolean;
     displaySummary?: boolean;
@@ -46,6 +44,9 @@ export type ResourceDetailWidgetProps = BaseProps &
     displayBudgetDocuments?: boolean;
     displayLikes?: boolean;
     likeWidgetProgressBarText?: string;
+    likeWidgetTitle?:string;
+    likeWidgetForText?:string;
+    likeWidgetAgainstText?:string;
     displayTags?: boolean;
     displaySocials?: boolean;
   };
@@ -195,6 +196,9 @@ function ResourceDetail({
               <>
                 <Likes
                   {...props}
+                  title={props.likeWidgetTitle}
+                  yesLabel={props.likeWidgetForText}
+                  noLabel={props.likeWidgetAgainstText}
                   progressBarDescription={props.likeWidgetProgressBarText}
                 />
                 <Spacer size={1} />
