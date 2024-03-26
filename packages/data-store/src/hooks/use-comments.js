@@ -15,6 +15,8 @@ export default function useComments(props) {
       'comments.fetch'
     );
 
+    console.log(error);
+
     dataToReturn = data;
     errorToReturn = error;
     isLoadingToReturn = isLoading;
@@ -22,7 +24,7 @@ export default function useComments(props) {
 
   // add functionality
   let comments = dataToReturn || [];
-
+console.log({dataToReturn})
   comments.create = function (newData) {
     return self.mutate(
       { projectId, resourceId, sentiment },
@@ -85,7 +87,7 @@ export default function useComments(props) {
   });
 
   return {
-    data: dataToReturn,
+    data: comments,
     error: errorToReturn,
     isLoading: isLoadingToReturn,
   };

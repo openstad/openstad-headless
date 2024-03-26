@@ -23,6 +23,12 @@
   gap: .5rem;
 }
 
+.resource-detail-comments-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
 .osc-resource-detail-title-container {
   display: flex;
   flex-direction: column;

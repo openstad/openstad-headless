@@ -21,7 +21,7 @@ import {
   Heading6,
 } from '@utrecht/component-library-react';
 import React from 'react';
-import { Likes } from '@openstad-headless/likes/src/likes';
+import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import { Comments } from '@openstad-headless/comments/src/comments';
 
 export type ResourceDetailWidgetProps = BaseProps &
@@ -30,6 +30,11 @@ export type ResourceDetailWidgetProps = BaseProps &
     resourceId?: string;
     resourceIdRelativePath?: string;
   } & {
+    displayComments?: boolean;
+    commentsVotingEnabled?: boolean;
+    commentsReplyingEnabled?: boolean;
+
+    likesWidget?: LikeWidgetProps;
     displayImage?: boolean;
     displayTitle?: boolean;
     displaySummary?: boolean;
@@ -46,6 +51,7 @@ export type ResourceDetailWidgetProps = BaseProps &
   };
 
 function ResourceDetail({
+  displayComments = true,
   displayImage = true,
   displayTitle = true,
   displaySummary = true,
@@ -103,179 +109,193 @@ function ResourceDetail({
   if (!resource) return null;
   const shouldHaveSideColumn = displayLikes || displayTags || displaySocials;
   return (
-    <div className={`osc ${'osc-resource-detail-column-container'}`}>
-      <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
-        {resource ? (
-          <article className="osc-resource-detail-content-items">
-            {displayImage && (
-              <Carousel
-                items={resource.images}
-                itemRenderer={(i) => (
-                  <Image
-                    src={resource.images?.at(0)?.url || ''}
-                    imageFooter={
-                      <div>
-                        <Paragraph className="osc-resource-detail-content-item-status">
-                          {resource.statuses
-                            ?.map((s: { label: string }) => s.label)
-                            ?.join(',')}
-                        </Paragraph>
-                      </div>
-                    }
-                  />
+    <section>
+      <div className={`osc ${'osc-resource-detail-column-container'}`}>
+        <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
+          {resource ? (
+            <article className="osc-resource-detail-content-items">
+              {displayImage && (
+                <Carousel
+                  items={resource.images}
+                  itemRenderer={(i) => (
+                    <Image
+                      src={resource.images?.at(0)?.url || ''}
+                      imageFooter={
+                        <div>
+                          <Paragraph className="osc-resource-detail-content-item-status">
+                            {resource.statuses
+                              ?.map((s: { label: string }) => s.label)
+                              ?.join(',')}
+                          </Paragraph>
+                        </div>
+                      }
+                    />
+                  )}
+                />
+              )}
+
+              {displayTitle && resource.title && (
+                <Heading4>{resource.title}</Heading4>
+              )}
+              <div className="osc-resource-detail-content-item-row">
+                {displayUser && resource?.user?.displayName && (
+                  <div>
+                    <Heading6 className="osc-resource-detail-content-item-title">
+                      Gemaakt door
+                    </Heading6>
+                    <span className="osc-resource-detail-content-item-text">
+                      {resource.user.displayName}
+                    </span>
+                  </div>
                 )}
-              />
-            )}
+                {displayDate && resource.startDateHumanized && (
+                  <div>
+                    <Heading6 className="osc-resource-detail-content-item-title">
+                      Datum
+                    </Heading6>
+                    <span className="osc-resource-detail-content-item-text">
+                      {resource.startDateHumanized}
+                    </span>
+                  </div>
+                )}
+                {displayBudget && resource.budget && (
+                  <div>
+                    <Heading6 className="osc-resource-detail-content-item-title">
+                      Budget
+                    </Heading6>
+                    <span className="osc-resource-detail-content-item-text">
+                      {`€ ${resource.budget.toLocaleString('nl-NL')}`}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div>
+                {displaySummary && <Heading5>{resource.summary}</Heading5>}
+                {displayDescription && (
+                  <Paragraph>{resource.description}</Paragraph>
+                )}
+              </div>
+              {displayLocation && resource.position && (
+                <>
+                  <Heading4>Plaats</Heading4>
+                  <Paragraph className="osc-resource-detail-content-item-location">
+                    {`${resource.position.lat}, ${resource.position.lng}`}
+                  </Paragraph>
+                </>
+              )}
+            </article>
+          ) : (
+            <span>resource niet gevonden..</span>
+          )}
+        </section>
 
-            {displayTitle && resource.title && (
-              <Heading4>{resource.title}</Heading4>
-            )}
-            <div className="osc-resource-detail-content-item-row">
-              {displayUser && resource?.user?.displayName && (
-                <div>
-                  <Heading6 className="osc-resource-detail-content-item-title">
-                    Gemaakt door
-                  </Heading6>
-                  <span className="osc-resource-detail-content-item-text">
-                    {resource.user.displayName}
-                  </span>
-                </div>
-              )}
-              {displayDate && resource.startDateHumanized && (
-                <div>
-                  <Heading6 className="osc-resource-detail-content-item-title">
-                    Datum
-                  </Heading6>
-                  <span className="osc-resource-detail-content-item-text">
-                    {resource.startDateHumanized}
-                  </span>
-                </div>
-              )}
-              {displayBudget && resource.budget && (
-                <div>
-                  <Heading6 className="osc-resource-detail-content-item-title">
-                    Budget
-                  </Heading6>
-                  <span className="osc-resource-detail-content-item-text">
-                    {`€ ${resource.budget.toLocaleString('nl-NL')}`}
-                  </span>
-                </div>
-              )}
-            </div>
-            <div>
-              {displaySummary && <Heading5>{resource.summary}</Heading5>}
-              {displayDescription && (
-                <Paragraph>{resource.description}</Paragraph>
-              )}
-            </div>
-            {displayLocation && resource.position && (
+        {shouldHaveSideColumn ? (
+          <aside className="resource-detail-side-column">
+            {displayLikes ? (
               <>
-                <Heading4>Plaats</Heading4>
-                <Paragraph className="osc-resource-detail-content-item-location">
-                  {`${resource.position.lat}, ${resource.position.lng}`}
-                </Paragraph>
+                <Likes
+                  {...props}
+                  progressBarDescription={props.likeWidgetProgressBarText}
+                />
+                <Spacer size={1} />
               </>
-            )}
-          </article>
-        ) : (
-          <span>resource niet gevonden..</span>
-        )}
-      </section>
+            ) : null}
 
-      {shouldHaveSideColumn ? (
-        <section className="resource-detail-side-column">
-          {displayLikes ? (
-            <>
-              <Likes
-                {...props}
-                progressBarDescription={props.likeWidgetProgressBarText}
-              />
-              <Spacer size={1} />
-            </>
-          ) : null}
-
-          <div className="resource-detail-side-section">
-            <Heading4>Status</Heading4>
-            <Spacer size={0.5} />
-            <div className="resource-detail-pil-list-content">
-              {resource.statuses?.map((s: { label: string }) => (
-                <Pill light rounded text={s.label}></Pill>
-              ))}
-            </div>
-
-            <Spacer size={2} />
-          </div>
-
-          {displayTags ? (
             <div className="resource-detail-side-section">
-              <Heading4>Tags</Heading4>
+              <Heading4>Status</Heading4>
               <Spacer size={0.5} />
               <div className="resource-detail-pil-list-content">
-                {(resource.tags as Array<{ type: string; name: string }>)
-                  ?.filter((t) => t.type !== 'status')
-                  ?.map((t) => <Pill text={t.name} />)}
+                {resource.statuses?.map((s: { label: string }) => (
+                  <Pill light rounded text={s.label}></Pill>
+                ))}
               </div>
+
               <Spacer size={2} />
             </div>
-          ) : null}
 
-          {displaySocials ? (
-            <div className="resource-detail-side-section">
-              <Heading4>Deel dit</Heading4>
-              <Spacer size={0.5} />
-              <div className="resource-detail-side-section-socials">
-                <IconButton
-                  onClick={() => {}}
-                  className="secondary-action-button"
-                  icon="ri-facebook-fill"
-                />
-
-                <IconButton
-                  onClick={() => {}}
-                  className="secondary-action-button"
-                  icon="ri-whatsapp-fill"
-                />
-
-                <IconButton
-                  onClick={() => {}}
-                  className="secondary-action-button"
-                  icon="ri-twitter-x-fill"
-                />
-
-                <IconButton
-                  onClick={() => {}}
-                  className="secondary-action-button"
-                  icon="ri-mail-fill"
-                />
-
-                <IconButton
-                  onClick={() => {
-                    navigator.clipboard.writeText(location.href);
-                  }}
-                  className="secondary-action-button"
-                  icon="ri-link"
-                />
-
-                <IconButton
-                  onClick={() => {}}
-                  className="secondary-action-button"
-                  icon="ri-linkedin-fill"
-                />
+            {displayTags ? (
+              <div className="resource-detail-side-section">
+                <Heading4>Tags</Heading4>
+                <Spacer size={0.5} />
+                <div className="resource-detail-pil-list-content">
+                  {(resource.tags as Array<{ type: string; name: string }>)
+                    ?.filter((t) => t.type !== 'status')
+                    ?.map((t) => <Pill text={t.name} />)}
+                </div>
+                <Spacer size={2} />
               </div>
-            </div>
-          ) : null}
-          <Spacer size={1} />
+            ) : null}
+
+            {displaySocials ? (
+              <div className="resource-detail-side-section">
+                <Heading4>Deel dit</Heading4>
+                <Spacer size={0.5} />
+                <div className="resource-detail-side-section-socials">
+                  <IconButton
+                    onClick={() => {}}
+                    className="secondary-action-button"
+                    icon="ri-facebook-fill"
+                  />
+
+                  <IconButton
+                    onClick={() => {}}
+                    className="secondary-action-button"
+                    icon="ri-whatsapp-fill"
+                  />
+
+                  <IconButton
+                    onClick={() => {}}
+                    className="secondary-action-button"
+                    icon="ri-twitter-x-fill"
+                  />
+
+                  <IconButton
+                    onClick={() => {}}
+                    className="secondary-action-button"
+                    icon="ri-mail-fill"
+                  />
+
+                  <IconButton
+                    onClick={() => {
+                      navigator.clipboard.writeText(location.href);
+                    }}
+                    className="secondary-action-button"
+                    icon="ri-link"
+                  />
+
+                  <IconButton
+                    onClick={() => {}}
+                    className="secondary-action-button"
+                    icon="ri-linkedin-fill"
+                  />
+                </div>
+              </div>
+            ) : null}
+            <Spacer size={1} />
+          </aside>
+        ) : null}
+      </div>
+
+      <Spacer size={2} />
+
+      {displayComments ? (
+        <section className="resource-detail-comments-container">
+          <Comments
+            {...props}
+            sentiment="for"
+            isVotingEnabled={props.commentsVotingEnabled || false}
+            isReplyingEnabled={props.commentsReplyingEnabled || false}
+            {...props}
+          />
+          <Comments
+            {...props}
+            sentiment="against"
+            isVotingEnabled={props.commentsVotingEnabled || false}
+            isReplyingEnabled={props.commentsReplyingEnabled || false}
+          />
         </section>
       ) : null}
-  
-      <section>
-      <Spacer size={2}/>
-
-        <Comments sentiment='for' {...props} />
-        <Comments sentiment='against' {...props} />
-
-      </section>
-    </div>
+    </section>
   );
 }
 

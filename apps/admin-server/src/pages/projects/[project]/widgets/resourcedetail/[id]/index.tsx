@@ -15,6 +15,7 @@ import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/sr
 import WidgetPreview from '@/components/widget-preview';
 import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
 import WidgetPublish from '@/components/widget-publish';
+import WidgetResourceCommentsDisplay from './comments';
 export const getServerSideProps = withApiUrl
  
 export default function WidgetResourceDetail({
@@ -53,6 +54,7 @@ export default function WidgetResourceDetail({
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="display">Display</TabsTrigger>
+              <TabsTrigger value="comments">Argumenten display</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -91,6 +93,26 @@ export default function WidgetResourceDetail({
                 />
               )}
             </TabsContent>
+
+            <TabsContent value="comments" className="p-0">
+              {previewConfig && (
+                <WidgetResourceCommentsDisplay
+                  {...previewConfig}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
+                  }
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                />
+              )}
+            </TabsContent>
+
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
