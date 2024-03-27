@@ -53,7 +53,7 @@ module.exports = function (db, sequelize, DataTypes) {
   Submission.scopes = function scopes() {
     return {
       defaultScope: {},
-      withUser: {
+      includeUser: {
         include: [
           {
             model: db.User,

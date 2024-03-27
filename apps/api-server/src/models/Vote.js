@@ -71,7 +71,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 					}],
 				};
 			},
-			withResource: function() {
+			includeResource: function() {
 				return {
 					include: [{
 						model      : db.Resource,
