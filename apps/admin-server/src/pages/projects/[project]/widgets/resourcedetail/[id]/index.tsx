@@ -18,8 +18,10 @@ import {
   withApiUrl,
 } from '@/lib/server-side-props-definition';
 import WidgetPublish from '@/components/widget-publish';
-import WidgetResourceCommentsDisplay from './comments';
 import WidgetResourceLikesDisplay from './likes';
+import ArgumentsGeneral from '../../comments/[id]/general';
+import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
+import LikesDisplay from '../../likes/[id]/weergave';
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
@@ -101,10 +103,20 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
 
             <TabsContent value="comments" className="p-0">
               {previewConfig && (
-                <WidgetResourceCommentsDisplay
-                  {...previewConfig}
+                <ArgumentsGeneral
+                  omitSchemaKeys={['resourceId', 'sentiment']}
+                  {...({
+                    ...previewConfig,
+                    resourceId: previewConfig.resourceId || '',
+                    isVotingEnabled: !!previewConfig.commentsVotingEnabled,
+                    isReplyingEnabled: !!previewConfig.commentsReplyingEnabled,
+                  } )}
                   updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
+                    updateConfig({
+                      ...widget.config,
+                      commentsVotingEnabled: config.isVotingEnabled,
+                      commentsReplyingEnabled: config.isReplyingEnabled,
+                    })
                   }
                   onFieldChanged={(key, value) => {
                     if (previewConfig) {
@@ -120,20 +132,45 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
 
             <TabsContent value="likes" className="p-0">
               {previewConfig && (
-                <WidgetResourceLikesDisplay
-                  {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
+                <LikesDisplay 
+                omitSchemaKeys={['resourceId']}
+                {...({
+                  ...previewConfig,
+                  resourceId: previewConfig.resourceId,
+                  yesLabel: previewConfig.likeWidgetForText,
+                  noLabel: previewConfig.likeWidgetAgainstText,
+                  variant: previewConfig.likeWidgetVariant
+                } )}
+                updateConfig={(config) =>
+                  updateConfig({
+                    ...widget.config,
+                    likeWidgetForText: config.yesLabel,
+                    likeWidgetAgainstText: config.noLabel,
+                    likeWidgetVariant: config.variant
+                  })
+                }
+                onFieldChanged={(key, value) => {
+                  if (previewConfig) {
+                    updatePreview({
+                      ...previewConfig,
+                      [key]: value,
+                    });
                   }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
-                />
+                }}/>
+                // <WidgetResourceLikesDisplay
+                //   {...previewConfig}
+                //   updateConfig={(config) =>
+                //     updateConfig({ ...widget.config, ...config })
+                //   }
+                //   onFieldChanged={(key, value) => {
+                //     if (previewConfig) {
+                //       updatePreview({
+                //         ...previewConfig,
+                //         [key]: value,
+                //       });
+                //     }
+                //   }}
+                // />
               )}
             </TabsContent>
 

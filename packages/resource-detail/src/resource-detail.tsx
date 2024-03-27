@@ -21,41 +21,46 @@ import {
   Heading6,
 } from '@utrecht/component-library-react';
 import React from 'react';
-import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
+import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { Comments } from '@openstad-headless/comments/src/comments';
+
+type booleanProps = {
+  [K in
+    | 'displayComments'
+    | 'commentsVotingEnabled'
+    | 'commentsReplyingEnabled'
+    | 'displayImage'
+    | 'displayTitle'
+    | 'displaySummary'
+    | 'displayDescription'
+    | 'displayUser'
+    | 'displayDate'
+    | 'displayBudget'
+    | 'displayLocation'
+    | 'displayBudgetDocuments'
+    | 'displayLikes'
+    | 'displayTags'
+    | 'displayStatus'
+    | 'displaySocials']: boolean | undefined;
+};
 
 export type ResourceDetailWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
     resourceId?: string;
     resourceIdRelativePath?: string;
-  } & {
-    displayComments?: boolean;
-    commentsVotingEnabled?: boolean;
-    commentsReplyingEnabled?: boolean;
-    displayImage?: boolean;
-    displayTitle?: boolean;
-    displaySummary?: boolean;
-    displayDescription?: boolean;
-    displayUser?: boolean;
-    displayDate?: boolean;
-    displayBudget?: boolean;
-    displayLocation?: boolean;
-    displayBudgetDocuments?: boolean;
-    displayLikes?: boolean;
-    likeWidgetProgressBarText?: string;
-    likeWidgetTitle?: string;
-    likeWidgetForText?: string;
-    likeWidgetAgainstText?: string;
-    displayTags?: boolean;
-    displayStatus?: boolean;
-    displaySocials?: boolean;
+  } & booleanProps & {
+    likeWidgetProgressBarText: LikeWidgetProps['progressBarDescription'];
+    likeWidgetVariant: LikeWidgetProps['variant'];
+    likeWidgetTitle: LikeWidgetProps['title'];
+    likeWidgetForText: LikeWidgetProps['yesLabel'];
+    likeWidgetAgainstText?: LikeWidgetProps['noLabel'];
   };
 
 function ResourceDetail({
   displayComments = true,
   commentsReplyingEnabled = true,
-  commentsVotingEnabled=true,
+  commentsVotingEnabled = true,
   displayImage = true,
   displayTitle = true,
   displaySummary = true,
@@ -116,7 +121,12 @@ function ResourceDetail({
     displayLikes || displayTags || displayStatus || displaySocials;
   return (
     <section>
-      <div className={`osc ${shouldHaveSideColumn?'osc-resource-detail-column-container': 'osc-resource-detail-container'}`}>
+      <div
+        className={`osc ${
+          shouldHaveSideColumn
+            ? 'osc-resource-detail-column-container'
+            : 'osc-resource-detail-container'
+        }`}>
         <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
           {resource ? (
             <article className="osc-resource-detail-content-items">
