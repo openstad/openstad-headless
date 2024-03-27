@@ -60,14 +60,14 @@ export function useProject(scopes?: Array<string>) {
     return await res.json();
   }
 
-  async function updateProject(config: any, name?: any, url?: any) {
+  async function updateProject(config: any, name?: any, areaId?: any, url?: any) {
     if (name) {
       const res = await fetch(`/api/openstad/api/project/${projectId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ config, name, url }),
+        body: JSON.stringify({ config, name, areaId: (areaId || null), url}),
       });
       const data = await res.json();
 
