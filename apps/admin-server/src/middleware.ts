@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { authMiddleware, getSession, signOut } from './auth';
+import { authMiddleware, getSession } from './auth';
 
 export default async function middleware(req: NextRequest) {
 
@@ -11,7 +11,6 @@ export default async function middleware(req: NextRequest) {
   if (req.nextUrl.pathname.startsWith('/favicon') ) return res;
 
   // default page
-  console.log(session);
   if (req.nextUrl.pathname.match(/^\/?$/)) // home
   if (session.user) {
     return NextResponse.redirect(`${process.env.URL}/projects`);

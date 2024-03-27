@@ -1,31 +1,34 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import type { NextApiRequest, NextApiResponse } from 'next';
 import { getIronSession } from 'iron-session';
 import hasRole from './lib/hasRole';
+import { createContext } from 'react';
 
 interface OpenstadProfile extends Record<string, any> {
   id: number;
-  role: string | null;
-  name: string | null;
-  email: string | null;
-  phoneNumber: string | null;
-  hashedPhoneNumber: string | null;
-  phoneNumberConfirmed: string | boolean | null;
-  streetName: string | null;
-  houseNumber: string | null;
-  suffix: string | null;
-  postcode: string | null;
-  city: string | null;
-  scope: string | null;
+  role: string | undefined;
+  name: string | undefined;
+  email: string | undefined;
+  phoneNumber: string | undefined;
+  hashedPhoneNumber: string | undefined;
+  phoneNumberConfirmed: string | boolean | undefined;
+  streetName: string | undefined;
+  houseNumber: string | undefined;
+  suffix: string | undefined;
+  postcode: string | undefined;
+  city: string | undefined;
+  scope: string | undefined;
 }
 
-type user = {
-  id: number,
-  name: string | null;
-  role: string | null;
+type userType = {
+  id: number;
+  name: string | undefined;
+  role: string | undefined;
 }
 
 interface SessionData {
-  [key:string]: string | number | user | null,
+  [key:string]: string | number | userType | undefined,
+  user?: userType,
 }
 
 const sessionOptions = {
@@ -39,7 +42,7 @@ const sessionOptions = {
   },
 };
 
-async function getSession(req: NextRequest, res: NextResponse) {
+async function getSession(req: NextRequest | NextApiRequest, res: NextResponse | NextApiResponse) {
   const session = await getIronSession<SessionData>(req, res, sessionOptions);
   return session;
 }
@@ -104,7 +107,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
         };
       } catch(err) {
         jwt = '';
-        session.user = null;
+        session.user = undefined;
       } finally {
         await session.save()
       }
@@ -152,10 +155,37 @@ function clientSignIn(projectId?: number, forceNewLogin?: boolean) {
 
 async function signOut(req: NextRequest, res: NextResponse) {
   const session = await getSession(req, res);
-  Object.keys(session).map(key => session[key] = null);
+  Object.keys(session).map(key => session[key] = undefined);
   await session.save()
   return NextResponse.redirect( `${process.env.URL}/auth/signout`, { headers: res.headers });
 }
+
+type SessionUserType = {
+  name?: string;
+  role?: string;
+}
+
+async function fetchSessionUser() {
+  try {
+    let response = await fetch('/api/current-user', {
+      headers: { 'Content-type': 'application/json' },
+    })
+    if (!response.ok) {
+      throw new Error('Fetch failed')
+    }
+    let result = await response.json();
+    return {
+      name: result.name,
+      role: result.role,
+    }
+  } catch(err) {
+    console.log(err);
+    return {};
+  }
+}
+
+let defaultSession:SessionUserType = {};
+let SessionContext = createContext(defaultSession);
 
 export {
   authMiddleware,
@@ -164,4 +194,8 @@ export {
   signIn,
   signOut,
   clientSignIn,
+  SessionContext,
+  fetchSessionUser,
+  type SessionUserType,
 }
+
