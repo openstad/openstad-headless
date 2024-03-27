@@ -125,7 +125,7 @@ export default function WidgetResourcesMapMap(
                 </FormLabel>
                 <Select
                   onValueChange={(value) => {
-                      onFieldChange(field.name, value);
+                      props.onFieldChanged(field.name, value);
                       field.onChange(value);
                     }}
                   value={field.value}>
@@ -155,7 +155,7 @@ export default function WidgetResourcesMapMap(
                 </FormLabel>
                 <Select
                   onValueChange={(value) => {
-                      onFieldChange(field.name, value);
+                      props.onFieldChanged(field.name, value);
                       field.onChange(value);
                     }}
                   value={field.value}>
@@ -186,7 +186,7 @@ export default function WidgetResourcesMapMap(
                 </FormLabel>
                 <Select
                   onValueChange={(value) => {
-                      onFieldChange(field.name, value);
+                      props.onFieldChanged(field.name, value);
                       field.onChange(value);
                     }}
                   value={field.value}>
@@ -217,7 +217,7 @@ export default function WidgetResourcesMapMap(
                 </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Bijv: /resources/[id]"
+                    placeholder="Bijv: 100%"
                     type="text"
                     {...field}
                     onChange={(e) => {
@@ -241,7 +241,7 @@ export default function WidgetResourcesMapMap(
                 </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Bijv: /resources/[id]"
+                    placeholder="Bijv: 350px"
                     type="text"
                     {...field}
                     onChange={(e) => {

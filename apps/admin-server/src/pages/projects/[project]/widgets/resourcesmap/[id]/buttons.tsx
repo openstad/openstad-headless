@@ -81,7 +81,7 @@ export default function WidgetResourcesMapButton(
                 <Select
                   onValueChange={(value) => {
                       let val = value == 'true' ? true : false
-                      onFieldChange(field.name, val);
+                      props.onFieldChanged(field.name, val);
                       field.onChange(val);
                       setShowCtaFields(val);
                     }}
@@ -164,7 +164,7 @@ export default function WidgetResourcesMapButton(
                 <Select
                   onValueChange={(value) => {
                       let val = value == 'true' ? true : false
-                      onFieldChange(field.name, val);
+                      props.onFieldChanged(field.name, val);
                       field.onChange(val);
                       setShowCountFields(val);
                     }}
