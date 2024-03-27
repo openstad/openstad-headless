@@ -116,7 +116,7 @@ function ResourceDetail({
     displayLikes || displayTags || displayStatus || displaySocials;
   return (
     <section>
-      <div className={`osc ${'osc-resource-detail-column-container'}`}>
+      <div className={`osc ${shouldHaveSideColumn?'osc-resource-detail-column-container': 'osc-resource-detail-container'}`}>
         <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
           {resource ? (
             <article className="osc-resource-detail-content-items">

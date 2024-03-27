@@ -4,6 +4,10 @@
   align-items: start;
 }
 
+.osc-resource-detail-container {
+  display: block;
+}
+
 .resource-detail-side-column {
   background-color: var(--osc-card);
 }
