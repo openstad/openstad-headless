@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -13,11 +12,13 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
+import useArea from '@/hooks/use-areas';
 import { useProject } from '../../../../hooks/use-project';
 import { SimpleCalendar } from '@/components/simple-calender-popup';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -40,6 +41,7 @@ const formSchema = z.object({
   }),
   enableReactions: z.boolean(),
   cssUrl: z.string().optional(),
+  areaId: z.string().optional(),
   url: z.string().optional()
 });
 
@@ -48,6 +50,7 @@ export default function ProjectSettings() {
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading, updateProject } = useProject();
+  const { data: areas } = useArea(project as string);
 
   let currentDate = new Date();
   const [checkboxInitial, setCheckboxInitial] = useState(true);
@@ -61,9 +64,10 @@ export default function ProjectSettings() {
         : new Date(currentDate.getFullYear(), currentDate.getMonth()+3),
       enableReactions: data?.config?.resources?.enableReactions || false,
       cssUrl: data?.config?.project?.cssUrl || '',
+      areaId: data?.areaId || '',
       url: data?.url || '',
     }),
-    [data?.name, data?.config]
+    [data, areas]
   );
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -97,7 +101,8 @@ export default function ProjectSettings() {
           },
         },
         values.name,
-        values.url
+        values.areaId,
+        values.url,
       );
       if (project) {
         toast.success('Project aangepast!');
@@ -197,6 +202,17 @@ export default function ProjectSettings() {
                         </FormItem>
                       )}
                     />
+
+                    <FormObjectSelectField
+                      form={form}
+                      fieldName="areaId"
+                      fieldLabel="Polygon voor kaarten"
+                      items={areas}
+                      keyForValue="id"
+                      label={(area) => `${area.name}`}
+                      noSelection="&nbsp;"
+                  />
+
                     <div>
                       <Checkbox checked={showUrl} onClick={(e) => setShowUrl(!showUrl)} className='mr-2'/>
                         <FormLabel>
