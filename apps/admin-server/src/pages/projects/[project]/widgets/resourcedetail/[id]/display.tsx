@@ -25,7 +25,6 @@ const formSchema = z.object({
   displayBudget: z.boolean(),
   displayBudgetDocuments: z.boolean(),
   displayLocation: z.boolean(),
-  displayLikes: z.boolean(),
   displayTags: z.boolean(),
   displaySocials: z.boolean(),
 });
@@ -42,17 +41,17 @@ export default function WidgetResourceDetailDisplay(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      displayImage: props?.displayImage || true,
-      displayTitle: props?.displayTitle || true,
-      displayDescription: props?.displayDescription || true,
-      displaySummary: props?.displaySummary || true,
-      displayUser: props?.displayUser || true,
-      displayDate: props?.displayDate || true,
-      displayBudget: props?.displayBudget || true,
-      displayBudgetDocuments: props?.displayBudgetDocuments || true,
-      displayLocation: props?.displayLocation || true,
-      displayTags: props?.displayTags || true,
-      displaySocials: props?.displaySocials || true,
+      displayImage: props?.displayImage || false,
+      displayTitle: props?.displayTitle || false,
+      displayDescription: props?.displayDescription || false,
+      displaySummary: props?.displaySummary || false,
+      displayUser: props?.displayUser || false,
+      displayDate: props?.displayDate || false,
+      displayBudget: props?.displayBudget || false,
+      displayBudgetDocuments: props?.displayBudgetDocuments || false,
+      displayLocation: props?.displayLocation || false,
+      displayTags: props?.displayTags || false,
+      displaySocials: props?.displaySocials || false,
     },
   });
 
