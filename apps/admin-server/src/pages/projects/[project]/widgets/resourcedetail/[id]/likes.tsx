@@ -93,7 +93,7 @@ export default function WidgetResourceLikesDisplay(
             name="likeWidgetForText"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Label voor "Ja"</FormLabel>
+                <FormLabel>Label voor &quot;Ja&quot;</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -113,7 +113,7 @@ export default function WidgetResourceLikesDisplay(
             name="likeWidgetAgainstText"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Label voor "Nee"</FormLabel>
+                <FormLabel>Label voor &quot;Nee&quot;</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
