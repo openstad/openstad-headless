@@ -125,13 +125,13 @@ function ResourceDetail({
                   items={resource.images}
                   itemRenderer={(i) => (
                     <Image
-                      src={resource.images?.at(0)?.url || ''}
+                      src={i.url}
                       imageFooter={
                         <div>
                           <Paragraph className="osc-resource-detail-content-item-status">
                             {resource.statuses
                               ?.map((s: { label: string }) => s.label)
-                              ?.join(',')}
+                              ?.join(', ')}
                           </Paragraph>
                         </div>
                       }
