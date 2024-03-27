@@ -6,7 +6,6 @@ export default function useUsers() {
   async function createUser(
     email: string,
     projectId?: string,
-    role?: string,
     nickName?: string,
     name?: string,
     phoneNumber?: string,
@@ -23,7 +22,6 @@ export default function useUsers() {
       },
       body: JSON.stringify({
         email: email,
-        role: role,
         nickName: nickName,
         name: name,
         phoneNumber: phoneNumber,
@@ -32,6 +30,9 @@ export default function useUsers() {
         postcode: postcode,
       }),
     });
+    const data = await res.json();
+    usersSwr.mutate([...usersSwr.data, data]);
+    return data;
   }
 
   return { ...usersSwr, createUser };

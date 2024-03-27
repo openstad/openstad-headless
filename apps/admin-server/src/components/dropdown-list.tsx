@@ -7,15 +7,15 @@ import {
 } from './ui/select';
 
 const UserRoleDropdownList = ({
-  roleId,
+  role,
   addProject,
 }: {
-  roleId?: string;
-  addProject: (roleId: string) => void;
+  role?: string;
+  addProject: (role: string) => void;
 }) => {
   return (
     <Select
-      defaultValue={roleId ? roleId : '0'}
+      defaultValue={role ? role : '0'}
       onValueChange={(value: string) => addProject(value)}>
       <SelectTrigger>
         <SelectValue placeholder="Geen deelname" />

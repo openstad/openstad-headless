@@ -45,6 +45,13 @@ router
       req.scope.push('includeProject');
     }
 
+    if(req.query.fromIdpUser) {
+      req.scope.push({method:['fromIdpUser', {
+        identifier: req.query.identifier,
+        provider: req.query.provider
+      }]})
+    }
+
     return next();
 
   });
@@ -175,7 +182,7 @@ router.route('/')
       ...req.body,
       ...req.oAuthUser,
       projectId: req.project.id,
-      role: req.oAuthUser.role || 'member',
+      role: req.body.role || 'member',
       lastLogin: Date.now(),
     };
     
