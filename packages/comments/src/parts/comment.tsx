@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import '../index.css';
 import { useState } from 'react';
 import DataStore from '@openstad-headless/data-store/src';
-import { GhostButton, Spacer } from '@openstad-headless/ui/src';
-import { CommentPropsType } from '../types/index';
+import { Spacer } from '@openstad-headless/ui/src';
 import CommentForm from './comment-form.js';
 import { DropDownMenu } from '@openstad-headless/ui/src';
 import hasRole from '../../../lib/has-role';
@@ -11,6 +10,8 @@ import hasRole from '../../../lib/has-role';
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
 import { Paragraph, Heading6, Button, ButtonGroup } from "@utrecht/component-library-react";
+import { CommentProps } from '../types/comment-props';
+import { CommentWidgetContext } from '../comments';
 
 function Comment({
   comment = {
@@ -22,32 +23,18 @@ function Comment({
       throw new Error('Not implemented');
     },
   },
-  isClosed = false,
-  isVotingEnabled = true,
-  isReplyingEnabled = true,
-  requiredUserRole = 'member',
-  userNameFields = ['displayName'],
   showDateSeperately = false,
-  hideReplyAsAdmin = false,
   ...props
-}: CommentPropsType) {
+}: CommentProps) {
+  const widgetContext = useContext(CommentWidgetContext);
+
   const args = {
     comment,
-    isClosed,
-    isVotingEnabled,
-    isReplyingEnabled,
-    requiredUserRole,
-    userNameFields,
     ...props,
-  } as CommentPropsType;
+  } as CommentProps;
 
   const datastore = new DataStore(args);
-  const {
-    data: currentUser,
-    error: currentUserError,
-    isLoading: currentUserIsLoading,
-  } = datastore.useCurrentUser({ ...args });
-
+  const { data: currentUser } = datastore.useCurrentUser({ ...args });
   const [isReplyFormActive, setIsReplyFormActive] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);
 
@@ -61,28 +48,32 @@ function Comment({
   }
 
   function canReply() {
-    if (args.isClosed) return false;
+    if (!widgetContext || widgetContext.isClosed) return false;
     if (hasRole(currentUser, 'moderator')) return true;
-    if (!args.isReplyingEnabled) return false; // widget setting
+    if (!widgetContext.isReplyingEnabled) return false; // widget setting
     return args.comment.can && args.comment.can.reply;
   }
 
   function canLike() {
-    if (args.isClosed) return false;
+    if (!widgetContext || widgetContext.isClosed) return false;
     if (hasRole(currentUser, 'moderator')) return true;
-    return hasRole(currentUser, requiredUserRole);
+    return hasRole(currentUser, widgetContext.requiredUserRole);
   }
 
   function canEdit() {
-    if (args.isClosed) return false;
+    if (!widgetContext || widgetContext.isClosed) return false;
     if (hasRole(currentUser, 'moderator')) return true;
     return args.comment.can && args.comment.can.edit;
   }
 
   function canDelete() {
-    if (args.isClosed) return false;
+    if (!widgetContext || widgetContext.isClosed) return false;
     if (hasRole(currentUser, 'moderator')) return true;
     return args.comment.can && args.comment.can.delete;
+  }
+
+  if(!widgetContext) {
+    return null;
   }
 
   return (
@@ -116,8 +107,13 @@ function Comment({
       {editMode ? (
         <CommentForm
           {...args}
+          placeholder={widgetContext.placeholder}
+          formIntro={widgetContext.formIntro}
+          comment={args.comment}
           submitComment={(e) => {
-            args.submitComment(e);
+            if(props.submitComment) {
+              props.submitComment(e);
+            }
             toggleEditForm();
           }}
         />
@@ -139,7 +135,7 @@ function Comment({
             {args.comment.createDateHumanized}
           </Paragraph>
           <ButtonGroup>
-            {isVotingEnabled && (
+            {widgetContext.isVotingEnabled && (
               canLike() ? (
                 <Button
                   appearance='secondary-action-button'
@@ -184,10 +180,14 @@ function Comment({
           <div className="input-container">
             <CommentForm
               {...args}
+              formIntro={widgetContext.formIntro}
+              placeholder={widgetContext.placeholder}
               comment={{ ...args.comment, parentId: args.comment.id }}
-              hideReplyAsAdmin={true}
+              // hideReplyAsAdmin={true}
               submitComment={(e) => {
-                args.submitComment(e);
+                if(props.submitComment) {
+                  props.submitComment(e);
+                }
                 toggleReplyForm();
               }}
             />
