@@ -209,7 +209,7 @@ export default function ProjectSettings() {
                       fieldLabel="Polygon voor kaarten"
                       items={areas}
                       keyForValue="id"
-                      label={(area) => `${area.name}`}
+                      label={(area:any) => `${area.name}`}
                       noSelection="&nbsp;"
                   />
 
