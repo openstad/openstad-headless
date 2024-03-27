@@ -44,15 +44,18 @@ export type ResourceDetailWidgetProps = BaseProps &
     displayBudgetDocuments?: boolean;
     displayLikes?: boolean;
     likeWidgetProgressBarText?: string;
-    likeWidgetTitle?:string;
-    likeWidgetForText?:string;
-    likeWidgetAgainstText?:string;
+    likeWidgetTitle?: string;
+    likeWidgetForText?: string;
+    likeWidgetAgainstText?: string;
     displayTags?: boolean;
+    displayStatus?: boolean;
     displaySocials?: boolean;
   };
 
 function ResourceDetail({
   displayComments = true,
+  commentsReplyingEnabled = true,
+  commentsVotingEnabled=true,
   displayImage = true,
   displayTitle = true,
   displaySummary = true,
@@ -64,6 +67,7 @@ function ResourceDetail({
   displayBudgetDocuments = true,
   displayLikes = true,
   displayTags = true,
+  displayStatus = true,
   displaySocials = true,
   ...props
 }: ResourceDetailWidgetProps) {
@@ -108,7 +112,8 @@ function ResourceDetail({
   });
 
   if (!resource) return null;
-  const shouldHaveSideColumn = displayLikes || displayTags || displaySocials;
+  const shouldHaveSideColumn =
+    displayLikes || displayTags || displayStatus || displaySocials;
   return (
     <section>
       <div className={`osc ${'osc-resource-detail-column-container'}`}>
@@ -205,18 +210,20 @@ function ResourceDetail({
               </>
             ) : null}
 
-            <div className="resource-detail-side-section">
-            <Spacer size={1} />
-              <Heading4>Status</Heading4>
-              <Spacer size={0.5} />
-              <div className="resource-detail-pil-list-content">
-                {resource.statuses?.map((s: { label: string }) => (
-                  <Pill light rounded text={s.label}></Pill>
-                ))}
-              </div>
+            {displayStatus ? (
+              <div className="resource-detail-side-section">
+                <Spacer size={1} />
+                <Heading4>Status</Heading4>
+                <Spacer size={0.5} />
+                <div className="resource-detail-pil-list-content">
+                  {resource.statuses?.map((s: { label: string }) => (
+                    <Pill light rounded text={s.label}></Pill>
+                  ))}
+                </div>
 
-              <Spacer size={2} />
-            </div>
+                <Spacer size={2} />
+              </div>
+            ) : null}
 
             {displayTags ? (
               <div className="resource-detail-side-section">
@@ -289,16 +296,16 @@ function ResourceDetail({
             {...props}
             resourceId={resourceId}
             sentiment="for"
-            isVotingEnabled={props.commentsVotingEnabled || false}
-            isReplyingEnabled={props.commentsReplyingEnabled || false}
+            isVotingEnabled={commentsVotingEnabled || false}
+            isReplyingEnabled={commentsReplyingEnabled || false}
             {...props}
           />
           <Comments
             {...props}
             resourceId={resourceId}
             sentiment="against"
-            isVotingEnabled={props.commentsVotingEnabled || false}
-            isReplyingEnabled={props.commentsReplyingEnabled || false}
+            isVotingEnabled={commentsVotingEnabled || false}
+            isReplyingEnabled={commentsReplyingEnabled || false}
           />
         </section>
       ) : null}

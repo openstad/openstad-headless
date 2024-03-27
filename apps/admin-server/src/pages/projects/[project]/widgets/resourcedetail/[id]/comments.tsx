@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { YesNoSelect } from '@/lib/form-widget-helpers';
+import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
@@ -33,9 +33,11 @@ export default function WidgetResourceCommentsDisplay(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      displayComments: props?.displayComments || true,
-      commentsVotingEnabled: props.commentsVotingEnabled || true,
-      commentsReplyingEnabled: props.commentsReplyingEnabled || true,
+      displayComments: undefinedToTrueOrProp(props?.displayComments),
+      commentsVotingEnabled: undefinedToTrueOrProp(props.commentsVotingEnabled),
+      commentsReplyingEnabled: undefinedToTrueOrProp(
+        props.commentsReplyingEnabled
+      ),
     },
   });
 

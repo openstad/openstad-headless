@@ -39,3 +39,9 @@ export function YesNoSelect(
     </Select>
   );
 }
+
+export const undefinedToTrueOrProp = (
+  varOrUndefined: boolean | undefined
+): boolean => {
+  return varOrUndefined === undefined || varOrUndefined;
+};

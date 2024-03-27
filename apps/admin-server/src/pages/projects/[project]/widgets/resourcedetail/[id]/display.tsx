@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { YesNoSelect } from '@/lib/form-widget-helpers';
+import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
@@ -27,6 +27,7 @@ const formSchema = z.object({
   displayLocation: z.boolean(),
   displayTags: z.boolean(),
   displaySocials: z.boolean(),
+  displayStatus: z.boolean(),
 });
 
 export default function WidgetResourceDetailDisplay(
@@ -41,17 +42,20 @@ export default function WidgetResourceDetailDisplay(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      displayImage: props?.displayImage || false,
-      displayTitle: props?.displayTitle || false,
-      displayDescription: props?.displayDescription || false,
-      displaySummary: props?.displaySummary || false,
-      displayUser: props?.displayUser || false,
-      displayDate: props?.displayDate || false,
-      displayBudget: props?.displayBudget || false,
-      displayBudgetDocuments: props?.displayBudgetDocuments || false,
-      displayLocation: props?.displayLocation || false,
-      displayTags: props?.displayTags || false,
-      displaySocials: props?.displaySocials || false,
+      displayImage: undefinedToTrueOrProp(props?.displayImage),
+      displayTitle: undefinedToTrueOrProp(props?.displayTitle),
+      displayDescription: undefinedToTrueOrProp(props?.displayDescription),
+      displaySummary: undefinedToTrueOrProp(props?.displaySummary),
+      displayUser: undefinedToTrueOrProp(props?.displayUser),
+      displayDate: undefinedToTrueOrProp(props?.displayDate),
+      displayBudget: undefinedToTrueOrProp(props?.displayBudget),
+      displayBudgetDocuments: undefinedToTrueOrProp(
+        props?.displayBudgetDocuments
+      ),
+      displayLocation: undefinedToTrueOrProp(props?.displayLocation),
+      displayTags: undefinedToTrueOrProp(props?.displayTags),
+      displaySocials: undefinedToTrueOrProp(props?.displaySocials),
+      displayStatus: undefinedToTrueOrProp(props?.displayStatus),
     },
   });
 
@@ -170,6 +174,18 @@ export default function WidgetResourceDetailDisplay(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Gekoppelde tags weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayStatus"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gekoppelde statussen weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
