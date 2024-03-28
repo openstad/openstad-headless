@@ -1,0 +1,19 @@
+.osc-resource-overview-map-button {
+}
+
+.osc-resource-overview-map-button.osc-first-button {
+  position: absolute;
+  z-index: 1000;
+  min-width: 200px;
+  left: 20px;
+  bottom: 20px;
+}
+
+.osc-resource-overview-map-button.osc-second-button {
+  position: absolute;
+  z-index: 1000;
+  min-width: 200px;
+  left: 20px;
+  bottom: 84px;
+}
+

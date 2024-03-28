@@ -9,4 +9,14 @@ export type ResourceOverviewMapWidgetProps = BaseProps &
   MapPropsType & {
     marker: MarkerProps;
     markerIcon: MarkerIconType;
+    markerHref?: string;
+    countButton?: {
+      show: boolean;
+      label?: string;
+    }
+    ctaButton?: {
+      show: boolean;
+      label?: string;
+      href?: string;
+    }
   };

@@ -12,6 +12,8 @@ const config: BaseMapWidgetProps = {
   projectId: import.meta.env.VITE_PROJECT_ID || 2,
   resourceId: import.meta.env.VITE_RESOURCE_ID || 1,
   tilesVariant: import.meta.env.VITE_TILES_VARIANT,
+  width: '100%',
+  height: '100%',
 };
 
 try {
@@ -83,6 +85,10 @@ let ResourceOverviewConfig:ResourceOverviewMapWidgetProps = {
   },
   categorize: {
     categorizeByField: 'theme',
+  },
+  countButton: {
+    show: true,
+    label: 'plannen',
   },
 }
 
