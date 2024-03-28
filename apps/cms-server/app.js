@@ -16,7 +16,7 @@ const apostropheServer = {};
 let startUpIsBusy = false;
 let startUpQueue = [];
 
-async function loadProjects () { 
+async function loadProjects () {
   try {
 
     const allProjects = await projectService.fetchAll();
@@ -24,6 +24,11 @@ async function loadProjects () {
 
     allProjects.forEach((project, i) => {
       if (!project.url) return;
+      // We are no longer saving the protocol in the database, but we need a
+      // protocol to be able to use `Url.parse` to get the host.
+      if (!project.url.startsWith('http://') && !project.url.startsWith('https://')) {
+        project.url = 'https://' + project.url;
+      }
       let url = Url.parse(project.url);
       console.log('Project fetched: ' + url.host);
 
@@ -250,8 +255,8 @@ app.use(async function (req, res, next) {
         apostropheServer[nextDomain].app(nextReq, nextRes);
       } else {
         doStartServer(...nextInQueue);
-      } 
-    } 
+      }
+    }
 
     startUpIsBusy = false;
 
