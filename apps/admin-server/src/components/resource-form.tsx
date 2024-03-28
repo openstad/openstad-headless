@@ -25,6 +25,8 @@ import useTags from '@/hooks/use-tags';
 import { CheckboxList } from './checkbox-list';
 import { X } from 'lucide-react';
 import { useProject } from '@/hooks/use-project';
+import * as HoverCard from '@radix-ui/react-hover-card';
+import * as InfoCircledIcon from '@radix-ui/react-icons';
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -110,11 +112,22 @@ export default function ResourceForm({ onFormSubmit }: Props) {
 
   const { data: tags, error: tagError, isLoading } = useTags(project as string);
 
-  const loadedTags = (tags || []) as {
+  let loadedTags = (tags || []) as {
     id: number;
     name: string;
     type?: string;
   }[];
+
+  loadedTags = loadedTags
+      .sort((a, b) => {
+          if (a.type < b.type) return -1;
+          if (a.type > b.type) return 1;
+
+          if (a.name < b.name) return -1;
+          if (a.name > b.name) return 1;
+
+          return 0;
+      });
 
   const budgetFallback = (existingData: any, key: string = '') => {
     if (!existingData) return 0;
@@ -212,48 +225,12 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-2/3 grid grid-cols-3 gap-4 lg:auto-rows-fit">
-          <FormField
-            control={form.control}
-            name="userId"
-            render={({ field }) => (
-              <FormItem className="col-span-full lg:col-span-2 lg:pr-40">
-                <FormLabel>User id van het plan (optioneel)</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Laat leeg om jezelf te koppelen"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="extraData.originalId"
-            render={({ field }) => (
-              <FormItem className="col-span-1 lg:-ml-40">
-                <FormLabel>
-                  Plan id van het originele plan (optioneel)
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="Het originele plan id"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
+          className="lg:w-2/3 grid grid-cols-2 gap-x-4 gap-y-6 lg:auto-rows-fit">
           <FormField
             control={form.control}
             name="title"
             render={({ field }) => (
-              <FormItem className="col-span-full">
+              <FormItem className="col-span-full lg:col-span-1">
                 <FormLabel>Titel</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
@@ -266,10 +243,10 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             control={form.control}
             name="summary"
             render={({ field }) => (
-              <FormItem className="col-span-full lg:col-span-2 lg:pr-40">
+              <FormItem className="col-span-full lg:col-span-1">
                 <FormLabel>Samenvatting</FormLabel>
                 <FormControl>
-                  <Textarea rows={6} {...field} />
+                  <Input {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -279,7 +256,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             control={form.control}
             name="description"
             render={({ field }) => (
-              <FormItem className="col-span-1 lg:-ml-40">
+              <FormItem className="col-span-full">
                 <FormLabel>Beschrijving</FormLabel>
                 <FormControl>
                   <Textarea rows={6} {...field} />
@@ -288,20 +265,71 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               </FormItem>
             )}
           />
+            <ImageUploader
+                form={form}
+                fieldName="image"
+                onImageUploaded={(imageResult) => {
+                    let array = [...(form.getValues('images') || [])];
+                    array.push(imageResult);
+                    form.setValue('images', array);
+                    form.resetField('image');
+                    form.trigger('images');
+                }}
+            />
+            <FormField
+                control={form.control}
+                name="budget"
+                render={({ field }) => (
+                    <FormItem className="col-span-1">
+                        <FormLabel>Budget</FormLabel>
+                        <FormControl>
+                            <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="extraData.originalId"
+                render={({ field }) => (
+                    <FormItem className="col-span-full col-span-1">
+                        <FormLabel>
+                            Resource ID van het originele resource (optioneel)
 
-          <FormField
-            control={form.control}
-            name="budget"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel>Budget</FormLabel>
-                <FormControl>
-                  <Input placeholder="" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                            <HoverCard.Root openDelay="0.2">
+                                <HoverCard.Trigger><InfoCircledIcon /></HoverCard.Trigger>
+                                <HoverCard.Content>De inhoud van de hover card</HoverCard.Content>
+                            </HoverCard.Root>
+
+                        </FormLabel>
+                        <FormControl>
+                            <Input
+                                type="number"
+                                placeholder="1"
+                                {...field}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="userId"
+                render={({ field }) => (
+                    <FormItem className="col-span-full lg:col-span-1">
+                        <FormLabel>ID van de gebruiker die aan deze resource is gekoppeld (optioneel)</FormLabel>
+                        <FormControl>
+                            <Input
+                                placeholder="1"
+                                {...field}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
 
           {/* <FormField
             control={form.control}
@@ -359,12 +387,15 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             )}
           />
 
+          <Separator className="lg:col-span-2 my-6" size="xl" />
+
+
           <FormField
             control={form.control}
             name="modBreak"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>ModBreak (optioneel)</FormLabel>
+                <FormLabel>Inhoud van de Modbreak</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
                 </FormControl>
@@ -378,7 +409,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             name="modBreakUserId"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>ModBreak user id (optioneel)</FormLabel>
+                <FormLabel>ID van de gebruiker die aan de Modbreak is gekoppeld (optioneel)</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
                 </FormControl>
@@ -390,38 +421,30 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             <SimpleCalendar
               form={form}
               fieldName="modBreakDate"
-              label="ModBreak datum (optioneel)"
+              label="Datum van de ModBreak (optioneel)"
               placeholder="Kies een datum"
               withReset
             />
           </div>
 
+          <Separator className="lg:col-span-2 my-6" size="xl" />
+
+            <div className="mt-auto col-span-full lg:col-span-1">
+                <SimpleCalendar
+                    form={form}
+                    fieldName="publishDate"
+                    label="Publiceer datum van de resource"
+                    withReset
+                />
+            </div>
+
           <div className="mt-auto col-span-full lg:col-span-1">
             <SimpleCalendar
               form={form}
               fieldName="startDate"
-              label="Startdatum van het plan"
+              label="Startdatum resource"
             />
           </div>
-          <div className="mt-auto col-span-full lg:col-span-1">
-            <SimpleCalendar
-              form={form}
-              fieldName="publishDate"
-              label="Publiceer datum van het plan (laat leeg voor een concept plan)"
-              withReset
-            />
-          </div>
-          <ImageUploader
-            form={form}
-            fieldName="image"
-            onImageUploaded={(imageResult) => {
-              let array = [...(form.getValues('images') || [])];
-              array.push(imageResult);
-              form.setValue('images', array);
-              form.resetField('image');
-              form.trigger('images');
-            }}
-          />
 
           <CheckboxList
             form={form}
@@ -432,6 +455,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             keyForGrouping="type"
             keyPerItem={(t) => `${t.id}`}
             items={loadedTags}
+            layout="vertical"
             selectedPredicate={(t) =>
               form.getValues('tags').findIndex((tg) => tg === t.id) > -1
             }
