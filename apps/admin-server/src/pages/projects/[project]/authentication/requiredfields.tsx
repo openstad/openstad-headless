@@ -60,7 +60,7 @@ const requiredUserFields = [
 
 const formSchema = z.object({
   requiredUserFields: z.string().array().default([]),
-  requiredUserFieldsLabels: z.array(z.object({id: z.string(), label: z.string()})).default([]),
+  requiredUserFieldsLabels: z.record(z.string()).default({}),
   title: z.string().optional(),
   description: z.string().optional(),
   buttonText: z.string().optional(),
@@ -74,10 +74,15 @@ export default function ProjectAuthenticationRequiredFields() {
     updateProject,
   } = useProject(['includeAuthConfig']);
 
+  const defaultLabels = requiredUserFields.reduce((acc: Record<string, string>, field) => {
+    acc[field.id] = '';
+    return acc;
+  }, {});
+
   const defaults = useCallback(
     () => ({
       requiredUserFields: data?.config?.auth?.provider?.openstad?.requiredUserFields || [],
-      requiredUserFieldsLabels: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.requiredUserFieldsLabels || [],
+      requiredUserFieldsLabels: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.requiredUserFieldsLabels || defaultLabels,
       title: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.title || '',
       description: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.description || '',
       buttonText: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.buttonText || '',
@@ -85,6 +90,8 @@ export default function ProjectAuthenticationRequiredFields() {
     }),
     [data?.config]
   );
+
+  console.log( defaults, data?.config?.auth?.provider?.openstad?.config?.requiredFields );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -219,12 +226,12 @@ export default function ProjectAuthenticationRequiredFields() {
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                       {requiredUserFields.map((item) => {
-                        const fieldValue = form.getValues('requiredUserFieldsLabels').find((label) => label.id === item.id)?.label || '';
+                        const fieldValue = form.getValues('requiredUserFieldsLabels')[item.id] ?? '';
                           return form.watch('requiredUserFields').includes(item.id) ? (
                               <FormField
                                   key={item.id}
                                   control={form.control}
-                                  name={`field_${item.id}`}
+                                  name={`requiredUserFieldsLabels.${item.id}`}
                                   render={({field}) => (
                                       <FormItem>
                                         <FormLabel>{item.label}</FormLabel>
@@ -233,26 +240,6 @@ export default function ProjectAuthenticationRequiredFields() {
                                               placeholder={item.label}
                                               defaultValue={fieldValue}
                                               onChange={(e) => {
-                                                const updatedValue = e.target.value;
-                                                const labels = form.getValues('requiredUserFieldsLabels');
-                                                const index = labels.findIndex((label) => label.id === item.id);
-                                                const updatedLabel = { id: item.id, label: updatedValue };
-
-                                                if (updatedValue.trim() === '') {
-                                                  if (index !== -1) {
-                                                    labels.splice(index, 1);
-                                                    form.setValue('requiredUserFieldsLabels', labels);
-                                                  }
-                                                } else {
-                                                  if (index !== -1) {
-                                                    labels[index] = updatedLabel;
-                                                  } else {
-                                                    labels.push(updatedLabel);
-                                                  }
-
-                                                  form.setValue('requiredUserFieldsLabels', labels);
-                                                }
-
                                                 field.onChange(e);
                                               }}
                                           />
@@ -264,18 +251,8 @@ export default function ProjectAuthenticationRequiredFields() {
                               />
                           ) : null
                       })}
-                      <FormField
-                          control={form.control}
-                          name="requiredUserFieldsLabels"
-                          render={({ field }) => (
-                              <FormItem>
-                                <Input type="hidden" {...field} />
-                                <FormMessage />
-                              </FormItem>
-                          )}
-                      />
                     </div>
-                    <Spacer size="5" />
+                    <Spacer size={5} />
                   </>
               ) : null}
 

@@ -17,6 +17,13 @@ export default function ProjectTags() {
 
   if(!data) return null;
 
+  console.log( data );
+  let loadedTags = (data || []) as {
+    id: number;
+    name: string;
+    type?: string;
+  }[];
+
   return (
     <div>
       <PageLayout
@@ -49,10 +56,13 @@ export default function ProjectTags() {
               </ListHeading>
             </div>
             <ul>
-              {data
+              {loadedTags
                   .sort((a, b) => {
-                    if (a.type < b.type) return -1;
-                    if (a.type > b.type) return 1;
+                    const aType = a.type ?? '';
+                    const bType = b.type ?? '';
+
+                    if (aType < bType) return -1;
+                    if (aType > bType) return 1;
 
                     if (a.name < b.name) return -1;
                     if (a.name > b.name) return 1;
