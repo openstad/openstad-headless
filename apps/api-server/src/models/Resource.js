@@ -754,9 +754,9 @@ module.exports = function (db, sequelize, DataTypes) {
             {
               model: db.Poll.scope([
                 'defaultScope',
-                'withResource',
-                { method: ['withVotes', 'poll', userId] },
-                { method: ['withUserVote', 'poll', userId] },
+                'includeResource',
+                { method: ['includeVotes', 'poll', userId] },
+                { method: ['includeUserVote', 'poll', userId] },
               ]),
               as: 'poll',
               required: false,
@@ -806,8 +806,20 @@ module.exports = function (db, sequelize, DataTypes) {
         return result;
       },
 
-      // oude scopes
-      // -----------
+      includeVotes: {
+        include: [
+          {
+            model: db.Vote,
+            include: [
+              {
+                model: db.User,
+                attributes: ['id', 'postcode', 'email'],
+              },
+            ],
+          },
+        ],
+        order: 'createdAt',
+      },
 
       summary: {
         attributes: {
@@ -819,92 +831,7 @@ module.exports = function (db, sequelize, DataTypes) {
           exclude: ['modBreak'],
         },
       },
-      withUser: {
-        include: [
-          {
-            model: db.User,
-            attributes: ['role', 'displayName', 'nickName', 'name', 'email'],
-          },
-        ],
-      },
-      withVoteCount: {
-        attributes: Object.keys(this.rawAttributes).concat([
-          voteCount('yes'),
-          voteCount('no'),
-        ]),
-      },
-      withVotes: {
-        include: [
-          {
-            model: db.Vote,
-            include: [
-              {
-                model: db.User,
-                attributes: ['id', 'zipCode', 'email'],
-              },
-            ],
-          },
-        ],
-        order: 'createdAt',
-      },
-      withComments: function (userId) {
-        return {
-          include: [
-            {
-              model: db.Comment.scope(
-                'defaultScope',
-                { method: ['includeVoteCount', 'commentsAgainst'] },
-                { method: ['includeUserVote', 'commentsAgainst', userId] },
-                'includeRepliesOnComments'
-              ),
-              as: 'commentsAgainst',
-              required: false,
-              where: {
-                sentiment: 'against',
-                parentId: null,
-              },
-            },
-            {
-              model: db.Comment.scope(
-                'defaultScope',
-                { method: ['includeVoteCount', 'commentsFor'] },
-                { method: ['includeUserVote', 'commentsFor', userId] },
-                'includeRepliesOnComments'
-              ),
-              as: 'commentsFor',
-              required: false,
-              where: {
-                sentiment: 'for',
-                parentId: null,
-              },
-            },
-          ],
-          // HACK: Inelegant?
-          order: [
-            sequelize.literal(
-              `GREATEST(0, \`commentsAgainst.yes\` - ${commentVoteThreshold}) DESC`
-            ),
-            sequelize.literal(
-              `GREATEST(0, \`commentsFor.yes\` - ${commentVoteThreshold}) DESC`
-            ),
-            'commentsAgainst.parentId',
-            'commentsFor.parentId',
-            'commentsAgainst.createdAt',
-            'commentsFor.createdAt',
-          ],
-        };
-      },
-      withAgenda: {
-        include: [
-          {
-            model: db.AgendaItem,
-            as: 'agenda',
-            required: false,
-            separate: true,
-            order: [['startDate', 'ASC']],
-          },
-        ],
-      },
+
     };
   };
 

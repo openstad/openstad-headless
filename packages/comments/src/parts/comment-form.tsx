@@ -1,39 +1,35 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Banner, Spacer } from '@openstad-headless/ui/src';
-import type { CommentPropsType } from '../types/index';
 import DataStore from '@openstad-headless/data-store/src';
 import hasRole from '../../../lib/has-role';
-import Form from "@openstad-headless/form/src/form";
-import type { CombinedFieldPropsWithType } from "@openstad-headless/form/src/props";
+import Form from '@openstad-headless/form/src/form';
+import type { CombinedFieldPropsWithType } from '@openstad-headless/form/src/props';
 
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Heading6, Button } from "@utrecht/component-library-react";
+import '@utrecht/component-library-css';
+import '@utrecht/design-tokens/dist/root.css';
+import { Heading6, Button } from '@utrecht/component-library-react';
+import { CommentWidgetContext } from '../comments';
+import { CommentFormProps } from '../types/comment-form-props';
 
 function CommentForm({
   comment,
   descriptionMinLength = 30,
   descriptionMaxLength = 500,
-  placeholder = 'Type hier je reactie',
-  requiredUserRole = 'member',
+  formIntro = 'Test',
+  placeholder = 'Type hier uw reactie',
   ...props
-}: CommentPropsType) {
+}: CommentFormProps) {
+  const commentsContext = useContext(CommentWidgetContext);
+
   const args = {
     comment,
     descriptionMinLength,
     descriptionMaxLength,
-    placeholder,
-    requiredUserRole,
     ...props,
-  } as CommentPropsType;
+  } as CommentFormProps;
 
   const datastore = new DataStore(args);
-  const {
-    data: currentUser,
-    error: currentUserError,
-    isLoading: currentUserIsLoading,
-  } = datastore.useCurrentUser({ ...args });
-
+  const { data: currentUser } = datastore.useCurrentUser({ ...args });
   const formFields: Array<CombinedFieldPropsWithType> = [];
 
   formFields.push({
@@ -43,82 +39,100 @@ function CommentForm({
     minCharacters: descriptionMinLength,
     maxCharacters: descriptionMaxLength,
     fieldRequired: false,
-    requiredWarning: "Dit veld is verplicht",
-    fieldKey: "description",
-    placeholder: args.placeholder,
+    requiredWarning: 'Dit veld is verplicht',
+    fieldKey: 'description',
+    placeholder: commentsContext?.placeholder,
     defaultValue: args.comment?.description,
   });
 
-  if (typeof (args.comment) !== 'undefined' && typeof (args.comment.parentId) !== 'undefined' && args.comment.parentId !== null) {
+  if (
+    typeof args.comment !== 'undefined' &&
+    typeof args.comment.parentId !== 'undefined' &&
+    args.comment.parentId !== null
+  ) {
     formFields.push({
       type: 'hidden',
-      fieldKey: "parentId",
+      fieldKey: 'parentId',
       defaultValue: args.comment.parentId.toString(),
     });
   }
 
-  if (typeof (args.comment) !== 'undefined' && typeof (args.comment.id) !== 'undefined') {
+  if (
+    typeof args.comment !== 'undefined' &&
+    typeof args.comment.id !== 'undefined'
+  ) {
     formFields.push({
       type: 'hidden',
-      fieldKey: "id",
+      fieldKey: 'id',
       defaultValue: args.comment.id.toString(),
     });
   }
 
+  if (!commentsContext) {
+    return null;
+  }
 
   return (
     <div className="reaction-input-container">
-        {args.formIntro ? <p>{args.formIntro}</p> : null}
-        <Spacer size={1} />
+      {commentsContext.formIntro && <p>{commentsContext.formIntro}</p>}
+      <Spacer size={1} />
 
-        {!hasRole(currentUser, 'member') ? ( // todo: args.requiredUserRole \
-          <Banner className="big">
-            <Heading6>Inloggen om deel te nemen aan de discussie.</Heading6>
-            <Spacer size={1} />
-            <Button
-              appearance="primary-action-button"
-              onClick={() => {
-                // login
-                document.location.href = args.login.url;
-              }}
-              type="button">
-              Inloggen
-            </Button>
-          </Banner>
-        ) : (
-          <>
-            {!hasRole(currentUser, 'moderator') && !props.isReplyingEnabled ? (
-              <Banner className="big">
+      {!hasRole(currentUser, 'member') ? ( // todo: args.requiredUserRole \
+        <Banner className="big">
+          <Heading6>Inloggen om deel te nemen aan de discussie.</Heading6>
+          <Spacer size={1} />
+          <Button
+            appearance="primary-action-button"
+            onClick={() => {
+              // login
+              if (commentsContext?.login?.url) {
+                document.location.href = commentsContext.login.url;
+              }
+            }}
+            type="button">
+            Inloggen
+          </Button>
+        </Banner>
+      ) : (
+        <>
+          {!hasRole(currentUser, 'moderator') &&
+          !commentsContext.isReplyingEnabled ? (
+            <Banner className="big">
+              <Spacer size={2} />
+              <Heading6>
+                De reactiemogelijkheid is gesloten, u kunt niet meer reageren
+              </Heading6>
+              <Spacer size={2} />
+            </Banner>
+          ) : null}
+
+          {hasRole(currentUser, 'moderator') &&
+          !commentsContext.isReplyingEnabled &&
+          !commentsContext.hideReplyAsAdmin ? (
+            <>
+              <Banner>
                 <Spacer size={2} />
                 <Heading6>
-                  De reactiemogelijkheid is gesloten, u kunt niet meer reageren
+                  Reageren is gesloten, maar je kunt nog reageren vanwege je rol
+                  als moderator
                 </Heading6>
                 <Spacer size={2} />
               </Banner>
-            ) : null}
+              <Spacer size={2} />
+            </>
+          ) : null}
+        </>
+      )}
 
-            {hasRole(currentUser, 'moderator') &&
-            !props.isReplyingEnabled &&
-            !props.hideReplyAsAdmin ? (
-              <>
-                <Banner>
-                  <Spacer size={2} />
-                  <Heading6>
-                    Reageren is gesloten, maar je kunt nog reageren vanwege je
-                    rol als moderator
-                  </Heading6>
-                  <Spacer size={2} />
-                </Banner>
-                <Spacer size={2} />
-              </>
-            ) : null}
-          </>
-        )}
-
-        {(hasRole(currentUser, 'member') && props.isReplyingEnabled) ||
-        hasRole(currentUser, 'moderator') ? (
-          <Form fields={formFields} submitHandler={args.submitComment} submitText="Verstuur" title=""/>
-        ) : null}
+      {(hasRole(currentUser, 'member') && commentsContext.isReplyingEnabled) ||
+      hasRole(currentUser, 'moderator') ? (
+        <Form
+          fields={formFields}
+          submitHandler={props.submitComment}
+          submitText="Verstuur"
+          title=""
+        />
+      ) : null}
     </div>
   );
 }

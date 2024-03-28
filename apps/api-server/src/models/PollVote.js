@@ -47,7 +47,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 			defaultScope: {
 			},
 
-			withPoll: function() {
+			includePoll: function() {
 				return {
 					include: [{
 						model: db.Poll,

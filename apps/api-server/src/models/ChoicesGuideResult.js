@@ -110,7 +110,7 @@ module.exports = function( db, sequelize, DataTypes ) {
         };
       },
 
-      withChoicesGuide: function() {
+      includeChoicesGuide: function() {
         return {
           include: [{
             model: db.ChoicesGuide,
@@ -119,7 +119,7 @@ module.exports = function( db, sequelize, DataTypes ) {
         };
       },
 
-      withUser: {
+      includeUser: {
         include: [{
           model: db.User,
           as: 'user',
