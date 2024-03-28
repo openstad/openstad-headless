@@ -91,8 +91,6 @@ export default function ProjectAuthenticationRequiredFields() {
     [data?.config]
   );
 
-  console.log( defaults, data?.config?.auth?.provider?.openstad?.config?.requiredFields );
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: defaults(),
