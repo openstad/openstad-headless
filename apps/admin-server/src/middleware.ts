@@ -31,20 +31,6 @@ export default withAuth(
         },
       });
     }
-
-    if (req.nextUrl.pathname.startsWith("/api/oauth")) {
-      const searchParams = req.nextUrl?.searchParams?.toString();
-      const rewrittenUrl =  `${process.env.OAUTH_URL_INTERNAL || process.env.OAUTH_URL}${req.nextUrl.pathname.replace("/api/oauth", "")}${searchParams?'?'+searchParams:''}`;
-
-      return NextResponse.rewrite(
-        rewrittenUrl,
-        {
-          headers: {
-            Authorization: "Basic " + btoa(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`),
-          },
-        },
-      );
-    }
   },
   {
     pages: {
