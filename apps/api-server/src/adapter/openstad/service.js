@@ -344,4 +344,91 @@ service.updateClient = async function({ authConfig, project }) {
   
 }
 
+service.fetchUniqueCode = async function({ authConfig }) {
+
+  let clientId = authConfig.clientId;
+  if (!clientId) {
+    throw new Error('OpenStad.service.fetchUniqueCodes: clientId not found')
+  }
+
+  try {
+
+    let url = `${authConfig.serverUrlInternal}/api/admin/unique-codes?clientId=${clientId}&amount=3`;
+    let response = await fetch(url, {
+	    headers: {
+        Authorization: `Basic ${new Buffer(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+      },
+    })
+    if (!response.ok) {
+      throw new Error('OpenStad.service.fetchUniqueCodes: fetch client failed')
+    }
+    let codes = await response.json();
+    return codes;
+
+  } catch(err) {
+    throw new Error('Cannot connect to auth server');
+  }
+}
+
+service.createUniqueCode = async function({ authConfig, amount }) {
+
+  let clientId = authConfig.clientId;
+  if (!clientId) {
+    throw new Error('OpenStad.service.createUniqueCodes: clientId not found')
+  }
+
+  try {
+
+    let url = `${authConfig.serverUrlInternal}/api/admin/unique-code?clientId=${clientId}&amount=${amount}`;
+    let response = await fetch(url, {
+	    headers: {
+        Authorization: `Basic ${new Buffer(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+      },
+      method: 'post',
+      body: '{}',
+    })
+    if (!response.ok) {
+      throw new Error('OpenStad.service.createUniqueCodes: fetch client failed')
+    }
+    let result = await response.json();
+    return result;
+
+  } catch(err) {
+    throw new Error('Cannot connect to auth server');
+  }
+}
+
+
+service.resetUniqueCode = async function({ authConfig, uniqueCodeId }) {
+
+  let clientId = authConfig.clientId;
+  if (!clientId) {
+    throw new Error('OpenStad.service.createUniqueCodes: clientId not found')
+  }
+
+  if (!uniqueCodeId) {
+    throw new Error('OpenStad.service.resetUniqueCodes: uniqueCodeId not found')
+  }
+
+  try {
+
+    let url = `${authConfig.serverUrlInternal}/api/admin/unique-code/${uniqueCodeId}/reset?clientId=${clientId}`;
+    let response = await fetch(url, {
+	    headers: {
+        Authorization: `Basic ${new Buffer(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+      },
+      method: 'post',
+      body: '{}',
+    })
+    if (!response.ok) {
+      throw new Error('OpenStad.service.resetUniqueCodes: fetch client failed')
+    }
+    let result = await response.json();
+    return result;
+
+  } catch(err) {
+    throw new Error('Cannot connect to auth server');
+  }
+}
+
 module.exports = service;
