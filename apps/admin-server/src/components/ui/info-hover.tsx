@@ -2,8 +2,12 @@ import React from "react";
 import * as HoverCard from '@radix-ui/react-hover-card';
 import InfoIcon from "@/components/info-icon";
 
-const InfoDialog = ({ content }) => {
-    const hoverCardStyle = {
+interface InfoDialogProps {
+    content: React.ReactNode;
+}
+
+const InfoDialog: React.FC<InfoDialogProps> = ({ content }) => {
+    const hoverCardStyle: React.CSSProperties = {
         borderRadius: '6px',
         padding: '20px',
         width: '300px',
@@ -12,7 +16,7 @@ const InfoDialog = ({ content }) => {
     };
 
     return (
-        <HoverCard.Root openDelay="0.2" closeDelay="0">
+        <HoverCard.Root openDelay={0.2} closeDelay={0}>
             <HoverCard.Trigger style={{display: 'inline-block', verticalAlign: 'text-bottom'}}><InfoIcon /></HoverCard.Trigger>
             <HoverCard.Content
                 style={hoverCardStyle}

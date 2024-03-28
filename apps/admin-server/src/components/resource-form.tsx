@@ -119,8 +119,11 @@ export default function ResourceForm({ onFormSubmit }: Props) {
 
   loadedTags = loadedTags
       .sort((a, b) => {
-          if (a.type < b.type) return -1;
-          if (a.type > b.type) return 1;
+          const aType = a.type ?? '';
+          const bType = b.type ?? '';
+
+          if (aType < bType) return -1;
+          if (aType > bType) return 1;
 
           if (a.name < b.name) return -1;
           if (a.name > b.name) return 1;
@@ -380,7 +383,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             )}
           />
 
-          <Separator className="lg:col-span-2 my-6" size="xl" />
+          <Separator className="lg:col-span-2 my-6" />
 
 
           <FormField
@@ -421,7 +424,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             />
           </div>
 
-          <Separator className="lg:col-span-2 my-6" size="xl" />
+          <Separator className="lg:col-span-2 my-6" />
 
             <div className="mt-auto col-span-full lg:col-span-1">
                 <SimpleCalendar

@@ -211,7 +211,7 @@ export default function ProjectAuthenticationRequiredFields() {
 
               {showPageFields ? (
                   <>
-                    <Spacer size="2" />
+                    <Spacer size={2} />
                     <div>
                       <FormLabel>
                         Standaard staat de titel van de bovenstaande geselecteerde verplichte velden als de titel boven het invulveld. Hier kun je dit per verplicht veld aanpassen.
