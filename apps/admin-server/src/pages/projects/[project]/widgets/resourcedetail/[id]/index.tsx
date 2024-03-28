@@ -18,9 +18,7 @@ import {
   withApiUrl,
 } from '@/lib/server-side-props-definition';
 import WidgetPublish from '@/components/widget-publish';
-import WidgetResourceLikesDisplay from './likes';
 import ArgumentsGeneral from '../../comments/[id]/general';
-import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
 import LikesDisplay from '../../likes/[id]/weergave';
 export const getServerSideProps = withApiUrl;
 
@@ -29,7 +27,8 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig();
+  const { data: widget, updateConfig } =
+    useWidgetConfig<ResourceDetailWidgetProps>();
   const { previewConfig, updatePreview } =
     useWidgetPreview<ResourceDetailWidgetProps>({
       projectId,
@@ -105,12 +104,12 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
               {previewConfig && (
                 <ArgumentsGeneral
                   omitSchemaKeys={['resourceId', 'sentiment']}
-                  {...({
+                  {...{
                     ...previewConfig,
                     resourceId: previewConfig.resourceId || '',
                     isVotingEnabled: !!previewConfig.commentsVotingEnabled,
                     isReplyingEnabled: !!previewConfig.commentsReplyingEnabled,
-                  } )}
+                  }}
                   updateConfig={(config) =>
                     updateConfig({
                       ...widget.config,
@@ -122,7 +121,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                     if (previewConfig) {
                       updatePreview({
                         ...previewConfig,
-                        [key]: value,
+                        commentsWidget:{[key]: value},
                       });
                     }
                   }}
@@ -132,45 +131,41 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
 
             <TabsContent value="likes" className="p-0">
               {previewConfig && (
-                <LikesDisplay 
-                omitSchemaKeys={['resourceId']}
-                {...({
-                  ...previewConfig,
-                  resourceId: previewConfig.resourceId,
-                  yesLabel: previewConfig.likeWidgetForText,
-                  noLabel: previewConfig.likeWidgetAgainstText,
-                  variant: previewConfig.likeWidgetVariant
-                } )}
-                updateConfig={(config) =>
-                  updateConfig({
-                    ...widget.config,
-                    likeWidgetForText: config.yesLabel,
-                    likeWidgetAgainstText: config.noLabel,
-                    likeWidgetVariant: config.variant
-                  })
-                }
-                onFieldChanged={(key, value) => {
-                  if (previewConfig) {
-                    updatePreview({
-                      ...previewConfig,
-                      [key]: value,
+                <LikesDisplay
+                  omitSchemaKeys={['resourceId']}
+                  {...{
+                    ...previewConfig,
+                    resourceId: previewConfig.resourceId,
+                    title: previewConfig.likeWidget?.title,
+                    yesLabel: previewConfig.likeWidget?.yesLabel,
+                    noLabel: previewConfig.likeWidget?.noLabel,
+                    showProgressBar: previewConfig.likeWidget?.showProgressBar,
+                    progressBarDescription:
+                      previewConfig.likeWidget?.progressBarDescription,
+                    variant: previewConfig.likeWidget?.variant,
+                  }}
+                  updateConfig={(config) => {
+                    updateConfig<ResourceDetailWidgetProps>({
+                      ...widget.config,
+                      likeWidget: {
+                        title: config.title,
+                        yesLabel: config.yesLabel,
+                        noLabel: config.noLabel,
+                        showProgressBar: config.showProgressBar,
+                        progressBarDescription: config.progressBarDescription,
+                        variant: config.variant,
+                      },
                     });
-                  }
-                }}/>
-                // <WidgetResourceLikesDisplay
-                //   {...previewConfig}
-                //   updateConfig={(config) =>
-                //     updateConfig({ ...widget.config, ...config })
-                //   }
-                //   onFieldChanged={(key, value) => {
-                //     if (previewConfig) {
-                //       updatePreview({
-                //         ...previewConfig,
-                //         [key]: value,
-                //       });
-                //     }
-                //   }}
-                // />
+                  }}
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        likeWidget:{[key]: value},
+                      });
+                    }
+                  }}
+                />
               )}
             </TabsContent>
 

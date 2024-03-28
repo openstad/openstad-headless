@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import useSWR from 'swr';
 
-export function useWidgetConfig() {
+export function useWidgetConfig<R>() {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
@@ -13,7 +13,7 @@ export function useWidgetConfig() {
       : null
   );
 
-  async function updateConfig(config: any) {
+  async function updateConfig<R extends {[key:string]:any}>(config: R) {
 
     // these are added by the preview but should not be saved
     if (config.login?.url) delete config.login?.url;
@@ -43,5 +43,5 @@ export function useWidgetConfig() {
     }
   }
 
-  return { ...swr, updateConfig };
+  return { ...swr, data: swr.data as {config: R}, updateConfig };
 }

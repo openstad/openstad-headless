@@ -22,7 +22,7 @@ import {
 } from '@utrecht/component-library-react';
 import React from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
-import { Comments } from '@openstad-headless/comments/src/comments';
+import { Comments, CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
 
 type booleanProps = {
   [K in
@@ -50,11 +50,14 @@ export type ResourceDetailWidgetProps = BaseProps &
     resourceId?: string;
     resourceIdRelativePath?: string;
   } & booleanProps & {
-    likeWidgetProgressBarText: LikeWidgetProps['progressBarDescription'];
-    likeWidgetVariant: LikeWidgetProps['variant'];
-    likeWidgetTitle: LikeWidgetProps['title'];
-    likeWidgetForText: LikeWidgetProps['yesLabel'];
-    likeWidgetAgainstText?: LikeWidgetProps['noLabel'];
+    likeWidget?: Omit<
+      LikeWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
+    commentsWidget?: Omit<
+      CommentsWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
   };
 
 function ResourceDetail({
@@ -211,10 +214,15 @@ function ResourceDetail({
               <>
                 <Likes
                   {...props}
-                  title={props.likeWidgetTitle}
-                  yesLabel={props.likeWidgetForText}
-                  noLabel={props.likeWidgetAgainstText}
-                  progressBarDescription={props.likeWidgetProgressBarText}
+                  title={props.likeWidget?.title}
+                  yesLabel={props.likeWidget?.yesLabel}
+                  noLabel={props.likeWidget?.noLabel}
+                  hideCounters={props.likeWidget?.hideCounters}
+                  variant={props.likeWidget?.variant}
+                  showProgressBar={props.likeWidget?.showProgressBar}
+                  progressBarDescription={
+                    props.likeWidget?.progressBarDescription
+                  }
                 />
                 <Spacer size={1} />
               </>
@@ -306,16 +314,15 @@ function ResourceDetail({
             {...props}
             resourceId={resourceId}
             sentiment="for"
-            isVotingEnabled={commentsVotingEnabled || false}
-            isReplyingEnabled={commentsReplyingEnabled || false}
-            {...props}
+            isVotingEnabled={props.commentsWidget?.isVotingEnabled || false}
+            isReplyingEnabled={props.commentsWidget?.isReplyingEnabled || false}
           />
           <Comments
             {...props}
             resourceId={resourceId}
             sentiment="against"
-            isVotingEnabled={commentsVotingEnabled || false}
-            isReplyingEnabled={commentsReplyingEnabled || false}
+            isVotingEnabled={props.commentsWidget?.isVotingEnabled || false}
+            isReplyingEnabled={props.commentsWidget?.isReplyingEnabled || false}
           />
         </section>
       ) : null}

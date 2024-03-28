@@ -19,7 +19,7 @@ export default function WidgetLikes({
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig();
+  const { data: widget, updateConfig } = useWidgetConfig<LikeWidgetProps>();
   const { previewConfig, updatePreview } = useWidgetPreview<LikeWidgetProps>({
     projectId,
   });

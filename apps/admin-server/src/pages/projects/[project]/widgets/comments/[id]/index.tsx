@@ -25,7 +25,7 @@ export default function WidgetArguments({
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig();
+  const { data: widget, updateConfig } = useWidgetConfig<CommentsWidgetProps>();
   const { previewConfig, updatePreview } =
     useWidgetPreview<CommentsWidgetProps>({
       projectId,

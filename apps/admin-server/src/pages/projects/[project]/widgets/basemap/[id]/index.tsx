@@ -24,7 +24,7 @@ export default function WidgetBaseMap({
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-    const { data: widget, updateConfig } = useWidgetConfig();
+    const { data: widget, updateConfig } = useWidgetConfig<BaseMapWidgetProps>();
     const { previewConfig, updatePreview } =
       useWidgetPreview<BaseMapWidgetProps>({
         projectId,
