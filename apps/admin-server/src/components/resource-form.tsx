@@ -5,12 +5,13 @@ import { useFieldArray, useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,8 +26,6 @@ import useTags from '@/hooks/use-tags';
 import { CheckboxList } from './checkbox-list';
 import { X } from 'lucide-react';
 import { useProject } from '@/hooks/use-project';
-import * as HoverCard from '@radix-ui/react-hover-card';
-import * as InfoCircledIcon from '@radix-ui/react-icons';
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -225,7 +224,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-2/3 grid grid-cols-2 gap-x-4 gap-y-6 lg:auto-rows-fit">
+          className="lg:w-2/3 grid grid-cols-2 lg:auto-rows-fit" style={{gap: '2.5rem'}}>
           <FormField
             control={form.control}
             name="title"
@@ -296,12 +295,6 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                     <FormItem className="col-span-full col-span-1">
                         <FormLabel>
                             Resource ID van het originele resource (optioneel)
-
-                            <HoverCard.Root openDelay="0.2">
-                                <HoverCard.Trigger><InfoCircledIcon /></HoverCard.Trigger>
-                                <HoverCard.Content>De inhoud van de hover card</HoverCard.Content>
-                            </HoverCard.Root>
-
                         </FormLabel>
                         <FormControl>
                             <Input
@@ -396,6 +389,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Inhoud van de Modbreak</FormLabel>
+                <FormDescription>Laat dit veld leeg om geen Modbreak bij deze resource te tonen</FormDescription>
                 <FormControl>
                   <Input placeholder="" {...field} />
                 </FormControl>
@@ -434,11 +428,12 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                     form={form}
                     fieldName="publishDate"
                     label="Publiceer datum van de resource"
+                    description="Als er geen publiceer datum is zal de resource worden opgeslagen als concept. Dit houdt in dat de resource niet zichtbaar zal zijn op de site."
                     withReset
                 />
             </div>
 
-          <div className="mt-auto col-span-full lg:col-span-1">
+          <div className="col-span-full lg:col-span-1">
             <SimpleCalendar
               form={form}
               fieldName="startDate"
