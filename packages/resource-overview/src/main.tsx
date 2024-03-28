@@ -6,7 +6,6 @@ import {
 } from './resource-overview.js';
 
 const config: ResourceOverviewWidgetProps = {
-  displayType: 'cardgrid',
   tagGroups: [{ type: 'theme', label: 'Thema', multiple: true }],
   displayTitle: true,
   displayDescription: true,
@@ -31,6 +30,8 @@ const config: ResourceOverviewWidgetProps = {
       import.meta.env.VITE_PROJECT_ID
     }/login?forceNewLogin=1&useAuth=default&redirectUri=${document.location}`,
   },
+  displayType: import.meta.env.VITE_DISPLAY_TYPE || 'cardgrid',
+  itemLink: import.meta.env.VITE_ITEM_LINK,
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
