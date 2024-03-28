@@ -60,7 +60,6 @@ router
       }
     }
     return next( new Error('Project not found') );
-
   });
 
 router.route('/')
@@ -68,7 +67,8 @@ router.route('/')
 // ----------
 // .get(auth.can('User', 'list')) -> now handled by onlyListable
   .get(function (req, res, next) {
-    req.scope.push({method: ['onlyListable', req.user.id, req.user.role]});
+    let role = req.user.role == 'superuser' ? 'admin' : req.user.role;
+    req.scope.push({method: ['onlyListable', req.user.id, role]});
     return next();
   })
   .get(function (req, res, next) {
@@ -76,7 +76,6 @@ router.route('/')
   })
   .get(pagination.init)
   .get(function (req, res, next) {
-
     let { dbQuery } = req;
     dbQuery.where = {
       ...req.queryConditions,

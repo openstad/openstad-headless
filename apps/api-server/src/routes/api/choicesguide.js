@@ -2,6 +2,7 @@ const express = require('express');
 const createError = require('http-errors');
 const db = require('../../db');
 const auth= require('../../middleware/sequelize-authorization-middleware');
+const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 // TODO: deze is nog niet verbouwd naar het nieuwe auth model, met name de json opbouw niet
 
@@ -652,34 +653,13 @@ router.route('/:choicesGuideId(\\d+)(/questiongroup/:questionGroupId(\\d+))?/res
 // --------------------------------
   .post(auth.can('ChoicesGuideResult', 'create'))
 
-  // is er een geldige gebruiker
+// is er een geldige gebruiker
 	.all(function(req, res, next) {
-
 		if (req.method == 'GET') return next(); // nvt
-
 		if (!( req.choicesguide.config && req.choicesguide.config.requiredUserRole )) return next();
-
-    // todo: gebruik hasRole
-    
-		if (req.choicesguide.config.requiredUserRole == 'anonymous' && ( req.user.role == 'anonymous' || req.user.role == 'member' || req.user.role === 'editor' || req.user.role === 'moderator' || req.user.role === 'admin' )) {
-			return next();
-		}
-		if (req.choicesguide.config.requiredUserRole == 'member' && ( req.user.role == 'member' || req.user.role === 'editor' || req.user.role === 'moderator' || req.user.role === 'admin' )) {
-			return next();
-		}
-		if (req.choicesguide.config.requiredUserRole == 'moderator' && ( req.user.role === 'editor' || req.user.role === 'moderator' || req.user.role === 'admin' )) {
-			return next();
-		}
-		if (req.choicesguide.config.requiredUserRole == 'editor' && ( req.user.role === 'editor' || req.user.role === 'admin'  )) {
-			return next();
-		}
-		if (req.choicesguide.config.requiredUserRole == 'admin' && ( req.user.role === 'admin' )) {
-			return next();
-		}
-
-		return next(createError(401, 'Je mag niet insturen op deze project'));
+    if (hasRole( req.user, req.choicesguide.config.requiredUserRole)) return next();
+		return next(createError(401, 'Je mag niet insturen op dit project'));
 	})
-
 
 // is de keuzewijzer actief
 	.post(function(req, res, next) {

@@ -12,6 +12,7 @@ const express = require('express');
 const createError = require('http-errors')
 
 const router = express.Router({mergeParams: true});
+const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 /**
  * After SQL query only the missing
@@ -88,8 +89,7 @@ router.route('/')
     // -----------
     .get((req, res, next) => {
 
-       // let isViewable = req.project && req.project.config && req.project.config.votes && req.project.config.votes.isViewable;
-        const isViewable = (req.user && (req.user.role == 'admin' || req.user.role == 'editor' || req.user.role == 'moderator'))
+        const isViewable = (req.user && hasRole( req.user, 'moderator'))
 
         if (isViewable) {
             return next();

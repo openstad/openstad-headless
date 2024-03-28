@@ -309,7 +309,7 @@ module.exports = function (db, sequelize, DataTypes) {
   }
 
   Project.auth = Project.prototype.auth = {
-    listableBy: 'all',
+    listableBy: 'member',
     viewableBy: 'all',
     createableBy: 'admin',
     updateableBy: 'editor',

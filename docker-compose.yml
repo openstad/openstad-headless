@@ -195,8 +195,8 @@ services:
     container_name: openstad-admin-server
     restart: unless-stopped
     environment:
-      - NEXTAUTH_URL=${ADMIN_URL}
-      - NEXTAUTH_SECRET=${AUTH_ADMIN_CLIENT_SECRET}
+      - URL=${ADMIN_URL}
+      - COOKIE_SECRET=${ADMIN_COOKIE_SECRET}
       - CLIENT_ID=${AUTH_ADMIN_CLIENT_ID}
       - CLIENT_SECRET=${AUTH_ADMIN_CLIENT_SECRET}
       - OAUTH_URL=${AUTH_APP_URL}
@@ -205,6 +205,8 @@ services:
       - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}
       - API_FIXED_AUTH_KEY=${API_FIXED_AUTH_KEY}
       - PORT=${ADMIN_PORT}
+      - NEXT_PUBLIC_API_URL=${API_URL}
+      - NEXT_PUBLIC_URL=${ADMIN_URL}
     ports:
       - '${ADMIN_PORT}:${ADMIN_PORT}'
     volumes:

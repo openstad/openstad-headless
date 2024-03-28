@@ -8,16 +8,13 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
 const c = require('config');
+
 const { Op } = require('sequelize');
+const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
-  return (
-    user &&
-    (user.role === 'admin' ||
-      user.role === 'editor' ||
-      user.role === 'moderator')
-  );
+  return hasRole( user, 'moderator')
 };
 
 // scopes: for all get requests
@@ -31,7 +28,6 @@ router.all('*', function (req, res, next) {
   // in case the votes are archived don't use these queries
   // this means they can be cleaned up from the main table for performance reason
   if (!req.project.config.archivedVotes) {
-    console.log();
     if (
       req.query.includeVoteCount &&
       ((req.project &&
@@ -208,7 +204,7 @@ router
     }
 
     let userId = req.user.id;
-    if (req.user.role == 'admin' && req.body.userId) userId = req.body.userId;
+    if (hasRole( req.user, 'admin') && req.body.userId) userId = req.body.userId;
 
     if (!!req.body.submittedData) {
       req.body = {

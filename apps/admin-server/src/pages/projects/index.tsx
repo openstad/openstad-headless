@@ -6,7 +6,6 @@ import React from 'react';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { useRouter } from 'next/router';
 import projectListSwr from '../../hooks/use-project-list';
-import { signOut } from 'next-auth/react';
 
 export default function Projects() {
   const { data, isLoading, error } = projectListSwr();

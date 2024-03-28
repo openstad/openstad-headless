@@ -76,6 +76,7 @@ AUTH_ADAPTER_OPENSTAD_SERVERURL=${process.env.AUTH_APP_URL}
 AUTH_FIXEDAUTHTOKENS='${fixed_auth_tokens}'
 
 IMAGE_APP_URL=${process.env.IMAGE_APP_URL}
+ADMIN_DOMAIN=${process.env.ADMIN_DOMAIN}
 `
     if (actions['create config']) {
       console.log('------------------------------');

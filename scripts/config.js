@@ -45,7 +45,7 @@ async function setupEnvVars() {
   let ADMIN_PORT = process.env.ADMIN_PORT = process.env.ADMIN_PORT || BASE_PORT + 70;
   let ADMIN_DOMAIN = process.env.ADMIN_DOMAIN = process.env.ADMIN_DOMAIN || ( process.env.BASE_DOMAIN == 'localhost' ? 'localhost:' + ADMIN_PORT : 'admin.' + process.env.BASE_DOMAIN );
   let ADMIN_URL = process.env.ADMIN_URL = process.env.ADMIN_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + ADMIN_DOMAIN;
-  let ADMIN_SECRET = process.env.ADMIN_SECRET = process.env.ADMIN_SECRET || generateRandomToken({ length: 64 });
+  let ADMIN_COOKIE_SECRET = process.env.ADMIN_COOKIE_SECRET = process.env.ADMIN_COOKIE_SECRET || generateRandomToken({ length: 64 });
 
   let CMS_PORT = process.env.CMS_PORT = process.env.CMS_PORT || BASE_PORT + 90;
   let CMS_DOMAIN = process.env.CMS_DOMAIN = process.env.CMS_DOMAIN || ( process.env.BASE_DOMAIN == 'localhost' ? 'localhost:' + CMS_PORT : 'cms.' + process.env.BASE_DOMAIN );
@@ -134,9 +134,8 @@ async function setupEnvVars() {
 
   // admin server
   process.env.ADMIN_URL = ADMIN_URL;
+  process.env.ADMIN_COOKIE_SECRET = ADMIN_COOKIE_SECRET;
   process.env.ADMIN_DOMAIN = ADMIN_DOMAIN;
-  process.env.ADMIN_PORT = ADMIN_PORT;
-  process.env.ADMIN_SECRET = ADMIN_SECRET;
   process.env.ADMIN_PORT = ADMIN_PORT;
 
   // cms server
@@ -256,8 +255,12 @@ IMAGE_THROTTLE_CC_REQUESTS=${process.env.IMAGE_THROTTLE_CC_REQUESTS}
 ADMIN_URL=${process.env.ADMIN_URL}
 ADMIN_DOMAIN=${process.env.ADMIN_DOMAIN}
 ADMIN_PORT=${process.env.ADMIN_PORT}
-ADMIN_SECRET=${process.env.ADMIN_SECRET}
-ADMIN_PORT=${process.env.ADMIN_PORT}
+ADMIN_COOKIE_SECRET=${process.env.ADMIN_COOKIE_SECRET}
+
+URL: string;
+COOKIE_SECRET: string;
+NEXT_PUBLIC_API_URL: string;
+NEXT_PUBLIC_URL: string;
 
 #cms server
 CMS_URL=${process.env.CMS_URL}

@@ -3,6 +3,7 @@ const dbConfig  = config.get('database');
 const mysql = require('mysql2');
 const express = require('express');
 const createError = require('http-errors')
+const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const pool = mysql.createPool({
     host: dbConfig.host,
@@ -31,7 +32,7 @@ router.route('/total')
     .get(function(req, res, next) {
 
         let isViewable = req.project && req.project.config && req.project.config.votes && req.project.config.votes.isViewable;
-        isViewable = isViewable || ( req.user && ( req.user.role == 'admin' || req.user.role == 'editor' || req.user.role == 'moderator' ) )
+        isViewable = isViewable || hasRole( req.user, 'moderator')
         if (!isViewable) return next(createError(401, 'Je kunt deze stats niet bekijken'));
 
         let query = "SELECT count(votes.id) AS counted FROM votes LEFT JOIN resources ON votes.resourceId = resources.id WHERE votes.deletedAt IS NULL AND  (votes.checked IS NULL OR votes.checked = 1) AND resources.deletedAt IS NULL AND resources.projectId=?";
