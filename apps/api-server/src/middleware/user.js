@@ -105,13 +105,13 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
           [db.Sequelize.Op.or]: [
             {
               role: 'admin',
-              projectId: 1,
+              projectId: config.admin.projectId,
             }, {
               projectId: projectId
             }
           ]});
       } else {
-        where.projectId = 1;
+        where.projectId = config.admin.projectId;
         where.role = 'admin';
       }
     }
@@ -132,9 +132,9 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
     throw err;
   }
 
-  if (dbUser.projectId != projectId && dbUser.projectId == 1 ) {
-    // admin op project 1 = superuser; use the correct authConfig
-    let adminProject = await db.Project.findOne({ where: { id: 1 } });
+  if (dbUser.projectId != projectId && dbUser.projectId == config.admin.projectId ) {
+    // admin op config.admin.projectId = superuser; use the correct authConfig
+    let adminProject = await db.Project.findOne({ where: { id: config.admin.projectId } });
     authConfig = await authSettings.config({ project: adminProject, useAuth: 'default' });
   }
 
@@ -158,7 +158,7 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
     })
 
     let mergedUser = merge(dbUser, userData);
-    if (mergedUser.projectId == 1 && mergedUser.role == 'admin') {
+    if (mergedUser.projectId == config.admin.projectId && mergedUser.role == 'admin') {
       // superusers mogen dingen over projecten heen, mindere goden alleen binnen hun eigen project
       mergedUser.role = 'superuser';
     }
