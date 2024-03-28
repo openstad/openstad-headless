@@ -28,7 +28,7 @@ import { ObjectListSelect } from '@/components/ui/object-select';
 import useResources from '@/hooks/use-resources';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
-import { createOmittedSchema } from '@/lib/form-widget-helpers/Omitable';
+import { LikeWidgetTabProps } from '.';
 
 const formSchema = z.object({
   title: z.string(),
@@ -46,8 +46,8 @@ type SchemaKey = keyof FormData;
 export default function LikesDisplay({
   omitSchemaKeys = [],
   ...props
-}: LikeWidgetProps &
-  EditFieldProps<LikeWidgetProps> & {
+}: LikeWidgetTabProps &
+  EditFieldProps<LikeWidgetTabProps> & {
     omitSchemaKeys?: Array<SchemaKey>;
   }) {
   const finalSchema = formSchema.omit(

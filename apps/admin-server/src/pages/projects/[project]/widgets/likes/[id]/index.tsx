@@ -9,8 +9,16 @@ import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 
 export const getServerSideProps = withApiUrl;
+
+
+// Use these props in the widget tabs
+export type LikeWidgetTabProps = Omit<
+  LikeWidgetProps,
+  keyof Omit<BaseProps, 'projectId'> | keyof ProjectSettingProps
+>;
 
 export default function WidgetLikes({
   apiUrl,
@@ -19,8 +27,8 @@ export default function WidgetLikes({
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig<LikeWidgetProps>();
-  const { previewConfig, updatePreview } = useWidgetPreview<LikeWidgetProps>({
+  const { data: widget, updateConfig } = useWidgetConfig<LikeWidgetTabProps>();
+  const { previewConfig, updatePreview } = useWidgetPreview<LikeWidgetTabProps>({
     projectId,
   });
 

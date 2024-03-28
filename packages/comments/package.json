@@ -12,6 +12,7 @@
   "dependencies": {
     "eslint-config-custom": "*",
     "@openstad-headless/ui": "file:../ui",
+    "@openstad-headless/types": "file:../types",
     "@openstad-headless/data-store": "file:../data-store",
     "@openstad-headless/lib": "file:../lib",
     "@openstad-headless/form": "file:../form",

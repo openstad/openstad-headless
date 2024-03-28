@@ -20,10 +20,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import useResources from '@/hooks/use-resources';
 import { ReactNode } from 'react';
+import { ArgumentWidgetTabProps } from '.';
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
@@ -37,8 +37,8 @@ type SchemaKey = keyof typeof formSchema.shape;
 export default function ArgumentsGeneral({
   omitSchemaKeys = [],
   ...props
-}: CommentsWidgetProps &
-  EditFieldProps<CommentsWidgetProps> & {
+}: ArgumentWidgetTabProps &
+  EditFieldProps<ArgumentWidgetTabProps> & {
     omitSchemaKeys?: Array<SchemaKey>;
   }) {
   const finalSchema = formSchema.omit(

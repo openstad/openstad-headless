@@ -9,9 +9,7 @@ import {
   Pill,
   IconButton,
 } from '@openstad-headless/ui/src';
-import { BaseProps } from '../../types/base-props';
-import { ProjectSettingProps } from '../../types/project-setting-props';
-
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
@@ -27,8 +25,6 @@ import { Comments, CommentsWidgetProps } from '@openstad-headless/comments/src/c
 type booleanProps = {
   [K in
     | 'displayComments'
-    | 'commentsVotingEnabled'
-    | 'commentsReplyingEnabled'
     | 'displayImage'
     | 'displayTitle'
     | 'displaySummary'
@@ -62,8 +58,6 @@ export type ResourceDetailWidgetProps = BaseProps &
 
 function ResourceDetail({
   displayComments = true,
-  commentsReplyingEnabled = true,
-  commentsVotingEnabled = true,
   displayImage = true,
   displayTitle = true,
   displaySummary = true,
@@ -313,16 +307,22 @@ function ResourceDetail({
           <Comments
             {...props}
             resourceId={resourceId}
-            sentiment="for"
+            title={props.commentsWidget?.title}
+            emptyListText={props.commentsWidget?.emptyListText}
+            formIntro={props.commentsWidget?.formIntro}
             isVotingEnabled={props.commentsWidget?.isVotingEnabled || false}
             isReplyingEnabled={props.commentsWidget?.isReplyingEnabled || false}
+            sentiment="for"
           />
           <Comments
             {...props}
             resourceId={resourceId}
-            sentiment="against"
+            title={props.commentsWidget?.title}
+            emptyListText={props.commentsWidget?.emptyListText}
+            formIntro={props.commentsWidget?.formIntro}
             isVotingEnabled={props.commentsWidget?.isVotingEnabled || false}
             isReplyingEnabled={props.commentsWidget?.isReplyingEnabled || false}
+            sentiment="against"
           />
         </section>
       ) : null}

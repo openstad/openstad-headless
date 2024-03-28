@@ -20,6 +20,9 @@ import {
 import WidgetPublish from '@/components/widget-publish';
 import ArgumentsGeneral from '../../comments/[id]/general';
 import LikesDisplay from '../../likes/[id]/weergave';
+import ArgumentsList from '../../comments/[id]/list';
+import { ArgumentWidgetTabProps } from '../../comments/[id]';
+import ArgumentsForm from '../../comments/[id]/form';
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
@@ -33,6 +36,39 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
     useWidgetPreview<ResourceDetailWidgetProps>({
       projectId,
     });
+
+  function extractConfig<T>(
+    subWidgetKey: keyof Pick<
+      ResourceDetailWidgetProps,
+      'commentsWidget' | 'likeWidget'
+    >
+  ) {
+    if (!previewConfig) throw new Error();
+
+    return {
+      resourceId: previewConfig.resourceId || '',
+      ...previewConfig[subWidgetKey],
+      updateConfig: (config: T) =>
+        updateConfig({
+          ...previewConfig,
+          [subWidgetKey]: {
+            ...previewConfig[subWidgetKey],
+            ...config,
+          },
+        }),
+      onFieldChanged: (key: string, value: any) => {
+        if (previewConfig) {
+          updatePreview({
+            ...previewConfig,
+            [subWidgetKey]: {
+              ...previewConfig[subWidgetKey],
+              [key]: value,
+            },
+          });
+        }
+      },
+    };
+  }
 
   return (
     <div>
@@ -57,10 +93,8 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="display">Display</TabsTrigger>
-              <TabsTrigger value="comments">
-                Argumenten widget display
-              </TabsTrigger>
-              <TabsTrigger value="likes">Likes widget display</TabsTrigger>
+              <TabsTrigger value="comments">Argumenten widget</TabsTrigger>
+              <TabsTrigger value="likes">Likes widget</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -102,30 +136,36 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
 
             <TabsContent value="comments" className="p-0">
               {previewConfig && (
-                <ArgumentsGeneral
-                  omitSchemaKeys={['resourceId', 'sentiment']}
-                  {...{
-                    ...previewConfig,
-                    resourceId: previewConfig.resourceId || '',
-                    isVotingEnabled: !!previewConfig.commentsVotingEnabled,
-                    isReplyingEnabled: !!previewConfig.commentsReplyingEnabled,
-                  }}
-                  updateConfig={(config) =>
-                    updateConfig({
-                      ...widget.config,
-                      commentsVotingEnabled: config.isVotingEnabled,
-                      commentsReplyingEnabled: config.isReplyingEnabled,
-                    })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        commentsWidget:{[key]: value},
-                      });
-                    }
-                  }}
-                />
+                <Tabs defaultValue="general">
+                  <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
+                    <TabsTrigger value="general">Algemeen</TabsTrigger>
+                    <TabsTrigger value="list">Lijst</TabsTrigger>
+                    <TabsTrigger value="form">Formulier</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="general" className="p-0">
+                    <ArgumentsGeneral
+                      omitSchemaKeys={['resourceId', 'sentiment']}
+                      {...extractConfig<ArgumentWidgetTabProps>(
+                        'commentsWidget'
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="list" className="p-0">
+                    <ArgumentsList
+                      {...extractConfig<ArgumentWidgetTabProps>(
+                        'commentsWidget'
+                      )}
+                    />
+                  </TabsContent>
+                  <TabsContent value="form" className="p-0">
+                    <ArgumentsForm
+                      {...extractConfig<ArgumentWidgetTabProps>(
+                        'commentsWidget'
+                      )}
+                    />
+                  </TabsContent>
+                </Tabs>
               )}
             </TabsContent>
 
@@ -135,33 +175,20 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   omitSchemaKeys={['resourceId']}
                   {...{
                     ...previewConfig,
+                    ...previewConfig.likeWidget,
                     resourceId: previewConfig.resourceId,
-                    title: previewConfig.likeWidget?.title,
-                    yesLabel: previewConfig.likeWidget?.yesLabel,
-                    noLabel: previewConfig.likeWidget?.noLabel,
-                    showProgressBar: previewConfig.likeWidget?.showProgressBar,
-                    progressBarDescription:
-                      previewConfig.likeWidget?.progressBarDescription,
-                    variant: previewConfig.likeWidget?.variant,
                   }}
                   updateConfig={(config) => {
                     updateConfig<ResourceDetailWidgetProps>({
                       ...widget.config,
-                      likeWidget: {
-                        title: config.title,
-                        yesLabel: config.yesLabel,
-                        noLabel: config.noLabel,
-                        showProgressBar: config.showProgressBar,
-                        progressBarDescription: config.progressBarDescription,
-                        variant: config.variant,
-                      },
+                      likeWidget: config,
                     });
                   }}
                   onFieldChanged={(key, value) => {
                     if (previewConfig) {
                       updatePreview({
                         ...previewConfig,
-                        likeWidget:{[key]: value},
+                        likeWidget: { [key]: value },
                       });
                     }
                   }}

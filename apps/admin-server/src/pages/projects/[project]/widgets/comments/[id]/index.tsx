@@ -14,13 +14,21 @@ import WidgetPreview from '@/components/widget-preview';
 import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
 import WidgetPublish from '@/components/widget-publish';
-export const getServerSideProps = withApiUrl
- 
-export default function WidgetArguments({
-  apiUrl
-}: WithApiUrlProps) {
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+export const getServerSideProps = withApiUrl;
+
+// Use these props in the widget tabs
+export type ArgumentWidgetTabProps = Omit<
+  CommentsWidgetProps,
+  keyof Omit<BaseProps, 'projectId'> | keyof ProjectSettingProps
+>;
+
+export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project as string;
