@@ -17,6 +17,13 @@ export default function ProjectTags() {
 
   if(!data) return null;
 
+  console.log( data );
+  let loadedTags = (data || []) as {
+    id: number;
+    name: string;
+    type?: string;
+  }[];
+
   return (
     <div>
       <PageLayout
@@ -41,7 +48,7 @@ export default function ProjectTags() {
         }>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
-            <div className="grid grid-cols-1 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
+            <div className="grid grid-cols-1 lg:grid-cols-6 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex truncate">ID</ListHeading>
               <ListHeading className="flex truncate">Naam</ListHeading>
               <ListHeading className="hidden lg:flex truncate">
@@ -49,7 +56,20 @@ export default function ProjectTags() {
               </ListHeading>
             </div>
             <ul>
-              {data?.map((tag: any) => (
+              {loadedTags
+                  .sort((a, b) => {
+                    const aType = a.type ?? '';
+                    const bType = b.type ?? '';
+
+                    if (aType < bType) return -1;
+                    if (aType > bType) return 1;
+
+                    if (a.name < b.name) return -1;
+                    if (a.name > b.name) return 1;
+
+                    return 0;
+                  })
+                  .map((tag: any) => (
                 <Link
                 href={`/projects/${project}/tags/${tag.id}`}
                 key={tag.id}>
