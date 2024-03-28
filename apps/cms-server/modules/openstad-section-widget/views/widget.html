@@ -1,8 +1,7 @@
 <style>
   {{data.widget.formattedContainerStyles}}
 </style>
-
-<div id="{% if data.widget.htmlId%}{{data.widget.htmlId}}{% else %}{{data.widget.containerId}}{% endif %}" class="section
+<div id="{{data.widget.containerId}}" class="section
   {% if data.widget.sectionToggle %}
   {% if data.widget.sectionOpen %}open{% else %}closed{% endif %}
   {% endif %}
@@ -169,8 +168,7 @@
         {% area data.widget, 'column2' %}
       </div>
     </div>
-    </div>
-  {% endif %}
-</div>
+    {% endif %}
+  </div>
 {% endif %}
 </div>
