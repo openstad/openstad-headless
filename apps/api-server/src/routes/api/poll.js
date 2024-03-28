@@ -12,20 +12,20 @@ router
    // scopes
 	.all('*', function(req, res, next) {
 
-		req.scope = ['defaultScope', 'withResource'];
+		req.scope = ['defaultScope', 'includeResource'];
 		req.scope.push({method: ['forProjectId', req.params.projectId]});
 
-		if (req.query.withVoteCount) {
+		if (req.query.includeVoteCount) {
       // votes are counted in model.voteCount
-			req.scope.push({method: ['withVotes', 'poll', req.user.id]});
+			req.scope.push({method: ['includeVotes', 'poll', req.user.id]});
 		}
 
-		if (req.query.withUserVote) {
-			req.scope.push({method: ['withUserVote', 'poll', req.user.id]});
+		if (req.query.includeUserVote) {
+			req.scope.push({method: ['includeUserVote', 'poll', req.user.id]});
 		}
 
-		if (req.query.withVotes) {
-			req.scope.push({method: ['withVotes', 'poll', req.user.id]});
+		if (req.query.includeVotes) {
+			req.scope.push({method: ['includeVotes', 'poll', req.user.id]});
 		}
 
 		return next();
@@ -51,7 +51,7 @@ router.route('/')
 			.findAndCountAll({ where, offset: req.dbQuery.offset, limit: req.dbQuery.limit })
 			.then(function( result ) {
         result.rows.forEach((poll) => {
-          if (req.query.withVoteCount) poll.countVotes(!req.query.withVotes);
+          if (req.query.includeVoteCount) poll.countVotes(!req.query.includeVotes);
         });
         req.results = result.rows;
         req.results = result.rows;
@@ -106,8 +106,8 @@ router.route('/')
 				db.Poll
           .scope(
 					  'defaultScope',
-            'withResource',
-					  {method: ['withUserVote', 'poll', req.user.id]},
+            'includeResource',
+					  {method: ['includeUserVote', 'poll', req.user.id]},
 				  )
 					.findByPk(result.id)
 					.then(function( poll ) {
@@ -126,7 +126,7 @@ router.route('/:pollId(\\d+)')
 	.all(function(req, res, next) {
 		var pollId = parseInt(req.params.pollId) || 1;
     let scope = req.scope
-    if (req.method == 'PUT') scope.push('withVotes');
+    if (req.method == 'PUT') scope.push('includeVotes');
 		db.Poll
 			.scope(scope)
 			.findOne({
@@ -134,7 +134,7 @@ router.route('/:pollId(\\d+)')
 			})
 			.then(found => {
 				if ( !found ) throw new Error('Poll not found');
-        if (req.query.withVoteCount) found.countVotes(!req.query.withVotes);
+        if (req.query.includeVoteCount) found.countVotes(!req.query.includeVotes);
 
 		    req.results = found;
 				next();
@@ -212,7 +212,7 @@ router.route('/:pollId(\\d+)/vote')
 
     let pollVote;
 		db.PollVote
-			.scope('defaultScope', 'withPoll')
+			.scope('defaultScope', 'includePoll')
 			.findOne({
 				where: { pollId: poll.id, userId: req.user.id }
 			})
