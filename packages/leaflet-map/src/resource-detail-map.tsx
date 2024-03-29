@@ -29,7 +29,7 @@ const ResourceDetailMap = ({
   const urlParams = new URLSearchParams(window.location.search);
   resourceId =
     resourceId || ( urlParams.get('openstadResourceId')
-      ? parseInt(urlParams.get('openstadResourceId') as string)
+      ? (urlParams.get('openstadResourceId') as string)
       : undefined );
 
   const {

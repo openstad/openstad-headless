@@ -116,7 +116,7 @@ const BaseMap = ({
   useEffect(() => {
     if (!mapRef) return;
     if (autoZoomAndCenter) {
-      if (autoZoomAndCenter == 'area' && area) {
+      if (autoZoomAndCenter == 'area' && area.length) {
         return setBoundsAndCenter(area);
       }
       if (currentMarkers?.length) {
@@ -135,7 +135,7 @@ const BaseMap = ({
     }
   }, [center, setBoundsAndCenter, mapRef]);
 
-  // markers
+  // // markers
   useEffect(() => {
     if (markers.length == 0 && currentMarkers.length == 0) return;
 
@@ -183,12 +183,12 @@ const BaseMap = ({
         ? [...markerData.onClick, onMarkerClick]
         : [onMarkerClick];
 
-      // ToDo
+      // // ToDo
       markerData.isVisible = true;
 
-      if (clustering && clustering.isActive && !markerData.doNotCluster) {
-        markerData.isClustered = true;
-      }
+      // if (clustering && clustering.isActive && !markerData.doNotCluster) {
+      //   markerData.isClustered = true;
+      // }
 
       result[i] = markerData;
     });
