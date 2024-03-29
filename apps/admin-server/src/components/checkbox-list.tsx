@@ -20,7 +20,7 @@ type Props<T> = {
     onValueChange: (value: T, checked: boolean) => void;
     keyPerItem: (t:T) => string;
     keyForGrouping?: keyof T;
-    layout?: string;
+    layout?: 'horizontal' | 'vertical';
 };
 
 export const CheckboxList = <T extends { [key: string]: any }>({
