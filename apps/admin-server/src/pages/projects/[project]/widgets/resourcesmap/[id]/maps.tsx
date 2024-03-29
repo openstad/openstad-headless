@@ -30,11 +30,12 @@ const formSchema = z.object({
 export default function WidgetResourcesMapMaps() {
   const category = 'map';
 
+    // TODO should use the passed props widget, this is the old way and is not advised
   const {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useWidgetConfig();
+  } = useWidgetConfig<any>();
 
   const defaults = useCallback(
     () => ({

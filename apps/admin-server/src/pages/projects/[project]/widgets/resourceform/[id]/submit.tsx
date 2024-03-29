@@ -27,6 +27,7 @@ export default function WidgetResourceFormSubmit() {
   type FormData = z.infer<typeof formSchema>;
   const category = 'submit';
 
+    // TODO should use the passed props widget, this is the old way and is not advised
   const {
     data: widget,
     isLoading: isLoadingWidget,

@@ -31,7 +31,7 @@ export default function WidgetResourceFormConfirmation() {
   type FormData = z.infer<typeof formSchema>;
   const category = 'confirmation';
 
-  // should use the passed props widget, this is the old way
+  // TODO should use the passed props widget, this is the old way and is not advised
   const {
     data: widget,
     isLoading: isLoadingWidget,
