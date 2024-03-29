@@ -1,7 +1,7 @@
-import CommentType from '../../../types/comment';
+import {Comment} from '@openstad-headless/types';
 
 export type CommentProps = {
-  comment: CommentType;
+  comment: Comment;
   showDateSeperately?: boolean;
   submitComment?: (e: any) => void;
 };

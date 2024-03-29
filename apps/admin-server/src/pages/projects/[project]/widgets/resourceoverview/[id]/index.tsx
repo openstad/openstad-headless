@@ -8,7 +8,6 @@ import {
 } from '../../../../../../components/ui/tabs';
 import WidgetResourceOverviewGeneral from './general';
 import WidgetResourceOverviewDisplay from './display';
-import WidgetResourceOverviewButton from './button';
 import WidgetResourceOverviewSorting from './sorting';
 import WidgetResourceOverviewPagination from './pagination';
 import WidgetResourceOverviewSearch from './search';
@@ -32,7 +31,8 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig();
+  const { data: widget, updateConfig } =
+    useWidgetConfig<ResourceOverviewWidgetProps>();
   const { previewConfig, updatePreview } =
     useWidgetPreview<ResourceOverviewWidgetProps>({
       projectId,
@@ -44,7 +44,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
     updateConfig: (config: ResourceOverviewWidgetProps) =>
       updateConfig({ ...widget.config, ...config }),
 
-    onFieldChanged: (key: keyof ResourceOverviewWidgetProps, value: any) => {
+    onFieldChanged: (key: string, value: any) => {
       if (previewConfig) {
         updatePreview({
           ...previewConfig,
@@ -77,9 +77,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
-              {/* <TabsTrigger value="image">Afbeeldingen</TabsTrigger> */}
               <TabsTrigger value="display">Display</TabsTrigger>
-              {/* <TabsTrigger value="button">Knop teksten</TabsTrigger> */}
               <TabsTrigger value="tags">Tags</TabsTrigger>
               <TabsTrigger value="search">Zoeken</TabsTrigger>
               <TabsTrigger value="sorting">Sorteren</TabsTrigger>
@@ -94,9 +92,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                 </TabsContent>
                 <TabsContent value="display" className="p-0">
                   <WidgetResourceOverviewDisplay {...totalPropPackage} />
-                </TabsContent>
-                <TabsContent value="button" className="p-0">
-                  <WidgetResourceOverviewButton {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="sorting" className="p-0">
                   <WidgetResourceOverviewSorting {...totalPropPackage} />

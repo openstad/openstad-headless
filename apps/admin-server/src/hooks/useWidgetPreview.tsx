@@ -8,7 +8,7 @@ export function useWidgetPreview<T extends {[key:string]:any}>(widgetSettings: P
   updatePreview: (arg: T) => void;
 } {
   const [previewConfig, setPreviewConfig] = useState<T>();
-  const { data: widget, isLoading: isLoadingWidget } = useWidgetConfig();
+  const { data: widget, isLoading: isLoadingWidget } = useWidgetConfig<T>();
 
   // Set the preview the first time the widget config is loaded
   useEffect(() => {
