@@ -31,11 +31,12 @@ export default function WidgetResourceFormConfirmation() {
   type FormData = z.infer<typeof formSchema>;
   const category = 'confirmation';
 
+  // should use the passed props widget, this is the old way
   const {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useWidgetConfig();
+  } = useWidgetConfig<any>();
 
   const defaults = useCallback(
     () => ({
