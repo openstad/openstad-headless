@@ -31,6 +31,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+// TODO see if this widget is still used or can be removed
 export default function WidgetMapImage() {
   const category = 'image';
 
@@ -38,7 +39,7 @@ export default function WidgetMapImage() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useWidgetConfig();
+  } = useWidgetConfig<any>();
 
   const defaults = useCallback(
     () => ({
