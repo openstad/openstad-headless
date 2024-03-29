@@ -17,7 +17,6 @@ export default function ProjectTags() {
 
   if(!data) return null;
 
-  console.log( data );
   let loadedTags = (data || []) as {
     id: number;
     name: string;
