@@ -12,29 +12,42 @@ import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { ArgumentWidgetTabProps } from '.';
 
 const formSchema = z.object({
   title: z.string(),
   emptyListText: z.string(),
 });
 
-export default function ArgumentsList(
-  props: CommentsWidgetProps & EditFieldProps<CommentsWidgetProps>
-) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver<any>(formSchema),
+type SchemaKey = keyof typeof formSchema.shape;
+
+export default function ArgumentsList({
+  omitSchemaKeys = [],
+  ...props
+}:ArgumentWidgetTabProps &
+  EditFieldProps<ArgumentWidgetTabProps> & { omitSchemaKeys?: Array<SchemaKey> }) {
+  const finalSchema = formSchema.omit(
+    omitSchemaKeys.reduce(
+      (prev, key) => Object.assign(prev, { [key]: true }),
+      {}
+    )
+  );
+
+  type FinalSchemaInfer = z.infer<typeof finalSchema>;
+
+  const form = useForm<FinalSchemaInfer>({
+    resolver: zodResolver<any>(finalSchema),
     defaultValues: {
-      title: props?.title || 'Argumenten',
+      title: props?.title || '',
       emptyListText: props?.emptyListText || 'Nog geen reacties geplaatst.',
     },
   });
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: FinalSchemaInfer) {
     props.updateConfig({ ...props, ...values });
   }
 
@@ -54,6 +67,7 @@ export default function ArgumentsList(
                 <FormLabel>Titel</FormLabel>
                 <FormControl>
                   <Input
+                    placeholder='[[nr]] reacties'
                     {...field}
                     onChange={(e) => {
                       onFieldChange(field.name, e.target.value);

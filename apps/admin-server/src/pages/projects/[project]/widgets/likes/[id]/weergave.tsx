@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
@@ -28,6 +28,7 @@ import { ObjectListSelect } from '@/components/ui/object-select';
 import useResources from '@/hooks/use-resources';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
+import { LikeWidgetTabProps } from '.';
 
 const formSchema = z.object({
   title: z.string(),
@@ -40,21 +41,39 @@ const formSchema = z.object({
   resourceId: z.string().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
+type SchemaKey = keyof FormData;
 
-export default function LikesDisplay(
-  props: LikeWidgetProps & EditFieldProps<LikeWidgetProps>
-) {
+export default function LikesDisplay({
+  omitSchemaKeys = [],
+  ...props
+}: LikeWidgetTabProps &
+  EditFieldProps<LikeWidgetTabProps> & {
+    omitSchemaKeys?: Array<SchemaKey>;
+  }) {
+  const finalSchema = formSchema.omit(
+    omitSchemaKeys.reduce(
+      (prev, key) => Object.assign(prev, { [key]: true }),
+      {}
+    )
+  );
+
+  type FinalSchemaInfer = z.infer<typeof finalSchema>;
+
+  const conditionallyRenderField = (key: SchemaKey, field: ReactNode) => {
+    return key in finalSchema.shape ? field : null;
+  };
+
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
   const { data, error } = useResources(props.projectId);
   // Force at least minimal typehinting
   const resources: Array<{ id: string | number; title: string }> = data || [];
 
-  function onSubmit(values: FormData) {
+  function onSubmit(values: FinalSchemaInfer) {
     props.updateConfig({ ...props, ...values });
   }
 
-  const form = useForm<FormData>({
-    resolver: zodResolver<any>(formSchema),
+  const form = useForm<FinalSchemaInfer>({
+    resolver: zodResolver<any>(finalSchema),
     defaultValues: {
       resourceId: props?.resourceId,
       title: props?.title || 'Wat vindt u van dit plan',
@@ -76,159 +95,183 @@ export default function LikesDisplay(
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 lg:w-1/2">
-        <FormObjectSelectField
-          form={form}
-          fieldName="resourceId"
-          fieldLabel="Koppel aan een specifieke resource"
-          items={resources}
-          keyForValue="id"
-          label={(resource) => `${resource.id} ${resource.title}`}
-          onFieldChanged={props.onFieldChanged}
-          noSelection="Niet koppelen (gebruik queryparam openstadResourceId)"
-        />
+        {conditionallyRenderField(
+          'resourceId',
+          <FormObjectSelectField
+            form={form}
+            fieldName="resourceId"
+            fieldLabel="Koppel aan een specifieke resource"
+            items={resources}
+            keyForValue="id"
+            label={(resource) => `${resource.id} ${resource.title}`}
+            onFieldChanged={props.onFieldChanged}
+            noSelection="Niet koppelen (gebruik queryparam openstadResourceId)"
+          />
+        )}
 
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Titel</FormLabel>
-              <FormControl>
-                <Input
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
-                  }}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="yesLabel"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Label voor &quot;Ja&quot;</FormLabel>
-              <FormControl>
-                <Input
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
-                  }}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="noLabel"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Label voor &quot;Nee&quot;</FormLabel>
-              <FormControl>
-                <Input
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
-                  }}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="variant"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Variant type</FormLabel>
-              <Select
-                onValueChange={(value) => {
-                  field.onChange(value);
-                  props.onFieldChanged(field.name, value);
-                }}
-                value={field.value}>
+        {conditionallyRenderField(
+          'title',
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Titel</FormLabel>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Standaard" />
-                  </SelectTrigger>
+                  <Input
+                    defaultValue={field.value}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      onFieldChange(field.name, e.target.value);
+                    }}
+                  />
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="small">Compact</SelectItem>
-                  <SelectItem value="medium">Standaard</SelectItem>
-                  <SelectItem value="large">Groot</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
+              </FormItem>
+            )}
+          />
+        )}
 
-        <FormField
-          control={form.control}
-          name="hideCounters"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Moet het aantal stemmen verborgen worden?</FormLabel>
-              <Select
-                onValueChange={(e: string) => {
-                  field.onChange(e === 'true');
-                  props.onFieldChanged(field.name, e === 'true');
-                }}
-                value={field.value ? 'true' : 'false'}>
+        {conditionallyRenderField(
+          'yesLabel',
+          <FormField
+            control={form.control}
+            name="yesLabel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Label voor &quot;Ja&quot;</FormLabel>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Nee" />
-                  </SelectTrigger>
+                  <Input
+                    defaultValue={field.value}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      onFieldChange(field.name, e.target.value);
+                    }}
+                  />
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="true">Ja</SelectItem>
-                  <SelectItem value="false">Nee</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+              </FormItem>
+            )}
+          />
+        )}
 
-        <FormField
-          control={form.control}
-          name="showProgressBar"
-          render={({ field }) => (
-            <FormItem className="col-span-1">
-              <FormLabel>Weergeef progressie balk</FormLabel>
-              {YesNoSelect(field, props)}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {conditionallyRenderField(
+          'noLabel',
+          <FormField
+            control={form.control}
+            name="noLabel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Label voor &quot;Nee&quot;</FormLabel>
+                <FormControl>
+                  <Input
+                    defaultValue={field.value}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      onFieldChange(field.name, e.target.value);
+                    }}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        )}
 
-        <FormField
-          control={form.control}
-          name="progressBarDescription"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Progress balk informatie</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder='Wat representeert de progressie balk?'
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
+        {conditionallyRenderField(
+          'variant',
+          <FormField
+            control={form.control}
+            name="variant"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Variant type</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    props.onFieldChanged(field.name, value);
                   }}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+                  value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Standaard" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="small">Compact</SelectItem>
+                    <SelectItem value="medium">Standaard</SelectItem>
+                    <SelectItem value="large">Groot</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+        )}
+
+        {conditionallyRenderField(
+          'hideCounters',
+          <FormField
+            control={form.control}
+            name="hideCounters"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Moet het aantal stemmen verborgen worden?</FormLabel>
+                <Select
+                  onValueChange={(e: string) => {
+                    field.onChange(e === 'true');
+                    props.onFieldChanged(field.name, e === 'true');
+                  }}
+                  value={field.value ? 'true' : 'false'}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Nee" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="true">Ja</SelectItem>
+                    <SelectItem value="false">Nee</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {conditionallyRenderField(
+          'showProgressBar',
+          <FormField
+            control={form.control}
+            name="showProgressBar"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Weergeef progressie balk</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {conditionallyRenderField(
+          'progressBarDescription',
+          <FormField
+            control={form.control}
+            name="progressBarDescription"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Progress balk informatie</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Wat representeert de progressie balk?"
+                    defaultValue={field.value}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      onFieldChange(field.name, e.target.value);
+                    }}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        )}
 
         <Button type="submit">Opslaan</Button>
       </form>

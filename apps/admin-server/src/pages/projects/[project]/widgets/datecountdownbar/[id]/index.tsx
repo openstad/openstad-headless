@@ -25,7 +25,7 @@ export default function WidgetDateCountdownBar({
   const id = router.query.id;
   const projectId = router.query.project;
 
-  const { data: widget, updateConfig } = useWidgetConfig();
+  const { data: widget, updateConfig } = useWidgetConfig<DateCountdownBarWidgetProps>();
   const { previewConfig, updatePreview } =
     useWidgetPreview<DateCountdownBarWidgetProps>({});
 
@@ -34,7 +34,7 @@ export default function WidgetDateCountdownBar({
     updateConfig: (config: DateCountdownBarWidgetProps) =>
       updateConfig({ ...widget.config, ...config }),
 
-    onFieldChanged: (key: keyof DateCountdownBarWidgetProps, value: any) => {
+    onFieldChanged: (key:string, value: any) => {
       if (previewConfig) {
         updatePreview({
           ...previewConfig,

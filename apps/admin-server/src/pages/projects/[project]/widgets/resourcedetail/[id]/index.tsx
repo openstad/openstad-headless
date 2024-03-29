@@ -18,8 +18,12 @@ import {
   withApiUrl,
 } from '@/lib/server-side-props-definition';
 import WidgetPublish from '@/components/widget-publish';
-import WidgetResourceCommentsDisplay from './comments';
-import WidgetResourceLikesDisplay from './likes';
+import ArgumentsGeneral from '../../comments/[id]/general';
+import LikesDisplay from '../../likes/[id]/weergave';
+import ArgumentsList from '../../comments/[id]/list';
+import { ArgumentWidgetTabProps } from '../../comments/[id]';
+import ArgumentsForm from '../../comments/[id]/form';
+import { LikeWidgetTabProps } from '../../likes/[id]';
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
@@ -27,11 +31,45 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig();
+  const { data: widget, updateConfig } =
+    useWidgetConfig<ResourceDetailWidgetProps>();
   const { previewConfig, updatePreview } =
     useWidgetPreview<ResourceDetailWidgetProps>({
       projectId,
     });
+
+  function extractConfig<T>(
+    subWidgetKey: keyof Pick<
+      ResourceDetailWidgetProps,
+      'commentsWidget' | 'likeWidget'
+    >
+  ) {
+    if (!previewConfig) throw new Error();
+
+    return {
+      resourceId: previewConfig.resourceId || '',
+      ...previewConfig[subWidgetKey],
+      updateConfig: (config: T) =>
+        updateConfig({
+          ...previewConfig,
+          [subWidgetKey]: {
+            ...previewConfig[subWidgetKey],
+            ...config,
+          },
+        }),
+      onFieldChanged: (key: string, value: any) => {
+        if (previewConfig) {
+          updatePreview({
+            ...previewConfig,
+            [subWidgetKey]: {
+              ...previewConfig[subWidgetKey],
+              [key]: value,
+            },
+          });
+        }
+      },
+    };
+  }
 
   return (
     <div>
@@ -56,10 +94,8 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="display">Display</TabsTrigger>
-              <TabsTrigger value="comments">
-                Argumenten widget display
-              </TabsTrigger>
-              <TabsTrigger value="likes">Likes widget display</TabsTrigger>
+              <TabsTrigger value="comments">Argumenten widget</TabsTrigger>
+              <TabsTrigger value="likes">Likes widget</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -101,38 +137,44 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
 
             <TabsContent value="comments" className="p-0">
               {previewConfig && (
-                <WidgetResourceCommentsDisplay
-                  {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
-                />
+                <Tabs defaultValue="general">
+                  <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
+                    <TabsTrigger value="general">Algemeen</TabsTrigger>
+                    <TabsTrigger value="list">Lijst</TabsTrigger>
+                    <TabsTrigger value="form">Formulier</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="general" className="p-0">
+                    <ArgumentsGeneral
+                      omitSchemaKeys={['resourceId', 'sentiment']}
+                      {...extractConfig<ArgumentWidgetTabProps>(
+                        'commentsWidget'
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="list" className="p-0">
+                    <ArgumentsList
+                      {...extractConfig<ArgumentWidgetTabProps>(
+                        'commentsWidget'
+                      )}
+                    />
+                  </TabsContent>
+                  <TabsContent value="form" className="p-0">
+                    <ArgumentsForm
+                      {...extractConfig<ArgumentWidgetTabProps>(
+                        'commentsWidget'
+                      )}
+                    />
+                  </TabsContent>
+                </Tabs>
               )}
             </TabsContent>
 
             <TabsContent value="likes" className="p-0">
               {previewConfig && (
-                <WidgetResourceLikesDisplay
-                  {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                <LikesDisplay
+                  omitSchemaKeys={['resourceId']}
+                  {...extractConfig<LikeWidgetTabProps>('likeWidget')}
                 />
               )}
             </TabsContent>

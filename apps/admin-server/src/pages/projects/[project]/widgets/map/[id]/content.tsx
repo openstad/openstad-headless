@@ -44,7 +44,7 @@ export default function WidgetMapContent() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useWidgetConfig();
+  } = useWidgetConfig<any>();
 
   const defaults = useCallback(
     () => ({

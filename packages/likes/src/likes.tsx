@@ -15,8 +15,7 @@ import { hasRole } from '@openstad-headless/lib';
 import DataStore from '@openstad-headless/data-store/src';
 import React, { useState, useEffect } from 'react';
 import './likes.css';
-import type { BaseProps } from '../../types/base-props.js';
-import type { ProjectSettingProps } from '../../types/project-setting-props.js';
+import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 
 export type LikeWidgetProps = BaseProps &
   LikeProps &

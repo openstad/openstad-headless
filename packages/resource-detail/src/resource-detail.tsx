@@ -9,9 +9,7 @@ import {
   Pill,
   IconButton,
 } from '@openstad-headless/ui/src';
-import { BaseProps } from '../../types/base-props';
-import { ProjectSettingProps } from '../../types/project-setting-props';
-
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
@@ -21,41 +19,45 @@ import {
   Heading6,
 } from '@utrecht/component-library-react';
 import React from 'react';
-import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
-import { Comments } from '@openstad-headless/comments/src/comments';
+import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
+import { Comments, CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
+
+type booleanProps = {
+  [K in
+    | 'displayComments'
+    | 'displayImage'
+    | 'displayTitle'
+    | 'displaySummary'
+    | 'displayDescription'
+    | 'displayUser'
+    | 'displayDate'
+    | 'displayBudget'
+    | 'displayLocation'
+    | 'displayBudgetDocuments'
+    | 'displayLikes'
+    | 'displayTags'
+    | 'displayStatus'
+    | 'displaySocials']: boolean | undefined;
+};
 
 export type ResourceDetailWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
     resourceId?: string;
     resourceIdRelativePath?: string;
-  } & {
-    displayComments?: boolean;
-    commentsVotingEnabled?: boolean;
-    commentsReplyingEnabled?: boolean;
-    displayImage?: boolean;
-    displayTitle?: boolean;
-    displaySummary?: boolean;
-    displayDescription?: boolean;
-    displayUser?: boolean;
-    displayDate?: boolean;
-    displayBudget?: boolean;
-    displayLocation?: boolean;
-    displayBudgetDocuments?: boolean;
-    displayLikes?: boolean;
-    likeWidgetProgressBarText?: string;
-    likeWidgetTitle?: string;
-    likeWidgetForText?: string;
-    likeWidgetAgainstText?: string;
-    displayTags?: boolean;
-    displayStatus?: boolean;
-    displaySocials?: boolean;
+  } & booleanProps & {
+    likeWidget?: Omit<
+      LikeWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
+    commentsWidget?: Omit<
+      CommentsWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
   };
 
 function ResourceDetail({
   displayComments = true,
-  commentsReplyingEnabled = true,
-  commentsVotingEnabled=true,
   displayImage = true,
   displayTitle = true,
   displaySummary = true,
@@ -116,7 +118,12 @@ function ResourceDetail({
     displayLikes || displayTags || displayStatus || displaySocials;
   return (
     <section>
-      <div className={`osc ${shouldHaveSideColumn?'osc-resource-detail-column-container': 'osc-resource-detail-container'}`}>
+      <div
+        className={`osc ${
+          shouldHaveSideColumn
+            ? 'osc-resource-detail-column-container'
+            : 'osc-resource-detail-container'
+        }`}>
         <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
           {resource ? (
             <article className="osc-resource-detail-content-items">
@@ -201,10 +208,15 @@ function ResourceDetail({
               <>
                 <Likes
                   {...props}
-                  title={props.likeWidgetTitle}
-                  yesLabel={props.likeWidgetForText}
-                  noLabel={props.likeWidgetAgainstText}
-                  progressBarDescription={props.likeWidgetProgressBarText}
+                  title={props.likeWidget?.title}
+                  yesLabel={props.likeWidget?.yesLabel}
+                  noLabel={props.likeWidget?.noLabel}
+                  hideCounters={props.likeWidget?.hideCounters}
+                  variant={props.likeWidget?.variant}
+                  showProgressBar={props.likeWidget?.showProgressBar}
+                  progressBarDescription={
+                    props.likeWidget?.progressBarDescription
+                  }
                 />
                 <Spacer size={1} />
               </>
@@ -295,17 +307,22 @@ function ResourceDetail({
           <Comments
             {...props}
             resourceId={resourceId}
+            title={props.commentsWidget?.title}
+            emptyListText={props.commentsWidget?.emptyListText}
+            formIntro={props.commentsWidget?.formIntro}
+            isVotingEnabled={props.commentsWidget?.isVotingEnabled || false}
+            isReplyingEnabled={props.commentsWidget?.isReplyingEnabled || false}
             sentiment="for"
-            isVotingEnabled={commentsVotingEnabled || false}
-            isReplyingEnabled={commentsReplyingEnabled || false}
-            {...props}
           />
           <Comments
             {...props}
             resourceId={resourceId}
+            title={props.commentsWidget?.title}
+            emptyListText={props.commentsWidget?.emptyListText}
+            formIntro={props.commentsWidget?.formIntro}
+            isVotingEnabled={props.commentsWidget?.isVotingEnabled || false}
+            isReplyingEnabled={props.commentsWidget?.isReplyingEnabled || false}
             sentiment="against"
-            isVotingEnabled={commentsVotingEnabled || false}
-            isReplyingEnabled={commentsReplyingEnabled || false}
           />
         </section>
       ) : null}

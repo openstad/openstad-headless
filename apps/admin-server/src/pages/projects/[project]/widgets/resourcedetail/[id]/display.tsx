@@ -28,6 +28,8 @@ const formSchema = z.object({
   displayTags: z.boolean(),
   displaySocials: z.boolean(),
   displayStatus: z.boolean(),
+  displayLikes: z.boolean(),
+  displayComments: z.boolean()
 });
 
 export default function WidgetResourceDetailDisplay(
@@ -56,6 +58,8 @@ export default function WidgetResourceDetailDisplay(
       displayTags: undefinedToTrueOrProp(props?.displayTags),
       displaySocials: undefinedToTrueOrProp(props?.displaySocials),
       displayStatus: undefinedToTrueOrProp(props?.displayStatus),
+      displayLikes: undefinedToTrueOrProp(props?.displayLikes),
+      displayComments: undefinedToTrueOrProp(props?.displayComments),
     },
   });
 
@@ -198,6 +202,30 @@ export default function WidgetResourceDetailDisplay(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Social share opties weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayLikes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Toon de likes widget</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayComments"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Toon de argumenten widget</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
