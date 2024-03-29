@@ -40,7 +40,7 @@ export default function ArgumentsList({
   const form = useForm<FinalSchemaInfer>({
     resolver: zodResolver<any>(finalSchema),
     defaultValues: {
-      title: props?.title || 'Argumenten',
+      title: props?.title || '',
       emptyListText: props?.emptyListText || 'Nog geen reacties geplaatst.',
     },
   });
@@ -67,6 +67,7 @@ export default function ArgumentsList({
                 <FormLabel>Titel</FormLabel>
                 <FormControl>
                   <Input
+                    placeholder='[[nr]] reacties'
                     {...field}
                     onChange={(e) => {
                       onFieldChange(field.name, e.target.value);

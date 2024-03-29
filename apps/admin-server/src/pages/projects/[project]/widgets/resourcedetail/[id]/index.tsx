@@ -23,6 +23,7 @@ import LikesDisplay from '../../likes/[id]/weergave';
 import ArgumentsList from '../../comments/[id]/list';
 import { ArgumentWidgetTabProps } from '../../comments/[id]';
 import ArgumentsForm from '../../comments/[id]/form';
+import { LikeWidgetTabProps } from '../../likes/[id]';
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
@@ -173,25 +174,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
               {previewConfig && (
                 <LikesDisplay
                   omitSchemaKeys={['resourceId']}
-                  {...{
-                    ...previewConfig,
-                    ...previewConfig.likeWidget,
-                    resourceId: previewConfig.resourceId,
-                  }}
-                  updateConfig={(config) => {
-                    updateConfig<ResourceDetailWidgetProps>({
-                      ...widget.config,
-                      likeWidget: config,
-                    });
-                  }}
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        likeWidget: { [key]: value },
-                      });
-                    }
-                  }}
+                  {...extractConfig<LikeWidgetTabProps>('likeWidget')}
                 />
               )}
             </TabsContent>
