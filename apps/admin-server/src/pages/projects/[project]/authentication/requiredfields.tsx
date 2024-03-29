@@ -21,7 +21,7 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
-import {Spacer} from "@openstad-headless/ui/src";
+import { Spacer } from "@/components/ui/spacer";
 
 const requiredUserFields = [
   {
@@ -260,7 +260,7 @@ export default function ProjectAuthenticationRequiredFields() {
               <Separator className="my-4" />
               <div>
                 <FormLabel>
-                  Als een gebruiker één of meer een deze verplichte velden moet invullen dan doet die dat op een pagina met deze teksten:
+                  Als een gebruiker één of meer van deze verplichte velden moet invullen dan doet die dat op een pagina met deze teksten:
                 </FormLabel>
               </div>
 
