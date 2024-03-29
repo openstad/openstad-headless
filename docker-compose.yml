@@ -31,8 +31,8 @@ services:
     volumes:
       - openstad-mongo-data:/var/lib/mongo
 
-  openstad-mailhog:
-    image: mailhog/mailhog
+  openstad-mailpit:
+    image: axllent/mailpit:v1.15.0
     ports:
       - 1025:1025 # smtp server
       - 8025:8025 # web ui
