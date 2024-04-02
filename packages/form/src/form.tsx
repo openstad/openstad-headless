@@ -24,6 +24,7 @@ function Form({
       submitDisabled = false,
       secondaryLabel = '',
       secondaryHandler = () => {},
+      ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: string | FileList | [] } = {};
     fields.forEach((field) => {
@@ -71,6 +72,7 @@ function Form({
                     {...field}
                     index={index}
                     onChange={handleInputChange}
+                    {...props}
                 />
             );
         }

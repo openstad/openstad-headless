@@ -1,7 +1,7 @@
 import React, {FC} from "react";
 import {Paragraph, FormLabel, FormFieldDescription, FormField} from "@utrecht/component-library-react";
 import './map.css';
-// import {EditorMap} from "@openstad-headless/leaflet-map/src/editor-map";
+import {EditorMap} from "@openstad-headless/leaflet-map/src/editor-map";
 
 export type MapProps = {
     title: string;
@@ -16,7 +16,8 @@ const MapField: FC<MapProps> = ({
     description,
     fieldKey,
     fieldRequired= false,
-    onChange
+    onChange,
+    ...props
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
@@ -32,7 +33,10 @@ const MapField: FC<MapProps> = ({
             className="form-field-map-container"
             id={`map`}
           >
-              {/*<EditorMap fieldName={fieldKey}/>*/}
+              <EditorMap
+                  fieldName={fieldKey}
+                  {...props}
+              />
           </div>
       </FormField>
     );
