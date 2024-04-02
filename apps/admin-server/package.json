@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@openstad-headless/types": "file:../../packages/types",
     "@openstad-headless/leaflet-map": "file:../../packages/leaflet-map",
     "@openstad-headless/comments": "file:../../packages/comments",
     "@openstad-headless/likes": "file:../../packages/likes",

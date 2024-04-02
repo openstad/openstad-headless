@@ -38,11 +38,12 @@ const formSchema = z.object({
 export default function ChoicesSelectorForm() {
   const category = 'selectionGuide';
 
+  //Temp fix, this widget needs reworking and does not exist yet in the packages folder
   const {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useWidgetConfig();
+  } = useWidgetConfig<any>();
 
   const defaults = useCallback(
     () => ({

@@ -1,14 +1,10 @@
-import CommentType from '../../../types/comment';
+import {Comment} from '@openstad-headless/types';
 
 export type CommentFormProps = {
-  comment: CommentType;
-  descriptionMinLength: number;
-  descriptionMaxLength: number;
-  placeholder: string;
-  formIntro: string;
-  requiredUserRole: string;
-  login: {
-    url: string;
-  };
+  comment?: Comment;
+  descriptionMinLength?: number;
+  descriptionMaxLength?: number;
+  placeholder?: string;
+  formIntro?: string;
   submitComment: (e: any) => void;
 };

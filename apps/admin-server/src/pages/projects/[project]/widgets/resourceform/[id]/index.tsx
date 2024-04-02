@@ -28,7 +28,7 @@ export default function WidgetResourceForm({
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig();
+  const { data: widget, updateConfig } = useWidgetConfig<ResourceFormWidgetProps>();
   const { previewConfig, updatePreview } = useWidgetPreview<ResourceFormWidgetProps>(
       {
         projectId,
@@ -75,7 +75,7 @@ export default function WidgetResourceForm({
                     updateConfig={(config) =>
                         updateConfig({ ...widget.config, ...config })
                     }
-                    onFieldChanged={(key, value) => {
+                    onFieldChanged={(key:string, value:any) => {
                       if (previewConfig) {
                         updatePreview({
                           ...previewConfig,

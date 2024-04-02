@@ -1,6 +1,5 @@
 export default function useComments(props) {
   let self = this;
-
   const projectId = props.projectId;
   const resourceId = props.resourceId;
   const sentiment = props.sentiment || null;
@@ -9,7 +8,7 @@ export default function useComments(props) {
   let errorToReturn = undefined;
   let isLoadingToReturn = false;
 
-  if (resourceId) {
+  if (resourceId && resourceId !== '0') {
     const { data, error, isLoading } = self.useSWR(
       { projectId, resourceId, sentiment },
       'comments.fetch'
@@ -22,7 +21,6 @@ export default function useComments(props) {
 
   // add functionality
   let comments = dataToReturn || [];
-
   comments.create = function (newData) {
     return self.mutate(
       { projectId, resourceId, sentiment },
@@ -85,7 +83,7 @@ export default function useComments(props) {
   });
 
   return {
-    data: dataToReturn,
+    data: comments,
     error: errorToReturn,
     isLoading: isLoadingToReturn,
   };
