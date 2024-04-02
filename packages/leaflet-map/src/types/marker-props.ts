@@ -9,7 +9,6 @@ export type MarkerProps =
   isVisible?: boolean,
   icon?: MarkerIconType,
   iconCreateFunction?: () => any, // TODO
-  defaultIcon?: MarkerIconType,
   href?: string,
   onClick?: any, // ToDo: ik krijg dit niet werkend in de basemap: ((e: LeafletMouseEvent, map: any) => void) | ((e: LeafletMouseEvent, map: any) => void)[],
   doNotCluster?: boolean,

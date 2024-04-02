@@ -12,7 +12,7 @@ import { Area, isPointInArea } from './area';
 import Marker from './marker';
 import MarkerClusterGroup from './marker-cluster-group';
 import parseLocation from './lib/parse-location';
-import type {BaseMapWidgetProps} from './types/basemap-widget-props'
+import type { BaseMapWidgetProps } from './types/basemap-widget-props';
 // ToDo: import { searchAddressByLatLng, suggestAddresses, LookupLatLngByAddressId } from './lib/search.js';
 
 import 'leaflet/dist/leaflet.css';
@@ -20,8 +20,7 @@ import './css/base-map.css';
 
 import type { MarkerProps } from './types/marker-props';
 import type { LocationType } from './types/location';
-
-
+import React from 'react';
 
 const BaseMap = ({
   iconCreateFunction = undefined,
@@ -58,7 +57,14 @@ const BaseMap = ({
   onMarkerClick = undefined,
 
   ...props
-}: PropsWithChildren<BaseMapWidgetProps & { onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void }>) => {
+}: PropsWithChildren<
+  BaseMapWidgetProps & {
+    onClick?: (
+      e: LeafletMouseEvent & { isInArea: boolean },
+      map: object
+    ) => void;
+  }
+>) => {
   const definedCenterPoint =
     center.lat && center.lng
       ? { lat: center.lat, lng: center.lng }
@@ -138,14 +144,18 @@ const BaseMap = ({
   // // markers
   useEffect(() => {
     if (markers.length == 0 && currentMarkers.length == 0) return;
-
-    let result = [...markers];
-    result.map((marker, i) => {
-      // unify location format
-      parseLocation(marker);
+    
+    let result = markers.map((marker, i) => {
+      const unifiedLocation = parseLocation(marker);
 
       // add
-      let markerData: MarkerProps = { ...marker };
+      let markerData: MarkerProps = {
+        ...marker,
+        lat: unifiedLocation.lat,
+        lng: unifiedLocation.lng,
+        _latlng: unifiedLocation,
+        location: unifiedLocation,
+      };
       markerData.markerId = `${parseInt(
         (Math.random() * 1e8) as any as string
       )}`;
@@ -186,11 +196,11 @@ const BaseMap = ({
       // // ToDo
       markerData.isVisible = true;
 
-      // if (clustering && clustering.isActive && !markerData.doNotCluster) {
-      //   markerData.isClustered = true;
-      // }
+      if (clustering && clustering.isActive && !markerData.doNotCluster) {
+        markerData.isClustered = true;
+      }
 
-      result[i] = markerData;
+      return markerData;
     });
 
     setCurrentMarkers(result);
@@ -226,34 +236,32 @@ const BaseMap = ({
             <Area area={area} areaPolygonStyle={areaPolygonStyle} />
           ) : null}
 
-          {!!currentMarkers && currentMarkers.length > 0 && currentMarkers.map((data) => {
+          {currentMarkers.map((data) => {
             if (data.isClustered) {
               clusterMarkers.push(data);
             } else if (data.lat && data.lng) {
               return (
-                  <Marker
-                      {...props}
-                      {...data}
-                      key={`marker-${data.markerId || data.lat + data.lng}`}
-                  />
+                <Marker
+                  {...props}
+                  {...data}
+                  key={`marker-${data.markerId || data.lat + data.lng}`}
+                />
               );
             }
           })}
 
           {clusterMarkers.length > 0 && (
-              <MarkerClusterGroup
-                  {...props}
-                  {...clustering}
-                  categorize={categorize}
-                  markers={clusterMarkers}
-              />
+            <MarkerClusterGroup
+              {...props}
+              {...clustering}
+              categorize={categorize}
+              markers={clusterMarkers}
+            />
           )}
 
           <MapEventsListener
             area={area}
-            onClick={(e, map) =>
-              onClick({ ...e, isInArea: e.isInArea}, map)
-            }
+            onClick={(e, map) => onClick({ ...e, isInArea: e.isInArea }, map)}
           />
 
           {props.children}

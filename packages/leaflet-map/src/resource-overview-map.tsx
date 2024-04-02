@@ -10,6 +10,7 @@ import type { MarkerProps } from './types/marker-props';
 import type { CategoriesType } from './types/categorize';
 import type {ResourceOverviewMapWidgetProps} from './types/resource-overview-map-widget-props'
 import { BaseMap } from './base-map';
+import React from 'react';
 
 const ResourceOverviewMap = ({
   categorize = undefined,
@@ -64,7 +65,7 @@ const ResourceOverviewMap = ({
         }
       }
       return marker;
-    }) || [];
+    });
 
   return (
     <BaseMap

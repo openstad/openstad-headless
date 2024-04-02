@@ -1,4 +1,6 @@
-import type { DivIcon, DivIconOptions, Icon, IconOptions } from 'leaflet';
+import type { DivIconOptions } from 'leaflet';
 
-export type MarkerIconType = DivIcon | DivIconOptions | Icon | IconOptions; // ToDO: icons moeten nog uitgewerkt
-
+export type MarkerIconType = DivIconOptions & {
+   color?: string;
+  iconCreateFunction?: Function | string;
+};
