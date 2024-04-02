@@ -29,7 +29,11 @@ export default function Marker({
       : removeFromClassName(icon, 'osc-map-marker-faded');
   }
 
-  const divIcon = MarkerIcon({ ...icon, iconCreateFunction });
+  const divIcon = MarkerIcon({
+    ...icon,
+    className: '',
+    iconCreateFunction,
+  });
 
   let eventHandlers: {
     [eventname: string]: (e: LeafletMouseEvent) => void;
