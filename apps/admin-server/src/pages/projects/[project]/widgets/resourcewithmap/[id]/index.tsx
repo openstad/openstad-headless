@@ -23,9 +23,9 @@ import WidgetResourceOverviewInclude from '../../resourceoverview/[id]/include';
 import WidgetResourceOverviewPagination from '../../resourceoverview/[id]/pagination';
 import WidgetResourceOverviewSorting from '../../resourceoverview/[id]/sorting';
 import WidgetResourceOverviewTags from '../../resourceoverview/[id]/tags';
-import WidgetResourcesMapContent from '../../resourcesmap/[id]/content';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
+import WidgetResourcesMapButtons from '../../resourcesmap/[id]/buttons';
 
 export const getServerSideProps = withApiUrl;
 
@@ -128,7 +128,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
                       <TabsTrigger value="map">Kaart</TabsTrigger>
                       <TabsTrigger value="button">Knoppen</TabsTrigger>
-                      <TabsTrigger value="publish">Publiceren</TabsTrigger>
                     </TabsList>
 
 
@@ -136,12 +135,9 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                       <WidgetResourcesMapMap {...totalPropPackage} />
                     </TabsContent>
                     <TabsContent value="button" className="p-0">
-                      <WidgetResourcesMapContent {...totalPropPackage} />
+                      <WidgetResourcesMapButtons {...totalPropPackage} />
                     </TabsContent>
 
-                    <TabsContent value="content" className="p-0">
-                      <WidgetResourcesMapContent />
-                    </TabsContent>
                   </Tabs>
                 </TabsContent>
                 <TabsContent value="publish" className="p-0">
