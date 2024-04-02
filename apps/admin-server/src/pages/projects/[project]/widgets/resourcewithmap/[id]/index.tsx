@@ -23,11 +23,9 @@ import WidgetResourceOverviewInclude from '../../resourceoverview/[id]/include';
 import WidgetResourceOverviewPagination from '../../resourceoverview/[id]/pagination';
 import WidgetResourceOverviewSorting from '../../resourceoverview/[id]/sorting';
 import WidgetResourceOverviewTags from '../../resourceoverview/[id]/tags';
-import WidgetResourcesMapButton from '../../resourcesmap/[id]/button';
 import WidgetResourcesMapContent from '../../resourcesmap/[id]/content';
-import WidgetResourcesMapCounter from '../../resourcesmap/[id]/counter';
-import WidgetResourcesMapMaps from '../../resourcesmap/[id]/maps';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
 
 export const getServerSideProps = withApiUrl;
 
@@ -128,21 +126,19 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                 <TabsContent value="map">
                   <Tabs defaultValue="preview">
                     <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
-                      <TabsTrigger value="map">Map</TabsTrigger>
-                      <TabsTrigger value="button">Call-To-Action knop</TabsTrigger>
-                      <TabsTrigger value="counter">Teller</TabsTrigger>
-                      <TabsTrigger value="content">Content</TabsTrigger>
+                      <TabsTrigger value="map">Kaart</TabsTrigger>
+                      <TabsTrigger value="button">Knoppen</TabsTrigger>
+                      <TabsTrigger value="publish">Publiceren</TabsTrigger>
                     </TabsList>
 
+
                     <TabsContent value="map" className="p-0">
-                      <WidgetResourcesMapMaps />
+                      <WidgetResourcesMapMap {...totalPropPackage} />
                     </TabsContent>
                     <TabsContent value="button" className="p-0">
-                      <WidgetResourcesMapButton />
+                      <WidgetResourcesMapContent {...totalPropPackage} />
                     </TabsContent>
-                    <TabsContent value="counter" className="p-0">
-                      <WidgetResourcesMapCounter />
-                    </TabsContent>
+
                     <TabsContent value="content" className="p-0">
                       <WidgetResourcesMapContent />
                     </TabsContent>
