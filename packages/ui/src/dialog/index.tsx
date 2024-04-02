@@ -26,7 +26,6 @@ export const Dialog = ({
             />
           </RadixDialog.Close>
         </div>
-
         {children}
       </RadixDialog.Content>
     </RadixDialog.Portal>

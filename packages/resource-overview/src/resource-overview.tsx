@@ -136,7 +136,7 @@ const defaultItemRenderer = (
       <div>
         <Spacer size={1} />
         {props.displayTitle ? (
-          <Heading5>{elipsize(resource.title, props.titleMaxLength || 20)}</Heading5>
+          <Heading4>{elipsize(resource.title, props.titleMaxLength || 20)}</Heading4>
         ) : null}
 
         {props.displaySummary ? (
