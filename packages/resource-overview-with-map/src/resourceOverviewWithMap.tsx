@@ -13,9 +13,9 @@ import { ResourceOverviewMap } from '../../leaflet-map/src/resource-overview-map
 import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 
 
-export type ResourceOverviewWithMapProps = ResourceOverviewWidgetProps & ResourceOverviewMapWidgetProps;
+export type ResourceOverviewWithMapWidgetProps = ResourceOverviewWidgetProps & ResourceOverviewMapWidgetProps;
 
-const ResourceOverviewWithMap = (props: ResourceOverviewWithMapProps) => {
+const ResourceOverviewWithMap = (props: ResourceOverviewWithMapWidgetProps) => {
   return (
     <div className="resourceOverviewWithMap-container">
       <ResourceOverview {...props} />
