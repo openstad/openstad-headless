@@ -32,7 +32,7 @@ services:
       - openstad-mongo-data:/var/lib/mongo
 
   openstad-mailpit:
-    image: axllent/mailpit:v1.15.0
+    image: axllent/mailpit:v1.15
     ports:
       - 1025:1025 # smtp server
       - 8025:8025 # web ui
