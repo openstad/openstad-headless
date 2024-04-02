@@ -44,7 +44,8 @@ const ResourceDetailMap = ({
   let currentMarker: MarkerProps;
   currentMarker = {
     ...marker,
-    location: { ...resource.location } || undefined,
+    lat: resource.location?.lat || undefined,
+    lng: resource.location?.lng || undefined,
     icon: marker?.icon || markerIcon,
   };
   parseLocation(currentMarker); // unify location format

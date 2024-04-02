@@ -58,13 +58,24 @@ const BaseMap = ({
   onClick = undefined,
   onMarkerClick = undefined,
 
+  width = '100%',
+  height = undefined,
+
   ...props
 }: PropsWithChildren<BaseMapWidgetProps & { onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void }>) => {
+
   const definedCenterPoint =
     center.lat && center.lng
       ? { lat: center.lat, lng: center.lng }
       : { lat: 52.37104644463586, lng: 4.900402911007405 };
 
+  // clustering geeft errors; ik begrijp niet waarom: het gebeurd alleen in de gebuilde widgets, niet in de dev componenten
+  // het lijkt een timing issue, waarbij niet alles in de juiste volgporde wordt geladen
+  // voor nu staat het dus uit
+  clustering = {
+    isActive: false
+  };
+  
   let [currentMarkers, setCurrentMarkers] = useState(markers);
   let [mapId] = useState(`${parseInt((Math.random() * 1e8) as any as string)}`);
   let [mapRef] = useMapRef(mapId);
@@ -123,17 +134,11 @@ const BaseMap = ({
       if (currentMarkers?.length) {
         return setBoundsAndCenter(currentMarkers);
       }
-      return setBoundsAndCenter(area);
+      if (center) {
+        setBoundsAndCenter([center]);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapRef]);
-
-  // update center
-  useEffect(() => {
-    if (!mapRef) return;
-    if (center) {
-      setBoundsAndCenter([center]);
-    }
   }, [center, setBoundsAndCenter, mapRef]);
 
   // markers
@@ -210,6 +215,15 @@ const BaseMap = ({
     ...props,
   };
 
+  // <div style={{ width: '100%', aspectRatio: 16 / 9 }}>
+  // <div style={{ width: '100%', height: '100%' }}>
+
+  let style = {
+    width: width,
+    height: height || undefined,
+    aspectRatio: height ? undefined : 16 / 9,
+  };
+
   return (
     <>
       <div className="map-container" style={{ width: '100%', aspectRatio: 16 / 9 }}>
@@ -255,7 +269,7 @@ const BaseMap = ({
           <MapEventsListener
             area={area}
             onClick={(e, map) =>
-              onClick({ ...e, isInArea: e.isInArea}, map)
+              onClick && onClick({ ...e, isInArea: e.isInArea}, map)
             }
           />
 
