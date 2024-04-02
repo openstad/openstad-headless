@@ -10,7 +10,10 @@ import {
 } from '../../resource-overview/src/resource-overview.js';
 
 import { BaseMapWidgetProps } from '../../leaflet-map/src/base-map.js';
+
 import { ResourceOverviewMapWidgetProps, ResourceOverviewMap } from '../../leaflet-map/src/resource-overview-map.js';
+import { BaseProps } from '../../types/base-props';
+import { ProjectSettingProps } from '../../types/project-setting-props';
 
 const resourceConfig: ResourceOverviewWidgetProps = {
   displayType: 'cardgrid',
@@ -61,9 +64,36 @@ let ResourceOverviewConfig:ResourceOverviewMapWidgetProps = {
   },
 }
 
-export const ResourceOverviewWithMapWidgetProps = {
-  ResourceOverviewConfig,
-  resourceConfig
+export type ResourceOverviewWithMapWidgetProps = BaseProps &
+ProjectSettingProps & {
+  displayType: string;
+  tagGroups: { type: string; label: string; multiple: boolean }[];
+  displayTitle: boolean;
+  displayDescription: boolean;
+  displaySummary: boolean;
+  titleMaxLength: number;
+  summaryMaxLength: number;
+  descriptionMaxLength: number;
+  displayShareButtons: boolean;
+  displayVote: boolean;
+  displayArguments: boolean;
+  displayTagFilters: boolean;
+  displaySearch: boolean;
+  displaySorting: boolean;
+  allowFiltering: boolean;
+  displayBanner: boolean;
+  api: {
+    url: string;
+  };
+  projectId: string;
+  login: {
+    url: string;
+  };
+  markers: string;
+  tilesVariant: string;
+  autoZoomAndCenter: string;
+  clustering: { isActive: boolean };
+  categorize: { categorizeByField: string };  
 };
 
 const ResourceOverviewWithMap = () => {

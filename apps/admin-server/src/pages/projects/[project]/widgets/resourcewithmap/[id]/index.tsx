@@ -17,7 +17,6 @@ import {
   withApiUrl,
 } from '@/lib/server-side-props-definition';
 import WidgetResourceOverviewSearch from '../../begrootmodule/[id]/search';
-import WidgetResourceOverviewButton from '../../resourceoverview/[id]/button';
 import WidgetResourceOverviewDisplay from '../../resourceoverview/[id]/display';
 import WidgetResourceOverviewGeneral from '../../resourceoverview/[id]/general';
 import WidgetResourceOverviewInclude from '../../resourceoverview/[id]/include';
@@ -28,6 +27,7 @@ import WidgetResourcesMapButton from '../../resourcesmap/[id]/button';
 import WidgetResourcesMapContent from '../../resourcesmap/[id]/content';
 import WidgetResourcesMapCounter from '../../resourcesmap/[id]/counter';
 import WidgetResourcesMapMaps from '../../resourcesmap/[id]/maps';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 
 export const getServerSideProps = withApiUrl;
 
@@ -36,19 +36,21 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig();
+  const { data: widget, updateConfig } =
+    useWidgetConfig<ResourceOverviewWithMapWidgetProps>();
   const { previewConfig, updatePreview } =
     useWidgetPreview<ResourceOverviewWithMapWidgetProps>({
       projectId,
     });
 
-  const totalPropPackage = {
-    ...widget?.config,
-    ...previewConfig,
+  const totalPropPackage: ResourceOverviewWithMapWidgetProps & EditFieldProps<ResourceOverviewWithMapWidgetProps> = {
+    ...(widget?.config || {}),
+    ...(previewConfig || {}),
     updateConfig: (config: ResourceOverviewWithMapWidgetProps) =>
-      updateConfig({ ...widget.config, ...config }),
+      updateConfig({ ...(widget?.config || {}), ...config }),
 
-    onFieldChanged: (key: keyof ResourceOverviewWithMapWidgetProps, value: any) => {
+
+    onFieldChanged: (key: string, value: any) => {
       if (previewConfig) {
         updatePreview({
           ...previewConfig,
@@ -103,9 +105,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     <TabsContent value="display" className="p-0">
                       <WidgetResourceOverviewDisplay {...totalPropPackage} />
                     </TabsContent>
-                    <TabsContent value="button" className="p-0">
-                      <WidgetResourceOverviewButton {...totalPropPackage} />
-                    </TabsContent>
                     <TabsContent value="sorting" className="p-0">
                       <WidgetResourceOverviewSorting {...totalPropPackage} />
                     </TabsContent>
@@ -120,6 +119,9 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     </TabsContent>
                     <TabsContent value="include" className="p-0">
                       <WidgetResourceOverviewInclude {...totalPropPackage} />
+                    </TabsContent>
+                    <TabsContent value="publish" className="p-0">
+                      <WidgetPublish apiUrl={apiUrl} />
                     </TabsContent>
                   </Tabs>
                 </TabsContent>
