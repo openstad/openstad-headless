@@ -144,7 +144,7 @@ router
         result.rows.forEach((resource) => {
           resource.project = req.project;
           if (req.query.includePoll && resource.poll)
-            resource.poll.countVotes(!req.query.withVotes);
+            resource.poll.countVotes(!req.query.includeVotes);
         });
         const { rows } = result;
         req.results = rows;
@@ -362,7 +362,7 @@ router
         found.project = req.project;
         if (req.query.includePoll) {
           // TODO: naar poll hooks
-          if (found.poll) found.poll.countVotes(!req.query.withVotes);
+          if (found.poll) found.poll.countVotes(!req.query.includeVotes);
         }
         req.resource = found;
         req.results = req.resource;
@@ -486,7 +486,7 @@ router
 
           if (req.query.includePoll) {
             // TODO: naar poll hooks
-            if (found.poll) found.poll.countVotes(!req.query.withVotes);
+            if (found.poll) found.poll.countVotes(!req.query.includeVotes);
           }
           found.project = req.project;
           req.results = found;

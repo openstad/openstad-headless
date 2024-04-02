@@ -13,22 +13,63 @@ import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
 import WidgetPreview from '@/components/widget-preview';
-import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
+import {
+  WithApiUrlProps,
+  withApiUrl,
+} from '@/lib/server-side-props-definition';
 import WidgetPublish from '@/components/widget-publish';
-export const getServerSideProps = withApiUrl
- 
-export default function WidgetResourceDetail({
-  apiUrl,
-}:WithApiUrlProps) {
+import ArgumentsGeneral from '../../comments/[id]/general';
+import LikesDisplay from '../../likes/[id]/weergave';
+import ArgumentsList from '../../comments/[id]/list';
+import { ArgumentWidgetTabProps } from '../../comments/[id]';
+import ArgumentsForm from '../../comments/[id]/form';
+import { LikeWidgetTabProps } from '../../likes/[id]';
+export const getServerSideProps = withApiUrl;
+
+export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig();
+  const { data: widget, updateConfig } =
+    useWidgetConfig<ResourceDetailWidgetProps>();
   const { previewConfig, updatePreview } =
     useWidgetPreview<ResourceDetailWidgetProps>({
       projectId,
     });
+
+  function extractConfig<T>(
+    subWidgetKey: keyof Pick<
+      ResourceDetailWidgetProps,
+      'commentsWidget' | 'likeWidget'
+    >
+  ) {
+    if (!previewConfig) throw new Error();
+
+    return {
+      resourceId: previewConfig.resourceId || '',
+      ...previewConfig[subWidgetKey],
+      updateConfig: (config: T) =>
+        updateConfig({
+          ...previewConfig,
+          [subWidgetKey]: {
+            ...previewConfig[subWidgetKey],
+            ...config,
+          },
+        }),
+      onFieldChanged: (key: string, value: any) => {
+        if (previewConfig) {
+          updatePreview({
+            ...previewConfig,
+            [subWidgetKey]: {
+              ...previewConfig[subWidgetKey],
+              [key]: value,
+            },
+          });
+        }
+      },
+    };
+  }
 
   return (
     <div>
@@ -53,6 +94,8 @@ export default function WidgetResourceDetail({
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="display">Display</TabsTrigger>
+              <TabsTrigger value="comments">Argumenten widget</TabsTrigger>
+              <TabsTrigger value="likes">Likes widget</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -91,6 +134,51 @@ export default function WidgetResourceDetail({
                 />
               )}
             </TabsContent>
+
+            <TabsContent value="comments" className="p-0">
+              {previewConfig && (
+                <Tabs defaultValue="general">
+                  <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
+                    <TabsTrigger value="general">Algemeen</TabsTrigger>
+                    <TabsTrigger value="list">Lijst</TabsTrigger>
+                    <TabsTrigger value="form">Formulier</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="general" className="p-0">
+                    <ArgumentsGeneral
+                      omitSchemaKeys={['resourceId', 'sentiment']}
+                      {...extractConfig<ArgumentWidgetTabProps>(
+                        'commentsWidget'
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="list" className="p-0">
+                    <ArgumentsList
+                      {...extractConfig<ArgumentWidgetTabProps>(
+                        'commentsWidget'
+                      )}
+                    />
+                  </TabsContent>
+                  <TabsContent value="form" className="p-0">
+                    <ArgumentsForm
+                      {...extractConfig<ArgumentWidgetTabProps>(
+                        'commentsWidget'
+                      )}
+                    />
+                  </TabsContent>
+                </Tabs>
+              )}
+            </TabsContent>
+
+            <TabsContent value="likes" className="p-0">
+              {previewConfig && (
+                <LikesDisplay
+                  omitSchemaKeys={['resourceId']}
+                  {...extractConfig<LikeWidgetTabProps>('likeWidget')}
+                />
+              )}
+            </TabsContent>
+
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>

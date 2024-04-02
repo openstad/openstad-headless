@@ -25,7 +25,7 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig();
+  const { data: widget, updateConfig } = useWidgetConfig<EnqueteWidgetProps>();
   const { previewConfig, updatePreview } = useWidgetPreview<EnqueteWidgetProps>(
     {
       projectId,

@@ -1,13 +1,7 @@
-import CommentType from '../../../types/comment';
+import {Comment} from '@openstad-headless/types';
 
 export type CommentProps = {
-  comment: CommentType;
-  sentiment: string;
-  emptyListText: string;
-  isVotingEnabled: boolean;
-  isReplyingEnabled: boolean;
-  requiredUserRole: string;
-  userNameFields: Array<string>;
+  comment: Comment;
   showDateSeperately?: boolean;
-  hideReplyAsAdmin?: boolean;
+  submitComment?: (e: any) => void;
 };

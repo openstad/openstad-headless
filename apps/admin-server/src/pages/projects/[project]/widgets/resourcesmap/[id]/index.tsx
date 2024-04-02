@@ -27,7 +27,7 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig();
+  const { data: widget, updateConfig } = useWidgetConfig<ResourceOverviewMapWidgetProps>();
   const { previewConfig, updatePreview } =
     useWidgetPreview<ResourceOverviewMapWidgetProps>({
       projectId,

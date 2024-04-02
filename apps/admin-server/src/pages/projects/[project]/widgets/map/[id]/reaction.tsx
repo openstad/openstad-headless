@@ -41,7 +41,7 @@ export default function WidgetMapReaction() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useWidgetConfig();
+  } = useWidgetConfig<any>();
 
   const defaults = useCallback(
     () => ({

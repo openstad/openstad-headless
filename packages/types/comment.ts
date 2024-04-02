@@ -1,5 +1,5 @@
 // This should be typed from the datastore, not here.
-type Comment = {
+export type Comment = {
   id: number;
   delete: (arg: number) => void;
   submitLike: () => void;
@@ -25,5 +25,3 @@ type Comment = {
     edit: boolean;
   };
 }>;
-
-export default Comment;

@@ -169,7 +169,7 @@ router.route('/')
     if (!req.activities.includes('comments')) return next();
     let where = { userId: req.userIds };
     return db.Comment
-      .scope(['withResource'])
+      .scope(['includeResource'])
       .findAll({ where })
       .then(function(rows) {
         req.results.comments = rows.filter(row => !!row.resource);
@@ -186,7 +186,7 @@ router.route('/')
     if (!req.activities.includes('votes')) return next();
     let where = { userId: req.userIds };
     return db.Vote
-      .scope(['withResource'])
+      .scope(['includeResource'])
       .findAll({ where })
       .then(function(rows) {
         req.results.votes = rows.filter(row => !!row.resource);;
