@@ -26,7 +26,7 @@ function Enquete(props: EnqueteWidgetProps) {
 
     const datastore = new DataStore(props);
 
-    const { data, create: createSubmission } = datastore.useSubmissions({
+    const { create: createSubmission } = datastore.useSubmissions({
         projectId: props.projectId,
     });
 
@@ -48,6 +48,11 @@ function Enquete(props: EnqueteWidgetProps) {
         }
     }
 
+    const formOnlyVisibleForUsers = (
+        (!!props.formVisibility && props.formVisibility === 'users')
+        || !props.formVisibility
+    );
+
     const formFields : FieldProps[] = [];
     if ( typeof(props) !== 'undefined'
         && typeof(props.items) === 'object'
@@ -57,14 +62,16 @@ function Enquete(props: EnqueteWidgetProps) {
             const fieldData : any = {
                 title: item.title,
                 description: item.description,
-                fieldKey: item.key,
-                disabled: hasRole(currentUser, 'member') ? false : true,
+                fieldKey: item.fieldKey,
+                disabled: !hasRole(currentUser, 'member') && formOnlyVisibleForUsers,
             };
 
             switch (item.questionType) {
                 case 'open':
                     fieldData['type'] = 'text';
-                    fieldData['variant'] = 'textarea';
+                    fieldData['variant'] = item.variant;
+                    fieldData['minCharacters'] = item.minCharacters || '';
+                    fieldData['maxCharacters'] = item.maxCharacters || '';
                     fieldData['rows'] = 5;
                     break;
                 case 'multiplechoice':
@@ -114,7 +121,8 @@ function Enquete(props: EnqueteWidgetProps) {
 
     return (
         <div className="osc">
-            {!hasRole(currentUser, 'member') && (
+            {
+                (formOnlyVisibleForUsers && !hasRole(currentUser, 'member')) && (
                 <>
                     <Banner className="big">
                         <h6>Inloggen om deel te nemen.</h6>
@@ -143,7 +151,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     submitHandler={onSubmit}
                     title=""
                     submitText="Versturen"
-                    submitDisabled={hasRole(currentUser, 'member') ? false : true}
+                    submitDisabled={!hasRole(currentUser, 'member') && formOnlyVisibleForUsers}
                 />
             </div>
 
