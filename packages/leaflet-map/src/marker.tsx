@@ -3,6 +3,7 @@ import { Marker as LeafletMarker, useMap } from 'react-leaflet'
 import type { MarkerProps } from './types/marker-props';
 import { addToClassname, removeFromClassName } from '../../lib/class-name.js';
 import MarkerIcon from './marker-icon';
+import React from 'react';
 
 export default function Marker({
 	lat = undefined,

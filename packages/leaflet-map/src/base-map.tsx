@@ -20,6 +20,7 @@ import './css/base-map.css';
 
 import type { MarkerProps } from './types/marker-props';
 import type { LocationType } from './types/location';
+import React from 'react';
 
 
 
