@@ -1,5 +1,4 @@
-import {BaseProps} from "../../types/base-props.js";
-import {ProjectSettingProps} from "../../types/project-setting-props.js";
+import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 
 export type ResourceFormWidgetProps = BaseProps &
     ProjectSettingProps &

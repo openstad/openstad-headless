@@ -9,8 +9,7 @@ import {
     Spacer,
 } from '@openstad-headless/ui/src';
 import hasRole from '../../lib/has-role';
-import { BaseProps } from '../../types/base-props';
-import { ProjectSettingProps } from '../../types/project-setting-props';
+import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 import React from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import Form from "@openstad-headless/form/src/form";

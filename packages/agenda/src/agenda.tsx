@@ -2,8 +2,7 @@ import './agenda.css';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { Spacer } from '@openstad-headless/ui/src';
-import { BaseProps } from '../../types/base-props';
-import { ProjectSettingProps } from '../../types/project-setting-props';
+import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 import React from 'react';
 
 import "@utrecht/component-library-css";
