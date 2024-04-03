@@ -40,6 +40,10 @@ body{
   background-color: var(--nlds-body-background-color, var(--nlds-default-background-color, #F0F4F8));
 }
 
+.utrecht-heading-1.utrecht-accordion__header{
+  --utrecht-heading-1-line-height: 0;
+}
+
 // HACK: Dialog bug fix
 body[data-apos-level]{
   padding: 0 !important;
