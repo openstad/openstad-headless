@@ -21,6 +21,9 @@ import {
 import React from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { Comments, CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
+import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
+
+import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
 
 type booleanProps = {
   [K in
@@ -54,6 +57,10 @@ export type ResourceDetailWidgetProps = BaseProps &
       CommentsWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
+    resourceDetailMap?: Omit<
+    ResourceDetailMapWidgetProps,
+    keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+  >;
   };
 
 function ResourceDetail({
@@ -188,12 +195,15 @@ function ResourceDetail({
                   <Paragraph>{resource.description}</Paragraph>
                 )}
               </div>
-              {displayLocation && resource.position && (
+              {displayLocation && resource.location && (
                 <>
                   <Heading4>Plaats</Heading4>
-                  <Paragraph className="osc-resource-detail-content-item-location">
-                    {`${resource.position.lat}, ${resource.position.lng}`}
-                  </Paragraph>
+                  <ResourceDetailMap
+                    resourceId={props.resourceId || '0'}
+                    {...props}
+                    center={resource.location}
+                    area={props.resourceDetailMap?.area}
+                  />
                 </>
               )}
             </article>

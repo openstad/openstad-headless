@@ -7,7 +7,7 @@ import { MarkerProps } from './marker-props';
 export type ResourceDetailMapWidgetProps = BaseProps &
   ProjectSettingProps &
   MapPropsType & {
-    resourceId?: number;
+    resourceId?: string;
     marker?: MarkerProps;
-    markerIcon: MarkerIconType;
+    markerIcon?: MarkerIconType;
   };
