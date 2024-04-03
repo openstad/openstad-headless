@@ -242,9 +242,7 @@ const BaseMap = ({
           ) : null}
 
           {!!currentMarkers && currentMarkers.length > 0 && currentMarkers.map((data) => {
-            // temp bug fix
-            // if (data.isClustered) {
-            if (0 && data.isClustered) {
+            if (data.isClustered) {
               clusterMarkers.push(data);
             } else if (data.lat && data.lng) {
               return (
