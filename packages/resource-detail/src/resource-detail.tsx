@@ -14,6 +14,7 @@ import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
   Paragraph,
+  Heading,
   Heading4,
   Heading5,
   Heading6,
@@ -148,14 +149,14 @@ function ResourceDetail({
               )}
 
               {displayTitle && resource.title && (
-                <Heading4>{resource.title}</Heading4>
+                <Heading level={1} appearance="utrecht-heading-2">{resource.title}</Heading>
               )}
               <div className="osc-resource-detail-content-item-row">
                 {displayUser && resource?.user?.displayName && (
                   <div>
-                    <Heading6 className="osc-resource-detail-content-item-title">
+                    <Heading level={3} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
                       Gemaakt door
-                    </Heading6>
+                    </Heading>
                     <span className="osc-resource-detail-content-item-text">
                       {resource.user.displayName}
                     </span>
@@ -163,9 +164,9 @@ function ResourceDetail({
                 )}
                 {displayDate && resource.startDateHumanized && (
                   <div>
-                    <Heading6 className="osc-resource-detail-content-item-title">
+                    <Heading level={3} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
                       Datum
-                    </Heading6>
+                    </Heading>
                     <span className="osc-resource-detail-content-item-text">
                       {resource.startDateHumanized}
                     </span>
@@ -173,9 +174,9 @@ function ResourceDetail({
                 )}
                 {displayBudget && resource.budget && (
                   <div>
-                    <Heading6 className="osc-resource-detail-content-item-title">
+                    <Heading level={3} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
                       Budget
-                    </Heading6>
+                    </Heading>
                     <span className="osc-resource-detail-content-item-text">
                       {`€ ${resource.budget.toLocaleString('nl-NL')}`}
                     </span>
@@ -183,7 +184,7 @@ function ResourceDetail({
                 )}
               </div>
               <div>
-                {displaySummary && <Heading5>{resource.summary}</Heading5>}
+                {displaySummary && <Heading level={2} appearance='utrecht-heading-4'>{resource.summary}</Heading>}
                 {displayDescription && (
                   <Paragraph>{resource.description}</Paragraph>
                 )}

@@ -18,13 +18,13 @@
 
 .resource-detail-side-section-socials {
   display: flex;
-  gap: .5rem;
+  gap: 0.5rem;
 }
 
 .resource-detail-pil-list-content {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: .5rem;
+  gap: 0.5rem;
 }
 
 .resource-detail-comments-container {
@@ -49,8 +49,11 @@
 }
 
 .osc-resource-detail-content-item-row {
-  background-color: var(--nlds-resource-detail-background-color, var(--nlds-default-background-color, #F0F4F8));
-  color:var(--nlds-resource-detail-color, var(--utrecht-paragraph-color));
+  background-color: var(
+    --nlds-resource-detail-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
+  color: var(--nlds-resource-detail-color, var(--utrecht-paragraph-color));
   padding: 0.5rem 0.7rem;
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -58,21 +61,20 @@
   border-radius: 4px;
 }
 
-@media (min-width: 768px) { 
+@media (min-width: 768px) {
   .osc-resource-detail-content-item-row {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 1366px) { 
+@media (max-width: 1366px) {
   .osc-resource-detail-column-container {
     display: block;
   }
 }
 
-h6.osc-resource-detail-content-item-title {
+.osc-resource-detail-content-item-title {
   font-weight: bold !important;
-  color: var(--osc-card-foreground) !important;
 }
 
 /* Temporary until map component is finished */
@@ -83,4 +85,8 @@ h6.osc-resource-detail-content-item-title {
   width: 100%;
   height: 50vh;
   background-color: var(--osc-card);
+}
+
+.osc .image-container > .osc-image-footer p:empty {
+  padding: 0;
 }

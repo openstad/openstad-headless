@@ -16,7 +16,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
-import WidgetResourceOverviewSearch from '../../begrootmodule/[id]/search';
+import WidgetResourceOverviewSearch from '../../resourceoverview/[id]/search';
 import WidgetResourceOverviewDisplay from '../../resourceoverview/[id]/display';
 import WidgetResourceOverviewGeneral from '../../resourceoverview/[id]/general';
 import WidgetResourceOverviewInclude from '../../resourceoverview/[id]/include';
@@ -26,6 +26,8 @@ import WidgetResourceOverviewTags from '../../resourceoverview/[id]/tags';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
 import WidgetResourcesMapButtons from '../../resourcesmap/[id]/buttons';
+import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
+import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 
 export const getServerSideProps = withApiUrl;
 
@@ -41,10 +43,27 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
       projectId,
     });
 
-  const totalPropPackage: ResourceOverviewWithMapWidgetProps & EditFieldProps<ResourceOverviewWithMapWidgetProps> = {
+  const totalPropPackageOverview = {
+    ...widget?.config,
+    ...previewConfig,
+    updateConfig: (config: ResourceOverviewWidgetProps) =>
+      updateConfig({ ...widget.config, ...config }),
+
+    onFieldChanged: (key: string, value: any) => {
+      if (previewConfig) {
+        updatePreview({
+          ...previewConfig,
+          [key]: value,
+        });
+      }
+    },
+    projectId,
+  };
+
+  const totalPropPackageMap: ResourceOverviewMapWidgetProps & EditFieldProps<ResourceOverviewMapWidgetProps> = {
     ...(widget?.config || {}),
     ...(previewConfig || {}),
-    updateConfig: (config: ResourceOverviewWithMapWidgetProps) =>
+    updateConfig: (config: ResourceOverviewMapWidgetProps) =>
       updateConfig({ ...(widget?.config || {}), ...config }),
 
 
@@ -98,25 +117,25 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                       <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
                     </TabsList>
                     <TabsContent value="general" className="p-0">
-                      <WidgetResourceOverviewGeneral {...totalPropPackage} />
+                      <WidgetResourceOverviewGeneral {...totalPropPackageOverview} />
                     </TabsContent>
                     <TabsContent value="display" className="p-0">
-                      <WidgetResourceOverviewDisplay {...totalPropPackage} />
+                      <WidgetResourceOverviewDisplay {...totalPropPackageOverview} />
                     </TabsContent>
                     <TabsContent value="sorting" className="p-0">
-                      <WidgetResourceOverviewSorting {...totalPropPackage} />
+                      <WidgetResourceOverviewSorting {...totalPropPackageOverview} />
                     </TabsContent>
                     <TabsContent value="pagination" className="p-0">
-                      <WidgetResourceOverviewPagination {...totalPropPackage} />
+                      <WidgetResourceOverviewPagination {...totalPropPackageOverview} />
                     </TabsContent>
                     <TabsContent value="search" className="p-0">
-                      <WidgetResourceOverviewSearch {...totalPropPackage} />
+                      <WidgetResourceOverviewSearch {...totalPropPackageOverview} />
                     </TabsContent>
                     <TabsContent value="tags" className="p-0">
-                      <WidgetResourceOverviewTags {...totalPropPackage} />
+                      <WidgetResourceOverviewTags {...totalPropPackageOverview} />
                     </TabsContent>
                     <TabsContent value="include" className="p-0">
-                      <WidgetResourceOverviewInclude {...totalPropPackage} />
+                      <WidgetResourceOverviewInclude {...totalPropPackageOverview} />
                     </TabsContent>
                     <TabsContent value="publish" className="p-0">
                       <WidgetPublish apiUrl={apiUrl} />
@@ -132,10 +151,10 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
 
 
                     <TabsContent value="map" className="p-0">
-                      <WidgetResourcesMapMap {...totalPropPackage} />
+                      <WidgetResourcesMapMap {...totalPropPackageMap} />
                     </TabsContent>
                     <TabsContent value="button" className="p-0">
-                      <WidgetResourcesMapButtons {...totalPropPackage} />
+                      <WidgetResourcesMapButtons {...totalPropPackageMap} />
                     </TabsContent>
 
                   </Tabs>

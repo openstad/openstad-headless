@@ -15,7 +15,7 @@ import './css/resource-overview-map.css';
 
 import type { MarkerProps } from './types/marker-props';
 import type { CategoriesType } from './types/categorize';
-import type {ResourceOverviewMapWidgetProps} from './types/resource-overview-map-widget-props'
+import type { ResourceOverviewMapWidgetProps } from './types/resource-overview-map-widget-props'
 import { BaseMap } from './base-map';
 
 const ResourceOverviewMap = ({
@@ -39,7 +39,7 @@ const ResourceOverviewMap = ({
   const allResources = resources?.records || [];
 
   let categorizeByField = categorize?.categorizeByField;
-  let categories: CategoriesType =  {};
+  let categories: CategoriesType = {};
 
   if (categorizeByField) {
     const { data: tags } = datastore.useTags({
@@ -85,48 +85,46 @@ const ResourceOverviewMap = ({
   if (countButton?.show) {
     let countbutton = (
       <Button
-      appearance='primary-action-button'
-      className={`osc-resource-overview-map-button osc-first-button`}
-        >
+        appearance='primary-action-button'
+        className={`osc-resource-overview-map-button osc-first-button`}
+      >
         <section className="resource-counter">
-        {resources?.metadata?.totalCount}
-      </section>
+          {resources?.metadata?.totalCount}
+        </section>
         <section
-      className="resource-label">
-        {countButton.label || 'plannen'}
-      </section>
+          className="resource-label">
+          {countButton.label || 'plannen'}
+        </section>
 
-        </Button>
+      </Button>
     );
     buttons.push(countbutton)
   }
   if (ctaButton?.show) {
     let countbutton = (
       <Button
-      appearance='primary-action-button'
-      onClick={(e) => document.location.href = ctaButton.href}
-      className={`osc-resource-overview-map-button ${buttons.length ? 'osc-second-button' : 'osc-first-button'}`}
-        >
+        appearance='primary-action-button'
+        onClick={(e) => document.location.href = ctaButton.href ?? ''}
+        className={`osc-resource-overview-map-button ${buttons.length ? 'osc-second-button' : 'osc-first-button'}`}
+      >
         <section
-      className="resource-label">
-        {ctaButton.label}
-      </section>
+          className="resource-label">
+          {ctaButton.label}
+        </section>
 
-        </Button>
+      </Button>
     );
     buttons.push(countbutton)
   }
 
   return (
-    <>
       <BaseMap
         {...props}
         categorize={{ categories, categorizeByField }}
         markers={currentMarkers}
       >
-      {buttons}
-    </BaseMap>
-    </>
+        {buttons}
+      </BaseMap>
   );
 };
 
