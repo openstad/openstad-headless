@@ -10,5 +10,6 @@ auth:
 image:
   deploymentContainer:
     image: ghcr.io/openstad/image-server:main-ba08874
+cms:
   deploymentContainer:
     image: ghcr.io/openstad/cms-server:main-ba08874
