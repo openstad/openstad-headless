@@ -72,6 +72,7 @@ const formSchema = z.object({
   displayTheme: z.boolean(),
   displayNeighbourhood: z.boolean(),
   displayModbreak: z.boolean(),
+  modbreakTitle: z.string().optional(),
   reactionSettings: z.string().array(),
   tagGroups: z.number().array().optional().default([]),
 });
@@ -102,6 +103,7 @@ export default function ProjectSettingsResource() {
       displayNeighbourhood:
         data?.config?.[category]?.displayNeighbourhood || false,
       displayModbreak: data?.config?.[category]?.displayModbreak || false,
+      modbreakTitle: data?.config?.[category]?.modbreakTitle || null,
       reactionSettings: data?.config?.[category]?.reactionSettings || [],
       tagGroups: data?.config?.resources?.tags || [],
     }),
@@ -133,6 +135,7 @@ export default function ProjectSettingsResource() {
           displayTheme: values.displayTheme,
           displayNeighbourhood: values.displayNeighbourhood,
           displayModbreak: values.displayModbreak,
+          modbreakTitle: values.modbreakTitle,
           reactionSettings: values.reactionSettings,
           tags: values.tagGroups || [],
         },
@@ -330,6 +333,24 @@ export default function ProjectSettingsResource() {
                       weergegeven in het resource-formulier?
                     </FormLabel>
                     {YesNoSelect(field, {})}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="modbreakTitle"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>
+                      Titel voor boven modbreak 
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Text die boven de modbreak wordt getoond"
+                        {...field}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

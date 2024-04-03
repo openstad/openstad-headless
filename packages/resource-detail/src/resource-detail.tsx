@@ -8,6 +8,7 @@ import {
   Spacer,
   Pill,
   IconButton,
+  Banner,
 } from '@openstad-headless/ui/src';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import '@utrecht/component-library-css';
@@ -20,7 +21,10 @@ import {
 } from '@utrecht/component-library-react';
 import React from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
-import { Comments, CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
+import {
+  Comments,
+  CommentsWidgetProps,
+} from '@openstad-headless/comments/src/comments';
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
 
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
@@ -33,6 +37,7 @@ type booleanProps = {
     | 'displaySummary'
     | 'displayDescription'
     | 'displayUser'
+    | 'displayModBreak'
     | 'displayDate'
     | 'displayBudget'
     | 'displayLocation'
@@ -58,9 +63,9 @@ export type ResourceDetailWidgetProps = BaseProps &
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
     resourceDetailMap?: Omit<
-    ResourceDetailMapWidgetProps,
-    keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
-  >;
+      ResourceDetailMapWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
   };
 
 function ResourceDetail({
@@ -70,6 +75,7 @@ function ResourceDetail({
   displaySummary = true,
   displayDescription = true,
   displayUser = true,
+  displayModBreak = true,
   displayDate = true,
   displayBudget = true,
   displayLocation = true,
@@ -157,6 +163,18 @@ function ResourceDetail({
               {displayTitle && resource.title && (
                 <Heading4>{resource.title}</Heading4>
               )}
+
+              {displayModBreak && resource.modBreak && (
+                <div className="resource-detail-modbreak-banner">
+                  <section>
+                    <Heading5>{props.resources.modbreakTitle}</Heading5>
+                    <Heading5>{resource.modBreakDateHumanized}</Heading5>
+                  </section>
+                  <Spacer size={1}/>
+                  <Heading5>{resource.modBreak}</Heading5>
+                </div>
+              )}
+
               <div className="osc-resource-detail-content-item-row">
                 {displayUser && resource?.user?.displayName && (
                   <div>
