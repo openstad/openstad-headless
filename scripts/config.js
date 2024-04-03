@@ -257,11 +257,6 @@ ADMIN_DOMAIN=${process.env.ADMIN_DOMAIN}
 ADMIN_PORT=${process.env.ADMIN_PORT}
 ADMIN_COOKIE_SECRET=${process.env.ADMIN_COOKIE_SECRET}
 
-URL: string;
-COOKIE_SECRET: string;
-NEXT_PUBLIC_API_URL: string;
-NEXT_PUBLIC_URL: string;
-
 #cms server
 CMS_URL=${process.env.CMS_URL}
 CMS_PORT=${process.env.CMS_PORT}
