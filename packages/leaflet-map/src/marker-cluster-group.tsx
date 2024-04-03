@@ -11,7 +11,7 @@ export default function MarkerClusterGroup({
   showCoverageOnHover = false,
   iconCreateFunction = amapsCreateClusterIcon,
   categorize = undefined,
-  markers,
+  markers = [],
   ...props
 }: MarkerClusterGroupProps) {
 

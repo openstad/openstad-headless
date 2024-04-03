@@ -6,6 +6,7 @@ export type EnqueteProps = {
   displayDescription?: boolean;
   description?: string;
   items?: Array<Item>;
+  formVisibility?: string;
 };
 
 export type Item = {
@@ -14,6 +15,10 @@ export type Item = {
   key: string;
   description?: string;
   questionType?: string;
+  fieldKey?: string;
+  minCharacters?: string;
+  maxCharacters?: string;
+  variant?: string;
   images?: Array<{
     image?: any;
     src: string;

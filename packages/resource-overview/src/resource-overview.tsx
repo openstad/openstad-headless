@@ -6,8 +6,7 @@ import DataStore from '@openstad-headless/data-store/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import { Image } from '@openstad-headless/ui/src';
 import { Dialog } from '@openstad-headless/ui/src';
-import { BaseProps } from '../../types/base-props';
-import { ProjectSettingProps } from '../../types/project-setting-props';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { elipsize } from '../../lib/ui-helpers';
@@ -221,7 +220,15 @@ function ResourceOverview({
         if (!props.itemLink) {
           console.error('Link to child resource is not set');
         } else {
-          location.href = location.href + props.itemLink.replace('[id]', resource.id);
+          let location = document.location;
+          let newUrl = props.itemLink.replace('[id]', resource.id);
+          if (!newUrl.startsWith('http')) {
+            if (!newUrl.startsWith('/')) {
+              newUrl = `${location.pathname}${location.pathname.endsWith('/') ? '' : '/'}${newUrl}`;
+            }
+            newUrl = `${location.protocol}//${location.host}${newUrl}`;
+          }
+          document.location.href = newUrl;
         }
       }
 

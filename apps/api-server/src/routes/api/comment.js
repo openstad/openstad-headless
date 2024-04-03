@@ -3,6 +3,7 @@ const db = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
+const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const express = require('express');
 const router = express.Router({ mergeParams: true });
@@ -139,7 +140,7 @@ router.route('/')
   .post(function(req, res, next) {
 
     let userId = req.user.id;
-    if (req.user.role == 'admin' && req.body.userId) userId = req.body.userId;
+    if (hasRole( req.user, 'admin') && req.body.userId) userId = req.body.userId;
     
     let data = {
       ...req.body,

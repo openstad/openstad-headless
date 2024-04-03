@@ -1,4 +1,5 @@
 const express = require('express');
+const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 let router = express.Router({mergeParams: true});
 
@@ -12,7 +13,7 @@ router
       id: req.user.id,
       projectId: req.user.projectId,
       complete: req.user.complete,
-      idpUser: req.user.role == 'admin' ? req.user.idpUser : { provider: req.user.idpUser.provider },
+      idpUser: hasRole( req.user, 'admin' ) ? req.user.idpUser : { provider: req.user.idpUser.provider },
       role: req.user.role,
       email: req.user.email,
       name: req.user.name,

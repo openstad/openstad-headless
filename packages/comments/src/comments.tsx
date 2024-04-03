@@ -6,8 +6,7 @@ import { Spacer } from '@openstad-headless/ui/src';
 import Comment from './parts/comment.js';
 import CommentForm from './parts/comment-form.js';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { BaseProps } from '../../types/base-props';
-import { ProjectSettingProps } from '../../types/project-setting-props';
+import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';

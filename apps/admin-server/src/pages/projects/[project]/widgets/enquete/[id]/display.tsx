@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import {
-  Form,
+  Form, FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -14,10 +14,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import React from "react";
 
 const formSchema = z.object({
   displayTitle: z.boolean(),
-  displayDescription: z.boolean(),
+  displayDescription: z.boolean().optional(),
+  formVisibility: z.string().optional(),
 });
 
 export default function WidgetEnqueteDisplay(
@@ -33,6 +36,7 @@ export default function WidgetEnqueteDisplay(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       displayTitle: props?.displayTitle || false,
+      formVisibility: props?.formVisibility || 'always',
     },
   });
 
@@ -66,6 +70,28 @@ export default function WidgetEnqueteDisplay(
               </FormItem>
             )}
           />
+          <FormField
+              control={form.control}
+              name="formVisibility"
+              render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Voor wie is de enquête zichtbaar?</FormLabel>
+                    <Select
+                        value={field.value}
+                        onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Kies een optie" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="always">Iedereen</SelectItem>
+                        <SelectItem value="users">Ingelogde gebruikers en admins</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+              )}></FormField>
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan

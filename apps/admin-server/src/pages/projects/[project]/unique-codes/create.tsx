@@ -1,6 +1,5 @@
 import { PageLayout } from '@/components/ui/page-layout';
 import React from 'react';
-import Link from 'next/link';
 import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -19,7 +18,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Separator } from '@/components/ui/separator';
 import { useProject } from '@/hooks/use-project';
-import useCode from '@/hooks/use-code';
+import useUniqueCodes from '@/hooks/use-unique-codes';
 import toast from 'react-hot-toast';
 
 const formSchema = z.object({
@@ -29,8 +28,7 @@ const formSchema = z.object({
 export default function ProjectCodeCreate() {
     const router = useRouter();
     const { project } = router.query;
-    const { data, isLoading } = useProject();
-    const { create } = useCode();
+    const { createUniqueCodes } = useUniqueCodes(project as string);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -38,9 +36,9 @@ export default function ProjectCodeCreate() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const codes = await create(data.config.auth.provider.openstad.clientId, values.numberOfCodes)
+    const codes = await createUniqueCodes(values.numberOfCodes)
     if (codes) {
-      toast.success('Codes aangemaakt!');
+      toast.success('De codes worden aangemaakt!');
     } else {
       toast.error('Er is helaas iets mis gegaan.')
     }
@@ -77,7 +75,7 @@ export default function ProjectCodeCreate() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Hoeveelheid nieuwe codes om aan te maken:
+                      Hoeveel nieuwe codes wil je maken?
                     </FormLabel>
                     <FormControl>
                       <Input placeholder='' {...field} />
