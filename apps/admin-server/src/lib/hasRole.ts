@@ -1,15 +1,15 @@
-import { roles } from './roles';
+import { roles, type Role } from './roles';
 
-interface user {
-  [key:string]: string | number,
+interface MustHaveRole {
+  role: Role,
 }
 
-export default function hasRole(user: user, minRoles: string | Array<string>) {
+export default function hasRole(user:MustHaveRole, minRoles: Role | Array<Role>) {
 
   minRoles = minRoles || 'admin'; // admin can do anything
   if (!Array.isArray(minRoles)) minRoles = [minRoles];
 
-  let userRole = user && user.role;
+  let userRole = user && user.role || '';
 
   let valid = minRoles.find( minRole => {
     return roles[userRole] && roles[userRole].indexOf(minRole) != -1

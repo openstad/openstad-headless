@@ -1,5 +1,14 @@
+export type Role =
+  'superuser' |
+  'admin' |
+  'editor' |
+  'moderator' |
+  'member' |
+  'anonymous' |
+  'all';
+
 type rolesType = {
-  [key:string]: Array<string>;
+  [key:string]: Array<Role>;
 }
 
 export const roles:rolesType = {

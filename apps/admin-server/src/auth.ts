@@ -2,11 +2,12 @@ import { NextResponse, type NextRequest } from 'next/server';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getIronSession } from 'iron-session';
 import hasRole from './lib/hasRole';
+import { Role } from './lib/roles';
 import { createContext } from 'react';
 
 interface OpenstadProfile extends Record<string, any> {
   id: number;
-  role: string | undefined;
+  role: Role;
   name: string | undefined;
   email: string | undefined;
   phoneNumber: string | undefined;
@@ -23,7 +24,7 @@ interface OpenstadProfile extends Record<string, any> {
 type userType = {
   id: number;
   name: string | undefined;
-  role: string | undefined;
+  role: Role;
 }
 
 interface SessionData {
@@ -137,8 +138,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
 
 }
 
-function signIn(req: NextRequest, projectId?: number, forceNewLogin?: boolean) {
-  projectId = projectId || 1;
+function signIn(req: NextRequest, projectId:number = 1, forceNewLogin?: boolean) {
   let path = req.nextUrl.pathname.replace('/api/openstad', '');
   if (path == '/') path = '/projects';
   let redirectUri = `${process.env.URL}${path}?openstadlogintoken=[[jwt]]`;
@@ -146,9 +146,7 @@ function signIn(req: NextRequest, projectId?: number, forceNewLogin?: boolean) {
   return NextResponse.redirect(loginUrl);
 }
 
-function clientSignIn(projectId?: number, forceNewLogin?: boolean) {
-  if (typeof projectId == 'undefined') projectId = 1;
-  if (typeof forceNewLogin == 'undefined') forceNewLogin = true;
+function clientSignIn() {
   let loginUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/project/1/login?useAuth=default&redirectUri=${process.env.NEXT_PUBLIC_URL}/projects`;
   document.location.href = loginUrl;
 }
