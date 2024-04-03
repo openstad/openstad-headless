@@ -29,16 +29,16 @@
     font-family:'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
 }
 
-.osc h1, .osc h2, .osc h3, .osc h4, .osc h5, .osc h6 {
+/* .osc h1, .osc h2, .osc h3, .osc h4, .osc h5, .osc h6 {
     margin: 0;
     padding: 0;
-}
+} */
 
 .osc figure {
     margin: 0;
 }
 
-.osc h1 {
+/* .osc h1 {
     font-size: 3.75rem;
     font-weight: bold;
     line-height: auto;
@@ -48,18 +48,18 @@
     font-size: 3rem;
     font-weight: bold;
     line-height: auto;
-}
+} */
 
 /* .osc h3 {
     font-size: 2.125rem;
     font-weight: bold;
     line-height: auto;
 } */
-.osc h4 {
-    /* font-size: 1.5rem;
+/* .osc h4 {
+    font-size: 1.5rem;
     font-weight: 700;
-    line-height: 2rem; */
-}
+    line-height: 2rem;
+} */
 
 .osc p.strong {
     color: var(--osc-foreground, black);
@@ -114,7 +114,7 @@
 }
 
 .--negative {
-    margin-block-start: calc(var(--nlds-default-margin-block-start, 3.5rem) * -1);
+    margin-block-start: calc(var(--nlds-default-margin-block-start, 2rem) * -1);
   }
 
 [lang="nl"] > *{

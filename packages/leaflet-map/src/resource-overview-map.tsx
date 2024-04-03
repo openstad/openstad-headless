@@ -121,7 +121,7 @@ const ResourceOverviewMap = ({
         {...props}
         categorize={{ categories, categorizeByField }}
         markers={currentMarkers}>
-        {buttons}
+        {/* {buttons} */}
       </BaseMap>
     </>
   );

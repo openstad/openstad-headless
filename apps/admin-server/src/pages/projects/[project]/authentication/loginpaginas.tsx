@@ -582,7 +582,7 @@ export default function ProjectAuthentication() {
               <TabsContent value="Local" className="p-0">
                 <div className="p-6 bg-white rounded-md">
                   <Form {...form}>
-                    <Heading size="xl">Login met wachwoord pagina</Heading>
+                    <Heading size="xl">Login met wachtwoord pagina</Heading>
                     <Separator className="my-4" />
                     <div>
                       <FormLabel>

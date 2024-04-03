@@ -35,6 +35,7 @@
     "@openstad-headless/resource-overview": "file:../../packages/resource-overview",
     "@openstad-headless/leaflet-map":"file:../../packages/leaflet-map",
     "@openstad-headless/stem-begroot": "file:../../packages/stem-begroot",
+    "@openstad-headless/resource-overview-with-map": "file:../../packages/resource-overview-with-map",
     "@openstad-headless/ui": "file:../../packages/ui",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.20.2",
