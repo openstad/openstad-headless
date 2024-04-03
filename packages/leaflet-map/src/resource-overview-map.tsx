@@ -118,12 +118,12 @@ const ResourceOverviewMap = ({
   }
 
   return (
-      <BaseMap
-        {...props}
-        categorize={{ categories, categorizeByField }}
-        markers={currentMarkers}
-      >
-        {buttons}
+    <BaseMap
+    {...props}
+    categorize={{ categories, categorizeByField }}
+    markers={currentMarkers}
+    >
+        {/* {buttons} */}
       </BaseMap>
   );
 };
