@@ -125,7 +125,8 @@ router
         } catch(err) {}
       }
       if (config.admin.domain) {
-        allowedDomains.push(config.admin.domain);
+        const domain = config.admin.domain.replace(/:\d+$/, '');
+        allowedDomains.push(domain);
       }
       let redirectUrlHost = '';
       try {
