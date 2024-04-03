@@ -126,7 +126,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     let path = req.nextUrl.pathname.replace('/api/openstad', '');
     let query = searchParams ? '?' + searchParams.toString() : '';
     query = query.replace(/openstadlogintoken=(?:.(?!&|$))+./, '');
-    const rewrittenUrl = `${process.env.API_URL}${path}${query}`;
+    const rewrittenUrl = `${process.env.API_URL_INTERNAL || process.env.API_URL}${path}${query}`;
     return NextResponse.rewrite(rewrittenUrl, {
       headers: {
         Authorization: `Bearer ${jwt}`,
