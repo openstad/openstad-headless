@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const Sequelize = require('sequelize');
 const db = require('../../db');
 const service = require('./service');
+const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 let router = express.Router({mergeParams: true});
 
@@ -302,6 +303,69 @@ router
     return res.json({ logout: 'success' })
 
   });
+
+
+// ----------------------------------------------------------------------------------------------------
+// unique codes
+
+router
+  .route('(/project/:projectId)?/uniquecode')
+  .all(async function (req, res, next) {
+    if (!hasRole(req.user, 'admin')) return next(new Error('You cannot list these codes'))
+    return next();
+  })
+
+  // list
+  .get(async function (req, res, next) {
+    let codes = {};
+    try {
+      codes = await service.fetchUniqueCode({
+        authConfig: req.authConfig,
+      });
+    } catch(err) {
+      console.log(err);
+      return next(err)
+    }
+    res.json(codes)
+  })
+
+  // create
+  .post(async function (req, res, next) {
+    let codes = {};
+    try {
+      codes = await service.createUniqueCode({
+        authConfig: req.authConfig,
+        amount: parseInt(req.body.amount) || 1,
+      });
+    } catch(err) {
+      console.log(err);
+      return next(err)
+    }
+    res.json(codes)
+  })
+
+router
+  .route('(/project/:projectId)?/uniquecode/:uniqueCodeId/reset')
+
+  // reset
+  .post(async function (req, res, next) {
+    if (!hasRole(req.user, 'admin')) return next(new Error('You cannot list these codes'))
+
+    let uniqueCodeId= parseInt(req.params.uniqueCodeId);
+    if (!uniqueCodeId) return next(new Error('No code id found'))
+
+    let codes = {};
+    try {
+      codes = await service.resetUniqueCode({
+        authConfig: req.authConfig,
+        uniqueCodeId: uniqueCodeId,
+      });
+    } catch(err) {
+      console.log(err);
+      return next(err)
+    }
+    res.json(codes)
+  })
 
 // ----------------------------------------------------------------------------------------------------
 // TAF
