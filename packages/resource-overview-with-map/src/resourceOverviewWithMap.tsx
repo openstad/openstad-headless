@@ -9,7 +9,7 @@ import {
   ResourceOverviewWidgetProps
 } from '../../resource-overview/src/resource-overview.js';
 
-import { ResourceOverviewMap } from '../../leaflet-map/src/resource-overview-map.js';
+import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map.js';
 import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 
 
