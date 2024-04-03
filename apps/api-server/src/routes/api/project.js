@@ -98,7 +98,7 @@ router.route('/')
       }
 
       // now find the corresponding projects
-		  let result = await db.Project.scope(req.scope).findAndCountAll({ offset: req.dbQuery.offset, limit: req.dbQuery.limit, where })
+      let result = await db.Project.scope(req.scope).findAndCountAll({ offset: req.dbQuery.offset, limit: req.dbQuery.limit, where })
       req.results = result.rows;
       req.dbQuery.count = result.count;
       return next();
