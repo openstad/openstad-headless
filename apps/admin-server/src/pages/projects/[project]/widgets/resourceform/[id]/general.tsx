@@ -41,11 +41,12 @@ type FormData = z.infer<typeof formSchema>;
 export default function WidgetResourceFormGeneral() {
   const category = 'general';
 
+    // should use the passed props widget, this is the old way and is not advised
   const {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useWidgetConfig();
+  } = useWidgetConfig<any>();
 
   const defaults = useCallback(
     () => ({

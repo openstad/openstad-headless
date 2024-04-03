@@ -1,40 +1,23 @@
-import withAuth from 'next-auth/middleware';
-import { NextResponse } from 'next/server';
-import logger from '@/lib/logger';
+import { NextResponse, type NextRequest } from 'next/server';
+import { authMiddleware, getSession } from './auth';
 
-export default withAuth(
-  function middleware(req) {
-    if (req.nextUrl.pathname.startsWith('/api/openstad')) {
+export default async function middleware(req: NextRequest) {
 
-      // deze afvanging zou op user role moeten werken maar die lijkt niet beschikbeer;
-      // voorlopig lijkt dit acceptabel omdat je alleen met role admin kunt inloggen op deze server
-      if (!req.nextauth.token?.accessToken) {
-        logger.error('No admin user found');
-        return NextResponse.json({ error: 'No admin user found' }, { status: 401 });
-      }
+  const res = NextResponse.next();
+  const session = await getSession(req, res);
 
-      logger.debug(
-        { Authorization: process.env.API_FIXED_AUTH_KEY },
-        'Rewrite with API_FIXED_AUTH_KEY'
-      );
+  // ignore
+  if (req.nextUrl.pathname.startsWith('/_next')) return res; // internal urls
+  if (req.nextUrl.pathname.startsWith('/favicon') ) return res;
 
-      const searchParams = req.nextUrl?.searchParams?.toString();
-      const rewrittenUrl = `${
-        process.env.API_URL_INTERNAL
-      }${req.nextUrl.pathname.replace('/api/openstad', '')}${
-        searchParams ? '?' + searchParams : ''
-      }`;
-
-      return NextResponse.rewrite(rewrittenUrl, {
-        headers: {
-          Authorization: process.env.API_FIXED_AUTH_KEY
-        },
-      });
-    }
-  },
-  {
-    pages: {
-      signIn: '/auth/signin',
-    },
+  // default page
+  if (req.nextUrl.pathname.match(/^\/?$/)) // home
+  if (session.user) {
+    return NextResponse.redirect(`${process.env.URL}/projects`);
+  } else {
+    return res;
   }
-);
+
+  return authMiddleware(req, res);
+
+}

@@ -31,7 +31,8 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig();
+  const { data: widget, updateConfig } =
+    useWidgetConfig<StemBegrootWidgetProps>();
   const { previewConfig, updatePreview } =
     useWidgetPreview<StemBegrootWidgetProps>({
       projectId,
@@ -43,7 +44,7 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
     updateConfig: (config: StemBegrootWidgetProps) =>
       updateConfig({ ...widget.config, ...config }),
 
-    onFieldChanged: (key: keyof StemBegrootWidgetProps, value: any) => {
+    onFieldChanged: (key: string, value: any) => {
       if (previewConfig) {
         updatePreview({
           ...previewConfig,

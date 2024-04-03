@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@openstad-headless/resource-overview": "file:../../packages/resource-overview",
+    "@openstad-headless/types": "file:../types",
     "@openstad-headless/data-store": "file:../data-store",
     "@openstad-headless/lib": "file:../lib",
     "@openstad-headless/ui": "file:../ui",

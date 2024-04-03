@@ -19,7 +19,7 @@ export default function WidgetCounter({
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig();
+  const { data: widget, updateConfig } = useWidgetConfig<CounterWidgetProps>();
   const { previewConfig, updatePreview } = useWidgetPreview<CounterWidgetProps>({
     projectId,
   });
