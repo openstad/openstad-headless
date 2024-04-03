@@ -69,7 +69,7 @@ export default function ProjectSettings() {
         : new Date(currentDate.getFullYear(), currentDate.getMonth()+3),
       enableReactions: data?.config?.resources?.enableReactions || false,
       cssUrl: data?.config?.project?.cssUrl || '',
-      areaId: data?.areaId || '',
+      areaId: data?.config?.project?.areaId || '',
       url: data?.url || '',
     }),
     [data, areas]
@@ -100,13 +100,13 @@ export default function ProjectSettings() {
           project: {
             endDate: values.endDate,
             cssUrl: values.cssUrl,
+            areaId: values.areaId,
           },
           resources: {
             enableReactions: values.enableReactions,
           },
         },
         values.name,
-        values.areaId,
         values.url,
       );
       if (project) {
