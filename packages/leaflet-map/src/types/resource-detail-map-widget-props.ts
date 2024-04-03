@@ -10,5 +10,5 @@ export type ResourceDetailMapWidgetProps = BaseProps &
   MapPropsType & {
     resourceId?: string;
     marker?: MarkerProps;
-    markerIcon: MarkerIconType;
+    markerIcon?: MarkerIconType;
   };
