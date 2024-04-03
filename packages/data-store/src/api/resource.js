@@ -2,7 +2,7 @@ export default {
 
   fetch: async function({ projectId, resourceId }, key) {
 
-    let url = `/api/project/${projectId}/resource/${resourceId}?includeUser=1&includeVoteCount=1&includeUserVote=1`;
+    let url = `/api/project/${projectId}/resource/${resourceId}?includeUser=1&includeVoteCount=1&includeUserVote=1&includeTags=1&includeStatus=1`;
     let headers = {
       'Content-Type': 'application/json'
     };

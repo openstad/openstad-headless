@@ -4,8 +4,7 @@ import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { Spacer } from '@openstad-headless/ui/src';
 import nunjucks from 'nunjucks';
-import { BaseProps } from '../../types/base-props';
-import { ProjectSettingProps } from '../../types/project-setting-props';
+import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 
 export type RawResourceWidgetProps = BaseProps &
   ProjectSettingProps & {

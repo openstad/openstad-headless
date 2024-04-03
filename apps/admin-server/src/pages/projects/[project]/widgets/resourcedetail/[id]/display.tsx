@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { YesNoSelect } from '@/lib/form-widget-helpers';
+import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
@@ -25,6 +25,11 @@ const formSchema = z.object({
   displayBudget: z.boolean(),
   displayBudgetDocuments: z.boolean(),
   displayLocation: z.boolean(),
+  displayTags: z.boolean(),
+  displaySocials: z.boolean(),
+  displayStatus: z.boolean(),
+  displayLikes: z.boolean(),
+  displayComments: z.boolean()
 });
 
 export default function WidgetResourceDetailDisplay(
@@ -39,15 +44,22 @@ export default function WidgetResourceDetailDisplay(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      displayImage: props?.displayImage || false,
-      displayTitle: props?.displayTitle || false,
-      displayDescription: props?.displayDescription || false,
-      displaySummary: props?.displaySummary || false,
-      displayUser: props?.displayUser || false,
-      displayDate: props?.displayDate || false,
-      displayBudget: props?.displayBudget || false,
-      displayBudgetDocuments: props?.displayBudgetDocuments || false,
-      displayLocation: props?.displayLocation || false,
+      displayImage: undefinedToTrueOrProp(props?.displayImage),
+      displayTitle: undefinedToTrueOrProp(props?.displayTitle),
+      displayDescription: undefinedToTrueOrProp(props?.displayDescription),
+      displaySummary: undefinedToTrueOrProp(props?.displaySummary),
+      displayUser: undefinedToTrueOrProp(props?.displayUser),
+      displayDate: undefinedToTrueOrProp(props?.displayDate),
+      displayBudget: undefinedToTrueOrProp(props?.displayBudget),
+      displayBudgetDocuments: undefinedToTrueOrProp(
+        props?.displayBudgetDocuments
+      ),
+      displayLocation: undefinedToTrueOrProp(props?.displayLocation),
+      displayTags: undefinedToTrueOrProp(props?.displayTags),
+      displaySocials: undefinedToTrueOrProp(props?.displaySocials),
+      displayStatus: undefinedToTrueOrProp(props?.displayStatus),
+      displayLikes: undefinedToTrueOrProp(props?.displayLikes),
+      displayComments: undefinedToTrueOrProp(props?.displayComments),
     },
   });
 
@@ -159,6 +171,67 @@ export default function WidgetResourceDetailDisplay(
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="displayTags"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gekoppelde tags weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayStatus"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gekoppelde statussen weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displaySocials"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Social share opties weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayLikes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Toon de likes widget</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayComments"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Toon de argumenten widget</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

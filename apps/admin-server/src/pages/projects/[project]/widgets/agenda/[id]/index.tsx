@@ -25,7 +25,7 @@ export default function WidgetAgenda({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig();
+  const { data: widget, updateConfig } = useWidgetConfig<AgendaWidgetProps>();
   const { previewConfig, updatePreview } = useWidgetPreview<AgendaWidgetProps>({
     projectId,
   });

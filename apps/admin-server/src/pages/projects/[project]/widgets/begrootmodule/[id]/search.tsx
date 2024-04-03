@@ -14,7 +14,7 @@ import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
+import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -25,8 +25,8 @@ const formSchema = z.object({
 });
 
 export default function WidgetResourceOverviewSearch(
-  props: ResourceOverviewWidgetProps &
-    EditFieldProps<ResourceOverviewWidgetProps>
+  props: StemBegrootWidgetProps &
+    EditFieldProps<StemBegrootWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
 

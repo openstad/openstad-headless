@@ -170,5 +170,15 @@ module.exports = {
       },
     }
 
+  },
+  methods: function (self) {
+    return {
+      async load(req, widgets) {
+        // Loop through widgets and apply a containerId to each widget
+        widgets.forEach((widget) => {
+          widget.containerId = this.apos.util.generateId();
+        });
+      }
+    }
   }
 };

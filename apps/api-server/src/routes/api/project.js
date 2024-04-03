@@ -12,6 +12,7 @@ const checkHostStatus = require('../../services/checkHostStatus')
 const projectsWithIssues = require('../../services/projects-with-issues');
 const authSettings = require('../../util/auth-settings');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const removeProtocolFromUrl = require('../../middleware/remove-protocol-from-url');
 
 let router = express.Router({mergeParams: true});
 
@@ -129,6 +130,7 @@ router.route('/')
 // create project
 // -----------
 	.post(auth.can('Project', 'create'))
+	.post(removeProtocolFromUrl)
 	.post(async function (req, res, next) {
     // create an oauth client if nessecary
     let project = {
@@ -248,6 +250,7 @@ router.route('/:projectId') //(\\d+)
 // update project
 // -----------
 	.put(auth.useReqUser)
+	.put(removeProtocolFromUrl)
 	.put(async function (req, res, next) {
     // update certain parts of config to the oauth client
 		const project = await db.Project.findOne({ where: { id: req.results.id} });

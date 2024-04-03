@@ -12,9 +12,9 @@ import { Heading } from '@/components/ui/typography';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { ArgumentWidgetTabProps } from '.';
 
 const formSchema = z.object({
   formIntro: z.string(),
@@ -22,7 +22,7 @@ const formSchema = z.object({
 });
 
 export default function ArgumentsForm(
-  props: CommentsWidgetProps & EditFieldProps<CommentsWidgetProps>
+  props: ArgumentWidgetTabProps & EditFieldProps<ArgumentWidgetTabProps>
 ) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
