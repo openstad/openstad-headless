@@ -118,14 +118,18 @@ router
     const isAllowedRedirectDomain = (url, project) => {
       let allowedDomains = project?.config?.allowedDomains || [];
       if (project.url) {
-        let projectDomain = new URL(project.url).hostname;
-        allowedDomains.push(projectDomain);
+        try {
+          let projectDomain = new URL(project.url).hostname;
+          allowedDomains.push(projectDomain);
+        } catch(err) {}
+      }
+      if (config.admin.domain) {
+        allowedDomains.push(config.admin.domain);
       }
       let redirectUrlHost = '';
       try {
         redirectUrlHost = new URL(url).hostname;
-      } catch (err) {
-      }
+      } catch(err) {}
       // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
       return allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1;
     }

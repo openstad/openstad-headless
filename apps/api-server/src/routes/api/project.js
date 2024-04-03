@@ -76,16 +76,39 @@ router.route('/')
 	.get(auth.can('Project', 'list'))
 	.get(pagination.init)
 	.get(function(req, res, next) {
+    if (req.query.includeAuthConfig) return next('includeAuthConfig is not implemented for projects list')
+    return next();
+	})
+	.get(async function(req, res, next) {
 
-		db.Project
-			.scope(req.scope)
-			.findAndCountAll({ offset: req.dbQuery.offset, limit: req.dbQuery.limit })
-			.then( result => {
-        req.results = result.rows;
-        req.dbQuery.count = result.count;
-        return next();
-			})
-			.catch(next);
+    try {
+      let where = {};
+      if (!hasRole( req.user, 'superuser' )) {
+        // first find all corresponding users for the current user, only where she is admin
+        let users = await db.User.findAll({
+          where: {
+            idpUser: {
+              identifier: req.user?.idpUser?.identifier || 'no identifier found',
+              provider: req.user?.idpUser?.provider || 'no provider found',
+            },
+            role: 'admin',
+          }
+        })
+        let projectIds = users.map(u => u.projectId);
+        where = { id : projectIds };
+      }
+
+      // now find the corresponding projects
+      let result = await db.Project.scope(req.scope).findAndCountAll({ offset: req.dbQuery.offset, limit: req.dbQuery.limit, where })
+      req.results = result.rows;
+      req.dbQuery.count = result.count;
+      return next();
+
+    } catch(err) {
+      next(err)
+    }
+
+
 	})
   .get(searchInResults({ searchfields: ['name', 'title'] }))
 	.get(auth.useReqUser)
@@ -95,7 +118,7 @@ router.route('/')
 		records.forEach((record, i) => {
       // todo: waarom is dit? dat zou door het auth systeem moeten worden afgevangen
       let project = record.toJSON()
-			if (!( req.user && req.user.role && req.user.role == 'admin' )) {
+			if (!( req.user && hasRole( req.user, 'admin') )) {
         project.config = undefined;
         project.safeConfig = undefined;
 			}
@@ -199,7 +222,7 @@ router.route('/issues')
     let records = req.results.records || req.results
 		records.forEach((record, i) => {
       let project = record.toJSON()
-			if (!( req.user && req.user.role && req.user.role == 'admin' )) {
+			if (!( req.user && hasRole( req.user, 'admin') )) {
         project.config = undefined;
 			}
       records[i] = project;

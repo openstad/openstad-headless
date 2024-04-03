@@ -1,15 +1,25 @@
 import '@/styles/globals.css';
-import { SessionProvider } from 'next-auth/react';
 import type { AppProps } from 'next/app';
 import { Toaster } from 'react-hot-toast';
+import { useState, useEffect } from 'react';
 import { SWRConfig } from 'swr';
+
+import { SessionContext, type SessionUserType, fetchSessionUser } from '../auth';
 
 export default function App({
   Component,
-  pageProps: { session, ...pageProps },
+  pageProps,
 }: AppProps) {
+
+  let [session, setSession] = useState({});
+  useEffect(() => {
+    fetchSessionUser()
+      .then((result:SessionUserType) => setSession(result))
+      .catch(console.error);
+  }, [])
+
   return (
-    <SessionProvider session={session}>
+    <SessionContext.Provider value={session}>
       <SWRConfig
         value={{
           fetcher: (
@@ -32,6 +42,6 @@ export default function App({
         <Component {...pageProps} />
       </SWRConfig>
       <Toaster position="bottom-center" />
-    </SessionProvider>
+    </SessionContext.Provider>
   );
 }
