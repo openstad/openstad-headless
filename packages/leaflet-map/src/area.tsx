@@ -90,19 +90,13 @@ export function Area({
   },
   ...props
 }: AreaProps) {
-  let [currentArea, setCurrentArea] = useState(area);
-
-  useEffect(() => {
-    let poly = createCutoutPolygon(currentArea);
-    setCurrentArea(poly);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [area]);
+  const poly = createCutoutPolygon(area);
 
   return (
     <Polygon
       {...props}
       pathOptions={areaPolygonStyle}
-      positions={currentArea}
+      positions={poly}
     />
   );
 }

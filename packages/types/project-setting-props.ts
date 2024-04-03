@@ -4,7 +4,7 @@ export type ProjectSettingProps = {
     endDate: Date;
     endDateNotificationSent: boolean;
     projectHasEnded: boolean;
-    areaId: number;
+    areaId: string;
   };
   anonymize: {
     anonymizeUsersXDaysAfterEndDate: number;
