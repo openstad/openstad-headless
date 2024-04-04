@@ -25,6 +25,7 @@ const EditorMap = ({
   },
   center = undefined,
   markers = [],
+  onChange,
   ...props
 }: PropsWithChildren<EditorMapWidgetProps>) => {
   let [currentEditorMarker, setCurrentEditorMarker] = useState<MarkerProps>({
@@ -49,6 +50,9 @@ const EditorMap = ({
     map: any
   ) {
     if (map && e.isInArea) {
+      if (onChange) {
+        onChange({name: fieldName, value: `{"lat":${e.latlng?.lat},"lng":${e.latlng?.lng}}`})
+      }
       setCurrentEditorMarker({
         ...currentEditorMarker,
         lat: e.latlng?.lat,
