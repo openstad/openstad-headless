@@ -206,8 +206,6 @@ services:
       - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}
       - API_FIXED_AUTH_KEY=${API_FIXED_AUTH_KEY}
       - PORT=${ADMIN_PORT}
-      - NEXT_PUBLIC_API_URL=${API_URL}
-      - NEXT_PUBLIC_URL=${ADMIN_URL}
     ports:
       - '${ADMIN_PORT}:${ADMIN_PORT}'
     volumes:

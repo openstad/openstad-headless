@@ -28,10 +28,6 @@ spec:
         env:
           - name: PORT
             value: "{{ .Values.admin.service.httpPort }}"
-          - name: NEXT_PUBLIC_URL
-            value: https://{{ template "openstad.admin.url" . }}
-          - name: NEXT_PUBLIC_API_URL
-            value: https://{{ template "openstad.api.url" . }}
           - name: URL
             value: https://{{ template "openstad.admin.url" . }}
           - name: COOKIE_SECRET
