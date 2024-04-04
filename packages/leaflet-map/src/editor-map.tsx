@@ -26,6 +26,7 @@ const EditorMap = ({
   center = undefined,
   markers = [],
   onChange,
+  fieldRequired = false,
   ...props
 }: PropsWithChildren<EditorMapWidgetProps>) => {
   let [currentEditorMarker, setCurrentEditorMarker] = useState<MarkerProps>({
@@ -72,6 +73,7 @@ const EditorMap = ({
 
       <input
         name={fieldName}
+        required={fieldRequired}
         type="hidden"
         value={`{"lat":${currentEditorMarker.lat},"lng":${currentEditorMarker.lng}}`}
       />

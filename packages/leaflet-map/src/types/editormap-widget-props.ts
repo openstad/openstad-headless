@@ -12,4 +12,5 @@ export type EditorMapWidgetProps = BaseProps &
     editorMarker?: MarkerProps;
     centerOnEditorMarker: boolean;
     onChange?: (e: {name: string, value: string | FileList | []}) => void;
+    fieldRequired?: boolean;
   };
