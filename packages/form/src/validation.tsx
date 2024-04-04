@@ -36,7 +36,7 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
                 return undefined;
             }
         case 'range':
-        // case 'map': TODO: Validate map when implemented
+        case 'map':
         case 'radiobox':
         case 'select':
         case 'tickmark-slider':
