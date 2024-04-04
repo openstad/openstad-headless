@@ -129,7 +129,7 @@ admin:
 
   # Secret values
   secrets:
-    nextAuthSecret:
+    cookieSecret:
     apiKey:
 
   # Service settings:
@@ -317,6 +317,9 @@ image:
   name: 'image'
   label: openstad-image-service
 
+  secrets:
+    verificationToken:
+
   # Service settings:
   # Primarily port configuration
   service:
@@ -465,7 +468,7 @@ secrets:
   admin:
     clientId:
     clientSecret:
-    nextauthSecret:
+    cookieSecret:
     imageApiToken:
 
   api:
