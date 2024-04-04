@@ -140,6 +140,7 @@ p.osc-searchtext {
   color: var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit));
 }
 
+.utrecht-button.resource-card--link h4,
 .utrecht-button.resource-card--link h5,
 .utrecht-button.resource-card--link p{
   color: inherit;

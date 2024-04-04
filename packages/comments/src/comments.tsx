@@ -91,11 +91,13 @@ function Comments({
   }
 
   return (
-    <CommentWidgetContext.Provider value={args}>
-      <section className="osc">
-        <Heading4 className="comments-title">
-          {title.replace(/\[\[nr\]\]/, comments.length)}
-        </Heading4>
+    <section className="osc">
+      <Heading4 className="comments-title">
+        {comments &&(
+          title.replace(/\[\[nr\]\]/, comments.length)
+        )}
+        {!comments && title}
+      </Heading4>
 
         {args.isClosed ? (
           <Banner>
@@ -118,7 +120,6 @@ function Comments({
           return <Comment {...attributes} key={index} />;
         })}
       </section>
-    </CommentWidgetContext.Provider>
   );
 }
 

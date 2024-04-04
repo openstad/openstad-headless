@@ -39,6 +39,17 @@ body{
   margin: 0 auto;
   background-color: var(--nlds-body-background-color, var(--nlds-default-background-color, #F0F4F8));
 }
+
+.utrecht-heading-1.utrecht-accordion__header{
+  --utrecht-heading-1-line-height: 0;
+}
+
+// HACK: Dialog bug fix
+body[data-apos-level]{
+  padding: 0 !important;
+  margin: 0 auto !important;
+}
+
 [data-apos-refreshable], .bp-wrapper, main{
   background: #fff;
 }

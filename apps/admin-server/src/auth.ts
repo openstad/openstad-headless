@@ -58,7 +58,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
   let targetProjectId = 1;
   let match = req.nextUrl.pathname.match(/^\/projects\/(\d+)/)
   if (match) targetProjectId = parseInt(match[1]);
-  match = req.nextUrl.pathname.match(/^\/api\/openstad\/api\/project\/(\d+)/)
+  match = req.nextUrl.pathname.match(/^\/api\/openstad\/(?:api|auth)\/project\/(\d+)/)
   if (match) targetProjectId = parseInt(match[1]);
 
   // session
@@ -126,7 +126,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     let path = req.nextUrl.pathname.replace('/api/openstad', '');
     let query = searchParams ? '?' + searchParams.toString() : '';
     query = query.replace(/openstadlogintoken=(?:.(?!&|$))+./, '');
-    const rewrittenUrl = `${process.env.API_URL}${path}${query}`;
+    const rewrittenUrl = `${process.env.API_URL_INTERNAL || process.env.API_URL}${path}${query}`;
     return NextResponse.rewrite(rewrittenUrl, {
       headers: {
         Authorization: `Bearer ${jwt}`,
