@@ -1,4 +1,4 @@
-import React, {FC} from "react";
+import React, {FC, useState} from "react";
 import {FormField, FormFieldDescription, FormLabel, Paragraph} from "@utrecht/component-library-react";
 import './map.css';
 import {EditorMap} from "@openstad-headless/leaflet-map/src/editor-map";
@@ -12,6 +12,7 @@ export type MapProps = BaseProps &
     description: string;
     fieldKey: string;
     fieldRequired: boolean;
+    disabled?: boolean;
     onChange?: (e: {name: string, value: string | FileList | []}) => void;
 }
 
@@ -21,11 +22,10 @@ const MapField: FC<MapProps> = ({
     fieldKey,
     fieldRequired= false,
     onChange,
+    disabled = false,
     ...props
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
-    // TODO: Get map value when setting a marker. The function to retrieve the value is not yet implemented
 
     const datastore: any = new DataStore({
         projectId: props.projectId,
@@ -39,20 +39,7 @@ const MapField: FC<MapProps> = ({
     let areaId = props?.project?.areaId || false;
     const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];
 
-    function calculateZoom(minLat, maxLat, minLng, maxLng) {
-        const visibleWidthDegrees = maxLng - minLng;
-        const visibleHeightDegrees = maxLat - minLat;
-        const visibleWidth = Math.abs(visibleWidthDegrees);
-        const visibleHeight = Math.abs(visibleHeightDegrees);
-
-        const visibleDimension = Math.max(visibleWidth, visibleHeight);
-
-        const zoom = Math.ceil(8 - Math.log2(visibleDimension));
-
-        return Math.max(0, Math.min(zoom, 25));
-    }
-
-    function calculateMapData(polygon) {
+    function calculateCenter(polygon) {
         if (!polygon || polygon.length === 0) {
             return null;
         }
@@ -69,23 +56,15 @@ const MapField: FC<MapProps> = ({
             if (point.lat > maxY) maxY = point.lat;
         });
 
-        const zoom = calculateZoom(minY, maxY, minX, maxX);
-
         const avgLat = (minY + maxY) / 2;
         const avgLng = (minX + maxX) / 2;
 
-        return {
-            center: {lat: avgLat, lng: avgLng},
-            zoom: zoom
-        };
+        return {lat: avgLat, lng: avgLng};
     }
 
     let center = undefined;
-    let zoom = 10;
     if (!!polygon && Array.isArray(polygon) && polygon.length > 0) {
-        const mapData = calculateMapData(polygon)
-        center = mapData?.center;
-        zoom = mapData?.zoom || 10;
+        center = calculateCenter(polygon);
     }
 
     return (
@@ -102,8 +81,9 @@ const MapField: FC<MapProps> = ({
                   autoZoomAndCenter="area"
                   fieldName={fieldKey}
                   center={center}
-                  zoom={zoom}
                   area={polygon}
+                  onChange={onChange}
+                  fieldRequired={fieldRequired}
                   {...props}
               />
           </div>
