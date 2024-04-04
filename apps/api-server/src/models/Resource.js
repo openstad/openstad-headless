@@ -124,6 +124,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
       viewableByRole: {
         type: DataTypes.ENUM(
+          'superuser',
           'admin',
           'editor',
           'moderator',
