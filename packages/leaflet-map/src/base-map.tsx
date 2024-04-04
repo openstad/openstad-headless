@@ -125,7 +125,7 @@ const BaseMap = ({
       return setBoundsAndCenter(area);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapRef]);
+  }, [mapRef, center]);
 
   // update center
   useEffect(() => {
