@@ -105,8 +105,6 @@ ADMIN_DOMAIN=${process.env.ADMIN_DOMAIN}
 ADMIN_PORT=${process.env.ADMIN_PORT}
 ADMIN_COOKIE_SECRET=${process.env.ADMIN_COOKIE_SECRET}
 
-NEXT_PUBLIC_API_URL=${process.env.API_URL}
-
 CMS_URL=${process.env.CMS_URL}
 CMS_PORT=${process.env.CMS_PORT}
 CMS_OVERWRITE_URL=${process.env.CMS_OVERWRITE_URL}

@@ -37,10 +37,5 @@ declare namespace NodeJS {
      * A fixed key in the API server that can be used as an admin login
      */
     API_FIXED_AUTH_KEY: string;
-    /**
-     * Admin url and api url for use in clientside scripts
-     */
-    NEXT_PUBLIC_API_URL: string;
-    NEXT_PUBLIC_URL: string;
   }
 }
