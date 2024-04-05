@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 
-export default function useStatuses(projectId?: string) {
+export default function useStatus(projectId?: string) {
   const url = `/api/openstad/api/project/${projectId}/status`;
 
   const statusListSwr = useSWR(projectId ? url : null);

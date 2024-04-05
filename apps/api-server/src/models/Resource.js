@@ -1053,11 +1053,8 @@ module.exports = function (db, sequelize, DataTypes) {
       if (!self.publishDate) return false;
       // status
       let statuses = self.statuses || [];
-      for (let status of statuses) { // todo: wil je dat zo?
-        if (
-          typeof status?.extraFunctionality?.noComment != 'boolean' ||
-            status.extraFunctionality.noComment
-        ) {
+      for (let status of statuses) {
+        if ( status.extraFunctionality?.noComment === true ) {
           return false;
         }
       }

@@ -5,7 +5,7 @@ export default function useStatuses(projectId?: string, id?: string) {
 
   const statuseswr = useSWR(projectId && id ? url : null);
 
-  async function updateStatus(name: string, seqnr: number, backgroundColor: string | undefined, color: string | undefined, label: string | undefined, mapIcon: string | undefined, listIcon: string | undefined, extraFunctionality: { editableByUser: boolean | undefined, noComment: boolean | undefined } ) {
+  async function updateStatus(name: string | undefined, seqnr: number | undefined, backgroundColor: string | undefined, color: string | undefined, label: string | undefined, mapIcon: string | undefined, listIcon: string | undefined, extraFunctionality: { editableByUser: boolean | undefined, noComment: boolean | undefined } ) {
     const res = await fetch(url, {
       method: 'PUT',
       headers: {

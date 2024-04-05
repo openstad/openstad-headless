@@ -13,11 +13,6 @@ router.all('*', function (req, res, next) {
   if (req.query.includeProject) {
     req.scope.push('includeProject');
   }
-
-  if (req.query.type) {
-    let type = req.query.type;
-    req.scope.push({ method: ['selectType', type] });
-  }
   
   if (req.query.statuses) {
     let statuses = req.query.statuses;
@@ -61,7 +56,6 @@ router
   .post(function (req, res, next) {
     const data = {
       name: req.body.name,
-      type: req.body.type,
       seqnr: req.body.seqnr,
       projectId: req.params.projectId,
     };

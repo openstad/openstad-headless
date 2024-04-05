@@ -81,10 +81,6 @@ router.all('*', function (req, res, next) {
     req.scope.push('includeTags');
   }
 
-  if (req.query.includeStatuses) {
-    req.scope.push('includeStatuses');
-  }
-
   if (req.query.includePoll) {
     req.scope.push({ method: ['includePoll', req.user.id] });
   }
