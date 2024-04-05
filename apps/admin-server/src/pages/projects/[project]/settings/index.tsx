@@ -160,25 +160,7 @@ export default function ProjectSettings() {
                       form={form}
                       fieldName="endDate"
                       label="Einddatum"
-                    />
-                    <FormField
-                      control={form.control}
-                      name="enableReactions"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            Is het mogelijk om reacties te plaatsen?
-                          </FormLabel>
-                          <Switch.Root
-                            className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-purple-600 outline-none cursor-default"
-                            onCheckedChange={(e: boolean) => {
-                              field.onChange(e);
-                            }}>
-                            <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                          </Switch.Root>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      fieldInfo="Plannen, Argumenten en Stemmen worden na deze datum niet meer getoond. De einddatum kan altijd aangepast worden."
                     />
                     <FormField
                       control={form.control}
@@ -198,6 +180,7 @@ export default function ProjectSettings() {
                       form={form}
                       fieldName="areaId"
                       fieldLabel="Polygon voor kaarten"
+                      fieldInfo="Op de pagina 'Polygonen' kun je een eigen gebied aanmaken. Selecteer hieronder het gebied waar dit project onder valt."
                       items={areas}
                       keyForValue="id"
                       label={(area: any) => `${area.name}`}
@@ -226,6 +209,26 @@ export default function ProjectSettings() {
                         )}
                       />
                     ) : null}
+
+                    <FormField
+                      control={form.control}
+                      name="enableReactions"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Is het mogelijk om reacties te plaatsen?
+                          </FormLabel>
+                          <Switch.Root
+                            className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-purple-600 outline-none cursor-default"
+                            onCheckedChange={(e: boolean) => {
+                              field.onChange(e);
+                            }}>
+                            <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                          </Switch.Root>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <Button className="w-fit col-span-full" type="submit">
                       Opslaan
                     </Button>

@@ -8,12 +8,14 @@ import {
 } from '../../components/ui/form';
 
 import { ObjectListSelect } from '@/components/ui/object-select';
+import InfoDialog from './info-hover';
 
 // TODO find the actual type of the form, so we can get typehinting in the parent for fieldName based on the passed form
 type Props<T> = {
   form: any;
   fieldName: string;
   fieldLabel?:string;
+  fieldInfo?:string;
   items: Array<T>;
   keyForValue: keyof T;
   onFieldChanged?: (key: string, value: keyof T) => void;
@@ -32,7 +34,8 @@ export const FormObjectSelectField = <T extends { [key: string]: any }>({
       render={({ field }) => (
         <FormItem>
           <FormLabel>
-            {props.fieldLabel}
+            {props.fieldLabel} 
+            {props.fieldInfo && <InfoDialog content={props.fieldInfo} />}
           </FormLabel>
           {ObjectListSelect<T>({
             field,

@@ -22,6 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import toast from 'react-hot-toast';
+import InfoDialog from '@/components/ui/info-hover';
 
 const formSchema = z.object({
   anonymizeUsersXDaysAfterEndDate: z.coerce.number(),
@@ -208,7 +209,9 @@ export default function ProjectSettingsAnonymization() {
               </div>
               <div className="p-6 bg-white rounded-md mt-4">
                 <Form {...emailForm}>
-                  <Heading size="xl">Waarschuwings e-mail</Heading>
+                  <Heading size="xl">Waarschuwings e-mail <InfoDialog content={'Content voor een waarschuwings email'} /></Heading>
+                  
+
                   <Separator className="my-4" />
                   <form
                     onSubmit={emailForm.handleSubmit(onSubmitEmail)}

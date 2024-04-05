@@ -206,24 +206,21 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   });
 
   return (
-    <div className="p-6 bg-white rounded-md">
-      <Form {...form}>
+    <div className="p-6 bg-muted">
+      <Form className='p-6 bg-white rounded-md' {...form}>
         <Heading size="xl">{id ? 'Aanpassen' : 'Toevoegen'}</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-2/3 grid grid-cols-3 gap-4 lg:auto-rows-fit">
+          className="grid grid-cols-2 gap-4 lg:auto-rows-fit max-w-screen-xl">
           <FormField
             control={form.control}
-            name="userId"
+            name="title"
             render={({ field }) => (
-              <FormItem className="col-span-full lg:col-span-2 lg:pr-40">
-                <FormLabel>User id van het plan (optioneel)</FormLabel>
+              <FormItem className="col-span-full lg:col-span-1">
+                <FormLabel>Titel</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Laat leeg om jezelf te koppelen"
-                    {...field}
-                  />
+                  <Input placeholder="" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -231,9 +228,63 @@ export default function ResourceForm({ onFormSubmit }: Props) {
           />
           <FormField
             control={form.control}
+            name="summary"
+            render={({ field }) => (
+              <FormItem className="col-span-full lg:col-span-1">
+                <FormLabel>Samenvatting</FormLabel>
+                <FormControl>
+                  <Input placeholder="" {...field} />
+
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem className="col-span-full">
+                <FormLabel>Beschrijving</FormLabel>
+                <FormControl>
+                  <Textarea rows={6} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <ImageUploader
+            form={form}
+            fieldName="image"
+            onImageUploaded={(imageResult) => {
+              let array = [...(form.getValues('images') || [])];
+              array.push(imageResult);
+              form.setValue('images', array);
+              form.resetField('image');
+              form.trigger('images');
+            }}
+          />
+
+          <FormField
+            control={form.control}
+            name="budget"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Budget</FormLabel>
+                <FormControl>
+                  <Input placeholder="" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="extraData.originalId"
             render={({ field }) => (
-              <FormItem className="col-span-1 lg:-ml-40">
+              <FormItem className="col-span-full lg:col-span-1">
                 <FormLabel>
                   Plan id van het originele plan (optioneel)
                 </FormLabel>
@@ -248,55 +299,17 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
-            name="title"
+            name="userId"
             render={({ field }) => (
-              <FormItem className="col-span-full">
-                <FormLabel>Titel</FormLabel>
+              <FormItem className="col-span-full lg:col-span-1">
+                <FormLabel>User id van het plan (optioneel)</FormLabel>
                 <FormControl>
-                  <Input placeholder="" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="summary"
-            render={({ field }) => (
-              <FormItem className="col-span-full lg:col-span-2 lg:pr-40">
-                <FormLabel>Samenvatting</FormLabel>
-                <FormControl>
-                  <Textarea rows={6} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem className="col-span-1 lg:-ml-40">
-                <FormLabel>Beschrijving</FormLabel>
-                <FormControl>
-                  <Textarea rows={6} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="budget"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel>Budget</FormLabel>
-                <FormControl>
-                  <Input placeholder="" {...field} />
+                  <Input
+                    placeholder="Laat leeg om jezelf te koppelen"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -349,7 +362,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             control={form.control}
             name="location"
             render={({ field }) => (
-              <FormItem className="col-span-1">
+              <FormItem className="col-span-full lg:col-span-1">
                 <FormLabel>Locatie (optioneel)</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
@@ -358,6 +371,8 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               </FormItem>
             )}
           />
+
+          <hr className="col-span-full mt-8 mb-8" />
 
           <FormField
             control={form.control}
@@ -396,6 +411,8 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             />
           </div>
 
+          <hr className="col-span-full mt-8 mb-8" />
+
           <div className="mt-auto col-span-full lg:col-span-1">
             <SimpleCalendar
               form={form}
@@ -411,17 +428,6 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               withReset
             />
           </div>
-          <ImageUploader
-            form={form}
-            fieldName="image"
-            onImageUploaded={(imageResult) => {
-              let array = [...(form.getValues('images') || [])];
-              array.push(imageResult);
-              form.setValue('images', array);
-              form.resetField('image');
-              form.trigger('images');
-            }}
-          />
 
           <CheckboxList
             form={form}

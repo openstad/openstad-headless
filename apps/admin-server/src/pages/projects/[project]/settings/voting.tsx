@@ -28,6 +28,7 @@ import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
 import toast from 'react-hot-toast';
 import * as Switch from '@radix-ui/react-switch';
+import InfoDialog from '@/components/ui/info-hover';
 
 const formSchema = z.object({
   isViewable: z.boolean(),
@@ -260,6 +261,7 @@ export default function ProjectSettingsVoting() {
                     <FormLabel>
                       Wat is de minimum hoeveelheid resources waar iemand op kan
                       stemmen?
+                      <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Count, Count per theme of Count per budgeting'} />
                     </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="1" {...field} />
@@ -276,6 +278,7 @@ export default function ProjectSettingsVoting() {
                     <FormLabel>
                       Wat is de maximum hoeveelheid resources waar iemand op kan
                       stemmen?
+                      <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Count, Count per theme of Count per budgeting'} />
                     </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="100" {...field} />
@@ -291,6 +294,7 @@ export default function ProjectSettingsVoting() {
                   <FormItem className="col-span-1">
                     <FormLabel>
                       Wat is het minimum budget?
+                      <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Budgeting '} />
                     </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="1" {...field} />
@@ -306,6 +310,7 @@ export default function ProjectSettingsVoting() {
                   <FormItem className="col-span-1">
                     <FormLabel>
                       Wat is het maximum budget?
+                      <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Budgeting '} />
                     </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="100" {...field} />

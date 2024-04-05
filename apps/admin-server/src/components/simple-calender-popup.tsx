@@ -12,24 +12,29 @@ import {
   FormMessage,
 } from './ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import InfoDialog from './ui/info-hover';
 
 // Would like to use a generic solution <T> to enable hinting in the using file
 // Now to remove the errors UseFormReturn<any> has to be used
 export const SimpleCalendar: React.FC<{
   form: UseFormReturn<any>;
   fieldName: Path<FieldValues>;
+  fieldInfo?: string;
   label: string;
   placeholder?: string;
   withReset?: boolean;
   allowPast?: boolean;
-}> = ({ form, fieldName, label, placeholder, withReset, allowPast }) => {
+}> = ({ form, fieldName, label, placeholder, withReset, allowPast, fieldInfo }) => {
   return (
     <FormField
       control={form.control}
       name={fieldName}
       render={({ field }) => (
         <FormItem className="flex flex-col">
-          <FormLabel>{label}</FormLabel>
+          <FormLabel>
+            {label}
+            {fieldInfo && <InfoDialog content={fieldInfo} />}
+            </FormLabel>
           <div className="flex flex-row gap-2">
             <Popover>
               <PopoverTrigger asChild>
