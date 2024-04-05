@@ -147,7 +147,7 @@ function signIn(req: NextRequest, projectId:number = 1, forceNewLogin?: boolean)
 }
 
 function clientSignIn() {
-  let loginUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/project/1/login?useAuth=default&redirectUri=${process.env.NEXT_PUBLIC_URL}/projects`;
+  let loginUrl = `/signin`;
   document.location.href = loginUrl;
 }
 

@@ -4,7 +4,7 @@ export default function Signout() {
 
   useEffect(() => {
     try {
-      let logoutUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/project/1/logout?useAuth=default&redirectUri=${process.env.NEXT_PUBLIC_URL}/`;
+      let logoutUrl = `/signout`;
       document.location.href = logoutUrl;
     } catch(err) {}
   }, []);

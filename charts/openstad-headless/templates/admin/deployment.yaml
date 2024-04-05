@@ -28,12 +28,12 @@ spec:
         env:
           - name: PORT
             value: "{{ .Values.admin.service.httpPort }}"
-          - name: NEXTAUTH_URL
+          - name: URL
             value: https://{{ template "openstad.admin.url" . }}
-          - name: NEXTAUTH_SECRET
+          - name: COOKIE_SECRET
             valueFrom:
               secretKeyRef:
-                key: nextAuthSecret
+                key: cookieSecret
                 name: {{ template "openstad.admin.secret.fullname" . }}
           - name: CLIENT_ID
             valueFrom:

@@ -11,12 +11,22 @@ export default async function middleware(req: NextRequest) {
   if (req.nextUrl.pathname.startsWith('/favicon') ) return res;
 
   // default page
-  if (req.nextUrl.pathname.match(/^\/?$/)) // home
-  if (session.user) {
-    return NextResponse.redirect(`${process.env.URL}/projects`);
-  } else {
-    return res;
+  if (req.nextUrl.pathname.match(/^\/?$/)) { // home
+    if (session.user) {
+      return NextResponse.redirect(`${process.env.URL}/projects`);
+    } else {
+      return res;
+    }
   }
+
+  // signin
+  if (req.nextUrl.pathname.match(/^\/signin$/i)) {
+    return NextResponse.redirect(`${process.env.API_URL}/auth/project/1/login?useAuth=default&redirectUri=${process.env.URL}/projects`);
+  }
+
+  // signout
+  if (req.nextUrl.pathname.match(/^\/signout$/i))
+    return NextResponse.redirect(`${process.env.API_URL}/auth/project/1/logout?useAuth=default&redirectUri=${process.env.URL}/`);
 
   return authMiddleware(req, res);
 

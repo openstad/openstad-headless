@@ -136,6 +136,9 @@ spec:
           - name: BASE_DOMAIN
             value: {{ .Values.host.base }}
 
+          - name: ADMIN_DOMAIN
+            value: {{ template "openstad.admin.url" . }}
+
           - name: AUTH_ADMIN_CLIENT_ID
             valueFrom:
               secretKeyRef:
