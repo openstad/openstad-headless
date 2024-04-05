@@ -71,7 +71,7 @@ export default function ProjectComments() {
                       <Paragraph>{comment.id}</Paragraph>
                     </div>
                     <Paragraph className="hidden lg:flex truncate lg:col-span-1 -mr-16">
-                      {comment.resourceId}
+                      <a href={`/projects/${project}/resources/${comment.resourceId}`} style={{textDecoration: 'underline', zIndex: '1'}}>{comment.resourceId}</a>
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate lg:col-span-2">
                       {comment.createdAt}

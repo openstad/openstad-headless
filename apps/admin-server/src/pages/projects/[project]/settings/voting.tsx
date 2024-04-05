@@ -119,7 +119,7 @@ export default function ProjectSettingsVoting() {
           },
           {
             name: 'Instellingen',
-            url: `'/projects/${project}/settings'`,
+            url: `/projects/${project}/settings`,
           },
           {
             name: 'Stemmen',
