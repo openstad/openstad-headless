@@ -5,14 +5,13 @@ import { CalendarIcon, RotateCcw } from 'lucide-react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 import { Button } from './ui/button';
 import {
-  FormControl, FormDescription,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from './ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import React from "react";
 
 // Would like to use a generic solution <T> to enable hinting in the using file
 // Now to remove the errors UseFormReturn<any> has to be used
@@ -23,8 +22,7 @@ export const SimpleCalendar: React.FC<{
   placeholder?: string;
   withReset?: boolean;
   allowPast?: boolean;
-  description?: string;
-}> = ({ form, fieldName, label, placeholder, withReset, allowPast, description }) => {
+}> = ({ form, fieldName, label, placeholder, withReset, allowPast }) => {
   return (
     <FormField
       control={form.control}
@@ -32,9 +30,6 @@ export const SimpleCalendar: React.FC<{
       render={({ field }) => (
         <FormItem className="flex flex-col">
           <FormLabel>{label}</FormLabel>
-          {description && (
-              <FormDescription>{description}</FormDescription>
-          )}
           <div className="flex flex-row gap-2">
             <Popover>
               <PopoverTrigger asChild>

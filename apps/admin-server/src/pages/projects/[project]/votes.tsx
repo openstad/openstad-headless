@@ -81,10 +81,10 @@ export default function ProjectResources() {
                       {vote.createdAt}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate lg:col-span-1">
-                      <a href={`/projects/${project}/resources/${vote.resourceId}`} style={{textDecoration: 'underline'}}>{vote.resourceId}</a>
+                      {vote.resourceId}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate lg:col-span-1">
-                      <a href={`/users/${vote.userId}`} style={{textDecoration: 'underline'}}>{vote.userId}</a>
+                      {vote.userId}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate lg:col-span-1 -mr-16">
                       {vote.opinion}
