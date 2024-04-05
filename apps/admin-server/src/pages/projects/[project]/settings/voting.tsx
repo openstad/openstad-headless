@@ -27,6 +27,7 @@ import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
 import toast from 'react-hot-toast';
+import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   isViewable: z.boolean(),
@@ -140,21 +141,13 @@ export default function ProjectSettingsVoting() {
                     <FormLabel>
                       Is de hoeveelheid stemmen publiek zichtbaar?
                     </FormLabel>
-                    <Select
-                      onValueChange={(e: string) =>
-                        field.onChange(e === 'true')
-                      }
-                      value={field.value ? 'true' : 'false'}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Ja" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Ja</SelectItem>
-                        <SelectItem value="false">Nee</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Switch.Root
+                      className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-purple-600 outline-none cursor-default"
+                      onCheckedChange={(e: boolean) => {
+                        field.onChange(e);
+                      }}>
+                      <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                    </Switch.Root>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -165,21 +158,13 @@ export default function ProjectSettingsVoting() {
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>Is het mogelijk om te stemmen?</FormLabel>
-                    <Select
-                      onValueChange={(e: string) =>
-                        field.onChange(e === 'true')
-                      }
-                      value={field.value ? 'true' : 'false'}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Nee" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Ja</SelectItem>
-                        <SelectItem value="false">Nee</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Switch.Root
+                      className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-purple-600 outline-none cursor-default"
+                      onCheckedChange={(e: boolean) => {
+                        field.onChange(e);
+                      }}>
+                      <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                    </Switch.Root>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -299,7 +284,7 @@ export default function ProjectSettingsVoting() {
                   </FormItem>
                 )}
               />
-               <FormField
+              <FormField
                 control={form.control}
                 name="minBudget"
                 render={({ field }) => (

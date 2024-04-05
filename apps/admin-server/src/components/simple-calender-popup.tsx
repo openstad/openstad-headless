@@ -37,7 +37,7 @@ export const SimpleCalendar: React.FC<{
                   <Button
                     variant={'outline'}
                     className={cn(
-                      'w-[240px] pl-3 text-left font-normal',
+                      'w-[100%] pl-3 text-left font-normal',
                       !field.value && 'text-muted-foreground'
                     )}>
                     {field.value ? (
@@ -45,7 +45,7 @@ export const SimpleCalendar: React.FC<{
                     ) : (
                       <span>{placeholder || 'Kies een datum'}</span>
                     )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    <CalendarIcon className="ml-auto h-4 w-4" />
                   </Button>
                 </FormControl>
               </PopoverTrigger>

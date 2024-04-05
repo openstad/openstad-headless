@@ -29,6 +29,7 @@ import useResources from '@/hooks/use-resources';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { LikeWidgetTabProps } from '.';
+import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   title: z.string(),
@@ -213,22 +214,15 @@ export default function LikesDisplay({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Moet het aantal stemmen verborgen worden?</FormLabel>
-                <Select
-                  onValueChange={(e: string) => {
-                    field.onChange(e === 'true');
-                    props.onFieldChanged(field.name, e === 'true');
+                <Switch.Root
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-purple-600 outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                    field.onChange(e);
+                    props.onFieldChanged(field.name, e);
                   }}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Nee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                  defaultChecked={true}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
                 <FormMessage />
               </FormItem>
             )}

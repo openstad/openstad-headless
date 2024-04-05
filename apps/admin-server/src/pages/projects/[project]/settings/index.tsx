@@ -22,15 +22,9 @@ import useArea from '@/hooks/use-areas';
 import { useProject } from '../../../../hooks/use-project';
 import { SimpleCalendar } from '@/components/simple-calender-popup';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import toast from 'react-hot-toast';
 import { Checkbox } from '@/components/ui/checkbox';
+import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -66,7 +60,7 @@ export default function ProjectSettings() {
       name: data?.name || '',
       endDate: data?.config?.project?.endDate
         ? new Date(data?.config?.project?.endDate)
-        : new Date(currentDate.getFullYear(), currentDate.getMonth()+3),
+        : new Date(currentDate.getFullYear(), currentDate.getMonth() + 3),
       enableReactions: data?.config?.resources?.enableReactions || false,
       cssUrl: data?.config?.project?.cssUrl || '',
       areaId: data?.areaId || '',
@@ -175,21 +169,13 @@ export default function ProjectSettings() {
                           <FormLabel>
                             Is het mogelijk om reacties te plaatsen?
                           </FormLabel>
-                          <Select
-                            onValueChange={(e: string) =>
-                              field.onChange(e === 'true')
-                            }
-                            value={field.value ? 'true' : 'false'}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Nee" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="true">Ja</SelectItem>
-                              <SelectItem value="false">Nee</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <Switch.Root
+                            className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-purple-600 outline-none cursor-default"
+                            onCheckedChange={(e: boolean) => {
+                              field.onChange(e);
+                            }}>
+                            <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                          </Switch.Root>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -214,31 +200,31 @@ export default function ProjectSettings() {
                       fieldLabel="Polygon voor kaarten"
                       items={areas}
                       keyForValue="id"
-                      label={(area:any) => `${area.name}`}
+                      label={(area: any) => `${area.name}`}
                       noSelection="&nbsp;"
-                  />
+                    />
 
                     <div>
-                      <Checkbox checked={showUrl} onClick={(e) => setShowUrl(!showUrl)} className='mr-2'/>
-                        <FormLabel>
-                          Wil je een CMS URL instellen?
-                        </FormLabel>
+                      <Checkbox checked={showUrl} onClick={(e) => setShowUrl(!showUrl)} className='mr-2' />
+                      <FormLabel>
+                        Wil je een CMS URL instellen?
+                      </FormLabel>
                     </div>
                     {showUrl ? (
                       <FormField
-                      control={form.control}
-                      name="url"
-                      render={({ field }) => (
-                        <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                          <FormLabel>Project URL</FormLabel>
-                          <em className="text-xs">Let op: voer de URL in zonder https:// ervoor, bijv. &apos;plannen.openstad.org&apos;</em>
-                          <FormControl>
-                            <Input placeholder="Url" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        control={form.control}
+                        name="url"
+                        render={({ field }) => (
+                          <FormItem className="col-span-full md:col-span-1 flex flex-col">
+                            <FormLabel>Project URL</FormLabel>
+                            <em className="text-xs">Let op: voer de URL in zonder https:// ervoor, bijv. &apos;plannen.openstad.org&apos;</em>
+                            <FormControl>
+                              <Input placeholder="Url" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     ) : null}
                     <Button className="w-fit col-span-full" type="submit">
                       Opslaan
@@ -263,7 +249,7 @@ export default function ProjectSettings() {
                   <Button
                     variant={'destructive'}
                     className="mt-4 w-fit"
-                    onClick={() => {}}>
+                    onClick={() => { }}>
                     Project archiveren
                   </Button>
                 </div>
