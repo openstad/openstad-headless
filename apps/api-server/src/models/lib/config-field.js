@@ -64,6 +64,9 @@ function parseConfig(which, config) {
         if (options[key].type && options[key].type === 'arrayOfStrings' && !(typeof value[key] === 'object' && Array.isArray(value[key]) && !value[key].find(val => typeof val !== 'string'))) {
           throw new Error(`project.config: ${key} must be an array of strings`);
         }
+        if (options[key].type && options[key].type === 'arrayOfNumbers' && !(typeof value[key] === 'object' && Array.isArray(value[key]) && !value[key].find(val => typeof val !== 'number'))) {
+          throw new Error(`project.config: ${key} must be an array of numbers`);
+        }
         if (options[key].type && options[key].type === 'arrayOfObjects' && !(typeof value[key] === 'object' && Array.isArray(value[key]) && !value[key].find(val => typeof val !== 'object'))) {
           throw new Error(`project.config: ${key} must be an array of objects`);
         }
