@@ -200,6 +200,7 @@ function getDefaultConfig(projectId) {
       url: logoutUrl,
     },
     projectId: projectId,
+    imageUrl: process.env.IMAGE_APP_URL,
   };
 }
 
