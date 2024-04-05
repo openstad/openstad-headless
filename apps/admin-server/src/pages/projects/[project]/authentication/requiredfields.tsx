@@ -163,7 +163,7 @@ export default function ProjectAuthenticationRequiredFields() {
                 name="requiredUserFields"
                 render={() => (
                   <FormItem className="col-span-full">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
                       {requiredUserFields.map((item) => (
                         <FormField
                           key={item.id}

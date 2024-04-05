@@ -84,7 +84,7 @@ export default function ProjectAreaEdit() {
             <Separator className="my-4" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="lg:w-1/2 grid grid-cols-1 gap-4">
+              className="lg:w-1/2 grid grid-cols-1 gap-x-4 gap-y-8">
               <FormField
                 control={form.control}
                 name="name"

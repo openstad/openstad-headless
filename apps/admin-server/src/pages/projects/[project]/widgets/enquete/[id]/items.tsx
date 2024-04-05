@@ -292,7 +292,7 @@ export default function WidgetEnqueteItems(
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="w-full grid gap-4">
+          className="w-full grid gap-x-4 gap-y-8">
           <div className="lg:w-full grid grid-cols-1 gap-x-6 lg:grid-cols-3">
             <div className="p-6 bg-white rounded-md flex flex-col justify-between">
               <div>

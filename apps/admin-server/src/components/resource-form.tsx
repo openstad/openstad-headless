@@ -212,7 +212,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="grid grid-cols-2 gap-4 lg:auto-rows-fit max-w-screen-xl">
+          className="grid grid-cols-2 gap-x-4 gap-y-8 lg:auto-rows-fit max-w-screen-xl">
           <FormField
             control={form.control}
             name="title"
@@ -452,7 +452,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             }}
           />
 
-          <section className="grid col-span-full grid-cols-3 gap-4 ">
+          <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
             {imageFields.map(({ id, url }, index) => {
               return (
                 <div key={id} style={{ position: 'relative' }}>

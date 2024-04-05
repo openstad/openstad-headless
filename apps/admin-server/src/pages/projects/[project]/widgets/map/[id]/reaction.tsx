@@ -83,7 +83,7 @@ export default function WidgetMapReaction() {
         <Separator className="mb-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-1/2">
+          className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8 lg:w-1/2">
           <FormField
             control={form.control}
             name="displayReactions"

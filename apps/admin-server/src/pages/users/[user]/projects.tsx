@@ -65,7 +65,7 @@ export default function CreateUserProjects() {
         <Separator className="my-4" />
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="ml-1">
-            <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 items-center lg:py-2 lg:border-b border-border gap-4">
+            <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 items-center lg:py-2 lg:border-b border-border gap-x-4 gap-y-8">
               <ListHeading className="hidden lg:flex">Projectnaam</ListHeading>
               <ListHeading className="hidden lg:flex">Rol</ListHeading>
             </div>

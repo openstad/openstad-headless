@@ -145,7 +145,7 @@ export default function ProjectAuthentication() {
                         Toegestaande authenticatie methoden
                       </FormLabel>
                     </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
                       {authTypes.map((item) => (
                         <FormField
                           key={item.id}

@@ -108,7 +108,7 @@ export default function WidgetRawStylingClasses(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
           {Object.entries(categorizedChoices).map(([category, choices]) => (
             <div key={category} className="flex flex-col gap-2">
               <h3>{category}</h3>

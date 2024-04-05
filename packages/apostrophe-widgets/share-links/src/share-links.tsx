@@ -68,7 +68,7 @@ function ShareLinks({ title }: Item) {
             }
           }}
           className='copy-link'
-          tabindex="0"
+          tabIndex="0"
         >
           <i className='icon --url'></i>
         </LinkSocial>
