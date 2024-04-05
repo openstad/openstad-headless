@@ -34,7 +34,7 @@ function ShareLinks({ title }: Item) {
 
         <LinkSocial
           external
-          href={'mailto:?subject='+document.title+'&body=' + encodeURIComponent(location.href)}
+          href={'mailto:?subject=' + document.title + '&body=' + encodeURIComponent(location.href)}
           title={'Mail'}
         >
           <i className='icon --mail'></i>
@@ -42,10 +42,35 @@ function ShareLinks({ title }: Item) {
 
         <LinkSocial
           external
-          href={'https://api.whatsapp.com/send?phone=&text='+ encodeURIComponent(location.href)+'&source=&data='}
+          href={'https://api.whatsapp.com/send?phone=&text=' + encodeURIComponent(location.href) + '&source=&data='}
           title={'Whatsapp'}
         >
           <i className='icon --whatsapp'></i>
+        </LinkSocial>
+
+        <LinkSocial
+          external
+          href={'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(location.href)}
+          title={'LinkedIn'}
+        >
+          <i className='icon --linkedin'></i>
+        </LinkSocial>
+
+        <LinkSocial
+          external
+          title={'Copy link'}
+          onClick={() => {
+            navigator.clipboard.writeText(location.href);
+          }}
+          onKeyDown={(e) => {
+            if(e.key === 'Enter') {
+              navigator.clipboard.writeText(location.href);
+            }
+          }}
+          className='copy-link'
+          tabindex="0"
+        >
+          <i className='icon --url'></i>
         </LinkSocial>
       </div>
     </div>
