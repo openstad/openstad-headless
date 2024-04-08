@@ -33,7 +33,6 @@ const formSchema = z.object({
   endDate: z.date().min(new Date(), {
     message: 'De datum moet nog niet geweest zijn!',
   }),
-  enableReactions: z.boolean(),
   cssUrl: z.string().optional(),
   areaId: z.string().optional(),
   // This URL regex is not perfect, but we don't want to restrict too much.
@@ -61,7 +60,6 @@ export default function ProjectSettings() {
       endDate: data?.config?.project?.endDate
         ? new Date(data?.config?.project?.endDate)
         : new Date(currentDate.getFullYear(), currentDate.getMonth() + 3),
-      enableReactions: data?.config?.resources?.enableReactions || false,
       cssUrl: data?.config?.project?.cssUrl || '',
       areaId: data?.areaId || '',
       url: data?.url || '',
@@ -94,9 +92,6 @@ export default function ProjectSettings() {
           project: {
             endDate: values.endDate,
             cssUrl: values.cssUrl,
-          },
-          resources: {
-            enableReactions: values.enableReactions,
           },
         },
         values.name,

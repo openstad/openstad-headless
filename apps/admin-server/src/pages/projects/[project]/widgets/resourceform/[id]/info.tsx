@@ -71,7 +71,7 @@ export default function WidgetResourceFormInfo() {
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Information</Heading>
+        <Heading size="xl">Display</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}

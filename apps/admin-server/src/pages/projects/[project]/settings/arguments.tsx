@@ -75,9 +75,9 @@ export default function ProjectSettingsArguments() {
     try {
       const project = await updateProject({
           [category]: {
-            enableReactions: values.enableReactions,
             ...data.config[category],
             reactionSettings: values.reactionSettings,
+            enableReactions: values.enableReactions,
           },
         },
       );

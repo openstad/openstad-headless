@@ -105,7 +105,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
             </TabsList>
             {previewConfig ? (
               <>
-                <TabsContent value="resources" className="extra-tabs">
+                <TabsContent value="resources">
                   <Tabs>
                     <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
                       <TabsTrigger value="general">Algemeen</TabsTrigger>
