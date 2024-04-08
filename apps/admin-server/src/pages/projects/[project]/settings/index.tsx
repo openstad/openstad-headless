@@ -45,7 +45,7 @@ const formSchema = z.object({
   // This URL regex is not perfect, but we don't want to restrict too much.
   // The main thing is that we want some text and a dot in the URL, and that we
   // don't want the protocol.
-  url: z.string().regex(/^([a-z0-9]+\.[a-z0-9.]+)$/g, {
+  url: z.string().regex(/^(?:([a-z0-9]+\.[a-z0-9.]+))?$/g, {
     message: 'De URL mag alleen kleine letters, cijfers en punten bevatten. Tip: gebruik geen https:// voor de URL'
   }).optional(),
 });
