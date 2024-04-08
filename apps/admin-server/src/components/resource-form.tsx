@@ -244,7 +244,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             control={form.control}
             name="description"
             render={({ field }) => (
-              <FormItem className="col-span-full">
+              <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
                 <FormLabel>Beschrijving</FormLabel>
                 <FormControl>
                   <Textarea rows={6} {...field} />
