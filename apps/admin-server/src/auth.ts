@@ -35,11 +35,14 @@ interface SessionData {
 const sessionOptions = {
   password: process.env.COOKIE_SECRET as string,
   cookieName: 'openstad-session',
+  // By setting ttl to 0 iron-session will create a cookie with the maximum age
+  // Where the cookie will expire 60 seconds before the session does.
+  // Source: https://github.com/vvo/iron-session?tab=readme-ov-file#examples
+  ttl: 0,
   cookieOptions: {
     sameSite: "lax",
     path: "/",
     secure: process.env.NODE_ENV === "production",
-    maxAge: 100,
   },
 };
 
@@ -63,7 +66,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
   // session
   const session = await getSession(req, res);
   let jwt = session[`project-${targetProjectId}`] || session[`project-1`];
-  
+
   // store login token
   const searchParams = req.nextUrl?.searchParams;
   let openstadlogintoken = searchParams.get('openstadlogintoken');
@@ -94,7 +97,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
         if (!response.ok) throw new Error('TokenValidationFailed')
         let result:OpenstadProfile = await response.json();
         if (!result.id) throw 'no user'
-        if ( !( req.nextUrl.pathname.match(/^\/(?:projects)?\/?/) && hasRole(result, 'member') ) // project overview is available for members; anything else requires 
+        if ( !( req.nextUrl.pathname.match(/^\/(?:projects)?\/?/) && hasRole(result, 'member') ) // project overview is available for members; anything else requires
              && result.role != 'superuser'
              && result.role != 'admin' ) {
           forceNewLogin = true;
@@ -112,14 +115,14 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
         await session.save()
       }
     }
-    
+
     // login if token not found
     if (!jwt) {
       return signIn(req, targetProjectId, forceNewLogin)
-    }  
+    }
 
   }
-  
+
   // api requests: add jwt
   if (req.nextUrl.pathname.startsWith('/api/openstad')) {
     let path = req.nextUrl.pathname.replace('/api/openstad', '');
@@ -131,7 +134,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
         Authorization: `Bearer ${jwt}`,
       },
     });
-  }  
+  }
 
   return res;
 
@@ -195,4 +198,3 @@ export {
   fetchSessionUser,
   type SessionUserType,
 }
-
