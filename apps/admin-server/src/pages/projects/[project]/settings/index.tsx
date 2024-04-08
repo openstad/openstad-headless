@@ -183,10 +183,17 @@ export default function ProjectSettings() {
                     />
 
                     <div>
-                      <Checkbox checked={showUrl} onClick={(e) => setShowUrl(!showUrl)} className='mr-2' />
                       <FormLabel>
                         Wil je een CMS URL instellen?
                       </FormLabel>
+                      <Switch.Root
+                        className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
+                        onCheckedChange={(e: boolean) => {
+                          setShowUrl(!showUrl)
+                        }}
+                        defaultChecked={!showUrl}>
+                        <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                      </Switch.Root>
                     </div>
                     {showUrl ? (
                       <FormField

@@ -52,30 +52,11 @@ export default function WidgetRawResource({ apiUrl }: WithApiUrlProps) {
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
-              <TabsTrigger value="styling">Styling classes</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig && (
                 <WidgetRawGeneral
-                  {...previewConfig}
-                  updateConfig={(config: any) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key: any, value: any) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
-                />
-              )}
-            </TabsContent>
-            <TabsContent value="styling" className="p-0">
-              {previewConfig && (
-                <WidgetRawStylingClasses
                   {...previewConfig}
                   updateConfig={(config: any) =>
                     updateConfig({ ...widget.config, ...config })

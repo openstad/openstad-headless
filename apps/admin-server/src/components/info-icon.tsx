@@ -11,8 +11,9 @@ const InfoIcon = () => {
         alignItems: 'center',
         fontSize: '10px',
         color: '#fff',
-        margin: '0 0 3px 8px',
-        fontFamily: 'serif'
+        margin: '0 0 0 8px',
+        fontFamily: 'serif',
+        lineHeight: '1'
     };
 
     return (

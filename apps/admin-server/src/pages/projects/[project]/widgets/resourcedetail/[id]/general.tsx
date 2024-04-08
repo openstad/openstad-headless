@@ -35,14 +35,13 @@ const formSchema = z.object({
 export default function WidgetResourceDetailGeneral(
   props: ResourceDetailWidgetProps & EditFieldProps<ResourceDetailWidgetProps>
 ) {
-  
+
   type FormData = z.infer<typeof formSchema>;
   async function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
   }
 
   const router = useRouter();
-
   const projectId = router.query.project as string;
   const { data: resourceList } = useResources(projectId as string);
   const resources = resourceList as { id: string; title: string }[];
@@ -82,29 +81,30 @@ export default function WidgetResourceDetailGeneral(
             items={resources}
             keyForValue="id"
             label={(resource) => `${resource.id} ${resource.title}`}
-            onFieldChanged={props.onFieldChanged}
+            onFieldChanged={(e, key) => {
+              props.onFieldChanged
+            }}
             noSelection="Niet koppelen - beschrijf het path of gebruik queryparam openstadResourceId"
           />
-
-          <FormField
-            control={form.control}
-            name="resourceIdRelativePath"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  <b>Geen specifieke resource gekoppeld?</b> Beschrijf hoe de resource gehaald wordt uit de url: (/pad/naar/[id]) of laat leeg om terug te vallen op ?openstadResourceId
-                </FormLabel>
-                <FormControl>
-                  <Input {...field} onChange={(e) =>{
-                    onFieldChange(field.name, e.target.value);
-                    field.onChange(e);
-                   }} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
+            <FormField
+              control={form.control}
+              name="resourceIdRelativePath"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Geen specifieke resource gekoppeld?
+                  </FormLabel>
+                  <em className="text-xs">Beschrijf hoe de resource gehaald wordt uit de url: (/pad/naar/[id]) of laat leeg om terug te vallen op ?openstadResourceId</em>
+                  <FormControl>
+                    <Input {...field} onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

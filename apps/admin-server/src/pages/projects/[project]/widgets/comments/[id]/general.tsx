@@ -24,6 +24,7 @@ import { FormObjectSelectField } from '@/components/ui/form-object-select-field'
 import useResources from '@/hooks/use-resources';
 import { ReactNode } from 'react';
 import { ArgumentWidgetTabProps } from '.';
+import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
@@ -135,22 +136,15 @@ export default function ArgumentsGeneral({
                   <FormLabel>
                     Is het toegestaan om te reageren op reacties?
                   </FormLabel>
-                  <Select
-                    onValueChange={(e: string) => {
-                      field.onChange(e === 'true');
-                      props.onFieldChanged(field.name, e === 'true');
+                  <Switch.Root
+                    className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                    onCheckedChange={(e: boolean) => {
+                      field.onChange(e);
+                      props.onFieldChanged(field.name, e);
                     }}
-                    value={field.value ? 'true' : 'false'}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Ja" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="true">Ja</SelectItem>
-                      <SelectItem value="false">Nee</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    defaultChecked={field.value}>
+                    <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                  </Switch.Root>
                   <FormMessage />
                 </FormItem>
               )}
@@ -167,22 +161,15 @@ export default function ArgumentsGeneral({
                   <FormLabel>
                     Is het mogelijk om te stemmen op reacties?
                   </FormLabel>
-                  <Select
-                    value={field.value ? 'true' : 'false'}
-                    onValueChange={(e: string) => {
-                      field.onChange(e === 'true');
-                      props.onFieldChanged(field.name, e === 'true');
-                    }}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Ja" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="true">Ja</SelectItem>
-                      <SelectItem value="false">Nee</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Switch.Root
+                    className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                    onCheckedChange={(e: boolean) => {
+                      field.onChange(e);
+                      props.onFieldChanged(field.name, e);
+                    }}
+                    defaultChecked={field.value}>
+                    <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                  </Switch.Root>
                   <FormMessage />
                 </FormItem>
               )}

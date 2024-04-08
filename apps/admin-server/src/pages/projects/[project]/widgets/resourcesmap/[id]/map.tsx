@@ -130,12 +130,12 @@ export default function WidgetResourcesMapMap(
                     }}
                   value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="" />
+                  <SelectTrigger>
+                      <SelectValue placeholder="Selecteer een optie" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">&nbsp;</SelectItem>
+                    <SelectItem value="" disabled>Selecteer een optie</SelectItem>
                     <SelectItem value="markers">Toon de markers</SelectItem>
                     <SelectItem value="area">Toon het gebied</SelectItem>
                   </SelectContent>
@@ -161,11 +161,11 @@ export default function WidgetResourcesMapMap(
                   value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="" />
+                      <SelectValue placeholder="Selecteer een optie" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">&nbsp;</SelectItem>
+                    <SelectItem value="" disabled>Selecteer een optie</SelectItem>
                     {tagGroupNames.map(type => (
                       <SelectItem value={type} key={type}>{type}</SelectItem>
                     ))}
@@ -192,11 +192,11 @@ export default function WidgetResourcesMapMap(
                   value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="" />
+                      <SelectValue placeholder="Selecteer een optie" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">&nbsp;</SelectItem>
+                    <SelectItem value="" disabled>Selecteer een optie</SelectItem>
                     <SelectItem value="nlmaps">NL maps</SelectItem>
                     <SelectItem value="amaps">Amsterdams</SelectItem>
                     <SelectItem value="openstreetmaps">Open Street Maps</SelectItem>
