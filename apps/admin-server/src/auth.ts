@@ -50,8 +50,7 @@ async function getSession(req: NextRequest | NextApiRequest, res: NextResponse |
 
 async function authMiddleware(req: NextRequest, res: NextResponse) {
 
-  // signout
-  if (req.nextUrl.pathname.startsWith('/signout')) return signOut(req, res);
+  // signout page
   if (req.nextUrl.pathname.startsWith('/auth/signout')) return res;
 
   // projectId
@@ -88,7 +87,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     // check login token
     if (jwt) {
       try {
-        let url = `${process.env.API_URL_INTERNAL}/auth/project/${targetProjectId}/me`
+        let url = `${process.env.API_URL_INTERNAL || process.env.API_URL}/auth/project/${targetProjectId}/me`
         let response = await fetch(url, {
           headers: { Authorization: `Bearer ${jwt}` },
         })
