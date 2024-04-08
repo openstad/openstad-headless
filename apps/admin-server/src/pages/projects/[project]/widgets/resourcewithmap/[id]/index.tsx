@@ -97,7 +97,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="general">
+          <Tabs defaultValue="resources">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="resources">Resources</TabsTrigger>
               <TabsTrigger value="map">Kaart</TabsTrigger>
@@ -106,7 +106,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
             {previewConfig ? (
               <>
                 <TabsContent value="resources">
-                  <Tabs>
+                  <Tabs defaultValue="general">
                     <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
                       <TabsTrigger value="general">Algemeen</TabsTrigger>
                       <TabsTrigger value="display">Display</TabsTrigger>
@@ -143,7 +143,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                   </Tabs>
                 </TabsContent>
                 <TabsContent value="map">
-                  <Tabs defaultValue="preview">
+                  <Tabs defaultValue="map">
                     <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
                       <TabsTrigger value="map">Kaart</TabsTrigger>
                       <TabsTrigger value="button">Knoppen</TabsTrigger>

@@ -75,7 +75,7 @@ export default function WidgetResourceFormInfo() {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-fit grid grid-cols-1 gap-4">
+          className="lg:w-2/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="viewable"

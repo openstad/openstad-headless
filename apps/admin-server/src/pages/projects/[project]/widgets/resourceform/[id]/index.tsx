@@ -15,28 +15,28 @@ import Preview from '@/components/widget-preview';
 import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
 import WidgetPublish from '@/components/widget-publish';
 import WidgetResourceFormItems from "@/pages/projects/[project]/widgets/resourceform/[id]/items";
-import {useWidgetPreview} from "@/hooks/useWidgetPreview";
-import {useWidgetConfig} from "@/hooks/use-widget-config";
+import { useWidgetPreview } from "@/hooks/useWidgetPreview";
+import { useWidgetConfig } from "@/hooks/use-widget-config";
 import WidgetPreview from "@/components/widget-preview";
-import {ResourceFormWidgetProps} from "@openstad-headless/resource-form/src/props";
+import { ResourceFormWidgetProps } from "@openstad-headless/resource-form/src/props";
 
 export const getServerSideProps = withApiUrl;
 export default function WidgetResourceForm({
   apiUrl,
-}:WithApiUrlProps) {
+}: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project as string;
 
   const { data: widget, updateConfig } = useWidgetConfig<ResourceFormWidgetProps>();
   const { previewConfig, updatePreview } = useWidgetPreview<ResourceFormWidgetProps>(
-      {
-        projectId,
-      }
+    {
+      projectId,
+    }
   );
 
   return (
-    <div className="w-full overflow-hidden">
+    <div >
       <PageLayout
         pageHeader="Project naam"
         breadcrumbs={[
@@ -54,7 +54,7 @@ export default function WidgetResourceForm({
           },
         ]}>
         <div className="container py-6 overflow-hidden">
-          <Tabs defaultValue="preview">
+          <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="items">Formulier velden</TabsTrigger>
@@ -70,19 +70,19 @@ export default function WidgetResourceForm({
             </TabsContent>
             <TabsContent value="items" className="p-0">
               {previewConfig && (
-                  <WidgetResourceFormItems
-                    {...previewConfig}
-                    updateConfig={(config) =>
-                        updateConfig({ ...widget.config, ...config })
+                <WidgetResourceFormItems
+                  {...previewConfig}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
+                  }
+                  onFieldChanged={(key: string, value: any) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
                     }
-                    onFieldChanged={(key:string, value:any) => {
-                      if (previewConfig) {
-                        updatePreview({
-                          ...previewConfig,
-                          [key]: value,
-                        });
-                      }
-                    }}
+                  }}
                 />
               )}
             </TabsContent>
@@ -99,16 +99,16 @@ export default function WidgetResourceForm({
               <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
           </Tabs>
-        </div>
 
-        <div className="py-6 mt-6 bg-white rounded-md">
-          {previewConfig ? (
+          <div className="py-6 mt-6 bg-white rounded-md">
+            {previewConfig ? (
               <WidgetPreview
-                  type="resourceform"
-                  config={previewConfig}
-                  projectId={projectId as string}
+                type="resourceform"
+                config={previewConfig}
+                projectId={projectId as string}
               />
-          ) : null}
+            ) : null}
+          </div>
         </div>
       </PageLayout>
     </div>

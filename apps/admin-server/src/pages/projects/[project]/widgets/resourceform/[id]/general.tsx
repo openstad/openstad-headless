@@ -22,6 +22,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   resource: z.enum([
@@ -41,7 +42,7 @@ type FormData = z.infer<typeof formSchema>;
 export default function WidgetResourceFormGeneral() {
   const category = 'general';
 
-    // should use the passed props widget, this is the old way and is not advised
+  // should use the passed props widget, this is the old way and is not advised
   const {
     data: widget,
     isLoading: isLoadingWidget,
@@ -152,19 +153,16 @@ export default function WidgetResourceFormGeneral() {
                   Wordt de admin verborgen van het project na de eerste publieke
                   actie?
                 </FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Ja" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+
+                <Switch.Root
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                    field.onChange(e);
+                  }}
+                  defaultChecked={field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
+
                 <FormMessage />
               </FormItem>
             )}
