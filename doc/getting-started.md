@@ -33,6 +33,10 @@ You can re-run this command, but you may want to read the [notes](#Notes) first.
 docker-compose up --build
 ```
 
+### 3a. Tmp: automatic database initialisation may fail.
+
+If so: read [Initial data](http://localhost:50809/#initial-data) later in this file.
+
 ### 4. What to expect
 
 You now have four servers, running on localhost:31410, 31430, 31450 and 31470. These urls should work:
@@ -138,10 +142,15 @@ Six docker containers have been created:
 
 During setup the databases are filled with some initial data, as described in the [databases](./databases.md) documentation.
 
-To rerun the database initialisation, e.g. for the api, run
+To rerun the database initialisation, run
 
 ```
-docker exec openstad-api-server bash -c "npm run init-database"
+docker exec openstad-api-server bash -c "cd /opt/openstad-headless/apps/api-server; npm run init-database"
+```
+and
+
+```
+docker exec openstad-auth-server bash -c "cd /opt/openstad-headless/apps/auth-server; npm run init-database"
 ```
 
 To connect directly to the database use
