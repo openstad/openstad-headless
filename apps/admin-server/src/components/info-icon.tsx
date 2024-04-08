@@ -5,7 +5,7 @@ const InfoIcon = () => {
         width: '15px',
         height: '15px',
         borderRadius: '50%',
-        backgroundColor: '#9543fa',
+        backgroundColor: '#1671ef',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
