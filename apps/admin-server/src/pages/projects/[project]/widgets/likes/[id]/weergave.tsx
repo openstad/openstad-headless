@@ -220,7 +220,7 @@ export default function LikesDisplay({
                     field.onChange(e);
                     props.onFieldChanged(field.name, e);
                   }}
-                  defaultChecked={true}>
+                  defaultChecked={field.value}>
                   <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
                 </Switch.Root>
                 <FormMessage />

@@ -158,7 +158,8 @@ export default function ProjectSettingsArguments() {
                       className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                       onCheckedChange={(e: boolean) => {
                         field.onChange(e);
-                      }}>
+                      }}
+                      defaultChecked={field.value}>
                       <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
                     </Switch.Root>
                     <FormMessage />
