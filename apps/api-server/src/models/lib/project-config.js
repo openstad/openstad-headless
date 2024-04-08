@@ -61,16 +61,6 @@ module.exports = {
     },
   },
 
-  statusses: {
-    type: 'object',
-    subset: {
-      defaultStatusId: {
-        type: 'int',
-        default: null,
-      },
-    },
-  },
-
   resources: {
     type: 'object',
     subset: {
@@ -165,6 +155,14 @@ module.exports = {
           "Initialavailablebudget": {type: 'int', default: 0},
           "minimalBudgetSpent": {type: 'int', default: 0},
         }
+      },
+      defaultStatusIds: {
+        type: 'arrayOfNumbers',
+        default: [],
+      },
+      defaultTagIds: {
+        type: 'arrayOfNumbers',
+        default: [],
       },
     },
   },

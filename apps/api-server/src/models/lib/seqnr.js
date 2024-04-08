@@ -1,4 +1,4 @@
-let renumber = async function({ model, where, seqnrFieldName = 'seqnr' }) {
+let renumber = async function({ model, where = {}, seqnrFieldName = 'seqnr' }) {
 
   let instances = await model.findAll({ where, order: [ seqnrFieldName ] });
 
