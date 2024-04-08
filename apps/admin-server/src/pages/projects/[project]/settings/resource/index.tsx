@@ -171,7 +171,7 @@ export default function ProjectSettingsResource() {
             <Separator className="my-4" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
+              className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="canAddNewResources"
@@ -422,7 +422,7 @@ export default function ProjectSettingsResource() {
             <Separator className="mb-4" />
             <form
               onSubmit={() => {}}
-              className="lg:w-1/2 grid grid-cols-2 gap-x-4 gap-y-8">
+              className="lg:w-1/2 grid grid-cols-2 gap-4">
               <div className="col-span-full space-y-2">
                 <Label>Type e-mail</Label>
                 <Select>
