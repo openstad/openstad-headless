@@ -77,7 +77,7 @@ export default function LikesDisplay({
     resolver: zodResolver<any>(finalSchema),
     defaultValues: {
       resourceId: props?.resourceId,
-      title: props?.title || 'Wat vindt u van dit plan',
+      title: props?.title,
       variant: props?.variant || 'medium',
       yesLabel: props?.yesLabel || 'Ja',
       noLabel: props?.noLabel || 'Nee',
