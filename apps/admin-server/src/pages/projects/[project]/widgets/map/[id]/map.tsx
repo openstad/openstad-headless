@@ -83,7 +83,7 @@ export default function WidgetMapMap() {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="grid grid-cols-2 gap-x-4 gap-y-8 lg:w-fit">
+          className="grid grid-cols-2 gap-4 lg:w-fit">
           <FormField
             control={form.control}
             name="variant"

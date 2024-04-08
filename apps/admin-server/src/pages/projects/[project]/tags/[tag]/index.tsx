@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -106,7 +107,7 @@ export default function ProjectTagEdit() {
                   <Separator className="my-4" />
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="lg:w-1/2 grid grid-cols-1 gap-x-4 gap-y-8">
+                    className="lg:w-1/2 grid grid-cols-1 gap-4">
                     <FormField
                       control={form.control}
                       name="name"
@@ -160,7 +161,7 @@ export default function ProjectTagEdit() {
                   <Separator className="my-4" />
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="lg:w-1/2 grid grid-cols-1 gap-x-4 gap-y-8">
+                    className="lg:w-1/2 grid grid-cols-1 gap-4">
                     <FormField
                       control={form.control}
                       name="backgroundColor"

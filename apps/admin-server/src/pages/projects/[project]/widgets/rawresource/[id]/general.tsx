@@ -69,7 +69,7 @@ export default function WidgetRawGeneral(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-x-4 gap-y-8 w-full lg:w-2/3">
+          className="flex flex-col gap-4 w-full lg:w-2/3">
           <FormField
             control={form.control}
             name="resourceId"

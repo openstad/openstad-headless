@@ -205,7 +205,7 @@ export default function ProjectAuthentication() {
                   </div>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="lg:w-1/2 grid grid-cols-1 gap-x-4 gap-y-8">
+                    className="lg:w-1/2 grid grid-cols-1 gap-4">
 
                     <FormField
                       control={form.control}
@@ -297,7 +297,7 @@ export default function ProjectAuthentication() {
                   </div>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="lg:w-1/2 grid grid-cols-1 gap-x-4 gap-y-8">
+                    className="lg:w-1/2 grid grid-cols-1 gap-4">
 
                     <FormField
                       control={form.control}
@@ -389,7 +389,7 @@ export default function ProjectAuthentication() {
                   </div>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="lg:w-1/2 grid grid-cols-1 gap-x-4 gap-y-8">
+                    className="lg:w-1/2 grid grid-cols-1 gap-4">
 
                     <div>
                       <FormLabel>
@@ -591,7 +591,7 @@ export default function ProjectAuthentication() {
                     </div>
                     <form
                       onSubmit={form.handleSubmit(onSubmit)}
-                      className="lg:w-1/2 grid grid-cols-1 gap-x-4 gap-y-8">
+                      className="lg:w-1/2 grid grid-cols-1 gap-4">
   
                       <FormField
                         control={form.control}

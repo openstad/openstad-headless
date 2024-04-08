@@ -53,7 +53,7 @@ export default function WidgetResourceOverviewInclude(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="grid gap-x-4 gap-y-8">         
+          className="grid gap-4">         
           <CheckboxList
             form={form}
             fieldName="onlyIncludeTagIds"
