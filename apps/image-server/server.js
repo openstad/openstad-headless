@@ -140,22 +140,22 @@ app.post('/image',
   });
 
 app.post('/images',
-  upload.array('images', 30), (req, res, next) => {
-    // req.files is array of `photos` files
-    // req.body will contain the text fields, if there were any
-    const createdCombination = secret + req.query.exp_date
-    const verification = crypto.createHmac("sha256", createdCombination).digest("hex")
-    if(Date.now() < req.query.exp_date && verification === req.query.signature) {
-      console.log("This post has been successfully verified!")
-    }
+    upload.array('image', 30), (req, res, next) => {
+        // req.files is array of `images` files
+        // req.body will contain the text fields, if there were any
+        const createdCombination = secret + req.query.exp_date
+        const verification = crypto.createHmac("sha256", createdCombination).digest("hex")
+        if(Date.now() < req.query.exp_date && verification === req.query.signature) {
+            console.log("This post has been successfully verified!")
+        }
 
-    const fileName = req.file.filename || req.file.key;
-    res.send(JSON.stringify(req.files.map((file) => {
-      return {
-        url: process.env.APP_URL + '/image/' + fileName
-      }
-    })));
-  });
+        res.send(JSON.stringify(req.files.map((file) => {
+            return {
+                url: process.env.APP_URL + '/image/' + file.filename
+            }
+        })));
+    });
+
 
 app.use(function (err, req, res, next) {
   const status = err.status ? err.status : 500;

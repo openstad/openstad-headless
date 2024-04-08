@@ -12,10 +12,10 @@ export type FormProps = {
     title?: string;
     fields: Array<CombinedFieldProps>;
     submitText?: string;
-    submitHandler: (values: { [p: string]: string | FileList | []}) => void;
+    submitHandler: (values: { [p: string]: string | string[] | []}) => void;
     submitDisabled?: boolean;
     secondaryLabel?: string;
-    secondaryHandler?: (values: { [p: string]: string | FileList | []}) => void;
+    secondaryHandler?: (values: { [p: string]: string | string[] | []}) => void;
 }
 
 type CombinedFieldPropsWithType =

@@ -16,7 +16,7 @@ export type TextInputProps = {
     defaultValue?: string;
     disabled?: boolean;
     rows?: TextInputProps['variant'] extends 'textarea' ? number : undefined;
-    onChange?: (e: {name: string, value: string | FileList | []}) => void;
+    onChange?: (e: {name: string, value: string | string[] | []}) => void;
 }
 
 const TextInput: FC<TextInputProps> = ({

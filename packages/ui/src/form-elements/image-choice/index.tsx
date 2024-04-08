@@ -16,7 +16,7 @@ export type ImageChoiceFieldProps = {
     requiredWarning?: string;
     fieldKey: string;
     disabled?: boolean;
-    onChange?: (e: {name: string, value: string | FileList | []}) => void;
+    onChange?: (e: {name: string, value: string | string[] | []}) => void;
 }
 
 export type ChoiceItem = {

@@ -53,7 +53,7 @@ export type FileUploadProps = {
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
-    allowedTypes?: string;
+    allowedTypes?: string[];
     disabled?: boolean;
     multiple?: boolean;
     onChange?: (e: {name: string, value: string | string[] | []}) => void;
@@ -67,7 +67,7 @@ const FileUploadField: FC<FileUploadProps> = ({
     fieldRequired = false,
     multiple = false,
     onChange,
-    allowedTypes = "",
+    allowedTypes = ['image/*'],
     disabled = false,
     ...props
 }) => {
@@ -76,8 +76,6 @@ const FileUploadField: FC<FileUploadProps> = ({
         Math.random().toString(36).substring(2, 15);
 
     const [files, setFiles] = useState<string[]>([]);
-    const [pondFiles, setPondFiles] = useState([])
-
 
     useEffect(() => {
         if (onChange) {
@@ -88,53 +86,9 @@ const FileUploadField: FC<FileUploadProps> = ({
         }
     }, [files]);
 
-    const handleFileUpload = (
-        event: React.ChangeEvent<HTMLInputElement>
-    ): void => {
-        const uploadedFiles = event.target.files;
-        const filesArray = [];
-
-        if (uploadedFiles) {
-            if (uploadedFiles.length > 0) {
-                for (const i in uploadedFiles) {
-                    if (uploadedFiles[i] instanceof File) {
-                        filesArray.push(uploadedFiles[i]);
-                    }
-                }
-            }
-        }
-
-        uploadImages(filesArray).then((urlArray) => {
-            setFiles(urlArray as string[]);
-        });
-    };
-
     const acceptAttribute = allowedTypes
         ? allowedTypes
         : "";
-
-    async function uploadImages(images: File[]): Promise<string[]> {
-        const imageArray: string[] = [];
-        const formData = new FormData();
-
-        for (const image of images) {
-            formData.append('image', image);
-            formData.append('filename', image.name);
-        }
-
-        const response = await fetch('/api/openstad/api/image', {
-            method: 'POST',
-            body: formData,
-        });
-
-        const responseData = await response.json();
-
-        for (const data of responseData) {
-            imageArray.push(data.url);
-        }
-
-        return imageArray;
-    }
 
     return (
         <FormField type="text">
@@ -143,28 +97,20 @@ const FileUploadField: FC<FileUploadProps> = ({
             </Paragraph>
             <FormFieldDescription>{description}</FormFieldDescription>
             <div className="utrecht-form-field__input">
-                <input
-                    id={randomID}
-                    name={fieldKey}
-                    required={fieldRequired}
-                    type="file"
-                    multiple={multiple}
-                    onChange={(e) => {
-                        handleFileUpload(e);
-                    }}
-                    accept={acceptAttribute}
-                    disabled={disabled}
-                />
-
                 <FilePond
-                    files={pondFiles}
-                    onupdatefiles={setPondFiles}
+                    files={files}
+                    onupdatefiles={setFiles}
                     allowMultiple={multiple}
                     server={{
                         process: props?.imageUrl + '/images',
                         fetch: props?.imageUrl + '/image',
                         revert: null,
                     }}
+                    id={randomID}
+                    name={fieldKey}
+                    required={fieldRequired}
+                    disabled={disabled}
+                    acceptedFileTypes={acceptAttribute}
                     {...filePondSettings}
                 />
 

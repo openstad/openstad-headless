@@ -13,7 +13,7 @@ export type MapProps = BaseProps &
     fieldKey: string;
     fieldRequired: boolean;
     disabled?: boolean;
-    onChange?: (e: {name: string, value: string | FileList | []}) => void;
+    onChange?: (e: {name: string, value: string | string[] | []}) => void;
 }
 
 const MapField: FC<MapProps> = ({

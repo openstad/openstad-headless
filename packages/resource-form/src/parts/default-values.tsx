@@ -57,6 +57,7 @@ export const defaultFormValues = [
         "variant": "text input",
         "multiple": true,
         "options": [],
+        "allowedTypes": ['image/*'],
         "fieldType": "upload"
     },
     {

@@ -64,6 +64,9 @@ export const InitializeFormFields = (items, data) => {
                         });
                     }
                     break;
+                case 'upload':
+                    fieldData['allowedTypes'] = item.allowedTypes;
+                    break;
             }
 
             formFields.push(fieldData);

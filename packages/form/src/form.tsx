@@ -26,7 +26,7 @@ function Form({
       secondaryHandler = () => {},
       ...props
 }: FormProps) {
-    const initialFormValues: { [key: string]: string | FileList | [] } = {};
+    const initialFormValues: { [key: string]: string | string[] | [] } = {};
     fields.forEach((field) => {
         if (field.fieldKey) {
             //@ts-expect-error
@@ -43,7 +43,7 @@ function Form({
         handleSubmit(fields as unknown as Array<CombinedFieldPropsWithType>, formValues, setFormErrors, submitHandler);
     };
 
-    const handleInputChange = (event: { name: string, value: string | FileList | []}) => {
+    const handleInputChange = (event: { name: string, value: string | string[] | []}) => {
         const { name, value } = event;
         setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
     };
