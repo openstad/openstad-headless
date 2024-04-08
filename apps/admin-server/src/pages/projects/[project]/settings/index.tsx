@@ -219,7 +219,7 @@ export default function ProjectSettings() {
                             Is het mogelijk om reacties te plaatsen?
                           </FormLabel>
                           <Switch.Root
-                            className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-purple-600 outline-none cursor-default"
+                            className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                             onCheckedChange={(e: boolean) => {
                               field.onChange(e);
                             }}>

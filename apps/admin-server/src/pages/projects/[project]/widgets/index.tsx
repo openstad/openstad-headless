@@ -34,7 +34,8 @@ export default function ProjectWidgets() {
         action={<CreateWidgetDialog projectId={project as string} />}>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
-            <div className="grid grid-cols-2 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
+            <div className="grid grid-cols-2 lg:grid-cols-[40px_repeat(5,1fr)] items-left py-2 px-2 border-b border-border">
+              <ListHeading className="hidden lg:flex">ID</ListHeading>
               <ListHeading className="hidden lg:flex">Widget</ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
                 Toegevoegd op
@@ -47,7 +48,8 @@ export default function ProjectWidgets() {
                 <Link
                   key={widget.id}
                   href={`/projects/${project}/widgets/${widget.type}/${widget.id}`}>
-                  <li className="grid grid-cols-2 lg:grid-cols-6 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                  <li className="grid grid-cols-2 lg:grid-cols-[40px_repeat(5,1fr)] py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                  <Paragraph className="my-auto -mr-16 lg:mr-0">{widget.id}</Paragraph>
                     <div className="">
                       <strong className="">
                         {WidgetDefinitions[widget.type]}
@@ -55,10 +57,11 @@ export default function ProjectWidgets() {
                       <Paragraph className="my-auto -mr-16 lg:mr-0">{widget.description}</Paragraph>
                     </div>
                     <Paragraph className="hidden lg:flex truncate my-auto">
-                      {widget.createdAt}
+                      {new Date(widget.createdAt).toLocaleDateString("nl-NL")}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto lg:-mr-16">
-                      {widget.updatedAt}
+                      {new Date(widget.updatedAt).toLocaleDateString("nl-NL")}
+
                     </Paragraph>
                     <div
                       className="hidden lg:flex ml-auto"

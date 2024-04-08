@@ -143,7 +143,7 @@ export default function ProjectSettingsVoting() {
                       Is de hoeveelheid stemmen publiek zichtbaar?
                     </FormLabel>
                     <Switch.Root
-                      className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-purple-600 outline-none cursor-default"
+                      className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                       onCheckedChange={(e: boolean) => {
                         field.onChange(e);
                       }}>
@@ -160,7 +160,7 @@ export default function ProjectSettingsVoting() {
                   <FormItem className="col-span-1">
                     <FormLabel>Is het mogelijk om te stemmen?</FormLabel>
                     <Switch.Root
-                      className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-purple-600 outline-none cursor-default"
+                      className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                       onCheckedChange={(e: boolean) => {
                         field.onChange(e);
                       }}>
