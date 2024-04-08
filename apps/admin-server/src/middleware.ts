@@ -25,8 +25,9 @@ export default async function middleware(req: NextRequest) {
   }
 
   // signout
-  if (req.nextUrl.pathname.match(/^\/signout$/i))
+  if (req.nextUrl.pathname.match(/^\/signout$/i)) {
     return NextResponse.redirect(`${process.env.API_URL}/auth/project/1/logout?useAuth=default&redirectUri=${process.env.URL}/`);
+  }
 
   return authMiddleware(req, res);
 

@@ -1,3 +1,4 @@
+
 const sanitize = require('../util/sanitize');
 const config = require('config');
 const getExtraDataConfig = require('../lib/sequelize-authorization/lib/getExtraDataConfig');
@@ -5,8 +6,8 @@ const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 const seqnr = require('./lib/seqnr');
 
 module.exports = function (db, sequelize, DataTypes) {
-  let Tag = sequelize.define(
-    'tag',
+  let Status = sequelize.define(
+    'statuses',
     {
       projectId: {
         type: DataTypes.INTEGER,
@@ -21,23 +22,12 @@ module.exports = function (db, sequelize, DataTypes) {
         },
       },
 
-      type: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        set: function (text) {
-          this.setDataValue(
-            'type',
-            text ? sanitize.safeTags(text.trim()) : null
-          );
-        },
-      },
-
       seqnr: {
         type: DataTypes.INTEGER,
         allowNull: false,
         default: 10,
       },
-      
+
       label: {
         type: DataTypes.STRING,
         allowNull: true,
@@ -63,7 +53,13 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: true,
       },
 
-		  extraData: getExtraDataConfig(DataTypes.JSON, 'tags'),
+      extraFunctionality: {
+        type: DataTypes.JSON,
+        allowNull: false,
+        defaultValue: {},
+      },
+
+		  extraData: getExtraDataConfig(DataTypes.JSON, 'statuses'),
 
 	  }, {
 
@@ -73,11 +69,11 @@ module.exports = function (db, sequelize, DataTypes) {
 
       hooks: {
         afterCreate: function (instance, options) {
-          seqnr.renumber({ model: db.Tag, where: { type: instance.type } });
+          seqnr.renumber({ model: db.Status });
         },
 
         afterUpdate: function (instance, options) {
-          seqnr.renumber({ model: db.Tag, where: { type: instance.type } });
+          seqnr.renumber({ model: db.Status });
         },
       },
 
@@ -85,7 +81,7 @@ module.exports = function (db, sequelize, DataTypes) {
     }
   );
 
-  Tag.scopes = function scopes() {
+  Status.scopes = function scopes() {
     return {
       forProjectId: function (projectId) {
         return {
@@ -103,14 +99,6 @@ module.exports = function (db, sequelize, DataTypes) {
         ],
       },
 
-      selectType: function (type) {
-        return {
-          where: {
-            type: type,
-          },
-        };
-      },
-
       onlyWithIds: function (idList) {
         return {
           where: {
@@ -121,17 +109,16 @@ module.exports = function (db, sequelize, DataTypes) {
     };
   };
 
-  Tag.associate = function (models) {
+  Status.associate = function (models) {
     this.belongsToMany(models.Resource, {
-      through: 'resource_tags',
+      through: 'resource_statuses',
       constraints: false,
     });
 
     this.belongsTo(models.Project, { onDelete: 'CASCADE' });
   };
 
-  // dit is hoe het momenteel werkt; ik denk niet dat dat de bedoeling is, maar ik volg nu
-  Tag.auth = Tag.prototype.auth = {
+  Status.auth = Status.prototype.auth = {
     listableBy: 'all',
     viewableBy: 'all',
     createableBy: 'moderator',
@@ -139,5 +126,5 @@ module.exports = function (db, sequelize, DataTypes) {
     deleteableBy: 'moderator',
   };
 
-  return Tag;
+  return Status;
 };

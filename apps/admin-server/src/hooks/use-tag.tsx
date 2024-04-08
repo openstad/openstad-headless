@@ -5,7 +5,7 @@ export default function useTags(projectId?: string, id?: string) {
 
   const tagSwr = useSWR(projectId && id ? url : null);
 
-  async function updateTag(name: string, type: string, seqnr: number, backgroundColor: string | undefined, color: string | undefined, label: string | undefined, mapIcon: string | undefined, listIcon: string | undefined) {
+  async function updateTag(name: string | undefined, type: string | undefined, seqnr: number | undefined, backgroundColor: string | undefined, color: string | undefined, label: string | undefined, mapIcon: string | undefined, listIcon: string | undefined) {
     const res = await fetch(url, {
       method: 'PUT',
       headers: {

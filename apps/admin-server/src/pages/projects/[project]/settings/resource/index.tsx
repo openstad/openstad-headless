@@ -30,6 +30,7 @@ import { Textarea } from '@/components/ui/textarea';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/router';
 import useTags from '@/hooks/use-tags';
+import useStatuses from '@/hooks/use-statuses';
 import _ from 'lodash';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { CheckboxList } from '@/components/checkbox-list';
@@ -59,6 +60,11 @@ type Tag = {
   type: string;
 };
 
+type Status = {
+  id: number;
+  name: string;
+};
+
 const formSchema = z.object({
   canAddNewResources: z.boolean(),
   minimumYesVotes: z.coerce.number(),
@@ -73,6 +79,7 @@ const formSchema = z.object({
   displayNeighbourhood: z.boolean(),
   displayModbreak: z.boolean(),
   tagGroups: z.number().array().optional().default([]),
+  statusGroups: z.number().array().optional().default([]),
 });
 
 export default function ProjectSettingsResource() {
@@ -83,6 +90,9 @@ export default function ProjectSettingsResource() {
   const { data, isLoading, updateProject } = useProject();
   const { data: tagData } = useTags(project as string);
   const tags = (tagData || []) as Tag[];
+
+  const { data: statusData } = useStatuses(project as string);
+  const statuses = (statusData || []) as Status[];
 
   const defaults = React.useCallback(
     () => ({
@@ -101,7 +111,8 @@ export default function ProjectSettingsResource() {
       displayNeighbourhood:
         data?.config?.[category]?.displayNeighbourhood || false,
       displayModbreak: data?.config?.[category]?.displayModbreak || false,
-      tagGroups: data?.config?.resources?.tags || [],
+      tagGroups: data?.config?.resources?.defaultTagIds || [],
+      statusGroups: data?.config?.resources?.defaultStatusIds || [],
     }),
     [data?.config]
   );
@@ -131,7 +142,8 @@ export default function ProjectSettingsResource() {
           displayTheme: values.displayTheme,
           displayNeighbourhood: values.displayNeighbourhood,
           displayModbreak: values.displayModbreak,
-          tags: values.tagGroups || [],
+          defaultTagIds: values.tagGroups || [],
+          defaultStatusIds: values.statusGroups || [],
         },
       });
       if (project) {
@@ -335,8 +347,7 @@ export default function ProjectSettingsResource() {
               <CheckboxList
                 form={form}
                 fieldName="tagGroups"
-                fieldLabel="Selecteer de gewenste tags die bij een resource weergegeven zullen
-               worden."
+                fieldLabel="Selecteer de tags die standaard op resource gezet zullen worden"
                 label={(t) => t.name}
                 keyForGrouping="type"
                 keyPerItem={(t) => `${t.id}`}
@@ -353,6 +364,29 @@ export default function ProjectSettingsResource() {
                     checked
                       ? [...values, tag.id]
                       : values.filter((id) => id !== tag.id)
+                  );
+                }}
+              />
+
+              <CheckboxList
+                form={form}
+                fieldName="statusGroups"
+                fieldLabel="Selecteer de statusen die standaard op resource gezet zullen worden"
+                label={(t) => t.name}
+                keyPerItem={(t) => `${t.id}`}
+                items={statuses}
+                selectedPredicate={(t) =>
+                  form.getValues('statusGroups').findIndex((tg) => tg === t.id) >
+                  -1
+                }
+                onValueChange={(status, checked) => {
+                  const values = form.getValues('statusGroups');
+
+                  form.setValue(
+                    'statusGroups',
+                    checked
+                      ? [...values, status.id]
+                      : values.filter((id) => id !== status.id)
                   );
                 }}
               />
