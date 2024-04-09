@@ -21,7 +21,7 @@ export type EnqueteWidgetProps = BaseProps &
 
 function Enquete(props: EnqueteWidgetProps) {
     const notifyCreate = () =>
-        toast.success('Enquete ingedient', { position: 'bottom-center' });
+        toast.success('Enquete ingediend', { position: 'bottom-center' });
 
     const datastore = new DataStore(props);
 
