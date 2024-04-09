@@ -39,7 +39,7 @@ export default function CountdownBarGeneral(
     } else if(props && (!props.date && !selectedDate)) {
       setSelectedDate(new Date());
     }
-  }, [selectedDate, props.date]);
+  }, [selectedDate, props.date, props]);
 
   function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });

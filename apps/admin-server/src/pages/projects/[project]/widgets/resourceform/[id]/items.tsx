@@ -176,9 +176,10 @@ export default function WidgetResourceFormItems(
         }
     }, [props?.items, items.length]);
 
+    const { onFieldChanged } = props;
     useEffect(() => {
-        props.onFieldChanged('items', items);
-    }, [items, props.onFieldChanged]);
+        onFieldChanged('items', items);
+    }, [items, onFieldChanged]);
 
     // Sets form to selected item values when item is selected
     useEffect(() => {

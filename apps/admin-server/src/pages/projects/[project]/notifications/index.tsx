@@ -40,7 +40,7 @@ export default function ProjectNotifications() {
 
       setTypeDefinitions(currentTypeDefinitions);
     }
-  }, data)
+  }, [data, defaultDefinitions])
 
   return (
     <div>

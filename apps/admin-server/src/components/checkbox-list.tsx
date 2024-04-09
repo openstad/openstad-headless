@@ -40,7 +40,7 @@ export const CheckboxList = <T extends { [key: string]: any }>({
       const groupNames = _.chain(items).map(keyForGrouping).uniq().value();
       setGroupedNames(groupNames);
     }
-  }, [items]);
+  }, [items, keyForGrouping]);
 
   if (!keyForGrouping) {
     return (

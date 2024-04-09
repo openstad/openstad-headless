@@ -64,7 +64,7 @@ export default function ProjectSettings() {
       areaId: data?.areaId || '',
       url: data?.url || '',
     }),
-    [data, areas]
+    [data, areas, currentDate]
   );
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -83,7 +83,7 @@ export default function ProjectSettings() {
         setCheckboxInitial(false)
       }
     }
-  }, [data]);
+  }, [data, checkboxInitial]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {

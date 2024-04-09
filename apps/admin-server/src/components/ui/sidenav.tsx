@@ -34,9 +34,9 @@ export function Sidenav({
         narrow ? 'w-auto' : null
       )}>
       <div className="flex flex-col items-center justify-center h-24">
-        <a href="/" title="Logo OpenStad">
+        <Link href="/" title="Logo OpenStad">
           <Logo iconOnly={narrow} />
-        </a>
+        </Link>
       </div>
       <div
         className={cn(

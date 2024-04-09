@@ -55,7 +55,7 @@ export default function WidgetResourceDetailGeneral(
       resourceId: props?.resourceId || undefined,
       resourceIdRelativePath: props?.resourceIdRelativePath || undefined
     }),
-    [props?.resourceId]
+    [props?.resourceId, props?.resourceIdRelativePath]
   );
 
   const form = useForm<FormData>({

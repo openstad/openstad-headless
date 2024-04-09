@@ -159,9 +159,10 @@ export default function WidgetEnqueteItems(
     }
   }, [props?.items]);
 
+  const { onFieldChanged } = props;
   useEffect(() => {
-    props.onFieldChanged('items', items);
-  }, [items]);
+      onFieldChanged('items', items);
+  }, [items, onFieldChanged]);
 
   // Sets form to selected item values when item is selected
   useEffect(() => {
