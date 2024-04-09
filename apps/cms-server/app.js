@@ -27,7 +27,8 @@ async function loadProjects () {
       // We are no longer saving the protocol in the database, but we need a
       // protocol to be able to use `Url.parse` to get the host.
       if (!project.url.startsWith('http://') && !project.url.startsWith('https://')) {
-        project.url = 'https://' + project.url;
+        const protocol = process.env.FORCE_HTTP === 'yes' ? 'http://' : 'https://';
+        project.url = protocol + project.url;
       }
       let url = Url.parse(project.url);
       console.log('Project fetched: ' + url.host);
