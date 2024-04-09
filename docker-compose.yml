@@ -236,6 +236,7 @@ services:
       - API_URL=${API_URL}
       - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}
       - API_KEY=${API_FIXED_AUTH_KEY}
+      - FORCE_HTTP=${FORCE_HTTP}
     ports:
       - '${CMS_PORT}:${CMS_PORT}'
     volumes:

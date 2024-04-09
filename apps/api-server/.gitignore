@@ -5,6 +5,7 @@
 /html/stemvanniels
 *.css
 coverage/
+/init
 
 ### Exclude project files for Jetbrains users ###
 .idea
