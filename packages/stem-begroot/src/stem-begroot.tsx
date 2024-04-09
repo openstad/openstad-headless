@@ -37,6 +37,7 @@ export type StemBegrootWidgetProps = BaseProps &
     thankMessage: string;
     showNewsletterButton: boolean;
     notEnoughBudgetText?: string;
+    displayPagination?: boolean;
     displayRanking: boolean;
     displayPriceLabel: boolean;
     showVoteCount: boolean;
@@ -202,9 +203,9 @@ function StemBegroot({
       resource.extraData?.originalId
       ? props.originalResourceUrl.includes('[id]')
         ? props.originalResourceUrl.replace(
-            '[id]',
-            `${resource.extraData?.originalId}`
-          )
+          '[id]',
+          `${resource.extraData?.originalId}`
+        )
         : `${props.originalResourceUrl}/${resource.extraData?.originalId}`
       : null;
   };
@@ -231,15 +232,15 @@ function StemBegroot({
         !(resource.budget <= props.votes.maxBudget - budgetUsed)
         ? notEnoughBudgetText
         : isInSelected(resource)
-        ? 'Verwijder'
-        : 'Voeg toe';
+          ? 'Verwijder'
+          : 'Voeg toe';
     }
     return !isInSelected(resource) &&
       !((props.votes.maxResources || 0) > selectedResources.length)
       ? notEnoughBudgetText
       : isInSelected(resource)
-      ? 'Verwijder'
-      : 'Voeg toe';
+        ? 'Verwijder'
+        : 'Voeg toe';
   };
 
   return (
@@ -279,10 +280,10 @@ function StemBegroot({
           currentStep={currentStep}
           steps={['Kies', 'Overzicht', 'Stemcode', 'Stem']}
         />
-    
-      <Spacer size={1} />
-      {usedBudgetList}
-      <Spacer size={1.5} />
+
+        <Spacer size={1} />
+        {usedBudgetList}
+        <Spacer size={1.5} />
 
         <section className="begroot-step-panel">
           {currentStep === 0 ? (
@@ -310,13 +311,13 @@ function StemBegroot({
                   const canAddMore =
                     props.votes.voteType === 'budgeting'
                       ? notUsedResources.some(
-                          (r: { budget: number }) =>
-                            r.budget < props.votes.maxBudget - budgetUsed
-                        )
+                        (r: { budget: number }) =>
+                          r.budget < props.votes.maxBudget - budgetUsed
+                      )
                       : Math.max(
-                          props.votes.maxResources - selectedResources.length,
-                          0
-                        ) > 0;
+                        props.votes.maxResources - selectedResources.length,
+                        0
+                      ) > 0;
                   return canAddMore;
                 }}
               />
@@ -477,13 +478,17 @@ function StemBegroot({
               }}
             />
             <Spacer size={3} />
-            <div className="osc-stem-begroot-paginator">
-              <Paginator
-                page={resources?.metadata?.page || 0}
-                totalPages={resources?.metadata?.pageCount || 1}
-                onPageChange={(page) => setPage(page)}
-              />
-            </div>
+
+            {props.displayPagination && (
+              <div className="osc-stem-begroot-paginator">
+                <Paginator
+                  page={resources?.metadata?.page || 0}
+                  totalPages={resources?.metadata?.pageCount || 1}
+                  onPageChange={(page) => setPage(page)}
+                />
+              </div>
+            )}
+
             <Spacer size={2} />
           </>
         ) : null}

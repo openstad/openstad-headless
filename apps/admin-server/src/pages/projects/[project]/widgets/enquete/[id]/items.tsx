@@ -27,6 +27,7 @@ import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import InfoDialog from '@/components/ui/info-hover';
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -604,9 +605,11 @@ export default function WidgetEnqueteItems(
                       name="fieldKey"
                       render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Key voor het opslaan, deze moet uniek zijn
-                              bijvoorbeeld: ‘samenvatting’
-                            </FormLabel>
+                            <FormLabel>
+                              Key voor het opslaan
+                              <InfoDialog content={'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'} />
+                              </FormLabel>
+                            <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
                             <Input {...field} />
                             <FormMessage/>
                           </FormItem>

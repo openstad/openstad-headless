@@ -17,17 +17,18 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import {Heading} from '@/components/ui/typography';
+import { Heading } from '@/components/ui/typography';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {ArrowDown, ArrowUp, X} from 'lucide-react';
+import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import {Item, Option, ResourceFormWidgetProps} from "@openstad-headless/resource-form/src/props";
-import {defaultFormValues} from "@openstad-headless/resource-form/src/parts/default-values";
+import { Item, Option, ResourceFormWidgetProps } from "@openstad-headless/resource-form/src/props";
+import { defaultFormValues } from "@openstad-headless/resource-form/src/parts/default-values";
 import useTags from "@/hooks/use-tags";
-import {useRouter} from "next/router";
+import { useRouter } from "next/router";
+import InfoDialog from '@/components/ui/info-hover';
 
 const formSchema = z.object({
     trigger: z.string(),
@@ -89,11 +90,10 @@ export default function WidgetResourceFormItems(
             setItems((currentItems) => [
                 ...currentItems,
                 {
-                    trigger: `${
-                        currentItems.length > 0
-                            ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
-                            : 1
-                    }`,
+                    trigger: `${currentItems.length > 0
+                        ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
+                        : 1
+                        }`,
                     title: values.title,
                     description: values.description,
                     type: values.type,
@@ -135,11 +135,10 @@ export default function WidgetResourceFormItems(
             setOption(null);
         } else {
             const newOption = {
-                trigger: `${
-                    options.length > 0
-                        ? parseInt(options[options.length - 1].trigger) + 1
-                        : 0
-                }`,
+                trigger: `${options.length > 0
+                    ? parseInt(options[options.length - 1].trigger) + 1
+                    : 0
+                    }`,
                 titles: values.options?.[values.options.length - 1].titles || [],
                 images: values.options?.[values.options.length - 1].images || [],
             };
@@ -172,7 +171,7 @@ export default function WidgetResourceFormItems(
     useEffect(() => {
         if (props?.items && props?.items?.length > 0) {
             setItems(props?.items);
-        } else if ( !!props.items && props.items.length < 1 && items.length < 1 ) {
+        } else if (!!props.items && props.items.length < 1 && items.length < 1) {
             setItems(defaultFormValues);
         }
     }, [props?.items]);
@@ -272,7 +271,7 @@ export default function WidgetResourceFormItems(
     }
 
     function handleSaveItems() {
-        console.log( items, props );
+        console.log(items, props);
         props.updateConfig({ ...props, items });
     }
 
@@ -347,37 +346,36 @@ export default function WidgetResourceFormItems(
                                             .map((item, index) => (
                                                 <div
                                                     key={index}
-                                                    className={`flex cursor-pointer justify-between border border-secondary ${
-                                                        item.trigger == selectedItem?.trigger &&
+                                                    className={`flex cursor-pointer justify-between border border-secondary ${item.trigger == selectedItem?.trigger &&
                                                         'bg-secondary'
-                                                    }`}>
-                            <span className="flex gap-2 py-3 px-2">
-                              <ArrowUp
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                      handleAction('moveUp', item.trigger, true)
-                                  }
-                              />
-                              <ArrowDown
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                      handleAction('moveDown', item.trigger, true)
-                                  }
-                              />
-                            </span>
+                                                        }`}>
+                                                    <span className="flex gap-2 py-3 px-2">
+                                                        <ArrowUp
+                                                            className="cursor-pointer"
+                                                            onClick={() =>
+                                                                handleAction('moveUp', item.trigger, true)
+                                                            }
+                                                        />
+                                                        <ArrowDown
+                                                            className="cursor-pointer"
+                                                            onClick={() =>
+                                                                handleAction('moveDown', item.trigger, true)
+                                                            }
+                                                        />
+                                                    </span>
                                                     <span
                                                         className="gap-2 py-3 px-2 w-full"
                                                         onClick={() => setItem(item)}>
-                              {`${item.title || 'Geen titel'}`}
-                            </span>
+                                                        {`${item.title || 'Geen titel'}`}
+                                                    </span>
                                                     <span className="gap-2 py-3 px-2">
-                              <X
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                      handleAction('delete', item.trigger, true)
-                                  }
-                              />
-                            </span>
+                                                        <X
+                                                            className="cursor-pointer"
+                                                            onClick={() =>
+                                                                handleAction('delete', item.trigger, true)
+                                                            }
+                                                        />
+                                                    </span>
                                                 </div>
                                             ))
                                         : 'Geen items'}
@@ -480,49 +478,48 @@ export default function WidgetResourceFormItems(
                                                     .map((option, index) => (
                                                         <div
                                                             key={index}
-                                                            className={`flex cursor-pointer justify-between border border-secondary ${
-                                                                option.trigger == selectedOption?.trigger &&
+                                                            className={`flex cursor-pointer justify-between border border-secondary ${option.trigger == selectedOption?.trigger &&
                                                                 'bg-secondary'
-                                                            }`}>
-                                <span className="flex gap-2 py-3 px-2">
-                                  <ArrowUp
-                                      className="cursor-pointer"
-                                      onClick={() =>
-                                          handleAction(
-                                              'moveUp',
-                                              option.trigger,
-                                              false
-                                          )
-                                      }
-                                  />
-                                  <ArrowDown
-                                      className="cursor-pointer"
-                                      onClick={() =>
-                                          handleAction(
-                                              'moveDown',
-                                              option.trigger,
-                                              false
-                                          )
-                                      }
-                                  />
-                                </span>
+                                                                }`}>
+                                                            <span className="flex gap-2 py-3 px-2">
+                                                                <ArrowUp
+                                                                    className="cursor-pointer"
+                                                                    onClick={() =>
+                                                                        handleAction(
+                                                                            'moveUp',
+                                                                            option.trigger,
+                                                                            false
+                                                                        )
+                                                                    }
+                                                                />
+                                                                <ArrowDown
+                                                                    className="cursor-pointer"
+                                                                    onClick={() =>
+                                                                        handleAction(
+                                                                            'moveDown',
+                                                                            option.trigger,
+                                                                            false
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </span>
                                                             <span
                                                                 className="py-3 px-2 w-full"
                                                                 onClick={() => setOption(option)}>
-                                  {option?.titles?.[0].text}
-                                </span>
+                                                                {option?.titles?.[0].text}
+                                                            </span>
                                                             <span className="py-3 px-2">
-                                  <X
-                                      className="cursor-pointer"
-                                      onClick={() =>
-                                          handleAction(
-                                              'delete',
-                                              option.trigger,
-                                              false
-                                          )
-                                      }
-                                  />
-                                </span>
+                                                                <X
+                                                                    className="cursor-pointer"
+                                                                    onClick={() =>
+                                                                        handleAction(
+                                                                            'delete',
+                                                                            option.trigger,
+                                                                            false
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </span>
                                                         </div>
                                                     ))
                                                 : 'Geen options'}
@@ -628,15 +625,15 @@ export default function WidgetResourceFormItems(
 
                                                 return (
                                                     <FormItem>
-                                                        <FormLabel>Key voor het opslaan, deze moet uniek zijn
-                                                            bijvoorbeeld: ‘samenvatting’
-                                                        </FormLabel>
-                                                        <Input {...field} disabled={!!fieldKey}/>
-                                                        <FormMessage/>
+                                                        <FormLabel>Key voor het opslaan</FormLabel>
+                                                        <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
+
+                                                        <Input {...field} disabled={!!fieldKey} />
+                                                        <FormMessage />
                                                     </FormItem>
                                                 )
                                             }
-                                        }
+                                            }
                                         />
                                         {form.watch('type') === 'tags' && (
                                             <FormField
@@ -648,7 +645,7 @@ export default function WidgetResourceFormItems(
                                                     }
 
                                                     if (!allTags || allTags.length === 0) {
-                                                        return <p style={{fontSize: '14px', margin: '20px 0', color: 'red'}}><strong>Geen tags gevonden om te selecteren. Maak dit aan onder het kopje &apos;Tags&apos;</strong></p>;
+                                                        return <p style={{ fontSize: '14px', margin: '20px 0', color: 'red' }}><strong>Geen tags gevonden om te selecteren. Maak dit aan onder het kopje &apos;Tags&apos;</strong></p>;
                                                     }
 
                                                     return (
@@ -660,9 +657,9 @@ export default function WidgetResourceFormItems(
                                                                     field.onChange(value);
                                                                     form.setValue('fieldKey', `tags[${value || firstTagType}]`)
                                                                 }}>
-                                                                    <SelectTrigger>
-                                                                        <SelectValue />
-                                                                    </SelectTrigger>
+                                                                <SelectTrigger>
+                                                                    <SelectValue />
+                                                                </SelectTrigger>
                                                                 <SelectContent>
                                                                     {allTags.reduce((uniqueTags: any[], tag: any) => {
                                                                         if (!uniqueTags.some((t) => t.type === tag.type)) {
@@ -695,7 +692,10 @@ export default function WidgetResourceFormItems(
 
                                                 return (
                                                     <FormItem>
-                                                        <FormLabel>Is dit veld verplicht?</FormLabel>
+                                                        <FormLabel>
+                                                            Is dit veld verplicht?
+                                                            <InfoDialog content={'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'} />
+                                                        </FormLabel>
                                                         <Select
                                                             onValueChange={(e: string) => field.onChange(e === 'true')}
                                                             value={
@@ -707,7 +707,7 @@ export default function WidgetResourceFormItems(
                                                         >
                                                             <FormControl>
                                                                 <SelectTrigger>
-                                                                    <SelectValue placeholder="Kies een optie"/>
+                                                                    <SelectValue placeholder="Kies een optie" />
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent>
@@ -715,7 +715,7 @@ export default function WidgetResourceFormItems(
                                                                 <SelectItem value="false">Nee</SelectItem>
                                                             </SelectContent>
                                                         </Select>
-                                                        <FormMessage/>
+                                                        <FormMessage />
                                                     </FormItem>
                                                 )
                                             }}
@@ -745,23 +745,23 @@ export default function WidgetResourceFormItems(
                                                         </FormItem>
                                                     )}
                                                 />
-                                                { form.watch('type') !== 'title' && form.watch('type') !== 'summary' && form.watch('type') !== 'description' && (
+                                                {form.watch('type') !== 'title' && form.watch('type') !== 'summary' && form.watch('type') !== 'description' && (
                                                     <>
                                                         <FormField
                                                             control={form.control}
                                                             name="minCharacters"
-                                                            render={({field}) => (
+                                                            render={({ field }) => (
                                                                 <FormItem>
                                                                     <FormLabel>Minimaal aantal tekens</FormLabel>
                                                                     <Input {...field} />
-                                                                    <FormMessage/>
+                                                                    <FormMessage />
                                                                 </FormItem>
                                                             )}
                                                         />
                                                         <FormField
                                                             control={form.control}
                                                             name="maxCharacters"
-                                                            render={({field}) => (
+                                                            render={({ field }) => (
                                                                 <FormItem>
                                                                     <FormLabel>Maximaal aantal tekens</FormLabel>
                                                                     <Input {...field} />
@@ -820,7 +820,7 @@ export default function WidgetResourceFormItems(
                                                         >
                                                             <FormControl>
                                                                 <SelectTrigger>
-                                                                    <SelectValue placeholder="Kies een optie"/>
+                                                                    <SelectValue placeholder="Kies een optie" />
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent>
@@ -828,7 +828,7 @@ export default function WidgetResourceFormItems(
                                                                 <SelectItem value="true">Alleen admin gebruikers</SelectItem>
                                                             </SelectContent>
                                                         </Select>
-                                                        <FormMessage/>
+                                                        <FormMessage />
                                                     </FormItem>
                                                 )
                                             }}

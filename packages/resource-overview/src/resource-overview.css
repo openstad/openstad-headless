@@ -82,7 +82,7 @@
   border-radius: 2px;
   background-color: var(
     --nlds-agenda-background-color,
-    var(--nlds-default-background-color, #f0f4f8)
+    var(--nlds-default-background-color, transparent)
   );
 }
 

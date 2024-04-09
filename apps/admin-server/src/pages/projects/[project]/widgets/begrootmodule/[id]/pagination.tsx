@@ -16,9 +16,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
-  itemsPerPage: z.coerce.number()
+  itemsPerPage: z.coerce.number(),
+  displayPagination: z.boolean(),
 });
 
 export default function WidgetStemBegrootPagination(
@@ -36,6 +38,7 @@ export default function WidgetStemBegrootPagination(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       itemsPerPage: props?.itemsPerPage || 30,
+      displayPagination: props?.displayPagination || false,
     },
   });
 
@@ -49,23 +52,46 @@ export default function WidgetStemBegrootPagination(
           className="lg:w-1/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
-            name="itemsPerPage"
+            name="displayPagination"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Hoeveelheid items per pagina</FormLabel>
+                <FormLabel>Paginatie tonen</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} 
-                    placeholder="30"
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
+                  <Switch.Root
+                    className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                    onCheckedChange={(e: boolean) => {
+                      props.onFieldChanged(field.name, e);
                       field.onChange(e);
-                    }} />
+                    }}
+                    defaultChecked={field.value}>
+                    <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                  </Switch.Root>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+          {props.displayPagination && (
+            <FormField
+              control={form.control}
+              name="itemsPerPage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Hoeveelheid items per pagina</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field}
+                      placeholder="30"
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>
