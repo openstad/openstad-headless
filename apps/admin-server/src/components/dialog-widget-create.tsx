@@ -34,7 +34,7 @@ import { useWidgetsHook } from '@/hooks/use-widgets';
 import { WidgetDefinitions } from '@/lib/widget-definitions';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
-import InfoDialog from './ui/info-hover';
+import InfoDialog from '@/components/ui/info-hover';
 
 type Props = {
   projectId?: string;

@@ -8,7 +8,7 @@ import {
 } from '../../components/ui/form';
 
 import { ObjectListSelect } from '@/components/ui/object-select';
-import InfoDialog from './info-hover';
+import InfoDialog from '@/components/ui/info-hover';
 
 // TODO find the actual type of the form, so we can get typehinting in the parent for fieldName based on the passed form
 type Props<T> = {

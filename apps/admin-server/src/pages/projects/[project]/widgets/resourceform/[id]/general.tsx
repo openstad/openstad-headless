@@ -119,8 +119,9 @@ export default function WidgetResourceFormGeneral() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Naam formulier. Deze moet uniek zijn binnen dit project.
+                  Naam formulier
                 </FormLabel>
+                <em className='text-xs'>Deze moet uniek zijn binnen dit project.</em>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>

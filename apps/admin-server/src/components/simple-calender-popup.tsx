@@ -12,7 +12,7 @@ import {
   FormMessage,
 } from './ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import InfoDialog from './ui/info-hover';
+import InfoDialog from '@/components/ui/info-hover';
 
 // Would like to use a generic solution <T> to enable hinting in the using file
 // Now to remove the errors UseFormReturn<any> has to be used

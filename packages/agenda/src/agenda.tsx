@@ -34,7 +34,7 @@ function Agenda(props: AgendaWidgetProps) {
   return (
     <div className="osc">
       <Spacer size={2} />
-      {props.displayTitle && props.title && <Heading3>{props.title}</Heading3>}
+      {props.displayTitle && <Heading3>{props.title}</Heading3>}
       <section className="osc-agenda">
         {props?.items &&
           props?.items?.length > 0 &&
