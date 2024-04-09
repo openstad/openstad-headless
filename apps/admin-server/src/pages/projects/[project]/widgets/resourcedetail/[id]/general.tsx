@@ -17,7 +17,7 @@ import { useRouter } from 'next/router';
 import useResources from '@/hooks/use-resources';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 
@@ -48,6 +48,7 @@ export default function WidgetResourceDetailGeneral(
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
+  const [toggle, setToggle] = useState('resourceId_');
 
   const defaults = useCallback(
     () => ({
@@ -83,9 +84,12 @@ export default function WidgetResourceDetailGeneral(
             label={(resource) => `${resource.id} ${resource.title}`}
             onFieldChanged={(e, key) => {
               props.onFieldChanged
+              setToggle(e + '_' + key);
+              console.log(e + '_' + key)
             }}
             noSelection="Niet koppelen - beschrijf het path of gebruik queryparam openstadResourceId"
           />
+          {toggle === 'resourceId_' ? (
             <FormField
               control={form.control}
               name="resourceIdRelativePath"
@@ -105,6 +109,8 @@ export default function WidgetResourceDetailGeneral(
                 </FormItem>
               )}
             />
+          ) : null}
+
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>
