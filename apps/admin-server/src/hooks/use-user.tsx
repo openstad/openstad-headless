@@ -2,13 +2,35 @@ import { useRouter } from 'next/router';
 import useSWR from 'swr';
 
 export default function useUser() {
-  const router = useRouter();
-  const userId = router.query.user;
-  const url = `/api/openstad/api/project/1/user/${userId}`;
 
-  const userSwr = useSWR(userId ? url : null);
+  const router = useRouter();
+  let userId = router.query.user || '';
+  if (Array.isArray(userId)) userId = userId[0];
+  userId = atob(userId);
+
+  let url = '';
+  if (userId) {
+    url = `/api/openstad/api/user/${userId}`;
+  }
+
+  let match = userId.match(/^(.+)-\*-(.+)$/);
+  if (match) {
+    url = `/api/openstad/api/user?&byIdpUser[identifier]=${match[2]}&byIdpUser[provider]=${match[1]}`
+  }
+
+  const userSwr = useSWR(url);
 
   async function updateUser(body: any) {
+
+    if (Array.isArray(body)) {
+      // update roles
+    } else {
+      // update user
+      let projectId = body.projectId;
+      if (!projectId) throw new Error('Deze gebruiker kan niet worden bewerkt');
+    }
+
+    let url = `/api/openstad/api/project/${body.projectId}/user/${body.id}`;
     const res = await fetch(url, {
       method: 'PUT',
       headers: {
@@ -16,10 +38,12 @@ export default function useUser() {
       },
       body: JSON.stringify({ ...body }),
     });
-    const data = await res.json();
+    if (!res.ok) throw new Error('User update failed')
 
-    userSwr.mutate(data);
+    return await res.json();
+
   }
 
   return { ...userSwr, updateUser };
+
 }
