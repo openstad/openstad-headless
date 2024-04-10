@@ -13,6 +13,7 @@ import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import WidgetPreview from '@/components/widget-preview';
 import type { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
+import WidgetResourceDetailMapGeneral from './general';
 
 
 export const getServerSideProps = withApiUrl;
@@ -30,6 +31,22 @@ export default function WidgetResourceDetailMap({
         projectId,
       });
   
+      const totalPropPackage = {
+        ...widget?.config,
+        ...previewConfig,
+        updateConfig: (config: ResourceDetailMapWidgetProps) =>
+          updateConfig({ ...widget.config, ...config }),
+    
+        onFieldChanged: (key: string, value: any) => {
+          if (previewConfig) {
+            updatePreview({
+              ...previewConfig,
+              [key]: value,
+            });
+          }
+        },
+        projectId,
+      };
 
   return (
     <div>
@@ -50,10 +67,15 @@ export default function WidgetResourceDetailMap({
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="publish">
+          <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
+              <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
+            <TabsContent value="general" className="p-0">
+              {previewConfig &&  <WidgetResourceDetailMapGeneral {...totalPropPackage}/>}
+             
+            </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>

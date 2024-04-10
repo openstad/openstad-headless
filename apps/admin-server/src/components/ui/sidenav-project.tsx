@@ -179,9 +179,9 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Resources</span>
           </Button>
         </Link>
-        <Link href={`/projects/${project}/codes`}>
+        <Link href={`/projects/${project}/unique-codes`}>
           <Button
-            variant={location.includes('/codes') ? 'secondary' : 'ghost'}
+            variant={location.includes('/unique-codes') ? 'secondary' : 'ghost'}
             className="w-full flex justify-start"
             onClick={(e) => {}}>
             <span className="truncate">Stemcodes</span>
@@ -209,6 +209,14 @@ export function SidenavProject({ className }: { className?: string }) {
             className="w-full flex justify-start"
             onClick={(e) => {}}>
             <span className="truncate">Tags</span>
+          </Button>
+        </Link>
+        <Link href={`/projects/${project}/statuses`}>
+          <Button
+            variant={location.includes('/statuses') ? 'secondary' : 'ghost'}
+            className="w-full flex justify-start"
+            onClick={(e) => {}}>
+            <span className="truncate">Statuses</span>
           </Button>
         </Link>
         <Link href={`/projects/${project}/comments`}>

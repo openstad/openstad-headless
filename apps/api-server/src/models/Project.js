@@ -169,9 +169,8 @@ module.exports = function (db, sequelize, DataTypes) {
 
       afterCreate: async function (instance, options) {
         // create a default status
-        let defaultStatus = await db.Tag.create({
+        let defaultStatus = await db.Status.create({
           projectId: instance.id,
-          type: 'status',
           name: 'open',
           seqnr: 10,
           noComment: false,
@@ -179,7 +178,7 @@ module.exports = function (db, sequelize, DataTypes) {
         });
         await instance.update({
           config: {
-            statusses: {
+            statuses: {
               defaultStatusId: defaultStatus.id,
             }
           }
@@ -229,6 +228,7 @@ module.exports = function (db, sequelize, DataTypes) {
     this.hasMany(models.User, { onDelete: 'CASCADE', hooks: true });
     this.hasMany(models.Resource, { onDelete: 'CASCADE', hooks: true });
     this.hasMany(models.Tag, { onDelete: 'CASCADE', hooks: true });
+    this.hasMany(models.Status, { onDelete: 'CASCADE', hooks: true });
     this.hasMany(models.NotificationTemplate, { onDelete: 'CASCADE', hooks: true });
     this.belongsTo(models.Area, { onDelete: 'CASCADE' });
   }
@@ -309,7 +309,7 @@ module.exports = function (db, sequelize, DataTypes) {
   }
 
   Project.auth = Project.prototype.auth = {
-    listableBy: 'all',
+    listableBy: 'member',
     viewableBy: 'all',
     createableBy: 'admin',
     updateableBy: 'editor',

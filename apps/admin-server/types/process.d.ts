@@ -4,11 +4,11 @@ declare namespace NodeJS {
      * The URL of the Admin portal application. Oauth callbacks will be sent to this url.
      * In development this is often http://localhost:31470
      */
-    NEXTAUTH_URL: string;
+    URL: string;
     /**
-     * Secret used to encrypt session data on the server.
+     * Secret used to encrypt session data on the server
      */
-    NEXTAUTH_SECRET: string;
+    COOKIE_SECRET: string;
     /**
      * Client ID for the Admin portal application
      */

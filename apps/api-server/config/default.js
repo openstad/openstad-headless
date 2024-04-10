@@ -155,6 +155,7 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
 
   admin: {
     projectId: process.env.ADMIN_PROJECTID || 1,
+	  domain: process.env.ADMIN_DOMAIN,
   },
 
   dev: {

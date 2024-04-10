@@ -5,8 +5,7 @@ import { Paragraph, ButtonLink } from '@utrecht/component-library-react';
 import React from 'react';
 import './counter.css';
 import DataStore from '@openstad-headless/data-store/src';
-import { BaseProps } from '../../types/base-props';
-import { ProjectSettingProps } from '../../types/project-setting-props';
+import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 
 export type CounterWidgetProps = BaseProps &
   CounterProps &

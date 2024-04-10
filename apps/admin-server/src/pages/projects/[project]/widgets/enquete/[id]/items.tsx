@@ -24,7 +24,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import { Item, Option } from '@openstad-headless/enquete/src/types/enquete-props';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -34,6 +34,10 @@ const formSchema = z.object({
   key: z.string(),
   description: z.string().optional(),
   questionType: z.string().optional(),
+  fieldKey: z.string(),
+  minCharacters: z.string().optional(),
+  maxCharacters: z.string().optional(),
+  variant: z.string().optional(),
   images: z
     .array(z.object({ image: z.any().optional(), src: z.string() }))
     .optional(),
@@ -83,6 +87,10 @@ export default function WidgetEnqueteItems(
           key: values.key,
           description: values.description,
           questionType: values.questionType,
+          fieldKey: values.fieldKey,
+          minCharacters: values.minCharacters,
+          maxCharacters: values.maxCharacters,
+          variant: values.variant || 'text input',
           options: values.options || [],
         },
       ]);
@@ -132,6 +140,10 @@ export default function WidgetEnqueteItems(
     question: '',
     questionSubtitle: '',
     questionType: '',
+    fieldKey: '',
+    minCharacters: '',
+    maxCharacters: '',
+    variant: 'text input',
     options: [],
   });
 
@@ -156,8 +168,12 @@ export default function WidgetEnqueteItems(
       form.reset({
         trigger: selectedItem.trigger,
         title: selectedItem.title || '',
+        fieldKey: selectedItem.fieldKey || '',
         description: selectedItem.description || '',
         questionType: selectedItem.questionType || '',
+        minCharacters: selectedItem.minCharacters || '',
+        maxCharacters: selectedItem.maxCharacters || '',
+        variant: selectedItem.variant || '',
         options: selectedItem.options || [],
       });
       setOptions(selectedItem.options || []);
@@ -585,6 +601,19 @@ export default function WidgetEnqueteItems(
                     />
                     <FormField
                       control={form.control}
+                      name="fieldKey"
+                      render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Key voor het opslaan, deze moet uniek zijn
+                              bijvoorbeeld: ‘samenvatting’
+                            </FormLabel>
+                            <Input {...field} />
+                            <FormMessage/>
+                          </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
                       name="description"
                       render={({ field }) => (
                         <FormItem>
@@ -629,6 +658,55 @@ export default function WidgetEnqueteItems(
                         </FormItem>
                       )}
                     />
+                    {form.watch('questionType') === 'open' && (
+                        <>
+                          <FormField
+                              control={form.control}
+                              name="variant"
+                              render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Is het veld qua grootte 1 regel of een tekstvak?</FormLabel>
+                                    <Select
+                                        value={field.value || 'text input'}
+                                        onValueChange={field.onChange}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Kies een optie" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="text input">1 regel</SelectItem>
+                                        <SelectItem value="textarea">Tekstvak</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                              )}
+                          />
+                            <FormField
+                                control={form.control}
+                                name="minCharacters"
+                                render={({field}) => (
+                                    <FormItem>
+                                      <FormLabel>Minimaal aantal tekens</FormLabel>
+                                      <Input {...field} />
+                                      <FormMessage/>
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="maxCharacters"
+                                render={({field}) => (
+                                    <FormItem>
+                                      <FormLabel>Maximaal aantal tekens</FormLabel>
+                                      <Input {...field} />
+                                      <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </>
+                    )}
                     {hasOptions() && (
                       <FormItem>
                         <Button

@@ -95,8 +95,8 @@ export default function ProjectTagEdit() {
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Tag</TabsTrigger>
-              <TabsTrigger value="advanced">
-                Geavanceerde instellingen
+              <TabsTrigger value="displaysettings">
+                Weergave
               </TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -153,7 +153,7 @@ export default function ProjectTagEdit() {
                 </Form>
               </div>
             </TabsContent>
-            <TabsContent value="advanced" className="p-0">
+            <TabsContent value="displaysettings" className="p-0">
               <div className="p-6 bg-white rounded-md">
                 <Form {...form}>
                   <Heading size="xl">Tag weergave</Heading>

@@ -6,6 +6,8 @@ import type { LocationType } from './location';
 import type { CategorizeType } from './categorize';
 
 export type BaseMapProps = {
+  width?: string,
+  height?: string,
   markers?: Array<MarkerProps>,
 	zoom?: number,
   autoZoomAndCenter?: 'area' | 'markers',

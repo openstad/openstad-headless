@@ -12,8 +12,8 @@ module.exports = async function setupAdminServer(actions) {
 
     // create local config
     let imgConfig = `
-NEXTAUTH_URL=${process.env.ADMIN_URL}
-NEXTAUTH_SECRET=openstad_headless
+URL=${process.env.ADMIN_URL}
+COOKIE_SECRET=${process.env.ADMIN_COOKIE_SECRET}
 CLIENT_ID=${process.env.AUTH_ADMIN_CLIENT_ID}
 CLIENT_SECRET=${process.env.AUTH_ADMIN_CLIENT_SECRET}
 OAUTH_URL=${process.env.AUTH_APP_URL}

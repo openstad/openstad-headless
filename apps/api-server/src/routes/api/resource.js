@@ -8,16 +8,13 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
 const c = require('config');
+
 const { Op } = require('sequelize');
+const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
-  return (
-    user &&
-    (user.role === 'admin' ||
-      user.role === 'editor' ||
-      user.role === 'moderator')
-  );
+  return hasRole( user, 'moderator')
 };
 
 // scopes: for all get requests
@@ -31,7 +28,6 @@ router.all('*', function (req, res, next) {
   // in case the votes are archived don't use these queries
   // this means they can be cleaned up from the main table for performance reason
   if (!req.project.config.archivedVotes) {
-    console.log();
     if (
       req.query.includeVoteCount &&
       ((req.project &&
@@ -93,6 +89,12 @@ router.all('*', function (req, res, next) {
     let tags = req.query.tags;
     req.scope.push({ method: ['selectTags', tags] });
     req.scope.push('includeTags');
+  }
+
+  if (req.query.statuses) {
+    let statuses = req.query.statuses;
+    req.scope.push({ method: ['selectStatuses', statuses] });
+    req.scope.push('includeStatuses');
   }
 
   if (req.query.includeUser) {
@@ -174,24 +176,6 @@ router
     }
     return next();
   })
-  .post(async function (req, res, next) {
-    // status tags
-    try {
-      req.body.tags = req.body.tags ? JSON.parse(req.body.tags) : [];
-    } catch (err) {}
-    let existingTags = await db.Tag.findAll({
-      where: { id: req.body.tags.map((t) => t.id) },
-    });
-    if (existingTags.find((t) => t.type == 'status')) return next(); // request already contains a status tag
-    let statusId = req.project?.config?.statusses?.defaultStatusId;
-    if (statusId) {
-      let found = req.body.tags.find((t) => t.id == statusId);
-      if (!found) {
-        req.body.tags.push({ id: statusId });
-      }
-    }
-    return next();
-  })
   .post(function (req, res, next) {
     try {
       req.body.location = req.body.location
@@ -208,7 +192,7 @@ router
     }
 
     let userId = req.user.id;
-    if (req.user.role == 'admin' && req.body.userId) userId = req.body.userId;
+    if (hasRole( req.user, 'admin') && req.body.userId) userId = req.body.userId;
 
     if (!!req.body.submittedData) {
       req.body = {
@@ -263,52 +247,48 @@ router
       });
   })
   .post(async function (req, res, next) {
+    // statuses
+    let statuses = req.body.statuses || [];
+    if (!Array.isArray(statuses)) statuses = [statuses];
+    statuses = statuses.filter(status => Number.isInteger(status));
+    if (!statuses.length) {
+      let defaultStatusIds = req.project.config?.resources?.defaultStatusIds || [];
+      if (!Array.isArray(defaultStatusIds)) defaultStatusIds = [defaultStatusIds];
+      statuses = defaultStatusIds;
+    }
+    if (statuses.length) {
+      await req.results.setStatuses(statuses);
+      req.scope.push('includeStatuses');
+    }
+    return next();
+  })
+  .post(async function (req, res, next) {
     // tags
     let tags = req.body.tags || [];
-    if (!Array.isArray(tags)) return next();
-
-    if (!tags.every((t) => Number.isInteger(t))) {
-      next('Tags zijn niet gegeven in het juiste formaat');
+    if (!Array.isArray(tags)) tags = [tags];
+    tags = tags.filter(tag => Number.isInteger(tag));
+    if (!tags.length) {
+      let defaultTagIds = req.project.config?.resources?.defaultTagIds || [];
+      if (!Array.isArray(defaultTagIds)) defaultTagIds = [defaultTagIds];
+      tags = defaultTagIds;
     }
-
-    const projectId = req.params.projectId;
-    const project = await db.Project.findOne({ where: { id: projectId } });
-    const projectConfigTags = project?.config?.resources?.tags;
-    const projectTags =
-      Array.isArray(projectConfigTags) &&
-      projectConfigTags.every((tId) => Number.isInteger(tId))
-        ? projectConfigTags
-        : [];
-
-    const tagEntities = await getValidTags(
-      projectId,
-      [...projectTags, ...tags],
-      req.user
-    );
-
-    const resourceInstance = req.results;
-    resourceInstance.setTags(tagEntities).then((tags) => {
-      // refetch. now with tags
-      let scope = [...req.scope, 'includeTags'];
-      if (req.canIncludeVoteCount) scope.push('includeVoteCount');
-
-      return db.Resource.scope(...scope)
-        .findOne({
-          where: { id: resourceInstance.id, projectId: req.params.projectId },
-        })
-        .then((found) => {
-          if (!found) {
-            console.error(
-              `Resource not found:', { id: ${resourceInstance.id}, projectId: ${req.params.projectId} }`
-            );
-          } else {
-            found.project = req.project;
-            req.results = found;
-          }
-          return next();
-        })
-        .catch(next);
-    });
+    if (tags.length) {
+      await req.results.setTags(tags);
+      req.scope.push('includeTags');
+    }
+    return next();
+  })
+  .post(async function (req, res, next) {
+    // refetch after tags and status updates
+    db.Resource.scope(...req.scope)
+      .findOne({
+        where: { id: req.results.id, projectId: req.params.projectId },
+      })
+      .then((result) => {
+        console.log(result.dataValues);
+        req.results = result;
+        return next();
+      });
   })
 
   // TODO: Add notifications

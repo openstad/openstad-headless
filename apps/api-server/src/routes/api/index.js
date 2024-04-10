@@ -29,6 +29,9 @@ router.use( '/project/:projectId(\\d+)(/resource/:resourceId(\\d+))?/poll', requ
 // tags
 router.use( '/project/:projectId(\\d+)/tag', require('./tag') );
 
+// statuses
+router.use( '/project/:projectId(\\d+)/status', require('./status') );
+
 // users
 router.use( '/project/:projectId(\\d+)/user', require('./user') );
 router.use( '/project/:projectId(\\d+)/user/:userId(\\d+)/activity', require('./user-activity') );

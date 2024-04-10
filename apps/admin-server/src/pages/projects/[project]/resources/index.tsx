@@ -47,7 +47,7 @@ export default function ProjectResources() {
           },
         ]}
         action={
-          <div className='flex flex-row w-full md:w-auto my-auto'>
+          <div className='flex flex-row w-full md:w-auto my-auto gap-4'>
             <Link
               href={`/projects/${project}/resources/create`}>
               <Button variant="default" className='text-xs p-2 w-fit'>

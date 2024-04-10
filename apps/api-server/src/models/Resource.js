@@ -124,6 +124,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
       viewableByRole: {
         type: DataTypes.ENUM(
+          'superuser',
           'admin',
           'editor',
           'moderator',
@@ -540,11 +541,10 @@ module.exports = function (db, sequelize, DataTypes) {
       defaultScope: {
         include: [
           {
-            model: db.Tag,
+            model: db.Status,
             as: 'statuses',
-            attributes: ['id', 'type', 'name', 'label', 'extraFunctionality'],
+            attributes: ['id', 'name', 'label', 'extraFunctionality'],
             through: { attributes: [] },
-            where: { type: 'status' },
             required: false,
           },
         ],
@@ -649,7 +649,19 @@ module.exports = function (db, sequelize, DataTypes) {
         include: [
           {
             model: db.Tag,
-            attributes: ['id', 'type', 'name', 'label', 'extraFunctionality'],
+            attributes: ['id', 'type', 'name', 'label'],
+            through: { attributes: [] },
+            required: false,
+          },
+        ],
+      },
+
+      includeStatuses: {
+        include: [
+          {
+            model: db.Status,
+            as: 'statuses',
+            attributes: ['id', 'name', 'label', 'extraFunctionality'],
             through: { attributes: [] },
             required: false,
           },
@@ -665,6 +677,21 @@ module.exports = function (db, sequelize, DataTypes) {
               through: { attributes: [] },
               where: {
                 id: tags,
+              },
+            },
+          ],
+        };
+      },
+
+      selectStatuses: function (statuses) {
+        return {
+          include: [
+            {
+              model: db.Status,
+              attributes: ['id', 'name'],
+              through: { attributes: [] },
+              where: {
+                id: statuses,
               },
             },
           ],
@@ -859,9 +886,8 @@ module.exports = function (db, sequelize, DataTypes) {
       constraints: false,
       onDelete: 'CASCADE',
     });
-    this.belongsToMany(models.Tag, {
-      as: 'statuses',
-      through: 'resource_tags',
+    this.belongsToMany(models.Status, {
+      through: 'resource_statuses',
       constraints: false,
       onDelete: 'CASCADE',
     });
@@ -967,6 +993,7 @@ module.exports = function (db, sequelize, DataTypes) {
   };
 
   let canMutate = function (user, self) {
+
     if (
       userHasRole(user, 'editor', self.userId) ||
       userHasRole(user, 'admin', self.userId) ||
@@ -974,19 +1001,20 @@ module.exports = function (db, sequelize, DataTypes) {
     ) {
       return true;
     }
-    let status = self.statuses?.find((tag) => tag.type === 'status');
-    if (
-      typeof status?.extraFunctionality?.editableByUser != 'boolean' ||
-      status.extraFunctionality.editableByUser
-    ) {
-      return true;
-    }
 
+    let editableByUser = true;
+    let statuses = self.statuses || [];
+    for (let status of statuses) {
+      if ( status.extraFunctionality?.editableByUser === false ) {
+        editableByUser = false;
+      }
+    }
     if (userHasRole(user, 'owner', self.userId)) {
-      return true;
+      return editableByUser;
     }
 
     // canEditAfterFirstLikeOrComment is handled in the validate hook
+
   };
 
   Resource.auth = Resource.prototype.auth = {
@@ -1024,12 +1052,11 @@ module.exports = function (db, sequelize, DataTypes) {
       // published
       if (!self.publishDate) return false;
       // status
-      let status = self.statuses?.find((tag) => tag.type === 'status');
-      if (
-        typeof status?.extraFunctionality?.noComment == 'boolean' &&
-        status.extraFunctionality.noComment
-      ) {
-        return false;
+      let statuses = self.statuses || [];
+      for (let status of statuses) {
+        if ( status.extraFunctionality?.noComment === true ) {
+          return false;
+        }
       }
       return true;
     },

@@ -6,8 +6,7 @@ import { Spacer } from '@openstad-headless/ui/src';
 import Comment from './parts/comment.js';
 import CommentForm from './parts/comment-form.js';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { BaseProps } from '../../types/base-props';
-import { ProjectSettingProps } from '../../types/project-setting-props';
+import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
@@ -95,7 +94,8 @@ function Comments({
     <CommentWidgetContext.Provider value={args}>
       <section className="osc">
         <Heading4 className="comments-title">
-          {title.replace(/\[\[nr\]\]/, comments.length)}
+          {comments && title.replace(/\[\[nr\]\]/, comments.length)}
+          {!comments && title}
         </Heading4>
 
         {args.isClosed ? (

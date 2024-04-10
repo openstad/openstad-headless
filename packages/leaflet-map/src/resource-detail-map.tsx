@@ -9,6 +9,7 @@ import './css/base-map.css';
 import type { MarkerProps } from './types/marker-props';
 import type {ResourceDetailMapWidgetProps} from './types/resource-detail-map-widget-props';
 import { BaseMap } from './base-map';
+import React from 'react';
 
 const ResourceDetailMap = ({
   resourceId = undefined,
@@ -29,7 +30,7 @@ const ResourceDetailMap = ({
   const urlParams = new URLSearchParams(window.location.search);
   resourceId =
     resourceId || ( urlParams.get('openstadResourceId')
-      ? parseInt(urlParams.get('openstadResourceId') as string)
+      ? urlParams.get('openstadResourceId') as string
       : undefined );
 
   const {
@@ -44,7 +45,8 @@ const ResourceDetailMap = ({
   let currentMarker: MarkerProps;
   currentMarker = {
     ...marker,
-    location: { ...resource.location } || undefined,
+    lat: resource.location?.lat || undefined,
+    lng: resource.location?.lng || undefined,
     icon: marker?.icon || markerIcon,
   };
   parseLocation(currentMarker); // unify location format
