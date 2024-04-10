@@ -38,7 +38,10 @@ export default function CreateUser() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      let user = await createUser({ ...values });
+      let user = await createUser({
+        email: values.email,
+        parojectId: values.projectId,
+      });
       toast.success('User is toegevoegd')
       user.key = `${user.idpUser.provider}-*-${user.idpUser.identifier}`
       document.location.href = `/users/${btoa(user.key)}`;
