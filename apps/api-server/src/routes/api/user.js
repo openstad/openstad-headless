@@ -45,6 +45,10 @@ router
       req.scope.push('includeProject');
     }
 
+    if (req.query.byIdpUser) {
+      req.scope.push({ method: [ 'byIdpUser', req.query.byIdpUser.identifier, req.query.byIdpUser.provider ]  });
+    }
+
     return next();
 
   });
@@ -59,19 +63,15 @@ router
         return next();
       }
     }
-    return next( new Error('Project not found') );
+    return next( new Error('Users: project not found') );
   });
 
 router.route('/')
 // list users
 // ----------
-// .get(auth.can('User', 'list')) -> now handled by onlyListable
   .get(function (req, res, next) {
     let role = req.user.role == 'superuser' ? 'admin' : req.user.role;
     req.scope.push({method: ['onlyListable', req.user.id, role]});
-    return next();
-  })
-  .get(function (req, res, next) {
     return next();
   })
   .get(pagination.init)
@@ -113,7 +113,6 @@ router.route('/')
     if (!(req.project.config && req.project.config.users && req.project.config.users.canCreateNewUsers)) return next(createError(401, 'Gebruikers mogen niet aangemaakt worden'));
     return next();
   })
-  .post(filterBody)
   .post(async function (req, res, next) {
     // auth server settings
     req.authConfig = await authSettings.config({ project: req.project, useAuth: req.query.useAuth || 'default' });
@@ -121,6 +120,30 @@ router.route('/')
     return next();
   })
   .post(async function (req, res, next) {
+    if (!req.body.idpUser) return next();
+    // new user is another instance of an existing user
+    if (!req.body.idpUser?.identifier || !req.body.idpUser.provider || req.body.idpUser.provider != req.authConfig.provider) return next(createError(400, 'User not found'));
+    let referenceUser = await db.User.findOne({
+      where: {
+        idpUser: {
+          identifier: req.body.idpUser.identifier,
+          provider: req.body.idpUser.provider
+        },
+        projectId: { [ Sequelize.Op.not ]: req.params.projectId }
+      }
+    })
+    if (!referenceUser) return next(createError(400, 'User not found'));
+    try {
+      req.oAuthUser = await req.adapter.service.fetchUserData({ authConfig: req.authConfig, userId: req.body.idpUser.identifier })
+      req.referenceUser = referenceUser;
+      return next();
+    } catch(err) {
+      return next(err)
+    }
+  })
+  .post(filterBody)
+  .post(async function (req, res, next) {
+    if (req.oAuthUser) return next();
     // Look for an Openstad user with this e-mail
     // TODO: other types of users
     if (!req.body.email) return next(createError(401, 'E-mail is a required field'));
@@ -137,26 +160,23 @@ router.route('/')
  * In case a user exists for that e-mail in the oAuth api move on, otherwise create it
  */
   .post(function (req, res, next) {
-    if (req.oAuthUser) {
-      next();
-    } else {
-      // in case no oauth user is found with this e-mail create it
-      if (!req.adapter?.service?.createUser) throw createError(400, 'Users can not be created for this provider')
-      req.adapter.service
-        .createUser({ authConfig: req.authConfig, userData: req.body })
-        .then(json => {
-          req.oAuthUser = json;
-          next()
-        })
-        .catch(next);
-    }
+    if (req.oAuthUser) return next();
+    // in case no oauth user is found with this e-mail create it
+    if (!req.adapter?.service?.createUser) throw createError(400, 'Users can not be created for this provider')
+    req.adapter.service
+      .createUser({ authConfig: req.authConfig, userData: req.body })
+      .then(json => {
+        req.oAuthUser = json;
+        next()
+      })
+      .catch(next);
   })
 // check if user not already exists in API
   .post(function (req, res, next) {
     db.User
       .scope(...req.scope)
       .findOne({
-        where: {email: req.body.email, projectId: req.project.id},
+        where: {idpUser: { identifier: req.oAuthUser.idpUser.identifier, provider: req.oAuthUser.idpUser.provider }, projectId: req.project.id},
       })
       .then(found => {
         if (found) {
@@ -169,20 +189,22 @@ router.route('/')
       .catch(next);
   })
   .post(auth.useReqUser)
-  .post(function (req, res, next) {
+  .post(async function(req, res, next) {
     const data = {
       ...req.body,
       ...req.oAuthUser,
       projectId: req.project.id,
-      role: req.oAuthUser.role || 'member',
+      role: req.body.role || req.oAuthUser.role || 'member',
       lastLogin: Date.now(),
     };
     
     db.User
       .authorizeData(data, 'create', req.user)
       .create(data)
-      .then(result => {
-        return res.json(result);
+      .then(async result => {
+        req.results = result;
+        if (req.referenceUser) await req.adapter.service.updateUser({ authConfig: req.authConfig, userData: { id: req.oAuthUser.idpUser.identifier, role: req.body.role } })
+        return next();
       })
       .catch(function (error) {
         // todo: dit komt uit de oude routes; maak het generieker
@@ -198,7 +220,10 @@ router.route('/')
           next(error);
         }
       });
-  });
+  })
+  .post(function (req, res, next) {
+    return res.json(req.results);
+  })
 
 // anonymize user
 // --------------
@@ -420,46 +445,66 @@ router.route('/:userId(\\d+)')
 
     try {
 
-      let updatedUserData = merge(true, userData, { id: user.idpUser && user.idpUser.identifier });
+      if (user.idpUser?.identifier) {
 
-      if (req.adapter.service.updateUser) {
-        updatedUserData = await req.adapter.service.updateUser({ authConfig: req.authConfig, userData: merge(true, userData, { id: user.idpUser && user.idpUser.identifier }) });
+        let updatedUserData = merge(true, userData, { id: user.idpUser && user.idpUser.identifier });
+
+        if (req.results.idpUser.provider == req.authConfig.provider && req.adapter.service.updateUser) {
+          updatedUserData = await req.adapter.service.updateUser({ authConfig: req.authConfig, userData: merge(true, userData, { id: user.idpUser && user.idpUser.identifier }) });
+        }
+
+        // user updates should not be done on certain project specific fields
+        let synchronizedUpdatedUserData = merge.recursive({}, updatedUserData);
+        let userProjectSpecificFields = ['nickName', 'role']; // todo: dit moet natuurlijk niet hier, maar dat is nu minder relevant
+        for (let userProjectSpecificField of userProjectSpecificFields) {
+          delete synchronizedUpdatedUserData[ userProjectSpecificField ];
+        }
+
+        let apiUsers = await db.User
+            .scope(['includeProject'])
+            .findAll({
+              where: {
+                idpUser: { identifier: updatedUserData.idpUser.identifier },
+                projectId: { [Op.not]: 0 }
+              }
+            })
+
+        for (let apiUser of apiUsers) {
+          let data = apiUser.projectId == req.params.projectId ? updatedUserData : synchronizedUpdatedUserData;
+          let result = await apiUser
+              .authorizeData(data, 'update', req.user)
+              .update(data)
+        };
+
+      } else {
+
+        let apiUser = await db.User
+            .scope(['includeProject'])
+            .findOne({
+              where: {
+                id: user.id,
+                projectId: req.params.projectId,
+              }
+            })
+        apiUser
+            .authorizeData(userData, 'update', req.user)
+            .update(userData)
       }
 
-      // user updates should not be done on certain project specific fields
-      let synchronizedUpdatedUserData = merge.recursive({}, updatedUserData);
-      let userProjectSpecificFields = ['nickName', 'role']; // todo: dit moet natuurlijk niet hier, maar dat is nu minder relevant
-      for (let userProjectSpecificField of userProjectSpecificFields) {
-        delete synchronizedUpdatedUserData[ userProjectSpecificField ];
-      }
-
-      let apiUsers = await db.User
-          .scope(['includeProject'])
-          .findAll({
-            where: {
-              idpUser: { identifier: updatedUserData.idpUser.identifier },
-              projectId: { [Op.not]: 0 }
-            }
-          })
-      for (let apiUser of apiUsers) {
-        let data = apiUser.projectId == req.params.projectId ? updatedUserData : synchronizedUpdatedUserData;
-        let result = await apiUser
-            .authorizeData(data, 'update', req.user)
-            .update(data)
-      };
-
-      let result = await db.User
-        .findOne({
-          where: {id: req.params.userId, projectId: req.params.projectId}
-        })
-
-      res.json(result);
+      return next();
 
     } catch(err) {
       console.log(err);
       return next( createError(500, 'User update failed') )
     }
 
+  })
+  .put(async function (req, res, next) {
+    let result = await db.User
+        .findOne({
+          where: {id: req.params.userId, projectId: req.params.projectId}
+        })
+    res.json(result);
   })
 
 // delete user
