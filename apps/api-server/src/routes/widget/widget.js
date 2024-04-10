@@ -201,7 +201,7 @@ function getDefaultConfig(project, widgetType) {
     logout: {
       url: logoutUrl,
     },
-    projectId: projectId,
+    projectId: project.id,
     imageUrl: process.env.IMAGE_APP_URL,
   };
 
