@@ -55,6 +55,7 @@ function API(props = {}) {
   };
 
   self.submissions = {
+    fetch: submissions.fetch.bind(self),
     create: submissions.create.bind(self)
   }
 
