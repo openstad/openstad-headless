@@ -16,12 +16,13 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import useUser from '@/hooks/use-user';
+import { toast } from 'react-hot-toast';
 
 const formSchema = z.object({
   email: z
-    .string({ invalid_type_error: '*Verplicht' })
-    .email('Geen geldig e-mailadres'),
-  nickName: z.string().optional(),
+    .string()
+    .email('Geen geldig e-mailadres')
+    .optional(),
   name: z.string().optional(),
   phoneNumber: z.string().optional(),
   address: z.string().optional(),
@@ -30,19 +31,27 @@ const formSchema = z.object({
 });
 
 export default function CreateUserGeneral() {
-  const { data, isLoading, updateUser } = useUser();
+
+  /* edit user: users are linked through idpUdser.identifier + idpUdser.provider
+   * normal fields of linked users are all updated by the API if one of them is
+   * updated, so editing one of these linked users suffices
+   */
+
+  const { data, updateUser } = useUser();
+
+  let user = data;
+  if (Array.isArray(data)) user = data[0];
 
   const defaults = useCallback(
     () => ({
-      email: data?.email,
-      nickName: data?.nickName || '',
-      name: data?.name || '',
-      phoneNumber: data?.phoneNumber || '',
-      address: data?.address || '',
-      city: data?.city || '',
-      postcode: data?.postcode || '',
+      email: user?.email || '',
+      name: user?.name || '',
+      phoneNumber: user?.phoneNumber || '',
+      address: user?.address || '',
+      city: user?.city || '',
+      postcode: user?.postcode || '',
     }),
-    [data]
+    [user]
   );
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,20 +63,27 @@ export default function CreateUserGeneral() {
     form.reset(defaults());
   }, [form, defaults]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    updateUser(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await updateUser({ ...values, id: user.id, projectId: user.projectId });
+      toast.success('User is bijgewerkt')
+    } catch(err:any) {
+      toast.error(err.message || 'User kon niet worden bijgewerkt')
+    }
   }
 
   if (!data) return null;
 
   return (
     <div className="p-6 bg-white rounded-md">
+
       <Form {...form}>
         <Heading size="xl">Algemene instellingen</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4 auto-rows-auto">
+
           <FormField
             control={form.control}
             name="email"
@@ -81,22 +97,7 @@ export default function CreateUserGeneral() {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="nickName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Gebruikersnaam (optioneel, alleen zichtbaar als nicknames in
-                  projecten aan staat)
-                </FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+
           <FormField
             control={form.control}
             name="name"
@@ -110,12 +111,13 @@ export default function CreateUserGeneral() {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="phoneNumber"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Telefoonnummer (optioneel)</FormLabel>
+                <FormLabel>Telefoonnummer</FormLabel>
                 <FormControl>
                   <Input type="tel" {...field} />
                 </FormControl>
@@ -123,12 +125,13 @@ export default function CreateUserGeneral() {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Adres (optioneel)</FormLabel>
+                <FormLabel>Adres</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -136,12 +139,13 @@ export default function CreateUserGeneral() {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="city"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Stad (optioneel)</FormLabel>
+                <FormLabel>Stad</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -149,12 +153,13 @@ export default function CreateUserGeneral() {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="postcode"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Postcode (optioneel)</FormLabel>
+                <FormLabel>Postcode</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -162,6 +167,7 @@ export default function CreateUserGeneral() {
               </FormItem>
             )}
           />
+
           <Button className="col-span-full w-fit" type="submit">
             Opslaan
           </Button>
