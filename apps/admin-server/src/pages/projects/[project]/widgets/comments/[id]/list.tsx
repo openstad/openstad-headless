@@ -54,7 +54,7 @@ export default function ArgumentsList({
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Lijst</Heading>
+        <Heading size="xl">Titel</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}

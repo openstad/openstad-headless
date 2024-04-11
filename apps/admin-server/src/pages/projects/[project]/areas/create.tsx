@@ -94,7 +94,7 @@ export default function ProjectAreaCreate() {
                       Je kan hier een polygoon aanmaken om een gebied op te
                       geven waar je kaarten op zullen focussen. Voor deze
                       polygoon kan je de waarden ophalen vanaf de volgende
-                      pagina: <a href="https://geojson.io" target="_blank" style={{textDecoration: "underline"}}>https://geojson.io</a>
+                      pagina: https://geojson.io
                     </p>
                     <FormControl>
                       <Textarea placeholder="" {...field} />

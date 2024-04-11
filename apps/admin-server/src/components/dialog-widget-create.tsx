@@ -34,6 +34,7 @@ import { useWidgetsHook } from '@/hooks/use-widgets';
 import { WidgetDefinitions } from '@/lib/widget-definitions';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
+import InfoDialog from '@/components/ui/info-hover';
 
 type Props = {
   projectId?: string;
@@ -97,51 +98,54 @@ export function CreateWidgetDialog({ projectId }: Props) {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>Aanmaken van een nieuwe widget</DialogTitle>
-              <DialogDescription>
-                Voer de naam in van de widget en selecteer het type
-              </DialogDescription>
+              <div className="space-y-6">
+                <div>
+                  <DialogTitle>Aanmaken van een nieuwe widget</DialogTitle>
+                  <DialogDescription>
+                    Voer de naam in van de widget en selecteer het type
+                  </DialogDescription>
+                </div>
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Widget type</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecteer een type widget" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className='overflow-y-auto max-h-[16rem]'>
+                          {widgetTypes.map((type) => (
+                            <SelectItem key={type[0]} value={type[0]}>
+                              {type[1]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Widget type:</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Beschrijving/naam van de widget<InfoDialog content={'Deze beschrijving moet uniek zijn per widget.'}/></FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecteer een type widget" />
-                        </SelectTrigger>
+                        <Input
+                          {...field}
+                          placeholder="De identificeerbare naam van de widget"
+                        />
                       </FormControl>
-                      <SelectContent className='overflow-y-auto max-h-[16rem]'>
-                        {widgetTypes.map((type) => (
-                          <SelectItem key={type[0]} value={type[0]}>
-                            {type[1]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Beschrijving/naam van de widget</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="De identificeerbare naam van de widget"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </DialogHeader>
             <DialogFooter>
               <Button disabled={!form.formState.isValid} type="submit">

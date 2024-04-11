@@ -27,8 +27,8 @@ export default function ArgumentsForm(
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      formIntro: props.formIntro || 'Type hier de intro tekst',
-      placeholder: props?.placeholder || 'Type hier uw reactie.',
+      formIntro: props.formIntro || 'Typ hier de intro tekst',
+      placeholder: props?.placeholder || 'Typ hier uw reactie.',
     },
   });
 

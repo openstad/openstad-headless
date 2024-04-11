@@ -16,7 +16,7 @@ export function Image({
       onClick={props.onClick}
       className={`image-container ${props.className}`}>
       {imageHeader?<div className='osc-image-header'>{imageHeader}</div> :null}
-      <img alt={props.alt} {...props} />
+      <img role="presentation" alt={props.alt} {...props} />
       <figcaption className="osc-image-footer">{imageFooter}</figcaption>
     </figure>
   );

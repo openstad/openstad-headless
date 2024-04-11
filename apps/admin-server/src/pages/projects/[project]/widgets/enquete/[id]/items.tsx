@@ -27,6 +27,7 @@ import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import InfoDialog from '@/components/ui/info-hover';
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -158,9 +159,10 @@ export default function WidgetEnqueteItems(
     }
   }, [props?.items]);
 
+  const { onFieldChanged } = props;
   useEffect(() => {
-    props.onFieldChanged('items', items);
-  }, [items]);
+      onFieldChanged('items', items);
+  }, [items, onFieldChanged]);
 
   // Sets form to selected item values when item is selected
   useEffect(() => {
@@ -292,7 +294,7 @@ export default function WidgetEnqueteItems(
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="w-full grid gap-4">
+          className="w-full grid gap-x-4 gap-y-8">
           <div className="lg:w-full grid grid-cols-1 gap-x-6 lg:grid-cols-3">
             <div className="p-6 bg-white rounded-md flex flex-col justify-between">
               <div>
@@ -604,9 +606,11 @@ export default function WidgetEnqueteItems(
                       name="fieldKey"
                       render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Key voor het opslaan, deze moet uniek zijn
-                              bijvoorbeeld: ‘samenvatting’
-                            </FormLabel>
+                            <FormLabel>
+                              Key voor het opslaan
+                              <InfoDialog content={'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'} />
+                              </FormLabel>
+                            <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
                             <Input {...field} />
                             <FormMessage/>
                           </FormItem>

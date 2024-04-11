@@ -21,7 +21,9 @@ const Paginator = ({
         icon="ri-arrow-left-s-line"
         className="secondary round"
         onClick={() => onPageChange(page - 1)}
-        disabled={page === 0}></IconButton>
+        disabled={page === 0}
+        text="Vorige pagina"
+          iconOnly={true}></IconButton>
 
       {pages.map((pageNr) => (
         <IconButton
@@ -36,7 +38,9 @@ const Paginator = ({
         icon="ri-arrow-right-s-line"
         className="secondary round"
         onClick={() => onPageChange(page + 1)}
-        disabled={page >= totalPages -1}></IconButton>
+        disabled={page >= totalPages -1}
+        text="Volgende pagina"
+          iconOnly={true}></IconButton>
     </div>
   );
 };

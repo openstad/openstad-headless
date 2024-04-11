@@ -16,6 +16,7 @@ import { AgendaWidgetProps } from '@openstad-headless/agenda/src/agenda';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
+
 const formSchema = z.object({
   title: z.string(),
 });

@@ -64,8 +64,8 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Resource Overview',
-            url: `/projects/${projectId}/widgets/resourceoverview/${id}`,
+            name: 'Resource Map',
+            url: `/projects/${projectId}/widgets/resourcesmap/${id}`,
           },
         ]}>
         <div className="container py-6">

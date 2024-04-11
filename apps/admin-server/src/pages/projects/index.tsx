@@ -63,7 +63,7 @@ export default function Projects() {
         }>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
-            <div className="grid grid-cols-1 lg:grid-cols-11 items-center py-2 px-2 border-b border-border">
+            <div className="grid grid-cols-1 lg:grid-cols-8 items-center py-2 px-2 border-b border-border">
               {headers.map((header) => (
                 <ListHeading className="hidden lg:flex" key={header}>
                   {header}
@@ -74,7 +74,7 @@ export default function Projects() {
               {data.map((project: any) => {
                 return (
                   <li
-                    className="grid grid-cols-2 lg:grid-cols-11 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
+                    className="grid grid-cols-2 lg:grid-cols-8 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
                     key={project.id}
                     onClick={(d) => {
                       router.push(`${router.asPath}/${project.id}/widgets`);
@@ -96,7 +96,7 @@ export default function Projects() {
                       {project?.config?.votes?.isActive === true ? 'Aan' : 'Uit'}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate -mr-16">
-                      {project?.config?.project?.endDate}
+                      {new Date(project?.config?.project?.endDate).toLocaleDateString('nl-NL')}
                     </Paragraph>
                     <Paragraph className="flex">
                       <ChevronRight

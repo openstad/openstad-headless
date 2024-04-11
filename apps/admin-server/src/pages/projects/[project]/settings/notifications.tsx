@@ -20,6 +20,7 @@ import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
 import toast from 'react-hot-toast';
+import InfoDialog from '@/components/ui/info-hover';
 
 const formSchema = z.object({
   fromAddress: z.string().email(),
@@ -98,7 +99,10 @@ export default function ProjectSettingsNotifications() {
                 name="fromAddress"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Emailadres verstuurder</FormLabel>
+                    <FormLabel>
+                      Emailadres verstuurder
+                      <InfoDialog content={'Dit email adres wordt gebruikt voor: ...'} />
+                    </FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
@@ -111,7 +115,10 @@ export default function ProjectSettingsNotifications() {
                 name="projectmanagerAddress"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Emailadres project manager</FormLabel>
+                    <FormLabel>
+                      Emailadres project manager
+                      <InfoDialog content={'Dit email adres wordt gebruikt voor: ...'} />
+                      </FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>

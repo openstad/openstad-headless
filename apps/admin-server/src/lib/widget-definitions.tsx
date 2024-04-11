@@ -3,8 +3,6 @@ export const WidgetDefinitions = {
   comments: 'Argumenten',
   begrootmodule: 'Begrootmodule',
   enquete: 'Enquete',
-  basemap: 'Base map',
-  editormap: 'Editor map',
   resourcesmap: 'Resource map',
   resourcedetailmap: 'Resource detail map',
   counter: 'Counter',

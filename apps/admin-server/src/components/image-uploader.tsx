@@ -41,10 +41,11 @@ export const ImageUploader: React.FC<{
   }
 
   useEffect(() => {
-    if (file != undefined) {
-      onImageUploaded && onImageUploaded(file)
+    if (file) {
+      form.setValue(fieldName, file.url);
+      onImageUploaded && onImageUploaded(file);
     }
-  }, [file])
+  }, [file, form, fieldName, onImageUploaded]);
 
   return (
     <FormField

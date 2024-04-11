@@ -5,36 +5,36 @@ import { CalendarIcon, RotateCcw } from 'lucide-react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 import { Button } from './ui/button';
 import {
-  FormControl, FormDescription,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from './ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import React from "react";
+import InfoDialog from '@/components/ui/info-hover';
 
 // Would like to use a generic solution <T> to enable hinting in the using file
 // Now to remove the errors UseFormReturn<any> has to be used
 export const SimpleCalendar: React.FC<{
   form: UseFormReturn<any>;
   fieldName: Path<FieldValues>;
+  fieldInfo?: string;
   label: string;
   placeholder?: string;
   withReset?: boolean;
   allowPast?: boolean;
-  description?: string;
-}> = ({ form, fieldName, label, placeholder, withReset, allowPast, description }) => {
+}> = ({ form, fieldName, label, placeholder, withReset, allowPast, fieldInfo }) => {
   return (
     <FormField
       control={form.control}
       name={fieldName}
       render={({ field }) => (
         <FormItem className="flex flex-col">
-          <FormLabel>{label}</FormLabel>
-          {description && (
-              <FormDescription>{description}</FormDescription>
-          )}
+          <FormLabel>
+            {label}
+            {fieldInfo && <InfoDialog content={fieldInfo} />}
+            </FormLabel>
           <div className="flex flex-row gap-2">
             <Popover>
               <PopoverTrigger asChild>
@@ -42,7 +42,7 @@ export const SimpleCalendar: React.FC<{
                   <Button
                     variant={'outline'}
                     className={cn(
-                      'w-[240px] pl-3 text-left font-normal',
+                      'w-[100%] pl-3 text-left font-normal',
                       !field.value && 'text-muted-foreground'
                     )}>
                     {field.value ? (
@@ -50,7 +50,7 @@ export const SimpleCalendar: React.FC<{
                     ) : (
                       <span>{placeholder || 'Kies een datum'}</span>
                     )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    <CalendarIcon className="ml-auto h-4 w-4" />
                   </Button>
                 </FormControl>
               </PopoverTrigger>
