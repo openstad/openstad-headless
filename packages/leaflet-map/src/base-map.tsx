@@ -226,7 +226,7 @@ const BaseMap = ({
 
   return (
     <>
-      <div className="map-container" style={{ width: '100%', aspectRatio: 16 / 9 }}>
+      <div className="map-container" style={style}>
         <MapContainer
           center={[definedCenterPoint.lat, definedCenterPoint.lng]}
           className="osc-base-map-widget-container"
