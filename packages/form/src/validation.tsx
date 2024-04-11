@@ -35,8 +35,12 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
             } else {
                 return undefined;
             }
-        case 'range':
         case 'map':
+            return z.object({
+                lat: z.number().optional(),
+                lng: z.number().optional()
+            }).refine((value) => Object.keys(value).length > 0, {message: (field.requiredWarning || 'Dit veld is verplicht')});
+        case 'range':
         case 'radiobox':
         case 'select':
         case 'tickmark-slider':
