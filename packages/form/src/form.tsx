@@ -27,7 +27,9 @@ function Form({
       secondaryHandler = () => {},
       ...props
 }: FormProps) {
-    const initialFormValues: { [key: string]: string | Record<number, never> | [] } = {};
+    type FormValue = string | Record<number, never> | [];
+
+    const initialFormValues: { [key: string]: FormValue } = {};
     fields.forEach((field) => {
         if (field.fieldKey) {
             //@ts-expect-error
@@ -45,7 +47,7 @@ function Form({
         handleSubmit(fields as unknown as Array<CombinedFieldPropsWithType>, formValues, setFormErrors, submitHandler);
     };
 
-    const handleInputChange = (event: { name: string, value: string | string[] | []}) => {
+    const handleInputChange = (event: { name: string, value: FormValue}) => {
         const { name, value } = event;
         setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
     };
@@ -63,7 +65,7 @@ function Form({
         imageChoice: ImageChoiceField as React.ComponentType<ComponentFieldProps>,
     };
 
-    const renderField = (field: CombinedFieldPropsWithType, index: number) => {
+    const renderField = (field: ComponentFieldProps, index: number) => {
         if (!field.type) {
             return null;
         }
@@ -86,7 +88,8 @@ function Form({
                 {title && <h5 className="form-widget-title">{title}</h5>}
 
                 <form className="form-container" noValidate onSubmit={handleFormSubmit}>
-                    {fields.map((field: CombinedFieldPropsWithType, index: number) => (
+                    {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */}
+                    {fields.map((field: ComponentFieldProps, index: number) => (
                         <div className={`question question-type-${field.type}`} key={index}>
                             {renderField(field, index)}
                             <FormFieldErrorMessage className="error-message">

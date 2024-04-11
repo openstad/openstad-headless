@@ -10,6 +10,6 @@ export type EditorMapWidgetProps = BaseProps &
     markerIcon: MarkerIconType;
     editorMarker?: MarkerProps;
     centerOnEditorMarker: boolean;
-    onChange?: (e: {name: string, value: string | FileList | []}) => void;
+    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
     fieldRequired?: boolean;
   };

@@ -7,15 +7,16 @@ import type { RadioboxFieldProps } from "@openstad-headless/ui/src/form-elements
 import type { FileUploadProps} from "@openstad-headless/ui/src/form-elements/file-upload";
 import type { HiddenInputProps } from "@openstad-headless/ui/src/form-elements/hidden";
 import type {ImageChoiceFieldProps} from "@openstad-headless/ui/src/form-elements/image-choice";
+import {MapProps} from "@openstad-headless/ui/src/form-elements/map/index.js";
 
 export type FormProps = {
     title?: string;
     fields: Array<CombinedFieldProps>;
     submitText?: string;
-    submitHandler: (values: { [p: string]: string | string[] | []}) => void;
+    submitHandler: (values: { [p: string]: string | Record<number, never> | []}) => void;
     submitDisabled?: boolean;
     secondaryLabel?: string;
-    secondaryHandler?: (values: { [p: string]: string | string[] | []}) => void;
+    secondaryHandler?: (values: { [p: string]: string | Record<number, never> | []}) => void;
 }
 
 type CombinedFieldPropsWithType =
@@ -27,7 +28,8 @@ type CombinedFieldPropsWithType =
     | ({ type?: 'radiobox' } & RadioboxFieldProps)
     | ({ type?: 'upload' } & FileUploadProps)
     | ({ type?: 'hidden' } & HiddenInputProps)
-    | ({ type?: 'imageChoice' } & ImageChoiceFieldProps);
+    | ({ type?: 'imageChoice' } & ImageChoiceFieldProps)
+    | ({ type?: 'map' } & MapProps);
 
 type ComponentFieldProps = (
     {

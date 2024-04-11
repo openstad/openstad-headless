@@ -5,6 +5,7 @@ import {EditorMap} from "@openstad-headless/leaflet-map/src/editor-map";
 import DataStore from "@openstad-headless/data-store/src";
 import {BaseProps} from "@openstad-headless/types/base-props.js";
 import {ProjectSettingProps} from "@openstad-headless/types/project-setting-props.js";
+import {LocationType} from "@openstad-headless/leaflet-map/src/types/location";
 
 export type MapProps = BaseProps &
     ProjectSettingProps & {
@@ -13,7 +14,14 @@ export type MapProps = BaseProps &
     fieldKey: string;
     fieldRequired: boolean;
     disabled?: boolean;
-    onChange?: (e: {name: string, value: string | string[] | []}) => void;
+    type?: string;
+    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    requiredWarning?: string;
+}
+
+type Point = {
+    lat: number;
+    lng: number;
 }
 
 const MapField: FC<MapProps> = ({
@@ -39,9 +47,9 @@ const MapField: FC<MapProps> = ({
     let areaId = props?.project?.areaId || false;
     const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];
 
-    function calculateCenter(polygon) {
+    function calculateCenter(polygon: Point[]) {
         if (!polygon || polygon.length === 0) {
-            return null;
+            return undefined;
         }
 
         let minX = Infinity;
@@ -62,7 +70,7 @@ const MapField: FC<MapProps> = ({
         return {lat: avgLat, lng: avgLng};
     }
 
-    let center = undefined;
+    let center: LocationType | undefined = undefined;
     if (!!polygon && Array.isArray(polygon) && polygon.length > 0) {
         center = calculateCenter(polygon);
     }
@@ -84,6 +92,8 @@ const MapField: FC<MapProps> = ({
                   area={polygon}
                   onChange={onChange}
                   fieldRequired={fieldRequired}
+                  markerIcon={undefined}
+                  centerOnEditorMarker={false}
                   {...props}
               />
           </div>

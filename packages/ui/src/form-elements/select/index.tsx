@@ -17,7 +17,8 @@ export type SelectFieldProps = {
     fieldKey: string;
     defaultOption?: string;
     disabled?: boolean;
-    onChange: (e: {name: string, value: string}) => void;
+    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    type?: string;
 }
 
 const SelectField: FC<SelectFieldProps> = ({
