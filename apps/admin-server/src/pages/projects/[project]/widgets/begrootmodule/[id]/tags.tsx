@@ -23,6 +23,8 @@ import _ from 'lodash';
 import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
 import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
 
+import * as Switch from '@radix-ui/react-switch';
+
 const formSchema = z.object({
   displayTagFilters: z.boolean(),
   tagGroups: z
@@ -81,7 +83,7 @@ export default function WidgetStemBegrootOverviewTags(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-1/3 grid grid-cols-1 gap-4">
+          className="lg:w-3/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="displayTagFilters"
@@ -93,16 +95,21 @@ export default function WidgetStemBegrootOverviewTags(
               </FormItem>
             )}
           />
+          <Separator className="my-4" />
 
           <FormField
             control={form.control}
             name="tagGroups"
             render={() => (
               <FormItem className="col-span-full">
-                <div>
-                  <FormLabel>Selecteer de gewenste tag groepen</FormLabel>
+                <div className='mb-2'>
+                  <FormLabel>
+                    <Heading size="xl">Selecteer de gewenste tag groepen</Heading>
+                  </FormLabel>
+                  <Separator className="my-4" />
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-2">
+
+                <div className="grid grid-cols-1 lg:grid-cols-1 lg:grid-cols-[auto_1fr_1fr] gap-x-8 gap-y-2">
                   {(tagGroupNames || []).map((groupName, index) => (
                     <>
                       <FormField
@@ -113,29 +120,31 @@ export default function WidgetStemBegrootOverviewTags(
                           return (
                             <FormItem
                               key={groupName}
-                              className="flex flex-row items-start space-x-3 space-y-0">
+                              className="flex flex-col items-start">
                               <FormControl>
-                                <Checkbox
-                                  checked={
-                                    field.value?.findIndex(
-                                      (el) => el.type === groupName
-                                    ) > -1
-                                  }
-                                  onCheckedChange={(checked: any) => {
-                                    const groups = handleTagCheckboxGroupChange(
-                                      groupName,
-                                      checked,
-                                      field.value,
-                                      'type'
-                                    );
-                                    field.onChange(groups);
-                                    props.onFieldChanged(field.name, groups);
-                                  }}
-                                />
+                                <>
+                                  <FormLabel>{groupName}</FormLabel>
+                                  <Switch.Root
+                                    className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                                    onCheckedChange={(checked: any) => {
+                                      const groups = handleTagCheckboxGroupChange(
+                                        groupName,
+                                        checked,
+                                        field.value,
+                                        'type'
+                                      );
+                                      field.onChange(groups);
+                                      props.onFieldChanged(field.name, groups);
+                                    }}
+                                    checked={
+                                      field.value?.findIndex(
+                                        (el) => el.type === groupName
+                                      ) > -1
+                                    }>
+                                    <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                                  </Switch.Root>
+                                </>
                               </FormControl>
-                              <FormLabel className="font-normal">
-                                {groupName}
-                              </FormLabel>
                             </FormItem>
                           );
                         }}
@@ -149,29 +158,32 @@ export default function WidgetStemBegrootOverviewTags(
                           return (
                             <FormItem
                               key={`${groupName}-label-input`}
-                              className="flex flex-row items-start space-x-3 space-y-0">
+                              className="flex flex-col items-start">
                               <FormControl>
-                                <Input
-                                  placeholder="Groep label"
-                                  key={`${groupName}-label-input-field`}
-                                  defaultValue={field.value.at(index)?.label}
-                                  disabled={
-                                    field.value.find(
-                                      (g) => g.type === groupName
-                                    ) === undefined
-                                  }
-                                  onChange={(e) => {
-                                    const groups = field.value;
-                                    const existingGroup = groups[index];
-
-                                    if (existingGroup) {
-                                      existingGroup.label = e.target.value;
-                                      groups[index] = existingGroup;
-                                      field.onChange(groups);
-                                      props.onFieldChanged(field.name, groups);
+                                <>
+                                  <FormLabel>Label van het filter</FormLabel>
+                                  <Input
+                                    placeholder="Groep label"
+                                    key={`${groupName}-label-input-field`}
+                                    defaultValue={field.value.at(index)?.label}
+                                    disabled={
+                                      field.value.find(
+                                        (g) => g.type === groupName
+                                      ) === undefined
                                     }
-                                  }}
-                                />
+                                    onChange={(e) => {
+                                      const groups = field.value;
+                                      const existingGroup = groups[index];
+
+                                      if (existingGroup) {
+                                        existingGroup.label = e.target.value;
+                                        groups[index] = existingGroup;
+                                        field.onChange(groups);
+                                        props.onFieldChanged(field.name, groups);
+                                      }
+                                    }}
+                                  />
+                                </>
                               </FormControl>
                             </FormItem>
                           );
@@ -186,40 +198,44 @@ export default function WidgetStemBegrootOverviewTags(
                           return (
                             <FormItem
                               key={groupName}
-                              className="flex flex-row items-start space-x-3 space-y-0">
+                              className="flex flex-col items-start">
                               <FormControl>
-                                <Checkbox
-                                  disabled={
-                                    field.value.find(
-                                      (g) => g.type === groupName
-                                    ) === undefined
-                                  }
-                                  checked={
-                                    field.value?.findIndex(
-                                      (el) =>
-                                        el.type === groupName && el.multiple
-                                    ) > -1
-                                  }
-                                  onCheckedChange={(checked: any) => {
-                                    const groups = handleTagCheckboxGroupChange(
-                                      groupName,
-                                      checked,
-                                      field.value,
-                                      'multiple'
-                                    );
-                                    field.onChange(groups);
-                                    props.onFieldChanged(field.name, groups);
-                                  }}
-                                />
+                                <>
+                                  <FormLabel>Meerdere tags van deze groep tegelijk filteren</FormLabel>
+                                  <Switch.Root
+                                    className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                                    onCheckedChange={(checked: any) => {
+                                      const groups = handleTagCheckboxGroupChange(
+                                        groupName,
+                                        checked,
+                                        field.value,
+                                        'multiple'
+                                      );
+                                      field.onChange(groups);
+                                      props.onFieldChanged(field.name, groups);
+                                    }}
+                                    disabled={
+                                      field.value.find(
+                                        (g) => g.type === groupName
+                                      ) === undefined
+                                    }
+                                    checked={
+                                      field.value?.findIndex(
+                                        (el) =>
+                                          el.type === groupName && el.multiple
+                                      ) > -1
+                                    }>
+                                    <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                                  </Switch.Root>
+                                </>
                               </FormControl>
-                              <FormLabel className="font-normal">
-                                Multiple
-                              </FormLabel>
                             </FormItem>
                           );
                         }}
                       />
+                      <Separator className="my-4 col-span-full" />
                     </>
+
                   ))}
                 </div>
               </FormItem>
