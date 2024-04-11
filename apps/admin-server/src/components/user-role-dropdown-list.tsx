@@ -25,8 +25,10 @@ const UserRoleDropdownList = ({
         <SelectItem value={''}></SelectItem>
       )}
         <SelectItem value={'admin'}>Administrator</SelectItem>
+        {/* currently not available
         <SelectItem value={'editor'}>Editor</SelectItem>
         <SelectItem value={'moderator'}>Moderator</SelectItem>
+        */}
         <SelectItem value={'member'}>Normale gebruiker</SelectItem>
         <SelectItem value={'anonymous'}>Anonieme gebruiker</SelectItem>
       </SelectContent>
