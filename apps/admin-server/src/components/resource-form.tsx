@@ -174,11 +174,11 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   function onSubmit(values: FormType) {
     onFormSubmit(values)
       .then(() => {
-        toast.success(`Plan successvol ${id ? 'aangepast' : 'aangemaakt'}`);
+        toast.success(`Resource successvol ${id ? 'aangepast' : 'aangemaakt'}`);
         router.push(`/projects/${project}/resources`);
       })
       .catch((e) => {
-        toast.error(`Plan kon niet ${id ? 'aangepast' : 'aangemaakt'} worden`);
+        toast.error(`Resource kon niet ${id ? 'aangepast' : 'aangemaakt'} worden`);
       });
   }
 
@@ -286,12 +286,12 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             render={({ field }) => (
               <FormItem className="col-span-full lg:col-span-1">
                 <FormLabel>
-                  Plan id van het originele plan (optioneel)
+                  Resource id van het originele resource (optioneel)
                 </FormLabel>
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="Het originele plan id"
+                    placeholder="Het originele resource id"
                     {...field}
                   />
                 </FormControl>
@@ -304,7 +304,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             name="userId"
             render={({ field }) => (
               <FormItem className="col-span-full lg:col-span-1">
-                <FormLabel>User id van het plan (optioneel)</FormLabel>
+                <FormLabel>User id van het resource (optioneel)</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Laat leeg om jezelf te koppelen"
@@ -417,14 +417,14 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             <SimpleCalendar
               form={form}
               fieldName="startDate"
-              label="Startdatum van het plan"
+              label="Startdatum van het resource"
             />
           </div>
           <div className="mt-auto col-span-full lg:col-span-1">
             <SimpleCalendar
               form={form}
               fieldName="publishDate"
-              label="Publiceer datum van het plan (laat leeg voor een concept plan)"
+              label="Publiceer datum van het resource (laat leeg voor een concept resource)"
               withReset
             />
           </div>
