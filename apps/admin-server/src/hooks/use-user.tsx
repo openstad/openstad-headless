@@ -22,9 +22,7 @@ export default function useUser() {
 
   async function updateUser(body: any) {
 
-    if (Array.isArray(body)) {
-      // update roles
-    } else {
+    if (!Array.isArray(body)) {
       // update user
       let projectId = body.projectId;
       if (!projectId) throw new Error('Deze gebruiker kan niet worden bewerkt');
