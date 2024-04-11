@@ -9,6 +9,26 @@ module.exports = `
   function triggerEvent() {
     document.dispatchEvent(new CustomEvent('OpenStadReactLoaded'));
   }
+  
+  function checkReactDom() {
+    if (!hasReactDom && !reactDomLoaded) {
+      const script = document.createElement('script');
+      script.src = '${reactDomJs}';
+      script.onload = function() {
+        document.addEventListener('OpenStadReactLoaded', renderWidget);
+        triggerEvent();
+      }
+      document.body.appendChild(script);
+    } else if (
+        typeof ReactDOM !== 'undefined' &&
+        ReactDOM.version.substr(0, 2) !== '18'
+    ) {
+      throw new Error('ReactDOM version 18 is required');
+    } else {
+      document.addEventListener('OpenStadReactLoaded', renderWidget);
+      triggerEvent();
+    }
+  }
 
   const hasReact = typeof React !== 'undefined';
   const reactLoaded = window.OpenStadReactLoaded;
@@ -18,32 +38,15 @@ module.exports = `
   if (!hasReact && !reactLoaded) {
     const script = document.createElement('script');
     script.src = '${reactJs}';
+    script.onload = (e) => {
+      checkReactDom();
+    }
+    
     document.body.appendChild(script);
     window.OpenStadReactLoaded = true;
-  } 
-  
-  if(hasReact && React.version.substr(0, 2) < '18') {
+  } else if (hasReact && React.version.substr(0, 2) < '18') {
     throw new Error('React version 18 is required');
-  }
-  
-  if (!hasReactDom && !reactDomLoaded) {
-      const script = document.createElement('script');
-      script.src = '${reactDomJs}';
-      script.onload = function() {
-      document.addEventListener('OpenStadReactLoaded', renderWidget);
-      triggerEvent();
-    }
-    document.body.appendChild(script);
-  } else if (
-    typeof ReactDOM !== 'undefined' &&
-    ReactDOM.version.substr(0, 2) !== '18'
-  ) {
-    console.log("NOT A REACT REACTDOM FOUND!");
-
-    throw new Error('ReactDOM version 18 is required');
   } else {
-    console.log("Already loaded")
-    document.addEventListener('OpenStadReactLoaded', renderWidget);
-    triggerEvent();
+    checkReactDom();
   }
 `;
