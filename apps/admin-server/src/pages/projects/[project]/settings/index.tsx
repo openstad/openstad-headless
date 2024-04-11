@@ -50,12 +50,15 @@ export default function ProjectSettings() {
   const { data, isLoading, updateProject } = useProject();
   const { data: areas } = useArea(project as string);
 
-  let currentDate = new Date();
   const [checkboxInitial, setCheckboxInitial] = useState(true);
   const [showUrl, setShowUrl] = useState(false);
 
   const defaults = useCallback(
-    () => ({
+    () => {
+
+      const currentDate = new Date();
+
+      return {
       name: data?.name || '',
       endDate: data?.config?.project?.endDate
         ? new Date(data?.config?.project?.endDate)
@@ -63,8 +66,9 @@ export default function ProjectSettings() {
       cssUrl: data?.config?.project?.cssUrl || '',
       areaId: data?.areaId || '',
       url: data?.url || '',
-    }),
-    [data, areas, currentDate]
+    }
+    },
+    [data, areas]
   );
 
   const form = useForm<z.infer<typeof formSchema>>({
