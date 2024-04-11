@@ -11,7 +11,8 @@ import 'filepond/dist/filepond.min.css'
 import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation'
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
-registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview);
+import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
+registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview, FilePondPluginFileValidateType);
 
 const filePondSettings = {
     labelIdle: "Sleep afbeelding(en) naar deze plek of <span class='filepond--label-action'>klik hier</span>",
@@ -40,10 +41,12 @@ const filePondSettings = {
     labelButtonUndoItemProcessing: 'Undo',
     labelButtonRetryItemProcessing: 'Retry',
     labelButtonProcessItem: 'Upload',
-    acceptedFileTypes: ['image/*'],
+    labelFileTypeNotAllowed: 'Bestandstype is niet toegestaan',
     allowFileSizeValidation: true,
     maxFileSize: '8mb',
     name: 'image',
+    credits: false,
+    maxParallelUploads: 1
 };
 
 
@@ -76,19 +79,30 @@ const FileUploadField: FC<FileUploadProps> = ({
         Math.random().toString(36).substring(2, 15);
 
     const [files, setFiles] = useState<string[]>([]);
+    const [uploadedFiles, setUploadedFiles] = useState([]);
 
     useEffect(() => {
         if (onChange) {
             onChange({
                 name: fieldKey,
-                value: files,
+                value: uploadedFiles,
             });
         }
-    }, [files]);
+    }, [uploadedFiles.length]);
 
     const acceptAttribute = allowedTypes
         ? allowedTypes
         : "";
+
+    const fileRemoved = (error, file) => {
+        const fileName = file?.file?.name
+
+        if ( !!fileName ) {
+            const updatedFiles = uploadedFiles.filter(item => item.name !== fileName);
+
+            setUploadedFiles(updatedFiles);
+        }
+    }
 
     return (
         <FormField type="text">
@@ -102,10 +116,20 @@ const FileUploadField: FC<FileUploadProps> = ({
                     onupdatefiles={setFiles}
                     allowMultiple={multiple}
                     server={{
-                        process: props?.imageUrl + '/images',
+                        process: {
+                            url: props?.imageUrl + '/images',
+                            method: 'POST',
+                            onload: (response) => {
+                                const currentFiles = [...uploadedFiles];
+                                currentFiles.push(JSON.parse(response)[0]);
+
+                                setUploadedFiles(currentFiles);
+                            },
+                        },
                         fetch: props?.imageUrl + '/image',
                         revert: null,
                     }}
+                    onremovefile={fileRemoved}
                     id={randomID}
                     name={fieldKey}
                     required={fieldRequired}

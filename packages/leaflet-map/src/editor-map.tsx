@@ -17,12 +17,7 @@ const EditorMap = ({
   fieldName = 'location',
   centerOnEditorMarker = true,
   editorMarker = undefined,
-  markerIcon = {
-    iconUrl: '/img/editor-marker-icon.svg',
-    shadowUrl: '/img/marker-shadow.png',
-    iconSize: [32, 40],
-    iconAnchor: [8, 40],
-  },
+  markerIcon = undefined,
   center = undefined,
   markers = [],
   onChange,
@@ -52,7 +47,8 @@ const EditorMap = ({
   ) {
     if (map && e.isInArea) {
       if (onChange) {
-        onChange({name: fieldName, value: `{"lat":${e.latlng?.lat},"lng":${e.latlng?.lng}}`})
+        const value = `{"lat":${e.latlng?.lat},"lng":${e.latlng?.lng}}`;
+        onChange({name: fieldName, value: JSON.parse(value)})
       }
       setCurrentEditorMarker({
         ...currentEditorMarker,

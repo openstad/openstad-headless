@@ -135,6 +135,7 @@ app.post('/image',
 
     const fileName = req.file.filename || req.file.key;
     res.send(JSON.stringify({
+      name: req.file.name,
       url: process.env.APP_URL + '/image/' + fileName
     }));
   });
@@ -151,6 +152,7 @@ app.post('/images',
 
         res.send(JSON.stringify(req.files.map((file) => {
             return {
+                name: file.originalname,
                 url: process.env.APP_URL + '/image/' + file.filename
             }
         })));
