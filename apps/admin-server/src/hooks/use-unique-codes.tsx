@@ -5,9 +5,9 @@ export default function useUniqueCodes(projectId: string) {
   const params = new URLSearchParams();
   params.set('useAuth', 'openstad');
 
-  const uniqueCodesListSwr = useSWR(
-    `/api/openstad/auth/project/${projectId}/uniquecode?` + params.toString(),
-  );
+  const url = `/api/openstad/auth/project/${projectId}/uniquecode?` + params.toString();
+
+  const uniqueCodesListSwr = useSWR(projectId ? url : null);
 
   async function createUniqueCodes(amount?: string) {
     try {
