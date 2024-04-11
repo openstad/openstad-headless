@@ -291,7 +291,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="Het originele plan id"
+                    placeholder="Het originele resource id"
                     {...field}
                   />
                 </FormControl>
