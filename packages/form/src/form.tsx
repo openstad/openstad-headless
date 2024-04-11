@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import type {CombinedFieldPropsWithType, ComponentFieldProps, FormProps} from "./props";
 import TextInput from "@openstad-headless/ui/src/form-elements/text";
 import RangeSlider from "@openstad-headless/ui/src/form-elements/a-b-slider";
@@ -12,6 +12,7 @@ import { handleSubmit } from "./submit";
 import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden/index.js";
 import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choice/index.js";
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
+import './form.css'
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -26,11 +27,12 @@ function Form({
       secondaryHandler = () => {},
       ...props
 }: FormProps) {
-    const initialFormValues: { [key: string]: string | string[] | [] } = {};
+    const initialFormValues: { [key: string]: string | Record<number, never> | [] } = {};
     fields.forEach((field) => {
         if (field.fieldKey) {
             //@ts-expect-error
             initialFormValues[field.fieldKey] = typeof field.defaultValue !== 'undefined' ? field.defaultValue : '';
+            initialFormValues[field.fieldKey] = field.type === 'map' ? {} : initialFormValues[field.fieldKey];
         }
     });
 
@@ -85,7 +87,7 @@ function Form({
 
                 <form className="form-container" noValidate onSubmit={handleFormSubmit}>
                     {fields.map((field: CombinedFieldPropsWithType, index: number) => (
-                        <div className={`question-type-${field.type}`} key={index}>
+                        <div className={`question question-type-${field.type}`} key={index}>
                             {renderField(field, index)}
                             <FormFieldErrorMessage className="error-message">
                                 {formErrors[field.fieldKey] && <span>{formErrors[field.fieldKey]}</span>}
