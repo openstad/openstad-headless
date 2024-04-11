@@ -34,7 +34,7 @@ export type LikeProps = {
 };
 
 function Likes({
-  title = 'Likes',
+  title = '',
   variant = 'large',
   hideCounters,
   yesLabel = 'Voor',

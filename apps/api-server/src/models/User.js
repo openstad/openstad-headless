@@ -331,6 +331,18 @@ module.exports = function (db, sequelize, DataTypes) {
 
     return {
 
+      byIdpUser: function (identifier, provider) {
+        let where = {
+          where: {
+            idpUser: {
+              identifier,
+              provider,
+            }
+          }
+        }
+        return where;
+      },
+
       includeProject: {
         include: [{
           model: db.Project,

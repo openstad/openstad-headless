@@ -84,7 +84,7 @@ export default function ChoicesSelectorForm() {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
+          className="w-fit lg:w-2/3 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="keuzewijzer"

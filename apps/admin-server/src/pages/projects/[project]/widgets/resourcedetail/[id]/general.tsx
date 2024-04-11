@@ -17,7 +17,7 @@ import { useRouter } from 'next/router';
 import useResources from '@/hooks/use-resources';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 
@@ -35,27 +35,27 @@ const formSchema = z.object({
 export default function WidgetResourceDetailGeneral(
   props: ResourceDetailWidgetProps & EditFieldProps<ResourceDetailWidgetProps>
 ) {
-  
+
   type FormData = z.infer<typeof formSchema>;
   async function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
   }
 
   const router = useRouter();
-
   const projectId = router.query.project as string;
   const { data: resourceList } = useResources(projectId as string);
   const resources = resourceList as { id: string; title: string }[];
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
+  const [toggle, setToggle] = useState('resourceId_');
 
   const defaults = useCallback(
     () => ({
       resourceId: props?.resourceId || undefined,
       resourceIdRelativePath: props?.resourceIdRelativePath || undefined
     }),
-    [props?.resourceId]
+    [props?.resourceId, props?.resourceIdRelativePath]
   );
 
   const form = useForm<FormData>({
@@ -82,28 +82,33 @@ export default function WidgetResourceDetailGeneral(
             items={resources}
             keyForValue="id"
             label={(resource) => `${resource.id} ${resource.title}`}
-            onFieldChanged={props.onFieldChanged}
+            onFieldChanged={(e, key) => {
+              props.onFieldChanged
+              setToggle(e + '_' + key);
+            }}
             noSelection="Niet koppelen - beschrijf het path of gebruik queryparam openstadResourceId"
           />
-
-          <FormField
-            control={form.control}
-            name="resourceIdRelativePath"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  <b>Geen specifieke resource gekoppeld?</b> Beschrijf hoe de resource gehaald wordt uit de url: (/pad/naar/[id]) of laat leeg om terug te vallen op ?openstadResourceId
-                </FormLabel>
-                <FormControl>
-                  <Input {...field} onChange={(e) =>{
-                    onFieldChange(field.name, e.target.value);
-                    field.onChange(e);
-                   }} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {toggle === 'resourceId_' ? (
+            <FormField
+              control={form.control}
+              name="resourceIdRelativePath"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Geen specifieke resource gekoppeld?
+                  </FormLabel>
+                  <em className="text-xs">Beschrijf hoe de resource gehaald wordt uit de url: (/pad/naar/[id]) of laat leeg om terug te vallen op ?openstadResourceId</em>
+                  <FormControl>
+                    <Input {...field} onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : null}
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan

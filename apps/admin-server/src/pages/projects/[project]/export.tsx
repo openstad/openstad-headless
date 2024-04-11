@@ -48,7 +48,7 @@ export default function ProjectExport() {
           <div className="p-6 bg-white rounded-md">
             <Heading size="xl">Exporteren</Heading>
             <Separator className="my-4" />
-            <div className="grid grid-cols-2 gap-4 w-fit">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 w-fit">
               <div className="col-span-full">
                 <div>
                   De volgende gegevens worden geëxporteerd.

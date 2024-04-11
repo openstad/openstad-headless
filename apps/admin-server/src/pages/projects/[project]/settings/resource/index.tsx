@@ -78,7 +78,6 @@ const formSchema = z.object({
   displayTheme: z.boolean(),
   displayNeighbourhood: z.boolean(),
   displayModbreak: z.boolean(),
-  reactionSettings: z.string().array(),
   tagGroups: z.number().array().optional().default([]),
   statusGroups: z.number().array().optional().default([]),
 });
@@ -112,7 +111,6 @@ export default function ProjectSettingsResource() {
       displayNeighbourhood:
         data?.config?.[category]?.displayNeighbourhood || false,
       displayModbreak: data?.config?.[category]?.displayModbreak || false,
-      reactionSettings: data?.config?.[category]?.reactionSettings || [],
       tagGroups: data?.config?.resources?.defaultTagIds || [],
       statusGroups: data?.config?.resources?.defaultStatusIds || [],
     }),
@@ -144,7 +142,6 @@ export default function ProjectSettingsResource() {
           displayTheme: values.displayTheme,
           displayNeighbourhood: values.displayNeighbourhood,
           displayModbreak: values.displayModbreak,
-          reactionSettings: values.reactionSettings,
           defaultTagIds: values.tagGroups || [],
           defaultStatusIds: values.statusGroups || [],
         },
@@ -343,56 +340,6 @@ export default function ProjectSettingsResource() {
                     </FormLabel>
                     {YesNoSelect(field, {})}
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="reactionSettings"
-                render={() => (
-                  <FormItem>
-                    <div>
-                      <FormLabel>
-                        Selecteer uw gewenste reactie instellingen
-                      </FormLabel>
-                    </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-2 gap-x-4">
-                      {reactions.map((item) => (
-                        <FormField
-                          key={item.id}
-                          control={form.control}
-                          name="reactionSettings"
-                          render={({ field }) => {
-                            return (
-                              <FormItem
-                                key={item.id}
-                                className="flex flex-row items-start space-x-3 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(item.id)}
-                                    onCheckedChange={(checked: any) => {
-                                      return checked
-                                        ? field.onChange([
-                                            ...field.value,
-                                            item.id,
-                                          ])
-                                        : field.onChange(
-                                            field.value?.filter(
-                                              (value) => value !== item.id
-                                            )
-                                          );
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormLabel className="font-normal">
-                                  {item.label}
-                                </FormLabel>
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      ))}
-                    </div>
                   </FormItem>
                 )}
               />

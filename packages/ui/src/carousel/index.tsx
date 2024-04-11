@@ -31,6 +31,8 @@ export function Carousel({
           className="primary-action-button"
           icon="ri-arrow-left-s-line"
           disabled={index === 0}
+          text={'Vorige slide'}
+          iconOnly={true}
           onClick={() => setIndex(index - 1)}
         />
       </div>
@@ -42,6 +44,8 @@ export function Carousel({
           className="primary-action-button"
           icon="ri-arrow-right-s-line"
           disabled={index === items.length - 1}
+          text={'Volgende slide'}
+          iconOnly={true}
           onClick={() => setIndex(index + 1)}
         />
       </div>

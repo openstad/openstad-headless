@@ -27,6 +27,8 @@ import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
 import toast from 'react-hot-toast';
+import * as Switch from '@radix-ui/react-switch';
+import InfoDialog from '@/components/ui/info-hover';
 
 const formSchema = z.object({
   isViewable: z.boolean(),
@@ -118,7 +120,7 @@ export default function ProjectSettingsVoting() {
           },
           {
             name: 'Instellingen',
-            url: `/projects/${project}/settings`,
+            url: `'/projects/${project}/settings'`,
           },
           {
             name: 'Stemmen',
@@ -131,7 +133,7 @@ export default function ProjectSettingsVoting() {
             <Separator className="my-4" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
+              className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
               <FormField
                 control={form.control}
                 name="isViewable"
@@ -140,21 +142,14 @@ export default function ProjectSettingsVoting() {
                     <FormLabel>
                       Is de hoeveelheid stemmen publiek zichtbaar?
                     </FormLabel>
-                    <Select
-                      onValueChange={(e: string) =>
-                        field.onChange(e === 'true')
-                      }
-                      value={field.value ? 'true' : 'false'}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Ja" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Ja</SelectItem>
-                        <SelectItem value="false">Nee</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Switch.Root
+                      className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                      onCheckedChange={(e: boolean) => {
+                        field.onChange(e);
+                      }}
+                      defaultChecked={field.value}>
+                      <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                    </Switch.Root>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -165,21 +160,14 @@ export default function ProjectSettingsVoting() {
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>Is het mogelijk om te stemmen?</FormLabel>
-                    <Select
-                      onValueChange={(e: string) =>
-                        field.onChange(e === 'true')
-                      }
-                      value={field.value ? 'true' : 'false'}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Nee" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Ja</SelectItem>
-                        <SelectItem value="false">Nee</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Switch.Root
+                      className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                      onCheckedChange={(e: boolean) => {
+                        field.onChange(e);
+                      }}
+                      defaultChecked={field.value}>
+                      <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                    </Switch.Root>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -275,6 +263,7 @@ export default function ProjectSettingsVoting() {
                     <FormLabel>
                       Wat is de minimum hoeveelheid resources waar iemand op kan
                       stemmen?
+                      <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Count, Count per theme of Count per budgeting'} />
                     </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="1" {...field} />
@@ -291,6 +280,7 @@ export default function ProjectSettingsVoting() {
                     <FormLabel>
                       Wat is de maximum hoeveelheid resources waar iemand op kan
                       stemmen?
+                      <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Count, Count per theme of Count per budgeting'} />
                     </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="100" {...field} />
@@ -299,13 +289,14 @@ export default function ProjectSettingsVoting() {
                   </FormItem>
                 )}
               />
-               <FormField
+              <FormField
                 control={form.control}
                 name="minBudget"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>
                       Wat is het minimum budget?
+                      <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Budgeting '} />
                     </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="1" {...field} />
@@ -321,6 +312,7 @@ export default function ProjectSettingsVoting() {
                   <FormItem className="col-span-1">
                     <FormLabel>
                       Wat is het maximum budget?
+                      <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Budgeting '} />
                     </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="100" {...field} />

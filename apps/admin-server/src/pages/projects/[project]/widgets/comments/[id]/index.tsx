@@ -61,7 +61,7 @@ export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
-              <TabsTrigger value="list">Lijst</TabsTrigger>
+              <TabsTrigger value="list">Titel</TabsTrigger>
               <TabsTrigger value="form">Formulier</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>

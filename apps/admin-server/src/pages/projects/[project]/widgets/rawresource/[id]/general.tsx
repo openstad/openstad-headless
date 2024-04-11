@@ -88,6 +88,7 @@ export default function WidgetRawGeneral(
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
+                    <SelectItem value="">Selecteer een resource</SelectItem>
                     {data?.map((resource: any) => (
                       <SelectItem key={resource.id} value={`${resource.id}`}>
                         {resource.title}

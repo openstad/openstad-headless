@@ -7,6 +7,7 @@ import {
 
 const config: ResourceOverviewWidgetProps = {
   tagGroups: [{ type: 'theme', label: 'Thema', multiple: true }],
+  displayPagination: true,
   displayTitle: true,
   displayDescription: true,
   displaySummary: true,

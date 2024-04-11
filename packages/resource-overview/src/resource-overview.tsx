@@ -29,6 +29,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
       onItemClick?: () => void
     ) => React.JSX.Element;
     resourceType?: 'resource';
+    displayPagination?: boolean;
     displayType?: 'cardrow' | 'cardgrid' | 'raw';
     allowFiltering?: boolean;
     displayTitle?: boolean;
@@ -333,13 +334,15 @@ function ResourceOverview({
           </section>
         </section>
         <Spacer size={4} />
-        <div className="osc-resource-overview-paginator col-span-full">
-          <Paginator
-            page={resourcesWithPagination?.metadata?.page || 0}
-            totalPages={resourcesWithPagination?.metadata?.pageCount || 1}
-            onPageChange={(page) => setPage(page)}
-          />
-        </div>
+        {props.displayPagination && (
+          <div className="osc-resource-overview-paginator col-span-full">
+            <Paginator
+              page={resourcesWithPagination?.metadata?.page || 0}
+              totalPages={resourcesWithPagination?.metadata?.pageCount || 1}
+              onPageChange={(page) => setPage(page)}
+            />
+          </div>
+        )}
       </div>
     </>
   );

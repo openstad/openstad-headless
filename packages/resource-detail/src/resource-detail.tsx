@@ -25,7 +25,7 @@ import { Comments, CommentsWidgetProps } from '@openstad-headless/comments/src/c
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
 
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
-
+import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 type booleanProps = {
   [K in
     | 'displayComments'
@@ -263,47 +263,7 @@ function ResourceDetail({
 
             {displaySocials ? (
               <div className="resource-detail-side-section">
-                <Heading4>Deel dit</Heading4>
-                <Spacer size={0.5} />
-                <div className="resource-detail-side-section-socials">
-                  <IconButton
-                    onClick={() => {}}
-                    className="secondary-action-button"
-                    icon="ri-facebook-fill"
-                  />
-
-                  <IconButton
-                    onClick={() => {}}
-                    className="secondary-action-button"
-                    icon="ri-whatsapp-fill"
-                  />
-
-                  <IconButton
-                    onClick={() => {}}
-                    className="secondary-action-button"
-                    icon="ri-twitter-x-fill"
-                  />
-
-                  <IconButton
-                    onClick={() => {}}
-                    className="secondary-action-button"
-                    icon="ri-mail-fill"
-                  />
-
-                  <IconButton
-                    onClick={() => {
-                      navigator.clipboard.writeText(location.href);
-                    }}
-                    className="secondary-action-button"
-                    icon="ri-link"
-                  />
-
-                  <IconButton
-                    onClick={() => {}}
-                    className="secondary-action-button"
-                    icon="ri-linkedin-fill"
-                  />
-                </div>
+                <ShareLinks title={'Deel dit'} />
               </div>
             ) : null}
             <Spacer size={1} />

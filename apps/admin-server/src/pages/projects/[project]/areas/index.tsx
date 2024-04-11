@@ -38,7 +38,7 @@ export default function ProjectAreas() {
         }>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
-            <div className="grid grid-cols-1 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
+            <div className="grid grid-cols-1 lg:grid-cols-3 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex">ID</ListHeading>
               <ListHeading className="hidden lg:flex">Naam</ListHeading>
             </div>
@@ -48,7 +48,7 @@ export default function ProjectAreas() {
                 <Link
                   href={`/projects/${project}/areas/${area.id}`}
                   key={area.id}>
-                  <li key={area.id} className="grid grid-cols-2 lg:grid-cols-4 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                  <li key={area.id} className="grid grid-cols-2 lg:grid-cols-3 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                     <Paragraph className="hidden lg:flex truncate">
                       {area.id}
                     </Paragraph>

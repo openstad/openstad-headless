@@ -9,6 +9,8 @@ import { Button } from "@utrecht/component-library-react";
 
 export type IconButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   icon?: string;
+  text?: string;
+  iconOnly?: boolean;
 };
 
 export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
@@ -19,7 +21,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         ref={ref}
         {...props}
         className={`osc-icon-button`}>
-        {props.icon ? <Icon icon={props.icon} /> : null}
+        {props.icon ? <Icon icon={props.icon} text={props.text} iconOnly={props.iconOnly}/> : null}
         {props.children}
       </Button>
     );

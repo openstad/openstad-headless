@@ -1,11 +1,28 @@
 const db = require('../../../db');
 const hat = require('hat');
+const getClientIdFromRequest = require('../../../utils/getClientIdFromRequest');
 
 const outputUser = (req, res, next) => {
   let result = { ...req.userObject };
-  delete result.dataValues.password;
-  delete result.dataValues.hashedPhoneNumber;
-  res.json(result.dataValues);
+  result = result.dataValues;
+  delete result.password;
+  delete result.hashedPhoneNumber;
+  if (result.roles) {
+    result.roles.map(role => {
+      let client = req.clients.find(c => c.id == role.clientId);
+      role.clientId = client.clientId;
+    })
+    let clientId = getClientIdFromRequest(req);
+    if (clientId) {
+      let roles = result.roles.filter( role => role.clientId == clientId).map (role => role.roleId);
+      if (roles.length == 1) {
+        let roleId = roles[0];
+        let role = req.roles.find( role => role.id == roleId );
+        result.role = role?.name;
+      }
+    }
+  }
+  res.json(result);
 };
 
 exports.all = (req, res, next) => {

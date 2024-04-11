@@ -59,7 +59,7 @@ export default function WidgetBaseMap({
             </TabsContent>
           </Tabs>
 
-          <div className="container py-6 mt-6 bg-white rounded-md">
+          {/* <div className="container py-6 mt-6 bg-white rounded-md">
             {previewConfig && (
               <>
                 <WidgetPreview
@@ -69,7 +69,7 @@ export default function WidgetBaseMap({
                 />
               </>
             )}
-          </div>
+          </div> */}
         </div>
       </PageLayout>
     </div>
