@@ -33,10 +33,15 @@ async function getProject(req, res, next, include = []) {
         let adapter = await authSettings.adapter({ authConfig });
         if (adapter.service.fetchClient) {
           let client = await adapter.service.fetchClient({authConfig, project})
+          project.config.auth.provider[provider].name = client.name;
+          project.config.auth.provider[provider].description = client.description;
+          project.config.auth.provider[provider].siteUrl = client.siteUrl;
           project.config.auth.provider[provider].authTypes = client.authTypes;
           project.config.auth.provider[provider].requiredUserFields = client.requiredUserFields;
           project.config.auth.provider[provider].twoFactorRoles = client.twoFactorRoles;
+          project.config.auth.provider[provider].allowedDomains = client.allowedDomains;
           project.config.auth.provider[provider].config = client.config;
+          project.config.auth.provider[provider].client = client;
         }
       }
     }
@@ -53,7 +58,7 @@ router
 
     req.scope = ['excludeEmailConfig'];
 
-    if (!req.query.includeConfig) {
+    if (!req.query.includeConfig && !req.query.includeAuthConfig) {
       req.scope.push('excludeConfig');
     }
 
