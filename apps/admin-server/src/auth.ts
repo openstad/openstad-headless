@@ -83,7 +83,10 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     return NextResponse.redirect( newUrl, { headers: res.headers });
   }
 
-  if (!req.nextUrl.pathname.startsWith('/_')) { // not on internal urls
+  if (!(
+      req.nextUrl.pathname.startsWith('/_') ||         // not on internal urls
+      req.nextUrl.pathname.startsWith('/api/openstad') // api routes require user but will nog login
+     )) {
 
     let forceNewLogin = false;
 
