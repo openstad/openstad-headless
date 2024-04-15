@@ -14,13 +14,12 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         { type: 'area', placeholder: 'Selecteer een gebied' },
         { type: 'tag', placeholder: 'Selecteer een tag' },
       ]}
-      config={{
-        api: {
-          url: import.meta.env.VITE_API_URL,
-        },
-        projectId: import.meta.env.VITE_PROJECT_ID,
-        resourceId: import.meta.env.VITE_RESOURCE_ID,
+      api={{
+        url: import.meta.env.VITE_API_URL,
       }}
+      projectId={ import.meta.env.VITE_PROJECT_ID }
+      resourceId={import.meta.env.VITE_RESOURCE_ID}
+      resourceIdRelativePath={import.meta.env.VITE_RESOURCE_ID_RELATIVE_PATH}
     />
   </React.StrictMode>
 );
