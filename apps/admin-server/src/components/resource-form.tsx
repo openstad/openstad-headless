@@ -22,6 +22,7 @@ import useResource from '@/hooks/use-resource';
 import toast from 'react-hot-toast';
 import { ImageUploader } from './image-uploader';
 import useTags from '@/hooks/use-tags';
+import useStatuses from '@/hooks/use-statuses';
 import { CheckboxList } from './checkbox-list';
 import { X } from 'lucide-react';
 import { useProject } from '@/hooks/use-project';
@@ -90,6 +91,7 @@ const formSchema = z.object({
     })
     .default({}),
   tags: z.number().array().default([]),
+  statuses: z.number().array().default([]),
 });
 
 type FormType = z.infer<typeof formSchema>;
@@ -108,12 +110,18 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     id as string
   );
 
-  const { data: tags, error: tagError, isLoading } = useTags(project as string);
+  const { data: tags, error: tagError } = useTags(project as string);
+  const { data: statuses, error: statusError } = useStatuses(project as string);
 
   const loadedTags = (tags || []) as {
     id: number;
     name: string;
     type?: string;
+  }[];
+
+  let loadedStatuses = (statuses || []) as {
+    id: number;
+    name: string;
   }[];
 
   const budgetFallback = (existingData: any, key: string = '') => {
@@ -139,7 +147,11 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       budgetInterval: budgetFallback(existingData, 'interval'),
       tags:
         existingData?.tags?.map((t: any) => t.id) ||
-        projectData?.config?.resources?.tags ||
+        projectData?.config?.resources?.defaultTagIds ||
+        [],
+      statuses:
+        existingData?.statuses?.map((t: any) => t.id) ||
+        projectData?.config?.resources?.defaultStatusIds ||
         [],
       startDate: existingData?.startDate
         ? new Date(existingData?.startDate)
@@ -185,20 +197,31 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   useEffect(() => {
     if (existingData) {
       form.reset(defaults());
-    }
-    if (!existingData && projectData?.config?.resources?.tags) {
-      const selectedTags = form.getValues('tags') || [];
+    } else {
+      let resetValues:{ tags?: number[]; statuses?: number[]; } = {};
+      if (projectData?.config?.resources?.defaultTagIds) {
+        const selectedTags = form.getValues('tags') || [];
 
-      if (selectedTags.length === 0) {
-        const projectTags = Array.isArray(projectData?.config?.resources?.tags)
-          ? projectData?.config?.resources?.tags
-          : [];
-        form.reset({
-          tags: Array.from(new Set([...selectedTags, ...projectTags])),
-        });
+        if (selectedTags.length === 0) {
+          const projectTags = Array.isArray(projectData.config.resources.defaultTagIds)
+            ? projectData.config.resources.defaultTagIds
+            : [];
+          resetValues.tags = Array.from(new Set([...selectedTags, ...projectTags]));
+        }
       }
+      if (projectData?.config?.resources?.defaultStatusIds) {
+        const selectedStatuses = form.getValues('statuses') || [];
+
+        if (selectedStatuses.length === 0) {
+          const projectStatuses = Array.isArray(projectData.config.resources.defaultStatusIds)
+            ? projectData.config.resources.defaultStatusIds
+            : [];
+          resetValues.statuses = Array.from(new Set([...selectedStatuses, ...projectStatuses]));
+        }
+      }
+      form.reset(resetValues);
     }
-  }, [existingData, form, defaults, projectData?.config?.resources?.tags]);
+  }, [existingData, form, defaults, projectData?.config?.resources?.defaultTagIds, projectData?.config?.resources?.defaultStatusIds]);
 
   const { fields: imageFields, remove: removeImage } = useFieldArray({
     control: form.control,
@@ -448,6 +471,28 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 checked
                   ? [...values, tag.id]
                   : values.filter((id) => id !== tag.id)
+              );
+            }}
+          />
+
+          <CheckboxList
+            form={form}
+            fieldName="statuses"
+            fieldLabel="Status"
+            label={(t) => t.name}
+            keyPerItem={(t) => `${t.id}`}
+            items={loadedStatuses}
+            layout="vertical"
+            selectedPredicate={(t) =>
+              form.getValues('statuses').findIndex((tg) => tg === t.id) > -1
+            }
+            onValueChange={(status, checked) => {
+              const values = form.getValues('statuses');
+              form.setValue(
+                'statuses',
+                checked
+                  ? [...values, status.id]
+                  : values.filter((id) => id !== status.id)
               );
             }}
           />
