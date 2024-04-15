@@ -87,41 +87,6 @@ module.exports = function (db, sequelize, DataTypes) {
         defaultValue: 1,
       },
 
-      typeId: {
-        type: DataTypes.STRING(255),
-        allowNull: true,
-        auth: {
-          updateableBy: 'moderator',
-          authorizeData: function (data, action, user, self, project) {
-            if (!self) return;
-            project = project || self.project;
-            if (!project) return; // todo: die kun je ophalen als eea. async is
-            let value = data || self.typeId;
-            let config = project.config.resources.types;
-            if (
-              !config ||
-              !Array.isArray(config) ||
-              !config[0] ||
-              !config[0].id
-            )
-              return null; // no config; this field is not used
-            let defaultValue = config[0].id;
-
-            let valueConfig = config.find((type) => type.id == value);
-            if (!valueConfig) return self.typeId || defaultValue; // non-existing value; fallback to the current value
-            let requiredRole =
-              self.rawAttributes.typeId.auth[action + 'ableBy'] || 'all';
-            if (!valueConfig.auth)
-              return userHasRole(user, requiredRole)
-                ? value
-                : self.typeId || defaultValue; // no auth defined for this value; use field.auth
-            requiredRole = valueConfig.auth[action + 'ableBy'] || requiredRole;
-            if (userHasRole(user, requiredRole)) return value; // user has requiredRole; value accepted
-            return self.typeId || defaultValue;
-          },
-        },
-      },
-
       viewableByRole: {
         type: DataTypes.ENUM(
           'superuser',

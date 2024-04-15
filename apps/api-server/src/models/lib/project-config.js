@@ -108,54 +108,6 @@ module.exports = {
       extraData: {
         type: 'object',
       },
-      types: {
-        type: 'arrayOfObjects',
-        default: [],
-        subset: {
-          name: {
-            type: 'string',
-            default: 'noName',
-          },
-          label: {
-            type: 'label',
-            default: 'Dit is niets',
-          },
-          auth: {
-            type: 'object', // TODO: werk dit uit
-          },
-          mapIcon: {
-            type: 'string',
-            default: '',
-          },
-          listIcon: {
-            type: 'string',
-            default: '',
-          },
-          buttonIcon: {
-            type: 'string',
-            default: '',
-          },
-          buttonLabel: {
-            type: 'string',
-            default: '',
-          },
-          backgroundColor: {
-            type: 'string',
-            default: '#164995',
-          },
-          textColor: {
-            type: 'string',
-            default: 'white',
-          },
-          // TODO: deze komen uit cms thema; werk dat verder uit
-          "flag": {type: 'string', default: ''},
-          "mapUploadedFlag": {type: 'string', default: ''},
-          "mapFlagWidth": {type: 'string', default: ''},
-          "mapFlagHeight": {type: 'string', default: ''},
-          "Initialavailablebudget": {type: 'int', default: 0},
-          "minimalBudgetSpent": {type: 'int', default: 0},
-        }
-      },
       defaultStatusIds: {
         type: 'arrayOfNumbers',
         default: [],
