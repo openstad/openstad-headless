@@ -1,0 +1,121 @@
+publiccodeYmlVersion: "0.2"
+
+name: OpenStad headless
+applicationSuite: OpenStad
+url: "https://github.com/openstad/openstad-headless"
+isBasedOn: "https://github.com/italia/otello.git"
+softwareVersion: "dev"
+releaseDate: "2023-09-01"
+logo: /img/logo.png
+
+platforms:
+  - web
+
+categories:
+  - digital-citizenship
+  - content-management
+  - data-collection
+
+usedBy:
+  - Gemeente Amsterdam
+  - Gemeente Den Haag
+  - Gemeente Alphen aan den Rijn
+  - Gemeente Nijmegen
+  - Provincie Zuid-Holland
+  - Provincie Noord-Holland
+  - Woonstad Rotterdam
+  - Gemeente Enschede
+  - Gemeente Apeldoorn
+  - Gemeente Delft
+  - Gemeente Tilburg
+  - Gemeente Deventer
+  - Gemeente Hardenberg
+  - Gemeente Voorne aan Zee
+  - Gemeente Haarlemmermeer
+  - Gemeente Veenendaal
+  - Gemeente Emmen
+  - Gemeente Westland
+  - Gemeente Velsen
+  - Gemeente Zutphen
+  - Gemeente Zwolle
+  - Gemeente Heemstede Bloemendaal
+  - Gemeente Duiven/Westervoort
+  - Gemeente Haarlem
+  - Gemeente Alblasserdam
+  - Gemeente Kaag en Braassem
+  - Gemeente Wijchen
+  - Gemeente Druten
+
+developmentStatus: development
+
+softwareType: "standalone/web"
+
+intendedAudience:
+  scope:
+    - local-authorities
+    - government
+  countries:
+    - nl
+
+description:
+  nl:
+    localisedName: OpenStad
+    shortDescription: >
+          OpenStad biedt een open source platform
+          waarmee je eenvoudig interactieve websites
+          kunt maken voor jouw participatieprojecten. 
+
+    longDescription: >
+          OpenStad biedt een open source platform
+          waarmee je eenvoudig interactieve websites
+          kunt maken voor jouw participatieprojecten. 
+
+          Het platform bevat widgets die speciaal
+          zijn ontwikkeld om inwoners op een interactieve
+          manier meer invloed en zeggenschap te geven
+          op wat er in hun stad of dorp gebeurt. Denk
+          bijvoorbeeld aan een online stemtool, manieren
+          om plannen in te sturen, een tool waarmee
+          bewoners budget kunnen toewijzen aan plannen
+          voor het gebied en een keuzewijzer voor
+          bijvoorbeeld complexe openbare ruimteprojecten.
+
+          Daarnaast hebben deelnemende gemeenten al
+          een hoop kennis opgedaan in het ontwerpen van
+          (online) participatieprocessen, die we graag
+          delen met collega’s uit andere gemeenten.
+
+    documentation: "https://docs.openstad.org/openstad"
+    apiDocumentation: "https://docs.openstad.org/openstad/technical"
+
+    features:
+       - stemtools en likes
+       - voorstellen uploaden
+       - participatief begroten
+       - keuzewijzer (beta)
+       - interactieve kaart (beta)
+       - authenticatiemethoden
+       - argumenten en reacties
+       - afbeeldingen en video’s
+       - agenda/tijdlijn
+       - notificaties
+       - moderatie
+    videos:
+       - https://www.youtube.com/watch?v=jMT6VujnKLY
+    awards:
+       - Gemeente Delers 2021
+
+legal:
+  license: ISC
+
+maintenance:
+  type: community
+
+  contacts:
+    - name: Bart Nieuwenweg
+      email: "mail@draad.nl"
+
+localisation:
+  localisationReady: false
+  availableLanguages:
+    - nl
