@@ -482,7 +482,6 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             label={(t) => t.name}
             keyPerItem={(t) => `${t.id}`}
             items={loadedStatuses}
-            layout="vertical"
             selectedPredicate={(t) =>
               form.getValues('statuses').findIndex((tg) => tg === t.id) > -1
             }
