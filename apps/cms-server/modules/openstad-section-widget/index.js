@@ -151,6 +151,19 @@ module.exports = {
         def: false,
       },
 
+      customClass: {
+        type: 'string',
+        label: 'Custom class',
+        help: 'Voeg een custom class toe aan de sectie',
+      },
+
+      customCSS: {
+        type: 'string',
+        textarea: true,
+        label: 'Custom CSS',
+        help: 'Voeg custom CSS toe aan de sectie',
+      },
+
       negativeMargin: {
         type: 'boolean',
         label: 'Sectie over vorige element plaatsen',
