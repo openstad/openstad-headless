@@ -323,7 +323,7 @@ router.route('/:projectId') //(\\d+)
 router.route('/:projectId(\\d+)/export')
 	.all(auth.can('Project', 'view'))
 	.all(async function(req, res, next) {
-		await getProject(req, res, next, [{model: db.Resource, include: [{model: db.Tag}, {model: db.Vote}, {model: db.Comment, as: 'commentsFor'}, {model: db.Comment, as: 'commentsAgainst'}, {model: db.Poll, as: 'poll'}]}, {model: db.Tag}])
+		await getProject(req, res, next, [{model: db.Resource, include: [{model: db.Tag}, {model: db.Vote}, {model: db.Comment, as: 'commentsFor'}, {model: db.Comment, as: 'commentsAgainst'}, {model: db.Poll, as: 'poll'}]}, {model: db.Tag}, {model: db.Status}])
 	})
 
 	.get(auth.can('Project', 'view'))
