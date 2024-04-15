@@ -50,12 +50,15 @@ export default function ProjectSettings() {
   const { data, isLoading, updateProject } = useProject();
   const { data: areas } = useArea(project as string);
 
-  let currentDate = new Date();
   const [checkboxInitial, setCheckboxInitial] = useState(true);
   const [showUrl, setShowUrl] = useState(false);
 
   const defaults = useCallback(
-    () => ({
+    () => {
+
+      const currentDate = new Date();
+
+      return {
       name: data?.name || '',
       endDate: data?.config?.project?.endDate
         ? new Date(data?.config?.project?.endDate)
@@ -63,8 +66,9 @@ export default function ProjectSettings() {
       cssUrl: data?.config?.project?.cssUrl || '',
       areaId: data?.config?.project?.areaId || '',
       url: data?.url || '',
-    }),
-    [data, areas, currentDate]
+    }
+    },
+    [data, areas]
   );
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -191,7 +195,7 @@ export default function ProjectSettings() {
                         onCheckedChange={(e: boolean) => {
                           setShowUrl(!showUrl)
                         }}
-                        defaultChecked={!showUrl}>
+                        checked={showUrl}>
                         <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
                       </Switch.Root>
                     </div>
