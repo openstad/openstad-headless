@@ -130,6 +130,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                         submitText={submitButton || "Versturen"}
                         submitHandler={onSubmit}
                         secondaryLabel={saveConceptButton || ""}
+                        {...props}
                     />
                 )}
 

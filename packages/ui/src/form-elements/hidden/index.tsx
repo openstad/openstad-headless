@@ -3,6 +3,8 @@ import React, { FC } from "react";
 export type HiddenInputProps = {
     fieldKey: string;
     defaultValue: string;
+    type?: string;
+    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
 }
 
 const HiddenInput: FC<HiddenInputProps> = ({

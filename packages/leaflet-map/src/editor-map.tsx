@@ -17,14 +17,11 @@ const EditorMap = ({
   fieldName = 'location',
   centerOnEditorMarker = true,
   editorMarker = undefined,
-  markerIcon = {
-    iconUrl: '/img/editor-marker-icon.svg',
-    shadowUrl: '/img/marker-shadow.png',
-    iconSize: [32, 40],
-    iconAnchor: [8, 40],
-  },
+  markerIcon = undefined,
   center = undefined,
   markers = [],
+  onChange,
+  fieldRequired = false,
   ...props
 }: PropsWithChildren<EditorMapWidgetProps>) => {
   let [currentEditorMarker, setCurrentEditorMarker] = useState<MarkerProps>({
@@ -49,6 +46,10 @@ const EditorMap = ({
     map: any
   ) {
     if (map && e.isInArea) {
+      if (onChange) {
+        const value = `{"lat":${e.latlng?.lat},"lng":${e.latlng?.lng}}`;
+        onChange({name: fieldName, value: JSON.parse(value)})
+      }
       setCurrentEditorMarker({
         ...currentEditorMarker,
         lat: e.latlng?.lat,
@@ -68,6 +69,7 @@ const EditorMap = ({
 
       <input
         name={fieldName}
+        required={fieldRequired}
         type="hidden"
         value={`{"lat":${currentEditorMarker.lat},"lng":${currentEditorMarker.lng}}`}
       />

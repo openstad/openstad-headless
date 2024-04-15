@@ -1,14 +1,27 @@
-import React, {FC} from "react";
-import {Paragraph, FormLabel, FormFieldDescription, FormField} from "@utrecht/component-library-react";
+import React, {FC, useState} from "react";
+import {FormField, FormFieldDescription, FormLabel, Paragraph} from "@utrecht/component-library-react";
 import './map.css';
-// import {EditorMap} from "@openstad-headless/leaflet-map/src/editor-map";
+import {EditorMap} from "@openstad-headless/leaflet-map/src/editor-map";
+import DataStore from "@openstad-headless/data-store/src";
+import {BaseProps} from "@openstad-headless/types/base-props.js";
+import {ProjectSettingProps} from "@openstad-headless/types/project-setting-props.js";
+import {LocationType} from "@openstad-headless/leaflet-map/src/types/location";
 
-export type MapProps = {
+export type MapProps = BaseProps &
+    ProjectSettingProps & {
     title: string;
     description: string;
     fieldKey: string;
     fieldRequired: boolean;
-    onChange?: (e: {name: string, value: string | FileList | []}) => void;
+    disabled?: boolean;
+    type?: string;
+    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    requiredWarning?: string;
+}
+
+type Point = {
+    lat: number;
+    lng: number;
 }
 
 const MapField: FC<MapProps> = ({
@@ -16,11 +29,51 @@ const MapField: FC<MapProps> = ({
     description,
     fieldKey,
     fieldRequired= false,
-    onChange
+    onChange,
+    disabled = false,
+    ...props
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
-    // TODO: Get map value when setting a marker. The function to retrieve the value is not yet implemented
+    const datastore: any = new DataStore({
+        projectId: props.projectId,
+        api: props.api,
+    });
+
+    const { data: areas } = datastore.useArea({
+        projectId: props.projectId
+    });
+
+    let areaId = props?.project?.areaId || false;
+    const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];
+
+    function calculateCenter(polygon: Point[]) {
+        if (!polygon || polygon.length === 0) {
+            return undefined;
+        }
+
+        let minX = Infinity;
+        let maxX = -Infinity;
+        let minY = Infinity;
+        let maxY = -Infinity;
+
+        polygon.forEach(point => {
+            if (point.lng < minX) minX = point.lng;
+            if (point.lng > maxX) maxX = point.lng;
+            if (point.lat < minY) minY = point.lat;
+            if (point.lat > maxY) maxY = point.lat;
+        });
+
+        const avgLat = (minY + maxY) / 2;
+        const avgLng = (minX + maxX) / 2;
+
+        return {lat: avgLat, lng: avgLng};
+    }
+
+    let center: LocationType | undefined = undefined;
+    if (!!polygon && Array.isArray(polygon) && polygon.length > 0) {
+        center = calculateCenter(polygon);
+    }
 
     return (
       <FormField type="text">
@@ -32,7 +85,17 @@ const MapField: FC<MapProps> = ({
             className="form-field-map-container"
             id={`map`}
           >
-              {/*<EditorMap fieldName={fieldKey}/>*/}
+              <EditorMap
+                  autoZoomAndCenter="area"
+                  fieldName={fieldKey}
+                  center={center}
+                  area={polygon}
+                  onChange={onChange}
+                  fieldRequired={fieldRequired}
+                  markerIcon={undefined}
+                  centerOnEditorMarker={false}
+                  {...props}
+              />
           </div>
       </FormField>
     );

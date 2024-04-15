@@ -64,7 +64,7 @@ export default function ProjectSettings() {
         ? new Date(data?.config?.project?.endDate)
         : new Date(currentDate.getFullYear(), currentDate.getMonth() + 3),
       cssUrl: data?.config?.project?.cssUrl || '',
-      areaId: data?.areaId || '',
+      areaId: data?.config?.project?.areaId || '',
       url: data?.url || '',
     }
     },
@@ -96,10 +96,10 @@ export default function ProjectSettings() {
           project: {
             endDate: values.endDate,
             cssUrl: values.cssUrl,
+            areaId: values.areaId,
           },
         },
         values.name,
-        values.areaId,
         values.url,
       );
       if (project) {

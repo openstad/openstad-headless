@@ -4,9 +4,9 @@ import type {CombinedFieldPropsWithType} from "./props";
 
 export const handleSubmit = (
     fields: Array<CombinedFieldPropsWithType>,
-    formValues: { [p: string]: string | FileList | [] },
+    formValues: { [p: string]: string | Record<number, never> | [] },
     setFormErrors: React.Dispatch<React.SetStateAction<{ [p: string]: string | null }>>,
-    submitHandler: (values: { [p: string]: string | FileList | []}) => void
+    submitHandler: (values: { [p: string]: string | Record<number, never> | [] }) => void
 ) => {
     const errors: { [key: string]: string | null } = {};
     fields?.forEach((field) => {

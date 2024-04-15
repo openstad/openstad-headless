@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import type {CombinedFieldPropsWithType, ComponentFieldProps, FormProps} from "./props";
 import TextInput from "@openstad-headless/ui/src/form-elements/text";
 import RangeSlider from "@openstad-headless/ui/src/form-elements/a-b-slider";
@@ -12,6 +12,7 @@ import { handleSubmit } from "./submit";
 import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden/index.js";
 import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choice/index.js";
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
+import './form.css'
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -24,12 +25,16 @@ function Form({
       submitDisabled = false,
       secondaryLabel = '',
       secondaryHandler = () => {},
+      ...props
 }: FormProps) {
-    const initialFormValues: { [key: string]: string | FileList | [] } = {};
+    type FormValue = string | Record<number, never> | [];
+
+    const initialFormValues: { [key: string]: FormValue } = {};
     fields.forEach((field) => {
         if (field.fieldKey) {
             //@ts-expect-error
             initialFormValues[field.fieldKey] = typeof field.defaultValue !== 'undefined' ? field.defaultValue : '';
+            initialFormValues[field.fieldKey] = field.type === 'map' ? {} : initialFormValues[field.fieldKey];
         }
     });
 
@@ -42,7 +47,7 @@ function Form({
         handleSubmit(fields as unknown as Array<CombinedFieldPropsWithType>, formValues, setFormErrors, submitHandler);
     };
 
-    const handleInputChange = (event: { name: string, value: string | FileList | []}) => {
+    const handleInputChange = (event: { name: string, value: FormValue}) => {
         const { name, value } = event;
         setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
     };
@@ -60,7 +65,7 @@ function Form({
         imageChoice: ImageChoiceField as React.ComponentType<ComponentFieldProps>,
     };
 
-    const renderField = (field: CombinedFieldPropsWithType, index: number) => {
+    const renderField = (field: ComponentFieldProps, index: number) => {
         if (!field.type) {
             return null;
         }
@@ -71,6 +76,7 @@ function Form({
                     {...field}
                     index={index}
                     onChange={handleInputChange}
+                    {...props}
                 />
             );
         }
@@ -82,8 +88,9 @@ function Form({
                 {title && <h5 className="form-widget-title">{title}</h5>}
 
                 <form className="form-container" noValidate onSubmit={handleFormSubmit}>
-                    {fields.map((field: CombinedFieldPropsWithType, index: number) => (
-                        <div className={`question-type-${field.type}`} key={index}>
+                    {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */}
+                    {fields.map((field: ComponentFieldProps, index: number) => (
+                        <div className={`question question-type-${field.type}`} key={index}>
                             {renderField(field, index)}
                             <FormFieldErrorMessage className="error-message">
                                 {formErrors[field.fieldKey] && <span>{formErrors[field.fieldKey]}</span>}

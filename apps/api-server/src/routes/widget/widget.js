@@ -202,6 +202,7 @@ function getDefaultConfig(project, widgetType) {
       url: logoutUrl,
     },
     projectId: project.id,
+    imageUrl: process.env.IMAGE_APP_URL,
   };
 
   if (widgetType == 'resourcedetailmap' || widgetType ==  'resourcesmap' || widgetType ==  'editormap') {
