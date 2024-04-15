@@ -82,7 +82,7 @@ function ResourceDetail({
   ...props
 }: ResourceDetailWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);
-  let resourceId = props.resourceId || '0';
+  let resourceId = props.resourceId || 0;
 
   if (!resourceId && props.resourceIdRelativePath) {
     const currentUrl = location.pathname;
