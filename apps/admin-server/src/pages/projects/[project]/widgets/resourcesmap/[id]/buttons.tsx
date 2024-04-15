@@ -24,6 +24,7 @@ import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import type {ResourceOverviewMapWidgetProps} from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props'
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import * as z from 'zod';
+import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   ctaButton: z.object({
@@ -78,24 +79,16 @@ export default function WidgetResourcesMapButton(
                 <FormLabel>
                 Toon een &apos;Call To Action&apos; knop
                 </FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                      let val = value == 'true' ? true : false
-                      props.onFieldChanged(field.name, val);
-                      field.onChange(val);
-                      setShowCtaFields(val);
-                    }}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Switch.Root
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                      props.onFieldChanged(field.name, e);
+                      field.onChange(e);
+                      setShowCtaFields(e);
+                  }}
+                  defaultChecked={field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
                 <FormMessage />
               </FormItem>
             )}
@@ -161,24 +154,16 @@ export default function WidgetResourcesMapButton(
                 <FormLabel>
                   Toon aantal resources
                 </FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                      let val = value == 'true' ? true : false
-                      props.onFieldChanged(field.name, val);
-                      field.onChange(val);
-                      setShowCountFields(val);
-                    }}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Switch.Root
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                      props.onFieldChanged(field.name, e);
+                      field.onChange(e);
+                      setShowCountFields(e);
+                  }}
+                  defaultChecked={field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
                 <FormMessage />
               </FormItem>
             )}

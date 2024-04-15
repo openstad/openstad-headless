@@ -17,6 +17,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import InfoDialog from '@/components/ui/info-hover';
+
 
 const formSchema = z.object({
   displayRanking: z.boolean(),
@@ -128,6 +130,7 @@ export default function BegrootmoduleDisplay(
               <FormItem className="col-span-1">
                 <FormLabel>
                   URL waar het resource oorspronkelijk vandaan is gehaald
+                  <InfoDialog content={'TODO'} />
                 </FormLabel>
                 <FormControl>
                   <Input

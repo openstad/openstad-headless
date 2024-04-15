@@ -16,6 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import InfoDialog from '@/components/ui/info-hover';
 
 const formSchema = z.object({
   submitButton: z.string(),
@@ -27,7 +28,7 @@ export default function WidgetResourceFormSubmit() {
   type FormData = z.infer<typeof formSchema>;
   const category = 'submit';
 
-    // TODO should use the passed props widget, this is the old way and is not advised
+  // TODO should use the passed props widget, this is the old way and is not advised
   const {
     data: widget,
     isLoading: isLoadingWidget,
@@ -67,13 +68,17 @@ export default function WidgetResourceFormSubmit() {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-fit grid grid-cols-1 gap-4">
+          className="lg:w-2/3 grid grid-cols-1 gap-4 ">
           <FormField
             control={form.control}
             name="submitButton"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tekst voor de oplever-knop</FormLabel>
+                <FormLabel>
+                  Tekst voor de oplever-knop
+                  <InfoDialog content={'TODO'} />
+
+                </FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -86,7 +91,10 @@ export default function WidgetResourceFormSubmit() {
             name="saveButton"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tekst voor de opslaan-knop</FormLabel>
+                <FormLabel>
+                  Tekst voor de opslaan-knop
+                  <InfoDialog content={'TODO'} />
+                </FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -99,7 +107,10 @@ export default function WidgetResourceFormSubmit() {
             name="saveConceptButton"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{`Tekst voor de 'opslaan als concept'-knop`}</FormLabel>
+                <FormLabel>
+                  {`Tekst voor de 'opslaan als concept'-knop`}
+                  <InfoDialog content={'TODO'} />
+                </FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>

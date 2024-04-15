@@ -119,7 +119,7 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
     dbUser = await db.User.findOne({ where });
 
     if (isFixed) {
-      if (!dbUser.projectId) dbUser.role = 'superuser';
+      if (!dbUser.projectId || dbUser.projectId == config.admin.projectId) dbUser.role = 'superuser'; // !dbUser.projectId is backwards compatibility
       return dbUser;
     }
 

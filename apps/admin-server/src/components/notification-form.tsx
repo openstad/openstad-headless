@@ -35,14 +35,6 @@ type Props = {
   body?: string;
 }
 
-const notificationTypes = {
-    'login email': 'Inloggen via e-mail',
-    'login sms': 'Inloggen via sms',
-    'new published resource - user feedback': 'Nieuwe resource gepubliceerd - Notificatie naar de gebruiker',
-    'updated resource - user feedback': 'Resource bijgewerkt - Notificatie naar de gebruiker',
-    'user account about to expire': 'Gebruikersaccount staat op het punt te verlopen'
-};
-
 const formSchema = z.object({
   engine: z.enum(['email', 'sms']),
   label: z.string().min(1, {
@@ -63,8 +55,7 @@ const formSchema = z.object({
 export function NotificationForm({ type, engine, id, label, subject, body }: Props) {
   const router = useRouter();
   const project = router.query.project as string;
-  const { data, create, update } = useNotificationTemplate(project as string);
-  const notificationTitle = notificationTypes[type];
+  const { data, create, update } = useNotificationTemplate(project as string)
 
   const defaults = React.useCallback(
     () => ({
@@ -105,9 +96,9 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
 
   return (
     <div>
-      <div className="container px-0 py-6">
-        <Form {...form} className="px-0 py-6 bg-white rounded-md">
-          <Heading size="xl">{notificationTitle}</Heading>
+      <div className="container py-6">
+        <Form {...form} className="p-6 bg-white rounded-md">
+          <Heading size="xl">{type}</Heading>
           <Separator className="my-4" />
           <form
             onSubmit={form.handleSubmit(onSubmit)}

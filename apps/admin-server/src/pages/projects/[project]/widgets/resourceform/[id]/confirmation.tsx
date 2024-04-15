@@ -1,19 +1,11 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
@@ -21,6 +13,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   confirmationUser: z.boolean(),
@@ -70,7 +63,7 @@ export default function WidgetResourceFormConfirmation() {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-fit grid grid-cols-1 gap-4">
+          className="lg:w-2/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="confirmationUser"
@@ -80,19 +73,14 @@ export default function WidgetResourceFormConfirmation() {
                   Krijgt de gebruiker een bevestiging voordat het opgeleverd
                   wordt?
                 </FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Nee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Switch.Root
+                      className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                      onCheckedChange={(e: boolean) => {
+                        field.onChange(e);
+                      }}
+                      defaultChecked={field.value}>
+                      <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                    </Switch.Root>
                 <FormMessage />
               </FormItem>
             )}
@@ -106,19 +94,14 @@ export default function WidgetResourceFormConfirmation() {
                   Krijgt een administrator een bevestiging voordat het
                   opgeleverd wordt?
                 </FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Nee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Switch.Root
+                      className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                      onCheckedChange={(e: boolean) => {
+                        field.onChange(e);
+                      }}
+                      defaultChecked={field.value}>
+                      <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                    </Switch.Root>
                 <FormMessage />
               </FormItem>
             )}

@@ -102,7 +102,7 @@ export default function CreateProject() {
             <Separator className="my-4" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
+              className="lg:w-2/3 grid grid-cols-1 lg:grid-cols-1 gap-x-4 gap-y-8">
               <FormField
                 control={form.control}
                 name="projectName"
@@ -116,7 +116,7 @@ export default function CreateProject() {
                   </FormItem>
                 )}
               />
-              <Button variant="default" type="submit" className="w-fit mt-4">
+              <Button variant="default" type="submit" className="w-fit">
                 Opslaan
               </Button>
             </form>
@@ -128,7 +128,7 @@ export default function CreateProject() {
             <Separator className="mb-4" />
             <form
               onSubmit={importForm.handleSubmit(onImport)}
-              className="lg:w-1/2 grid grid-cols-2 gap-4">
+              className="lg:w-2/3 grid grid-cols-1 gap-x-4 gap-y-8">
               <FormField
                 control={importForm.control}
                 name="importedProjectName"
@@ -143,7 +143,7 @@ export default function CreateProject() {
                 )}
               />
               <Input type="file" onChange={handleChange} />
-              <Button variant="default" type="submit" className="w-fit mt-4">
+              <Button variant="default" type="submit" className="w-fit">
                 Importeren
               </Button>
             </form>

@@ -214,8 +214,9 @@ exports.saveRoles = (req, res, next) => {
         }
 
         if (roleId){
-          let parsedClientId = parseInt(clientId.replace('\'', ''), 10);
-          if ( !( parsedClientId && Number.isInteger(parsedClientId)  )) {
+          clientId = clientId.replace('\'', '')
+          let parsedClientId = parseInt(clientId, 10);
+          if ( !( parsedClientId && clientId == parsedClientId && Number.isInteger(parsedClientId))) {
             let found = req.clients.find(availableClient => availableClient.clientId == clientId);
             parsedClientId = found && found.id;
           }

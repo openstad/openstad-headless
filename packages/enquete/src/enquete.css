@@ -14,6 +14,13 @@
   gap: 1rem;
 }
 
+.form-container .utrecht-form-field .utrecht-form-field-description:empty{
+  margin: 0;
+}
+.form-container .utrecht-form-field-error-message.error-message:empty{
+  display: none;
+}
+
 .form-container > div:nth-child(even){
   background-color: var(--osc-card);
 }

@@ -2,16 +2,6 @@ module.exports = async function seed(config, db) {
 
   try {
 
-    console.log('  creating initial user - add this user to config fixed tokens');
-    try {
-      await db.User.create({
-        role: 'admin',
-        name: 'Initial super user',
-      });
-    } catch(err) {
-      console.log(err);
-    }
-
     console.log('  creating default project');
     let project = await db.Project.create({
       id: 1,
@@ -38,6 +28,17 @@ module.exports = async function seed(config, db) {
         },
       },
     });
+
+    console.log('  creating initial user - add this user to config fixed tokens');
+    try {
+      await db.User.create({
+        projectId: 1,
+        role: 'admin',
+        name: 'Initial super user',
+      });
+    } catch(err) {
+      console.log(err);
+    }
 
     // map polygons
     console.log('  creating map polygons');
