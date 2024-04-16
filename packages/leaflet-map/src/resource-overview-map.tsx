@@ -81,9 +81,9 @@ const ResourceOverviewMap = ({
       return marker;
     }) || [];
 
-  let buttons:React.JSX.Element[] = [];
+  let countButtonElement:React.JSX.Element|null = null;
   if (countButton?.show) {
-    let countbutton = (
+    countButtonElement = (
       <Button
         appearance="primary-action-button"
         className={`osc-resource-overview-map-button osc-first-button`}>
@@ -95,10 +95,11 @@ const ResourceOverviewMap = ({
         </section>
       </Button>
     );
-    buttons.push(countbutton);
   }
+
+  let ctaButtonElement:React.JSX.Element|null = null;
   if (ctaButton?.show) {
-    let countbutton = (
+    ctaButtonElement = (
       <Button
         appearance="primary-action-button"
         onClick={(e) => {
@@ -107,12 +108,11 @@ const ResourceOverviewMap = ({
           }
         }}
         className={`osc-resource-overview-map-button ${
-          buttons.length ? 'osc-second-button' : 'osc-first-button'
+          countButtonElement ? 'osc-second-button' : 'osc-first-button'
         }`}>
         <section className="resource-label">{ctaButton.label}</section>
       </Button>
     );
-    buttons.push(countbutton);
   }
 
   return (
@@ -121,7 +121,8 @@ const ResourceOverviewMap = ({
         {...props}
         categorize={{ categories, categorizeByField }}
         markers={currentMarkers}>
-        {/* {buttons} */}
+        {ctaButtonElement}
+        {countButtonElement}
       </BaseMap>
     </>
   );

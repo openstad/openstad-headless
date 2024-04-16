@@ -303,6 +303,31 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             }}
           />
 
+            <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeeldingen</label>
+                <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
+                    {imageFields.map(({ id, url }, index) => {
+                        return (
+                            <div key={id} style={{ position: 'relative' }}>
+                                <img src={url} alt={url} />
+                                <Button
+                                    color="red"
+                                    onClick={() => {
+                                        removeImage(index);
+                                    }}
+                                    style={{
+                                        position: 'absolute',
+                                        right: 0,
+                                        top: 0,
+                                    }}>
+                                    <X size={24} />
+                                </Button>
+                            </div>
+                        );
+                    })}
+                </section>
+             </div>
+
           <FormField
             control={form.control}
             name="budget"
@@ -513,29 +538,6 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               );
             }}
           />
-
-          <section className="grid col-span-full grid-cols-3 gap-4 ">
-            {imageFields.map(({ id, url }, index) => {
-              return (
-                <div key={id} style={{ position: 'relative' }}>
-                  <img src={url} alt={url} />
-                  <Button
-                    color="red"
-                    onClick={() => {
-                      removeImage(index);
-                    }}
-                    style={{
-                      position: 'absolute',
-                      right: 0,
-                      top: 0,
-                    }}>
-                    <X size={24} />
-                  </Button>
-                </div>
-              );
-            })}
-          </section>
-
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>
