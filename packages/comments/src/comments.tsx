@@ -7,7 +7,7 @@ import Comment from './parts/comment.js';
 import CommentForm from './parts/comment-form.js';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
-
+import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import { Paragraph, Heading4 } from '@utrecht/component-library-react';
@@ -17,6 +17,7 @@ import { CommentFormProps } from './types/comment-form-props';
 export type CommentsWidgetProps = BaseProps &
   ProjectSettingProps & {
     resourceId: string;
+    resourceIdRelativePath?: string;
     requiredUserRole?: string;
     userNameFields?: Array<string>;
     title?: string;
@@ -45,8 +46,12 @@ function Comments({
   isClosedText = 'Het inzenden van reacties is niet langer mogelijk',
   ...props
 }: CommentsWidgetProps) {
-  const urlParams = new URLSearchParams(window.location.search);
-  const resourceId = urlParams.get('openstadResourceId') || props.resourceId;
+
+  let resourceId = String(getResourceId({
+    resourceId: parseInt(props.resourceId || ''),
+    url: document.location.href,
+    targetUrl: props.resourceIdRelativePath,
+  })); // todo: make it a number throughout the code
 
   const args = {
     requiredUserRole,

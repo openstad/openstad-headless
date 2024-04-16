@@ -2,6 +2,7 @@ import './resource-detail.css';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import {
   Carousel,
   Image,
@@ -81,35 +82,12 @@ function ResourceDetail({
   displaySocials = true,
   ...props
 }: ResourceDetailWidgetProps) {
-  const urlParams = new URLSearchParams(window.location.search);
-  let resourceId = props.resourceId || '0';
 
-  if (!resourceId && props.resourceIdRelativePath) {
-    const currentUrl = location.pathname;
-    const currentUrlSegments = currentUrl.split('/');
-
-    const relativePathSegments = (
-      props.resourceIdRelativePath.startsWith('/')
-        ? props.resourceIdRelativePath
-        : `/${props.resourceIdRelativePath}`
-    ).split('/');
-    const indexContainingSegment = relativePathSegments.findIndex((segment) =>
-      segment.includes('[id]')
-    );
-
-    if (
-      indexContainingSegment > -1 &&
-      currentUrlSegments.at(indexContainingSegment)?.match(/^\d+$/)
-    ) {
-      resourceId = currentUrlSegments[indexContainingSegment];
-    }
-  } else if (!resourceId) {
-    resourceId = `${
-      urlParams.get('openstadResourceId')
-        ? `${parseInt(urlParams.get('openstadResourceId') as string)}`
-        : '0'
-    }`;
-  }
+  let resourceId: string|undefined = String(getResourceId({
+    resourceId: parseInt(props.resourceId || ''),
+    url: document.location.href,
+    targetUrl: props.resourceIdRelativePath,
+  })); // todo: make it a number throughout the code
 
   const datastore = new DataStore({
     projectId: props.projectId,
