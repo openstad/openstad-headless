@@ -2,7 +2,7 @@ import { PageLayout } from '../../../../components/ui/page-layout';
 import { Button } from '../../../../components/ui/button';
 import Link from 'next/link';
 import { ChevronRight, Plus } from 'lucide-react';
-import React, { use, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import useResources from '@/hooks/use-resources';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
@@ -13,9 +13,6 @@ export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
   const { data, error, isLoading, remove } = useResources(project as string);
-  const [filterData, setFilterData] = useState(data);
-
-  if (!data) return null;
 
   const exportData = (data: BlobPart, fileName: string, type: string) => {
     // Create a link and download the file
@@ -33,15 +30,22 @@ export default function ProjectResources() {
     exportData(jsonData, `resources.json`, "application/json");
   }
 
+  const [filterData, setFilterData] = useState<any[]>([]);
+
+  useEffect(() => {
+    setFilterData(data);
+  }, [data])
+
+  if (!data) return null;
+
   const sortFunctions = {
     'date-added': (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     'id': (a: any, b: any) => b.id - a.id,
-    'resource': (a: any, b: any) => b.title.toLowerCase().localeCompare(a.title.toLowerCase()),
+    'resource': (a: any, b: any) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()),
     'voted-yes': (a: any, b: any) => b.resource?.yes || 0 - a.resource?.yes || 0,
     'voted-no': (a: any, b: any) => b.resource?.no || 0 - a.resource?.no || 0,
   };
 
-console.log(filterData)
 
   const sortTable = (sortType: string, el: MouseEvent<HTMLElement>) => {
     const sortFunction = sortFunctions[sortType as keyof typeof sortFunctions];
@@ -111,7 +115,7 @@ console.log(filterData)
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-              <button className="filter-button" onClick={(e) => sortTable('voted-yes', e)}>
+                <button className="filter-button" onClick={(e) => sortTable('voted-yes', e)}>
                   Gestemd op ja
                 </button>
               </ListHeading>
