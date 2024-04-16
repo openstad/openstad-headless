@@ -11,6 +11,7 @@ import {
 import { ProgressBar } from '@openstad-headless/ui/src';
 import { SessionStorage } from '@openstad-headless/lib/session-storage';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { hasRole } from '@openstad-headless/lib';
 import DataStore from '@openstad-headless/data-store/src';
 import React, { useState, useEffect } from 'react';
@@ -21,6 +22,7 @@ export type LikeWidgetProps = BaseProps &
   LikeProps &
   ProjectSettingProps & {
     resourceId?: string;
+    resourceIdRelativePath?: string;
   };
 
 export type LikeProps = {
@@ -42,9 +44,13 @@ function Likes({
   showProgressBar = true,
   ...props
 }: LikeWidgetProps) {
-  const urlParams = new URLSearchParams(window.location.search);
-  const resourceId =
-    urlParams.get('openstadResourceId') || props.resourceId || '';
+
+  let resourceId = String(getResourceId({
+    resourceId: parseInt(props.resourceId || ''),
+    url: document.location.href,
+    targetUrl: props.resourceIdRelativePath,
+  })); // todo: make it a number throughout the code
+
   const necessaryVotes = props.resources?.minimumYesVotes || 50;
 
   // Pass explicitely because datastore is not ts, we will not get a hint if the props have changed
