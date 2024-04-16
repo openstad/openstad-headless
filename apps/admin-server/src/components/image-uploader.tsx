@@ -15,6 +15,7 @@ export const ImageUploader: React.FC<{
   onImageUploaded?: (imageObject: {url: string} ) => void;
 }> = ({ form, fieldName, onImageUploaded }) => {
   const [file, setFile] = React.useState<{url: string}>();
+  const [fileUrl, setFileUrl] = React.useState<string>('');
 
   function prepareFile(image: any) {
     const formData = new FormData();
@@ -41,9 +42,10 @@ export const ImageUploader: React.FC<{
   }
 
   useEffect(() => {
-    if (file) {
-      form.setValue(fieldName, file.url);
-      onImageUploaded && onImageUploaded(file);
+    if (file && fileUrl !== file.url ) {
+        setFileUrl(file.url);
+        form.setValue(fieldName, file.url);
+        onImageUploaded && onImageUploaded(file);
     }
   }, [file, form, fieldName, onImageUploaded]);
 
