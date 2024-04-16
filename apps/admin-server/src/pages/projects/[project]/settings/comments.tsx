@@ -12,7 +12,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
@@ -25,26 +24,12 @@ import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   canComment: z.boolean().optional(),
-  defaultSentiments: z.string().optional(),
   closedText: z.string().optional(),
   canReply: z.boolean().optional(),
   canLike: z.boolean().optional(),
   descriptionMinLength: z.number().optional(),
   descriptionMaxLength: z.number().optional(),
 });
-
-const sentiments = [
-  {
-    id: 'for and against',
-    label: 'Laat de reacties voor en tegen zien.',
-    value: '["for","against"]',
-  },
-  {
-    id: 'no sentiment',
-    label: 'Laat de reacties zonder sentiment zien.',
-    value: '["no sentiment"]',
-  },
-];
 
 export default function ProjectSettingsComments() {
 
@@ -57,7 +42,6 @@ export default function ProjectSettingsComments() {
   const defaults = useCallback(
     () => ({
         canComment: data?.config?.comments?.canComment,
-        defaultSentiments: JSON.stringify(data?.config?.comments?.defaultSentiments || []),
         closedText: data?.config?.comments?.closedText,
         canReply: data?.config?.comments?.canReply,
         canLike: data?.config?.comments?.canLike,
@@ -82,7 +66,6 @@ export default function ProjectSettingsComments() {
       const project = await updateProject({
         comments: {
           canComment: values.canComment,
-          defaultSentiments: JSON.parse(values.defaultSentiments||''),
           closedText: values.closedText,
           canReply: values.canReply,
           canLike: values.canLike,
@@ -151,17 +134,6 @@ export default function ProjectSettingsComments() {
 
               {showCommentSettings ? (
                 <>
-
-                  <FormObjectSelectField
-                    form={form}
-                    fieldName="defaultSentiments"
-                    fieldLabel="Wat is het gewenste type reacties"
-                    fieldInfo="Wil je reacties voor en tegen, of maar één type reacties. Dit wordt ook toegepast in de resource-detail widget."
-                    items={sentiments}
-                    keyForValue="value"
-                    label={(option: any) => `${option.label}`}
-                    noSelection="&nbsp;"
-                  />
 
                   <FormField
                     control={form.control}
@@ -241,7 +213,7 @@ export default function ProjectSettingsComments() {
                   name="closedText"
                   render={({ field }) => (
                     <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                      <FormLabel>Tekst 'U kunt nu niet reageren'</FormLabel>
+                      <FormLabel>Tekst &apos;U kunt nu niet reageren&apos;</FormLabel>
                       <FormControl>
                         <Input placeholder="typ een tekst" {...field} />
                       </FormControl>

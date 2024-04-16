@@ -174,10 +174,6 @@ module.exports = {
         type: 'boolean',
         default: true,
       },
-      defaultSentiments: {
-        type: 'arrayOfStrings',
-        default: ['for', 'against'],
-      },
       requiredUserRole: {
         type: 'string',
         default: 'member',
