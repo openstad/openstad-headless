@@ -127,8 +127,6 @@ export default function ResourceForm({ onFormSubmit }: Props) {
 
   loadedTags = loadedTags
     .sort((a, b) => {
-      if (a.type < b.type) return -1;
-      if (a.type > b.type) return 1;
       const aType = a.type ?? '';
       const bType = b.type ?? '';
 
