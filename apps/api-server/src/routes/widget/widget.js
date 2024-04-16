@@ -287,9 +287,12 @@ function getWidgetJavascriptOutput(
     (function () {
       try {
         let process = { env: { NODE_ENV: 'production' } };
-
+        
+        const randomComponentId = '${componentId}-' + Math.floor(Math.random() * 1000000);
+        const renderedWidgets = {};
+        
         const currentScript = document.currentScript;
-          currentScript.insertAdjacentHTML('afterend', \`<div id="${componentId}" style="width: 100%; height: 100%;"></div>\`);
+          currentScript.insertAdjacentHTML('afterend', \`<div id="\${randomComponentId}" style="width: 100%; height: 100%;"></div>\`);
 
           const redirectUri = encodeURI(window.location.href);
           const config = JSON.parse(\`${widgetConfig}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
@@ -301,8 +304,16 @@ function getWidgetJavascriptOutput(
           \`;
           
           function renderWidget () {
+            
+            // Check if widget has already been rendered
+            if (renderedWidgets[randomComponentId]) {
+              return;
+            }
+            
+            renderedWidgets[randomComponentId] = true;
+            
             ${widgetOutput}
-            ${widgetSettings.functionName}.${widgetSettings.componentName}.loadWidget('${componentId}', config);
+            ${widgetSettings.functionName}.${widgetSettings.componentName}.loadWidget(randomComponentId, config);
           }
           
           ${reactCheck}
