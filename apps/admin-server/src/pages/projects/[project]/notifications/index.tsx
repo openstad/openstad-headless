@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import useNotificationTemplate from '@/hooks/use-notification-template'
 import { NotificationForm } from '@/components/notification-form';
 import { Separator } from '@/components/ui/separator';
+import AccordionUI from "@/components/ui/accordion";
 
 export default function ProjectNotifications() {
   type NotificationType = 'login email' | 'login sms' | 'new published resource - user feedback' | 'updated resource - user feedback' | 'user account about to expire';
@@ -56,9 +57,10 @@ export default function ProjectNotifications() {
             url: `/projects/${project}/notifications`,
           },
         ]}>
-        <div className="container py-6">
+        <div className="container py-10">
           <div className='p-6 bg-white rounded-md'>
             <div className="space-y-4 lg:w-1/2">
+              <h2 className="font-futura font-bold tracking-tight text-2xl">Stel de notificatie e-mails in</h2>
               <p>
                 De mails die worden gebruikt zijn volledig opgezet met behulp van MJML.
                 Hieronder geven we een link naar de documentatie van MJML,
@@ -69,6 +71,11 @@ export default function ProjectNotifications() {
                 <a href="https://documentation.mjml.io" className='text-blue-600'>MJML documentatie</a>
               </p>
               <br />
+
+              <AccordionUI items={[
+                {
+                  header: 'Meer uitleg over MJML',
+                  content:(<>
               <code>{mjmlText}</code>
               <br />
               <br />
@@ -113,26 +120,28 @@ export default function ProjectNotifications() {
                 -status<br />
                 -submittedData
               </p>
-            </div>
+
             <br />
-
-            {Object.entries(typeDefinitions).map(([type, templateList]) => {
-
-              if(templateList.length === 0) {
-                return <div key={type}>
-                <Separator />
-                <NotificationForm type={type as NotificationType} />
-              </div>
+                </>)
               }
-              return <>
-                {templateList.map(template => {
-                  return <div key={template.id}>
-                  <Separator />
-                  <NotificationForm type={template.type} engine={template.engine} id={template.id} label={template.label} subject={template.subject} body={template.body} />
-                </div>
-                })}
-              </>
-            })}
+                ]} />
+            </div>
+
+              {Object.entries(typeDefinitions).map(([type, templateList], index) => (
+                  <>
+                    {templateList.length === 0 && (
+                        <div key={type}>
+                          <NotificationForm type={type as NotificationType} />
+                          {index !== Object.entries(typeDefinitions).length - 1 && <Separator />}
+                        </div>
+                    )}
+                    {templateList.map((template) => (
+                        <div key={template.id}>
+                          <NotificationForm type={template.type} engine={template.engine} id={template.id} label={template.label} subject={template.subject} body={template.body} />
+                        </div>
+                    ))}
+                  </>
+              ))}
           </div>
         </div>
       </PageLayout>

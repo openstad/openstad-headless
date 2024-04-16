@@ -6,6 +6,7 @@ import useVotes from '@/hooks/use-votes';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
+import useUsers from "@/hooks/use-users";
 
 export default function ProjectResources() {
   const router = useRouter();
@@ -27,6 +28,8 @@ export default function ProjectResources() {
     const jsonData = JSON.stringify(data);
     exportData(jsonData, `votes.json`, "application/json");
   }
+
+  const { data: usersData } = useUsers();
 
   return (
     <div>
@@ -73,6 +76,15 @@ export default function ProjectResources() {
             </div>
             <ul>
               {data?.map((vote: any) => {
+                const userId = vote.userId;
+                const currentUser = !!usersData && Array.isArray(usersData) ? usersData?.filter((user) => {
+                  if (user.id === userId) {
+                    return user;
+                  }
+                }) : [];
+                const user = currentUser.length > 0 ? currentUser[0] : '';
+                const currentUserKey = !!user && user.idpUser?.identifier && user.idpUser?.provider ? `${user.idpUser.provider}-*-${user.idpUser.identifier}` : ( user.id?.toString() || 'unknown' );
+
                 return (
                   <li
                     key={vote.id}
@@ -84,10 +96,10 @@ export default function ProjectResources() {
                       {vote.createdAt}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate lg:col-span-1">
-                      {vote.resourceId}
+                      <a href={`/projects/${project}/resources/${vote.resourceId}`} style={{textDecoration: 'underline'}}>{vote.resourceId}</a>
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate lg:col-span-1">
-                      {vote.userId}
+                      <a href={`/users/${btoa(currentUserKey)}`} style={{textDecoration: 'underline'}}>{vote.userId}</a>
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate lg:col-span-1">
                       {vote.ip}

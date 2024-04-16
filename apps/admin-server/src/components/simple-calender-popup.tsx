@@ -6,6 +6,7 @@ import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 import { Button } from './ui/button';
 import {
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -13,6 +14,7 @@ import {
 } from './ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import InfoDialog from '@/components/ui/info-hover';
+import React from "react";
 
 // Would like to use a generic solution <T> to enable hinting in the using file
 // Now to remove the errors UseFormReturn<any> has to be used
@@ -24,7 +26,7 @@ export const SimpleCalendar: React.FC<{
   placeholder?: string;
   withReset?: boolean;
   allowPast?: boolean;
-}> = ({ form, fieldName, label, placeholder, withReset, allowPast, fieldInfo }) => {
+}> = ({ form, fieldName, label, placeholder, withReset, allowPast, fieldInfo, description }) => {
   return (
     <FormField
       control={form.control}
@@ -35,6 +37,9 @@ export const SimpleCalendar: React.FC<{
             {label}
             {fieldInfo && <InfoDialog content={fieldInfo} />}
             </FormLabel>
+          {description && (
+              <FormDescription>{description}</FormDescription>
+          )}
           <div className="flex flex-row gap-2">
             <Popover>
               <PopoverTrigger asChild>

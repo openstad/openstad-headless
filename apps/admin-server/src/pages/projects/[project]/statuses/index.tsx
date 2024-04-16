@@ -41,7 +41,7 @@ export default function ProjectStatuses() {
         }>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
-            <div className="grid grid-cols-1 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
+            <div className="grid grid-cols-1 lg:grid-cols-6 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex truncate">ID</ListHeading>
               <ListHeading className="flex truncate">Naam</ListHeading>
               <ListHeading className="hidden lg:flex truncate">

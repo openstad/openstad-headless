@@ -21,6 +21,7 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Spacer } from "@/components/ui/spacer";
 
 const requiredUserFields = [
   {
@@ -59,6 +60,7 @@ const requiredUserFields = [
 
 const formSchema = z.object({
   requiredUserFields: z.string().array().default([]),
+  requiredUserFieldsLabels: z.record(z.string()).default({}),
   title: z.string().optional(),
   description: z.string().optional(),
   buttonText: z.string().optional(),
@@ -72,9 +74,15 @@ export default function ProjectAuthenticationRequiredFields() {
     updateProject,
   } = useProject(['includeAuthConfig']);
 
+  const defaultLabels = requiredUserFields.reduce((acc: Record<string, string>, field) => {
+    acc[field.id] = '';
+    return acc;
+  }, {});
+
   const defaults = useCallback(
     () => ({
       requiredUserFields: data?.config?.auth?.provider?.openstad?.requiredUserFields || [],
+      requiredUserFieldsLabels: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.requiredUserFieldsLabels || defaultLabels,
       title: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.title || '',
       description: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.description || '',
       buttonText: data?.config?.auth?.provider?.openstad?.config?.requiredFields?.buttonText || '',
@@ -105,6 +113,7 @@ export default function ProjectAuthenticationRequiredFields() {
                   description: values.description,
                   buttonText: values.buttonText,
                   info: values.info,
+                  requiredUserFieldsLabels: values.requiredUserFieldsLabels,
                 }
               },
             }
@@ -204,6 +213,46 @@ export default function ProjectAuthenticationRequiredFields() {
                   </FormItem>
                 )}
               />
+
+              {showPageFields ? (
+                  <>
+                    <Spacer size={2} />
+                    <div>
+                      <FormLabel>
+                        Standaard staat de titel van de bovenstaande geselecteerde verplichte velden als de titel boven het invulveld. Hier kun je dit per verplicht veld aanpassen.
+                      </FormLabel>
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {requiredUserFields.map((item) => {
+                        const fieldValue = form.getValues('requiredUserFieldsLabels')[item.id] ?? '';
+                        return form.watch('requiredUserFields').includes(item.id) ? (
+                            <FormField
+                                key={item.id}
+                                control={form.control}
+                                name={`requiredUserFieldsLabels.${item.id}`}
+                                render={({field}) => (
+                                    <FormItem>
+                                      <FormLabel>{item.label}</FormLabel>
+                                      <FormControl>
+                                        <Input
+                                            placeholder={item.label}
+                                            defaultValue={fieldValue}
+                                            onChange={(e) => {
+                                              field.onChange(e);
+                                            }}
+                                        />
+
+                                      </FormControl>
+                                      <FormMessage/>
+                                    </FormItem>
+                                )}
+                            />
+                        ) : null
+                      })}
+                    </div>
+                    <Spacer size={5} />
+                  </>
+              ) : null}
 
               {showPageFields ? (
               <>
