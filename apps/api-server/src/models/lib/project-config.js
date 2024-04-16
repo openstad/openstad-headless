@@ -170,38 +170,38 @@ module.exports = {
   comments: {
     type: 'object',
     subset: {
-      new: {
-        type: 'object',
-        subset: {
-          anonymous: {
-            type: 'object',
-            subset: {
-              redirect: {
-                type: 'string',
-                default: null,
-              },
-              notAllowedMessage: {
-                type: 'string',
-                default: null,
-              }
-            }
-          },
-          showFields: {
-            type: 'arrayOfStrings', // eh...
-            default: ['zipCode', 'displayName'],
-          }
-        }
-      },
-      isClosed: {
+      canComment: {
         type: 'boolean',
-        default: false,
+        default: true,
       },
-
+      defaultSentiments: {
+        type: 'arrayOfStrings',
+        default: ['for', 'against'],
+      },
+      requiredUserRole: {
+        type: 'string',
+        default: 'member',
+      },
       closedText: {
         type: 'string',
         default: 'De reactiemogelijkheid is gesloten, u kunt niet meer reageren',
       },
-
+      canReply: {
+        type: 'boolean',
+        default: true,
+      },
+      canLike: {
+        type: 'boolean',
+        default: true,
+      },
+      descriptionMinLength: {
+        type: 'number',
+        default: 30,
+      },
+      descriptionMaxLength: {
+        type: 'number',
+        default: 500,
+      },
     }
   },
 
