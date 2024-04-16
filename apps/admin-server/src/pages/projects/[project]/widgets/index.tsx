@@ -32,7 +32,7 @@ export default function ProjectWidgets() {
     'type': (a: any, b: any) => b.type.toLowerCase().localeCompare(a.type.toLowerCase()),
   };
 
-  const sortTable = (sortType: string, el: MouseEvent<HTMLElement>) => {
+  const sortTable = (sortType: string, el: React.MouseEvent<HTMLElement, MouseEvent>) => {
     const sortFunction = sortFunctions[sortType as keyof typeof sortFunctions];
     if (!sortFunction) {
       console.error(`Invalid sortType: ${sortType}`);

@@ -32,7 +32,7 @@ export default function ProjectTags() {
   };
 
 
-  const sortTable = (sortType: string, el: MouseEvent<HTMLElement>) => {
+  const sortTable = (sortType: string, el: React.MouseEvent<HTMLElement, MouseEvent>) => {
     const sortFunction = sortFunctions[sortType as keyof typeof sortFunctions];
     if (!sortFunction) {
       console.error(`Invalid sortType: ${sortType}`);
