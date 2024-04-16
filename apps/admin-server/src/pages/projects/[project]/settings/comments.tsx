@@ -212,7 +212,7 @@ export default function ProjectSettingsComments() {
                       <FormItem className="col-span-full md:col-span-1 flex flex-col">
                         <FormLabel>Minimaal aantal karakters</FormLabel>
                         <FormControl>
-                          <Input placeholder="typ een tekst" {...field} />
+                          <Input type="number" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -226,7 +226,7 @@ export default function ProjectSettingsComments() {
                       <FormItem className="col-span-full md:col-span-1 flex flex-col">
                         <FormLabel>Maximaal aantal karakters</FormLabel>
                         <FormControl>
-                          <Input placeholder="typ een tekst" {...field} />
+                          <Input type="number" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
