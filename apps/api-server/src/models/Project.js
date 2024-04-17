@@ -120,14 +120,14 @@ module.exports = function (db, sequelize, DataTypes) {
             if (instance.config.project.projectHasEnded) {
               config.votes.isActive = false;
               config.resources.canAddNewResources = false;
-              config.comments.isClosed = true;
+              config.comments.canComment = false;
               config.polls.canAddPolls = false;
               config.users.canCreateNewUsers = false;
             } else {
               // commented: do not update these params on unsetting
               // config.votes.isActive = true;
               // config.resources.canAddNewResources = true;
-              // config.comments.isClosed = false;
+              // config.comments.canComment = false;
               // config.polls.canAddPolls = true;
               // config.users.canCreateNewUsers = true;
             }

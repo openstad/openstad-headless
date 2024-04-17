@@ -78,7 +78,7 @@ export default function WidgetResourceFormConfirmation() {
                       onCheckedChange={(e: boolean) => {
                         field.onChange(e);
                       }}
-                      defaultChecked={field.value}>
+                      checked={field.value}>
                       <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
                     </Switch.Root>
                 <FormMessage />
@@ -99,7 +99,7 @@ export default function WidgetResourceFormConfirmation() {
                       onCheckedChange={(e: boolean) => {
                         field.onChange(e);
                       }}
-                      defaultChecked={field.value}>
+                      checked={field.value}>
                       <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
                     </Switch.Root>
                 <FormMessage />

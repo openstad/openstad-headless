@@ -1,13 +1,14 @@
-import { PageLayout} from '@/components/ui/page-layout'
+import { PageLayout } from '@/components/ui/page-layout'
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ChevronRight, Plus } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useStatuses from '@/hooks/use-statuses';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import toast from 'react-hot-toast';
+import { sortTable } from '@/components/ui/sortTable';
 
 export default function ProjectStatuses() {
   const router = useRouter();
@@ -15,7 +16,13 @@ export default function ProjectStatuses() {
 
   const { data, isLoading, removeStatus } = useStatuses(project as string);
 
-  if(!data) return null;
+  const [filterData, setFilterData] = useState(data);
+
+  useEffect(() => {
+    setFilterData(data);
+  }, [data])
+
+  if (!data) return null;
 
   return (
     <div>
@@ -41,22 +48,26 @@ export default function ProjectStatuses() {
         }>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
-            <div className="grid grid-cols-1 lg:grid-cols-6 items-center py-2 px-2 border-b border-border">
-              <ListHeading className="hidden lg:flex truncate">ID</ListHeading>
-              <ListHeading className="flex truncate">Naam</ListHeading>
+            <div className="grid grid-cols-1 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex truncate">
-                Type
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
+                  ID
+                </button>
+              </ListHeading>
+              <ListHeading className="flex truncate">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('name', e, filterData))}>
+                  Naam
+                </button>
               </ListHeading>
             </div>
             <ul>
-              {data?.map((status: any) => (
+              {filterData?.map((status: any) => (
                 <Link
-                href={`/projects/${project}/statuses/${status.id}`}
-                key={status.id}>
-                  <li key={status.id} className="grid grid-cols-2 lg:grid-cols-6 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                  href={`/projects/${project}/statuses/${status.id}`}
+                  key={status.id}>
+                  <li key={status.id} className="grid grid-cols-2 lg:grid-cols-4 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                     <Paragraph className="my-auto -mr-16 lg:mr-0">{status.id || null}</Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">{status.name || null}</Paragraph>
-                    <Paragraph className="hidden lg:flex truncate my-auto">{status.type}</Paragraph>
                     <div
                       className="hidden lg:flex ml-auto"
                       onClick={(e) => e.preventDefault()}>
@@ -82,7 +93,7 @@ export default function ProjectStatuses() {
                     </Paragraph>
                   </li>
                 </Link>
-              ))}  
+              ))}
             </ul>
           </div>
         </div>

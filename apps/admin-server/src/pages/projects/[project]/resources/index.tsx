@@ -2,19 +2,18 @@ import { PageLayout } from '../../../../components/ui/page-layout';
 import { Button } from '../../../../components/ui/button';
 import Link from 'next/link';
 import { ChevronRight, Plus } from 'lucide-react';
-import React from 'react';
+import React, { use, useEffect, useState } from 'react';
 import useResources from '@/hooks/use-resources';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { toast } from 'react-hot-toast';
+import { sortTable } from '@/components/ui/sortTable';
 
 export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
   const { data, error, isLoading, remove } = useResources(project as string);
-
-  if (!data) return null;
 
   const exportData = (data: BlobPart, fileName: string, type: string) => {
     // Create a link and download the file
@@ -31,6 +30,14 @@ export default function ProjectResources() {
     const jsonData = JSON.stringify(data);
     exportData(jsonData, `resources.json`, "application/json");
   }
+
+  const [filterData, setFilterData] = useState(data);
+
+  useEffect(() => {
+    setFilterData(data);
+  }, [data])
+
+  if (!data) return null;
 
   return (
     <div>
@@ -61,24 +68,37 @@ export default function ProjectResources() {
           </div>
         }>
         <div className="container py-6">
-          <div className="p-7 bg-white rounded-md">
+          <div className="p-6 bg-white rounded-md">
             <div className="grid grid-cols-2 lg:grid-cols-7 items-center py-2 px-2 border-b border-border">
-              <ListHeading className="hidden lg:flex">Resource ID</ListHeading>
-              <ListHeading className="hidden lg:flex">ID</ListHeading>
-              <ListHeading className="hidden lg:flex">Resources</ListHeading>
-              <ListHeading className="hidden lg:flex lg:col-span-1">
-                Gestemd op ja
+              <ListHeading className="hidden lg:flex">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
+                  ID
+                </button>
+              </ListHeading>
+              <ListHeading className="hidden lg:flex">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('resource', e, filterData))}>
+                  Resources
+                </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                Gestemd op nee
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('voted-yes', e, filterData))}>
+                  Gestemd op ja
+                </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                Datum aangemaakt
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('voted-no', e, filterData))}>
+                  Gestemd op nee
+                </button>
+              </ListHeading>
+              <ListHeading className="hidden lg:flex lg:col-span-1">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('date-added', e, filterData))}>
+                  Datum aangemaakt
+                </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
             </div>
             <ul>
-              {data?.map((resource: any) => (
+              {filterData?.map((resource: any) => (
                 <Link
                   href={`/projects/${project}/resources/${resource.id}`}
                   key={resource.id}>
