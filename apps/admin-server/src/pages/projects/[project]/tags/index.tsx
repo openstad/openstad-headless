@@ -19,6 +19,7 @@ export default function ProjectTags() {
 
 
   const [filterData, setFilterData] = useState(data);
+  const debouncedSearchTable = searchTable(setFilterData);
 
   useEffect(() => {
     let loadedTags = (data || []) as {
@@ -67,7 +68,12 @@ export default function ProjectTags() {
         }>
         <div className="container py-6">
 
-        <input type="text" className='mb-4 p-2 rounded float-right' placeholder="Zoeken..." onChange={(e) => setFilterData(searchTable(e.target.value, filterData, data))} />
+        <input
+            type="text"
+            className='mb-4 p-2 rounded float-right'
+            placeholder="Zoeken..."
+            onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
+          />
 
           <div className="p-6 bg-white rounded-md clear-right">
 

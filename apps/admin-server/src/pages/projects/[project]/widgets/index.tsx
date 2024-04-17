@@ -22,11 +22,13 @@ export default function ProjectWidgets() {
   );
 
   const [data, setData] = useState(widgets);
+  
+  const debouncedSearchTable = searchTable(setData);
 
-  useEffect(() => { 
-  if (widgets) {
-    setData(widgets);
-  }
+  useEffect(() => {
+    if (widgets) {
+      setData(widgets);
+    }
   }, [widgets]);
 
   return (
@@ -46,7 +48,13 @@ export default function ProjectWidgets() {
         action={<CreateWidgetDialog projectId={project as string} />}>
         <div className="container py-6">
 
-          <input type="text" className='mb-4 p-2 rounded float-right' placeholder="Zoeken..." onChange={(e) => setData(searchTable(e.target.value, data, widgets))} />
+          <input
+            type="text"
+            className='mb-4 p-2 rounded float-right'
+            placeholder="Zoeken..."
+            onChange={(e) => debouncedSearchTable(e.target.value, data, widgets)}
+          />
+
 
           <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-2 lg:grid-cols-[40px_repeat(5,1fr)] items-left py-2 px-2 border-b border-border">

@@ -17,6 +17,7 @@ export default function ProjectStatuses() {
   const { data, isLoading, removeStatus } = useStatuses(project as string);
 
   const [filterData, setFilterData] = useState(data);
+  const debouncedSearchTable = searchTable(setFilterData);
 
   useEffect(() => {
     setFilterData(data);
@@ -48,7 +49,12 @@ export default function ProjectStatuses() {
         }>
         <div className="container py-6">
 
-        <input type="text" className='mb-4 p-2 rounded float-right' placeholder="Zoeken..." onChange={(e) => setFilterData(searchTable(e.target.value, filterData, data))} />
+        <input
+            type="text"
+            className='mb-4 p-2 rounded float-right'
+            placeholder="Zoeken..."
+            onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
+          />
 
           <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-1 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
