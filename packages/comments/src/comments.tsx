@@ -1,6 +1,7 @@
 import React, { createContext } from 'react';
 import './index.css';
 import DataStore from '@openstad-headless/data-store/src';
+import hasRole from '../../lib/has-role';
 import { Banner } from '@openstad-headless/ui/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import Comment from './parts/comment.js';
@@ -10,7 +11,7 @@ import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
-import { Paragraph, Heading4 } from '@utrecht/component-library-react';
+import { Button, Paragraph, Heading3, Heading6 } from '@utrecht/component-library-react';
 import { CommentFormProps } from './types/comment-form-props';
 
 // This type holds all properties needed for this component to work
@@ -18,15 +19,10 @@ export type CommentsWidgetProps = BaseProps &
   ProjectSettingProps & {
     resourceId: string;
     resourceIdRelativePath?: string;
-    userNameFields?: Array<string>;
     title?: string;
     sentiment?: string;
     useSentiments?: Array<string>;
     emptyListText?: string;
-    isVotingEnabled?: boolean;
-    isReplyingEnabled?: boolean;
-    isClosed?: boolean;
-    isClosedText?: string;
     placeholder?: string;
     formIntro?: string;
     hideReplyAsAdmin?: boolean; // todo: wat is dit?
@@ -45,13 +41,10 @@ export const CommentWidgetContext = createContext<
 
 function Comments({
   title = '[[nr]] comments',
-  requiredUserRole = 'member',
-  userNameFields = [],
+  sentiment = 'no sentiment',
   emptyListText = 'Nog geen reacties',
-  isVotingEnabled = true,
-  isReplyingEnabled = true,
-  isClosed = false,
-  isClosedText = 'Het inzenden van reacties is niet langer mogelijk',
+  placeholder = 'type hier uw reactie',
+  formIntro = '',
   ...props
 }: CommentsWidgetProps) {
 
@@ -62,12 +55,18 @@ function Comments({
   })); // todo: make it a number throughout the code
 
   const args = {
-    requiredUserRole,
     title,
-    isVotingEnabled,
-    isReplyingEnabled,
-    isClosed,
-    isClosedText,
+    sentiment,
+    emptyListText,
+    placeholder,
+    formIntro,
+    canComment: typeof props.comments?.canComment != 'undefined' ? props.comments.canComment : true,
+    canLike: typeof props.comments?.canLike != 'undefined' ? props.comments.canLike : true,
+    canReply: typeof props.comments?.canReply != 'undefined' ? props.comments.canReply : true,
+    closedText: props.comments?.closedText || 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
+    requiredUserRole: props.comments?.requiredUserRole || 'member',
+    descriptionMinLength: props.comments?.descriptionMinLength || 30,
+    descriptionMaxLength: props.comments?.descriptionMaxLength || 500,
     ...props,
   } as CommentsWidgetProps;
 
@@ -79,8 +78,10 @@ function Comments({
   const { data: comments } = datastore.useComments({
     projectId: props.projectId,
     resourceId: resourceId,
-    sentiment: props.sentiment,
+    sentiment: args.sentiment,
   });
+
+  const { data: currentUser } = datastore.useCurrentUser({ ...args });
 
   async function submitComment(formData: any) {
     const formDataCopy = { ...formData };
@@ -106,21 +107,50 @@ function Comments({
   return (
     <CommentWidgetContext.Provider value={args}>
       <section className="osc">
-        <Heading4 className="comments-title">
+        <Heading3 className="comments-title">
           {comments && title.replace(/\[\[nr\]\]/, comments.length)}
           {!comments && title}
-        </Heading4>
+        </Heading3>
 
-        {args.isClosed ? (
+        {!args.canComment ? (
           <Banner>
-            <p>{args.isClosedText}</p>
+            <Spacer size={2} />
+            <Heading6>{args.closedText}</Heading6>
+            <Spacer size={2} />
           </Banner>
-        ) : (
+        ) : null}
+
+        {!args.canComment && hasRole(currentUser, 'moderator') ? (
+          <Banner>
+            <Heading6>U kunt nog reageren vanwege uw rol als moderator</Heading6>
+            <Spacer size={2} />
+          </Banner>
+        ) : null }
+
+        {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
+          <Banner className="big">
+            <Heading6>Inloggen om deel te nemen aan de discussie.</Heading6>
+            <Spacer size={1} />
+            <Button
+              appearance="primary-action-button"
+              onClick={() => {
+                // login
+                if (args.login?.url) {
+                  document.location.href = args.login.url;
+                }
+              }}
+              type="button">
+              Inloggen
+            </Button>
+          </Banner>
+        ) : null}
+
+        {(args.canComment && hasRole(currentUser, args.requiredUserRole)) || hasRole(currentUser, 'moderator') ? (
           <div className="input-container">
             <CommentForm {...args} submitComment={submitComment} />
             <Spacer size={1} />
           </div>
-        )}
+        ) : null}
 
         <Spacer size={1} />
 

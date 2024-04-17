@@ -1,13 +1,10 @@
 import React, { useContext } from 'react';
-import { Banner, Spacer } from '@openstad-headless/ui/src';
-import DataStore from '@openstad-headless/data-store/src';
-import hasRole from '../../../lib/has-role';
+import { Spacer } from '@openstad-headless/ui/src';
 import Form from '@openstad-headless/form/src/form';
 import type { CombinedFieldPropsWithType } from '@openstad-headless/form/src/props';
 
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
-import { Heading6, Button } from '@utrecht/component-library-react';
 import { CommentWidgetContext } from '../comments';
 import { CommentFormProps } from '../types/comment-form-props';
 
@@ -28,8 +25,6 @@ function CommentForm({
     ...props,
   } as CommentFormProps;
 
-  const datastore = new DataStore(args);
-  const { data: currentUser } = datastore.useCurrentUser({ ...args });
   const formFields: Array<CombinedFieldPropsWithType> = [];
 
   formFields.push({
@@ -76,63 +71,13 @@ function CommentForm({
     <div className="reaction-input-container">
       {commentsContext.formIntro && <p>{commentsContext.formIntro}</p>}
       <Spacer size={1} />
-
-      {!hasRole(currentUser, 'member') ? ( // todo: args.requiredUserRole \
-        <Banner className="big">
-          <Heading6>Inloggen om deel te nemen aan de discussie.</Heading6>
-          <Spacer size={1} />
-          <Button
-            appearance="primary-action-button"
-            onClick={() => {
-              // login
-              if (commentsContext?.login?.url) {
-                document.location.href = commentsContext.login.url;
-              }
-            }}
-            type="button">
-            Inloggen
-          </Button>
-        </Banner>
-      ) : (
-        <>
-          {!hasRole(currentUser, 'moderator') &&
-          !commentsContext.isReplyingEnabled ? (
-            <Banner className="big">
-              <Spacer size={2} />
-              <Heading6>
-                De reactiemogelijkheid is gesloten, u kunt niet meer reageren
-              </Heading6>
-              <Spacer size={2} />
-            </Banner>
-          ) : null}
-
-          {hasRole(currentUser, 'moderator') &&
-          !commentsContext.isReplyingEnabled &&
-          !commentsContext.hideReplyAsAdmin ? (
-            <>
-              <Banner>
-                <Spacer size={2} />
-                <Heading6>
-                  Reageren is gesloten, maar je kunt nog reageren vanwege je rol
-                  als moderator
-                </Heading6>
-                <Spacer size={2} />
-              </Banner>
-              <Spacer size={2} />
-            </>
-          ) : null}
-        </>
-      )}
-
-      {(hasRole(currentUser, 'member') && commentsContext.isReplyingEnabled) ||
-      hasRole(currentUser, 'moderator') ? (
-        <Form
-          fields={formFields}
-          submitHandler={props.submitComment}
-          submitText="Verstuur"
-          title=""
-        />
-      ) : null}
+      {args.formIntro && <p>{args.formIntro}</p>}
+      <Form
+        fields={formFields}
+        submitHandler={props.submitComment}
+        submitText="Verstuur"
+        title=""
+      />
     </div>
   );
 }
