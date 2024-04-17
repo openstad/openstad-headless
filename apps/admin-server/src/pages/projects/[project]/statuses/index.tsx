@@ -20,7 +20,6 @@ export default function ProjectStatuses() {
 
   useEffect(() => {
     setFilterData(data);
-    console.log(data)
   }, [data])
 
   if (!data) return null;

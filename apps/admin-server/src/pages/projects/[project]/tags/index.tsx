@@ -22,7 +22,6 @@ export default function ProjectTags() {
 
   useEffect(() => {
     setFilterData(data);
-    console.log(data)
   }, [data])
 
   return (

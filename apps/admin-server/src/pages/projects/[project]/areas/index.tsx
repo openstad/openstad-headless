@@ -19,7 +19,6 @@ export default function ProjectAreas() {
 
   useEffect(() => {
     setFilterData(data);
-    console.log(data)
   }, [data])
 
   return (
