@@ -68,6 +68,7 @@ export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
             <TabsContent value="general" className="p-0">
               {previewConfig ? (
                 <ArgumentsGeneral
+                  omitSchemaKeys={['useSentiments']}
                   {...previewConfig}
                   updateConfig={(config) =>
                     updateConfig({ ...widget.config, ...config })

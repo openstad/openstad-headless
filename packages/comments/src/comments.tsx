@@ -18,17 +18,25 @@ export type CommentsWidgetProps = BaseProps &
   ProjectSettingProps & {
     resourceId: string;
     resourceIdRelativePath?: string;
-    requiredUserRole?: string;
     userNameFields?: Array<string>;
     title?: string;
     sentiment?: string;
+    useSentiments?: Array<string>;
     emptyListText?: string;
     isVotingEnabled?: boolean;
     isReplyingEnabled?: boolean;
     isClosed?: boolean;
     isClosedText?: string;
     placeholder?: string;
-    hideReplyAsAdmin?: boolean;
+    formIntro?: string;
+    hideReplyAsAdmin?: boolean; // todo: wat is dit?
+    canComment?: boolean,
+    canLike?: boolean,
+    canReply?: boolean,
+    closedText?: string;
+    requiredUserRole?: string,
+    descriptionMinLength?: number,
+    descriptionMaxLength?: number,
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
