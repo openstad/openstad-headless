@@ -21,7 +21,13 @@ export default function ProjectTags() {
   const [filterData, setFilterData] = useState(data);
 
   useEffect(() => {
-    const filterStartData = data?.sort((a, b) => {
+    let loadedTags = (data || []) as {
+      id: number;
+      name: string;
+      type?: string;
+    }[];
+
+    const filterStartData = loadedTags?.sort((a, b) => {
       const aType = a.type ?? '';
       const bType = b.type ?? '';
 
@@ -36,12 +42,6 @@ export default function ProjectTags() {
 
     setFilterData(filterStartData);
   }, [data])
-
-  let loadedTags = (data || []) as {
-    id: number;
-    name: string;
-    type?: string;
-  }[];
 
   return (
     <div>
