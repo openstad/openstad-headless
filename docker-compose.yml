@@ -78,6 +78,7 @@ services:
       - CMS_URL=${CMS_URL}
       - BASE_DOMAIN=${BASE_DOMAIN}
       - ADMIN_DOMAIN=${ADMIN_DOMAIN}
+      - FORCE_HTTP=${FORCE_HTTP}
     ports:
       - '${API_PORT}:${API_PORT}'
     volumes:
@@ -176,6 +177,7 @@ services:
       - THROTTLE_CC_REQUESTS=${IMAGE_THROTTLE_CC_REQUESTS}
       - NODE_ENV=development
       - IMAGE_VERIFICATION_TOKEN=${IMAGE_VERIFICATION_TOKEN}
+      - FORCE_HTTP=${FORCE_HTTP}
     ports:
       - '${IMAGE_PORT_API}:${IMAGE_PORT_API}'
     volumes:

@@ -134,9 +134,17 @@ app.post('/image',
     }
 
     const fileName = req.file.filename || req.file.key;
+    let url = `${process.env.APP_URL}/image/${fileName}`;
+
+    let protocol = '';
+
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+    }
+
     res.send(JSON.stringify({
       name: req.file.name,
-      url: process.env.APP_URL + '/image/' + fileName
+      url: protocol + url
     }));
   });
 
@@ -151,9 +159,17 @@ app.post('/images',
         }
 
         res.send(JSON.stringify(req.files.map((file) => {
+            let url = `${process.env.APP_URL}/image/${file.filename}`;
+
+            let protocol = '';
+
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+              protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+            }
+
             return {
                 name: file.originalname,
-                url: process.env.APP_URL + '/image/' + file.filename
+                url: protocol + url
             }
         })));
     });
