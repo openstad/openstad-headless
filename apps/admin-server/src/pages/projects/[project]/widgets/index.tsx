@@ -10,7 +10,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { sortTable } from '@/components/ui/sortTable';
+import { sortTable, searchTable } from '@/components/ui/sortTable';
 
 export default function ProjectWidgets() {
   const router = useRouter();
@@ -22,11 +22,13 @@ export default function ProjectWidgets() {
   );
 
   const [data, setData] = useState(widgets);
+  
+  const debouncedSearchTable = searchTable(setData);
 
-  useEffect(() => { 
-  if (widgets) {
-    setData(widgets);
-  }
+  useEffect(() => {
+    if (widgets) {
+      setData(widgets);
+    }
   }, [widgets]);
 
   return (
@@ -45,7 +47,16 @@ export default function ProjectWidgets() {
         ]}
         action={<CreateWidgetDialog projectId={project as string} />}>
         <div className="container py-6">
-          <div className="p-6 bg-white rounded-md">
+
+          <input
+            type="text"
+            className='mb-4 p-2 rounded float-right'
+            placeholder="Zoeken..."
+            onChange={(e) => debouncedSearchTable(e.target.value, data, widgets)}
+          />
+
+
+          <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-2 lg:grid-cols-[40px_repeat(5,1fr)] items-left py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex">
                 <button className="filter-button" onClick={(e) => setData(sortTable('id', e, data))}>
