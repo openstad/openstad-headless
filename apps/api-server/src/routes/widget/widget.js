@@ -191,6 +191,16 @@ function getDefaultConfig(project, widgetType) {
   const loginUrl = `${config.url}/auth/project/${project.id}/login?useAuth=default&forceNewLogin=1&redirectUri=[[REDIRECT_URI]]`;
   const logoutUrl = `${config.url}/auth/project/${project.id}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
 
+  let url = process.env.IMAGE_APP_URL;
+
+  let protocol = '';
+
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    protocol = '';
+  } else {
+    protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+  }
+
   let result = {
     api: {
       url: config.url,
@@ -202,7 +212,7 @@ function getDefaultConfig(project, widgetType) {
       url: logoutUrl,
     },
     projectId: project.id,
-    imageUrl: process.env.IMAGE_APP_URL,
+    imageUrl: protocol + url,
   };
 
   if (widgetType == 'resourcedetailmap' || widgetType ==  'resourcesmap' || widgetType ==  'editormap') {

@@ -14,7 +14,16 @@ router.route('/')
     const ttl = Date.now() + 60 * 1000;
     const secret = process.env.IMAGE_VERIFICATION_TOKEN + ttl
     const hash = crypto.createHmac("sha256", secret).digest("hex")
-    const url = `${process.env.IMAGE_APP_URL}/image?exp_date=${ttl}&signature=${hash}`
+    let url = `${process.env.IMAGE_APP_URL}/image?exp_date=${ttl}&signature=${hash}`;
+    let protocol = '';
+
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+        protocol = '';
+    } else {
+        protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+    }
+
+    url = protocol + url;
 
     res.json(url)
   })
