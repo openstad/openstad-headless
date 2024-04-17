@@ -22,6 +22,7 @@ export const SimpleCalendar: React.FC<{
   form: UseFormReturn<any>;
   fieldName: Path<FieldValues>;
   fieldInfo?: string;
+  description?: string;
   label: string;
   placeholder?: string;
   withReset?: boolean;
