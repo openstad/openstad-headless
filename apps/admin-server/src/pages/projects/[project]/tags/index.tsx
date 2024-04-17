@@ -24,6 +24,12 @@ export default function ProjectTags() {
     setFilterData(data);
   }, [data])
 
+  let loadedTags = (data || []) as {
+    id: number;
+    name: string;
+    type?: string;
+  }[];
+
   return (
     <div>
       <PageLayout
@@ -48,6 +54,7 @@ export default function ProjectTags() {
         }>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
+
             <div className="grid grid-cols-1 lg:grid-cols-5 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex truncate">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
@@ -66,7 +73,20 @@ export default function ProjectTags() {
               </ListHeading>
             </div>
             <ul>
-              {filterData?.map((tag: any) => (
+              {loadedTags
+                  .sort((a, b) => {
+                    const aType = a.type ?? '';
+                    const bType = b.type ?? '';
+
+                    if (aType < bType) return -1;
+                    if (aType > bType) return 1;
+
+                    if (a.name < b.name) return -1;
+                    if (a.name > b.name) return 1;
+
+                    return 0;
+                  })
+                  .map((tag: any) => (
                 <Link
                   href={`/projects/${project}/tags/${tag.id}`}
                   key={tag.id}>

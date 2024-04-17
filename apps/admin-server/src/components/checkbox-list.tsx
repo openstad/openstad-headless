@@ -46,12 +46,15 @@ export const CheckboxList = <T extends { [key: string]: any }>({
 
     if (!keyForGrouping) {
         return (
+          <section className={`grid gap-x-3 gap-y-4 flex-col my-4 content-start`}>
+            <FormLabel>{fieldLabel}</FormLabel>
+            <fieldset className="p-0 rounded grid grid-cols-1 space-y-1">
+              <legend className="sr-only">{fieldLabel}</legend>
             <FormField
                 control={form.control}
                 name={fieldName}
                 render={({ field }) => (
                     <FormItem className={`col-span-full ${layout === 'vertical' ? 'flex flex-col' : 'flex flex-row flex-wrap'}`}>
-                        <FormLabel>{fieldLabel}</FormLabel>
                         {items?.map((item: any) => (
                             <FormField
                                 key={keyPerItem(item)}
@@ -61,7 +64,9 @@ export const CheckboxList = <T extends { [key: string]: any }>({
                                     return (
                                         <FormItem
                                             key={`checkbox-${keyPerItem(item)}`}
-                                            className={`flex space-x-3 space-y-0 ${layout === 'vertical' ? 'flex-col' : 'flex-row'}`}>
+                                            className={`gap-x-0 gap-y-4 grid grid-cols-2 space-x-3 space-y-0 flex-col`}
+                                            style={{gridTemplateColumns: 'min-content auto'}}
+                                        >
                                             <FormControl>
                                                 <Checkbox
                                                     checked={selectedPredicate(item)}
@@ -82,6 +87,8 @@ export const CheckboxList = <T extends { [key: string]: any }>({
                     </FormItem>
                 )}
             />
+            </fieldset>
+          </section>
         );
     }
 

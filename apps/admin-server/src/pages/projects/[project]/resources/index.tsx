@@ -69,7 +69,7 @@ export default function ProjectResources() {
         }>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
-            <div className="grid grid-cols-2 lg:grid-cols-[40px_repeat(6,1fr)] items-center py-2 px-2 border-b border-border">
+            <div className="grid grid-cols-2 lg:grid-cols-7 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
                   ID
@@ -102,7 +102,7 @@ export default function ProjectResources() {
                 <Link
                   href={`/projects/${project}/resources/${resource.id}`}
                   key={resource.id}>
-                  <li className="grid grid-cols-2 lg:grid-cols-[40px_repeat(6,1fr)] py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                  <li className="grid grid-cols-2 lg:grid-cols-7 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                     <Paragraph className="my-auto -mr-16 lg:mr-0">
                       {resource.id}
                     </Paragraph>
