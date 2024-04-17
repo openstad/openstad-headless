@@ -17,9 +17,7 @@ router.route('/')
     let url = `${process.env.IMAGE_APP_URL}/image?exp_date=${ttl}&signature=${hash}`;
     let protocol = '';
 
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-        protocol = '';
-    } else {
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
         protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
     }
 

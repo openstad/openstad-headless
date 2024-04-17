@@ -138,9 +138,7 @@ app.post('/image',
 
     let protocol = '';
 
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      protocol = '';
-    } else {
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
       protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
     }
 
@@ -165,9 +163,7 @@ app.post('/images',
 
             let protocol = '';
 
-            if (url.startsWith('http://') || url.startsWith('https://')) {
-              protocol = '';
-            } else {
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
               protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
             }
 

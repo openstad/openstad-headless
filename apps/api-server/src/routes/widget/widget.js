@@ -195,9 +195,7 @@ function getDefaultConfig(project, widgetType) {
 
   let protocol = '';
 
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    protocol = '';
-  } else {
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
     protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
   }
 
