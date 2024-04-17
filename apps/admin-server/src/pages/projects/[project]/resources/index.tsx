@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { toast } from 'react-hot-toast';
-import { sortTable } from '@/components/ui/sortTable';
+import { sortTable, searchTable } from '@/components/ui/sortTable';
 
 export default function ProjectResources() {
   const router = useRouter();
@@ -68,7 +68,10 @@ export default function ProjectResources() {
           </div>
         }>
         <div className="container py-6">
-          <div className="p-6 bg-white rounded-md">
+
+        <input type="text" className='mb-4 p-2 rounded float-right' placeholder="Zoeken..." onChange={(e) => setFilterData(searchTable(e.target.value, filterData, data))} />
+
+          <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-2 lg:grid-cols-[40px_repeat(6,1fr)] items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>

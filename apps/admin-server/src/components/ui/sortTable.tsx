@@ -32,3 +32,20 @@ export const sortTable = (sortType: string, el: React.MouseEvent<HTMLElement, Mo
 
     return sortedWidgets;
 };
+
+
+export const searchTable = (searchTerm: string, data: Array<any>, originalData: Array<any>) => {
+
+    if (searchTerm.length >= 3) {
+        const searchResult = data.filter(item =>
+            Object.values(item).some(val =>
+                String(val).toLowerCase().includes(searchTerm.toLowerCase())
+            )
+        );
+        return searchResult;
+
+    } else {
+        return originalData;
+    }
+
+};
