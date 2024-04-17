@@ -70,14 +70,14 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Stemmen</span>
               </Button>
             </Link>
-            <Link href={`/projects/${project}/settings/arguments`}>
+            <Link href={`/projects/${project}/settings/comments`}>
               <Button
                 variant={
-                  location.includes('/settings/arguments') ? 'secondary' : 'ghost'
+                  location.includes('/settings/comments') ? 'secondary' : 'ghost'
                 }
                 size="default"
                 className="w-full flex justify-start pl-8">
-                <span className="truncate">Argumenten</span>
+                <span className="truncate">Reacties</span>
               </Button>
             </Link>
             <Link href={`/projects/${project}/settings/anonymization`}>

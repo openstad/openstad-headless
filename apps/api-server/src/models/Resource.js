@@ -1045,8 +1045,8 @@ module.exports = function (db, sequelize, DataTypes) {
       if (!self) return false;
       // project config: comments is closed
       if (
-        typeof self?.project?.config?.comments?.isClosed != 'boolean' ||
-        self.project.config.comments.isClosed
+        typeof self?.project?.config?.comments?.canComment != 'boolean' ||
+        self.project.config.comments.canComment == false
       )
         return false;
       // published
