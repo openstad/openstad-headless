@@ -249,7 +249,7 @@ function ResourceDetail({
 
       <Spacer size={2} />
 
-      {props.commentsWidget?.useSentiments?.length ? (
+      {Array.isArray(props.commentsWidget?.useSentiments) && props.commentsWidget?.useSentiments?.length ? (
         <section className="resource-detail-comments-container">
           {props.commentsWidget?.useSentiments?.map(sentiment => (
             <Comments
