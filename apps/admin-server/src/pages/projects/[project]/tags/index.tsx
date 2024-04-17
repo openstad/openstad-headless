@@ -21,7 +21,20 @@ export default function ProjectTags() {
   const [filterData, setFilterData] = useState(data);
 
   useEffect(() => {
-    setFilterData(data);
+    const filterStartData = data?.sort((a, b) => {
+      const aType = a.type ?? '';
+      const bType = b.type ?? '';
+
+      if (aType < bType) return -1;
+      if (aType > bType) return 1;
+
+      if (a.name < b.name) return -1;
+      if (a.name > b.name) return 1;
+
+      return 0;
+    });
+
+    setFilterData(filterStartData);
   }, [data])
 
   let loadedTags = (data || []) as {
@@ -73,20 +86,7 @@ export default function ProjectTags() {
               </ListHeading>
             </div>
             <ul>
-              {loadedTags
-                  .sort((a, b) => {
-                    const aType = a.type ?? '';
-                    const bType = b.type ?? '';
-
-                    if (aType < bType) return -1;
-                    if (aType > bType) return 1;
-
-                    if (a.name < b.name) return -1;
-                    if (a.name > b.name) return 1;
-
-                    return 0;
-                  })
-                  .map((tag: any) => (
+              {filterData?.map((tag: any) => (
                 <Link
                   href={`/projects/${project}/tags/${tag.id}`}
                   key={tag.id}>
