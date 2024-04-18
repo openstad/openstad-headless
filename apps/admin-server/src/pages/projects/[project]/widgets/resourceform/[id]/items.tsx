@@ -171,10 +171,8 @@ export default function WidgetResourceFormItems(
     useEffect(() => {
         if (props?.items && props?.items?.length > 0) {
             setItems(props?.items);
-        } else if (!!props.items && props.items.length < 1 && items.length < 1) {
-            setItems(defaultFormValues);
         }
-    }, [props?.items, items.length]);
+    }, [props?.items]);
 
     const { onFieldChanged } = props;
     useEffect(() => {
