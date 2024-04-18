@@ -31,7 +31,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
 }) => {
     return (
         <div className="question">
-            <Fieldset>
+            <Fieldset role="radiogroup">
                 <FieldsetLegend>
                     {title}
                 </FieldsetLegend>

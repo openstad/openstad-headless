@@ -51,7 +51,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
 
     return (
         <div className="question">
-            <Fieldset>
+            <Fieldset role="checkboxgroup">
                 <FieldsetLegend>
                     {title}
                 </FieldsetLegend>
