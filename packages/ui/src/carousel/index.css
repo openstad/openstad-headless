@@ -18,12 +18,12 @@
 
 .osc-carousel-previous {
     position: absolute;
-    left: 1rem;
+    left: 10px;
     z-index: 1;
 }
 
 .osc-carousel-next {
     position: absolute;
-    right: 1rem;
+    right: 10px;
     z-index: 1;
 }
