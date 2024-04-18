@@ -29,7 +29,6 @@ const formSchema = z.object({
   displaySocials: z.boolean(),
   displayStatus: z.boolean(),
   displayLikes: z.boolean(),
-  displayComments: z.boolean()
 });
 
 export default function WidgetResourceDetailDisplay(
@@ -59,7 +58,6 @@ export default function WidgetResourceDetailDisplay(
       displaySocials: undefinedToTrueOrProp(props?.displaySocials),
       displayStatus: undefinedToTrueOrProp(props?.displayStatus),
       displayLikes: undefinedToTrueOrProp(props?.displayLikes),
-      displayComments: undefinedToTrueOrProp(props?.displayComments),
     },
   });
 
@@ -214,18 +212,6 @@ export default function WidgetResourceDetailDisplay(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Toon de likes widget</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="displayComments"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Toon de argumenten widget</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

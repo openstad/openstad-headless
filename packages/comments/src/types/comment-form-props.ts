@@ -6,5 +6,6 @@ export type CommentFormProps = {
   descriptionMaxLength?: number;
   placeholder?: string;
   formIntro?: string;
+  parentId?: number;
   submitComment: (e: any) => void;
 };

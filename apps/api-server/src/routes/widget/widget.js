@@ -217,10 +217,6 @@ function getDefaultConfig(project, widgetType) {
     result.area = project.area?.polygon
   }
 
-  console.log('==========');
-  console.log(widgetType);
-  console.log(project);
-
   return result;
 
 }

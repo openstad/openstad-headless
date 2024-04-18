@@ -24,13 +24,11 @@ import { FormObjectSelectField } from '@/components/ui/form-object-select-field'
 import useResources from '@/hooks/use-resources';
 import { ReactNode } from 'react';
 import { ArgumentWidgetTabProps } from '.';
-import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
   sentiment: z.string(),
-  isReplyingEnabled: z.boolean(),
-  isVotingEnabled: z.boolean(),
+  useSentiments: z.string().optional(),
 });
 
 type SchemaKey = keyof typeof formSchema.shape;
@@ -60,13 +58,16 @@ export default function ArgumentsGeneral({
     defaultValues: {
       resourceId: props.resourceId,
       sentiment: props.sentiment || 'for',
-      isReplyingEnabled: props.isReplyingEnabled || false,
-      isVotingEnabled: props.isVotingEnabled || false,
+      useSentiments: JSON.stringify(props.useSentiments || ["for","against"]),
     },
   });
 
   function onSubmit(values: finalSchemaInfer) {
-    props.updateConfig({ ...props, ...values });
+    let useSentiments;
+    try {
+      useSentiments = JSON.parse(values.useSentiments || '');
+    } catch(err) {}
+    props.updateConfig({ ...props, ...values, useSentiments });
   }
 
   const { data } = useResources(props.projectId);
@@ -127,49 +128,30 @@ export default function ArgumentsGeneral({
           )}
 
           {conditionallyRenderField(
-            'isReplyingEnabled',
+            'useSentiments',
             <FormField
               control={form.control}
-              name="isReplyingEnabled"
+              name="useSentiments"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Is het toegestaan om te reageren op reacties?
-                  </FormLabel>
-                  <Switch.Root
-                    className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                    onCheckedChange={(e: boolean) => {
-                      field.onChange(e);
-                      props.onFieldChanged(field.name, e);
-                    }}
-                    checked={field.value}>
-                    <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                  </Switch.Root>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-
-          {conditionallyRenderField(
-            'isVotingEnabled',
-            <FormField
-              control={form.control}
-              name="isVotingEnabled"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Is het mogelijk om te stemmen op reacties?
-                  </FormLabel>
-                  <Switch.Root
-                    className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                    onCheckedChange={(e: boolean) => {
-                      field.onChange(e);
-                      props.onFieldChanged(field.name, e);
-                    }}
-                    checked={field.value}>
-                    <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                  </Switch.Root>
+                  <FormLabel>Tonen van reacties:</FormLabel>
+                  <Select
+                    value={field.value}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      props.onFieldChanged(field.name, value);
+                    }}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Voor" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value='[]'>Toon geen reacties</SelectItem>
+                      <SelectItem value='["for","against"]'>Voor en tegen</SelectItem>
+                      <SelectItem value='["no sentiment"]'>Eén lijst, geen sentiment</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

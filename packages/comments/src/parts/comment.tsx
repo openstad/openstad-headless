@@ -48,26 +48,25 @@ function Comment({
   }
 
   function canReply() {
-    if (!widgetContext || widgetContext.isClosed) return false;
-    if (hasRole(currentUser, 'moderator')) return true;
-    if (!widgetContext.isReplyingEnabled) return false; // widget setting
+    if (!widgetContext || !widgetContext.canComment) return false;
+    if (!widgetContext.canReply) return false; // widget setting
     return args.comment.can && args.comment.can.reply;
   }
 
   function canLike() {
-    if (!widgetContext || widgetContext.isClosed) return false;
+    if (!widgetContext || !widgetContext.canComment) return false;
     if (hasRole(currentUser, 'moderator')) return true;
     return hasRole(currentUser, widgetContext.requiredUserRole);
   }
 
   function canEdit() {
-    if (!widgetContext || widgetContext.isClosed) return false;
+    if (!widgetContext || !widgetContext.canComment) return false;
     if (hasRole(currentUser, 'moderator')) return true;
     return args.comment.can && args.comment.can.edit;
   }
 
   function canDelete() {
-    if (!widgetContext || widgetContext.isClosed) return false;
+    if (!widgetContext || !widgetContext.canComment) return false;
     if (hasRole(currentUser, 'moderator')) return true;
     return args.comment.can && args.comment.can.delete;
   }
@@ -108,7 +107,6 @@ function Comment({
         <CommentForm
           {...args}
           placeholder={widgetContext.placeholder}
-          formIntro={widgetContext.formIntro}
           comment={args.comment}
           submitComment={(e) => {
             if(props.submitComment) {
@@ -135,7 +133,7 @@ function Comment({
             {args.comment.createDateHumanized}
           </Paragraph>
           <ButtonGroup>
-            {widgetContext.isVotingEnabled && (
+            {widgetContext.canLike && (
               canLike() ? (
                 <Button
                   appearance='secondary-action-button'
@@ -157,9 +155,7 @@ function Comment({
                 onClick={() => toggleReplyForm()}>
                 Reageren
               </Button>
-            ) : (
-              <Button disabled>Reageren</Button>
-            )}
+            ) : null }
           </ButtonGroup>
         </section>
       )}
@@ -180,9 +176,9 @@ function Comment({
           <div className="input-container">
             <CommentForm
               {...args}
-              formIntro={widgetContext.formIntro}
+              formIntro="Reageer op deze reactie"
               placeholder={widgetContext.placeholder}
-              comment={{ ...args.comment, parentId: args.comment.id }}
+              parentId={args.comment.id}
               // hideReplyAsAdmin={true}
               submitComment={(e) => {
                 if(props.submitComment) {

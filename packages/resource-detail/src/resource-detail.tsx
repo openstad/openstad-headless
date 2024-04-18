@@ -29,7 +29,6 @@ import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-d
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 type booleanProps = {
   [K in
-    | 'displayComments'
     | 'displayImage'
     | 'displayTitle'
     | 'displaySummary'
@@ -66,7 +65,6 @@ export type ResourceDetailWidgetProps = BaseProps &
   };
 
 function ResourceDetail({
-  displayComments = true,
   displayImage = true,
   displayTitle = true,
   displaySummary = true,
@@ -251,28 +249,19 @@ function ResourceDetail({
 
       <Spacer size={2} />
 
-      {displayComments ? (
+      {Array.isArray(props.commentsWidget?.useSentiments) && props.commentsWidget?.useSentiments?.length ? (
         <section className="resource-detail-comments-container">
-          <Comments
-            {...props}
-            resourceId={resourceId}
-            title={props.commentsWidget?.title}
-            emptyListText={props.commentsWidget?.emptyListText}
-            formIntro={props.commentsWidget?.formIntro}
-            isVotingEnabled={props.commentsWidget?.isVotingEnabled || false}
-            isReplyingEnabled={props.commentsWidget?.isReplyingEnabled || false}
-            sentiment="for"
-          />
-          <Comments
-            {...props}
-            resourceId={resourceId}
-            title={props.commentsWidget?.title}
-            emptyListText={props.commentsWidget?.emptyListText}
-            formIntro={props.commentsWidget?.formIntro}
-            isVotingEnabled={props.commentsWidget?.isVotingEnabled || false}
-            isReplyingEnabled={props.commentsWidget?.isReplyingEnabled || false}
-            sentiment="against"
-          />
+          {props.commentsWidget?.useSentiments?.map(sentiment => (
+            <Comments
+              {...props}
+              resourceId={resourceId || ''}
+              title={props.commentsWidget?.title}
+              emptyListText={props.commentsWidget?.emptyListText}
+              formIntro={props.commentsWidget?.formIntro}
+              placeholder={props.commentsWidget?.placeholder}
+              sentiment={sentiment}
+            />
+          ))}
         </section>
       ) : null}
     </section>
