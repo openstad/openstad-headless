@@ -401,6 +401,11 @@ function StemBegroot({
                     } finally {
                       session.remove('osc-resource-vote-pending');
                     }
+                  } else if(currentStep === 4) {
+                    session.remove('osc-resource-vote-pending');
+                    session.remove('cmsUser');
+                    session.remove('openStadUser');
+                    location.reload();
                   } else {
                     setCurrentStep(currentStep + 1);
                   }
