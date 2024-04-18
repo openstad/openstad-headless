@@ -10,21 +10,23 @@ const config: CommentsWidgetProps = {
   resourceId: import.meta.env.VITE_RESOURCE_ID,
   login: {
     label: import.meta.env.VITE_LOGIN_LABEL,
-    url: `${import.meta.env.VITE_API_URL}/auth/project/${
-      import.meta.env.VITE_PROJECT_ID
-    }/login?forceNewLogin=1&useAuth=default&redirectUri=${document.location}`,
+    url: `${import.meta.env.VITE_API_URL}/auth/project/${import.meta.env.VITE_PROJECT_ID
+      }/login?forceNewLogin=1&useAuth=default&redirectUri=${document.location}`,
   },
-  sentiment: import.meta.env.VITE_SENTIMENT,
+  sentiment: import.meta.env.VITE_SENTIMENT || 'for',
   emptyListText: import.meta.env.VITE_EMPTY_LIST_TEXT,
   title: import.meta.env.VITE_TITLE,
   placeholder: import.meta.env.VITE_PLACEHOLDER,
   formIntro: import.meta.env.VITE_FORM_INTRO,
-  isClosedText: import.meta.env.VITE_COMMENTS_IS_CLOSED_TEXT,
-  isVotingEnabled: import.meta.env.VITE_IS_VOTING_ENABLED != 'false',
-  isReplyingEnabled: import.meta.env.VITE_IS_REPLYING_ENABLED != 'false',
-  requiredUserRole: import.meta.env.VITE_REQUIRED_USER_ROLE,
-  userNameFields: eval(import.meta.env.VITE_USER_NAME_FIELDS),
-  isClosed: import.meta.env.VITE_VOTING_IS_CLOSED,
+  comments: {
+    canComment: (import.meta.env.VITE_COMMENTS_CAN_COMMENT != 'false'),
+    canLike: (import.meta.env.VITE_COMMENTS_CAN_LIKE != 'false'),
+    canReply: (import.meta.env.VITE_COMMENTS_CAN_REPLY != 'false'),
+    closedText: import.meta.env.VITE_COMMENTS_CLOSED_TEXT,
+    requiredUserRole: import.meta.env.VITE_COMMENTS_REQUIRED_USER_ROLE || 'member',
+    descriptionMinLength: import.meta.env.VITE_COMMENTS_DESCRIPTION_MIN_LENGTH || 30,
+    descriptionMaxLength: import.meta.env.VITE_COMMENTS_DESCRIPTION_MAX_LENGTH || 500,
+  }
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

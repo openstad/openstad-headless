@@ -29,11 +29,14 @@ export type ProjectSettingProps = {
     canEditAfterFirstLikeOrComment: boolean;
     types: Array<string>;
   };
-
   comments: {
-    new: {};
-    isClosed: boolean;
+    canComment: boolean,
+    canLike: boolean,
+    canReply: boolean,
     closedText: string;
+    requiredUserRole: string,
+    descriptionMinLength: number,
+    descriptionMaxLength: number,
   };
   users: {
     canCreateNewUsers: boolean;

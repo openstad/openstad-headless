@@ -27,8 +27,8 @@ const formSchema = z.object({
   closedText: z.string().optional(),
   canReply: z.boolean().optional(),
   canLike: z.boolean().optional(),
-  descriptionMinLength: z.number().optional(),
-  descriptionMaxLength: z.number().optional(),
+  descriptionMinLength: z.coerce.number().gt(0).optional(),
+  descriptionMaxLength: z.coerce.number().gt(0).optional(),
 });
 
 export default function ProjectSettingsComments() {
