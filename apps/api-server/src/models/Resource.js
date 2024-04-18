@@ -1054,7 +1054,7 @@ module.exports = function (db, sequelize, DataTypes) {
       // status
       let statuses = self.statuses || [];
       for (let status of statuses) {
-        if ( status.extraFunctionality?.noComment === true ) {
+        if ( status.extraFunctionality?.canComment === false ) {
           return false;
         }
       }
