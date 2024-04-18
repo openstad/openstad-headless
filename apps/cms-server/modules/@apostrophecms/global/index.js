@@ -204,6 +204,10 @@ module.exports = {
               label: 'Column naam',
               type: 'string',
             },
+            intro: {
+              label: 'Intro tekst',
+              type: 'string',
+            },
             items: {
               type: 'array',
               label: 'Links',
