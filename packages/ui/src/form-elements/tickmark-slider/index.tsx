@@ -36,7 +36,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
     return (
         <div className="a-b-slider-container">
             {title && (
-                <h3 className="a-b-question">{title}</h3>
+                <h3 className="utrecht-form-fieldset__legend utrecht-form-fieldset__legend--html-legend">{title}</h3>
             )}
             {description && (
                 <p>{description}</p>
