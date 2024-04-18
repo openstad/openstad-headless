@@ -24,63 +24,9 @@
   background-color: var(--nlds-enquete-background-color,var(--nlds-default-background-color, #F0F4F8));
 }
 
-.form-container textarea {
-  border-radius: 4px;
-}
-
 .form-container figure img {
   max-height: 15rem;
   object-fit: cover;
-}
-
-.form-container-checkbox-container {
-  display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
-  align-items: center;
-  padding-left: 0.2rem;
-}
-
-.utrecht-textarea {
-  border-radius: 4px;
-  border: 1px solid var(--osc-border);
-  padding: 0.5rem;
-  background-color: white;
-  width: 100%;
-}
-
-.utrecht-textarea:disabled {
-  background-color: white;
-  cursor: not-allowed;
-}
-
-.form-container-checkbox {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  width: 1rem;
-  height: 1rem;
-  background-color: var(--osc-card);
-  border: 1px solid var(--osc-foreground);
-  border-radius: 0;
-  cursor: pointer;
-  display: inline-block;
-}
-
-.form-container-checkbox-container p {
-  margin: 0;
-}
-
-.form-container-checkbox:checked {
-  background-color: var(--osc-secondary);
-  border-color: var(--osc-secondary);
-}
-
-.osc .utrecht-radio-button,
-.osc .utrecht-checkbox {
-  width: initial;
-  border: none;
-  margin-right: 7px;
 }
 
 .osc-enquete-item-content button[type="submit"] {
