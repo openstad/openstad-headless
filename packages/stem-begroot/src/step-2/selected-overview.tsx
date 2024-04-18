@@ -1,10 +1,10 @@
 import React, { Fragment } from 'react';
-import { Spacer } from '@openstad-headless/ui/src';
+import { Image, Spacer } from '@openstad-headless/ui/src';
 import { BudgetStatusPanel } from '../reuseables/budget-status-panel';
 
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Heading5, Paragraph, Strong } from "@utrecht/component-library-react";
+import '@utrecht/component-library-css';
+import '@utrecht/design-tokens/dist/root.css';
+import { Heading5, Paragraph, Strong } from '@utrecht/component-library-react';
 
 type Props = {
   selectedResources: Array<any>;
@@ -44,9 +44,18 @@ export const BegrotenSelectedOverview = ({
         {selectedResources.map((resource) => (
           <div key={`budget-overview-row-${resource.id}`}>
             <div className="budget-two-text-row-spaced">
-              <Paragraph>{resource.title}</Paragraph>
+              <section className='budget-overview-row'>
+                <Image
+                  height={'4rem'}
+                  width={'4rem'}
+                  src={resource.images?.at(0)?.url || ''}
+                />
+                <Paragraph>{resource.title}</Paragraph>
+              </section>
               {typeIsBudgeting ? (
-                <Paragraph><Strong>{resource.budget}</Strong></Paragraph>
+                <Paragraph>
+                  <Strong>&euro;{resource.budget || 0}</Strong>
+                </Paragraph>
               ) : null}
             </div>
             <Spacer size={1} />
@@ -71,11 +80,15 @@ export const BegrotenSelectedOverview = ({
       {typeIsBudgeting ? (
         <div className="budget-unused-panel-step-2 budget-two-text-row-spaced">
           <Paragraph className="strong">Ongebruikt budget:</Paragraph>
-          <Paragraph className="strong">&euro;{maxBudget - budgetUsed}</Paragraph>
+          <Paragraph className="strong">
+            &euro;{maxBudget - budgetUsed}
+          </Paragraph>
         </div>
       ) : (
         <div className="budget-unused-panel-step-2 budget-two-text-row-spaced">
-          <Paragraph><Strong>Aantal beschikbare plannen</Strong></Paragraph>
+          <Paragraph>
+            <Strong>Aantal beschikbare plannen</Strong>
+          </Paragraph>
           <Paragraph>
             <Strong>
               {Math.max(maxNrOfResources - selectedResources.length, 0)}
