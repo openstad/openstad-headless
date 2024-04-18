@@ -18,7 +18,8 @@ import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import InfoDialog from '@/components/ui/info-hover';
-
+import { ObjectListSelect } from '@/components/ui/object-select';
+import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 
 const formSchema = z.object({
   displayRanking: z.boolean(),
@@ -27,6 +28,9 @@ const formSchema = z.object({
   notEnoughBudgetText: z.string(),
   showOriginalResource: z.boolean(),
   originalResourceUrl: z.string().url(),
+  resourceListColumns: z.coerce.number({
+    invalid_type_error: 'Alleen volledige nummers kunnen worden ingevoerd',
+  }),
 });
 
 type Formdata = z.infer<typeof formSchema>;
@@ -49,6 +53,7 @@ export default function BegrootmoduleDisplay(
       notEnoughBudgetText: props.notEnoughBudgetText || 'Niet genoeg budget',
       showOriginalResource: props.showOriginalResource || false,
       originalResourceUrl: props.originalResourceUrl || '',
+      resourceListColumns: props.resourceListColumns || 3,
     },
   });
 
@@ -145,6 +150,18 @@ export default function BegrootmoduleDisplay(
               </FormItem>
             )}
           />
+
+          <FormObjectSelectField
+            form={form}
+            fieldName="resourceListColumns"
+            keyForValue="value"
+            fieldLabel="Selecteer het maximaal aantal kolommen voor de resource lijst"
+            onFieldChanged={(key, value) => {
+              onFieldChange(key, value);
+            }}
+            items={[{ value: 1 }, { value: 2 }, { value: 3 }]}
+          />
+
           <Button type="submit" className="w-fit col-span-full">
             Opslaan
           </Button>
