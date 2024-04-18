@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect } from 'react';
+import React from 'react';
 
 import '../index.css';
 import './index.css';
@@ -7,7 +7,7 @@ type Props<T> = {
   items: Array<T>;
   renderHeader?: () => React.JSX.Element;
   renderItem: (item: T, index:number) => React.JSX.Element;
-  columns?: 1 | 2 | 3;
+  columns?: number;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 export const List = <T extends { [key: string]: any }>({
