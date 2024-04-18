@@ -20,6 +20,11 @@ import { BaseMap } from './base-map';
 import React from 'react';
 import {LocationType} from "@openstad-headless/leaflet-map/src/types/location.js";
 
+type Point = {
+  lat: number;
+  lng: number;
+}
+
 const ResourceOverviewMap = ({
   categorize = undefined,
   markerHref = undefined,
