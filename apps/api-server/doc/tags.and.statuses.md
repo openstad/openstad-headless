@@ -1,8 +1,10 @@
-## Tags
+## Tags and Statuses
 
 Tags are used for categorizing resources.
 
 Tags belong to a project. An resource can have multiple tags. Tags can be grouped by their type. Tags have sequence numbers for ordening them in lists.
+
+Statuses are technically equal to tags, plus an extraFunctionalty field.
 
 ### List all tags for a project
 ```
@@ -44,13 +46,13 @@ Authorization: XXX
 
 ## Status
 
-`status` is a special (hardcoded) type of tag. Tags of this type should (in most cases) only exist once per resource, although this is not enforced.
+All of the above is also available for statuses; rplace 'tags' with 'statuses' in any api call.
 
-Status tags have an extraFunctionality field, which can be used to allow or disallow certain functions on resources when that status is active.
+Statuses have an extraFunctionality field, which can be used to allow or disallow certain functions on resources when that status is active.
 
-Currently this is used in Resource.canComment: if a status tag has the extraFunctionality.noComment field set, adding comments is not allowed.
+Currently this is used in Resource.canComment (if a status tag has the extraFunctionality.canComment field set to false, adding comments is not allowed) and canUser .
 
-Each new Project wil be created with 4 status tags: `open`, `closed`, `accepted` and `denied`. All of these but the `open` tag have the noComment field set.
+Each new Project wil be created with 1 status tag: `open`.
 
 ## Tag administration
 

@@ -1,10 +1,6 @@
 import './stem-begroot.css';
 import React, { useEffect, useState } from 'react';
-import {
-  Paginator,
-  Spacer,
-  Stepper,
-} from '@openstad-headless/ui/src';
+import { Paginator, Spacer, Stepper } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
@@ -23,9 +19,9 @@ import { Step3Success } from './step-3-success';
 import { Step3 } from './step-3';
 import { Step4 } from './step-4';
 
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Button, Heading3 } from "@utrecht/component-library-react";
+import '@utrecht/component-library-css';
+import '@utrecht/design-tokens/dist/root.css';
+import { Button, Heading3 } from '@utrecht/component-library-react';
 
 export type StemBegrootWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -54,11 +50,13 @@ export type StemBegrootWidgetProps = BaseProps &
     textActiveSearch?: string;
     itemsPerPage?: number;
     onlyIncludeTagIds: string;
+    resourceListColumns?: number;
   };
 
 function StemBegroot({
   notEnoughBudgetText = 'Niet genoeg budget',
   onlyIncludeTagIds = '',
+  resourceListColumns = 3,
   ...props
 }: StemBegrootWidgetProps) {
   const datastore = new DataStore({
@@ -203,9 +201,9 @@ function StemBegroot({
       resource.extraData?.originalId
       ? props.originalResourceUrl.includes('[id]')
         ? props.originalResourceUrl.replace(
-          '[id]',
-          `${resource.extraData?.originalId}`
-        )
+            '[id]',
+            `${resource.extraData?.originalId}`
+          )
         : `${props.originalResourceUrl}/${resource.extraData?.originalId}`
       : null;
   };
@@ -232,15 +230,15 @@ function StemBegroot({
         !(resource.budget <= props.votes.maxBudget - budgetUsed)
         ? notEnoughBudgetText
         : isInSelected(resource)
-          ? 'Verwijder'
-          : 'Voeg toe';
+        ? 'Verwijder'
+        : 'Voeg toe';
     }
     return !isInSelected(resource) &&
       !((props.votes.maxResources || 0) > selectedResources.length)
       ? notEnoughBudgetText
       : isInSelected(resource)
-        ? 'Verwijder'
-        : 'Voeg toe';
+      ? 'Verwijder'
+      : 'Voeg toe';
   };
 
   return (
@@ -281,9 +279,15 @@ function StemBegroot({
           steps={['Kies', 'Overzicht', 'Stemcode', 'Stem']}
         />
 
+       
         <Spacer size={1} />
+        
+        {props.votes.voteType === 'budgeting'?
+        <> 
         {usedBudgetList}
         <Spacer size={1.5} />
+        </>: null}
+       
 
         <section className="begroot-step-panel">
           {currentStep === 0 ? (
@@ -291,6 +295,7 @@ function StemBegroot({
               <StemBegrootBudgetList
                 introText={props.step1}
                 maxBudget={props.votes.maxBudget}
+                allResourceInList={resources?.records}
                 selectedResources={selectedResources}
                 maxNrOfResources={props.votes.maxResources || 0}
                 typeIsBudgeting={props.votes.voteType === 'budgeting'}
@@ -311,13 +316,13 @@ function StemBegroot({
                   const canAddMore =
                     props.votes.voteType === 'budgeting'
                       ? notUsedResources.some(
-                        (r: { budget: number }) =>
-                          r.budget < props.votes.maxBudget - budgetUsed
-                      )
+                          (r: { budget: number }) =>
+                            r.budget < props.votes.maxBudget - budgetUsed
+                        )
                       : Math.max(
-                        props.votes.maxResources - selectedResources.length,
-                        0
-                      ) > 0;
+                          props.votes.maxResources - selectedResources.length,
+                          0
+                        ) > 0;
                   return canAddMore;
                 }}
               />
@@ -339,10 +344,7 @@ function StemBegroot({
           ) : null}
 
           {currentStep === 2 ? (
-            <Step3
-              loginUrl={`${props?.login?.url}`}
-              step3={props.step3}
-            />
+            <Step3 loginUrl={`${props?.login?.url}`} step3={props.step3} />
           ) : null}
 
           {currentStep === 3 ? (
@@ -366,7 +368,7 @@ function StemBegroot({
           <div className="begroot-step-panel-navigation-section">
             {currentStep > 0 && currentStep < 4 ? (
               <Button
-                appearance='secondary-action-button'
+                appearance="secondary-action-button"
                 onClick={() => {
                   if (currentStep === 3) {
                     setNavAfterLogin(true);
@@ -382,7 +384,7 @@ function StemBegroot({
             {/* Dont show on voting step if you are on step 2 your not logged in*/}
             {currentStep !== 2 ? (
               <Button
-                appearance='primary-action-button'
+                appearance="primary-action-button"
                 onClick={async () => {
                   if (currentStep === 0) {
                     prepareForVote(null);
@@ -466,6 +468,7 @@ function StemBegroot({
               showVoteCount={props.showVoteCount}
               showOriginalResource={props.showOriginalResource}
               originalResourceUrl={props.originalResourceUrl}
+              resourceListColumns={resourceListColumns || 3}
               onResourcePrimaryClicked={(resource) => {
                 session.remove('osc-resource-vote-pending');
 

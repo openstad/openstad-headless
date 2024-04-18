@@ -475,6 +475,41 @@ router
         .catch(next);
     });
   })
+  .put(async function (req, res, next) {
+    // statuses
+    let statuses = req.body.statuses;
+    if (!Array.isArray(statuses)) return next();
+
+    if (!statuses.every((t) => Number.isInteger(t))) {
+      next('Statuses zijn niet gegeven in het juiste formaat');
+    }
+
+    const projectId = req.params.projectId;
+    const statusEntities = await getValidStatuses(projectId, statuses, req.user);
+
+    const resourceInstance = req.results;
+    resourceInstance.setStatuses(statusEntities).then((result) => {
+      // refetch. now with statuses
+      let scope = [...req.scope, 'includeStatuses'];
+      if (req.canIncludeVoteCount) scope.push('includeVoteCount');
+      return db.Resource.scope(...scope)
+        .findOne({
+          where: { id: resourceInstance.id, projectId: req.params.projectId },
+        })
+        .then((found) => {
+          if (!found) throw new Error('Resource not found');
+
+          if (req.query.includePoll) {
+            // TODO: naar poll hooks
+            if (found.poll) found.poll.countVotes(!req.query.includeVotes);
+          }
+          found.project = req.project;
+          req.results = found;
+          next();
+        })
+        .catch(next);
+    });
+  })
   .put(function (req, res, next) {
     db.Notification.create({
       type: 'updated resource - admin update',
@@ -525,6 +560,17 @@ async function getValidTags(projectId, tags) {
   });
 
   return tagsOfProject;
+}
+
+// Get all valid statuses of the project based on given ids
+async function getValidStatuses(projectId, statuses) {
+  const uniqueIds = Array.from(new Set(statuses));
+
+  const statusesOfProject = await db.Status.findAll({
+    where: { projectId, id: { [Op.in]: uniqueIds } },
+  });
+
+  return statusesOfProject;
 }
 
 module.exports = router;
