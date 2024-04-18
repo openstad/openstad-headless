@@ -52,7 +52,7 @@ export const StemBegrootBudgetList = ({
         {!canAddMore ? (
           <Paragraph className="budget-list-status-text helptext error">
             {typeIsBudgeting
-              ? 'Onvoldoende budget'
+              ? 'Onvoldoende budget of geen plannen gevonden voor uw zoekopdracht'
               : 'Maximaal aantal plannen bereikt'}
           </Paragraph>
         ) : null}
