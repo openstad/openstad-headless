@@ -735,7 +735,14 @@ export default function WidgetEnqueteItems(
                       Annuleer
                     </Button>
                   )}
-                  <Button className="w-fit mt-4" type="submit">
+                  <Button
+                    className="w-fit mt-4"
+                    type="submit"
+                    onClick={ (e) => {
+                      e.preventDefault();
+                      onSubmit(form.getValues())
+                    }}
+                  >
                     {selectedItem
                       ? 'Sla wijzigingen op'
                       : 'Voeg item toe aan lijst'}
