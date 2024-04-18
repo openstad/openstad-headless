@@ -9,12 +9,14 @@ import { Heading5, Paragraph, Strong, Button } from "@utrecht/component-library-
 export const StemBegrootBudgetList = ({
   introText = '',
   selectedResources = [],
+  allResourceInList = [],
   maxBudget,
   typeIsBudgeting,
   maxNrOfResources,
   decideCanAddMore,
   onSelectedResourceRemove,
 }: {
+  allResourceInList: Array<any>
   selectedResources: Array<any>;
   maxBudget: number;
   typeIsBudgeting: boolean;
@@ -49,10 +51,10 @@ export const StemBegrootBudgetList = ({
       </section>
       <section className="budget-list-container">
         <Heading5>Uw selecties</Heading5>
-        {!canAddMore ? (
+        {!canAddMore && allResourceInList.length > 0 ? (
           <Paragraph className="budget-list-status-text helptext error">
             {typeIsBudgeting
-              ? `Onvoldoende budget of geen plannen gevonden voor uw zoekopdracht. ${selectedResources.length > 0?'Druk op volgende om verder te gaan met uw huidige selectie.': ''}`
+              ? 'Onvoldoende budget'
               : 'Maximaal aantal plannen bereikt'}
           </Paragraph>
         ) : null}
@@ -85,7 +87,7 @@ export const StemBegrootBudgetList = ({
               />
             ))}
 
-            {canAddMore ? (
+            {allResourceInList.length === 0 || canAddMore ? (
               <Button
                 appearance="secondary-action-button"
                 className="budget-list-action-hint-container"

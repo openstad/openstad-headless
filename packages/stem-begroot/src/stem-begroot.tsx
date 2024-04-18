@@ -295,6 +295,7 @@ function StemBegroot({
               <StemBegrootBudgetList
                 introText={props.step1}
                 maxBudget={props.votes.maxBudget}
+                allResourceInList={resources?.records}
                 selectedResources={selectedResources}
                 maxNrOfResources={props.votes.maxResources || 0}
                 typeIsBudgeting={props.votes.voteType === 'budgeting'}
