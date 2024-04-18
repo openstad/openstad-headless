@@ -64,10 +64,10 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
 
                 {choices?.map((choice, index) => (
                     <FormField type="checkbox" key={index}>
-                        <Paragraph className="checkbox-field-label">
+                        <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
                             <FormLabel htmlFor={`${fieldKey}_${index}`} type="checkbox">
                                 <Checkbox
-                                    className="checkbox-field-input"
+                                    className="utrecht-form-field__input"
                                     id={`${fieldKey}_${index}`}
                                     name={fieldKey}
                                     value={choice}

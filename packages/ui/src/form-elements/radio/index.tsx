@@ -44,10 +44,10 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
 
                 {choices?.map((choice, index) => (
                     <FormField type="radio" key={index}>
-                        <Paragraph className="radio-field-label">
+                        <Paragraph className="utrecht-form-field__label utrecht-form-field__label--radio">
                             <FormLabel htmlFor={`${fieldKey}_${index}`} type="radio">
                                 <RadioButton
-                                    className="radio-field-input"
+                                    className="utrecht-form-field__input"
                                     id={`${fieldKey}_${index}`}
                                     name={fieldKey}
                                     required={fieldRequired}

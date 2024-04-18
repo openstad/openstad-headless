@@ -53,7 +53,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                 <div className={"image-choice-container"}>
                     {choices?.map((choice, index) => (
                         <FormField type="radio" key={index}>
-                            <Paragraph className="radio-field-label">
+                            <Paragraph className="utrecht-form-field__label utrecht-form-field__label--radio">
                                 <FormLabel htmlFor={`${fieldKey}_${index}`} type="radio">
                                     <RadioButton
                                         className="radio-field-input"
