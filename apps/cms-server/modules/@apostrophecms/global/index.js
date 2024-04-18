@@ -1,11 +1,11 @@
 // modules/@apostrophecms/global/index.js
-const fs                = require('fs');
-const fields            = require('./lib/fields');
-const arrangeFields     = require('./lib/arrangeFields');
+const fs = require('fs');
+const fields = require('./lib/fields');
+const arrangeFields = require('./lib/arrangeFields');
 
 module.exports = {
   options: {
-    deferWidgetLoading: true
+    deferWidgetLoading: true,
   },
   init: function (self) {
     //   console.log('self.data', self.data);
@@ -16,16 +16,17 @@ module.exports = {
     return {
       async enrich(req, res, next) {
         req.data.projectConfig = {
-          organisationName: 'Amsterdam'
+          organisationName: 'Amsterdam',
         };
         req.data.global.projectName = 'Openstad';
-        req.project = self.apos.options.project;          
+        req.project = self.apos.options.project;
 
         // system defaults
         let cmsDefaults = process.env.CMS_DEFAULTS;
         try {
-          if (typeof cmsDefaults == 'string') cmsDefaults = JSON.parse(cmsDefaults);
-        } catch(err) {}
+          if (typeof cmsDefaults == 'string')
+            cmsDefaults = JSON.parse(cmsDefaults);
+        } catch (err) {}
 
         // analytics
         if (req.data.global.analyticsType == 'serverdefault') {
@@ -35,27 +36,63 @@ module.exports = {
         }
 
         // cookie consent
-        req.data.global.cookieConsentDefined = req.data.global.useCookieWarning ? req.cookies && typeof(req.cookies['openstad-cookie-consent']) != 'undefined' : undefined;
-        req.data.global.cookieConsent = req.data.global.useCookieWarning ? req.cookies && req.cookies['openstad-cookie-consent'] == 1 : true;
+        req.data.global.cookieConsentDefined = req.data.global.useCookieWarning
+          ? req.cookies &&
+            typeof req.cookies['openstad-cookie-consent'] != 'undefined'
+          : undefined;
+        req.data.global.cookieConsent = req.data.global.useCookieWarning
+          ? req.cookies && req.cookies['openstad-cookie-consent'] == 1
+          : true;
 
         return next();
-      }
+      },
     };
   },
 
   fields: {
-
     add: {
-
       siteTitle: {
         type: 'string',
-        label: 'Site titel'
+        label: 'Site titel',
       },
 
       siteLogo: {
         type: 'attachment',
         label: 'Site logo',
-        fileGroup: 'images'
+        fileGroup: 'images',
+      },
+
+      ctaButtons: {
+        label: 'Header buttons',
+        type: 'array',
+        draggable: true,
+        fields: {
+          add: {
+            label: {
+              label: 'Label',
+              type: 'string',
+            },
+            href: {
+              label: 'Url',
+              type: 'string',
+            },
+            appearance: {
+              type: 'select',
+              label: 'Variant',
+              def: 'primary-action',
+              choices: [
+                {
+                  label: 'primary-action',
+                  value: 'primary-action',
+                },
+                {
+                  label: 'secondary-action',
+                  value: 'secondary-action',
+                },
+              ],
+            },
+          },
+        },
       },
 
       cssExtras: {
@@ -78,15 +115,15 @@ module.exports = {
               type: 'string',
               label: 'URL voor CSS imports (optioneel)',
             },
-          }
-        }
+          },
+        },
       },
       compactMenu: {
         type: 'boolean',
         label: 'Compacte weergave van het hoofdmenu.',
-        def: false
+        def: false,
       },
-      analyticsType:   {
+      analyticsType: {
         type: 'select',
         permission: 'admin',
         label: 'Analytics type',
@@ -94,23 +131,23 @@ module.exports = {
         choices: [
           {
             value: 'none',
-            label: "No analytics",
+            label: 'No analytics',
           },
           {
             value: 'google-analytics',
-            label: "Google Analytics (with a property like G-xxxxx)",
-            showFields: ['analyticsIdentifier']
+            label: 'Google Analytics (with a property like G-xxxxx)',
+            showFields: ['analyticsIdentifier'],
           },
           {
             value: 'custom',
-            label: "Custom: use a custom codeblock",
-            showFields: ['analyticsCodeBlock']
+            label: 'Custom: use a custom codeblock',
+            showFields: ['analyticsCodeBlock'],
           },
           {
             value: 'serverdefault',
-            label: "Use the server default settings",
+            label: 'Use the server default settings',
           },
-        ]
+        ],
       },
 
       useCookieWarning: {
@@ -121,15 +158,13 @@ module.exports = {
           {
             label: 'Yes',
             value: true,
-            showFields: [
-              'cookiePageLink'
-            ]
+            showFields: ['cookiePageLink'],
           },
           {
             label: 'No',
-            value: false
-          }
-        ]
+            value: false,
+          },
+        ],
       },
 
       cookiePageLink: {
@@ -138,7 +173,7 @@ module.exports = {
         def: '/about-cookies',
         required: true,
         if: {
-          useCookieWarning: true
+          useCookieWarning: true,
         },
       },
 
@@ -146,7 +181,7 @@ module.exports = {
         type: 'string',
         label: 'Google Analytics Property ID (like G-xxxxx)',
         if: {
-          analyticsType: 'google-analytics'
+          analyticsType: 'google-analytics',
         },
       },
 
@@ -155,7 +190,7 @@ module.exports = {
         permission: 'admin',
         label: 'Custom code',
         if: {
-          analyticsType: 'custom'
+          analyticsType: 'custom',
         },
       },
 
@@ -167,7 +202,11 @@ module.exports = {
           add: {
             title: {
               label: 'Column naam',
-              type: 'string'
+              type: 'string',
+            },
+            intro: {
+              label: 'Intro tekst',
+              type: 'string',
             },
             items: {
               type: 'array',
@@ -176,47 +215,44 @@ module.exports = {
                 add: {
                   label: {
                     label: 'Link tekst',
-                    type: 'string'
+                    type: 'string',
                   },
                   url: {
                     label: 'Link url',
-                    type: 'string'
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                    type: 'string',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
 
     group: {
       basics: {
         label: 'Algemene instellingen',
-        fields: [ 'siteTitle', 'siteLogo' ],
+        fields: ['siteTitle', 'siteLogo', 'ctaButtons'],
       },
       css: {
         label: 'Vormgeving',
-        fields: [ 'cssExtras', 'customCssLink', 'compactMenu' ],
+        fields: ['cssExtras', 'customCssLink', 'compactMenu'],
       },
       cookies: {
         label: 'Cookie instellingen',
-        fields: [ 'useCookieWarning', 'cookiePageLink' ],
+        fields: ['useCookieWarning', 'cookiePageLink'],
       },
       analitics: {
         label: 'Analitics',
-        fields: [ 'analyticsType', 'analyticsIdentifier', 'analyticsCodeBlock' ],
+        fields: ['analyticsType', 'analyticsIdentifier', 'analyticsCodeBlock'],
       },
       footer: {
         label: 'Footer',
-        fields: [ 'footerlinks' ],      
-      }
-    }
-  }
-
+        fields: ['footerlinks'],
+      },
+    },
+  },
 };
-
-
 
 /*
 Todo, move over this to new config:
@@ -315,4 +351,3 @@ module.exports = {
   }
 };
 */
-

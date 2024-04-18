@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Heading, Link } from "@utrecht/component-library-react";
+import { Heading, Link, Paragraph } from "@utrecht/component-library-react";
 import './footer.css';
 
 interface Item {
@@ -16,6 +16,7 @@ function Footer({ content }: Item) {
         {JSON.parse(content).map((section: any, index: number) => (
           <div key={index} className="footer-section">
             <Heading level={2} appearance="utrecht-heading-4">{section.title}</Heading>
+            <Paragraph> {section.intro} </Paragraph>
             <ul>
               {section.items.map((item: any, index: number) => (
                 <li key={index}>
