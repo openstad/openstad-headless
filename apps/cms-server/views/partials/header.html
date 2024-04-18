@@ -72,17 +72,27 @@
         {% endif %}
       </div>
 
-        {% if data.global.compactMenu %}
-          <nav id="navbar"
-            class="--compact"
-            data-home='
-            [{
-              "_url": "{{ data.home._url }}",
-              "title": "{{ data.home.title }}"
-            }]'
-            data-content='{{ data.home._children | json }}'
-          ></nav>
-        {% endif %}
+        <div class="header_navbar-container">
+          {% if data.global.compactMenu %}
+            <nav id="navbar"
+              class="--compact"
+              data-home='
+              [{
+                "_url": "{{ data.home._url }}",
+                "title": "{{ data.home.title }}"
+              }]'
+              data-content='{{ data.home._children | json }}'
+            ></nav>
+          {% endif %}
+
+          {% if data.global.ctaButtons.length > 0 %}
+            <div class="cta-buttons">
+              {% for ctaButton in data.global.ctaButtons %}
+              <a href="{{ctaButton.href}}" class="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--{{ctaButton.appearance}}">{{ctaButton.label}}</a>
+              {% endfor %}
+              </div>
+          {% endif %}
+        </div>
       </div>
   </div>
 </header>

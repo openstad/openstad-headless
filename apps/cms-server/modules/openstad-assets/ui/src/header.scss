@@ -67,6 +67,11 @@ header {
   }
 }
 
+.header_navbar-container{
+  display: flex;
+  gap: 20px;
+}
+
 .header-side-container {
   position: absolute;
   left: 115px;
