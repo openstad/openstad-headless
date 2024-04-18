@@ -100,3 +100,7 @@
 .question-type-imageChoice .image-choice-container > * {
   flex: 1;
 }
+
+label.utrecht-form-label{
+  margin-block-end: 6px;
+}
