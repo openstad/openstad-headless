@@ -68,7 +68,7 @@ Searching is done using the [fuzzysort](https://github.com/farzher/fuzzysort) mo
 
 ### List resources filtered by tag(s)
 
-See [tags documentation](./tags.md):
+See [tags documentation](./tags.and.statuses.md):
 ```
 GET :HOSTNAME/api/project/:PROJECT_ID/resource?tags=:TAG_ID1&tags=:TAG_ID2
 ```

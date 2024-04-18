@@ -22,8 +22,10 @@ export const StemBegrootResourceList = ({
   displayPriceLabel = true,
   displayRanking = true,
   showVoteCount = true,
+  resourceListColumns = 3,
   header
 }: {
+  resourceListColumns?: number;
   resources: Array<any>;
   selectedResources: Array<any>;
   onResourcePlainClicked: (resource: any, index: number) => void;
@@ -41,7 +43,7 @@ export const StemBegrootResourceList = ({
   return (
     <List
       id='stem-begroot-resource-selections-list'
-      columns={3}
+      columns={resourceListColumns}
       items={resources || []}
       renderHeader={() => header || <></>}
       renderItem={(resource, index) => {

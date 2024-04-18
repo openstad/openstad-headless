@@ -38,7 +38,7 @@ const formSchema = z.object({
   mapIcon: z.string().max(5000).optional(),
   listIcon: z.string().optional(),
   editableByUser: z.boolean().optional(),
-  noComment: z.boolean().optional(),
+  canComment: z.boolean().optional(),
 });
 
 export default function ProjectStatusEdit() {
@@ -59,7 +59,7 @@ export default function ProjectStatusEdit() {
       mapIcon: data?.mapIcon || undefined,
       listIcon: data?.listIcon || undefined,
       editableByUser: data?.extraFunctionality?.editableByUser ?? true,
-      noComment: data?.extraFunctionality?.noComment ?? false,
+      canComment: data?.extraFunctionality?.canComment ?? true,
     }),
     [data]
   );
@@ -70,7 +70,7 @@ export default function ProjectStatusEdit() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const status = await updateStatus(values.name, values.seqnr, values.backgroundColor, values.color, values.label, values.mapIcon, values.listIcon, { editableByUser: values.editableByUser, noComment: values.noComment });
+    const status = await updateStatus(values.name, values.seqnr, values.backgroundColor, values.color, values.label, values.mapIcon, values.listIcon, { editableByUser: values.editableByUser, canComment: values.canComment });
     if (status) {
       toast.success('Status aangepast!');
     } else {
@@ -271,7 +271,7 @@ export default function ProjectStatusEdit() {
                     />
                     <FormField
                       control={form.control}
-                      name="noComment"
+                      name="canComment"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>

@@ -1,4 +1,4 @@
-import React, { createContext } from 'react';
+import React, { useState, useEffect, createContext } from 'react';
 import './index.css';
 import DataStore from '@openstad-headless/data-store/src';
 import hasRole from '../../lib/has-role';
@@ -54,7 +54,7 @@ function Comments({
     targetUrl: props.resourceIdRelativePath,
   })); // todo: make it a number throughout the code
 
-  const args = {
+  let args = {
     title,
     sentiment,
     emptyListText,
@@ -80,6 +80,23 @@ function Comments({
     resourceId: resourceId,
     sentiment: args.sentiment,
   });
+
+  const { data: resource } = datastore.useResource({
+    projectId: props.projectId,
+    resourceId: resourceId,
+  });
+
+  const [canComment, setCanComment] = useState(args.canComment)
+  useEffect(() => {
+    if (!resource) return;
+    let statuses = resource.statuses || [];
+    for (let status of statuses) {
+      if (status.extraFunctionality?.canComment === false) {
+        setCanComment(false)
+      }
+    }
+  }, [resource]);
+  if (canComment === false) args.canComment = canComment;
 
   const { data: currentUser } = datastore.useCurrentUser({ ...args });
 

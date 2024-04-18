@@ -25,6 +25,11 @@
   display: flex;
   justify-content: space-between;
   padding: 20px;
+  gap: 20px;
+}
+
+#footer-container footer .container .footer-section{
+  width: 100%;
 }
 
 #footer-container footer .container ul{
