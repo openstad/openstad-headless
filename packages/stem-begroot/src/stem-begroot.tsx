@@ -281,9 +281,15 @@ function StemBegroot({
           steps={['Kies', 'Overzicht', 'Stemcode', 'Stem']}
         />
 
+       
         <Spacer size={1} />
+        
+        {props.votes.voteType === 'budgeting'?
+        <> 
         {usedBudgetList}
         <Spacer size={1.5} />
+        </>: null}
+       
 
         <section className="begroot-step-panel">
           {currentStep === 0 ? (
