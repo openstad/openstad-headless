@@ -68,7 +68,7 @@ export const StemBegrootResourceList = ({
                 <Spacer size={1} />
                 <section className="stembegroot-content-item-header">
                   {displayPriceLabel ? (
-                    <h5>&euro;{resource.budget || 0}</h5>
+                    <h5>&euro;{resource.budget.toLocaleString('nl-NL') || 0}</h5>
                   ) : null}
                   <div className="stembegroot-content-item-header-taglist">
                     <Paragraph className="strong">Thema:</Paragraph>
