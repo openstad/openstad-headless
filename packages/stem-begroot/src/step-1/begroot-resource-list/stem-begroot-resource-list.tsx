@@ -10,7 +10,7 @@ import { elipsize } from '@openstad-headless/lib/ui-helpers';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Button, Paragraph, Strong, Link } from "@utrecht/component-library-react";
+import { Button, Paragraph, Strong, Link, Heading4 } from "@utrecht/component-library-react";
 
 export const StemBegrootResourceList = ({
   resources,
@@ -71,13 +71,14 @@ export const StemBegrootResourceList = ({
                     <h5>&euro;{resource.budget.toLocaleString('nl-NL') || 0}</h5>
                   ) : null}
                   <div className="stembegroot-content-item-header-taglist">
-                    <Paragraph className="strong">Thema:</Paragraph>
+                    <Paragraph><Strong>Thema:</Strong></Paragraph>
                     <Paragraph>{theme?.name || 'Geen thema'}</Paragraph>
                     <Paragraph><Strong>Gebied:</Strong></Paragraph>
                     <Paragraph> {area?.name || 'Geen gebied'}</Paragraph>
                   </div>
                 </section>
                 <Spacer size={1} />
+                <Heading4>{resource.title}</Heading4>
                 <Paragraph>{elipsize(resource.description, 200)}</Paragraph>
                 <Spacer size={1} />
               </div>
