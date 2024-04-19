@@ -14,7 +14,11 @@ import React from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import Form from "@openstad-headless/form/src/form";
 import { FieldProps } from '@openstad-headless/form/src/props';
-
+import {
+    Paragraph,
+    Heading4,
+    Heading6,
+  } from '@utrecht/component-library-react';
 export type EnqueteWidgetProps = BaseProps &
     ProjectSettingProps &
     EnquetePropsType;
@@ -124,7 +128,7 @@ function Enquete(props: EnqueteWidgetProps) {
                 (formOnlyVisibleForUsers && !hasRole(currentUser, 'member')) && (
                 <>
                     <Banner className="big">
-                        <h6>Inloggen om deel te nemen.</h6>
+                        <Heading6>Inloggen om deel te nemen.</Heading6>
                         <Spacer size={1} />
                         <Button
                             type="button"
@@ -139,10 +143,10 @@ function Enquete(props: EnqueteWidgetProps) {
             )}
 
             <div className="osc-enquete-item-content">
-                {props.displayTitle && props.title && <h4>{props.title}</h4>}
+                {props.displayTitle && props.title && <Heading4>{props.title}</Heading4>}
                 <div className="osc-enquete-item-description">
                     {props.displayDescription && props.description && (
-                        <p>{props.description}</p>
+                        <Paragraph>{props.description}</Paragraph>
                     )}
                 </div>
                 <Form

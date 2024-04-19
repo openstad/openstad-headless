@@ -173,7 +173,7 @@ module.exports = function (db, sequelize, DataTypes) {
           projectId: instance.id,
           name: 'open',
           seqnr: 10,
-          noComment: false,
+          canComment: true,
           editableByUser: true,
         });
         await instance.update({

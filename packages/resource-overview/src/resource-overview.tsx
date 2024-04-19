@@ -126,7 +126,7 @@ const defaultItemRenderer = (
           <div>
             {resource.statuses?.map((statusTag: any) => (
               <Paragraph className="osc-resource-overview-content-item-status">
-                {statusTag.label === 'OPEN' ? 'Open' : 'Gesloten'}
+                {statusTag.label}
               </Paragraph>
             ))}
           </div>
