@@ -16,7 +16,7 @@ import Form from "@openstad-headless/form/src/form";
 import { FieldProps } from '@openstad-headless/form/src/props';
 import {
     Paragraph,
-    Heading4,
+    Heading2,
     Heading6,
   } from '@utrecht/component-library-react';
 export type EnqueteWidgetProps = BaseProps &
@@ -143,7 +143,7 @@ function Enquete(props: EnqueteWidgetProps) {
             )}
 
             <div className="osc-enquete-item-content">
-                {props.displayTitle && props.title && <Heading4>{props.title}</Heading4>}
+                {props.displayTitle && props.title && <Heading2>{props.title}</Heading2>}
                 <div className="osc-enquete-item-description">
                     {props.displayDescription && props.description && (
                         <Paragraph>{props.description}</Paragraph>

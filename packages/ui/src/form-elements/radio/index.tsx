@@ -45,7 +45,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                 {choices?.map((choice, index) => (
                     <FormField type="radio" key={index}>
                         <Paragraph className="utrecht-form-field__label utrecht-form-field__label--radio">
-                            <FormLabel htmlFor={`${fieldKey}_${index}`} type="radio">
+                            <FormLabel htmlFor={`${fieldKey}_${index}`} type="radio" className="--label-grid">
                                 <RadioButton
                                     className="utrecht-form-field__input"
                                     id={`${fieldKey}_${index}`}
@@ -57,7 +57,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                                     }) : null}
                                     disabled={disabled}
                                 />
-                                {choice}
+                                <span>{choice}</span>
                             </FormLabel>
                         </Paragraph>
                     </FormField>

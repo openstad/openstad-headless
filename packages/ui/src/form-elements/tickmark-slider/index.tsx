@@ -1,3 +1,4 @@
+import { FieldsetLegend, FormFieldDescription } from '@utrecht/component-library-react';
 import React, { FC, useState } from 'react';
 
 export type TickmarkSliderProps = {
@@ -11,22 +12,22 @@ export type TickmarkSliderProps = {
     imageDescription?: string;
     description?: string;
     disabled?: boolean;
-    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
     type?: string;
 }
 
 const TickmarkSlider: FC<TickmarkSliderProps> = ({
-     title= '',
-     description = '',
-     fieldOptions = [],
-     fieldRequired = false,
-     fieldKey,
-     imageSrc = '',
-     imageAlt = '',
-     imageDescription = '',
-     onChange,
-     index,
-     disabled = false,
+    title = '',
+    description = '',
+    fieldOptions = [],
+    fieldRequired = false,
+    fieldKey,
+    imageSrc = '',
+    imageAlt = '',
+    imageDescription = '',
+    onChange,
+    index,
+    disabled = false,
 }) => {
     const defaultValue = Math.ceil(fieldOptions.length / 2).toString();
     const [value, setValue] = useState<string>(defaultValue);
@@ -36,11 +37,15 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
     return (
         <div className="a-b-slider-container">
             {title && (
-                <h3 className="utrecht-form-fieldset__legend utrecht-form-fieldset__legend--html-legend">{title}</h3>
+                <FieldsetLegend>
+                    {title}
+                </FieldsetLegend>
             )}
-            {description && (
-                <p>{description}</p>
-            )}
+            {description &&
+                <FormFieldDescription>
+                    {description}
+                </FormFieldDescription>
+            }
             {imageSrc && (
                 <figure>
                     <img src={imageSrc} alt={imageAlt} />
