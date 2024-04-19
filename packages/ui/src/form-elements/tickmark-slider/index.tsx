@@ -1,5 +1,6 @@
 import { FieldsetLegend, FormFieldDescription } from '@utrecht/component-library-react';
 import React, { FC, useState } from 'react';
+import { Spacer } from '@openstad-headless/ui/src';
 
 export type TickmarkSliderProps = {
     index: number;
@@ -42,9 +43,12 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 </FieldsetLegend>
             )}
             {description &&
-                <FormFieldDescription>
-                    {description}
-                </FormFieldDescription>
+                    <>
+                    <FormFieldDescription>
+                        {description}
+                    </FormFieldDescription>
+                    <Spacer size={.5} />
+                </>
             }
             {imageSrc && (
                 <figure>

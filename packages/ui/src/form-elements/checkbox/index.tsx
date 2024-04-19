@@ -7,6 +7,7 @@ import {
     Checkbox,
     Paragraph, FormFieldDescription,
 } from "@utrecht/component-library-react";
+import { Spacer } from '@openstad-headless/ui/src';
 
 export type CheckboxFieldProps = {
     title: string;
@@ -57,9 +58,12 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                 </FieldsetLegend>
 
                 {description &&
+                <>
                     <FormFieldDescription>
                         {description}
                     </FormFieldDescription>
+                    <Spacer size={.5} />
+                    </>
                 }
 
                 {choices?.map((choice, index) => (

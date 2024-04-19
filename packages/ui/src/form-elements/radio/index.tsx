@@ -7,6 +7,7 @@ import {
     RadioButton,
     Paragraph, FormFieldDescription,
 } from "@utrecht/component-library-react";
+import { Spacer } from '@openstad-headless/ui/src';
 
 export type RadioboxFieldProps = {
     title: string;
@@ -17,7 +18,7 @@ export type RadioboxFieldProps = {
     fieldKey: string;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
 }
 
 const RadioboxField: FC<RadioboxFieldProps> = ({
@@ -37,9 +38,12 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                 </FieldsetLegend>
 
                 {description &&
-                    <FormFieldDescription>
-                        {description}
-                    </FormFieldDescription>
+                    <>
+                        <FormFieldDescription>
+                            {description}
+                        </FormFieldDescription>
+                        <Spacer size={.5} />
+                    </>
                 }
 
                 {choices?.map((choice, index) => (

@@ -1,5 +1,6 @@
 import React, { FC, useState } from "react";
 import { FormField, FormFieldDescription, FormLabel, Paragraph, Textarea, Textbox } from "@utrecht/component-library-react";
+import { Spacer } from '@openstad-headless/ui/src';
 
 export type TextInputProps = {
     title: string;
@@ -17,7 +18,7 @@ export type TextInputProps = {
     disabled?: boolean;
     rows?: TextInputProps['variant'] extends 'textarea' ? number : undefined;
     type?: string;
-    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
 }
 
 const TextInput: FC<TextInputProps> = ({
@@ -25,9 +26,9 @@ const TextInput: FC<TextInputProps> = ({
     description,
     variant,
     fieldKey,
-    fieldRequired= false,
+    fieldRequired = false,
     placeholder = '',
-    defaultValue= '',
+    defaultValue = '',
     onChange,
     disabled = false,
     rows,
@@ -40,7 +41,14 @@ const TextInput: FC<TextInputProps> = ({
             <Paragraph className="utrecht-form-field__label">
                 <FormLabel htmlFor={randomID}>{title}</FormLabel>
             </Paragraph>
-            <FormFieldDescription>{description}</FormFieldDescription>
+            {description &&
+                <>
+                    <FormFieldDescription>
+                        {description}
+                    </FormFieldDescription>
+                    <Spacer size={.5} />
+                </>
+            }
             <div className="utrecht-form-field__input">
                 <InputComponent
                     id={randomID}
