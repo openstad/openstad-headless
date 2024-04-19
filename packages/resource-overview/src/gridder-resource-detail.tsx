@@ -25,7 +25,6 @@ export const GridderResourceDetail = ({
   // When resource is correctly typed the we will not need :any
   const theme = resource.tags?.filter((t: any) => t.type === 'theme')?.at(0);
   const area = resource.tags?.filter((t: any) => t.type === 'area')?.at(0);
-console.log(theme, area, resource)
   return (
     <>
       <div className="osc-gridder-resource-detail">
