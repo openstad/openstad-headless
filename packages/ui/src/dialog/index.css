@@ -21,7 +21,7 @@
   transform: translate(-50%, -50%);
   width: 90%;
   max-height: 75vh;
-  padding: 25px 0;
+  padding: 25px;
   animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
   max-width: 82.5rem;
   overflow: auto;
@@ -29,10 +29,6 @@
 }
 .osc-DialogContent:focus {
   outline: none;
-}
-
-.osc-DialogContent .carousel-items{
-  padding: 0 72px;
 }
 
 .osc-DialogTitle {
@@ -67,4 +63,40 @@
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
   }
+}
+
+.osc-DialogContent .carousel-button-container{
+  position: absolute;
+  display: flex;
+  top: -36px;
+  left: 0;
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+
+.osc-DialogContent .carousel-button-container .osc-carousel-previous,
+.osc-DialogContent .carousel-button-container .osc-carousel-next{
+  position: relative;
+  flex-shrink: 0;
+  flex-grow: 1;
+  right: 0;
+  left: 0;
+}
+
+.osc-DialogContent .carousel-button-container p{
+  margin: 0;
+}
+
+.osc-DialogContent > div > button,
+.osc-DialogContent .carousel-button-container button{
+  aspect-ratio: 1;
+  min-width: auto;
+  min-height: auto;
+  padding: 0;
+  width: 36px;
+  height: 36px;
+}
+
+.osc-DialogContent .carousel-items{
+  padding-top: 10px;
 }

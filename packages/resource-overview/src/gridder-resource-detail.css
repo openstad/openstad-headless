@@ -3,6 +3,13 @@
     gap: 2rem;
 }
 
+@media screen and (max-width: 768px) {
+    .osc-gridder-resource-detail {
+        flex-direction: column;
+    }
+    
+}
+
 .osc-gridder-resource-detail-budget-theme-bar {
     /* display: flex;
     justify-content: space-between; */
