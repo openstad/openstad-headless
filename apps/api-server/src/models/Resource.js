@@ -1043,12 +1043,10 @@ module.exports = function (db, sequelize, DataTypes) {
     },
     canComment: function canComment(self) {
       if (!self) return false;
-      // project config: comments is closed
-      if (
-        typeof self?.project?.config?.comments?.canComment != 'boolean' ||
-        self.project.config.comments.canComment == false
-      )
+      if ( self.project?.config?.comments?.canComment === false ) {
+        // project config: comments is closed
         return false;
+      }
       // published
       if (!self.publishDate) return false;
       // status
