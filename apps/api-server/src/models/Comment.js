@@ -215,12 +215,10 @@ module.exports = function( db, sequelize, DataTypes ) {
 				return {
 					include: [{
 						model      : db.Resource,
-						attributes : ['id', 'projectId', 'title', 'viewableByRole'],
+						attributes : ['id', 'projectId', 'title', 'publishDate', 'viewableByRole'],
             include: {
-              model: db.Tag,
-              attributes: ['id', 'type', 'name'],
-              where: { type: 'status' },
-              required: false,
+              model: db.Project,
+              attributes: ['id', 'config'],
             },
 					}]
 				}
@@ -317,18 +315,17 @@ module.exports = function( db, sequelize, DataTypes ) {
       // TODO: ik denk dat je alleen moet kunnen voten bij resource.isOpen, maar dat doet hij nu ook niet. Sterker: hij checkt nu alleen maar op parentId.
       if (userHasRole(user, 'member') && self.id && !self.parentId) {
         return true;
-      } else {
-        return false;
       }
+      return false;
     },
     canReply: function(user, self) {
-	  if (user.role == "admin") return true;
+	    if (user.role == "admin") return true;
       if (!self.resource) return false;
-      if (self.resource.auth.canComment() && userHasRole(user, 'member') && self.id && !self.parentId) {
+      if (self.resource.project?.config?.comments?.canReply === false) return false;
+      if (self.resource.auth.canComment(self.resource) && userHasRole(user, 'member') && self.id && !self.parentId) {
         return true;
-      } else {
-        return false;
       }
+      return false;
     },
     toAuthorizedJSON(user, result, self) {
       // TODO: ik denk dat ik doit overal wil. Misschien met een scope of andere param.
