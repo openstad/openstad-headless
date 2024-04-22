@@ -25,6 +25,7 @@ type userType = {
   id: number;
   name: string | undefined;
   role: Role;
+  jwt: string;
 }
 
 interface SessionData {
@@ -110,6 +111,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
           id: result.id,
           name: result.name,
           role: result.role,
+          jwt: jwt as string,
         };
       } catch(err) {
         jwt = '';
@@ -164,8 +166,10 @@ async function signOut(req: NextRequest, res: NextResponse) {
 }
 
 type SessionUserType = {
+  id?: number;
   name?: string;
   role?: string;
+  jwt?: string;
 }
 
 async function fetchSessionUser() {
@@ -178,8 +182,10 @@ async function fetchSessionUser() {
     }
     let result = await response.json();
     return {
+      id: result.id,
       name: result.name,
       role: result.role,
+      jwt: result.jwt,
     }
   } catch(err) {
     console.log(err);
