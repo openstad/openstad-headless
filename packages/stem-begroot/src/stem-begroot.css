@@ -33,18 +33,23 @@
 }
 
 .stembegroot-content-item-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
+  background: var(--nlds-tags-background-color, var(--nlds-default-background-color));
+  padding: 10px;
 }
 
 .stembegroot-content-item-header-taglist {
-  display: flex;
-  gap: 1rem;
 }
 
 .stembegroot-content-item-header-taglist p {
   margin: 0;
+}
+
+.stembegroot-content-item-header .pill-grid{
+  grid-gap: 0;
+}
+
+.stembegroot-content-item-header .pill-grid span + span:before{
+  content:', ';
 }
 
 .osc-stem-begroot-content-item-footer {
@@ -114,4 +119,24 @@
 .osc-stem-begroot-paginator {
   display: flex;
   justify-content: center;
+}
+
+
+article.stem-begroot--container{
+  position: relative;
+}
+article.stem-begroot--container .price{
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: var(--nlds-price-background-color, var(--utrecht-button-primary-action-background-color));
+  color: var(--nlds-price-color, var(--utrecht-button-primary-action-color));
+  padding: 7px 10px;
+  border-radius: var(--nlds-price-border-radius, var(--utrecht-button-border-radius));
+}
+
+article.stem-begroot--container .price h5{
+  margin: 0;
+  font-size: .875rem;
+  color: inherit;
 }
