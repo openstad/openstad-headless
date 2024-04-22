@@ -1025,6 +1025,11 @@ module.exports = function (db, sequelize, DataTypes) {
       }
       return true;
     },
+    canMutateStatus: function canMutateStatus (user, self) {
+      if (!user || !self) return false;
+      if (!self.auth.canUpdate(user, self)) return false;
+      return userHasRole(user, 'moderator');
+    },
     toAuthorizedJSON: function (user, data, self) {
       if (!self.auth.canView(user, self)) {
         return {};
