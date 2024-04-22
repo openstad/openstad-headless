@@ -247,6 +247,13 @@ router
       });
   })
   .post(async function (req, res, next) {
+    // skip updating status if user is not allowed to mutate status
+    if (!req.results.auth.canMutateStatus(req.user, req.results)) {
+      delete req.body.statuses;
+    }
+    return next();
+  })
+  .post(async function (req, res, next) {
     // statuses
     let statuses = req.body.statuses || [];
     if (!Array.isArray(statuses)) statuses = [statuses];
@@ -474,6 +481,13 @@ router
         })
         .catch(next);
     });
+  })
+  .put(async function (req, res, next) {
+    // skip updating status if user is not allowed to mutate status
+    if (!req.results.auth.canMutateStatus(req.user, req.results)) {
+      delete req.body.statuses;
+    }
+    return next();
   })
   .put(async function (req, res, next) {
     // statuses
