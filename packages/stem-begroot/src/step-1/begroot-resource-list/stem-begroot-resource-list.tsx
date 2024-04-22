@@ -64,7 +64,7 @@ export const StemBegrootResourceList = ({
           <>
             <article className="stem-begroot--container">
               <Image src={resource.images?.at(0)?.url || ''} />
-              < Spacer size={.5} />
+              <Spacer size={.5} />
               <div>
                 <section className="stembegroot-content-item-header">
                   <div className="stembegroot-content-item-header-taglist">
