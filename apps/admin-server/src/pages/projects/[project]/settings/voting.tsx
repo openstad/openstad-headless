@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
 import toast from 'react-hot-toast';
@@ -56,6 +56,7 @@ const formSchema = z.object({
 
 export default function ProjectSettingsVoting() {
   const category = 'votes';
+  const [fieldValue, setFieldValue] = useState<string>('');
 
   const router = useRouter();
   const { project } = router.query;
@@ -233,7 +234,11 @@ export default function ProjectSettingsVoting() {
                     <FormLabel>
                       Wat voor type stemmen wordt er gebruikt?
                     </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={(e) => {
+                      field.onChange(e);
+                      setFieldValue(e);
+                    }}
+                      value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Count" />
@@ -255,6 +260,7 @@ export default function ProjectSettingsVoting() {
                   </FormItem>
                 )}
               />
+              {fieldValue !== 'likes' && (
               <FormField
                 control={form.control}
                 name="minResources"
@@ -272,6 +278,8 @@ export default function ProjectSettingsVoting() {
                   </FormItem>
                 )}
               />
+              )}
+              {fieldValue !== 'likes' && (
               <FormField
                 control={form.control}
                 name="maxResources"
@@ -289,6 +297,8 @@ export default function ProjectSettingsVoting() {
                   </FormItem>
                 )}
               />
+              )}
+              {fieldValue !== 'likes' && (
               <FormField
                 control={form.control}
                 name="minBudget"
@@ -305,6 +315,8 @@ export default function ProjectSettingsVoting() {
                   </FormItem>
                 )}
               />
+              )}
+              {fieldValue !== 'likes' && (
               <FormField
                 control={form.control}
                 name="maxBudget"
@@ -321,6 +333,7 @@ export default function ProjectSettingsVoting() {
                   </FormItem>
                 )}
               />
+              )}
               <Button type="submit" className="w-fit col-span-full">
                 Opslaan
               </Button>
