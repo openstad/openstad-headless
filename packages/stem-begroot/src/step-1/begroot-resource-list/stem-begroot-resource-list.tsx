@@ -64,14 +64,9 @@ export const StemBegrootResourceList = ({
           <>
             <article className="stem-begroot--container">
               <Image src={resource.images?.at(0)?.url || ''} />
-              {displayPriceLabel ? (
-                <div className="price">
-                  <Heading5>&euro;{resource.budget.toLocaleString('nl-NL') || 0}</Heading5>
-                </div>
-              ) : null}
+              < Spacer size={.5} />
               <div>
                 <section className="stembegroot-content-item-header">
-
                   <div className="stembegroot-content-item-header-taglist">
                     <Heading6>Tags</Heading6>
                     <div className="pill-grid stembegroot">
@@ -98,35 +93,38 @@ export const StemBegrootResourceList = ({
                     </Paragraph>
                   </>
                 ) : null}
+              <div className="stembegroot--infolabels">
+                {displayPriceLabel ? (
+                  <div className="price">
+                    <Heading5>&euro;{resource.budget.toLocaleString('nl-NL') || 0}</Heading5>
+                  </div>
+                ) : null}
+                {showVoteCount ? (
 
-              {
-                showVoteCount ? (
-                  <>
-                    <div className="osc-stem-begroot-content-item-footer">
-                      <>
+                  <div className="osc-stem-begroot-content-item-footer">
+                    <>
+                      <Icon
+                        icon="ri-thumb-up-line"
+                        variant="regular"
+                        text={resource.yes}
+                      />
+                      <Icon
+                        icon="ri-thumb-down-line"
+                        variant="regular"
+                        text={resource.no}
+                      />
+                      {displayRanking && resource.extraData?.ranking ? (
                         <Icon
-                          icon="ri-thumb-up-line"
+                          icon="ri-trophy-line"
                           variant="regular"
-                          text={resource.yes}
+                          text={resource.extraData?.ranking}
                         />
-                        <Icon
-                          icon="ri-thumb-down-line"
-                          variant="regular"
-                          text={resource.no}
-                        />
-                        {displayRanking && resource.extraData?.ranking ? (
-                          <Icon
-                            icon="ri-trophy-line"
-                            variant="regular"
-                            text={resource.extraData?.ranking}
-                          />
-                        ) : null}
-                      </>
-                    </div>
-                    <Spacer size={.5} />
-                  </>
-                ) : null
-              }
+                      ) : null}
+                    </>
+                  </div>
+                ) : null}
+                < Spacer size={.5} />
+              </div>
 
               <div className="osc-stem-begroot-content-item-footer">
                 <Button
