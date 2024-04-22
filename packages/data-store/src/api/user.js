@@ -55,5 +55,9 @@ export default {
 
   },
   
+  logout: function({ url }) {
+    url = url || `${this.apiUrl}/auth/project/${projectId}/logout?useAuth=oidc`;
+    document.location.href = url;
+  },
 
 }

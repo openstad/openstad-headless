@@ -92,6 +92,13 @@ export default function useCurrentUser(props) {
     }
   }
 
+  // add functionality
+  if (data) {
+    data.logout = function(params) {
+      self.api.user.logout(params);
+    }
+  }
+
   return {
     data,
     setUser: () => console.log('setUser not (yet) implemented'),
