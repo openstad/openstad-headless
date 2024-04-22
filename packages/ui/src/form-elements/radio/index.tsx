@@ -7,6 +7,7 @@ import {
     RadioButton,
     Paragraph, FormFieldDescription,
 } from "@utrecht/component-library-react";
+import { Spacer } from '@openstad-headless/ui/src';
 
 export type RadioboxFieldProps = {
     title: string;
@@ -17,7 +18,7 @@ export type RadioboxFieldProps = {
     fieldKey: string;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
 }
 
 const RadioboxField: FC<RadioboxFieldProps> = ({
@@ -37,15 +38,18 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                 </FieldsetLegend>
 
                 {description &&
-                    <FormFieldDescription>
-                        {description}
-                    </FormFieldDescription>
+                    <>
+                        <FormFieldDescription>
+                            {description}
+                        </FormFieldDescription>
+                        <Spacer size={.5} />
+                    </>
                 }
 
                 {choices?.map((choice, index) => (
                     <FormField type="radio" key={index}>
                         <Paragraph className="utrecht-form-field__label utrecht-form-field__label--radio">
-                            <FormLabel htmlFor={`${fieldKey}_${index}`} type="radio">
+                            <FormLabel htmlFor={`${fieldKey}_${index}`} type="radio" className="--label-grid">
                                 <RadioButton
                                     className="utrecht-form-field__input"
                                     id={`${fieldKey}_${index}`}
@@ -57,7 +61,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                                     }) : null}
                                     disabled={disabled}
                                 />
-                                {choice}
+                                <span>{choice}</span>
                             </FormLabel>
                         </Paragraph>
                     </FormField>

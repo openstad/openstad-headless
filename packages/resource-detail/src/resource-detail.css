@@ -22,9 +22,10 @@
 }
 
 .resource-detail-pil-list-content {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
+  display: flex;
+  gap: .5rem;
+  align-items: start;
+  flex-wrap: wrap;
 }
 
 .resource-detail-comments-container {

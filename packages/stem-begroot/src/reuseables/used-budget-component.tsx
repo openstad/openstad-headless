@@ -22,13 +22,13 @@ export const BudgetUsedList = ({
         key={`budget-item-${budget}-${index}`}
           className="budget-badge budget-badge-primary"
           style={{ flex: budget }}>
-          <Paragraph>&euro;{budget || 0}</Paragraph>
+          <Paragraph>&euro;{budget.toLocaleString('nl-NL') || 0}</Paragraph>
         </div>
       ))}
       <div
         style={{ flex: Math.max(maxBudget - budgetUsed, 0)}}
         className="osc-stem-begroot-budget-list-budget-left-indication budget-badge budget-badge-plain">
-        <Paragraph>&euro;{Math.max(maxBudget - budgetUsed, 0)}</Paragraph>
+        <Paragraph>&euro;{Math.max(maxBudget - budgetUsed, 0).toLocaleString('nl-NL')}</Paragraph>
       </div>
     </div>
   );

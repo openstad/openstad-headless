@@ -39,63 +39,26 @@ export const BegrotenSelectedOverview = ({
       <Spacer size={1.5} />
       <div className="budget-overview-panel">
         <Heading5>Overzicht van mijn selectie</Heading5>
-        <Spacer size={2} />
+        <Spacer size={1} />
 
         {selectedResources.map((resource) => (
-          <div key={`budget-overview-row-${resource.id}`}>
-            <div className="budget-two-text-row-spaced">
-              <section className='budget-overview-row'>
-                <Image
-                  height={'4rem'}
-                  width={'4rem'}
-                  src={resource.images?.at(0)?.url || ''}
-                />
-                <Paragraph>{resource.title}</Paragraph>
-              </section>
-              {typeIsBudgeting ? (
-                <Paragraph>
-                  <Strong>&euro;{resource.budget || 0}</Strong>
-                </Paragraph>
-              ) : null}
-            </div>
-            <Spacer size={1} />
+          <div key={`budget-overview-row-${resource.id}`} className="budget-two-text-row-spaced">
+            <section className='budget-overview-row'>
+              <Image
+                height={'4rem'}
+                width={'4rem'}
+                src={resource.images?.at(0)?.url || ''}
+              />
+              <Paragraph>{resource.title}</Paragraph>
+            </section>
+            {typeIsBudgeting ? (
+              <Paragraph>
+                <Strong>&euro;{resource.budget.toLocaleString('nl-NL') || 0}</Strong>
+              </Paragraph>
+            ) : null}
           </div>
         ))}
-
-        <Spacer size={2} />
-        <div className="budget-two-text-row-spaced">
-          {typeIsBudgeting ? (
-            <Heading5>Totaal gebruikt budget</Heading5>
-          ) : (
-            <Heading5>Aantal gekozen plannen</Heading5>
-          )}
-          {typeIsBudgeting ? (
-            <Heading5>&euro;{budgetUsed}</Heading5>
-          ) : (
-            <Heading5>{selectedResources.length}</Heading5>
-          )}
-        </div>
       </div>
-
-      {typeIsBudgeting ? (
-        <div className="budget-unused-panel-step-2 budget-two-text-row-spaced">
-          <Paragraph className="strong">Ongebruikt budget:</Paragraph>
-          <Paragraph className="strong">
-            &euro;{maxBudget - budgetUsed}
-          </Paragraph>
-        </div>
-      ) : (
-        <div className="budget-unused-panel-step-2 budget-two-text-row-spaced">
-          <Paragraph>
-            <Strong>Aantal beschikbare plannen</Strong>
-          </Paragraph>
-          <Paragraph>
-            <Strong>
-              {Math.max(maxNrOfResources - selectedResources.length, 0)}
-            </Strong>
-          </Paragraph>
-        </div>
-      )}
     </>
   );
 };

@@ -121,8 +121,8 @@ const config: EnqueteWidgetProps = {
           trigger: '1',
           titles: [
             {
-              text: 'Ja',
-              key: 'ja',
+              text: '1. Een natuurpark. De natuur is hier belangrijker dan de mens. Wandelen door het park is mogelijk, maar het belang van de natuur staat voorop.',
+              key: '1. Een natuurpark. De natuur is hier belangrijker dan de mens. Wandelen door het park is mogelijk, maar het belang van de natuur staat voorop.',
             },
           ],
         },
@@ -130,8 +130,8 @@ const config: EnqueteWidgetProps = {
           trigger: '2',
           titles: [
             {
-              text: 'Nee',
-              key: 'nee',
+              text: '2. Een recreatiepark. Een park dat aantrekkelijk is om in te wandelen, om te zonnen, te spelen. Misschien ook met een of meer horecavoorzieningen.',
+              key: '2. Een recreatiepark. Een park dat aantrekkelijk is om in te wandelen, om te zonnen, te spelen. Misschien ook met een of meer horecavoorzieningen.',
             },
           ],
         },
@@ -139,8 +139,8 @@ const config: EnqueteWidgetProps = {
           trigger: '3',
           titles: [
             {
-              text: 'Misschien in de toekomst',
-              key: 'misschien',
+              text: '4. Een doe-park. Een park waar buurtbewoners actief in participeren. Denk aan tuinieren of helpen met het onderhoud van het park. Of door gezamenlijk een activiteit te ontwikkelen en te beheren. Bijvoorbeeld huisvesting van een vereniging met buitenactiviteiten.',
+              key: '4. Een doe-park. Een park waar buurtbewoners actief in participeren. Denk aan tuinieren of helpen met het onderhoud van het park. Of door gezamenlijk een activiteit te ontwikkelen en te beheren. Bijvoorbeeld huisvesting van een vereniging met buitenactiviteiten.',
             },
           ],
         },
