@@ -36,6 +36,9 @@ module.exports = async function seed(config, db) {
             },
           }
         },
+        resources: {
+          defaultStatusIds: [1],
+        },
         votes: {
           isActive: true,
           requiredUserRole: 'anonymous',
@@ -101,6 +104,9 @@ module.exports = async function seed(config, db) {
               clientSecret: 'anonymous123'
             },
           }
+        },
+        resources: {
+          defaultStatusIds: [2],
         },
         votes: {
           isActive: true,
