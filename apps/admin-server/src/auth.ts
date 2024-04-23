@@ -54,9 +54,6 @@ async function getSession(req: NextRequest | NextApiRequest, res: NextResponse |
 
 async function authMiddleware(req: NextRequest, res: NextResponse) {
 
-  // signout page
-  if (req.nextUrl.pathname.startsWith('/auth/signout')) return res;
-
   // projectId
   let targetProjectId = 1;
   let match = req.nextUrl.pathname.match(/^\/projects\/(\d+)/)
@@ -123,7 +120,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
 
     // login if token not found
     if (!jwt) {
-      return signIn(req, targetProjectId, forceNewLogin)
+      return signIn(req, res, targetProjectId, forceNewLogin)
     }
 
   }
@@ -145,24 +142,21 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
 
 }
 
-function signIn(req: NextRequest, projectId:number = 1, forceNewLogin?: boolean) {
+async function signIn(req: NextRequest, res: NextResponse, projectId:number = 1, forceNewLogin?: boolean) {
+  if (forceNewLogin) {
+    const session = await getSession(req, res);
+    session.destroy()
+  }
   let path = req.nextUrl.pathname.replace('/api/openstad', '');
   if (path == '/') path = '/projects';
   let redirectUri = `${process.env.URL}${path}?openstadlogintoken=[[jwt]]`;
   let loginUrl = `${process.env.API_URL}/auth/project/${projectId}/login?useAuth=default&redirectUri=${redirectUri}${ forceNewLogin ? '&forceNewLogin=1' : '' }`;
-  return NextResponse.redirect(loginUrl);
+  return NextResponse.redirect(loginUrl, { headers: res.headers });
 }
 
 function clientSignIn() {
   let loginUrl = `/signin`;
   document.location.href = loginUrl;
-}
-
-async function signOut(req: NextRequest, res: NextResponse) {
-  const session = await getSession(req, res);
-  Object.keys(session).map(key => session[key] = undefined);
-  await session.save()
-  return NextResponse.redirect( `${process.env.URL}/auth/signout`, { headers: res.headers });
 }
 
 type SessionUserType = {
@@ -201,7 +195,6 @@ export {
   getSession,
   sessionOptions,
   signIn,
-  signOut,
   clientSignIn,
   SessionContext,
   fetchSessionUser,
