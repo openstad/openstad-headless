@@ -58,9 +58,9 @@ router.route('/')
 
 	// with one existing submission
 	// --------------------------
-	router.route('/:submissionId(\\d+)')
+	router.route('/:submissionId([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})')
 		.all(function(req, res, next) {
-			var submissionId = parseInt(req.params.submissionId);
+			var submissionId = req.params.submissionId;
 
 			req.scope = ['defaultScope'];
 			req.scope.push({method: ['forProjectId', req.params.projectId]});
