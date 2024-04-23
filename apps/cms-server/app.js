@@ -177,13 +177,15 @@ app.use('/config-reset', async function (req, res, next) {
   next();
 });
 
-app.use('/login', function (req, res, next) {
+app.use(':priviliged(/admin)?/login', function (req, res, next) {
   const domainAndPath = req.openstadDomain;
   const i = req.url.indexOf('?');
-  const query = req.url.substr(i + 1);
+  let query = req.url.substr(i + 1);
   const protocol = req.headers['x-forwarded-proto'] || req.protocol;
   const url = protocol + '://' + domainAndPath + '/auth/login';
-
+  if (req.params.priviliged) {
+    query += `${query ? '&' : ''}loginPriviliged=1`;
+  }
   return res.redirect(url && query ? url + '?' + query : url);
 });
 

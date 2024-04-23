@@ -112,7 +112,7 @@ module.exports = (db, sequelize, Sequelize) => {
         where: { userId: self.id }
       })
       .then(userRoles => {
-        let userRole = userRoles.find( userRole => userRole.client.clientId == clientId );
+        let userRole = userRoles.find( userRole => userRole.client.clientId == clientId || userRole.client.id == clientId );
         let role = userRole?.role;
         return role?.name
       })
