@@ -202,7 +202,7 @@ export default function ProjectSubmissions() {
                       className="hidden lg:flex ml-auto"
                       onClick={(e) => e.preventDefault()}>
                       <RemoveResourceDialog
-                        header="Resource verwijderen"
+                        header="Inzending verwijderen"
                         message="Weet je zeker dat je deze inzending wilt verwijderen?"
                         onDeleteAccepted={() =>
                           remove(submission.id)
