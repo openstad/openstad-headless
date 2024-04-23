@@ -95,6 +95,8 @@ export default function useCurrentUser(props) {
   // add functionality
   if (data) {
     data.logout = function(params) {
+      const session = new SessionStorage(props);
+      session.destroy();
       self.api.user.logout(params);
     }
   }
