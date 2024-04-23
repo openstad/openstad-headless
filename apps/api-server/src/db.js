@@ -23,7 +23,7 @@ if (dbConfig.MYSQL_CA_CERT && dbConfig.MYSQL_CA_CERT.trim && dbConfig.MYSQL_CA_C
 let sequelize = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.password, {
 	dialect        : dbConfig.dialect,
 	host           : dbConfig.host,
-	port					 : dbConfig.port || 3306,
+	port					 : dbConfig.port || undefined,
 	dialectOptions,
 	timeZone       : config.timeZone,
 	logging        : require('debug')('app:db:query'),

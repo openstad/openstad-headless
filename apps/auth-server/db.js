@@ -17,7 +17,7 @@ let sequelize = new Sequelize({
   database: process.env.DB_NAME,
   username: process.env.DB_USER || process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  port:     process.env.DB_PORT || '3306',
+  port:     process.env.DB_PORT || undefined,
 
   dialect: process.env.DB_DIALECT || 'mysql',
   dialectOptions,
