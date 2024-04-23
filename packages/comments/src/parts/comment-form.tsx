@@ -16,6 +16,7 @@ function CommentForm({
   placeholder = 'Type hier uw reactie',
   parentId = 0,
   activeMode = '',
+  sentiment = '',
   ...props
 }: CommentFormProps) {
   const commentsContext = useContext(CommentWidgetContext);
@@ -40,6 +41,12 @@ function CommentForm({
     fieldKey: 'description',
     placeholder: commentsContext?.placeholder,
     defaultValue: !parentId ? args.comment?.description : '',
+  });
+
+  formFields.push({
+    type: 'hidden',
+    fieldKey: 'sentiment',
+    defaultValue: sentiment,
   });
 
   if (
