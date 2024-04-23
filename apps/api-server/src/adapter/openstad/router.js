@@ -97,7 +97,9 @@ router
 
     // redirect to idp server
     let redirectUri = encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.redirectUri);
-    let url = `${req.authConfig.serverUrl}/dialog/authorize?redirect_uri=${redirectUri}&response_type=code&client_id=${req.authConfig.clientId}&scope=offline&forceLogin=1`;
+    let url = `${req.authConfig.serverUrl}/login`;
+    if (req.query.loginPriviliged) url += '/admin';
+    url += `?redirect_uri=${redirectUri}&response_type=code&client_id=${req.authConfig.clientId}&scope=offline&forceLogin=1`;
     res.redirect(url);
 
   })
