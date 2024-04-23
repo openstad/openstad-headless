@@ -85,6 +85,10 @@ export default function ProjectSettingsVoting() {
     form.reset(defaults());
   }, [form, defaults]);
 
+useEffect(() => {
+  setFieldValue(data?.config?.[category]?.voteType);
+}, [data]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const project = await updateProject({
@@ -251,8 +255,8 @@ export default function ProjectSettingsVoting() {
                         <SelectItem value="countPerTheme">
                           Count per theme
                         </SelectItem>
-                        <SelectItem value="countPerBudgeting">
-                          Count per budgeting
+                        <SelectItem value="budgetingPerTheme">
+                          Budgeting per theme
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -260,79 +264,77 @@ export default function ProjectSettingsVoting() {
                   </FormItem>
                 )}
               />
-              {fieldValue !== 'likes' && (
-              <FormField
-                control={form.control}
-                name="minResources"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Wat is de minimum hoeveelheid resources waar iemand op kan
-                      stemmen?
-                      <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Count, Count per theme of Count per budgeting'} />
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="1" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {(fieldValue === 'countPerTheme' || fieldValue === 'count') && (
+                <FormField
+                  control={form.control}
+                  name="minResources"
+                  render={({ field }) => (
+                    <FormItem className="col-span-1">
+                      <FormLabel>
+                        Wat is de minimum hoeveelheid resources waar iemand op kan stemmen?
+                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Count, Count per theme of Count per budgeting'} />
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="1" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
-              {fieldValue !== 'likes' && (
-              <FormField
-                control={form.control}
-                name="maxResources"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Wat is de maximum hoeveelheid resources waar iemand op kan
-                      stemmen?
-                      <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Count, Count per theme of Count per budgeting'} />
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="100" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {(fieldValue === 'countPerTheme' || fieldValue === 'count') && (
+                <FormField
+                  control={form.control}
+                  name="maxResources"
+                  render={({ field }) => (
+                    <FormItem className="col-span-1">
+                      <FormLabel>
+                        Wat is de maximum hoeveelheid resources waar iemand op kan stemmen?
+                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Count, Count per theme of Count per budgeting'} />
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="100" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
-              {fieldValue !== 'likes' && (
-              <FormField
-                control={form.control}
-                name="minBudget"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Wat is het minimum budget?
-                      <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Budgeting '} />
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="1" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {(fieldValue === 'budgetingPerTheme' || fieldValue === 'budgeting') && (
+                <FormField
+                  control={form.control}
+                  name="minBudget"
+                  render={({ field }) => (
+                    <FormItem className="col-span-1">
+                      <FormLabel>
+                        Wat is het minimum budget?
+                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Budgeting '} />
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="1" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
-              {fieldValue !== 'likes' && (
-              <FormField
-                control={form.control}
-                name="maxBudget"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Wat is het maximum budget?
-                      <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Budgeting '} />
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="100" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {(fieldValue === 'budgetingPerTheme' || fieldValue === 'budgeting') && (
+                <FormField
+                  control={form.control}
+                  name="maxBudget"
+                  render={({ field }) => (
+                    <FormItem className="col-span-1">
+                      <FormLabel>
+                        Wat is het maximum budget?
+                        <InfoDialog content={'Dit veld is alleen beschikbaar als één van de volgende types gekozen is: Budgeting '} />
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="100" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
               <Button type="submit" className="w-fit col-span-full">
                 Opslaan
