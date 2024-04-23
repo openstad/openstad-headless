@@ -28,6 +28,7 @@ const formSchema = z.object({
   address: z.string().optional(),
   city: z.string().optional(),
   postcode: z.string().optional(),
+  password: z.string().optional(),
 });
 
 export default function CreateUserGeneral() {
@@ -50,6 +51,7 @@ export default function CreateUserGeneral() {
       address: user?.address || '',
       city: user?.city || '',
       postcode: user?.postcode || '',
+      password: user?.password || '',
     }),
     [user]
   );
@@ -162,6 +164,20 @@ export default function CreateUserGeneral() {
                 <FormLabel>Postcode</FormLabel>
                 <FormControl>
                   <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input type="password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
