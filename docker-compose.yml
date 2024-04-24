@@ -142,6 +142,7 @@ services:
       - API_URL=${API_URL}
       - ADMIN_URL=${ADMIN_URL}
       - ALLOWED_ADMIN_DOMAINS=["${ADMIN_DOMAIN}"]
+      - ENVIRONMENT_NAME=${ENVIRONMENT_NAME}
       - NODE_ENV=development
     ports:
       - '${AUTH_PORT}:${AUTH_PORT}'
