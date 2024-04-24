@@ -50,3 +50,12 @@
   background-color: black !important;
   max-width: none;
 }
+
+.pill-grid {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+.pill-grid p {
+  margin: 0;
+}

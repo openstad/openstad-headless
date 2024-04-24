@@ -7,6 +7,7 @@ import {
     Checkbox,
     Paragraph, FormFieldDescription,
 } from "@utrecht/component-library-react";
+import { Spacer } from '@openstad-headless/ui/src';
 
 export type CheckboxFieldProps = {
     title: string;
@@ -57,15 +58,18 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                 </FieldsetLegend>
 
                 {description &&
+                <>
                     <FormFieldDescription>
                         {description}
                     </FormFieldDescription>
+                    <Spacer size={.5} />
+                    </>
                 }
 
                 {choices?.map((choice, index) => (
                     <FormField type="checkbox" key={index}>
                         <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
-                            <FormLabel htmlFor={`${fieldKey}_${index}`} type="checkbox">
+                            <FormLabel htmlFor={`${fieldKey}_${index}`} type="checkbox" className="--label-grid">
                                 <Checkbox
                                     className="utrecht-form-field__input"
                                     id={`${fieldKey}_${index}`}
@@ -76,7 +80,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                                     onChange={handleChoiceChange}
                                     disabled={disabled}
                                 />
-                                {choice}
+                                <span>{choice}</span>
                             </FormLabel>
                         </Paragraph>
                     </FormField>
