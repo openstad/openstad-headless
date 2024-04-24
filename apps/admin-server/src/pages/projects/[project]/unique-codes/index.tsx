@@ -36,7 +36,6 @@ export default function ProjectCodes() {
   }, [uniquecodes])
   
   if (!uniquecodes?.data) return null;
-  console.log(filterData)
 
   return (
     <div>
