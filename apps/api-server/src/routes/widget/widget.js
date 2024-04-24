@@ -189,6 +189,7 @@ Object.keys(widgetDefinitions).forEach((widget) => {
 function getDefaultConfig(project, widgetType) {
 
   const loginUrl = `${config.url}/auth/project/${project.id}/login?useAuth=default&forceNewLogin=1&redirectUri=[[REDIRECT_URI]]`;
+  const loginUrlAnonymous = `${config.url}/auth/project/${project.id}/login?useAuth=anonymous&forceNewLogin=1&redirectUri=[[REDIRECT_URI]]`;
   const logoutUrl = `${config.url}/auth/project/${project.id}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
 
   let url = process.env.IMAGE_APP_URL;
@@ -205,6 +206,9 @@ function getDefaultConfig(project, widgetType) {
     },
     login: {
       url: loginUrl,
+      anonymous: {
+        url: loginUrlAnonymous,
+      },
     },
     logout: {
       url: logoutUrl,
