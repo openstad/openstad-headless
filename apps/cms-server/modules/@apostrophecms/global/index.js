@@ -20,6 +20,7 @@ module.exports = {
         };
         req.data.global.projectName = 'Openstad';
         req.project = self.apos.options.project;
+        req.data.global.projectTitle = req.project.title;
 
         // system defaults
         let cmsDefaults = process.env.CMS_DEFAULTS;
