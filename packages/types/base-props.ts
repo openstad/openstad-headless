@@ -6,6 +6,10 @@ export type BaseProps = {
   login?: {
     label?: string;
     url: string;
+    anonymous?: {
+      label?: string;
+      url: string;
+    };
   };
   logout?: {
     label?: string;
