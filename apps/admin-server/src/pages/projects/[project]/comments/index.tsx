@@ -6,6 +6,8 @@ import useComments from '@/hooks/use-comments';
 import Link from 'next/link';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import toast from 'react-hot-toast';
+import { sortTable, searchTable } from '@/components/ui/sortTable';
+
 
 export default function ProjectComments() {
   const router = useRouter();
@@ -33,6 +35,13 @@ export default function ProjectComments() {
     }
   }, [data]);
 
+  const [filterData, setFilterData] = useState(data);
+  const debouncedSearchTable = searchTable(setFilterData);
+
+  useEffect(() => {
+    setFilterData(data);
+  }, [data])
+
   return (
     <div>
       <PageLayout
@@ -51,16 +60,24 @@ export default function ProjectComments() {
           <div className="p-6 bg-white rounded-md">
             <div className="grid grid-cols-1 lg:grid-cols-7 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex lg:col-span-2">
-                Argument ID
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
+                  Argument ID
+                </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                Resource ID
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('resourceId', e, filterData))}>
+                  Resource ID
+                </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-2">
-                Geplaatst op
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('createdAt', e, filterData))}>
+                  Geplaatst op
+                </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                Sentiment
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('sentiment', e, filterData))}>
+                  Sentiment
+                </button>
               </ListHeading>
             </div>
             <ul>

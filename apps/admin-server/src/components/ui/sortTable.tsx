@@ -1,12 +1,18 @@
 const sortFunctions = {
     'date-added': (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    'createdAt': (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     'date-modified': (a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
     'id': (a: any, b: any) => b.id - a.id,
+    'resourceId': (a: any, b: any) => b.resourceId - a.resourceId,
     'type': (a: any, b: any) => b.type.toLowerCase().localeCompare(a.type.toLowerCase()),
     'resource': (a: any, b: any) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()),
     'voted-yes': (a: any, b: any) => b.resource?.yes || 0 - a.resource?.yes || 0,
     'voted-no': (a: any, b: any) => b.resource?.no || 0 - a.resource?.no || 0,
     'name': (a: any, b: any) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+    'code': (a: any, b: any) => b.code - a.code,
+    'ip': (a: any, b: any) => b.ip - a.ip,
+    'userId': (a: any, b: any) => b.userId - a.userId,
+
 };
 
 export const sortTable = (sortType: string, el: React.MouseEvent<HTMLElement, MouseEvent>, data: Array<any>) => {
