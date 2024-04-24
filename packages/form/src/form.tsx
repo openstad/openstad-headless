@@ -95,7 +95,7 @@ function Form({
                         <div className={`question question-type-${field.type}`} key={index}>
                             {renderField(field, index)}
                             <FormFieldErrorMessage className="error-message">
-                                {formErrors[field.fieldKey] && <span>{formErrors[field.fieldKey]}</span>}
+                                {field.fieldKey && formErrors[field.fieldKey] && <span>{formErrors[field.fieldKey]}</span>}
                             </FormFieldErrorMessage>
                         </div>
                     ))}
