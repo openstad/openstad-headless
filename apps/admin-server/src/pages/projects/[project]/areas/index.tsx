@@ -56,7 +56,7 @@ export default function ProjectAreas() {
           <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-1 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex">
-              <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
                   ID
                 </button>
               </ListHeading>
