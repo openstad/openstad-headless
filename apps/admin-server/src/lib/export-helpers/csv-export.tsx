@@ -1,5 +1,21 @@
-export const exportDataToCSV = (data, fileName, widgetName) => {
-  const normalizeData = (value) => {
+export const exportDataToCSV = (data: any, widgetName: string) => {
+  function transformString() {
+    widgetName = widgetName.replace(/\s+/g, '-').toLowerCase();
+    widgetName = widgetName.replace(/[^a-z0-9-]/g, '');
+    widgetName = widgetName.replace(/-+/g, '-');
+
+    const currentDate = new Date().toLocaleDateString('nl-NL', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).replace(/\//g, '-');
+
+    return `export-${widgetName}-${currentDate}`;
+  }
+
+  const fileName = transformString();
+
+  const normalizeData = (value: any) => {
         let parsedValue;
 
         try {
@@ -15,8 +31,8 @@ export const exportDataToCSV = (data, fileName, widgetName) => {
     return value;
   };
 
-  const createRow = (rowData, keys) => {
-    const rowValues = keys.map((key) => {
+  const createRow = (rowData: any, keys: any) => {
+    const rowValues = keys.map((key: any) => {
       return normalizeData(rowData[key]);
     });
 
@@ -24,14 +40,14 @@ export const exportDataToCSV = (data, fileName, widgetName) => {
   };
 
   const allKeys = data.reduce(
-    (acc, curr) => [...acc, ...Object.keys(curr.submittedData)],
+    (acc: any, curr: any) => [...acc, ...Object.keys(curr.submittedData)],
     ['ID', 'Aangemaakt op', 'Project ID', 'Widget', 'Gebruikers ID']
   );
   const columns = Array.from(new Set(allKeys));
 
   const headerRow = [...columns].join(';');
 
-  const dataRows = data.map((row) => {
+  const dataRows = data.map((row: any) => {
     const rowData = {
       ID: row.id,
       'Aangemaakt op' : row.createdAt,
