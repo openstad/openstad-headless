@@ -547,7 +547,7 @@ export default function WidgetResourceFormItems(
                                                             </SelectTrigger>
                                                         </FormControl>
                                                         <SelectContent>
-                                                            <SelectItem value="none">Geen antwoordopties</SelectItem>
+                                                            <SelectItem value="none">Informatie blok</SelectItem>
                                                             <SelectItem value="radiobox">Radio buttons</SelectItem>
                                                             <SelectItem value="text">Tekstveld</SelectItem>
                                                             <SelectItem value="checkbox">Checkboxes</SelectItem>
@@ -614,26 +614,27 @@ export default function WidgetResourceFormItems(
                                                 </FormItem>
                                             )}
                                         />
-                                        <FormField
-                                            control={form.control}
-                                            name="fieldKey"
-                                            render={({ field }) => {
-                                                const nonStaticType = ['none', 'radiobox', 'text', 'checkbox', 'map', 'upload'];
-                                                const type = form.watch('type');
-                                                const fieldKey = !nonStaticType.includes(type || '') ? type : '';
+                                        {form.watch('type') !== 'none' && (
+                                            <FormField
+                                                control={form.control}
+                                                name="fieldKey"
+                                                render={({ field }) => {
+                                                    const nonStaticType = ['none', 'radiobox', 'text', 'checkbox', 'map', 'upload'];
+                                                    const type = form.watch('type');
+                                                    const fieldKey = !nonStaticType.includes(type || '') ? type : '';
 
-                                                return (
-                                                    <FormItem>
-                                                        <FormLabel>Key voor het opslaan</FormLabel>
-                                                        <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
+                                                    return (
+                                                        <FormItem>
+                                                            <FormLabel>Key voor het opslaan</FormLabel>
+                                                            <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
 
-                                                        <Input {...field} disabled={!!fieldKey} />
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )
-                                            }
-                                            }
-                                        />
+                                                            <Input {...field} disabled={!!fieldKey} />
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
+                                        )}
                                         {form.watch('type') === 'tags' && (
                                             <FormField
                                                 control={form.control}
@@ -681,44 +682,46 @@ export default function WidgetResourceFormItems(
                                                 }}
                                             />
                                         )}
-                                        <FormField
-                                            control={form.control}
-                                            name="fieldRequired"
-                                            render={({ field }) => {
-                                                const staticType = ['title', 'summary', 'description'];
-                                                const type = form.watch('type');
-                                                const required = staticType.includes(type || '');
+                                        {form.watch('type') !== 'none' && (
+                                            <FormField
+                                                control={form.control}
+                                                name="fieldRequired"
+                                                render={({ field }) => {
+                                                    const staticType = ['title', 'summary', 'description'];
+                                                    const type = form.watch('type');
+                                                    const required = staticType.includes(type || '');
 
-                                                return (
-                                                    <FormItem>
-                                                        <FormLabel>
-                                                            Is dit veld verplicht?
-                                                            <InfoDialog content={'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'} />
-                                                        </FormLabel>
-                                                        <Select
-                                                            onValueChange={(e: string) => field.onChange(e === 'true')}
-                                                            value={
-                                                                required
-                                                                    ? 'true'
-                                                                    : (field.value ? 'true' : 'false')
-                                                            }
-                                                            disabled={required}
-                                                        >
-                                                            <FormControl>
-                                                                <SelectTrigger>
-                                                                    <SelectValue placeholder="Kies een optie" />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                <SelectItem value="true">Ja</SelectItem>
-                                                                <SelectItem value="false">Nee</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )
-                                            }}
-                                        />
+                                                    return (
+                                                        <FormItem>
+                                                            <FormLabel>
+                                                                Is dit veld verplicht?
+                                                                <InfoDialog content={'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'} />
+                                                            </FormLabel>
+                                                            <Select
+                                                                onValueChange={(e: string) => field.onChange(e === 'true')}
+                                                                value={
+                                                                    required
+                                                                        ? 'true'
+                                                                        : (field.value ? 'true' : 'false')
+                                                                }
+                                                                disabled={required}
+                                                            >
+                                                                <FormControl>
+                                                                    <SelectTrigger>
+                                                                        <SelectValue placeholder="Kies een optie" />
+                                                                    </SelectTrigger>
+                                                                </FormControl>
+                                                                <SelectContent>
+                                                                    <SelectItem value="true">Ja</SelectItem>
+                                                                    <SelectItem value="false">Nee</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
+                                        )}
                                         {form.watch('fieldType') === 'text' && (
                                             <>
                                                 <FormField

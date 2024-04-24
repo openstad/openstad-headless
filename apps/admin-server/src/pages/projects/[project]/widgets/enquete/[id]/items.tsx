@@ -601,21 +601,23 @@ export default function WidgetEnqueteItems(
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="fieldKey"
-                      render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Key voor het opslaan
-                              <InfoDialog content={'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'} />
-                              </FormLabel>
-                            <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
-                            <Input {...field} />
-                            <FormMessage/>
-                          </FormItem>
-                      )}
-                    />
+                    {form.watch('questionType') !== 'none' && (
+                      <FormField
+                        control={form.control}
+                        name="fieldKey"
+                        render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Key voor het opslaan
+                                <InfoDialog content={'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'} />
+                                </FormLabel>
+                              <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
+                              <Input {...field} />
+                              <FormMessage/>
+                            </FormItem>
+                        )}
+                      />
+                    )}
                     <FormField
                       control={form.control}
                       name="description"
@@ -643,7 +645,7 @@ export default function WidgetEnqueteItems(
                             </FormControl>
                             <SelectContent>
                               <SelectItem value="none">
-                                Geen antwoordopties
+                                Informatie blok
                               </SelectItem>
                               <SelectItem value="images">
                                 Twee antwoordopties met afbeeldingen

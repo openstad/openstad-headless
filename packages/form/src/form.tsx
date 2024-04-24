@@ -9,8 +9,9 @@ import TickmarkSlider from "@openstad-headless/ui/src/form-elements/tickmark-sli
 import FileUploadField from "@openstad-headless/ui/src/form-elements/file-upload";
 import MapField from "@openstad-headless/ui/src/form-elements/map";
 import { handleSubmit } from "./submit";
-import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden/index.js";
-import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choice/index.js";
+import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden";
+import ImageChoiceField from "@openstad-headless/ui/src/form-elements/image-choice";
+import InfoField from "@openstad-headless/ui/src/form-elements/info";
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
 import './form.css'
 
@@ -63,6 +64,7 @@ function Form({
         map: MapField as React.ComponentType<ComponentFieldProps>,
         hidden: HiddenInput as React.ComponentType<ComponentFieldProps>,
         imageChoice: ImageChoiceField as React.ComponentType<ComponentFieldProps>,
+        none: InfoField as React.ComponentType<ComponentFieldProps>,
     };
 
     const renderField = (field: ComponentFieldProps, index: number) => {

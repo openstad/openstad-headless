@@ -36,7 +36,7 @@ export const InitializeFormFields = (items, data) => {
             }
 
             const fieldData: any = {
-                type: item.fieldType,
+                type: item.fieldType || item.type,
                 title: item.title,
                 description: item.description,
                 fieldKey: item.fieldKey,
