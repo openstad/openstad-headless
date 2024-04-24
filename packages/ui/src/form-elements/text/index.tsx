@@ -42,12 +42,12 @@ const TextInput: FC<TextInputProps> = ({
     const [isFocused, setIsFocused] = useState(false);
     const [helpText, setHelpText] = useState('');
 
-    const characterHelpText = (count) => {
+    const characterHelpText = (count: number) => {
         let helpText = '';
 
-        if (!!minCharacters && count < minCharacters) {
+        if (minCharacters && count < minCharacters) {
             helpText = minCharactersWarning?.replace('{minCharacters}', (minCharacters - count).toString());
-        } else if (!!maxCharacters && count < maxCharacters) {
+        } else if (maxCharacters && count < maxCharacters) {
             helpText = maxCharactersWarning?.replace('{maxCharacters}', (maxCharacters - count).toString());
         }
 

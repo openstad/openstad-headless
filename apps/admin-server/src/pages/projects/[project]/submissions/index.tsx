@@ -20,7 +20,7 @@ export default function ProjectSubmissions() {
   const [filterData, setFilterData] = useState(data);
   const debouncedSearchTable = searchTable(setFilterData);
   const [activeWidget, setActiveWidget] = useState("0");
-  const [allWidgets, setAllWidgets] = useState([]);
+  const [allWidgets, setAllWidgets] = useState<{ id: number; name: string }[]>([]);
 
   useEffect(() => {
     let loadedTags = (data || []) as { createdAt: string }[];
@@ -41,13 +41,13 @@ export default function ProjectSubmissions() {
 
   useEffect(() => {
     if (!!data && !!widgetData) {
-      let widgets = [];
+      let widgets: { id: number; name: string }[] = [];
 
       data.forEach((submission: any) => {
         const widgetId = submission.widgetId;
-        const usedWidget = widgetData.find((widget) => widget.id === widgetId);
+        const usedWidget = widgetData.find((widget: any) => widget.id === widgetId);
 
-        if (usedWidget && !widgets.some((widget) => widget.id === usedWidget.id)) {
+        if (usedWidget && !widgets.some((widget: any) => widget.id === usedWidget.id)) {
           widgets.push({
             id: usedWidget.id,
             name: usedWidget.description
@@ -59,9 +59,9 @@ export default function ProjectSubmissions() {
     }
   }, [data, widgetData]);
 
-  const selectClick = (value) => {
+  const selectClick = (value: any) => {
     const ID = value !== "0" ? value?.split(" - ")[0] : "0";
-    const filteredData = ID === "0" ? data : data?.filter((submission) => (submission.widgetId).toString() === ID);
+    const filteredData = ID === "0" ? data : data?.filter((submission: any) => (submission.widgetId).toString() === ID);
 
     setFilterData(filteredData);
     setActiveWidget(value);
@@ -88,7 +88,6 @@ export default function ProjectSubmissions() {
             <Select
               value={activeWidget}
               onValueChange={selectClick}
-              className="w-auto"
             >
                 <SelectTrigger
                   className="w-auto"
@@ -97,7 +96,7 @@ export default function ProjectSubmissions() {
                 </SelectTrigger>
               <SelectContent>
                 <SelectItem value="0">Filter inzendingen op widget</SelectItem>
-                {allWidgets?.map((widget) => (
+                {allWidgets?.map((widget: any) => (
                   <SelectItem key={widget.id} value={`${widget.id} - ${widget.name}`}>{`${widget.id} - ${widget.name}`}</SelectItem>
                 ))}
 
@@ -107,7 +106,7 @@ export default function ProjectSubmissions() {
             <Button
               className="text-xs p-2"
               type="submit"
-              onClick={() => exportDataToCSV(filterData, 'submissions', activeWidget)}
+              onClick={() => exportDataToCSV(filterData, activeWidget)}
               disabled={activeWidget === "0"}
             >
               Exporteer inzendingen .csv
@@ -153,12 +152,13 @@ export default function ProjectSubmissions() {
             <ul>
               {filterData?.map((submission: any) => {
                 const userId = submission.userId;
-                const user = usersData?.find((user) => user.id === userId) || null;
+                const user = usersData?.find((user: any) => user.id === userId) || null;
                 const currentUserKey = !!user && user.idpUser?.identifier && user.idpUser?.provider ? `${user.idpUser.provider}-*-${user.idpUser.identifier}` : ( user?.id?.toString() || 'unknown' );
 
                 const widgetId = submission.widgetId;
-                const usedWidget = widgetData?.find((widget) => widget.id === widgetId) || null;
+                const usedWidget = widgetData?.find((widget: any) => widget.id === widgetId) || null;
                 const widgetName = usedWidget ? usedWidget.description : null;
+                const widgetType = usedWidget ? usedWidget.type : null;
 
                 return (
                   <li

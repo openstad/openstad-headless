@@ -57,7 +57,7 @@ function CommentForm({
     formFields.push({
       type: 'hidden',
       fieldKey: 'parentId',
-      defaultValue: parentId,
+      defaultValue: parentId.toString(),
     });
   }
 
