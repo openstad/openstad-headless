@@ -81,10 +81,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     return NextResponse.redirect( newUrl, { headers: res.headers });
   }
 
-  if (!(
-      req.nextUrl.pathname.startsWith('/_') ||         // not on internal urls
-      req.nextUrl.pathname.startsWith('/api/openstad') // api routes require user but will nog login
-     )) {
+  if (!(req.nextUrl.pathname.startsWith('/_'))) { // not on internal urls
 
     let forceNewLogin = false;
 
@@ -119,14 +116,15 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     }
 
     // login if token not found
-    if (!jwt) {
+    if (!jwt && !req.nextUrl.pathname.startsWith('/api/openstad')) {
+       // api routes require user but will nog login
       return signIn(req, res, targetProjectId, forceNewLogin)
     }
 
   }
 
   // api requests: add jwt
-  if (req.nextUrl.pathname.startsWith('/api/openstad')) {
+  if (jwt && req.nextUrl.pathname.startsWith('/api/openstad')) {
     let path = req.nextUrl.pathname.replace('/api/openstad', '');
     let query = searchParams ? '?' + searchParams.toString() : '';
     query = query.replace(/openstadlogintoken=(?:.(?!&|$))+./, '');
