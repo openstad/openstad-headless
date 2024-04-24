@@ -83,7 +83,6 @@ router
 router
   .route('(/project/:projectId)?/login')
   .get(function (req, res, next) {
-
     // logout first?
     if (!req.query.forceNewLogin) return next();
     let baseUrl = config.url
@@ -91,17 +90,14 @@ router
     backToHereUrl = encodeURIComponent(backToHereUrl)
     let url = baseUrl + '/auth/project/' + req.project.id + '/logout?redirectUri=' + backToHereUrl;
     return res.redirect(url)
-
   })
   .get(function (req, res, next) {
     // redirect to idp server
     let redirectUri = encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.redirectUri);
     let url = `${req.authConfig.serverUrl}/dialog/authorize`;
-    if (req.query.loginPriviliged) url = `${req.authConfig.serverUrl}/auth/admin/login`,
-    url += `?redirect_uri=${redirectUri}&response_type=code&client_id=${req.authConfig.clientId}&scope=offline`;
-    console.log(url);
+    if (req.query.loginPriviliged) url = `${req.authConfig.serverUrl}/auth/admin/login`;
+    url = `${url}?redirect_uri=${redirectUri}&response_type=code&client_id=${req.authConfig.clientId}&scope=offline`;
     res.redirect(url);
-
   })
 
 // ----------------------------------------------------------------------------------------------------
