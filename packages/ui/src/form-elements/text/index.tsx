@@ -30,9 +30,9 @@ const TextInput: FC<TextInputProps> = ({
     defaultValue= '',
     onChange,
     disabled = false,
-    minCharacters = '',
+    minCharacters = 0,
     minCharactersWarning = 'Nog minimaal {minCharacters} tekens',
-    maxCharacters = '',
+    maxCharacters = 0,
     maxCharactersWarning = 'Je hebt nog {maxCharacters} tekens over',
     rows,
 }) => {
@@ -45,9 +45,9 @@ const TextInput: FC<TextInputProps> = ({
     const characterHelpText = (count: number) => {
         let helpText = '';
 
-        if (minCharacters && count < minCharacters) {
+        if (!!minCharacters && count < minCharacters) {
             helpText = minCharactersWarning?.replace('{minCharacters}', (minCharacters - count).toString());
-        } else if (maxCharacters && count < maxCharacters) {
+        } else if (!!maxCharacters && count < maxCharacters) {
             helpText = maxCharactersWarning?.replace('{maxCharacters}', (maxCharacters - count).toString());
         }
 
