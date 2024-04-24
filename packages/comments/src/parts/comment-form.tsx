@@ -14,6 +14,9 @@ function CommentForm({
   descriptionMaxLength = 500,
   formIntro = 'Test',
   placeholder = 'Type hier uw reactie',
+  parentId = 0,
+  activeMode = '',
+  sentiment = '',
   ...props
 }: CommentFormProps) {
   const commentsContext = useContext(CommentWidgetContext);
@@ -37,24 +40,31 @@ function CommentForm({
     requiredWarning: 'Dit veld is verplicht',
     fieldKey: 'description',
     placeholder: commentsContext?.placeholder,
-    defaultValue: args.comment?.description,
+    defaultValue: !parentId ? args.comment?.description : '',
+  });
+
+  formFields.push({
+    type: 'hidden',
+    fieldKey: 'sentiment',
+    defaultValue: sentiment,
   });
 
   if (
     typeof args.comment !== 'undefined' &&
-    typeof args.comment.parentId !== 'undefined' &&
-    args.comment.parentId !== null
+    !!parentId &&
+    activeMode === 'reply'
   ) {
     formFields.push({
       type: 'hidden',
       fieldKey: 'parentId',
-      defaultValue: args.comment.parentId.toString(),
+      defaultValue: parentId.toString(),
     });
   }
 
   if (
     typeof args.comment !== 'undefined' &&
-    typeof args.comment.id !== 'undefined'
+    typeof args.comment.id !== 'undefined' &&
+    activeMode === 'edit'
   ) {
     formFields.push({
       type: 'hidden',

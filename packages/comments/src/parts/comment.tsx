@@ -106,8 +106,9 @@ function Comment({
       {editMode ? (
         <CommentForm
           {...args}
-          placeholder={widgetContext.placeholder}
+          activeMode="edit"
           comment={args.comment}
+          placeholder={widgetContext.placeholder}
           submitComment={(e) => {
             if(props.submitComment) {
               props.submitComment(e);
@@ -176,9 +177,10 @@ function Comment({
           <div className="input-container">
             <CommentForm
               {...args}
+              activeMode="reply"
               formIntro="Reageer op deze reactie"
-              placeholder={widgetContext.placeholder}
               parentId={args.comment.id}
+              placeholder={widgetContext.placeholder}
               // hideReplyAsAdmin={true}
               submitComment={(e) => {
                 if(props.submitComment) {
