@@ -15,7 +15,7 @@ import {
 import { MoreHorizontal } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useUniqueCodes from '@/hooks/use-unique-codes';
-import { sortTable } from '@/components/ui/sortTable';
+import { searchTable, sortTable } from '@/components/ui/sortTable';
 
 const headers = [
   { label: "ID", key: "id" },
@@ -29,6 +29,7 @@ export default function ProjectCodes() {
 
 
   const [filterData, setFilterData] = useState(uniquecodes?.data);
+  const debouncedSearchTable = searchTable(setFilterData);
 
   useEffect(() => {
     setFilterData(uniquecodes?.data);
@@ -67,7 +68,14 @@ export default function ProjectCodes() {
           </div>
         }>
         <div className="container py-6">
-          <div className="p-6 bg-white rounded-md">
+        <input
+            type="text"
+            className='mb-4 p-2 rounded float-right'
+            placeholder="Zoeken..."
+            onChange={(e) => debouncedSearchTable(e.target.value, filterData, uniquecodes?.data)}
+          />
+
+          <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-1 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex truncate">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
