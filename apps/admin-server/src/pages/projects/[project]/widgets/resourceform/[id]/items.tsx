@@ -722,7 +722,7 @@ export default function WidgetResourceFormItems(
                                                 }}
                                             />
                                         )}
-                                        {form.watch('fieldType') === 'text' && (
+                                        {form.watch('fieldType') === 'text' || form.watch('type') === 'text' && (
                                             <>
                                                 <FormField
                                                     control={form.control}
