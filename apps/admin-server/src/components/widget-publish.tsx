@@ -12,7 +12,7 @@ export default function WidgetPublish({ apiUrl }: { apiUrl: string }) {
   const widgetScriptTag = `<script src="${apiUrl}/widget/${id}" type="text/javascript"></script>`;
   const widgetUrl = `${apiUrl}/widget/${id}`;
 
-  const onCopy = (textToBeCopied, toastStart) => {
+  const onCopy = (textToBeCopied: string, toastStart: string) => {
     navigator.clipboard.writeText(textToBeCopied);
     toast.success(`${toastStart} gekopieerd naar klembord`);
   };
@@ -27,8 +27,8 @@ export default function WidgetPublish({ apiUrl }: { apiUrl: string }) {
       <p>
         <em>
           Voeg bovenstaande code toe op de plek waar u de widget wilt tonen.<br />
-          Met de 'Kopieer code' knop wordt bovenstaande code in zijn geheel gekopieerd.<br />
-          Met de 'Kopieer widget URL' knop wordt alleen de URL gekopieerd die bij de src tussen aanhalingstekens staat.
+          Met de &apos;Kopieer code&apos; knop wordt bovenstaande code in zijn geheel gekopieerd.<br />
+          Met de &apos;Kopieer widget URL&apos; knop wordt alleen de URL gekopieerd die bij de src tussen aanhalingstekens staat.
         </em>
       </p>
       <div className="flex gap-4 p-0">
