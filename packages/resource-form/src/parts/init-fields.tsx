@@ -36,7 +36,7 @@ export const InitializeFormFields = (items, data) => {
             }
 
             const fieldData: any = {
-                type: item.fieldType,
+                type: item.fieldType || item.type,
                 title: item.title,
                 description: item.description,
                 fieldKey: item.fieldKey,
@@ -45,13 +45,11 @@ export const InitializeFormFields = (items, data) => {
                 maxCharacters: getMinMaxByField(`${item.fieldKey}MaxLength`, data) || item.maxCharacters || '',
                 variant: item.variant,
                 multiple: item.multiple,
-                options: item.options
+                options: item.options,
+                rows: 5
             };
 
             switch (item.fieldType) {
-                case 'text':
-                    fieldData['rows'] = 4;
-                    break;
                 case 'checkbox':
                 case 'select':
                 case 'radiobox':

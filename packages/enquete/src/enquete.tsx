@@ -116,6 +116,9 @@ function Enquete(props: EnqueteWidgetProps) {
                         { value: 'Laugh', label: <Icon icon="ri-emotion-laugh-line" /> },
                     ];
                     break;
+                case 'none':
+                    fieldData['type'] = 'none';
+                    break;
             }
 
             formFields.push(fieldData);
