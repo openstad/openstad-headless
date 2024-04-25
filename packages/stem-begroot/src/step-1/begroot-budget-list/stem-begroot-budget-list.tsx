@@ -78,6 +78,8 @@ export const StemBegrootBudgetList = ({
                       }}
                       className="subtle-button"
                       icon="ri-close-line"
+                      iconOnly={true}
+                      text='Item verwijderen'
                     />
                   </div>
                 }

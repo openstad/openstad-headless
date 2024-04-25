@@ -11,6 +11,7 @@ type Props = {
   placeholder?: string;
   onlyIncludeIds?: number[];
   onUpdateFilter?: (filter: string) => void;
+  title: string;
 };
 
 type TagDefinition = { id: number; name: string };
@@ -38,6 +39,7 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
           value: tag.id,
           label: tag.name,
         }))}
+        title={props.title}
         onValueChange={(value) => {
           onUpdateFilter && onUpdateFilter(value);
         }}>
