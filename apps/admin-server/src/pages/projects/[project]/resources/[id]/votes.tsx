@@ -48,7 +48,7 @@ export default function ProjectResourceVotes() {
               {votes?.map((vote: any) => {
                 const userId = vote.userId;
                 const user = usersData?.find((user: any) => user.id === userId) || null;
-                const currentUserKey = !!user && user.idpUser?.identifier && user.idpUser?.provider ? `${user.idpUser.provider}-*-${user.idpUser.identifier}` : ( user.id?.toString() || 'unknown' );
+                const currentUserKey = !!user && user.idpUser?.identifier && user.idpUser?.provider ? `${user.idpUser.provider}-*-${user.idpUser.identifier}` : ( user?.id?.toString() || 'unknown' );
 
                 return (
                   <li
