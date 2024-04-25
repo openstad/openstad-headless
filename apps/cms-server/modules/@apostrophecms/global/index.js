@@ -52,6 +52,7 @@ module.exports = {
 
   fields: {
     add: {
+
       siteTitle: {
         type: 'string',
         label: 'Site titel',
@@ -94,6 +95,113 @@ module.exports = {
             },
           },
         },
+      },
+
+      showLoginButton: {
+        type: 'boolean',
+        def: 'false',
+        label: 'Toon login knop',
+      },
+
+      loginButtonLabel: {
+        label: 'Login knop tekst',
+        def: 'Login',
+        type: 'string',
+        if: {
+          showLoginButton: true,
+        },
+      },
+
+      loginButtonAppearance: {
+        type: 'select',
+        label: 'Login knop variant',
+        def: 'primary-action',
+        choices: [
+          {
+            label: 'primary-action',
+            value: 'primary-action',
+          },
+          {
+            label: 'secondary-action',
+            value: 'secondary-action',
+          },
+        ],
+        if: {
+          showLoginButton: true,
+        },
+      },
+
+      showAccountButton: {
+        type: 'boolean',
+        def: 'false',
+        label: 'Toon \'mijn account\' knop',
+      },
+
+      accountButtonHref: {
+        label: 'Link naar \'mijn account\' pagina',
+        def: '/account',
+        type: 'string',
+        if: {
+          showAccountButton: true,
+        },
+      },
+
+      accountButtonLabel: {
+        label: '\'Mijn account\' knop tekst',
+        def: 'Mijn account',
+        type: 'string',
+        help: '[[name]] wordt vervangen door de naam van de gebruiker',
+        if: {
+          showAccountButton: true,
+        },
+      },
+
+      accountButtonAppearance: {
+        type: 'select',
+        label: '\'Mijn account\' knop variant',
+        def: 'primary-action',
+        choices: [
+          {
+            label: 'primary-action',
+            value: 'primary-action',
+          },
+          {
+            label: 'secondary-action',
+            value: 'secondary-action',
+          },
+        ],
+        if: {
+          showAccountButton: true,
+        },
+      },
+
+      logoutButtonLabel: {
+        label: 'Loguit knop tekst',
+        def: 'Logout',
+        help: '[[name]] wordt vervangen door de naam van de gebruiker',
+        type: 'string',
+      },
+
+      logoutButtonAppearance: {
+        type: 'select',
+        label: 'Loguit knop variant',
+        def: 'primary-action',
+        choices: [
+          {
+            label: 'primary-action',
+            value: 'primary-action',
+          },
+          {
+            label: 'secondary-action',
+            value: 'secondary-action',
+          },
+        ],
+      },
+
+      siteLogo: {
+        type: 'attachment',
+        label: 'Site logo',
+        fileGroup: 'images',
       },
 
       cssExtras: {
@@ -238,6 +346,10 @@ module.exports = {
       css: {
         label: 'Vormgeving',
         fields: ['cssExtras', 'customCssLink', 'compactMenu'],
+      },
+      login: {
+        label: 'Gebruikers login',
+        fields: ['showLoginButton', 'loginButtonLabel', 'loginButtonAppearance', 'showAccountButton', 'accountButtonHref', 'accountButtonLabel', 'accountButtonAppearance', 'logoutButtonLabel', 'logoutButtonAppearance'],
       },
       cookies: {
         label: 'Cookie instellingen',

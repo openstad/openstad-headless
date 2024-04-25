@@ -177,6 +177,21 @@ app.use('/config-reset', async function (req, res, next) {
   next();
 });
 
+function createReturnUrl(req, res) {
+  // check in url if returnTo params is set for redirecting to page
+  // req.session.returnTo = req.query.returnTo ? decodeURIComponent(req.query.returnTo) : null;
+  const thisHost = req.headers['x-forwarded-host'] || req.get('host');
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+  let returnUrl = protocol + '://' + thisHost;
+  if (req.query.returnTo && typeof req.query.returnTo === 'string') {
+    // only get the pathname to prevent external redirects
+    let pathToReturnTo = Url.parse(req.query.returnTo, true);
+    pathToReturnTo = pathToReturnTo.path;
+    returnUrl = returnUrl + pathToReturnTo;
+  }
+  return returnUrl;
+}
+
 app.use(':priviliged(/admin)?/login', function (req, res, next) {
   const domainAndPath = req.openstadDomain;
   const i = req.url.indexOf('?');
@@ -190,25 +205,12 @@ app.use(':priviliged(/admin)?/login', function (req, res, next) {
 });
 
 app.get('/auth/login', (req, res, next) => {
-  // check in url if returnTo params is set for redirecting to page
-  // req.session.returnTo = req.query.returnTo ? decodeURIComponent(req.query.returnTo) : null;
+
+  let returnUrl = createReturnUrl(req, res);
+  returnUrl = encodeURIComponent(returnUrl + '?openstadlogintoken=[[jwt]]');
+
   let projectDomain = process.env.OVERWRITE_DOMAIN ? process.env.OVERWRITE_DOMAIN : req.openstadDomain;
   const project = (projects[projectDomain] ? projects[projectDomain] : false);
-  //const project = projects[0];
-
-  //    req.session.save(() => {
-  const thisHost = req.headers['x-forwarded-host'] || req.get('host');
-  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-  let returnUrl = protocol + '://' + thisHost;
-
-  if (req.query.returnTo && typeof req.query.returnTo === 'string') {
-    // only get the pathname to prevent external redirects
-    let pathToReturnTo = Url.parse(req.query.returnTo, true);
-    pathToReturnTo = pathToReturnTo.path;
-    returnUrl = returnUrl + pathToReturnTo;
-  }
-
-  returnUrl = encodeURIComponent(returnUrl + '?openstadlogintoken=[[jwt]]');
 
   const apiUrl = process.env.API_URL;
   let url = `${apiUrl}/auth/project/${project.id}/login?redirectUri=${returnUrl}`;
@@ -216,6 +218,32 @@ app.get('/auth/login', (req, res, next) => {
   url = req.query.loginPriviliged ? url + '&loginPriviliged=1' : url + '&forceNewLogin=1'; // ;
 
   return res.redirect(url);
+
+});
+
+app.use('/logout', function (req, res, next) {
+  const domainAndPath = req.openstadDomain;
+  const i = req.url.indexOf('?');
+  let query = req.url.substr(i + 1);
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+  const url = protocol + '://' + domainAndPath + '/auth/logout';
+  return res.redirect(url && query ? url + '?' + query : url);
+});
+
+app.get('/auth/logout', (req, res, next) => {
+
+  let returnUrl = createReturnUrl(req, res);
+
+  let projectDomain = process.env.OVERWRITE_DOMAIN ? process.env.OVERWRITE_DOMAIN : req.openstadDomain;
+  const project = (projects[projectDomain] ? projects[projectDomain] : false);
+
+  const apiUrl = process.env.API_URL;
+  let url = `${apiUrl}/auth/project/${project.id}/logout?redirectUri=${returnUrl}`;
+  url = req.query.useOauth ? url + '&useOauth=' + req.query.useOauth : url;
+  url = req.query.loginPriviliged ? url + '&loginPriviliged=1' : url + '&forceNewLogin=1'; // ;
+
+  return res.redirect(url);
+
 });
 
 app.use(async function (req, res, next) {
