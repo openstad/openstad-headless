@@ -39,20 +39,22 @@ const formSchema = z.object({
   minCharacters: z.string().optional(),
   maxCharacters: z.string().optional(),
   variant: z.string().optional(),
-  images: z
-    .array(z.object({ image: z.any().optional(), src: z.string() }))
-    .optional(),
   options: z
     .array(
       z.object({
         trigger: z.string(),
         titles: z.array(z.object({ text: z.string(), key: z.string() })),
-        images: z
-          .array(z.object({ image: z.any().optional() }))
-          .optional(),
       })
     )
     .optional(),
+  image1Upload: z.string().optional(),
+  image1: z.string().optional(),
+  text1: z.string().optional(),
+  key1: z.string().optional(),
+  image2: z.string().optional(),
+  image2Upload: z.string().optional(),
+  text2: z.string().optional(),
+  key2: z.string().optional(),
 });
 
 export default function WidgetEnqueteItems(
@@ -93,6 +95,12 @@ export default function WidgetEnqueteItems(
           maxCharacters: values.maxCharacters,
           variant: values.variant || 'text input',
           options: values.options || [],
+          image1: values.image1 || '',
+          text1: values.text1 || '',
+          key1: values.key1 || '',
+          image2: values.image2 || '',
+          text2: values.text2 || '',
+          key2: values.key2 || '',
         },
       ]);
     }
@@ -111,9 +119,6 @@ export default function WidgetEnqueteItems(
                 titles:
                   values.options?.find((o) => o.trigger === option.trigger)
                     ?.titles || [],
-                images:
-                  values.options?.find((o) => o.trigger === option.trigger)
-                    ?.images || [],
               }
             : option
         )
@@ -127,7 +132,6 @@ export default function WidgetEnqueteItems(
             : 0
         }`,
         titles: values.options?.[values.options.length - 1].titles || [],
-        images: values.options?.[values.options.length - 1].images || [],
       };
       setOptions((currentOptions) => [...currentOptions, newOption]);
     }
@@ -146,6 +150,12 @@ export default function WidgetEnqueteItems(
     maxCharacters: '',
     variant: 'text input',
     options: [],
+    image1: '',
+    text1: '',
+    key1: '',
+    image2: '',
+    text2: '',
+    key2: '',
   });
 
   const form = useForm<FormData>({
@@ -177,6 +187,12 @@ export default function WidgetEnqueteItems(
         maxCharacters: selectedItem.maxCharacters || '',
         variant: selectedItem.variant || '',
         options: selectedItem.options || [],
+        image1: selectedItem.image1 || '',
+        text1: selectedItem.text1 || '',
+        key1: selectedItem.key1 || '',
+        image2: selectedItem.image2 || '',
+        text2: selectedItem.text2 || '',
+        key2: selectedItem.key2 || '',
       });
       setOptions(selectedItem.options || []);
     }
@@ -255,8 +271,6 @@ export default function WidgetEnqueteItems(
 
   const hasOptions = () => {
     switch (form.watch('questionType')) {
-      case 'images':
-        return true;
       case 'multiplechoice':
         return true;
       case 'multiple':
@@ -290,7 +304,6 @@ export default function WidgetEnqueteItems(
 
   return (
     <div>
-      {/* <ImageUploader /> */}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -361,111 +374,6 @@ export default function WidgetEnqueteItems(
                   <div className="flex flex-col gap-y-2">
                     <Heading size="xl">Antwoordopties</Heading>
                     <Separator className="mt-2" />
-                    {form.watch('questionType') === 'images' && (
-                      <>
-                        <ImageUploader
-                          form={form}
-                          fieldName="image1"
-                          imageLabel="Afbeelding 1"
-                          allowedTypes="image/*"
-                          onImageUploaded={(imageResult) => {
-                            const image = imageResult ? imageResult.url : undefined;
-                            const options = form.getValues("options");
-                            const optionsKey = options.length - 1;
-                            const newOptions = [...options];
-                            if (newOptions[optionsKey]?.images[0]) {
-                              newOptions[optionsKey].images[0].image = image;
-                            }
-
-                            form.setValue("options", newOptions);
-                            form.resetField('image1');
-                            form.trigger('options');
-
-                            setOptions(newOptions);
-                          }}
-                        />
-
-                        { options[options.length - 1]?.images[0]?.image && (
-                          <div style={{ position: 'relative' }}>
-                            <img src={options[options.length - 1]?.images[0]?.image} />
-                          </div>
-                        )}
-
-                        <FormField
-                          control={form.control}
-                          name={`options.${options.length - 1}.titles.0.key`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Key afbeelding 1</FormLabel>
-                              <Input {...field} />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`options.${options.length - 1}.titles.0.text`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Titel afbeelding 1</FormLabel>
-                              <Input {...field} />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <ImageUploader
-                          form={form}
-                          fieldName="image2"
-                          imageLabel="Afbeelding 2"
-                          allowedTypes="image/*"
-                          onImageUploaded={(imageResult) => {
-                            const image = imageResult ? imageResult.url : undefined;
-                            const options = form.getValues("options");
-                            const optionsKey = options.length - 1;
-                            const newOptions = [...options];
-                            if (newOptions[optionsKey]?.images[1]) {
-                              newOptions[optionsKey].images[1].image = image;
-                            }
-
-                            form.setValue("options", newOptions);
-                            form.resetField('image2');
-                            form.trigger('options');
-
-                            setOptions(newOptions);
-                          }}
-                        />
-
-                        { options[options.length - 1]?.images[1]?.image && (
-                          <div style={{ position: 'relative' }}>
-                            <img src={options[options.length - 1]?.images[1]?.image} />
-                          </div>
-                        )}
-
-                        <FormField
-                          control={form.control}
-                          name={`options.${options.length - 1}.titles.1.key`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Key afbeelding 2</FormLabel>
-                              <Input {...field} />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`options.${options.length - 1}.titles.1.text`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Titel afbeelding 2</FormLabel>
-                              <Input {...field} />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </>
-                    )}
                     {hasList() && (
                       <>
                         <FormField
@@ -602,7 +510,7 @@ export default function WidgetEnqueteItems(
                 <div>
                   <Heading size="xl">Enquete items</Heading>
                   <Separator className="my-4" />
-                  <div className="w-full lg:w-2/3 flex flex-col gap-y-2">
+                  <div className="w-full lg:w-2/3 flex flex-col grid gap-y-4">
                     <FormField
                       control={form.control}
                       name="trigger"
@@ -736,6 +644,94 @@ export default function WidgetEnqueteItems(
                             />
                         </>
                     )}
+                    {form.watch('questionType') === 'images' && (
+                      <>
+                        <ImageUploader
+                          form={form}
+                          fieldName="image1Upload"
+                          imageLabel="Afbeelding 1"
+                          allowedTypes="image/*"
+                          onImageUploaded={(imageResult) => {
+                            const image = imageResult ? imageResult.url : '';
+
+                            form.setValue("image1", image);
+                            form.resetField('image1Upload');
+                          }}
+                        />
+
+                        { !!form.getValues('image1') && (
+                          <div style={{ position: 'relative' }}>
+                            <img src={form.getValues('image1')} />
+                          </div>
+                        )}
+
+                        <FormField
+                          control={form.control}
+                          name="key1"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Key afbeelding 1</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="text1"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Titel afbeelding 1</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <ImageUploader
+                          form={form}
+                          fieldName="image2Upload"
+                          imageLabel="Afbeelding 2"
+                          allowedTypes="image/*"
+                          onImageUploaded={(imageResult) => {
+                            const image = imageResult ? imageResult.url : '';
+
+                            form.setValue("image2", image);
+                            form.resetField('image2Upload');
+                          }}
+                        />
+
+                        { !!form.getValues('image2') && (
+                          <div style={{ position: 'relative' }}>
+                            <img src={form.getValues('image2')} />
+                          </div>
+                        )}
+
+                        <FormField
+                          control={form.control}
+                          name="key2"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Key afbeelding 2</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="text2"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Titel afbeelding 2</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                    </>
+                    )}
+
                     {hasOptions() && (
                       <FormItem>
                         <Button

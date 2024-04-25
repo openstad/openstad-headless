@@ -92,19 +92,19 @@ function Enquete(props: EnqueteWidgetProps) {
                     break;
                 case 'images':
                     fieldData['type'] = 'imageChoice';
+                    fieldData['choices'] = [
+                      {
+                          label: item?.text1 || '',
+                          value: item?.key1 || '',
+                          imageSrc: item?.image1 || ''
+                      },
+                      {
+                          label: item?.text2 || '',
+                          value: item?.key2 || '',
+                          imageSrc: item?.image2 || ''
+                      }
+                    ];
 
-                    if (item.options &&
-                    item.options?.length > 0 &&
-                    item.options[0].titles &&
-                    item.options[0].titles.length > 0) {
-                        fieldData['choices'] = item.options[0].titles.map((option, index) => {
-                            return {
-                                label: option.text,
-                                value: option.key,
-                                imageSrc: item.options?.at(0)?.images?.at(index)?.image || '',
-                            };
-                        });
-                    }
                     break;
                 case 'scale':
                     fieldData['type'] = 'tickmark-slider';

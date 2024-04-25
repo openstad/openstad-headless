@@ -19,20 +19,18 @@ export type Item = {
   minCharacters?: string;
   maxCharacters?: string;
   variant?: string;
-  images?: Array<{
-    image?: any;
-    src: string;
-  }>;
+  image1?: string;
+  text1?: string;
+  key1?: string;
+  image2?: string;
+  text2?: string;
+  key2?: string;
   options?: Array<Option>;
 };
 
 export type Option = {
   trigger: string;
   titles: Array<Title>;
-  images?: Array<{
-    image?: any;
-    src: string;
-  }>;
 };
 
 export type Title = {
