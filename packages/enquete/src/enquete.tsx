@@ -101,7 +101,7 @@ function Enquete(props: EnqueteWidgetProps) {
                             return {
                                 label: option.text,
                                 value: option.key,
-                                imageSrc: item.options?.at(0)?.images?.at(index)?.src || '',
+                                imageSrc: item.options?.at(0)?.images?.at(index)?.image || '',
                             };
                         });
                     }

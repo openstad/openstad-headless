@@ -48,7 +48,7 @@ const formSchema = z.object({
         trigger: z.string(),
         titles: z.array(z.object({ text: z.string(), key: z.string() })),
         images: z
-          .array(z.object({ image: z.any().optional(), src: z.string() }))
+          .array(z.object({ image: z.any().optional() }))
           .optional(),
       })
     )
@@ -363,23 +363,34 @@ export default function WidgetEnqueteItems(
                     <Separator className="mt-2" />
                     {form.watch('questionType') === 'images' && (
                       <>
-                        <FormField
-                          control={form.control}
-                          name={`options.${options.length - 1}.images.0.image`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Afbeelding 1</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="file"
-                                  {...field}
-                                  onChange={(e) => setFile(e.target.files?.[0])}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
+                        <ImageUploader
+                          form={form}
+                          fieldName="image1"
+                          imageLabel="Afbeelding 1"
+                          allowedTypes="image/*"
+                          onImageUploaded={(imageResult) => {
+                            const image = imageResult ? imageResult.url : undefined;
+                            const options = form.getValues("options");
+                            const optionsKey = options.length - 1;
+                            const newOptions = [...options];
+                            if (newOptions[optionsKey]?.images[0]) {
+                              newOptions[optionsKey].images[0].image = image;
+                            }
+
+                            form.setValue("options", newOptions);
+                            form.resetField('image1');
+                            form.trigger('options');
+
+                            setOptions(newOptions);
+                          }}
                         />
+
+                        { options[options.length - 1]?.images[0]?.image && (
+                          <div style={{ position: 'relative' }}>
+                            <img src={options[options.length - 1]?.images[0]?.image} />
+                          </div>
+                        )}
+
                         <FormField
                           control={form.control}
                           name={`options.${options.length - 1}.titles.0.key`}
@@ -402,23 +413,35 @@ export default function WidgetEnqueteItems(
                             </FormItem>
                           )}
                         />
-                        <FormField
-                          control={form.control}
-                          name={`options.${options.length - 1}.images.1.image`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Afbeelding 2</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="file"
-                                  {...field}
-                                  onChange={(e) => setFile(e.target.files?.[0])} // Dit moet nog aangepast worden naar een array van files
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
+
+                        <ImageUploader
+                          form={form}
+                          fieldName="image2"
+                          imageLabel="Afbeelding 2"
+                          allowedTypes="image/*"
+                          onImageUploaded={(imageResult) => {
+                            const image = imageResult ? imageResult.url : undefined;
+                            const options = form.getValues("options");
+                            const optionsKey = options.length - 1;
+                            const newOptions = [...options];
+                            if (newOptions[optionsKey]?.images[1]) {
+                              newOptions[optionsKey].images[1].image = image;
+                            }
+
+                            form.setValue("options", newOptions);
+                            form.resetField('image2');
+                            form.trigger('options');
+
+                            setOptions(newOptions);
+                          }}
                         />
+
+                        { options[options.length - 1]?.images[1]?.image && (
+                          <div style={{ position: 'relative' }}>
+                            <img src={options[options.length - 1]?.images[1]?.image} />
+                          </div>
+                        )}
+
                         <FormField
                           control={form.control}
                           name={`options.${options.length - 1}.titles.1.key`}
