@@ -67,7 +67,7 @@ header {
   }
 }
 
-.header_navbar-container{
+.header_navbar-container {
   display: flex;
   gap: 20px;
 }
@@ -242,5 +242,116 @@ header.amsterdam-header {
   @media screen and (max-width: 768px) {
     height: 63px;
     padding: 0;
+  }
+}
+
+
+// Mobile menu
+
+body:has(.--mobile.--show) {
+  overflow: clip;
+}
+
+.close-button {
+  display: none;
+}
+
+.header_navbar-container.--mobile .close-button {
+  --background: var(--utrecht-button-primary-action-background-color, #333);
+  --size: 16px;
+  --border: 2px;
+  display: block;
+  height: 32px;
+  width: 32px;
+  border: none;
+  background-color: transparent;
+  position: relative;
+  padding: 0;
+
+  &:before {
+    content: '';
+    position: absolute;
+    height: var(--size);
+    width: calc(var(--size) * 2);
+    border: solid var(--background);
+    border-width: var(--border) 0 var(--border) 0px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  &:after {
+    content: '';
+    position: absolute;
+    height: var(--border);
+    width: calc(var(--size) * 2);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--background);
+  }
+
+  span {
+    overflow: clip;
+    height: 0;
+    width: 0;
+    display: block;
+  }
+}
+
+.header_navbar-container.--show {
+  position: fixed;
+  inset: 0;
+  background-color: #fff;
+  z-index: 99;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+  padding: 2rem 10px 10px 10px;
+  text-align: center;
+  justify-items: center;
+  overflow: auto;
+
+  .close-button {
+    &:before {
+      transform: translate(-50%, -50%) rotate(45deg);
+      height: 0px;
+      border-bottom: 0;
+    }
+
+    &:after {
+      transform: translate(-50%, -50%) rotate(-45deg);
+    }
+  }
+
+  .cta-buttons {
+    justify-self: center;
+  }
+
+  #navbar {
+    align-self: start;
+    width: 100%;
+
+    .container {
+      max-width: none;
+    }
+
+    #main-menu {
+      display: block;
+
+      a {
+        display: block;
+      }
+    }
+  }
+}
+
+.header_navbar-container.--mobile:not(.--show) {
+  #navbar {
+    display: none;
+  }
+
+  .cta-buttons {
+    display: none;
   }
 }
