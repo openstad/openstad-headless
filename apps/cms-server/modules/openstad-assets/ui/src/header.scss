@@ -255,7 +255,9 @@ body:has(.--mobile.--show) {
 .close-button {
   display: none;
 }
-
+#navbar.--hidden{
+  display: none;
+}
 .header_navbar-container.--mobile .close-button {
   --background: var(--utrecht-button-primary-action-background-color, #333);
   --size: 16px;
@@ -267,6 +269,7 @@ body:has(.--mobile.--show) {
   background-color: transparent;
   position: relative;
   padding: 0;
+  justify-self: end;
 
   &:before {
     content: '';
@@ -308,11 +311,12 @@ body:has(.--mobile.--show) {
   grid-template-columns: 1fr;
   grid-template-rows: auto 1fr auto;
   padding: 2rem 10px 10px 10px;
-  text-align: center;
-  justify-items: center;
+  justify-items: start;
   overflow: auto;
 
   .close-button {
+    grid-row: 1;
+
     &:before {
       transform: translate(-50%, -50%) rotate(45deg);
       height: 0px;
@@ -326,11 +330,15 @@ body:has(.--mobile.--show) {
 
   .cta-buttons {
     justify-self: center;
+    grid-row: 3;
   }
 
   #navbar {
     align-self: start;
     width: 100%;
+    background: transparent;
+    padding: 0;
+    display: block;
 
     .container {
       max-width: none;

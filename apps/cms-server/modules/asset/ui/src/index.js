@@ -15,17 +15,28 @@ export default () => {
 
 // Make mobile menu
 window.onload = function () {
+  const mainContainer = document.querySelector('.main-header-container');
+  const navContainer = document.querySelector('.header_navbar-container');
+  const mainMenuContainer = document.querySelector('#main-menu');
+  const logo = document.querySelector('.main-header-container .col-xs-12');
   if (document.getElementsByClassName('--compact').length > 0) {
-    const mainContainer = document.querySelector('.main-header-container');
-    const navContainer = document.querySelector('.header_navbar-container');
-    const logo = document.querySelector('.main-header-container .col-xs-12');
-
     if (
       navContainer.offsetWidth + logo.offsetWidth >=
       mainContainer.offsetWidth
     ) {
       navContainer.classList.add('--mobile');
     } else {
+      navContainer.classList.remove('--mobile');
+    }
+  } else {
+    if (mainMenuContainer.offsetWidth >= mainContainer.offsetWidth) {
+      document.getElementById('navbar').classList.add('--hidden');
+      navContainer.appendChild(
+        document.getElementById('navbar').cloneNode(true)
+      );
+      navContainer.classList.add('--mobile');
+    } else {
+      document.getElementById('navbar').classList.remove('--hidden');
       navContainer.classList.remove('--mobile');
     }
   }

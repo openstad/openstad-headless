@@ -49,13 +49,14 @@
   grid-gap: 0;
 }
 
-.stembegroot-content-item-header .pill-grid span + span:before{
-  content:', ';
+.stembegroot-content-item-header .pill-grid span:has(+ span):after{
+  content: ', ';
 }
 
 .osc-stem-begroot-content-item-footer {
   display: flex;
   gap: 1rem;
+  align-self: end;
 }
 
 .osc-stem-begroot-content-item-footer .osc-stem-begroot-item-action-btn {
@@ -125,6 +126,8 @@
 
 article.stem-begroot--container{
   position: relative;
+  display: grid;
+  grid-gap: .5rem;
 }
 article.stem-begroot--container .price{
   background-color: var(--nlds-price-background-color, var(--nlds-tags-background-color, var(--nlds-default-background-color)));
@@ -141,5 +144,35 @@ article.stem-begroot--container .price h5{
 article.stem-begroot--container .stembegroot--infolabels{
   display: flex;
   grid-gap: .5rem;
-  margin-bottom: .5rem;
+  align-items: center;
+}
+
+@media only screen and (max-width: 768px) {
+  .stem-begroot-budget-list,
+  .begroot-step-2-instruction-budget-status-panel {
+    --nlds--budget-budget-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .osc-resources-filter{
+    flex-wrap: wrap;
+  }
+
+  .stepper{
+    flex-wrap: wrap;
+    grid-gap: 5px;
+  }
+
+  .osc-resources-filter > .utrecht-form-field{
+    width: 100%;
+  }
+
+  .osc-listview.osc-listview-template-columns-3{
+    grid-template-columns: repeat( auto-fit, minmax(200px, 1fr) );
+    grid-gap: 10px;
+  }
+
+  .osc-stem-begroot-content-item-footer{
+    flex-wrap: wrap;
+  }
 }
