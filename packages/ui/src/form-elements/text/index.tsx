@@ -1,6 +1,7 @@
 import React, { FC, useState } from "react";
 import { FormField, FormFieldDescription, FormLabel, Paragraph, Textarea, Textbox } from "@utrecht/component-library-react";
 import { Spacer } from '@openstad-headless/ui/src';
+import './style.css';
 
 export type TextInputProps = {
     title: string;
@@ -55,6 +56,8 @@ const TextInput: FC<TextInputProps> = ({
         setHelpText(helpText);
     }
 
+    const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
+
     return (
         <FormField type="text">
             <Paragraph className="utrecht-form-field__label">
@@ -68,7 +71,7 @@ const TextInput: FC<TextInputProps> = ({
                     <Spacer size={.5} />
                 </>
             }
-            <div className="utrecht-form-field__input">
+            <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}>
                 <InputComponent
                     id={randomID}
                     name={fieldKey}
@@ -90,7 +93,9 @@ const TextInput: FC<TextInputProps> = ({
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                 />
-                {isFocused && helpText && <FormFieldDescription>{helpText}</FormFieldDescription>}
+                {isFocused && helpText &&
+                  <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
+                }
             </div>
         </FormField>
     );

@@ -13,7 +13,9 @@ export const ImageUploader: React.FC<{
   form: UseFormReturn<any>;
   fieldName: Path<FieldValues>;
   onImageUploaded?: (imageObject: {url: string} ) => void;
-}> = ({ form, fieldName, onImageUploaded }) => {
+  imageLabel?: string;
+  allowedTypes?: string;
+}> = ({ form, fieldName, onImageUploaded, allowedTypes, imageLabel = 'Afbeelding' }) => {
   const [file, setFile] = React.useState<{url: string}>();
   const [fileUrl, setFileUrl] = React.useState<string>('');
 
@@ -49,16 +51,21 @@ export const ImageUploader: React.FC<{
     }
   }, [file, form, fieldName, onImageUploaded]);
 
+  const acceptAttribute = allowedTypes
+    ? allowedTypes
+    : "";
+
   return (
     <FormField
       control={form.control}
       name={fieldName}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Afbeelding</FormLabel>
+          <FormLabel>{imageLabel}</FormLabel>
           <FormControl>
             <Input
               type="file"
+              accept={acceptAttribute}
               {...field}
               onChange={(e) => uploadImage(e.target.files?.[0])}
             />
