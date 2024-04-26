@@ -143,6 +143,9 @@ p.osc-searchtext {
 .utrecht-button.resource-card--link p {
   color: inherit;
 }
+.utrecht-button.resource-card--link p {
+  font-weight: 400;
+}
 
 .status-label + .status-label::before {
   content: ', ';
