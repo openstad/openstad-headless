@@ -13,6 +13,7 @@ const projectsWithIssues = require('../../services/projects-with-issues');
 const authSettings = require('../../util/auth-settings');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const removeProtocolFromUrl = require('../../middleware/remove-protocol-from-url');
+const messageStreaming = require('../../services/message-streaming');
 
 let router = express.Router({mergeParams: true});
 
@@ -181,6 +182,11 @@ router.route('/')
 			})
 			.catch(next)
 	})
+	.post(async function (req, res, next) {
+    let publisher = await messageStreaming.getPublisher();
+    publisher.publish('new-project', 'event');
+    return next()
+	})
 	.post(auth.useReqUser)
 	.post(function(req, res, next) {
     return res.json(req.results);
@@ -284,7 +290,11 @@ router.route('/:projectId') //(\\d+)
 	.put(async function(req, res, next) {
 		const project = await db.Project.findOne({ where: { id: req.results.id} });
     if (!( project && project.can && project.can('update') )) return next( new Error('You cannot update this project') );
-		project
+
+    req.pendingMessages = [{ key: `project-${project.id}-update`, value: 'event' }];
+    if (req.body.url && req.body.url != project.url) req.pendingMessages.push({ key: `project-urls-update`, value: 'event' });
+
+    project
 			.authorizeData(req.body, 'update')
 			.update(req.body)
 			.then(result => {
@@ -300,6 +310,15 @@ router.route('/:projectId') //(\\d+)
 				next();
         return null;
 			});
+	})
+	.put(async function (req, res, next) {
+    if (!req.pendingMessages) return next();
+    let publisher = await messageStreaming.getPublisher();
+    req.pendingMessages.map(message => {
+      console.log('Message:', message.key, message.value);
+      publisher.publish(message.key, message.value);
+    });
+    return next()
 	})
 	.put(function (req, res, next) {
 		// when succesfull return project JSON
