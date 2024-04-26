@@ -10,10 +10,11 @@ export default function WidgetPublish({ apiUrl }: { apiUrl: string }) {
   const router = useRouter();
   const id = router.query.id;
   const widgetScriptTag = `<script src="${apiUrl}/widget/${id}" type="text/javascript"></script>`;
+  const widgetUrl = `${apiUrl}/widget/${id}`;
 
-  const onCopy = () => {
-    navigator.clipboard.writeText(widgetScriptTag);
-    toast.success('Code gekopieerd naar klembord');
+  const onCopy = (textToBeCopied: string, toastStart: string) => {
+    navigator.clipboard.writeText(textToBeCopied);
+    toast.success(`${toastStart} gekopieerd naar klembord`);
   };
 
   return (
@@ -25,10 +26,15 @@ export default function WidgetPublish({ apiUrl }: { apiUrl: string }) {
       <Input disabled={true} value={widgetScriptTag} />
       <p>
         <em>
-          Voeg bovenstaande code toe op de plek waar u de widget wilt tonen.
+          Voeg bovenstaande code toe op de plek waar u de widget wilt tonen.<br />
+          Met de &apos;Kopieer code&apos; knop wordt bovenstaande code in zijn geheel gekopieerd.<br />
+          Met de &apos;Kopieer widget URL&apos; knop wordt alleen de URL gekopieerd die bij de src tussen aanhalingstekens staat.
         </em>
       </p>
-      <Button onClick={onCopy}>Kopieer code</Button>
+      <div className="flex gap-4 p-0">
+        <Button onClick={() => onCopy(widgetScriptTag, 'Code')}>Kopieer code</Button>
+        <Button className="offset-2" onClick={() => onCopy(widgetUrl, 'Widget URL')}>Kopieer widget URL</Button>
+      </div>
     </div>
   );
 }

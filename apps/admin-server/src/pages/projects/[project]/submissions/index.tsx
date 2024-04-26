@@ -23,13 +23,9 @@ export default function ProjectSubmissions() {
   const [allWidgets, setAllWidgets] = useState<{ id: number; name: string }[]>([]);
 
   useEffect(() => {
-    let loadedTags = (data || []) as { createdAt: string }[];
+    let loadedSubmissions = (data || []) as { createdAt: string }[];
 
-    const sortedData = loadedTags.sort((a, b) => {
-      const timestampA = Date.parse(a.createdAt);
-      const timestampB = Date.parse(b.createdAt);
-      return timestampB - timestampA;
-    });
+    const sortedData = loadedSubmissions.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
 
     setFilterData(sortedData);
   }, [data]);
