@@ -75,6 +75,7 @@ export const StemBegrootResourceList = ({
                   </div>
                 </section>
                 <Heading4>{resource.title}</Heading4>
+                <Heading5>{elipsize(resource.summary, 100)}</Heading5>
                 <Paragraph>{elipsize(resource.description, 200)}</Paragraph>
 
               {
