@@ -92,6 +92,24 @@
               {% endfor %}
               </div>
           {% endif %}
+
+          {% if data.global.showLoginButton and not data.loggedIn %}
+            <div class="login-button">
+              <a href="/login" class="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--{{data.global.loginButtonAppearance}}">{{data.global.loginButtonLabel}}</a>
+            </div>
+          {% endif %}
+
+          {% if data.global.showAccountButton and data.loggedIn %}
+            <div class="account-button">
+              <a href="{{data.global.accountButtonHref}}" class="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--{{data.global.accountButtonAppearance}}">{{ data.global.accountButtonLabel | replace('[[name]]', data.openstadUser.displayName) | replace('[[displayName]]', data.openstadUser.displayName) }}</a>
+            </div>
+          {% endif %}
+
+          {% if data.loggedIn %}
+            <div class="logout-button">
+              <a href="/logout" class="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--{{data.global.logoutButtonAppearance}}">{{ data.global.logoutButtonLabel | replace('[[name]]', data.openstadUser.displayName) | replace('[[displayName]]', data.openstadUser.displayName) }}</a>
+              </div>
+          {% endif %}
         </div>
       </div>
   </div>
