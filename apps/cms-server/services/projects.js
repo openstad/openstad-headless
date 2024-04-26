@@ -23,6 +23,29 @@ const fetchAll = async () => {
 
 };
 
+const fetchOne = async (projectId) => {
+
+  try {
+    let uri = `${apiUrl}/api/project/${projectId}?includeConfig=1`;
+    let response = await fetch(uri, {
+      headers: {
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache',
+        'Authorization': process.env.API_KEY,
+      }
+    })
+    if (!response.ok) {
+      console.log(response);
+      throw new Error('Fetch failed')
+    }
+    return await response.json();
+  } catch(err) {
+    console.log(err);
+  }
+
+};
+
 module.exports = {
-  fetchAll
+  fetchAll,
+  fetchOne,
 };

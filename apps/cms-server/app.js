@@ -9,33 +9,71 @@ const aposConfig = require('./lib/apos-config');
 const { refresh } = require('less');
 const REFRESH_PROJECTS_INTERVAL = 60000 * 5;
 const Url = require('node:url');
+const messageStreaming = require('./services/message-streaming');
 
 let projects = {};
+let subscriptions = {}
 const apostropheServer = {};
 
 let startUpIsBusy = false;
 let startUpQueue = [];
 
-async function loadProjects () {
+async function setupProject(project) {
+  if (!project.url) return;
+  // We are no longer saving the protocol in the database, but we need a
+  // protocol to be able to use `Url.parse` to get the host.
+  if (!project.url.startsWith('http://') && !project.url.startsWith('https://')) {
+    const protocol = process.env.FORCE_HTTP === 'yes' ? 'http://' : 'https://';
+    project.domain = project.url;
+    project.url = protocol + project.url;
+  }
+  let url = Url.parse(project.url);
+  console.log('Project fetched: ' + url.host);
+
+  // for convenience and speed we set the domain name as the key
+  projects[url.host] = project;
+
+  // add event subscription
+  if (!subscriptions[project.id]) {
+    subscriptions[project.id] = await messageStreaming.getSubscriber();
+    await subscriptions[project.id].subscribe(`project-${project.id}-update`, message => {
+      if (apostropheServer[project.domain]) {
+        // restart the server with the new settings
+        apostropheServer[project.domain].apos.destroy();
+        delete apostropheServer[project.domain];
+      }
+      loadProject(project.id)
+    });
+  }
+
+}
+
+async function loadProject(projectId) {
+  const project = await projectService.fetchOne(projectId);
+  setupProject(project)
+}
+
+async function loadProjects() {
   try {
 
-    const allProjects = await projectService.fetchAll();
     projects = {};
 
-    allProjects.forEach((project, i) => {
-      if (!project.url) return;
-      // We are no longer saving the protocol in the database, but we need a
-      // protocol to be able to use `Url.parse` to get the host.
-      if (!project.url.startsWith('http://') && !project.url.startsWith('https://')) {
-        const protocol = process.env.FORCE_HTTP === 'yes' ? 'http://' : 'https://';
-        project.url = protocol + project.url;
-      }
-      let url = Url.parse(project.url);
-      console.log('Project fetched: ' + url.host);
+    const allProjects = await projectService.fetchAll();
 
-      // for convenience and speed we set the domain name as the key
-      projects[url.host] = project;
+    allProjects.forEach(async project => {
+      setupProject(project)
     });
+
+    // add event subscription
+    if (!subscriptions['all']) {
+      subscriptions['all'] = await messageStreaming.getSubscriber();
+      await subscriptions['all'].subscribe(`project-urls-update`, message => {
+        loadProjects();
+      });
+      await subscriptions['all'].subscribe(`new-project`, message => {
+        loadProjects();
+      });
+    }
 
     cleanUpProjects();
     
