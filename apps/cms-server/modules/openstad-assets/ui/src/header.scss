@@ -363,3 +363,33 @@ body:has(.--mobile.--show) {
     display: none;
   }
 }
+
+// top bar buttons
+.header-top-bar {
+  background: #fff;
+  margin: -18px -13px 18px -13px;
+  border-bottom: solid 1px #f3f3f3;
+
+  @media only screen and (max-width: 768px) {
+    margin: -25px 0 0 0;
+  }
+  .container{
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    gap: 10px;
+  }
+  a{
+    font-size: 12px;
+    padding: 3px 0;
+    display: inline-block;
+  }
+}
+
+
+#navbar.--compact {
+  margin-right: -10px !important;
+}
+#navbar.--compact:has(+ .cta-buttons) {
+  margin-right: 0;
+}

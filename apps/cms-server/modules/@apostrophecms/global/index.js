@@ -112,25 +112,6 @@ module.exports = {
         },
       },
 
-      loginButtonAppearance: {
-        type: 'select',
-        label: 'Login knop variant',
-        def: 'primary-action',
-        choices: [
-          {
-            label: 'primary-action',
-            value: 'primary-action',
-          },
-          {
-            label: 'secondary-action',
-            value: 'secondary-action',
-          },
-        ],
-        if: {
-          showLoginButton: true,
-        },
-      },
-
       showAccountButton: {
         type: 'boolean',
         def: 'false',
@@ -156,46 +137,11 @@ module.exports = {
         },
       },
 
-      accountButtonAppearance: {
-        type: 'select',
-        label: '\'Mijn account\' knop variant',
-        def: 'primary-action',
-        choices: [
-          {
-            label: 'primary-action',
-            value: 'primary-action',
-          },
-          {
-            label: 'secondary-action',
-            value: 'secondary-action',
-          },
-        ],
-        if: {
-          showAccountButton: true,
-        },
-      },
-
       logoutButtonLabel: {
         label: 'Loguit knop tekst',
         def: 'Logout',
         help: '[[name]] wordt vervangen door de naam van de gebruiker',
         type: 'string',
-      },
-
-      logoutButtonAppearance: {
-        type: 'select',
-        label: 'Loguit knop variant',
-        def: 'primary-action',
-        choices: [
-          {
-            label: 'primary-action',
-            value: 'primary-action',
-          },
-          {
-            label: 'secondary-action',
-            value: 'secondary-action',
-          },
-        ],
       },
 
       siteLogo: {
@@ -349,7 +295,7 @@ module.exports = {
       },
       login: {
         label: 'Gebruikers login',
-        fields: ['showLoginButton', 'loginButtonLabel', 'loginButtonAppearance', 'showAccountButton', 'accountButtonHref', 'accountButtonLabel', 'accountButtonAppearance', 'logoutButtonLabel', 'logoutButtonAppearance'],
+        fields: ['showLoginButton', 'loginButtonLabel', 'showAccountButton', 'accountButtonHref', 'accountButtonLabel', 'logoutButtonLabel'],
       },
       cookies: {
         label: 'Cookie instellingen',
