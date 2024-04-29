@@ -99,6 +99,9 @@
   display: flex;
   justify-content: center;
 }
+.osc-resourceoverview-search-container:empty{
+  display: none;
+}
 
 p.osc-searchtext {
   display: inline-block;

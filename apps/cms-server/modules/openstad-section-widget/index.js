@@ -164,6 +164,12 @@ module.exports = {
         help: 'Voeg custom CSS toe aan de sectie',
       },
 
+      removeTopMargin: {
+        type: 'boolean',
+        label: 'Witruimte boven sectie verwijderen',
+        def: false,
+      },
+
       negativeMargin: {
         type: 'boolean',
         label: 'Sectie over vorige element plaatsen',
