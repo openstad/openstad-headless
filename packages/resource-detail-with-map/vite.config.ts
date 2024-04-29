@@ -15,8 +15,8 @@ export default defineConfig(({ command }) => {
       build: {
         lib: {
           formats: ['iife'],
-          entry: 'src/resource-detail.tsx',
-          name: 'OpenstadHeadlessResourceDetail',
+          entry: 'src/resourceDetailWithMap.tsx',
+          name: 'OpenstadHeadlessResourceDetailWithMap',
         },
         rollupOptions: {
           external: ['react', 'react-dom', 'remixicon/fonts/remixicon.css'],

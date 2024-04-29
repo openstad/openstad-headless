@@ -23,7 +23,7 @@
 
 .resource-detail-pil-list-content {
   display: flex;
-  gap: .5rem;
+  gap: 0.5rem;
   align-items: start;
   flex-wrap: wrap;
 }
@@ -90,4 +90,38 @@
 
 .osc .image-container > .osc-image-footer p:empty {
   padding: 0;
+}
+
+.osc-resource-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 100vh;
+}
+.osc-resource-detail-grid .osc-resource-detail-content-items {
+  overflow: auto;
+}
+.osc-resource-detail-grid .map-container {
+  aspect-ratio: unset !important;
+}
+
+.osc-resource-detail-grid .back-to-overview {
+  grid-column: span 2;
+  display: block;
+  background: var(--nlds-default-background-color, #f0f4f8);
+  padding: 1rem 0.5rem;
+  position: relative;
+  padding-left: 2rem;
+  color: var(--grid-back-color, #333);
+  text-decoration: none;
+}
+.osc-resource-detail-grid .back-to-overview:before {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height:6px;
+  left: 1rem;
+  top: 21px;
+  border: solid var(--grid-back-color, #333);
+  border-width: 2px 0 0 2px;
+  transform: rotate(-45deg);
 }

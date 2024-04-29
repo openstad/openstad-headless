@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { ResourceDetail } from './resource-detail.js';
+import { ResourceDetail } from './resourceDetailWithMap';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
