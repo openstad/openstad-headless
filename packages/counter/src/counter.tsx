@@ -15,12 +15,12 @@ export type CounterWidgetProps = BaseProps &
 
 export type CounterProps = {
   counterType:
-    | 'resource'
-    | 'vote'
-    | 'votedUsers'
-    | 'static'
-    | 'argument'
-    | 'submission';
+  | 'resource'
+  | 'vote'
+  | 'votedUsers'
+  | 'static'
+  | 'argument'
+  | 'submission';
   label?: string;
   url?: string;
   opinion?: string;
@@ -47,7 +47,7 @@ function Counter({
   });
 
   const { data: resources } = datastore.useResources({
-    projectId: counterType === 'resource' ? props.projectId: undefined,
+    projectId: counterType === 'resource' ? props.projectId : undefined,
   });
 
   const { data: resource } = datastore.useResource({
@@ -102,10 +102,15 @@ function Counter({
   }
 
   const content = () => {
+    const renderAmount = (e: number) => {
+      return e.toString().split('').map((item, index) => <span className="amount-item" key={index}><span>{item}</span></span>);
+    };
     return (
       <Paragraph>
-        {label ? <span className="label">{label}:</span> : null}
-        <span className="amount">{amountDisplayed}</span>
+        <span className="amount">
+          {renderAmount(amountDisplayed)}
+        </span>
+        {label ? <span className="label">{label}</span> : null}
       </Paragraph>
     );
   };

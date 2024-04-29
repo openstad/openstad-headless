@@ -332,15 +332,17 @@ function ResourceOverview({
               })}
           </section>
         </section>
-        <Spacer size={4} />
         {props.displayPagination && (
-          <div className="osc-resource-overview-paginator col-span-full">
-            <Paginator
-              page={resourcesWithPagination?.metadata?.page || 0}
-              totalPages={resourcesWithPagination?.metadata?.pageCount || 1}
-              onPageChange={(page) => setPage(page)}
-            />
-          </div>
+          <>
+            <Spacer size={4} />
+            <div className="osc-resource-overview-paginator col-span-full">
+              <Paginator
+                page={resourcesWithPagination?.metadata?.page || 0}
+                totalPages={resourcesWithPagination?.metadata?.pageCount || 1}
+                onPageChange={(page) => setPage(page)}
+              />
+            </div>
+          </>
         )}
       </div>
     </>

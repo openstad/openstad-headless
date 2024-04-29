@@ -153,6 +153,7 @@ export function Filters({
                     dataStore={dataStore}
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
+                    title={`Selecteer een item`}
                     onlyIncludeIds={tagsLimitation}
                     onUpdateFilter={(updatedTag) =>
                       updateTagListSingle(tagGroup.type, updatedTag)

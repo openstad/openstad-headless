@@ -57,12 +57,12 @@ function IconSection({ content, expandable, expandablelabel, expanded }: Item) {
     <section className="icon-section">
       {expandable === 'true' ? (
         <AccordionProvider
-        sections={[
-          {
-            body: <div className="icon-section-container" dangerouslySetInnerHTML={{ __html: renderedCards }} />,
-            expanded: expanded === 'true',
-            label: expandablelabel
-          }
+          sections={[
+            {
+              body: <div className="icon-section-container" dangerouslySetInnerHTML={{ __html: renderedCards }} />,
+              expanded: expanded === 'true',
+              label: expandablelabel,
+            }
         ]}
       />
       ) : (

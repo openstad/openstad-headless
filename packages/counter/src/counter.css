@@ -2,36 +2,68 @@
   display: flex;
   text-decoration: none;
   border-radius: var(--nlds-counter-border-radius, 0);
-  padding: var(--nlds-counter-padding, .5rem .5rem);
+  padding: var(--nlds-counter-padding, 0.5rem 0.5rem);
   height: var(--nlds-counter-height, auto);
-  background-color: var(--nlds-counter-background-color, transparent);
+  color: var(--utrecht-button-secondary-action-background-color);
+  background-color: var(--utrecht-button-secondary-action-color);
   max-width: none;
   justify-content: left;
+  margin-top: 0;
 }
 
-.osc.counter-container.--link{
+.osc.counter-container.--link {
   max-width: none;
   width: 100%;
   justify-content: start;
   text-decoration: none;
+  color: var(--utrecht-button-secondary-action-background-color);
+  background-color: var(--utrecht-button-secondary-action-color);
+  border: none;
+  margin-top: 0;
 }
 
 .osc.counter-container p {
   display: flex;
-  gap: var(--nlds-counter-gap, .25rem);
+  gap: var(--nlds-counter-gap, 0.25rem);
   justify-content: var(--nlds-counter-justify-content, left);
   align-items: var(--nlds-counter-align-items, center);
   color: inherit;
-
 }
 
-.osc.counter-container{
-  margin-block-start: var(--nlds-counter-margin-block-start, var(--nlds-default-margin-block-start, 1.5rem));
-  margin-block-end: var(--nlds-counter-margin-block-end, var(--nlds-default-margin-block-end, 1.5rem));
+.osc.counter-container {
+  margin-block-start: var(
+    --nlds-counter-margin-block-start,
+    var(--nlds-default-margin-block-start, 1.5rem)
+  );
+  margin-block-end: var(
+    --nlds-counter-margin-block-end,
+    var(--nlds-default-margin-block-end, 1.5rem)
+  );
 }
 
 .osc.counter-container .amount {
-  font-size: var(--nlds-counter-amount-font-size, 1.5em);
+  margin-inline-end: .3rem;
+}
+
+.osc.counter-container .amount-item {
+  font-size: var(--nlds-counter-amount-font-size, 1.3em);
   font-weight: var(--nlds-counter-amount-font-weight, 700);
-  color: var(--nlds-counter-amount-color, inherit);
+  color: var(--nlds-counter-amount-color, #333);
+
+  background: var(--nlds-counter-amount-background-color, #fff);
+  padding: 2px 4px;
+  border-radius: 4px;
+  position: relative;
+  overflow: clip;
+  margin-inline-end: 0.2rem;
+  display: inline-block;
+}
+.osc.counter-container .amount span {
+  position: relative;
+}
+.osc.counter-container .amount-item:before {
+  content: '';
+  position: absolute;
+  inset: 0 0 50% 0;
+  background: rgba(0, 0, 0, .1);
 }
