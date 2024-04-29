@@ -64,8 +64,6 @@ export const StemBegrootResourceList = ({
           <>
             <article className="stem-begroot--container">
               <Image src={resource.images?.at(0)?.url || ''} />
-              <Spacer size={.5} />
-              <div>
                 <section className="stembegroot-content-item-header">
                   <div className="stembegroot-content-item-header-taglist">
                     <Heading6>Tags</Heading6>
@@ -76,11 +74,9 @@ export const StemBegrootResourceList = ({
                     </div>
                   </div>
                 </section>
-                <Spacer size={1} />
                 <Heading4>{resource.title}</Heading4>
+                <Heading5>{elipsize(resource.summary, 100)}</Heading5>
                 <Paragraph>{elipsize(resource.description, 200)}</Paragraph>
-                <Spacer size={1} />
-              </div >
 
               {
                 originalUrl ? (

@@ -14,7 +14,7 @@
   position: sticky;
   z-index: 99;
   top: 0;
-  padding: .5rem 0;
+  padding: 0.5rem 0;
   background: #fff;
 }
 
@@ -88,7 +88,7 @@
   display: grid;
   flex-grow: 1;
   align-items: end;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 350px));
   gap: 0.5rem;
 }
 
@@ -113,7 +113,10 @@
 .budget-badge {
   border-width: 1px;
   border-style: solid;
-  border-radius: var(--nlds-budget-badge-border-radius, var(--utrecht-button-border-radius, 0));
+  border-radius: var(
+    --nlds-budget-badge-border-radius,
+    var(--utrecht-button-border-radius, 0)
+  );
   background-color: var(--nlds-budget-badge-background-color, #dbdfe5);
   border-color: var(--nlds-budget-badge-border-color, #dbdfe5);
 }
@@ -124,10 +127,43 @@
 }
 
 .budget-badge-primary {
-  background-color: var(--nlds-budget-badge-active-background-color, var(--utrecht-button-primary-action-background-color));
-  border-color: var(--nlds-budget-badge-active-border-color, var(--utrecht-button-primary-action-background-color));
+  background-color: var(
+    --nlds-budget-badge-active-background-color,
+    var(--utrecht-button-primary-action-background-color)
+  );
+  border-color: var(
+    --nlds-budget-badge-active-border-color,
+    var(--utrecht-button-primary-action-background-color)
+  );
 }
 
 .budget-badge-primary > p {
   color: var(--nlds-budget-badge-active-color, #fff);
+}
+
+.total-budget {
+  display: flex;
+  align-items: start;
+  flex-direction: row;
+  gap: 0.5rem;
+  position: sticky;
+  z-index: 99;
+  top: 74px;
+  background: #dbdfe5;
+  padding: 10px;
+  font-size: 14px;
+  justify-content: center;
+  border-radius: 0 0
+    var(
+      --nlds-budget-badge-border-radius,
+      var(--utrecht-button-border-radius, 0)
+    )
+    var(
+      --nlds-budget-badge-border-radius,
+      var(--utrecht-button-border-radius, 0)
+    );
+}
+
+.total-budget > * {
+  font-size: inherit;
 }
