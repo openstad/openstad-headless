@@ -55,3 +55,14 @@ body[data-apos-level] {
 main {
   background: #fff;
 }
+
+.skip-link.utrecht-button-link.utrecht-button-link--html-a.utrecht-button-link--primary-action{
+  position: absolute;
+  z-index: -1;
+  top: 10px;
+  left: 10px;
+
+  &:focus-visible{
+    z-index: 99999999;
+  }
+}
