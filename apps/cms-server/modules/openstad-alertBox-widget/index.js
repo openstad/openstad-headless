@@ -13,11 +13,6 @@ module.exports = {
         type: 'string',
         label: 'Content'
       },
-      negative: {
-        type: 'boolean',
-        label: 'Witruimte boven weghalen',
-        def: false
-      },
     },
   }
 };

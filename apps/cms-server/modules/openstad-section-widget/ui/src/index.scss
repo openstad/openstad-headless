@@ -52,8 +52,15 @@
   padding: 2.5rem 1.5rem;
 }
 
+.section:not(.--negative) {
+  margin-block-start: var(--nlds-default-margin-block-start, 3.5rem);
+}
+
 .section.--negative{
   margin-block-start: calc((var(--nlds-default-margin-block-start, 3.5rem) + 5rem) * -1);
+}
+.section.--mt-0{
+  margin-block-start: 0;
 }
 
 // give standard margin bottom to columns in row, otherwise they are stacked
