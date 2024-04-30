@@ -301,33 +301,33 @@ router
   // TODO: Add notifications
   .post(function (req, res, next) {
     res.json(req.results);
-    // if (!req.query.nomail && req.body['publishDate']) {
-    //   db.Notification.create({
-    //     type: "new published resource - admin update",
-    // 		  projectId: req.project.id,
-    //     data: {
-    //       userId: req.user.id,
-    //       resourceId: req.results.id
-    //     }
-    // 	  })
-    //   db.Notification.create({
-    //     type: "new published resource - user feedback",
-    // 		  projectId: req.project.id,
-    //     data: {
-    //       userId: req.user.id,
-    //       resourceId: req.results.id
-    //     }
-    // 		})
-    // } else if (!req.query.nomail && !req.body['publishDate']) {
-    //   db.Notification.create({
-    //     type: "new concept resource - user feedback",
-    // 		  projectId: req.project.id,
-    //     data: {
-    //       userId: req.user.id,
-    //       resourceId: req.results.id
-    //     }
-    // 		})
-    // }
+    if (!req.query.nomail && req.body['publishDate']) {
+      db.Notification.create({
+        type: "new published resource - admin update",
+    		  projectId: req.project.id,
+        data: {
+          userId: req.user.id,
+          resourceId: req.results.id
+        }
+    	  })
+      db.Notification.create({
+        type: "new published resource - user feedback",
+    		  projectId: req.project.id,
+        data: {
+          userId: req.user.id,
+          resourceId: req.results.id
+        }
+    		})
+    } else if (!req.query.nomail && !req.body['publishDate']) {
+      db.Notification.create({
+        type: "new concept resource - user feedback",
+    		  projectId: req.project.id,
+        data: {
+          userId: req.user.id,
+          resourceId: req.results.id
+        }
+    		})
+    }
   });
 
 // one resource
