@@ -58,7 +58,7 @@ export type ResourceDetailWidgetProps = BaseProps &
     >;
   };
 
-function ResourceDetail({
+function ResourceDetailWithMap({
   displayImage = true,
   displayTitle = true,
   displaySummary = true,
@@ -180,5 +180,5 @@ function ResourceDetail({
   );
 }
 
-ResourceDetail.loadWidget = loadWidget;
-export { ResourceDetail };
+ResourceDetailWithMap.loadWidget = loadWidget;
+export { ResourceDetailWithMap };

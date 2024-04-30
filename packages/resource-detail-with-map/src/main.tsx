@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { ResourceDetail } from './resourceDetailWithMap';
+import {ResourceDetailWithMap} from './resourceDetailWithMap';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ResourceDetail
+    <ResourceDetailWithMap
       tagTypes={[
         {
           type: 'theme',
