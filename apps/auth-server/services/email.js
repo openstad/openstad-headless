@@ -14,7 +14,7 @@ const formatTransporter = function ({ host, port, secure, auth }) {
   return {
     host:   host ? host : process.env.MAIL_SERVER_URL,
     port:   port ? port : process.env.MAIL_SERVER_PORT,
-    secure: secure ? secure : process.env.MAIL_SERVER_SECURE && process.env.MAIL_SERVER_SECURE !== 'false',
+    secure: false,
     auth:   {
       user: (auth && auth.user) ? auth.user : process.env.MAIL_SERVER_USER_NAME,
       pass: (auth && auth.pass) ? auth.pass : process.env.MAIL_SERVER_PASSWORD,

@@ -2,6 +2,7 @@ const emailProvider = require('./email');
 const fetch = require('node-fetch');
 const tokenUrl = require('./tokenUrl');
 const tokenSMS = require('./tokenSMS');
+const path = require('path');
 
 exports.sendVerification = async (user, client, redirectUrl, adminLoginRequest) => {
 
@@ -21,7 +22,10 @@ exports.sendVerification = async (user, client, redirectUrl, adminLoginRequest) 
   const emailTemplateString = authTypeConfig.emailTemplate ? authTypeConfig.emailTemplate : false;
   const emailSubject = authTypeConfig.emailSubject ? authTypeConfig.emailSubject : 'Inloggen bij ' + client.name;
   const emailHeaderImage = authTypeConfig.emailHeaderImage ? authTypeConfig.emailHeaderImage : false;
-  const transporterConfig = clientConfig.smtpTransport ? clientConfig.smtpTransport : {};
+  const transporterConfig = clientConfig.smtpTransport ? clientConfig.smtpTransport : {
+    host: 'openstad-mailpit',
+    port: 1025
+  };
 
   let emailLogo;
 
@@ -44,8 +48,8 @@ exports.sendVerification = async (user, client, redirectUrl, adminLoginRequest) 
     fromEmail: clientConfig.fromEmail,
     fromName: clientConfig.fromName,
     subject: emailSubject,
-    templateString: emailTemplateString,
-    template: 'emails/login-url.html',
+    templateString: false,
+    template: path.resolve(__dirname, '../views/emails/login-url.html'),
     variables: {
       tokenUrl: generatedTokenUrl,
       name: user.name,
