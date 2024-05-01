@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useContext } from 'react';
 
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { WidgetDefinition } from '@/lib/widget-definitions';
+import { SessionContext } from '../auth';
 
 // Can we type config better? Or should we define types for all widgetConfigs and use them as seperate props. A.k.a. likeConifg?:LikeConfig, argConfig?: ArgConfig
 type Props = {
@@ -12,15 +13,21 @@ type Props = {
 };
 
 export default function WidgetPreview({ type, config, projectId }: Props) {
-  // @todo: get the correct defaults
-  // Dit moet alleen doorgegeven worden in config prop
-  config['login'] = {
-    url: `/api/auth/project/${projectId}/login?useAuth=default&redirectUri=[[REDIRECT_URI]]`,
-  };
 
-  config['logout'] = {
-    url: `/api/auth/project/${projectId}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`,
-  };
+  const sessionData = useContext(SessionContext);
+
+  useEffect(() => {
+    let userAsString = JSON.stringify({ id: sessionData.id, role: sessionData.role, jwt: sessionData.jwt });
+    const script = document.createElement('script');
+    if (sessionData.id) {
+      script.innerHTML = `var globalOpenStadUser = ${userAsString || ''};`;
+    }
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    }
+  }, [sessionData]);
+
   const randomId = Math.floor(Math.random() * 1000000);
 
   const fetchWidget = useCallback(() => {

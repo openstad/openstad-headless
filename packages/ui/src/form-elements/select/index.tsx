@@ -6,7 +6,9 @@ import {
     Select,
     SelectOption
 } from "@utrecht/component-library-react";
+import React from "react";
 import {FC} from "react";
+import { Spacer } from '@openstad-headless/ui/src';
 
 export type SelectFieldProps = {
     title?: string;
@@ -33,10 +35,15 @@ const SelectField: FC<SelectFieldProps> = ({
 }) => {
     return (
         <FormField type="select">
-            <Paragraph className="utrecht-form-field__label">
-                <FormLabel htmlFor={fieldKey}>{title}</FormLabel>
-            </Paragraph>
-            <FormFieldDescription>{description}</FormFieldDescription>
+            <FormLabel htmlFor={fieldKey}>{title}</FormLabel>
+            {description &&
+                <>
+                    <FormFieldDescription>
+                        {description}
+                    </FormFieldDescription>
+                    <Spacer size={.5} />
+                </>
+            }
             <Paragraph className="utrecht-form-field__input">
                 <Select
                     className="form-item"

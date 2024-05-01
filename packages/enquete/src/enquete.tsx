@@ -14,7 +14,11 @@ import React from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import Form from "@openstad-headless/form/src/form";
 import { FieldProps } from '@openstad-headless/form/src/props';
-
+import {
+    Paragraph,
+    Heading2,
+    Heading6,
+  } from '@utrecht/component-library-react';
 export type EnqueteWidgetProps = BaseProps &
     ProjectSettingProps &
     EnquetePropsType;
@@ -88,19 +92,19 @@ function Enquete(props: EnqueteWidgetProps) {
                     break;
                 case 'images':
                     fieldData['type'] = 'imageChoice';
+                    fieldData['choices'] = [
+                      {
+                          label: item?.text1 || '',
+                          value: item?.key1 || '',
+                          imageSrc: item?.image1 || ''
+                      },
+                      {
+                          label: item?.text2 || '',
+                          value: item?.key2 || '',
+                          imageSrc: item?.image2 || ''
+                      }
+                    ];
 
-                    if (item.options &&
-                    item.options?.length > 0 &&
-                    item.options[0].titles &&
-                    item.options[0].titles.length > 0) {
-                        fieldData['choices'] = item.options[0].titles.map((option, index) => {
-                            return {
-                                label: option.text,
-                                value: option.key,
-                                imageSrc: item.options?.at(0)?.images?.at(index)?.src || '',
-                            };
-                        });
-                    }
                     break;
                 case 'scale':
                     fieldData['type'] = 'tickmark-slider';
@@ -111,6 +115,9 @@ function Enquete(props: EnqueteWidgetProps) {
                         { value: 'Happy', label: <Icon icon="ri-emotion-happy-line" /> },
                         { value: 'Laugh', label: <Icon icon="ri-emotion-laugh-line" /> },
                     ];
+                    break;
+                case 'none':
+                    fieldData['type'] = 'none';
                     break;
             }
 
@@ -124,7 +131,7 @@ function Enquete(props: EnqueteWidgetProps) {
                 (formOnlyVisibleForUsers && !hasRole(currentUser, 'member')) && (
                 <>
                     <Banner className="big">
-                        <h6>Inloggen om deel te nemen.</h6>
+                        <Heading6>Inloggen om deel te nemen.</Heading6>
                         <Spacer size={1} />
                         <Button
                             type="button"
@@ -139,10 +146,10 @@ function Enquete(props: EnqueteWidgetProps) {
             )}
 
             <div className="osc-enquete-item-content">
-                {props.displayTitle && props.title && <h4>{props.title}</h4>}
+                {props.displayTitle && props.title && <Heading2>{props.title}</Heading2>}
                 <div className="osc-enquete-item-description">
                     {props.displayDescription && props.description && (
-                        <p>{props.description}</p>
+                        <Paragraph>{props.description}</Paragraph>
                     )}
                 </div>
                 <Form

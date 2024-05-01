@@ -46,6 +46,11 @@
   align-items: center;
 }
 
+.like-kind .selected{
+  outline: 2px var(--utrecht-button-primary-action-background-color) dashed !important;
+  outline-offset: 1px;
+}
+
 .like-widget-container.small .like-option > .like-kind {
   justify-content: center;
   align-items: center;

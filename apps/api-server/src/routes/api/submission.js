@@ -19,7 +19,11 @@ router.route('/')
 		if (req.query.filter || req.query.exclude) {
 			req.scope.push({method: ['filter', JSON.parse(req.query.filter), req.query.exclude]});
 		}
-		
+
+		if (req.params && req.params.projectId) {
+			req.scope.push({method: ['forProjectId', req.params.projectId]});
+		}
+
 		db.Submission
 			.scope(...req.scope)
 			.findAndCountAll({where, offset: req.dbQuery.offset, limit: req.dbQuery.limit, order: req.dbQuery.order})
@@ -58,9 +62,9 @@ router.route('/')
 
 	// with one existing submission
 	// --------------------------
-	router.route('/:submissionId(\\d+)')
+	router.route('/:submissionId([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})')
 		.all(function(req, res, next) {
-			var submissionId = parseInt(req.params.submissionId);
+			var submissionId = req.params.submissionId;
 
 			req.scope = ['defaultScope'];
 			req.scope.push({method: ['forProjectId', req.params.projectId]});

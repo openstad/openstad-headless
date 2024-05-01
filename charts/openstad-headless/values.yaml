@@ -69,6 +69,7 @@ mysql:
 # Internal config
 public:
   name: openstad
+  environmentName:
 
 # Settings
 

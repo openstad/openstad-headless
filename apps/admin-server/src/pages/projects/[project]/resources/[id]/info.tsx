@@ -13,28 +13,11 @@ export default function ProjectResourceCreate() {
 
   return id ? (
     <div>
-      <PageLayout
-        pageHeader="Resources"
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Resources',
-            url: `/projects/${project}/resources`,
-          },
-          {
-            name: 'Resources aanpassen',
-            url: `/projects/${project}/resources/${id}`,
-          },
-        ]}>
         <ResourceForm
           onFormSubmit={(values) =>
             update(Number.parseInt(id as string), values)
           }
         />
-      </PageLayout>
     </div>
   ) : null;
 }

@@ -25,6 +25,7 @@ type userType = {
   id: number;
   name: string | undefined;
   role: Role;
+  jwt: string;
 }
 
 interface SessionData {
@@ -53,9 +54,6 @@ async function getSession(req: NextRequest | NextApiRequest, res: NextResponse |
 
 async function authMiddleware(req: NextRequest, res: NextResponse) {
 
-  // signout page
-  if (req.nextUrl.pathname.startsWith('/auth/signout')) return res;
-
   // projectId
   let targetProjectId = 1;
   let match = req.nextUrl.pathname.match(/^\/projects\/(\d+)/)
@@ -83,10 +81,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     return NextResponse.redirect( newUrl, { headers: res.headers });
   }
 
-  if (!(
-      req.nextUrl.pathname.startsWith('/_') ||         // not on internal urls
-      req.nextUrl.pathname.startsWith('/api/openstad') // api routes require user but will nog login
-     )) {
+  if (!(req.nextUrl.pathname.startsWith('/_'))) { // not on internal urls
 
     let forceNewLogin = false;
 
@@ -110,6 +105,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
           id: result.id,
           name: result.name,
           role: result.role,
+          jwt: jwt as string,
         };
       } catch(err) {
         jwt = '';
@@ -120,14 +116,15 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     }
 
     // login if token not found
-    if (!jwt) {
-      return signIn(req, targetProjectId, forceNewLogin)
+    if (!jwt && !req.nextUrl.pathname.startsWith('/api/openstad')) {
+       // api routes require user but will nog login
+      return signIn(req, res, targetProjectId, forceNewLogin)
     }
 
   }
 
   // api requests: add jwt
-  if (req.nextUrl.pathname.startsWith('/api/openstad')) {
+  if (jwt && req.nextUrl.pathname.startsWith('/api/openstad')) {
     let path = req.nextUrl.pathname.replace('/api/openstad', '');
     let query = searchParams ? '?' + searchParams.toString() : '';
     query = query.replace(/openstadlogintoken=(?:.(?!&|$))+./, '');
@@ -143,12 +140,16 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
 
 }
 
-function signIn(req: NextRequest, projectId:number = 1, forceNewLogin?: boolean) {
+async function signIn(req: NextRequest, res: NextResponse, projectId:number = 1, forceNewLogin?: boolean) {
+  if (forceNewLogin) {
+    const session = await getSession(req, res);
+    session.destroy()
+  }
   let path = req.nextUrl.pathname.replace('/api/openstad', '');
   if (path == '/') path = '/projects';
   let redirectUri = `${process.env.URL}${path}?openstadlogintoken=[[jwt]]`;
   let loginUrl = `${process.env.API_URL}/auth/project/${projectId}/login?useAuth=default&redirectUri=${redirectUri}${ forceNewLogin ? '&forceNewLogin=1' : '' }`;
-  return NextResponse.redirect(loginUrl);
+  return NextResponse.redirect(loginUrl, { headers: res.headers });
 }
 
 function clientSignIn() {
@@ -156,16 +157,11 @@ function clientSignIn() {
   document.location.href = loginUrl;
 }
 
-async function signOut(req: NextRequest, res: NextResponse) {
-  const session = await getSession(req, res);
-  Object.keys(session).map(key => session[key] = undefined);
-  await session.save()
-  return NextResponse.redirect( `${process.env.URL}/auth/signout`, { headers: res.headers });
-}
-
 type SessionUserType = {
+  id?: number;
   name?: string;
   role?: string;
+  jwt?: string;
 }
 
 async function fetchSessionUser() {
@@ -178,8 +174,10 @@ async function fetchSessionUser() {
     }
     let result = await response.json();
     return {
+      id: result.id,
       name: result.name,
       role: result.role,
+      jwt: result.jwt,
     }
   } catch(err) {
     console.log(err);
@@ -195,7 +193,6 @@ export {
   getSession,
   sessionOptions,
   signIn,
-  signOut,
   clientSignIn,
   SessionContext,
   fetchSessionUser,

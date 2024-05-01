@@ -7,7 +7,8 @@ import type { RadioboxFieldProps } from "@openstad-headless/ui/src/form-elements
 import type { FileUploadProps} from "@openstad-headless/ui/src/form-elements/file-upload";
 import type { HiddenInputProps } from "@openstad-headless/ui/src/form-elements/hidden";
 import type {ImageChoiceFieldProps} from "@openstad-headless/ui/src/form-elements/image-choice";
-import {MapProps} from "@openstad-headless/ui/src/form-elements/map/index.js";
+import type {MapProps} from "@openstad-headless/ui/src/form-elements/map";
+import type {InfoFieldProps} from "@openstad-headless/ui/src/form-elements/info";
 
 export type FormProps = {
     title?: string;
@@ -29,7 +30,8 @@ type CombinedFieldPropsWithType =
     | ({ type?: 'upload' } & FileUploadProps)
     | ({ type?: 'hidden' } & HiddenInputProps)
     | ({ type?: 'imageChoice' } & ImageChoiceFieldProps)
-    | ({ type?: 'map' } & MapProps);
+    | ({ type?: 'map' } & MapProps)
+    | ({ type?: 'none' } & InfoFieldProps);
 
 type ComponentFieldProps = (
     {
@@ -47,7 +49,8 @@ type CombinedFieldProps = (
     RadioboxFieldProps |
     FileUploadProps |
     HiddenInputProps |
-    ImageChoiceFieldProps
+    ImageChoiceFieldProps |
+    InfoFieldProps
 );
 
 export type { CombinedFieldProps as FieldProps, CombinedFieldPropsWithType, ComponentFieldProps};

@@ -1,8 +1,3 @@
-[data-openstad-iconsection]{
-  margin-block-start: var(--nlds-iconsection-margin-block-start, var(--nlds-default-margin-block-start, 3.5rem));
-  margin-block-end: var(--nlds-iconsection-margin-block-end, var(--nlds-default-margin-block-end, 3.5rem));
-}
-
 .icon-section{
   background-color: var(--nlds-iconsection-background-color, var(--nlds-default-background-color, #F0F4F8));
 }

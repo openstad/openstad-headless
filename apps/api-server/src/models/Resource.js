@@ -87,41 +87,6 @@ module.exports = function (db, sequelize, DataTypes) {
         defaultValue: 1,
       },
 
-      typeId: {
-        type: DataTypes.STRING(255),
-        allowNull: true,
-        auth: {
-          updateableBy: 'moderator',
-          authorizeData: function (data, action, user, self, project) {
-            if (!self) return;
-            project = project || self.project;
-            if (!project) return; // todo: die kun je ophalen als eea. async is
-            let value = data || self.typeId;
-            let config = project.config.resources.types;
-            if (
-              !config ||
-              !Array.isArray(config) ||
-              !config[0] ||
-              !config[0].id
-            )
-              return null; // no config; this field is not used
-            let defaultValue = config[0].id;
-
-            let valueConfig = config.find((type) => type.id == value);
-            if (!valueConfig) return self.typeId || defaultValue; // non-existing value; fallback to the current value
-            let requiredRole =
-              self.rawAttributes.typeId.auth[action + 'ableBy'] || 'all';
-            if (!valueConfig.auth)
-              return userHasRole(user, requiredRole)
-                ? value
-                : self.typeId || defaultValue; // no auth defined for this value; use field.auth
-            requiredRole = valueConfig.auth[action + 'ableBy'] || requiredRole;
-            if (userHasRole(user, requiredRole)) return value; // user has requiredRole; value accepted
-            return self.typeId || defaultValue;
-          },
-        },
-      },
-
       viewableByRole: {
         type: DataTypes.ENUM(
           'superuser',
@@ -893,97 +858,6 @@ module.exports = function (db, sequelize, DataTypes) {
     });
   };
 
-  Resource.prototype.getUserVote = function (user) {
-    return db.Vote.findOne({
-      attributes: ['opinion'],
-      where: {
-        resourceId: this.id,
-        userId: user.id,
-      },
-    });
-  };
-
-  // standaard stemvan
-  Resource.prototype.addUserVote = function (user, opinion, ip, extended) {
-    var data = {
-      resourceId: this.id,
-      userId: user.id,
-      opinion: opinion,
-      ip: ip,
-    };
-
-    var found;
-
-    return db.Vote.findOne({ where: data })
-      .then(function (vote) {
-        if (vote) {
-          found = true;
-        }
-        if (vote && vote.opinion === opinion) {
-          return vote.destroy();
-        } else {
-          // HACK: `upsert` on paranoid deleted row doesn't unset
-          //        `deletedAt`.
-          // TODO: Pull request?
-          data.deletedAt = null;
-          data.opinion = opinion;
-          return db.Vote.upsert(data);
-        }
-      })
-      .then(function (result) {
-        if (extended) {
-          // nieuwe versie, gebruikt door de api server
-          if (found) {
-            if (result && !!result.deletedAt) {
-              return 'cancelled';
-            } else {
-              return 'replaced';
-            }
-          } else {
-            return 'new';
-          }
-        } else {
-          // oude versie
-          // When the user double-voted with the same opinion, the vote
-          // is removed: return `true`. Otherwise return `false`.
-          //
-          // `vote.destroy` returns model when `paranoid` is `true`.
-          return result && !!result.deletedAt;
-        }
-      });
-  };
-
-  // stemtool stijl, voor eberhard3 - TODO: werkt nu alleen voor maxChoices = 1;
-  Resource.prototype.setUserVote = function (user, opinion, ip) {
-    let self = this;
-    if (config.votes && config.votes.maxChoices) {
-      return db.Vote.findAll({ where: { userId: user.id } })
-        .then((vote) => {
-          if (vote) {
-            if (config.votes.switchOrError == 'error')
-              throw new Error('Je hebt al gestemd'); // waarmee de default dus switch is
-            return vote
-              .update({ ip, confirmResourceId: self.id })
-              .then((vote) => true);
-          } else {
-            return db.Vote.create({
-              resourceId: self.id,
-              userId: user.id,
-              opinion: opinion,
-              ip: ip,
-            }).then((vote) => {
-              return false;
-            });
-          }
-        })
-        .catch((err) => {
-          throw err;
-        });
-    } else {
-      throw new Error('Resource.setUserVote: missing params');
-    }
-  };
-
   Resource.prototype.setModBreak = function (user, modBreak) {
     return this.update({
       modBreak: modBreak,
@@ -1043,12 +917,10 @@ module.exports = function (db, sequelize, DataTypes) {
     },
     canComment: function canComment(self) {
       if (!self) return false;
-      // project config: comments is closed
-      if (
-        typeof self?.project?.config?.comments?.canComment != 'boolean' ||
-        self.project.config.comments.canComment == false
-      )
+      if ( self.project?.config?.comments?.canComment === false ) {
+        // project config: comments is closed
         return false;
+      }
       // published
       if (!self.publishDate) return false;
       // status
@@ -1059,6 +931,11 @@ module.exports = function (db, sequelize, DataTypes) {
         }
       }
       return true;
+    },
+    canMutateStatus: function canMutateStatus (user, self) {
+      if (!user || !self) return false;
+      if (!self.auth.canUpdate(user, self)) return false;
+      return userHasRole(user, 'moderator');
     },
     toAuthorizedJSON: function (user, data, self) {
       if (!self.auth.canView(user, self)) {

@@ -1,16 +1,18 @@
 import { cn } from '@/lib/utils';
 import { Slot } from '@radix-ui/react-slot';
 import { VariantProps, cva } from 'class-variance-authority';
-import React, { ReactNode } from 'react';
+import React, {CSSProperties, ReactNode} from 'react';
 
 export function Paragraph({
   children,
   className,
+  style
 }: {
   children: ReactNode;
   className?: string;
+  style?: CSSProperties;
 }) {
-  return <p className={cn('text-sm leading-7', className)}>{children}</p>;
+  return <p className={cn('text-sm leading-7', className)} style={style}>{children}</p>;
 }
 
 export function ListHeading({

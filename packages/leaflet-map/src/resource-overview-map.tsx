@@ -18,6 +18,12 @@ import type { CategoriesType } from './types/categorize';
 import type { ResourceOverviewMapWidgetProps } from './types/resource-overview-map-widget-props';
 import { BaseMap } from './base-map';
 import React from 'react';
+import {LocationType} from "@openstad-headless/leaflet-map/src/types/location.js";
+
+type Point = {
+  lat: number;
+  lng: number;
+}
 
 const ResourceOverviewMap = ({
   categorize = undefined,
@@ -115,12 +121,51 @@ const ResourceOverviewMap = ({
     );
   }
 
+  const { data: areas } = datastore.useArea({
+    projectId: props.projectId
+  });
+
+  let areaId = props?.project?.areaId || false;
+  const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];
+
+  function calculateCenter(polygon: Point[]) {
+    if (!polygon || polygon.length === 0) {
+      return undefined;
+    }
+
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+
+    polygon.forEach(point => {
+      if (point.lng < minX) minX = point.lng;
+      if (point.lng > maxX) maxX = point.lng;
+      if (point.lat < minY) minY = point.lat;
+      if (point.lat > maxY) maxY = point.lat;
+    });
+
+    const avgLat = (minY + maxY) / 2;
+    const avgLng = (minX + maxX) / 2;
+
+    return {lat: avgLat, lng: avgLng};
+  }
+
+  let center: LocationType | undefined = undefined;
+  if (!!polygon && Array.isArray(polygon) && polygon.length > 0) {
+    center = calculateCenter(polygon);
+  }
+
   return (
     <>
       <BaseMap
         {...props}
+        area={polygon}
+        autoZoomAndCenter="area"
         categorize={{ categories, categorizeByField }}
-        markers={currentMarkers}>
+        center={center}
+        markers={currentMarkers}
+      >
         {ctaButtonElement}
         {countButtonElement}
       </BaseMap>

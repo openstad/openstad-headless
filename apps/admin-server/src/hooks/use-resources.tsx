@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 
 export default function useResources(projectId?: string) {
-  const url = `/api/openstad/api/project/${projectId}/resource?includeUserVote=1`;
+  const url = `/api/openstad/api/project/${projectId}/resource?includeUserVote=1&includeVoteCount=1`;
 
   const resourcesListSwr = useSWR(projectId ? url : null);
 

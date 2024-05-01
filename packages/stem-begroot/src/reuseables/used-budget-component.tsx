@@ -13,23 +13,29 @@ export const BudgetUsedList = ({
 }) => {
 
   let sortedBudgets = [...selectedBudgets];
-  sortedBudgets = sortedBudgets.sort((r1, r2) => r2-r1);
+  sortedBudgets = sortedBudgets.sort((r1, r2) => r2 - r1);
 
   return (
-    <div className="budget-used-list">
-      {sortedBudgets.map((budget,index) => (
+    <>
+      <div className="budget-used-list">
+        {sortedBudgets.map((budget, index) => (
+          <div
+            key={`budget-item-${budget}-${index}`}
+            className="budget-badge budget-badge-primary"
+            style={{ flex: budget }}>
+            <Paragraph>&euro;{budget.toLocaleString('nl-NL') || 0}</Paragraph>
+          </div>
+        ))}
         <div
-        key={`budget-item-${budget}-${index}`}
-          className="budget-badge budget-badge-primary"
-          style={{ flex: budget }}>
-          <Paragraph>&euro;{budget || 0}</Paragraph>
+          style={{ flex: Math.max(maxBudget - budgetUsed, 0) }}
+          className="osc-stem-begroot-budget-list-budget-left-indication budget-badge budget-badge-plain">
+          <Paragraph>&euro;{Math.max(maxBudget - budgetUsed, 0).toLocaleString('nl-NL')}</Paragraph>
         </div>
-      ))}
-      <div
-        style={{ flex: Math.max(maxBudget - budgetUsed, 0)}}
-        className="osc-stem-begroot-budget-list-budget-left-indication budget-badge budget-badge-plain">
-        <Paragraph>&euro;{Math.max(maxBudget - budgetUsed, 0)}</Paragraph>
       </div>
-    </div>
+      <div className="total-budget">
+        <Paragraph>Totaal: &euro;{maxBudget.toLocaleString('nl-NL')},</Paragraph>
+        <Paragraph>Gebruikt: &euro;{budgetUsed.toLocaleString('nl-NL')}</Paragraph>
+      </div>
+    </>
   );
 };

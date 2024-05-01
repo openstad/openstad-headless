@@ -25,12 +25,12 @@ export const BudgetStatusPanel = ({
 
           <Paragraph className="info-budget-label">
             <span>Budget gekozen:</span>
-            <span><Strong>&euro;{budgetUsed}</Strong></span>
+            <span><Strong>&euro;{budgetUsed.toLocaleString('nl-NL')}</Strong></span>
           </Paragraph>
           <Paragraph className="info-budget-label">
             <span>Budget over:</span>
             <span className="strong">
-              <Strong>&euro;{Math.max(maxBudget - budgetUsed, 0)} </Strong>
+              <Strong>&euro;{Math.max(maxBudget - budgetUsed, 0).toLocaleString('nl-NL')} </Strong>
             </span>
           </Paragraph>
         </>

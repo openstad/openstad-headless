@@ -1,6 +1,6 @@
 {% extends data.outerLayout %}
 
-{% set title = data.piece.title or data.page.title %}
+{% set title = [ data.global.projectTitle, ' - ', data.piece.title or data.page.title ] | join %}
 {% block title %}
 {{ title }}
 {% if not title %}
@@ -21,6 +21,11 @@ page or piece.') }}
 {% endblock %}
 
 {% block beforeMain %}
+
+<a class="skip-link utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action" href="#main">
+  Ga naar de hoofdinhoud
+</a>
+
 {% include 'partials/openstaduser.html' %}
 <div class="bp-wrapper">
   {% include 'partials/css.html' %}
@@ -28,7 +33,8 @@ page or piece.') }}
   {% include 'partials/header.html' %}
   {% include 'partials/analytics.html' %}
   {% include 'partials/navbar.html' %}
-  <div class="page">
+
+  <div class="page" id="main">
     {% endblock %}
 
     {% block main %}

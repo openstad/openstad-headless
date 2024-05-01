@@ -3,6 +3,7 @@ import {
   Icon,
   Image,
   List,
+  Pill,
   Spacer,
 } from '@openstad-headless/ui/src';
 
@@ -10,7 +11,7 @@ import { elipsize } from '@openstad-headless/lib/ui-helpers';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Button, Paragraph, Strong, Link } from "@utrecht/component-library-react";
+import { Button, Paragraph, Strong, Link, Heading4, Heading5, Heading6 } from "@utrecht/component-library-react";
 
 export const StemBegrootResourceList = ({
   resources,
@@ -61,40 +62,41 @@ export const StemBegrootResourceList = ({
 
         return (
           <>
-            <article>
+            <article className="stem-begroot--container">
               <Image src={resource.images?.at(0)?.url || ''} />
-
-              <div>
-                <Spacer size={1} />
                 <section className="stembegroot-content-item-header">
-                  {displayPriceLabel ? (
-                    <h5>&euro;{resource.budget || 0}</h5>
-                  ) : null}
                   <div className="stembegroot-content-item-header-taglist">
-                    <Paragraph className="strong">Thema:</Paragraph>
-                    <Paragraph>{theme?.name || 'Geen thema'}</Paragraph>
-                    <Paragraph><Strong>Gebied:</Strong></Paragraph>
-                    <Paragraph> {area?.name || 'Geen gebied'}</Paragraph>
+                    <Heading6>Tags</Heading6>
+                    <div className="pill-grid stembegroot">
+                      {(resource.tags as Array<{ type: string; name: string }>)
+                        ?.filter((t) => t.type !== 'status')
+                        ?.map((t) => <span>{t.name || 'Geen thema'}</span>)}
+                    </div>
                   </div>
                 </section>
-                <Spacer size={1} />
+                <Heading4>{resource.title}</Heading4>
+                <Heading5>{elipsize(resource.summary, 100)}</Heading5>
                 <Paragraph>{elipsize(resource.description, 200)}</Paragraph>
-                <Spacer size={1} />
-              </div>
 
-              {originalUrl ? (
-                <>
-                  <Paragraph className="strong">
-                    Dit een vervolg op plan:&nbsp;
-                    <Link target="_blank" href={originalUrl}>
-                      {originalUrl}
-                    </Link>
-                  </Paragraph>
-                </>
-              ) : null}
+              {
+                originalUrl ? (
+                  <>
+                    <Paragraph className="strong">
+                      Dit een vervolg op plan:&nbsp;
+                      <Link target="_blank" href={originalUrl}>
+                        {originalUrl}
+                      </Link>
+                    </Paragraph>
+                  </>
+                ) : null}
+              <div className="stembegroot--infolabels">
+                {displayPriceLabel ? (
+                  <div className="price">
+                    <Heading5>&euro;{resource.budget.toLocaleString('nl-NL') || 0}</Heading5>
+                  </div>
+                ) : null}
+                {showVoteCount ? (
 
-              {showVoteCount ? (
-                <>
                   <div className="osc-stem-begroot-content-item-footer">
                     <>
                       <Icon
@@ -116,9 +118,9 @@ export const StemBegrootResourceList = ({
                       ) : null}
                     </>
                   </div>
-                  <Spacer size={.5} />
-                </>
-              ) : null}
+                ) : null}
+                < Spacer size={.5} />
+              </div>
 
               <div className="osc-stem-begroot-content-item-footer">
                 <Button
@@ -136,11 +138,11 @@ export const StemBegrootResourceList = ({
                     onResourcePrimaryClicked(resource);
                   }}
                   appearance='primary-action-button'
-                  >
+                >
                   {primaryBtnText}
                 </Button>
               </div>
-            </article>
+            </article >
           </>
         );
       }}

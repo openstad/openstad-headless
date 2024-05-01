@@ -1,5 +1,5 @@
 import { PageLayout } from '../../../components/ui/page-layout';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useVotes from '@/hooks/use-votes';
@@ -7,11 +7,15 @@ import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import useUsers from "@/hooks/use-users";
+import { sortTable, searchTable } from '@/components/ui/sortTable';
 
 export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
   const { data, remove } = useVotes(project as string);
+
+  const [filterData, setFilterData] = useState(data);
+  const debouncedSearchTable = searchTable(setFilterData);
 
   const exportData = (data: BlobPart, fileName: string, type: string) => {
     // Create a link and download the file
@@ -30,6 +34,10 @@ export default function ProjectResources() {
   }
 
   const { data: usersData } = useUsers();
+
+  useEffect(() => {
+    setFilterData(data);
+  }, [data])
 
   return (
     <div>
@@ -53,37 +61,52 @@ export default function ProjectResources() {
           </div>
         }>
         <div className="container py-6">
-          <div className="p-6 bg-white rounded-md">
+
+          <input
+              type="text"
+              className='mb-4 p-2 rounded float-right'
+              placeholder="Zoeken..."
+              onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
+            />
+
+          <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-1 lg:grid-cols-8 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                Stem ID
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
+                  Stem ID
+                </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-2">
-                Stemdatum
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('createdAt', e, filterData))}>
+                  Stemdatum
+                </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                Plan ID
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('resourceId', e, filterData))}>
+                  Plan ID
+                </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                Gebruiker ID
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('userId', e, filterData))}>
+                  Gebruiker ID
+                </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                Gebruiker IP
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('ip', e, filterData))}>
+                  Gebruiker IP
+                </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                Voorkeur
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('opinion', e, filterData))}>
+                  Voorkeur
+                </button>
               </ListHeading>
             </div>
             <ul>
-              {data?.map((vote: any) => {
+              {filterData?.map((vote: any) => {
                 const userId = vote.userId;
-                const currentUser = !!usersData && Array.isArray(usersData) ? usersData?.filter((user) => {
-                  if (user.id === userId) {
-                    return user;
-                  }
-                }) : [];
-                const user = currentUser.length > 0 ? currentUser[0] : '';
-                const currentUserKey = !!user && user.idpUser?.identifier && user.idpUser?.provider ? `${user.idpUser.provider}-*-${user.idpUser.identifier}` : ( user.id?.toString() || 'unknown' );
+                const user = usersData?.find((user: any) => user.id === userId) || null;
+                const currentUserKey = !!user && user.idpUser?.identifier && user.idpUser?.provider ? `${user.idpUser.provider}-*-${user.idpUser.identifier}` : ( user?.id?.toString() || 'unknown' );
 
                 return (
                   <li

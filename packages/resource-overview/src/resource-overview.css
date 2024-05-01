@@ -75,15 +75,13 @@
   }
 }
 
-.osc-resource-overview-content-item-status {
+.osc .image-container .osc-image-footer .osc-resource-overview-content-item-status {
   display: inline-block;
   margin: 0;
-  padding: 0.125rem 0.25rem;
+  padding: .25rem .5rem;
   border-radius: 2px;
-  background-color: var(
-    --nlds-agenda-background-color,
-    var(--nlds-default-background-color, transparent)
-  );
+  background-color: var(--nlds-agenda-background-color, transparent);
+  font-size: 14px;
 }
 
 .osc-resource-overview-content-item-description {
@@ -100,6 +98,9 @@
 .osc-resourceoverview-search-container {
   display: flex;
   justify-content: center;
+}
+.osc-resourceoverview-search-container:empty{
+  display: none;
 }
 
 p.osc-searchtext {
@@ -142,6 +143,13 @@ p.osc-searchtext {
 
 .utrecht-button.resource-card--link h4,
 .utrecht-button.resource-card--link h5,
-.utrecht-button.resource-card--link p{
+.utrecht-button.resource-card--link p {
   color: inherit;
+}
+.utrecht-button.resource-card--link p {
+  font-weight: 400;
+}
+
+.status-label + .status-label::before {
+  content: ', ';
 }

@@ -26,29 +26,33 @@ export function Carousel({
       {...props}
       className={`osc ${props.className} osc-carousel`}
       style={{ width: '100%' }}>
-      <div className="osc-carousel-navigation-button-wrapper osc-carousel-previous">
-        <IconButton
-          className="primary-action-button"
-          icon="ri-arrow-left-s-line"
-          disabled={index === 0}
-          text={'Vorige slide'}
-          iconOnly={true}
-          onClick={() => setIndex(index - 1)}
-        />
+
+      <div className="carousel-button-container">
+        <div className="osc-carousel-navigation-button-wrapper osc-carousel-previous">
+          <IconButton
+            className="primary-action-button"
+            icon="ri-arrow-left-s-line"
+            disabled={index === 0}
+            text={'Vorige slide'}
+            iconOnly={true}
+            onClick={() => setIndex(index - 1)}
+          />
+        </div>
+        <div className="osc-carousel-navigation-button-wrapper osc-carousel-next">
+          <IconButton
+            className="primary-action-button"
+            icon="ri-arrow-right-s-line"
+            disabled={index === items.length - 1}
+            text={'Volgende slide'}
+            iconOnly={true}
+            onClick={() => setIndex(index + 1)}
+          />
+        </div>
       </div>
 
       <div className="carousel-items">{itemRenderer(items.at(index))}</div>
 
-      <div className="osc-carousel-navigation-button-wrapper osc-carousel-next">
-        <IconButton
-          className="primary-action-button"
-          icon="ri-arrow-right-s-line"
-          disabled={index === items.length - 1}
-          text={'Volgende slide'}
-          iconOnly={true}
-          onClick={() => setIndex(index + 1)}
-        />
-      </div>
+
     </div>
   );
 }

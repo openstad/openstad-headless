@@ -5,6 +5,7 @@ import {
   Icon,
   IconButton,
   Image,
+  Pill,
   SecondaryButton,
   Spacer,
 } from '@openstad-headless/ui/src';
@@ -14,7 +15,7 @@ import { Dialog } from '@openstad-headless/ui/src';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Button, Paragraph, Strong, Link, Heading5, Heading4 } from "@utrecht/component-library-react";
+import { Button, Paragraph, Strong, Link, Heading5, Heading4, Heading1 } from "@utrecht/component-library-react";
 
 export const StemBegrootResourceDetailDialog = ({
   openDetailDialog,
@@ -72,75 +73,75 @@ export const StemBegrootResourceDetailDialog = ({
                     src={resource.images?.at(0)?.url || ''}
                     style={{ aspectRatio: 16 / 9 }}
                   />
-                  <div>
+                  {/* <div>
                     <Button className="osc-begrootmodule-load-map-button"></Button>
+                  </div> */}
+
+                  <div className="osc-gridder-resource-detail-budget-theme-bar">
+                    <Heading4>Budget</Heading4>
+                    <Paragraph>&euro; {resource.budget > 0 ? resource.budget.toLocaleString('nl-NL') : 0}</Paragraph>
+                    <Spacer size={1} />
+                    <Heading4>Tags</Heading4>
+                    <Spacer size={.5} />
+                    <div className="pill-grid">
+                      {(resource.tags as Array<{ type: string; name: string }>)
+                        ?.filter((t) => t.type !== 'status')
+                        ?.map((t) => <Pill text={t.name || 'Geen thema'} />)}
+                    </div>
                   </div>
                 </section>
 
                 <section className="osc-begrootmodule-resource-detail-texts-and-actions-container">
                   <div>
-                    <div className="osc-begrootmodule-resource-detail-budget-theme-bar">
-                      {displayPriceLabel ? (
-                        <Heading5><Strong>&euro; {resource.budget || 0}</Strong></Heading5>
-                      ) : null}
 
+                    <div>
                       <div>
-                        <Paragraph><Strong>Thema:</Strong></Paragraph>
-                        <Paragraph>{theme?.name || 'Geen thema'}</Paragraph>
-                        <Paragraph><Strong>Thema:</Strong></Paragraph>
-                        <Paragraph> {area?.name || 'Geen gebied'}</Paragraph>
+                        <Heading1>{resource.title}</Heading1>
+                        <Paragraph className="strong">{resource.summary}</Paragraph>
+                        <Paragraph>{resource.description}</Paragraph>
                       </div>
                     </div>
 
-                    <div>
-                      <Spacer size={2} />
-                      <Heading4>{resource.title}</Heading4>
-                      <Spacer size={1} />
-                      <Paragraph><Strong>{resource.summary}</Strong></Paragraph>
-                      <Spacer size={1} />
-                      <Paragraph>{resource.description}</Paragraph>
+                    <Spacer size={2} />
+                    
+                    {originalUrl ? (
+                      <>
+                        <Paragraph className="strong">
+                          Dit een vervolg op het volgende plan:&nbsp;
+                          <Link target="_blank" href={originalUrl}>
+                            {originalUrl}
+                          </Link>
+                        </Paragraph>
 
-                      <Spacer size={1} />
+                      </>
+                    ) : null}
 
-                      {originalUrl ? (
+                    <div className="osc-stem-begroot-content-item-footer">
+                      {showVoteCount ? (
                         <>
-                          <Paragraph className="strong">
-                            Dit een vervolg op het volgende plan:&nbsp;
-                            <Link target="_blank" href={originalUrl}>
-                              {originalUrl}
-                            </Link>
-                          </Paragraph>
-                         
+                          <Icon
+                            icon="ri-thumb-up-line"
+                            variant="regular"
+                            text={resource.yes}
+                          />
+                          <Icon
+                            icon="ri-thumb-down-line"
+                            variant="regular"
+                            text={resource.no}
+                          />
                         </>
                       ) : null}
 
-                      <div className="osc-stem-begroot-content-item-footer">
-                        {showVoteCount ? (
-                          <>
-                            <Icon
-                              icon="ri-thumb-up-line"
-                              variant="regular"
-                              text={resource.yes}
-                            />
-                            <Icon
-                              icon="ri-thumb-down-line"
-                              variant="regular"
-                              text={resource.no}
-                            />
-                          </>
-                        ) : null}
-
-                        {displayRanking ? (
-                          <Icon
-                            icon="ri-trophy-line"
-                            variant="regular"
-                            text={resource.extraData?.ranking || 0}
-                          />
-                        ) : null}
-                      </div>
+                      {displayRanking ? (
+                        <Icon
+                          icon="ri-trophy-line"
+                          variant="regular"
+                          text={resource.extraData?.ranking || 0}
+                        />
+                      ) : null}
                     </div>
                   </div>
-                  <Spacer size={1}/>
+                  <Spacer size={1} />
                   <div className="osc-begrootmodule-resource-detail-actions">
                     <Button
                       appearance='primary-action-button'

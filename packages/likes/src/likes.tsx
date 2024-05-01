@@ -101,14 +101,18 @@ function Likes({
       return;
     }
 
-    if (
-      (!currentUser.role ||
-        !hasRole(currentUser, props.votes.requiredUserRole)) &&
-      props.login
-    ) {
+    if (!hasRole(currentUser, props.votes.requiredUserRole)) {
+      let loginUrl = props.login?.url || '';
+      if (props.votes.requiredUserRole == 'anonymous') {
+        loginUrl = props.login?.anonymous?.url || '';
+      }
+      if (!loginUrl) {
+        console.log('Config error: no login url defined');
+        return;
+      }
       // login
       session.set('osc-resource-vote-pending', { [resource.id]: value });
-      return (document.location.href = props?.login?.url);
+      return (document.location.href = loginUrl);
     }
 
     let change: { [key: string]: any } = {};

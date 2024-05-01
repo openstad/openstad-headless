@@ -14,7 +14,7 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const filterBody = (req, res, next) => {
   const data = {};
-  const keys = ['name', 'nickName', 'email', 'phoneNumber', 'address', 'city', 'postcode', 'extraData', 'listableByRole', 'detailsViewableByRole'];
+  const keys = ['password', 'name', 'nickName', 'email', 'phoneNumber', 'address', 'city', 'postcode', 'extraData', 'listableByRole', 'detailsViewableByRole'];
 
   keys.forEach((key) => {
     if (typeof req.body[key] != 'undefined') {

@@ -117,18 +117,18 @@ const defaultItemRenderer = (
     }
     return <Paragraph>Er is een fout in de template</Paragraph>;
   }
-  
+
   return (
     <Button appearance="subtle-button" className="resource-card--link" onClick={() => onItemClick && onItemClick()}>
       <Image
         src={resource.images?.at(0)?.url || ''}
         imageFooter={
           <div>
-            {resource.statuses?.map((statusTag: any) => (
-              <Paragraph className="osc-resource-overview-content-item-status">
-                {statusTag.label === 'OPEN' ? 'Open' : 'Gesloten'}
-              </Paragraph>
-            ))}
+            <Paragraph className="osc-resource-overview-content-item-status">
+              {resource.statuses?.map((statusTag: any) => (
+                <span className="status-label">{statusTag.label}</span>
+              ))}
+            </Paragraph>
           </div>
         }
       />
@@ -280,9 +280,8 @@ function ResourceOverview({
         {displayBanner ? renderHeader() : null}
 
         <section
-          className={`osc-resource-overview-content ${
-            !filterNeccesary ? 'full' : ''
-          }`}>
+          className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
+            }`}>
           {props.displaySearchText ? (
             <div className="osc-resourceoverview-search-container col-span-full">
               {props.textActiveSearch && search && (
@@ -333,15 +332,17 @@ function ResourceOverview({
               })}
           </section>
         </section>
-        <Spacer size={4} />
         {props.displayPagination && (
-          <div className="osc-resource-overview-paginator col-span-full">
-            <Paginator
-              page={resourcesWithPagination?.metadata?.page || 0}
-              totalPages={resourcesWithPagination?.metadata?.pageCount || 1}
-              onPageChange={(page) => setPage(page)}
-            />
-          </div>
+          <>
+            <Spacer size={4} />
+            <div className="osc-resource-overview-paginator col-span-full">
+              <Paginator
+                page={resourcesWithPagination?.metadata?.page || 0}
+                totalPages={resourcesWithPagination?.metadata?.pageCount || 1}
+                onPageChange={(page) => setPage(page)}
+              />
+            </div>
+          </>
         )}
       </div>
     </>

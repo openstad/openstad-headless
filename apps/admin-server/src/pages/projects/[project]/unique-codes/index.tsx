@@ -1,8 +1,8 @@
-import { PageLayout} from '@/components/ui/page-layout'
+import { PageLayout } from '@/components/ui/page-layout'
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { CSVLink } from 'react-csv';
@@ -15,18 +15,27 @@ import {
 import { MoreHorizontal } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useUniqueCodes from '@/hooks/use-unique-codes';
+import { searchTable, sortTable } from '@/components/ui/sortTable';
 
 const headers = [
-  {label: "ID", key: "id"},
-  {label: "Code", key: "code"}
+  { label: "ID", key: "id" },
+  { label: "Code", key: "code" }
 ]
 
 export default function ProjectCodes() {
   const router = useRouter();
   const { project } = router.query;
-  const { data:uniquecodes, resetUniqueCode} = useUniqueCodes(project as string);
+  const { data: uniquecodes, resetUniqueCode } = useUniqueCodes(project as string);
 
-  if(!uniquecodes?.data) return null;
+
+  const [filterData, setFilterData] = useState(uniquecodes?.data);
+  const debouncedSearchTable = searchTable(setFilterData);
+
+  useEffect(() => {
+    setFilterData(uniquecodes?.data);
+  }, [uniquecodes])
+  
+  if (!uniquecodes?.data) return null;
 
   return (
     <div>
@@ -58,18 +67,37 @@ export default function ProjectCodes() {
           </div>
         }>
         <div className="container py-6">
-          <div className="p-6 bg-white rounded-md">
+        <input
+            type="text"
+            className='mb-4 p-2 rounded float-right'
+            placeholder="Zoeken..."
+            onChange={(e) => debouncedSearchTable(e.target.value, filterData, uniquecodes?.data)}
+          />
+
+          <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-1 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
-              <ListHeading className="hidden lg:flex truncate">ID</ListHeading>
-              <ListHeading className="flex truncate">Code</ListHeading>
-              <ListHeading className="hidden lg:flex truncate">Gebruikt</ListHeading>
+              <ListHeading className="hidden lg:flex truncate">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
+                  ID
+                </button>
+              </ListHeading>
+              <ListHeading className="flex truncate">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('code', e, filterData))}>
+                  Code
+                </button>
+              </ListHeading>
+              <ListHeading className="hidden lg:flex truncate">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('userId', e, filterData))}>
+                  Gebruikt
+                </button>
+              </ListHeading>
             </div>
             <ul>
-              {uniquecodes?.data.map((code: any) => (
+              {filterData?.map((code: any) => (
                 <li key={code.id} className="grid grid-cols-2 lg:grid-cols-4 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                   <Paragraph className="hidden lg:flex truncate">{code.id || null}</Paragraph>
                   <Paragraph className="hidden lg:flex truncate">{code.code || null}</Paragraph>
-                  <Paragraph className="flex truncate -mr-16">{!!code.userId?`Gebruikt (userId=${code.userId})`:''}</Paragraph>
+                  <Paragraph className="flex truncate -mr-16">{!!code.userId ? `Gebruikt (userId=${code.userId})` : ''}</Paragraph>
                   {!!code.userId ? (
                     <div
                       className="hidden lg:flex ml-auto"
@@ -89,7 +117,7 @@ export default function ProjectCodes() {
                                 .catch(() =>
                                   toast.error('Stemcode kon niet worden gereset')
                                 )
-                              }
+                            }
                             }
                             className="text-xs">
                             Reset
@@ -97,9 +125,9 @@ export default function ProjectCodes() {
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-                  ) : null }
+                  ) : null}
                 </li>
-              ))}  
+              ))}
             </ul>
           </div>
         </div>

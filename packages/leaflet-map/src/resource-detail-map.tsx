@@ -56,9 +56,22 @@ const ResourceDetailMap = ({
     currentCenter = { ...resource.location };
   }
 
+  const { data: areas } = datastore.useArea({
+    projectId: props.projectId
+  });
+
+  let areaId = props?.project?.areaId || false;
+  const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];
+
   return (
     <>
-      <BaseMap {...props} center={currentCenter} markers={[currentMarker]} />
+      <BaseMap
+        {...props}
+        area={polygon}
+        autoZoomAndCenter="area"
+        center={currentCenter}
+        markers={[currentMarker]}
+      />
     </>
   );
 };

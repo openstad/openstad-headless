@@ -1,5 +1,7 @@
 import React, { FC, useState } from "react";
 import { FormField, FormFieldDescription, FormLabel, Paragraph, Textarea, Textbox } from "@utrecht/component-library-react";
+import { Spacer } from '@openstad-headless/ui/src';
+import './style.css';
 
 export type TextInputProps = {
     title: string;
@@ -17,7 +19,7 @@ export type TextInputProps = {
     disabled?: boolean;
     rows?: TextInputProps['variant'] extends 'textarea' ? number : undefined;
     type?: string;
-    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
 }
 
 const TextInput: FC<TextInputProps> = ({
@@ -25,23 +27,51 @@ const TextInput: FC<TextInputProps> = ({
     description,
     variant,
     fieldKey,
-    fieldRequired= false,
+    fieldRequired = false,
     placeholder = '',
-    defaultValue= '',
+    defaultValue = '',
     onChange,
     disabled = false,
+    minCharacters = 0,
+    minCharactersWarning = 'Nog minimaal {minCharacters} tekens',
+    maxCharacters = 0,
+    maxCharactersWarning = 'Je hebt nog {maxCharacters} tekens over',
     rows,
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const InputComponent = variant === 'textarea' ? Textarea : Textbox;
+
+    const [isFocused, setIsFocused] = useState(false);
+    const [helpText, setHelpText] = useState('');
+
+    const characterHelpText = (count: number) => {
+        let helpText = '';
+
+        if (!!minCharacters && count < minCharacters) {
+            helpText = minCharactersWarning?.replace('{minCharacters}', (minCharacters - count).toString());
+        } else if (!!maxCharacters && count < maxCharacters) {
+            helpText = maxCharactersWarning?.replace('{maxCharacters}', (maxCharacters - count).toString());
+        }
+
+        setHelpText(helpText);
+    }
+
+    const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
 
     return (
         <FormField type="text">
             <Paragraph className="utrecht-form-field__label">
                 <FormLabel htmlFor={randomID}>{title}</FormLabel>
             </Paragraph>
-            <FormFieldDescription>{description}</FormFieldDescription>
-            <div className="utrecht-form-field__input">
+            {description &&
+                <>
+                    <FormFieldDescription>
+                        {description}
+                    </FormFieldDescription>
+                    <Spacer size={.5} />
+                </>
+            }
+            <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}>
                 <InputComponent
                     id={randomID}
                     name={fieldKey}
@@ -56,10 +86,16 @@ const TextInput: FC<TextInputProps> = ({
                                 value: e.target.value,
                             });
                         }
+                        characterHelpText(e.target.value.length)
                     }}
                     disabled={disabled}
                     rows={rows}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
                 />
+                {isFocused && helpText &&
+                  <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
+                }
             </div>
         </FormField>
     );

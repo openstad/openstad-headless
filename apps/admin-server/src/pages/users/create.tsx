@@ -40,7 +40,7 @@ export default function CreateUser() {
     try {
       let user = await createUser({
         email: values.email,
-        parojectId: values.projectId,
+        projectId: values.projectId,
       });
       toast.success('User is toegevoegd')
       user.key = `${user.idpUser.provider}-*-${user.idpUser.identifier}`

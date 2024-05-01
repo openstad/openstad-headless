@@ -104,11 +104,6 @@
     display: block;
 }
 
-.section {
-    margin-block-start: var(--nlds-section-margin-block-start, var(--nlds-default-margin-block-start, 2rem));
-    margin-block-end: var(--nlds-section-margin-block-end, var(--nlds-default-margin-block-end, 2rem));
-}
-
 *:first-child {
     --nlds-counter-margin-block-start: 0;
 }
