@@ -53,7 +53,7 @@ export const BegrotenSelectedOverview = ({
             </section>
             {typeIsBudgeting ? (
               <Paragraph>
-                <Strong>&euro;{resource.budget.toLocaleString('nl-NL') || 0}</Strong>
+                <Strong>&euro;{resource.budget?.toLocaleString('nl-NL') || 0}</Strong>
               </Paragraph>
             ) : null}
           </div>

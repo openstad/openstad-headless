@@ -92,7 +92,7 @@ export const StemBegrootResourceList = ({
               <div className="stembegroot--infolabels">
                 {displayPriceLabel ? (
                   <div className="price">
-                    <Heading5>&euro;{resource.budget.toLocaleString('nl-NL') || 0}</Heading5>
+                    <Heading5>&euro;{resource.budget?.toLocaleString('nl-NL') || 0}</Heading5>
                   </div>
                 ) : null}
                 {showVoteCount ? (
