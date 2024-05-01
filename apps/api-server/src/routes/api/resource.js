@@ -300,33 +300,42 @@ router
 
   // TODO: Add notifications
   .post(function (req, res, next) {
+    const sendConfirmationToUser = typeof(req.body['confirmationUser']) !== 'undefined' ? req.body['confirmationUser'] : false;
+    const sendConfirmationToAdmin = typeof(req.body['confirmationAdmin']) !== 'undefined' ? req.body['confirmationAdmin'] : false;
+
     res.json(req.results);
     if (!req.query.nomail && req.body['publishDate']) {
-      db.Notification.create({
-        type: "new published resource - admin update",
-    		  projectId: req.project.id,
-        data: {
-          userId: req.user.id,
-          resourceId: req.results.id
-        }
-    	  })
-      db.Notification.create({
-        type: "new published resource - user feedback",
-    		  projectId: req.project.id,
-        data: {
-          userId: req.user.id,
-          resourceId: req.results.id
-        }
-    		})
+      if (sendConfirmationToAdmin) {
+        db.Notification.create({
+          type: "new published resource - admin update",
+          projectId: req.project.id,
+          data: {
+            userId: req.user.id,
+            resourceId: req.results.id
+          }
+        })
+      }
+      if (sendConfirmationToUser) {
+        db.Notification.create({
+          type: "new published resource - user feedback",
+          projectId: req.project.id,
+          data: {
+            userId: req.user.id,
+            resourceId: req.results.id
+          }
+        })
+      }
     } else if (!req.query.nomail && !req.body['publishDate']) {
-      db.Notification.create({
-        type: "new concept resource - user feedback",
-    		  projectId: req.project.id,
-        data: {
-          userId: req.user.id,
-          resourceId: req.results.id
-        }
-    		})
+      if (sendConfirmationToUser) {
+        db.Notification.create({
+          type: "new concept resource - user feedback",
+          projectId: req.project.id,
+          data: {
+            userId: req.user.id,
+            resourceId: req.results.id
+          }
+        })
+      }
     }
   });
 
