@@ -36,8 +36,6 @@ services:
     ports:
       - 1025:1025 # smtp server
       - 8025:8025 # web ui
-    environment:
-      - "MP_SMTP_TLS_REQUIRED=false"
 
   openstad-api-server:
     build:
