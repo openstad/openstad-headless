@@ -35,7 +35,7 @@
         </a>
         {% elif data.global.siteLogo %}
         <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-uploaded logo-main-container">
-          <img src="{{apos.attachment.url(data.global.siteLogo)}}" alt="logo" id="logo-image">
+          <img src="{{apos.attachment.url(data.global.siteLogo)}}" alt="Afbeelding van het logo, link naar de homepage" id="logo-image">
           {% if not data.global.hideSiteTitle %}
           <h2 class="header-subtitle">
             {{data.global.siteTitle}}
@@ -44,7 +44,7 @@
         </a>
         {% else %}
         <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-default logo-main-container">
-          <img class="default" src="{{ apos.asset.url('/modules/openstad-assets/img/logo-openstad.png?v=1') }}" alt="logo" id="logo-image">
+          <img class="default" src="{{ apos.asset.url('/modules/openstad-assets/img/logo-openstad.png?v=1') }}" alt="Afbeelding van het logo, link naar de homepage" id="logo-image">
         </a>
         {% endif %}
         <div class="header-side-container {{ 'without-site-title' if data.global.hideSiteTitle}}">
