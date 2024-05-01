@@ -1,3 +1,5 @@
+import { Search } from "lucide-react";
+
 const sortFunctions = {
     'date-added': (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     'createdAt': (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -39,17 +41,17 @@ export const sortTable = (sortType: string, el: React.MouseEvent<HTMLElement, Mo
     return sortedWidgets;
 };
 
-export const searchTable = (setData: Function, delay: number = 500) => {
+export const searchTable = (setData: Function, type?: string, delay: number = 500) => {
     let timerId: NodeJS.Timeout;
-
     const debouncedSearchTable = (searchTerm: string, data: Array<any> = [], originalData: Array<any> = []) => {
         clearTimeout(timerId);
         timerId = setTimeout(() => {
-            if (searchTerm.length >= 3) {
+            if (searchTerm.length >= 1) {
                 const searchResult = data.filter(item =>
-                    Object.values(item).some(val =>
-                        String(val).toLowerCase().includes(searchTerm.toLowerCase())
-                    )
+                    type ? String(item[type]).toLowerCase().includes(searchTerm.toLowerCase())
+                        : Object.values(item).some(val =>
+                            String(val).toLowerCase().includes(searchTerm.toLowerCase())
+                        )
                 );
                 setData(searchResult);
             } else {

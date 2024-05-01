@@ -22,8 +22,8 @@ export default function ProjectWidgets() {
   );
 
   const [data, setData] = useState(widgets);
-  
-  const debouncedSearchTable = searchTable(setData);
+  const [filterSearchType, setFilterSearchType] = useState<string>('');
+  const debouncedSearchTable = searchTable(setData, filterSearchType);
 
   useEffect(() => {
     if (widgets) {
@@ -48,13 +48,28 @@ export default function ProjectWidgets() {
         action={<CreateWidgetDialog projectId={project as string} />}>
         <div className="container py-6">
 
-          <input
-            type="text"
-            className='mb-4 p-2 rounded float-right'
-            placeholder="Zoeken..."
-            onChange={(e) => debouncedSearchTable(e.target.value, data, widgets)}
-          />
 
+          <div className="float-right mb-4 flex gap-4">
+
+            <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
+            <select
+              className="p-2 rounded"
+              onChange={(e) => setFilterSearchType(e.target.value)}
+            >
+              <option value="">Alles</option>
+              <option value="id">ID</option>
+              <option value="type">Widget</option>
+              <option value="createdAt">Toegevoegd op</option>
+              <option value="updatedAt">Gewijzigd op</option>
+            </select>
+
+            <input
+              type="text"
+              className='p-2 rounded'
+              placeholder="Zoeken..."
+              onChange={(e) => debouncedSearchTable(e.target.value, data, widgets)}
+            />
+          </div>
 
           <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-2 lg:grid-cols-[40px_repeat(5,1fr)] items-left py-2 px-2 border-b border-border">

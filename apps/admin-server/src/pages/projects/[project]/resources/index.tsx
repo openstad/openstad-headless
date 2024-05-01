@@ -32,7 +32,8 @@ export default function ProjectResources() {
   }
 
   const [filterData, setFilterData] = useState(data);
-  const debouncedSearchTable = searchTable(setFilterData);
+  const [filterSearchType, setFilterSearchType] = useState<string>('');
+  const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
 
   useEffect(() => {
     setFilterData(data);
@@ -70,12 +71,28 @@ export default function ProjectResources() {
         }>
         <div className="container py-6">
 
-        <input
-            type="text"
-            className='mb-4 p-2 rounded float-right'
-            placeholder="Zoeken..."
-            onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
-          />
+          <div className="float-right mb-4 flex gap-4">
+            <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
+            <select
+              className="p-2 rounded"
+              onChange={(e) => setFilterSearchType(e.target.value)}
+            >
+              <option value="">Alles</option>
+              <option value="id">Stem ID</option>
+              <option value="resource">Resources</option>
+              <option value="yes">Gestemd op ja</option>
+              <option value="no">Gestemd op nee</option>
+              <option value="createdAt">Datum aangemaakt</option>
+
+              
+            </select>
+            <input
+              type="text"
+              className='p-2 rounded'
+              placeholder="Zoeken..."
+              onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
+            />
+          </div>
 
           <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-2 lg:grid-cols-7 items-center py-2 px-2 border-b border-border">
