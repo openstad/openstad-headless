@@ -21,6 +21,8 @@ async function setupEnvVars() {
   process.env.DB_USERNAME = process.env.DB_USERNAME || 'openstad';
   process.env.DB_PASSWORD = process.env.DB_PASSWORD || generateRandomToken({ length: 32 });
 
+  process.env.MESSAGESTREAMING_REDIS_URL = process.env.MESSAGESTREAMING_REDIS_URL || '';
+
   let API_PORT = process.env.API_PORT = process.env.API_PORT || BASE_PORT + 10;
   let API_DOMAIN = process.env.API_DOMAIN = process.env.API_DOMAIN || ( process.env.BASE_DOMAIN == 'localhost' ? 'localhost:' + API_PORT : 'api.' + process.env.BASE_DOMAIN );
   let API_URL = process.env.API_URL = process.env.API_URL = process.env.API_URL || ( process.env.FORCE_HTTP ? 'http://' : 'https://' ) + API_DOMAIN;
@@ -158,6 +160,8 @@ DB_HOST=${process.env.DB_HOST}
 DB_USERNAME=${process.env.DB_USERNAME}
 DB_PASSWORD=${process.env.DB_PASSWORD}
 DB_BASE_NAME=${process.env.DB_BASE_NAME}
+
+MESSAGESTREAMING_REDIS_URL=${process.env.MESSAGESTREAMING_REDIS_URL || 'openstad-redis'}
 
 BASIC_AUTH_USER=${process.env.BASIC_AUTH_USER}
 BASIC_AUTH_PASSWORD=${process.env.BASIC_AUTH_PASSWORD}
