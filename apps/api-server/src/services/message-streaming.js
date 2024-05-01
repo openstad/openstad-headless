@@ -4,9 +4,15 @@ const redis = require('redis');
 let client = null;
 
 async function getClient() {
-  return redis.createClient(config.messageStreaming.redis)
-    .on('error', err => console.log('Redis Client Error', err))
-    .connect();
+  let client;
+  try {
+    client = await redis.createClient(config.messageStreaming.redis)
+      .connect();
+  } catch(err) {
+    //console.log(err);
+  }
+
+  return client;
 }
 
 module.exports = {

@@ -8,9 +8,13 @@ async function getClient() {
     return client.duplicate();
   }
 
-  client = await redis.createClient({ url: process.env.MESSAGESTREAMING_REDIS_URL })
-    .on('error', err => console.log('Redis Client Error', err))
-    .connect();
+  try {
+    client = await redis.createClient({ url: process.env.MESSAGESTREAMING_REDIS_URL })
+      .connect();
+  } catch(err) {
+    // console.log(err);
+  }
+
   return client;
 
 }

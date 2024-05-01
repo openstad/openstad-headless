@@ -184,7 +184,11 @@ router.route('/')
 	})
 	.post(async function (req, res, next) {
     let publisher = await messageStreaming.getPublisher();
-    publisher.publish('new-project', 'event');
+    if (publisher) {
+      publisher.publish('new-project', 'event');
+    } else {
+      console.log('No publisher found')
+    }
     return next()
 	})
 	.post(auth.useReqUser)
@@ -314,10 +318,14 @@ router.route('/:projectId') //(\\d+)
 	.put(async function (req, res, next) {
     if (!req.pendingMessages) return next();
     let publisher = await messageStreaming.getPublisher();
-    req.pendingMessages.map(message => {
-      console.log('Message:', message.key, message.value);
-      publisher.publish(message.key, message.value);
-    });
+    if (publisher) {
+      req.pendingMessages.map(message => {
+        console.log('Message:', message.key, message.value);
+        publisher.publish(message.key, message.value);
+      });
+    } else {
+      console.log('No publisher found')
+    }
     return next()
 	})
 	.put(function (req, res, next) {

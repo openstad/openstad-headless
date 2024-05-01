@@ -35,15 +35,20 @@ async function setupProject(project) {
 
   // add event subscription
   if (!subscriptions[project.id]) {
-    subscriptions[project.id] = await messageStreaming.getSubscriber();
-    await subscriptions[project.id].subscribe(`project-${project.id}-update`, message => {
-      if (apostropheServer[project.domain]) {
-        // restart the server with the new settings
-        apostropheServer[project.domain].apos.destroy();
-        delete apostropheServer[project.domain];
-      }
-      loadProject(project.id)
-    });
+    let subscriber = await messageStreaming.getSubscriber();
+    if (subscriber) {
+      subscriptions[project.id] = subscriber;
+      await subscriptions[project.id].subscribe(`project-${project.id}-update`, message => {
+        if (apostropheServer[project.domain]) {
+          // restart the server with the new settings
+          apostropheServer[project.domain].apos.destroy();
+          delete apostropheServer[project.domain];
+        }
+        loadProject(project.id)
+      });
+    } else {
+      console.log('No subscriber found');
+    }
   }
 
 }
@@ -66,13 +71,18 @@ async function loadProjects() {
 
     // add event subscription
     if (!subscriptions['all']) {
-      subscriptions['all'] = await messageStreaming.getSubscriber();
-      await subscriptions['all'].subscribe(`project-urls-update`, message => {
-        loadProjects();
-      });
-      await subscriptions['all'].subscribe(`new-project`, message => {
-        loadProjects();
-      });
+      let subscriber = await messageStreaming.getSubscriber();
+      if (subscriber) {
+        subscriptions['all'] = subscriber;
+        await subscriptions['all'].subscribe(`project-urls-update`, message => {
+          loadProjects();
+        });
+        await subscriptions['all'].subscribe(`new-project`, message => {
+          loadProjects();
+        });
+      } else {
+        console.log('No subscriber found');
+      }
     }
 
     cleanUpProjects();
