@@ -41,10 +41,14 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
   const totalPropPackageMap: ResourceOverviewMapWidgetProps & EditFieldProps<ResourceOverviewMapWidgetProps> = {
     ...(widget?.config || {}),
     ...(previewConfig || {}),
+    marker: {
+      // provide default values for the marker properties
+    },
+    markerIcon: {
+      // provide default values for the markerIcon properties
+    },
     updateConfig: (config: ResourceOverviewMapWidgetProps) =>
       updateConfig({ ...(widget?.config || {}), ...config }),
-
-
     onFieldChanged: (key: string, value: any) => {
       if (previewConfig) {
         updatePreview({
