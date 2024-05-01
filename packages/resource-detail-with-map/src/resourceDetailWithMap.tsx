@@ -20,7 +20,6 @@ import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
 
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
-import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 type booleanProps = {
   [K in
   | 'displayImage'
@@ -43,6 +42,7 @@ export type ResourceDetailWidgetProps = BaseProps &
     projectId?: string;
     resourceId?: string;
     resourceIdRelativePath?: string;
+    backUrl?: string;
   } & booleanProps & {
     likeWidget?: Omit<
       LikeWidgetProps,
@@ -72,6 +72,7 @@ function ResourceDetailWithMap({
   displayTags = false,
   displayStatus = false,
   displaySocials = false,
+  backUrl = '/',
   ...props
 }: ResourceDetailWidgetProps) {
 
@@ -92,13 +93,11 @@ function ResourceDetailWithMap({
   });
 
   if (!resource) return null;
-  const shouldHaveSideColumn =
-    displayLikes || displayTags || displayStatus || displaySocials;
   return (
     <section className="osc-resource-detail-content osc-resource-detail-grid">
       {resource ? (
         <>
-          <a href="/" className="back-to-overview">Terug naar overzicht</a>
+          <a href={backUrl} className="back-to-overview">Terug naar overzicht</a>
           <article className="osc-resource-detail-content-items">
             {displayImage && (
               <Carousel

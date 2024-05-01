@@ -95,7 +95,7 @@
 .osc-resource-detail-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto 100vh;
+  grid-template-rows: auto calc(100vh - 252px);
 }
 .osc-resource-detail-grid .osc-resource-detail-content-items {
   overflow: auto;
@@ -113,6 +113,7 @@
   padding-left: 2rem;
   color: var(--grid-back-color, #333);
   text-decoration: none;
+  line-height:1;
 }
 .osc-resource-detail-grid .back-to-overview:before {
   content: '';

@@ -31,7 +31,7 @@
     "@openstad-headless/likes": "file:../../packages/likes",
     "@openstad-headless/raw-resource": "file:../../packages/raw-resource",
     "@openstad-headless/resource-detail": "file:../../packages/resource-detail",
-    "@openstad-headless/resource-detail-wth-map": "file:../../packages/resource-detail-with-map",
+    "@openstad-headless/resource-detail-with-map": "file:../../packages/resource-detail-with-map",
     "@openstad-headless/resource-form": "file:../../packages/resource-form",
     "@openstad-headless/resource-overview": "file:../../packages/resource-overview",
     "@openstad-headless/leaflet-map":"file:../../packages/leaflet-map",

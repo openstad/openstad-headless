@@ -15,7 +15,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useRouter } from 'next/router';
 import useResources from '@/hooks/use-resources';
-import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
+import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail-with-map/src/resourceDetailWithMap';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { useCallback, useEffect, useState } from 'react';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
@@ -30,6 +30,7 @@ const formSchema = z.object({
       (value) => !value || value.includes('[id]'),
       'Specificeer een [id] veld'
     ),
+  backUrl: z.string().optional(),
 });
 
 export default function WidgetResourceDetailGeneral(
@@ -53,9 +54,10 @@ export default function WidgetResourceDetailGeneral(
   const defaults = useCallback(
     () => ({
       resourceId: props?.resourceId || undefined,
-      resourceIdRelativePath: props?.resourceIdRelativePath || undefined
+      resourceIdRelativePath: props?.resourceIdRelativePath || undefined,
+       backUrl: props?.backUrl || undefined,
     }),
-    [props?.resourceId, props?.resourceIdRelativePath]
+    [props?.resourceId, props?.resourceIdRelativePath, props?.backUrl]
   );
 
   const form = useForm<FormData>({
@@ -109,6 +111,26 @@ export default function WidgetResourceDetailGeneral(
               )}
             />
           ) : null}
+
+            <FormField
+              control={form.control}
+              name="backUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Overzicht url:
+                  </FormLabel>
+                  <em className="text-xs">De URL waar het overzicht staat, bijvoorbeeld: '/overzicht'</em>
+                  <FormControl>
+                    <Input {...field} onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan

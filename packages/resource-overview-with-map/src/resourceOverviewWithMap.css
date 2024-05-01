@@ -1,7 +1,7 @@
 .resourceOverviewWithMap-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  height: 750px;
+  height: calc(100vh - 193px);
 }
 
 .resourceOverviewWithMap-container

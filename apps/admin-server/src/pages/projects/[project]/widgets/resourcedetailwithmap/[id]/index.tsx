@@ -12,18 +12,18 @@ import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail-with-map/src/resourceDetailWithMap';
+
+import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
+import WidgetResourcesMapButtons from '../../resourcesmap/[id]/buttons';
+import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+
 import WidgetPreview from '@/components/widget-preview';
 import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
 import WidgetPublish from '@/components/widget-publish';
-import ArgumentsGeneral from '../../comments/[id]/general';
-import LikesDisplay from '../../likes/[id]/weergave';
-import ArgumentsList from '../../comments/[id]/list';
-import { ArgumentWidgetTabProps } from '../../comments/[id]';
-import ArgumentsForm from '../../comments/[id]/form';
-import { LikeWidgetTabProps } from '../../likes/[id]';
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
@@ -38,38 +38,23 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
       projectId,
     });
 
-  function extractConfig<T>(
-    subWidgetKey: keyof Pick<
-      ResourceDetailWidgetProps,
-      'commentsWidget' | 'likeWidget'
-    >
-  ) {
-    if (!previewConfig) throw new Error();
+  const totalPropPackageMap: ResourceOverviewMapWidgetProps & EditFieldProps<ResourceOverviewMapWidgetProps> = {
+    ...(widget?.config || {}),
+    ...(previewConfig || {}),
+    updateConfig: (config: ResourceOverviewMapWidgetProps) =>
+      updateConfig({ ...(widget?.config || {}), ...config }),
 
-    return {
-      resourceId: previewConfig.resourceId || '',
-      ...previewConfig[subWidgetKey],
-      updateConfig: (config: T) =>
-        updateConfig({
+
+    onFieldChanged: (key: string, value: any) => {
+      if (previewConfig) {
+        updatePreview({
           ...previewConfig,
-          [subWidgetKey]: {
-            ...previewConfig[subWidgetKey],
-            ...config,
-          },
-        }),
-      onFieldChanged: (key: string, value: any) => {
-        if (previewConfig) {
-          updatePreview({
-            ...previewConfig,
-            [subWidgetKey]: {
-              ...previewConfig[subWidgetKey],
-              [key]: value,
-            },
-          });
-        }
-      },
-    };
-  }
+          [key]: value,
+        });
+      }
+    },
+    projectId,
+  };
 
   return (
     <div>
@@ -90,100 +75,78 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="general">
+          <Tabs defaultValue="resources">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
-              <TabsTrigger value="general">Algemeen</TabsTrigger>
-              <TabsTrigger value="display">Display</TabsTrigger>
-              <TabsTrigger value="comments">Argumenten widget</TabsTrigger>
-              <TabsTrigger value="likes">Likes widget</TabsTrigger>
+              <TabsTrigger value="resources">Resources</TabsTrigger>
+              <TabsTrigger value="map">Kaart</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
-            <TabsContent value="general" className="p-0">
-              {previewConfig && (
-                <WidgetResourceDetailGeneral
-                  {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
-                />
-              )}
-            </TabsContent>
-            <TabsContent value="display" className="p-0">
-              {previewConfig && (
-                <WidgetResourceDetailDisplay
-                  {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
-                />
-              )}
-            </TabsContent>
 
-            <TabsContent value="comments" className="p-0">
-              {previewConfig && (
-                <Tabs defaultValue="general">
-                  <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
-                    <TabsTrigger value="general">Algemeen</TabsTrigger>
-                    <TabsTrigger value="list">Lijst</TabsTrigger>
-                    <TabsTrigger value="form">Formulier</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="general" className="p-0">
-                    <ArgumentsGeneral
-                      omitSchemaKeys={['resourceId', 'sentiment']}
-                      {...extractConfig<ArgumentWidgetTabProps>(
-                        'commentsWidget'
-                      )}
+            <TabsContent value="resources">
+              <Tabs defaultValue="general">
+                <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
+                  <TabsTrigger value="general">Algemeen</TabsTrigger>
+                  <TabsTrigger value="display">Display</TabsTrigger>
+                </TabsList>
+                <TabsContent value="general" className="p-0">
+                  {previewConfig && (
+                    <WidgetResourceDetailGeneral
+                      {...previewConfig}
+                      updateConfig={(config) =>
+                        updateConfig({ ...widget.config, ...config })
+                      }
+                      onFieldChanged={(key, value) => {
+                        if (previewConfig) {
+                          updatePreview({
+                            ...previewConfig,
+                            [key]: value,
+                          });
+                        }
+                      }}
                     />
-                  </TabsContent>
-
-                  <TabsContent value="list" className="p-0">
-                    <ArgumentsList
-                      {...extractConfig<ArgumentWidgetTabProps>(
-                        'commentsWidget'
-                      )}
+                  )}
+                </TabsContent>
+                <TabsContent value="display" className="p-0">
+                  {previewConfig && (
+                    <WidgetResourceDetailDisplay
+                      {...previewConfig}
+                      updateConfig={(config) =>
+                        updateConfig({ ...widget.config, ...config })
+                      }
+                      onFieldChanged={(key, value) => {
+                        if (previewConfig) {
+                          updatePreview({
+                            ...previewConfig,
+                            [key]: value,
+                          });
+                        }
+                      }}
                     />
-                  </TabsContent>
-                  <TabsContent value="form" className="p-0">
-                    <ArgumentsForm
-                      {...extractConfig<ArgumentWidgetTabProps>(
-                        'commentsWidget'
-                      )}
-                    />
-                  </TabsContent>
-                </Tabs>
-              )}
+                  )}
+                </TabsContent>
+              </Tabs>
             </TabsContent>
+            <TabsContent value="map">
+              <Tabs defaultValue="map">
+                <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
+                  <TabsTrigger value="map">Kaart</TabsTrigger>
+                  <TabsTrigger value="button">Knoppen</TabsTrigger>
+                </TabsList>
 
-            <TabsContent value="likes" className="p-0">
-              {previewConfig && (
-                <LikesDisplay
-                  omitSchemaKeys={['resourceId']}
-                  {...extractConfig<LikeWidgetTabProps>('likeWidget')}
-                />
-              )}
+
+                <TabsContent value="map" className="p-0">
+                  <WidgetResourcesMapMap {...totalPropPackageMap} />
+                </TabsContent>
+                <TabsContent value="button" className="p-0">
+                  <WidgetResourcesMapButtons {...totalPropPackageMap} />
+                </TabsContent>
+
+              </Tabs>
             </TabsContent>
-
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
           </Tabs>
-
           <div className="container py-6 mt-6 bg-white rounded-md">
             {previewConfig && (
               <>
@@ -196,7 +159,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
             )}
           </div>
         </div>
-      </PageLayout>
-    </div>
+      </PageLayout >
+    </div >
   );
 }
