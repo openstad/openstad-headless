@@ -161,7 +161,7 @@ function ResourceDetail({
                       Budget
                     </Heading>
                     <span className="osc-resource-detail-content-item-text">
-                      {`€ ${resource.budget.toLocaleString('nl-NL')}`}
+                      {`€ ${resource.budget?.toLocaleString('nl-NL')}`}
                     </span>
                   </div>
                 )}
