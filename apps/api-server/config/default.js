@@ -100,6 +100,12 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
     },
 	},
 
+  messageStreaming: {
+    redis: {
+      url: process.env.MESSAGESTREAMING_REDIS_URL,
+    }
+  },
+
   auth: AUTH || {
     jwtSecret: AUTH_JWTSECRET || 'REPLACE THIS VALUE!!',
     adapter: AUTH_ADAPTER || {

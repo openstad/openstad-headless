@@ -25,6 +25,16 @@ services:
       timeout: 20s
       retries: 10
 
+  openstad-redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      timeout: 20s
+      retries: 10
+
   openstad-mongo:
     image: mongo
     restart: always
@@ -50,6 +60,8 @@ services:
     depends_on:
       openstad-mysql:
         condition: service_healthy
+      openstad-redis:
+        condition: service_healthy
     container_name: openstad-api-server
     restart: unless-stopped
     environment:
@@ -59,6 +71,7 @@ services:
       - DB_PASSWORD=${API_DATABASE_PASSWORD}
       - DB_NAME=${API_DATABASE_DATABASE}
       - DB_HOST=${API_DATABASE_HOST}
+      - MESSAGESTREAMING_REDIS_URL=${MESSAGESTREAMING_REDIS_URL}
       - EMAILADDRESS=${API_EMAILADDRESS}
       - PORT=${API_PORT}
       - MAIL_FROM=${API_MAIL_FROM}
@@ -226,8 +239,10 @@ services:
         - APP=cms-server
         - PORT=${CMS_PORT}
     image: openstad/headless-cms-server:${RELEASE_VERSION:-latest}
+    depends_on:
+      openstad-redis:
+        condition: service_healthy
     # TODO: dit moet conditional: alleen als we deze db gebruiken
-    # depends_on:
     #   openstad-mongo:
     #     condition: service_healthy
     container_name: openstad-cms-server
@@ -236,6 +251,7 @@ services:
       - PORT=${CMS_PORT}
       - OVERWRITE_URL=${CMS_URL}
       - MONGODB_URI=${CMS_MONGODB_URI}
+      - MESSAGESTREAMING_REDIS_URL=${MESSAGESTREAMING_REDIS_URL}
       - CMS_DEFAULTS=${CMS_DEFAULTS}
       - API_URL=${API_URL}
       - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}

@@ -47,6 +47,8 @@ MYSQL_PASSWORD=${process.env.DB_PASSWORD}
 AUTH_DB_NAME=${process.env.AUTH_DB_NAME}
 API_DB_NAME=${process.env.API_DB_NAME}
 
+MESSAGESTREAMING_REDIS_URL=${process.env.MESSAGESTREAMING_REDIS_URL || 'openstad-redis'}
+
 API_URL=${process.env.API_URL}
 API_HOSTNAME=${process.env.API_DOMAIN}
 API_PORT=${process.env.API_PORT}
