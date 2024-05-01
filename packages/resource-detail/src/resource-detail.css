@@ -91,3 +91,19 @@
 .osc .image-container > .osc-image-footer p:empty {
   padding: 0;
 }
+
+.resource-detail-modbreak-banner {
+  padding: 1rem;
+  border: 1px solid grey;
+  border-radius: 4px;
+}
+
+.resource-detail-modbreak-banner > section {
+  display: flex;
+  width: 100%;
+  gap: 1rem;
+}
+
+.resource-detail-modbreak-banner > section > *:first-child {
+  font-weight: bold;
+}
