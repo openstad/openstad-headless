@@ -403,6 +403,8 @@ function StemBegroot({
                     } finally {
                       session.remove('osc-resource-vote-pending');
                     }
+                  } else if(currentStep === 4) {
+                    currentUser.logout({url: location.href});
                   } else {
                     setCurrentStep(currentStep + 1);
                   }
