@@ -120,7 +120,7 @@ export default function WidgetResourceDetailGeneral(
                   <FormLabel>
                     Overzicht url:
                   </FormLabel>
-                  <em className="text-xs">De URL waar het overzicht staat, bijvoorbeeld: '/overzicht'</em>
+                  <em className="text-xs">De URL waar het overzicht staat, bijvoorbeeld: &lsquo;/overzicht&rsquo;</em>
                   <FormControl>
                     <Input {...field} onChange={(e) => {
                       onFieldChange(field.name, e.target.value);
