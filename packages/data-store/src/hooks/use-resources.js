@@ -1,11 +1,14 @@
-export default function useResources({
-  projectId,
-  page = 0,
-  pageSize = 20,
-  search = '',
-  tags = [],
-  sort = 'createdAt_desc',
-}) {
+export default function useResources(
+  {
+    projectId,
+    page = 0,
+    pageSize = 20,
+    search = '',
+    tags = [],
+    sort = 'createdAt_desc',
+  },
+  options
+) {
   let self = this;
 
   if (!projectId) {
@@ -25,7 +28,8 @@ export default function useResources({
   // If you add a prop here, the also do it for filter
   const { data, error, isLoading } = self.useSWR(
     { projectId, page, pageSize, search, tags, sort },
-    'resources.fetch'
+    'resources.fetch',
+    options
   );
 
   // add functionality
@@ -46,12 +50,12 @@ export default function useResources({
 
   const create = function (submittedData, widgetId) {
     return self.mutate(
-        { projectId },
-        'resources.create',
-        { submittedData, widgetId },
-        {
-          action: 'create',
-        }
+      { projectId },
+      'resources.create',
+      { submittedData, widgetId },
+      {
+        action: 'create',
+      }
     );
   };
 
@@ -79,5 +83,5 @@ export default function useResources({
       });
     };
   });
-  return {data :resources, error, isLoading, submitVotes, create};
+  return { data: resources, error, isLoading, submitVotes, create };
 }

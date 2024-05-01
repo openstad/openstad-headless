@@ -1,6 +1,6 @@
 import './resource-overview.css';
 import React, { useCallback, useState } from 'react';
-import { Banner, Carousel, Icon, Paginator } from '@openstad-headless/ui/src';
+import { Carousel, Icon, Paginator } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { Spacer } from '@openstad-headless/ui/src';
@@ -13,16 +13,29 @@ import { elipsize } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
 import { hasRole } from '@openstad-headless/lib';
 import nunjucks from 'nunjucks';
+import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map';
 
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Heading4, Heading5, Paragraph, Button } from "@utrecht/component-library-react";
+import '@utrecht/component-library-css';
+import '@utrecht/design-tokens/dist/root.css';
+import {
+  Heading4,
+  Heading5,
+  Paragraph,
+  Button,
+} from '@utrecht/component-library-react';
+import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
-  } & {
-    renderHeader?: (resources?: Array<any>) => React.JSX.Element;
+    resourceOverviewMapWidget?: Omit<
+      ResourceOverviewMapWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'projectId'
+    >;
+    renderHeader?: (
+      props: ResourceOverviewWidgetProps,
+      resources?: Array<any>,
+    ) => React.JSX.Element;
     renderItem?: (
       resource: any,
       props: ResourceOverviewWidgetProps,
@@ -65,10 +78,17 @@ export type ResourceOverviewWidgetProps = BaseProps &
 
 //Temp: Header can only be made when the map works so for now a banner
 // If you dont want a banner pas <></> into the renderHeader prop
-const defaultHeaderRenderer = (resources?: any) => {
+const defaultHeaderRenderer = (
+  widgetProps: ResourceOverviewWidgetProps,
+  resources?: any
+) => {
   return (
     <>
-      <Banner></Banner>
+      <ResourceOverviewMap
+        {...widgetProps}
+        {...widgetProps.resourceOverviewMapWidget}
+        items={resources}
+      />
       <section className="osc-resource-overview-title-container">
         <Heading4>Plannen</Heading4>
       </section>
@@ -119,7 +139,10 @@ const defaultItemRenderer = (
   }
 
   return (
-    <Button appearance="subtle-button" className="resource-card--link" onClick={() => onItemClick && onItemClick()}>
+    <Button
+      appearance="subtle-button"
+      className="resource-card--link"
+      onClick={() => onItemClick && onItemClick()}>
       <Image
         src={resource.images?.at(0)?.url || ''}
         imageFooter={
@@ -136,11 +159,15 @@ const defaultItemRenderer = (
       <div>
         <Spacer size={1} />
         {props.displayTitle ? (
-          <Heading4>{elipsize(resource.title, props.titleMaxLength || 20)}</Heading4>
+          <Heading4>
+            {elipsize(resource.title, props.titleMaxLength || 20)}
+          </Heading4>
         ) : null}
 
         {props.displaySummary ? (
-          <Heading5>{elipsize(resource.summary, props.summaryMaxLength || 20)}</Heading5>
+          <Heading5>
+            {elipsize(resource.summary, props.summaryMaxLength || 20)}
+          </Heading5>
         ) : null}
 
         {props.displayDescription ? (
@@ -159,7 +186,11 @@ const defaultItemRenderer = (
         ) : null}
 
         {props.displayArguments ? (
-          <Icon icon="ri-message-line" variant="big" text={resource.commentCount} />
+          <Icon
+            icon="ri-message-line"
+            variant="big"
+            text={resource.commentCount}
+          />
         ) : null}
       </div>
     </Button>
@@ -225,7 +256,9 @@ function ResourceOverview({
           let newUrl = props.itemLink.replace('[id]', resource.id);
           if (!newUrl.startsWith('http')) {
             if (!newUrl.startsWith('/')) {
-              newUrl = `${location.pathname}${location.pathname.endsWith('/') ? '' : '/'}${newUrl}`;
+              newUrl = `${location.pathname}${
+                location.pathname.endsWith('/') ? '' : '/'
+              }${newUrl}`;
             }
             newUrl = `${location.protocol}//${location.host}${newUrl}`;
           }
@@ -277,11 +310,12 @@ function ResourceOverview({
       />
 
       <div className="osc">
-        {displayBanner ? renderHeader() : null}
+        {displayBanner ? renderHeader(props, resources) : null}
 
         <section
-          className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
-            }`}>
+          className={`osc-resource-overview-content ${
+            !filterNeccesary ? 'full' : ''
+          }`}>
           {props.displaySearchText ? (
             <div className="osc-resourceoverview-search-container col-span-full">
               {props.textActiveSearch && search && (

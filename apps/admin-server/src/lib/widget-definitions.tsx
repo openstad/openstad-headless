@@ -3,7 +3,7 @@ export const WidgetDefinitions = {
   comments: 'Argumenten',
   begrootmodule: 'Begrootmodule',
   enquete: 'Enquete',
-  resourcesmap: 'Resource map',
+  resourcesmap: 'Resource overview map',
   resourcedetailmap: 'Resource detail map',
   counter: 'Counter',
   datecountdownbar: 'Date countdown bar',

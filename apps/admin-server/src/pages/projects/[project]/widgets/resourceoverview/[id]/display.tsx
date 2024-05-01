@@ -81,7 +81,7 @@ export default function WidgetResourceOverviewDisplay(
             name="displayBanner"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Titel weergeven</FormLabel>
+                <FormLabel>Map weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
