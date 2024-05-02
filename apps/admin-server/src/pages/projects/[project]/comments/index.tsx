@@ -82,22 +82,34 @@ export default function ProjectComments() {
           <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-1 lg:grid-cols-7 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex lg:col-span-2">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
+                <button className="filter-button" onClick={(e) => {
+                  const sortedData = sortTable('id', e, filterData);
+                  setFilterData(sortedData ? sortedData : []);
+                }}>
                   Argument ID
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('resourceId', e, filterData))}>
+              <button className="filter-button" onClick={(e) => {
+                  const sortedData = sortTable('id', e, filterData);
+                  setFilterData(sortedData ? sortedData : []);
+                }}>
                   Resource ID
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-2">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('createdAt', e, filterData))}>
+              <button className="filter-button" onClick={(e) => {
+                  const sortedData = sortTable('id', e, filterData);
+                  setFilterData(sortedData ? sortedData : []);
+                }}>
                   Geplaatst op
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('sentiment', e, filterData))}>
+              <button className="filter-button" onClick={(e) => {
+                  const sortedData = sortTable('id', e, filterData);
+                  setFilterData(sortedData ? sortedData : []);
+                }}>
                   Sentiment
                 </button>
               </ListHeading>
