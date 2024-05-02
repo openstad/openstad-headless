@@ -18,6 +18,10 @@ page or piece.') }}
     process = { env: {NODE_ENV: 'production'} };
   }
 </script>
+{% if data.global.favicon %}
+  <link rel="icon" type="image/x-icon" href="{{data.global.favicon._url}}"/>
+{% endif %}
+
 {% endblock %}
 
 {% block beforeMain %}
