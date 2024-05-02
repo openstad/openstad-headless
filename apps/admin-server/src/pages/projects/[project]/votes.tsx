@@ -15,7 +15,8 @@ export default function ProjectResources() {
   const { data, remove } = useVotes(project as string);
 
   const [filterData, setFilterData] = useState(data);
-  const debouncedSearchTable = searchTable(setFilterData);
+  const [filterSearchType, setFilterSearchType] = useState<string>('');
+  const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
 
   const exportData = (data: BlobPart, fileName: string, type: string) => {
     // Create a link and download the file
@@ -62,12 +63,27 @@ export default function ProjectResources() {
         }>
         <div className="container py-6">
 
-          <input
+          <div className="float-right mb-4 flex gap-4">
+            <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
+            <select
+              className="p-2 rounded"
+              onChange={(e) => setFilterSearchType(e.target.value)}
+            >
+              <option value="">Alles</option>
+              <option value="id">Stem ID</option>
+              <option value="createdAt">Stemdatum</option>
+              <option value="resourceId">Plan ID</option>
+              <option value="userId">Gebruiker ID</option>
+              <option value="ip">Gebruiker IP</option>
+              <option value="opinion">Voorkeur</option>
+            </select>
+            <input
               type="text"
-              className='mb-4 p-2 rounded float-right'
+              className='p-2 rounded'
               placeholder="Zoeken..."
               onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
             />
+          </div>
 
           <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-1 lg:grid-cols-8 items-center py-2 px-2 border-b border-border">
@@ -106,7 +122,7 @@ export default function ProjectResources() {
               {filterData?.map((vote: any) => {
                 const userId = vote.userId;
                 const user = usersData?.find((user: any) => user.id === userId) || null;
-                const currentUserKey = !!user && user.idpUser?.identifier && user.idpUser?.provider ? `${user.idpUser.provider}-*-${user.idpUser.identifier}` : ( user?.id?.toString() || 'unknown' );
+                const currentUserKey = !!user && user.idpUser?.identifier && user.idpUser?.provider ? `${user.idpUser.provider}-*-${user.idpUser.identifier}` : (user?.id?.toString() || 'unknown');
 
                 return (
                   <li
@@ -119,10 +135,10 @@ export default function ProjectResources() {
                       {vote.createdAt}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate lg:col-span-1">
-                      <a href={`/projects/${project}/resources/${vote.resourceId}`} style={{textDecoration: 'underline'}}>{vote.resourceId}</a>
+                      <a href={`/projects/${project}/resources/${vote.resourceId}`} style={{ textDecoration: 'underline' }}>{vote.resourceId}</a>
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate lg:col-span-1">
-                      <a href={`/users/${btoa(currentUserKey)}`} style={{textDecoration: 'underline'}}>{vote.userId}</a>
+                      <a href={`/users/${btoa(currentUserKey)}`} style={{ textDecoration: 'underline' }}>{vote.userId}</a>
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate lg:col-span-1">
                       {vote.ip}
