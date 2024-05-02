@@ -87,7 +87,7 @@ const defaultHeaderRenderer = (
       <ResourceOverviewMap
         {...widgetProps}
         {...widgetProps.resourceOverviewMapWidget}
-        items={resources}
+        givenResources={resources}
       />
       <section className="osc-resource-overview-title-container">
         <Heading4>Plannen</Heading4>

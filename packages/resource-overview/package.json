@@ -14,6 +14,7 @@
     "@openstad-headless/data-store": "file:../data-store",
     "@openstad-headless/lib": "file:../lib",
     "@openstad-headless/ui": "file:../ui",
+    "@openstad-headless/leaflet-map": "file:../leaflet-map",
     "@types/nunjucks": "^3.2.6",
     "@utrecht/component-library-css": "^3.0.1-alpha.18",
     "@utrecht/component-library-react": "^3.0.1-alpha.18",
