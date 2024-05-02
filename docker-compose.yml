@@ -111,6 +111,7 @@ services:
       - /opt/openstad-headless/packages/resource-detail/node_modules
       - /opt/openstad-headless/packages/resource-overview/node_modules
       - /opt/openstad-headless/packages/resource-form/node_modules
+      - /opt/openstad-headless/packages/resource-with-detail-map/node_modules
       - /opt/openstad-headless/packages/types/node_modules
       - /opt/openstad-headless/packages/ui/node_modules
 

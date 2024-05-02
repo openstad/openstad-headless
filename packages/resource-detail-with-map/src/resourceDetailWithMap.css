@@ -1,0 +1,128 @@
+.osc-resource-detail-column-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  align-items: start;
+}
+
+.osc-resource-detail-container {
+  display: block;
+}
+
+.resource-detail-side-column {
+  background-color: var(--osc-card);
+}
+
+.resource-detail-side-section {
+  padding: 0rem 2rem;
+}
+
+.resource-detail-side-section-socials {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.resource-detail-pil-list-content {
+  display: flex;
+  gap: 0.5rem;
+  align-items: start;
+  flex-wrap: wrap;
+}
+
+.resource-detail-comments-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.osc-resource-detail-title-container {
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
+  align-items: center;
+}
+
+.osc-resource-detail-content-items {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.osc-resource-detail-content-item-row {
+  background-color: var(
+    --nlds-resource-detail-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
+  color: var(--nlds-resource-detail-color, var(--utrecht-paragraph-color));
+  padding: 0.5rem 0.7rem;
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem;
+  border-radius: 4px;
+}
+
+@media (min-width: 768px) {
+  .osc-resource-detail-content-item-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1366px) {
+  .osc-resource-detail-column-container {
+    display: block;
+  }
+}
+
+.osc-resource-detail-content-item-title {
+  font-weight: bold !important;
+}
+
+/* Temporary until map component is finished */
+.osc-resource-detail-content-item-location {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 50vh;
+  background-color: var(--osc-card);
+}
+
+.osc .image-container > .osc-image-footer p:empty {
+  padding: 0;
+}
+
+.osc-resource-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto calc(100vh - 252px);
+}
+.osc-resource-detail-grid .osc-resource-detail-content-items {
+  overflow: auto;
+}
+.osc-resource-detail-grid .map-container {
+  aspect-ratio: unset !important;
+}
+
+.osc-resource-detail-grid .back-to-overview {
+  grid-column: span 2;
+  display: block;
+  background: var(--nlds-default-background-color, #f0f4f8);
+  padding: 1rem 0.5rem;
+  position: relative;
+  padding-left: 2rem;
+  color: var(--grid-back-color, #333);
+  text-decoration: none;
+  line-height:1;
+}
+.osc-resource-detail-grid .back-to-overview:before {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height:6px;
+  left: 1rem;
+  top: 21px;
+  border: solid var(--grid-back-color, #333);
+  border-width: 2px 0 0 2px;
+  transform: rotate(-45deg);
+}

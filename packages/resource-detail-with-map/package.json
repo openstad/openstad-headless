@@ -1,5 +1,5 @@
 {
-  "name": "@openstad-headless/resource-detail",
+  "name": "@openstad-headless/resource-detail-with-map",
   "private": true,
   "version": "0.0.0",
   "type": "module",
