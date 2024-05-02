@@ -14,6 +14,7 @@ export type ResourceFormWidget = {
     submit?: Submit;
     items?: Array<Item>;
     info?: Info;
+    confirmation?: Confirmation;
 };
 
 export type General = {
