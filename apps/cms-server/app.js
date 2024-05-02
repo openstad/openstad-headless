@@ -9,7 +9,7 @@ const aposConfig = require('./lib/apos-config');
 const { refresh } = require('less');
 const REFRESH_PROJECTS_INTERVAL = 60000 * 5;
 const Url = require('node:url');
-const messageStreaming = require('./services/message-streaming');
+const messageStreaming = require('@openstad-headless/message-streaming');
 
 let projects = {};
 let subscriptions = {}
@@ -35,20 +35,14 @@ async function setupProject(project) {
 
   // add event subscription
   if (!subscriptions[project.id]) {
-    let subscriber = await messageStreaming.getSubscriber();
-    if (subscriber) {
-      subscriptions[project.id] = subscriber;
-      await subscriptions[project.id].subscribe(`project-${project.id}-update`, message => {
-        if (apostropheServer[project.domain]) {
-          // restart the server with the new settings
-          apostropheServer[project.domain].apos.destroy();
-          delete apostropheServer[project.domain];
-        }
-        loadProject(project.id)
-      });
-    } else {
-      console.log('No subscriber found');
-    }
+    subscriptions[project.id] = await messageStreaming.subscribe(`project-${project.id}-update`, message => {
+      if (apostropheServer[project.domain]) {
+        // restart the server with the new settings
+        apostropheServer[project.domain].apos.destroy();
+        delete apostropheServer[project.domain];
+      }
+      loadProject(project.id)
+    });
   }
 
 }
@@ -70,19 +64,17 @@ async function loadProjects() {
     });
 
     // add event subscription
-    if (!subscriptions['all']) {
-      let subscriber = await messageStreaming.getSubscriber();
-      if (subscriber) {
-        subscriptions['all'] = subscriber;
-        await subscriptions['all'].subscribe(`project-urls-update`, message => {
-          loadProjects();
-        });
-        await subscriptions['all'].subscribe(`new-project`, message => {
-          loadProjects();
-        });
-      } else {
-        console.log('No subscriber found');
-      }
+    if (!subscriptions['url-updates']) {
+      subscriptions['url-updates'] = await messageStreaming.subscribe(`project-urls-update`, message => {
+        console.log('UPDATED URLS: reload');
+        loadProjects();
+      });
+    }
+    if (!subscriptions['new-projects']) {
+      subscriptions['new-projects'] = await messageStreaming.subscribe(`new-project`, message => {
+        console.log('NEW PROJECT: reload');
+        loadProjects();
+      });
     }
 
     cleanUpProjects();
