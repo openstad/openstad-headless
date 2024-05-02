@@ -38,9 +38,6 @@ const ResourceOverviewMap = ({
     config: { api: props.api },
   });
 
-  console.log({givenResources})
-  console.log({shouldSuspense:!!givenResources})
-
   if (!Array.isArray(givenResources)) {
     givenResources = undefined;
   }
@@ -51,9 +48,6 @@ const ResourceOverviewMap = ({
     },
     { suspense: !!givenResources }
   );
-  console.log({resources})
-
-
 
   const allResources = givenResources || resources?.records || [];
   let categorizeByField = categorize?.categorizeByField;
