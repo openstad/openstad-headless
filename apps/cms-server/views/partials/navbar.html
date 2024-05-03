@@ -1,20 +1,20 @@
 
 {% if data.global.arrangeMainMenu and data.global.arrangeMainMenu == 'manually' %}
-<nav id="navbar"
+<div id="navbar"
       data-content='{{ data.global.mainMenuItems | json }}'
-></nav>
+></div>
 {% else %}
 
 {% if not data.global.compactMenu %}
   {% set menuData = data.home._children | json | replace("'", "&#39;") %}
-  <nav id="navbar"
+  <div id="navbar"
     data-home='
     [{
       "_url": "{{ data.home._url }}",
       "title": "{{ data.home.title }}"
     }]'
     data-content='{{ menuData }}'
-  ></nav>
+  ></div>
 {% endif %}
 
 {% endif %}

@@ -9,7 +9,7 @@ import hasRole from '../../../lib/has-role';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Paragraph, Heading6, Button, ButtonGroup } from "@utrecht/component-library-react";
+import { Paragraph, Heading, Button, ButtonGroup } from "@utrecht/component-library-react";
 import { CommentProps } from '../types/comment-props';
 import { CommentWidgetContext } from '../comments';
 
@@ -78,9 +78,9 @@ function Comment({
   return (
     <article className='comment-item'>
       <section className="comment-item-header">
-        <Heading6 className="reaction-name">
+        <Heading level={4} appearance='utrecht-heading-6' className="reaction-name">
           {args.comment.user && args.comment.user.displayName}{' '}
-        </Heading6>
+        </Heading>
         {canEdit() || canDelete() ? (
           <DropDownMenu
             items={[

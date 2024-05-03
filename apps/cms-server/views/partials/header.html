@@ -37,9 +37,11 @@
         <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-uploaded logo-main-container">
           <img src="{{apos.attachment.url(data.global.siteLogo)}}" alt="Afbeelding van het logo, link naar de homepage" id="logo-image">
           {% if not data.global.hideSiteTitle %}
+          {% if data.global.siteTitle.length > 0%}
           <h2 class="header-subtitle">
             {{data.global.siteTitle}}
           </h2>
+        {% endif %}
         {% endif %}
         </a>
         {% else %}
@@ -99,7 +101,7 @@
         <div class="header_navbar-container">
           <button class="close-button"><span>Close</span></button>
           {% if data.global.compactMenu %}
-            <nav id="navbar"
+            <div id="navbar"
               class="--compact"
               data-home='
               [{
@@ -107,7 +109,7 @@
                 "title": "{{ data.home.title }}"
               }]'
               data-content='{{ data.home._children | json }}'
-            ></nav>
+            ></div>
           {% endif %}
 
           {% if data.global.ctaButtons.length > 0 %}

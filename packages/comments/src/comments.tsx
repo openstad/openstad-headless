@@ -11,7 +11,7 @@ import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
-import { Button, Paragraph, Heading3, Heading6 } from '@utrecht/component-library-react';
+import { Button, Paragraph, Heading3, Heading } from '@utrecht/component-library-react';
 import { CommentFormProps } from './types/comment-form-props';
 
 // This type holds all properties needed for this component to work
@@ -132,21 +132,21 @@ function Comments({
         {!args.canComment ? (
           <Banner>
             <Spacer size={2} />
-            <Heading6>{args.closedText}</Heading6>
+            <Heading level={4} appearance='utrecht-heading-6'>{args.closedText}</Heading>
             <Spacer size={2} />
           </Banner>
         ) : null}
 
         {!args.canComment && hasRole(currentUser, 'moderator') ? (
           <Banner>
-            <Heading6>U kunt nog reageren vanwege uw rol als moderator</Heading6>
+            <Heading level={4} appearance='utrecht-heading-6'>U kunt nog reageren vanwege uw rol als moderator</Heading>
             <Spacer size={2} />
           </Banner>
         ) : null }
 
         {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
           <Banner className="big">
-            <Heading6>Inloggen om deel te nemen aan de discussie.</Heading6>
+            <Heading level={4} appearance='utrecht-heading-6'>Inloggen om deel te nemen aan de discussie.</Heading>
             <Spacer size={1} />
             <Button
               appearance="primary-action-button"

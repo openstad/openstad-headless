@@ -16,9 +16,6 @@ import '@utrecht/design-tokens/dist/root.css';
 import {
   Paragraph,
   Heading,
-  Heading4,
-  Heading5,
-  Heading6,
 } from '@utrecht/component-library-react';
 import React from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
@@ -140,7 +137,7 @@ function ResourceDetail({
               <div className="osc-resource-detail-content-item-row">
                 {displayUser && resource?.user?.displayName && (
                   <div>
-                    <Heading level={3} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
+                    <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
                       Gemaakt door
                     </Heading>
                     <span className="osc-resource-detail-content-item-text">
@@ -150,7 +147,7 @@ function ResourceDetail({
                 )}
                 {displayDate && resource.startDateHumanized && (
                   <div>
-                    <Heading level={3} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
+                    <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
                       Datum
                     </Heading>
                     <span className="osc-resource-detail-content-item-text">
@@ -160,7 +157,7 @@ function ResourceDetail({
                 )}
                 {displayBudget && resource.budget && (
                   <div>
-                    <Heading level={3} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
+                    <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
                       Budget
                     </Heading>
                     <span className="osc-resource-detail-content-item-text">
@@ -177,7 +174,7 @@ function ResourceDetail({
               </div>
               {displayLocation && resource.location && (
                 <>
-                  <Heading4>Plaats</Heading4>
+                  <Heading level={2} appearance="utrecht-heading-2">Plaats</Heading>
                   <ResourceDetailMap
                     resourceId={props.resourceId || '0'}
                     {...props}
@@ -215,7 +212,7 @@ function ResourceDetail({
             {displayStatus ? (
               <div className="resource-detail-side-section">
                 <Spacer size={1} />
-                <Heading4>Status</Heading4>
+                <Heading level={3} appearance="utrecht-heading-4">Status</Heading>
                 <Spacer size={0.5} />
                 <div className="resource-detail-pil-list-content">
                   {resource.statuses?.map((s: { label: string }) => (
@@ -229,7 +226,8 @@ function ResourceDetail({
 
             {displayTags ? (
               <div className="resource-detail-side-section">
-                <Heading4>Tags</Heading4>
+                <Heading level={3} appearance="utrecht-heading-4">Tags</Heading>
+
                 <Spacer size={0.5} />
                 <div className="resource-detail-pil-list-content">
                   {(resource.tags as Array<{ type: string; name: string }>)
