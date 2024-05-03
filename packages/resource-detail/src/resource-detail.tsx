@@ -29,19 +29,19 @@ import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-d
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 type booleanProps = {
   [K in
-    | 'displayImage'
-    | 'displayTitle'
-    | 'displaySummary'
-    | 'displayDescription'
-    | 'displayUser'
-    | 'displayDate'
-    | 'displayBudget'
-    | 'displayLocation'
-    | 'displayBudgetDocuments'
-    | 'displayLikes'
-    | 'displayTags'
-    | 'displayStatus'
-    | 'displaySocials']: boolean | undefined;
+  | 'displayImage'
+  | 'displayTitle'
+  | 'displaySummary'
+  | 'displayDescription'
+  | 'displayUser'
+  | 'displayDate'
+  | 'displayBudget'
+  | 'displayLocation'
+  | 'displayBudgetDocuments'
+  | 'displayLikes'
+  | 'displayTags'
+  | 'displayStatus'
+  | 'displaySocials']: boolean | undefined;
 };
 
 export type ResourceDetailWidgetProps = BaseProps &
@@ -59,9 +59,9 @@ export type ResourceDetailWidgetProps = BaseProps &
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
     resourceDetailMap?: Omit<
-    ResourceDetailMapWidgetProps,
-    keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
-  >;
+      ResourceDetailMapWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
   };
 
 function ResourceDetail({
@@ -81,7 +81,7 @@ function ResourceDetail({
   ...props
 }: ResourceDetailWidgetProps) {
 
-  let resourceId: string|undefined = String(getResourceId({
+  let resourceId: string | undefined = String(getResourceId({
     resourceId: parseInt(props.resourceId || ''),
     url: document.location.href,
     targetUrl: props.resourceIdRelativePath,
@@ -97,21 +97,24 @@ function ResourceDetail({
     resourceId: resourceId,
   });
 
+  const showDate = (date: string) => {
+    return date.split(' ').slice(0, -1).join(' ')
+  };
+
   if (!resource) return null;
   const shouldHaveSideColumn =
     displayLikes || displayTags || displayStatus || displaySocials;
   return (
     <section>
       <div
-        className={`osc ${
-          shouldHaveSideColumn
-            ? 'osc-resource-detail-column-container'
-            : 'osc-resource-detail-container'
-        }`}>
+        className={`osc ${shouldHaveSideColumn
+          ? 'osc-resource-detail-column-container'
+          : 'osc-resource-detail-container'
+          }`}>
         <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
           {resource ? (
             <article className="osc-resource-detail-content-items">
-              {displayImage && (
+              {displayImage  && (
                 <Carousel
                   items={resource.images}
                   itemRenderer={(i) => (
@@ -151,7 +154,7 @@ function ResourceDetail({
                       Datum
                     </Heading>
                     <span className="osc-resource-detail-content-item-text">
-                      {resource.startDateHumanized}
+                      {showDate(resource.startDateHumanized)}
                     </span>
                   </div>
                 )}
@@ -166,7 +169,7 @@ function ResourceDetail({
                   </div>
                 )}
               </div>
-              <div>
+              <div className="resource-detail-content">
                 {displaySummary && <Heading level={2} appearance='utrecht-heading-4'>{resource.summary}</Heading>}
                 {displayDescription && (
                   <Paragraph>{resource.description}</Paragraph>

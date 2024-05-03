@@ -140,7 +140,7 @@ const defaultItemRenderer = (
         ) : null}
 
         {props.displaySummary ? (
-          <Heading5>{elipsize(resource.summary, props.summaryMaxLength || 20)}</Heading5>
+          <Paragraph>{elipsize(resource.summary, props.summaryMaxLength || 20)}</Paragraph>
         ) : null}
 
         {props.displayDescription ? (

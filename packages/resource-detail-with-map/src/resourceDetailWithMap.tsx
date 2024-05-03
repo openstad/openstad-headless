@@ -92,6 +92,10 @@ function ResourceDetailWithMap({
     resourceId: resourceId,
   });
 
+  const showDate = (date: string) => {
+    return date.split(' ').slice(0, -1).join(' ')
+  };
+
   if (!resource) return null;
   return (
     <section className="osc-resource-detail-content osc-resource-detail-grid">
@@ -139,7 +143,7 @@ function ResourceDetailWithMap({
                     Datum
                   </Heading>
                   <span className="osc-resource-detail-content-item-text">
-                    {resource.startDateHumanized}
+                    {showDate(resource.startDateHumanized)}
                   </span>
                 </div>
               )}
@@ -154,7 +158,7 @@ function ResourceDetailWithMap({
                 </div>
               )}
             </div>
-            <div>
+            <div className="resource-detail-content">
               {displaySummary && <Heading level={2} appearance='utrecht-heading-4'>{resource.summary}</Heading>}
               {displayDescription && (
                 <Paragraph>{resource.description}</Paragraph>

@@ -48,7 +48,7 @@ export default function WidgetResourceOverviewGeneral(
     defaultValues: {
       resourceType: props?.resourceType || 'resource',
       displayType: props?.displayType || 'cardrow',
-      itemLink: props?.itemLink || '/resources/[id]',
+      itemLink: props?.itemLink || '/resource?openstadResourceId=[id]',
       rawInput: props?.rawInput || '',
     },
   });
