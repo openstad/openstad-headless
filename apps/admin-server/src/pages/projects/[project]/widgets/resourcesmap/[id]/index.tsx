@@ -39,25 +39,6 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
       projectId,
     });
 
-  function getTotalPropPackage<T>() {
-    return {
-      ...widget?.config,
-      ...previewConfig,
-      updateConfig: (config: ResourceOverviewMapWidgetProps) =>
-        updateConfig({ ...widget.config, ...config }),
-
-      onFieldChanged: (key: string, value: any) => {
-        if (previewConfig) {
-          updatePreview({
-            ...previewConfig,
-            [key]: value,
-          });
-        }
-      },
-      projectId,
-    };
-  }
-
   return (
     <div>
       <PageLayout
