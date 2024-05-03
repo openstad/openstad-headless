@@ -1086,7 +1086,7 @@ textarea {
   line-height: inherit;
 }
 a {
-  color: #1d7cf4;
+  color: #1167d4;
   text-decoration: none;
 }
 a:hover,
@@ -6727,7 +6727,6 @@ label {
   font-weight: 600;
 }
 a {
-  color: #2b9ad6;
   text-decoration: underline;
 }
 a:hover {
