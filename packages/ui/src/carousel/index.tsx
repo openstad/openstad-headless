@@ -21,8 +21,6 @@ export function Carousel({
 
   if (items.length === 0) return null;
 
-  console.log()
-
   return (
     <div
       {...props}
