@@ -102,7 +102,7 @@ function ResourceDetailWithMap({
       {resource ? (
         <>
           <a href={backUrl} className="back-to-overview">Terug naar overzicht</a>
-          <article className="osc-resource-detail-content-items">
+          <article className="osc-resource-detail-content-items" tabIndex={0}>
             {displayImage && (
               <Carousel
                 items={resource.images}
@@ -129,7 +129,7 @@ function ResourceDetailWithMap({
             <div className="osc-resource-detail-content-item-row">
               {displayUser && resource?.user?.displayName && (
                 <div>
-                  <Heading level={3} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
+                  <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
                     Gemaakt door
                   </Heading>
                   <span className="osc-resource-detail-content-item-text">
@@ -139,7 +139,7 @@ function ResourceDetailWithMap({
               )}
               {displayDate && resource.startDateHumanized && (
                 <div>
-                  <Heading level={3} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
+                  <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
                     Datum
                   </Heading>
                   <span className="osc-resource-detail-content-item-text">
@@ -149,7 +149,7 @@ function ResourceDetailWithMap({
               )}
               {displayBudget && resource.budget && (
                 <div>
-                  <Heading level={3} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
+                  <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
                     Budget
                   </Heading>
                   <span className="osc-resource-detail-content-item-text">
