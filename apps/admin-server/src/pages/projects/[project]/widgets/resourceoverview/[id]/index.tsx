@@ -27,6 +27,7 @@ import WidgetResourcesMapContent from '../../resourcesmap/[id]/content';
 import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
 import { ResourceOverviewMapWidgetTabProps } from '../../resourcesmap/[id]';
 import WidgetResourcesMapButton from '../../resourcesmap/[id]/buttons';
+import { extractConfig } from '@/lib/sub-widget-helper';
 
 export const getServerSideProps = withApiUrl;
 
@@ -58,39 +59,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
     },
     projectId,
   };
-
-  function extractConfig<T>(
-    subWidgetKey: keyof Pick<
-      ResourceOverviewWidgetProps,
-      'resourceOverviewMapWidget'
-    >
-  ) {
-    if (!previewConfig) throw new Error();
-
-    return {
-      projectId: previewConfig.projectId || '',
-      ...previewConfig[subWidgetKey],
-      updateConfig: (config: T) =>
-        updateConfig({
-          ...previewConfig,
-          [subWidgetKey]: {
-            ...previewConfig[subWidgetKey],
-            ...config,
-          },
-        }),
-      onFieldChanged: (key: string, value: any) => {
-        if (previewConfig) {
-          updatePreview({
-            ...previewConfig,
-            [subWidgetKey]: {
-              ...previewConfig[subWidgetKey],
-              [key]: value,
-            },
-          });
-        }
-      },
-    };
-  }
 
   return (
     <div>
@@ -137,20 +105,31 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
                       <TabsTrigger value="general">Kaart</TabsTrigger>
                       <TabsTrigger value="buttons">knoppen</TabsTrigger>
-
                     </TabsList>
                     <TabsContent value="general" className="p-0">
                       <WidgetResourcesMapMap
-                        {...extractConfig<ResourceOverviewMapWidgetTabProps>(
-                          'resourceOverviewMapWidget'
-                        )}
+                        {...extractConfig<
+                          ResourceOverviewWidgetProps,
+                          ResourceOverviewMapWidgetTabProps
+                        >({
+                          previewConfig,
+                          subWidgetKey: 'resourceOverviewMapWidget',
+                          updateConfig,
+                          updatePreview,
+                        })}
                       />
                     </TabsContent>
                     <TabsContent value="buttons" className="p-0">
                       <WidgetResourcesMapButton
-                        {...extractConfig<ResourceOverviewMapWidgetTabProps>(
-                          'resourceOverviewMapWidget'
-                        )}
+                        {...extractConfig<
+                          ResourceOverviewWidgetProps,
+                          ResourceOverviewMapWidgetTabProps
+                        >({
+                          previewConfig,
+                          subWidgetKey: 'resourceOverviewMapWidget',
+                          updateConfig,
+                          updatePreview,
+                        })}
                       />
                     </TabsContent>
                   </Tabs>

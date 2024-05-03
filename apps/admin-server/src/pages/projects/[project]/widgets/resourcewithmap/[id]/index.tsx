@@ -28,6 +28,8 @@ import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
 import WidgetResourcesMapButtons from '../../resourcesmap/[id]/buttons';
 import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
 import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
+import { extractConfig } from '@/lib/sub-widget-helper';
+import { ResourceOverviewMapWidgetTabProps } from '../../resourcesmap/[id]';
 
 export const getServerSideProps = withApiUrl;
 
@@ -60,12 +62,12 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
     projectId,
   };
 
-  const totalPropPackageMap: ResourceOverviewMapWidgetProps & EditFieldProps<ResourceOverviewMapWidgetProps> = {
+  const totalPropPackageMap: ResourceOverviewMapWidgetProps &
+    EditFieldProps<ResourceOverviewMapWidgetProps> = {
     ...(widget?.config || {}),
     ...(previewConfig || {}),
     updateConfig: (config: ResourceOverviewMapWidgetProps) =>
       updateConfig({ ...(widget?.config || {}), ...config }),
-
 
     onFieldChanged: (key: string, value: any) => {
       if (previewConfig) {
@@ -114,28 +116,44 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                       <TabsTrigger value="search">Zoeken</TabsTrigger>
                       <TabsTrigger value="sorting">Sorteren</TabsTrigger>
                       <TabsTrigger value="pagination">Pagination</TabsTrigger>
-                      <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
+                      <TabsTrigger value="include">
+                        Inclusief/exclusief
+                      </TabsTrigger>
                     </TabsList>
                     <TabsContent value="general" className="p-0">
-                      <WidgetResourceOverviewGeneral {...totalPropPackageOverview} />
+                      <WidgetResourceOverviewGeneral
+                        {...totalPropPackageOverview}
+                      />
                     </TabsContent>
                     <TabsContent value="display" className="p-0">
-                      <WidgetResourceOverviewDisplay {...totalPropPackageOverview} />
+                      <WidgetResourceOverviewDisplay
+                        {...totalPropPackageOverview}
+                      />
                     </TabsContent>
                     <TabsContent value="sorting" className="p-0">
-                      <WidgetResourceOverviewSorting {...totalPropPackageOverview} />
+                      <WidgetResourceOverviewSorting
+                        {...totalPropPackageOverview}
+                      />
                     </TabsContent>
                     <TabsContent value="pagination" className="p-0">
-                      <WidgetResourceOverviewPagination {...totalPropPackageOverview} />
+                      <WidgetResourceOverviewPagination
+                        {...totalPropPackageOverview}
+                      />
                     </TabsContent>
                     <TabsContent value="search" className="p-0">
-                      <WidgetResourceOverviewSearch {...totalPropPackageOverview} />
+                      <WidgetResourceOverviewSearch
+                        {...totalPropPackageOverview}
+                      />
                     </TabsContent>
                     <TabsContent value="tags" className="p-0">
-                      <WidgetResourceOverviewTags {...totalPropPackageOverview} />
+                      <WidgetResourceOverviewTags
+                        {...totalPropPackageOverview}
+                      />
                     </TabsContent>
                     <TabsContent value="include" className="p-0">
-                      <WidgetResourceOverviewInclude {...totalPropPackageOverview} />
+                      <WidgetResourceOverviewInclude
+                        {...totalPropPackageOverview}
+                      />
                     </TabsContent>
                     <TabsContent value="publish" className="p-0">
                       <WidgetPublish apiUrl={apiUrl} />
@@ -149,20 +167,37 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                       <TabsTrigger value="button">Knoppen</TabsTrigger>
                     </TabsList>
 
-
                     <TabsContent value="map" className="p-0">
-                      <WidgetResourcesMapMap {...totalPropPackageMap} />
+                      <WidgetResourcesMapMap
+                        {...extractConfig<
+                          ResourceOverviewWithMapWidgetProps,
+                          ResourceOverviewMapWidgetTabProps
+                        >({
+                          previewConfig,
+                          subWidgetKey: 'resourceOverviewMapWidget',
+                          updateConfig,
+                          updatePreview,
+                        })}
+                      />
                     </TabsContent>
                     <TabsContent value="button" className="p-0">
-                      <WidgetResourcesMapButtons {...totalPropPackageMap} />
+                      <WidgetResourcesMapButtons
+                        {...extractConfig<
+                          ResourceOverviewWithMapWidgetProps,
+                          ResourceOverviewMapWidgetTabProps
+                        >({
+                          previewConfig,
+                          subWidgetKey: 'resourceOverviewMapWidget',
+                          updateConfig,
+                          updatePreview,
+                        })}
+                      />
                     </TabsContent>
-
                   </Tabs>
                 </TabsContent>
                 <TabsContent value="publish" className="p-0">
                   <WidgetPublish apiUrl={apiUrl} />
                 </TabsContent>
-
               </>
             ) : null}
           </Tabs>
