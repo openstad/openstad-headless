@@ -22,7 +22,7 @@
           <!-- Username label and input -->
           <div class="input-fields">
             {% include 'elements/error-flash.html' %}
-            <label>
+            <label for="input_field">
               {{emailLabel if emailLabel else 'E-mail:'}}
             </label>
             <input
@@ -32,6 +32,7 @@
             class="form-input"
             required
             autofocus
+            id="input_field"
             />
           </div>
         </div>

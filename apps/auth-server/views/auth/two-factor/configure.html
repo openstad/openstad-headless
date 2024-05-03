@@ -40,10 +40,10 @@
 
                 <img src="{{twoFactorQrSrc}}" />
                 <br />
-                <label>
+                <label for="input_field">
                     Secret
                 </label>
-                <input type="text" disabled value="{{twoFactorSecret}}" style="max-width: none"/>
+                <input type="text" disabled value="{{twoFactorSecret}}" style="max-width: none" id="input_field"/>
             </div>
             <input type="hidden" name="_csrf" value="{{csrfToken}}">
             <input type="hidden" name="clientId" value="{{clientId}}">
