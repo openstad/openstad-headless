@@ -186,6 +186,17 @@ let moduleDefinitions = {
     defaultConfig: {
       projectId: null,
     },
+  },
+  documentmap: {
+    packageName: '@openstad-headless/documentMap',
+    directory: 'documentMap',
+    js: ['dist/documentMap.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessDocumentMap',
+    componentName: 'DocumentMap',
+    defaultConfig: {
+      projectId: null,
+    },
   }
 };
 

@@ -14,7 +14,8 @@ export const WidgetDefinitions = {
   resourceform: 'Resource form',
   resourceoverview: 'Resource overview',
   resourcewithmap: 'Resource with map',
-  resourcedetailwithmap: 'Resource detail with map'
+  resourcedetailwithmap: 'Resource detail with map',
+  documentmap: 'Documents with comments',
 };
 
 export type WidgetDefinition = keyof typeof WidgetDefinitions;
