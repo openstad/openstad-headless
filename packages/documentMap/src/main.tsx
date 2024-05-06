@@ -13,7 +13,10 @@ const config: DocumentMapProps = {
     anonymous: {
       url: `${import.meta.env.VITE_API_URL}/auth/project/${import.meta.env.VITE_PROJECT_ID}/login?forceNewLogin=1&useAuth=anonymous&redirectUri=${document.location}`,
     },
-  }
+  },
+  documentUrl: 'https://fastly.picsum.photos/id/48/1920/1080.jpg?hmac=r2li6k6k9q34DhZiETPlmLsPPGgOChYumNm6weWMflI',
+  documentHeight: 1080,
+  documentWidth: 1920,
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
