@@ -45,10 +45,11 @@ function DocumentMap({
   const [selectedCommentIndex, setSelectedCommentIndex] = useState<Number>();
   const [selectedMarkerIndex, setSelectedMarkerIndex] = useState<Number>();
 
-  const defaultIcon = iconDefault ? new Icon({ iconUrl: iconDefault }) : new Icon.Default();
-  const highlightedIcon = new Icon({ iconUrl: iconHighlight });
+  console.log(iconDefault === undefined ? 'undefined' : 'test')
+  const defaultIcon = new Icon({ iconUrl: iconHighlight, className: 'defaultIcon'});
+  const highlightedIcon = new Icon({ iconUrl: iconHighlight, className: 'highlightedIcon'});
 
-  const imageBounds: LatLngBoundsLiteral = [[-documentHeight / 10, -documentWidth / 10], [documentHeight / 10, documentWidth / 10]];
+  const imageBounds: LatLngBoundsLiteral = [[-documentWidth / 10, -documentHeight / 10], [documentWidth / 10, documentHeight / 10]];
 
   const MapEvents = () => {
     const map = useMapEvents({
@@ -64,7 +65,7 @@ function DocumentMap({
     return null;
   };
 
-  const addComment = (e, position) => {
+  const addComment = (e: any, position: any) => {
     const value = e.target.previousSibling.value;
 
     e.preventDefault();
