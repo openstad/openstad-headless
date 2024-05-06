@@ -1,5 +1,5 @@
 {
-  "name": "@openstad-headless/likes",
+  "name": "@openstad-headless/documentMap",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -20,6 +20,7 @@
     "copy": "^0.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-leaflet": "^4.2.1",
     "remixicon": "^3.5.0",
     "swr": "^2.2.4"
   },

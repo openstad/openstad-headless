@@ -1,0 +1,5 @@
+.documentMap--container{
+  height: calc(100vh - 193px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
