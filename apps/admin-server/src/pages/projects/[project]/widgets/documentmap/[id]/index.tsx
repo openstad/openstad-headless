@@ -14,12 +14,13 @@ import type { DocumentMapProps } from '@openstad-headless/documentMap/src/docume
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
+import DocumentGeneral from './general';
 
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetDateCountdownBar({
   apiUrl,
-}:WithApiUrlProps) {
+}: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project;
@@ -33,7 +34,7 @@ export default function WidgetDateCountdownBar({
     updateConfig: (config: DocumentMapProps) =>
       updateConfig({ ...widget.config, ...config }),
 
-    onFieldChanged: (key:string, value: any) => {
+    onFieldChanged: (key: string, value: any) => {
       if (previewConfig) {
         updatePreview({
           ...previewConfig,
@@ -58,8 +59,8 @@ export default function WidgetDateCountdownBar({
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Date countdown bar',
-            url: `/projects/${projectId}/widgets/documentMap/${id}`,
+            name: 'Document met opmerkingen',
+            url: `/projects/${projectId}/widgets/documentmap/${id}`,
           },
         ]}>
         <div className="container py-6">
@@ -69,10 +70,9 @@ export default function WidgetDateCountdownBar({
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
-                {previewConfig? 
-                    <p>test</p>
-                    // <CountdownBarGeneral {...totalPropPackage} {...previewConfig} />
-                :null}
+              {previewConfig ?
+                <DocumentGeneral {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
+                : null}
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />

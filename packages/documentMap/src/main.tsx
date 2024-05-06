@@ -15,8 +15,9 @@ const config: DocumentMapProps = {
     },
   },
   documentUrl: 'https://fastly.picsum.photos/id/48/1920/1080.jpg?hmac=r2li6k6k9q34DhZiETPlmLsPPGgOChYumNm6weWMflI',
-  documentHeight: 1920,
-  documentWidth: 1080,
+  documentHeight: 1080,
+  documentWidth: 1920,
+  zoom: 0
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
