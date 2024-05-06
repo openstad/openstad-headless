@@ -26,6 +26,7 @@ export type DocumentMapProps = BaseProps &
     zoom?: number;
     iconDefault?: string;
     iconHighlight?: string;
+    introTekst?: string;
   };
 
 
@@ -34,8 +35,9 @@ function DocumentMap({
   zoom = 1,
   iconDefault,
   iconHighlight = 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309740_1280.png',
-  documentWidth = 1080,
-  documentHeight = 1920,
+  documentWidth = 1920,
+  documentHeight = 1080,
+  introTekst,
   ...props
 }: DocumentMapProps) {
 
@@ -45,11 +47,10 @@ function DocumentMap({
   const [selectedCommentIndex, setSelectedCommentIndex] = useState<Number>();
   const [selectedMarkerIndex, setSelectedMarkerIndex] = useState<Number>();
 
-  console.log(iconDefault === undefined ? 'undefined' : 'test')
   const defaultIcon = new Icon({ iconUrl: iconHighlight, className: 'defaultIcon'});
   const highlightedIcon = new Icon({ iconUrl: iconHighlight, className: 'highlightedIcon'});
 
-  const imageBounds: LatLngBoundsLiteral = [[-documentWidth / 10, -documentHeight / 10], [documentWidth / 10, documentHeight / 10]];
+  const imageBounds: LatLngBoundsLiteral = [[-documentHeight, -documentWidth], [documentHeight, documentWidth]];
 
   const MapEvents = () => {
     const map = useMapEvents({
@@ -85,7 +86,7 @@ function DocumentMap({
       <div className="content" tabIndex={0}>
         <header>
           <Paragraph>
-            Klik op de kaart om een opmerking toe te voegen.
+            {introTekst ? introTekst : 'Welkom bij de documentmap'}
           </Paragraph>
         </header>
         {comments.map((comment, index) => (
@@ -116,7 +117,7 @@ function DocumentMap({
         ))}
       </div>
       <div className='map-container'>
-        <MapContainer center={[0, 0]} zoom={zoom} crs={CRS.Simple}>
+        <MapContainer center={[0, 0]} zoom={zoom} crs={CRS.Simple} minZoom={-6}>
           <MapEvents />
           {comments.map((comment, index) => (
             <Marker
