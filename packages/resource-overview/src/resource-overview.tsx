@@ -16,7 +16,7 @@ import nunjucks from 'nunjucks';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Heading4, Heading5, Paragraph, Button } from "@utrecht/component-library-react";
+import { Heading4, Paragraph, Button } from "@utrecht/component-library-react";
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -33,6 +33,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayType?: 'cardrow' | 'cardgrid' | 'raw';
     allowFiltering?: boolean;
     displayTitle?: boolean;
+    displayStatusLabel?: boolean;
     titleMaxLength?: number;
     displayRanking?: boolean;
     displayLabel?: boolean;
@@ -123,13 +124,15 @@ const defaultItemRenderer = (
       <Image
         src={resource.images?.at(0)?.url || ''}
         imageFooter={
-          <div>
-            <Paragraph className="osc-resource-overview-content-item-status">
-              {resource.statuses?.map((statusTag: any) => (
-                <span className="status-label">{statusTag.label}</span>
-              ))}
-            </Paragraph>
-          </div>
+          props.displayStatusLabel && (
+            <div>
+              <Paragraph className="osc-resource-overview-content-item-status">
+                {resource.statuses?.map((statusTag: any) => (
+                  <span className="status-label">{statusTag.label}</span>
+                ))}
+              </Paragraph>
+            </div>
+          )
         }
       />
 
