@@ -66,9 +66,9 @@ export default function CountdownBarGeneral(
       afterText: props.afterText || '',
       date: props.date,
       direction: props.direction || 'horizontal',
-      showLabels: props.showLabels || true,
-      showHours: props.showHours || true,
-      showMinutes: props.showMinutes || true,
+      showLabels: props.showLabels,
+      showHours: props.showHours,
+      showMinutes: props.showMinutes,
     },
   });
 
@@ -140,7 +140,7 @@ export default function CountdownBarGeneral(
                   <SelectItem key={1} value={'horizontal'}>
                     Naast elkaar
                   </SelectItem>
-                  <SelectItem key={1} value={'vertical'}>
+                  <SelectItem key={2} value={'vertical'}>
                     Onder elkaar
                   </SelectItem>
                 </SelectContent>
