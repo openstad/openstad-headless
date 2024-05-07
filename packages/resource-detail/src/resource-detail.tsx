@@ -243,7 +243,6 @@ function ResourceDetail({
                 <ShareLinks title={'Deel dit'} />
               </div>
             ) : null}
-            <Spacer size={1} />
           </aside>
         ) : null}
       </div>

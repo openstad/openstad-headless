@@ -16,6 +16,11 @@
   padding: 0rem 2rem;
 }
 
+.resource-detail-side-section:last-of-type {
+  padding-bottom: 1rem;
+}
+
+
 .resource-detail-side-section-socials {
   display: flex;
   gap: 0.5rem;
@@ -30,7 +35,7 @@
 
 .resource-detail-comments-container {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1rem;
 }
 
