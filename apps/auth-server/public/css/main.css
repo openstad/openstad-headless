@@ -7261,7 +7261,7 @@ header.amsterdam-header .header-side-container {
   color: #434343;
   font-weight: 600;
   line-height: 1.125rem;
-  background-color: #F3F3F3;
+  background-color: var(--nlds-navbar-background-color, var(--nlds-default-background-color));
   border: none;
   margin-bottom: 40px;
 }
