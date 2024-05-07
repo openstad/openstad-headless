@@ -15,14 +15,28 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage
 } from '../../../../../../components/ui/form';
 import { Input } from '../../../../../../components/ui/input';
 import { useState, useEffect } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import * as Switch from '@radix-ui/react-switch';
+
 
 const formSchema = z.object({
   beforeText: z.string().optional(),
   afterText: z.string().optional(),
   date: z.string().optional(),
+  direction: z.string().optional(),
+  showLabels: z.boolean().optional(),
+  showHours: z.boolean().optional(),
+  showMinutes: z.boolean().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -36,13 +50,13 @@ export default function CountdownBarGeneral(
   useEffect(() => {
     if (!selectedDate && props.date) {
       setSelectedDate(parseISO(props.date));
-    } else if(props && (!props.date && !selectedDate)) {
+    } else if (props && (!props.date && !selectedDate)) {
       setSelectedDate(new Date());
     }
   }, [selectedDate, props.date, props]);
 
   function onSubmit(values: FormData) {
-    props.updateConfig({ ...props, ...values });
+    props.updateConfig({ ...props, ...values, direction: values.direction as "horizontal" | "vertical" });
   }
 
   const form = useForm<FormData>({
@@ -51,6 +65,10 @@ export default function CountdownBarGeneral(
       beforeText: props.beforeText || '',
       afterText: props.afterText || '',
       date: props.date,
+      direction: props.direction || 'horizontal',
+      showLabels: props.showLabels || true,
+      showHours: props.showHours || true,
+      showMinutes: props.showMinutes || true,
     },
   });
 
@@ -103,6 +121,94 @@ export default function CountdownBarGeneral(
           )}
         />
 
+        <FormField
+          control={form.control}
+          name="direction"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Selecteer weergave</FormLabel>
+              <Select onValueChange={(e) => {
+                field.onChange(e);
+                props.onFieldChanged(field.name, e);
+              }} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecteer weergave" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className='overflow-y-auto max-h-[16rem]'>
+                  <SelectItem key={1} value={'horizontal'}>
+                    Naast elkaar
+                  </SelectItem>
+                  <SelectItem key={1} value={'vertical'}>
+                    Onder elkaar
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
+        <div className='grid grid-cols-3'>
+          <FormField
+            control={form.control}
+            name="showLabels"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Labels weergeven</FormLabel>
+                <Switch.Root
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                    field.onChange(e);
+                    props.onFieldChanged(field.name, e);
+                  }}
+                  checked={field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="showHours"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Toon uren</FormLabel>
+                <Switch.Root
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                    field.onChange(e);
+                    props.onFieldChanged(field.name, e);
+                  }}
+                  checked={field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="showMinutes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Toon minuten</FormLabel>
+                <Switch.Root
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                    field.onChange(e);
+                    props.onFieldChanged(field.name, e);
+                  }}
+                  checked={field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <FormField
           control={form.control}
           name="date"
