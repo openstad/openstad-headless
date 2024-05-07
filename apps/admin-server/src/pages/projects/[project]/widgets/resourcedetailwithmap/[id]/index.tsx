@@ -74,7 +74,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Resource Detail',
+            name: 'Resource Detail with map',
             url: `/projects/${projectId}/widgets/resourcedetail/${id}`,
           },
         ]}>
