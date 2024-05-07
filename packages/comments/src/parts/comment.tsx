@@ -96,7 +96,7 @@ function Comment({
             <Button appearance="subtle-button">
               <div>
                 <i className="ri-more-fill"></i>
-                <span className="sr-only"></span>
+                <span className="sr-only">Bewerken</span>
               </div>
             </Button>
           </DropDownMenu>
