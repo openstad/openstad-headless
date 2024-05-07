@@ -67,6 +67,7 @@
 }
 .osc-resource-detail-grid .osc-resource-detail-content-items {
   overflow: auto;
+  justify-content: start;
 }
 .osc-resource-detail-grid .map-container {
   aspect-ratio: unset !important;
