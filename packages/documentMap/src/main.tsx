@@ -17,7 +17,9 @@ const config: DocumentMapProps = {
   documentUrl: 'https://fastly.picsum.photos/id/48/1920/1080.jpg?hmac=r2li6k6k9q34DhZiETPlmLsPPGgOChYumNm6weWMflI',
   documentHeight: 1080,
   documentWidth: 1920,
-  zoom: 0
+  zoom: -2,
+  titleTekst: 'Dit is een interactief document.',
+  introTekst: 'Klik op de markers om de opmerkingen te bekijken.',
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

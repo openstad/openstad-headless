@@ -1,10 +1,11 @@
+import DataStore from '@openstad-headless/data-store/src';
+import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import 'remixicon/fonts/remixicon.css';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
   Paragraph,
   Heading,
-  ButtonLink,
   Textarea,
   Button,
   FormLabel
@@ -20,12 +21,16 @@ import 'leaflet/dist/leaflet.css';
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
+    projectId?: string;
+    resourceId?: string;
+    resourceIdRelativePath?: string;
     documentUrl?: string;
     documentWidth?: number;
     documentHeight?: number;
     zoom?: number;
     iconDefault?: string;
     iconHighlight?: string;
+    titleTekst?: string;
     introTekst?: string;
   };
 
@@ -37,10 +42,28 @@ function DocumentMap({
   iconHighlight = 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309740_1280.png',
   documentWidth = 1920,
   documentHeight = 1080,
+  titleTekst,
   introTekst,
   ...props
 }: DocumentMapProps) {
 
+  let resourceId: string | undefined = String(getResourceId({
+    resourceId: parseInt(props.resourceId || ''),
+    url: document.location.href,
+    targetUrl: props.resourceIdRelativePath,
+  }));
+
+  const datastore = new DataStore({
+    projectId: props.projectId,
+    resourceId: resourceId,
+    api: props.api,
+  });
+  const { data: resource } = datastore.useResource({
+    projectId: props.projectId,
+    resourceId: resourceId,
+  });
+
+  console.log(resource)
 
   const [popupPosition, setPopupPosition] = useState<any>(null);
   const [comments, setComments] = useState<Array<{ comment: string, position: any, date: any }>>([]);
@@ -85,9 +108,8 @@ function DocumentMap({
     <div className="documentMap--container">
       <div className="content" tabIndex={0}>
         <header>
-          <Paragraph>
-            {introTekst ? introTekst : 'Welkom bij de documentmap'}
-          </Paragraph>
+          {titleTekst ? <Heading level={1}>{titleTekst}</Heading> : ''}
+          {introTekst ? <Paragraph>{introTekst}</Paragraph> : ''}
         </header>
         {comments.map((comment, index) => (
           <>
