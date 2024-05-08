@@ -108,6 +108,10 @@ function ResourceDetailWithMap({
     return date.split(' ').slice(0, -1).join(' ')
   };
 
+  const { data: resources } = datastore.useResources({
+    projectId: props.projectId,
+  });
+
   
   let countButtonElement:React.JSX.Element|null = null;
   if (countButton?.show) {
@@ -116,7 +120,7 @@ function ResourceDetailWithMap({
         appearance="primary-action-button"
         className={`osc-resource-overview-map-button osc-first-button`}>
         <section className="resource-counter">
-          {resource?.metadata?.totalCount}
+          {resources?.metadata?.totalCount}
         </section>
         <section className="resource-label">
           {countButton.label || 'plannen'}
