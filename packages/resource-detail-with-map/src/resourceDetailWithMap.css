@@ -104,3 +104,20 @@
   flex-direction: column;
   gap: 1rem;
 }
+
+.osc-resource-detail-grid .osc-first-button {
+  position: absolute;
+  z-index: 1000;
+  min-width: 200px;
+  left: 20px;
+  bottom: 20px;
+}
+
+.osc-resource-detail-grid .osc-second-button {
+  position: absolute;
+  z-index: 1000;
+  min-width: 200px;
+  left: 20px;
+  bottom: 69px;
+}
+

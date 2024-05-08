@@ -18,6 +18,7 @@ import React from 'react';
 import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
+import { Button } from '@utrecht/component-library-react';
 
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
 type booleanProps = {
@@ -43,6 +44,15 @@ export type ResourceDetailWidgetProps = BaseProps &
     resourceId?: string;
     resourceIdRelativePath?: string;
     backUrl?: string;
+    countButton?: {
+      show: boolean;
+      label?: string;
+    }
+    ctaButton?: {
+      show: boolean;
+      label?: string;
+      href?: string;
+    }
   } & booleanProps & {
     likeWidget?: Omit<
       LikeWidgetProps,
@@ -72,6 +82,8 @@ function ResourceDetailWithMap({
   displayTags = false,
   displayStatus = false,
   displaySocials = false,
+  countButton = undefined,
+  ctaButton = undefined,
   backUrl = '/',
   ...props
 }: ResourceDetailWidgetProps) {
@@ -95,6 +107,42 @@ function ResourceDetailWithMap({
   const showDate = (date: string) => {
     return date.split(' ').slice(0, -1).join(' ')
   };
+
+  
+  let countButtonElement:React.JSX.Element|null = null;
+  if (countButton?.show) {
+    countButtonElement = (
+      <Button
+        appearance="primary-action-button"
+        className={`osc-resource-overview-map-button osc-first-button`}>
+        <section className="resource-counter">
+          {resource?.metadata?.totalCount}
+        </section>
+        <section className="resource-label">
+          {countButton.label || 'plannen'}
+        </section>
+      </Button>
+    );
+  }
+
+  let ctaButtonElement:React.JSX.Element|null = null;
+  if (ctaButton?.show) {
+    ctaButtonElement = (
+      <Button
+        appearance="primary-action-button"
+        onClick={(e) => {
+          if (ctaButton.href) {
+            document.location.href = ctaButton.href;
+          }
+        }}
+        className={`osc-resource-overview-map-button ${
+          countButtonElement ? 'osc-second-button' : 'osc-first-button'
+        }`}>
+        <section className="resource-label">{ctaButton.label}</section>
+      </Button>
+    );
+  }
+
 
   if (!resource) return null;
   return (
@@ -172,7 +220,10 @@ function ResourceDetailWithMap({
                 {...props}
                 center={resource.location}
                 area={props.resourceDetailMap?.area}
-              />
+              >
+                {ctaButtonElement}
+                {countButtonElement}
+              </ResourceDetailMap>
             </>
           )}
         </>
