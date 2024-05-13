@@ -13,7 +13,7 @@ const projectsWithIssues = require('../../services/projects-with-issues');
 const authSettings = require('../../util/auth-settings');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const removeProtocolFromUrl = require('../../middleware/remove-protocol-from-url');
-const messageStreaming = require('@openstad-headless/message-streaming');
+const messageStreaming = require('../../services/message-streaming');
 
 let router = express.Router({mergeParams: true});
 
@@ -183,7 +183,12 @@ router.route('/')
 			.catch(next)
 	})
 	.post(async function (req, res, next) {
-    messageStreaming.publish('new-project', 'event');
+    let publisher = await messageStreaming.getPublisher();
+    if (publisher) {
+      publisher.publish('new-project', 'event');
+    } else {
+      console.log('No publisher found')
+    }
     return next()
 	})
 	.post(auth.useReqUser)
@@ -312,9 +317,15 @@ router.route('/:projectId') //(\\d+)
 	})
 	.put(async function (req, res, next) {
     if (!req.pendingMessages) return next();
-    req.pendingMessages.map(message => {
-      messageStreaming.publish(message.key, message.value);
-    });
+    let publisher = await messageStreaming.getPublisher();
+    if (publisher) {
+      req.pendingMessages.map(message => {
+        console.log('Message:', message.key, message.value);
+        publisher.publish(message.key, message.value);
+      });
+    } else {
+      console.log('No publisher found')
+    }
     return next()
 	})
 	.put(function (req, res, next) {
