@@ -12,6 +12,7 @@ const router = express.Router({ mergeParams: true });
 router.route('/')
   .get(function(req, res, next) {
     const ttl = Date.now() + 60 * 1000;
+    if (!process.env.IMAGE_VERIFICATION_TOKEN) throw new Error('API config error: IMAGE_VERIFICATION_TOKEN is empty')
     const secret = process.env.IMAGE_VERIFICATION_TOKEN + ttl
     const hash = crypto.createHmac("sha256", secret).digest("hex")
     let url = `${process.env.IMAGE_APP_URL}/image?exp_date=${ttl}&signature=${hash}`;
