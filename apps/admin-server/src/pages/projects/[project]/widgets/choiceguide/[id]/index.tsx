@@ -13,10 +13,11 @@ import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import WidgetPreview from '@/components/widget-preview';
+import WidgetChoiceGuideItems from "@/pages/projects/[project]/widgets/choiceguide/[id]/items";
 
 export const getServerSideProps = withApiUrl;
 
-export default function WidgetKeuzewijzer({
+export default function WidgetChoiceGuide({
   apiUrl,
 }: WithApiUrlProps) {
   const router = useRouter();
@@ -54,6 +55,24 @@ export default function WidgetKeuzewijzer({
             <TabsContent value="form" className="p-0">
               <ChoicesSelectorForm />
             </TabsContent>
+            <TabsContent value="items" className="p-0">
+              {previewConfig && (
+                <WidgetChoiceGuideItems
+                  {...previewConfig}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
+                  }
+                  onFieldChanged={(key: string, value: any) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                />
+              )}
+            </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
@@ -62,7 +81,7 @@ export default function WidgetKeuzewijzer({
           <div className='py-6 mt-6 bg-white rounded-md'>
               {previewConfig ? (
                 <WidgetPreview
-                  type="keuzewijzer"
+                  type="choiceguide"
                   config={previewConfig}
                   projectId={projectId as string}
                 />

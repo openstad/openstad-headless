@@ -1,6 +1,6 @@
 import React from 'react';
 import hasRole from '../../lib/has-role';
-import type {ResourceFormWidgetProps} from "./props.js";
+import {ChoiceGuideProps} from "./props.js";
 import {Banner, Button, Spacer} from "@openstad-headless/ui/src/index.js";
 import {InitializeFormFields} from "./parts/init-fields.js";
 import toast, { Toaster } from 'react-hot-toast';
@@ -8,7 +8,7 @@ import { loadWidget } from '@openstad-headless/lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
 import Form from "@openstad-headless/form/src/form";
 
-function ResourceFormWidget(props: ResourceFormWidgetProps) {
+function ChoiceGuide(props: ChoiceGuideProps) {
     const { submitButton, saveConceptButton} = props.submit  || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
     const { loginText, loginButtonText} = props.info  || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
 
@@ -101,9 +101,11 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     return (
         <div className="osc">
             <div className="osc-resource-form-item-content">
-                {props.displayTitle && props.title ? <h4>{props.title}</h4> : null}
+                {props.displayTitle && props.title && <h4>{props.title}</h4>}
                 <div className="osc-resource-form-item-description">
-                    {props.displayDescription && props.description ? <p>{props.description}</p> : null}
+                    {props.displayDescription && props.description && (
+                        <p>{props.description}</p>
+                    )}
                 </div>
 
                 {!hasRole(currentUser, 'member') ? (
@@ -124,10 +126,10 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                 ) : (
                     <Form
                         fields={formFields}
-                        secondaryLabel={saveConceptButton || ""}
-                        submitHandler={onSubmit}
-                        submitText={submitButton || "Versturen"}
                         title=""
+                        submitText={submitButton || "Versturen"}
+                        submitHandler={onSubmit}
+                        secondaryLabel={saveConceptButton || ""}
                         {...props}
                     />
                 )}
@@ -138,5 +140,5 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     );
 }
 
-ResourceFormWidget.loadWidget = loadWidget;
-export { ResourceFormWidget };
+ChoiceGuide.loadWidget = loadWidget;
+export { ChoiceGuide };

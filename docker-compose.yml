@@ -88,6 +88,7 @@ services:
       - ./packages:/opt/openstad-headless/packages
       - /opt/openstad-headless/packages/agenda/node_modules
       - /opt/openstad-headless/packages/comments/node_modules
+      - /opt/openstad-headless/packages/choiceguide/node_modules
       - /opt/openstad-headless/packages/configs/node_modules
       - /opt/openstad-headless/packages/data-store/node_modules
       - /opt/openstad-headless/packages/date-countdown-bar/node_modules

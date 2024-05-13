@@ -2,6 +2,7 @@ export const WidgetDefinitions = {
   agenda: 'Agenda',
   comments: 'Argumenten',
   begrootmodule: 'Begrootmodule',
+  choiceguide: 'Keuzewijzer',
   enquete: 'Enquete',
   resourcesmap: 'Resource map',
   resourcedetailmap: 'Resource detail map',

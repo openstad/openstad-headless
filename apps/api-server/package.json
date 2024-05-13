@@ -24,6 +24,7 @@
     "@kubernetes/client-node": "^0.18.1",
     "@openstad-headless/agenda": "file:../../packages/agenda",
     "@openstad-headless/comments": "file:../../packages/comments",
+    "@openstad-headless/choiceguide": "file:../../packages/choiceguide",
     "@openstad-headless/counter": "file:../../packages/counter",
     "@openstad-headless/datastore": "file:../../packages/data-store",
     "@openstad-headless/date-countdown-bar": "file:../../packages/date-countdown-bar",

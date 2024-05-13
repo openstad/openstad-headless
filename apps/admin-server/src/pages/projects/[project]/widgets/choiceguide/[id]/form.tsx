@@ -7,7 +7,6 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from '../../../../../../components/ui/form';
 import {
   Select,
@@ -24,8 +23,6 @@ import { Separator } from '@/components/ui/separator';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 
 const formSchema = z.object({
-  keuzewijzer: z.string(),
-  questionsOnPage: z.coerce.number(),
   startHalfway: z.boolean(),
   preferences: z.enum(['standard', 'minToPlus', 'field', 'none']),
   display: z.enum(['16:9', '1:1']),
@@ -47,7 +44,6 @@ export default function ChoicesSelectorForm() {
 
   const defaults = useCallback(
     () => ({
-      questionsOnPage: widget?.config?.selectionGuide?.questionsOnPage || 100,
       preferences: widget?.config?.[category]?.preferences || 'standard',
       display: widget?.config?.[category]?.display || '16:9',
       titlePreference:
@@ -56,7 +52,6 @@ export default function ChoicesSelectorForm() {
       titleNoPreference:
         widget?.config?.[category]?.titleNoPreference ||
         'Je hebt nog geen keuze gemaakt.',
-      keuzewijzer: widget?.config?.[category]?.keuzewijzer || '',
       startHalfway: widget?.config?.[category]?.startHalfway || '',
       urlStartPage: widget?.config?.[category]?.urlStartPage || '',
       urlResultPage: widget?.config?.[category]?.urlResultPage || '',
@@ -85,35 +80,6 @@ export default function ChoicesSelectorForm() {
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="w-fit lg:w-2/3 grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="keuzewijzer"
-            render={({ field }) => (
-              <FormItem className="col-span-full">
-                <FormLabel>Kies de keuzewijzer:</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent></SelectContent>
-                </Select>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="questionsOnPage"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Aantal vragen per pagina:</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
             name="startHalfway"
