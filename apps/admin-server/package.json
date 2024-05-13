@@ -50,7 +50,7 @@
     "leaflet-draw": "^1.0.4",
     "lodash": "^4.17.21",
     "lucide-react": "^0.276.0",
-    "next": "^13.4.17",
+    "next": "^14.2.3",
     "pino": "^8.15.1",
     "postcss": "^8.4.38",
     "radix-ui": "^1.0.1",
