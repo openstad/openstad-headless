@@ -26,7 +26,7 @@ const formSchema = z.object({
   descriptionMaxLength: z.coerce.number(),
   displaySummary: z.boolean(),
   summaryMaxLength: z.coerce.number(),
-
+  displayStatusLabel: z.boolean(),
   displayArguments: z.boolean(),
   displayVote: z.boolean(),
   // displayRanking: z.boolean(),
@@ -60,6 +60,7 @@ export default function WidgetResourceOverviewDisplay(
       summaryMaxLength: props?.summaryMaxLength || 30,
       displayArguments: props?.displayArguments || false,
       displayVote: props?.displayVote || false,
+      displayStatusLabel: props?.displayStatusLabel || false,
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -244,6 +245,20 @@ export default function WidgetResourceOverviewDisplay(
               <FormItem>
                 <FormLabel>
                   Hoeveelheid stemmen weergeven
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayStatusLabel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Status label weergeven
                 </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />

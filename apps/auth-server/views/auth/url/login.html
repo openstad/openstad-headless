@@ -27,7 +27,7 @@
 			<div class="form-group">
 				{% include 'elements/error-flash.html' %}
 
-				<label>
+				<label for="input_field">
 					{{ label if label else 'Emailadres:' }}
 				</label>
 
@@ -37,7 +37,8 @@
 				name="email"
 				class="form-input"
 				required
-        autofocus
+				autofocus
+				id="input_field"
 				/>
 			</div>
 			<input type="hidden" name="_csrf" value="{{csrfToken}}">

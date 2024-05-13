@@ -25,13 +25,14 @@
         {% set first = true %}
         {% for requiredField in requiredFields %}
 				<div class="form-group">
-					<label> {{requiredField.label}} </label>
+					<label for="input_field"> {{requiredField.label}} </label>
           <input
           type="text"
           required
           name="{{requiredField.key}}"
           class="input-{{requiredField.key}} input-field"
           {{'autofocus' if first}}
+		  id="input_field"
           />
 				</div>
         {% set first = false %}

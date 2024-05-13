@@ -61,6 +61,7 @@ function IconSection({ content, expandable, expandablelabel, expanded }: Item) {
             {
               body: <div className="icon-section-container" dangerouslySetInnerHTML={{ __html: renderedCards }} />,
               expanded: expanded === 'true',
+              headingLevel: 2,
               label: expandablelabel,
             }
         ]}

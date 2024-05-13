@@ -101,7 +101,7 @@ export default function WidgetResourcesMapMap(
                 </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Bijv: /resources/[id]"
+                    placeholder="Bijv: /resource?openstadResourceId=[id]"
                     type="text"
                     {...field}
                     onChange={(e) => {

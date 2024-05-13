@@ -22,6 +22,15 @@
   );
 }
 
+.osc-resource-overview-resource-collection .utrecht-paragraph + .utrecht-paragraph {
+  margin-top: .75rem;
+  opacity: .75;
+}
+
+.osc-resource-overview-resource-collection .utrecht-paragraph {
+  margin-top: .75rem;
+}
+
 .osc-resource-overview-resource-collection {
   display: grid;
   grid-column-start: span 2;
