@@ -30,7 +30,6 @@
     "@openstad-headless/enquete": "file:../../packages/enquete",
     "@openstad-headless/leaflet-map": "file:../../packages/leaflet-map",
     "@openstad-headless/likes": "file:../../packages/likes",
-    "@openstad-headless/message-streaming": "file:../../packages/message-streaming",
     "@openstad-headless/raw-resource": "file:../../packages/raw-resource",
     "@openstad-headless/resource-detail": "file:../../packages/resource-detail",
     "@openstad-headless/resource-detail-with-map": "file:../../packages/resource-detail-with-map",

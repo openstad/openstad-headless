@@ -41,7 +41,6 @@
   },
   "homepage": "https://github.com/Amsterdam/openstad-frontend#readme",
   "dependencies": {
-    "@openstad-headless/message-streaming": "file:../../packages/message-streaming",
     "apostrophe": "^3.0.0",
     "dotenv": "^16.0.3",
     "http-proxy-middleware": "^2.0.6",
