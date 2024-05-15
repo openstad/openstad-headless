@@ -28,10 +28,9 @@
   padding-inline-end: 2rem;
 }
 
-.resourceOverviewWithMap-container > div:first-child {
+.resourceOverviewWithMap-container .detail-container{
   overflow: scroll;
 }
-
 .resourceOverviewWithMap-container .map-container {
   aspect-ratio: unset !important;
   height: 100%;

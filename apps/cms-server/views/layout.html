@@ -38,7 +38,7 @@ page or piece.') }}
   {% include 'partials/analytics.html' %}
   {% include 'partials/navbar.html' %}
 
-  <div class="page" id="main">
+  <main class="page" id="main">
     {% endblock %}
 
     {% block main %}
@@ -50,7 +50,7 @@ page or piece.') }}
     {% endblock %}
 
     {% block afterMain %}
-  </div>
+    </main>
   {% include 'partials/footer.html' %}
 </div>{# Close .bp-wrapper #}
 {% endblock %}

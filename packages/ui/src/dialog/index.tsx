@@ -2,8 +2,6 @@ import * as RadixDialog from '@radix-ui/react-dialog';
 import '../index.css';
 import './index.css';
 import React, { PropsWithChildren } from 'react';
-import { GhostButton } from '../button';
-import { Icon } from '../icon';
 import { IconButton } from '../iconbutton';
 
 export const Dialog = ({

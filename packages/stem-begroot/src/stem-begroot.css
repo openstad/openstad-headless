@@ -147,7 +147,7 @@ article.stem-begroot--container .price {
   );
 }
 
-article.stem-begroot--container .price h5 {
+#stem-begroot-resource-selections-list article.stem-begroot--container .price h3 {
   margin: 0;
   font-size: 0.875rem;
 }
@@ -198,4 +198,13 @@ article.stem-begroot--container .stembegroot--infolabels {
   .budget-used-list > *:last-child p:before{
     content:'Over: '
   }
+}
+
+.stem-begroot--container .utrecht-paragraph + .utrecht-paragraph {
+  margin-top: .75rem;
+  opacity: .75;
+}
+
+.stem-begroot--container .utrecht-paragraph {
+  margin-top: .75rem;
 }

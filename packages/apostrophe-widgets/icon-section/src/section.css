@@ -7,6 +7,7 @@
   color: var(--utrecht-button-primary-action-color);
   display: block;
   border-radius: var(--nlds-iconsection-border-radius, 0);
+  text-align: center;
 }
 .icon-section .utrecht-accordion__button[aria-expanded]::after{
   background-color: var(--utrecht-button-primary-action-color);

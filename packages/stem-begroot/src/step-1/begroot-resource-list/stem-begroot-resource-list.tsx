@@ -11,7 +11,7 @@ import { elipsize } from '@openstad-headless/lib/ui-helpers';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Button, Paragraph, Strong, Link, Heading4, Heading5, Heading6 } from "@utrecht/component-library-react";
+import { Button, Paragraph, Link, Heading5, Heading } from "@utrecht/component-library-react";
 
 export const StemBegrootResourceList = ({
   resources,
@@ -66,7 +66,7 @@ export const StemBegrootResourceList = ({
               <Image src={resource.images?.at(0)?.url || ''} />
                 <section className="stembegroot-content-item-header">
                   <div className="stembegroot-content-item-header-taglist">
-                    <Heading6>Tags</Heading6>
+                    <Heading level={2} appearance="utrecht-heading-6">Tags</Heading>
                     <div className="pill-grid stembegroot">
                       {(resource.tags as Array<{ type: string; name: string }>)
                         ?.filter((t) => t.type !== 'status')
@@ -74,8 +74,8 @@ export const StemBegrootResourceList = ({
                     </div>
                   </div>
                 </section>
-                <Heading4>{resource.title}</Heading4>
-                <Heading5>{elipsize(resource.summary, 100)}</Heading5>
+                <Heading level={2} appearance="utrecht-heading-4">{resource.title}</Heading>
+                <Paragraph>{elipsize(resource.summary, 100)}</Paragraph>
                 <Paragraph>{elipsize(resource.description, 200)}</Paragraph>
 
               {
@@ -92,7 +92,7 @@ export const StemBegrootResourceList = ({
               <div className="stembegroot--infolabels">
                 {displayPriceLabel ? (
                   <div className="price">
-                    <Heading5>&euro;{resource.budget?.toLocaleString('nl-NL') || 0}</Heading5>
+                    <Heading level={3} appearance='utrecht-heading-5'>&euro;{resource.budget?.toLocaleString('nl-NL') || 0}</Heading>
                   </div>
                 ) : null}
                 {showVoteCount ? (

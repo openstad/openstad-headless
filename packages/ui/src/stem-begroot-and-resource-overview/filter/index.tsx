@@ -7,7 +7,7 @@ import './index.css';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Button } from "@utrecht/component-library-react";
+import { Button, FormLabel } from "@utrecht/component-library-react";
 
 type Filter = {
   tags: Array<number>;
@@ -122,11 +122,15 @@ export function Filters({
     <section id="stem-begroot-filter">
       <div className={`osc-resources-filter ${className}`}>
         {props.displaySearch ? (
-          <Input
-            onChange={(e) => search(e.target.value)}
-            className="osc-filter-search-bar"
-            placeholder="Zoeken"
-          />
+          <div>
+            <FormLabel htmlFor="search">Zoeken</FormLabel>
+            <Input
+              onChange={(e) => search(e.target.value)}
+              className="osc-filter-search-bar"
+              placeholder="Zoeken"
+              id='search'
+            />
+          </div>
         ) : null}
         {props.displayTagFilters ? (
           <>
