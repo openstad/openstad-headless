@@ -1,9 +1,0 @@
-{
-  "name": "@openstad-headless/message-streaming",
-  "version": "0.0.1",
-  "type": "commonjs",
-  "scripts": {},
-  "dependencies": {
-    "redis": "^4.6.13"
-  }
-}

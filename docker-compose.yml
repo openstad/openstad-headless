@@ -108,6 +108,7 @@ services:
       - /opt/openstad-headless/packages/eslint-config-custom/node_modules
       - /opt/openstad-headless/packages/lib/node_modules
       - /opt/openstad-headless/packages/likes/node_modules
+      - /opt/openstad-headless/packages/message-streaming/node_modules
       - /opt/openstad-headless/packages/raw-resource/node_modules
       - /opt/openstad-headless/packages/resource-detail/node_modules
       - /opt/openstad-headless/packages/resource-overview/node_modules
