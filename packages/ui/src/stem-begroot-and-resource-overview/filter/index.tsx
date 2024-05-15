@@ -136,7 +136,6 @@ export function Filters({
         {props.displayTagFilters ? (
           <>
             {tagGroups.map((tagGroup, index) => {
-              console.log(tagGroups)
               if (tagGroup.multiple) {
                 return (
                   <MultiSelectTagFilter
