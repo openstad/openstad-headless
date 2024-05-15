@@ -13,7 +13,7 @@
     width: 100%;
     align-self: end;
 }
-.osc-resources-filter > div label{
+.osc-resources-filter:not(:has(.multiselect-container)) > div label{
     margin-bottom: 10px;
     display: block;
 }
@@ -24,7 +24,7 @@
 }
 
 
-.osc-resources-filter input{
+.osc-resources-filter:not(:has(.multiselect-container)) input{
     height: 100%;
     max-width: none;
 }
