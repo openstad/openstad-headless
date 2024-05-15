@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import projectListSwr from '../hooks/use-project-list';
 
 export default function Projects() {
-  const { data, isLoading, error } = projectListSwr();
+  const { data } = projectListSwr({projectsWithIssues: true});
   const router = useRouter();
 
   if (!data) return null;
@@ -37,7 +37,7 @@ export default function Projects() {
         ]}>
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
-            <div className="grid grid-cols-1 lg:grid-cols-11 items-center py-2 px-2 border-b border-border">
+            <div className="grid grid-cols-1 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
               {headers.map((header) => (
                 <ListHeading className="hidden lg:flex" key={header}>
                   {header}
@@ -48,17 +48,18 @@ export default function Projects() {
               {data.map((project: any) => {
                 const currentDate = Date.now()
                 const anonymizationDate = addDays(project.config.project.endDate, project.config.anonymize.anonymizeUsersXDaysAfterEndDate)
+                console.log(project);
                 if (currentDate > project.config.project.endDate && project.config.project.endDate != null) {
                   return (
                     <li
-                      className="grid grid-cols-2 lg:grid-cols-11 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
+                      className="grid grid-cols-2 lg:grid-cols-4 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
                       key={project.id}
                       onClick={(d) => {
                         router.push(`/projects/${project.id}/widgets`);
                       }}>
                       <Paragraph className="truncate">{project.name}</Paragraph>
                       <Paragraph className="hidden lg:flex truncate">
-                        {project.createdAt}
+                        {new Date(project.createdAt).toLocaleDateString("nl-NL")}
                       </Paragraph>
                       <Paragraph className="hidden lg:flex truncate -mr-16">
                         Einddatum is geweest, maar het project loopt nog.
@@ -75,17 +76,18 @@ export default function Projects() {
                 if (currentDate > anonymizationDate && project.config.project.endDate != null) {
                   return (
                     <li
-                      className="grid grid-cols-2 lg:grid-cols-11 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
+                      className="grid grid-cols-2 lg:grid-cols-4 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
                       key={project.id}
                       onClick={(d) => {
                         router.push(`/projects/${project.id}/widgets`);
                       }}>
                       <Paragraph className="truncate">{project.name}</Paragraph>
                       <Paragraph className="hidden lg:flex truncate">
-                        {project.createdAt}
+                        {new Date(project.createdAt).toLocaleDateString("nl-NL")}
                       </Paragraph>
-                      <Paragraph className="hidden lg:flex truncate -mr-16">
-                        De gebruikers van het project moeten geanonimiseerd worden.
+                      <Paragraph className="hidden lg:flex -mr-16">
+                        { project.issue == 'Project has ended but is not yet anonymized' && 'De gebruikers van het project moeten geanonimiseerd worden.' }
+                        { project.issue == 'Project endDate is in the past but projectHasEnded is not set' && 'De einddatum van het project is in het verleden maar het project is nog niet beëindigd' }
                       </Paragraph>
                       <Paragraph className="flex">
                         <ChevronRight
