@@ -83,14 +83,15 @@ export function Filters({
 
   const updateTagListMultiple = (tagType: string, updatedTag: string) => {
     const existingTags = selectedOptions[tagType];
-    let selected = [...(existingTags || [])];
-
+    const selected = [...(existingTags || [])];
+    
     if (selected.includes(updatedTag)) {
-      selected = selected.filter((o) => o != updatedTag);
+      const index = selected.indexOf(updatedTag);
+      selected.splice(index, 1);
     } else {
       selected.push(updatedTag);
     }
-
+  
     setSelected({ ...selectedOptions, [tagType]: selected });
     setTags(tagType, selected);
   };
@@ -122,7 +123,7 @@ export function Filters({
     <section id="stem-begroot-filter">
       <div className={`osc-resources-filter ${className}`}>
         {props.displaySearch ? (
-          <div>
+          <div className="form-element">
             <FormLabel htmlFor="search">Zoeken</FormLabel>
             <Input
               onChange={(e) => search(e.target.value)}
@@ -135,6 +136,7 @@ export function Filters({
         {props.displayTagFilters ? (
           <>
             {tagGroups.map((tagGroup, index) => {
+              console.log(tagGroups)
               if (tagGroup.multiple) {
                 return (
                   <MultiSelectTagFilter
@@ -144,9 +146,9 @@ export function Filters({
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
                     onlyIncludeIds={tagsLimitation}
-                    onUpdateFilter={(updatedTag) =>
+                    onUpdateFilter={(updatedTag) => {
                       updateTagListMultiple(tagGroup.type, updatedTag)
-                    }
+                    }}
                   />
                 );
               } else {
@@ -170,9 +172,12 @@ export function Filters({
         ) : null}
 
         {props.displaySorting ? (
-          <Select onValueChange={setSort} options={sorting}>
-            <option value={''}>Sorteer op</option>
-          </Select>
+          <div className="form-element">
+            <FormLabel htmlFor={'sortField'}>Sorteer op</FormLabel>
+            <Select onValueChange={setSort} options={sorting} id="sortField">
+              <option value={''}>Sorteer op</option>
+            </Select>
+          </div>
         ) : null}
 
         <Button

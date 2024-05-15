@@ -35,7 +35,7 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
     }
 
     return (
-      <div>
+      <div className="form-element">
         <FormLabel htmlFor={props.placeholder}>{props.placeholder}</FormLabel>
         <Select
           id={props.placeholder}

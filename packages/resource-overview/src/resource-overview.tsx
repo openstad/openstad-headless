@@ -316,7 +316,9 @@ function ResourceOverview({
                 } else {
                   setTags(f.tags);
                 }
-                setSort(f.sort);
+                if (['createdAt_desc', 'createdAt_asc'].includes(f.sort)) {
+                  setSort(f.sort);
+                }
                 setSearch(f.search.text);
               }}
             />
@@ -324,15 +326,31 @@ function ResourceOverview({
 
           <section className="osc-resource-overview-resource-collection">
             {resources &&
-              resources.map((resource: any, index: number) => {
-                return (
-                  <React.Fragment key={`resource-item-${resource.title}`}>
-                    {renderItem(resource, { ...props, displayType }, () => {
-                      onResourceClick(resource, index);
-                    })}
-                  </React.Fragment>
-                );
-              })}
+              resources
+                .filter((resource: any) =>
+                  tags.every((tag: number) => {
+                    return resource.tags || (Array.isArray(resource.tags) && resource.tags.includes(tag));
+                  })
+                )
+                .sort((a: any, b: any) => {
+                  if (sort === 'createdAt_desc') {
+                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                  }
+                  if (sort === 'createdAt_asc') {
+                    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+                  }
+                  return 0;
+                })
+                .map((resource: any, index: number) => {
+                  return (
+                    <React.Fragment key={`resource-item-${resource.title}`}>
+                      {renderItem(resource, { ...props, displayType }, () => {
+                        onResourceClick(resource, index);
+                      })}
+                    </React.Fragment>
+                  );
+                })
+            }
           </section>
         </section>
         {props.displayPagination && (
