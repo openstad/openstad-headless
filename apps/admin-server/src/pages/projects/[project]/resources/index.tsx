@@ -79,7 +79,7 @@ export default function ProjectResources() {
             >
               <option value="">Alles</option>
               <option value="id">Stem ID</option>
-              <option value="resource">Resources</option>
+              <option value="title">Resources</option>
               <option value="yes">Gestemd op ja</option>
               <option value="no">Gestemd op nee</option>
               <option value="createdAt">Datum aangemaakt</option>
