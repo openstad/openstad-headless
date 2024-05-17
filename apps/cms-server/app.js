@@ -159,7 +159,7 @@ async function run(id, projectData, options, callback) {
   };
 
   const apos = apostrophe(
-    projectConfig
+    projectConfig,
   );
 
   return apos;
