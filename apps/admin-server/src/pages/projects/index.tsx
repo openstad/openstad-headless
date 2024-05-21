@@ -43,6 +43,7 @@ export default function Projects() {
     </div>
   );
 
+
   return (
     <div>
       <PageLayout
@@ -117,6 +118,11 @@ export default function Projects() {
                   Einddatum
                 </button>
               </ListHeading>
+              <ListHeading className="hidden lg:flex">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('url', e, filterData))}>
+                  url
+                </button>
+              </ListHeading>
             </div>
             <ul>
               {filterData?.map((project: any) => {
@@ -141,7 +147,10 @@ export default function Projects() {
                       Open
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate -mr-16">
-                    {project?.config?.project?.endDate ? new Date(project.config.project.endDate).toLocaleDateString('nl-NL') : ''}
+                      {project?.config?.project?.endDate ? new Date(project.config.project.endDate).toLocaleDateString('nl-NL') : ''}
+                    </Paragraph>
+                    <Paragraph className="hidden lg:flex truncate">
+                      {project.url}
                     </Paragraph>
                     <Paragraph className="flex">
                       <ChevronRight
