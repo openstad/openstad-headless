@@ -39,7 +39,7 @@ export default function ProjectResource() {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="info">Info</TabsTrigger>
               <TabsTrigger value="votes">Stemmen</TabsTrigger>
-              <TabsTrigger value="comments">Argumenten</TabsTrigger>
+              <TabsTrigger value="comments">Reacties</TabsTrigger>
             </TabsList>
             <TabsContent value="info" className="p-0">
               <ProjectResourceCreate />

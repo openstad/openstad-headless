@@ -234,7 +234,7 @@ export function SidenavProject({ className }: { className?: string }) {
             variant={location.includes('/comments') ? 'secondary' : 'ghost'}
             className="w-full flex justify-start"
             onClick={(e) => {}}>
-            <span className="truncate">Argumenten</span>
+            <span className="truncate">Reacties</span>
           </Button>
         </Link>
         <Link href={`/projects/${project}/submissions`}>

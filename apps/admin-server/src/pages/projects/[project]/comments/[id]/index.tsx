@@ -70,18 +70,18 @@ export default function ProjectCommentEdit() {
             url: '/projects',
           },
           {
-            name: 'Argumenten',
+            name: 'Reacties',
             url: `/projects/${project}/comments`,
           },
           {
-            name: 'Argument aanpassen',
+            name: 'Reactie aanpassen',
             url: `/projects/${project}/comments/${id}`,
           },
         ]}>
         <div className="container py-6">
         <div className="p-6 bg-white rounded-md">
                 <Form {...form}>
-                  <Heading size="xl">Argument aanpassen</Heading>
+                  <Heading size="xl">Reactie aanpassen</Heading>
                   <Separator className="my-4" />
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
