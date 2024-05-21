@@ -41,7 +41,7 @@
   },
   "homepage": "https://github.com/Amsterdam/openstad-frontend#readme",
   "dependencies": {
-    "apostrophe": "^3.0.0",
+    "apostrophe": "^4.3.0",
     "dotenv": "^16.0.3",
     "http-proxy-middleware": "^2.0.6",
     "jquery": "^3.7.1",
