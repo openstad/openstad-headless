@@ -83,7 +83,7 @@ export default function WidgetResourceOverviewDisplay(
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
 
-          <div className='col-span-2 lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8 w-full'>
+          <div className='col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8 w-full'>
             <FormField
               control={form.control}
               name="displayBanner"
