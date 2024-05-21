@@ -29,6 +29,7 @@ const formSchema = z.object({
   displayStatusLabel: z.boolean(),
   displayArguments: z.boolean(),
   displayVote: z.boolean(),
+  bannerText: z.string().optional(),
   // displayRanking: z.boolean(),
   // displayLabel: z.boolean(),
   // displayShareButtons: z.boolean(),
@@ -53,6 +54,7 @@ export default function WidgetResourceOverviewDisplay(
     defaultValues: {
       displayBanner: props?.displayBanner || false,
       displayTitle: props?.displayTitle || false,
+      bannerText: props?.bannerText,
       titleMaxLength: props?.titleMaxLength || 20,
       displayDescription: props?.displayDescription || false,
       descriptionMaxLength: props?.descriptionMaxLength || 20,
@@ -69,6 +71,9 @@ export default function WidgetResourceOverviewDisplay(
     },
   });
 
+  const { watch } = form;
+  const displayBanner = watch('displayBanner');
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
@@ -77,17 +82,44 @@ export default function WidgetResourceOverviewDisplay(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
-          <FormField
-            control={form.control}
-            name="displayBanner"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Titel weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
+
+          <div className='col-span-2 lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8 w-full'>
+            <FormField
+              control={form.control}
+              name="displayBanner"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Titel weergeven</FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {displayBanner && (
+              <FormField
+                control={form.control}
+                name="bannerText"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Titel
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
-          />
+          </div>
 
           <FormField
             control={form.control}

@@ -22,6 +22,7 @@ const config: ResourceOverviewWidgetProps = {
   displaySorting: true,
   allowFiltering: true,
   displayBanner: true,
+  bannerText: 'Dit is een title',
   displayStatusLabel: true,
   api: {
     url: import.meta.env.VITE_API_URL,
