@@ -640,11 +640,11 @@ module.exports = function (db, sequelize, DataTypes) {
               model: db.Tag,
               attributes: ['id', 'name'],
               through: { attributes: [] },
-              where: {
-                id: tags,
-              },
             },
           ],
+          where: {
+            id: tags,
+          },
         };
       },
 
@@ -655,11 +655,11 @@ module.exports = function (db, sequelize, DataTypes) {
               model: db.Status,
               attributes: ['id', 'name'],
               through: { attributes: [] },
-              where: {
-                id: statuses,
-              },
             },
           ],
+          where: {
+            id: statuses,
+          },
         };
       },
 
