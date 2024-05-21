@@ -40,7 +40,7 @@ export const CommentWidgetContext = createContext<
 >(undefined);
 
 function Comments({
-  title = '[[nr]] comments',
+  title = '[[nr]] reacties',
   sentiment = 'no sentiment',
   emptyListText = 'Nog geen reacties',
   placeholder = 'type hier uw reactie',
