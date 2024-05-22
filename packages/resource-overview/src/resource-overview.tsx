@@ -22,7 +22,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
   } & {
-    renderHeader?: (resources?: Array<any>) => React.JSX.Element;
+    renderHeader?: (resources?: any) => React.JSX.Element;
     renderItem?: (
       resource: any,
       props: ResourceOverviewWidgetProps,
@@ -62,6 +62,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     textResults?: string;
     onlyIncludeTagIds?: string;
     rawInput?: string;
+    bannerText?: string;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -71,7 +72,7 @@ const defaultHeaderRenderer = (resources?: any) => {
     <>
       <Banner></Banner>
       <section className="osc-resource-overview-title-container">
-        <Heading4>Plannen</Heading4>
+        <Heading4>{resources}</Heading4>
       </section>
     </>
   );
@@ -174,6 +175,7 @@ function ResourceOverview({
   allowFiltering = true,
   displayType = 'cardrow',
   displayBanner = false,
+  bannerText = 'Plannen',
   renderHeader = defaultHeaderRenderer,
   itemsPerPage = 20,
   textResults = 'Dit zijn de zoekresultaten voor [search]',
@@ -280,7 +282,7 @@ function ResourceOverview({
       />
 
       <div className="osc">
-        {displayBanner ? renderHeader() : null}
+        {displayBanner ? renderHeader(bannerText) : null}
 
         <section
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''

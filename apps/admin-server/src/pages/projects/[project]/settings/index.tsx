@@ -157,7 +157,7 @@ export default function ProjectSettings() {
                       form={form}
                       fieldName="endDate"
                       label="Einddatum"
-                      fieldInfo="Plannen, Argumenten en Stemmen worden na deze datum niet meer getoond. De einddatum kan altijd aangepast worden."
+                      fieldInfo="Plannen, Reacties en Stemmen worden na deze datum niet meer getoond. De einddatum kan altijd aangepast worden."
                     />
                     <FormField
                       control={form.control}

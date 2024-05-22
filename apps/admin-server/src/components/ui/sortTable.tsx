@@ -9,6 +9,7 @@ const sortFunctions = {
     'voted-yes': (a: any, b: any) => b.resource?.yes || 0 - a.resource?.yes || 0,
     'voted-no': (a: any, b: any) => b.resource?.no || 0 - a.resource?.no || 0,
     'name': (a: any, b: any) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+    'url': (a: any, b: any) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
     'email': (a: any, b: any) => { let aEmail = a?.email || ''; let bEmail = b?.email || ''; return aEmail.toLowerCase().localeCompare(bEmail.toLowerCase()) },
     'postcode': (a: any, b: any) => { let aPostcode = a?.postcode || ''; let bPostcode = b?.postcode || ''; return aPostcode.toLowerCase().localeCompare(bPostcode.toLowerCase()) },
     'code': (a: any, b: any) => b.code - a.code,
