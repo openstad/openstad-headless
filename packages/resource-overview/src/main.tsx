@@ -34,6 +34,10 @@ const config: ResourceOverviewWidgetProps = {
   },
   displayType: import.meta.env.VITE_DISPLAY_TYPE || 'cardgrid',
   itemLink: import.meta.env.VITE_ITEM_LINK,
+  sorting: [
+    { value: 'createdAt_desc', label: 'Nieuwste eerst' },
+    { value: 'createdAt_asc', label: 'Oudste eerst' },
+  ],
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
