@@ -47,7 +47,7 @@ function DocumentMap({
   documentHeight = 1080,
   titleTekst,
   introTekst,
-  imageResourceId = '16',
+  imageResourceId,
   ...props
 }: DocumentMapProps) {
 
@@ -61,19 +61,10 @@ function DocumentMap({
     projectId: props.projectId,
     api: props.api,
   });
-  const { data: resource } = datastore.useResource({
+  const { data: resource } = datastore.useImageResource({
     projectId: props.projectId,
-    imageResourceId: resourceId,
+    imageResourceId: imageResourceId,
   });
-
-  const { data: comments } = datastore.useComments({
-    projectId: props.projectId,
-    resourceId: imageResourceId,
-    type: 'image-resource',
-  });
-
-  console.log(imageResourceId)
-  console.log(comments)
 
   const [popupPosition, setPopupPosition] = useState<any>(null);
   // const [comments, setComments] = useState<Array<{ comment: string, position: any, date: any }>>([]);
@@ -124,7 +115,7 @@ function DocumentMap({
 
         <Comments
           {...props}
-          resourceId={imageResourceId || ''}
+          imageResourceId={imageResourceId || ''}
           type="image-resource"
         />
 

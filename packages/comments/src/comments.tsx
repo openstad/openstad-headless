@@ -18,6 +18,7 @@ import { CommentFormProps } from './types/comment-form-props';
 export type CommentsWidgetProps = BaseProps &
   ProjectSettingProps & {
     resourceId: string;
+    imageResourceId: string;
     resourceIdRelativePath?: string;
     title?: string;
     sentiment?: string;
@@ -33,7 +34,7 @@ export type CommentsWidgetProps = BaseProps &
     requiredUserRole?: string,
     descriptionMinLength?: number,
     descriptionMaxLength?: number,
-    type?: string | 'resource';
+    type?: string;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -45,6 +46,8 @@ function Comments({
   sentiment = 'no sentiment',
   emptyListText = 'Nog geen reacties',
   placeholder = 'type hier uw reactie',
+  imageResourceId,
+  type = 'resource',
   formIntro = '',
   ...props
 }: CommentsWidgetProps) {
@@ -76,18 +79,34 @@ function Comments({
     api: props.api,
   });
 
+  const idToUse = type === 'resource' ? resourceId : imageResourceId;
+  const sentimentToUse = type === 'image-resource' ? "no sentiment" : args.sentiment;
+
   const { data: comments } = datastore.useComments({
     projectId: props.projectId,
-    resourceId: resourceId,
-    sentiment: args.sentiment,
-    type: props.type,
+    resourceId: idToUse,
+    sentiment: sentimentToUse,
+    type: type,
   });
 
-  const { data: resource } = datastore.useResource({
-    projectId: props.projectId,
-    resourceId: resourceId,
-    type: props.type,
-  });
+  let resource;
+  if ( type === 'resource' ) {
+    const {data: resourceData} = datastore.useResource({
+      projectId: props.projectId,
+      resourceId: idToUse,
+      type: type,
+    });
+
+    resource = resourceData;
+  } else {
+    const {data: resourceData} = datastore.useImageResource({
+      projectId: props.projectId,
+      imageResourceId: idToUse,
+      type: type,
+    });
+
+    resource = resourceData;
+  }
 
   const [canComment, setCanComment] = useState(args.canComment)
   useEffect(() => {
@@ -106,7 +125,12 @@ function Comments({
   async function submitComment(formData: any) {
     const formDataCopy = { ...formData };
 
-    formDataCopy.resourceId = `${resourceId}`;
+    if ( type !== 'resource' ) {
+      formDataCopy.imageResourceId = `${imageResourceId}`;
+      formDataCopy.resourceId = null;
+    } else {
+      formDataCopy.resourceId = `${resourceId}`;
+    }
 
     try {
       if (formDataCopy.id) {
@@ -123,7 +147,6 @@ function Comments({
       console.log(err);
     }
   }
-  console.log(props.type)
 
   return (
     <CommentWidgetContext.Provider value={args}>
