@@ -34,8 +34,8 @@ function hideEmailsForNormalUsers(comments) {
 }
 
 module.exports = function (db, sequelize, DataTypes) {
-  var Resource = sequelize.define(
-    'image-resource',
+  var ImageResource = sequelize.define(
+    'image_resource',
     {
       projectId: {
         type: DataTypes.INTEGER,
@@ -437,7 +437,7 @@ module.exports = function (db, sequelize, DataTypes) {
           checkValue(value, configExtraData);
 
           if (errors.length) {
-            console.log('Resource validation error:', errors);
+            console.log('ImageResource validation error:', errors);
             throw Error(errors.join('\n'));
           }
 
@@ -447,7 +447,7 @@ module.exports = function (db, sequelize, DataTypes) {
     }
   );
 
-  Resource.scopes = function scopes() {
+  ImageResource.scopes = function scopes() {
     function voteCount(opinion) {
       if (config.votes && config.votes.confirmationRequired) {
         return [
@@ -462,7 +462,7 @@ module.exports = function (db, sequelize, DataTypes) {
 						v.checked IS NULL OR
 						v.checked  = 1
 					) AND
-					v.resourceId     = resource.id AND
+					v.imageResourceId     = image_resource.id AND
 					v.opinion    = "${opinion}")
 			`),
           opinion,
@@ -479,7 +479,7 @@ module.exports = function (db, sequelize, DataTypes) {
 						v.checked IS NULL OR
 						v.checked  = 1
 					) AND
-					v.resourceId     = resource.id AND
+					v.imageResourceId     = image_resource.id AND
 					v.opinion    = "${opinion}")
 			`),
           opinion,
@@ -496,7 +496,7 @@ module.exports = function (db, sequelize, DataTypes) {
 					comments a
 				WHERE
 					a.deletedAt IS NULL AND
-					a.resourceId = resource.id)
+					a.imageResourceId = image_resource.id)
 			`),
         fieldName,
       ];
@@ -746,7 +746,7 @@ module.exports = function (db, sequelize, DataTypes) {
             {
               model: db.Poll.scope([
                 'defaultScope',
-                'includeResource',
+                'includeImageResource',
                 { method: ['includeVotes', 'poll', userId] },
                 { method: ['includeUserVote', 'poll', userId] },
               ]),
@@ -827,7 +827,7 @@ module.exports = function (db, sequelize, DataTypes) {
     };
   };
 
-  Resource.associate = function (models) {
+  ImageResource.associate = function (models) {
     this.belongsTo(models.User, { onDelete: 'CASCADE' });
     this.belongsTo(models.Project, { onDelete: 'CASCADE' });
     this.hasMany(models.Vote, { onDelete: 'CASCADE' });
@@ -838,12 +838,12 @@ module.exports = function (db, sequelize, DataTypes) {
     this.hasMany(models.Comment, { as: 'commentsFor', onDelete: 'CASCADE' });
     this.hasOne(models.Poll, {
       as: 'poll',
-      foreignKey: 'resourceId',
+      foreignKey: 'imageResourceId',
       onDelete: 'CASCADE',
     });
     this.hasOne(models.Vote, {
       as: 'userVote',
-      foreignKey: 'resourceId',
+      foreignKey: 'imageResourceId',
       onDelete: 'CASCADE',
     });
     this.belongsToMany(models.Tag, {
@@ -858,7 +858,7 @@ module.exports = function (db, sequelize, DataTypes) {
     });
   };
 
-  Resource.prototype.setModBreak = function (user, modBreak) {
+  ImageResource.prototype.setModBreak = function (user, modBreak) {
     return this.update({
       modBreak: modBreak,
       modBreakUserId: user.id,
@@ -891,7 +891,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
   };
 
-  Resource.auth = Resource.prototype.auth = {
+  ImageResource.auth = ImageResource.prototype.auth = {
     listableBy: 'all',
     viewableBy: 'all',
     createableBy: 'member',
@@ -986,7 +986,7 @@ module.exports = function (db, sequelize, DataTypes) {
     },
   };
 
-  return Resource;
+  return ImageResource;
 
   async function beforeValidateHook(instance, options) {
     // add project config
@@ -996,25 +996,5 @@ module.exports = function (db, sequelize, DataTypes) {
       projectConfig = merge.recursive(true, config, project.config);
     }
     instance.config = projectConfig;
-
-    // count comments and votes
-    let canEditAfterFirstLikeOrComment =
-      (projectConfig && projectConfig.canEditAfterFirstLikeOrComment) || false;
-    if (
-      !canEditAfterFirstLikeOrComment &&
-      !userHasRole(instance.auth && instance.auth.user, 'moderator')
-    ) {
-      let firstLikeSubmitted = await db.Vote.count({
-        where: { resourceId: instance.id },
-      });
-      let firstCommentSubmitted = await db.Comment.count({
-        where: { resourceId: instance.id },
-      });
-      if (firstLikeSubmitted || firstCommentSubmitted) {
-        throw Error(
-          'You cannot edit an resource after the first like or comment has been added'
-        );
-      }
-    }
   }
 };

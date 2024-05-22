@@ -113,9 +113,9 @@ router.all('*', function (req, res, next) {
 router
   .route('/')
 
-  // list resources
+  // list image resources
   // ----------
-  .get(auth.can('Image Resource', 'list'))
+  .get(auth.can('ImageResource', 'list'))
   .get(pagination.init)
   .get(function (req, res, next) {
     let { dbQuery } = req;
@@ -140,13 +140,13 @@ router
       });
     }
 
-    db.Resource.scope(...req.scope)
+    db.ImageResource.scope(...req.scope)
       .findAndCountAll(dbQuery)
       .then(function (result) {
-        result.rows.forEach((resource) => {
-          resource.project = req.project;
-          if (req.query.includePoll && resource.poll)
-            resource.poll.countVotes(!req.query.includeVotes);
+        result.rows.forEach((imageResource) => {
+          imageResource.project = req.project;
+          if (req.query.includePoll && imageResource.poll)
+            imageResource.poll.countVotes(!req.query.includeVotes);
         });
         const { rows } = result;
         req.results = rows;
@@ -163,17 +163,11 @@ router
     res.json(req.results);
   })
 
-  // create resource
+  // create image resource
   // -----------
   .post(auth.can('ImageResource', 'create'))
   .post(function (req, res, next) {
     if (!req.project) return next(createError(401, 'Project niet gevonden'));
-    return next();
-  })
-  .post(function (req, res, next) {
-    if (!req.project?.config?.resources?.canAddNewResources) {
-      return next(createError(401, 'Inzenden is gesloten'));
-    }
     return next();
   })
   .post(function (req, res, next) {
@@ -211,11 +205,11 @@ router
     };
 
     let responseData;
-    db.Resource.authorizeData(data, 'create', req.user, null, req.project)
+    db.ImageResource.authorizeData(data, 'create', req.user, null, req.project)
       .create(data)
-      .then((resourceInstance) => {
-        db.Resource.scope(...req.scope)
-          .findByPk(resourceInstance.id)
+      .then((imageResourceInstance) => {
+        db.ImageResource.scope(...req.scope)
+          .findByPk(imageResourceInstance.id)
           .then((result) => {
             result.project = req.project;
             req.results = result;
@@ -287,7 +281,7 @@ router
   })
   .post(async function (req, res, next) {
     // refetch after tags and status updates
-    db.Resource.scope(...req.scope)
+    db.ImageResource.scope(...req.scope)
       .findOne({
         where: { id: req.results.id, projectId: req.params.projectId },
       })
@@ -298,70 +292,29 @@ router
       });
   })
 
-  // TODO: Add notifications
-  .post(function (req, res, next) {
-    const sendConfirmationToUser = typeof(req.body['confirmationUser']) !== 'undefined' ? req.body['confirmationUser'] : false;
-    const sendConfirmationToAdmin = typeof(req.body['confirmationAdmin']) !== 'undefined' ? req.body['confirmationAdmin'] : false;
-
-    res.json(req.results);
-    if (!req.query.nomail && req.body['publishDate']) {
-      if (sendConfirmationToAdmin) {
-        db.Notification.create({
-          type: "new published resource - admin update",
-          projectId: req.project.id,
-          data: {
-            userId: req.user.id,
-            resourceId: req.results.id
-          }
-        })
-      }
-      if (sendConfirmationToUser) {
-        db.Notification.create({
-          type: "new published resource - user feedback",
-          projectId: req.project.id,
-          data: {
-            userId: req.user.id,
-            resourceId: req.results.id
-          }
-        })
-      }
-    } else if (!req.query.nomail && !req.body['publishDate']) {
-      if (sendConfirmationToUser) {
-        db.Notification.create({
-          type: "new concept resource - user feedback",
-          projectId: req.project.id,
-          data: {
-            userId: req.user.id,
-            resourceId: req.results.id
-          }
-        })
-      }
-    }
-  });
-
 // one resource
 // --------
 router
-  .route('/:resourceId(\\d+)')
+  .route('/:imageResourceId(\\d+)')
   .all(function (req, res, next) {
-    var resourceId = parseInt(req.params.resourceId) || 1;
+    var imageResourceId = parseInt(req.params.imageResourceId) || 1;
 
     let scope = [...req.scope];
     if (req.canIncludeVoteCount) scope.push('includeVoteCount');
 
-    db.Resource.scope(...scope)
+    db.ImageResource.scope(...scope)
       .findOne({
-        where: { id: resourceId, projectId: req.params.projectId },
+        where: { id: imageResourceId, projectId: req.params.projectId },
       })
       .then((found) => {
-        if (!found) throw new Error('Resource not found');
+        if (!found) throw new Error('Image resource not found');
         found.project = req.project;
         if (req.query.includePoll) {
           // TODO: naar poll hooks
           if (found.poll) found.poll.countVotes(!req.query.includeVotes);
         }
-        req.resource = found;
-        req.results = req.resource;
+        req.imageResource = found;
+        req.results = req.imageResource;
         next();
       })
       .catch((err) => {
@@ -370,7 +323,7 @@ router
       });
   })
 
-  // view resource
+  // view image resource
   // ---------
   .get(auth.can('ImageResource', 'view'))
   .get(auth.useReqUser)
@@ -378,44 +331,18 @@ router
     res.json(req.results);
   })
 
-  // update resource
+  // update image resource
   // -----------
   .put(auth.useReqUser)
-  .put(function (req, res, next) {
-    if (
-      !(
-        req.project.config &&
-        req.project.config.resources &&
-        req.project.config.resources.canAddNewResources
-      )
-    ) {
-      if (!req.results.dataValues.publishDate) {
-        return next(
-          createError(
-            401,
-            'Aanpassen en inzenden van concept plannen is gesloten'
-          )
-        );
-      }
-    }
-    return next();
-  })
   .put(function (req, res, next) {
     req.tags = req.body.tags;
     next();
   })
   .put(function (req, res, next) {
-    const currentResource = req.results.dataValues;
-    const wasConcept = currentResource && !currentResource.publishDate;
-    const willNowBePublished = req.body['publishDate'];
-    req.changedToPublished = wasConcept && willNowBePublished;
-    next();
-  })
-  .put(function (req, res, next) {
-    var resource = req.results;
+    var imageResource = req.results;
 
-    if (!(resource && resource.can && resource.can('update')))
-      return next(new Error('You cannot update this Resource'));
+    if (!(imageResource && imageResource.can && imageResource.can('update')))
+      return next(new Error('You cannot update this image Resource'));
 
     if (req.body.location) {
       try {
@@ -446,7 +373,7 @@ router
       }
     }
 
-    resource
+    imageResource
       .authorizeData(data, 'update')
       .update(data)
       .then((result) => {
@@ -468,17 +395,17 @@ router
     const projectId = req.params.projectId;
     const tagEntities = await getValidTags(projectId, tags, req.user);
     
-    const resourceInstance = req.results;
-    resourceInstance.setTags(tagEntities).then((result) => {
+    const imageResourceInstance = req.results;
+    imageResourceInstance.setTags(tagEntities).then((result) => {
       // refetch. now with tags
       let scope = [...req.scope, 'includeTags'];
       if (req.canIncludeVoteCount) scope.push('includeVoteCount');
-      return db.Resource.scope(...scope)
+      return db.ImageResource.scope(...scope)
         .findOne({
-          where: { id: resourceInstance.id, projectId: req.params.projectId },
+          where: { id: imageResourceInstance.id, projectId: req.params.projectId },
         })
         .then((found) => {
-          if (!found) throw new Error('Resource not found');
+          if (!found) throw new Error('Image resource not found');
 
           if (req.query.includePoll) {
             // TODO: naar poll hooks
@@ -510,17 +437,17 @@ router
     const projectId = req.params.projectId;
     const statusEntities = await getValidStatuses(projectId, statuses, req.user);
 
-    const resourceInstance = req.results;
-    resourceInstance.setStatuses(statusEntities).then((result) => {
+    const imageResourceInstance = req.results;
+    imageResourceInstance.setStatuses(statusEntities).then((result) => {
       // refetch. now with statuses
       let scope = [...req.scope, 'includeStatuses'];
       if (req.canIncludeVoteCount) scope.push('includeVoteCount');
-      return db.Resource.scope(...scope)
+      return db.ImageResource.scope(...scope)
         .findOne({
-          where: { id: resourceInstance.id, projectId: req.params.projectId },
+          where: { id: imageResourceInstance.id, projectId: req.params.projectId },
         })
         .then((found) => {
-          if (!found) throw new Error('Resource not found');
+          if (!found) throw new Error('Image resource not found');
 
           if (req.query.includePoll) {
             // TODO: naar poll hooks
@@ -534,42 +461,21 @@ router
     });
   })
   .put(function (req, res, next) {
-    db.Notification.create({
-      type: 'updated resource - admin update',
-      projectId: req.project.id,
-      data: {
-        userId: req.user.id,
-        resourceId: req.results.id,
-      },
-    });
-    if (req.changedToPublished) {
-      db.Notification.create({
-        type: 'new published resource - user feedback',
-        projectId: req.project.id,
-        data: {
-          userId: req.user.id,
-          resourceId: req.results.id,
-        },
-      });
-    }
-    next();
-  })
-  .put(function (req, res, next) {
     res.json(req.results);
   })
 
-  // delete resource
+  // delete image resource
   // ---------
   .delete(auth.useReqUser)
   .delete(function (req, res, next) {
-    const resource = req.results;
-    if (!(resource && resource.can && resource.can('delete')))
-      return next(new Error('You cannot delete this resource'));
+    const imageResource = req.results;
+    if (!(imageResource && imageResource.can && imageResource.can('delete')))
+      return next(new Error('You cannot delete this image resource'));
 
-    resource
+    imageResource
       .destroy()
       .then(() => {
-        res.json({ resource: 'deleted' });
+        res.json({ imageResource: 'deleted' });
       })
       .catch(next);
   });

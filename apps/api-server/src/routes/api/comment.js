@@ -31,19 +31,30 @@ router
 
   })
   .all('*', function(req, res, next) {
-    // zoek het resource
-    // todo: ik denk momenteel alleen nog gebruikt door create; dus zet hem daar neer
-    let resourceId = parseInt(req.params.resourceId) || 0;
-    if (!resourceId) return next();
-    db.Resource
-      .scope('includeProject')
-      .findByPk(resourceId)
-      .then(resource => {
-        if (!resource || resource.projectId != req.params.projectId) return next(createError(400, 'Resource not found'));
-        req.resource = resource;
-        return next();
-      });
+    let resourceId = parseInt(req.params.resourceId);
+    let imageResourceId = parseInt(req.params.imageResourceId);
+
+    function fetchAndValidateResource(model, id) {
+      model.scope('includeProject').findByPk(id)
+        .then(resource => {
+          if (!resource || resource.projectId != req.params.projectId) {
+            return next(createError(400, 'Resource not found'));
+          }
+          req.resource = resource;
+          return next();
+        })
+        .catch(err => next(createError(500, 'Database error')));
+    }
+
+    if (resourceId) {
+      return fetchAndValidateResource(db.Resource, resourceId);
+    } else if (imageResourceId) {
+      return fetchAndValidateResource(db.ImageResource, imageResourceId);
+    } else {
+      return next();
+    }
   })
+
   .all('/:commentId(\\d+)(/vote)?', function(req, res, next) {
 
     // include one existing comment

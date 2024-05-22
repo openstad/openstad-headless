@@ -27,6 +27,7 @@ import useStatuses from '@/hooks/use-statuses';
 import { CheckboxList } from './checkbox-list';
 import { X } from 'lucide-react';
 import { useProject } from '@/hooks/use-project';
+import useImageResource from "@/hooks/use-image-resource";
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -101,15 +102,23 @@ type Props = {
   onFormSubmit: (body: FormType) => Promise<any>;
 };
 
-export default function ResourceForm({ onFormSubmit }: Props) {
+export default function ResourceForm({ onFormSubmit, type }: Props) {
   const router = useRouter();
   const { project, id } = router.query;
   const { data: projectData } = useProject();
 
-  const { data: existingData, error } = useResource(
-    project as string,
-    id as string
-  );
+  const [existingData, setExistingData] = useState(null);
+
+  const resourceData = useResource(project as string, id as string);
+  const imageResourceData = useImageResource(project as string, id as string);
+
+  useEffect(() => {
+    if (type === 'resource') {
+      setExistingData(resourceData.data);
+    } else if (type === 'image-resource') {
+      setExistingData(imageResourceData.data);
+    }
+  }, [type, resourceData, imageResourceData]);
 
   const { data: tags, error: tagError } = useTags(project as string);
   const { data: statuses, error: statusError } = useStatuses(project as string);
@@ -200,7 +209,10 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     onFormSubmit(values)
       .then(() => {
         toast.success(`Plan successvol ${id ? 'aangepast' : 'aangemaakt'}`);
-        router.push(`/projects/${project}/resources`);
+
+        const pushUrl = type === 'image-resource' ? `/projects/${project}/image-resources` : `/projects/${project}/resources`;
+
+        router.push(pushUrl);
       })
       .catch((e) => {
         toast.error(`Plan kon niet ${id ? 'aangepast' : 'aangemaakt'} worden`);

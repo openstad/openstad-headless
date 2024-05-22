@@ -1,7 +1,9 @@
 import useSWR from 'swr';
 
-export default function useComments(projectId?: string) {
-  const url = `/api/openstad/api/project/${projectId}/resource?includeComments=1&includeRepliesOnComments=1`;
+export default function useComments(projectId?: string, type?: string) {
+  const resourceType = type === 'image-resource' ? 'image-resource' : 'resource' ;
+
+  const url = `/api/openstad/api/project/${projectId}/${resourceType}?includeComments=1&includeRepliesOnComments=1`;
 
   const commentListSwr = useSWR(projectId ? url : null);
 

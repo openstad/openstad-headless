@@ -7,7 +7,9 @@ export default function useImageResources(projectId?: string) {
   const imageResourcesListSwr = useSWR(projectId ? url : null);
 
   async function create(body: any) {
-    const res = await fetch(url, {
+    const createUrl = `/api/openstad/api/project/${projectId}/image-resource`;
+
+    const res = await fetch(createUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -15,12 +17,14 @@ export default function useImageResources(projectId?: string) {
       body: JSON.stringify({ ...body }),
     });
 
+    console.log( 'RES', res );
+
     if (res.ok) {
       const data = await res.json();
       imageResourcesListSwr.mutate([...imageResourcesListSwr.data, data]);
       return data;
     } else {
-      throw new Error('Could not create the plan');
+      throw new Error('Could not create the image resource');
     }
   }
 
@@ -43,7 +47,7 @@ export default function useImageResources(projectId?: string) {
       imageResourcesListSwr.mutate(updatedList);
       return data;
     } else {
-      throw new Error('Could not update the plan');
+      throw new Error('Could not update the image resource');
     }
   }
 
@@ -63,7 +67,7 @@ export default function useImageResources(projectId?: string) {
       imageResourcesListSwr.mutate(updatedList);
       return updatedList;
     } else {
-      throw new Error('Could not remove the plan');
+      throw new Error('Could not remove the image resource');
     }
   }
   return { ...imageResourcesListSwr, create, update, remove };
