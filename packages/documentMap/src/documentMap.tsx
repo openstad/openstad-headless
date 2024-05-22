@@ -26,26 +26,26 @@ export type DocumentMapProps = BaseProps &
     projectId?: string;
     resourceId?: string;
     resourceIdRelativePath?: string;
-    documentUrl?: string;
     documentWidth?: number;
     documentHeight?: number;
     zoom?: number;
     iconDefault?: string;
     iconHighlight?: string;
-    titleTekst?: string;
-    introTekst?: string;
   };
 
 
 function DocumentMap({
-  documentUrl,
   zoom = 1,
   iconDefault,
   iconHighlight = 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309740_1280.png',
   documentWidth = 1920,
   documentHeight = 1080,
+<<<<<<< HEAD
   titleTekst,
   introTekst,
+=======
+  imageResourceId,
+>>>>>>> b864aa4d (Use the image of image-resource)
   ...props
 }: DocumentMapProps) {
 
@@ -64,6 +64,8 @@ function DocumentMap({
     projectId: props.projectId,
     resourceId: resourceId,
   });
+
+  console.log(resource)
 
   const { data: comments } = datastore.useComments({
     projectId: props.projectId,
@@ -112,11 +114,11 @@ function DocumentMap({
   return (
     <div className="documentMap--container">
       <div className="content" tabIndex={0}>
-        <header>
-          {resource.title ? <Heading level={1}>{resource.title}</Heading> : ''}
-          {resource.summary ? <Heading level={5}>{resource.summary}</Heading> : ''}
-          {resource.description ? <Paragraph>{resource.description}</Paragraph> : ''}
-        </header>
+        <div>
+          {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
+          {resource.summary ? <Heading level={5}>{resource.summary}</Heading> : null}
+          {resource.description ? <Paragraph>{resource.description}</Paragraph> : null}
+        </div>
 
         <Comments
           {...props}
@@ -159,7 +161,7 @@ function DocumentMap({
             </Marker>
           ))} */}
           <ImageOverlay
-            url={documentUrl ? documentUrl : 'https://fastly.picsum.photos/id/48/1920/1080.jpg?hmac=r2li6k6k9q34DhZiETPlmLsPPGgOChYumNm6weWMflI'}
+            url={resource.images ? resource.images[0].url : 'https://fastly.picsum.photos/id/48/1920/1080.jpg?hmac=r2li6k6k9q34DhZiETPlmLsPPGgOChYumNm6weWMflI'}
             bounds={imageBounds}
           />
           {popupPosition && (
