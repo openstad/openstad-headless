@@ -20,7 +20,7 @@ module.exports = {
       summary: {
         type: 'string',
         textarea: true,
-        label: 'Korte samenvatting (Gebruikt voor de blog overzicht pagina)',
+        label: 'Korte samenvatting (Wordt gebruikt op de blog overzicht pagina)',
       },
     },
     group: {
