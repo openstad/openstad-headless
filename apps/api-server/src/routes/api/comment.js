@@ -92,9 +92,18 @@ router.route('/')
   .get(function(req, res, next) {
     let { dbQuery } = req;
 
-    let resourceId = parseInt(req.params.resourceId) || 0;
+    let resourceId, imageResourceId;
+
+    if ( !!req.params.imageResourceId ) {
+      imageResourceId = parseInt(req.params.imageResourceId) || 0;
+    } else {
+      resourceId = parseInt(req.params.resourceId) || 0;
+    }
+
     let where = {};
-    if (resourceId) {
+    if (imageResourceId) {
+      where.imageResourceId = imageResourceId;
+    } else if (resourceId) {
       where.resourceId = resourceId;
     }
     let sentiment = req.query.sentiment;
@@ -152,10 +161,32 @@ router.route('/')
 
     let userId = req.user.id;
     if (hasRole( req.user, 'admin') && req.body.userId) userId = req.body.userId;
-    
+
+    const attr = {};
+
+    if ( !!req.params.imageResourceId ) {
+      attr['imageResourceId'] = parseInt(req.params.imageResourceId);
+    } else {
+      attr['resourceId'] = parseInt(req.params.resourceId);
+    }
+
+    try {
+      req.body.location = req.body.location
+        ? JSON.parse(req.body.location)
+        : null;
+    } catch (err) {}
+
+    if (
+      req.body.location &&
+      typeof req.body.location == 'object' &&
+      !Object.keys(req.body.location).length
+    ) {
+      req.body.location = null;
+    }
+
     let data = {
       ...req.body,
-      resourceId: req.params.resourceId,
+      ...attr,
       userId,
     };
 
@@ -198,6 +229,25 @@ router.route('/:commentId(\\d+)')
   .put(function(req, res, next) {
     var comment = req.results;
     if (!(comment && comment.can && comment.can('update'))) return next(new Error('You cannot update this comment'));
+
+    if (req.body.location) {
+      try {
+        req.body.location = JSON.parse(req.body.location || null);
+      } catch (err) {}
+
+      if (
+        req.body.location &&
+        typeof req.body.location === 'object' &&
+        !Object.keys(req.body.location).length
+      ) {
+        req.body.location = undefined;
+      }
+    } else {
+      if (req.body.location === null) {
+        req.body.location = JSON.parse(null);
+      }
+    }
+
     comment
       .authorizeData(req.body, 'update')
       .update(req.body)

@@ -59,6 +59,17 @@ module.exports = function (db, sequelize, DataTypes) {
         defaultValue: {},
       },
 
+      imageResourceId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'image_resources',
+          key: 'id'
+        },
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE'
+      },
+
 		  extraData: getExtraDataConfig(DataTypes.JSON, 'statuses'),
 
 	  }, {

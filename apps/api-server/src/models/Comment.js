@@ -77,6 +77,11 @@ module.exports = function( db, sequelize, DataTypes ) {
 			type         : DataTypes.VIRTUAL
 		},
 
+		location: {
+			type: DataTypes.JSON,
+			allowNull: true,
+		},
+
 		createDateHumanized: {
 			type         : DataTypes.VIRTUAL,
 			get          : function() {
@@ -90,6 +95,17 @@ module.exports = function( db, sequelize, DataTypes ) {
 				}
 			}
 		},
+
+		imageResourceId: {
+			type         : DataTypes.INTEGER,
+			allowNull    : true,
+			references   : {
+				model : 'image_resources',
+				key   : 'id'
+			},
+			onDelete     : 'SET NULL',
+			onUpdate     : 'CASCADE'
+		}
 
 	}, {
 

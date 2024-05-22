@@ -39,6 +39,16 @@ module.exports = function( db, sequelize, DataTypes ) {
 		checked : {
 			type         : DataTypes.BOOLEAN,
 			allowNull    : true
+		},
+		imageResourceId: { // Nieuwe kolom
+			type: DataTypes.INTEGER,
+			allowNull: true,
+			references: {
+				model: 'image_resources',
+				key: 'id'
+			},
+			onDelete: 'SET NULL',
+			onUpdate: 'CASCADE'
 		}
 	}, {
 		indexes: [{
@@ -56,14 +66,14 @@ module.exports = function( db, sequelize, DataTypes ) {
 	Vote.scopes = function scopes() {
 		return {
 
-			forProjectId: function( projectId ) {
+			forProjectId: function(projectId) {
 				return {
 					// where: {
 					//  	resourceId: [ sequelize.literal(`select id FROM resources WHERE projectId = ${projectId}`) ]
 					// }
 					include: [{
-						model      : db.Resource,
-						attributes : ['id', 'projectId'],
+						model: db.Resource,
+						attributes: ['id', 'projectId'],
 						required: true,
 						where: {
 							projectId: projectId
@@ -103,15 +113,15 @@ module.exports = function( db, sequelize, DataTypes ) {
 
   // TODO: dit wordt nauwelijks gebruikt omdat de logica helemaal in de route zit. Maar hier zou dus netter zijn.
 	Vote.auth = Vote.prototype.auth = {
-    listableBy: 'all',
-    viewableBy: 'all',
-    createableBy: 'member',
-    updateableBy: ['moderator', 'owner'],
-    deleteableBy: ['moderator', 'owner'],
-    canToggle: function(user, self) {
-      return userHasRole(user, 'moderator', self.userId);
-    }
-  }
+		listableBy: 'all',
+		viewableBy: 'all',
+		createableBy: 'member',
+		updateableBy: ['moderator', 'owner'],
+		deleteableBy: ['moderator', 'owner'],
+		canToggle: function(user, self) {
+			return userHasRole(user, 'moderator', self.userId);
+		}
+	}
 
 	return Vote;
 };
