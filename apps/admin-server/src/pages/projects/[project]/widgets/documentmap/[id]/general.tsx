@@ -72,46 +72,6 @@ export default function DocumentGeneral(
 
         <FormField
           control={form.control}
-          name="introTekst"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Introductie tekst</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Introductie tekst"
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
-                  }}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="documentUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Url van het document</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="https://example.com/document.pdf"
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
-                  }}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="documentWidth"
           render={({ field }) => (
             <FormItem>
