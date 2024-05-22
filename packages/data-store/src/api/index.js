@@ -1,5 +1,6 @@
 import fetchx from './fetch';
 import resource from './resource';
+import imageResource from './imageResource';
 import comments from './comments';
 import resources from './resources';
 import tags from './tags';
@@ -46,6 +47,13 @@ function API(props = {}) {
     update: resource.update.bind(self),
     delete: resource.delete.bind(self),
     submitLike: resource.submitLike.bind(self),
+  };
+
+  self.imageResource = {
+    fetch: imageResource.fetch.bind(self),
+    update: imageResource.update.bind(self),
+    delete: imageResource.delete.bind(self),
+    submitLike: imageResource.submitLike.bind(self),
   };
 
   self.resources = {

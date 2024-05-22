@@ -3,9 +3,11 @@ import { useSWRConfig } from 'swr';
 import useSWR from 'swr';
 import API from './api';
 import useResource from './hooks/use-resource.js';
+import useImageResource from './hooks/use-image-resource.js';
 import useArea from './hooks/use-area.js';
 import useComments from './hooks/use-comments.js';
 import useResources from './hooks/use-resources.js';
+// import useImageResources from './hooks/use-image-resources.js';
 import useTags from './hooks/use-tags.js';
 import useCurrentUser from './hooks/use-current-user.js';
 import useUserVote from './hooks/use-user-vote.js';
@@ -24,8 +26,10 @@ function DataStore(props = {}) {
 
   // hooks
   self.useResource = useResource.bind(self);
+  self.useImageResource = useImageResource.bind(self);
   self.useComments = useComments.bind(self);
   self.useResources = useResources.bind(self);
+  // self.useImageResources = useImageResources.bind(self);
   self.useArea = useArea.bind(self);
   self.useTags = useTags.bind(self);
   self.useCurrentUser = useCurrentUser.bind(self);
