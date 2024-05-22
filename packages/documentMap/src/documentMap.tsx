@@ -55,10 +55,14 @@ function DocumentMap({
 
   const datastore = new DataStore({
     projectId: props.projectId,
-    resourceId: resourceId,
     api: props.api,
   });
-  const { data: resource } = datastore.useResource({
+  const { data: resource } = datastore.useImageResource({
+    projectId: props.projectId,
+    imageResourceId: resourceId,
+  });
+
+  const { data: comments } = datastore.useComments({
     projectId: props.projectId,
     resourceId: resourceId,
   });
@@ -66,7 +70,7 @@ function DocumentMap({
   console.log(resource)
 
   const [popupPosition, setPopupPosition] = useState<any>(null);
-  const [comments, setComments] = useState<Array<{ comment: string, position: any, date: any }>>([]);
+  // const [comments, setComments] = useState<Array<{ comment: string, position: any, date: any }>>([]);
   const [selectedCommentIndex, setSelectedCommentIndex] = useState<Number>();
   const [selectedMarkerIndex, setSelectedMarkerIndex] = useState<Number>();
 
