@@ -41,8 +41,6 @@ export default function DocumentGeneral(
   
   const form = useForm<DocumentMapProps>({
     defaultValues: {
-      documentUrl: props.documentUrl || '',
-      introTekst: props.introTekst || '',
       documentWidth: props.documentWidth || 1920,
       documentHeight: props.documentHeight || 1080,
       zoom: props.zoom || 0,
@@ -68,6 +66,7 @@ export default function DocumentGeneral(
           label={(resource) => `${resource.id} ${resource.title}`}
           onFieldChanged={props.onFieldChanged}
         />
+
 
         <FormField
           control={form.control}

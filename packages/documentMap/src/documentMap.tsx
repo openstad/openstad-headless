@@ -114,11 +114,11 @@ function DocumentMap({
   return (
     <div className="documentMap--container">
       <div className="content" tabIndex={0}>
-        <div>
+        <section className="content-intro">
           {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
           {resource.summary ? <Heading level={5}>{resource.summary}</Heading> : null}
           {resource.description ? <Paragraph>{resource.description}</Paragraph> : null}
-        </div>
+        </section>
 
         <Comments
           {...props}

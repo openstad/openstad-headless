@@ -2,17 +2,22 @@
   height: calc(100vh - 193px);
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-gap: 1rem;
 }
 
 .documentMap--container .content{
   overflow: auto;
+  padding: 2rem;
 }
 
-.documentMap--container .content header{
-  margin-bottom: 2rem;
-  padding: 10px;
+.documentMap--container .content .content-intro{
+  margin-block-end: 2rem;
 }
+
+
+.documentMap--container .content .content-intro p{
+  margin-block-start: .5rem;
+}
+
 
 .documentMap--container .map-container > div{
   width: 100%;
