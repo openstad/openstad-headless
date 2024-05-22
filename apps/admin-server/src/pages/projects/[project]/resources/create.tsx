@@ -27,7 +27,7 @@ export default function ProjectResourceCreate() {
             url: `/projects/${project}/resources/create`,
           },
         ]}>
-        <ResourceForm onFormSubmit={(body) => create(body)} />
+        <ResourceForm type="resource" onFormSubmit={(body) => create(body)} />
       </PageLayout>
     </div>
   );

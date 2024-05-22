@@ -15,7 +15,7 @@ export default function ProjectResourceArguments() {
 
   type Comment = {
     id: number;
-    resourceId: number;
+    imageResourceId: number;
     createdAt: string;
     replies?: Comment[];
   }
@@ -28,7 +28,7 @@ export default function ProjectResourceArguments() {
       ...(commentsFor.flatMap((comment: Comment) => comment.replies || []) as Comment[]),
       ...commentsAgainst,
       ...(commentsAgainst.flatMap((comment: Comment) => comment.replies || []) as Comment[]),
-    ]).filter((comment: Comment) => comment.resourceId === parseInt(id as string, 10))
+    ]).filter((comment: Comment) => comment.imageResourceId === parseInt(id as string, 10))
       .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 
     setComments(comments);

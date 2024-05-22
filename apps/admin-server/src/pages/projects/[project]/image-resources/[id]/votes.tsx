@@ -16,8 +16,8 @@ export default function ProjectResourceVotes() {
   const { data: usersData } = useUsers();
 
   useEffect(() => {
-    const loadedVotes = ((data || []) as { resourceId: number, createdAt: string }[])
-      .filter(vote => vote.resourceId === parseInt(id as string, 10))
+    const loadedVotes = ((data || []) as { imageResourceId: number, createdAt: string }[])
+      .filter(vote => vote.imageResourceId === parseInt(id as string, 10))
       .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 
     setVotes(loadedVotes);

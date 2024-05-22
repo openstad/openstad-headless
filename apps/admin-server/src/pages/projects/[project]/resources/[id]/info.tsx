@@ -17,6 +17,7 @@ export default function ProjectResourceCreate() {
           onFormSubmit={(values) =>
             update(Number.parseInt(id as string), values)
           }
+          type="resource"
         />
     </div>
   ) : null;

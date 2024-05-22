@@ -10,26 +10,10 @@ import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { toast } from 'react-hot-toast';
 import { sortTable, searchTable } from '@/components/ui/sortTable';
 
-export default function ProjectResources() {
+export default function ProjectImageResources() {
   const router = useRouter();
   const { project } = router.query;
   const { data, error, isLoading, remove } = useImageResources(project as string);
-
-  const exportData = (data: BlobPart, fileName: string, type: string) => {
-    // Create a link and download the file
-    const blob = new Blob([data], { type });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
-
-  function transform() {
-    const jsonData = JSON.stringify(data);
-    exportData(jsonData, `resources.json`, "application/json");
-  }
 
   const [filterData, setFilterData] = useState(data);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
@@ -61,12 +45,9 @@ export default function ProjectResources() {
               href={`/projects/${project}/image-resources/create`}>
               <Button variant="default" className='text-xs p-2 w-fit'>
                 <Plus size="20" className="hidden lg:flex" />
-                Resource toevoegen
+                Afbeelding resource toevoegen
               </Button>
             </Link>
-            <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
-              Exporteer resources
-            </Button>
           </div>
         }>
         <div className="container py-6">
@@ -79,7 +60,7 @@ export default function ProjectResources() {
             >
               <option value="">Alles</option>
               <option value="id">Stem ID</option>
-              <option value="resource">Resources</option>
+              <option value="resource">Afbeelding resources</option>
               <option value="yes">Gestemd op ja</option>
               <option value="no">Gestemd op nee</option>
               <option value="createdAt">Datum aangemaakt</option>
@@ -103,7 +84,7 @@ export default function ProjectResources() {
               </ListHeading>
               <ListHeading className="hidden lg:flex">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('resource', e, filterData))}>
-                  Resources
+                  Afbeelding resources
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
@@ -149,15 +130,15 @@ export default function ProjectResources() {
                       className="hidden lg:flex ml-auto"
                       onClick={(e) => e.preventDefault()}>
                       <RemoveResourceDialog
-                        header="Resource verwijderen"
-                        message="Weet je zeker dat je deze resource wilt verwijderen?"
+                        header="Afbeelding resource verwijderen"
+                        message="Weet je zeker dat je deze afbeelding resource wilt verwijderen?"
                         onDeleteAccepted={() =>
                           remove(resource.id)
                             .then(() =>
-                              toast.success('Resource successvol verwijderd')
+                              toast.success('Afbeelding resource successvol verwijderd')
                             )
                             .catch((e) =>
-                              toast.error('Resource kon niet worden verwijderd')
+                              toast.error('Afbeelding resource kon niet worden verwijderd')
                             )
                         }
                       />

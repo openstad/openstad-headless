@@ -19,15 +19,15 @@ export default function ProjectResourceCreate() {
             url: '/projects',
           },
           {
-            name: 'Resources',
+            name: 'Image resources',
             url: `/projects/${project}/image-resources`,
           },
           {
-            name: 'Resource toevoegen',
+            name: 'Image resource toevoegen',
             url: `/projects/${project}/image-resources/create`,
           },
         ]}>
-        <ResourceForm onFormSubmit={(body) => create(body)} />
+        <ResourceForm type="image-resource" onFormSubmit={(body) => create(body)} />
       </PageLayout>
     </div>
   );
