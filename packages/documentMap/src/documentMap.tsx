@@ -1,4 +1,6 @@
 import DataStore from '@openstad-headless/data-store/src';
+import { Comments } from '@openstad-headless/comments/src/comments';
+
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import 'remixicon/fonts/remixicon.css';
 import '@utrecht/component-library-css';
@@ -63,15 +65,18 @@ function DocumentMap({
     resourceId: resourceId,
   });
 
-  console.log(resource)
+  const { data: comments } = datastore.useComments({
+    projectId: props.projectId,
+    resourceId: resourceId,
+  });
 
   const [popupPosition, setPopupPosition] = useState<any>(null);
   const [comments, setComments] = useState<Array<{ comment: string, position: any, date: any }>>([]);
   const [selectedCommentIndex, setSelectedCommentIndex] = useState<Number>();
   const [selectedMarkerIndex, setSelectedMarkerIndex] = useState<Number>();
 
-  const defaultIcon = new Icon({ iconUrl: iconHighlight, className: 'defaultIcon'});
-  const highlightedIcon = new Icon({ iconUrl: iconHighlight, className: 'highlightedIcon'});
+  const defaultIcon = new Icon({ iconUrl: iconHighlight, className: 'defaultIcon' });
+  const highlightedIcon = new Icon({ iconUrl: iconHighlight, className: 'highlightedIcon' });
 
   const imageBounds: LatLngBoundsLiteral = [[-documentHeight, -documentWidth], [documentHeight, documentWidth]];
 
@@ -96,7 +101,7 @@ function DocumentMap({
     e.stopPropagation();
 
     if (value.length > 0) {
-      setComments([...comments, { comment: value, position, date: new Date() }]);
+      // setComments([...comments, { comment: value, position, date: new Date() }]);
       setPopupPosition(null)
     } else {
       return;
@@ -111,32 +116,13 @@ function DocumentMap({
           {titleTekst ? <Heading level={1}>{titleTekst}</Heading> : ''}
           {introTekst ? <Paragraph>{introTekst}</Paragraph> : ''}
         </header>
-        {comments.map((comment, index) => (
-          <>
-            <button
-              key={index}
-              className={`comment ${index === selectedCommentIndex ? 'highlight' : ''}`}
-              onClick={(e) => {
-                if ((e.currentTarget as Element).classList.contains('highlight')) {
-                  setSelectedMarkerIndex(-1);
-                  setSelectedCommentIndex(-1);
-                } else {
-                  setSelectedMarkerIndex(index);
-                  setSelectedCommentIndex(index);
-                }
-              }}
-            >
-              <Paragraph>
-                {comment.comment}
-              </Paragraph>
-              <Paragraph className="flex">
-                <span>Geplaatst door: Anoniem</span>
-                <span>Datum: {comment.date.toLocaleDateString()}, {comment.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-              </Paragraph>
-            </button>
-          </>
 
-        ))}
+        <Comments
+          {...props}
+          resourceId={resourceId || ''}
+          type="image-resource"
+        />
+
       </div>
       <div className='map-container'>
         <MapContainer center={[0, 0]} zoom={zoom} crs={CRS.Simple} minZoom={-6}>

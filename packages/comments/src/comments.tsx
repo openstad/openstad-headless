@@ -33,6 +33,7 @@ export type CommentsWidgetProps = BaseProps &
     requiredUserRole?: string,
     descriptionMinLength?: number,
     descriptionMaxLength?: number,
+    type?: string | 'resource';
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -79,11 +80,13 @@ function Comments({
     projectId: props.projectId,
     resourceId: resourceId,
     sentiment: args.sentiment,
+    type: props.type,
   });
 
   const { data: resource } = datastore.useResource({
     projectId: props.projectId,
     resourceId: resourceId,
+    type: props.type,
   });
 
   const [canComment, setCanComment] = useState(args.canComment)
@@ -120,6 +123,7 @@ function Comments({
       console.log(err);
     }
   }
+  console.log(props.type)
 
   return (
     <CommentWidgetContext.Provider value={args}>
@@ -162,7 +166,8 @@ function Comments({
           </Banner>
         ) : null}
 
-        {(args.canComment && hasRole(currentUser, args.requiredUserRole)) || hasRole(currentUser, 'moderator') ? (
+        {/* {(args.canComment && hasRole(currentUser, args.requiredUserRole)) || hasRole(currentUser, 'moderator') ? ( */}
+        {args.canComment ? (
           <div className="input-container">
             <CommentForm {...args} submitComment={submitComment} />
             <Spacer size={1} />
