@@ -227,6 +227,7 @@ module.exports = function (db, sequelize, DataTypes) {
   Project.associate = function (models) {
     this.hasMany(models.User, { onDelete: 'CASCADE', hooks: true });
     this.hasMany(models.Resource, { onDelete: 'CASCADE', hooks: true });
+    this.hasMany(models.ImageResource, { onDelete: 'CASCADE', hooks: true });
     this.hasMany(models.Tag, { onDelete: 'CASCADE', hooks: true });
     this.hasMany(models.Status, { onDelete: 'CASCADE', hooks: true });
     this.hasMany(models.NotificationTemplate, { onDelete: 'CASCADE', hooks: true });

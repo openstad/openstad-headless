@@ -25,7 +25,7 @@ module.exports = function( db, sequelize, DataTypes ) {
       auth: {
         updateableBy : 'editor',
       },
-			allowNull    : false
+			allowNull    : true
 		},
 
 		userId: {
@@ -138,31 +138,31 @@ module.exports = function( db, sequelize, DataTypes ) {
 			},
 
 			afterCreate: function(instance, options) {
-				db.Resource.findByPk(instance.resourceId)
-					.then( resource => {
-            db.Notification.create({
-              type: "new or updated comment - admin update",
-			        projectId: resource.projectId,
-              data: {
-                "resourceId": resource.id,
-                "commentId": instance.id
-              }
-					  })
-					})
+				// db.Resource.findByPk(instance.resourceId)
+				// 	.then( resource => {
+        //     db.Notification.create({
+        //       type: "new or updated comment - admin update",
+			  //       projectId: resource.projectId,
+        //       data: {
+        //         "resourceId": resource.id,
+        //         "commentId": instance.id
+        //       }
+				// 	  })
+				// 	})
 			},
 
 			afterUpdate: function(instance, options) {
-				db.Resource.findByPk(instance.resourceId)
-					.then( resource => {
-            db.Notification.create({
-              type: "new or updated comment - admin update",
-			        projectId: resource.projectId,
-              data: {
-                "resourceId": resource.id,
-                "commentId": instance.id
-              }
-					  })
-					})
+				// db.Resource.findByPk(instance.resourceId)
+				// 	.then( resource => {
+        //     db.Notification.create({
+        //       type: "new or updated comment - admin update",
+			  //       projectId: resource.projectId,
+        //       data: {
+        //         "resourceId": resource.id,
+        //         "commentId": instance.id
+        //       }
+				// 	  })
+				// 	})
 			},
 
 		},
@@ -205,6 +205,14 @@ module.exports = function( db, sequelize, DataTypes ) {
 				};
 			},
 
+			forProjectIdImageResource: function( projectId ) {
+				return {
+					where: {
+						imageResourceId: [ sequelize.literal(`select id FROM image_resources WHERE projectId = ${projectId}`) ]
+					}
+				};
+			},
+
 			includeRepliesOnComments: function( userId ) {
 				let commentVoteThreshold = 5; // todo: configureerbaar
 				return {
@@ -213,7 +221,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 						as         : 'replies',
 						required   : false,
             // force attribs because the automatic list is incomplete
-					  attributes : ['id', 'parentId', 'resourceId', 'userId', 'sentiment', 'description', 'label', 'createdAt', 'updatedAt', 'createDateHumanized']
+					  attributes : ['id', 'parentId', 'resourceId', 'imageResourceId', 'location', 'userId', 'sentiment', 'description', 'label', 'createdAt', 'updatedAt', 'createDateHumanized']
 					}],
 					where: {
 						parentId: null
@@ -231,6 +239,19 @@ module.exports = function( db, sequelize, DataTypes ) {
 				return {
 					include: [{
 						model      : db.Resource,
+						attributes : ['id', 'projectId', 'title', 'publishDate', 'viewableByRole'],
+            include: {
+              model: db.Project,
+              attributes: ['id', 'config'],
+            },
+					}]
+				}
+			},
+
+			includeImageResource: function() {
+				return {
+					include: [{
+						model      : db.ImageResource,
 						attributes : ['id', 'projectId', 'title', 'publishDate', 'viewableByRole'],
             include: {
               model: db.Project,
@@ -284,6 +305,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 
 	Comment.associate = function( models ) {
 		this.belongsTo(models.Resource, { onDelete: 'CASCADE' }); // TODO: defined in the DB as NOT NULL, which is incorrect when parentId is used
+		this.belongsTo(models.ImageResource, { onDelete: 'CASCADE' }); // TODO: defined in the DB as NOT NULL, which is incorrect when parentId is used
 		this.belongsTo(models.User, { onDelete: 'CASCADE' });
 		this.hasMany(models.CommentVote, {
 			as: 'votes',

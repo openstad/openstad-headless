@@ -10,7 +10,8 @@ export default function ProjectResourceArguments() {
   const router = useRouter();
   const { project } = router.query;
   const { id } = router.query;
-  const { data, removeComment } = useComments(project as string);
+  const { data, removeComment } = useComments(project as string, 'image-resource');
+
   const [comments, setComments] = useState<any[]>([]);
 
   type Comment = {

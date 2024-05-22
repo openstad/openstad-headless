@@ -26,7 +26,7 @@ router.use( '/project/:projectId(\\d+)/resource', require('./resource') );
 router.use( '/project/:projectId(\\d+)/image-resource', require('./image-resource') );
 
 // comments
-router.use( '/project/:projectId(\\d+)(/imageResource/:imageResourceId(\\d+))?/comment', require('./comment') );
+router.use( '/project/:projectId(\\d+)(/image-resource/:imageResourceId(\\d+))?/comment', require('./comment') );
 
 // polls
 router.use( '/project/:projectId(\\d+)(/resource/:resourceId(\\d+))?/poll', require('./poll') );

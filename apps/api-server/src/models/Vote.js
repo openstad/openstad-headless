@@ -5,7 +5,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 	var Vote = sequelize.define('vote', {
 		resourceId: {
 			type         : DataTypes.INTEGER,
-			allowNull    : false
+			allowNull    : true
 		},
 		userId: {
 			type         : DataTypes.INTEGER,

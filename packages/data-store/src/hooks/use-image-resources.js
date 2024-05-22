@@ -1,4 +1,4 @@
-export default function useResources({
+export default function useImageResources({
                                        projectId,
                                        page = 0,
                                        pageSize = 20,

@@ -589,7 +589,7 @@ module.exports = function (db, sequelize, DataTypes) {
               as: 'commentsFor',
               required: false,
               where: {
-                sentiment: 'for',
+                sentiment: 'no sentiment',
                 parentId: null,
               },
             },

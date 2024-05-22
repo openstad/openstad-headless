@@ -2,6 +2,8 @@ import fetchx from './fetch';
 import resource from './resource';
 import comments from './comments';
 import resources from './resources';
+import imageResource from './imageResource';
+import imageResources from './imageResources';
 import tags from './tags';
 import user from './user';
 import area from './area';
@@ -53,6 +55,20 @@ function API(props = {}) {
     delete: resources.delete.bind(self),
     create: resources.create.bind(self),
     submitLike: resources.submitLike.bind(self)
+  };
+
+  self.imageResource = {
+    fetch: imageResource.fetch.bind(self),
+    update: imageResource.update.bind(self),
+    delete: imageResource.delete.bind(self),
+    submitLike: imageResource.submitLike.bind(self),
+  };
+
+  self.imageResources = {
+    fetch: imageResources.fetch.bind(self),
+    delete: imageResources.delete.bind(self),
+    create: imageResources.create.bind(self),
+    submitLike: imageResources.submitLike.bind(self)
   };
 
   self.submissions = {

@@ -11,8 +11,12 @@ const router = express.Router({ mergeParams: true });
 // scopes: for all get requests
 router
   .all('*', function(req, res, next) {
-    req.scope = ['defaultScope', 'includeResource'];
-    req.scope.push({ method: ['forProjectId', req.params.projectId] });
+
+    const method = req.params.imageResourceId ? 'forProjectId' : 'forProjectIdImageResource';
+    const scope = req.params.imageResourceId ? 'includeResource' : 'includeImageResource';
+
+    req.scope = ['defaultScope', scope];
+    req.scope.push({ method: [method, req.params.projectId] });
 
     if (req.query.includeRepliesOnComments) {
       req.scope.push('includeRepliesOnComments');
@@ -101,18 +105,38 @@ router.route('/')
     }
 
     let where = {};
+
+    const scope = [
+      { method: [ 'includeVoteCount', 'comment' ] },
+      'includeRepliesOnComments',
+      'defaultScope',
+    ];
+
     if (imageResourceId) {
       where.imageResourceId = imageResourceId;
+      scope.push(
+        'includeImageResource',
+        { method: [ 'forProjectIdImageResource', req.params.projectId ] },
+        { method: [ 'includeRepliesOnComments', imageResourceId ] },
+        { method: [ 'includeUserVote', 'comment', imageResourceId ] }
+      )
     } else if (resourceId) {
       where.resourceId = resourceId;
+      scope.push(
+        'includeResource',
+        { method: [ 'forProjectId', req.params.projectId ] },
+        { method: [ 'includeRepliesOnComments', resourceId ] },
+        { method: [ 'includeUserVote', 'comment', resourceId ] }
+      )
     }
+
     let sentiment = req.query.sentiment;
     if (sentiment && (sentiment == 'against' || sentiment == 'for' || sentiment == 'no sentiment')) {
       where.sentiment = sentiment;
     }
 
     return db.Comment
-      .scope(...req.scope)
+      .scope(...scope)
       .findAndCountAll(
         {
           where,

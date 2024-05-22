@@ -1,4 +1,4 @@
-export default function useResource(props) {
+export default function useImageResource(props) {
 
   let self = this;
 
