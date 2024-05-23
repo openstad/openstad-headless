@@ -223,8 +223,11 @@ router.route('/issues')
     // projects that have ended but are not anonymized
     projectsWithIssues.endedButNotAnonymized({ offset: req.dbQuery.offset, limit: req.dbQuery.limit })
 			.then( result => {
-        req.results = req.results.concat( result.rows );
-        req.dbQuery.count += result.count;
+        // zie module: deze query is een findAll ipv findAndCountAll
+        // req.results = req.results.concat( result.rows );
+        // req.dbQuery.count += result.count;
+        req.results = req.results.concat( result );
+        req.dbQuery.count += result.length;
         return next();
 			})
 			.catch(next);

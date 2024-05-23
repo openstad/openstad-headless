@@ -18,7 +18,7 @@ module.exports = function( req, res, next ) {
   if ((req.path.match('^(/api/user)') && ( req.method == 'GET' ))) return next();
 
   let projectId = getProjectId(req.path);
-  if (req.path.match('^(/api/project/?)$')) projectId = 1; // list projects only on admin site
+  if (req.path.match('^(/api/project(/issues)?/?)$')) projectId = 1; // list projects only on admin site
 
   if (!projectId || typeof projectId !== 'number') return next(new createError(400, 'Project niet gevonden for path: ' + req.path));
 
