@@ -96,7 +96,11 @@ exports.postLogin = (req, res, next) => {
     if (!user) {
       req.flash('error', {msg: 'Incorrect combination email/password'});
       const redirectUrl = req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : req.client.redirectUrl;
-      return res.redirect(`${authLocalConfig.loginUrl}?clientId=${req.client.clientId}&redirect_uri=${redirectUrl}`);
+      let loginUrl = authLocalConfig.loginUrl;
+      if (req.params.priviligedRoute &&  req.params.priviligedRoute == 'admin') {
+        loginUrl += '/admin'
+      }
+      return res.redirect(`${loginUrl}?clientId=${req.client.clientId}&redirect_uri=${redirectUrl}`);
     }
 
     req.logIn(user, function(err) {
