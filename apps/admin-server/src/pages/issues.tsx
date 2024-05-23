@@ -48,7 +48,6 @@ export default function Projects() {
               {data.map((project: any) => {
                 const currentDate = Date.now()
                 const anonymizationDate = addDays(project.config.project.endDate, project.config.anonymize.anonymizeUsersXDaysAfterEndDate)
-                console.log(project);
                 if (currentDate > project.config.project.endDate && project.config.project.endDate != null) {
                   return (
                     <li
