@@ -32,6 +32,7 @@ async function init() {
     'create config': true,
     'npm install': true,
     'init database': true,
+    'init images': true,
     'create certs': true,
     'build': true,
   }
