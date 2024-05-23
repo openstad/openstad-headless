@@ -17,7 +17,12 @@ import { CommentFormProps } from './types/comment-form-props';
 // This type holds all properties needed for this component to work
 export type CommentsWidgetProps = BaseProps &
   ProjectSettingProps & {
+<<<<<<< HEAD
     resourceId: string;
+=======
+    resourceId?: string;
+    imageResourceId?: string;
+>>>>>>> 8493eeeb (clickable markers)
     resourceIdRelativePath?: string;
     title?: string;
     sentiment?: string;
@@ -33,7 +38,12 @@ export type CommentsWidgetProps = BaseProps &
     requiredUserRole?: string,
     descriptionMinLength?: number,
     descriptionMaxLength?: number,
+<<<<<<< HEAD
     type?: string | 'resource';
+=======
+    type?: string;
+    selectedComment?: Number | undefined;
+>>>>>>> 8493eeeb (clickable markers)
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -46,6 +56,7 @@ function Comments({
   emptyListText = 'Nog geen reacties',
   placeholder = 'type hier uw reactie',
   formIntro = '',
+  selectedComment,
   ...props
 }: CommentsWidgetProps) {
 
@@ -166,8 +177,8 @@ function Comments({
           </Banner>
         ) : null}
 
-        {/* {(args.canComment && hasRole(currentUser, args.requiredUserRole)) || hasRole(currentUser, 'moderator') ? ( */}
-        {args.canComment ? (
+        {/* {(args.canComment && hasRole(currentUser, args.requiredUserRole)) && type === 'resource' || hasRole(currentUser, 'moderator') && type === 'resource' ? ( */}
+        {args.canComment && type === 'resource' ? (
           <div className="input-container">
             <CommentForm {...args} submitComment={submitComment} />
             <Spacer size={1} />
@@ -181,7 +192,7 @@ function Comments({
         ) : null}
         {(comments || []).map((comment: any, index: number) => {
           let attributes = { ...args, comment, submitComment };
-          return <Comment {...attributes} key={index} />;
+          return <Comment {...attributes} key={index} selected={selectedComment === index} index={index} />;
         })}
       </section>
     </CommentWidgetContext.Provider>

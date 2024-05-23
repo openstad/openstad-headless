@@ -24,12 +24,15 @@ function Comment({
     },
   },
   showDateSeperately = false,
+  selected,
+  index,
   ...props
 }: CommentProps) {
   const widgetContext = useContext(CommentWidgetContext);
 
   const args = {
     comment,
+    selected, 
     ...props,
   } as CommentProps;
 
@@ -76,7 +79,7 @@ function Comment({
   }
 
   return (
-    <article className='comment-item'>
+    <article className={`comment-item ${selected ? 'selected' : ''}`} id={`comment-${index}`}>
       <section className="comment-item-header">
         <Heading level={4} appearance='utrecht-heading-6' className="reaction-name">
           {args.comment.user && args.comment.user.displayName}{' '}
