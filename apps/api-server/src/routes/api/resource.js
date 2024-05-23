@@ -344,7 +344,7 @@ router
 router
   .route('/:resourceId(\\d+)')
   .all(function (req, res, next) {
-    var resourceId = parseInt(req.params.resourceId) || 1;
+    let resourceId = parseInt(req.params.resourceId) || 0;
 
     let scope = [...req.scope];
     if (req.canIncludeVoteCount) scope.push('includeVoteCount');
