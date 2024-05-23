@@ -17,8 +17,8 @@ import { CommentFormProps } from './types/comment-form-props';
 // This type holds all properties needed for this component to work
 export type CommentsWidgetProps = BaseProps &
   ProjectSettingProps & {
-    resourceId: string;
-    imageResourceId: string;
+    resourceId?: string;
+    imageResourceId?: string;
     resourceIdRelativePath?: string;
     title?: string;
     sentiment?: string;
@@ -35,6 +35,7 @@ export type CommentsWidgetProps = BaseProps &
     descriptionMinLength?: number,
     descriptionMaxLength?: number,
     type?: string;
+    selectedComment?: Number | undefined;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -49,6 +50,7 @@ function Comments({
   imageResourceId,
   type = 'resource',
   formIntro = '',
+  selectedComment,
   ...props
 }: CommentsWidgetProps) {
 
@@ -189,8 +191,8 @@ function Comments({
           </Banner>
         ) : null}
 
-        {/* {(args.canComment && hasRole(currentUser, args.requiredUserRole)) || hasRole(currentUser, 'moderator') ? ( */}
-        {args.canComment ? (
+        {/* {(args.canComment && hasRole(currentUser, args.requiredUserRole)) && type === 'resource' || hasRole(currentUser, 'moderator') && type === 'resource' ? ( */}
+        {args.canComment && type === 'resource' ? (
           <div className="input-container">
             <CommentForm {...args} submitComment={submitComment} />
             <Spacer size={1} />
@@ -204,7 +206,7 @@ function Comments({
         ) : null}
         {(comments || []).map((comment: any, index: number) => {
           let attributes = { ...args, comment, submitComment };
-          return <Comment {...attributes} key={index} />;
+          return <Comment {...attributes} key={index} selected={selectedComment === index} index={index} />;
         })}
       </section>
     </CommentWidgetContext.Provider>

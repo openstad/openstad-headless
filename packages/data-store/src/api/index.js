@@ -1,6 +1,5 @@
 import fetchx from './fetch';
 import resource from './resource';
-import imageResource from './imageResource';
 import comments from './comments';
 import resources from './resources';
 import imageResource from './imageResource';

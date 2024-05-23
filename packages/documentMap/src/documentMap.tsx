@@ -41,17 +41,9 @@ function DocumentMap({
   iconHighlight = 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309740_1280.png',
   documentWidth = 1920,
   documentHeight = 1080,
-  titleTekst,
-  introTekst,
   imageResourceId,
   ...props
 }: DocumentMapProps) {
-
-  let resourceId: string | undefined = String(getResourceId({
-    resourceId: parseInt(imageResourceId || ''),
-    url: document.location.href,
-    targetUrl: props.resourceIdRelativePath,
-  }));
 
   const datastore = new DataStore({
     projectId: props.projectId,
@@ -60,7 +52,7 @@ function DocumentMap({
   });
   const { data: resource } = datastore.useImageResource({
     projectId: props.projectId,
-    imageResourceId: imageResourceId,
+    resourceId: imageResourceId,
   });
 
   const { data: comments } = datastore.useComments({
@@ -71,7 +63,6 @@ function DocumentMap({
 
 
   const [popupPosition, setPopupPosition] = useState<any>(null);
-  // const [comments, setComments] = useState<Array<{ comment: string, position: any, date: any }>>([]);
   const [selectedCommentIndex, setSelectedCommentIndex] = useState<Number>();
   const [selectedMarkerIndex, setSelectedMarkerIndex] = useState<Number>();
 
@@ -93,15 +84,22 @@ function DocumentMap({
 
     return null;
   };
-
+  const contentRef = React.useRef<HTMLDivElement>(null);
   const addComment = (e: any, position: any) => {
     const value = e.target.previousSibling.value;
 
     e.preventDefault();
     e.stopPropagation();
 
-    if (value.length > 0) {
-      // setComments([...comments, { comment: value, position, date: new Date() }]);
+    if (value.length >= 30) {
+
+      comments.create({
+        description: value,
+        location: position,
+        createdAt: new Date(),
+        sentiment: 'no sentiment',
+      });
+
       setPopupPosition(null)
     } else {
       return;
@@ -111,7 +109,7 @@ function DocumentMap({
 
   return (
     <div className="documentMap--container">
-      <div className="content" tabIndex={0}>
+      <div className="content" tabIndex={0} ref={contentRef}>
         <section className="content-intro">
           {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
           {resource.summary ? <Heading level={5}>{resource.summary}</Heading> : null}
@@ -122,16 +120,17 @@ function DocumentMap({
           {...props}
           imageResourceId={imageResourceId || ''}
           type="image-resource"
+          selectedComment={selectedCommentIndex}
         />
 
       </div>
       <div className='map-container'>
         <MapContainer center={[0, 0]} zoom={zoom} crs={CRS.Simple} minZoom={-6}>
           <MapEvents />
-          {/* {comments.map((comment, index) => (
+          {comments.map((comment: any, index: number) => (
             <Marker
               key={index}
-              position={comment.position}
+              position={comment.location}
               icon={index === selectedMarkerIndex ? highlightedIcon : defaultIcon}
               eventHandlers={{
                 click: () => {
@@ -141,6 +140,15 @@ function DocumentMap({
                   } else {
                     setSelectedMarkerIndex(index);
                     setSelectedCommentIndex(index);
+
+                    // Calculate the scroll position of the comment within the 'content' container
+                    const commentElement = document.getElementById(`comment-${index}`);
+                    const commentPosition = commentElement?.offsetTop ?? 0;
+                    const containerPosition = contentRef.current?.offsetTop ?? 0;
+                    const scrollPosition = commentPosition - containerPosition;
+
+                    // Scroll the 'content' container to the comment
+                    contentRef.current?.scrollTo({ top: scrollPosition, behavior: 'smooth' });
                   }
                 },
                 keydown: (e: L.LeafletKeyboardEvent) => {
@@ -157,7 +165,7 @@ function DocumentMap({
               }}
             >
             </Marker>
-          ))} */}
+          ))}
           <ImageOverlay
             url={resource.images ? resource.images[0].url : 'https://fastly.picsum.photos/id/48/1920/1080.jpg?hmac=r2li6k6k9q34DhZiETPlmLsPPGgOChYumNm6weWMflI'}
             bounds={imageBounds}

@@ -165,7 +165,7 @@ router.route('/')
   .post(function(req, res, next) {
 
     if (!req.resource) return next(createError(400, 'Inzending niet gevonden'));
-    if (!req.resource.auth.canComment(req.resource)) return next(createError(400, 'Je kunt niet reageren op deze inzending'));
+    // if (!req.resource.auth.canComment(req.resource)) return next(createError(400, 'Je kunt niet reageren op deze inzending'));
     return next();
   })
   .post(function(req, res, next) {
