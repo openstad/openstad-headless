@@ -5,9 +5,9 @@
 {% else %}
 <a class="{{'mainlogo' if logo === 'amsterdam-logo.html' else 'main-logo-container' }}" href="{{ client.siteUrl }}" title="Terug naar {{ client.name }}">
   {% if logo %}
-    <img id="logo-image" src="{{logo}}" />
+    <img id="logo-image" src="{{logo}}"  alt="Link naar hoofdpagina, afbeelding logo"/>
   {% else %}
-    <img class="default-logo" src="/img/logo-openstad.png" />
+    <img class="default-logo" src="/img/logo-openstad.png" alt="Link naar hoofdpagina, afbeelding logo"/>
   {% endif %}
 </a>
 {% if displayClientName %}

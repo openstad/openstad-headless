@@ -8,6 +8,8 @@ module.exports = {
     '@apostrophecms/global': {},
     'asset': { },
     'default-page': { },
+    '@apostrophecms/blog': {},
+    '@apostrophecms/blog-page': {},
     'openstad-login': { },
     'openstad-section-widget': { },
     'openstad-assets': { },

@@ -19,12 +19,12 @@ export default function ProjectComments() {
     if (data) {
       let comments = []
       for (let i = 0; i < data.length; i++) {
-        if(data[i]?.commentsFor) {
+        if (data[i]?.commentsFor) {
           for (let j = 0; j < data[i]?.commentsFor.length; j++) {
             comments.push(data[i]?.commentsFor[j])
           }
         }
-        if(data[i]?.commentsAgainst) {
+        if (data[i]?.commentsAgainst) {
           for (let k = 0; k < data[i]?.commentsAgainst.length; k++) {
             comments.push(data[i]?.commentsAgainst[k])
           }
@@ -35,54 +35,88 @@ export default function ProjectComments() {
     }
   }, [data]);
 
-  const [filterData, setFilterData] = useState(data);
-  const debouncedSearchTable = searchTable(setFilterData);
+  const [filterData, setFilterData] = useState(comments);
+  const [filterSearchType, setFilterSearchType] = useState<string>('');
+  const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
 
   useEffect(() => {
-    setFilterData(data);
-  }, [data])
+    setFilterData(comments);
+  }, [comments])
 
   return (
     <div>
       <PageLayout
         pageHeader="Projecten"
         breadcrumbs={[
-          { 
+          {
             name: 'Projecten',
             url: '/projects',
           },
           {
-            name: 'Argumenten',
+            name: 'Reacties',
             url: `/projects/${project}/comments`,
           },
         ]}>
         <div className="container py-6">
-          <div className="p-6 bg-white rounded-md">
+
+          <div className="float-right mb-4 flex gap-4">
+            <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
+            <select
+              className="p-2 rounded"
+              onChange={(e) => setFilterSearchType(e.target.value)}
+            >
+              <option value="">Alles</option>
+              <option value="id">Reactie ID</option>
+              <option value="resourceId">Resource ID</option>
+              <option value="createdAt">Geplaatst op</option>
+              <option value="sentiment">Sentiment</option>
+            </select>
+            <input
+              type="text"
+              className='p-2 rounded'
+              placeholder="Zoeken..."
+              onChange={(e) => debouncedSearchTable(e.target.value, filterData, comments)}
+            />
+          </div>
+
+          <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-1 lg:grid-cols-7 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex lg:col-span-2">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
-                  Argument ID
+                <button className="filter-button" onClick={(e) => {
+                  const sortedData = sortTable('id', e, filterData);
+                  setFilterData(sortedData ? sortedData : []);
+                }}>
+                  Reactie ID
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('resourceId', e, filterData))}>
+              <button className="filter-button" onClick={(e) => {
+                  const sortedData = sortTable('id', e, filterData);
+                  setFilterData(sortedData ? sortedData : []);
+                }}>
                   Resource ID
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-2">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('createdAt', e, filterData))}>
+              <button className="filter-button" onClick={(e) => {
+                  const sortedData = sortTable('id', e, filterData);
+                  setFilterData(sortedData ? sortedData : []);
+                }}>
                   Geplaatst op
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
-                <button className="filter-button" onClick={(e) => setFilterData(sortTable('sentiment', e, filterData))}>
+              <button className="filter-button" onClick={(e) => {
+                  const sortedData = sortTable('id', e, filterData);
+                  setFilterData(sortedData ? sortedData : []);
+                }}>
                   Sentiment
                 </button>
               </ListHeading>
             </div>
             <ul>
-              {comments?.map((comment: any) => (
-               <Link href={`/projects/${project}/comments/${comment.id}`} key={comment.id}>
+              {filterData?.map((comment: any) => (
+                <Link href={`/projects/${project}/comments/${comment.id}`} key={comment.id}>
                   <li key={comment.id} className="grid grid-cols-3 lg:grid-cols-7 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                     <div className="col-span-2 truncate">
                       <Paragraph>{comment.id}</Paragraph>
@@ -93,7 +127,7 @@ export default function ProjectComments() {
                           e.preventDefault();
                           router.push(`/projects/${project}/resources/${comment.resourceId}`);
                         }}
-                       style={{textDecoration: 'underline', zIndex: '1'}}>{comment.resourceId}
+                        style={{ textDecoration: 'underline', zIndex: '1' }}>{comment.resourceId}
                       </a>
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate lg:col-span-2">
@@ -106,21 +140,21 @@ export default function ProjectComments() {
                       className="hidden lg:flex ml-auto"
                       onClick={(e) => e.preventDefault()}>
                       <RemoveResourceDialog
-                        header="Argument verwijderen"
-                        message="Weet je zeker dat je deze argument wilt verwijderen?"
+                        header="Reactie verwijderen"
+                        message="Weet je zeker dat je deze reactie wilt verwijderen?"
                         onDeleteAccepted={() =>
                           removeComment(comment.id)
                             .then(() =>
-                              toast.success('Argument successvol verwijderd')
+                              toast.success('Reactie successvol verwijderd')
                             )
                             .catch((e) =>
-                              toast.error('Argument kon niet worden verwijderd')
+                              toast.error('Reactie kon niet worden verwijderd')
                             )
                         }
                       />
                     </div>
                   </li>
-               </Link>
+                </Link>
               ))}
             </ul>
           </div>

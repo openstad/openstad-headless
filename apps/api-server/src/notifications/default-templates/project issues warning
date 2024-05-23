@@ -24,20 +24,11 @@
       <mj-section>
         <mj-column width="500px">
           <mj-text font-size="20px" font-family="Helvetica Neue">Er is iets mis met een project.</mj-text>
-          <mj-text>Beste administrator,</mj-text>
-          <mj-text color="#525252">Er is iets misgegaan met een van de projecten. Via de link hieronder kunt u de lijst van projecten met problemen inzien.</mj-text>
-          <mj-button background-color="#EC0000" href="{{redirectUrl}}">Weergeven</mj-button>
-        </mj-column>
-      </mj-section>
-      <mj-raw>
-        <!-- ALternate link -->
-      </mj-raw>
-      <mj-section>
-        <mj-column width="400px">
-          <mj-text>Of gebruik deze link in je browser:</mj-text>
-        </mj-column>
-        <mj-column>
-          <mj-text>{{redirectUrl}}</mj-text>
+          <mj-text>Beste beheerder,</mj-text>
+          <mj-text color="#525252">Er is iets mis met een of meer projecten. Hier is de lijst van waarschuwingen:</mj-text>
+          {% for message in messages %}
+          <mj-text color="#525252">{{message.content}}</mj-text>
+          {% endfor %}
         </mj-column>
       </mj-section>
     </mj-body>

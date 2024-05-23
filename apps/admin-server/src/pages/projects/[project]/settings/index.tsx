@@ -50,6 +50,7 @@ export default function ProjectSettings() {
 
   const [checkboxInitial, setCheckboxInitial] = useState(true);
   const [showUrl, setShowUrl] = useState(false);
+  const [projectHasEnded, setProjectHasEnded] = useState(false);
 
   const defaults = useCallback(
     () => {
@@ -84,6 +85,7 @@ export default function ProjectSettings() {
         setShowUrl(true)
         setCheckboxInitial(false)
       }
+      setProjectHasEnded(data?.config?.project?.projectHasEnded)
     }
   }, [data, checkboxInitial]);
 
@@ -99,6 +101,25 @@ export default function ProjectSettings() {
         },
         values.name,
         values.url,
+      );
+      if (project) {
+        toast.success('Project aangepast!');
+      } else {
+        toast.error('Er is helaas iets mis gegaan.')
+      }
+    } catch (error) {
+      console.error('could not update', error);
+    }
+  }
+
+  async function saveProjectHasEnded(value: boolean) {
+    try {
+      const project = await updateProject(
+        {
+          project: {
+            projectHasEnded: value
+          }
+        }
       );
       if (project) {
         toast.success('Project aangepast!');
@@ -128,6 +149,7 @@ export default function ProjectSettings() {
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Projectinformatie</TabsTrigger>
+              <TabsTrigger value="projecthasended">Project beëindigen</TabsTrigger>
               <TabsTrigger value="advanced">
                 Project archiveren
               </TabsTrigger>
@@ -157,7 +179,7 @@ export default function ProjectSettings() {
                       form={form}
                       fieldName="endDate"
                       label="Einddatum"
-                      fieldInfo="Plannen, Argumenten en Stemmen worden na deze datum niet meer getoond. De einddatum kan altijd aangepast worden."
+                      fieldInfo="Plannen, Reacties en Stemmen worden na deze datum niet meer getoond. De einddatum kan altijd aangepast worden."
                     />
                     <FormField
                       control={form.control}
@@ -219,6 +241,33 @@ export default function ProjectSettings() {
                     </Button>
                   </form>
                 </Form>
+              </div>
+            </TabsContent>
+            <TabsContent value="projecthasended" className="p-0">
+              <div className="p-6 bg-white rounded-md">
+                <Heading size="xl">Project beëindigen</Heading>
+                <Separator className="my-4" />
+                <div className="space-y-4">
+                  <div>
+                    Als u het project beëindigt worden automatisch de mogelijkheden voor inzenden, reageren en stemmen gesloten.
+                  </div>
+                  <div>
+                    Project beëindigen
+                    <Switch.Root
+                      className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
+                      onCheckedChange={(e: boolean) => {
+                        setProjectHasEnded(!projectHasEnded)
+                      }}
+                      checked={projectHasEnded}>
+                      <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                    </Switch.Root>
+                  </div>
+                  <Button
+                    className="mt-4 w-fit"
+                    onClick={() => saveProjectHasEnded(projectHasEnded)}>
+                    Opslaan
+                  </Button>
+                </div>
               </div>
             </TabsContent>
             <TabsContent value="advanced" className="p-0">

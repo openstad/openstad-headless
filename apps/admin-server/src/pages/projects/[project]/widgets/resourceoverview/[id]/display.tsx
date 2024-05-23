@@ -26,9 +26,10 @@ const formSchema = z.object({
   descriptionMaxLength: z.coerce.number(),
   displaySummary: z.boolean(),
   summaryMaxLength: z.coerce.number(),
-
+  displayStatusLabel: z.boolean(),
   displayArguments: z.boolean(),
   displayVote: z.boolean(),
+  bannerText: z.string().optional(),
   // displayRanking: z.boolean(),
   // displayLabel: z.boolean(),
   // displayShareButtons: z.boolean(),
@@ -53,6 +54,7 @@ export default function WidgetResourceOverviewDisplay(
     defaultValues: {
       displayBanner: props?.displayBanner || false,
       displayTitle: props?.displayTitle || false,
+      bannerText: props?.bannerText,
       titleMaxLength: props?.titleMaxLength || 20,
       displayDescription: props?.displayDescription || false,
       descriptionMaxLength: props?.descriptionMaxLength || 20,
@@ -60,6 +62,7 @@ export default function WidgetResourceOverviewDisplay(
       summaryMaxLength: props?.summaryMaxLength || 30,
       displayArguments: props?.displayArguments || false,
       displayVote: props?.displayVote || false,
+      displayStatusLabel: props?.displayStatusLabel || false,
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -67,6 +70,9 @@ export default function WidgetResourceOverviewDisplay(
       // displayCaption: props?.displayCaption || false,
     },
   });
+
+  const { watch } = form;
+  const displayBanner = watch('displayBanner');
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -76,17 +82,44 @@ export default function WidgetResourceOverviewDisplay(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
-          <FormField
-            control={form.control}
-            name="displayBanner"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Titel weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
+
+          <div className='col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8 w-full'>
+            <FormField
+              control={form.control}
+              name="displayBanner"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Titel weergeven</FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {displayBanner && (
+              <FormField
+                control={form.control}
+                name="bannerText"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Titel
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
-          />
+          </div>
 
           <FormField
             control={form.control}
@@ -244,6 +277,20 @@ export default function WidgetResourceOverviewDisplay(
               <FormItem>
                 <FormLabel>
                   Hoeveelheid stemmen weergeven
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayStatusLabel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Status label weergeven
                 </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />

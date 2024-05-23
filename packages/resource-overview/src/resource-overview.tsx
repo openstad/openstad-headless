@@ -16,13 +16,13 @@ import nunjucks from 'nunjucks';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Heading4, Heading5, Paragraph, Button } from "@utrecht/component-library-react";
+import { Heading4, Paragraph, Button } from "@utrecht/component-library-react";
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
   } & {
-    renderHeader?: (resources?: Array<any>) => React.JSX.Element;
+    renderHeader?: (resources?: any) => React.JSX.Element;
     renderItem?: (
       resource: any,
       props: ResourceOverviewWidgetProps,
@@ -33,6 +33,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayType?: 'cardrow' | 'cardgrid' | 'raw';
     allowFiltering?: boolean;
     displayTitle?: boolean;
+    displayStatusLabel?: boolean;
     titleMaxLength?: number;
     displayRanking?: boolean;
     displayLabel?: boolean;
@@ -61,6 +62,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     textResults?: string;
     onlyIncludeTagIds?: string;
     rawInput?: string;
+    bannerText?: string;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -70,7 +72,7 @@ const defaultHeaderRenderer = (resources?: any) => {
     <>
       <Banner></Banner>
       <section className="osc-resource-overview-title-container">
-        <Heading4>Plannen</Heading4>
+        <Heading4>{resources}</Heading4>
       </section>
     </>
   );
@@ -123,13 +125,15 @@ const defaultItemRenderer = (
       <Image
         src={resource.images?.at(0)?.url || ''}
         imageFooter={
-          <div>
-            <Paragraph className="osc-resource-overview-content-item-status">
-              {resource.statuses?.map((statusTag: any) => (
-                <span className="status-label">{statusTag.label}</span>
-              ))}
-            </Paragraph>
-          </div>
+          props.displayStatusLabel && (
+            <div>
+              <Paragraph className="osc-resource-overview-content-item-status">
+                {resource.statuses?.map((statusTag: any) => (
+                  <span className="status-label">{statusTag.label}</span>
+                ))}
+              </Paragraph>
+            </div>
+          )
         }
       />
 
@@ -140,7 +144,7 @@ const defaultItemRenderer = (
         ) : null}
 
         {props.displaySummary ? (
-          <Heading5>{elipsize(resource.summary, props.summaryMaxLength || 20)}</Heading5>
+          <Paragraph>{elipsize(resource.summary, props.summaryMaxLength || 20)}</Paragraph>
         ) : null}
 
         {props.displayDescription ? (
@@ -171,6 +175,7 @@ function ResourceOverview({
   allowFiltering = true,
   displayType = 'cardrow',
   displayBanner = false,
+  bannerText = 'Plannen',
   renderHeader = defaultHeaderRenderer,
   itemsPerPage = 20,
   textResults = 'Dit zijn de zoekresultaten voor [search]',
@@ -277,7 +282,7 @@ function ResourceOverview({
       />
 
       <div className="osc">
-        {displayBanner ? renderHeader() : null}
+        {displayBanner ? renderHeader(bannerText) : null}
 
         <section
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
@@ -313,7 +318,9 @@ function ResourceOverview({
                 } else {
                   setTags(f.tags);
                 }
-                setSort(f.sort);
+                if (['createdAt_desc', 'createdAt_asc'].includes(f.sort)) {
+                  setSort(f.sort);
+                }
                 setSearch(f.search.text);
               }}
             />
@@ -321,15 +328,31 @@ function ResourceOverview({
 
           <section className="osc-resource-overview-resource-collection">
             {resources &&
-              resources.map((resource: any, index: number) => {
-                return (
-                  <React.Fragment key={`resource-item-${resource.title}`}>
-                    {renderItem(resource, { ...props, displayType }, () => {
-                      onResourceClick(resource, index);
-                    })}
-                  </React.Fragment>
-                );
-              })}
+              resources
+                .filter((resource: any) =>
+                  tags.every((tag: number) => {
+                    return resource.tags || (Array.isArray(resource.tags) && resource.tags.includes(tag));
+                  })
+                )
+                .sort((a: any, b: any) => {
+                  if (sort === 'createdAt_desc') {
+                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                  }
+                  if (sort === 'createdAt_asc') {
+                    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+                  }
+                  return 0;
+                })
+                .map((resource: any, index: number) => {
+                  return (
+                    <React.Fragment key={`resource-item-${resource.title}`}>
+                      {renderItem(resource, { ...props, displayType }, () => {
+                        onResourceClick(resource, index);
+                      })}
+                    </React.Fragment>
+                  );
+                })
+            }
           </section>
         </section>
         {props.displayPagination && (

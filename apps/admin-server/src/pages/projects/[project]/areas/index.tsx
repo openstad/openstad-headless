@@ -16,7 +16,8 @@ export default function ProjectAreas() {
   const { data, removeArea } = useArea(project as string);
 
   const [filterData, setFilterData] = useState(data);
-  const debouncedSearchTable = searchTable(setFilterData);
+  const [filterSearchType, setFilterSearchType] = useState<string>('');
+  const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
 
   useEffect(() => {
     setFilterData(data);
@@ -46,12 +47,23 @@ export default function ProjectAreas() {
         }>
         <div className="container py-6">
 
-        <input
-            type="text"
-            className='mb-4 p-2 rounded float-right'
-            placeholder="Zoeken..."
-            onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
-          />
+          <div className="float-right mb-4 flex gap-4">
+            <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
+            <select
+              className="p-2 rounded"
+              onChange={(e) => setFilterSearchType(e.target.value)}
+            >
+              <option value="">Alles</option>
+              <option value="id">Stem ID</option>
+              <option value="name">Naam</option>
+            </select>
+            <input
+              type="text"
+              className='p-2 rounded'
+              placeholder="Zoeken..."
+              onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
+            />
+          </div>
 
           <div className="p-6 bg-white rounded-md clear-right">
             <div className="grid grid-cols-1 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
@@ -61,7 +73,7 @@ export default function ProjectAreas() {
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">
-              <button className="filter-button" onClick={(e) => setFilterData(sortTable('name', e, filterData))}>
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('name', e, filterData))}>
                   Naam
                 </button>
               </ListHeading>

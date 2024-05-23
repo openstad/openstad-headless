@@ -1,18 +1,33 @@
 .osc-resources-filter {
+    --utrecht-pointer-target-min-size: auto;
     align-items: stretch;
-    display: var(--nlds-budget-resources-filter-display, flex);    
+    display: flex;
     padding: var(--nlds-budget-resources-filter-padding, 1rem);
     gap: var(--nlds-budget-resources-filter-gap, 1rem);
     background-color: var(--nlds-budget-resources-filter-background-color, var(--nlds-default-background-color, #F0F4F8));
 }
 
-.osc-resources-filter > .utrecht-form-field,
+.osc-resources-filter > div,
 .osc-resources-filter > button{
-    flex-shrink: 0;
+    flex-shrink: 1;
+    width: 100%;
+    align-self: end;
+}
+.osc-resources-filter > div.form-element > label{
+    height: 0;
+    width: 0;
+    overflow: clip;
+    display: block;
 }
 
-.osc-resources-filter input{
-    height: 100%;
+.osc-resources-filter > div > *{
+    width: 100%;
+    max-width: unset;
+}
+
+
+.osc-resources-filter:not(:has(.multiselect-container)) input{
+    min-height: 100%;
     max-width: none;
 }
 
