@@ -38,7 +38,7 @@ THROTTLE_CC_REQUESTS=${process.env.IMAGE_THROTTLE_CC_REQUESTS}
     }
 
     // init db
-    if (actions['init database']) {
+    if (actions['init images']) {
       console.log('------------------------------');
       console.log('Init default images');
       await execute('npm', ['run', 'init-images'], { cwd: './apps/image-server' });
