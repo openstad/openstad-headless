@@ -81,7 +81,7 @@ function Comment({
   return (
     <article className={`comment-item ${selected ? 'selected' : ''}`} id={`comment-${index}`}>
       <section className="comment-item-header">
-        <Heading level={4} appearance='utrecht-heading-6' className="reaction-name">
+        <Heading level={4} appearance='utrecht-heading-6'  className={`${args.comment.user?.role === 'admin' ? '--isAdmin' : null} reaction-name`}>
           {args.comment.user && args.comment.user.displayName}{' '}
         </Heading>
         {canEdit() || canDelete() ? (
