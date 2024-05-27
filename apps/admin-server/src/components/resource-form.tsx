@@ -108,7 +108,7 @@ export default function ResourceForm({ onFormSubmit, type }: Props) {
   const { project, id } = router.query;
   const { data: projectData } = useProject();
 
-  const [existingData, setExistingData] = useState(null);
+  const [existingData, setExistingData] = useState<any>(null);
 
   const resourceData = useResource(project as string, id as string);
   const imageResourceData = useImageResource(project as string, id as string);
