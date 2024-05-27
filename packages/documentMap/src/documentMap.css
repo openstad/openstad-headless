@@ -83,3 +83,11 @@
 .leaflet-container .leaflet-marker-pane img.highlightedIcon{
   width: 20px;
 }
+
+.leaflet-popup-content p.--error{
+  margin: 0;
+  color: #d30000;
+  font-style: italic;
+  font-size: 14px;
+
+}
