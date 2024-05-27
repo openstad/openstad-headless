@@ -25,6 +25,7 @@ function Comment({
   },
   showDateSeperately = false,
   selected,
+  type,
   index,
   ...props
 }: CommentProps) {
@@ -32,7 +33,7 @@ function Comment({
 
   const args = {
     comment,
-    selected, 
+    selected,
     ...props,
   } as CommentProps;
 
@@ -74,14 +75,29 @@ function Comment({
     return args.comment.can && args.comment.can.delete;
   }
 
-  if(!widgetContext) {
+  if (!widgetContext) {
     return null;
   }
 
+  const findLocation = (index: number) => () => {
+    const markerIcons = Array.from(document.getElementsByClassName('leaflet-marker-icon'));
+    const comments = Array.from(document.getElementsByClassName('comment-item'));
+  
+    const isAlreadySelected = markerIcons[index]?.classList.contains('--highlightedIcon');
+  
+    markerIcons.forEach((markerIcon) => markerIcon.classList.remove('--highlightedIcon'));
+    comments.forEach((comment) => comment.classList.remove('selected'));
+  
+    if (!isAlreadySelected) {
+      markerIcons[index]?.classList.toggle('--highlightedIcon');
+      comments[index]?.classList.toggle('selected');
+    }
+  }
+
   return (
-    <article className={`comment-item ${selected ? 'selected' : ''}`} id={`comment-${index}`}>
+    <article className={`comment-item ${selected ? 'selected' : ''}`} id={`comment-${index}`} onClick={findLocation(index || 0)}>
       <section className="comment-item-header">
-        <Heading level={4} appearance='utrecht-heading-6'  className={`reaction-name`}>
+        <Heading level={4} appearance='utrecht-heading-6' className={`reaction-name`}>
           {args.comment.user && args.comment.user.displayName}{' '}
           {args.comment.user && args.comment.user.role === 'admin' ? <span className='--isAdmin'>{args.comment.user.role}</span> : null}
         </Heading>
@@ -114,7 +130,7 @@ function Comment({
           comment={args.comment}
           placeholder={widgetContext.placeholder}
           submitComment={(e) => {
-            if(props.submitComment) {
+            if (props.submitComment) {
               props.submitComment(e);
             }
             toggleEditForm();
@@ -155,12 +171,12 @@ function Comment({
               )
             )}
             {canReply() ? (
-              <Button 
+              <Button
                 appearance='primary-action-button'
                 onClick={() => toggleReplyForm()}>
                 Reageren
               </Button>
-            ) : null }
+            ) : null}
           </ButtonGroup>
         </section>
       )}
@@ -187,7 +203,7 @@ function Comment({
               placeholder={widgetContext.placeholder}
               // hideReplyAsAdmin={true}
               submitComment={(e) => {
-                if(props.submitComment) {
+                if (props.submitComment) {
                   props.submitComment(e);
                 }
                 toggleReplyForm();

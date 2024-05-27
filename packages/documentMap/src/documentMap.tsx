@@ -135,13 +135,24 @@ function DocumentMap({
 
   const MarkerWithId: React.FC<ExtendedMarkerProps> = ({ id, index, ...props }) => {
     const markerRef = useRef<any>(null);
-  
+
+    const scrollToComment = (index: number) => {
+      const comments = Array.from(document.getElementsByClassName('comment-item'));
+      comments.forEach((comment) => comment.classList.remove('selected'));
+
+      const commentElement = document.getElementById(`comment-${index}`);
+      const commentPosition = commentElement?.offsetTop ?? 0;
+      const containerPosition = contentRef.current?.offsetTop ?? 0;
+      const scrollPosition = commentPosition - containerPosition;
+
+      contentRef.current?.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+    };
+
     return (
       <Marker
-        ref={markerRef}
         {...props}
-        // icon={index === selectedMarkerIndex ? highlightedIcon : defaultIcon}
-        icon={MarkerIcon({icon:{className: index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon'}})}
+        ref={markerRef}
+        icon={MarkerIcon({ icon: { className: index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon' } })}
         eventHandlers={{
           click: () => {
             if (index === selectedMarkerIndex) {
@@ -150,13 +161,7 @@ function DocumentMap({
             } else {
               setSelectedMarkerIndex(index);
               setSelectedCommentIndex(index);
-  
-              const commentElement = document.getElementById(`comment-${index}`);
-              const commentPosition = commentElement?.offsetTop ?? 0;
-              const containerPosition = contentRef.current?.offsetTop ?? 0;
-              const scrollPosition = commentPosition - containerPosition;
-  
-              contentRef.current?.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+              scrollToComment(index);
             }
           },
           keydown: (e: L.LeafletKeyboardEvent) => {
@@ -167,13 +172,7 @@ function DocumentMap({
               } else {
                 setSelectedMarkerIndex(index);
                 setSelectedCommentIndex(index);
-  
-                const commentElement = document.getElementById(`comment-${index}`);
-                const commentPosition = commentElement?.offsetTop ?? 0;
-                const containerPosition = contentRef.current?.offsetTop ?? 0;
-                const scrollPosition = commentPosition - containerPosition;
-  
-                contentRef.current?.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+                scrollToComment(index);
               }
             }
           }
