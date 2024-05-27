@@ -244,8 +244,6 @@ function setConfigsToOutput(
   );
 
   config = JSON.stringify(config)
-    .replaceAll('\\', '\\\\')
-    .replaceAll('`', '\\`');
 
   return getWidgetJavascriptOutput(
     widgetSettings,
@@ -288,6 +286,8 @@ function getWidgetJavascriptOutput(
     `url(${config.url}/widget/${widgetType}-images/`
   );
 
+  const widgetConfigWithCorrectEscapes = widgetConfig.replaceAll('\\', '\\\\').replaceAll('`', '\\`');
+  
   // Create function to render component
   // The process.env.NODE_ENV is set to production, otherwise some React dependencies will not work correctly
   // @todo: find a way around this so we don't have to provide the `process` variable
@@ -303,7 +303,8 @@ function getWidgetJavascriptOutput(
           currentScript.insertAdjacentHTML('afterend', \`<div id="\${randomComponentId}" style="width: 100%; height: 100%;"></div>\`);
 
           const redirectUri = encodeURI(window.location.href);
-          const config = JSON.parse(\`${widgetConfig}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
+          
+          const config = JSON.parse(\`${widgetConfigWithCorrectEscapes}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
           
           document.querySelector('head').innerHTML += \`
             <style>${css}</style>
