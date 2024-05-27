@@ -1,13 +1,14 @@
-import React, {FC, useState} from "react";
+import React, {FC} from "react";
 import {FormField, FormFieldDescription, FormLabel, Paragraph} from "@utrecht/component-library-react";
 import './map.css';
 import {EditorMap} from "@openstad-headless/leaflet-map/src/editor-map";
-import DataStore from "@openstad-headless/data-store/src";
 import {BaseProps} from "@openstad-headless/types/base-props.js";
+import type {AreaProps} from '@openstad-headless/leaflet-map/src/types/area-props';
 import {ProjectSettingProps} from "@openstad-headless/types/project-setting-props.js";
 import {LocationType} from "@openstad-headless/leaflet-map/src/types/location";
 
 export type MapProps = BaseProps &
+    AreaProps &
     ProjectSettingProps & {
     title: string;
     description: string;
@@ -35,18 +36,6 @@ const MapField: FC<MapProps> = ({
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
-    const datastore: any = new DataStore({
-        projectId: props.projectId,
-        api: props.api,
-    });
-
-    const { data: areas } = datastore.useArea({
-        projectId: props.projectId
-    });
-
-    let areaId = props?.project?.areaId || false;
-    const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];
-
     function calculateCenter(polygon: Point[]) {
         if (!polygon || polygon.length === 0) {
             return undefined;
@@ -71,8 +60,8 @@ const MapField: FC<MapProps> = ({
     }
 
     let center: LocationType | undefined = undefined;
-    if (!!polygon && Array.isArray(polygon) && polygon.length > 0) {
-        center = calculateCenter(polygon);
+    if (!!props.area && Array.isArray(props.area) && props.area.length > 0) {
+      center = calculateCenter(props.area);
     }
 
     return (
@@ -89,7 +78,6 @@ const MapField: FC<MapProps> = ({
                   autoZoomAndCenter="area"
                   fieldName={fieldKey}
                   center={center}
-                  area={polygon}
                   onChange={onChange}
                   fieldRequired={fieldRequired}
                   markerIcon={undefined}

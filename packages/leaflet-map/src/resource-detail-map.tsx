@@ -33,11 +33,7 @@ const ResourceDetailMap = ({
       ? urlParams.get('openstadResourceId') as string
       : undefined );
 
-  const {
-    data: resource,
-    error,
-    isLoading,
-  } = datastore.useResource({
+  const { data: resource } = datastore.useResource({
     projectId: props.projectId,
     resourceId: resourceId,
   });
@@ -56,19 +52,10 @@ const ResourceDetailMap = ({
     currentCenter = { ...resource.location };
   }
 
-  const { data: areas } = datastore.useArea({
-    projectId: props.projectId
-  });
-
-  let areaId = props?.project?.areaId || false;
-  const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];
-
   return (
     <>
       <BaseMap
         {...props}
-        area={polygon}
-        autoZoomAndCenter="area"
         center={currentCenter}
         markers={[currentMarker]}
       />

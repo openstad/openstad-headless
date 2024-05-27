@@ -217,7 +217,7 @@ function getDefaultConfig(project, widgetType) {
     imageUrl: protocol + url,
   };
 
-  if (widgetType == 'resourcedetailmap' || widgetType ==  'resourcesmap' || widgetType ==  'editormap') {
+  if (widgetType == 'resourcedetailmap' || widgetType ==  'resourcesmap' || widgetType ==  'editormap' || widgetType ==  'resourceform') {
     result.area = project.area?.polygon
   }
 

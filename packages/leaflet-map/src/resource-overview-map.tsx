@@ -121,13 +121,6 @@ const ResourceOverviewMap = ({
     );
   }
 
-  const { data: areas } = datastore.useArea({
-    projectId: props.projectId
-  });
-
-  let areaId = props?.project?.areaId || false;
-  const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];
-
   function calculateCenter(polygon: Point[]) {
     if (!polygon || polygon.length === 0) {
       return undefined;
@@ -152,16 +145,14 @@ const ResourceOverviewMap = ({
   }
 
   let center: LocationType | undefined = undefined;
-  if (!!polygon && Array.isArray(polygon) && polygon.length > 0) {
-    center = calculateCenter(polygon);
+  if (!!props.area && Array.isArray(props.area) && props.area.length > 0) {
+    center = calculateCenter(props.area);
   }
 
   return (
     <>
       <BaseMap
         {...props}
-        area={polygon}
-        autoZoomAndCenter="area"
         categorize={{ categories, categorizeByField }}
         center={center}
         markers={currentMarkers}
