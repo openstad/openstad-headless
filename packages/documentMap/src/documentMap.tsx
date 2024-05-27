@@ -53,7 +53,7 @@ function DocumentMap({
     resourceId: resourceId,
   });
 
-  const { data: comments, isLoading: loading } = datastore.useComments({
+  const { data: comments } = datastore.useComments({
     projectId: props.projectId,
     resourceId: resourceId,
   });
@@ -128,7 +128,7 @@ function DocumentMap({
     id: string;
     index: number;
   }
-  
+
   const MarkerWithId: React.FC<ExtendedMarkerProps> = ({ id, index, ...props }) => {
     const markerRef = useRef<any>(null);
   
@@ -182,7 +182,7 @@ function DocumentMap({
       <div className="content" tabIndex={0} ref={contentRef}>
         <section className="content-intro">
           {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
-          {resource.summary ? <Heading level={5}>{resource.summary}</Heading> : null}
+          {resource.summary ? <Heading level={2} appearance={'utrecht-heading-5'}>{resource.summary}</Heading> : null}
           {resource.description ? <Paragraph id={randomId}>{resource.description}</Paragraph> : null}
         </section>
 
@@ -205,7 +205,7 @@ function DocumentMap({
             </MarkerWithId>
           ))}
           <ImageOverlay
-            url={resource.images ? resource.images[0].url : 'https://fastly.picsum.photos/id/48/1920/1080.jpg?hmac=r2li6k6k9q34DhZiETPlmLsPPGgOChYumNm6weWMflI'}
+            url={resource.images ? resource.images[0].url : ''}
             bounds={imageBounds}
             aria-describedby={randomId}
           />

@@ -77,11 +77,11 @@
 
 
 .leaflet-container .leaflet-marker-pane img.defaultIcon{
-  width: 20px;
+  width: 26px;
   filter: hue-rotate(225deg);
 }
 .leaflet-container .leaflet-marker-pane img.highlightedIcon{
-  width: 20px;
+  width: 26px;
 }
 
 .leaflet-popup-content p.--error{
