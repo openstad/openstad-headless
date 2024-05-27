@@ -100,6 +100,7 @@ type FormType = z.infer<typeof formSchema>;
 
 type Props = {
   onFormSubmit: (body: FormType) => Promise<any>;
+  type: 'resource' | 'image-resource';
 };
 
 export default function ResourceForm({ onFormSubmit, type }: Props) {

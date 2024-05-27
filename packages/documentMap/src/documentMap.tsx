@@ -1,7 +1,6 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { Comments } from '@openstad-headless/comments/src/comments';
 
-import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import 'remixicon/fonts/remixicon.css';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
@@ -69,6 +68,8 @@ function DocumentMap({
   const defaultIcon = new Icon({ iconUrl: iconHighlight, className: 'defaultIcon' });
   const highlightedIcon = new Icon({ iconUrl: iconHighlight, className: 'highlightedIcon' });
 
+  console.log(defaultIcon, highlightedIcon)
+
   const imageBounds: LatLngBoundsLiteral = [[-documentHeight, -documentWidth], [documentHeight, documentWidth]];
 
   const MapEvents = () => {
@@ -86,15 +87,26 @@ function DocumentMap({
   };
 
   const contentRef = useRef<HTMLDivElement>(null);
-  const commentsContainerRef = useRef<any>(null);
+
+  const [shortLengthError, setShortLengthError] = useState(false);
+  const [longLengthError, setLongLengthError] = useState(false);
 
   const addComment = (e: any, position: any) => {
     const value = e.target.previousSibling.value;
-
+    setShortLengthError(false);
+    setLongLengthError(false);
     e.preventDefault();
     e.stopPropagation();
 
-    if (value.length >= 30) {
+    if (value.length < 30) {
+      setShortLengthError(true);
+    }
+
+    if (value.length > 500) {
+      setLongLengthError(true);
+    }
+
+    if (value.length >= 30 && value.length <= 500) {
 
       comments.create({
         description: value,
@@ -103,10 +115,9 @@ function DocumentMap({
         sentiment: 'no sentiment',
       });
 
-      if (commentsContainerRef.current) {
-        commentsContainerRef.current = Date.now();
-      }
       setPopupPosition(null)
+      setShortLengthError(false);
+      setLongLengthError(false);
     } else {
       return;
     }
@@ -118,9 +129,9 @@ function DocumentMap({
 
   const [randomId, setRandomId] = useState('');
 
-useEffect(() => {
-  setRandomId(generateRandomId());
-}, []);
+  useEffect(() => {
+    setRandomId(generateRandomId());
+  }, []);
 
   return (
     <div className="documentMap--container">
@@ -131,14 +142,12 @@ useEffect(() => {
           {resource.description ? <Paragraph id={randomId}>{resource.description}</Paragraph> : null}
         </section>
 
-        <div ref={commentsContainerRef}>
-          <Comments
-            {...props}
-            imageResourceId={imageResourceId || ''}
-            type="image-resource"
-            selectedComment={selectedCommentIndex}
-          />
-        </div>
+        <Comments
+          {...props}
+          imageResourceId={imageResourceId || ''}
+          type="image-resource"
+          selectedComment={selectedCommentIndex}
+        />
       </div>
       <div className='map-container'>
         <MapContainer center={[0, 0]} zoom={zoom} crs={CRS.Simple} minZoom={-6}>
@@ -197,6 +206,8 @@ useEffect(() => {
             <Popup position={popupPosition}>
               <form>
                 <FormLabel htmlFor="commentBox">Voeg een opmerking toe</FormLabel>
+                {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal 30 tekens bevatten</Paragraph>}
+                {longLengthError && <Paragraph className="--error">De opmerking mag maximaal 500 tekens bevatten</Paragraph>}
                 <Textarea name="comment" rows={3} id="commentBox"></Textarea>
                 <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>Insturen</Button>
               </form>
