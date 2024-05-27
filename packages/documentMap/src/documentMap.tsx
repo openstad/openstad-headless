@@ -22,8 +22,6 @@ import 'leaflet/dist/leaflet.css';
 
 import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
 
-console.log(MarkerIcon)
-
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
