@@ -17,12 +17,7 @@ import { CommentFormProps } from './types/comment-form-props';
 // This type holds all properties needed for this component to work
 export type CommentsWidgetProps = BaseProps &
   ProjectSettingProps & {
-<<<<<<< HEAD
     resourceId: string;
-=======
-    resourceId?: string;
-    imageResourceId?: string;
->>>>>>> 8493eeeb (clickable markers)
     resourceIdRelativePath?: string;
     title?: string;
     sentiment?: string;
@@ -38,12 +33,7 @@ export type CommentsWidgetProps = BaseProps &
     requiredUserRole?: string,
     descriptionMinLength?: number,
     descriptionMaxLength?: number,
-<<<<<<< HEAD
-    type?: string | 'resource';
-=======
-    type?: string;
     selectedComment?: Number | undefined;
->>>>>>> 8493eeeb (clickable markers)
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -91,13 +81,11 @@ function Comments({
     projectId: props.projectId,
     resourceId: resourceId,
     sentiment: args.sentiment,
-    type: props.type,
   });
 
   const { data: resource } = datastore.useResource({
     projectId: props.projectId,
     resourceId: resourceId,
-    type: props.type,
   });
 
   const [canComment, setCanComment] = useState(args.canComment)
@@ -157,7 +145,7 @@ function Comments({
             <Heading level={4} appearance='utrecht-heading-6'>U kunt nog reageren vanwege uw rol als moderator</Heading>
             <Spacer size={2} />
           </Banner>
-        ) : null }
+        ) : null}
 
         {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
           <Banner className="big">

@@ -20,6 +20,10 @@ import { LatLngBoundsLiteral, CRS, Icon } from 'leaflet';
 
 import 'leaflet/dist/leaflet.css';
 
+import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
+
+console.log(MarkerIcon)
+
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
@@ -136,7 +140,8 @@ function DocumentMap({
       <Marker
         ref={markerRef}
         {...props}
-        icon={index === selectedMarkerIndex ? highlightedIcon : defaultIcon}
+        // icon={index === selectedMarkerIndex ? highlightedIcon : defaultIcon}
+        icon={MarkerIcon({icon:{className: index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon'}})}
         eventHandlers={{
           click: () => {
             if (index === selectedMarkerIndex) {
@@ -190,6 +195,7 @@ function DocumentMap({
           {...props}
           resourceId={resourceId || ''}
           selectedComment={selectedCommentIndex}
+          imageResourceComments={comments}
         />
       </div>
       <div className='map-container'>
