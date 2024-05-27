@@ -36,6 +36,7 @@ export type CommentsWidgetProps = BaseProps &
     descriptionMaxLength?: number,
     type?: string;
     selectedComment?: Number | undefined;
+    imageResourceComments?: Object;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -51,6 +52,7 @@ function Comments({
   type = 'resource',
   formIntro = '',
   selectedComment,
+  imageResourceComments,
   ...props
 }: CommentsWidgetProps) {
 
@@ -84,16 +86,23 @@ function Comments({
   const idToUse = type === 'resource' ? resourceId : imageResourceId;
   const sentimentToUse = type === 'image-resource' ? "no sentiment" : args.sentiment;
 
-  const { data: comments } = datastore.useComments({
-    projectId: props.projectId,
-    resourceId: idToUse,
-    sentiment: sentimentToUse,
-    type: type,
-  });
+  let comments: any;
+
+  if (!imageResourceComments) {
+    comments = datastore.useComments({
+      projectId: props.projectId,
+      resourceId: idToUse,
+      sentiment: sentimentToUse,
+      type: type,
+    }).data;
+  } else {
+    comments = imageResourceComments;
+  }
+
 
   let resource: any;
-  if ( type === 'resource' ) {
-    const {data: resourceData} = datastore.useResource({
+  if (type === 'resource') {
+    const { data: resourceData } = datastore.useResource({
       projectId: props.projectId,
       resourceId: idToUse,
       type: type,
@@ -101,7 +110,7 @@ function Comments({
 
     resource = resourceData;
   } else {
-    const {data: resourceData} = datastore.useImageResource({
+    const { data: resourceData } = datastore.useImageResource({
       projectId: props.projectId,
       imageResourceId: idToUse,
       type: type,
@@ -127,7 +136,7 @@ function Comments({
   async function submitComment(formData: any) {
     const formDataCopy = { ...formData };
 
-    if ( type !== 'resource' ) {
+    if (type !== 'resource') {
       formDataCopy.imageResourceId = `${imageResourceId}`;
       formDataCopy.resourceId = null;
     } else {
@@ -171,7 +180,7 @@ function Comments({
             <Heading level={4} appearance='utrecht-heading-6'>U kunt nog reageren vanwege uw rol als moderator</Heading>
             <Spacer size={2} />
           </Banner>
-        ) : null }
+        ) : null}
 
         {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
           <Banner className="big">
