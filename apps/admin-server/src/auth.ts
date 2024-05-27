@@ -95,7 +95,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
         if (!response.ok) throw new Error('TokenValidationFailed')
         let result:OpenstadProfile = await response.json();
         if (!result.id) throw 'no user'
-        if ( !( req.nextUrl.pathname.match(/^\/(?:projects)?\/?/) && hasRole(result, 'member') ) // project overview is available for members; anything else requires
+        if ( !( req.nextUrl.pathname.match(/^\/(?:projects)?\/?$/) && hasRole(result, 'member') ) // project overview is available for members; anything else requires
              && result.role != 'superuser'
              && result.role != 'admin' ) {
           forceNewLogin = true;

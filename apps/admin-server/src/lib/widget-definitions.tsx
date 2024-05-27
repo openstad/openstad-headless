@@ -1,6 +1,6 @@
 export const WidgetDefinitions = {
   agenda: 'Agenda',
-  comments: 'Argumenten',
+  comments: 'Reacties',
   begrootmodule: 'Begrootmodule',
   enquete: 'Enquete',
   resourcesmap: 'Resource map',

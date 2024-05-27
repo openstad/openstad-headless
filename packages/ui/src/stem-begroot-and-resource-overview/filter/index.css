@@ -13,8 +13,10 @@
     width: 100%;
     align-self: end;
 }
-.osc-resources-filter > div label{
-    margin-bottom: 10px;
+.osc-resources-filter > div.form-element > label{
+    height: 0;
+    width: 0;
+    overflow: clip;
     display: block;
 }
 
@@ -24,8 +26,8 @@
 }
 
 
-.osc-resources-filter input{
-    height: 100%;
+.osc-resources-filter:not(:has(.multiselect-container)) input{
+    min-height: 100%;
     max-width: none;
 }
 

@@ -32,33 +32,12 @@ function removeURLParameter(url, parameter) {
   return url;
 };
 
-async function logout(req, res, next) {
-  // logout - ik kan het niet als functie aanroepen; daarom hier een kopie uit /node_modules/apostrophe/modules/@apostrophecms/login/index.js
-  const loggedInCookieName = 'loggedIn';
-  if (req.session) {
-    const destroySession = () => {
-      return require('util').promisify(function(callback) {
-        return req.session.destroy(callback);
-      })();
-    };
-    const cookie = req.session.cookie;
-    await destroySession();
-    const expireCookie = new expressSession.Cookie(cookie);
-    expireCookie.expires = new Date(0);
-    const name = self.apos.modules['@apostrophecms/express'].sessionOptions.name;
-    req.res.header('set-cookie', expireCookie.serialize(name, 'deleted'));
-    req.res.cookie(`${self.apos.shortName}.${loggedInCookieName}`, 'false');
-  }
-  next()
-}
-
-
 module.exports = {
   middleware(self) {
     return {
       async enrich(req, res, next) {
         const projectId = req.project.id;
-        req.data.global.logoutUrl = `${process.env.API_URL}/auth/project/${projectId}/logout?useAuth=default&redirectUri=${req.protocol}://${req.host}${req.url}`;
+        req.data.global.logoutUrl = `${process.env.API_URL}/auth/project/${projectId}/logout?useAuth=default&redirectUri=${req.protocol}://${req.host}${req.url}/api/v1/openstad-auth/logout`;
         return next();
       },
       async authenticate (req, res, next) {
@@ -130,13 +109,13 @@ module.exports = {
               });
             };
 
-            const FIVE_SECONDS = 5 * 1000;
+            const THIRTY_SECONDS = 30 * 1000;
             const date = new Date().getTime();
-            const dateToCheck = req.session.openStadlastJWTCheck ? new Date(req.session.openStadlastJWTCheck) : new Date().getTime() - FIVE_SECONDS - 1;
+            const dateToCheck = req.session.openStadlastJWTCheck ? new Date(req.session.openStadlastJWTCheck) : new Date().getTime() - THIRTY_SECONDS - 1;
 
             // apostropheCMS does a lot calls on page load
             // if user is a CMS user and last apicheck was within one minute ago don't repeat
-            if (req.user && req.session.openstadUser && ((date - dateToCheck) < FIVE_SECONDS)) {
+            if (req.user && req.session.openstadUser && ((date - dateToCheck) < THIRTY_SECONDS)) {
               setUserData(req, next);
             } else {
 
@@ -167,9 +146,7 @@ module.exports = {
                 } else {
                   // if not valid clear the JWT and redirect
                   req.session.destroy(() => {
-                    logout(req, res, () => {
-                      res.redirect('/');
-                    });
+                    res.redirect('/');
                   });
                 }
 
@@ -210,9 +187,6 @@ module.exports = {
         // if logged in to aposthrophecms, move on
         if (req.user && req.user.email === email) {
           return next();
-          // logout CMS when apostropheUser is different then openstadUser
-        } else if (req.user && req.user.email !== req.data.openstadUser.email) {
-          return logout(req, res, next)
         };
 
         if (self.apos && self.apos.user) {
@@ -284,6 +258,19 @@ module.exports = {
             console.log('errr', e);
             return next(e);
           }
+        }
+      }
+    };
+  },
+  routes(self) {
+    return {
+      get: {
+        // GET /api/v1/openstad-auth/logout
+        async logout(req, res) {
+          req.session.openStadlastJWTCheck = 0;
+          req.session.save(() => {
+            return res.redirect('/');
+          });
         }
       }
     };

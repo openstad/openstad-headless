@@ -89,7 +89,7 @@
   margin: 0;
   padding: .25rem .5rem;
   border-radius: 2px;
-  background-color: var(--nlds-agenda-background-color, transparent);
+  background-color: transparent;
   font-size: 14px;
 }
 

@@ -53,7 +53,7 @@ export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Argumenten',
+            name: 'Reacties',
             url: `/projects/${projectId}/widgets/comments/${id}`,
           },
         ]}>

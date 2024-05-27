@@ -1,0 +1,44 @@
+{% extends "layout.html" %} {% import "filters.html" as filters %} {% import
+"@apostrophecms/pager:macros.html" as pager with context %} {% block title %}{{
+data.page.title }} {% endblock %} {% block main %}
+
+<div class="section">
+  <div class="container u-small-dropdowns">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="news-overview-header">
+          <h1 class="utrecht-heading-1">{{ data.page.title }}</h1>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12">
+        <article class="news-grid">
+          {% for piece in data.pieces %}
+          <a href="{{ piece._url }}" class="news-card">
+            <figure>
+              <img
+                src="{{ apos.attachment.url(piece.image, { size: 'full' }) }}"
+                role="presentation"
+              />
+            </figure>
+            <div class="card-content">
+              <div class="date">
+                {{ piece.publishedAt | date('MMMM D, YYYY') }}
+              </div>
+              <h2 class="utrecht-heading-4">{{ piece.title }}</h2>
+              <p class="utrecht-paragraph">{{ piece.summary }}</p>
+            </div>
+          </a>
+          {% endfor %}
+
+          <div class="pagination">
+            {{ pager.render({ page: data.currentPage, total: data.totalPages },
+            data.url) }}
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

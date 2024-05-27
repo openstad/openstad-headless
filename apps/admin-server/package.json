@@ -52,9 +52,9 @@
     "leaflet-draw": "^1.0.4",
     "lodash": "^4.17.21",
     "lucide-react": "^0.276.0",
-    "next": "^13.4.17",
+    "next": "^14.2.3",
     "pino": "^8.15.1",
-    "postcss": "8.4.28",
+    "postcss": "^8.4.38",
     "radix-ui": "^1.0.1",
     "react": "18.2.0",
     "react-csv": "^2.2.2",
@@ -69,7 +69,6 @@
     "tailwind-merge": "^1.14.0",
     "tailwindcss": "3.3.3",
     "tailwindcss-animate": "^1.0.7",
-    "xlsx": "^0.18.5",
     "zod": "^3.22.2"
   },
   "devDependencies": {

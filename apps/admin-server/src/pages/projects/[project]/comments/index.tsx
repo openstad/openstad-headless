@@ -53,7 +53,7 @@ export default function ProjectComments() {
             url: '/projects',
           },
           {
-            name: 'Argumenten',
+            name: 'Reacties',
             url: `/projects/${project}/comments`,
           },
         ]}>
@@ -66,7 +66,7 @@ export default function ProjectComments() {
               onChange={(e) => setFilterSearchType(e.target.value)}
             >
               <option value="">Alles</option>
-              <option value="id">Argument ID</option>
+              <option value="id">Reactie ID</option>
               <option value="resourceId">Resource ID</option>
               <option value="createdAt">Geplaatst op</option>
               <option value="sentiment">Sentiment</option>
@@ -86,7 +86,7 @@ export default function ProjectComments() {
                   const sortedData = sortTable('id', e, filterData);
                   setFilterData(sortedData ? sortedData : []);
                 }}>
-                  Argument ID
+                  Reactie ID
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
@@ -140,15 +140,15 @@ export default function ProjectComments() {
                       className="hidden lg:flex ml-auto"
                       onClick={(e) => e.preventDefault()}>
                       <RemoveResourceDialog
-                        header="Argument verwijderen"
-                        message="Weet je zeker dat je deze argument wilt verwijderen?"
+                        header="Reactie verwijderen"
+                        message="Weet je zeker dat je deze reactie wilt verwijderen?"
                         onDeleteAccepted={() =>
                           removeComment(comment.id)
                             .then(() =>
-                              toast.success('Argument successvol verwijderd')
+                              toast.success('Reactie successvol verwijderd')
                             )
                             .catch((e) =>
-                              toast.error('Argument kon niet worden verwijderd')
+                              toast.error('Reactie kon niet worden verwijderd')
                             )
                         }
                       />

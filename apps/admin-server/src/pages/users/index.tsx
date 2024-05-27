@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useUsers, type userType } from '@/hooks/use-users';
 import { Plus, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { sortTable, searchTable } from '@/components/ui/sortTable';
 
 type mergedType = {
   [key: string]: userType & { key?: string };
@@ -25,6 +26,14 @@ export default function Users() {
     })
     setUsers( Object.keys(merged).map(key => ({ ...merged[key], key })) );
   }, [data]);
+
+  const [filterData, setFilterData] = useState(data);
+  const [filterSearchType, setFilterSearchType] = useState<string>('');
+  const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
+
+  useEffect(() => {
+    setFilterData(users);
+  }, [users])
 
   if (!data) return null;
 
@@ -68,14 +77,46 @@ export default function Users() {
           </div>
         }>
         <div className="container py-6">
-          <div className="p-6 bg-white rounded-md">
+
+          <div className="float-right mb-4 flex gap-4">
+            <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
+            <select
+              className="p-2 rounded"
+              onChange={(e) => setFilterSearchType(e.target.value)}
+            >
+              <option value="">Alles</option>
+              <option value="email">E-mail</option>
+              <option value="name">Naam</option>
+              <option value="postcode">Postcode</option>
+            </select>
+            <input
+              type="text"
+              className='p-2 rounded'
+              placeholder="Zoeken..."
+              onChange={(e) => debouncedSearchTable(e.target.value, filterData, users)}
+            />
+          </div>
+
+          <div className="p-6 bg-white rounded-md clear-right">
             <div className="mt-4 grid grid-cols-2 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
-              <ListHeading className="hidden lg:flex">E-mail</ListHeading>
-              <ListHeading className="hidden lg:flex">Naam</ListHeading>
-              <ListHeading className="hidden lg:flex">Postcode</ListHeading>
+              <ListHeading className="hidden lg:flex">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('email', e, filterData))}>
+                  E-mail
+                </button>
+              </ListHeading>
+              <ListHeading className="hidden lg:flex">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('name', e, filterData))}>
+                  Naam
+                </button>
+              </ListHeading>
+              <ListHeading className="hidden lg:flex">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('postcode', e, filterData))}>
+                  Postcode
+                </button>
+              </ListHeading>
             </div>
             <ul>
-              {users?.sort( (a:userType, b:userType) => a.name && b.name ? a.name.localeCompare(b.name) : 1 ).map((user: any) => (
+              {filterData?.map((user: any) => (
                 <Link href={`/users/${btoa(user.key)}`} key={user.key}>
                   <li className="grid grid-cols-2 lg:grid-cols-4 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                     <Paragraph className="hidden lg:flex truncate">
