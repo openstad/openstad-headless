@@ -4,7 +4,6 @@ import '@utrecht/design-tokens/dist/root.css';
 import { Button } from '@utrecht/component-library-react';
 
 import type { PropsWithChildren } from 'react';
-import { useState, useEffect } from 'react';
 import { loadWidget } from '../../lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
 import parseLocation from './lib/parse-location';
@@ -57,7 +56,7 @@ const ResourceOverviewMap = ({
       tags.forEach((tag: any) => {
         // TODO: types/Tag does not exist yet
         categories[tag.name] = {
-          color: tag.backgroundColor,
+          color: tag.backgroundColor || '#558',
           icon: tag.mapIcon,
         };
       });
