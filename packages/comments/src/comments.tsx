@@ -91,7 +91,7 @@ function Comments({
     type: type,
   });
 
-  let resource;
+  let resource: any;
   if ( type === 'resource' ) {
     const {data: resourceData} = datastore.useResource({
       projectId: props.projectId,
