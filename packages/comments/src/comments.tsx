@@ -215,7 +215,7 @@ function Comments({
         ) : null}
         {(comments || []).map((comment: any, index: number) => {
           let attributes = { ...args, comment, submitComment };
-          return <Comment {...attributes} key={index} selected={selectedComment === index} index={index} />;
+          return <Comment {...attributes} key={index} selected={selectedComment === index} index={index} type={type} />;
         })}
       </section>
     </CommentWidgetContext.Provider>
