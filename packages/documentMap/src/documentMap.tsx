@@ -15,7 +15,7 @@ import { loadWidget } from '@openstad-headless/lib/load-widget';
 import React, { useState, useRef, useEffect } from 'react';
 import './documentMap.css';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { MapContainer, ImageOverlay, useMapEvents, Popup, Marker } from 'react-leaflet';
+import { MapContainer, ImageOverlay, useMapEvents, Popup, Marker, MarkerProps } from 'react-leaflet';
 import { LatLngBoundsLiteral, CRS, Icon } from 'leaflet';
 
 import 'leaflet/dist/leaflet.css';
@@ -60,17 +60,16 @@ function DocumentMap({
     type: 'image-resource',
   });
 
-
   const [popupPosition, setPopupPosition] = useState<any>(null);
   const [selectedCommentIndex, setSelectedCommentIndex] = useState<Number>();
   const [selectedMarkerIndex, setSelectedMarkerIndex] = useState<Number>();
-
   const defaultIcon = new Icon({ iconUrl: iconHighlight, className: 'defaultIcon' });
   const highlightedIcon = new Icon({ iconUrl: iconHighlight, className: 'highlightedIcon' });
-
-  console.log(defaultIcon, highlightedIcon)
-
   const imageBounds: LatLngBoundsLiteral = [[-documentHeight, -documentWidth], [documentHeight, documentWidth]];
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [shortLengthError, setShortLengthError] = useState(false);
+  const [longLengthError, setLongLengthError] = useState(false);
+  const [randomId, setRandomId] = useState('');
 
   const MapEvents = () => {
     const map = useMapEvents({
@@ -85,11 +84,6 @@ function DocumentMap({
 
     return null;
   };
-
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  const [shortLengthError, setShortLengthError] = useState(false);
-  const [longLengthError, setLongLengthError] = useState(false);
 
   const addComment = (e: any, position: any) => {
     const value = e.target.previousSibling.value;
@@ -127,11 +121,63 @@ function DocumentMap({
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   }
 
-  const [randomId, setRandomId] = useState('');
 
   useEffect(() => {
     setRandomId(generateRandomId());
   }, []);
+
+  interface ExtendedMarkerProps extends MarkerProps {
+    id: string;
+    index: number;
+  }
+  
+  const MarkerWithId: React.FC<ExtendedMarkerProps> = ({ id, index, ...props }) => {
+    const markerRef = useRef<any>(null);
+  
+    return (
+      <Marker
+        ref={markerRef}
+        {...props}
+        icon={index === selectedMarkerIndex ? highlightedIcon : defaultIcon}
+        eventHandlers={{
+          click: () => {
+            if (index === selectedMarkerIndex) {
+              setSelectedMarkerIndex(-1);
+              setSelectedCommentIndex(-1);
+            } else {
+              setSelectedMarkerIndex(index);
+              setSelectedCommentIndex(index);
+  
+              const commentElement = document.getElementById(`comment-${index}`);
+              const commentPosition = commentElement?.offsetTop ?? 0;
+              const containerPosition = contentRef.current?.offsetTop ?? 0;
+              const scrollPosition = commentPosition - containerPosition;
+  
+              contentRef.current?.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+            }
+          },
+          keydown: (e: L.LeafletKeyboardEvent) => {
+            if (e.originalEvent.key === 'Enter') {
+              if (index === selectedMarkerIndex) {
+                setSelectedMarkerIndex(-1);
+                setSelectedCommentIndex(-1);
+              } else {
+                setSelectedMarkerIndex(index);
+                setSelectedCommentIndex(index);
+  
+                const commentElement = document.getElementById(`comment-${index}`);
+                const commentPosition = commentElement?.offsetTop ?? 0;
+                const containerPosition = contentRef.current?.offsetTop ?? 0;
+                const scrollPosition = commentPosition - containerPosition;
+  
+                contentRef.current?.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+              }
+            }
+          }
+        }}
+      />
+    );
+  };
 
   return (
     <div className="documentMap--container">
@@ -153,49 +199,13 @@ function DocumentMap({
         <MapContainer center={[0, 0]} zoom={zoom} crs={CRS.Simple} minZoom={-6}>
           <MapEvents />
           {comments.map((comment: any, index: number) => (
-            <Marker
+            <MarkerWithId
               key={index}
               id={`marker-${index}`}
+              index={index}
               position={comment.location}
-              icon={index === selectedMarkerIndex ? highlightedIcon : defaultIcon}
-              eventHandlers={{
-                click: () => {
-                  if (index === selectedMarkerIndex) {
-                    setSelectedMarkerIndex(-1);
-                    setSelectedCommentIndex(-1);
-                  } else {
-                    setSelectedMarkerIndex(index);
-                    setSelectedCommentIndex(index);
-
-                    const commentElement = document.getElementById(`comment-${index}`);
-                    const commentPosition = commentElement?.offsetTop ?? 0;
-                    const containerPosition = contentRef.current?.offsetTop ?? 0;
-                    const scrollPosition = commentPosition - containerPosition;
-
-                    contentRef.current?.scrollTo({ top: scrollPosition, behavior: 'smooth' });
-                  }
-                },
-                keydown: (e: L.LeafletKeyboardEvent) => {
-                  if (e.originalEvent.key === 'Enter') {
-                    if (index === selectedMarkerIndex) {
-                      setSelectedMarkerIndex(-1);
-                      setSelectedCommentIndex(-1);
-                    } else {
-                      setSelectedMarkerIndex(index);
-                      setSelectedCommentIndex(index);
-
-                      const commentElement = document.getElementById(`comment-${index}`);
-                      const commentPosition = commentElement?.offsetTop ?? 0;
-                      const containerPosition = contentRef.current?.offsetTop ?? 0;
-                      const scrollPosition = commentPosition - containerPosition;
-
-                      contentRef.current?.scrollTo({ top: scrollPosition, behavior: 'smooth' });
-                    }
-                  }
-                }
-              }}
             >
-            </Marker>
+            </MarkerWithId>
           ))}
           <ImageOverlay
             url={resource.images ? resource.images[0].url : 'https://fastly.picsum.photos/id/48/1920/1080.jpg?hmac=r2li6k6k9q34DhZiETPlmLsPPGgOChYumNm6weWMflI'}
