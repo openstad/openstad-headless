@@ -40,13 +40,13 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
       updateConfig({ ...widget.config, ...config }),
 
     onFieldChanged: (key: string, value: any) => {
-      let updatedConfig = {
-        ...previewConfig,
-        [key]: value,
-      }
-      if (key == 'categorize.categorizeByField') updatedConfig.categorize = { categorizeByField: value };
-      if (key == 'clustering.isActive') updatedConfig.clustering = { isActive: value };
       if (previewConfig) {
+        let updatedConfig = {
+          ...previewConfig,
+          [key]: value,
+        }
+        if (key == 'categorize.categorizeByField') updatedConfig.categorize = { categorizeByField: value };
+        if (key == 'clustering.isActive') updatedConfig.clustering = { isActive: value };
         updatePreview(updatedConfig);
       }
     },
