@@ -113,8 +113,9 @@ function DocumentMap({
     <div className="documentMap--container">
       <div className="content" tabIndex={0}>
         <header>
-          {titleTekst ? <Heading level={1}>{titleTekst}</Heading> : ''}
-          {introTekst ? <Paragraph>{introTekst}</Paragraph> : ''}
+          {resource.title ? <Heading level={1}>{resource.title}</Heading> : ''}
+          {resource.summary ? <Heading level={5}>{resource.summary}</Heading> : ''}
+          {resource.description ? <Paragraph>{resource.description}</Paragraph> : ''}
         </header>
 
         <Comments
@@ -127,7 +128,7 @@ function DocumentMap({
       <div className='map-container'>
         <MapContainer center={[0, 0]} zoom={zoom} crs={CRS.Simple} minZoom={-6}>
           <MapEvents />
-          {comments.map((comment, index) => (
+          {/* {comments.map((comment, index) => (
             <Marker
               key={index}
               position={comment.position}
@@ -156,7 +157,7 @@ function DocumentMap({
               }}
             >
             </Marker>
-          ))}
+          ))} */}
           <ImageOverlay
             url={documentUrl ? documentUrl : 'https://fastly.picsum.photos/id/48/1920/1080.jpg?hmac=r2li6k6k9q34DhZiETPlmLsPPGgOChYumNm6weWMflI'}
             bounds={imageBounds}

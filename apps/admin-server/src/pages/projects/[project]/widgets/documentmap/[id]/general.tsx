@@ -14,6 +14,8 @@ import {
   FormLabel,
 } from '../../../../../../components/ui/form';
 import { Input } from '../../../../../../components/ui/input';
+import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
+import useResources from '@/hooks/use-resources';
 
 const formSchema = z.object({
   documentUrl: z.string().optional(),
@@ -34,6 +36,9 @@ export default function DocumentGeneral(
     props.updateConfig({ ...props, ...values });
   }
 
+  const { data } = useResources(props.projectId);
+  const resources: Array<{ id: string | number; title: string }> = data || [];
+  
   const form = useForm<DocumentMapProps>({
     defaultValues: {
       documentUrl: props.documentUrl || '',
@@ -53,6 +58,17 @@ export default function DocumentGeneral(
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 lg:w-1/2">
+
+        <FormObjectSelectField
+          form={form}
+          fieldName="imageResourceId"
+          fieldLabel="Kies een image resource"
+          items={resources}
+          keyForValue="id"
+          label={(resource) => `${resource.id} ${resource.title}`}
+          onFieldChanged={props.onFieldChanged}
+        />
+
         <FormField
           control={form.control}
           name="introTekst"
