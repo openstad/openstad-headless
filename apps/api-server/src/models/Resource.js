@@ -199,6 +199,12 @@ module.exports = function (db, sequelize, DataTypes) {
         defaultValue: [],
       },
 
+      documents: {
+        type: DataTypes.JSON,
+        allowNull: null,
+        defaultValue: [],
+      },
+
       budget: {
         type: DataTypes.INTEGER,
         auth: {
