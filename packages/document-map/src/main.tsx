@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { DocumentMapProps, DocumentMap } from './documentMap.js';
+import { DocumentMapProps, DocumentMap } from './document-map.js';
 
 const config: DocumentMapProps = {
   api: {

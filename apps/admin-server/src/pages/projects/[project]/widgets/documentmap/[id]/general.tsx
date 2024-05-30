@@ -2,7 +2,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import type { DocumentMapProps } from '@openstad-headless/documentMap/src/documentMap';
+import type { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Button } from '../../../../../../components/ui/button';

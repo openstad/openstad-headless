@@ -10,7 +10,7 @@ import {
 import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import type { DocumentMapProps } from '@openstad-headless/documentMap/src/documentMap';
+import type { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';

@@ -13,7 +13,7 @@ import {
 } from '@utrecht/component-library-react';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import React, { useState, useRef, useEffect } from 'react';
-import './documentMap.css';
+import './document-map.css';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { MapContainer, ImageOverlay, useMapEvents, Popup, Marker, MarkerProps } from 'react-leaflet';
 import { LatLngBoundsLiteral, CRS, Icon } from 'leaflet';

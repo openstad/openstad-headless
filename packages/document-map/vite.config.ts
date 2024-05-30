@@ -15,7 +15,7 @@ export default defineConfig(({command}) => {
             build: {
                 lib: {
                     formats: ['iife'],
-                    entry: 'src/documentMap.tsx',
+                    entry: 'src/document-map.tsx',
                     name: 'OpenstadHeadlessDocumentMap',
                 },
                 rollupOptions: {
