@@ -22,6 +22,7 @@ import { SimpleCalendar } from '@/components/simple-calender-popup';
 import useResource from '@/hooks/use-resource';
 import toast from 'react-hot-toast';
 import { ImageUploader } from './image-uploader';
+import {DocumentUploader} from './document-uploader';
 import useTags from '@/hooks/use-tags';
 import useStatuses from '@/hooks/use-statuses';
 import { CheckboxList } from './checkbox-list';
@@ -81,6 +82,11 @@ const formSchema = z.object({
   image: z.string().optional(),
   images: z
     .array(z.object({ url: z.string() }))
+    .optional()
+    .default([]),
+  document: z.string().optional(),
+  documents: z
+    .array(z.object({ url: z.string(), name: z.string() }))
     .optional()
     .default([]),
 
@@ -184,6 +190,8 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         : '',
       image: '',
       images: existingData?.images || [],
+      document: '',
+      documents: existingData?.documents || [],
       extraData: {
         originalId: existingData?.extraData?.originalId || undefined,
       },
@@ -241,6 +249,11 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     name: 'images',
   });
 
+  const { fields: documentFields, remove: removeFile } = useFieldArray({
+    control: form.control,
+    name: 'documents',
+  });
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
@@ -292,6 +305,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
           <ImageUploader
             form={form}
             fieldName="image"
+            allowedTypes={['image/*']}
             onImageUploaded={(imageResult) => {
               let array = [...(form.getValues('images') || [])];
               array.push(imageResult);
@@ -301,7 +315,30 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             }}
           />
 
+          <DocumentUploader
+            form={form}
+            fieldName="document"
+            allowedTypes={[
+              'application/pdf',
+              'application/msword',
+              'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+              'application/vnd.ms-excel',
+              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+              'application/vnd.ms-powerpoint',
+              'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+            ]}
+            onDocumentUploaded={(documentResult) => {
+              let array = [...(form.getValues('documents') || [])];
+              array.push(documentResult);
+              form.setValue('documents', array);
+              form.resetField('document');
+              form.trigger('documents');
+            }}
+          />
+
             <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
+              {imageFields.length > 0 && (
+                <>
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeeldingen</label>
                 <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
                     {imageFields.map(({ id, url }, index) => {
@@ -324,8 +361,77 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                         );
                     })}
                 </section>
+                </>
+              )}
              </div>
 
+          <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
+            {documentFields.length > 0 && (
+              <>
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Documenten</label>
+                <section className="grid col-span-full grid-cols-1 gap-x-4 gap-y-8 ">
+                  {documentFields.map(({ id, url, name }, index) => {
+                    return (
+                      <div key={id} style={{ position: 'relative', display: 'flex', flexWrap: 'wrap' }}>
+                        <div style={{ position: 'relative', display: 'flex'}}>
+                        <Button
+                          color="red"
+                          onClick={() => {
+                            removeFile(index);
+                          }}
+                          style={{
+                            position: 'relative',
+                            right: 0,
+                            top: 0,
+                            padding: '0 4px',
+                            marginRight: '5px'
+                          }}>
+                          <X size={24} />
+                        </Button>
+                        <p>
+                          <a style={{
+                              color: 'blue',
+                              textDecoration: 'underline',
+                              fontSize: '15px',
+                              lineHeight: '1.2'
+                            }}
+                            href={url} target="_blank">
+                            {url}
+                          </a>
+                        </p>
+                        </div>
+                        <Input
+                          style={{
+                            display: 'block',
+                            width: '100%',
+                          }}
+                          type="text"
+                          name="name"
+                          defaultValue={name}
+                          onBlur={(e) => {
+                            let array = [...(form.getValues('documents') || [])];
+
+                            if (
+                              e.target.value
+                              && array.length > 0
+                              && typeof array[index] !== "undefined"
+                              && typeof array[index].name !== "undefined"
+                              && e.target.value !== array[index].name
+                            ) {
+                              array[index].name = e.target.value;
+
+                              form.setValue('documents', array);
+                              form.trigger('documents');
+                            }
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+                </section>
+              </>
+              )}
+          </div>
           <FormField
             control={form.control}
             name="budget"
