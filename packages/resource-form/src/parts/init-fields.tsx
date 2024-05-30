@@ -62,8 +62,8 @@ export const InitializeFormFields = (items, data) => {
                         });
                     }
                     break;
-                case 'upload':
-                    fieldData['allowedTypes'] = item.allowedTypes;
+                case 'imageUpload':
+                    fieldData['allowedTypes'] = item.allowedTypes || ["image/*"];
                     break;
             }
 

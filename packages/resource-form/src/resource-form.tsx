@@ -54,7 +54,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     };
 
     const configureFormData = (formData, publish = false) => {
-        const dbFixedColumns = ['title', 'summary', 'description', 'budget', 'images', 'location', 'tags'];
+        const dbFixedColumns = ['title', 'summary', 'description', 'budget', 'images', 'location', 'tags', 'documents'];
         const extraData = {};
 
         formData = addTagsToFormData(formData);
