@@ -32,6 +32,7 @@ export type DocumentMapProps = BaseProps &
     zoom?: number;
     iconDefault?: string;
     iconHighlight?: string;
+    sentiment?: string;
   };
 
 
@@ -42,14 +43,15 @@ function DocumentMap({
   documentWidth = 1920,
   documentHeight = 1080,
   resourceId,
+  sentiment = 'no sentiment',
   ...props
 }: DocumentMapProps) {
 
   const datastore = new DataStore({
     projectId: props.projectId,
-    resourceId: resourceId,
     api: props.api,
   });
+
   const { data: resource } = datastore.useResource({
     projectId: props.projectId,
     resourceId: resourceId,
@@ -58,6 +60,7 @@ function DocumentMap({
   const { data: comments } = datastore.useComments({
     projectId: props.projectId,
     resourceId: resourceId,
+    sentiment: sentiment,
   });
 
   const [popupPosition, setPopupPosition] = useState<any>(null);
@@ -192,13 +195,15 @@ function DocumentMap({
           {...props}
           resourceId={resourceId || ''}
           selectedComment={selectedCommentIndex}
-          imageResourceComments={comments}
+          showForm={false}
         />
       </div>
       <div className='map-container'>
         <MapContainer center={[0, 0]} zoom={zoom} crs={CRS.Simple} minZoom={-6}>
           <MapEvents />
-          {comments.map((comment: any, index: number) => (
+          {comments
+            .filter((comment:any) => !!comment.location)
+            .map((comment: any, index: number) => (
             <MarkerWithId
               key={index}
               id={`marker-${index}`}

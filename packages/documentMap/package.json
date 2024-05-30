@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@openstad-headless/comments": "file:../comments",
     "@openstad-headless/data-store": "file:../data-store",
     "@openstad-headless/lib": "file:../lib",
     "@openstad-headless/types": "file:../types",
@@ -17,7 +18,6 @@
     "@utrecht/component-library-css": "^3.0.1-alpha.18",
     "@utrecht/component-library-react": "^3.0.1-alpha.18",
     "@utrecht/design-tokens": "^1.0.0-alpha.631",
-    "copy": "^0.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",

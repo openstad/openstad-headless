@@ -18,8 +18,7 @@ import { FormObjectSelectField } from '@/components/ui/form-object-select-field'
 import useResources from '@/hooks/use-resources';
 
 const formSchema = z.object({
-  documentUrl: z.string().optional(),
-  introTekst: z.string().optional(),
+  resourceId: z.string().optional(),
   documentWidth: z.number().optional(),
   documentHeight: z.number().optional(),
   zoom: z.number().optional(),
@@ -41,6 +40,7 @@ export default function DocumentGeneral(
   
   const form = useForm<DocumentMapProps>({
     defaultValues: {
+      resourceId: props.resourceId || undefined,
       documentWidth: props.documentWidth || 1920,
       documentHeight: props.documentHeight || 1080,
       zoom: props.zoom || 0,
@@ -59,8 +59,8 @@ export default function DocumentGeneral(
 
         <FormObjectSelectField
           form={form}
-          fieldName="imageResourceId"
-          fieldLabel="Kies een image resource"
+          fieldName="resourceId"
+          fieldLabel="Kies een resource"
           items={resources}
           keyForValue="id"
           label={(resource) => `${resource.id} ${resource.title}`}

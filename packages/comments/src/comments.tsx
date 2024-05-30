@@ -29,6 +29,7 @@ export type CommentsWidgetProps = BaseProps &
     canComment?: boolean,
     canLike?: boolean,
     canReply?: boolean,
+    showForm?: boolean,
     closedText?: string;
     requiredUserRole?: string,
     descriptionMinLength?: number,
@@ -65,6 +66,7 @@ function Comments({
     canComment: typeof props.comments?.canComment != 'undefined' ? props.comments.canComment : true,
     canLike: typeof props.comments?.canLike != 'undefined' ? props.comments.canLike : true,
     canReply: typeof props.comments?.canReply != 'undefined' ? props.comments.canReply : true,
+    showForm: typeof props.showForm != 'undefined' ? props.showForm : true,
     closedText: props.comments?.closedText || 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
     requiredUserRole: props.comments?.requiredUserRole || 'member',
     descriptionMinLength: props.comments?.descriptionMinLength || 30,
@@ -122,8 +124,6 @@ function Comments({
       console.log(err);
     }
   }
-  console.log(props.type)
-
   return (
     <CommentWidgetContext.Provider value={args}>
       <section className="osc">
@@ -166,7 +166,7 @@ function Comments({
         ) : null}
 
         {/* {(args.canComment && hasRole(currentUser, args.requiredUserRole)) && type === 'resource' || hasRole(currentUser, 'moderator') && type === 'resource' ? ( */}
-        {args.canComment && type === 'resource' ? (
+        {args.canComment && args.showForm ? (
           <div className="input-container">
             <CommentForm {...args} submitComment={submitComment} />
             <Spacer size={1} />
@@ -180,7 +180,7 @@ function Comments({
         ) : null}
         {(comments || []).map((comment: any, index: number) => {
           let attributes = { ...args, comment, submitComment };
-          return <Comment {...attributes} key={index} selected={selectedComment === index} index={index} type={type} />;
+          return <Comment {...attributes} key={index} selected={selectedComment === index} index={index} />;
         })}
       </section>
     </CommentWidgetContext.Provider>
