@@ -86,7 +86,7 @@ const formSchema = z.object({
     .default([]),
   document: z.string().optional(),
   documents: z
-    .array(z.object({ url: z.string(), name: z.string() }))
+    .array(z.object({ url: z.string().optional(), name: z.string().optional() }))
     .optional()
     .default([]),
 

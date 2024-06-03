@@ -42,7 +42,11 @@ type booleanProps = {
   | 'displaySocials']: boolean | undefined;
 };
 
-export type ResourceDetailWidgetProps = BaseProps &
+export type ResourceDetailWidgetProps = {
+    documentsTitle?: string;
+    documentsDesc?: string;
+  } &
+  BaseProps &
   ProjectSettingProps & {
     projectId?: string;
     resourceId?: string;
@@ -60,7 +64,12 @@ export type ResourceDetailWidgetProps = BaseProps &
       ResourceDetailMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
-  };
+  } ;
+
+type DocumentType = {
+  name?: string;
+  url?: string;
+}
 
 function ResourceDetail({
   displayImage = true,
@@ -104,7 +113,7 @@ function ResourceDetail({
 
   if (!resource) return null;
   const shouldHaveSideColumn =
-    displayLikes || displayTags || displayStatus || displaySocials;
+    displayLikes || displayTags || displayStatus || displaySocials || displayDocuments;
   return (
     <section>
       <div
@@ -256,7 +265,7 @@ function ResourceDetail({
                   {!!documentsTitle && (<Heading level={2} appearance="utrecht-heading-4">{documentsTitle}</Heading>)}
                   {!!documentsDesc && (<Paragraph>{documentsDesc}</Paragraph>)}
                   <ButtonGroup>
-                    {resource.documents?.map((document, index) => (
+                    {resource.documents?.map((document: DocumentType, index: number) => (
                       <ButtonLink
                         appearance="primary-action-button"
                         className="osc counter-container"
@@ -265,7 +274,7 @@ function ResourceDetail({
                         key={index}
                       >
                         <Icon
-                          variant="ri-download-2-fill"
+                          icon="ri-download-2-fill"
                         />
                         {document.name}
                       </ButtonLink>

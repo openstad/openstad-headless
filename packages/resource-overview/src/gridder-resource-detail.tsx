@@ -34,10 +34,19 @@ export const GridderResourceDetail = ({
   onRemoveClick?: (resource: any) => void;
   isModerator?: boolean;
   loginUrl?: string;
+  displayDocuments?: boolean;
+  documentsTitle?: string;
+  documentsDesc?: string;
 }) => {
   // When resource is correctly typed the we will not need :any
   const theme = resource.tags?.filter((t: any) => t.type === 'theme')?.at(0);
   const area = resource.tags?.filter((t: any) => t.type === 'area')?.at(0);
+
+  type DocumentType = {
+    name?: string;
+    url?: string;
+  }
+
   return (
     <>
       <div className="osc-gridder-resource-detail">
@@ -81,7 +90,7 @@ export const GridderResourceDetail = ({
                 {!!documentsDesc && (<Paragraph>{documentsDesc}</Paragraph>)}
                 <Spacer size={2} />
                 <ButtonGroup>
-                  {resource.documents?.map((document, index) => (
+                  {resource.documents?.map((document: DocumentType, index: number) => (
                     <ButtonLink
                       appearance="primary-action-button"
                       className="osc counter-container"
@@ -90,7 +99,7 @@ export const GridderResourceDetail = ({
                       key={index}
                     >
                       <Icon
-                        variant="ri-download-2-fill"
+                        icon="ri-download-2-fill"
                       />
                       {document.name}
                     </ButtonLink>

@@ -152,7 +152,7 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                     disabled={disabled}
                     acceptedFileTypes={typeof acceptAttribute === 'string' ? [acceptAttribute] : acceptAttribute}
                     beforeAddFile={(fileItem) => {
-                        return new Promise((resolve, reject) => {
+                        return new Promise<boolean>((resolve, reject) => {
                             const forbiddenCharsRegex = /[\\/:\*\?"<>\|]/;
                             const fileName = fileItem.file.name;
                             const forbiddenChar = fileName.match(forbiddenCharsRegex);
@@ -162,11 +162,12 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                                 const errorMessage = `Bestandsnaam mag het teken "${forbiddenCharName}" niet bevatten.`;
                                 reject(errorMessage);
                             } else {
-                                resolve(fileItem);
+                                resolve(true);
                             }
                         }).catch(error => {
-                            toast.error(error, {position: 'bottom-center'});
-                        })
+                            toast.error(error, { position: 'bottom-center' });
+                            return false;
+                        });
                     }}
                     {...filePondSettings}
                 />
