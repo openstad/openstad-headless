@@ -14,8 +14,8 @@ import {
   Button,
   ButtonGroup,
   ButtonLink,
+  Heading,
   Heading1,
-  Heading2,
   Heading4,
   Paragraph
 } from "@utrecht/component-library-react";
@@ -76,13 +76,14 @@ export const GridderResourceDetail = ({
           { (!!displayDocuments && !!resource && Array.isArray(resource.documents) && resource.documents.length > 0 ) && (
             <>
               <Spacer size={2} />
-              <div>
-                {!!documentsTitle && (<Heading2>{documentsTitle}</Heading2>)}
+              <div className="document-download-container">
+                {!!documentsTitle && (<Heading level={2} appearance="utrecht-heading-4">{documentsTitle}</Heading>)}
                 {!!documentsDesc && (<Paragraph>{documentsDesc}</Paragraph>)}
+                <Spacer size={2} />
                 <ButtonGroup>
                   {resource.documents?.map((document, index) => (
                     <ButtonLink
-                      appearance="secondary-action-button"
+                      appearance="primary-action-button"
                       className="osc counter-container"
                       download
                       href={document.url}

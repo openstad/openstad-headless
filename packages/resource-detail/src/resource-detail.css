@@ -8,8 +8,12 @@
   display: block;
 }
 
-.resource-detail-side-column {
+.resource-detail-side-column .aside--content {
   background-color: var(--nlds-default-background-color, #f0f4f8);
+}
+
+.aside--content + .aside--content{
+  margin-top: 1rem;
 }
 
 .resource-detail-side-section {
