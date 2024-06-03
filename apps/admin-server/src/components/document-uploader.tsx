@@ -31,8 +31,6 @@ export const DocumentUploader: React.FC<{
   async function uploadDocument(data: any) {
     let document = prepareDocument(data);
 
-    console.log( 'Document data', document );
-
     await fetch('/api/openstad/api/document', {
       method: 'GET',
     })
@@ -68,10 +66,9 @@ export const DocumentUploader: React.FC<{
           <FormControl>
             <Input
               type="file"
-              // accept={acceptAttribute}
+              accept={acceptAttribute}
               {...field}
               onChange={(e) => {
-                console.log( 'change', e.target.files );
                 uploadDocument(e.target.files?.[0])
               }}
             />

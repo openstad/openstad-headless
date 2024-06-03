@@ -15,6 +15,7 @@ import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/sr
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import {Input} from "@/components/ui/input";
+import {useFieldDebounce} from "@/hooks/useFieldDebounce";
 
 const formSchema = z.object({
   displayImage: z.boolean(),
@@ -43,6 +44,8 @@ export default function WidgetResourceDetailDisplay(
   async function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
   }
+
+  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
