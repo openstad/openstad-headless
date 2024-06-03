@@ -1,0 +1,99 @@
+.documentMap--container {
+  height: calc(100vh - 193px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+@media only screen and (max-width: 1000px) {
+  .documentMap--container {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .documentMap--container .map-container {
+    height: 500px;
+  }
+  .documentMap--container .content {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+.documentMap--container .content {
+  overflow: auto;
+  padding: 2rem;
+}
+
+.documentMap--container .content .content-intro {
+  margin-block-end: 2rem;
+}
+
+.documentMap--container .content .content-intro p {
+  margin-block-start: 0.5rem;
+}
+
+.documentMap--container .map-container > div {
+  width: 100%;
+  height: 100%;
+}
+
+.documentMap--container .map-container form {
+  display: grid;
+  grid-gap: 10px;
+}
+
+.documentMap--container .map-container textarea {
+  width: 300px;
+}
+.documentMap--container .map-container button {
+  width: 100%;
+  max-width: none;
+  display: block;
+}
+
+.documentMap--container .content .comment {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  padding: 0;
+  background: unset;
+  cursor: pointer;
+}
+.documentMap--container .content p {
+  white-space: pre-wrap;
+}
+
+.documentMap--container .content button .flex {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  opacity: 0.6;
+  margin-top: 0.5rem;
+  border-top: solid 1px rgba(0, 0, 0, 0.05);
+  padding-top: 0.5rem;
+}
+
+.documentMap--container .content .comment {
+  padding: 1rem;
+}
+
+.documentMap--container .content .comment.highlight {
+  background: rgb(255, 227, 0, 0.35);
+  border-radius: 4px;
+}
+
+.documentMap--container .content .comment + .comment {
+  border-top: solid 1px rgba(0, 0, 0, 0.1);
+}
+
+.leaflet-container .leaflet-marker-pane .--highlightedIcon {
+  filter: hue-rotate(92deg) saturate(2);
+  z-index: 999;
+}
+.leaflet-popup-content p.--error {
+  margin: 0;
+  color: #d30000;
+  font-style: italic;
+  font-size: 14px;
+}

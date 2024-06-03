@@ -108,14 +108,6 @@ module.exports = {
       extraData: {
         type: 'object',
       },
-      defaultStatusIds: {
-        type: 'arrayOfNumbers',
-        default: [],
-      },
-      defaultTagIds: {
-        type: 'arrayOfNumbers',
-        default: [],
-      },
     },
   },
 

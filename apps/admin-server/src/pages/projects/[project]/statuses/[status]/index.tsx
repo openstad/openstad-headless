@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
@@ -33,6 +34,7 @@ const formSchema = z.object({
   name: z.string(),
   seqnr: z.coerce.number(),
   backgroundColor: z.string().optional(),
+  addToNewResources: z.boolean().optional(),
   color: z.string().optional(),
   label: z.string().optional(),
   mapIcon: z.string().max(5000).optional(),
@@ -53,6 +55,7 @@ export default function ProjectStatusEdit() {
     () => ({
       name: data?.name || null,
       seqnr: data?.seqnr || null,
+      addToNewResources: data?.addToNewResources || false,
       backgroundColor: data?.backgroundColor || undefined,
       color: data?.color || undefined,
       label: data?.label || undefined,
@@ -70,7 +73,7 @@ export default function ProjectStatusEdit() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const status = await updateStatus(values.name, values.seqnr, values.backgroundColor, values.color, values.label, values.mapIcon, values.listIcon, { editableByUser: values.editableByUser, canComment: values.canComment });
+    const status = await updateStatus(values.name, values.seqnr, values.addToNewResources, values.backgroundColor, values.color, values.label, values.mapIcon, values.listIcon, { editableByUser: values.editableByUser, canComment: values.canComment });
     if (status) {
       toast.success('Status aangepast!');
     } else {
@@ -141,6 +144,19 @@ export default function ProjectStatusEdit() {
                           <FormControl>
                             <Input type="number" placeholder="" {...field} />
                           </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="addToNewResources"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Voeg deze status automatisch toe aan nieuwe resources
+                          </FormLabel>
+                          {YesNoSelect(field, {})}
                           <FormMessage />
                         </FormItem>
                       )}

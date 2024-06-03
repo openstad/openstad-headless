@@ -90,7 +90,7 @@ export default function ProjectTags() {
 
           <div className="p-6 bg-white rounded-md clear-right">
 
-            <div className="grid grid-cols-1 lg:grid-cols-5 items-center py-2 px-2 border-b border-border">
+            <div className="grid grid-cols-1 lg:grid-cols-6 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex truncate">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
                   ID
@@ -106,16 +106,22 @@ export default function ProjectTags() {
                   Type
                 </button>
               </ListHeading>
+              <ListHeading className="hidden lg:flex truncate">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('addToNewResources', e, filterData))}>
+                  Voeg toe aan nieuwe resources
+                </button>
+              </ListHeading>
             </div>
             <ul>
               {filterData?.map((tag: any) => (
                 <Link
                   href={`/projects/${project}/tags/${tag.id}`}
                   key={tag.id}>
-                  <li key={tag.id} className="grid grid-cols-2 lg:grid-cols-5 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                  <li key={tag.id} className="grid grid-cols-2 lg:grid-cols-6 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                     <Paragraph className="my-auto -mr-16 lg:mr-0">{tag.id || null}</Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">{tag.name || null}</Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">{tag.type}</Paragraph>
+                    <Paragraph className="hidden lg:flex truncate my-auto">{tag.addToNewResources ? 'Ja' : 'Nee'}</Paragraph>
                     <div
                       className="hidden lg:flex ml-auto"
                       onClick={(e) => e.preventDefault()}>

@@ -36,9 +36,6 @@ module.exports = async function seed(config, db) {
             },
           }
         },
-        resources: {
-          defaultStatusIds: [1],
-        },
         votes: {
           isActive: true,
           requiredUserRole: 'anonymous',
@@ -104,9 +101,6 @@ module.exports = async function seed(config, db) {
               clientSecret: 'anonymous123'
             },
           }
-        },
-        resources: {
-          defaultStatusIds: [3],
         },
         votes: {
           isViewable: true,
@@ -456,6 +450,7 @@ module.exports = async function seed(config, db) {
     await status1.update({
       projectId: 2,
       label: 'Open',
+      addToNewResources: true,
       mapIcon: '{"html":"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?><svg width=\\"39\\" height=\\"50\\" viewBox=\\"0 0 39 50\\" fill=\\"none\\" xmlns=\\"http://www.w3.org/2000/svg\\"><path d=\\"M19.1038 0C29.6577 0 38.2075 8.46671 38.2075 18.9181C38.2075 33.1786 21.7544 47.7273 21.0432 48.3035L19.1038 50L17.1643 48.3035C16.4532 47.7273 0 33.1786 0 18.9181C0 8.46831 8.54983 0 19.1038 0ZM32.3245 18.9181C32.3083 11.6837 26.4091 5.84187 19.1038 5.82586C11.7984 5.84187 5.89922 11.6837 5.88306 18.9181C5.88306 27.3367 14.1581 37.2439 19.0876 42.1095C23.1767 38.1242 32.3245 27.993 32.3245 18.9181Z\\" fill=\\"green\\"></path><path d=\\"M19.104 5.82568C26.4093 5.84169 32.3086 11.6836 32.3247 18.9179C32.3247 27.9928 23.1769 38.124 19.0879 42.1093C14.1584 37.2437 5.8833 27.3366 5.8833 18.9179C5.89946 11.6836 11.7987 5.84169 19.104 5.82568ZM25.5689 18.9179C25.5689 15.3807 22.6759 12.5158 19.104 12.5158C15.5322 12.5158 12.6391 15.3807 12.6391 18.9179C12.6391 22.455 15.5322 25.3199 19.104 25.3199C22.6759 25.3199 25.5689 22.455 25.5689 18.9179Z\\" fill=\\"white\\"></path><path d=\\"M19.1038 25.3202C22.6743 25.3202 25.5687 22.4539 25.5687 18.9182C25.5687 15.3824 22.6743 12.5161 19.1038 12.5161C15.5333 12.5161 12.6389 15.3824 12.6389 18.9182C12.6389 22.4539 15.5333 25.3202 19.1038 25.3202Z\\" fill=\\"green\\"></path></svg>","width":34,"height":45,"anchor":[17,45]}',
       listIcon: '{"html":"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?><svg width=\\"34px\\" height=\\"34px\\" viewBox=\\"0 0 34 34\\" version=\\"1.1\\" xmlns=\\"http://www.w3.org/2000/svg\\" xmlns:xlink=\\"http://www.w3.org/1999/xlink\\"><title>melding-lijst-icon</title><g id=\\"Stijlen-en-interacties\\" stroke=\\"none\\" stroke-width=\\"1\\" fill=\\"none\\" fill-rule=\\"evenodd\\"><g id=\\"Icons\\" transform=\\"translate(-1250.000000, -217.000000)\\"><g id=\\"Group-3-Copy\\" transform=\\"translate(1250.000000, 216.000000)\\"></g><g id=\\"melding-lijst-icon\\" transform=\\"translate(1250.000000, 217.000000)\\"><circle id=\\"Oval\\" fill=\\"#008800\\" cx=\\"17\\" cy=\\"17\\" r=\\"17\\"></circle><path d=\\"M14.5,24.5 L7,24.5 L7,22 L7.625,22 C9.00571187,22 10.125,20.8807119 10.125,19.5 L10.125,13.25 C10.125,10.4885763 12.3635763,8.25 15.125,8.25 L15.75,8.25 C15.75,7.55964406 16.3096441,7 17,7 C17.6903559,7 18.25,7.55964406 18.25,8.25 L18.875,8.25 C21.6364237,8.25 23.875,10.4885763 23.875,13.25 L23.875,19.5 C23.875,20.8807119 24.9942881,22 26.375,22 L27,22 L27,24.5 L19.5,24.5 C19.5,25.8807119 18.3807119,27 17,27 C15.6192881,27 14.5,25.8807119 14.5,24.5 Z M15.75,24.5 C15.75,25.1903559 16.3096441,25.75 17,25.75 C17.6903559,25.75 18.25,25.1903559 18.25,24.5 L15.75,24.5 Z M12.625,13.25 L12.625,19.5 C12.625,20.4107179 12.3815143,21.2645666 11.956089,22 L22.043911,22 C21.6184857,21.2645666 21.375,20.4107179 21.375,19.5 L21.375,13.25 C21.375,11.8692881 20.2557119,10.75 18.875,10.75 L15.125,10.75 C13.7442881,10.75 12.625,11.8692881 12.625,13.25 Z\\" id=\\"Shape\\" fill=\\"#000000\\" fill-rule=\\"nonzero\\"></path></g></g></g></svg>","width":34,"height":34}',
       color: 'black',
@@ -486,6 +481,9 @@ module.exports = async function seed(config, db) {
     
     let status3 = await db.Status.findOne({
       where: { projectId: 3, name: 'open' }
+    });
+    await status3.update({
+      addToNewResources: true,
     });
 
     resource6.addStatus(status3);

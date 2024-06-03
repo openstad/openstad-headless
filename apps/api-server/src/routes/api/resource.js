@@ -258,11 +258,9 @@ router
     let statuses = req.body.statuses || [];
     if (!Array.isArray(statuses)) statuses = [statuses];
     statuses = statuses.filter(status => Number.isInteger(status));
-    if (!statuses.length) {
-      let defaultStatusIds = req.project.config?.resources?.defaultStatusIds || [];
-      if (!Array.isArray(defaultStatusIds)) defaultStatusIds = [defaultStatusIds];
-      statuses = defaultStatusIds;
-    }
+    let defaultStatusses = await db.Status.findAll({ where: { projectId: req.project.id, addToNewResources: true } });
+    statuses = statuses.concat( defaultStatusses.map( status => status.id ) );
+    statuses = statuses.filter( (value, index) => statuses.indexOf(value) === index ) // unique
     if (statuses.length) {
       await req.results.setStatuses(statuses);
       req.scope.push('includeStatuses');
@@ -274,11 +272,9 @@ router
     let tags = req.body.tags || [];
     if (!Array.isArray(tags)) tags = [tags];
     tags = tags.filter(tag => Number.isInteger(tag));
-    if (!tags.length) {
-      let defaultTagIds = req.project.config?.resources?.defaultTagIds || [];
-      if (!Array.isArray(defaultTagIds)) defaultTagIds = [defaultTagIds];
-      tags = defaultTagIds;
-    }
+    let defaultTags = await db.Tag.findAll({ where: { projectId: req.project.id, addToNewResources: true } });
+    tags = tags.concat( defaultTags.map( status => status.id ) );
+    tags = tags.filter( (value, index) => tags.indexOf(value) === index ) // unique
     if (tags.length) {
       await req.results.setTags(tags);
       req.scope.push('includeTags');
@@ -292,7 +288,6 @@ router
         where: { id: req.results.id, projectId: req.params.projectId },
       })
       .then((result) => {
-        console.log(result.dataValues);
         req.results = result;
         return next();
       });

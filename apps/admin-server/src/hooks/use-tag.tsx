@@ -5,13 +5,13 @@ export default function useTags(projectId?: string, id?: string) {
 
   const tagSwr = useSWR(projectId && id ? url : null);
 
-  async function updateTag(name: string | undefined, type: string | undefined, seqnr: number | undefined, backgroundColor: string | undefined, color: string | undefined, label: string | undefined, mapIcon: string | undefined, listIcon: string | undefined) {
+  async function updateTag(name: string | undefined, type: string | undefined, seqnr: number | undefined, addToNewResources: boolean | undefined, backgroundColor: string | undefined, color: string | undefined, label: string | undefined, mapIcon: string | undefined, listIcon: string | undefined) {
     const res = await fetch(url, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ projectId, id, name, type, seqnr, backgroundColor, color, label, mapIcon, listIcon }),
+      body: JSON.stringify({ projectId, id, name, type, seqnr, addToNewResources, backgroundColor, color, label, mapIcon, listIcon }),
     });
 
     return await res.json();
