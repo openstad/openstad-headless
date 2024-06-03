@@ -118,3 +118,8 @@
     -ms-hyphens: auto;
     hyphens: auto;
 }
+
+.document-download-container{
+    background: var(--nlds-default-background-color, #F0F4F8);
+    padding: 30px;
+}
