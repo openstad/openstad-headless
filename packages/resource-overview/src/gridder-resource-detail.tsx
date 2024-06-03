@@ -10,12 +10,25 @@ import './gridder-resource-detail.css';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Button, Heading1, Heading4, Heading5, Paragraph } from "@utrecht/component-library-react";
+import {
+  Button,
+  ButtonGroup,
+  ButtonLink,
+  Heading1,
+  Heading2,
+  Heading4,
+  Paragraph
+} from "@utrecht/component-library-react";
+import { Icon } from "../../ui/src/icon"
+
 export const GridderResourceDetail = ({
   resource,
   onRemoveClick,
   isModerator = false,
   loginUrl = '',
+  displayDocuments = false,
+  documentsTitle = '',
+  documentsDesc = '',
 }: {
   resource: any;
   onRemoveClick?: (resource: any) => void;
@@ -59,6 +72,32 @@ export const GridderResourceDetail = ({
               <Paragraph>{resource.description}</Paragraph>
             </div>
           </div>
+
+          { (!!displayDocuments && !!resource && Array.isArray(resource.documents) && resource.documents.length > 0 ) && (
+            <>
+              <Spacer size={2} />
+              <div>
+                {!!documentsTitle && (<Heading2>{documentsTitle}</Heading2>)}
+                {!!documentsDesc && (<Paragraph>{documentsDesc}</Paragraph>)}
+                <ButtonGroup>
+                  {resource.documents?.map((document, index) => (
+                    <ButtonLink
+                      appearance="secondary-action-button"
+                      className="osc counter-container"
+                      download
+                      href={document.url}
+                      key={index}
+                    >
+                      <Icon
+                        variant="ri-download-2-fill"
+                      />
+                      {document.name}
+                    </ButtonLink>
+                  ))}
+                </ButtonGroup>
+              </div>
+            </>
+          )}
           <Spacer size={2} />
           <div className="osc-gridder-resource-detail-actions">
             <Button

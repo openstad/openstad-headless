@@ -8,14 +8,14 @@ import {
   Image,
   Spacer,
   Pill,
-  IconButton,
+  IconButton, Icon,
 } from '@openstad-headless/ui/src';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
   Paragraph,
-  Heading,
+  Heading, Heading2, ButtonGroup, ButtonLink,
 } from '@utrecht/component-library-react';
 import React from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
@@ -38,6 +38,7 @@ type booleanProps = {
   | 'displayLikes'
   | 'displayTags'
   | 'displayStatus'
+  | 'displayDocuments'
   | 'displaySocials']: boolean | undefined;
 };
 
@@ -75,6 +76,9 @@ function ResourceDetail({
   displayTags = true,
   displayStatus = true,
   displaySocials = true,
+  displayDocuments = true,
+  documentsTitle = '',
+  documentsDesc = '',
   ...props
 }: ResourceDetailWidgetProps) {
 
@@ -243,6 +247,33 @@ function ResourceDetail({
                 <ShareLinks title={'Deel dit'} />
               </div>
             ) : null}
+
+            { (!!displayDocuments && !!resource && Array.isArray(resource.documents) && resource.documents.length > 0 ) && (
+              <>
+                <Spacer size={2} />
+                <div>
+                  {!!documentsTitle && (<Heading2>{documentsTitle}</Heading2>)}
+                  {!!documentsDesc && (<Paragraph>{documentsDesc}</Paragraph>)}
+                  <ButtonGroup>
+                    {resource.documents?.map((document, index) => (
+                      <ButtonLink
+                        appearance="secondary-action-button"
+                        className="osc counter-container"
+                        download
+                        href={document.url}
+                        key={index}
+                      >
+                        <Icon
+                          variant="ri-download-2-fill"
+                        />
+                        {document.name}
+                      </ButtonLink>
+                    ))}
+                  </ButtonGroup>
+                </div>
+              </>
+            )}
+
           </aside>
         ) : null}
       </div>
