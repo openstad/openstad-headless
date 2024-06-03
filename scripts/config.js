@@ -130,6 +130,8 @@ async function setupEnvVars() {
   process.env.IMAGE_PORT_IMAGE_SERVER = IMAGE_PORT_IMAGE_SERVER || '';
   process.env.IMAGE_VERIFICATION_TOKEN = IMAGE_VERIFICATION_TOKEN || generateRandomToken({ length: 32 });
 
+  process.env.DOCUMENTS_DIR = process.env.DOCUMENTS_DIR || '';
+
   process.env.IMAGE_IMAGES_DIR = process.env.IMAGE_IMAGES_DIR || '';
   process.env.IMAGE_THROTTLE = process.env.IMAGE_THROTTLE || true;
   process.env.IMAGE_THROTTLE_CC_PROCESSORS = process.env.IMAGE_THROTTLE_CC_PROCESSORS || 4;
@@ -251,6 +253,8 @@ IMAGE_APP_URL=${process.env.IMAGE_APP_URL}
 IMAGE_PORT_API=${process.env.IMAGE_PORT_API}
 IMAGE_PORT_IMAGE_SERVER=${process.env.IMAGE_PORT_IMAGE_SERVER}
 IMAGE_VERIFICATION_TOKEN=${process.env.IMAGE_VERIFICATION_TOKEN}
+
+IMAGE_IMAGES_DIR=${process.env.DOCUMENTS_DIR}
 
 IMAGE_IMAGES_DIR=${process.env.IMAGE_IMAGES_DIR}
 IMAGE_THROTTLE=${process.env.IMAGE_THROTTLE}

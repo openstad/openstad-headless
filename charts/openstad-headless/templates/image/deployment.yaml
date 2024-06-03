@@ -33,6 +33,8 @@ spec:
             value: "31451"
           - name: IMAGES_DIR
             value: {{ .Values.image.volumes.data.mountPath | default "/opt/openstad-headless/apps/image-server/images" }}
+          - name: DOCUMENTS_DIR
+            value: {{ .Values.image.volumes.data.mountPath | default "/opt/openstad-headless/apps/image-server/documents" }}
           - name: THROTTLE
             value: "{{ .Values.image.throttle.enabled | default true }}"
           - name: THROTTLE_CC_PROCESSORS
