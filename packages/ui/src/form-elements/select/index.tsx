@@ -59,8 +59,8 @@ const SelectField: FC<SelectFieldProps> = ({
                         {defaultOption}
                     </SelectOption>
                     {choices?.map((value, index) => (
-                        <SelectOption value={value} key={index}>
-                            {value}
+                        <SelectOption value={value && value.value ? value.value : value} key={index}>
+                            {value && value.label ? value.label : value}
                         </SelectOption>
                     ))}
                 </Select>
