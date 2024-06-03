@@ -271,8 +271,9 @@ router
     // tags
     let tags = req.body.tags || [];
     if (!Array.isArray(tags)) tags = [tags];
-    tags = tags.filter(tag => Number.isInteger(tag));
+    tags = tags.filter(tag => !Number.isNaN(parseInt(tag)));
     let defaultTags = await db.Tag.findAll({ where: { projectId: req.project.id, addToNewResources: true } });
+    tags = tags.map( tag => parseInt(tag) );
     tags = tags.concat( defaultTags.map( status => status.id ) );
     tags = tags.filter( (value, index) => tags.indexOf(value) === index ) // unique
     if (tags.length) {
