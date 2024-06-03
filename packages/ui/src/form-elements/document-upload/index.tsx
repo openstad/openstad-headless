@@ -86,21 +86,44 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
         Math.random().toString(36).substring(2, 15) +
         Math.random().toString(36).substring(2, 15);
 
-    const [files, setDocuments] = useState<FilePondFile[]>([]);
-    const [uploadedDocuments, setUploadedDocuments] = useState<{ name: string, url: string }[]>([]);
+    const [documents, setDocuments] = useState<FilePondFile[]>([]);
+    const [uploadedDocuments, setUploadedDocuments] = useState<{ name: string, originalName: string, url: string }[]>([]);
 
-    useEffect(() => {
-        if (onChange) {
-            onChange({
-                name: fieldKey,
-                value: uploadedDocuments,
-            });
-        }
-    }, [uploadedDocuments.length]);
+    // useEffect(() => {
+    //     if (onChange) {
+    //         const finalDocuments = uploadedDocuments.map(({ originalName, ...item }) => item);
+    //
+    //         onChange({
+    //             name: fieldKey,
+    //             value: finalDocuments,
+    //         });
+    //     }
+    // }, [uploadedDocuments.length]);
 
     const acceptAttribute = allowedTypes
         ? allowedTypes
         : "";
+
+    useEffect(() => {
+        setTimeout(() => {
+            console.log('Documenten', documents);
+            const allDocuments = [];
+
+            // documents = alle documenten
+            // uploadedDocuments heeft de juiste waardes
+
+            // let obj = arr.find(o => o.name === 'string 1');
+
+            if (documents.length > 0) {
+                documents.forEach((document, index) => {
+                    const filename = document.filename;
+                    const serverId = document.serverId;
+
+                    console.log(filename, serverId);
+                });
+            }
+        }, 1)
+    }, [documents.length, uploadedDocuments.length]);
 
     return (
         <FormField type="text">
@@ -110,7 +133,7 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
             <FormFieldDescription>{description}</FormFieldDescription>
             <div className="utrecht-form-field__input">
                 <FilePond
-                    files={files.map(file => file.file)}
+                    files={documents.map(file => file.file)}
                     onupdatefiles={(fileItems: FilePondFile[]) => {
                         setDocuments(fileItems);
                     }}
@@ -130,13 +153,6 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                         },
                         fetch: props?.imageUrl + '/documents',
                         revert: null,
-                    }}
-                    onremovefile={(error: FilePondErrorDescription | null, file: FilePondFile) => {
-                        const fileName = file?.file?.name;
-                        if (!!fileName) {
-                            const updatedDocuments = uploadedDocuments.filter(item => item.name !== fileName);
-                            setUploadedDocuments(updatedDocuments);
-                        }
                     }}
                     id={randomID}
                     required={fieldRequired}
