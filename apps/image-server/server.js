@@ -29,8 +29,6 @@ const imageMulterConfig = {
   }
 }
 
-const randomUUID = crypto.randomUUID();
-
 const sanitizeFileName = (fileName) => {
   let sanitizedFileName = fileName.replace(/[^a-z0-9_\-]/gi, '_');
   return sanitizedFileName.replace(/_+/g, '_');
@@ -40,6 +38,8 @@ const createFilename = (originalFileName) => {
   const fileExtension = originalFileName.split('.').pop();
   const fileNameWithoutExtension = originalFileName.substring(0, originalFileName.lastIndexOf('.')) || originalFileName
   const sanitizedFileName = sanitizeFileName(fileNameWithoutExtension);
+
+  const randomUUID = crypto.randomUUID();
 
   return `${sanitizedFileName}-${randomUUID}.${fileExtension}`;
 }
@@ -213,6 +213,12 @@ const documentMulterConfig = {
       return cb(null, false, new Error('goes wrong on the mimetype'));
     }
 
+    const forbiddenChars = /[\\/:]/;
+    if (forbiddenChars.test(file.originalname)) {
+      req.fileValidationError = 'Forbidden characters in filename';
+      return cb(null, false, new Error('Forbidden characters in filename'));
+    }
+
     cb(null, true);
   },
   storage: multer.diskStorage({
@@ -264,6 +270,8 @@ app.post('/document',
       console.log("This post has been successfully verified!")
     }
 
+    const fileExtension = req.file.originalname.split('.').pop();
+
     if (!allowedExtensions.includes(fileExtension.toLowerCase())) {
       return res.status(400).json({ error: 'Invalid file extension' });
     }
@@ -279,8 +287,7 @@ app.post('/document',
     }
 
     res.send(JSON.stringify({
-      name: fileName,
-      originalName: req.file.originalname,
+      name: req.file.originalname,
       url: protocol + url
     }));
   });
@@ -303,9 +310,7 @@ app.post('/documents',
     }
 
     res.send(JSON.stringify(req.files.map((file) => {
-      console.log( 'req.file', file );
-      const fileName = createFilename(file.originalname)
-      let url = `${process.env.APP_URL}/document/${encodeURIComponent(fileName)}`;
+      let url = `${process.env.APP_URL}/document/${encodeURIComponent(file.filename)}`;
 
       let protocol = '';
 
@@ -314,8 +319,7 @@ app.post('/documents',
       }
 
       return {
-        name: fileName,
-        originalName: file.originalname,
+        name: file.originalname,
         url: protocol + url
       }
     })));
