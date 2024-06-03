@@ -15,6 +15,7 @@
     "@openstad-headless/comments": "file:../../packages/comments",
     "@openstad-headless/counter": "file:../../packages/counter",
     "@openstad-headless/date-countdown-bar": "file:../../packages/date-countdown-bar",
+    "@openstad-headless/document-map": "file:../../packages/document-map",
     "@openstad-headless/enquete": "file:../../packages/enquete",
     "@openstad-headless/form": "file:../../packages/form",
     "@openstad-headless/leaflet-map": "file:../../packages/leaflet-map",

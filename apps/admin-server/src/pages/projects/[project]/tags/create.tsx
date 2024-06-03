@@ -12,6 +12,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
@@ -23,7 +24,8 @@ import toast from 'react-hot-toast';
 const formSchema = z.object({
   name: z.string(),
   type: z.string(),
-  seqnr: z.coerce.number()
+  seqnr: z.coerce.number(),
+  addToNewResources: z.boolean(),
 });
 
 export default function ProjectTagCreate() {
@@ -37,8 +39,8 @@ export default function ProjectTagCreate() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const tags = await createTag(values.name, values.type, values.seqnr);
-    if (tags) {
+    const tag = await createTag(values.name, values.type, values.seqnr, values.addToNewResources);
+    if (tag?.id) {
       toast.success('Tag aangemaakt!');
       router.push(`/projects/${project}/tags`);
     } else {
@@ -106,6 +108,19 @@ export default function ProjectTagCreate() {
                     <FormControl>
                       <Input type="number" placeholder="" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="addToNewResources"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Voeg deze status automatisch toe aan nieuwe resources
+                    </FormLabel>
+                    {YesNoSelect(field, {})}
                     <FormMessage />
                   </FormItem>
                 )}

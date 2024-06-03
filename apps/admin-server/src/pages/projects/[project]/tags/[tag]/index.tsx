@@ -13,6 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
@@ -27,6 +28,7 @@ const formSchema = z.object({
   name: z.string(),
   type: z.string(),
   seqnr: z.coerce.number(),
+  addToNewResources: z.boolean().optional(),
   backgroundColor: z.string().optional(),
   color: z.string().optional(),
   label: z.string().optional(),
@@ -47,6 +49,7 @@ export default function ProjectTagEdit() {
       name: data?.name || null,
       type: data?.type || null,
       seqnr: data?.seqnr || null,
+      addToNewResources: data?.addToNewResources || false,
       backgroundColor: data?.backgroundColor || undefined,
       color: data?.color || undefined,
       label: data?.label || undefined,
@@ -62,7 +65,7 @@ export default function ProjectTagEdit() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const tag = await updateTag(values.name, values.type, values.seqnr, values.backgroundColor, values.color, values.label, values.mapIcon, values.listIcon);
+    const tag = await updateTag(values.name, values.type, values.seqnr, values.addToNewResources, values.backgroundColor, values.color, values.label, values.mapIcon, values.listIcon);
     if (tag) {
       toast.success('Tag aangepast!');
     } else {
@@ -143,6 +146,19 @@ export default function ProjectTagEdit() {
                           <FormControl>
                             <Input type="number" placeholder="" {...field} />
                           </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="addToNewResources"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Voeg deze tag automatisch toe aan nieuwe resources
+                          </FormLabel>
+                          {YesNoSelect(field, {})}
                           <FormMessage />
                         </FormItem>
                       )}

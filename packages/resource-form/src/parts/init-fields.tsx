@@ -29,7 +29,7 @@ export const InitializeFormFields = (items, data) => {
                         .filter((tag: any) => tag.type === item.tags)
                         .map((tag: any, index: number) => ({
                             trigger: `${index}`,
-                            titles: [{text: tag.name, key: tag.name}],
+                            titles: [{text: tag.name, key: tag.id}],
                             images: []
                         }))
                     : [];
@@ -58,7 +58,7 @@ export const InitializeFormFields = (items, data) => {
                         item.options.length > 0
                     ) {
                         fieldData['choices'] = item.options.map((option) => {
-                            return option.titles[0].key
+                            return {label: option.titles[0].text, value: option.titles[0].key};
                         });
                     }
                     break;
