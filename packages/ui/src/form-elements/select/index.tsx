@@ -13,7 +13,7 @@ import { Spacer } from '@openstad-headless/ui/src';
 export type SelectFieldProps = {
     title?: string;
     description?: string;
-    choices?: string[];
+    choices?: string[] | [{value: string, label: string}];
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
@@ -33,6 +33,13 @@ const SelectField: FC<SelectFieldProps> = ({
       onChange,
       disabled = false,
 }) => {
+    choices = choices.map((choice) => {
+      if (typeof choice === 'string') {
+        return { value: choice, label: choice }
+      } else {
+        return choice;
+      }
+    }) as [{value: string, label: string}];
     return (
         <FormField type="select">
             <FormLabel htmlFor={fieldKey}>{title}</FormLabel>
@@ -59,8 +66,8 @@ const SelectField: FC<SelectFieldProps> = ({
                         {defaultOption}
                     </SelectOption>
                     {choices?.map((value, index) => (
-                        <SelectOption value={value && value.value ? value.value : value} key={index}>
-                            {value && value.label ? value.label : value}
+                        <SelectOption value={value && value.value} key={index}>
+                            {value && value.label}
                         </SelectOption>
                     ))}
                 </Select>
