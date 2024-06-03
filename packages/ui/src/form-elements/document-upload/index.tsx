@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useState } from "react";
+import toast, { Toaster } from 'react-hot-toast';
 import {
     FormField,
     FormFieldDescription,
@@ -87,42 +88,34 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
         Math.random().toString(36).substring(2, 15);
 
     const [documents, setDocuments] = useState<FilePondFile[]>([]);
-    const [uploadedDocuments, setUploadedDocuments] = useState<{ name: string, originalName: string, url: string }[]>([]);
-
-    // useEffect(() => {
-    //     if (onChange) {
-    //         const finalDocuments = uploadedDocuments.map(({ originalName, ...item }) => item);
-    //
-    //         onChange({
-    //             name: fieldKey,
-    //             value: finalDocuments,
-    //         });
-    //     }
-    // }, [uploadedDocuments.length]);
+    const [uploadedDocuments, setUploadedDocuments] = useState<{ name: string, url: string }[]>([]);
 
     const acceptAttribute = allowedTypes
         ? allowedTypes
         : "";
 
     useEffect(() => {
-        setTimeout(() => {
-            console.log('Documenten', documents);
-            const allDocuments = [];
+        const allDocuments = [];
 
-            // documents = alle documenten
-            // uploadedDocuments heeft de juiste waardes
+        if ( documents.length > 0 && uploadedDocuments.length > 0 ) {
+            for (let i = 0; i < documents.length; i++) {
+                const file = documents[i].file;
+                if (file && file.name) {
+                    let fileInUploadedDocuments = uploadedDocuments.find(o => o.name === file.name);
 
-            // let obj = arr.find(o => o.name === 'string 1');
-
-            if (documents.length > 0) {
-                documents.forEach((document, index) => {
-                    const filename = document.filename;
-                    const serverId = document.serverId;
-
-                    console.log(filename, serverId);
-                });
+                    if (fileInUploadedDocuments) {
+                        allDocuments.push(fileInUploadedDocuments);
+                    }
+                }
             }
-        }, 1)
+        }
+
+        if (onChange) {
+            onChange({
+                name: fieldKey,
+                value: allDocuments,
+            });
+        }
     }, [documents.length, uploadedDocuments.length]);
 
     return (
@@ -158,9 +151,27 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                     required={fieldRequired}
                     disabled={disabled}
                     acceptedFileTypes={typeof acceptAttribute === 'string' ? [acceptAttribute] : acceptAttribute}
+                    beforeAddFile={(fileItem) => {
+                        return new Promise((resolve, reject) => {
+                            const forbiddenCharsRegex = /[\\/:\*\?"<>\|]/;
+                            const fileName = fileItem.file.name;
+                            const forbiddenChar = fileName.match(forbiddenCharsRegex);
+
+                            if (forbiddenChar) {
+                                const forbiddenCharName = forbiddenChar[0];
+                                const errorMessage = `Bestandsnaam mag het teken "${forbiddenCharName}" niet bevatten.`;
+                                reject(errorMessage);
+                            } else {
+                                resolve(fileItem);
+                            }
+                        }).catch(error => {
+                            toast.error(error, {position: 'bottom-center'});
+                        })
+                    }}
                     {...filePondSettings}
                 />
 
+                <Toaster />
             </div>
         </FormField>
     );
