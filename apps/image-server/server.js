@@ -29,51 +29,19 @@ const imageMulterConfig = {
   }
 }
 
-const documentMulterConfig = {
-  onError: function (err, next) {
-    console.error(err);
-    next(err);
-  },
-  fileFilter: function (req, file, cb) {
-    const allowedTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-powerpoint',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-    ];
+const randomUUID = crypto.randomUUID();
 
-    if (allowedTypes.indexOf(file.mimetype) === -1) {
-      req.fileValidationError = 'goes wrong on the mimetype';
-      return cb(null, false, new Error('goes wrong on the mimetype'));
-    }
+const sanitizeFileName = (fileName) => {
+  let sanitizedFileName = fileName.replace(/[^a-z0-9_\-]/gi, '_');
+  return sanitizedFileName.replace(/_+/g, '_');
+}
 
-    cb(null, true);
-  },
-  storage: multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, process.env.DOCUMENTS_DIR || 'documents/');
-    },
-    filename: function (req, file, cb) {
-      const originalFileName = file.originalname;
-      const fileExtension = originalFileName.split('.').pop();
+const createFilename = (originalFileName) => {
+  const fileExtension = originalFileName.split('.').pop();
+  const fileNameWithoutExtension = originalFileName.substring(0, originalFileName.lastIndexOf('.')) || originalFileName
+  const sanitizedFileName = sanitizeFileName(fileNameWithoutExtension);
 
-      const todaysDate = new Date();
-      const year = todaysDate.getFullYear();
-      const month = String(todaysDate.getMonth() + 1).padStart(2, '0');
-      const day = String(todaysDate.getDate()).padStart(2, '0');
-      const hours = String(todaysDate.getHours()).padStart(2, '0');
-      const minutes = String(todaysDate.getMinutes()).padStart(2, '0');
-
-      const currentDate = `${day}${month}${year}_${hours}${minutes}`;
-
-      const uniqueFileName = `${originalFileName.replace(/\.[^/.]+$/, '')}-${currentDate}.${fileExtension}`;
-
-      cb(null, uniqueFileName);
-    }
-  })
+  return `${sanitizedFileName}-${randomUUID}.${fileExtension}`;
 }
 
 const imageSteamConfig = {
@@ -109,10 +77,8 @@ const imageSteamConfig = {
 };
 
 imageMulterConfig.dest = process.env.IMAGES_DIR || 'images/';
-documentMulterConfig.dest = process.env.DOCUMENTS_DIR || 'documents/';
 
 const imageUpload = multer(imageMulterConfig);
-const documentUpload = multer(documentMulterConfig);
 
 const argv = require('yargs')
   .usage('Usage: $0 [options] pathToImage')
@@ -168,16 +134,6 @@ app.get('/image/*',
     imageHandler(req, res);
   });
 
-app.get('/document/*',
-  function (req, res, next) {
-    req.url = req.url.replace('/document', '');
-
-    /**
-     * Pass request en response to the imageserver
-     */
-    // return res.download(`${process.env.APP_URL}/document/${req.url}`);
-    return res.download(`documents/${req.url}`);
-  });
 
 /**
  *  The url for creating one Image
@@ -234,6 +190,58 @@ app.post('/images',
         })));
     });
 
+
+
+const documentMulterConfig = {
+  onError: function (err, next) {
+    console.error(err);
+    next(err);
+  },
+  fileFilter: function (req, file, cb) {
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    ];
+
+    if (allowedTypes.indexOf(file.mimetype) === -1) {
+      req.fileValidationError = 'goes wrong on the mimetype';
+      return cb(null, false, new Error('goes wrong on the mimetype'));
+    }
+
+    cb(null, true);
+  },
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, process.env.DOCUMENTS_DIR || 'documents/');
+    },
+    filename: function (req, file, cb) {
+
+      const uniqueFileName = createFilename(file.originalname)
+
+      cb(null, uniqueFileName);
+    }
+  })
+}
+
+documentMulterConfig.dest = process.env.DOCUMENTS_DIR || 'documents/';
+const documentUpload = multer(documentMulterConfig);
+
+app.get('/document/*',
+  function (req, res, next) {
+    req.url = req.url.replace('/document', '');
+
+    /**
+     * Pass request en response to the imageserver
+     */
+    // return res.download(`${process.env.APP_URL}/document/${req.url}`);
+    return res.download(`documents/${req.url}`);
+  });
+
 const allowedExtensions = [
   'pdf',
   'doc',
@@ -249,29 +257,19 @@ const allowedExtensions = [
  */
 app.post('/document',
   documentUpload.single('document'), (req, res, next) => {
+  console.log( 'req.file', req.file );
     const createdCombination = secret + req.query.exp_date;
     const verification = crypto.createHmac("sha256", createdCombination).digest("hex");
     if (Date.now() < req.query.exp_date && verification === req.query.signature) {
       console.log("This post has been successfully verified!")
     }
 
-    const originalFileName = req.file.originalname;
-    const fileExtension = originalFileName.split('.').pop();
-
     if (!allowedExtensions.includes(fileExtension.toLowerCase())) {
       return res.status(400).json({ error: 'Invalid file extension' });
     }
 
-    const todaysDate = new Date();
-    const year = todaysDate.getFullYear();
-    const month = String(todaysDate.getMonth() + 1).padStart(2, '0');
-    const day = String(todaysDate.getDate()).padStart(2, '0');
-    const hours = String(todaysDate.getHours()).padStart(2, '0');
-    const minutes = String(todaysDate.getMinutes()).padStart(2, '0');
+    const fileName = createFilename(req.file.originalname);
 
-    const currentDate = `${day}${month}${year}_${hours}${minutes}`;
-
-    const fileName = `${originalFileName.replace(/\.[^/.]+$/, '')}-${currentDate}.${fileExtension}`;
     let url = `${process.env.APP_URL}/document/${encodeURIComponent(fileName)}`;
 
     let protocol = '';
@@ -281,7 +279,8 @@ app.post('/document',
     }
 
     res.send(JSON.stringify({
-      name: originalFileName,
+      name: fileName,
+      originalName: req.file.originalname,
       url: protocol + url
     }));
   });
@@ -304,19 +303,8 @@ app.post('/documents',
     }
 
     res.send(JSON.stringify(req.files.map((file) => {
-      const originalFileName = file.originalname;
-      const fileExtension = originalFileName.split('.').pop();
-
-      const todaysDate = new Date();
-      const year = todaysDate.getFullYear();
-      const month = String(todaysDate.getMonth() + 1).padStart(2, '0');
-      const day = String(todaysDate.getDate()).padStart(2, '0');
-      const hours = String(todaysDate.getHours()).padStart(2, '0');
-      const minutes = String(todaysDate.getMinutes()).padStart(2, '0');
-
-      const currentDate = `${day}${month}${year}_${hours}${minutes}`;
-
-      const fileName = `${originalFileName.replace(/\.[^/.]+$/, '')}-${currentDate}.${fileExtension}`;
+      console.log( 'req.file', file );
+      const fileName = createFilename(file.originalname)
       let url = `${process.env.APP_URL}/document/${encodeURIComponent(fileName)}`;
 
       let protocol = '';
@@ -326,7 +314,8 @@ app.post('/documents',
       }
 
       return {
-        name: originalFileName,
+        name: fileName,
+        originalName: file.originalname,
         url: protocol + url
       }
     })));
