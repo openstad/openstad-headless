@@ -101,6 +101,17 @@ function ResourceDetail({
   if (!resource) return null;
   const shouldHaveSideColumn =
     displayLikes || displayTags || displayStatus || displaySocials;
+
+  let defaultImage = '';
+
+  if (Array.isArray(resource?.tags)) {
+    const sortedTags = resource.tags.sort((a, b) => a.name.localeCompare(b.name));
+    const tagWithImage = sortedTags.find(tag => tag.defaultResourceImage);
+    defaultImage = tagWithImage?.defaultResourceImage || '';
+  }
+
+  defaultImage = !!defaultImage ? [{'url': defaultImage}] : '';
+
   return (
     <section>
       <div
@@ -113,7 +124,7 @@ function ResourceDetail({
             <article className="osc-resource-detail-content-items">
               {displayImage  && (
                 <Carousel
-                  items={resource.images}
+                  items={ ( Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : defaultImage}
                   itemRenderer={(i) => (
                     <Image
                       src={i.url}

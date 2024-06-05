@@ -149,6 +149,17 @@ function ResourceDetailWithMap({
 
 
   if (!resource) return null;
+
+  let defaultImage = '';
+
+  if (Array.isArray(resource?.tags)) {
+    const sortedTags = resource.tags.sort((a, b) => a.name.localeCompare(b.name));
+    const tagWithImage = sortedTags.find(tag => tag.defaultResourceImage);
+    defaultImage = tagWithImage?.defaultResourceImage || '';
+  }
+
+  defaultImage = !!defaultImage ? [{'url': defaultImage}] : '';
+
   return (
     <section className="osc-resource-detail-content osc-resource-detail-grid">
       {resource ? (
@@ -157,7 +168,7 @@ function ResourceDetailWithMap({
           <article className="osc-resource-detail-content-items" tabIndex={0}>
             {displayImage && (
               <Carousel
-                items={resource.images}
+                items={ ( Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : defaultImage}
                 itemRenderer={(i) => (
                   <Image
                     src={i.url}

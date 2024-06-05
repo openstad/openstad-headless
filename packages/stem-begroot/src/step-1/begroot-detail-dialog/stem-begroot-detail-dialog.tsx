@@ -65,12 +65,20 @@ export const StemBegrootResourceDetailDialog = ({
           const primaryButtonText = resourceBtnTextHandler(resource);
           const originalUrl = defineOriginalUrl(resource);
 
+          let defaultImage = '';
+
+          if (Array.isArray(resource?.tags)) {
+            const sortedTags = resource.tags.sort((a, b) => a.name.localeCompare(b.name));
+            const tagWithImage = sortedTags.find(tag => tag.defaultResourceImage);
+            defaultImage = tagWithImage?.defaultResourceImage || '';
+          }
+
           return (
             <>
               <div className="osc-begrootmodule-resource-detail">
                 <section className="osc-begrootmodule-resource-detail-photo">
                   <Image
-                    src={resource.images?.at(0)?.url || ''}
+                    src={resource.images?.at(0)?.url || defaultImage}
                     style={{ aspectRatio: 16 / 9 }}
                   />
                   {/* <div>

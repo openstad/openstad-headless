@@ -120,10 +120,18 @@ const defaultItemRenderer = (
     return <Paragraph>Er is een fout in de template</Paragraph>;
   }
 
+  let defaultImage = '';
+
+  if (Array.isArray(resource?.tags)) {
+    const sortedTags = resource.tags.sort((a, b) => a.name.localeCompare(b.name));
+    const tagWithImage = sortedTags.find(tag => tag.defaultResourceImage);
+    defaultImage = tagWithImage?.defaultResourceImage || '';
+  }
+
   return (
     <Button appearance="subtle-button" className="resource-card--link" onClick={() => onItemClick && onItemClick()}>
       <Image
-        src={resource.images?.at(0)?.url || ''}
+        src={resource.images?.at(0)?.url || defaultImage}
         imageFooter={
           props.displayStatusLabel && (
             <div>

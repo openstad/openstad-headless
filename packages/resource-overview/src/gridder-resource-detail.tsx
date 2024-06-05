@@ -25,12 +25,20 @@ export const GridderResourceDetail = ({
   // When resource is correctly typed the we will not need :any
   const theme = resource.tags?.filter((t: any) => t.type === 'theme')?.at(0);
   const area = resource.tags?.filter((t: any) => t.type === 'area')?.at(0);
+  let defaultImage = '';
+
+  if (Array.isArray(resource?.tags)) {
+    const sortedTags = resource.tags.sort((a, b) => a.name.localeCompare(b.name));
+    const tagWithImage = sortedTags.find(tag => tag.defaultResourceImage);
+    defaultImage = tagWithImage?.defaultResourceImage || '';
+  }
+
   return (
     <>
       <div className="osc-gridder-resource-detail">
         <section className="osc-gridder-resource-detail-photo">
           <Image
-            src={resource.images?.at(0)?.url || ''}
+            src={resource.images?.at(0)?.url || defaultImage}
             style={{ aspectRatio: 16 / 9 }}
           />
           {/* <div>
