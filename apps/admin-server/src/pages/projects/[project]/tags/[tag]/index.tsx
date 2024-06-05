@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { YesNoSelect } from '@/lib/form-widget-helpers';
+import {undefinedToTrueOrProp, YesNoSelect} from '@/lib/form-widget-helpers';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
@@ -34,6 +34,8 @@ const formSchema = z.object({
   label: z.string().optional(),
   mapIcon: z.string().max(5000).optional(),
   listIcon: z.string().optional(),
+  useDifferentSubmitAddress: z.boolean().optional(),
+  newSubmitAddress: z.string().optional(),
 });
 
 export default function ProjectTagEdit() {
@@ -55,6 +57,8 @@ export default function ProjectTagEdit() {
       label: data?.label || undefined,
       mapIcon: data?.mapIcon || undefined,
       listIcon: data?.listIcon || undefined,
+      useDifferentSubmitAddress: undefinedToTrueOrProp(data?.useDifferentSubmitAddress),
+      newSubmitAddress: data?.newSubmitAddress || '',
     }),
     [data]
   );
@@ -65,13 +69,33 @@ export default function ProjectTagEdit() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const tag = await updateTag(values.name, values.type, values.seqnr, values.addToNewResources, values.backgroundColor, values.color, values.label, values.mapIcon, values.listIcon);
+    const tag = await updateTag(
+      values.name,
+      values.type,
+      values.seqnr,
+      values.addToNewResources,
+      values.backgroundColor,
+      values.color,
+      values.label,
+      values.mapIcon,
+      values.listIcon,
+      values.useDifferentSubmitAddress,
+      values.newSubmitAddress
+    );
     if (tag) {
       toast.success('Tag aangepast!');
     } else {
       toast.error('Er is helaas iets mis gegaan.')
     }
   }
+
+  useEffect(() => {
+    const useDifferentSubmitAddress = form.watch('useDifferentSubmitAddress');
+
+    if ( !useDifferentSubmitAddress ) {
+      form.setValue('newSubmitAddress', '');
+    }
+  }, [ form.watch('useDifferentSubmitAddress') ]);
 
   useEffect(() => {
     form.reset(defaults());
@@ -101,6 +125,9 @@ export default function ProjectTagEdit() {
               <TabsTrigger value="general">Tag</TabsTrigger>
               <TabsTrigger value="displaysettings">
                 Weergave
+              </TabsTrigger>
+              <TabsTrigger value="notification">
+                Notificatie opties
               </TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -250,6 +277,54 @@ export default function ProjectTagEdit() {
                 </Form>
               </div>
             </TabsContent>
+
+            <TabsContent value="notification" className="p-0">
+              <div className="p-6 bg-white rounded-md">
+                <Form {...form}>
+                  <Heading size="xl">Notificatie opties</Heading>
+                  <Separator className="my-4" />
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="lg:w-1/2 grid grid-cols-1 gap-4">
+
+                    <FormField
+                      control={form.control}
+                      name="useDifferentSubmitAddress"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Nieuwe inzendingen van resources met deze tag moeten worden bevestigd via een ander e-mailadres
+                          </FormLabel>
+                          {YesNoSelect(field, {})}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    { form.watch('useDifferentSubmitAddress') && (
+                      <FormField
+                        control={form.control}
+                        name="newSubmitAddress"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Geef het e-mailadres op waar de bevestiging naartoe gestuurd moet worden</FormLabel>
+                            <FormControl>
+                              <Input placeholder="" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    <Button className="w-fit col-span-full" type="submit">
+                      Opslaan
+                    </Button>
+                  </form>
+                </Form>
+              </div>
+            </TabsContent>
+
           </Tabs>
         </div>
       </PageLayout>
