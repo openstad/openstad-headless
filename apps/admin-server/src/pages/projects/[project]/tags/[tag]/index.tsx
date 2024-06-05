@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useForm } from 'react-hook-form';
+import {useForm} from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -23,6 +23,8 @@ import { useRouter } from 'next/router';
 import useTag from '@/hooks/use-tag';
 import { useCallback, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import {ImageUploader} from "@/components/image-uploader";
+import {X} from "lucide-react";
 
 const formSchema = z.object({
   name: z.string(),
@@ -36,6 +38,8 @@ const formSchema = z.object({
   listIcon: z.string().optional(),
   useDifferentSubmitAddress: z.boolean().optional(),
   newSubmitAddress: z.string().optional(),
+  image: z.string().optional(),
+  defaultResourceImage: z.string().optional(),
 });
 
 export default function ProjectTagEdit() {
@@ -59,6 +63,7 @@ export default function ProjectTagEdit() {
       listIcon: data?.listIcon || undefined,
       useDifferentSubmitAddress: undefinedToTrueOrProp(data?.useDifferentSubmitAddress),
       newSubmitAddress: data?.newSubmitAddress || '',
+      defaultResourceImage: data?.defaultResourceImage || '',
     }),
     [data]
   );
@@ -80,7 +85,8 @@ export default function ProjectTagEdit() {
       values.mapIcon,
       values.listIcon,
       values.useDifferentSubmitAddress,
-      values.newSubmitAddress
+      values.newSubmitAddress,
+      values.defaultResourceImage
     );
     if (tag) {
       toast.success('Tag aangepast!');
@@ -128,6 +134,9 @@ export default function ProjectTagEdit() {
               </TabsTrigger>
               <TabsTrigger value="notification">
                 Notificatie opties
+              </TabsTrigger>
+              <TabsTrigger value="imagesettings">
+                Afbeelding
               </TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -316,6 +325,59 @@ export default function ProjectTagEdit() {
                         )}
                       />
                     )}
+
+                    <Button className="w-fit col-span-full" type="submit">
+                      Opslaan
+                    </Button>
+                  </form>
+                </Form>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="imagesettings" className="p-0">
+              <div className="p-6 bg-white rounded-md">
+                <Form {...form}>
+                  <Heading size="xl">Afbeelding opties</Heading>
+                  <Separator className="my-4" />
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="lg:w-1/2 grid grid-cols-1 gap-4">
+
+                    <ImageUploader
+                      form={form}
+                      imageLabel="Upload hier een afbeelding die vervolgens automatisch wordt ingesteld als de standaardafbeelding voor de resource die aan deze tag is gekoppeld"
+                      fieldName="image"
+                      allowedTypes="image/*"
+                      onImageUploaded={(imageResult) => {
+                        const result = typeof (imageResult.url) !== 'undefined' ? imageResult.url : '';
+                        form.setValue('defaultResourceImage', result);
+                        form.resetField('image')
+                        form.trigger('defaultResourceImage');
+                      }}
+                    />
+
+                    <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
+                      <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeeldingen</label>
+                      <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
+                        {!!form.watch('defaultResourceImage') && (
+                            <div style={{ position: 'relative' }}>
+                              <img src={form.watch('defaultResourceImage')} alt={form.watch('defaultResourceImage')} />
+                              <Button
+                                color="red"
+                                onClick={() => {
+                                  form.setValue('defaultResourceImage', '');
+                                }}
+                                style={{
+                                  position: 'absolute',
+                                  right: 0,
+                                  top: 0,
+                                }}>
+                                <X size={24} />
+                              </Button>
+                            </div>
+                          )}
+                      </section>
+                    </div>
 
                     <Button className="w-fit col-span-full" type="submit">
                       Opslaan
