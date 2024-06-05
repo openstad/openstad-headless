@@ -69,13 +69,12 @@ module.exports = ( db, sequelize, DataTypes ) => {
           let managerTypes = ['new published resource - admin update', 'updated resource - admin update', 'project issues warning', 'new or updated comment - admin update', 'submission', 'action', 'message by carrier pigeon'];
           if (managerTypes.find(type => type == instance.type)) {
             let defaultRecipient = project.emailConfig?.notifications?.projectmanagerAddress;
-            defaultRecipient = !!defaultRecipient ? [defaultRecipient] : '';
 
             let overwriteEmail =  (
               instance.data.hasOwnProperty('emailReceivers')
               && Array.isArray(instance.data.emailReceivers)
               && instance.data.emailReceivers.length > 0
-            ) ? instance.data.emailReceivers : null;
+            ) ? instance.data.emailReceivers.join(',') : null;
 
             instance.to = overwriteEmail || defaultRecipient;
           }
@@ -112,15 +111,11 @@ module.exports = ( db, sequelize, DataTypes ) => {
               }
             };
 
-            if (Array.isArray(instance.to)) {
-              await Promise.all(instance.to.map(async (recipient) => {
-                let message = await db.NotificationMessage.create({ ...messageData, to: recipient });
-                await message.send();
-              }));
-            } else {
-              let message = await db.NotificationMessage.create({ ...messageData, to: instance.to });
+            let recipients = instance.to.split(',').map(email => email.trim());
+            await Promise.all(recipients.map(async (recipient) => {
+              let message = await db.NotificationMessage.create({ ...messageData, to: recipient });
               await message.send();
-            }
+            }));
 
             await instance.update({ status: 'sent' });
           } else {
