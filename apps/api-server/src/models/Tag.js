@@ -71,6 +71,17 @@ module.exports = function (db, sequelize, DataTypes) {
 
 		  extraData: getExtraDataConfig(DataTypes.JSON, 'tags'),
 
+      useDifferentSubmitAddress: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        default: false,
+      },
+
+      newSubmitAddress: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      }
+
 	  }, {
 
       defaultScope: {

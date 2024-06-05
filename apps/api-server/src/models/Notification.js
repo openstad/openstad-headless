@@ -68,7 +68,16 @@ module.exports = ( db, sequelize, DataTypes ) => {
         if (!instance.to) {
           let managerTypes = ['new published resource - admin update', 'updated resource - admin update', 'project issues warning', 'new or updated comment - admin update', 'submission', 'action', 'message by carrier pigeon'];
           if (managerTypes.find(type => type == instance.type)) {
-            instance.to = project.emailConfig?.notifications?.projectmanagerAddress;
+            let defaultRecipient = project.emailConfig?.notifications?.projectmanagerAddress;
+            defaultRecipient = !!defaultRecipient ? [defaultRecipient] : '';
+
+            let overwriteEmail =  (
+              instance.data.hasOwnProperty('emailReceivers')
+              && Array.isArray(instance.data.emailReceivers)
+              && instance.data.emailReceivers.length > 0
+            ) ? instance.data.emailReceivers : null;
+
+            instance.to = overwriteEmail || defaultRecipient;
           }
           let adminTypes = ['system issues warning'];
           if (adminTypes.find(type => type == instance.type)) {
@@ -93,18 +102,26 @@ module.exports = ( db, sequelize, DataTypes ) => {
           // send immediatly or wait for cron
           let immediateTypes = ['new concept resource - user feedback', 'new published resource - user feedback', 'updated resource - user feedback', 'new published resource - admin update', 'updated resource - admin update', 'login email', 'login sms', 'user account about to expire', 'project issues warning', 'system issues warning', 'action', 'message by carrier pigeon'];
           if (immediateTypes.find(type => type == instance.type)) {
-            let message = await db.NotificationMessage.create({
+            let messageData = {
               projectId: instance.projectId,
               engine: instance.engine,
               type: instance.type,
               from: instance.from,
-              to: instance.to,
-            }, {
               data: {
                 ...instance.data
               }
-            });
-            await message.send();
+            };
+
+            if (Array.isArray(instance.to)) {
+              await Promise.all(instance.to.map(async (recipient) => {
+                let message = await db.NotificationMessage.create({ ...messageData, to: recipient });
+                await message.send();
+              }));
+            } else {
+              let message = await db.NotificationMessage.create({ ...messageData, to: instance.to });
+              await message.send();
+            }
+
             await instance.update({ status: 'sent' });
           } else {
             await instance.update({ status: 'queued' });
