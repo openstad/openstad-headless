@@ -80,9 +80,9 @@ function Comment({
   }
 
   const findLocation = (index: number) => () => {
+
     const markerIcons = Array.from(document.getElementsByClassName('leaflet-marker-icon'));
     const comments = Array.from(document.getElementsByClassName('comment-item'));
-  
     const isAlreadySelected = markerIcons[index]?.classList.contains('--highlightedIcon');
   
     markerIcons.forEach((markerIcon) => markerIcon.classList.remove('--highlightedIcon'));
@@ -90,7 +90,7 @@ function Comment({
   
     if (!isAlreadySelected) {
       markerIcons[index]?.classList.toggle('--highlightedIcon');
-      comments[index]?.classList.toggle('selected');
+      document.getElementById(`comment-${index}`)?.classList.toggle('selected');
     }
   }
 
