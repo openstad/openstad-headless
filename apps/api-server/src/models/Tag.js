@@ -80,6 +80,11 @@ module.exports = function (db, sequelize, DataTypes) {
       newSubmitAddress: {
         type: DataTypes.TEXT,
         allowNull: true,
+      },
+
+      defaultResourceImage: {
+        type: DataTypes.TEXT,
+        allowNull: true,
       }
 
 	  }, {
