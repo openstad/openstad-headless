@@ -34,7 +34,7 @@ spec:
           - name: IMAGES_DIR
             value: {{ .Values.image.volumes.data.mountPath | default "/opt/openstad-headless/apps/image-server/images" }}
           - name: DOCUMENTS_DIR
-            value: {{ .Values.image.volumes.data.mountPath | default "/opt/openstad-headless/apps/image-server/documents" }}
+            value: {{ .Values.image.volumes.data.documentMountPath | default "/opt/openstad-headless/apps/image-server/documents" }}
           - name: THROTTLE
             value: "{{ .Values.image.throttle.enabled | default true }}"
           - name: THROTTLE_CC_PROCESSORS
@@ -56,6 +56,8 @@ spec:
 {{ toYaml .Values.image.resources | indent 12 }}
         volumeMounts:
           - mountPath: {{ .Values.image.volumes.data.mountPath | default "/opt/openstad-headless/apps/image-server/images" }}
+            name: data-vol
+          - mountPath: {{ .Values.image.volumes.data.documentMountPath | default "/opt/openstad-headless/apps/image-server/documents" }}
             name: data-vol
       volumes:
         - name: data-vol
