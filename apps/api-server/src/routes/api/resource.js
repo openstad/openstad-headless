@@ -295,19 +295,28 @@ router
   })
 
   // TODO: Add notifications
-  .post(function (req, res, next) {
+  .post(async function (req, res, next) {
     const sendConfirmationToUser = typeof(req.body['confirmationUser']) !== 'undefined' ? req.body['confirmationUser'] : false;
     const sendConfirmationToAdmin = typeof(req.body['confirmationAdmin']) !== 'undefined' ? req.body['confirmationAdmin'] : false;
 
     res.json(req.results);
     if (!req.query.nomail && req.body['publishDate']) {
       if (sendConfirmationToAdmin) {
+        const tags = await req.results.getTags();
+
+        const emailReceivers = (await Promise.all(tags.map(async (tag) => {
+          const {useDifferentSubmitAddress, newSubmitAddress} = await tag.dataValues;
+
+          return useDifferentSubmitAddress ? newSubmitAddress : null;
+        }))).filter(data => data !== null);
+
         db.Notification.create({
           type: "new published resource - admin update",
           projectId: req.project.id,
           data: {
             userId: req.user.id,
-            resourceId: req.results.id
+            resourceId: req.results.id,
+            emailReceivers: emailReceivers
           }
         })
       }
