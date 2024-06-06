@@ -63,6 +63,9 @@ export type ResourceOverviewWidgetProps = BaseProps &
     onlyIncludeTagIds?: string;
     rawInput?: string;
     bannerText?: string;
+    displayDocuments?: boolean;
+    documentsTitle?: string;
+    documentsDesc?: string;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -194,6 +197,9 @@ function ResourceOverview({
   itemsPerPage = 20,
   textResults = 'Dit zijn de zoekresultaten voor [search]',
   onlyIncludeTagIds = '',
+  displayDocuments = false,
+  documentsTitle = '',
+  documentsDesc = '',
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -278,6 +284,9 @@ function ResourceOverview({
                 resource={item}
                 isModerator={isModerator}
                 loginUrl={props.login?.url}
+                displayDocuments={displayDocuments}
+                documentsTitle={documentsTitle}
+                documentsDesc={documentsDesc}
                 onRemoveClick={(resource) => {
                   try {
                     resource

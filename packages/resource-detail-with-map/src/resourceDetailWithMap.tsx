@@ -35,10 +35,14 @@ type booleanProps = {
   | 'displayLikes'
   | 'displayTags'
   | 'displayStatus'
+  | 'displayDocuments'
   | 'displaySocials']: boolean | undefined;
 };
 
-export type ResourceDetailWidgetProps = BaseProps &
+export type ResourceDetailWidgetProps = {
+    documentsTitle?: string;
+    documentsDesc?: string;
+  } & BaseProps &
   ProjectSettingProps & {
     projectId?: string;
     resourceId?: string;

@@ -30,6 +30,9 @@ const formSchema = z.object({
   displayArguments: z.boolean(),
   displayVote: z.boolean(),
   bannerText: z.string().optional(),
+  displayDocuments: z.boolean(),
+  documentsTitle: z.string().optional(),
+  documentsDesc: z.string().optional(),
   // displayRanking: z.boolean(),
   // displayLabel: z.boolean(),
   // displayShareButtons: z.boolean(),
@@ -63,6 +66,9 @@ export default function WidgetResourceOverviewDisplay(
       displayArguments: props?.displayArguments || false,
       displayVote: props?.displayVote || false,
       displayStatusLabel: props?.displayStatusLabel || false,
+      displayDocuments: props?.displayDocuments || false,
+      documentsTitle: props?.documentsTitle || '',
+      documentsDesc: props?.documentsDesc || '',
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -297,6 +303,70 @@ export default function WidgetResourceOverviewDisplay(
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="displayDocuments"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Geüploade documenten weergeven
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {form.watch("displayDocuments") && (
+            <>
+              <FormField
+                control={form.control}
+                name="documentsTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Welke titel moet er boven de download knop(pen) komen?
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="documentsDesc"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Welke beschrijving moet er boven de download knop(pen) komen?
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
           {/* <FormField
             control={form.control}
             name="displayShareButtons"

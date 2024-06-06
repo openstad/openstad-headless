@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useState } from "react";
+import toast, { Toaster } from 'react-hot-toast';
 import {
     FormField,
     FormFieldDescription,
@@ -9,7 +10,7 @@ import {
 import { FilePond, registerPlugin } from 'react-filepond'
 import { FilePondFile, FilePondErrorDescription } from 'filepond'
 import 'filepond/dist/filepond.min.css'
-import './file-upload.css'
+import './document-upload.css'
 import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation'
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
@@ -17,19 +18,19 @@ import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview, FilePondPluginFileValidateType);
 
 const filePondSettings = {
-    labelIdle: "Sleep afbeelding(en) naar deze plek of <span class='filepond--label-action'>klik hier</span>",
-    labelInvalidField: 'Veld bevat ongeldige bestanden',
+    labelIdle: "Sleep document(en) naar deze plek of <span class='filepond--label-action'>klik hier</span>",
+    labelInvalidField: 'Veld bevat ongeldige documenten',
     labelFileWaitingForSize: 'Wachtend op grootte',
     labelFileSizeNotAvailable: 'Grootte niet beschikbaar',
-    labelFileCountSingular: 'Bestand in lijst',
-    labelFileCountPlural: 'Bestanden in lijst',
+    labelFileCountSingular: 'Document in lijst',
+    labelFileCountPlural: 'Documenten in lijst',
     labelFileLoading: 'Laden',
     labelFileAdded: 'Toegevoegd',
     labelFileLoadError: 'Fout bij het uploaden',
     labelFileRemoved: 'Verwijderd',
     labelFileRemoveError: 'Fout bij het verwijderen',
     labelFileProcessing: 'Uploaden',
-    labelFileProcessingComplete: 'Afbeelding geladen',
+    labelFileProcessingComplete: 'Document geladen',
     labelFileProcessingAborted: 'Upload geannuleerd',
     labelFileProcessingError: 'Fout tijdens uploaden',
     labelFileProcessingRevertError: 'Fout tijdens terugdraaien',
@@ -46,11 +47,11 @@ const filePondSettings = {
     labelFileTypeNotAllowed: 'Bestandstype is niet toegestaan',
     allowFileSizeValidation: true,
     maxFileSize: '8mb',
-    name: 'image',
+    name: 'document',
     maxParallelUploads: 1
 };
 
-export type FileUploadProps = {
+export type DocumentUploadProps = {
     title: string;
     description?: string;
     fieldRequired?: boolean;
@@ -64,14 +65,21 @@ export type FileUploadProps = {
     imageUrl?: string;
 }
 
-const FileUploadField: FC<FileUploadProps> = ({
+const DocumentUploadField: FC<DocumentUploadProps> = ({
     title,
     description,
     fieldKey,
     fieldRequired = false,
     multiple = false,
     onChange,
-    allowedTypes = ['image/*'],
+    allowedTypes = ['application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    ],
     disabled = false,
     ...props
 }) => {
@@ -79,21 +87,36 @@ const FileUploadField: FC<FileUploadProps> = ({
         Math.random().toString(36).substring(2, 15) +
         Math.random().toString(36).substring(2, 15);
 
-    const [files, setFiles] = useState<FilePondFile[]>([]);
-    const [uploadedFiles, setUploadedFiles] = useState<{ name: string, url: string }[]>([]);
-
-    useEffect(() => {
-        if (onChange) {
-            onChange({
-                name: fieldKey,
-                value: uploadedFiles,
-            });
-        }
-    }, [uploadedFiles.length]);
+    const [documents, setDocuments] = useState<FilePondFile[]>([]);
+    const [uploadedDocuments, setUploadedDocuments] = useState<{ name: string, url: string }[]>([]);
 
     const acceptAttribute = allowedTypes
         ? allowedTypes
         : "";
+
+    useEffect(() => {
+        const allDocuments = [];
+
+        if ( documents.length > 0 && uploadedDocuments.length > 0 ) {
+            for (let i = 0; i < documents.length; i++) {
+                const file = documents[i].file;
+                if (file && file.name) {
+                    let fileInUploadedDocuments = uploadedDocuments.find(o => o.name === file.name);
+
+                    if (fileInUploadedDocuments) {
+                        allDocuments.push(fileInUploadedDocuments);
+                    }
+                }
+            }
+        }
+
+        if (onChange) {
+            onChange({
+                name: fieldKey,
+                value: allDocuments,
+            });
+        }
+    }, [documents.length, uploadedDocuments.length]);
 
     return (
         <FormField type="text">
@@ -103,44 +126,56 @@ const FileUploadField: FC<FileUploadProps> = ({
             <FormFieldDescription>{description}</FormFieldDescription>
             <div className="utrecht-form-field__input">
                 <FilePond
-                    files={files.map(file => file.file)}
+                    files={documents.map(file => file.file)}
                     onupdatefiles={(fileItems: FilePondFile[]) => {
-                        setFiles(fileItems);
+                        setDocuments(fileItems);
                     }}
                     allowMultiple={multiple}
                     server={{
                         process: {
-                            url: props?.imageUrl + '/images',
+                            url: props?.imageUrl + '/documents',
                             method: 'POST',
                             onload: (response: any) => {
-                                const currentFiles = [...uploadedFiles];
-                                currentFiles.push(JSON.parse(response)[0]);
+                                const currentDocuments = [...uploadedDocuments];
+                                currentDocuments.push(JSON.parse(response)[0]);
 
-                                setUploadedFiles(currentFiles);
+                                setUploadedDocuments(currentDocuments);
 
-                                return JSON.stringify(currentFiles); // Dit heeft echt geen nut, maar het lost wel de TS problemen op
+                                return JSON.stringify(currentDocuments); // Dit heeft echt geen nut, maar het lost wel de TS problemen op
                             },
                         },
-                        fetch: props?.imageUrl + '/image',
+                        fetch: props?.imageUrl + '/documents',
                         revert: null,
-                    }}
-                    onremovefile={(error: FilePondErrorDescription | null, file: FilePondFile) => {
-                        const fileName = file?.file?.name;
-                        if (!!fileName) {
-                            const updatedFiles = uploadedFiles.filter(item => item.name !== fileName);
-                            setUploadedFiles(updatedFiles);
-                        }
                     }}
                     id={randomID}
                     required={fieldRequired}
                     disabled={disabled}
                     acceptedFileTypes={typeof acceptAttribute === 'string' ? [acceptAttribute] : acceptAttribute}
+                    beforeAddFile={(fileItem) => {
+                        return new Promise<boolean>((resolve, reject) => {
+                            const forbiddenCharsRegex = /[\\/:\*\?"<>\|]/;
+                            const fileName = fileItem.file.name;
+                            const forbiddenChar = fileName.match(forbiddenCharsRegex);
+
+                            if (forbiddenChar) {
+                                const forbiddenCharName = forbiddenChar[0];
+                                const errorMessage = `Bestandsnaam mag het teken "${forbiddenCharName}" niet bevatten.`;
+                                reject(errorMessage);
+                            } else {
+                                resolve(true);
+                            }
+                        }).catch(error => {
+                            toast.error(error, { position: 'bottom-center' });
+                            return false;
+                        });
+                    }}
                     {...filePondSettings}
                 />
 
+                <Toaster />
             </div>
         </FormField>
     );
 };
 
-export default FileUploadField;
+export default DocumentUploadField;

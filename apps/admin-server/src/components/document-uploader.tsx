@@ -9,47 +9,48 @@ import {
 } from './ui/form';
 import { Input } from './ui/input';
 
-export const ImageUploader: React.FC<{
+export const DocumentUploader: React.FC<{
   form: UseFormReturn<any>;
   fieldName: Path<FieldValues>;
-  onImageUploaded?: (imageObject: {url: string} ) => void;
-  imageLabel?: string;
+  onDocumentUploaded?: (documentObject: {url: string} ) => void;
+  documentLabel?: string;
   allowedTypes?: string[];
-}> = ({ form, fieldName, onImageUploaded, allowedTypes, imageLabel = 'Afbeelding' }) => {
-  const [file, setFile] = React.useState<{url: string}>();
-  const [fileUrl, setFileUrl] = React.useState<string>('');
+}> = ({ form, fieldName, onDocumentUploaded, allowedTypes, documentLabel = 'Document' }) => {
+  const [document, setDocument] = React.useState<{url: string, name: string}>();
+  const [documentUrl, setDocumentUrl] = React.useState<string>('');
 
-  function prepareFile(image: any) {
+  function prepareDocument(document: any) {
     const formData = new FormData();
-    formData.append('image', image);
-    formData.append('filename', 'testName');
+    formData.append('document', document);
+    formData.append('documentname', 'testName');
     formData.append('description', 'testDescription');
 
     return formData;
   }
 
-  async function uploadImage(data: any) {
-    let image = prepareFile(data);
-    await fetch('/api/openstad/api/image', {
+  async function uploadDocument(data: any) {
+    let document = prepareDocument(data);
+
+    await fetch('/api/openstad/api/document', {
       method: 'GET',
     })
       .then((response) => response.json())
       .then(async (data) => {
         const response = await fetch(data, {
           method: 'POST',
-          body: image,
+          body: document,
         })
-        setFile(await response.json());
+        setDocument(await response.json());
       });
   }
 
   useEffect(() => {
-    if (file && fileUrl !== file.url ) {
-        setFileUrl(file.url);
-        form.setValue(fieldName, file.url);
-        onImageUploaded && onImageUploaded(file);
+    if (document && documentUrl !== document.url ) {
+        setDocumentUrl(document.url);
+        form.setValue(fieldName, document.url);
+      onDocumentUploaded && onDocumentUploaded(document);
     }
-  }, [file, form, fieldName, onImageUploaded]);
+  }, [document, form, fieldName, onDocumentUploaded]);
 
   const acceptAttribute = allowedTypes
     ? allowedTypes.join(',')
@@ -61,13 +62,15 @@ export const ImageUploader: React.FC<{
       name={fieldName}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{imageLabel}</FormLabel>
+          <FormLabel>{documentLabel}</FormLabel>
           <FormControl>
             <Input
               type="file"
               accept={acceptAttribute}
               {...field}
-              onChange={(e) => uploadImage(e.target.files?.[0])}
+              onChange={(e) => {
+                uploadDocument(e.target.files?.[0])
+              }}
             />
           </FormControl>
           <FormMessage />

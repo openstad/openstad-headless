@@ -8,14 +8,14 @@ import {
   Image,
   Spacer,
   Pill,
-  IconButton,
+  IconButton, Icon,
 } from '@openstad-headless/ui/src';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
   Paragraph,
-  Heading,
+  Heading, Heading2, ButtonGroup, ButtonLink,
 } from '@utrecht/component-library-react';
 import React from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
@@ -38,10 +38,15 @@ type booleanProps = {
   | 'displayLikes'
   | 'displayTags'
   | 'displayStatus'
+  | 'displayDocuments'
   | 'displaySocials']: boolean | undefined;
 };
 
-export type ResourceDetailWidgetProps = BaseProps &
+export type ResourceDetailWidgetProps = {
+    documentsTitle?: string;
+    documentsDesc?: string;
+  } &
+  BaseProps &
   ProjectSettingProps & {
     projectId?: string;
     resourceId?: string;
@@ -59,7 +64,12 @@ export type ResourceDetailWidgetProps = BaseProps &
       ResourceDetailMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
-  };
+  } ;
+
+type DocumentType = {
+  name?: string;
+  url?: string;
+}
 
 function ResourceDetail({
   displayImage = true,
@@ -75,6 +85,9 @@ function ResourceDetail({
   displayTags = true,
   displayStatus = true,
   displaySocials = true,
+  displayDocuments = true,
+  documentsTitle = '',
+  documentsDesc = '',
   ...props
 }: ResourceDetailWidgetProps) {
 
@@ -100,7 +113,7 @@ function ResourceDetail({
 
   if (!resource) return null;
   const shouldHaveSideColumn =
-    displayLikes || displayTags || displayStatus || displaySocials;
+    displayLikes || displayTags || displayStatus || displaySocials || displayDocuments;
 
   let tagDefaultResourceImage = '';
 
@@ -128,7 +141,7 @@ function ResourceDetail({
         <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
           {resource ? (
             <article className="osc-resource-detail-content-items">
-              {displayImage  && (
+              {displayImage && (
                 <Carousel
                   items={ ( Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : defaultImage}
                   itemRenderer={(i) => (
@@ -208,58 +221,86 @@ function ResourceDetail({
 
         {shouldHaveSideColumn ? (
           <aside className="resource-detail-side-column">
-            {displayLikes ? (
-              <>
-                <Likes
-                  {...props}
-                  title={props.likeWidget?.title}
-                  yesLabel={props.likeWidget?.yesLabel}
-                  noLabel={props.likeWidget?.noLabel}
-                  hideCounters={props.likeWidget?.hideCounters}
-                  variant={props.likeWidget?.variant}
-                  showProgressBar={props.likeWidget?.showProgressBar}
-                  progressBarDescription={
-                    props.likeWidget?.progressBarDescription
-                  }
-                />
-                <Spacer size={1} />
-              </>
-            ) : null}
+            <div className="aside--content">
+              {displayLikes ? (
+                <>
+                  <Likes
+                    {...props}
+                    title={props.likeWidget?.title}
+                    yesLabel={props.likeWidget?.yesLabel}
+                    noLabel={props.likeWidget?.noLabel}
+                    hideCounters={props.likeWidget?.hideCounters}
+                    variant={props.likeWidget?.variant}
+                    showProgressBar={props.likeWidget?.showProgressBar}
+                    progressBarDescription={
+                      props.likeWidget?.progressBarDescription
+                    }
+                  />
+                  <Spacer size={1} />
+                </>
+              ) : null}
 
-            {displayStatus ? (
-              <div className="resource-detail-side-section">
-                <Spacer size={1} />
-                <Heading level={3} appearance="utrecht-heading-4">Status</Heading>
-                <Spacer size={0.5} />
-                <div className="resource-detail-pil-list-content">
-                  {resource.statuses?.map((s: { label: string }) => (
-                    <Pill light rounded text={s.label}></Pill>
-                  ))}
+              {displayStatus ? (
+                <div className="resource-detail-side-section">
+                  <Spacer size={1} />
+                  <Heading level={3} appearance="utrecht-heading-4">Status</Heading>
+                  <Spacer size={0.5} />
+                  <div className="resource-detail-pil-list-content">
+                    {resource.statuses?.map((s: { label: string }) => (
+                      <Pill light rounded text={s.label}></Pill>
+                    ))}
+                  </div>
+
+                  <Spacer size={2} />
                 </div>
+              ) : null}
 
-                <Spacer size={2} />
-              </div>
-            ) : null}
+              {displayTags ? (
+                <div className="resource-detail-side-section">
+                  <Heading level={3} appearance="utrecht-heading-4">Tags</Heading>
 
-            {displayTags ? (
-              <div className="resource-detail-side-section">
-                <Heading level={3} appearance="utrecht-heading-4">Tags</Heading>
-
-                <Spacer size={0.5} />
-                <div className="resource-detail-pil-list-content">
-                  {(resource.tags as Array<{ type: string; name: string }>)
-                    ?.filter((t) => t.type !== 'status')
-                    ?.map((t) => <Pill text={t.name} />)}
+                  <Spacer size={0.5} />
+                  <div className="resource-detail-pil-list-content">
+                    {(resource.tags as Array<{ type: string; name: string }>)
+                      ?.filter((t) => t.type !== 'status')
+                      ?.map((t) => <Pill text={t.name} />)}
+                  </div>
+                  <Spacer size={2} />
                 </div>
-                <Spacer size={2} />
-              </div>
-            ) : null}
+              ) : null}
 
-            {displaySocials ? (
-              <div className="resource-detail-side-section">
-                <ShareLinks title={'Deel dit'} />
+              {displaySocials ? (
+                <div className="resource-detail-side-section">
+                  <ShareLinks title={'Deel dit'} />
+                </div>
+              ) : null}
+            </div>
+            {(!!displayDocuments && !!resource && Array.isArray(resource.documents) && resource.documents.length > 0) && (
+              <div className="aside--content">
+                <Spacer size={2} />
+                <div className='document-download-container'>
+                  {!!documentsTitle && (<Heading level={2} appearance="utrecht-heading-4">{documentsTitle}</Heading>)}
+                  {!!documentsDesc && (<Paragraph>{documentsDesc}</Paragraph>)}
+                  <ButtonGroup>
+                    {resource.documents?.map((document: DocumentType, index: number) => (
+                      <ButtonLink
+                        appearance="primary-action-button"
+                        className="osc counter-container"
+                        download
+                        href={document.url}
+                        key={index}
+                      >
+                        <Icon
+                          icon="ri-download-2-fill"
+                        />
+                        {document.name}
+                      </ButtonLink>
+                    ))}
+                  </ButtonGroup>
+                </div>
               </div>
-            ) : null}
+            )}
+
           </aside>
         ) : null}
       </div>

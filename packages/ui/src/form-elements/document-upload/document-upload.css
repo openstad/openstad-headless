@@ -1,0 +1,21 @@
+.filepond--wrapper .filepond--credits {
+ display: none !important;
+}
+
+html .filepond--item {
+ height: auto !important;
+}
+
+html .filepond--file-status {
+ max-width: 100%;
+ -webkit-flex-shrink: 1;
+ flex-shrink: 1;
+}
+
+html [data-filepond-item-state*=error] .filepond--item-panel, html [data-filepond-item-state*=invalid] .filepond--item-panel{
+ background-color: #c44e47 !important;
+}
+
+html .filepond--file-status * {
+ white-space: normal;
+}

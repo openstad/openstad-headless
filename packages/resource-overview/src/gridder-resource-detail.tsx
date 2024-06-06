@@ -10,22 +10,43 @@ import './gridder-resource-detail.css';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
-import { Button, Heading1, Heading4, Heading5, Paragraph } from "@utrecht/component-library-react";
+import {
+  Button,
+  ButtonGroup,
+  ButtonLink,
+  Heading,
+  Heading1,
+  Heading4,
+  Paragraph
+} from "@utrecht/component-library-react";
+import { Icon } from "../../ui/src/icon"
+
 export const GridderResourceDetail = ({
   resource,
   onRemoveClick,
   isModerator = false,
   loginUrl = '',
+  displayDocuments = false,
+  documentsTitle = '',
+  documentsDesc = '',
 }: {
   resource: any;
   onRemoveClick?: (resource: any) => void;
   isModerator?: boolean;
   loginUrl?: string;
+  displayDocuments?: boolean;
+  documentsTitle?: string;
+  documentsDesc?: string;
 }) => {
   // When resource is correctly typed the we will not need :any
   const theme = resource.tags?.filter((t: any) => t.type === 'theme')?.at(0);
   const area = resource.tags?.filter((t: any) => t.type === 'area')?.at(0);
 
+  type DocumentType = {
+    name?: string;
+    url?: string;
+  }
+  
   let defaultImage = '';
 
   interface Tag {
@@ -74,6 +95,33 @@ export const GridderResourceDetail = ({
               <Paragraph>{resource.description}</Paragraph>
             </div>
           </div>
+
+          { (!!displayDocuments && !!resource && Array.isArray(resource.documents) && resource.documents.length > 0 ) && (
+            <>
+              <Spacer size={2} />
+              <div className="document-download-container">
+                {!!documentsTitle && (<Heading level={2} appearance="utrecht-heading-4">{documentsTitle}</Heading>)}
+                {!!documentsDesc && (<Paragraph>{documentsDesc}</Paragraph>)}
+                <Spacer size={2} />
+                <ButtonGroup>
+                  {resource.documents?.map((document: DocumentType, index: number) => (
+                    <ButtonLink
+                      appearance="primary-action-button"
+                      className="osc counter-container"
+                      download
+                      href={document.url}
+                      key={index}
+                    >
+                      <Icon
+                        icon="ri-download-2-fill"
+                      />
+                      {document.name}
+                    </ButtonLink>
+                  ))}
+                </ButtonGroup>
+              </div>
+            </>
+          )}
           <Spacer size={2} />
           <div className="osc-gridder-resource-detail-actions">
             <Button
