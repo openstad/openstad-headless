@@ -67,6 +67,7 @@ router
       projectId: req.params.projectId,
       useDifferentSubmitAddress: req.params.useDifferentSubmitAddress,
       newSubmitAddress: req.params.newSubmitAddress,
+      defaultResourceImage: req.params.defaultResourceImage,
     };
 
     db.Tag.authorizeData(data, 'create', req.user)

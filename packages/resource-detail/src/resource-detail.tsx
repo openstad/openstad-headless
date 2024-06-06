@@ -101,6 +101,23 @@ function ResourceDetail({
   if (!resource) return null;
   const shouldHaveSideColumn =
     displayLikes || displayTags || displayStatus || displaySocials;
+
+  let tagDefaultResourceImage = '';
+
+  interface Tag {
+    name: string;
+    defaultResourceImage?: string;
+  }
+
+  if (Array.isArray(resource?.tags)) {
+    const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+
+    const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+    tagDefaultResourceImage = tagWithImage?.defaultResourceImage;
+  }
+
+  const defaultImage = !!tagDefaultResourceImage ? [{ url: tagDefaultResourceImage }] : [{ url: '' }];
+
   return (
     <section>
       <div
@@ -113,7 +130,7 @@ function ResourceDetail({
             <article className="osc-resource-detail-content-items">
               {displayImage  && (
                 <Carousel
-                  items={resource.images}
+                  items={ ( Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : defaultImage}
                   itemRenderer={(i) => (
                     <Image
                       src={i.url}
