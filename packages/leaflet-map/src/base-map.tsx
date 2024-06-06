@@ -44,8 +44,8 @@ const BaseMap = ({
 
   tilesVariant = 'nlmaps',
   tiles = undefined,
-  minZoom = 0,
-  maxZoom = 25,
+  minZoom = 12,
+  maxZoom = 0,
 
   categorize = undefined,
 
