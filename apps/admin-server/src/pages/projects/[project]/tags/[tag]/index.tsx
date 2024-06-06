@@ -347,7 +347,7 @@ export default function ProjectTagEdit() {
                       form={form}
                       imageLabel="Upload hier een afbeelding die vervolgens automatisch wordt ingesteld als de standaardafbeelding voor de resource die aan deze tag is gekoppeld"
                       fieldName="image"
-                      allowedTypes="image/*"
+                      allowedTypes={["image/*"]}
                       onImageUploaded={(imageResult) => {
                         const result = typeof (imageResult.url) !== 'undefined' ? imageResult.url : '';
                         form.setValue('defaultResourceImage', result);
