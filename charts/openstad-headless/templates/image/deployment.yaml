@@ -60,9 +60,9 @@ spec:
           - mountPath: {{ .Values.image.volumes.data.documentMountPath | default "/opt/openstad-headless/apps/image-server/documents" }}
             name: data-docs-vol
       volumes:
-        - name: data-docs-vol
-          persistentVolumeClaim:
-            claimName: docs-data-claim
         - name: data-vol
           persistentVolumeClaim:
             claimName: image-data-claim
+        - name: data-docs-vol
+          persistentVolumeClaim:
+            claimName: docs-data-claim
