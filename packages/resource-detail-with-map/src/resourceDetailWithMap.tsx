@@ -112,7 +112,7 @@ function ResourceDetailWithMap({
     projectId: props.projectId,
   });
 
-  
+
   let countButtonElement:React.JSX.Element|null = null;
   if (countButton?.show) {
     countButtonElement = (
@@ -150,15 +150,21 @@ function ResourceDetailWithMap({
 
   if (!resource) return null;
 
-  let defaultImage = '';
+  let tagDefaultResourceImage = '';
+
+  interface Tag {
+    name: string;
+    defaultResourceImage?: string;
+   }
 
   if (Array.isArray(resource?.tags)) {
-    const sortedTags = resource.tags.sort((a, b) => a.name.localeCompare(b.name));
-    const tagWithImage = sortedTags.find(tag => tag.defaultResourceImage);
-    defaultImage = tagWithImage?.defaultResourceImage || '';
+    const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+
+    const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+    tagDefaultResourceImage = tagWithImage?.defaultResourceImage;
   }
 
-  defaultImage = !!defaultImage ? [{'url': defaultImage}] : '';
+  const defaultImage = !!tagDefaultResourceImage ? [{ url: tagDefaultResourceImage }] : [{ url: '' }];
 
   return (
     <section className="osc-resource-detail-content osc-resource-detail-grid">

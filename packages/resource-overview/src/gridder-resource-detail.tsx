@@ -25,11 +25,18 @@ export const GridderResourceDetail = ({
   // When resource is correctly typed the we will not need :any
   const theme = resource.tags?.filter((t: any) => t.type === 'theme')?.at(0);
   const area = resource.tags?.filter((t: any) => t.type === 'area')?.at(0);
+
   let defaultImage = '';
 
+  interface Tag {
+    name: string;
+    defaultResourceImage?: string;
+   }
+
   if (Array.isArray(resource?.tags)) {
-    const sortedTags = resource.tags.sort((a, b) => a.name.localeCompare(b.name));
-    const tagWithImage = sortedTags.find(tag => tag.defaultResourceImage);
+    const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+
+    const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
     defaultImage = tagWithImage?.defaultResourceImage || '';
   }
 

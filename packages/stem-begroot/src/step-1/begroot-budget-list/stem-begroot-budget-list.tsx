@@ -65,9 +65,13 @@ export const StemBegrootBudgetList = ({
             {selectedResources.map((resource) => {
               let defaultImage = '';
 
+              interface Tag {
+                name: string;
+                defaultResourceImage?: string;
+              }
               if (Array.isArray(resource?.tags)) {
-                const sortedTags = resource.tags.sort((a, b) => a.name.localeCompare(b.name));
-                const tagWithImage = sortedTags.find(tag => tag.defaultResourceImage);
+                const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+                const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
                 defaultImage = tagWithImage?.defaultResourceImage || '';
               }
 

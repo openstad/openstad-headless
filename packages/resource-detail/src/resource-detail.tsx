@@ -102,15 +102,21 @@ function ResourceDetail({
   const shouldHaveSideColumn =
     displayLikes || displayTags || displayStatus || displaySocials;
 
-  let defaultImage = '';
+  let tagDefaultResourceImage = '';
 
-  if (Array.isArray(resource?.tags)) {
-    const sortedTags = resource.tags.sort((a, b) => a.name.localeCompare(b.name));
-    const tagWithImage = sortedTags.find(tag => tag.defaultResourceImage);
-    defaultImage = tagWithImage?.defaultResourceImage || '';
+  interface Tag {
+    name: string;
+    defaultResourceImage?: string;
   }
 
-  defaultImage = !!defaultImage ? [{'url': defaultImage}] : '';
+  if (Array.isArray(resource?.tags)) {
+    const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+
+    const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+    tagDefaultResourceImage = tagWithImage?.defaultResourceImage;
+  }
+
+  const defaultImage = !!tagDefaultResourceImage ? [{ url: tagDefaultResourceImage }] : [{ url: '' }];
 
   return (
     <section>
