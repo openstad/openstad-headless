@@ -140,15 +140,6 @@ app.get('/image/*',
  */
 app.post('/image',
   imageUpload.single('image'), (req, res, next) => {
-    // req.file is the `image` file
-    // req.body will hold the text fields, if there were any
-    //
-    const createdCombination = secret + req.query.exp_date
-    const verification = crypto.createHmac("sha256", createdCombination).digest("hex")
-    if(Date.now() < req.query.exp_date && verification === req.query.signature) {
-      console.log("This post has been successfully verified!")
-    }
-
     const fileName = req.file.filename || req.file.key;
     let url = `${process.env.APP_URL}/image/${fileName}`;
 
@@ -166,14 +157,6 @@ app.post('/image',
 
 app.post('/images',
   imageUpload.array('image', 30), (req, res, next) => {
-        // req.files is array of `images` files
-        // req.body will contain the text fields, if there were any
-        const createdCombination = secret + req.query.exp_date
-        const verification = crypto.createHmac("sha256", createdCombination).digest("hex")
-        if(Date.now() < req.query.exp_date && verification === req.query.signature) {
-            console.log("This post has been successfully verified!")
-        }
-
         res.send(JSON.stringify(req.files.map((file) => {
             let url = `${process.env.APP_URL}/image/${file.filename}`;
 
@@ -226,7 +209,6 @@ const documentMulterConfig = {
       cb(null, process.env.DOCUMENTS_DIR || 'documents/');
     },
     filename: function (req, file, cb) {
-
       const uniqueFileName = createFilename(file.originalname)
 
       cb(null, uniqueFileName);
@@ -248,34 +230,11 @@ app.get('/document/*',
     return res.download(`documents/${req.url}`);
   });
 
-const allowedExtensions = [
-  'pdf',
-  'doc',
-  'docx',
-  'xls',
-  'xlsx',
-  'ppt',
-  'pptx'
-];
-
 /**
  *  The url for creating one Document
  */
 app.post('/document',
   documentUpload.single('document'), (req, res, next) => {
-  console.log( 'req.file', req.file );
-    const createdCombination = secret + req.query.exp_date;
-    const verification = crypto.createHmac("sha256", createdCombination).digest("hex");
-    if (Date.now() < req.query.exp_date && verification === req.query.signature) {
-      console.log("This post has been successfully verified!")
-    }
-
-    const fileExtension = req.file.originalname.split('.').pop();
-
-    if (!allowedExtensions.includes(fileExtension.toLowerCase())) {
-      return res.status(400).json({ error: 'Invalid file extension' });
-    }
-
     const fileName = createFilename(req.file.originalname);
 
     let url = `${process.env.APP_URL}/document/${encodeURIComponent(fileName)}`;
@@ -294,21 +253,6 @@ app.post('/document',
 
 app.post('/documents',
   documentUpload.array('document', 30), (req, res, next) => {
-    const createdCombination = secret + req.query.exp_date;
-    const verification = crypto.createHmac("sha256", createdCombination).digest("hex");
-    if (Date.now() < req.query.exp_date && verification === req.query.signature) {
-      console.log("This post has been successfully verified!")
-    }
-
-    const invalidFiles = req.files.filter(file => {
-      const fileExtension = file.originalname.split('.').pop();
-      return !allowedExtensions.includes(fileExtension.toLowerCase());
-    });
-
-    if (invalidFiles.length > 0) {
-      return res.status(400).json({ error: 'Invalid file extension' });
-    }
-
     res.send(JSON.stringify(req.files.map((file) => {
       let url = `${process.env.APP_URL}/document/${encodeURIComponent(file.filename)}`;
 
