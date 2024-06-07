@@ -2,7 +2,7 @@ import React, {FC, useState} from "react";
 import {FormField, FormFieldDescription, FormLabel, Paragraph} from "@utrecht/component-library-react";
 import './map.css';
 import {EditorMap} from "@openstad-headless/leaflet-map/src/editor-map";
-import DataStore from "@openstad-headless/data-store/src";
+import DataStore from '@openstad-headless/data-store/src';
 import {BaseProps} from "@openstad-headless/types/base-props.js";
 import {ProjectSettingProps} from "@openstad-headless/types/project-setting-props.js";
 import {LocationType} from "@openstad-headless/leaflet-map/src/types/location";
@@ -35,16 +35,17 @@ const MapField: FC<MapProps> = ({
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
-    const datastore: any = new DataStore({
+    const datastore = new DataStore({
         projectId: props.projectId,
         api: props.api,
+        config: { api: props.api },
     });
 
     const { data: areas } = datastore.useArea({
         projectId: props.projectId
     });
 
-    let areaId = props?.project?.areaId || false;
+    let areaId = props?.map?.areaId || false;
     const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];
 
     function calculateCenter(polygon: Point[]) {
@@ -75,6 +76,11 @@ const MapField: FC<MapProps> = ({
         center = calculateCenter(polygon);
     }
 
+    const zoom = {
+        minZoom: props?.map?.minZoom ? parseInt(props.map.minZoom) : 7,
+        maxZoom: props?.map?.maxZoom ? parseInt(props.map.maxZoom) : 20
+    };
+
     return (
       <FormField type="text">
           <Paragraph className="utrecht-form-field__label">
@@ -95,6 +101,7 @@ const MapField: FC<MapProps> = ({
                   markerIcon={undefined}
                   centerOnEditorMarker={false}
                   {...props}
+                  {...zoom}
               />
           </div>
       </FormField>
