@@ -108,16 +108,6 @@ export default function ProjectSettingsMap() {
             <form
               onSubmit={form.handleSubmit(onSubmit)}
               className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
-              <FormObjectSelectField
-                form={form}
-                fieldName="areaId"
-                fieldLabel="Polygon voor kaarten"
-                fieldInfo="Op de pagina 'Polygonen' kun je een eigen gebied aanmaken. Selecteer hieronder het gebied waar dit project onder valt."
-                items={areas}
-                keyForValue="id"
-                label={(area: any) => `${area.name}`}
-                noSelection="&nbsp;"
-              />
 
               <FormField
                 control={form.control}
@@ -129,7 +119,7 @@ export default function ProjectSettingsMap() {
                       <InfoDialog content="Gebruik een waarde tussen 7 en 20 om het zoomniveau in te stellen. Bij niveau 7 is heel Nederland zichtbaar, terwijl niveau 20 het maximale detailniveau vertegenwoordigt, waarbij je kunt inzoomen tot individuele huizen." />
                     </FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="1" {...field} />
+                      <Input type="number" min="7" max="20" placeholder="7" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -146,11 +136,22 @@ export default function ProjectSettingsMap() {
                       <InfoDialog content="Gebruik een waarde tussen 7 en 20 om het zoomniveau in te stellen. Bij niveau 7 is heel Nederland zichtbaar, terwijl niveau 20 het maximale detailniveau vertegenwoordigt, waarbij je kunt inzoomen tot individuele huizen." />
                     </FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="1" {...field} />
+                      <Input type="number" min="7" max="20" placeholder="20" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
+              />
+
+              <FormObjectSelectField
+                form={form}
+                fieldName="areaId"
+                fieldLabel="Polygon voor kaarten"
+                fieldInfo="Op de pagina 'Polygonen' kun je een eigen gebied aanmaken. Selecteer hieronder het gebied waar dit project onder valt."
+                items={areas}
+                keyForValue="id"
+                label={(area: any) => `${area.name}`}
+                noSelection="&nbsp;"
               />
 
               <Button type="submit" className="w-fit col-span-full">
