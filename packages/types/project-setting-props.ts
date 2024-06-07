@@ -68,5 +68,6 @@ export type ProjectSettingProps = {
   map: {
     minZoom: string;
     maxZoom: string;
+    areaId: string;
   }
 };
