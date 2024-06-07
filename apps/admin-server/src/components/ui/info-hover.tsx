@@ -16,6 +16,7 @@ const InfoDialog: React.FC<InfoDialogProps> = ({ content }) => {
         fontSize: '1rem',
         fontWeight: '400',
         lineHeight: '1.3rem',
+        zIndex: '11',
     };
 
     return (
