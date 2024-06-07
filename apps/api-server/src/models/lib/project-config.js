@@ -275,6 +275,24 @@ module.exports = {
       }
     }
   },
+
+  map: {
+    type: "object",
+    subset: {
+      minZoom: {
+        type: "string",
+        default: '7',
+      },
+      maxZoom: {
+        type: "string",
+        default: '20',
+      },
+      areaId: {
+        type: 'string',
+        default: '0',
+      }
+    }
+  },
   
   host: {
     status: null,
