@@ -43,6 +43,7 @@ export default function ProjectSettingsMap() {
   const { project } = router.query;
   const { data, updateProject } = useProject();
   const { data: areas } = useArea(project as string);
+  const [disabled, setDisabled]  = useState(false);
 
   const defaults = useCallback(
     () => {
@@ -82,6 +83,20 @@ export default function ProjectSettingsMap() {
       console.error('could not update', error);
     }
   }
+
+  useEffect(() => {
+    const minZoomValue = form.watch('minZoom');
+    const maxZoomValue = form.watch('maxZoom');
+
+    if ( parseInt(minZoomValue) >= parseInt(maxZoomValue) ) {
+      form.setError('minZoom', {type: 'manual', message: 'Waarde kan niet hoger zijn dan het inzoom niveau'});
+      form.setError('maxZoom', {type: 'manual', message: 'Waarde kan niet hoger zijn dan het uitzoom niveau'});
+      setDisabled(true);
+    } else {
+      form.clearErrors(['minZoom', 'maxZoom'])
+      setDisabled(false);
+    }
+  }, [ form.watch('minZoom'), form.watch('maxZoom') ] );
 
   return (
     <div>
@@ -154,7 +169,11 @@ export default function ProjectSettingsMap() {
                 noSelection="&nbsp;"
               />
 
-              <Button type="submit" className="w-fit col-span-full">
+              <Button
+                type="submit"
+                className="w-fit col-span-full"
+                disabled={disabled}
+              >
                 Opslaan
               </Button>
             </form>
