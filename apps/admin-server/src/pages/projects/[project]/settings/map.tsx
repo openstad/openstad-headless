@@ -88,7 +88,7 @@ export default function ProjectSettingsMap() {
     const minZoomValue = form.watch('minZoom');
     const maxZoomValue = form.watch('maxZoom');
 
-    if ( parseInt(minZoomValue) >= parseInt(maxZoomValue) ) {
+    if ( !!minZoomValue && !!maxZoomValue && parseInt(minZoomValue) >= parseInt(maxZoomValue) ) {
       form.setError('minZoom', {type: 'manual', message: 'Waarde kan niet hoger zijn dan het inzoom niveau'});
       form.setError('maxZoom', {type: 'manual', message: 'Waarde kan niet hoger zijn dan het uitzoom niveau'});
       setDisabled(true);
