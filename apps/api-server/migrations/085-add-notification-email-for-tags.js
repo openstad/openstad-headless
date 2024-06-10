@@ -5,7 +5,7 @@ module.exports = {
     await queryInterface.addColumn('tags', 'newSubmitAddress', {
       type: Sequelize.TEXT,
       allowNull: true,
-      after: 'extraFunctionality',
+      after: 'listIcon',
     });
   },
 

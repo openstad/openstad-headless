@@ -6,7 +6,7 @@ module.exports = {
       type: Sequelize.BOOLEAN,
       allowNull: true,
       default: false,
-      after: 'extraFunctionality',
+      after: 'listIcon',
     });
   },
 
