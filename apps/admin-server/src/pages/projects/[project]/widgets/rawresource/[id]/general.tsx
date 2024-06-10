@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -76,6 +76,7 @@ export default function WidgetRawGeneral(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Resource</FormLabel>
+                <FormDescription>Indien er geen resource is gekoppeld, wordt er gecontroleerd of er een resource aanwezig is in de URL. In dat geval zal deze resource automatisch worden gekoppeld.</FormDescription>
                 <Select
                   onValueChange={(e) => {
                     field.onChange(e);
@@ -88,7 +89,7 @@ export default function WidgetRawGeneral(
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">Selecteer een resource</SelectItem>
+                    <SelectItem value="">Geen resource koppelen</SelectItem>
                     {data?.map((resource: any) => (
                       <SelectItem key={resource.id} value={`${resource.id}`}>
                         {resource.title}
