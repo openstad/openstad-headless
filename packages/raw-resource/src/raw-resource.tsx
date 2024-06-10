@@ -26,6 +26,8 @@ function RawResource(props: RawResourceWidgetProps) {
     targetUrl: props.resourceIdRelativePath,
   })); // todo: make it a number throughout the code
 
+  props.resourceId = resourceId
+
   const datastore = new DataStore({
     projectId: props.projectId,
     resourceId: resourceId,
