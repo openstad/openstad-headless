@@ -65,4 +65,9 @@ export type ProjectSettingProps = {
     visibleWidgets: Array<string>;
   };
   ignoreBruteForce: Array<string>;
+  map: {
+    minZoom: string;
+    maxZoom: string;
+    areaId: string;
+  }
 };

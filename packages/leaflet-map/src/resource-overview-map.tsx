@@ -125,7 +125,7 @@ const ResourceOverviewMap = ({
     projectId: props.projectId
   });
 
-  let areaId = props?.project?.areaId || false;
+  let areaId = props?.map?.areaId || false;
   const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];
 
   function calculateCenter(polygon: Point[]) {
@@ -156,10 +156,16 @@ const ResourceOverviewMap = ({
     center = calculateCenter(polygon);
   }
 
+  const zoom = {
+    minZoom: props?.map?.minZoom ? parseInt(props.map.minZoom) : 7,
+    maxZoom: props?.map?.maxZoom ? parseInt(props.map.maxZoom) : 20
+  };
+
   return (
     <>
       <BaseMap
         {...props}
+        {...zoom}
         area={polygon}
         autoZoomAndCenter="area"
         categorize={{ categories, categorizeByField }}

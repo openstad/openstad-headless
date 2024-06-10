@@ -12,4 +12,6 @@ export type EditorMapWidgetProps = BaseProps &
     centerOnEditorMarker: boolean;
     onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
     fieldRequired?: boolean;
+    minZoom: number;
+    maxZoom: number;
   };
