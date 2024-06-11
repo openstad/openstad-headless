@@ -16,12 +16,15 @@ import {
 import { Input } from '../../../../../../components/ui/input';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import useResources from '@/hooks/use-resources';
+import InfoDialog from "@/components/ui/info-hover";
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
   documentWidth: z.number().optional(),
   documentHeight: z.number().optional(),
   zoom: z.number().optional(),
+  minZoom: z.number().optional(),
+  maxZoom: z.number().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -43,7 +46,9 @@ export default function DocumentGeneral(
       resourceId: props.resourceId || undefined,
       documentWidth: props.documentWidth || 1920,
       documentHeight: props.documentHeight || 1080,
-      zoom: props.zoom || 0,
+      zoom: props.zoom || 1,
+      minZoom: props.minZoom || -6,
+      maxZoom: props.maxZoom || 10,
     },
   });
 
@@ -114,10 +119,67 @@ export default function DocumentGeneral(
           name="zoom"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Standaard zoom waarde (Kleiner is verder uitgezoomd).</FormLabel>
+              <FormLabel>
+                Standaard zoomwaarde
+                <InfoDialog
+                  content="Dit is de standaard zoomwaarde van de kaart. Een kleinere waarde betekent dat de kaart verder is uitgezoomd, waardoor een groter gebied zichtbaar is."
+                />
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="1"
+                  defaultValue={field.value}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    onFieldChange(field.name, e.target.value);
+                  }}
+                />
+              </FormControl>
+            </FormItem>
+
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="minZoom"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Maximale zoomniveau voor uitzoomen
+                <InfoDialog
+                  content="Dit is het maximale niveau waarop gebruikers kunnen uitzoomen op de kaart. Hoe kleiner het ingevulde getal, hoe verder gebruikers kunnen uitzoomen om meer detail te zien."
+                />
+              </FormLabel>
               <FormControl>
                 <Input
                   placeholder="-6"
+                  defaultValue={field.value}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    onFieldChange(field.name, e.target.value);
+                  }}
+                />
+              </FormControl>
+            </FormItem>
+
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="maxZoom"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Maximale zoomniveau voor inzoomen
+                <InfoDialog
+                  content="Dit is het maximale niveau waarop gebruikers kunnen inzoomen op de kaart. Hoe hoger het ingevulde getal, hoe verder gebruikers kunnen inzoomen om meer detail te zien."
+                />
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="10"
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
