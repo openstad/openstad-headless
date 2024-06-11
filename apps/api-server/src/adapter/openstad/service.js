@@ -301,8 +301,8 @@ service.updateClient = async function({ authConfig, project }) {
         canCreateNewUsers: project.config.users?.canCreateNewUsers
       },
       styling: {
-        logo: project.config.styling?.logo,
-        favicon: project.config.styling?.favicon,
+        logo: authConfig?.config?.styling?.logo || project.config.styling?.logo,
+        favicon: authConfig?.config?.styling?.favicon || project.config.styling?.favicon,
         inlineCSS: project.config.styling?.inlineCSS,
         displayClientName: project.config.styling?.displayClientName,
       },
