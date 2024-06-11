@@ -7,15 +7,16 @@
         <!-- Company Header -->
       </mj-raw>
       <mj-section>
-        <mj-image src="https://ci3.googleusercontent.com/meips/ADKq_NaAOJ8-rc0buYlKOzBv3PCsHUNMvL72LbsayLaMjJV_NdAiNiI8ops0z7dQRQeJhXS7I3kf5MSJS2Jdwq0y6rPFlgrtD7o7TD2otUGELpZQcCZmPA=s0-d-e1-ft#https://auth.openstad-ams-acc.savvy.codes/email/logo-small.png" height="70px" width="99px">
-        </mj-image>
+        <mj-column width="200px">
+          <mj-image src="{{ imagePath }}/logo-openstad.png"> </mj-image>
+        </mj-column>
       </mj-section>
       <mj-raw>
         <!-- Image Header -->
       </mj-raw>
       <mj-section>
         <mj-column width="600px">
-          <mj-image src="https://ci3.googleusercontent.com/meips/ADKq_NbMV2Gxxrz-2nT553nqOZz4rd7vpAsjRCYed7jRt9tcjprZn4qFgaGsSGCJr3TmwbumBh8XAU11x9FdtsKXJtK11ML1ah5-FEDSiqGGIeLswLoekbQ=s0-d-e1-ft#https://auth.openstad-ams-acc.savvy.codes/email/mail-header.jpg"></mj-image>
+          <mj-image src="{{ imagePath }}/mail-header.jpg"></mj-image>
         </mj-column>
       </mj-section>
       <mj-raw>
@@ -26,7 +27,7 @@
           <mj-text font-size="20px" font-family="Helvetica Neue">Een bestaande resource is aangepast.</mj-text>
           <mj-text>Beste administrator,</mj-text>
           <mj-text color="#525252">Er is recentelijk een resource aangepast. Hieronder kunt u direct de nieuwe resource bekijken in het admin-paneel.</mj-text>
-          <mj-button background-color="#EC0000" href="{{redirectUrl}}">Weergeven</mj-button>
+          <mj-button background-color="#12B886" href="{{redirectUrl}}">Weergeven</mj-button>
         </mj-column>
       </mj-section>
       <mj-raw>
