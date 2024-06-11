@@ -9,7 +9,8 @@ import {
   Heading,
   Textarea,
   Button,
-  FormLabel
+  FormLabel,
+  Checkbox,
 } from '@utrecht/component-library-react';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import React, { useState, useRef, useEffect } from 'react';
@@ -17,6 +18,7 @@ import './document-map.css';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { MapContainer, ImageOverlay, useMapEvents, Popup, Marker, MarkerProps } from 'react-leaflet';
 import { LatLngBoundsLiteral, CRS, Icon } from 'leaflet';
+import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 
 import 'leaflet/dist/leaflet.css';
 
@@ -42,10 +44,15 @@ function DocumentMap({
   iconHighlight = 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309740_1280.png',
   documentWidth = 1920,
   documentHeight = 1080,
-  resourceId,
   sentiment = 'no sentiment',
   ...props
 }: DocumentMapProps) {
+
+  let resourceId: string | undefined = String(getResourceId({
+    resourceId: parseInt(props.resourceId || ''),
+    url: document.location.href,
+    targetUrl: props.resourceIdRelativePath,
+  })); // todo: make it a number throughout the code
 
   const datastore = new DataStore({
     projectId: props.projectId,
@@ -73,6 +80,8 @@ function DocumentMap({
   const [shortLengthError, setShortLengthError] = useState(false);
   const [longLengthError, setLongLengthError] = useState(false);
   const [randomId, setRandomId] = useState('');
+
+  const [toggleMarker, setToggleMarker] = useState(true);
 
   const MapEvents = () => {
     const map = useMapEvents({
@@ -185,6 +194,10 @@ function DocumentMap({
   return (
     <div className="documentMap--container">
       <div className="content" tabIndex={0} ref={contentRef}>
+        <div className='toggleMarkers'>
+          <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)}/>
+          <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
+        </div>
         <section className="content-intro">
           {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
           {resource.summary ? <Heading level={2} appearance={'utrecht-heading-5'}>{resource.summary}</Heading> : null}
@@ -198,20 +211,20 @@ function DocumentMap({
           showForm={false}
         />
       </div>
-      <div className='map-container'>
+      <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''}`}>
         <MapContainer center={[0, 0]} zoom={zoom} crs={CRS.Simple} minZoom={-6}>
           <MapEvents />
           {comments
-            .filter((comment:any) => !!comment.location)
+            .filter((comment: any) => !!comment.location)
             .map((comment: any, index: number) => (
-            <MarkerWithId
-              key={index}
-              id={`marker-${index}`}
-              index={index}
-              position={comment.location}
-            >
-            </MarkerWithId>
-          ))}
+              <MarkerWithId
+                key={index}
+                id={`marker-${index}`}
+                index={index}
+                position={comment.location}
+              >
+              </MarkerWithId>
+            ))}
           <ImageOverlay
             url={resource.images ? resource.images[0].url : ''}
             bounds={imageBounds}

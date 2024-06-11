@@ -1,0 +1,10 @@
+
+> @openstad-headless/api-server@1.0.0 migrate-database
+> node ./scripts/migrate-database.js
+
+{ event: 'migrating', name: '083-default-tags-and-statusses.js' }
+{
+  event: 'migrated',
+  name: '083-default-tags-and-statusses.js',
+  durationSeconds: 0.067
+}
