@@ -260,7 +260,7 @@ function DocumentMap({
           {popupPosition && (
             <Popup position={popupPosition}>
               {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
-                <Paragraph>Inloggen om deel te nemen aan de discussie.</Paragraph>
+                <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
               ) :
                 <form>
                   <FormLabel htmlFor="commentBox">Voeg een opmerking toe</FormLabel>
