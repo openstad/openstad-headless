@@ -33,6 +33,8 @@ export type DocumentMapProps = BaseProps &
     documentWidth?: number;
     documentHeight?: number;
     zoom?: number;
+    minZoom?: number;
+    maxZoom?: number;
     iconDefault?: string;
     iconHighlight?: string;
     sentiment?: string;
@@ -44,6 +46,8 @@ export type DocumentMapProps = BaseProps &
 
 function DocumentMap({
   zoom = 1,
+  minZoom = -6,
+  maxZoom = 10,
   iconDefault,
   iconHighlight = 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309740_1280.png',
   documentWidth = 1920,
@@ -236,7 +240,7 @@ function DocumentMap({
         />
       </div>
       <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''}`}>
-        <MapContainer center={[0, 0]} zoom={zoom} crs={CRS.Simple} minZoom={-6}>
+        <MapContainer center={[0, 0]} crs={CRS.Simple} maxZoom={maxZoom} minZoom={minZoom} zoom={zoom} >
           <MapEvents />
           {comments
             .filter((comment: any) => !!comment.location)
