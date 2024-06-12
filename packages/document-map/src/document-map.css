@@ -88,7 +88,7 @@
 }
 
 .leaflet-container .leaflet-marker-pane .leaflet-marker-icon {
-  opacity: .5;
+  opacity: 0.5;
 }
 
 .leaflet-container .leaflet-marker-pane .leaflet-marker-icon.--highlightedIcon {
@@ -104,16 +104,25 @@
 }
 
 
-.toggleMarkers{
+.documentMap--header {
   display: flex;
-  gap: .5rem;
+  gap: 0.5rem;
   cursor: pointer;
-  justify-content: flex-end;
+  justify-content: space-between;
   margin-bottom: 20px;
   border-bottom: solid 1px #f3f3f3;
   padding-bottom: 20px;
+  align-items: center;
 }
 
-.--hideMarkers .leaflet-container .leaflet-marker-pane .leaflet-marker-icon{
+.documentMap--header .toggleMarkers {
+  display: flex;
+  gap: 0.5rem;
+}
+.documentMap--header .toggleMarkers:only-child {
+  margin-left: auto;
+}
+
+.--hideMarkers .leaflet-container .leaflet-marker-pane .leaflet-marker-icon {
   display: none;
 }

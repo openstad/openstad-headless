@@ -29,6 +29,7 @@ const formSchema = z.object({
   canLike: z.boolean().optional(),
   descriptionMinLength: z.coerce.number().gt(0).optional(),
   descriptionMaxLength: z.coerce.number().gt(0).optional(),
+  adminLabel: z.string().optional(),
 });
 
 export default function ProjectSettingsComments() {
@@ -47,6 +48,7 @@ export default function ProjectSettingsComments() {
         canLike: data?.config?.comments?.canLike,
         descriptionMinLength: data?.config?.comments?.descriptionMinLength,
         descriptionMaxLength: data?.config?.comments?.descriptionMaxLength,
+        adminLabel: data?.config?.comments?.adminLabel,
     }),
     [data]
   );
@@ -71,6 +73,7 @@ export default function ProjectSettingsComments() {
           canLike: values.canLike,
           descriptionMinLength: values.descriptionMinLength,
           descriptionMaxLength: values.descriptionMaxLength,
+          adminLabel: values.adminLabel,
         },
       },
       );
@@ -223,6 +226,20 @@ export default function ProjectSettingsComments() {
                 />
 
               )}
+
+<FormField
+                  control={form.control}
+                  name="adminLabel"
+                  render={({ field }) => (
+                    <FormItem className="col-span-full md:col-span-1 flex flex-col">
+                      <FormLabel>Admin label bij reacties</FormLabel>
+                      <FormControl>
+                        <Input placeholder="typ een tekst" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
               <Button type="submit" className="w-fit col-span-full">
                 Opslaan

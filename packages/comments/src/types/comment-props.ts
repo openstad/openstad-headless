@@ -7,4 +7,5 @@ export type CommentProps = {
   index?: number;
   showDateSeperately?: boolean;
   submitComment?: (e: any) => void;
+  adminLabel?: string;
 };

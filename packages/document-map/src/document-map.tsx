@@ -11,6 +11,7 @@ import {
   Button,
   FormLabel,
   Checkbox,
+  Link
 } from '@utrecht/component-library-react';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import React, { useState, useRef, useEffect } from 'react';
@@ -37,6 +38,7 @@ export type DocumentMapProps = BaseProps &
     sentiment?: string;
     canComment?: boolean;
     requiredUserRole?: string;
+    url?: string;
   };
 
 
@@ -75,8 +77,6 @@ function DocumentMap({
   const [popupPosition, setPopupPosition] = useState<any>(null);
   const [selectedCommentIndex, setSelectedCommentIndex] = useState<Number>();
   const [selectedMarkerIndex, setSelectedMarkerIndex] = useState<Number>();
-  const defaultIcon = new Icon({ iconUrl: iconHighlight, className: 'defaultIcon' });
-  const highlightedIcon = new Icon({ iconUrl: iconHighlight, className: 'highlightedIcon' });
   const imageBounds: LatLngBoundsLiteral = [[-documentHeight, -documentWidth], [documentHeight, documentWidth]];
   const contentRef = useRef<HTMLDivElement>(null);
   const [shortLengthError, setShortLengthError] = useState(false);
@@ -152,18 +152,12 @@ function DocumentMap({
     if (!resource) return;
     let statuses = resource.statuses || [];
     for (let status of statuses) {
-      console.log(status)
       if (status.extraFunctionality?.canComment === false) {
         setCanComment(false)
       }
     }
   }, [resource]);
   if (canComment === false) args.canComment = canComment;
-
-  // console.log(currentUser);
-  // console.log(canComment);
-
-
 
   interface ExtendedMarkerProps extends MarkerProps {
     id: string;
@@ -221,9 +215,12 @@ function DocumentMap({
   return (
     <div className="documentMap--container">
       <div className="content" tabIndex={0} ref={contentRef}>
-        <div className='toggleMarkers'>
-          <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
-          <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
+        <div className="documentMap--header">
+          {props.url ? <Link href={props.url} title="Bekijk tekstuele versie" target="_blank">Bekijk tekstuele versie.</Link> : null}
+          <div className='toggleMarkers'>
+            <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
+            <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
+          </div>
         </div>
         <section className="content-intro">
           {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}

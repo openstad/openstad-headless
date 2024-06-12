@@ -48,6 +48,7 @@ export default function DocumentGeneral(
       documentWidth: props.documentWidth || 1920,
       documentHeight: props.documentHeight || 1080,
       zoom: props.zoom || 0,
+      url: props.url || undefined,
     },
   });
 
@@ -60,18 +61,6 @@ export default function DocumentGeneral(
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 lg:w-1/2">
-
-        {/* <FormObjectSelectField
-          form={form}
-          fieldName="resourceId"
-          fieldLabel="Kies een resource"
-          items={resources}
-          keyForValue="id"
-          label={(resource) => `${resource.id} ${resource.title}`}
-          onFieldChanged={props.onFieldChanged}
-        /> */}
-
-
         <FormObjectSelectField
           form={form}
           fieldName="resourceId"
@@ -167,6 +156,26 @@ export default function DocumentGeneral(
               </FormControl>
             </FormItem>
 
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Pagina met begleidende tekst</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="/path/to/page"
+                  defaultValue={field.value}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    onFieldChange(field.name, e.target.value);
+                  }}
+                />
+              </FormControl>
+            </FormItem>
           )}
         />
 
