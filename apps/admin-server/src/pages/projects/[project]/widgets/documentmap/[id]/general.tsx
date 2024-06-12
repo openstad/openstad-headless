@@ -17,7 +17,7 @@ import { Input } from '../../../../../../components/ui/input';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import useResources from '@/hooks/use-resources';
 import InfoDialog from "@/components/ui/info-hover";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import * as React from "react";
 
 const formSchema = z.object({
@@ -27,6 +27,7 @@ const formSchema = z.object({
   zoom: z.number().optional(),
   minZoom: z.number().optional(),
   maxZoom: z.number().optional(),
+  url: z.string().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -35,7 +36,7 @@ export default function DocumentGeneral(
     EditFieldProps<DocumentMapProps>
 ) {
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
-  const [disabled, setDisabled]  = useState(false);
+  const [disabled, setDisabled] = useState(false);
 
   function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
@@ -43,7 +44,7 @@ export default function DocumentGeneral(
 
   const { data } = useResources(props.projectId);
   const resources: Array<{ id: string | number; title: string }> = data || [];
-  
+
   const form = useForm<DocumentMapProps>({
     defaultValues: {
       resourceId: props.resourceId || undefined,
@@ -52,6 +53,7 @@ export default function DocumentGeneral(
       zoom: props.zoom || 1,
       minZoom: props.minZoom || -6,
       maxZoom: props.maxZoom || 10,
+      url: props.url || '',
     },
   });
 
@@ -226,6 +228,26 @@ export default function DocumentGeneral(
               <FormMessage />
             </FormItem>
 
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Pagina met begleidende tekst</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="/path/to/page"
+                  defaultValue={field.value}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    onFieldChange(field.name, e.target.value);
+                  }}
+                />
+              </FormControl>
+            </FormItem>
           )}
         />
 
