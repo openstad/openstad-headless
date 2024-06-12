@@ -216,7 +216,7 @@ function DocumentMap({
     <div className="documentMap--container">
       <div className="content" tabIndex={0} ref={contentRef}>
         <div className="documentMap--header">
-          {props.url ? <Link href={props.url} title="Bekijk tekstuele versie" target="_blank">Bekijk tekstuele versie.</Link> : null}
+          {props.url ? <Link href={props.url} title="Bekijk tekstuele versie" target="_blank" id={randomId}>Bekijk tekstuele versie.</Link> : null}
           <div className='toggleMarkers'>
             <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
             <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
@@ -225,7 +225,7 @@ function DocumentMap({
         <section className="content-intro">
           {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
           {resource.summary ? <Heading level={2} appearance={'utrecht-heading-5'}>{resource.summary}</Heading> : null}
-          {resource.description ? <Paragraph id={randomId}>{resource.description}</Paragraph> : null}
+          {resource.description ? <Paragraph>{resource.description}</Paragraph> : null}
         </section>
 
         <Comments
