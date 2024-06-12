@@ -63,9 +63,9 @@ export default function DocumentGeneral(
     let shouldDisable = false;
 
     if (minZoomValue && maxZoomValue && zoomValue) {
-      const minZoom = parseInt(minZoomValue);
-      const maxZoom = parseInt(maxZoomValue);
-      const zoom = parseInt(zoomValue);
+      const minZoom = typeof minZoomValue == 'string' ? parseInt(minZoomValue) : minZoomValue;
+      const maxZoom = typeof maxZoomValue == 'string' ? parseInt(maxZoomValue) : maxZoomValue;
+      const zoom = typeof zoomValue == 'string' ? parseInt(zoomValue) : zoomValue;
 
       if (zoom > maxZoom || zoom < minZoom) {
         form.setError('zoom', { type: 'manual', message: 'Waarde moet tussen het in- en uitzoom niveau liggen' });
