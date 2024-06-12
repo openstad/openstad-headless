@@ -9,3 +9,7 @@
     <link rel="stylesheet" href="{{ link.item }}">
   {% endfor %}
 {% endif %}
+
+{% if data.global.favicon %}
+  <link rel="icon" type="image/x-icon" href="{{ data.global.favicon }}">
+{% endif %}
