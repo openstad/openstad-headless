@@ -1,6 +1,6 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { Comments } from '@openstad-headless/comments/src/comments';
-
+import hasRole from '../../lib/has-role';
 import 'remixicon/fonts/remixicon.css';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
@@ -35,6 +35,8 @@ export type DocumentMapProps = BaseProps &
     iconDefault?: string;
     iconHighlight?: string;
     sentiment?: string;
+    canComment?: boolean;
+    requiredUserRole?: string;
   };
 
 
@@ -138,6 +140,31 @@ function DocumentMap({
     setRandomId(generateRandomId());
   }, []);
 
+  let args = {
+    canComment: true,
+    requiredUserRole: 'member',
+  }
+
+  const { data: currentUser } = datastore.useCurrentUser({ ...args });
+
+  const [canComment, setCanComment] = useState(args.canComment)
+  useEffect(() => {
+    if (!resource) return;
+    let statuses = resource.statuses || [];
+    for (let status of statuses) {
+      console.log(status)
+      if (status.extraFunctionality?.canComment === false) {
+        setCanComment(false)
+      }
+    }
+  }, [resource]);
+  if (canComment === false) args.canComment = canComment;
+
+  // console.log(currentUser);
+  // console.log(canComment);
+
+
+
   interface ExtendedMarkerProps extends MarkerProps {
     id: string;
     index: number;
@@ -195,7 +222,7 @@ function DocumentMap({
     <div className="documentMap--container">
       <div className="content" tabIndex={0} ref={contentRef}>
         <div className='toggleMarkers'>
-          <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)}/>
+          <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
           <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
         </div>
         <section className="content-intro">
@@ -232,13 +259,17 @@ function DocumentMap({
           />
           {popupPosition && (
             <Popup position={popupPosition}>
-              <form>
-                <FormLabel htmlFor="commentBox">Voeg een opmerking toe</FormLabel>
-                {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal 30 tekens bevatten</Paragraph>}
-                {longLengthError && <Paragraph className="--error">De opmerking mag maximaal 500 tekens bevatten</Paragraph>}
-                <Textarea name="comment" rows={3} id="commentBox"></Textarea>
-                <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>Insturen</Button>
-              </form>
+              {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
+                <Paragraph>Inloggen om deel te nemen aan de discussie.</Paragraph>
+              ) :
+                <form>
+                  <FormLabel htmlFor="commentBox">Voeg een opmerking toe</FormLabel>
+                  {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal 30 tekens bevatten</Paragraph>}
+                  {longLengthError && <Paragraph className="--error">De opmerking mag maximaal 500 tekens bevatten</Paragraph>}
+                  <Textarea name="comment" rows={3} id="commentBox"></Textarea>
+                  <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>Insturen</Button>
+                </form>}
+
             </Popup>
           )}
         </MapContainer>
