@@ -11,12 +11,14 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
+  FormLabel, FormMessage,
 } from '../../../../../../components/ui/form';
 import { Input } from '../../../../../../components/ui/input';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import useResources from '@/hooks/use-resources';
 import InfoDialog from "@/components/ui/info-hover";
+import {useEffect, useState} from "react";
+import * as React from "react";
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
@@ -33,6 +35,7 @@ export default function DocumentGeneral(
     EditFieldProps<DocumentMapProps>
 ) {
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
+  const [disabled, setDisabled]  = useState(false);
 
   function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
@@ -51,6 +54,37 @@ export default function DocumentGeneral(
       maxZoom: props.maxZoom || 10,
     },
   });
+
+  useEffect(() => {
+    const minZoomValue = form.watch('minZoom');
+    const maxZoomValue = form.watch('maxZoom');
+    const zoomValue = form.watch('zoom');
+
+    let shouldDisable = false;
+
+    if (minZoomValue && maxZoomValue && zoomValue) {
+      const minZoom = parseInt(minZoomValue);
+      const maxZoom = parseInt(maxZoomValue);
+      const zoom = parseInt(zoomValue);
+
+      if (zoom > maxZoom || zoom < minZoom) {
+        form.setError('zoom', { type: 'manual', message: 'Waarde moet tussen het in- en uitzoom niveau liggen' });
+        shouldDisable = true;
+      } else {
+        form.clearErrors('zoom');
+      }
+
+      if (minZoom >= maxZoom) {
+        form.setError('minZoom', { type: 'manual', message: 'Waarde kan niet hoger zijn dan het uitzoom niveau' });
+        form.setError('maxZoom', { type: 'manual', message: 'Waarde kan niet lager zijn dan het inzoom niveau' });
+        shouldDisable = true;
+      } else {
+        form.clearErrors(['minZoom', 'maxZoom']);
+      }
+    }
+
+    setDisabled(shouldDisable);
+  }, [form.watch('minZoom'), form.watch('maxZoom'), form.watch('zoom')]);
 
   return (
     <Form {...form} className="p-6 bg-white rounded-md">
@@ -135,6 +169,7 @@ export default function DocumentGeneral(
                   }}
                 />
               </FormControl>
+              <FormMessage />
             </FormItem>
 
           )}
@@ -161,6 +196,7 @@ export default function DocumentGeneral(
                   }}
                 />
               </FormControl>
+              <FormMessage />
             </FormItem>
 
           )}
@@ -187,12 +223,18 @@ export default function DocumentGeneral(
                   }}
                 />
               </FormControl>
+              <FormMessage />
             </FormItem>
 
           )}
         />
 
-        <Button type="submit">Opslaan</Button>
+        <Button
+          type="submit"
+          disabled={disabled}
+        >
+          Opslaan
+        </Button>
       </form>
     </Form>
   );
