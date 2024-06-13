@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
@@ -18,6 +18,7 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
+import { getApiFetchMethodNames } from '@openstad-headless/data-store/src/api/index';
 import useTag from '@/hooks/use-tags';
 import toast from 'react-hot-toast';
 
@@ -32,6 +33,7 @@ export default function ProjectTagCreate() {
   const router = useRouter();
   const project = router.query.project;
   const { createTag } = useTag(project as string);
+  const [disabled, setDisabled]  = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -47,6 +49,21 @@ export default function ProjectTagCreate() {
       toast.error('Er is helaas iets mis gegaan.')
     }
   }
+
+  const apiFetchMethodNames = getApiFetchMethodNames();
+
+  useEffect(() => {
+    const type = form.watch('type');
+
+    if ( !!apiFetchMethodNames && Array.isArray(apiFetchMethodNames) && apiFetchMethodNames.includes(type) ) {
+      form.setError('type', {type: 'manual', message: `${type} valt onder de benamingen die niet gebruikt mag worden wegens mogelijke conflicten.`});
+      setDisabled(true);
+    } else {
+      form.clearErrors(['type'])
+      setDisabled(false);
+    }
+
+  }, [ form.watch('type') ] );
 
   return (
     <div>
@@ -125,7 +142,11 @@ export default function ProjectTagCreate() {
                   </FormItem>
                 )}
               />
-              <Button className="w-fit col-span-full" type="submit">
+              <Button
+                className="w-fit col-span-full"
+                disabled={disabled}
+                type="submit"
+              >
                 Opslaan
               </Button>
             </form>
