@@ -139,6 +139,10 @@ router
         return sortingQuery;
       });
     }
+    
+    //dbQuery.logging = (...args) => { args.forEach(arg => { typeof arg !== "object" ? console.log(arg.replaceAll("\n", "")) : console.log(arg)}) };
+    
+    console.log (dbQuery);
 
     db.Resource.scope(...req.scope)
       .findAndCountAll(dbQuery)

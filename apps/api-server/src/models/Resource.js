@@ -646,6 +646,10 @@ module.exports = function (db, sequelize, DataTypes) {
               model: db.Tag,
               attributes: ['id', 'name'],
               through: { attributes: [] },
+              required: true,
+              where: {
+                id: tags
+              }
             },
           ],
           where: {
