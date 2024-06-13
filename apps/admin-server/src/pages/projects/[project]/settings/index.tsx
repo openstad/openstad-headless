@@ -102,7 +102,6 @@ export default function ProjectSettings() {
   }, [data, checkboxInitial]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
     try {
       const project = await updateProject(
         {
