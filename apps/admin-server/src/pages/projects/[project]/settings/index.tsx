@@ -250,7 +250,7 @@ export default function ProjectSettings() {
                           return(
                           <FormItem className="col-span-full md:col-span-1 flex flex-col">
                             <FormLabel>
-                              Wil je een wachtwoord instellen voor de website?
+                              Wil je de website beveiligen met een gebruikersnaam en wachtwoord?
                             </FormLabel>
                             <Switch.Root
                               className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
