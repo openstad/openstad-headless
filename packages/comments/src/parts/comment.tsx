@@ -94,7 +94,6 @@ function Comment({
       document.getElementById(`comment-${index}`)?.classList.toggle('selected');
     }
   }
-  console.log(args.comment.user)
 
   return (
     <article className={`comment-item ${selected ? 'selected' : ''}`} id={`comment-${index}`} onClick={findLocation(index || 0)}>
