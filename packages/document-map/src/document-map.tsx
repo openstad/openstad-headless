@@ -145,8 +145,8 @@ function DocumentMap({
   }, []);
 
   let args = {
-    canComment: true,
-    requiredUserRole: 'member',
+    canComment: typeof props.comments?.canComment != 'undefined' ? props.comments.canComment : true,
+    requiredUserRole: props.comments?.requiredUserRole || 'member',
   }
 
   const { data: currentUser } = datastore.useCurrentUser({ ...args });
