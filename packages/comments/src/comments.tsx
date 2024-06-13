@@ -71,6 +71,7 @@ function Comments({
     requiredUserRole: props.comments?.requiredUserRole || 'member',
     descriptionMinLength: props.comments?.descriptionMinLength || 30,
     descriptionMaxLength: props.comments?.descriptionMaxLength || 500,
+    adminLabel: props.comments?.adminLabel || 'admin',
     ...props,
   } as CommentsWidgetProps;
 

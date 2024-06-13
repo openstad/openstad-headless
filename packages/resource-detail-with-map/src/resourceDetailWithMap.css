@@ -36,6 +36,10 @@
   border-radius: 4px;
 }
 
+.osc-resource-detail-content-item-row:empty{
+  display: none;
+}
+
 @media (max-width: 1366px) {
   .osc-resource-detail-column-container {
     display: block;
