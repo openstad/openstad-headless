@@ -1,6 +1,6 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { Comments } from '@openstad-headless/comments/src/comments';
-
+import hasRole from '../../lib/has-role';
 import 'remixicon/fonts/remixicon.css';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
@@ -9,7 +9,9 @@ import {
   Heading,
   Textarea,
   Button,
-  FormLabel
+  FormLabel,
+  Checkbox,
+  Link
 } from '@utrecht/component-library-react';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import React, { useState, useRef, useEffect } from 'react';
@@ -17,6 +19,7 @@ import './document-map.css';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { MapContainer, ImageOverlay, useMapEvents, Popup, Marker, MarkerProps } from 'react-leaflet';
 import { LatLngBoundsLiteral, CRS, Icon } from 'leaflet';
+import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 
 import 'leaflet/dist/leaflet.css';
 
@@ -30,22 +33,34 @@ export type DocumentMapProps = BaseProps &
     documentWidth?: number;
     documentHeight?: number;
     zoom?: number;
+    minZoom?: number;
+    maxZoom?: number;
     iconDefault?: string;
     iconHighlight?: string;
     sentiment?: string;
+    canComment?: boolean;
+    requiredUserRole?: string;
+    url?: string;
   };
 
 
 function DocumentMap({
   zoom = 1,
+  minZoom = -6,
+  maxZoom = 10,
   iconDefault,
   iconHighlight = 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309740_1280.png',
   documentWidth = 1920,
   documentHeight = 1080,
-  resourceId,
   sentiment = 'no sentiment',
   ...props
 }: DocumentMapProps) {
+
+  let resourceId: string | undefined = String(getResourceId({
+    resourceId: parseInt(props.resourceId || ''),
+    url: document.location.href,
+    targetUrl: props.resourceIdRelativePath,
+  })); // todo: make it a number throughout the code
 
   const datastore = new DataStore({
     projectId: props.projectId,
@@ -66,13 +81,13 @@ function DocumentMap({
   const [popupPosition, setPopupPosition] = useState<any>(null);
   const [selectedCommentIndex, setSelectedCommentIndex] = useState<Number>();
   const [selectedMarkerIndex, setSelectedMarkerIndex] = useState<Number>();
-  const defaultIcon = new Icon({ iconUrl: iconHighlight, className: 'defaultIcon' });
-  const highlightedIcon = new Icon({ iconUrl: iconHighlight, className: 'highlightedIcon' });
   const imageBounds: LatLngBoundsLiteral = [[-documentHeight, -documentWidth], [documentHeight, documentWidth]];
   const contentRef = useRef<HTMLDivElement>(null);
   const [shortLengthError, setShortLengthError] = useState(false);
   const [longLengthError, setLongLengthError] = useState(false);
   const [randomId, setRandomId] = useState('');
+
+  const [toggleMarker, setToggleMarker] = useState(true);
 
   const MapEvents = () => {
     const map = useMapEvents({
@@ -128,6 +143,25 @@ function DocumentMap({
   useEffect(() => {
     setRandomId(generateRandomId());
   }, []);
+
+  let args = {
+    canComment: typeof props.comments?.canComment != 'undefined' ? props.comments.canComment : true,
+    requiredUserRole: props.comments?.requiredUserRole || 'member',
+  }
+
+  const { data: currentUser } = datastore.useCurrentUser({ ...args });
+
+  const [canComment, setCanComment] = useState(args.canComment)
+  useEffect(() => {
+    if (!resource) return;
+    let statuses = resource.statuses || [];
+    for (let status of statuses) {
+      if (status.extraFunctionality?.canComment === false) {
+        setCanComment(false)
+      }
+    }
+  }, [resource]);
+  if (canComment === false) args.canComment = canComment;
 
   interface ExtendedMarkerProps extends MarkerProps {
     id: string;
@@ -185,10 +219,17 @@ function DocumentMap({
   return (
     <div className="documentMap--container">
       <div className="content" tabIndex={0} ref={contentRef}>
+        <div className="documentMap--header">
+          {props.url ? <Link href={props.url} title="Bekijk tekstuele versie" target="_blank" id={randomId}>Bekijk tekstuele versie.</Link> : null}
+          <div className='toggleMarkers'>
+            <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
+            <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
+          </div>
+        </div>
         <section className="content-intro">
           {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
           {resource.summary ? <Heading level={2} appearance={'utrecht-heading-5'}>{resource.summary}</Heading> : null}
-          {resource.description ? <Paragraph id={randomId}>{resource.description}</Paragraph> : null}
+          {resource.description ? <Paragraph>{resource.description}</Paragraph> : null}
         </section>
 
         <Comments
@@ -198,20 +239,20 @@ function DocumentMap({
           showForm={false}
         />
       </div>
-      <div className='map-container'>
-        <MapContainer center={[0, 0]} zoom={zoom} crs={CRS.Simple} minZoom={-6}>
+      <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''}`}>
+        <MapContainer center={[0, 0]} crs={CRS.Simple} maxZoom={maxZoom} minZoom={minZoom} zoom={zoom} >
           <MapEvents />
           {comments
-            .filter((comment:any) => !!comment.location)
+            .filter((comment: any) => !!comment.location)
             .map((comment: any, index: number) => (
-            <MarkerWithId
-              key={index}
-              id={`marker-${index}`}
-              index={index}
-              position={comment.location}
-            >
-            </MarkerWithId>
-          ))}
+              <MarkerWithId
+                key={index}
+                id={`marker-${index}`}
+                index={index}
+                position={comment.location}
+              >
+              </MarkerWithId>
+            ))}
           <ImageOverlay
             url={resource.images ? resource.images[0].url : ''}
             bounds={imageBounds}
@@ -219,13 +260,17 @@ function DocumentMap({
           />
           {popupPosition && (
             <Popup position={popupPosition}>
-              <form>
-                <FormLabel htmlFor="commentBox">Voeg een opmerking toe</FormLabel>
-                {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal 30 tekens bevatten</Paragraph>}
-                {longLengthError && <Paragraph className="--error">De opmerking mag maximaal 500 tekens bevatten</Paragraph>}
-                <Textarea name="comment" rows={3} id="commentBox"></Textarea>
-                <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>Insturen</Button>
-              </form>
+              {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
+                <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
+              ) :
+                <form>
+                  <FormLabel htmlFor="commentBox">Voeg een opmerking toe</FormLabel>
+                  {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal 30 tekens bevatten</Paragraph>}
+                  {longLengthError && <Paragraph className="--error">De opmerking mag maximaal 500 tekens bevatten</Paragraph>}
+                  <Textarea name="comment" rows={3} id="commentBox"></Textarea>
+                  <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>Insturen</Button>
+                </form>}
+
             </Popup>
           )}
         </MapContainer>
