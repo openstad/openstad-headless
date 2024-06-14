@@ -44,7 +44,7 @@ export function SidenavProject({ className }: { className?: string }) {
             variant={location.includes('/settings') ? 'secondary' : 'ghost'}
             size="default"
             className="w-full flex justify-between">
-            <span className="truncate">Instellingen</span>
+            <span className="truncate">Projectinstellingen</span>
             <ChevronDown
               size={16}
             />
@@ -101,7 +101,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 }
                 size="default"
                 className="w-full flex justify-start pl-8">
-                <span className="truncate">Administrator notificaties</span>
+                <span className="truncate">E-mail instellingen</span>
               </Button>
             </Link>
             <Link href={`/projects/${project}/settings/resource`}>
@@ -125,7 +125,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 }
                 size="default"
                 className="w-full flex justify-start pl-8">
-                <span className="truncate">Map instellingen</span>
+                <span className="truncate">Kaart instellingen</span>
               </Button>
             </Link>
             <Link href={`/projects/${project}/settings/widgets`}>
@@ -137,7 +137,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 }
                 size="default"
                 className="w-full flex justify-start pl-8">
-                <span className="truncate">Widget instellingen</span>
+                <span className="truncate">Toegestane websites</span>
               </Button>
             </Link>
           </>
@@ -276,7 +276,7 @@ export function SidenavProject({ className }: { className?: string }) {
             }
             size="default"
             className="w-full flex justify-start">
-            <span className="truncate">Notificaties</span>
+            <span className="truncate">Notificaties en e-mails</span>
           </Button>
         </Link>
         <Link href={`/projects/${project}/duplicate`}>

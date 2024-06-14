@@ -265,7 +265,7 @@ service.createClient = async function({ authConfig, project }) {
 }
 
 service.updateClient = async function({ authConfig, project }) {
-
+  console.log('OpenStad.service.updateClient', authConfig)
   let clientId = authConfig.clientId;
   if (!clientId) {
     console.log('OpenStad.service.updateClient: clientId not found')

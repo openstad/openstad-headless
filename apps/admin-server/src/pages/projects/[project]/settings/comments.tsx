@@ -21,6 +21,7 @@ import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
 import toast from 'react-hot-toast';
 import * as Switch from '@radix-ui/react-switch';
+import InfoDialog from '@/components/ui/info-hover';
 
 const formSchema = z.object({
   canComment: z.boolean().optional(),
@@ -185,7 +186,7 @@ export default function ProjectSettingsComments() {
                     name="descriptionMinLength"
                     render={({ field }) => (
                       <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                        <FormLabel>Minimaal aantal karakters</FormLabel>
+                        <FormLabel>Minimaal aantal karakters dat een bezoeker moet invoeren bij een reactie</FormLabel>
                         <FormControl>
                           <Input type="number" {...field} />
                         </FormControl>
@@ -199,7 +200,7 @@ export default function ProjectSettingsComments() {
                     name="descriptionMaxLength"
                     render={({ field }) => (
                       <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                        <FormLabel>Maximaal aantal karakters</FormLabel>
+                        <FormLabel>Maximaal aantal karakters dat een bezoeker mag invoeren bij een reactie</FormLabel>
                         <FormControl>
                           <Input type="number" {...field} />
                         </FormControl>
@@ -232,7 +233,11 @@ export default function ProjectSettingsComments() {
                   name="adminLabel"
                   render={({ field }) => (
                     <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                      <FormLabel>Admin label bij reacties</FormLabel>
+
+
+                      <FormLabel>Label dat wordt getoond bij reacties van beheerders
+                        <InfoDialog content={'Dit is de duiding die achter de gebruikersnaam van de beheerder komt te staan. Bijvoorbeeld: Webredactie'} />
+                      </FormLabel>
                       <FormControl>
                         <Input placeholder="typ een tekst" {...field} />
                       </FormControl>

@@ -37,7 +37,6 @@ function useZodForm<TSchema extends z.ZodType>(
 
 export default function ProjectSettingsWidgets() {
   const category = 'widgets';
-  const [fieldValue, setFieldValue] = useState<string>('');
 
   const router = useRouter();
   const { project } = router.query;
@@ -110,17 +109,20 @@ export default function ProjectSettingsWidgets() {
             url: '/projects/${project}/settings',
           },
           {
-            name: 'Widget instellingen',
+            name: 'Toegestane websites',
             url: `/projects/${project}/settings/widgets`,
           },
         ]}
       >
         <div className="container py-6">
           <Form className="p-6 bg-white rounded-md">
-            <Heading size="xl">Widgets</Heading>
+            <Heading size="xl">Toegestane websites</Heading>
             <Separator className="my-4" />
             <p className="text-gray-500">
               Hier kun je de URLs instellen waar de widgets van dit project op mogen draaien.
+            </p>
+            <p className="text-gray-500">
+              Let op: Widgets werken alleen op externe websites als de URL van de betreffende website hier is toegevoegd.
             </p>
             <br/>
             <form

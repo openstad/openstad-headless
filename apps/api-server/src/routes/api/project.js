@@ -14,6 +14,7 @@ const authSettings = require('../../util/auth-settings');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const removeProtocolFromUrl = require('../../middleware/remove-protocol-from-url');
 const messageStreaming = require('../../services/message-streaming');
+const service = require('../../adapter/openstad/service');
 
 let router = express.Router({mergeParams: true});
 
@@ -332,6 +333,23 @@ router.route('/:projectId') //(\\d+)
     return next()
 	})
 	.put(function (req, res, next) {
+    
+    // Check if updating allowedDomains
+    console.log(req.results)
+    if(typeof req?.results?.config?.widgets?.allowedDomains !==  "undefined"){
+      // update in auth db
+      const defaultProvider = req.results.config.auth.default;
+      let authConfig = {
+        clientId: req.results.config.auth.provider[defaultProvider].clientId
+      }
+      console.log('updateClient', authConfig, req.results)
+      service.updateClient({
+        authConfig: authConfig,
+        project: req.results
+      })
+    }
+
+
 		// when succesfull return project JSON
 		res.json(req.results);
 	})
