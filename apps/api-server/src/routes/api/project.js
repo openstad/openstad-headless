@@ -335,19 +335,20 @@ router.route('/:projectId') //(\\d+)
 	.put(function (req, res, next) {
     
     // Check if updating allowedDomains
-    console.log(req.results)
-    if(typeof req?.results?.config?.widgets?.allowedDomains !==  "undefined"){
-      // update in auth db
-      const defaultProvider = req.results.config.auth.default;
-      let authConfig = {
-        clientId: req.results.config.auth.provider[defaultProvider].clientId
-      }
-      console.log('updateClient', authConfig, req.results)
-      service.updateClient({
-        authConfig: authConfig,
-        project: req.results
-      })
-    }
+    // console.log(req.results)
+    // WIP: update auth db
+    // if(typeof req?.results?.config?.widgets?.allowedDomains !==  "undefined"){
+    //   // update in auth db
+    //   const defaultProvider = req.results.config.auth.default;
+    //   let authConfig = {
+    //     clientId: req.results.config.auth.provider[defaultProvider].clientId
+    //   }
+    //   console.log('updateClient', authConfig, req.results)
+    //   service.updateClient({
+    //     authConfig: authConfig,
+    //     project: req.results
+    //   })
+    // }
 
 
 		// when succesfull return project JSON
