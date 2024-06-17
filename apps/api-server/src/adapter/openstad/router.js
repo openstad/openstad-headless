@@ -294,13 +294,24 @@ router
     }
     return next();
   })
-  .get(function (req, res, next) {
+  .get(async function (req, res, next) {
+    // Check if redirectUri is in allowlist
+    if(req.query.redirectUri){
+      // Get project by req.params.projectId
+      const projectId = req.params.projectId;
+      const project = await db.Project.findByPk(projectId);
+      if(!project) return next(createError(404, 'Project not found'));
 
-    // todo: isallowed
-    if (req.query.redirectUri) return res.redirect(req.query.redirectUri);
+      // Check if redirectUri is in allowlist
+      let allowedDomains = project?.config?.widgets?.allowedDomains || [];
+      if(allowedDomains.includes(req.query.redirectUri)){
+        return res.redirect(req.query.redirectUri);
+      }
+
+      return next(createError(403, 'redirectUri not found in allowlist.'));
+    }
 
     return res.json({ logout: 'success' })
-
   });
 
 
