@@ -125,7 +125,7 @@ export default function ProjectSettings() {
       updatedProject = {
         ...updatedProject,
         widgets: {
-          allowedDomains: ['https://' + values.url]
+          allowedDomains: ['https://' + values.url, 'http://' + values.url, 'https://www.' + values.url, 'http://www.' + values.url]
         }
       }
     }
