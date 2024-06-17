@@ -302,9 +302,24 @@ router.route('/:projectId') //(\\d+)
     req.pendingMessages = [{ key: `project-${project.id}-update`, value: 'event' }];
     if (req.body.url && req.body.url != project.url) req.pendingMessages.push({ key: `project-urls-update`, value: 'event' });
 
+    // Update allowedDomains if creating a new site
+    let updateBody = req.body;
+    if((project?.config?.widgets?.allowedDomains || []).length === 0 && req?.body?.url){
+      updateBody.config = updateBody.config || {};
+      updateBody.config.widgets = updateBody.config.widgets || {};
+      updateBody.config.widgets.allowedDomains = [req.body.url];
+
+      // Update client (auth-db)
+      let adminAuthConfig = await authSettings.config({ project: project, useAuth: 'openstad' });
+      service.updateClient({
+        authConfig: adminAuthConfig,
+        project: updateBody
+      })
+    }
+
     project
 			.authorizeData(req.body, 'update')
-			.update(req.body)
+			.update(updateBody)
 			.then(result => {
         req.results = result;
 				return checkHostStatus({id: result.id});

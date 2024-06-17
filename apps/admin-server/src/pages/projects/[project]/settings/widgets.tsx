@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 
 const formSchema = z.object({
   urls: z.array(z.object({
-    url: z.string().url(),
+    url: z.string()
   })),
 });
 
@@ -78,13 +78,13 @@ export default function ProjectSettingsWidgets() {
     reset
   } = useZodForm({
     schema: formSchema,
-    defaultValues: { urls: data?.config?.widgets?.allowedDomains.map((url: any) => ({ url })) || [] },
+    defaultValues: { urls: (data?.config?.widgets?.allowedDomains ?? []).map((url: any) => ({ url })) || [] },
   });
 
   useEffect(() => {
     if (data?.config?.widgets?.allowedDomains) {
       // set form values once the data is available
-      reset({ urls: data.config.widgets.allowedDomains.map((url: any) => ({ url })) });
+      reset({ urls: (data?.config?.widgets?.allowedDomains ?? []).map((url: any) => ({ url })) });
     }
   }, [data, reset]);
 
