@@ -145,7 +145,7 @@ useEffect(() => {
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>
-                      Is de hoeveelheid stemmen publiek zichtbaar?
+                      Is het aantal stemmen op een resource te zien voor alle bezoekers?
                     </FormLabel>
                     <Switch.Root
                       className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
@@ -164,7 +164,7 @@ useEffect(() => {
                 name="isActive"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
-                    <FormLabel>Is het mogelijk om te stemmen?</FormLabel>
+                    <FormLabel>Is het mogelijk voor bezoekers om te stemmen op een resource?</FormLabel>
                     <Switch.Root
                       className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                       onCheckedChange={(e: boolean) => {
@@ -183,8 +183,7 @@ useEffect(() => {
                 render={({ field }) => (
                   <FormItem className="col-span-full">
                     <FormLabel>
-                      Moet het systeem een error geven wanneer iemand twee keer
-                      stemt, of moet de vorige stem vervangen worden?
+                      Wat moet er gebeuren als iemand twee keer stemt op dezelfde resource?
                     </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
@@ -193,7 +192,7 @@ useEffect(() => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="error">Error</SelectItem>
+                        <SelectItem value="error">Toon een foutmelding</SelectItem>
                         <SelectItem value="replace">
                           Vervang de vorige stem
                         </SelectItem>
@@ -250,13 +249,13 @@ useEffect(() => {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="likes">Likes</SelectItem>
-                        <SelectItem value="count">Count</SelectItem>
-                        <SelectItem value="budgeting">Budgeting</SelectItem>
+                        <SelectItem value="count">Aantallen</SelectItem>
+                        <SelectItem value="budgeting">Begroten</SelectItem>
                         <SelectItem value="countPerTheme">
-                          Count per theme
+                          Aantal per thema
                         </SelectItem>
                         <SelectItem value="budgetingPerTheme">
-                          Budgeting per theme
+                          Begroten per thema
                         </SelectItem>
                       </SelectContent>
                     </Select>

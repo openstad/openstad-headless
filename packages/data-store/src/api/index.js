@@ -17,6 +17,20 @@ export default function singelton(props = { config: {} }) {
   return (windowGlobal.OpenStadAPI = windowGlobal.OpenStadAPI || new API(props));
 }
 
+export function getApiFetchMethodNames() {
+  const apiInstance = new API({ logMethods: true });
+  const apiFetchMethodNames = [];
+
+  for (const key of Object.keys(apiInstance)) {
+    const value = apiInstance[key];
+    if (value && typeof value === 'object' && 'fetch' in value) {
+      apiFetchMethodNames.push(key);
+    }
+  }
+
+  return apiFetchMethodNames;
+}
+
 function API(props = {}) {
   let self = this;
 
@@ -82,4 +96,8 @@ function API(props = {}) {
     fetch: userVote.fetch.bind(self),
     submitVote: userVote.submitVote.bind(self),
   };
+
+  if (props.logMethods) {
+    return self;
+  }
 }

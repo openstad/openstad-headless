@@ -265,7 +265,6 @@ service.createClient = async function({ authConfig, project }) {
 }
 
 service.updateClient = async function({ authConfig, project }) {
-
   let clientId = authConfig.clientId;
   if (!clientId) {
     console.log('OpenStad.service.updateClient: clientId not found')
@@ -273,9 +272,7 @@ service.updateClient = async function({ authConfig, project }) {
   }
 
   try {
-
     let client = await service.fetchClient({ authConfig, project });
-
     let authTypes = authConfig.authTypes || client.authTypes;
     if (!Array.isArray(authTypes)) authTypes = [ authTypes ];
 
@@ -306,13 +303,6 @@ service.updateClient = async function({ authConfig, project }) {
         inlineCSS: project.config.styling?.inlineCSS,
         displayClientName: project.config.styling?.displayClientName,
       },
-      fromEmail: authConfig.config.fromEmail || client.config.fromEmail,
-      fromName: authConfig.config.fromName || client.config.fromName,
-      contactEmail: authConfig.config.contactEmail || client.config.contactEmail,
-      defaultRoleId: authConfig.config.defaultRoleId || client.config.defaultRoleId,
-      requiredFields: authConfig.config.requiredFields || client.config.requiredFields,
-      twoFactor: authConfig.config.twoFactor || client.config.twoFactor,
-      configureTwoFactor: authConfig.config.configureTwoFactor || client.config.configureTwoFactor,
       authTypes: {
         UniqueCode: merge({}, client.config?.authTypes?.UniqueCode, authConfig.config?.UniqueCode),
         Url: merge({}, client.config?.authTypes?.Url, authConfig.config?.Url),
@@ -320,10 +310,24 @@ service.updateClient = async function({ authConfig, project }) {
         Local: merge({}, client.config?.authTypes?.Local, authConfig.config?.Local),
       }
     };
+    // Update these properties (if they exist in the authConfig or client config), else keep the existing value
+    const properties = ['fromEmail', 'fromName', 'contactEmail', 'defaultRoleId', 'requiredFields', 'twoFactor', 'configureTwoFactor'];
+    properties.forEach(property => {
+      if (authConfig?.config && authConfig.config[property]) {
+        newClientConfig[property] = authConfig.config[property];
+      } else if (client?.config && client.config[property]) {
+        newClientConfig[property] = client.config[property];
+      }
+    });
 
     let clientConfig = client.config;
     data.config = merge.recursive({}, clientConfig, newClientConfig);
 
+    // Update allowedDomains if exists
+    if(typeof  project.config.allowedDomains !== 'undefined' && project.config.allowedDomains.length > 0) {
+      data.allowedDomains = project.config.allowedDomains;
+    }
+    
     // update client
     let url = `${authConfig.serverUrlInternal}/api/admin/client/${clientId}`;
     let response = await fetch(url, {

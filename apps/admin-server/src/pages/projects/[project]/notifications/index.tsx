@@ -53,7 +53,7 @@ export default function ProjectNotifications() {
             url: '/projects',
           },
           {
-            name: 'Notificaties',
+            name: 'Notificaties en e-mails',
             url: `/projects/${project}/notifications`,
           },
         ]}>
