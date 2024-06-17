@@ -78,7 +78,7 @@ export default function ProjectSettingsWidgets() {
     reset
   } = useZodForm({
     schema: formSchema,
-    defaultValues: { urls: data?.config?.widgets?.allowedDomains.map((url: any) => ({ url })) || [] },
+    defaultValues: { urls: (data?.config?.widgets?.allowedDomains ?? []).map((url: any) => ({ url })) || [] },
   });
 
   useEffect(() => {

@@ -41,8 +41,6 @@ const formSchema = z.object({
   basicAuthActive: z.coerce.boolean().optional(),
 });
 
-
-
 export default function ProjectSettings() {
 
   const router = useRouter();
@@ -54,11 +52,11 @@ export default function ProjectSettings() {
   const [projectHasEnded, setProjectHasEnded] = useState(false);
   const [basicAuthActive, setBasicAuthActive] = useState(false);
   const [basicAuthInitial, setBasicAuthInitial] = useState(true);
+  const [initProjectUrl, setInitProjectUrl] = useState(''); // This is used to check if the project url is changed
 
   const defaults = useCallback(
     () => {
       const currentDate = new Date();
-
 
       return {
       name: data?.name || '',
@@ -74,6 +72,12 @@ export default function ProjectSettings() {
     },
     [data]
   );
+
+  useEffect(() => {
+    if(initProjectUrl === ''){
+      setInitProjectUrl(data?.url);
+    }
+  }, [data, initProjectUrl]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -102,19 +106,33 @@ export default function ProjectSettings() {
   }, [data, checkboxInitial]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    let updatedProject = null; // Set to null first to prevent typescript error
+    updatedProject = {
+      project: {
+        name: values.name,
+        endDate: values.endDate,
+        cssUrl: values.cssUrl
+      },
+      basicAuth: {
+        active: values.basicAuthActive,
+        username: values.username,
+        password: values.password
+      }
+    }
+    
+    if(initProjectUrl !== values.url && initProjectUrl === '') {
+      // Add this url to the allowed domains
+      updatedProject = {
+        ...updatedProject,
+        widgets: {
+          allowedDomains: [values.url]
+        }
+      }
+    }
+
     try {
       const project = await updateProject(
-        {
-          project: {
-            endDate: values.endDate,
-            cssUrl: values.cssUrl
-          },
-          basicAuth: {
-            active: values.basicAuthActive,
-            username: values.username,
-            password: values.password
-          }
-        },
+        updatedProject,
         values.name,
         values.url,
       );
