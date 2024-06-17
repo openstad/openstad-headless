@@ -23,6 +23,7 @@ import { Separator } from '@/components/ui/separator';
 import toast from 'react-hot-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import InfoDialog from '@/components/ui/info-hover';
 
 const authTypes = [
   {
@@ -113,6 +114,13 @@ export default function ProjectAuthentication() {
     setShowEmailFields(data?.config?.auth?.provider?.openstad?.authTypes?.includes('Url'));
   }, [data]);
 
+  const infoDialogContents: { [key: string]: string } = {
+    'UniqueCode': 'Unieke code',
+    'Url': 'E-mail een inloglink',
+    'Phonenumber': 'SMS verificatie',
+    'Local': 'Wachtwoord',
+  }
+
   return (
     <div>
       <PageLayout
@@ -132,6 +140,10 @@ export default function ProjectAuthentication() {
             <Form {...form}>
               <Heading size="xl">Authenticatie instellingen</Heading>
               <Separator className="my-4" />
+              <p className="text-gray-500">
+                Hier bepaal je op welke wijze gebruikers zich moeten authenticeren in het project.
+              </p>
+              <br/>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4 lg:w-1/2">
@@ -177,6 +189,7 @@ export default function ProjectAuthentication() {
                                 <FormLabel className="font-normal">
                                   {item.label}
                                 </FormLabel>
+                                {infoDialogContents[item.id] && <InfoDialog content={infoDialogContents[item.id]} />}
                               </FormItem>
                             );
                           }}

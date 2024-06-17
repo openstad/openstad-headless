@@ -332,24 +332,23 @@ router.route('/:projectId') //(\\d+)
     }
     return next()
 	})
-	.put(function (req, res, next) {
-    
+	.put(async function (req, res, next) {
     // Check if updating allowedDomains
-    // console.log(req.results)
-    // WIP: update auth db
-    // if(typeof req?.results?.config?.widgets?.allowedDomains !==  "undefined"){
-    //   // update in auth db
-    //   const defaultProvider = req.results.config.auth.default;
-    //   let authConfig = {
-    //     clientId: req.results.config.auth.provider[defaultProvider].clientId
-    //   }
-    //   console.log('updateClient', authConfig, req.results)
-    //   service.updateClient({
-    //     authConfig: authConfig,
-    //     project: req.results
-    //   })
-    // }
+    if(typeof req?.results?.config?.widgets?.allowedDomains !==  "undefined"){
+      let adminProject = await db.Project.findByPk(config.admin.projectId);
+      let adminAuthConfig = await authSettings.config({ project: adminProject, useAuth: 'openstad' });
+      let proj = req.results.dataValues;
 
+      // Check if widgets allowedDomains exists
+      if(typeof req?.results?.config?.widgets?.allowedDomains !==  "undefined" && req.results.config.widgets.allowedDomains.length > 0){
+        proj.config.allowedDomains = req.results.config.widgets.allowedDomains;
+      }
+
+      service.updateClient({
+        authConfig: adminAuthConfig,
+        project: req.results.dataValues
+      })
+    }
 
 		// when succesfull return project JSON
 		res.json(req.results);

@@ -70,8 +70,6 @@ export default function ProjectSettingsWidgets() {
     }
   }
 
-  console.log(data?.config?.widgets?.allowedDomains);
-
   const {
     handleSubmit,
     register,
