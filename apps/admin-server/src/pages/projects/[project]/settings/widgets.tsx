@@ -84,7 +84,7 @@ export default function ProjectSettingsWidgets() {
   useEffect(() => {
     if (data?.config?.widgets?.allowedDomains) {
       // set form values once the data is available
-      reset({ urls: data.config.widgets.allowedDomains.map((url: any) => ({ url })) });
+      reset({ urls: (data?.config?.widgets?.allowedDomains ?? []).map((url: any) => ({ url })) });
     }
   }, [data, reset]);
 
