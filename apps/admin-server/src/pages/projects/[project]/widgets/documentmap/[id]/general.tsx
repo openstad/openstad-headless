@@ -44,6 +44,7 @@ export default function DocumentGeneral(
 
   const { data } = useResources(props.projectId);
   const resources: Array<{ id: string | number; title: string }> = data || [];
+  const [toggle, setToggle] = useState('resourceId_');
 
   const form = useForm<DocumentMapProps>({
     defaultValues: {
@@ -101,12 +102,37 @@ export default function DocumentGeneral(
         <FormObjectSelectField
           form={form}
           fieldName="resourceId"
-          fieldLabel="Kies een resource"
+          fieldLabel="Koppel aan een specifieke resource"
           items={resources}
           keyForValue="id"
           label={(resource) => `${resource.id} ${resource.title}`}
-          onFieldChanged={props.onFieldChanged}
+          onFieldChanged={(e, key) => {
+            props.onFieldChanged
+            setToggle(e + '_' + key);
+          }}
+          noSelection="Niet koppelen - beschrijf het path of gebruik queryparam openstadResourceId"
         />
+        {toggle === 'resourceId_' ? (
+          <FormField
+            control={form.control}
+            name="resourceIdRelativePath"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Geen specifieke resource gekoppeld?
+                </FormLabel>
+                <em className="text-xs">Beschrijf hoe de resource gehaald wordt uit de url: (/pad/naar/[id]) of laat leeg om terug te vallen op ?openstadResourceId</em>
+                <FormControl>
+                  <Input {...field} onChange={(e) => {
+                    onFieldChange(field.name, e.target.value);
+                    field.onChange(e);
+                  }} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : null}
 
 
         <FormField
