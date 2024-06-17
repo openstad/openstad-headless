@@ -75,9 +75,9 @@ export default function ProjectSettings() {
 
   useEffect(() => {
     if(initProjectUrl === ''){
-      setInitProjectUrl(data?.url);
+      setInitProjectUrl(data?.url || '');
     }
-  }, [data, initProjectUrl]);
+  }, [data]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -125,7 +125,7 @@ export default function ProjectSettings() {
       updatedProject = {
         ...updatedProject,
         widgets: {
-          allowedDomains: [values.url]
+          allowedDomains: ['https://' + values.url]
         }
       }
     }
