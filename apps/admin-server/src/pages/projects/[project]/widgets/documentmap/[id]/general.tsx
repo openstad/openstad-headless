@@ -99,16 +99,6 @@ export default function DocumentGeneral(
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 lg:w-1/2">
 
-        {/* <FormObjectSelectField
-          form={form}
-          fieldName="resourceId"
-          fieldLabel="Kies een resource"
-          items={resources}
-          keyForValue="id"
-          label={(resource) => `${resource.id} ${resource.title}`}
-          onFieldChanged={props.onFieldChanged}
-        /> */}
-
         <FormObjectSelectField
           form={form}
           fieldName="resourceId"
