@@ -163,7 +163,7 @@ export default function ProjectAuthentication() {
                                       if (item.id == 'Url') setShowEmailFields(checked)
                                       return checked
                                         ? field.onChange([
-                                            ...field.value,
+                                            ...(Array.isArray(field.value) ? field.value : []),
                                             item.id,
                                           ])
                                         : field.onChange(
