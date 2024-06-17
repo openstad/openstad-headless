@@ -112,13 +112,13 @@ export default function ProjectSettingsMap() {
             url: '/projects/${project}/settings',
           },
           {
-            name: 'Map instellingen',
+            name: 'Kaart instellingen',
             url: `/projects/${project}/settings/map`,
           },
         ]}>
         <div className="container py-6">
           <Form {...form} className="p-6 bg-white rounded-md">
-            <Heading size="xl">Map instellingen</Heading>
+            <Heading size="xl">Kaart instellingen</Heading>
             <Separator className="my-4" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}

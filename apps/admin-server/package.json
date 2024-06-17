@@ -60,7 +60,7 @@
     "react-csv": "^2.2.2",
     "react-day-picker": "^8.8.2",
     "react-dom": "18.2.0",
-    "react-hook-form": "^7.46.1",
+    "react-hook-form": "^7.51.5",
     "react-hot-toast": "^2.4.1",
     "react-leaflet": "^4.2.1",
     "react-leaflet-draw": "^0.20.4",
