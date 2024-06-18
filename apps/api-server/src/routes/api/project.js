@@ -311,11 +311,11 @@ router.route('/:projectId') //(\\d+)
     let updateBody = req.body;
     if((project?.config?.widgets?.allowedDomains || []).length === 0 && req?.body?.url){
       let url = new URL(req.body.url);
-      let hostname = url.hostname;
+      let host = url.host;
 
       updateBody.config = updateBody.config || {};
       updateBody.config.widgets = updateBody.config.widgets || {};
-      updateBody.config.widgets.allowedDomains = [hostname];
+      updateBody.config.widgets.allowedDomains = [host];
 
       // Update client (auth-db)
       let adminAuthConfig = await authSettings.config({ project: project });
