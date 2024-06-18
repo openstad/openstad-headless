@@ -302,15 +302,23 @@ router.route('/:projectId') //(\\d+)
     req.pendingMessages = [{ key: `project-${project.id}-update`, value: 'event' }];
     if (req.body.url && req.body.url != project.url) req.pendingMessages.push({ key: `project-urls-update`, value: 'event' });
 
+    // Check if url contains protocol
+    if (req.body.url && /^https?:\/\//i.test(req.body.url)) {
+      return next(new Error('URL cannot contain protocol (http, https)'));
+    }
+
     // Update allowedDomains if creating a new site
     let updateBody = req.body;
     if((project?.config?.widgets?.allowedDomains || []).length === 0 && req?.body?.url){
+      let url = new URL(req.body.url);
+      let hostname = url.hostname;
+
       updateBody.config = updateBody.config || {};
       updateBody.config.widgets = updateBody.config.widgets || {};
-      updateBody.config.widgets.allowedDomains = [req.body.url];
+      updateBody.config.widgets.allowedDomains = [hostname];
 
       // Update client (auth-db)
-      let adminAuthConfig = await authSettings.config({ project: project, useAuth: 'openstad' });
+      let adminAuthConfig = await authSettings.config({ project: project });
       service.updateClient({
         authConfig: adminAuthConfig,
         project: updateBody
