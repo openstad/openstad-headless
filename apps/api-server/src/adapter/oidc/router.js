@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const Sequelize = require('sequelize');
 const db = require('../../db');
 const service = require('./service');
-const isRedirectAllowed = require('../../services/redirectIfAllowed');
+const isRedirectAllowed = require('../../services/isRedirectAllowed');
 
 let router = express.Router({mergeParams: true});
 

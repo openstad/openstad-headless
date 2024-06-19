@@ -7,7 +7,7 @@ const Sequelize = require('sequelize');
 const db = require('../../db');
 const service = require('./service');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
-const isRedirectAllowed = require('../../services/redirectIfAllowed');
+const isRedirectAllowed = require('../../services/isRedirectAllowed');
 let router = express.Router({mergeParams: true});
 
 // Todo: dit is 'openstad', dus veel configuratie mag hier hardcoded en uit de config gehaald
