@@ -4,9 +4,13 @@ const isRedirectAllowed = async (projectId, redirectUri) => {
 
     const project = await db.Project.findByPk(projectId);
     if(!project) return false;
-
-    let allowedDomains = (project && project.config && project.config.widgets && project.config.widgets.allowedDomains) || [];
+    let allowedDomains = project?.config?.widgets?.allowedDomains || [];
     allowedDomains = allowedDomains.map(domain => {
+        // check if url has http or https and add http if not
+        if(!domain.startsWith('http://') && !domain.startsWith('https://')){
+            domain = 'http://'+domain; // add http so we can parse the url
+        }
+
         let url = new URL(domain);
         // remove wwww 
         if(url.host.startsWith('www.')){
