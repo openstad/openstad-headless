@@ -302,15 +302,15 @@ router.route('/:projectId') //(\\d+)
     req.pendingMessages = [{ key: `project-${project.id}-update`, value: 'event' }];
     if (req.body.url && req.body.url != project.url) req.pendingMessages.push({ key: `project-urls-update`, value: 'event' });
 
-    // Check if url contains protocol
-    if (req.body.url && /^https?:\/\//i.test(req.body.url)) {
-      return next(new Error('URL cannot contain protocol (http, https)'));
-    }
-
     // Update allowedDomains if creating a new site
     let updateBody = req.body;
     if((project?.config?.widgets?.allowedDomains || []).length === 0 && req?.body?.url){
-      let url = new URL(req.body.url);
+      // Check if url has protocol
+      let reqUrl = req.body.url
+      if(!reqUrl.includes('http://') && !reqUrl.includes('https://')){
+        reqUrl = 'http://' + reqUrl; 
+      }
+      let url = new URL(url);
       let host = url.host;
 
       updateBody.config = updateBody.config || {};
