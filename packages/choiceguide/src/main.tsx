@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { ResourceFormWidgetProps } from './props.js';
-import {ResourceFormWidget} from "./resource-form";
+import { ChoiceGuideFormWidgetProps } from './props.js';
+import {ChoiceGuideFormWidget} from "./choiceguide";
 import {defaultFormValues} from "./parts/default-values.tsx";
 
-const config: ResourceFormWidgetProps = {
+const config: ChoiceGuideFormWidgetProps = {
     api: {
         url: import.meta.env.VITE_API_URL,
     },
@@ -45,7 +45,7 @@ const config: ResourceFormWidgetProps = {
 };
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ResourceFormWidget
+    <ChoiceGuideFormWidget
         {...config}
     />
   </React.StrictMode>

@@ -23,7 +23,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
         isLoading: currentUserIsLoading,
     } = datastore.useCurrentUser({ ...props });
 
-    const { create: createResource } = datastore.useResources({
+    const { create: createChoiceGuide } = datastore.useChoiceGuides({
         projectId: props.projectId,
     });
 
@@ -88,7 +88,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
         const finalFormData = configureFormData(formData, true);
 
         try {
-            const result = await createResource(finalFormData, props.widgetId);
+            const result = await createChoiceGuide(finalFormData, props.widgetId);
             if (result) {
                 notifySuccess();
             }
@@ -100,9 +100,9 @@ function ChoiceGuide(props: ChoiceGuideProps) {
 
     return (
         <div className="osc">
-            <div className="osc-resource-form-item-content">
+            <div className="osc-choiceguide-form-item-content">
                 {props.displayTitle && props.title && <h4>{props.title}</h4>}
-                <div className="osc-resource-form-item-description">
+                <div className="osc-choiceguide-form-item-description">
                     {props.displayDescription && props.description && (
                         <p>{props.description}</p>
                     )}
