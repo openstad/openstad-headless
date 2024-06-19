@@ -73,4 +73,10 @@ export type Option = {
 export type Title = {
     text: string;
     key: string;
+    weights: Record<string, Weight>;
 };
+
+type Weight = {
+    weightX: string | number;
+    weightY: string | number;
+}
