@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button } from '../../../../../../components/ui/button';
 import { Input } from '../../../../../../components/ui/input';
 import {
@@ -21,21 +21,27 @@ import * as z from 'zod';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
+import {undefinedToTrueOrProp, YesNoSelect} from "@/lib/form-widget-helpers";
 
 const formSchema = z.object({
-  startHalfway: z.boolean(),
-  preferences: z.enum(['standard', 'minToPlus', 'field', 'none']),
-  display: z.enum(['16:9', '1:1']),
-  titlePreference: z.string(),
-  titleNoPreference: z.string(),
-  urlStartPage: z.string().url(),
-  urlResultPage: z.string().url(),
+  noOfQuestionsToShow: z.number().int(),
+  startWithAllQuestionsAnswered: z.boolean(),
+  startWithAllQuestionsAnsweredAndConfirmed: z.boolean().optional(),
+  showPageCountAndCurrentPageInButton: z.boolean(),
+  choicesType: z.enum(['default', 'minus-to-plus-100', 'plane', 'hidden']),
+  imageAspectRatio: z.enum(['16x9', '1x1']),
+  choicesPreferenceMinColor: z.string().optional(),
+  choicesPreferenceMaxColor: z.string().optional(),
+  choicesPreferenceTitle: z.string().optional(),
+  choicesNoPreferenceYetTitle: z.string().optional(),
+  choicesInBetweenPreferenceTitle: z.string().optional(),
+  beforeUrl: z.string().optional(),
+  afterUrl: z.string().optional(),
 });
 
-export default function ChoicesSelectorForm() {
-  const category = 'selectionGuide';
+export default function ChoicesSelectorForm(props) {
+  const category = 'choiceGuide';
 
-  //Temp fix, this widget needs reworking and does not exist yet in the packages folder
   const {
     data: widget,
     isLoading: isLoadingWidget,
@@ -44,22 +50,33 @@ export default function ChoicesSelectorForm() {
 
   const defaults = useCallback(
     () => ({
-      preferences: widget?.config?.[category]?.preferences || 'standard',
-      display: widget?.config?.[category]?.display || '16:9',
-      titlePreference:
-        widget?.config?.[category]?.titlePreference ||
-        'Jouw voorkeur is {preferredChoice}.',
-      titleNoPreference:
-        widget?.config?.[category]?.titleNoPreference ||
-        'Je hebt nog geen keuze gemaakt.',
-      startHalfway: widget?.config?.[category]?.startHalfway || '',
-      urlStartPage: widget?.config?.[category]?.urlStartPage || '',
-      urlResultPage: widget?.config?.[category]?.urlResultPage || '',
+      noOfQuestionsToShow: widget?.config?.[category]?.noOfQuestionsToShow || 100,
+      startWithAllQuestionsAnswered: undefinedToTrueOrProp(widget?.config?.[category]?.startWithAllQuestionsAnswered),
+      startWithAllQuestionsAnsweredAndConfirmed: undefinedToTrueOrProp(widget?.config?.[category]?.startWithAllQuestionsAnsweredAndConfirmed),
+      showPageCountAndCurrentPageInButton: undefinedToTrueOrProp(widget?.config?.[category]?.showPageCountAndCurrentPageInButton),
+      choicesType: widget?.config?.[category]?.choicesType || 'default',
+      imageAspectRatio: widget?.config?.[category]?.imageAspectRatio || '16x9',
+      choicesPreferenceMinColor: widget?.config?.[category]?.choicesPreferenceMinColor || '#ff9100',
+      choicesPreferenceMaxColor: widget?.config?.[category]?.choicesPreferenceMaxColor || '#bed200',
+      choicesPreferenceTitle: widget?.config?.[category]?.choicesPreferenceTitle || 'Jouw voorkeur is {preferredChoice}',
+      choicesNoPreferenceYetTitle: widget?.config?.[category]?.choicesNoPreferenceYetTitle || 'Je hebt nog geen keuze gemaakt',
+      choicesInBetweenPreferenceTitle: widget?.config?.[category]?.choicesInBetweenPreferenceTitle || 'Je staat precies tussen meerdere voorkeuren in',
+      beforeUrl: widget?.config?.[category]?.beforeUrl || '',
+      afterUrl: widget?.config?.[category]?.afterUrl || '',
     }),
     [widget?.config]
   );
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  type FormData = z.infer<typeof formSchema>;
+  async function onSubmit(values: FormData) {
+    try {
+      await updateConfig({ [category]: values });
+    } catch (error) {
+      console.error('could not update', error);
+    }
+  }
+
+  const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: defaults(),
   });
@@ -68,9 +85,8 @@ export default function ChoicesSelectorForm() {
     form.reset(defaults());
   }, [form, defaults]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ [category]: values });
-  }
+  const watchStartWithAllQuestionsAnswered = form.watch('startWithAllQuestionsAnswered');
+  const watchChoicesType = form.watch('choicesType');
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -82,58 +98,165 @@ export default function ChoicesSelectorForm() {
           className="w-fit lg:w-2/3 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="startHalfway"
+            name="noOfQuestionsToShow"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Begin met alle vragen beantwoord op 50%?</FormLabel>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Nee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Ja</SelectItem>
-                    <SelectItem value="false">Nee</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormLabel>Aantal vragen per pagina</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} />
+                </FormControl>
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="preferences"
+            name="startWithAllQuestionsAnswered"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Weergave van de voorkeuren:</FormLabel>
+                <FormLabel>Begin met alle vragen beantwoord op 50%</FormLabel>
+                {YesNoSelect(field, props)}
+              </FormItem>
+            )}
+          />
+          {watchStartWithAllQuestionsAnswered && (
+            <FormField
+              control={form.control}
+              name="startWithAllQuestionsAnsweredAndConfirmed"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>En die 50%</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value ? 'true' : 'false'}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecteer" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="true">
+                        Hoef je niet aan te passen, de vraag telt als beantwoord
+                      </SelectItem>
+                      <SelectItem value="false">
+                        Moet je aanpassen voor een vraag telt als beantwoord
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+          )}
+          <FormField
+            control={form.control}
+            name="showPageCountAndCurrentPageInButton"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Wil je de voortgang van de pagina&apos;s te zien is in de
+                  &apos;Volgende&apos; knop?
+                </FormLabel>
+                {YesNoSelect(field, props)}
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="choicesType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Weergave van de voorkeuren</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Standaard" />
+                      <SelectValue placeholder="Selecteer weergave" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="standard">Standaard</SelectItem>
-                    <SelectItem value="minToPlus">
-                      Van min naar plus 100
-                    </SelectItem>
-                    <SelectItem value="field">In een vlak</SelectItem>
-                    <SelectItem value="none">
-                      Geen (Voorkeuren worden verborgen)
-                    </SelectItem>
+                    <SelectItem value="default">Standaard</SelectItem>
+                    <SelectItem value="minus-to-plus-100">Van min naar plus 100</SelectItem>
+                    <SelectItem value="plane">In een vlak</SelectItem>
+                    <SelectItem value="hidden">Geen: verberg de voorkeuren</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
             )}
           />
+          {(watchChoicesType === 'minus-to-plus-100' || watchChoicesType === 'plane') && (
+            <>
+              {watchChoicesType === 'minus-to-plus-100' && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="choicesPreferenceMinColor"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Kleur van de balken, minimaal</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="choicesPreferenceMaxColor"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Kleur van de balken, maximaal</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+              <FormField
+                control={form.control}
+                name="choicesPreferenceTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Titel boven de keuzes, met voorkeur</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="choicesNoPreferenceYetTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Titel boven de keuzes, nog geen voorkeur</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              {watchChoicesType === 'plane' && (
+                <FormField
+                  control={form.control}
+                  name="choicesInBetweenPreferenceTitle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Titel boven de keuzes, tussen twee voorkeuren in
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              )}
+            </>
+          )}
           <FormField
             control={form.control}
-            name="display"
+            name="imageAspectRatio"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Aspect ratio van afbeeldingen:</FormLabel>
+                <FormLabel>Weergave: afbeeldingen aspect ratio</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -141,8 +264,8 @@ export default function ChoicesSelectorForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="16:9">16:9</SelectItem>
-                    <SelectItem value="1:1">1:1</SelectItem>
+                    <SelectItem value="16x9">16:9</SelectItem>
+                    <SelectItem value="1x1">1:1</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -150,10 +273,10 @@ export default function ChoicesSelectorForm() {
           />
           <FormField
             control={form.control}
-            name="titlePreference"
+            name="beforeUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Titel boven de keuzes, met voorkeur:</FormLabel>
+                <FormLabel>URL van de inleidende pagina</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -162,34 +285,10 @@ export default function ChoicesSelectorForm() {
           />
           <FormField
             control={form.control}
-            name="titleNoPreference"
+            name="afterUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Titel boven de keuzes, zonder voorkeur:</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="urlStartPage"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>URL van de inleidende pagina:</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="urlResultPage"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>URL van de resultaatspagina:</FormLabel>
+                <FormLabel>URL van de resultaat pagina</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>

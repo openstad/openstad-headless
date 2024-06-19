@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import { useRouter } from 'next/router';
 import ChoicesSelectorForm from './form';
@@ -14,6 +14,7 @@ import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetChoiceGuideItems from "@/pages/projects/[project]/widgets/choiceguide/[id]/items";
+import WidgetChoiceGuideQuestionGroups from "@/pages/projects/[project]/widgets/choiceguide/[id]/questionGroups";
 
 export const getServerSideProps = withApiUrl;
 
@@ -49,7 +50,9 @@ export default function WidgetChoiceGuide({
         <div className="container py-6">
           <Tabs defaultValue="form">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
-              <TabsTrigger value="form">Form</TabsTrigger>
+              <TabsTrigger value="form">Instellingen</TabsTrigger>
+              <TabsTrigger value="items">Velden</TabsTrigger>
+              <TabsTrigger value="questionGroups">Vraaggroepen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="form" className="p-0">
@@ -73,19 +76,22 @@ export default function WidgetChoiceGuide({
                 />
               )}
             </TabsContent>
+            <TabsContent value="questionGroups" className="p-0">
+              <WidgetChoiceGuideQuestionGroups />
+            </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
           </Tabs>
 
           <div className='py-6 mt-6 bg-white rounded-md'>
-              {previewConfig ? (
-                <WidgetPreview
-                  type="choiceguide"
-                  config={previewConfig}
-                  projectId={projectId as string}
-                />
-              ) : null}
+              {/*{previewConfig ? (*/}
+              {/*  <WidgetPreview*/}
+              {/*    type="choiceguide"*/}
+              {/*    config={previewConfig}*/}
+              {/*    projectId={projectId as string}*/}
+              {/*  />*/}
+              {/*) : null}*/}
             </div>
         </div>
       </PageLayout>
