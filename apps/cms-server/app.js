@@ -29,10 +29,14 @@ async function setupProject(project) {
     project.url = protocol + project.url;
   }
   let url = Url.parse(project.url);
-  console.log('Project fetched: ' + url.host);
+  let host = url.host;
+  if (url.path !== '/') {
+    host += url.path;
+  }
+  console.log('Project fetched: ' + host);
 
   // for convenience and speed we set the domain name as the key
-  projects[url.host] = project;
+  projects[host] = project;
 
   // add event subscription
   if (!subscriptions[project.id]) {
@@ -125,8 +129,11 @@ async function doStartServer(domain, req, res) {
 
 async function run(id, projectData, options, callback) {
 
+  console.log ('run project', process.env.OVERWRITE_DOMAIN ? 'http://localhost:3000' : projectData.url);
+  
   const project = {
     ...aposConfig,
+    prefix: projectData.projectPrefix ? '/' + projectData.projectPrefix : '',
     baseUrl: process.env.OVERWRITE_DOMAIN ? 'http://localhost:3000' : projectData.url,
     options: projectData,
     project: projectData,
@@ -140,6 +147,8 @@ async function run(id, projectData, options, callback) {
   }
 
   const config = project;
+  
+  console.log ('run config', config);
 
   let assetsIdentifier;
 
@@ -253,9 +262,9 @@ app.use('/config-reset', async function (req, res, next) {
 function createReturnUrl(req, res) {
   // check in url if returnTo params is set for redirecting to page
   // req.session.returnTo = req.query.returnTo ? decodeURIComponent(req.query.returnTo) : null;
-  const thisHost = req.headers['x-forwarded-host'] || req.get('host');
+  const domainAndPath = req.domainAndPath;
   const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-  let returnUrl = protocol + '://' + thisHost;
+  let returnUrl = protocol + '://' + domainAndPath;
   if (req.query.returnTo && typeof req.query.returnTo === 'string') {
     // only get the pathname to prevent external redirects
     let pathToReturnTo = Url.parse(req.query.returnTo, true);
@@ -265,24 +274,69 @@ function createReturnUrl(req, res) {
   return returnUrl;
 }
 
-app.use(':priviliged(/admin)?/login', function (req, res, next) {
-  const domainAndPath = req.openstadDomain;
-  const i = req.url.indexOf('?');
-  let query = req.url.substr(i + 1);
-  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-  const url = protocol + '://' + domainAndPath + '/auth/login';
-  if (req.params.priviliged) {
+
+/**
+ * Check if a site is running under the first path
+ *
+ * So for instance, following should work:
+ *  openstad.org/site2
+ *  openstad.org/site3
+ *
+ * If not existing openstad.org will handle the above examples as pages,
+ * if openstad.org exists of course.
+ */
+app.use('/:projectPrefix', function (req, res, next) {
+    const domainAndPath = req.openstadDomain + '/' + req.params.projectPrefix;
+
+    req.url = req.originalUrl;
+    
+    console.log ('=>> URL', req.url, req.originalUrl);
+    
+    console.log ('domainAndPath', domainAndPath);
+    
+    const project = projects[domainAndPath] ? projects[domainAndPath] : false;
+
+    if (project) {
+        req.domainAndPath = domainAndPath;
+        project.projectPrefix = req.params.projectPrefix;
+        req.projectPrefix = req.params.projectPrefix;
+        req.project = project;
+        return next();
+        // try to run static from subsite
+    } else {
+      console.log ('express static', domainAndPath);
+        return express.static('public')(req, res, next);
+    }
+});
+
+function loginMiddleware(req, res, priviliged = false) {
+  console.log('login', req.params, req.domainAndPath);
+  const domainAndPath = req.domainAndPath;
+  const i             = req.url.indexOf('?');
+  let query           = req.url.substr(i + 1);
+  const protocol      = req.headers['x-forwarded-proto'] || req.protocol;
+  const url           = protocol + '://' + domainAndPath + '/auth/login';
+  if (priviliged) {
     query += `${query ? '&' : ''}loginPriviliged=1`;
   }
   return res.redirect(url && query ? url + '?' + query : url);
+}
+
+app.use('/:projectPrefix?/admin/login', function (req, res, next) {
+  return loginMiddleware(req, res, true);
 });
 
-app.get('/auth/login', (req, res, next) => {
+app.use('/:projectPrefix?/login', function (req, res, next) {
+  return loginMiddleware(req, res, false);
+});
+
+app.get('/:projectPrefix?/auth/login', (req, res, next) => {
 
   let returnUrl = createReturnUrl(req, res);
   returnUrl = encodeURIComponent(returnUrl + '?openstadlogintoken=[[jwt]]');
 
-  let projectDomain = process.env.OVERWRITE_DOMAIN ? process.env.OVERWRITE_DOMAIN : req.openstadDomain;
+  //let projectDomain = process.env.OVERWRITE_DOMAIN ? process.env.OVERWRITE_DOMAIN : req.openstadDomain;
+  let projectDomain = req.domainAndPath;
   const project = (projects[projectDomain] ? projects[projectDomain] : false);
 
   const apiUrl = process.env.API_URL;
@@ -324,13 +378,15 @@ app.use(async function (req, res, next) {
   try {
 
     // format domain to our specification
-    let domain = req.headers['x-forwarded-host'] || req.get('host');
+    let domain = req.domainAndPath || req.headers['x-forwarded-host'] || req.get('host');
     domain = domain.replace([ 'http://', 'https://' ], [ '' ]);
     domain = domain.replace([ 'www' ], [ '' ]);
-
+    
+    console.log ('req.project', req.domainAndPath, domain);
+    
     // for dev purposes allow overwrite domain name
-    domain = process.env.OVERWRITE_DOMAIN ? process.env.OVERWRITE_DOMAIN : domain;
-
+//    domain = process.env.OVERWRITE_DOMAIN ? process.env.OVERWRITE_DOMAIN : domain;
+    
     if (!projects[domain]) {
       console.log('Project not found: ', domain);
       res.status(404).json({ error: 'Project not found' });
@@ -365,7 +421,7 @@ app.use(async function (req, res, next) {
     startUpIsBusy = false;
 
   } catch (e) {
-    console.log('Error starting up project: ', domain, e);
+    console.log('Error starting up project: ', e);
     res.status(500).json({
       error: 'An error occured running project ',
       domain

@@ -40,6 +40,8 @@ services:
     restart: always
     volumes:
       - openstad-mongo-data:/var/lib/mongo
+    ports:
+      - 27017:27017
 
   openstad-mailpit:
     image: axllent/mailpit:v1.15

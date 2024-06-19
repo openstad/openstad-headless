@@ -1,4 +1,5 @@
 module.exports = {
+  /*prefix: '/begroten',*/
   modules: {
     '@apostrophecms/rich-text-widget': {
       options: {
