@@ -35,6 +35,7 @@ export type ProjectSettingProps = {
     canReply: boolean,
     closedText: string;
     requiredUserRole: string,
+    requiredUserLikeRole: string,
     descriptionMinLength: number,
     descriptionMaxLength: number,
     adminLabel: string,
