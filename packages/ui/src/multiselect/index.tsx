@@ -16,6 +16,7 @@ export function MultiSelect({
   label: string;
   options: Array<{ value: string; label: string; checked?: boolean }>;
   defaultOpen?: boolean;
+  id?: string;
   onItemSelected: (optionValue: string) => void;
 }) {
 

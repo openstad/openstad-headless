@@ -144,10 +144,10 @@ module.exports = {
         type: 'string',
       },
 
-      siteLogo: {
+      favicon: {
         type: 'attachment',
-        label: 'Site logo',
-        fileGroup: 'images',
+        label: 'Favicon',
+        fileGroup: 'icons',
       },
 
       cssExtras: {
@@ -291,7 +291,7 @@ module.exports = {
       },
       css: {
         label: 'Vormgeving',
-        fields: ['cssExtras', 'customCssLink', 'compactMenu'],
+        fields: ['cssExtras', 'customCssLink', 'favicon', 'compactMenu'],
       },
       login: {
         label: 'Gebruikers login',

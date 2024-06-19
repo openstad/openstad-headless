@@ -15,8 +15,8 @@
           <p class="intro">
               {{description if description else 'Laat je e-mail achter en we mailen je instructies voor het resetten van je wachtwoord.'}}
           </p>
-          <label> {{label if label else 'E-mail:'}} </label>
-          <input type="email" name="email" id="email" placeholder="Email" class="form-input" required autofocus>
+          <label for="input_field"> {{label if label else 'E-mail:'}} </label>
+          <input type="email" name="email" id="email" placeholder="Email" class="form-input" required autofocus id="input_field">
         </div>
         <button type="submit" class="btn btn-primary">
             {{buttonText if buttonText else 'Stuur e-mail'}}

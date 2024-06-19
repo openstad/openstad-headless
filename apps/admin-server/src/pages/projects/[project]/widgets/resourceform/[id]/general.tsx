@@ -33,7 +33,12 @@ const formSchema = z.object({
     'submission',
   ]),
   formName: z.string(),
-  redirectUrl: z.string().url(),
+  redirectUrl: z.string().refine(value =>
+    /^(\/[^\s]*)|(https?:\/\/[^\s]*)$/i.test(value),
+    {
+      message: "Must be a valid URL or a relative path",
+    }
+  ),
   hideAdmin: z.boolean(),
   // organiseForm: z.enum(['static', 'staticAppended', 'dynamic']),
 });

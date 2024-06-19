@@ -109,11 +109,11 @@ function Enquete(props: EnqueteWidgetProps) {
                 case 'scale':
                     fieldData['type'] = 'tickmark-slider';
                     fieldData['fieldOptions'] = [
-                        { value: 'Sad', label: <Icon icon="ri-emotion-sad-line" /> },
-                        { value: 'Unhappy', label: <Icon icon="ri-emotion-unhappy-line" /> },
-                        { value: 'Normal', label: <Icon icon="ri-emotion-normal-line" /> },
-                        { value: 'Happy', label: <Icon icon="ri-emotion-happy-line" /> },
-                        { value: 'Laugh', label: <Icon icon="ri-emotion-laugh-line" /> },
+                        { value: '1', label: 1 },
+                        { value: '2', label: 2 },
+                        { value: '3', label: 3 },
+                        { value: '4', label: 4 },
+                        { value: '5', label: 5 },
                     ];
                     break;
                 case 'none':

@@ -32,10 +32,11 @@ export default function WidgetResourceFormConfirmation() {
   } = useWidgetConfig<any>();
 
   const defaults = useCallback(
-    () => ({
-      confirmationUser: widget?.config?.[category]?.confirmationUser || false,
-      confirmationAdmin: widget?.config?.[category]?.confirmationAdmin || false,
-    }),
+    () => {
+      const confirmationUser = widget?.config?.[category]?.confirmationUser !== null ? widget?.config?.[category]?.confirmationUser : true;
+      const confirmationAdmin = widget?.config?.[category]?.confirmationAdmin !== null ? widget?.config?.[category]?.confirmationAdmin : true;
+      return { confirmationUser, confirmationAdmin };
+    },
     [widget?.config]
   );
 

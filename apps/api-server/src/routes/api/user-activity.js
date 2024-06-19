@@ -7,6 +7,7 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const {Op} = require('sequelize');
 const merge = require('merge');
+const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const router = express.Router({mergeParams: true});
 
@@ -48,7 +49,9 @@ const activityConfig = {
 
 router
   .all('*', function (req, res, next) {
-    // req.scope = ['includeProject'];
+    // alleen admins of jezelf
+    if (!req.user.id) return next( createError(401, 'Je kunt deze activiteiten niet bekijken'));
+    if (!( req.params.userId == req.user.id ||  hasRole(req.user, 'admin') )) return next( createError(401, 'Je kunt deze activiteiten niet bekijken'));
     next();
   });
 
@@ -90,7 +93,7 @@ router.route('/')
           .scope(['includeProject'])
           .findAll({
             where: {
-              idpUser: { identifier: user.idpUser.identifier },
+              idpUser: { identifier: user.idpUser.identifier, provider: user.idpUser.provider },
               // old users have no projectId, this will break the update
               // skip them
               // probably should clean up these users

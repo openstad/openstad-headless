@@ -18,5 +18,9 @@
     "allowSyntheticDefaultImports": true,
     "emitDeclarationOnly": true,
 
-  }
+  },
+  "include": [
+    "src/**/*",
+    "types/**/*"
+  ]
 }

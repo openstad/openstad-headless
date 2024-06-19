@@ -81,7 +81,7 @@ module.exports = ( db, sequelize, DataTypes ) => {
             if (!template) throw new Error('Notification template not found');
 
             // fetch data
-            templateData = {};
+            templateData = options.data;
             templateData.project = await db.Project.scope('includeConfig', 'includeEmailConfig').findByPk(instance.projectId);
             let keys = ['resource', 'user', 'comment', 'submission'];
             for (let key of keys) {

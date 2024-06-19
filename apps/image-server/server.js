@@ -7,7 +7,7 @@ const crypto = require('crypto')
 
 const secret = process.env.IMAGE_VERIFICATION_TOKEN
 
-const multerConfig = {
+const imageMulterConfig = {
   onError: function (err, next) {
     console.error(err);
     next(err);
@@ -27,6 +27,21 @@ const multerConfig = {
 
     cb(null, true);
   }
+}
+
+const sanitizeFileName = (fileName) => {
+  let sanitizedFileName = fileName.replace(/[^a-z0-9_\-]/gi, '_');
+  return sanitizedFileName.replace(/_+/g, '_');
+}
+
+const createFilename = (originalFileName) => {
+  const fileExtension = originalFileName.split('.').pop();
+  const fileNameWithoutExtension = originalFileName.substring(0, originalFileName.lastIndexOf('.')) || originalFileName
+  const sanitizedFileName = sanitizeFileName(fileNameWithoutExtension);
+
+  const randomUUID = crypto.randomUUID();
+
+  return `${sanitizedFileName}-${randomUUID}.${fileExtension}`;
 }
 
 const imageSteamConfig = {
@@ -61,9 +76,9 @@ const imageSteamConfig = {
   },
 };
 
-multerConfig.dest = process.env.IMAGES_DIR || 'images/';
+imageMulterConfig.dest = process.env.IMAGES_DIR || 'images/';
 
-const upload = multer(multerConfig);
+const imageUpload = multer(imageMulterConfig);
 
 const argv = require('yargs')
   .usage('Usage: $0 [options] pathToImage')
@@ -119,20 +134,12 @@ app.get('/image/*',
     imageHandler(req, res);
   });
 
+
 /**
  *  The url for creating one Image
  */
 app.post('/image',
-  upload.single('image'), (req, res, next) => {
-    // req.file is the `image` file
-    // req.body will hold the text fields, if there were any
-    //
-    const createdCombination = secret + req.query.exp_date
-    const verification = crypto.createHmac("sha256", createdCombination).digest("hex")
-    if(Date.now() < req.query.exp_date && verification === req.query.signature) {
-      console.log("This post has been successfully verified!")
-    }
-
+  imageUpload.single('image'), (req, res, next) => {
     const fileName = req.file.filename || req.file.key;
     let url = `${process.env.APP_URL}/image/${fileName}`;
 
@@ -149,15 +156,7 @@ app.post('/image',
   });
 
 app.post('/images',
-    upload.array('image', 30), (req, res, next) => {
-        // req.files is array of `images` files
-        // req.body will contain the text fields, if there were any
-        const createdCombination = secret + req.query.exp_date
-        const verification = crypto.createHmac("sha256", createdCombination).digest("hex")
-        if(Date.now() < req.query.exp_date && verification === req.query.signature) {
-            console.log("This post has been successfully verified!")
-        }
-
+  imageUpload.array('image', 30), (req, res, next) => {
         res.send(JSON.stringify(req.files.map((file) => {
             let url = `${process.env.APP_URL}/image/${file.filename}`;
 
@@ -173,6 +172,102 @@ app.post('/images',
             }
         })));
     });
+
+
+
+const documentMulterConfig = {
+  onError: function (err, next) {
+    console.error(err);
+    next(err);
+  },
+  fileFilter: function (req, file, cb) {
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    ];
+
+    if (allowedTypes.indexOf(file.mimetype) === -1) {
+      req.fileValidationError = 'goes wrong on the mimetype';
+      return cb(null, false, new Error('goes wrong on the mimetype'));
+    }
+
+    const forbiddenChars = /[\\/:]/;
+    if (forbiddenChars.test(file.originalname)) {
+      req.fileValidationError = 'Forbidden characters in filename';
+      return cb(null, false, new Error('Forbidden characters in filename'));
+    }
+
+    cb(null, true);
+  },
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, process.env.DOCUMENTS_DIR || 'documents/');
+    },
+    filename: function (req, file, cb) {
+      const uniqueFileName = createFilename(file.originalname)
+
+      cb(null, uniqueFileName);
+    }
+  })
+}
+
+documentMulterConfig.dest = process.env.DOCUMENTS_DIR || 'documents/';
+const documentUpload = multer(documentMulterConfig);
+
+app.get('/document/*',
+  function (req, res, next) {
+    req.url = req.url.replace('/document', '');
+
+    /**
+     * Pass request en response to the imageserver
+     */
+    // return res.download(`${process.env.APP_URL}/document/${req.url}`);
+    return res.download(`documents/${req.url}`);
+  });
+
+/**
+ *  The url for creating one Document
+ */
+app.post('/document',
+  documentUpload.single('document'), (req, res, next) => {
+    const fileName = createFilename(req.file.originalname);
+
+    let url = `${process.env.APP_URL}/document/${encodeURIComponent(fileName)}`;
+
+    let protocol = '';
+
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+    }
+
+    res.send(JSON.stringify({
+      name: req.file.originalname,
+      url: protocol + url
+    }));
+  });
+
+app.post('/documents',
+  documentUpload.array('document', 30), (req, res, next) => {
+    res.send(JSON.stringify(req.files.map((file) => {
+      let url = `${process.env.APP_URL}/document/${encodeURIComponent(file.filename)}`;
+
+      let protocol = '';
+
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+      }
+
+      return {
+        name: file.originalname,
+        url: protocol + url
+      }
+    })));
+  });
 
 
 app.use(function (err, req, res, next) {

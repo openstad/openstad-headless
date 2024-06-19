@@ -36,9 +36,6 @@ module.exports = async function seed(config, db) {
             },
           }
         },
-        resources: {
-          defaultStatusIds: [1],
-        },
         votes: {
           isActive: true,
           requiredUserRole: 'anonymous',
@@ -105,19 +102,15 @@ module.exports = async function seed(config, db) {
             },
           }
         },
-        resources: {
-          defaultStatusIds: [2],
-        },
         votes: {
-          isActive: true,
-          requiredUserRole: 'anonymous',
           isViewable: true,
-          maxResources: 10000,
-          minResources: 1,
-          minBudget: 100,
-          maxBudget: 80000,
-          voteType: 'budgeting',
-          withExisting: 'error',
+          isActive: true,
+          requiredUserRole: "member",
+          mustConfirm: false,
+          withExisting: "replace",
+          voteType: "budgeting",
+          minBudget: 1000,
+          maxBudget: 20000,
         }
       },
       emailConfig: {
@@ -284,6 +277,7 @@ module.exports = async function seed(config, db) {
         lat: 52.3710476 + ( Math.random() * .03 - .015 ),
         lng: 4.9005494 + ( Math.random() * .03 - .015 )
       },
+      budget: 10000,
       startDate: db.sequelize.fn('now'),
       publishDate: db.sequelize.fn('now'),
     });
@@ -299,6 +293,7 @@ module.exports = async function seed(config, db) {
         lat: 52.3710476 + ( Math.random() * .03 - .015 ),
         lng: 4.9005494 + ( Math.random() * .03 - .015 )
       },
+      budget: 11000,
       startDate: db.sequelize.fn('now'),
       publishDate: db.sequelize.fn('now'),
     });
@@ -314,6 +309,7 @@ module.exports = async function seed(config, db) {
         lat: 52.3710476 + ( Math.random() * .03 - .015 ),
         lng: 4.9005494 + ( Math.random() * .03 - 015 )
       },
+      budget: 6000,
       startDate: db.sequelize.fn('now'),
       publishDate: db.sequelize.fn('now'),
     });
@@ -329,6 +325,7 @@ module.exports = async function seed(config, db) {
         lat: 52.3710476 + ( Math.random() * .03 - .015 ),
         lng: 4.9005494 + ( Math.random() * .03 - 015 )
       },
+      budget: 5000,
       startDate: db.sequelize.fn('now'),
       publishDate: db.sequelize.fn('now'),
     });
@@ -339,11 +336,12 @@ module.exports = async function seed(config, db) {
       title: 'Nullam dignissim tincidunt',
       summary: 'Nullam dignissim tincidunt urna, non vehicula enim convallis vitae. Nulla enim nibh, semper et metus.',
       description: 'Nullam dignissim tincidunt urna, non vehicula enim convallis vitae. Nulla enim nibh, semper et metus quis, venenatis eleifend nisi. Phasellus sed erat est. Donec ac lobortis turpis. Nulla facilisi. Pellentesque sit amet nisi id ante maximus consequat non sit amet nisl. Sed diam metus, malesuada ac aliquet in, pulvinar ac elit. Sed feugiat a dui sit amet luctus. Morbi sit amet dignissim neque, eget blandit lorem. Suspendisse ultrices mauris felis, in fermentum metus vestibulum a. Integer congue pharetra risus a interdum. Vivamus fringilla justo ac elementum tempor. Quisque ultrices fringilla lobortis. Aliquam ullamcorper ligula eu ipsum imperdiet vestibulum. Maecenas pretium, mi eget blandit tincidunt, justo lorem ornare lorem, in vulputate diam quam mollis ligula. Etiam viverra, nisl et laoreet tristique, dui sapien volutpat leo, in euismod diam dui nec orci. ',
-      images: [ { url: `${process.env.IMAGE_APP_URL}/image/forum.romanum.05.jpg`} ],
+      images: [ { url: `${process.env.IMAGE_APP_URL}/image/forum.romanum.05.png`} ],
       location: {        
         lat: 52.3710476 + ( Math.random() * .03 - .015 ),
         lng: 4.9005494 + ( Math.random() * .03 - .015 )
       },
+      budget: 15000,
       startDate: db.sequelize.fn('now'),
       publishDate: db.sequelize.fn('now'),
     });
@@ -446,39 +444,53 @@ module.exports = async function seed(config, db) {
     resource10.addTag(theme6);
 
     console.log('      belonging to a status');
-    let status1 = await db.Status.create({
+    let status1 = await db.Status.findOne({
+      where: { projectId: 2, name: 'open' }
+    })
+    await status1.update({
       projectId: 2,
-      name: 'Open',
-      seqnr: 10,
       label: 'Open',
+      addToNewResources: true,
       mapIcon: '{"html":"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?><svg width=\\"39\\" height=\\"50\\" viewBox=\\"0 0 39 50\\" fill=\\"none\\" xmlns=\\"http://www.w3.org/2000/svg\\"><path d=\\"M19.1038 0C29.6577 0 38.2075 8.46671 38.2075 18.9181C38.2075 33.1786 21.7544 47.7273 21.0432 48.3035L19.1038 50L17.1643 48.3035C16.4532 47.7273 0 33.1786 0 18.9181C0 8.46831 8.54983 0 19.1038 0ZM32.3245 18.9181C32.3083 11.6837 26.4091 5.84187 19.1038 5.82586C11.7984 5.84187 5.89922 11.6837 5.88306 18.9181C5.88306 27.3367 14.1581 37.2439 19.0876 42.1095C23.1767 38.1242 32.3245 27.993 32.3245 18.9181Z\\" fill=\\"green\\"></path><path d=\\"M19.104 5.82568C26.4093 5.84169 32.3086 11.6836 32.3247 18.9179C32.3247 27.9928 23.1769 38.124 19.0879 42.1093C14.1584 37.2437 5.8833 27.3366 5.8833 18.9179C5.89946 11.6836 11.7987 5.84169 19.104 5.82568ZM25.5689 18.9179C25.5689 15.3807 22.6759 12.5158 19.104 12.5158C15.5322 12.5158 12.6391 15.3807 12.6391 18.9179C12.6391 22.455 15.5322 25.3199 19.104 25.3199C22.6759 25.3199 25.5689 22.455 25.5689 18.9179Z\\" fill=\\"white\\"></path><path d=\\"M19.1038 25.3202C22.6743 25.3202 25.5687 22.4539 25.5687 18.9182C25.5687 15.3824 22.6743 12.5161 19.1038 12.5161C15.5333 12.5161 12.6389 15.3824 12.6389 18.9182C12.6389 22.4539 15.5333 25.3202 19.1038 25.3202Z\\" fill=\\"green\\"></path></svg>","width":34,"height":45,"anchor":[17,45]}',
+      listIcon: '{"html":"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?><svg width=\\"34px\\" height=\\"34px\\" viewBox=\\"0 0 34 34\\" version=\\"1.1\\" xmlns=\\"http://www.w3.org/2000/svg\\" xmlns:xlink=\\"http://www.w3.org/1999/xlink\\"><title>melding-lijst-icon</title><g id=\\"Stijlen-en-interacties\\" stroke=\\"none\\" stroke-width=\\"1\\" fill=\\"none\\" fill-rule=\\"evenodd\\"><g id=\\"Icons\\" transform=\\"translate(-1250.000000, -217.000000)\\"><g id=\\"Group-3-Copy\\" transform=\\"translate(1250.000000, 216.000000)\\"></g><g id=\\"melding-lijst-icon\\" transform=\\"translate(1250.000000, 217.000000)\\"><circle id=\\"Oval\\" fill=\\"#008800\\" cx=\\"17\\" cy=\\"17\\" r=\\"17\\"></circle><path d=\\"M14.5,24.5 L7,24.5 L7,22 L7.625,22 C9.00571187,22 10.125,20.8807119 10.125,19.5 L10.125,13.25 C10.125,10.4885763 12.3635763,8.25 15.125,8.25 L15.75,8.25 C15.75,7.55964406 16.3096441,7 17,7 C17.6903559,7 18.25,7.55964406 18.25,8.25 L18.875,8.25 C21.6364237,8.25 23.875,10.4885763 23.875,13.25 L23.875,19.5 C23.875,20.8807119 24.9942881,22 26.375,22 L27,22 L27,24.5 L19.5,24.5 C19.5,25.8807119 18.3807119,27 17,27 C15.6192881,27 14.5,25.8807119 14.5,24.5 Z M15.75,24.5 C15.75,25.1903559 16.3096441,25.75 17,25.75 C17.6903559,25.75 18.25,25.1903559 18.25,24.5 L15.75,24.5 Z M12.625,13.25 L12.625,19.5 C12.625,20.4107179 12.3815143,21.2645666 11.956089,22 L22.043911,22 C21.6184857,21.2645666 21.375,20.4107179 21.375,19.5 L21.375,13.25 C21.375,11.8692881 20.2557119,10.75 18.875,10.75 L15.125,10.75 C13.7442881,10.75 12.625,11.8692881 12.625,13.25 Z\\" id=\\"Shape\\" fill=\\"#000000\\" fill-rule=\\"nonzero\\"></path></g></g></g></svg>","width":34,"height":34}',
+      color: 'black',
+      backgroundColor: '#008800'
+    });
+
+    let status2 = await db.Status.create({
+      projectId: 2,
+      name: 'closed',
+      seqnr: 100,
+      label: 'Gesloten',
+      mapIcon: '{"html":"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?><svg width=\\"39\\" height=\\"50\\" viewBox=\\"0 0 39 50\\" fill=\\"none\\" xmlns=\\"http://www.w3.org/2000/svg\\"><path d=\\"M19.1038 0C29.6577 0 38.2075 8.46671 38.2075 18.9181C38.2075 33.1786 21.7544 47.7273 21.0432 48.3035L19.1038 50L17.1643 48.3035C16.4532 47.7273 0 33.1786 0 18.9181C0 8.46831 8.54983 0 19.1038 0ZM32.3245 18.9181C32.3083 11.6837 26.4091 5.84187 19.1038 5.82586C11.7984 5.84187 5.89922 11.6837 5.88306 18.9181C5.88306 27.3367 14.1581 37.2439 19.0876 42.1095C23.1767 38.1242 32.3245 27.993 32.3245 18.9181Z\\" fill=\\"red\\"></path><path d=\\"M19.104 5.82568C26.4093 5.84169 32.3086 11.6836 32.3247 18.9179C32.3247 27.9928 23.1769 38.124 19.0879 42.1093C14.1584 37.2437 5.8833 27.3366 5.8833 18.9179C5.89946 11.6836 11.7987 5.84169 19.104 5.82568ZM25.5689 18.9179C25.5689 15.3807 22.6759 12.5158 19.104 12.5158C15.5322 12.5158 12.6391 15.3807 12.6391 18.9179C12.6391 22.455 15.5322 25.3199 19.104 25.3199C22.6759 25.3199 25.5689 22.455 25.5689 18.9179Z\\" fill=\\"white\\"></path><path d=\\"M19.1038 25.3202C22.6743 25.3202 25.5687 22.4539 25.5687 18.9182C25.5687 15.3824 22.6743 12.5161 19.1038 12.5161C15.5333 12.5161 12.6389 15.3824 12.6389 18.9182C12.6389 22.4539 15.5333 25.3202 19.1038 25.3202Z\\" fill=\\"green\\"></path></svg>","width":34,"height":45,"anchor":[17,45]}',
       listIcon: '{"html":"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?><svg width=\\"34px\\" height=\\"34px\\" viewBox=\\"0 0 34 34\\" version=\\"1.1\\" xmlns=\\"http://www.w3.org/2000/svg\\" xmlns:xlink=\\"http://www.w3.org/1999/xlink\\"><title>melding-lijst-icon</title><g id=\\"Stijlen-en-interacties\\" stroke=\\"none\\" stroke-width=\\"1\\" fill=\\"none\\" fill-rule=\\"evenodd\\"><g id=\\"Icons\\" transform=\\"translate(-1250.000000, -217.000000)\\"><g id=\\"Group-3-Copy\\" transform=\\"translate(1250.000000, 216.000000)\\"></g><g id=\\"melding-lijst-icon\\" transform=\\"translate(1250.000000, 217.000000)\\"><circle id=\\"Oval\\" fill=\\"#880000\\" cx=\\"17\\" cy=\\"17\\" r=\\"17\\"></circle><path d=\\"M14.5,24.5 L7,24.5 L7,22 L7.625,22 C9.00571187,22 10.125,20.8807119 10.125,19.5 L10.125,13.25 C10.125,10.4885763 12.3635763,8.25 15.125,8.25 L15.75,8.25 C15.75,7.55964406 16.3096441,7 17,7 C17.6903559,7 18.25,7.55964406 18.25,8.25 L18.875,8.25 C21.6364237,8.25 23.875,10.4885763 23.875,13.25 L23.875,19.5 C23.875,20.8807119 24.9942881,22 26.375,22 L27,22 L27,24.5 L19.5,24.5 C19.5,25.8807119 18.3807119,27 17,27 C15.6192881,27 14.5,25.8807119 14.5,24.5 Z M15.75,24.5 C15.75,25.1903559 16.3096441,25.75 17,25.75 C17.6903559,25.75 18.25,25.1903559 18.25,24.5 L15.75,24.5 Z M12.625,13.25 L12.625,19.5 C12.625,20.4107179 12.3815143,21.2645666 11.956089,22 L22.043911,22 C21.6184857,21.2645666 21.375,20.4107179 21.375,19.5 L21.375,13.25 C21.375,11.8692881 20.2557119,10.75 18.875,10.75 L15.125,10.75 C13.7442881,10.75 12.625,11.8692881 12.625,13.25 Z\\" id=\\"Shape\\" fill=\\"#000000\\" fill-rule=\\"nonzero\\"></path></g></g></g></svg>","width":34,"height":34}',
       color: 'black',
-      backgroundColor: '#880000'
+      backgroundColor: '#880000',
+      extraFunctionality: {
+        editableByUser: false,
+        canComment: false,
+      }
     });
 
     resource1.addStatus(status1);
     resource2.addStatus(status1);
-    resource3.addStatus(status1);
+    resource3.addStatus(status2);
     resource4.addStatus(status1);
     resource5.addStatus(status1);
 
-    let status2 = await db.Status.create({
-      projectId: 3,
-      name: 'Open',
-      seqnr: 10,
-      label: 'Open',
-      mapIcon: '{"html":"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?><svg width=\\"39\\" height=\\"50\\" viewBox=\\"0 0 39 50\\" fill=\\"none\\" xmlns=\\"http://www.w3.org/2000/svg\\"><path d=\\"M19.1038 0C29.6577 0 38.2075 8.46671 38.2075 18.9181C38.2075 33.1786 21.7544 47.7273 21.0432 48.3035L19.1038 50L17.1643 48.3035C16.4532 47.7273 0 33.1786 0 18.9181C0 8.46831 8.54983 0 19.1038 0ZM32.3245 18.9181C32.3083 11.6837 26.4091 5.84187 19.1038 5.82586C11.7984 5.84187 5.89922 11.6837 5.88306 18.9181C5.88306 27.3367 14.1581 37.2439 19.0876 42.1095C23.1767 38.1242 32.3245 27.993 32.3245 18.9181Z\\" fill=\\"green\\"></path><path d=\\"M19.104 5.82568C26.4093 5.84169 32.3086 11.6836 32.3247 18.9179C32.3247 27.9928 23.1769 38.124 19.0879 42.1093C14.1584 37.2437 5.8833 27.3366 5.8833 18.9179C5.89946 11.6836 11.7987 5.84169 19.104 5.82568ZM25.5689 18.9179C25.5689 15.3807 22.6759 12.5158 19.104 12.5158C15.5322 12.5158 12.6391 15.3807 12.6391 18.9179C12.6391 22.455 15.5322 25.3199 19.104 25.3199C22.6759 25.3199 25.5689 22.455 25.5689 18.9179Z\\" fill=\\"white\\"></path><path d=\\"M19.1038 25.3202C22.6743 25.3202 25.5687 22.4539 25.5687 18.9182C25.5687 15.3824 22.6743 12.5161 19.1038 12.5161C15.5333 12.5161 12.6389 15.3824 12.6389 18.9182C12.6389 22.4539 15.5333 25.3202 19.1038 25.3202Z\\" fill=\\"green\\"></path></svg>","width":34,"height":45,"anchor":[17,45]}',
-      listIcon: '{"html":"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?><svg width=\\"34px\\" height=\\"34px\\" viewBox=\\"0 0 34 34\\" version=\\"1.1\\" xmlns=\\"http://www.w3.org/2000/svg\\" xmlns:xlink=\\"http://www.w3.org/1999/xlink\\"><title>melding-lijst-icon</title><g id=\\"Stijlen-en-interacties\\" stroke=\\"none\\" stroke-width=\\"1\\" fill=\\"none\\" fill-rule=\\"evenodd\\"><g id=\\"Icons\\" transform=\\"translate(-1250.000000, -217.000000)\\"><g id=\\"Group-3-Copy\\" transform=\\"translate(1250.000000, 216.000000)\\"></g><g id=\\"melding-lijst-icon\\" transform=\\"translate(1250.000000, 217.000000)\\"><circle id=\\"Oval\\" fill=\\"#880000\\" cx=\\"17\\" cy=\\"17\\" r=\\"17\\"></circle><path d=\\"M14.5,24.5 L7,24.5 L7,22 L7.625,22 C9.00571187,22 10.125,20.8807119 10.125,19.5 L10.125,13.25 C10.125,10.4885763 12.3635763,8.25 15.125,8.25 L15.75,8.25 C15.75,7.55964406 16.3096441,7 17,7 C17.6903559,7 18.25,7.55964406 18.25,8.25 L18.875,8.25 C21.6364237,8.25 23.875,10.4885763 23.875,13.25 L23.875,19.5 C23.875,20.8807119 24.9942881,22 26.375,22 L27,22 L27,24.5 L19.5,24.5 C19.5,25.8807119 18.3807119,27 17,27 C15.6192881,27 14.5,25.8807119 14.5,24.5 Z M15.75,24.5 C15.75,25.1903559 16.3096441,25.75 17,25.75 C17.6903559,25.75 18.25,25.1903559 18.25,24.5 L15.75,24.5 Z M12.625,13.25 L12.625,19.5 C12.625,20.4107179 12.3815143,21.2645666 11.956089,22 L22.043911,22 C21.6184857,21.2645666 21.375,20.4107179 21.375,19.5 L21.375,13.25 C21.375,11.8692881 20.2557119,10.75 18.875,10.75 L15.125,10.75 C13.7442881,10.75 12.625,11.8692881 12.625,13.25 Z\\" id=\\"Shape\\" fill=\\"#000000\\" fill-rule=\\"nonzero\\"></path></g></g></g></svg>","width":34,"height":34}',
-      color: 'black',
-      backgroundColor: '#880000'
+    
+    let status3 = await db.Status.findOne({
+      where: { projectId: 3, name: 'open' }
+    });
+    await status3.update({
+      addToNewResources: true,
     });
 
-    resource6.addStatus(status2);
-    resource7.addStatus(status2);
-    resource8.addStatus(status2);
-    resource9.addStatus(status2);
-    resource10.addStatus(status2);
+    resource6.addStatus(status3);
+    resource7.addStatus(status3);
+    resource8.addStatus(status3);
+    resource9.addStatus(status3);
+    resource10.addStatus(status3);
 
     console.log('      with 5 likes');
     await db.Vote.create({
@@ -576,7 +588,7 @@ module.exports = async function seed(config, db) {
       opinion: 'yes',
     });
 
-    console.log('    two widgets');
+    console.log('    five widgets');
     await db.Widget.create({
       projectId: 2,
       type: 'likes',
@@ -585,10 +597,31 @@ module.exports = async function seed(config, db) {
     });
 
     await db.Widget.create({
+      projectId: 2,
+      type: 'resourceoverview',
+      description: 'Plannen overzicht',
+      config: {"displaySorting":true,"defaultSorting":"createdAt_desc","sorting":[{"value":"createdAt_desc","label":"Nieuwste eerst"},{"value":"createdAt_asc","label":"Oudste eerst"}],"displaySearch":true,"displaySearchText":false,"textActiveSearch":"Je ziet hier zoekresultaten voor [zoekterm]","tagGroups":[{"type":"theme","multiple":true,"label":"Thema"},{"type":"area","multiple":true,"label":"Gebied"}],"displayTagFilters":true,"displayTagGroupName":false,"displayBanner":true,"titleMaxLength":"100","descriptionMaxLength":"100","summaryMaxLength":"100","displayTitle":true,"displayDescription":false,"displaySummary":true,"displayArguments":true,"displayVote":true,"itemLink":"/plan?osid=[id]","resourceType":"resource","displayType":"cardrow","rawInput":"","projectId":"2"},
+    });
+
+    await db.Widget.create({
+      projectId: 2,
+      type: 'resourcedetail',
+      description: 'Plan detail',
+      config: {"displayImage":true,"displayUser":true,"displayBudget":true,"displayDescription":true,"displayTitle":true,"displayDate":true,"displaySummary":true,"displayLocation":true,"displayBudgetDocuments":false,"projectId":"2","resourceIdRelativePath":"/plan?osid=[id]","commentsWidget":{"useSentiments":["for","against"]}},
+    });
+
+    await db.Widget.create({
+      projectId: 2,
+      type: 'resourcesmap',
+      description: 'Kaart met plannen',
+      config: {},
+    });
+
+    await db.Widget.create({
       projectId: 3,
-      type: 'likes',
-      description: 'Likes op begroot',
-      config: {"title":"Likes op begroot","variant":"medium","yesLabel":"Yes!","noLabel":"Neeee!","hideCounters":false},
+      type: 'begrootmodule',
+      description: 'Begroot widget',
+      config: {"displayPriceLabel":true,"showVoteCount":true,"originalResourceUrl":"http://a.bc","displayRanking":false,"notEnoughBudgetText":"Niet genoeg budget","showOriginalResource":false,"displaySearch":true,"displaySearchText":true,"textActiveSearch":"Je ziet hier zoekresultaten voor [zoekterm]","displayTagFilters":false},
     });
 
     console.log('    a choices-guide');

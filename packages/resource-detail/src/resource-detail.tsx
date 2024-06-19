@@ -8,17 +8,14 @@ import {
   Image,
   Spacer,
   Pill,
-  IconButton,
+  IconButton, Icon,
 } from '@openstad-headless/ui/src';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
   Paragraph,
-  Heading,
-  Heading4,
-  Heading5,
-  Heading6,
+  Heading, Heading2, ButtonGroup, ButtonLink,
 } from '@utrecht/component-library-react';
 import React from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
@@ -29,22 +26,27 @@ import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-d
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 type booleanProps = {
   [K in
-    | 'displayImage'
-    | 'displayTitle'
-    | 'displaySummary'
-    | 'displayDescription'
-    | 'displayUser'
-    | 'displayDate'
-    | 'displayBudget'
-    | 'displayLocation'
-    | 'displayBudgetDocuments'
-    | 'displayLikes'
-    | 'displayTags'
-    | 'displayStatus'
-    | 'displaySocials']: boolean | undefined;
+  | 'displayImage'
+  | 'displayTitle'
+  | 'displaySummary'
+  | 'displayDescription'
+  | 'displayUser'
+  | 'displayDate'
+  | 'displayBudget'
+  | 'displayLocation'
+  | 'displayBudgetDocuments'
+  | 'displayLikes'
+  | 'displayTags'
+  | 'displayStatus'
+  | 'displayDocuments'
+  | 'displaySocials']: boolean | undefined;
 };
 
-export type ResourceDetailWidgetProps = BaseProps &
+export type ResourceDetailWidgetProps = {
+    documentsTitle?: string;
+    documentsDesc?: string;
+  } &
+  BaseProps &
   ProjectSettingProps & {
     projectId?: string;
     resourceId?: string;
@@ -59,10 +61,15 @@ export type ResourceDetailWidgetProps = BaseProps &
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
     resourceDetailMap?: Omit<
-    ResourceDetailMapWidgetProps,
-    keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
-  >;
-  };
+      ResourceDetailMapWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
+  } ;
+
+type DocumentType = {
+  name?: string;
+  url?: string;
+}
 
 function ResourceDetail({
   displayImage = true,
@@ -78,10 +85,13 @@ function ResourceDetail({
   displayTags = true,
   displayStatus = true,
   displaySocials = true,
+  displayDocuments = true,
+  documentsTitle = '',
+  documentsDesc = '',
   ...props
 }: ResourceDetailWidgetProps) {
 
-  let resourceId: string|undefined = String(getResourceId({
+  let resourceId: string | undefined = String(getResourceId({
     resourceId: parseInt(props.resourceId || ''),
     url: document.location.href,
     targetUrl: props.resourceIdRelativePath,
@@ -97,23 +107,43 @@ function ResourceDetail({
     resourceId: resourceId,
   });
 
+  const showDate = (date: string) => {
+    return date.split(' ').slice(0, -1).join(' ')
+  };
+
   if (!resource) return null;
   const shouldHaveSideColumn =
-    displayLikes || displayTags || displayStatus || displaySocials;
+    displayLikes || displayTags || displayStatus || displaySocials || displayDocuments;
+
+  let tagDefaultResourceImage = '';
+
+  interface Tag {
+    name: string;
+    defaultResourceImage?: string;
+  }
+
+  if (Array.isArray(resource?.tags)) {
+    const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+
+    const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+    tagDefaultResourceImage = tagWithImage?.defaultResourceImage;
+  }
+
+  const defaultImage = !!tagDefaultResourceImage ? [{ url: tagDefaultResourceImage }] : [{ url: '' }];
+
   return (
     <section>
       <div
-        className={`osc ${
-          shouldHaveSideColumn
-            ? 'osc-resource-detail-column-container'
-            : 'osc-resource-detail-container'
-        }`}>
+        className={`osc ${shouldHaveSideColumn
+          ? 'osc-resource-detail-column-container'
+          : 'osc-resource-detail-container'
+          }`}>
         <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
           {resource ? (
             <article className="osc-resource-detail-content-items">
               {displayImage && (
                 <Carousel
-                  items={resource.images}
+                  items={ ( Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : defaultImage}
                   itemRenderer={(i) => (
                     <Image
                       src={i.url}
@@ -137,7 +167,7 @@ function ResourceDetail({
               <div className="osc-resource-detail-content-item-row">
                 {displayUser && resource?.user?.displayName && (
                   <div>
-                    <Heading level={3} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
+                    <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
                       Gemaakt door
                     </Heading>
                     <span className="osc-resource-detail-content-item-text">
@@ -147,17 +177,17 @@ function ResourceDetail({
                 )}
                 {displayDate && resource.startDateHumanized && (
                   <div>
-                    <Heading level={3} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
+                    <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
                       Datum
                     </Heading>
                     <span className="osc-resource-detail-content-item-text">
-                      {resource.startDateHumanized}
+                      {showDate(resource.startDateHumanized)}
                     </span>
                   </div>
                 )}
                 {displayBudget && resource.budget && (
                   <div>
-                    <Heading level={3} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
+                    <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
                       Budget
                     </Heading>
                     <span className="osc-resource-detail-content-item-text">
@@ -166,7 +196,7 @@ function ResourceDetail({
                   </div>
                 )}
               </div>
-              <div>
+              <div className="resource-detail-content">
                 {displaySummary && <Heading level={2} appearance='utrecht-heading-4'>{resource.summary}</Heading>}
                 {displayDescription && (
                   <Paragraph>{resource.description}</Paragraph>
@@ -174,7 +204,7 @@ function ResourceDetail({
               </div>
               {displayLocation && resource.location && (
                 <>
-                  <Heading4>Plaats</Heading4>
+                  <Heading level={2} appearance="utrecht-heading-2">Plaats</Heading>
                   <ResourceDetailMap
                     resourceId={props.resourceId || '0'}
                     {...props}
@@ -191,58 +221,86 @@ function ResourceDetail({
 
         {shouldHaveSideColumn ? (
           <aside className="resource-detail-side-column">
-            {displayLikes ? (
-              <>
-                <Likes
-                  {...props}
-                  title={props.likeWidget?.title}
-                  yesLabel={props.likeWidget?.yesLabel}
-                  noLabel={props.likeWidget?.noLabel}
-                  hideCounters={props.likeWidget?.hideCounters}
-                  variant={props.likeWidget?.variant}
-                  showProgressBar={props.likeWidget?.showProgressBar}
-                  progressBarDescription={
-                    props.likeWidget?.progressBarDescription
-                  }
-                />
-                <Spacer size={1} />
-              </>
-            ) : null}
+            <div className="aside--content">
+              {displayLikes ? (
+                <>
+                  <Likes
+                    {...props}
+                    title={props.likeWidget?.title}
+                    yesLabel={props.likeWidget?.yesLabel}
+                    noLabel={props.likeWidget?.noLabel}
+                    hideCounters={props.likeWidget?.hideCounters}
+                    variant={props.likeWidget?.variant}
+                    showProgressBar={props.likeWidget?.showProgressBar}
+                    progressBarDescription={
+                      props.likeWidget?.progressBarDescription
+                    }
+                  />
+                  <Spacer size={1} />
+                </>
+              ) : null}
 
-            {displayStatus ? (
-              <div className="resource-detail-side-section">
-                <Spacer size={1} />
-                <Heading4>Status</Heading4>
-                <Spacer size={0.5} />
-                <div className="resource-detail-pil-list-content">
-                  {resource.statuses?.map((s: { label: string }) => (
-                    <Pill light rounded text={s.label}></Pill>
-                  ))}
+              {displayStatus ? (
+                <div className="resource-detail-side-section">
+                  <Spacer size={1} />
+                  <Heading level={3} appearance="utrecht-heading-4">Status</Heading>
+                  <Spacer size={0.5} />
+                  <div className="resource-detail-pil-list-content">
+                    {resource.statuses?.map((s: { label: string }) => (
+                      <Pill light rounded text={s.label}></Pill>
+                    ))}
+                  </div>
+
+                  <Spacer size={2} />
                 </div>
+              ) : null}
 
-                <Spacer size={2} />
-              </div>
-            ) : null}
+              {displayTags ? (
+                <div className="resource-detail-side-section">
+                  <Heading level={3} appearance="utrecht-heading-4">Tags</Heading>
 
-            {displayTags ? (
-              <div className="resource-detail-side-section">
-                <Heading4>Tags</Heading4>
-                <Spacer size={0.5} />
-                <div className="resource-detail-pil-list-content">
-                  {(resource.tags as Array<{ type: string; name: string }>)
-                    ?.filter((t) => t.type !== 'status')
-                    ?.map((t) => <Pill text={t.name} />)}
+                  <Spacer size={0.5} />
+                  <div className="resource-detail-pil-list-content">
+                    {(resource.tags as Array<{ type: string; name: string }>)
+                      ?.filter((t) => t.type !== 'status')
+                      ?.map((t) => <Pill text={t.name} />)}
+                  </div>
+                  <Spacer size={2} />
                 </div>
-                <Spacer size={2} />
-              </div>
-            ) : null}
+              ) : null}
 
-            {displaySocials ? (
-              <div className="resource-detail-side-section">
-                <ShareLinks title={'Deel dit'} />
+              {displaySocials ? (
+                <div className="resource-detail-side-section">
+                  <ShareLinks title={'Deel dit'} />
+                </div>
+              ) : null}
+            </div>
+            {(!!displayDocuments && !!resource && Array.isArray(resource.documents) && resource.documents.length > 0) && (
+              <div className="aside--content">
+                <Spacer size={2} />
+                <div className='document-download-container'>
+                  {!!documentsTitle && (<Heading level={2} appearance="utrecht-heading-4">{documentsTitle}</Heading>)}
+                  {!!documentsDesc && (<Paragraph>{documentsDesc}</Paragraph>)}
+                  <ButtonGroup>
+                    {resource.documents?.map((document: DocumentType, index: number) => (
+                      <ButtonLink
+                        appearance="primary-action-button"
+                        className="osc counter-container"
+                        download
+                        href={document.url}
+                        key={index}
+                      >
+                        <Icon
+                          icon="ri-download-2-fill"
+                        />
+                        {document.name}
+                      </ButtonLink>
+                    ))}
+                  </ButtonGroup>
+                </div>
               </div>
-            ) : null}
-            <Spacer size={1} />
+            )}
+
           </aside>
         ) : null}
       </div>

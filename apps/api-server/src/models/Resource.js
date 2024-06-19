@@ -199,6 +199,12 @@ module.exports = function (db, sequelize, DataTypes) {
         defaultValue: [],
       },
 
+      documents: {
+        type: DataTypes.JSON,
+        allowNull: null,
+        defaultValue: [],
+      },
+
       budget: {
         type: DataTypes.INTEGER,
         auth: {
@@ -614,7 +620,7 @@ module.exports = function (db, sequelize, DataTypes) {
         include: [
           {
             model: db.Tag,
-            attributes: ['id', 'type', 'name', 'label'],
+            attributes: ['id', 'type', 'name', 'label', 'defaultResourceImage'],
             through: { attributes: [] },
             required: false,
           },
@@ -640,11 +646,11 @@ module.exports = function (db, sequelize, DataTypes) {
               model: db.Tag,
               attributes: ['id', 'name'],
               through: { attributes: [] },
-              where: {
-                id: tags,
-              },
             },
           ],
+          where: {
+            id: tags,
+          },
         };
       },
 
@@ -655,11 +661,11 @@ module.exports = function (db, sequelize, DataTypes) {
               model: db.Status,
               attributes: ['id', 'name'],
               through: { attributes: [] },
-              where: {
-                id: statuses,
-              },
             },
           ],
+          where: {
+            id: statuses,
+          },
         };
       },
 
@@ -755,47 +761,6 @@ module.exports = function (db, sequelize, DataTypes) {
             },
           ],
         };
-      },
-
-      sort: function (sort) {
-        let result = {};
-
-        var order;
-        switch (sort) {
-          case 'votes_desc':
-            // TODO: zou dat niet op diff moeten, of eigenlijk configureerbaar
-            order = sequelize.literal('yes DESC');
-            break;
-          case 'votes_asc':
-            // TODO: zou dat niet op diff moeten, of eigenlijk configureerbaar
-            order = sequelize.literal('yes ASC');
-            break;
-          case 'random':
-            // TODO: zou dat niet op diff moeten, of eigenlijk configureerbaar
-            order = sequelize.random();
-            break;
-          case 'createdate_asc':
-            order = [['createdAt', 'ASC']];
-            break;
-          case 'createdate_desc':
-            order = [['createdAt', 'DESC']];
-            break;
-          case 'budget_asc':
-            order = [['createdAt', 'ASC']];
-            break;
-          case 'budget_desc':
-            order = [['createdAt', 'DESC']];
-            break;
-          case 'date_asc':
-            order = [['startDate', 'ASC']];
-          case 'date_desc':
-          default:
-            order = [['startDate', 'DESC']];
-        }
-
-        result.order = order;
-
-        return result;
       },
 
       includeVotes: {

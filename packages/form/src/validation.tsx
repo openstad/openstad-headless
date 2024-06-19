@@ -29,7 +29,8 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
             } else {
                 return undefined;
             }
-        case 'upload':
+        case 'documentUpload':
+        case 'imageUpload':
             if (typeof (field.fieldRequired) !== 'undefined' && field.fieldRequired) {
                 return z.array(fileSchema).min(1, field.requiredWarning || 'Dit veld is verplicht');
             } else {

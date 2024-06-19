@@ -21,7 +21,7 @@ import { Step4 } from './step-4';
 
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
-import { Button, Heading3 } from '@utrecht/component-library-react';
+import { Button, Heading } from '@utrecht/component-library-react';
 
 export type StemBegrootWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -201,9 +201,9 @@ function StemBegroot({
       resource.extraData?.originalId
       ? props.originalResourceUrl.includes('[id]')
         ? props.originalResourceUrl.replace(
-            '[id]',
-            `${resource.extraData?.originalId}`
-          )
+          '[id]',
+          `${resource.extraData?.originalId}`
+        )
         : `${props.originalResourceUrl}/${resource.extraData?.originalId}`
       : null;
   };
@@ -230,15 +230,15 @@ function StemBegroot({
         !(resource.budget <= props.votes.maxBudget - budgetUsed)
         ? notEnoughBudgetText
         : isInSelected(resource)
-        ? 'Verwijder'
-        : 'Voeg toe';
+          ? 'Verwijder'
+          : 'Voeg toe';
     }
     return !isInSelected(resource) &&
       !((props.votes.maxResources || 0) > selectedResources.length)
       ? notEnoughBudgetText
       : isInSelected(resource)
-      ? 'Verwijder'
-      : 'Voeg toe';
+        ? 'Verwijder'
+        : 'Voeg toe';
   };
 
   return (
@@ -279,15 +279,15 @@ function StemBegroot({
           steps={['Kies', 'Overzicht', 'Stemcode', 'Stem']}
         />
 
-       
+
         <Spacer size={1} />
-        
-        {props.votes.voteType === 'budgeting'?
-        <> 
-        {usedBudgetList}
-        <Spacer size={1.5} />
-        </>: null}
-       
+
+        {props.votes.voteType === 'budgeting' ?
+          <>
+            {usedBudgetList}
+            <Spacer size={1.5} />
+          </> : null}
+
 
         <section className="begroot-step-panel">
           {currentStep === 0 ? (
@@ -316,13 +316,13 @@ function StemBegroot({
                   const canAddMore =
                     props.votes.voteType === 'budgeting'
                       ? notUsedResources.some(
-                          (r: { budget: number }) =>
-                            r.budget < props.votes.maxBudget - budgetUsed
-                        )
+                        (r: { budget: number }) =>
+                          r.budget < props.votes.maxBudget - budgetUsed
+                      )
                       : Math.max(
-                          props.votes.maxResources - selectedResources.length,
-                          0
-                        ) > 0;
+                        props.votes.maxResources - selectedResources.length,
+                        0
+                      ) > 0;
                   return canAddMore;
                 }}
               />
@@ -403,6 +403,8 @@ function StemBegroot({
                     } finally {
                       session.remove('osc-resource-vote-pending');
                     }
+                  } else if (currentStep === 4) {
+                    currentUser.logout({ url: location.href });
                   } else {
                     setCurrentStep(currentStep + 1);
                   }
@@ -421,7 +423,8 @@ function StemBegroot({
             <StemBegrootResourceList
               header={
                 <>
-                  <Heading3>Plannen</Heading3>
+                  <Heading level={1} appearance="utrecht-heading-3">Plannen</Heading>
+                  <Spacer size={1} />
                   {datastore ? (
                     <Filters
                       tagsLimitation={tagIdsToLimitResourcesTo}

@@ -19,12 +19,20 @@ export type DateCountdownBarWidgetProps = {
   beforeText?: string;
   afterText?: string;
   date: string;
+  direction?: 'horizontal' | 'vertical';
+  showLabels?: boolean;
+  showHours?: boolean;
+  showMinutes?: boolean;
 };
 
 function DateCountdownBar({
   beforeText = '',
   date,
   afterText = '',
+  direction = 'horizontal',
+  showLabels = true,
+  showHours = true,
+  showMinutes = true,
 }: DateCountdownBarWidgetProps) {
   const zone = 'Europe/Amsterdam';
 
@@ -95,38 +103,50 @@ function DateCountdownBar({
     return nr > 10 ? nr.toString() : nr.toString().padStart(2, '0');
   };
 
+  const renderAmount = (e: string) => {
+    return e.split('').map((item, index) => <span className="amount-item" key={index}><span>{item}</span></span>);
+  };
+
   return (
-    <div className="osc date-countdown-bar-container">
+    <div className={`osc date-countdown-bar-container --${direction}`}>
       {beforeTextParam.length > 0 ? (
-          <Paragraph className="osc-countdown-bar-text">{beforeTextParam}</Paragraph>
+        <Paragraph className="osc-countdown-bar-text --end">{beforeTextParam}</Paragraph>
       ) : null}
 
       <div className="osc-countdown-bar-nr-container">
         <div className="osc-countdown-bar-nr-left">
           <Paragraph>
-            <span className="nr-left-title">{padNumber(timeLeft.days)}</span>
-            <span className="nr-left-label">Dagen</span>
+            <span className="nr-left-title amount">{renderAmount(padNumber(timeLeft.days))}</span>
+            {showLabels && (
+              <span className="nr-left-label">Dagen</span>
+            )}
           </Paragraph>
         </div>
-
-        <div className="osc-countdown-bar-nr-left">
-          <Paragraph>
-            <span className="nr-left-title">{padNumber(timeLeft.hours)}</span>
-            <span className="nr-left-label">Uren</span>
-          </Paragraph>
-        </div>
-
-        {timeLeft.minutes > 0 ? (
+        {showHours && (
           <div className="osc-countdown-bar-nr-left">
             <Paragraph>
-              <span className="nr-left-title">{padNumber(timeLeft.minutes)}</span>
-              <span className="nr-left-label">Minuten</span>
+              <span className="nr-left-title amount">{renderAmount(padNumber(timeLeft.hours))}</span>
+              {showLabels && (
+                <span className="nr-left-label">Uren</span>
+              )}
             </Paragraph>
           </div>
-        ) : null}
+        )}
+        {showMinutes && (
+          timeLeft.minutes > 0 ? (
+            <div className="osc-countdown-bar-nr-left">
+              <Paragraph>
+                <span className="nr-left-title amount">{renderAmount(padNumber(timeLeft.minutes))}</span>
+                {showLabels && (
+                  <span className="nr-left-label">Minuten</span>
+                )}
+              </Paragraph>
+            </div>
+          ) : null
+        )}
       </div>
       {afterTextParam.length > 0 ? (
-          <Paragraph className="osc-countdown-bar-text">{afterTextParam}</Paragraph>
+        <Paragraph className="osc-countdown-bar-text --start">{afterTextParam}</Paragraph>
       ) : null}
     </div>
   );

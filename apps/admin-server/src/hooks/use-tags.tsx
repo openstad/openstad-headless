@@ -5,13 +5,13 @@ export default function useTag(projectId?: string) {
 
   const tagListSwr = useSWR(projectId ? url : null);
 
-  async function createTag(name: string, type: string, seqnr: number) {
+  async function createTag(name: string, type: string, seqnr: number, addToNewResources: boolean) {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ projectId, name, type, seqnr }),
+      body: JSON.stringify({ projectId, name, type, seqnr, addToNewResources }),
     });
 
     return await res.json();

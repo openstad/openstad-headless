@@ -21,5 +21,7 @@ export type BaseMapProps = {
 	disableDefaultUI?: boolean,
   clustering?: MarkerClusterGroupProps,
   categorize?: CategorizeType,
+  minZoom?: number,
+  maxZoom?: number
 };
 

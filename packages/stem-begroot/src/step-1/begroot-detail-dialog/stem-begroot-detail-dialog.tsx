@@ -65,12 +65,25 @@ export const StemBegrootResourceDetailDialog = ({
           const primaryButtonText = resourceBtnTextHandler(resource);
           const originalUrl = defineOriginalUrl(resource);
 
+          let defaultImage = '';
+
+          interface Tag {
+            name: string;
+            defaultResourceImage?: string;
+          }
+
+          if (Array.isArray(resource?.tags)) {
+            const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+            const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+            defaultImage = tagWithImage?.defaultResourceImage || '';
+          }
+
           return (
             <>
               <div className="osc-begrootmodule-resource-detail">
                 <section className="osc-begrootmodule-resource-detail-photo">
                   <Image
-                    src={resource.images?.at(0)?.url || ''}
+                    src={resource.images?.at(0)?.url || defaultImage}
                     style={{ aspectRatio: 16 / 9 }}
                   />
                   {/* <div>
@@ -79,7 +92,7 @@ export const StemBegrootResourceDetailDialog = ({
 
                   <div className="osc-gridder-resource-detail-budget-theme-bar">
                     <Heading4>Budget</Heading4>
-                    <Paragraph>&euro; {resource.budget > 0 ? resource.budget.toLocaleString('nl-NL') : 0}</Paragraph>
+                    <Paragraph>&euro; {resource.budget > 0 ? resource.budget?.toLocaleString('nl-NL') : 0}</Paragraph>
                     <Spacer size={1} />
                     <Heading4>Tags</Heading4>
                     <Spacer size={.5} />

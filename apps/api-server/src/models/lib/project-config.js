@@ -108,14 +108,6 @@ module.exports = {
       extraData: {
         type: 'object',
       },
-      defaultStatusIds: {
-        type: 'arrayOfNumbers',
-        default: [],
-      },
-      defaultTagIds: {
-        type: 'arrayOfNumbers',
-        default: [],
-      },
     },
   },
 
@@ -280,6 +272,24 @@ module.exports = {
       visibleWidgets: {
         type: "arrayOfStrings",
         default: []
+      }
+    }
+  },
+
+  map: {
+    type: "object",
+    subset: {
+      minZoom: {
+        type: "string",
+        default: '7',
+      },
+      maxZoom: {
+        type: "string",
+        default: '20',
+      },
+      areaId: {
+        type: 'string',
+        default: '0',
       }
     }
   },

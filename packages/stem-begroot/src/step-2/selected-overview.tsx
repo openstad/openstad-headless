@@ -41,23 +41,38 @@ export const BegrotenSelectedOverview = ({
         <Heading5>Overzicht van mijn selectie</Heading5>
         <Spacer size={1} />
 
-        {selectedResources.map((resource) => (
-          <div key={`budget-overview-row-${resource.id}`} className="budget-two-text-row-spaced">
-            <section className='budget-overview-row'>
-              <Image
-                height={'4rem'}
-                width={'4rem'}
-                src={resource.images?.at(0)?.url || ''}
-              />
-              <Paragraph>{resource.title}</Paragraph>
-            </section>
-            {typeIsBudgeting ? (
-              <Paragraph>
-                <Strong>&euro;{resource.budget.toLocaleString('nl-NL') || 0}</Strong>
-              </Paragraph>
-            ) : null}
-          </div>
-        ))}
+        {selectedResources.map((resource) => {
+          let defaultImage = '';
+
+          interface Tag {
+            name: string;
+            defaultResourceImage?: string;
+          }
+
+          if (Array.isArray(resource?.tags)) {
+            const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+            const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+            defaultImage = tagWithImage?.defaultResourceImage || '';
+          }
+
+          return (
+            <div key={`budget-overview-row-${resource.id}`} className="budget-two-text-row-spaced">
+              <section className='budget-overview-row'>
+                <Image
+                  height={'4rem'}
+                  width={'4rem'}
+                  src={resource.images?.at(0)?.url || defaultImage}
+                />
+                <Paragraph>{resource.title}</Paragraph>
+              </section>
+              {typeIsBudgeting ? (
+                <Paragraph>
+                  <Strong>&euro;{resource.budget?.toLocaleString('nl-NL') || 0}</Strong>
+                </Paragraph>
+              ) : null}
+            </div>
+          )
+        })}
       </div>
     </>
   );

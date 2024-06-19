@@ -11,6 +11,7 @@ import Form from "@openstad-headless/form/src/form";
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const { submitButton, saveConceptButton} = props.submit  || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
     const { loginText, loginButtonText} = props.info  || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
+    const { confirmationUser, confirmationAdmin} = props.confirmation  || {};
 
     const datastore: any = new DataStore({
         projectId: props.projectId,
@@ -53,7 +54,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     };
 
     const configureFormData = (formData, publish = false) => {
-        const dbFixedColumns = ['title', 'summary', 'description', 'budget', 'images', 'location', 'tags'];
+        const dbFixedColumns = ['title', 'summary', 'description', 'budget', 'images', 'location', 'tags', 'documents'];
         const extraData = {};
 
         formData = addTagsToFormData(formData);
@@ -69,6 +70,8 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
         formData.extraData = extraData;
         formData.publishDate = publish ? new Date() : '';
+        formData.confirmationUser = confirmationUser;
+        formData.confirmationAdmin = confirmationAdmin;
 
         return formData;
     }

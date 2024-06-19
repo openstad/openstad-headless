@@ -4,7 +4,7 @@ export default function useResources({
   pageSize = 20,
   search = '',
   tags = [],
-  sort = 'createdAt_desc',
+  sort = 'random',
 }) {
   let self = this;
 
