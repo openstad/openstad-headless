@@ -12,13 +12,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
@@ -38,8 +31,6 @@ const formSchema = z.object({
   descriptionMinLength: z.coerce.number().gt(0).optional(),
   descriptionMaxLength: z.coerce.number().gt(0).optional(),
   adminLabel: z.string().optional(),
-  requiredUserRole: z.enum(['anonymous', 'member']),
-  requiredUserLikeRole: z.enum(['anonymous', 'member']),
 });
 
 export default function ProjectSettingsComments() {
@@ -49,7 +40,6 @@ export default function ProjectSettingsComments() {
   const { data, updateProject } = useProject();
 
   const [ showCommentSettings, setShowCommentSettings ] = useState(false);
-  const [ showLikeSettings, setShowLikeSettings ] = useState(false);
 
   const defaults = useCallback(
     () => ({
@@ -60,8 +50,6 @@ export default function ProjectSettingsComments() {
         descriptionMinLength: data?.config?.comments?.descriptionMinLength,
         descriptionMaxLength: data?.config?.comments?.descriptionMaxLength,
         adminLabel: data?.config?.comments?.adminLabel,
-        requiredUserRole: data?.config?.comments?.requiredUserRole,
-        requiredUserLikeRole: data?.config?.comments?.requiredUserLikeRole,
     }),
     [data]
   );
@@ -74,7 +62,6 @@ export default function ProjectSettingsComments() {
   useEffect(() => {
     form.reset(defaults());
     setShowCommentSettings(data?.config?.comments?.canComment)
-    setShowLikeSettings(data?.config?.comments?.canLike)
   }, [form, defaults]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -87,8 +74,6 @@ export default function ProjectSettingsComments() {
           canLike: values.canLike,
           descriptionMinLength: values.descriptionMinLength,
           descriptionMaxLength: values.descriptionMaxLength,
-          requiredUserRole: values.requiredUserRole,
-          requiredUserLikeRole: values.requiredUserLikeRole,
           adminLabel: values.adminLabel,
         },
       },
@@ -151,34 +136,6 @@ export default function ProjectSettingsComments() {
                 )}
               />
 
-               <FormField
-                control={form.control}
-                name="requiredUserRole"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>
-                      Wat voor gebruikers hebben het recht om te reageren?
-                    </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Geregistreerde gebruikers" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="anonymous">
-                          Anonieme gebruikers
-                        </SelectItem>
-                        <SelectItem value="member">
-                          Geregistreerde gebruikers
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {showCommentSettings ? (
                 <>
 
@@ -215,7 +172,6 @@ export default function ProjectSettingsComments() {
                           className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                           onCheckedChange={(e: boolean) => {
                             field.onChange(e);
-                            setShowLikeSettings(e);
                           }}
                           checked={field.value}>
                           <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
@@ -224,38 +180,6 @@ export default function ProjectSettingsComments() {
                       </FormItem>
                     )}
                   />
-
-                  {showLikeSettings && (
-                    <>
-                      <FormField
-                        control={form.control}
-                        name="requiredUserLikeRole"
-                        render={({ field }) => (
-                          <FormItem className="col-span-1">
-                            <FormLabel>
-                              Wat voor gebruikers hebben het recht om te liken?
-                            </FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Geregistreerde gebruikers" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="anonymous">
-                                  Anonieme gebruikers
-                                </SelectItem>
-                                <SelectItem value="member">
-                                  Geregistreerde gebruikers
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </>)
-                  }
 
                   <FormField
                     control={form.control}
