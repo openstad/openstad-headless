@@ -32,7 +32,6 @@ export type CommentsWidgetProps = BaseProps &
     showForm?: boolean,
     closedText?: string;
     requiredUserRole?: string,
-    requiredUserLikeRole?: string,
     descriptionMinLength?: number,
     descriptionMaxLength?: number,
     selectedComment?: Number | undefined;
@@ -70,7 +69,6 @@ function Comments({
     showForm: typeof props.showForm != 'undefined' ? props.showForm : true,
     closedText: props.comments?.closedText || 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
     requiredUserRole: props.comments?.requiredUserRole || 'member',
-    requiredUserLikeRole: props.comments?.requiredUserLikeRole || 'member',
     descriptionMinLength: props.comments?.descriptionMinLength || 30,
     descriptionMaxLength: props.comments?.descriptionMaxLength || 500,
     adminLabel: props.comments?.adminLabel || 'admin',
