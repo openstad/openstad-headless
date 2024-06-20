@@ -302,9 +302,31 @@ router.route('/:projectId') //(\\d+)
     req.pendingMessages = [{ key: `project-${project.id}-update`, value: 'event' }];
     if (req.body.url && req.body.url != project.url) req.pendingMessages.push({ key: `project-urls-update`, value: 'event' });
 
+    // Update allowedDomains if creating a new site
+    let updateBody = req.body;
+    if((project?.config?.allowedDomains || []).length === 0 && req?.body?.url){
+      // Check if url has protocol
+      let reqUrl = req.body.url
+      if(!reqUrl.includes('http://') && !reqUrl.includes('https://')){
+        reqUrl = 'http://' + reqUrl; 
+      }
+      let url = new URL(url);
+      let host = url.host;
+
+      updateBody.config = updateBody.config || {};
+      updateBody.config.allowedDomains = [host];
+
+      // Update client (auth-db)
+      let adminAuthConfig = await authSettings.config({ project: project });
+      service.updateClient({
+        authConfig: adminAuthConfig,
+        project: updateBody
+      })
+    }
+
     project
 			.authorizeData(req.body, 'update')
-			.update(req.body)
+			.update(updateBody)
 			.then(result => {
         req.results = result;
 				return checkHostStatus({id: result.id});
