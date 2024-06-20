@@ -128,10 +128,10 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Kaart instellingen</span>
               </Button>
             </Link>
-            <Link href={`/projects/${project}/settings/widgets`}>
+            <Link href={`/projects/${project}/settings/alloweddomains`}>
               <Button
                 variant={
-                  location.includes('/settings/widgets')
+                  location.includes('/settings/alloweddomains')
                     ? 'secondary'
                     : 'ghost'
                 }
