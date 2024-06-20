@@ -234,6 +234,12 @@ function setConfigsToOutput(
   widgetConfig,
   widgetId
 ) {
+  
+  // Move general settings to the root to ensure we have the correct config
+  if (widgetConfig.hasOwnProperty('general')) {
+    widgetConfig = {...widgetConfig, ...widgetConfig.general};
+  }
+  
   let config = merge.recursive(
     {},
     widgetSettings.Config,
