@@ -304,7 +304,7 @@ router.route('/:projectId') //(\\d+)
 
     // Update allowedDomains if creating a new site
     let updateBody = req.body;
-    if((project?.config?.widgets?.allowedDomains || []).length === 0 && req?.body?.url){
+    if((project?.config?.allowedDomains || []).length === 0 && req?.body?.url){
       // Check if url has protocol
       let reqUrl = req.body.url
       if(!reqUrl.includes('http://') && !reqUrl.includes('https://')){
@@ -314,8 +314,7 @@ router.route('/:projectId') //(\\d+)
       let host = url.host;
 
       updateBody.config = updateBody.config || {};
-      updateBody.config.widgets = updateBody.config.widgets || {};
-      updateBody.config.widgets.allowedDomains = [host];
+      updateBody.config.allowedDomains = [host];
 
       // Update client (auth-db)
       let adminAuthConfig = await authSettings.config({ project: project });
@@ -357,14 +356,14 @@ router.route('/:projectId') //(\\d+)
 	})
 	.put(async function (req, res, next) {
     // Check if updating allowedDomains
-    if(typeof req?.results?.config?.widgets?.allowedDomains !==  "undefined"){
+    if(typeof req?.results?.config?.allowedDomains !==  "undefined"){
       let adminProject = await db.Project.findByPk(config.admin.projectId);
       let adminAuthConfig = await authSettings.config({ project: adminProject, useAuth: 'openstad' });
       let proj = req.results.dataValues;
 
       // Check if widgets allowedDomains exists
-      if(typeof req?.results?.config?.widgets?.allowedDomains !==  "undefined" && req.results.config.widgets.allowedDomains.length > 0){
-        proj.config.allowedDomains = req.results.config.widgets.allowedDomains;
+      if(typeof req?.results?.config?.allowedDomains !==  "undefined" && req.results.config.allowedDomains.length > 0){
+        proj.config.allowedDomains = req.results.config.allowedDomains;
       }
 
       service.updateClient({
