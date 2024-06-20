@@ -37,18 +37,16 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
                 return undefined;
             }
         case 'map':
+            const mapSchema = z.object({
+                lat: z.number().optional(),
+                lng: z.number().optional(),
+            });
+
             if (typeof (field.fieldRequired) !== 'undefined' && field.fieldRequired) {
-                return z.object({
-                    lat: z.number().optional(),
-                    lng: z.number().optional()
-                }).refine((value) => Object.keys(value).length > 0, {message: (field.requiredWarning || 'Dit veld is verplicht')});
-            } else {
-                return z.object({
-                    lat: z.number().optional(),
-                    lng: z.number().optional()
-                }).optional();
+                return mapSchema.refine((value) => Object.keys(value).length > 0, { message: (field.requiredWarning || 'Dit veld is verplicht') });
             }
 
+            return mapSchema.optional();
 
         case 'range':
         case 'radiobox':
