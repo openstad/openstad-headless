@@ -21,7 +21,7 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
             let maxWarning = field.maxCharactersWarning || 'Tekst moet maximaal {maxCharacters} karakters bevatten';
             maxWarning = maxWarning.replace('{maxCharacters}', max.toString());
 
-            return z.string().min(min, minWarning).max(max, maxWarning);
+            return z.string().min(min, minWarning).max(max, maxWarning).optional();
 
         case 'checkbox':
             if (typeof (field.fieldRequired) !== 'undefined' && field.fieldRequired) {
@@ -37,10 +37,17 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
                 return undefined;
             }
         case 'map':
-            return z.object({
+            const mapSchema = z.object({
                 lat: z.number().optional(),
-                lng: z.number().optional()
-            }).refine((value) => Object.keys(value).length > 0, {message: (field.requiredWarning || 'Dit veld is verplicht')});
+                lng: z.number().optional(),
+            });
+
+            if (typeof (field.fieldRequired) !== 'undefined' && field.fieldRequired) {
+                return mapSchema.refine((value) => Object.keys(value).length > 0, { message: (field.requiredWarning || 'Dit veld is verplicht') });
+            }
+
+            return mapSchema.optional();
+
         case 'range':
         case 'radiobox':
         case 'select':
