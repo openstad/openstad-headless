@@ -21,7 +21,7 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
             let maxWarning = field.maxCharactersWarning || 'Tekst moet maximaal {maxCharacters} karakters bevatten';
             maxWarning = maxWarning.replace('{maxCharacters}', max.toString());
 
-            return z.string().min(min, minWarning).max(max, maxWarning);
+            return z.string().min(min, minWarning).max(max, maxWarning).optional();
 
         case 'checkbox':
             if (typeof (field.fieldRequired) !== 'undefined' && field.fieldRequired) {
