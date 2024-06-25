@@ -14,7 +14,7 @@ interface Item {
 
 const renderButtons = (buttons) => {
   return JSON.parse(buttons).map((element: any, index) => {
-    return <ButtonLink key={index} appearance={element.appearance} href={element.href}>{element.label}</ButtonLink>;
+    return <ButtonLink key={index} appearance={element.appearance} target={element.target} href={element.href}>{element.label}</ButtonLink>;
   });
 }
 
