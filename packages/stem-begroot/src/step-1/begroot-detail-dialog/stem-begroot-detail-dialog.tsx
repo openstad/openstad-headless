@@ -31,6 +31,7 @@ export const StemBegrootResourceDetailDialog = ({
   showVoteCount,
   showOriginalResource,
   originalResourceUrl,
+  isSimpleView,
 }: {
   openDetailDialog: boolean;
   setOpenDetailDialog: (condition: boolean) => void;
@@ -45,6 +46,7 @@ export const StemBegrootResourceDetailDialog = ({
   showVoteCount: boolean;
   showOriginalResource: boolean;
   originalResourceUrl?: string;
+  isSimpleView: boolean;
 }) => (
   <Dialog
     open={openDetailDialog}
@@ -89,7 +91,7 @@ export const StemBegrootResourceDetailDialog = ({
                   {/* <div>
                     <Button className="osc-begrootmodule-load-map-button"></Button>
                   </div> */}
-
+                {isSimpleView === false && (
                   <div className="osc-gridder-resource-detail-budget-theme-bar">
                     <Heading4>Budget</Heading4>
                     <Paragraph>&euro; {resource.budget > 0 ? resource.budget?.toLocaleString('nl-NL') : 0}</Paragraph>
@@ -102,6 +104,7 @@ export const StemBegrootResourceDetailDialog = ({
                         ?.map((t) => <Pill text={t.name || 'Geen thema'} />)}
                     </div>
                   </div>
+                )}
                 </section>
 
                 <section className="osc-begrootmodule-resource-detail-texts-and-actions-container">
