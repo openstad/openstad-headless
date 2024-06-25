@@ -62,7 +62,7 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Simple voting',
+            name: 'Stemmodule',
             url: `/projects/${projectId}/widgets/simple-voting/${id}`,
           },
         ]}>
