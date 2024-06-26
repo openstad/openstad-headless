@@ -84,6 +84,12 @@ const ResourceOverviewMap = ({
           marker.data = { [categorizeByField]: tag.name };
         }
       }
+
+      // Set the resource name
+      marker.icon = {
+        title: resource.title ?? 'Locatie pin',
+      }
+
       return marker;
     }) || [];
 
