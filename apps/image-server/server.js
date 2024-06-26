@@ -13,14 +13,7 @@ const imageMulterConfig = {
     next(err);
   },
   fileFilter: function (req, file, cb) {
-    const allowedTypes = [
-      'image/gif',
-      'image/jpeg',
-      'image/png',
-      'image/svg+xml'
-    ];
-
-    if (allowedTypes.indexOf(file.mimetype) === -1) {
+    if (file.mimetype && !file.mimetype.startsWith('image/')) {
       req.fileValidationError = 'goes wrong on the mimetype';
       return cb(null, false, new Error('goes wrong on the mimetype'));
     }

@@ -309,7 +309,7 @@ router.route('/:projectId') //(\\d+)
       // Check if url has protocol
       let reqUrl = req.body.url
       if(!reqUrl.includes('http://') && !reqUrl.includes('https://')){
-        reqUrl = 'http://' + reqUrl; 
+        reqUrl = 'http://' + reqUrl;
       }
       let url = new URL(url);
       let host = url.host;
@@ -366,11 +366,6 @@ router.route('/:projectId') //(\\d+)
       if(typeof req?.results?.config?.allowedDomains !==  "undefined" && req.results.config.allowedDomains.length > 0){
         proj.config.allowedDomains = req.results.config.allowedDomains;
       }
-
-      service.updateClient({
-        authConfig: adminAuthConfig,
-        project: req.results.dataValues
-      })
     }
 
 		// when succesfull return project JSON

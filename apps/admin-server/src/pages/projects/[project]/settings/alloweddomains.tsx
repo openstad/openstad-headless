@@ -52,7 +52,9 @@ export default function ProjectSettingsWidgets() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
 
-    const out = values.urls.map((url) => url.url);
+    const out = values.urls.map((url) => {
+      return url.url.replace(/^https?:\/\//i, '');
+    });
 
     try {
       const project = await updateProject({
@@ -140,7 +142,7 @@ export default function ProjectSettingsWidgets() {
               ))}
               <Button
                 className="w-fit col-span-full"
-                onClick={() => append({ url: "https://" })}
+                onClick={() => append({ url: "" })}
               >
                 URL toevoegen
               </Button>
