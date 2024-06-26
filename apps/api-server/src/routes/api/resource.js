@@ -210,6 +210,22 @@ router
       startDate: req.body.startDate || new Date(),
     };
 
+    // Check if resource has images and if so, check their domains
+    const imageServer = process.env.IMAGE_APP_URL;
+    const hostname = new URL(imageServer).hostname;
+    if(data.images && data.images.length > 0) {
+      data.images.forEach(image => {
+        try{
+          const url = new URL(image.url);
+          if(url.hostname !== hostname) {
+            return next(createError(400, 'Invalid image url'));
+          }
+        } catch (err) {
+          return next(createError(400, 'Invalid image url'));
+        }
+      });
+    }
+
     let responseData;
     db.Resource.authorizeData(data, 'create', req.user, null, req.project)
       .create(data)

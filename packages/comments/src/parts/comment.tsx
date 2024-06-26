@@ -27,6 +27,7 @@ function Comment({
   selected,
   type,
   index,
+  adminLabel,
   ...props
 }: CommentProps) {
   const widgetContext = useContext(CommentWidgetContext);
@@ -99,7 +100,7 @@ function Comment({
       <section className="comment-item-header">
         <Heading level={4} appearance='utrecht-heading-6' className={`reaction-name`}>
           {args.comment.user && args.comment.user.displayName}{' '}
-          {args.comment.user && args.comment.user.role === 'admin' ? <span className='--isAdmin'>{args.comment.user.role}</span> : null}
+          {args.comment.user && args.comment.user.role === 'admin' ? <span className='--isAdmin'>{adminLabel}</span> : null}
         </Heading>
         {canEdit() || canDelete() ? (
           <DropDownMenu

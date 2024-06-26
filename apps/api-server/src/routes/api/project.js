@@ -14,6 +14,7 @@ const authSettings = require('../../util/auth-settings');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const removeProtocolFromUrl = require('../../middleware/remove-protocol-from-url');
 const messageStreaming = require('../../services/message-streaming');
+const service = require('../../adapter/openstad/service');
 
 let router = express.Router({mergeParams: true});
 
@@ -174,6 +175,7 @@ router.route('/')
 			.create({ emailConfig: {}, ...req.body })
 			.then(result => {
         req.results = result;
+
 				return checkHostStatus({id: result.id});
 			})
 			.then(() => {
@@ -301,9 +303,31 @@ router.route('/:projectId') //(\\d+)
     req.pendingMessages = [{ key: `project-${project.id}-update`, value: 'event' }];
     if (req.body.url && req.body.url != project.url) req.pendingMessages.push({ key: `project-urls-update`, value: 'event' });
 
+    // Update allowedDomains if creating a new site
+    let updateBody = req.body;
+    if((project?.config?.allowedDomains || []).length === 0 && req?.body?.url){
+      // Check if url has protocol
+      let reqUrl = req.body.url
+      if(!reqUrl.includes('http://') && !reqUrl.includes('https://')){
+        reqUrl = 'http://' + reqUrl; 
+      }
+      let url = new URL(url);
+      let host = url.host;
+
+      updateBody.config = updateBody.config || {};
+      updateBody.config.allowedDomains = [host];
+
+      // Update client (auth-db)
+      let adminAuthConfig = await authSettings.config({ project: project });
+      service.updateClient({
+        authConfig: adminAuthConfig,
+        project: updateBody
+      })
+    }
+
     project
 			.authorizeData(req.body, 'update')
-			.update(req.body)
+			.update(updateBody)
 			.then(result => {
         req.results = result;
 				return checkHostStatus({id: result.id});
@@ -331,7 +355,24 @@ router.route('/:projectId') //(\\d+)
     }
     return next()
 	})
-	.put(function (req, res, next) {
+	.put(async function (req, res, next) {
+    // Check if updating allowedDomains
+    if(typeof req?.results?.config?.allowedDomains !==  "undefined"){
+      let adminProject = await db.Project.findByPk(config.admin.projectId);
+      let adminAuthConfig = await authSettings.config({ project: adminProject, useAuth: 'openstad' });
+      let proj = req.results.dataValues;
+
+      // Check if widgets allowedDomains exists
+      if(typeof req?.results?.config?.allowedDomains !==  "undefined" && req.results.config.allowedDomains.length > 0){
+        proj.config.allowedDomains = req.results.config.allowedDomains;
+      }
+
+      service.updateClient({
+        authConfig: adminAuthConfig,
+        project: req.results.dataValues
+      })
+    }
+
 		// when succesfull return project JSON
 		res.json(req.results);
 	})

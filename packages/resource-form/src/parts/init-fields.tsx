@@ -49,7 +49,7 @@ export const InitializeFormFields = (items, data) => {
                 rows: 5
             };
 
-            switch (item.fieldType) {
+            switch (item.type) {
                 case 'checkbox':
                 case 'select':
                 case 'radiobox':
@@ -58,13 +58,24 @@ export const InitializeFormFields = (items, data) => {
                         item.options.length > 0
                     ) {
                         fieldData['choices'] = item.options.map((option) => {
-                            return {label: option.titles[0].text, value: option.titles[0].key};
+                            return option.titles[0].key
                         });
                     }
                     break;
                 case 'imageUpload':
                     fieldData['allowedTypes'] = item.allowedTypes || ["image/*"];
                     break;
+                case 'tags':
+                    if (
+                        item.options &&
+                        item.options.length > 0
+                    ) {
+                        fieldData['choices'] = item.options.map((option) => {
+                            return option.titles[0].text
+                        });
+                    }
+                    break;
+                
             }
 
             formFields.push(fieldData);

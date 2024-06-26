@@ -56,6 +56,21 @@ module.exports = {
                   value: 'subtle-button'
                 }
               ]
+            },
+            target: {
+              type: 'select',
+              label: 'Target',
+              def: '_self',
+              choices: [
+                {
+                  label: 'Self',
+                  value: '_self'
+                },
+                {
+                  label: 'Blank',
+                  value: '_blank'
+                }
+              ]
             }
           }
         }

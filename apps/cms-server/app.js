@@ -10,6 +10,7 @@ const { refresh } = require('less');
 const REFRESH_PROJECTS_INTERVAL = 60000 * 5;
 const Url = require('node:url');
 const messageStreaming = require('./services/message-streaming');
+const basicAuth = require('express-basic-auth');
 
 let projects = {};
 let subscriptions = {}
@@ -216,6 +217,30 @@ app.use(async function (req, res, next) {
   domain = domain.replace([ 'www' ], [ '' ]);
 
   req.openstadDomain = domain;
+
+  next();
+});
+
+// Create a middleware function for basic authentication
+app.use((req, res, next) => {
+  // format domain to our specification
+  let domain = req.headers['x-forwarded-host'] || req.get('host');
+
+  // Check if the domain matches any of the project URLs that require basic authentication
+  let projectsVals = Object.values(projects);
+
+  let project = projectsVals.find(project => {
+    let projectUrl = new URL(project.url).host;
+    return projectUrl === domain && project?.config?.basicAuth?.active;
+  });
+
+  if (project) {
+    console.log('Basic auth enabled for project: ', project.url);
+    return basicAuth({
+      users: { [project.config.basicAuth.username]: project.config.basicAuth.password },
+      challenge: true
+    })(req, res, next);
+  }
 
   next();
 });

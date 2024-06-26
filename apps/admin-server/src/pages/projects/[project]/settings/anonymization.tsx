@@ -163,6 +163,7 @@ export default function ProjectSettingsAnonymization() {
                           <FormLabel>
                             Anonimiseer gebruikers x dagen na het einde van het
                             project
+                            <InfoDialog content={'Na het aantal ingevoerde dagen worden automatisch alle voor- en achternamen van gebruikers van de website aangepast naar "gebruiker verwijderd".'} />
                           </FormLabel>
                           <FormControl>
                             <Input type="number" placeholder="60" {...field} />
@@ -179,6 +180,7 @@ export default function ProjectSettingsAnonymization() {
                           <FormLabel>
                             Na hoeveel dagen aan inactiviteit worden gebruikers
                             gewaarschuwd?
+                            <InfoDialog content={'Na het ingevoerde aantal dagen krijgen geregistreerde gebruikers van het project automatisch een mailtje dat hun account geanonimiseerd gaat worden. De tekst van deze mail kun je hieronder aanpassen.'} />
                           </FormLabel>
                           <FormControl>
                             <Input type="number" placeholder="180" {...field} />
@@ -194,7 +196,7 @@ export default function ProjectSettingsAnonymization() {
                         <FormItem>
                           <FormLabel>
                             Na hoeveel dagen aan inactiviteit worden gebruikers
-                            geanonimiseerd?
+                            automatisch geanonimiseerd?
                           </FormLabel>
                           <FormControl>
                             <Input type="number" placeholder="200" {...field} />
