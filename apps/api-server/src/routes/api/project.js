@@ -175,6 +175,7 @@ router.route('/')
 			.create({ emailConfig: {}, ...req.body })
 			.then(result => {
         req.results = result;
+
 				return checkHostStatus({id: result.id});
 			})
 			.then(() => {
