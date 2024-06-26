@@ -173,7 +173,7 @@ router.route('/')
 	.post(function(req, res, next) {
 		db.Project
 			.create({ emailConfig: {}, ...req.body })
-			.then(async result => {
+			.then(result => {
         req.results = result;
 
 				return checkHostStatus({id: result.id});
