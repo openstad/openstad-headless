@@ -175,29 +175,6 @@ router.route('/')
 			.create({ emailConfig: {}, ...req.body })
 			.then(async result => {
         req.results = result;
-        const defaultStatuses = {
-          'closed': 20,
-          'accepted': 30,
-        };
-
-        Object.entries(defaultStatuses).forEach(([name, seqnr]) => {
-          let data = {
-            name,
-            seqnr,
-            addToNewResources: true,
-            projectId: result.id,
-          };
-
-          db.Status.authorizeData(data, 'create', req.user)
-            .create(data)
-            .then((result) => {
-              console.log(`Status created: ${name}, with seqnr: ${seqnr}`);
-            })
-            .catch((error) => {
-              console.error(`Error creating status ${name}:`, error);
-              next(error);
-            });
-        });
 
 				return checkHostStatus({id: result.id});
 			})
