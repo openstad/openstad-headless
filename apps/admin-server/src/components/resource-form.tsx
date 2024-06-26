@@ -540,13 +540,6 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             control={form.control}
             name="location"
             render={({ field }) => (
-              // <FormItem className="col-span-1">
-              //   <FormLabel>Locatie (optioneel)</FormLabel>
-              //   <FormControl>
-              //     <Input placeholder="" {...field} />
-              //   </FormControl>
-              //   <FormMessage />
-              // </FormItem>
               <MapInput onSelectLocation={handleLocationSelect} field={field} />
             )}
           />

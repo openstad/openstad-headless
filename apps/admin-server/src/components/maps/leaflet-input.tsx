@@ -44,13 +44,9 @@ const MapInput: React.FC<MapComponentProps> = ({ onSelectLocation, field }) => {
           if(dynamicMarkerIcon !== null && markerPosition === null) {
             // Check if field value has saved coordinates and set marker position
             if (field && field.value) {
-              
               try{
                 const { lat, lng } = JSON.parse(field.value);
-                console.log(lat, lng)
-
                 if (!isNaN(lat) && !isNaN(lng)) {
-                  console.log('Setting marker position')
                   setMarkerPosition(L.latLng(lat, lng));
                 }
               } catch(e) {
