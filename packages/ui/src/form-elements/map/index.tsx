@@ -92,7 +92,6 @@ const MapField: FC<MapProps> = ({
             id={`map`}
           >
               <EditorMap
-                  autoZoomAndCenter="area"
                   fieldName={fieldKey}
                   center={center}
                   area={polygon}
