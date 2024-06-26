@@ -16,7 +16,7 @@
         <!-- Image Header -->
       </mj-raw>
       <mj-section>
-        <mj-column width="600px">
+        <mj-column width="400px">
           <mj-image src="{{imagePath}}/mail-header.jpg"></mj-image>
         </mj-column>
       </mj-section>
@@ -36,10 +36,21 @@
       </mj-raw>
       <mj-section>
         <mj-column width="400px">
-          <mj-text>Of gebruik deze link in je browser:</mj-text>
+          <mj-text
+          font-size="14px"
+          line-height="22px"
+          color="#444"
+          font-family="helvetica"
+          >Of gebruik deze link in je browser:</mj-text>
+          
         </mj-column>
         <mj-column>
-          <mj-text>{{loginurl}}</mj-text>
+          <mj-text
+          font-size="14px"
+          line-height="22px"
+          color="#444"
+          font-family="helvetica"
+          >{{loginurl}}</mj-text>
         </mj-column>
       </mj-section>
     </mj-body>
