@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { StemBegroot, StemBegrootWidgetProps } from './stem-begroot.js';
+import { SimpleVoting, SimpleVotingWidgetProps } from './simple-voting.js';
 
-const config: StemBegrootWidgetProps = {
+const config: SimpleVotingWidgetProps = {
   api: {
     url: import.meta.env.VITE_API_URL,
   },
@@ -35,10 +35,10 @@ const config: StemBegrootWidgetProps = {
     mustConfirm: false,
     requiredUserRole: 'member',
     voteValues: [],
-    maxResources: 4,
+    maxResources: 1,
     minResources: 1,
-    minBudget: 100,
-    maxBudget: 80000,
+    minBudget: 1,
+    maxBudget: 1,
     isActive: true,
     voteType: 'count',
     withExisting: 'error',
@@ -50,12 +50,10 @@ const config: StemBegrootWidgetProps = {
     { type: 'area', label: 'Gebied', multiple: false },
     { type: 'theme', label: 'Thema', multiple: false },
   ],
-  showInfoMenu: true,
-  isSimpleView: false,
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <StemBegroot {...config} />
+    <SimpleVoting {...config} />
   </React.StrictMode>
 );

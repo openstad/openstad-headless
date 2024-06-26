@@ -13,6 +13,7 @@ export const StemBegrootBudgetList = ({
   maxBudget,
   typeIsBudgeting,
   maxNrOfResources,
+  showInfoMenu,
   decideCanAddMore,
   onSelectedResourceRemove,
 }: {
@@ -22,6 +23,7 @@ export const StemBegrootBudgetList = ({
   typeIsBudgeting: boolean;
   maxNrOfResources: number;
   introText?: string;
+  showInfoMenu?: boolean;
   decideCanAddMore: () => boolean;
   onSelectedResourceRemove: (resource: { id: number }) => void;
 }) => {
@@ -34,21 +36,23 @@ export const StemBegrootBudgetList = ({
 
   return (
     <>
-      <section className="stem-begroot-budget-list">
-        <div className="stem-begroot-budget-list-used-budgets">
-          <div className="stem-begroot-helptext-and-budget-section-helptext">
-            <Paragraph>{introText}</Paragraph>
+      {showInfoMenu && (
+        <section className="stem-begroot-budget-list">
+          <div className="stem-begroot-budget-list-used-budgets">
+            <div className="stem-begroot-helptext-and-budget-section-helptext">
+              <Paragraph>{introText}</Paragraph>
+            </div>
           </div>
-        </div>
-
-        <BudgetStatusPanel
-          typeIsBudgeting={typeIsBudgeting}
-          maxNrOfResources={maxNrOfResources}
-          nrOfResourcesSelected={selectedResources.length}
-          maxBudget={maxBudget}
-          budgetUsed={budgetUsed}
-        />
-      </section>
+          <BudgetStatusPanel
+            typeIsBudgeting={typeIsBudgeting}
+            maxNrOfResources={maxNrOfResources}
+            nrOfResourcesSelected={selectedResources.length}
+            maxBudget={maxBudget}
+            budgetUsed={budgetUsed}
+            showInfoMenu={showInfoMenu}
+          />
+        </section>
+      )}
       <section className="budget-list-container">
         <Heading5>Uw selecties</Heading5>
         {!canAddMore && allResourceInList.length > 0 ? (
