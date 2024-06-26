@@ -630,7 +630,7 @@ export default function WidgetResourceFormItems(
                                                 control={form.control}
                                                 name="fieldKey"
                                                 render={({ field }) => {
-                                                    const nonStaticType = ['none', 'radiobox', 'text', 'checkbox', 'map', 'imageUpload', 'documentUpload'];
+                                                    const nonStaticType = ['none', 'radiobox', 'text', 'checkbox', 'map', 'imageUpload', 'documentUpload', 'select'];
                                                     const type = form.watch('type');
                                                     const fieldKey = !nonStaticType.includes(type || '') ? type : '';
 
