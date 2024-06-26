@@ -267,7 +267,7 @@ services:
       - '${CMS_PORT}:${CMS_PORT}'
     volumes:
       - ./apps/cms-server:/opt/openstad-headless/apps/cms-server
-      - openstad-cms-server-node_modules:/opt/openstad-headless/apps/cms-server/node_modules
+      - ./node_modules:/opt/openstad-headless/apps/cms-server/node_modules
       - openstad-cms-server-init:/opt/openstad-headless/apps/cms-server/init
 
 volumes:

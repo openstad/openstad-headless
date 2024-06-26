@@ -123,32 +123,41 @@ async function doStartServer(domain, req, res) {
     apostropheServer[domain] = await run(domain, projects[domain], {});
     apostropheServer[domain].app.set('trust proxy', true);
     apostropheServer[domain].app(req, res);
+    
     return Promise.resolve();
   }
 }
 
 async function run(id, projectData, options, callback) {
-
-  console.log ('run project', process.env.OVERWRITE_DOMAIN ? 'http://localhost:3000' : projectData.url);
+  
+  const baseUrl = process.env.OVERWRITE_DOMAIN ? 'http://localhost:3000' : projectData.url;
+  
+  console.log ('run project', baseUrl, projectData.projectPrefix ? projectData.projectPrefix : '');
   
   const project = {
     ...aposConfig,
-    prefix: projectData.projectPrefix ? '/' + projectData.projectPrefix : '',
-    baseUrl: process.env.OVERWRITE_DOMAIN ? 'http://localhost:3000' : projectData.url,
+    sitePrefix: projectData.projectPrefix ? projectData.projectPrefix : '',
+    baseUrl: 'http://localhost:31490',
     options: projectData,
     project: projectData,
     _id: id,
     shortName: 'openstad-' + projectData.id,
     mongo: {},
+    orphan: (req, res) => {
+      console.log ('orphan', req.url);
+    },
+    mountPath: projectData.projectPrefix ? projectData.projectPrefix : '',
   };
 
   if (process.env.MONGODB_URI) {
     project.mongo.uri = process.env.MONGODB_URI.replace("{database}", project.shortName);
   }
+  
+  console.log ('=> mongo uri', project.mongo.uri)
 
   const config = project;
   
-  console.log ('run config', config);
+  //console.log ('run config', config);
 
   let assetsIdentifier;
 
@@ -167,7 +176,7 @@ async function run(id, projectData, options, callback) {
       return callback(null, apos);
     }
   };
-
+  
   const apos = apostrophe(
     projectConfig,
   );
@@ -288,7 +297,7 @@ function createReturnUrl(req, res) {
 app.use('/:projectPrefix', function (req, res, next) {
     const domainAndPath = req.openstadDomain + '/' + req.params.projectPrefix;
 
-    req.url = req.originalUrl;
+    //req.url = req.originalUrl;
     
     console.log ('=>> URL', req.url, req.originalUrl);
     
@@ -304,8 +313,9 @@ app.use('/:projectPrefix', function (req, res, next) {
         return next();
         // try to run static from subsite
     } else {
-      console.log ('express static', domainAndPath);
-        return express.static('public')(req, res, next);
+      return next();
+/*      console.log ('express static', domainAndPath);
+        return express.static('public')(req, res, next);*/
     }
 });
 

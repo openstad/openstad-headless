@@ -18,4 +18,11 @@ module.exports = {
       },
     ],
   },
+  handlers(self){
+    return {
+      'apostrophe:afterInit': async (req, piece) => {
+        console.log ('<===> apos after init', req, piece)
+      }
+    }
+  }
 };
