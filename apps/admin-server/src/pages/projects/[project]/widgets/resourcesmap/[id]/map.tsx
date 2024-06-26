@@ -47,8 +47,8 @@ const formSchema = z.object({
 type SchemaKey = keyof typeof formSchema.shape;
 
 export default function WidgetResourcesMapMap(
-  props: ResourceOverviewMapWidgetTabProps &
-    EditFieldProps<ResourceOverviewMapWidgetTabProps>& {
+  props: ResourceOverviewMapWidgetProps &
+    EditFieldProps<ResourceOverviewMapWidgetProps>& {
       omitSchemaKeys?: Array<SchemaKey>;
     }
 ) {
@@ -86,7 +86,7 @@ export default function WidgetResourcesMapMap(
       setGroupedNames(groupNames);
     }
   }, [tags]);
-  
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
