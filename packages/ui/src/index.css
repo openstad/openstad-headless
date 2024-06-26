@@ -103,8 +103,8 @@
     overflow: hidden;
     display: block;
 }
-
-*:first-child {
+ 
+*:first-child { 
     --nlds-counter-margin-block-start: 0;
 }
 
