@@ -18,37 +18,26 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 
 export const getServerSideProps = withApiUrl;
 
-export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
+export type ResourceOverviewMapWidgetTabProps = Omit<
+  ResourceOverviewMapWidgetProps,
+  keyof Omit<BaseProps, 'projectId'>
+>;
 
+export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig<ResourceOverviewMapWidgetProps>();
+  const { data: widget, updateConfig } =
+    useWidgetConfig<ResourceOverviewMapWidgetProps>();
   const { previewConfig, updatePreview } =
     useWidgetPreview<ResourceOverviewMapWidgetProps>({
       projectId,
     });
-
-  const totalPropPackage = {
-    ...widget?.config,
-    ...previewConfig,
-    updateConfig: (config: ResourceOverviewMapWidgetProps) =>
-      updateConfig({ ...widget.config, ...config }),
-
-    onFieldChanged: (key: string, value: any) => {
-      if (previewConfig) {
-        updatePreview({
-          ...previewConfig,
-          [key]: value,
-        });
-      }
-    },
-    projectId,
-  };
 
   return (
     <div>
@@ -77,15 +66,41 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
             </TabsList>
             {previewConfig ? (
               <>
-            <TabsContent value="map" className="p-0">
-              <WidgetResourcesMapMap {...totalPropPackage}/>
-            </TabsContent>
-            <TabsContent value="button" className="p-0">
-              <WidgetResourcesMapButtons {...totalPropPackage}/>
-            </TabsContent>
-            <TabsContent value="publish" className="p-0">
-              <WidgetPublish apiUrl={apiUrl} />
-            </TabsContent>
+                <TabsContent value="map" className="p-0">
+                  <WidgetResourcesMapMap
+                    {...previewConfig}
+                    updateConfig={(config) =>
+                      updateConfig({ ...widget.config, ...config })
+                    }
+                    onFieldChanged={(key, value) => {
+                      if (previewConfig) {
+                        updatePreview({
+                          ...previewConfig,
+                          [key]: value,
+                        });
+                      }
+                    }}
+                  />
+                </TabsContent>
+                <TabsContent value="button" className="p-0">
+                  <WidgetResourcesMapButtons
+                    {...previewConfig}
+                    updateConfig={(config) =>
+                      updateConfig({ ...widget.config, ...config })
+                    }
+                    onFieldChanged={(key, value) => {
+                      if (previewConfig) {
+                        updatePreview({
+                          ...previewConfig,
+                          [key]: value,
+                        });
+                      }
+                    }}
+                  />
+                </TabsContent>
+                <TabsContent value="publish" className="p-0">
+                  <WidgetPublish apiUrl={apiUrl} />
+                </TabsContent>
               </>
             ) : null}
           </Tabs>

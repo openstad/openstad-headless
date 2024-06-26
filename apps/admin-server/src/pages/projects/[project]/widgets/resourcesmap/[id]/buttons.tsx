@@ -25,6 +25,7 @@ import type {ResourceOverviewMapWidgetProps} from '@openstad-headless/leaflet-ma
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import * as z from 'zod';
 import * as Switch from '@radix-ui/react-switch';
+import { ResourceOverviewMapWidgetTabProps } from '.';
 
 const formSchema = z.object({
   ctaButton: z.object({
@@ -38,9 +39,14 @@ const formSchema = z.object({
   }),
 });
 
+
+type SchemaKey = keyof typeof formSchema.shape;
+
 export default function WidgetResourcesMapButton(
-  props: ResourceOverviewMapWidgetProps &
-    EditFieldProps<ResourceOverviewMapWidgetProps>
+  props: ResourceOverviewMapWidgetTabProps &
+  EditFieldProps<ResourceOverviewMapWidgetTabProps>& {
+    omitSchemaKeys?: Array<SchemaKey>;
+  }
 ) {
 
   type FormData = z.infer<typeof formSchema>;

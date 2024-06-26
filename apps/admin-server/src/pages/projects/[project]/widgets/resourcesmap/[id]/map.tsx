@@ -25,6 +25,7 @@ import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import type {ResourceOverviewMapWidgetProps} from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props'
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import * as z from 'zod';
+import { ResourceOverviewMapWidgetTabProps } from '.';
 
 type Tag = {
   id: number;
@@ -43,9 +44,13 @@ const formSchema = z.object({
   height: z.string().optional(),
 });
 
+type SchemaKey = keyof typeof formSchema.shape;
+
 export default function WidgetResourcesMapMap(
-  props: ResourceOverviewMapWidgetProps &
-    EditFieldProps<ResourceOverviewMapWidgetProps>
+  props: ResourceOverviewMapWidgetTabProps &
+    EditFieldProps<ResourceOverviewMapWidgetTabProps>& {
+      omitSchemaKeys?: Array<SchemaKey>;
+    }
 ) {
 
   type FormData = z.infer<typeof formSchema>;
@@ -81,7 +86,7 @@ export default function WidgetResourcesMapMap(
       setGroupedNames(groupNames);
     }
   }, [tags]);
-  
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>

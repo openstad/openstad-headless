@@ -4,7 +4,7 @@ export const WidgetDefinitions = {
   begrootmodule: 'Begrootmodule',
   simplevoting: 'Stemmodule',
   enquete: 'Enquete',
-  resourcesmap: 'Resource map',
+  resourcesmap: 'Resource overview map',
   resourcedetailmap: 'Resource detail map',
   counter: 'Counter',
   datecountdownbar: 'Date countdown bar',

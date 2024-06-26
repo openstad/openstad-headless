@@ -20,6 +20,7 @@ import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 
 const formSchema = z.object({
   displayBanner: z.boolean(),
+  displayMap: z.boolean(),
   displayTitle: z.boolean(),
   titleMaxLength: z.coerce.number(),
   displayDescription: z.boolean(),
@@ -56,6 +57,7 @@ export default function WidgetResourceOverviewDisplay(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       displayBanner: props?.displayBanner || false,
+      displayMap: props?.displayMap || false,
       displayTitle: props?.displayTitle || false,
       bannerText: props?.bannerText,
       titleMaxLength: props?.titleMaxLength || 20,
@@ -79,6 +81,7 @@ export default function WidgetResourceOverviewDisplay(
 
   const { watch } = form;
   const displayBanner = watch('displayBanner');
+  const displayMap = watch('displayMap');
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -125,6 +128,20 @@ export default function WidgetResourceOverviewDisplay(
                 )}
               />
             )}
+          </div>
+
+          <div className='col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8 w-full'>
+            <FormField
+              control={form.control}
+              name="displayMap"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Kaart weergeven</FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           <FormField
