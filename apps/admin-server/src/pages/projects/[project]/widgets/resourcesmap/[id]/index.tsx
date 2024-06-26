@@ -24,7 +24,7 @@ export const getServerSideProps = withApiUrl;
 
 export type ResourceOverviewMapWidgetTabProps = Omit<
   ResourceOverviewMapWidgetProps,
-  keyof Omit<BaseProps, 'projectId'> | keyof ProjectSettingProps
+  keyof Omit<BaseProps, 'projectId'>
 >;
 
 export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {

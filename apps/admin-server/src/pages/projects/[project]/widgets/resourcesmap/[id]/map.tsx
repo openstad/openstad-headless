@@ -47,8 +47,8 @@ const formSchema = z.object({
 type SchemaKey = keyof typeof formSchema.shape;
 
 export default function WidgetResourcesMapMap(
-  props: ResourceOverviewMapWidgetProps &
-    EditFieldProps<ResourceOverviewMapWidgetProps>& {
+  props: ResourceOverviewMapWidgetTabProps &
+    EditFieldProps<ResourceOverviewMapWidgetTabProps>& {
       omitSchemaKeys?: Array<SchemaKey>;
     }
 ) {

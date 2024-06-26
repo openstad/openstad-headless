@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { ResourceOverviewWithMapProps, ResourceOverviewWithMap } from './resourceOverviewWithMap';
+import { ResourceOverviewWithMapWidgetProps, ResourceOverviewWithMap } from './resourceOverviewWithMap';
 
-const config: ResourceOverviewWithMapProps = {
+const config: ResourceOverviewWithMapWidgetProps = {
     displayType: 'cardgrid',
     tagGroups: [{ type: 'theme', label: 'Thema', multiple: true }],
     displayTitle: true,

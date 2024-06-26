@@ -33,8 +33,11 @@ export type ResourceOverviewWidgetProps = BaseProps &
       keyof BaseProps | keyof ProjectSettingProps | 'projectId'
     >;
     renderHeader?: (
-      props: ResourceOverviewWidgetProps,
-      resources?: Array<any>,
+      widgetProps: ResourceOverviewWidgetProps,
+      resources?: any,
+      title?: string,
+      displayHeader?: boolean,
+      displayMap?: boolean
     ) => React.JSX.Element;renderItem?: (
       resource: any,
       props: ResourceOverviewWidgetProps,
@@ -70,6 +73,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     displayTagGroupName?: boolean;
     displayBanner?: boolean;
+    displayMap?: boolean;
     itemsPerPage?: number;
     textResults?: string;
     onlyIncludeTagIds?: string;
