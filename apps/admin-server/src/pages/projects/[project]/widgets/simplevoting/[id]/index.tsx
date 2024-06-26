@@ -19,6 +19,12 @@ import type { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src
 
 import WidgetPreview from '@/components/widget-preview';
 import SimpleVotingDisplay from './display';
+import BegrootmoduleExplanation from '../../begrootmodule/[id]/explanation';
+import WidgetStemBegrootSearch from '../../begrootmodule/[id]/search';
+import WidgetStemBegrootOverviewTags from '../../begrootmodule/[id]/tags';
+import WidgetStemBegrootSorting from '../../begrootmodule/[id]/sorting';
+import WidgetStemBegrootPagination from '../../begrootmodule/[id]/pagination';
+
 export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
@@ -70,12 +76,11 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
           <Tabs defaultValue="display">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="display">Weergave opties</TabsTrigger>
-              {/* <TabsTrigger value="explanation">Uitleg</TabsTrigger>
+              <TabsTrigger value="explanation">Uitleg</TabsTrigger>
               <TabsTrigger value="search">Zoeken</TabsTrigger>
               <TabsTrigger value="tags">Tags</TabsTrigger>
               <TabsTrigger value="sorting">Sorteer opties</TabsTrigger>
               <TabsTrigger value="pagination">Pagination</TabsTrigger>
-              <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger> */}
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
 
@@ -83,6 +88,21 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
               <>
               <TabsContent value="display" className="p-0">
                   <SimpleVotingDisplay {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="explanation" className="p-0">
+                  <BegrootmoduleExplanation {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="search" className="p-0">
+                  <WidgetStemBegrootSearch {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="tags" className="p-0">
+                  <WidgetStemBegrootOverviewTags {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="sorting" className="p-0">
+                  <WidgetStemBegrootSorting {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="pagination" className="p-0">
+                  <WidgetStemBegrootPagination {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="publish" className="p-0">
                   <WidgetPublish apiUrl={apiUrl} />
