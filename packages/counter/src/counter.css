@@ -8,7 +8,7 @@
   background-color: var(--utrecht-button-secondary-action-color);
   max-width: none;
   justify-content: left;
-  margin-top: 0;
+  margin: 0;
 }
 
 .osc.counter-container.--link {

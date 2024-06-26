@@ -19,6 +19,7 @@ function ShareLinks({ title }: Item) {
         <LinkSocial
           external
           href={'http://www.facebook.com/share.php?u=' + encodeURIComponent(location.href)}
+          target="_blank"
           title={'Facebook'}
         >
           <i className='icon --facebook'></i>
@@ -27,6 +28,7 @@ function ShareLinks({ title }: Item) {
         <LinkSocial
           external
           href={'https://twitter.com/intent/tweet?text=' + encodeURIComponent(location.href)}
+          target="_blank"
           title={'Twitter'}
         >
           <i className='icon --twitter'></i>
@@ -43,6 +45,7 @@ function ShareLinks({ title }: Item) {
         <LinkSocial
           external
           href={'https://api.whatsapp.com/send?phone=&text=' + encodeURIComponent(location.href) + '&source=&data='}
+          target="_blank"
           title={'Whatsapp'}
         >
           <i className='icon --whatsapp'></i>
@@ -51,6 +54,7 @@ function ShareLinks({ title }: Item) {
         <LinkSocial
           external
           href={'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(location.href)}
+          target="_blank"
           title={'LinkedIn'}
         >
           <i className='icon --linkedin'></i>

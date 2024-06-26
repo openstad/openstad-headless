@@ -14,7 +14,7 @@ export const ImageUploader: React.FC<{
   fieldName: Path<FieldValues>;
   onImageUploaded?: (imageObject: {url: string} ) => void;
   imageLabel?: string;
-  allowedTypes?: string;
+  allowedTypes?: string[];
 }> = ({ form, fieldName, onImageUploaded, allowedTypes, imageLabel = 'Afbeelding' }) => {
   const [file, setFile] = React.useState<{url: string}>();
   const [fileUrl, setFileUrl] = React.useState<string>('');
@@ -52,7 +52,7 @@ export const ImageUploader: React.FC<{
   }, [file, form, fieldName, onImageUploaded]);
 
   const acceptAttribute = allowedTypes
-    ? allowedTypes
+    ? allowedTypes.join(',')
     : "";
 
   return (

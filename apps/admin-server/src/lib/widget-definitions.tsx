@@ -1,7 +1,8 @@
 export const WidgetDefinitions = {
   agenda: 'Agenda',
-  comments: 'Argumenten',
+  comments: 'Reacties',
   begrootmodule: 'Begrootmodule',
+  simplevoting: 'Stemmodule',
   enquete: 'Enquete',
   resourcesmap: 'Resource overview map',
   resourcedetailmap: 'Resource detail map',
@@ -13,7 +14,9 @@ export const WidgetDefinitions = {
   resourcedetail: 'Resource detail',
   resourceform: 'Resource form',
   resourceoverview: 'Resource overview',
-  resourcewithmap: 'Resource with map'
+  resourcewithmap: 'Resource with map',
+  resourcedetailwithmap: 'Resource detail with map',
+  documentmap: 'Documents with comments',
 };
 
 export type WidgetDefinition = keyof typeof WidgetDefinitions;

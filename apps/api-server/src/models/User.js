@@ -543,7 +543,7 @@ module.exports = function (db, sequelize, DataTypes) {
       }
       
       await self.update({
-        idpUser: null,
+        idpUser: {},
         role: 'anonymous',
         passwordHash: null,
         listableByRole: 'editor',

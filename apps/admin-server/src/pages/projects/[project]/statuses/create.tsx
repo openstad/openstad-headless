@@ -12,6 +12,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
@@ -22,7 +23,8 @@ import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   name: z.string(),
-  seqnr: z.coerce.number()
+  seqnr: z.coerce.number(),
+  addToNewResources: z.boolean(),
 });
 
 export default function ProjectStatusCreate() {
@@ -36,8 +38,8 @@ export default function ProjectStatusCreate() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const statuses = await createStatus(values.name, values.seqnr);
-    if (statuses) {
+    const status = await createStatus(values.name, values.seqnr, values.addToNewResources);
+    if (status?.id) {
       toast.success('Status aangemaakt!');
       router.push(`/projects/${project}/statuses`);
     } else {
@@ -92,6 +94,19 @@ export default function ProjectStatusCreate() {
                     <FormControl>
                       <Input type="number" placeholder="" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="addToNewResources"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Voeg deze status automatisch toe aan nieuwe resources
+                    </FormLabel>
+                    {YesNoSelect(field, {})}
                     <FormMessage />
                   </FormItem>
                 )}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
@@ -12,24 +12,28 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
+import { getApiFetchMethodNames } from '@openstad-headless/data-store/src/api/index';
 import useTag from '@/hooks/use-tags';
 import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   name: z.string(),
   type: z.string(),
-  seqnr: z.coerce.number()
+  seqnr: z.coerce.number(),
+  addToNewResources: z.boolean(),
 });
 
 export default function ProjectTagCreate() {
   const router = useRouter();
   const project = router.query.project;
   const { createTag } = useTag(project as string);
+  const [disabled, setDisabled]  = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
@@ -37,14 +41,29 @@ export default function ProjectTagCreate() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const tags = await createTag(values.name, values.type, values.seqnr);
-    if (tags) {
+    const tag = await createTag(values.name, values.type, values.seqnr, values.addToNewResources);
+    if (tag?.id) {
       toast.success('Tag aangemaakt!');
       router.push(`/projects/${project}/tags`);
     } else {
       toast.error('Er is helaas iets mis gegaan.')
     }
   }
+
+  const apiFetchMethodNames = getApiFetchMethodNames();
+
+  useEffect(() => {
+    const type = form.watch('type');
+
+    if ( !!apiFetchMethodNames && Array.isArray(apiFetchMethodNames) && apiFetchMethodNames.includes(type) ) {
+      form.setError('type', {type: 'manual', message: `${type} valt onder de benamingen die niet gebruikt mag worden wegens mogelijke conflicten.`});
+      setDisabled(true);
+    } else {
+      form.clearErrors(['type'])
+      setDisabled(false);
+    }
+
+  }, [ form.watch('type') ] );
 
   return (
     <div>
@@ -110,7 +129,24 @@ export default function ProjectTagCreate() {
                   </FormItem>
                 )}
               />
-              <Button className="w-fit col-span-full" type="submit">
+              <FormField
+                control={form.control}
+                name="addToNewResources"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Voeg deze status automatisch toe aan nieuwe resources
+                    </FormLabel>
+                    {YesNoSelect(field, {})}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                className="w-fit col-span-full"
+                disabled={disabled}
+                type="submit"
+              >
                 Opslaan
               </Button>
             </form>

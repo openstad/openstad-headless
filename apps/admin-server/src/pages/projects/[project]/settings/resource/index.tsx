@@ -74,10 +74,7 @@ const formSchema = z.object({
   summaryMaxLength: z.coerce.number(),
   descriptionMinLength: z.coerce.number(),
   descriptionMaxLength: z.coerce.number(),
-  displayLocation: z.boolean(),
-  displayTheme: z.boolean(),
-  displayNeighbourhood: z.boolean(),
-  displayModbreak: z.boolean(),
+  // displayModbreak: z.boolean(),
   tagGroups: z.number().array().optional().default([]),
   statusGroups: z.number().array().optional().default([]),
 });
@@ -106,11 +103,7 @@ export default function ProjectSettingsResource() {
         data?.config?.[category]?.descriptionMinLength || null,
       descriptionMaxLength:
         data?.config?.[category]?.descriptionMaxLength || null,
-      displayLocation: data?.config?.[category]?.displayLocation || false,
-      displayTheme: data?.config?.[category]?.displayTheme || false,
-      displayNeighbourhood:
-        data?.config?.[category]?.displayNeighbourhood || false,
-      displayModbreak: data?.config?.[category]?.displayModbreak || false,
+      // displayModbreak: data?.config?.[category]?.displayModbreak || false,
       tagGroups: data?.config?.resources?.defaultTagIds || [],
       statusGroups: data?.config?.resources?.defaultStatusIds || [],
     }),
@@ -138,10 +131,7 @@ export default function ProjectSettingsResource() {
           summaryMaxLength: values.summaryMaxLength,
           descriptionMinLength: values.descriptionMinLength,
           descriptionMaxLength: values.descriptionMaxLength,
-          displayLocation: values.displayLocation,
-          displayTheme: values.displayTheme,
-          displayNeighbourhood: values.displayNeighbourhood,
-          displayModbreak: values.displayModbreak,
+          // displayModbreak: values.displayModbreak,
           defaultTagIds: values.tagGroups || [],
           defaultStatusIds: values.statusGroups || [],
         },
@@ -176,8 +166,12 @@ export default function ProjectSettingsResource() {
         ]}>
         <div className="container py-6">
           <Form {...form} className="p-6 bg-white rounded-md">
-            <Heading size="xl">Resource template</Heading>
+            <Heading size="xl">Resource instellingen</Heading>
             <Separator className="my-4" />
+            <p className="text-gray-500">
+              Met resources bedoelen we het type inzendingen dat gebruikers doen in dit project. <br/>Denk aan: ideeën, plannen, tips of knelpunten. Dit is afhankelijk van het type input wat je wilt uitvragen.
+            </p>
+            <br/>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
               className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -287,49 +281,7 @@ export default function ProjectSettingsResource() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="displayLocation"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Wordt het invoerveld voor de locatie weergegeven in het
-                      resource-formulier?
-                    </FormLabel>
-                    {YesNoSelect(field, {})}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="displayTheme"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Wordt het invoerveld voor het thema weergegeven in het
-                      resource-formulier?
-                    </FormLabel>
-                    {YesNoSelect(field, {})}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="displayNeighbourhood"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Wordt het invoerveld voor de buurt weergegeven in het
-                      resource-formulier?
-                    </FormLabel>
-                    {YesNoSelect(field, {})}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name="displayModbreak"
                 render={({ field }) => (
@@ -342,7 +294,7 @@ export default function ProjectSettingsResource() {
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
 
               <CheckboxList
                 form={form}
@@ -375,6 +327,7 @@ export default function ProjectSettingsResource() {
                 label={(t) => t.name}
                 keyPerItem={(t) => `${t.id}`}
                 items={statuses}
+                layout="vertical"
                 selectedPredicate={(t) =>
                   form.getValues('statusGroups').findIndex((tg) => tg === t.id) >
                   -1
@@ -396,48 +349,6 @@ export default function ProjectSettingsResource() {
               </Button>
             </form>
           </Form>
-          <div className="p-6 bg-white rounded-md mt-4">
-            <Heading size="xl" className="mb-4">
-              Resource mail template
-            </Heading>
-            <Separator className="mb-4" />
-            <form
-              onSubmit={() => {}}
-              className="lg:w-1/2 grid grid-cols-2 gap-4">
-              <div className="col-span-full space-y-2">
-                <Label>Type e-mail</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecteer" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="thanks">Bedank-mail</SelectItem>
-                    <SelectItem value="submit">
-                      Opleveren van concept-plan
-                    </SelectItem>
-                    <SelectItem value="publish">
-                      Uitbrengen van concept-plan
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="col-span-full space-y-2">
-                <Label>Vanaf adres</Label>
-                <Input id="mail" placeholder="email@example.com" />
-              </div>
-              <div className="col-span-full space-y-2">
-                <Label>Onderwerp</Label>
-                <Input id="subject" placeholder="Onderwerp van de mail" />
-              </div>
-              <div className="col-span-full space-y-2">
-                <Label>E-mail tekst template</Label>
-                <Textarea id="template" placeholder="Inhoud van de mail" />
-              </div>
-              <Button type="button" className="w-fit mt-4">
-                Opslaan
-              </Button>
-            </form>
-          </div>
         </div>
       </PageLayout>
     </div>

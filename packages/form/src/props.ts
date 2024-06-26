@@ -4,7 +4,8 @@ import type { RangeSliderProps } from "@openstad-headless/ui/src/form-elements/a
 import type { CheckboxFieldProps } from "@openstad-headless/ui/src/form-elements/checkbox";
 import type { SelectFieldProps } from "@openstad-headless/ui/src/form-elements/select";
 import type { RadioboxFieldProps } from "@openstad-headless/ui/src/form-elements/radio";
-import type { FileUploadProps} from "@openstad-headless/ui/src/form-elements/file-upload";
+import type { ImageUploadProps} from "@openstad-headless/ui/src/form-elements/image-upload";
+import type { DocumentUploadProps} from "@openstad-headless/ui/src/form-elements/document-upload";
 import type { HiddenInputProps } from "@openstad-headless/ui/src/form-elements/hidden";
 import type {ImageChoiceFieldProps} from "@openstad-headless/ui/src/form-elements/image-choice";
 import type {MapProps} from "@openstad-headless/ui/src/form-elements/map";
@@ -27,7 +28,8 @@ type CombinedFieldPropsWithType =
     | ({ type?: 'checkbox' } & CheckboxFieldProps)
     | ({ type?: 'select' } & SelectFieldProps)
     | ({ type?: 'radiobox' } & RadioboxFieldProps)
-    | ({ type?: 'upload' } & FileUploadProps)
+    | ({ type?: 'imageUpload' } & ImageUploadProps)
+    | ({ type?: 'documentUpload' } & DocumentUploadProps)
     | ({ type?: 'hidden' } & HiddenInputProps)
     | ({ type?: 'imageChoice' } & ImageChoiceFieldProps)
     | ({ type?: 'map' } & MapProps)
@@ -47,7 +49,8 @@ type CombinedFieldProps = (
     CheckboxFieldProps |
     SelectFieldProps |
     RadioboxFieldProps |
-    FileUploadProps |
+    ImageUploadProps |
+    DocumentUploadProps |
     HiddenInputProps |
     ImageChoiceFieldProps |
     InfoFieldProps

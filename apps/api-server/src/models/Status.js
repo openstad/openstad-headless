@@ -28,6 +28,12 @@ module.exports = function (db, sequelize, DataTypes) {
         default: 10,
       },
 
+      addToNewResources: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        default: false,
+      },
+
       label: {
         type: DataTypes.STRING,
         allowNull: true,

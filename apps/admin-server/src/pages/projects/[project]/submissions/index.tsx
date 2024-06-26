@@ -18,7 +18,9 @@ export default function ProjectSubmissions() {
   const { data, remove } = useSubmissions(project as string);
 
   const [filterData, setFilterData] = useState(data);
-  const debouncedSearchTable = searchTable(setFilterData);
+  const [filterSearchType, setFilterSearchType] = useState<string>('');
+  const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
+
   const [activeWidget, setActiveWidget] = useState("0");
   const [allWidgets, setAllWidgets] = useState<{ id: number; name: string }[]>([]);
 
@@ -111,12 +113,25 @@ export default function ProjectSubmissions() {
         }>
         <div className="container py-6">
 
-        <input
-            type="text"
-            className='mb-4 p-2 rounded float-right'
-            placeholder="Zoeken..."
-            onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
-          />
+        <div className="float-right mb-4 flex gap-4">
+            <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
+            <select
+              className="p-2 rounded"
+              onChange={(e) => setFilterSearchType(e.target.value)}
+            >
+              <option value="">Alles</option>
+              <option value="id">Widget ID</option>
+              <option value="user">Gebruiker ID</option>
+              <option value="submittedData">Ingezonden Data</option>
+              <option value="createdAt">Datum aangemaakt</option>
+            </select>
+            <input
+              type="text"
+              className='p-2 rounded'
+              placeholder="Zoeken..."
+              onChange={(e) => debouncedSearchTable(e.target.value, filterData, data)}
+            />
+          </div>
 
           <div className="p-6 bg-white rounded-md clear-right">
             <div

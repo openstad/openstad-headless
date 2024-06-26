@@ -55,3 +55,14 @@
     display: grid;
     grid-gap: 0.5rem;
 }
+
+.osc .multi-select{
+    position: relative;
+}
+
+.osc .multi-select .multiselect-container{
+    background: #fff;
+    position: absolute;
+    z-index: 1;
+    width: 100%;
+}

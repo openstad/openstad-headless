@@ -20,15 +20,20 @@ import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 
 const formSchema = z.object({
   displayBanner: z.boolean(),
+  displayMap: z.boolean(),
   displayTitle: z.boolean(),
   titleMaxLength: z.coerce.number(),
   displayDescription: z.boolean(),
   descriptionMaxLength: z.coerce.number(),
   displaySummary: z.boolean(),
   summaryMaxLength: z.coerce.number(),
-
+  displayStatusLabel: z.boolean(),
   displayArguments: z.boolean(),
   displayVote: z.boolean(),
+  bannerText: z.string().optional(),
+  displayDocuments: z.boolean(),
+  documentsTitle: z.string().optional(),
+  documentsDesc: z.string().optional(),
   // displayRanking: z.boolean(),
   // displayLabel: z.boolean(),
   // displayShareButtons: z.boolean(),
@@ -52,7 +57,9 @@ export default function WidgetResourceOverviewDisplay(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       displayBanner: props?.displayBanner || false,
+      displayMap: props?.displayMap || false,
       displayTitle: props?.displayTitle || false,
+      bannerText: props?.bannerText,
       titleMaxLength: props?.titleMaxLength || 20,
       displayDescription: props?.displayDescription || false,
       descriptionMaxLength: props?.descriptionMaxLength || 20,
@@ -60,6 +67,10 @@ export default function WidgetResourceOverviewDisplay(
       summaryMaxLength: props?.summaryMaxLength || 30,
       displayArguments: props?.displayArguments || false,
       displayVote: props?.displayVote || false,
+      displayStatusLabel: props?.displayStatusLabel || false,
+      displayDocuments: props?.displayDocuments || false,
+      documentsTitle: props?.documentsTitle || '',
+      documentsDesc: props?.documentsDesc || '',
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -67,6 +78,10 @@ export default function WidgetResourceOverviewDisplay(
       // displayCaption: props?.displayCaption || false,
     },
   });
+
+  const { watch } = form;
+  const displayBanner = watch('displayBanner');
+  const displayMap = watch('displayMap');
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -76,17 +91,58 @@ export default function WidgetResourceOverviewDisplay(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
-          <FormField
-            control={form.control}
-            name="displayBanner"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Map weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
+
+          <div className='col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8 w-full'>
+            <FormField
+              control={form.control}
+              name="displayBanner"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Titel weergeven</FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {displayBanner && (
+              <FormField
+                control={form.control}
+                name="bannerText"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Titel
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
-          />
+          </div>
+
+          <div className='col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8 w-full'>
+            <FormField
+              control={form.control}
+              name="displayMap"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Kaart weergeven</FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <FormField
             control={form.control}
@@ -250,6 +306,84 @@ export default function WidgetResourceOverviewDisplay(
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="displayStatusLabel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Status label weergeven
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayDocuments"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Geüploade documenten weergeven
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {form.watch("displayDocuments") && (
+            <>
+              <FormField
+                control={form.control}
+                name="documentsTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Welke titel moet er boven de download knop(pen) komen?
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="documentsDesc"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Welke beschrijving moet er boven de download knop(pen) komen?
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
           {/* <FormField
             control={form.control}
             name="displayShareButtons"

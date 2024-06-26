@@ -17,7 +17,7 @@ exports.index = (req, res, next) => {
   // Replace field labels with labels defined in the client config (if provided)
   if (Object.keys(requiredUserFieldsLabels).length > 0) {
     requiredUserFields = requiredUserFields.map((field) => {
-      const newLabel = requiredUserFieldsLabels[field.id];
+      const newLabel = requiredUserFieldsLabels[field.key];
 
       if (!!newLabel) {
         field.label = newLabel;

@@ -1086,7 +1086,7 @@ textarea {
   line-height: inherit;
 }
 a {
-  color: #1d7cf4;
+  color: #1167d4;
   text-decoration: none;
 }
 a:hover,
@@ -6727,7 +6727,6 @@ label {
   font-weight: 600;
 }
 a {
-  color: #2b9ad6;
   text-decoration: underline;
 }
 a:hover {
@@ -7262,7 +7261,7 @@ header.amsterdam-header .header-side-container {
   color: #434343;
   font-weight: 600;
   line-height: 1.125rem;
-  background-color: #F3F3F3;
+  background-color: var(--nlds-navbar-background-color, var(--nlds-default-background-color));
   border: none;
   margin-bottom: 40px;
 }

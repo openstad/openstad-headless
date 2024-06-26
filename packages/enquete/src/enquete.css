@@ -112,10 +112,6 @@ label.utrecht-form-label{
   margin-block-end: 6px;
 }
 
-.osc-enquete-item-description + .form-widget{
-  margin-top: 2rem;
-}
-
 .--label-grid{
   display: flex;
   flex-direction: row-reverse;

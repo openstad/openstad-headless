@@ -19,7 +19,6 @@ import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
   Heading4,
-  Heading5,
   Paragraph,
   Button,
 } from '@utrecht/component-library-react';
@@ -28,6 +27,7 @@ import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/s
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
+  } & {
     resourceOverviewMapWidget?: Omit<
       ResourceOverviewMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'projectId'
@@ -35,8 +35,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     renderHeader?: (
       props: ResourceOverviewWidgetProps,
       resources?: Array<any>,
-    ) => React.JSX.Element;
-    renderItem?: (
+    ) => React.JSX.Element;renderItem?: (
       resource: any,
       props: ResourceOverviewWidgetProps,
       onItemClick?: () => void
@@ -46,6 +45,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayType?: 'cardrow' | 'cardgrid' | 'raw';
     allowFiltering?: boolean;
     displayTitle?: boolean;
+    displayStatusLabel?: boolean;
     titleMaxLength?: number;
     displayRanking?: boolean;
     displayLabel?: boolean;
@@ -74,24 +74,35 @@ export type ResourceOverviewWidgetProps = BaseProps &
     textResults?: string;
     onlyIncludeTagIds?: string;
     rawInput?: string;
+    bannerText?: string;
+    displayDocuments?: boolean;
+    documentsTitle?: string;
+    documentsDesc?: string;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
 // If you dont want a banner pas <></> into the renderHeader prop
 const defaultHeaderRenderer = (
   widgetProps: ResourceOverviewWidgetProps,
-  resources?: any
+  resources?: any,
+  title?: string,
+  displayHeader?: boolean,
+  displayMap?: boolean
 ) => {
   return (
     <>
-      <ResourceOverviewMap
-        {...widgetProps}
-        {...widgetProps.resourceOverviewMapWidget}
-        givenResources={resources}
-      />
-      <section className="osc-resource-overview-title-container">
-        <Heading4>Plannen</Heading4>
-      </section>
+      {displayMap &&
+        <ResourceOverviewMap
+          {...widgetProps}
+          {...widgetProps.resourceOverviewMapWidget}
+          givenResources={resources}
+        />
+      }
+      {displayHeader &&
+        <section className="osc-resource-overview-title-container">
+          <Heading4>{title}</Heading4>
+        </section>
+      }
     </>
   );
 };
@@ -138,21 +149,37 @@ const defaultItemRenderer = (
     return <Paragraph>Er is een fout in de template</Paragraph>;
   }
 
+  let defaultImage = '';
+
+  interface Tag {
+    name: string;
+    defaultResourceImage?: string;
+   }
+
+  if (Array.isArray(resource?.tags)) {
+    const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+
+    const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+    defaultImage = tagWithImage?.defaultResourceImage || '';
+  }
+
   return (
     <Button
       appearance="subtle-button"
       className="resource-card--link"
       onClick={() => onItemClick && onItemClick()}>
       <Image
-        src={resource.images?.at(0)?.url || ''}
+        src={resource.images?.at(0)?.url || defaultImage}
         imageFooter={
-          <div>
-            <Paragraph className="osc-resource-overview-content-item-status">
-              {resource.statuses?.map((statusTag: any) => (
-                <span className="status-label">{statusTag.label}</span>
-              ))}
-            </Paragraph>
-          </div>
+          props.displayStatusLabel && (
+            <div>
+              <Paragraph className="osc-resource-overview-content-item-status">
+                {resource.statuses?.map((statusTag: any) => (
+                  <span className="status-label">{statusTag.label}</span>
+                ))}
+              </Paragraph>
+            </div>
+          )
         }
       />
 
@@ -165,9 +192,9 @@ const defaultItemRenderer = (
         ) : null}
 
         {props.displaySummary ? (
-          <Heading5>
+          <Paragraph>
             {elipsize(resource.summary, props.summaryMaxLength || 20)}
-          </Heading5>
+          </Paragraph>
         ) : null}
 
         {props.displayDescription ? (
@@ -202,10 +229,15 @@ function ResourceOverview({
   allowFiltering = true,
   displayType = 'cardrow',
   displayBanner = false,
+  displayMap = false,
+  bannerText = 'Plannen',
   renderHeader = defaultHeaderRenderer,
   itemsPerPage = 20,
   textResults = 'Dit zijn de zoekresultaten voor [search]',
   onlyIncludeTagIds = '',
+  displayDocuments = false,
+  documentsTitle = '',
+  documentsDesc = '',
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -292,6 +324,9 @@ function ResourceOverview({
                 resource={item}
                 isModerator={isModerator}
                 loginUrl={props.login?.url}
+                displayDocuments={displayDocuments}
+                documentsTitle={documentsTitle}
+                documentsDesc={documentsDesc}
                 onRemoveClick={(resource) => {
                   try {
                     resource
@@ -310,7 +345,8 @@ function ResourceOverview({
       />
 
       <div className="osc">
-        {displayBanner ? renderHeader(props, resources) : null}
+
+        {displayBanner || displayMap ? renderHeader(props, resources, bannerText, displayBanner, displayMap) : null}
 
         <section
           className={`osc-resource-overview-content ${
@@ -347,7 +383,9 @@ function ResourceOverview({
                 } else {
                   setTags(f.tags);
                 }
-                setSort(f.sort);
+                if (['createdAt_desc', 'createdAt_asc'].includes(f.sort)) {
+                  setSort(f.sort);
+                }
                 setSearch(f.search.text);
               }}
             />
@@ -355,15 +393,31 @@ function ResourceOverview({
 
           <section className="osc-resource-overview-resource-collection">
             {resources &&
-              resources.map((resource: any, index: number) => {
-                return (
-                  <React.Fragment key={`resource-item-${resource.title}`}>
-                    {renderItem(resource, { ...props, displayType }, () => {
-                      onResourceClick(resource, index);
-                    })}
-                  </React.Fragment>
-                );
-              })}
+              resources
+                .filter((resource: any) =>
+                  tags.every((tag: number) => {
+                    return resource.tags || (Array.isArray(resource.tags) && resource.tags.includes(tag));
+                  })
+                )
+                .sort((a: any, b: any) => {
+                  if (sort === 'createdAt_desc') {
+                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                  }
+                  if (sort === 'createdAt_asc') {
+                    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+                  }
+                  return 0;
+                })
+                .map((resource: any, index: number) => {
+                  return (
+                    <React.Fragment key={`resource-item-${resource.title}`}>
+                      {renderItem(resource, { ...props, displayType }, () => {
+                        onResourceClick(resource, index);
+                      })}
+                    </React.Fragment>
+                  );
+                })
+            }
           </section>
         </section>
         {props.displayPagination && (
