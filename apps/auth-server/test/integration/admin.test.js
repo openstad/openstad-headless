@@ -21,7 +21,7 @@ describe('Grant Type Client', () => {
 
     await db.migrate.latest();
 
-    await db.raw("insert into clients (`id`, `name`, `redirectUrl`, `description`, `clientId`, `clientSecret`, `siteUrl`, `authTypes`) values(1, 'test', 'test', 'test', 'trustedClient', 'ssh-otherpassword', 'test', '[\"UniqueCode\"]');");
+    await db.raw("insert into clients (`id`, `name`, `redirectUrl`, `description`, `clientId`, `clientSecret`, `authTypes`) values(1, 'test', 'test', 'test', 'trustedClient', 'ssh-otherpassword', '[\"UniqueCode\"]');");
 
   });
 

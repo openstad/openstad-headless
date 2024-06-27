@@ -37,6 +37,12 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: false,
         default: 10,
       },
+
+      addToNewResources: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        default: false,
+      },
       
       label: {
         type: DataTypes.STRING,
@@ -64,6 +70,22 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 
 		  extraData: getExtraDataConfig(DataTypes.JSON, 'tags'),
+
+      useDifferentSubmitAddress: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        default: false,
+      },
+
+      newSubmitAddress: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+
+      defaultResourceImage: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      }
 
 	  }, {
 

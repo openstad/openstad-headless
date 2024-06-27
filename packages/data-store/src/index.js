@@ -50,15 +50,15 @@ function DataStore(props = {}) {
     return { type, ...props };
   };
 
-  self.useSWR = function (props, fetcherAsString) {
+  self.useSWR = function (props, fetcherAsString, options = {}) {
     let fetcher = eval(`self.api.${fetcherAsString}`);
     let key = self.createKey(props, fetcherAsString);
 
     windowGlobal.OpenStadSWR[JSON.stringify(key, null, 2)] = true;
 
-    return useSWR(key, fetcher, {
-      keepPreviousData: true,
-    });
+    return useSWR(key, () =>
+      fetcher(props, { ...options, keepPreviousData: true })
+    );
   };
 
   const { mutate } = useSWRConfig();

@@ -59,11 +59,23 @@ export const StemBegrootResourceList = ({
           ?.filter((t: any) => t.type === 'area')
           ?.at(0);
 
+        let defaultImage = '';
+
+        interface Tag {
+          name: string;
+          defaultResourceImage?: string;
+        }
+
+        if (Array.isArray(resource?.tags)) {
+          const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+          const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+          defaultImage = tagWithImage?.defaultResourceImage || '';
+        }
 
         return (
           <>
             <article className="stem-begroot--container">
-              <Image src={resource.images?.at(0)?.url || ''} />
+              <Image src={resource.images?.at(0)?.url || defaultImage} />
                 <section className="stembegroot-content-item-header">
                   <div className="stembegroot-content-item-header-taglist">
                     <Heading level={2} appearance="utrecht-heading-6">Tags</Heading>

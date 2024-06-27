@@ -6,7 +6,6 @@ export type ResourceFormWidgetProps = BaseProps &
 
 export type ResourceFormWidget = {
     widgetId?: number;
-    afterSubmitUrl?: string;
     displayTitle?: boolean;
     title?: string;
     displayDescription?: boolean;
@@ -15,6 +14,7 @@ export type ResourceFormWidget = {
     items?: Array<Item>;
     info?: Info;
     confirmation?: Confirmation;
+    redirectUrl?: string,
 };
 
 export type General = {

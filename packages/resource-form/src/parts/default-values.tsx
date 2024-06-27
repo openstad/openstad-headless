@@ -58,7 +58,7 @@ export const defaultFormValues = [
         "multiple": true,
         "options": [],
         "allowedTypes": ['image/*'],
-        "fieldType": "upload"
+        "fieldType": "imageUpload"
     },
     {
         "trigger": "5",

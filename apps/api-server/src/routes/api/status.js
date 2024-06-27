@@ -57,6 +57,7 @@ router
     const data = {
       name: req.body.name,
       seqnr: req.body.seqnr,
+      addToNewResources: req.body.addToNewResources,
       projectId: req.params.projectId,
     };
 

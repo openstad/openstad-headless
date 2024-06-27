@@ -12,13 +12,11 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
-import useArea from '@/hooks/use-areas';
 import { useProject } from '../../../../hooks/use-project';
 import { SimpleCalendar } from '@/components/simple-calender-popup';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -30,32 +28,37 @@ const formSchema = z.object({
   name: z.string().min(1, {
     message: 'De naam van een project mag niet leeg zijn!',
   }),
+  username: z.string().optional(),
+  password: z.string().optional(),
   endDate: z.date().min(new Date(), {
     message: 'De datum moet nog niet geweest zijn!',
   }),
   cssUrl: z.string().optional(),
-  areaId: z.string().optional(),
   // We don't want to restrict this URL too much
   url: z.string().regex(/^(?:([a-z0-9.:]+))?$/g, {
     message: 'De URL mag alleen kleine letters, cijfers en punten bevatten. Tip: gebruik geen https:// voor de URL'
   }).optional(),
+  basicAuthActive: z.coerce.boolean().optional(),
 });
+
+
 
 export default function ProjectSettings() {
 
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading, updateProject } = useProject();
-  const { data: areas } = useArea(project as string);
 
   const [checkboxInitial, setCheckboxInitial] = useState(true);
   const [showUrl, setShowUrl] = useState(false);
   const [projectHasEnded, setProjectHasEnded] = useState(false);
+  const [basicAuthActive, setBasicAuthActive] = useState(false);
+  const [basicAuthInitial, setBasicAuthInitial] = useState(true);
 
   const defaults = useCallback(
     () => {
-
       const currentDate = new Date();
+
 
       return {
       name: data?.name || '',
@@ -63,11 +66,13 @@ export default function ProjectSettings() {
         ? new Date(data?.config?.project?.endDate)
         : new Date(currentDate.getFullYear(), currentDate.getMonth() + 3),
       cssUrl: data?.config?.project?.cssUrl || '',
-      areaId: data?.config?.project?.areaId || '',
       url: data?.url || '',
+      basicAuthActive: data?.config?.basicAuth?.active || false,
+      username: data?.config?.basicAuth?.username || '',
+      password: data?.config?.basicAuth?.password || '',
     }
     },
-    [data, areas]
+    [data]
   );
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -77,6 +82,8 @@ export default function ProjectSettings() {
 
   useEffect(() => {
     form.reset(defaults());
+    // if(basicAuthActive !== data?.config?.basicAuth?.active)
+    //   setBasicAuthActive(data?.config?.basicAuth?.active);
   }, [form, defaults]);
 
   useEffect(() => {
@@ -87,6 +94,11 @@ export default function ProjectSettings() {
       }
       setProjectHasEnded(data?.config?.project?.projectHasEnded)
     }
+
+    if (basicAuthInitial) {
+      setBasicAuthActive(data?.config?.basicAuth?.active)
+      setBasicAuthInitial(false)
+    }
   }, [data, checkboxInitial]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -95,9 +107,13 @@ export default function ProjectSettings() {
         {
           project: {
             endDate: values.endDate,
-            cssUrl: values.cssUrl,
-            areaId: values.areaId,
+            cssUrl: values.cssUrl
           },
+          basicAuth: {
+            active: values.basicAuthActive,
+            username: values.username,
+            password: values.password
+          }
         },
         values.name,
         values.url,
@@ -179,14 +195,14 @@ export default function ProjectSettings() {
                       form={form}
                       fieldName="endDate"
                       label="Einddatum"
-                      fieldInfo="Plannen, Reacties en Stemmen worden na deze datum niet meer getoond. De einddatum kan altijd aangepast worden."
+                      fieldInfo="Plannen indienen, reacties plaatsen of liken is na deze datum niet meer mogelijk."
                     />
                     <FormField
                       control={form.control}
                       name="cssUrl"
                       render={({ field }) => (
                         <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                          <FormLabel>URL voor CSS imports (optioneel)</FormLabel>
+                          <FormLabel>Geef de URL voor de huisstijl op (css bestand)</FormLabel>
                           <FormControl>
                             <Input placeholder="Url" {...field} />
                           </FormControl>
@@ -195,20 +211,9 @@ export default function ProjectSettings() {
                       )}
                     />
 
-                    <FormObjectSelectField
-                      form={form}
-                      fieldName="areaId"
-                      fieldLabel="Polygon voor kaarten"
-                      fieldInfo="Op de pagina 'Polygonen' kun je een eigen gebied aanmaken. Selecteer hieronder het gebied waar dit project onder valt."
-                      items={areas}
-                      keyForValue="id"
-                      label={(area: any) => `${area.name}`}
-                      noSelection="&nbsp;"
-                    />
-
                     <div>
                       <FormLabel>
-                        Wil je een CMS URL instellen?
+                        Wil je een website voor dit project?
                       </FormLabel>
                       <Switch.Root
                         className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
@@ -235,7 +240,60 @@ export default function ProjectSettings() {
                         )}
                       />
                     ) : null}
-
+                    <div>
+                    <FormField
+                        control={form.control}
+                        name="basicAuthActive"
+                        render={ function ({ field }) {
+                          setBasicAuthActive(field.value ?? false);
+                          return(
+                          <FormItem className="col-span-full md:col-span-1 flex flex-col">
+                            <FormLabel>
+                              Wil je de website beveiligen met een gebruikersnaam en wachtwoord?
+                            </FormLabel>
+                            <Switch.Root
+                              className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
+                              onCheckedChange={(e: boolean) => {
+                                setBasicAuthActive(!basicAuthActive)
+                                field.onChange(e);
+                              }}
+                              checked={field.value}>
+                              <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                            </Switch.Root>
+                        </FormItem>)
+                      }}
+                    />
+                    </div>
+                    {basicAuthActive ? (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="username"
+                          render={({ field }) => (
+                            <FormItem className="col-span-full md:col-span-1 flex flex-col">
+                              <FormLabel>Gebruikersnaam</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Gebruikersnaam" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem className="col-span-full md:col-span-1 flex flex-col">
+                              <FormLabel>Wachtwoord</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Wachtwoord" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    ) : null}
                     <Button className="w-fit col-span-full" type="submit">
                       Opslaan
                     </Button>

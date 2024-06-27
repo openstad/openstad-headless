@@ -69,7 +69,7 @@ export default function ProjectStatuses() {
           </div>
 
           <div className="p-6 bg-white rounded-md clear-right">
-            <div className="grid grid-cols-1 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
+            <div className="grid grid-cols-1 lg:grid-cols-5 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex truncate">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
                   ID
@@ -80,15 +80,21 @@ export default function ProjectStatuses() {
                   Naam
                 </button>
               </ListHeading>
+              <ListHeading className="hidden lg:flex truncate">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('addToNewResources', e, filterData))}>
+                  Voeg toe aan nieuwe resources
+                </button>
+              </ListHeading>
             </div>
             <ul>
               {filterData?.map((status: any) => (
                 <Link
                   href={`/projects/${project}/statuses/${status.id}`}
                   key={status.id}>
-                  <li key={status.id} className="grid grid-cols-2 lg:grid-cols-4 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                  <li key={status.id} className="grid grid-cols-2 lg:grid-cols-5 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                     <Paragraph className="my-auto -mr-16 lg:mr-0">{status.id || null}</Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">{status.name || null}</Paragraph>
+                    <Paragraph className="hidden lg:flex truncate my-auto">{status.addToNewResources ? 'Ja' : 'Nee'}</Paragraph>
                     <div
                       className="hidden lg:flex ml-auto"
                       onClick={(e) => e.preventDefault()}>

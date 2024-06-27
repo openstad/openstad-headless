@@ -173,16 +173,28 @@ module.exports = function (db, sequelize, DataTypes) {
           projectId: instance.id,
           name: 'open',
           seqnr: 10,
+          addToNewResources: true,
           canComment: true,
           editableByUser: true,
         });
-        await instance.update({
-          config: {
-            statuses: {
-              defaultStatusId: defaultStatus.id,
-            }
-          }
-        })
+
+        await db.Status.create({
+          projectId: instance.id,
+          name: 'closed',
+          seqnr: 20,
+          addToNewResources: false,
+          canComment: true,
+          editableByUser: true,
+        });
+
+        await db.Status.create({
+          projectId: instance.id,
+          name: 'accepted',
+          seqnr: 30,
+          addToNewResources: false,
+          canComment: true,
+          editableByUser: true,
+        });
       },
 
     },

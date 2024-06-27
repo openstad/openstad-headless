@@ -63,7 +63,11 @@ router
       name: req.body.name,
       type: req.body.type,
       seqnr: req.body.seqnr,
+      addToNewResources: req.body.addToNewResources,
       projectId: req.params.projectId,
+      useDifferentSubmitAddress: req.params.useDifferentSubmitAddress,
+      newSubmitAddress: req.params.newSubmitAddress,
+      defaultResourceImage: req.params.defaultResourceImage,
     };
 
     db.Tag.authorizeData(data, 'create', req.user)

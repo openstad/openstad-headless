@@ -103,8 +103,8 @@
     overflow: hidden;
     display: block;
 }
-
-*:first-child {
+ 
+*:first-child { 
     --nlds-counter-margin-block-start: 0;
 }
 
@@ -117,4 +117,9 @@
     -moz-hyphens: auto;
     -ms-hyphens: auto;
     hyphens: auto;
+}
+
+.document-download-container{
+    background: var(--nlds-default-background-color, #F0F4F8);
+    padding: 30px;
 }

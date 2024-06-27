@@ -21,6 +21,7 @@ import { useRouter } from 'next/router';
 import { useProject } from '../../../../hooks/use-project';
 import toast from 'react-hot-toast';
 import * as Switch from '@radix-ui/react-switch';
+import InfoDialog from '@/components/ui/info-hover';
 
 const formSchema = z.object({
   canComment: z.boolean().optional(),
@@ -29,6 +30,7 @@ const formSchema = z.object({
   canLike: z.boolean().optional(),
   descriptionMinLength: z.coerce.number().gt(0).optional(),
   descriptionMaxLength: z.coerce.number().gt(0).optional(),
+  adminLabel: z.string().optional(),
 });
 
 export default function ProjectSettingsComments() {
@@ -47,6 +49,7 @@ export default function ProjectSettingsComments() {
         canLike: data?.config?.comments?.canLike,
         descriptionMinLength: data?.config?.comments?.descriptionMinLength,
         descriptionMaxLength: data?.config?.comments?.descriptionMaxLength,
+        adminLabel: data?.config?.comments?.adminLabel,
     }),
     [data]
   );
@@ -71,6 +74,7 @@ export default function ProjectSettingsComments() {
           canLike: values.canLike,
           descriptionMinLength: values.descriptionMinLength,
           descriptionMaxLength: values.descriptionMaxLength,
+          adminLabel: values.adminLabel,
         },
       },
       );
@@ -182,7 +186,7 @@ export default function ProjectSettingsComments() {
                     name="descriptionMinLength"
                     render={({ field }) => (
                       <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                        <FormLabel>Minimaal aantal karakters</FormLabel>
+                        <FormLabel>Minimaal aantal karakters dat een bezoeker moet invoeren bij een reactie</FormLabel>
                         <FormControl>
                           <Input type="number" {...field} />
                         </FormControl>
@@ -196,7 +200,7 @@ export default function ProjectSettingsComments() {
                     name="descriptionMaxLength"
                     render={({ field }) => (
                       <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                        <FormLabel>Maximaal aantal karakters</FormLabel>
+                        <FormLabel>Maximaal aantal karakters dat een bezoeker mag invoeren bij een reactie</FormLabel>
                         <FormControl>
                           <Input type="number" {...field} />
                         </FormControl>
@@ -223,6 +227,24 @@ export default function ProjectSettingsComments() {
                 />
 
               )}
+
+<FormField
+                  control={form.control}
+                  name="adminLabel"
+                  render={({ field }) => (
+                    <FormItem className="col-span-full md:col-span-1 flex flex-col">
+
+
+                      <FormLabel>Label dat wordt getoond bij reacties van beheerders
+                        <InfoDialog content={'Dit is de duiding die achter de gebruikersnaam van de beheerder komt te staan. Bijvoorbeeld: Webredactie'} />
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="typ een tekst" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
               <Button type="submit" className="w-fit col-span-full">
                 Opslaan

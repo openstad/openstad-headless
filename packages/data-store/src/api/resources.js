@@ -1,7 +1,6 @@
 export default {
   fetch: async function (
     { projectId, page, pageSize, search, tags, sort },
-    data,
     options
   ) {
     const params = new URLSearchParams();
@@ -28,7 +27,7 @@ export default {
     }
 
     let url = `/api/project/${projectId}/resource?includeUser=1&includeUserVote=1&includeVoteCount=1&includeTags=1&includeCommentsCount=1&${params.toString()}`;
-    return this.fetch(url);
+    return this.fetch(url, options);
   },
 
   delete: async function ({ projectId, resourceId }, data) {

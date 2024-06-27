@@ -199,6 +199,12 @@ module.exports = function (db, sequelize, DataTypes) {
         defaultValue: [],
       },
 
+      documents: {
+        type: DataTypes.JSON,
+        allowNull: null,
+        defaultValue: [],
+      },
+
       budget: {
         type: DataTypes.INTEGER,
         auth: {
@@ -614,7 +620,7 @@ module.exports = function (db, sequelize, DataTypes) {
         include: [
           {
             model: db.Tag,
-            attributes: ['id', 'type', 'name', 'label'],
+            attributes: ['id', 'type', 'name', 'label', 'defaultResourceImage'],
             through: { attributes: [] },
             required: false,
           },
