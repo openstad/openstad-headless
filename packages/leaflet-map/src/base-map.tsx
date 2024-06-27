@@ -139,7 +139,7 @@ const BaseMap = ({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapRef]);
+  }, [mapRef, markers]);
 
   // markers
   useEffect(() => {

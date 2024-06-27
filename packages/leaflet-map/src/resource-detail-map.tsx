@@ -33,11 +33,7 @@ const ResourceDetailMap = ({
       ? urlParams.get('openstadResourceId') as string
       : undefined );
 
-  const {
-    data: resource,
-    error,
-    isLoading,
-  } = datastore.useResource({
+  const { data: resource } = datastore.useResource({
     projectId: props.projectId,
     resourceId: resourceId,
   });
