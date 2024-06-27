@@ -79,7 +79,7 @@ const MapField: FC<MapProps> = ({
     const zoom = {
         minZoom: props?.map?.minZoom ? parseInt(props.map.minZoom) : 7,
         maxZoom: props?.map?.maxZoom ? parseInt(props.map.maxZoom) : 20
-    };
+    }; 
 
     return (
       <FormField type="text">
@@ -91,7 +91,9 @@ const MapField: FC<MapProps> = ({
             className="form-field-map-container"
             id={`map`}
           >
+            {((areaId && polygon.length) || !areaId) && (
               <EditorMap
+                  {...props}
                   fieldName={fieldKey}
                   center={center}
                   area={polygon}
@@ -99,9 +101,11 @@ const MapField: FC<MapProps> = ({
                   fieldRequired={fieldRequired}
                   markerIcon={undefined}
                   centerOnEditorMarker={false}
-                  {...props}
+                  autoZoomAndCenter='area'
+                  
                   {...zoom}
               />
+            )}
           </div>
       </FormField>
     );
