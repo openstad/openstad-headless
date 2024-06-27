@@ -47,6 +47,9 @@ MYSQL_PASSWORD=${process.env.DB_PASSWORD}
 AUTH_DB_NAME=${process.env.AUTH_DB_NAME}
 API_DB_NAME=${process.env.API_DB_NAME}
 
+MESSAGESTREAMING_REDIS_URL=${process.env.MESSAGESTREAMING_REDIS_URL || 'openstad-redis'}
+MESSAGESTREAMING_POSTFIX=${process.env.MESSAGESTREAMING_POSTFIX || ''}
+
 API_URL=${process.env.API_URL}
 API_HOSTNAME=${process.env.API_DOMAIN}
 API_PORT=${process.env.API_PORT}
@@ -94,6 +97,7 @@ AUTH_COOKIE_SECURE_OFF=${process.env.AUTH_COOKIE_SECURE_OFF}
 IMAGE_APP_URL=${process.env.IMAGE_APP_URL}
 IMAGE_PORT_API=${process.env.IMAGE_PORT_API}
 IMAGE_PORT_IMAGE_SERVER=${process.env.IMAGE_PORT_IMAGE_SERVER}
+IMAGE_IMAGES_DIR=${process.env.DOCUMENTS_DIR || '/opt/openstad-headless/apps/image-server/documents'}
 IMAGE_IMAGES_DIR=${process.env.IMAGE_IMAGES_DIR || '/opt/openstad-headless/apps/image-server/images'}
 IMAGE_THROTTLE=${process.env.IMAGE_THROTTLE}
 IMAGE_THROTTLE_CC_PROCESSORS=${process.env.IMAGE_THROTTLE_CC_PROCESSORS}

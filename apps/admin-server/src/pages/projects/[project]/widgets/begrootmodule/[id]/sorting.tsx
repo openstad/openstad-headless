@@ -27,10 +27,41 @@ import * as z from 'zod';
 // Defines the types allowed to go to the frontend
 const SortingTypes = [
   {
-    value: 'createdAt_desc',
-    label: 'Nieuwste eerst',
+    value: "title",
+    label: "Titel"
   },
-  { value: 'createdAt_asc', label: 'Oudste eerst' },
+  {
+    value: "createdAt_desc",
+    label: "Nieuwste eerst"
+  },
+  {
+    value: "createdAt_asc",
+    label: "Oudste eerst"
+  },
+  {
+    value: "votes_desc",
+    label: "Meeste stemmen"
+  },
+  {
+    value: "votes_asc",
+    label: "Minste stemmen"
+  },
+  // {
+  //   value: "comments_desc",
+  //   label: "Meeste reacties"
+  // },
+  // {
+  //   value: "comments_asc",
+  //   label: "Minste reacties"
+  // },
+  {
+    value: "ranking",
+    label: "Ranglijst"
+  },
+  {
+    value: "random",
+    label: "Willekeurig"
+  }
 ];
 
 const formSchema = z.object({
@@ -57,7 +88,7 @@ export default function WidgetStemBegrootSorting(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       displaySorting: props?.displaySorting || false,
-      defaultSorting: props?.defaultSorting || 'createdAt_desc',
+      defaultSorting: props?.defaultSorting || 'random',
       sorting: props?.sorting || [],
     },
   });

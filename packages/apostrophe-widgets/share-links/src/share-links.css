@@ -52,4 +52,5 @@
     display: flex;
     grid-gap: 5px;
     margin-top: 10px;
+    flex-wrap: wrap;
 }

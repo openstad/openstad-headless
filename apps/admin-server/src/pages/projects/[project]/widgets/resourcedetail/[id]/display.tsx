@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import {
-  Form,
+  Form, FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -14,6 +14,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import {Input} from "@/components/ui/input";
+import {useFieldDebounce} from "@/hooks/useFieldDebounce";
 
 const formSchema = z.object({
   displayImage: z.boolean(),
@@ -29,6 +31,9 @@ const formSchema = z.object({
   displaySocials: z.boolean(),
   displayStatus: z.boolean(),
   displayLikes: z.boolean(),
+  displayDocuments: z.boolean(),
+  documentsTitle: z.string().optional(),
+  documentsDesc: z.string().optional(),
 });
 
 export default function WidgetResourceDetailDisplay(
@@ -39,6 +44,8 @@ export default function WidgetResourceDetailDisplay(
   async function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
   }
+
+  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
@@ -58,6 +65,9 @@ export default function WidgetResourceDetailDisplay(
       displaySocials: undefinedToTrueOrProp(props?.displaySocials),
       displayStatus: undefinedToTrueOrProp(props?.displayStatus),
       displayLikes: undefinedToTrueOrProp(props?.displayLikes),
+      displayDocuments: undefinedToTrueOrProp(props?.displayDocuments),
+      documentsTitle: props?.documentsTitle || '',
+      documentsDesc: props?.documentsDesc || '',
     },
   });
 
@@ -217,6 +227,70 @@ export default function WidgetResourceDetailDisplay(
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="displayDocuments"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Geüploade documenten weergeven
+                </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {form.watch("displayDocuments") && (
+            <>
+              <FormField
+                control={form.control}
+                name="documentsTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Welke titel moet er boven de download knop(pen) komen?
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="documentsDesc"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Welke beschrijving moet er boven de download knop(pen) komen?
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
 
           <Button className="w-fit col-span-full" type="submit">
             Opslaan

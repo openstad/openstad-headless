@@ -38,6 +38,7 @@ export type ProjectSettingProps = {
     requiredUserRole: string,
     descriptionMinLength: number,
     descriptionMaxLength: number,
+    adminLabel: string,
   };
   users: {
     canCreateNewUsers: boolean;
@@ -66,4 +67,9 @@ export type ProjectSettingProps = {
     visibleWidgets: Array<string>;
   };
   ignoreBruteForce: Array<string>;
+  map: {
+    minZoom: string;
+    maxZoom: string;
+    areaId: string;
+  }
 };

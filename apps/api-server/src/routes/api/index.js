@@ -61,6 +61,8 @@ router.use( '/lock', require('./lock') );
 
 router.use( '/image', require('./image-verification-link') );
 
+router.use( '/document', require('./document-verification-link') );
+
 // area on project and no project route, system wide the same
 router.use( '/project/:projectId(\\d+)/area', require('./area') );
 router.use( '/area', require('./area') );

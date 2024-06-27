@@ -43,9 +43,13 @@ projectsWithIssues.shouldHaveEndedButAreNot = function({ offset, limit }) {
 }
 
 projectsWithIssues.endedButNotAnonymized = function({ offset, limit }) {
+  // findAndCountAll mist de join op users; dat gebeurd zo goauw je de groupBy toevoegt
+  // ik doorzie niet direct waarom en heb nu geen tijd om er in te steken, dus ik verbouw hem naar een findAll
+  // paginering is op deze query toch niet echt relevant, en is er alleen om consistent te zijn met de rest
   return db.Project
-    .findAndCountAll({
-      offset, limit,
+    // .findAndCountAll({
+    .findAll({
+      // offset, limit,
       attributes: { 
         include: [
           [Sequelize.literal('"Project has ended but is not yet anonymized"'), 'issue'],

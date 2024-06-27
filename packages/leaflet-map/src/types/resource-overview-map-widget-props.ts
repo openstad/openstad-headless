@@ -6,8 +6,8 @@ import { MarkerProps } from './marker-props';
 export type ResourceOverviewMapWidgetProps = BaseProps &
   ProjectSettingProps &
   MapPropsType & {
-    marker: MarkerProps;
-    markerIcon: MarkerIconType;
+    marker?: MarkerProps;
+    markerIcon?: MarkerIconType;
     markerHref?: string;
     countButton?: {
       show: boolean;
@@ -18,4 +18,5 @@ export type ResourceOverviewMapWidgetProps = BaseProps &
       label?: string;
       href?: string;
     }
+    givenResources?: Array<any>
   };

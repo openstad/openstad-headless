@@ -25,6 +25,16 @@ services:
       timeout: 20s
       retries: 10
 
+  openstad-redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      timeout: 20s
+      retries: 10
+
   openstad-mongo:
     image: mongo
     restart: always
@@ -50,6 +60,8 @@ services:
     depends_on:
       openstad-mysql:
         condition: service_healthy
+      openstad-redis:
+        condition: service_healthy
     container_name: openstad-api-server
     restart: unless-stopped
     environment:
@@ -59,6 +71,8 @@ services:
       - DB_PASSWORD=${API_DATABASE_PASSWORD}
       - DB_NAME=${API_DATABASE_DATABASE}
       - DB_HOST=${API_DATABASE_HOST}
+      - MESSAGESTREAMING_REDIS_URL=${MESSAGESTREAMING_REDIS_URL}
+      - MESSAGESTREAMING_POSTFIX=${MESSAGESTREAMING_POSTFIX}
       - EMAILADDRESS=${API_EMAILADDRESS}
       - PORT=${API_PORT}
       - MAIL_FROM=${API_MAIL_FROM}
@@ -94,10 +108,12 @@ services:
       - /opt/openstad-headless/packages/eslint-config-custom/node_modules
       - /opt/openstad-headless/packages/lib/node_modules
       - /opt/openstad-headless/packages/likes/node_modules
+      - /opt/openstad-headless/packages/message-streaming/node_modules
       - /opt/openstad-headless/packages/raw-resource/node_modules
       - /opt/openstad-headless/packages/resource-detail/node_modules
       - /opt/openstad-headless/packages/resource-overview/node_modules
       - /opt/openstad-headless/packages/resource-form/node_modules
+      - /opt/openstad-headless/packages/resource-with-detail-map/node_modules
       - /opt/openstad-headless/packages/types/node_modules
       - /opt/openstad-headless/packages/ui/node_modules
 
@@ -172,6 +188,7 @@ services:
       - PORT_API=${IMAGE_PORT_API}
       - PORT_IMAGE_SERVER=${IMAGE_PORT_IMAGE_SERVER}
       - IMAGES_DIR=${IMAGE_IMAGES_DIR}
+      - DOCUMENTS_DIR=${DOCUMENTS_DIR}
       - THROTTLE=${IMAGE_THROTTLE}
       - THROTTLE_CC_PROCESSORS=${IMAGE_THROTTLE_CC_PROCESSORS}
       - THROTTLE_CC_PREFETCHER=${IMAGE_THROTTLE_CC_PREFETCHER}
@@ -225,16 +242,20 @@ services:
         - APP=cms-server
         - PORT=${CMS_PORT}
     image: openstad/headless-cms-server:${RELEASE_VERSION:-latest}
+    depends_on:
+      openstad-redis:
+        condition: service_healthy
     # TODO: dit moet conditional: alleen als we deze db gebruiken
-    # depends_on:
     #   openstad-mongo:
     #     condition: service_healthy
     container_name: openstad-cms-server
     restart: unless-stopped
     environment:
       - PORT=${CMS_PORT}
-      - OVERWRITE_URL=${CMS_URL}
+      - OVERWRITE_URL=${CMS_OVERWRITE_URL}
       - MONGODB_URI=${CMS_MONGODB_URI}
+      - MESSAGESTREAMING_REDIS_URL=${MESSAGESTREAMING_REDIS_URL}
+      - MESSAGESTREAMING_POSTFIX=${MESSAGESTREAMING_POSTFIX}
       - CMS_DEFAULTS=${CMS_DEFAULTS}
       - API_URL=${API_URL}
       - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}

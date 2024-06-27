@@ -4,7 +4,6 @@ import '@utrecht/design-tokens/dist/root.css';
 import { Button } from '@utrecht/component-library-react';
 
 import type { PropsWithChildren } from 'react';
-import { useState, useEffect } from 'react';
 import { loadWidget } from '../../lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
 import parseLocation from './lib/parse-location';
@@ -18,18 +17,19 @@ import type { CategoriesType } from './types/categorize';
 import type { ResourceOverviewMapWidgetProps } from './types/resource-overview-map-widget-props';
 import { BaseMap } from './base-map';
 import React from 'react';
-import {LocationType} from "@openstad-headless/leaflet-map/src/types/location.js";
+import { LocationType } from '@openstad-headless/leaflet-map/src/types/location.js';
 
 type Point = {
   lat: number;
   lng: number;
-}
+};
 
 const ResourceOverviewMap = ({
   categorize = undefined,
   markerHref = undefined,
   countButton = undefined,
   ctaButton = undefined,
+  givenResources,
   ...props
 }: PropsWithChildren<ResourceOverviewMapWidgetProps>) => {
   const datastore = new DataStore({
@@ -38,12 +38,18 @@ const ResourceOverviewMap = ({
     config: { api: props.api },
   });
 
-  const { data: resources } = datastore.useResources({
-    projectId: props.projectId,
-  });
+  if (!Array.isArray(givenResources)) {
+    givenResources = undefined;
+  }
 
-  const allResources = resources?.records || [];
+  const { data: resources } = datastore.useResources(
+    {
+      projectId: props.projectId,
+    },
+    { suspense: !!givenResources }
+  );
 
+  const allResources = givenResources || resources?.records || [];
   let categorizeByField = categorize?.categorizeByField;
   let categories: CategoriesType = {};
 
@@ -57,13 +63,12 @@ const ResourceOverviewMap = ({
       tags.forEach((tag: any) => {
         // TODO: types/Tag does not exist yet
         categories[tag.name] = {
-          color: tag.backgroundColor,
+          color: tag.backgroundColor || '#558',
           icon: tag.mapIcon,
         };
       });
     }
   }
-
   let currentMarkers =
     allResources.map((resource: any) => {
       // TODO: types/resource does not exist yet
@@ -84,10 +89,16 @@ const ResourceOverviewMap = ({
           marker.data = { [categorizeByField]: tag.name };
         }
       }
+
+      // Set the resource name
+      marker.icon = {
+        title: resource.title ?? 'Locatie pin',
+      }
+
       return marker;
     }) || [];
 
-  let countButtonElement:React.JSX.Element|null = null;
+  let countButtonElement: React.JSX.Element = <></>;
   if (countButton?.show) {
     countButtonElement = (
       <Button
@@ -103,7 +114,7 @@ const ResourceOverviewMap = ({
     );
   }
 
-  let ctaButtonElement:React.JSX.Element|null = null;
+  let ctaButtonElement: React.JSX.Element = <></>;
   if (ctaButton?.show) {
     ctaButtonElement = (
       <Button
@@ -122,11 +133,14 @@ const ResourceOverviewMap = ({
   }
 
   const { data: areas } = datastore.useArea({
-    projectId: props.projectId
+    projectId: props.projectId,
   });
 
-  let areaId = props?.project?.areaId || false;
-  const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];
+  let areaId = props?.map?.areaId || false;
+  const polygon =
+    areaId && Array.isArray(areas) && areas.length > 0
+      ? (areas.find((area) => area.id.toString() === areaId) || {}).polygon
+      : [];
 
   function calculateCenter(polygon: Point[]) {
     if (!polygon || polygon.length === 0) {
@@ -138,7 +152,7 @@ const ResourceOverviewMap = ({
     let minY = Infinity;
     let maxY = -Infinity;
 
-    polygon.forEach(point => {
+    polygon.forEach((point) => {
       if (point.lng < minX) minX = point.lng;
       if (point.lng > maxX) maxX = point.lng;
       if (point.lat < minY) minY = point.lat;
@@ -148,24 +162,29 @@ const ResourceOverviewMap = ({
     const avgLat = (minY + maxY) / 2;
     const avgLng = (minX + maxX) / 2;
 
-    return {lat: avgLat, lng: avgLng};
+    return { lat: avgLat, lng: avgLng };
   }
 
   let center: LocationType | undefined = undefined;
-  if (!!polygon && Array.isArray(polygon) && polygon.length > 0) {
-    center = calculateCenter(polygon);
+  if (!!props.area && Array.isArray(props.area) && props.area.length > 0) {
+    center = calculateCenter(props.area);
   }
+
+  const zoom = {
+    minZoom: props?.map?.minZoom ? parseInt(props.map.minZoom) : 7,
+    maxZoom: props?.map?.maxZoom ? parseInt(props.map.maxZoom) : 20
+  };
 
   return (
     <>
       <BaseMap
         {...props}
+        {...zoom}
         area={polygon}
         autoZoomAndCenter="area"
         categorize={{ categories, categorizeByField }}
         center={center}
-        markers={currentMarkers}
-      >
+        markers={currentMarkers}>
         {ctaButtonElement}
         {countButtonElement}
       </BaseMap>

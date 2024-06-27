@@ -5,13 +5,13 @@ export default function useStatus(projectId?: string) {
 
   const statusListSwr = useSWR(projectId ? url : null);
 
-  async function createStatus(name: string, seqnr: number) {
+  async function createStatus(name: string, seqnr: number, addToNewResources: boolean) {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ projectId, name, seqnr }),
+      body: JSON.stringify({ projectId, name, seqnr, addToNewResources }),
     });
 
     return await res.json();

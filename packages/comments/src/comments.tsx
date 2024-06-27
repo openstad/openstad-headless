@@ -11,7 +11,7 @@ import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
-import { Button, Paragraph, Heading3, Heading6 } from '@utrecht/component-library-react';
+import { Button, Paragraph, Heading3, Heading } from '@utrecht/component-library-react';
 import { CommentFormProps } from './types/comment-form-props';
 
 // This type holds all properties needed for this component to work
@@ -29,10 +29,12 @@ export type CommentsWidgetProps = BaseProps &
     canComment?: boolean,
     canLike?: boolean,
     canReply?: boolean,
+    showForm?: boolean,
     closedText?: string;
     requiredUserRole?: string,
     descriptionMinLength?: number,
     descriptionMaxLength?: number,
+    selectedComment?: Number | undefined;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -40,11 +42,12 @@ export const CommentWidgetContext = createContext<
 >(undefined);
 
 function Comments({
-  title = '[[nr]] comments',
+  title = '[[nr]] reacties',
   sentiment = 'no sentiment',
   emptyListText = 'Nog geen reacties',
   placeholder = 'type hier uw reactie',
   formIntro = '',
+  selectedComment,
   ...props
 }: CommentsWidgetProps) {
 
@@ -63,10 +66,12 @@ function Comments({
     canComment: typeof props.comments?.canComment != 'undefined' ? props.comments.canComment : true,
     canLike: typeof props.comments?.canLike != 'undefined' ? props.comments.canLike : true,
     canReply: typeof props.comments?.canReply != 'undefined' ? props.comments.canReply : true,
+    showForm: typeof props.showForm != 'undefined' ? props.showForm : true,
     closedText: props.comments?.closedText || 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
     requiredUserRole: props.comments?.requiredUserRole || 'member',
     descriptionMinLength: props.comments?.descriptionMinLength || 30,
     descriptionMaxLength: props.comments?.descriptionMaxLength || 500,
+    adminLabel: props.comments?.adminLabel || 'admin',
     ...props,
   } as CommentsWidgetProps;
 
@@ -120,7 +125,6 @@ function Comments({
       console.log(err);
     }
   }
-
   return (
     <CommentWidgetContext.Provider value={args}>
       <section className="osc">
@@ -132,21 +136,21 @@ function Comments({
         {!args.canComment ? (
           <Banner>
             <Spacer size={2} />
-            <Heading6>{args.closedText}</Heading6>
+            <Heading level={4} appearance='utrecht-heading-6'>{args.closedText}</Heading>
             <Spacer size={2} />
           </Banner>
         ) : null}
 
         {!args.canComment && hasRole(currentUser, 'moderator') ? (
           <Banner>
-            <Heading6>U kunt nog reageren vanwege uw rol als moderator</Heading6>
+            <Heading level={4} appearance='utrecht-heading-6'>U kunt nog reageren vanwege uw rol als moderator</Heading>
             <Spacer size={2} />
           </Banner>
-        ) : null }
+        ) : null}
 
         {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
           <Banner className="big">
-            <Heading6>Inloggen om deel te nemen aan de discussie.</Heading6>
+            <Heading level={4} appearance='utrecht-heading-6'>Inloggen om deel te nemen aan de discussie.</Heading>
             <Spacer size={1} />
             <Button
               appearance="primary-action-button"
@@ -162,7 +166,8 @@ function Comments({
           </Banner>
         ) : null}
 
-        {(args.canComment && hasRole(currentUser, args.requiredUserRole)) || hasRole(currentUser, 'moderator') ? (
+        {/* {(args.canComment && hasRole(currentUser, args.requiredUserRole)) && type === 'resource' || hasRole(currentUser, 'moderator') && type === 'resource' ? ( */}
+        {args.canComment && args.showForm ? (
           <div className="input-container">
             <CommentForm {...args} submitComment={submitComment} />
             <Spacer size={1} />
@@ -176,7 +181,7 @@ function Comments({
         ) : null}
         {(comments || []).map((comment: any, index: number) => {
           let attributes = { ...args, comment, submitComment };
-          return <Comment {...attributes} key={index} />;
+          return <Comment {...attributes} key={index} selected={selectedComment === index} index={index} />;
         })}
       </section>
     </CommentWidgetContext.Provider>

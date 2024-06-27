@@ -12,11 +12,6 @@ module.exports = (db, sequelize, Sequelize) => {
       allowNull: false,
     },
 
-    siteUrl: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-
     redirectUrl: {
       type: DataTypes.STRING,
       allowNull: false,

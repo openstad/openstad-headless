@@ -8,19 +8,20 @@ module.exports = {
     '@apostrophecms/global': {},
     'asset': { },
     'default-page': { },
+    '@apostrophecms/blog': {},
+    '@apostrophecms/blog-page': {},
     'openstad-login': { },
     'openstad-section-widget': { },
     'openstad-assets': { },
     'openstad-auth': { },
     'openstad-component-widget': { },
-    'openstad-component-widget': { },
     'openstad-title-widget': { },
-    'openstad-sharelinks-widget': { },
+    'openstad-shareLinks-widget': { },
     'openstad-accordion-widget': { },
     'openstad-iconSection-widget': { },
     'openstad-button-widget': { },
     'openstad-rte-widget': { },
-    'openstad-alertbox-widget': { },
+    'openstad-alertBox-widget': { },
     'openstad-timeline-widget': {
       options: {
         label: 'Een agenda'

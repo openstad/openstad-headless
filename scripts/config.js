@@ -14,12 +14,17 @@ async function setupEnvVars() {
   let BASIC_AUTH_USER = process.env.BASIC_AUTH_USER = process.env.BASIC_AUTH_USER || 'openstad';
   let BASIC_AUTH_PASSWORD = process.env.BASIC_AUTH_PASSWORD = process.env.BASIC_AUTH_PASSWORD || 'openstad';
 
+  process.env.FORCE_HTTP = process.env.FORCE_HTTP || '';
   let COOKIE_SECURE_OFF = process.env.FORCE_HTTP ? 'yes' : '';
 
   process.env.BASE_DOMAIN = process.env.BASE_DOMAIN || 'localhost'
 
+  process.env.DB_HOST = process.env.DB_HOST || ''
   process.env.DB_USERNAME = process.env.DB_USERNAME || 'openstad';
   process.env.DB_PASSWORD = process.env.DB_PASSWORD || generateRandomToken({ length: 32 });
+  process.env.DB_BASE_NAME = process.env.DB_BASE_NAME || ''
+
+  process.env.MESSAGESTREAMING_REDIS_URL = process.env.MESSAGESTREAMING_REDIS_URL || '';
 
   let API_PORT = process.env.API_PORT = process.env.API_PORT || BASE_PORT + 10;
   let API_DOMAIN = process.env.API_DOMAIN = process.env.API_DOMAIN || ( process.env.BASE_DOMAIN == 'localhost' ? 'localhost:' + API_PORT : 'api.' + process.env.BASE_DOMAIN );
@@ -65,12 +70,12 @@ async function setupEnvVars() {
   process.env.API_DB_NAME = process.env.API_DB_NAME || ( process.env.DB_BASE_NAME ? process.env.DB_BASE_NAME + '-api' :  'openstad-api' );
   process.env.API_DB_DIALECT = process.env.API_DB_DIALECT || process.env.DB_DIALECT || 'mariadb';
 
-  process.env.API_FROM_EMAIL_ADDRESS = process.env.API_FROM_EMAIL_ADDRESS || process.env.FROM_EMAIL_ADDRESS;
+  process.env.API_FROM_EMAIL_ADDRESS = process.env.API_FROM_EMAIL_ADDRESS || process.env.FROM_EMAIL_ADDRESS || '';
   process.env.API_SMTP_SECURE = process.env.API_SMTP_SECURE || process.env.SMTP_SECURE || false;
-  process.env.API_SMTP_PORT = process.env.API_SMTP_PORT || process.env.SMTP_PORT;
-  process.env.API_SMTP_HOST = process.env.API_SMTP_HOST || process.env.SMTP_HOST;
-  process.env.API_SMTP_USERNAME = process.env.API_SMTP_USERNAME || process.env.SMTP_USERNAME;
-  process.env.API_SMTP_PASSWORD = process.env.API_SMTP_PASSWORD || process.env.SMTP_PASSWORD;
+  process.env.API_SMTP_PORT = process.env.API_SMTP_PORT || process.env.SMTP_PORT || '';
+  process.env.API_SMTP_HOST = process.env.API_SMTP_HOST || process.env.SMTP_HOST || '';
+  process.env.API_SMTP_USERNAME = process.env.API_SMTP_USERNAME || process.env.SMTP_USERNAME || '';
+  process.env.API_SMTP_PASSWORD = process.env.API_SMTP_PASSWORD || process.env.SMTP_PASSWORD || '';
 
   process.env.FROM_EMAIL_ADDRESS = process.env.FROM_EMAIL_ADDRESS || process.env.API_FROM_EMAIL_ADDRESS;
   process.env.SMTP_SECURE = process.env.SMTP_SECURE || process.env.API_SMTP_SECURE || false;
@@ -115,9 +120,8 @@ async function setupEnvVars() {
   process.env.AUTH_FIRST_CLIENT_SECRET = AUTH_FIRST_CLIENT_SECRET;
   process.env.AUTH_FIRST_LOGIN_CODE = process.env.AUTH_FIRST_LOGIN_CODE || generateRandomToken({ length: 32 });
 
-
-  // KPN_CLIENT_ID=
-  // KPN_CLIENT_SECRET=
+  process.env.KPN_CLIENT_ID=process.env.KPN_CLIENT_ID || '';
+  process.env.KPN_CLIENT_SECRET=process.env.KPN_CLIENT_SECRET || '';
 
   // image server
   process.env.IMAGE_DOMAIN = IMAGE_DOMAIN || '';
@@ -125,6 +129,8 @@ async function setupEnvVars() {
   process.env.IMAGE_PORT_API = IMAGE_PORT_API || '';
   process.env.IMAGE_PORT_IMAGE_SERVER = IMAGE_PORT_IMAGE_SERVER || '';
   process.env.IMAGE_VERIFICATION_TOKEN = IMAGE_VERIFICATION_TOKEN || generateRandomToken({ length: 32 });
+
+  process.env.DOCUMENTS_DIR = process.env.DOCUMENTS_DIR || '';
 
   process.env.IMAGE_IMAGES_DIR = process.env.IMAGE_IMAGES_DIR || '';
   process.env.IMAGE_THROTTLE = process.env.IMAGE_THROTTLE || true;
@@ -158,6 +164,9 @@ DB_HOST=${process.env.DB_HOST}
 DB_USERNAME=${process.env.DB_USERNAME}
 DB_PASSWORD=${process.env.DB_PASSWORD}
 DB_BASE_NAME=${process.env.DB_BASE_NAME}
+
+MESSAGESTREAMING_REDIS_URL=${process.env.MESSAGESTREAMING_REDIS_URL || 'openstad-redis'}
+MESSAGESTREAMING_POSTFIX=${process.env.MESSAGESTREAMING_POSTFIX || ''}
 
 BASIC_AUTH_USER=${process.env.BASIC_AUTH_USER}
 BASIC_AUTH_PASSWORD=${process.env.BASIC_AUTH_PASSWORD}
@@ -244,6 +253,8 @@ IMAGE_APP_URL=${process.env.IMAGE_APP_URL}
 IMAGE_PORT_API=${process.env.IMAGE_PORT_API}
 IMAGE_PORT_IMAGE_SERVER=${process.env.IMAGE_PORT_IMAGE_SERVER}
 IMAGE_VERIFICATION_TOKEN=${process.env.IMAGE_VERIFICATION_TOKEN}
+
+IMAGE_IMAGES_DIR=${process.env.DOCUMENTS_DIR}
 
 IMAGE_IMAGES_DIR=${process.env.IMAGE_IMAGES_DIR}
 IMAGE_THROTTLE=${process.env.IMAGE_THROTTLE}

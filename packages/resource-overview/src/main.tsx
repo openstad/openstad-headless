@@ -22,6 +22,8 @@ const config: ResourceOverviewWidgetProps = {
   displaySorting: true,
   allowFiltering: true,
   displayBanner: true,
+  bannerText: 'Dit is een title',
+  displayStatusLabel: true,
   api: {
     url: import.meta.env.VITE_API_URL,
   },
@@ -33,6 +35,10 @@ const config: ResourceOverviewWidgetProps = {
   },
   displayType: import.meta.env.VITE_DISPLAY_TYPE || 'cardgrid',
   itemLink: import.meta.env.VITE_ITEM_LINK,
+  sorting: [
+    { value: 'createdAt_desc', label: 'Nieuwste eerst' },
+    { value: 'createdAt_asc', label: 'Oudste eerst' },
+  ],
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

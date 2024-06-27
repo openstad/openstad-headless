@@ -320,13 +320,23 @@ export default function WidgetResourceFormItems(
                 const variant = (defaultFormItem.type === 'summary' || defaultFormItem.type === 'description') ? 'textarea' : 'text input';
                 form.setValue('variant', variant);
             }
+        } else if ( form.watch("type") === 'documentUpload' || form.watch("type") === 'imageUpload' ) {
+            const recommendedFieldKey =
+              form.watch("type") === 'documentUpload'
+                ? 'documents'
+                : (
+                  form.watch("type") === 'imageUpload'
+                    ? 'images'
+                    : ''
+                );
+
+            form.setValue('fieldKey', recommendedFieldKey );
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [form.watch("type")]);
 
     return (
         <div>
-            {/* <ImageUploader /> */}
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
@@ -552,7 +562,8 @@ export default function WidgetResourceFormItems(
                                                             <SelectItem value="text">Tekstveld</SelectItem>
                                                             <SelectItem value="checkbox">Checkboxes</SelectItem>
                                                             <SelectItem value="map">Locatie</SelectItem>
-                                                            <SelectItem value="upload">Afbeelding upload</SelectItem>
+                                                            <SelectItem value="imageUpload">Afbeelding upload</SelectItem>
+                                                            <SelectItem value="documentUpload">Document upload</SelectItem>
                                                             <SelectItem value="select">Dropdown</SelectItem>
 
                                                             <SelectItem value="title">Resource: Titel</SelectItem>
@@ -619,7 +630,7 @@ export default function WidgetResourceFormItems(
                                                 control={form.control}
                                                 name="fieldKey"
                                                 render={({ field }) => {
-                                                    const nonStaticType = ['none', 'radiobox', 'text', 'checkbox', 'map', 'upload'];
+                                                    const nonStaticType = ['none', 'radiobox', 'text', 'checkbox', 'map', 'imageUpload', 'documentUpload', 'select'];
                                                     const type = form.watch('type');
                                                     const fieldKey = !nonStaticType.includes(type || '') ? type : '';
 
@@ -775,14 +786,13 @@ export default function WidgetResourceFormItems(
                                                 )}
                                             </>
                                         )}
-
-                                        {form.watch('fieldType') === 'upload' && (
+                                        {(form.watch('type') === 'imageUpload' || form.watch('type') === 'documentUpload' || form.watch('type') === 'images') && (
                                             <FormField
                                                 control={form.control}
                                                 name="multiple"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Mogen er meerdere afbeeldingen tegelijkertijd geüpload worden?</FormLabel>
+                                                        <FormLabel>Mogen er meerdere {form.watch('type') === 'documentUpload' ? 'documenten' : 'afbeeldingen'} tegelijkertijd geüpload worden?</FormLabel>
                                                         <Select
                                                             onValueChange={(e: string) => field.onChange(e === 'true')}
                                                             value={field.value ? 'true' : 'false'}>

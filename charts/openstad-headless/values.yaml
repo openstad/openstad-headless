@@ -393,6 +393,7 @@ image:
     data:
       size: 1Gi
       mountPath: /opt/openstad-headless/apps/image-server/images
+      documentMountPath: /opt/openstad-headless/apps/image-server/documents
 
 cms:
   name: cms
