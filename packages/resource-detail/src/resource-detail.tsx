@@ -19,7 +19,10 @@ import {
 } from '@utrecht/component-library-react';
 import React from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
-import { Comments, CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
+import {
+  Comments,
+  CommentsWidgetProps,
+} from '@openstad-headless/comments/src/comments';
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
 
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
@@ -28,6 +31,7 @@ type booleanProps = {
   [K in
   | 'displayImage'
   | 'displayTitle'
+  | 'displayModBreak'
   | 'displaySummary'
   | 'displayDescription'
   | 'displayUser'
@@ -64,7 +68,7 @@ export type ResourceDetailWidgetProps = {
       ResourceDetailMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
-  } ;
+  };
 
 type DocumentType = {
   name?: string;
@@ -74,6 +78,7 @@ type DocumentType = {
 function ResourceDetail({
   displayImage = true,
   displayTitle = true,
+  displayModBreak = true,
   displaySummary = true,
   displayDescription = true,
   displayUser = true,
@@ -162,8 +167,22 @@ function ResourceDetail({
               )}
 
               {displayTitle && resource.title && (
-                <Heading level={1} appearance="utrecht-heading-2">{resource.title}</Heading>
+                <Heading level={1} appearance="utrecht-heading-2">
+                  {resource.title}
+                </Heading>
               )}
+
+              {displayModBreak && resource.modBreak && (
+                <div className="resource-detail-modbreak-banner">
+                  <section>
+                    <Heading level={2} appearance='utrecht-heading-6'>{props.resources.modbreakTitle}</Heading>
+                    <Heading level={2} appearance='utrecht-heading-6'>{resource.modBreakDateHumanized}</Heading>
+                  </section>
+                  <Spacer size={1} />
+                  <Heading level={2} appearance='utrecht-heading-6'>{resource.modBreak}</Heading>
+                </div>
+              )}
+
               <div className="osc-resource-detail-content-item-row">
                 {displayUser && resource?.user?.displayName && (
                   <div>
@@ -307,9 +326,10 @@ function ResourceDetail({
 
       <Spacer size={2} />
 
-      {Array.isArray(props.commentsWidget?.useSentiments) && props.commentsWidget?.useSentiments?.length ? (
+      {Array.isArray(props.commentsWidget?.useSentiments) &&
+      props.commentsWidget?.useSentiments?.length ? (
         <section className="resource-detail-comments-container">
-          {props.commentsWidget?.useSentiments?.map(sentiment => (
+          {props.commentsWidget?.useSentiments?.map((sentiment) => (
             <Comments
               {...props}
               resourceId={resourceId || ''}
