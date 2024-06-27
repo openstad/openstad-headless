@@ -175,11 +175,11 @@ function ResourceDetail({
               {displayModBreak && resource.modBreak && (
                 <div className="resource-detail-modbreak-banner">
                   <section>
-                    <Heading5>{props.resources.modbreakTitle}</Heading5>
-                    <Heading5>{resource.modBreakDateHumanized}</Heading5>
+                    <Heading level={2} appearance='utrecht-heading-6'>{props.resources.modbreakTitle}</Heading>
+                    <Heading level={2} appearance='utrecht-heading-6'>{resource.modBreakDateHumanized}</Heading>
                   </section>
                   <Spacer size={1} />
-                  <Heading5>{resource.modBreak}</Heading5>
+                  <Heading level={2} appearance='utrecht-heading-6'>{resource.modBreak}</Heading>
                 </div>
               )}
 
