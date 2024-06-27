@@ -1,10 +1,16 @@
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
-import { Paragraph, ButtonLink, Heading } from '@utrecht/component-library-react';
+import { Paragraph, Heading } from '@utrecht/component-library-react';
 import React from 'react';
 import './activity.css';
+import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 
+export type ActivityWidgetProps = BaseProps &
+ActivityProps &
+  ProjectSettingProps & {
+    resourceId?: string;
+  };
 export type ActivityProps = {
   currentTitle?: string;
   otherTitle?: string;
@@ -26,9 +32,8 @@ function Activity({
   ...props
 }: ActivityProps) {
 
-  console.log(currentSite)
 
-  const listItem = (data, key) => {
+  const listItem = (data: any, key: number) => {
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const date = new Date(data.date);
 
@@ -45,7 +50,7 @@ function Activity({
     )
   }
 
-  const noActivity = (text) => {
+  const noActivity = (text: string) => {
     return (
       <li className='no-activity'>
         <Paragraph>{text}</Paragraph>

@@ -5,10 +5,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger} from '../../../../../../compo
 import WidgetPreview from '@/components/widget-preview';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
-import { ActivityProps } from '@openstad-headless/activity/src/activity';
+import { ActivityWidgetProps } from '@openstad-headless/activity/src/activity';
 import WidgetPublish from '@/components/widget-publish';
 import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
-import CounterDisplay from './general';
+import ActivityDisplay from './general';
 
 export const getServerSideProps = withApiUrl
 
@@ -19,8 +19,8 @@ export default function WidgetActivity({
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig<ActivityProps>();
-  const { previewConfig, updatePreview } = useWidgetPreview<ActivityProps>({
+  const { data: widget, updateConfig } = useWidgetConfig<ActivityWidgetProps>();
+  const { previewConfig, updatePreview } = useWidgetPreview<ActivityWidgetProps>({
     projectId,
   });
 
@@ -50,7 +50,7 @@ export default function WidgetActivity({
               </TabsList>
               <TabsContent value='display' className='p-0'>
                 {previewConfig ? (
-                  <CounterDisplay
+                  <ActivityDisplay
                   {...previewConfig}
                   updateConfig={(config) =>
                     updateConfig({ ...widget.config, ...config })
