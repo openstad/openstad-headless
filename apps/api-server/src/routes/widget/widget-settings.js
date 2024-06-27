@@ -208,6 +208,17 @@ let moduleDefinitions = {
     defaultConfig: {
       projectId: null,
     },
+  },
+  activity: {
+    packageName: '@openstad-headless/activity',
+    directory: 'activity',
+    js: ['dist/activity.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessActivity',
+    componentName: 'Activity',
+    defaultConfig: {
+      projectId: null,
+    },
   }
 };
 
