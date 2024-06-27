@@ -357,7 +357,7 @@ export default function ProjectSettingsResource() {
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Text die boven de modbreak wordt getoond"
+                        placeholder="Tekst die boven de modbreak wordt getoond"
                         {...field}
                       />
                     </FormControl>
