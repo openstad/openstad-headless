@@ -58,6 +58,12 @@ module.exports = {
         label: 'Site titel',
       },
 
+      hideSiteTitle: {
+        type: 'boolean',
+        label: 'Verberg site titel',
+        def: true,
+      },
+
       siteLogo: {
         type: 'attachment',
         label: 'Site logo',
@@ -144,10 +150,10 @@ module.exports = {
         type: 'string',
       },
 
-      siteLogo: {
+      favicon: {
         type: 'attachment',
-        label: 'Site logo',
-        fileGroup: 'images',
+        label: 'Favicon',
+        fileGroup: 'icons',
       },
 
       cssExtras: {
@@ -287,11 +293,11 @@ module.exports = {
     group: {
       basics: {
         label: 'Algemene instellingen',
-        fields: ['siteTitle', 'siteLogo', 'ctaButtons'],
+        fields: ['siteTitle', 'hideSiteTitle',  'siteLogo', 'ctaButtons'],
       },
       css: {
         label: 'Vormgeving',
-        fields: ['cssExtras', 'customCssLink', 'compactMenu'],
+        fields: ['cssExtras', 'customCssLink', 'favicon', 'compactMenu'],
       },
       login: {
         label: 'Gebruikers login',

@@ -296,12 +296,12 @@ exports.checkRequiredUserFields = (req, res, next) => {
 }
 
 exports.create =  (req, res, next) => {
-  const { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes, config, allowedDomains, twoFactorRoles } = req.body;
+  const { name, description, exposedUserFields, requiredUserFields, redirectUrl, authTypes, config, allowedDomains, twoFactorRoles } = req.body;
   const rack = hat.rack();
   const clientId = rack();
   const clientSecret = rack();
 
-  const values = { name, description, exposedUserFields, requiredUserFields, siteUrl, redirectUrl, authTypes, clientId, clientSecret, allowedDomains, config, twoFactorRoles};
+  const values = { name, description, exposedUserFields, requiredUserFields, redirectUrl, authTypes, clientId, clientSecret, allowedDomains, config, twoFactorRoles};
 
   db.Client
     .create(values)
@@ -313,13 +313,12 @@ exports.create =  (req, res, next) => {
 }
 
 exports.update = (req, res, next) => {
-  const { name, description, exposedUserFields, requiredUserFields, redirectUrl, siteUrl, authTypes, config, allowedDomains, twoFactorRoles } = req.body;
+  const { name, description, exposedUserFields, requiredUserFields, redirectUrl, authTypes, config, allowedDomains, twoFactorRoles } = req.body;
 
   req.client
     .update({
       name,
       description,
-      siteUrl,
       redirectUrl,
       exposedUserFields,
       requiredUserFields,

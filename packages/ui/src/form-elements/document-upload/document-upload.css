@@ -1,0 +1,41 @@
+.filepond--wrapper .filepond--credits {
+ display: none !important;
+}
+
+.filepond--root{
+    border: solid 1px #7b7b7b;
+}
+.filepond--root,
+.filepond--root .filepond--drop-label {
+  height: 90px;
+  margin: 0;
+}
+
+.filepond--list{
+    height: 55px;
+    overflow: clip;
+    pointer-events: none;
+}
+
+
+.filepond--file-wrapper.filepond--file-wrapper,
+.filepond--image-preview-wrapper {
+    height: 50px;
+}
+.filepond--item{
+    pointer-events: all;
+}
+
+html .filepond--file-status {
+ max-width: 100%;
+ -webkit-flex-shrink: 1;
+ flex-shrink: 1;
+}
+
+html [data-filepond-item-state*=error] .filepond--item-panel, html [data-filepond-item-state*=invalid] .filepond--item-panel{
+ background-color: #c44e47 !important;
+}
+
+html .filepond--file-status * {
+ white-space: normal;
+}

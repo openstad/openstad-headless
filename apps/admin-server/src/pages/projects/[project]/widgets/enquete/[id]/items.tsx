@@ -650,7 +650,7 @@ export default function WidgetEnqueteItems(
                           form={form}
                           fieldName="image1Upload"
                           imageLabel="Afbeelding 1"
-                          allowedTypes="image/*"
+                          allowedTypes={["image/*"]}
                           onImageUploaded={(imageResult) => {
                             const image = imageResult ? imageResult.url : '';
 
@@ -692,7 +692,7 @@ export default function WidgetEnqueteItems(
                           form={form}
                           fieldName="image2Upload"
                           imageLabel="Afbeelding 2"
-                          allowedTypes="image/*"
+                          allowedTypes={["image/*"]}
                           onImageUploaded={(imageResult) => {
                             const image = imageResult ? imageResult.url : '';
 

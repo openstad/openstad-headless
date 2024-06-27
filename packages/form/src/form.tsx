@@ -6,7 +6,8 @@ import CheckboxField from "@openstad-headless/ui/src/form-elements/checkbox";
 import RadioboxField from "@openstad-headless/ui/src/form-elements/radio";
 import SelectField from "@openstad-headless/ui/src/form-elements/select";
 import TickmarkSlider from "@openstad-headless/ui/src/form-elements/tickmark-slider";
-import FileUploadField from "@openstad-headless/ui/src/form-elements/file-upload";
+import ImageUploadField from "@openstad-headless/ui/src/form-elements/image-upload";
+import DocumentUploadField from "@openstad-headless/ui/src/form-elements/document-upload";
 import MapField from "@openstad-headless/ui/src/form-elements/map";
 import { handleSubmit } from "./submit";
 import HiddenInput from "@openstad-headless/ui/src/form-elements/hidden";
@@ -60,7 +61,8 @@ function Form({
         radiobox: RadioboxField as React.ComponentType<ComponentFieldProps>,
         select: SelectField as React.ComponentType<ComponentFieldProps>,
         'tickmark-slider': TickmarkSlider as React.ComponentType<ComponentFieldProps>,
-        upload: FileUploadField as React.ComponentType<ComponentFieldProps>,
+        imageUpload: ImageUploadField as React.ComponentType<ComponentFieldProps>,
+        documentUpload: DocumentUploadField as React.ComponentType<ComponentFieldProps>,
         map: MapField as React.ComponentType<ComponentFieldProps>,
         hidden: HiddenInput as React.ComponentType<ComponentFieldProps>,
         imageChoice: ImageChoiceField as React.ComponentType<ComponentFieldProps>,

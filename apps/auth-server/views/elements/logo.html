@@ -3,13 +3,11 @@
 {% if logo and logo === 'amsterdam-logo.html' %}
   {% include 'elements/amsterdam-logo.html' %}
 {% else %}
-<a class="{{'mainlogo' if logo === 'amsterdam-logo.html' else 'main-logo-container' }}" href="{{ client.siteUrl }}" title="Terug naar {{ client.name }}">
   {% if logo %}
-    <img id="logo-image" src="{{logo}}" />
+    <img id="logo-image" src="{{logo}}"  alt="Link naar hoofdpagina, afbeelding logo test" style="max-width: 130px"/>
   {% else %}
-    <img class="default-logo" src="/img/logo-openstad.png" />
+    <img class="default-logo" src="/img/logo-openstad.png" alt="Link naar hoofdpagina, afbeelding logo test" style="max-width: 130px"/>
   {% endif %}
-</a>
 {% if displayClientName %}
 <span class=" {{'subsitetitle' if logo === 'amsterdam-logo.html' else 'subsitetitle subsitetitle-default' }}">
   <a href="#">

@@ -23,6 +23,7 @@ exports.sendVerification = async (user, client, redirectUrl, adminLoginRequest) 
   const emailHeaderImage = authTypeConfig.emailHeaderImage ? authTypeConfig.emailHeaderImage : false;
   const transporterConfig = clientConfig.smtpTransport ? clientConfig.smtpTransport : {};
 
+
   let emailLogo;
 
   // load env sheets that have been set for complete Environment, not specific for just one client
@@ -55,6 +56,7 @@ exports.sendVerification = async (user, client, redirectUrl, adminLoginRequest) 
       logo: emailLogo,
       loginurl: generatedTokenUrl,
       user,
+      imagePath: process.env.EMAIL_ASSETS_URL,
     },
     transporterConfig
   });

@@ -1,6 +1,8 @@
 import { MultiSelect } from '@openstad-headless/ui/src';
 import React from 'react';
 import DataStore from '@openstad-headless/data-store/src';
+import { FormLabel } from "@utrecht/component-library-react";
+
 
 //Todo correctly type resources. Will be possible when the datastore is correctly typed
 
@@ -35,17 +37,21 @@ const MultiSelectTagFilter = ({
   });
 
   return (
-    <MultiSelect
-      label={props.placeholder || ''}
-      onItemSelected={(value) => {
-        onUpdateFilter && onUpdateFilter(value);
-      }}
-      options={(tags || []).map((tag: TagDefinition) => ({
-        value: tag.id,
-        label: tag.name,
-        checked: selected.includes(tag.id),
-      }))}
-    />
+    <div className="form-element">
+      <FormLabel htmlFor={props.placeholder}>{props.placeholder}</FormLabel>
+      <MultiSelect
+        id={props.placeholder}
+        label={props.placeholder || ''}
+        onItemSelected={(value) => {
+          onUpdateFilter && onUpdateFilter(value);
+        }}
+        options={(tags || []).map((tag: TagDefinition) => ({
+          value: tag.id,
+          label: tag.name,
+          checked: selected.includes(tag.id),
+        }))}
+      />
+    </div>
   );
 };
 export { MultiSelectTagFilter };

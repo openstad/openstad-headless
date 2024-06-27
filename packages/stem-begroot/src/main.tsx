@@ -50,6 +50,8 @@ const config: StemBegrootWidgetProps = {
     { type: 'area', label: 'Gebied', multiple: false },
     { type: 'theme', label: 'Thema', multiple: false },
   ],
+  showInfoMenu: true,
+  isSimpleView: false,
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

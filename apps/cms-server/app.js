@@ -9,33 +9,82 @@ const aposConfig = require('./lib/apos-config');
 const { refresh } = require('less');
 const REFRESH_PROJECTS_INTERVAL = 60000 * 5;
 const Url = require('node:url');
+const messageStreaming = require('./services/message-streaming');
+const basicAuth = require('express-basic-auth');
 
 let projects = {};
+let subscriptions = {}
 const apostropheServer = {};
 
 let startUpIsBusy = false;
 let startUpQueue = [];
 
-async function loadProjects () {
+async function setupProject(project) {
+  if (!project.url) return;
+  // We are no longer saving the protocol in the database, but we need a
+  // protocol to be able to use `Url.parse` to get the host.
+  if (!project.url.startsWith('http://') && !project.url.startsWith('https://')) {
+    const protocol = process.env.FORCE_HTTP === 'yes' ? 'http://' : 'https://';
+    project.domain = project.url;
+    project.url = protocol + project.url;
+  }
+  let url = Url.parse(project.url);
+  console.log('Project fetched: ' + url.host);
+
+  // for convenience and speed we set the domain name as the key
+  projects[url.host] = project;
+
+  // add event subscription
+  if (!subscriptions[project.id]) {
+    let subscriber = await messageStreaming.getSubscriber();
+    if (subscriber) {
+      subscriptions[project.id] = subscriber;
+      await subscriptions[project.id].subscribe(`project-${project.id}-update`, message => {
+        if (apostropheServer[project.domain]) {
+          // restart the server with the new settings
+          apostropheServer[project.domain].apos.destroy();
+          delete apostropheServer[project.domain];
+        }
+        loadProject(project.id)
+      });
+    } else {
+      console.log('No subscriber found');
+    }
+  }
+
+}
+
+async function loadProject(projectId) {
+  const project = await projectService.fetchOne(projectId);
+  setupProject(project)
+}
+
+async function loadProjects() {
   try {
 
-    const allProjects = await projectService.fetchAll();
     projects = {};
 
-    allProjects.forEach((project, i) => {
-      if (!project.url) return;
-      // We are no longer saving the protocol in the database, but we need a
-      // protocol to be able to use `Url.parse` to get the host.
-      if (!project.url.startsWith('http://') && !project.url.startsWith('https://')) {
-        const protocol = process.env.FORCE_HTTP === 'yes' ? 'http://' : 'https://';
-        project.url = protocol + project.url;
-      }
-      let url = Url.parse(project.url);
-      console.log('Project fetched: ' + url.host);
+    const allProjects = await projectService.fetchAll();
 
-      // for convenience and speed we set the domain name as the key
-      projects[url.host] = project;
+    allProjects.forEach(async project => {
+      setupProject(project)
     });
+
+    // add event subscription
+    if (!subscriptions['all']) {
+      let subscriber = await messageStreaming.getSubscriber();
+      if (subscriber) {
+        subscriptions['all'] = subscriber;
+        await subscriptions['all'].subscribe(`project-urls-update`, message => {
+          loadProjects();
+        });
+        await subscriptions['all'].subscribe(`new-project`, message => {
+          loadProjects();
+        });
+      } else {
+        console.log('No subscriber found');
+      }
+    }
 
     cleanUpProjects();
     
@@ -111,7 +160,7 @@ async function run(id, projectData, options, callback) {
   };
 
   const apos = apostrophe(
-    projectConfig
+    projectConfig,
   );
 
   return apos;
@@ -168,6 +217,30 @@ app.use(async function (req, res, next) {
   domain = domain.replace([ 'www' ], [ '' ]);
 
   req.openstadDomain = domain;
+
+  next();
+});
+
+// Create a middleware function for basic authentication
+app.use((req, res, next) => {
+  // format domain to our specification
+  let domain = req.headers['x-forwarded-host'] || req.get('host');
+
+  // Check if the domain matches any of the project URLs that require basic authentication
+  let projectsVals = Object.values(projects);
+
+  let project = projectsVals.find(project => {
+    let projectUrl = new URL(project.url).host;
+    return projectUrl === domain && project?.config?.basicAuth?.active;
+  });
+
+  if (project) {
+    console.log('Basic auth enabled for project: ', project.url);
+    return basicAuth({
+      users: { [project.config.basicAuth.username]: project.config.basicAuth.password },
+      challenge: true
+    })(req, res, next);
+  }
 
   next();
 });

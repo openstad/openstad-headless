@@ -69,6 +69,11 @@ module.exports = function( db, sequelize, DataTypes ) {
 			allowNull    : true
 		},
 
+    location: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
+
 		yes: {
 			type         : DataTypes.VIRTUAL
 		},

@@ -12,6 +12,7 @@ const allowlist = [
   'project.*',
   'widgets.*',
   'comments.*',
+  'map.*',
 ];
 
 function isInAllowlist(key) {

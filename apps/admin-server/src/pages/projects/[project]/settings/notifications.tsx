@@ -83,13 +83,13 @@ export default function ProjectSettingsNotifications() {
             url: `/projects/${project}/settings`,
           },
           {
-            name: 'Administrator notificaties',
+            name: 'E-mail instellingen',
             url: `'/projects/${project}/settings/notifications'`,
           },
         ]}>
         <div className="container py-6">
           <Form {...form} className="p-6 bg-white rounded-md">
-            <Heading size="xl">Administrator notificaties</Heading>
+            <Heading size="xl">E-mail instellingen</Heading>
             <Separator className="my-4" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -100,8 +100,8 @@ export default function ProjectSettingsNotifications() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Emailadres verstuurder
-                      <InfoDialog content={'Dit email adres wordt gebruikt voor: ...'} />
+                      Vanaf welk e-mailadres kunnen de notificaties verstuurd worden?
+                      <InfoDialog content={'Let op: dit werkt alleen als de domeininstellingen voor dit e-mailadres correct geconfigureerd zijn. Tip: maak hiervoor gebruik van Flowmailer of Sendgrid.'} />
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />
@@ -116,8 +116,8 @@ export default function ProjectSettingsNotifications() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Emailadres project manager
-                      <InfoDialog content={'Dit email adres wordt gebruikt voor: ...'} />
+                      Naar welk e-mailadres moeten de reacties op de notificaties gestuurd worden?
+                      <InfoDialog content={'Dit is het e-mailadres waarop reacties op automatische e-mails van OpenStad binnenkomen. Denk aan: inlogmails en bevestigingsmails na indienen resource. Dit e-mailadres wordt ook getoond op de loginpagina van OpenStad.'} />
                       </FormLabel>
                     <FormControl>
                       <Input placeholder="" {...field} />

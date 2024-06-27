@@ -43,7 +43,7 @@ export default function ProjectResourceArguments() {
               style={{gridTemplateColumns: "1fr 1fr 3fr 2fr 1fr 1fr"}}
             >
               <ListHeading className="hidden lg:flex">
-                Argument ID
+                Reactie ID
               </ListHeading>
               <ListHeading className="hidden lg:flex">
                 Reactie op argument
@@ -96,15 +96,15 @@ export default function ProjectResourceArguments() {
                       className="hidden lg:flex"
                       onClick={(e) => e.preventDefault()}>
                       <RemoveResourceDialog
-                        header="Argument verwijderen"
-                        message="Weet je zeker dat je deze argument wilt verwijderen?"
+                        header="Reactie verwijderen"
+                        message="Weet je zeker dat je deze reactie wilt verwijderen?"
                         onDeleteAccepted={() =>
                           removeComment(comment.id)
                             .then(() =>
-                              toast.success('Argument successvol verwijderd')
+                              toast.success('Reactie successvol verwijderd')
                             )
                             .catch((e) =>
-                              toast.error('Argument kon niet worden verwijderd')
+                              toast.error('Reactie kon niet worden verwijderd')
                             )
                         }
                       />

@@ -13,6 +13,7 @@ export const StemBegrootBudgetList = ({
   maxBudget,
   typeIsBudgeting,
   maxNrOfResources,
+  showInfoMenu,
   decideCanAddMore,
   onSelectedResourceRemove,
 }: {
@@ -22,6 +23,7 @@ export const StemBegrootBudgetList = ({
   typeIsBudgeting: boolean;
   maxNrOfResources: number;
   introText?: string;
+  showInfoMenu?: boolean;
   decideCanAddMore: () => boolean;
   onSelectedResourceRemove: (resource: { id: number }) => void;
 }) => {
@@ -34,21 +36,23 @@ export const StemBegrootBudgetList = ({
 
   return (
     <>
-      <section className="stem-begroot-budget-list">
-        <div className="stem-begroot-budget-list-used-budgets">
-          <div className="stem-begroot-helptext-and-budget-section-helptext">
-            <Paragraph>{introText}</Paragraph>
+      {showInfoMenu && (
+        <section className="stem-begroot-budget-list">
+          <div className="stem-begroot-budget-list-used-budgets">
+            <div className="stem-begroot-helptext-and-budget-section-helptext">
+              <Paragraph>{introText}</Paragraph>
+            </div>
           </div>
-        </div>
-
-        <BudgetStatusPanel
-          typeIsBudgeting={typeIsBudgeting}
-          maxNrOfResources={maxNrOfResources}
-          nrOfResourcesSelected={selectedResources.length}
-          maxBudget={maxBudget}
-          budgetUsed={budgetUsed}
-        />
-      </section>
+          <BudgetStatusPanel
+            typeIsBudgeting={typeIsBudgeting}
+            maxNrOfResources={maxNrOfResources}
+            nrOfResourcesSelected={selectedResources.length}
+            maxBudget={maxBudget}
+            budgetUsed={budgetUsed}
+            showInfoMenu={showInfoMenu}
+          />
+        </section>
+      )}
       <section className="budget-list-container">
         <Heading5>Uw selecties</Heading5>
         {!canAddMore && allResourceInList.length > 0 ? (
@@ -62,32 +66,46 @@ export const StemBegrootBudgetList = ({
         <Spacer size={1} />
         <div className="budget-list-selections">
           <div className="budget-list-selection-indicaction-container">
-            {selectedResources.map((resource) => (
-              <Image
-                imageHeader={
-                  <div
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      justifyContent: 'end',
-                      alignItems: 'center',
-                    }}>
-                    <IconButton
-                      onClick={() => {
-                        onSelectedResourceRemove(resource);
-                      }}
-                      className="subtle-button"
-                      icon="ri-close-line"
-                      iconOnly={true}
-                      text='Item verwijderen'
-                    />
-                  </div>
-                }
-                key={`resource-detail-image-${resource.id}`}
-                className="budget-list-selection-indicaction"
-                src={resource.images?.at(0)?.url || ''}
-              />
-            ))}
+            {selectedResources.map((resource) => {
+              let defaultImage = '';
+
+              interface Tag {
+                name: string;
+                defaultResourceImage?: string;
+              }
+              if (Array.isArray(resource?.tags)) {
+                const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+                const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+                defaultImage = tagWithImage?.defaultResourceImage || '';
+              }
+
+              return (
+                <Image
+                  imageHeader={
+                    <div
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'end',
+                        alignItems: 'center',
+                      }}>
+                      <IconButton
+                        onClick={() => {
+                          onSelectedResourceRemove(resource);
+                        }}
+                        className="subtle-button"
+                        icon="ri-close-line"
+                        iconOnly={true}
+                        text='Item verwijderen'
+                      />
+                    </div>
+                  }
+                  key={`resource-detail-image-${resource.id}`}
+                  className="budget-list-selection-indicaction"
+                  src={resource.images?.at(0)?.url || defaultImage}
+                />
+              )
+            })}
 
             {allResourceInList.length === 0 || canAddMore ? (
               <Button

@@ -16,7 +16,7 @@ export type Comment = {
 
   replies: Array<Comment>;
 
-  user?: { displayName: string };
+  user?: { displayName: string, role: string};
   submitLike: () => void;
 
   can?: {

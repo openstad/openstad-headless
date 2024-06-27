@@ -31,6 +31,7 @@ export const StemBegrootResourceDetailDialog = ({
   showVoteCount,
   showOriginalResource,
   originalResourceUrl,
+  isSimpleView,
 }: {
   openDetailDialog: boolean;
   setOpenDetailDialog: (condition: boolean) => void;
@@ -45,6 +46,7 @@ export const StemBegrootResourceDetailDialog = ({
   showVoteCount: boolean;
   showOriginalResource: boolean;
   originalResourceUrl?: string;
+  isSimpleView: boolean;
 }) => (
   <Dialog
     open={openDetailDialog}
@@ -65,21 +67,34 @@ export const StemBegrootResourceDetailDialog = ({
           const primaryButtonText = resourceBtnTextHandler(resource);
           const originalUrl = defineOriginalUrl(resource);
 
+          let defaultImage = '';
+
+          interface Tag {
+            name: string;
+            defaultResourceImage?: string;
+          }
+
+          if (Array.isArray(resource?.tags)) {
+            const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
+            const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
+            defaultImage = tagWithImage?.defaultResourceImage || '';
+          }
+
           return (
             <>
               <div className="osc-begrootmodule-resource-detail">
                 <section className="osc-begrootmodule-resource-detail-photo">
                   <Image
-                    src={resource.images?.at(0)?.url || ''}
+                    src={resource.images?.at(0)?.url || defaultImage}
                     style={{ aspectRatio: 16 / 9 }}
                   />
                   {/* <div>
                     <Button className="osc-begrootmodule-load-map-button"></Button>
                   </div> */}
-
+                {isSimpleView === false && (
                   <div className="osc-gridder-resource-detail-budget-theme-bar">
                     <Heading4>Budget</Heading4>
-                    <Paragraph>&euro; {resource.budget > 0 ? resource.budget.toLocaleString('nl-NL') : 0}</Paragraph>
+                    <Paragraph>&euro; {resource.budget > 0 ? resource.budget?.toLocaleString('nl-NL') : 0}</Paragraph>
                     <Spacer size={1} />
                     <Heading4>Tags</Heading4>
                     <Spacer size={.5} />
@@ -89,6 +104,7 @@ export const StemBegrootResourceDetailDialog = ({
                         ?.map((t) => <Pill text={t.name || 'Geen thema'} />)}
                     </div>
                   </div>
+                )}
                 </section>
 
                 <section className="osc-begrootmodule-resource-detail-texts-and-actions-container">

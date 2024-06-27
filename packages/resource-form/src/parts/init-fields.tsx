@@ -29,7 +29,7 @@ export const InitializeFormFields = (items, data) => {
                         .filter((tag: any) => tag.type === item.tags)
                         .map((tag: any, index: number) => ({
                             trigger: `${index}`,
-                            titles: [{text: tag.name, key: tag.name}],
+                            titles: [{text: tag.name, key: tag.id}],
                             images: []
                         }))
                     : [];
@@ -49,7 +49,7 @@ export const InitializeFormFields = (items, data) => {
                 rows: 5
             };
 
-            switch (item.fieldType) {
+            switch (item.type) {
                 case 'checkbox':
                 case 'select':
                 case 'radiobox':
@@ -62,9 +62,20 @@ export const InitializeFormFields = (items, data) => {
                         });
                     }
                     break;
-                case 'upload':
-                    fieldData['allowedTypes'] = item.allowedTypes;
+                case 'imageUpload':
+                    fieldData['allowedTypes'] = item.allowedTypes || ["image/*"];
                     break;
+                case 'tags':
+                    if (
+                        item.options &&
+                        item.options.length > 0
+                    ) {
+                        fieldData['choices'] = item.options.map((option) => {
+                            return option.titles[0].text
+                        });
+                    }
+                    break;
+                
             }
 
             formFields.push(fieldData);

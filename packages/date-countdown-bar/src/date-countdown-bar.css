@@ -1,17 +1,28 @@
 
 .osc.date-countdown-bar-container {
   display: flex;
+  gap: 1rem;
   justify-content: center;
+  flex-wrap: wrap;
   align-items: center;
   background-color: var(--nlds-countdownbar-background-color, var(--nlds-default-background-color, #F0F4F8));
-  gap: var(--nlds-countdownbar-gap, .5rem);
-  padding: var(--nlds-countdownbar-padding, .5rem 0rem);
+  gap: var(--nlds-countdownbar-gap, 1rem);
+  padding: var(--nlds-countdownbar-padding, 1rem);
   height: var(--nlds-countdownbar-height, auto);
+}
+
+
+.osc.date-countdown-bar-container.--horizontal {
+  flex-direction: row;
+}
+.osc.date-countdown-bar-container.--vertical {
+  flex-direction: column;
+  text-align: center;
 }
 
 .osc-countdown-bar-nr-container{
   display: flex;
-  gap: var(--nlds-countdownbar-nr-container-gap, .5rem);
+  gap: var(--nlds-countdownbar-nr-container-gap, .8rem);
 }
 
 .osc.date-countdown-bar-container .osc-countdown-bar-text {
@@ -21,15 +32,21 @@
 
 .osc-countdown-bar-nr-left p{
   text-align: center;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  white-space: nowrap;
 }
 .osc-countdown-bar-nr-left .nr-left-title,
 .osc-countdown-bar-nr-left .nr-left-label {
   display: block;
 }
 
+
+
 .osc.date-countdown-bar-container .nr-left-title {
   font-weight: var(--nlds-countdownbar-label-number-font-weight, 700);
-  font-size: var(--nlds-countdownbar-label-number-font-size, 1.5rem);
+  font-size: var(--nlds-countdownbar-label-number-font-size, 1rem);
   line-height: var(--nlds-countdownbar-label-number-line-height, 2rem);
 }
 
@@ -37,4 +54,27 @@
   font-weight: var(--nlds-countdownbar-label-title-font-weight, 400);
   font-size: var(--nlds-countdownbar-label-title-font-size, .75rem);
   line-height: var(--nlds-countdownbar-label-title-line-height, 1rem);
+}
+
+.osc.date-countdown-bar-container .amount-item {
+  font-size: var(--nlds-counter-amount-font-size, 1.3em);
+  font-weight: var(--nlds-counter-amount-font-weight, 700);
+  color: var(--nlds-counter-amount-color, #333);
+
+  background: var(--nlds-counter-amount-background-color, #fff);
+  padding: 2px 4px;
+  border-radius: 4px;
+  position: relative;
+  overflow: clip;
+  margin-inline-end: 0.2rem;
+  display: inline-block;
+}
+.osc.date-countdown-bar-container .amount span {
+  position: relative;
+}
+.osc.date-countdown-bar-container .amount-item:before {
+  content: '';
+  position: absolute;
+  inset: 0 0 50% 0;
+  background: rgba(0, 0, 0, .1);
 }
