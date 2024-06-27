@@ -58,6 +58,12 @@ module.exports = {
         label: 'Site titel',
       },
 
+      hideSiteTitle: {
+        type: 'boolean',
+        label: 'Verberg site titel',
+        def: true,
+      },
+
       siteLogo: {
         type: 'attachment',
         label: 'Site logo',
@@ -287,7 +293,7 @@ module.exports = {
     group: {
       basics: {
         label: 'Algemene instellingen',
-        fields: ['siteTitle', 'siteLogo', 'ctaButtons'],
+        fields: ['siteTitle', 'hideSiteTitle',  'siteLogo', 'ctaButtons'],
       },
       css: {
         label: 'Vormgeving',
