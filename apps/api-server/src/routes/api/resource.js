@@ -314,17 +314,18 @@ router
   .post(async function (req, res, next) {
     const sendConfirmationToUser = typeof(req.body['confirmationUser']) !== 'undefined' ? req.body['confirmationUser'] : false;
     const sendConfirmationToAdmin = typeof(req.body['confirmationAdmin']) !== 'undefined' ? req.body['confirmationAdmin'] : false;
-
     res.json(req.results);
     if (!req.query.nomail && req.body['publishDate']) {
       if (sendConfirmationToAdmin) {
         const tags = await req.results.getTags();
-
-        const emailReceivers = (await Promise.all(tags.map(async (tag) => {
+        
+        const emailReceivers = (await Promise.all(tags.flatMap(async (tag) => {
           const {useDifferentSubmitAddress, newSubmitAddress} = await tag.dataValues;
-
-          return useDifferentSubmitAddress ? newSubmitAddress : null;
-        }))).filter(data => data !== null);
+          if(useDifferentSubmitAddress && newSubmitAddress !== null){
+            return useDifferentSubmitAddress ? newSubmitAddress.split(',') : [];
+          }
+          return [];
+        }))).filter(data => data !== null && data.length > 0).flat(); 
 
         db.Notification.create({
           type: "new published resource - admin update",

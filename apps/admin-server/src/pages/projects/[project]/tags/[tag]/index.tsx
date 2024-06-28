@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import {useForm} from 'react-hook-form';
+import {useForm, useFieldArray, Controller} from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -37,9 +37,10 @@ const formSchema = z.object({
   mapIcon: z.string().max(5000).optional(),
   listIcon: z.string().optional(),
   useDifferentSubmitAddress: z.boolean().optional(),
-  newSubmitAddress: z.string().optional(),
   image: z.string().optional(),
   defaultResourceImage: z.string().optional(),
+  newSubmitAddress: z.string().optional(),
+  emails: z.array(z.object({ address: z.string() })).optional(),
 });
 
 export default function ProjectTagEdit() {
@@ -62,18 +63,27 @@ export default function ProjectTagEdit() {
       mapIcon: data?.mapIcon || undefined,
       listIcon: data?.listIcon || undefined,
       useDifferentSubmitAddress: undefinedToTrueOrProp(data?.useDifferentSubmitAddress),
-      newSubmitAddress: data?.newSubmitAddress || '',
+      emails: data?.newSubmitAddress
+        ? data.newSubmitAddress.split(',').map((address: string) => ({ address: address.trim() }))
+        : [{ address: '' }],
       defaultResourceImage: data?.defaultResourceImage || '',
     }),
     [data]
   );
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: {},
+    defaultValues: {
+      newSubmitAddress: data?.newSubmitAddress || '',
+    },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if(values.useDifferentSubmitAddress && values.emails !== undefined && values.emails.length > 0) {
+      console.log('values', values, 'data', data);
+      const csv = values.emails.map((email: { address: any; }) => email.address).join(',');
+      values.newSubmitAddress = csv;
+    }
+
     const tag = await updateTag(
       values.name,
       values.type,
@@ -94,6 +104,11 @@ export default function ProjectTagEdit() {
       toast.error('Er is helaas iets mis gegaan.')
     }
   }
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'emails',
+  });
 
   useEffect(() => {
     const useDifferentSubmitAddress = form.watch('useDifferentSubmitAddress');
@@ -309,26 +324,37 @@ export default function ProjectTagEdit() {
                         </FormItem>
                       )}
                     />
-
-                    { form.watch('useDifferentSubmitAddress') && (
-                      <FormField
-                        control={form.control}
-                        name="newSubmitAddress"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Geef het e-mailadres op waar de bevestiging naartoe gestuurd moet worden</FormLabel>
-                            <FormControl>
-                              <Input placeholder="" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    {form.watch('useDifferentSubmitAddress') && (
+                      <>
+                        {fields.map((field, index) => (
+                          <div key={field.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                            <Controller
+                              control={form.control}
+                              name={`emails.${index}.address`}
+                              render={({ field }) => (
+                                <input
+                                  {...field}
+                                  style={{
+                                    flex: 1,
+                                    marginRight: '10px',
+                                    padding: '5px',
+                                    borderRadius: '4px',
+                                    border: '1px solid #ccc',
+                                    maxWidth: '500px',
+                                  }}
+                                  placeholder="Enter email address"
+                                />
+                              )}
+                            />
+                            <button type="button" onClick={() => remove(index)}> Verwijderen</button>
+                          </div>
+                        ))}
+                        <button type="button" onClick={() => append({ address: '' })}>Add Email</button>
+                      </>
                     )}
-
-                    <Button className="w-fit col-span-full" type="submit">
-                      Opslaan
-                    </Button>
+                  <Button className="w-fit col-span-full" type="submit">
+                    Opslaan
+                  </Button>
                   </form>
                 </Form>
               </div>
