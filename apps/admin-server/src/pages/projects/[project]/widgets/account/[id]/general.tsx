@@ -44,10 +44,10 @@ export default function AccountDisplay(
   const form = useForm<Formdata>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      allowNickname: props.allowNickname || false,
-      minLength: props.minLength || 1,
-      maxLength: props.maxLength || 120,
-      allowUserEdit: props.allowUserEdit || false,
+      allowNickname: props.allowNickname,
+      minLength: props.minLength,
+      maxLength: props.maxLength,
+      allowUserEdit: props.allowUserEdit,
     },
   });
 

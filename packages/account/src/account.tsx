@@ -4,7 +4,6 @@ import '@utrecht/design-tokens/dist/root.css';
 import { FormFieldTextbox, Heading, Paragraph, Button } from '@utrecht/component-library-react';
 import React, { useState } from 'react';
 import './account.css';
-import DataStore from '@openstad-headless/data-store/src';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 
 export type AccountWidgetProps = BaseProps &
@@ -13,18 +12,51 @@ export type AccountWidgetProps = BaseProps &
     resourceId?: string;
   };
 
+
+
 export type AccountProps = {
   allowNickname?: boolean;
   minLength?: number;
   maxLength?: number;
   allowUserEdit?: boolean;
+  formData?: object;
 };
 
 function Account({
-  allowNickname,
+  allowNickname = true,
   minLength = 2,
   maxLength = 140,
   allowUserEdit = true,
+  formData = {
+    email: {
+      value: 'test@draad.nl',
+      label: 'E-mailadres',
+    },
+    name: {
+      value: 'John',
+      label: 'Naam',
+    },
+    straatnaam: {
+      value: 'Nieuwstraat',
+      label: 'Straatnaam',
+    },
+    huisnummer: {
+      value: '9',
+      label: 'Huisnummer',
+    },
+    postalCode: {
+      value: '1234AB',
+      label: 'Postcode',
+    },
+    city: {
+      value: 'Nijkerk',
+      label: 'Woonplaats',
+    },
+    nickname: {
+      value: 'johndoe12',
+      label: 'Schermnaam',
+    }
+  },
   ...props
 }: AccountWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);
@@ -35,41 +67,23 @@ function Account({
   const [canEditUser, setCanEditUser] = useState(false);
   const [editButtonText] = useState([['Bewerken'], ['Opslaan']]);
 
-  const [formData] = useState({
-    email: {
-      value: 'test@draad.nl',
-      label: 'E-mailadres',
-    },
-    firstname: {
-      value: 'John',
-      label: 'Voornaam',
-    },
-    lastname: {
-      value: 'Doe',
-      label: 'Achternaam',
-    },
-    postalCode: {
-      value: '1234AB',
-      label: 'Postcode',
-    },
-    nickname: {
-      value: 'johndoe12',
-      label: 'Schermnaam',
-    }
-  });
-
   return (
     <section className="account">
       <div>
-        <FormFieldTextbox
-          label={formData.email.label}
-          description="Niet aanpasbaar"
-          name="mail"
-          readOnly
-          value={formData.email.value}
-          maxLength={maxLength}
-          minLength={minLength}
-        />
+      {Object.entries(formData).map((field, index) => (
+            field[0] === 'email' && (
+              <FormFieldTextbox
+                label={field[1].label}
+                name={field[1].label}
+                description="Niet aanpasbaar"
+                maxLength={maxLength}
+                minLength={minLength}
+                defaultValue={field[1].value}
+                readOnly
+                key={index}
+              />
+            )
+          ))}
       </div>
       <div>
         {allowUserEdit && (
@@ -77,30 +91,22 @@ function Account({
             setCanEditUser(!canEditUser)
           )}>{canEditUser ? editButtonText[1] : editButtonText[0]}</Button>
         )}
-        <FormFieldTextbox
-          label={formData.firstname.label}
-          name="firstname"
-          maxLength={maxLength}
-          minLength={minLength}
-          defaultValue={formData.firstname.value}
-          readOnly={!canEditUser}
-        />
-        <FormFieldTextbox
-          label={formData.lastname.label}
-          name="lastname"
-          maxLength={maxLength}
-          minLength={minLength}
-          defaultValue={formData.lastname.value}
-          readOnly={!canEditUser}
-        />
-        <FormFieldTextbox
-          label={formData.postalCode.label}
-          name="postalCode"
-          maxLength={maxLength}
-          minLength={minLength}
-          defaultValue={formData.postalCode.value}
-          readOnly={!canEditUser}
-        />
+
+        {Object.entries(formData).map((field, index) => (
+          field[0] !== 'nickname' && field[0] !== 'email' && (
+            <FormFieldTextbox
+              label={field[1].label}
+              name={field[1].label}
+              maxLength={maxLength}
+              minLength={minLength}
+              defaultValue={field[1].value}
+              readOnly={!canEditUser}
+              key={index}
+            />
+          )
+        ))}
+
+
       </div>
       {allowNickname && (
         <div>
@@ -114,14 +120,21 @@ function Account({
               setCanEditNickname(!canEditNickname)
             )}>{canEditNickname ? editButtonText[1] : editButtonText[0]}</Button>
           )}
-          <FormFieldTextbox
-            label={formData.nickname.label}
-            name="nickname"
-            maxLength={maxLength}
-            minLength={minLength}
-            defaultValue={formData.nickname.value}
-            readOnly={!canEditNickname}
-          />
+
+          {Object.entries(formData).map((field, index) => (
+            field[0] === 'nickname' && (
+              <FormFieldTextbox
+                label={field[1].label}
+                name={field[1].label}
+                maxLength={maxLength}
+                minLength={minLength}
+                defaultValue={field[1].value}
+                readOnly={!canEditNickname}
+                key={index}
+              />
+            )
+          ))}
+
         </div>
       )}
     </section>

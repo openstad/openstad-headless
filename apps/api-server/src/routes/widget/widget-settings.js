@@ -215,7 +215,7 @@ let moduleDefinitions = {
     js: ['dist/account.iife.js'],
     css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessAccount',
-    componentName: 'account',
+    componentName: 'Account',
     defaultConfig: {
       projectId: null,
     },
