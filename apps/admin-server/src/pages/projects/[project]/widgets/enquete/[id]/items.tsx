@@ -732,7 +732,7 @@ export default function WidgetEnqueteItems(
                     {form.watch('questionType') === 'imageUpload' && (
                       <FormField
                         control={form.control}
-                        name="imageUpload"
+                        name="variant"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Mogen er meerdere afbeeldingen tegelijkertijd geüpload worden?</FormLabel>
