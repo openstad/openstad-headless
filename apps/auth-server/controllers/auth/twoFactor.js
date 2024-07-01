@@ -141,3 +141,13 @@ exports.configurePost = async (req, res, next) => {
             .catch((err) => { next(err) });
     }
 }
+
+exports.reset2fa = async (req, res, next) => {
+    req.user
+        .update({ twoFactorToken: null, twoFactorConfigured: false })
+        .then(() => {
+            req.flash('success', {msg: 'Two factor authentication reset!'});
+            res.redirect(formatRedirectUrl(twoFactorBaseUrl, req));
+        })
+        .catch((err) => { next(err) });
+}

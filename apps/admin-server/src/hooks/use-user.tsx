@@ -39,9 +39,22 @@ export default function useUser() {
     if (!res.ok) throw new Error('User update failed')
 
     return await res.json();
-
   }
 
-  return { ...userSwr, updateUser };
+  async function reset2fa(body: any) {
 
+    let url = `/api/openstad/api/project/${body.projectId}/user/${body.id}`;
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ...body, twoFactorToken: null, twoFactorConfigured: false}),
+    });
+    if (!res.ok) throw new Error('Reset 2FA failed')
+
+    return await res.json();
+  }
+
+  return { ...userSwr, updateUser, reset2fa };
 }

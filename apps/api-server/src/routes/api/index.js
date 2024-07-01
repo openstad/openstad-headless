@@ -34,6 +34,8 @@ router.use( '/project/:projectId(\\d+)/status', require('./status') );
 
 // users
 router.use( '/project/:projectId(\\d+)/user', require('./user') );
+// TODO: remove reset-2fa if using the user update endpoint
+router.use( '/project/:projectId(\\d+)/user/:userId(\\d+)/reset-2fa', require('./user') );
 router.use( '/project/:projectId(\\d+)/user/:userId(\\d+)/activity', require('./user-activity') );
 router.use( '/user', require('./user') );
 

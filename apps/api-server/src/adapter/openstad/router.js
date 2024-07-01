@@ -381,6 +381,30 @@ router
   })
 
 // ----------------------------------------------------------------------------------------------------
-// TAF
+// Auth 2FA routes
+
+// TODO: Misschien niet eens nodig omdat we de user update route kunnen gebruiken?
+router
+  .route('(/project/:projectId)?/user/:userId/reset-2fa')
+  // reset
+  .put(async function (req, res, next) {
+    if (!hasRole(req.user, 'admin')) return next(new Error('You cannot reset 2FA for this user'))
+    res.json({ message: 'reset 2fa' })
+
+    // let userId = parseInt(req.params.userId);
+    // if (!userId) return next(new Error('No user id found'))
+
+    // let user = {};
+    // try {
+    //   user = await service.reset2FA({
+    //     authConfig: req.authConfig,
+    //     userId: userId,
+    //   });
+    // } catch(err) {
+    //   console.log(err);
+    //   return next(err)
+    // }
+    // res.json(user)
+  })
 
 module.exports = router;

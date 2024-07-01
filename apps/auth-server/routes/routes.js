@@ -265,6 +265,7 @@ module.exports = function (app) {
     app.post('/auth/two-factor', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.post);
     app.get('/auth/two-factor/configure', clientMw.withOne, csrfProtection, addCsrfGlobal, clientMw.checkIfEmailRequired, authTwoFactor.configure);
     app.post('/auth/two-factor/configure', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.configurePost);
+    app.post('/auth/two-factor/reset', clientMw.withOne, csrfProtection, addCsrfGlobal, authTwoFactor.reset2fa);
 
     app.use('/dialog', [bruteForce.global]);
 
