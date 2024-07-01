@@ -18,7 +18,7 @@ import {
     Paragraph,
     Heading2,
     Heading6,
-  } from '@utrecht/component-library-react';
+} from '@utrecht/component-library-react';
 export type EnqueteWidgetProps = BaseProps &
     ProjectSettingProps &
     EnquetePropsType;
@@ -34,16 +34,16 @@ function Enquete(props: EnqueteWidgetProps) {
     });
 
     const {
-      data: currentUser,
-      error: currentUserError,
-      isLoading: currentUserIsLoading,
+        data: currentUser,
+        error: currentUserError,
+        isLoading: currentUserIsLoading,
     } = datastore.useCurrentUser({ ...props });
 
     async function onSubmit(formData: any) {
         const result = await createSubmission(formData, props.widgetId);
 
         if (result) {
-            if(props.afterSubmitUrl) {
+            if (props.afterSubmitUrl) {
                 location.href = props.afterSubmitUrl.replace("[id]", result.id)
             } else {
                 notifyCreate();
@@ -56,13 +56,13 @@ function Enquete(props: EnqueteWidgetProps) {
         || !props.formVisibility
     );
 
-    const formFields : FieldProps[] = [];
-    if ( typeof(props) !== 'undefined'
-        && typeof(props.items) === 'object'
+    const formFields: FieldProps[] = [];
+    if (typeof (props) !== 'undefined'
+        && typeof (props.items) === 'object'
         && props.items.length > 0
     ) {
         for (const item of props.items) {
-            const fieldData : any = {
+            const fieldData: any = {
                 title: item.title,
                 description: item.description,
                 fieldKey: item.fieldKey,
@@ -93,18 +93,23 @@ function Enquete(props: EnqueteWidgetProps) {
                 case 'images':
                     fieldData['type'] = 'imageChoice';
                     fieldData['choices'] = [
-                      {
-                          label: item?.text1 || '',
-                          value: item?.key1 || '',
-                          imageSrc: item?.image1 || ''
-                      },
-                      {
-                          label: item?.text2 || '',
-                          value: item?.key2 || '',
-                          imageSrc: item?.image2 || ''
-                      }
+                        {
+                            label: item?.text1 || '',
+                            value: item?.key1 || '',
+                            imageSrc: item?.image1 || ''
+                        },
+                        {
+                            label: item?.text2 || '',
+                            value: item?.key2 || '',
+                            imageSrc: item?.image2 || ''
+                        }
                     ];
 
+                    break;
+                case 'imageUpload':
+                    fieldData['type'] = 'imageUpload';
+                    fieldData['allowedTypes'] = ["image/*"];
+                    fieldData['imageUrl'] = props?.imageUrl;
                     break;
                 case 'scale':
                     fieldData['type'] = 'tickmark-slider';
@@ -129,21 +134,21 @@ function Enquete(props: EnqueteWidgetProps) {
         <div className="osc">
             {
                 (formOnlyVisibleForUsers && !hasRole(currentUser, 'member')) && (
-                <>
-                    <Banner className="big">
-                        <Heading6>Inloggen om deel te nemen.</Heading6>
-                        <Spacer size={1} />
-                        <Button
-                            type="button"
-                            onClick={() => {
-                                document.location.href = props.login?.url || '';
-                            }}>
-                            Inloggen
-                        </Button>
-                    </Banner>
-                    <Spacer size={2} />
-                </>
-            )}
+                    <>
+                        <Banner className="big">
+                            <Heading6>Inloggen om deel te nemen.</Heading6>
+                            <Spacer size={1} />
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    document.location.href = props.login?.url || '';
+                                }}>
+                                Inloggen
+                            </Button>
+                        </Banner>
+                        <Spacer size={2} />
+                    </>
+                )}
 
             <div className="osc-enquete-item-content">
                 {props.displayTitle && props.title && <Heading2>{props.title}</Heading2>}
