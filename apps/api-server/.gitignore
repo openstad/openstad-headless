@@ -6,6 +6,7 @@
 *.css
 coverage/
 /init
+package-lock.json
 
 ### Exclude project files for Jetbrains users ###
 .idea
