@@ -29,6 +29,7 @@ export function viteSetup(data: Data): any {
             'remixicon/fonts/remixicon.css',
             '@utrecht/component-library-css',
             '@utrecht/design-tokens/dist/root.css',
+            'leaflet/dist/leaflet.css',
           ],
           output: {
             globals: {
