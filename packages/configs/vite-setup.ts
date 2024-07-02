@@ -1,8 +1,14 @@
 import react from '@vitejs/plugin-react';
 
-export function viteSetup(command, entryName, name) {
+interface Data {
+  command: string;
+  entryName: string;
+  name: string;
+}
+
+export function viteSetup(data: Data): any {
   // When running in dev mode, use the React plugin
-  if (command === 'serve') {
+  if (data.command === 'serve') {
     return {
       plugins: [react()],
     };
@@ -13,8 +19,8 @@ export function viteSetup(command, entryName, name) {
       build: {
         lib: {
           formats: ['iife'],
-          entry: `src/${entryName}.tsx`,
-          name: name,
+          entry: `src/${data.entryName}.tsx`,
+          name: data.name,
         },
         rollupOptions: {
           external: [

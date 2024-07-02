@@ -19,6 +19,9 @@
       "noUnusedLocals": true,
       "noUnusedParameters": true,
       "noFallthroughCasesInSwitch": true,
+      "types": [
+        "node"
+      ]
     },
 
     "include": ["next-env.d.ts",  "next-env.d.ts",
