@@ -63,7 +63,7 @@ const ResourceOverviewMap = ({
       tags.forEach((tag: any) => {
         // TODO: types/Tag does not exist yet
         categories[tag.name] = {
-          color: tag.backgroundColor,
+          color: tag.backgroundColor || '#558',
           icon: tag.mapIcon,
         };
       });
@@ -166,8 +166,8 @@ const ResourceOverviewMap = ({
   }
 
   let center: LocationType | undefined = undefined;
-  if (!!polygon && Array.isArray(polygon) && polygon.length > 0) {
-    center = calculateCenter(polygon);
+  if (!!props.area && Array.isArray(props.area) && props.area.length > 0) {
+    center = calculateCenter(props.area);
   }
 
   const zoom = {

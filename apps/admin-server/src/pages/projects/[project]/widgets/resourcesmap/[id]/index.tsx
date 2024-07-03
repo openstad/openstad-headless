@@ -39,6 +39,26 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
       projectId,
     });
 
+  const totalPropPackage = {
+    ...widget?.config,
+    ...previewConfig,
+    updateConfig: (config: ResourceOverviewMapWidgetProps) =>
+      updateConfig({ ...widget.config, ...config }),
+
+    onFieldChanged: (key: string, value: any) => {
+      if (previewConfig) {
+        let updatedConfig = {
+          ...previewConfig,
+          [key]: value,
+        }
+        if (key == 'categorize.categorizeByField') updatedConfig.categorize = { categorizeByField: value };
+        if (key == 'clustering.isActive') updatedConfig.clustering = { isActive: value };
+        updatePreview(updatedConfig);
+      }
+    },
+    projectId,
+  };
+
   return (
     <div>
       <PageLayout
@@ -68,34 +88,12 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
               <>
                 <TabsContent value="map" className="p-0">
                   <WidgetResourcesMapMap
-                    {...previewConfig}
-                    updateConfig={(config) =>
-                      updateConfig({ ...widget.config, ...config })
-                    }
-                    onFieldChanged={(key, value) => {
-                      if (previewConfig) {
-                        updatePreview({
-                          ...previewConfig,
-                          [key]: value,
-                        });
-                      }
-                    }}
+                    {...totalPropPackage}
                   />
                 </TabsContent>
                 <TabsContent value="button" className="p-0">
                   <WidgetResourcesMapButtons
-                    {...previewConfig}
-                    updateConfig={(config) =>
-                      updateConfig({ ...widget.config, ...config })
-                    }
-                    onFieldChanged={(key, value) => {
-                      if (previewConfig) {
-                        updatePreview({
-                          ...previewConfig,
-                          [key]: value,
-                        });
-                      }
-                    }}
+                    {...totalPropPackage}
                   />
                 </TabsContent>
                 <TabsContent value="publish" className="p-0">

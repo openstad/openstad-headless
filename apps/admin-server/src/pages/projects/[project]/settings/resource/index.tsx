@@ -74,7 +74,11 @@ const formSchema = z.object({
   summaryMaxLength: z.coerce.number(),
   descriptionMinLength: z.coerce.number(),
   descriptionMaxLength: z.coerce.number(),
-  // displayModbreak: z.boolean(),
+  displayLocation: z.boolean(),
+  displayTheme: z.boolean(),
+  displayNeighbourhood: z.boolean(),
+  displayModbreak: z.boolean(),
+  modbreakTitle: z.string().optional(),
   tagGroups: z.number().array().optional().default([]),
   statusGroups: z.number().array().optional().default([]),
 });
@@ -103,7 +107,12 @@ export default function ProjectSettingsResource() {
         data?.config?.[category]?.descriptionMinLength || null,
       descriptionMaxLength:
         data?.config?.[category]?.descriptionMaxLength || null,
-      // displayModbreak: data?.config?.[category]?.displayModbreak || false,
+      displayLocation: data?.config?.[category]?.displayLocation || false,
+      displayTheme: data?.config?.[category]?.displayTheme || false,
+      displayNeighbourhood:
+        data?.config?.[category]?.displayNeighbourhood || false,
+      displayModbreak: data?.config?.[category]?.displayModbreak || false,
+      modbreakTitle: data?.config?.[category]?.modbreakTitle || null,
       tagGroups: data?.config?.resources?.defaultTagIds || [],
       statusGroups: data?.config?.resources?.defaultStatusIds || [],
     }),
@@ -131,7 +140,11 @@ export default function ProjectSettingsResource() {
           summaryMaxLength: values.summaryMaxLength,
           descriptionMinLength: values.descriptionMinLength,
           descriptionMaxLength: values.descriptionMaxLength,
-          // displayModbreak: values.displayModbreak,
+          displayLocation: values.displayLocation,
+          displayTheme: values.displayTheme,
+          displayNeighbourhood: values.displayNeighbourhood,
+          displayModbreak: values.displayModbreak,
+          modbreakTitle: values.modbreakTitle,
           defaultTagIds: values.tagGroups || [],
           defaultStatusIds: values.statusGroups || [],
         },
@@ -295,6 +308,25 @@ export default function ProjectSettingsResource() {
                   </FormItem>
                 )}
               /> */}
+
+<FormField
+                control={form.control}
+                name="modbreakTitle"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>
+                      Titel voor boven modbreak 
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Tekst die boven de modbreak wordt getoond"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <CheckboxList
                 form={form}
