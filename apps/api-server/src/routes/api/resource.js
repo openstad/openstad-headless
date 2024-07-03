@@ -211,11 +211,23 @@ router
     };
 
     // Check if resource has images and if so, check their domains
-    const imageServer = process.env.IMAGE_APP_URL;
+    let imageServer = process.env.IMAGE_APP_URL;
+    if (!imageServer) {
+      console.log ('Error: No image server found, please provide IMAGE_APP_URL environment variable.');
+      return next(createError(500, 'No image server found'));
+    }
+    // Add protocol to IMAGE_APP_URL for `new URL` to work correctly.
+    if (!imageServer.startsWith('http://') && !imageServer.startsWith('https://')) {
+      imageServer = 'https://' + imageServer;
+    }
     const hostname = new URL(imageServer).hostname;
     if(data.images && data.images.length > 0) {
       data.images.forEach(image => {
         try{
+          // Add protocol to image URL for `new URL` to work correctly.
+          if (!image.url.startsWith('http://') && !image.url.startsWith('https://')) {
+            image.url = 'https://' + image.url;
+          }
           const url = new URL(image.url);
           if(url.hostname !== hostname) {
             return next(createError(400, 'Invalid image url'));
@@ -325,7 +337,7 @@ router
             return useDifferentSubmitAddress ? newSubmitAddress.split(',') : [];
           }
           return [];
-        }))).filter(data => data !== null && data.length > 0).flat(); 
+        }))).filter(data => data !== null && data.length > 0).flat();
 
         db.Notification.create({
           type: "new published resource - admin update",
