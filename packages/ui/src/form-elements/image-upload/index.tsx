@@ -83,13 +83,15 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     const [uploadedImages, setUploadedImages] = useState<{ name: string, url: string }[]>([]);
 
     useEffect(() => {
+        console.log('useEffect imageUpload')
         if (onChange) {
+            console.log('useEffect imageUpload onChange')
             onChange({
                 name: fieldKey,
                 value: uploadedImages,
             });
         }
-    }, [uploadedImages.length]);
+    }, [uploadedImages.length, setImages, setUploadedImages]);
 
     const acceptAttribute = allowedTypes
         ? allowedTypes
@@ -106,6 +108,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                     files={files.map(file => file.file)}
                     onupdatefiles={(fileItems: FilePondFile[]) => {
                         setImages(fileItems);
+                        console.log('test update')
                     }}
                     allowMultiple={multiple}
                     server={{
