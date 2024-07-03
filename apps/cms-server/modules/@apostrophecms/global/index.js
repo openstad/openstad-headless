@@ -162,9 +162,9 @@ module.exports = {
         def: '#logo-image {\n  max-height: 50px;\n}',
         label: 'Extra CSS',
       },
-      customCssLink: {
+      customNldsLink: {
         type: 'string',
-        label: 'URL voor CSS imports (optioneel)',
+        label: 'URL voor NLDS import (optioneel)',
       },
       customCssLink: {
         type: 'array',
@@ -297,7 +297,7 @@ module.exports = {
       },
       css: {
         label: 'Vormgeving',
-        fields: ['cssExtras', 'customCssLink', 'favicon', 'compactMenu'],
+        fields: ['cssExtras', 'customNldsLink', 'customCssLink', 'favicon', 'compactMenu'],
       },
       login: {
         label: 'Gebruikers login',

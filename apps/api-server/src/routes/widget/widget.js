@@ -276,6 +276,7 @@ function getWidgetJavascriptOutput(
   let css = '';
 
   const data = JSON.parse(widgetConfig)
+  const nldsCss = data.project?.nldsUrl ? `<link href="${data.project.nldsUrl}" rel="stylesheet">` : '';
   const extraCss = data.project?.cssUrl ? `<link href="${data.project.cssUrl}" rel="stylesheet">` : '';
   
   widgetSettings.js.forEach((file) => {
@@ -315,6 +316,7 @@ function getWidgetJavascriptOutput(
           document.querySelector('head').innerHTML += \`
             <style>${css}</style>
             <link href="${remixIconCss}" rel="stylesheet">
+            ${nldsCss}
             ${extraCss}
           \`;
           
