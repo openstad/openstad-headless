@@ -358,21 +358,13 @@ router.route('/:projectId') //(\\d+)
 	})
 	.put(async function (req, res, next) {
     // Check if updating allowedDomains
-    console.log("brrrr", req?.results?.config?.allowedDomains)
     if(typeof req?.results?.config?.allowedDomains !==  "undefined"){
-      let adminProject = await db.Project.findByPk(config.admin.projectId);
-      let adminAuthConfig = await authSettings.config({ project: adminProject, useAuth: 'openstad' });
       let proj = req.results.dataValues;
 
       // Check if allowedDomains exists
       if(typeof req?.results?.config?.allowedDomains !==  "undefined" && req.results.config.allowedDomains.length > 0){
         proj.config.allowedDomains = req.results.config.allowedDomains;
       }
-      console.log('prrr', req.results.dataValues);
-      service.updateClient({
-        authConfig: adminAuthConfig,
-        project: req.results.dataValues
-      })
     }
 
 		// when succesfull return project JSON
