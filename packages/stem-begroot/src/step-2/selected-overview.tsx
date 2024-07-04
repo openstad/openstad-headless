@@ -13,6 +13,7 @@ type Props = {
   maxNrOfResources: number;
   introText?: string;
   typeIsBudgeting: boolean;
+  showInfoMenu?: boolean;
 };
 
 export const BegrotenSelectedOverview = ({
@@ -22,18 +23,22 @@ export const BegrotenSelectedOverview = ({
   selectedResources,
   introText = '',
   typeIsBudgeting,
+  showInfoMenu
 }: Props) => {
   return (
     <>
       <div className="begroot-step-2-instruction-budget-status-panel">
         <Paragraph>{introText}</Paragraph>
-        <BudgetStatusPanel
-          typeIsBudgeting={typeIsBudgeting}
-          maxNrOfResources={maxNrOfResources}
-          nrOfResourcesSelected={selectedResources.length}
-          maxBudget={maxBudget}
-          budgetUsed={budgetUsed}
+        {showInfoMenu && (
+          <BudgetStatusPanel
+            typeIsBudgeting={typeIsBudgeting}
+            maxNrOfResources={maxNrOfResources}
+            nrOfResourcesSelected={selectedResources.length}
+            maxBudget={maxBudget}
+            budgetUsed={budgetUsed}
+            showInfoMenu={showInfoMenu}
         />
+        )}
       </div>
 
       <Spacer size={1.5} />

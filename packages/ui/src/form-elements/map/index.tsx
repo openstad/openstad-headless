@@ -1,13 +1,15 @@
-import React, {FC, useState} from "react";
+import React, {FC} from "react";
 import {FormField, FormFieldDescription, FormLabel, Paragraph} from "@utrecht/component-library-react";
 import './map.css';
 import {EditorMap} from "@openstad-headless/leaflet-map/src/editor-map";
 import DataStore from '@openstad-headless/data-store/src';
 import {BaseProps} from "@openstad-headless/types/base-props.js";
+import type {AreaProps} from '@openstad-headless/leaflet-map/src/types/area-props';
 import {ProjectSettingProps} from "@openstad-headless/types/project-setting-props.js";
 import {LocationType} from "@openstad-headless/leaflet-map/src/types/location";
 
 export type MapProps = BaseProps &
+    AreaProps &
     ProjectSettingProps & {
     title: string;
     description: string;
@@ -72,14 +74,14 @@ const MapField: FC<MapProps> = ({
     }
 
     let center: LocationType | undefined = undefined;
-    if (!!polygon && Array.isArray(polygon) && polygon.length > 0) {
-        center = calculateCenter(polygon);
+    if (!!props.area && Array.isArray(props.area) && props.area.length > 0) {
+      center = calculateCenter(props.area);
     }
 
     const zoom = {
         minZoom: props?.map?.minZoom ? parseInt(props.map.minZoom) : 7,
         maxZoom: props?.map?.maxZoom ? parseInt(props.map.maxZoom) : 20
-    };
+    }; 
 
     return (
       <FormField type="text">
@@ -91,18 +93,19 @@ const MapField: FC<MapProps> = ({
             className="form-field-map-container"
             id={`map`}
           >
+            {((areaId && polygon.length) || !areaId) && (
               <EditorMap
-                  autoZoomAndCenter="area"
+                  {...props}
                   fieldName={fieldKey}
                   center={center}
-                  area={polygon}
                   onChange={onChange}
                   fieldRequired={fieldRequired}
                   markerIcon={undefined}
                   centerOnEditorMarker={false}
-                  {...props}
+                  autoZoomAndCenter='area'
                   {...zoom}
               />
+            )}
           </div>
       </FormField>
     );

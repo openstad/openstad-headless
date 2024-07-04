@@ -51,6 +51,8 @@ export type StemBegrootWidgetProps = BaseProps &
     itemsPerPage?: number;
     onlyIncludeTagIds: string;
     resourceListColumns?: number;
+    showInfoMenu?: boolean;
+    isSimpleView?: boolean;
   };
 
 function StemBegroot({
@@ -67,6 +69,7 @@ function StemBegroot({
   const [openDetailDialog, setOpenDetailDialog] = React.useState(false);
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [lastStep, setLastStep] = useState<number>(0);
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
   const [navAfterLogin, setNavAfterLogin] = useState<boolean>();
   const [shouldReloadSelectedResources, setReloadSelectedResources] =
@@ -124,6 +127,18 @@ function StemBegroot({
   const isAllowedToVote =
     props.votes.requiredUserRole &&
     hasRole(currentUser, props.votes.requiredUserRole);
+
+  useEffect(() => {
+    if(props.isSimpleView && currentStep === 1 && lastStep > currentStep){
+      setCurrentStep(0); // Skip step 2
+    }else if(props.isSimpleView && currentStep === 1 && lastStep < currentStep){
+      setCurrentStep(2); // Skip step 2
+    }
+
+    if(currentStep !== lastStep){
+      setLastStep(currentStep);
+    }
+  }, [props.isSimpleView, currentStep]);
 
   // Check the pending state and if there are any resources, hint to  update the selected items
   useEffect(() => {
@@ -255,6 +270,7 @@ function StemBegroot({
         defineOriginalUrl={getOriginalResourceUrl}
         openDetailDialog={openDetailDialog}
         setOpenDetailDialog={setOpenDetailDialog}
+        isSimpleView={Boolean(props.isSimpleView)}
         onPrimaryButtonClick={(resource) => {
           session.remove('osc-resource-vote-pending');
 
@@ -275,11 +291,10 @@ function StemBegroot({
 
       <div className="osc">
         <Stepper
-          currentStep={currentStep}
-          steps={['Kies', 'Overzicht', 'Stemcode', 'Stem']}
-        />
-
-
+            currentStep={currentStep}
+            steps={['Kies', 'Overzicht', 'Stemcode', 'Stem']}
+            isSimpleView={props.isSimpleView}
+          />
         <Spacer size={1} />
 
         {props.votes.voteType === 'budgeting' ?
@@ -294,6 +309,7 @@ function StemBegroot({
             <>
               <StemBegrootBudgetList
                 introText={props.step1}
+                showInfoMenu={props.showInfoMenu}
                 maxBudget={props.votes.maxBudget}
                 allResourceInList={resources?.records}
                 selectedResources={selectedResources}
@@ -339,6 +355,7 @@ function StemBegroot({
                 maxBudget={props.votes.maxBudget}
                 maxNrOfResources={props.votes.maxResources || 0}
                 typeIsBudgeting={props.votes.voteType === 'budgeting'}
+                showInfoMenu={props.showInfoMenu}
               />
             </>
           ) : null}

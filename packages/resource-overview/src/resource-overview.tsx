@@ -1,6 +1,6 @@
 import './resource-overview.css';
 import React, { useCallback, useState } from 'react';
-import { Banner, Carousel, Icon, Paginator } from '@openstad-headless/ui/src';
+import { Carousel, Icon, Paginator } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { Spacer } from '@openstad-headless/ui/src';
@@ -13,17 +13,32 @@ import { elipsize } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
 import { hasRole } from '@openstad-headless/lib';
 import nunjucks from 'nunjucks';
+import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map';
 
-import "@utrecht/component-library-css";
-import "@utrecht/design-tokens/dist/root.css";
-import { Heading4, Paragraph, Button } from "@utrecht/component-library-react";
+import '@utrecht/component-library-css';
+import '@utrecht/design-tokens/dist/root.css';
+import {
+  Heading4,
+  Paragraph,
+  Button,
+} from '@utrecht/component-library-react';
+import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
   } & {
-    renderHeader?: (resources?: any) => React.JSX.Element;
-    renderItem?: (
+    resourceOverviewMapWidget?: Omit<
+      ResourceOverviewMapWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'projectId'
+    >;
+    renderHeader?: (
+      widgetProps: ResourceOverviewWidgetProps,
+      resources?: any,
+      title?: string,
+      displayHeader?: boolean,
+      displayMap?: boolean
+    ) => React.JSX.Element;renderItem?: (
       resource: any,
       props: ResourceOverviewWidgetProps,
       onItemClick?: () => void
@@ -58,6 +73,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     displayTagGroupName?: boolean;
     displayBanner?: boolean;
+    displayMap?: boolean;
     itemsPerPage?: number;
     textResults?: string;
     onlyIncludeTagIds?: string;
@@ -70,13 +86,27 @@ export type ResourceOverviewWidgetProps = BaseProps &
 
 //Temp: Header can only be made when the map works so for now a banner
 // If you dont want a banner pas <></> into the renderHeader prop
-const defaultHeaderRenderer = (resources?: any) => {
+const defaultHeaderRenderer = (
+  widgetProps: ResourceOverviewWidgetProps,
+  resources?: any,
+  title?: string,
+  displayHeader?: boolean,
+  displayMap?: boolean
+) => {
   return (
     <>
-      <Banner></Banner>
-      <section className="osc-resource-overview-title-container">
-        <Heading4>{resources}</Heading4>
-      </section>
+      {displayMap &&
+        <ResourceOverviewMap
+          {...widgetProps}
+          {...widgetProps.resourceOverviewMapWidget}
+          givenResources={resources}
+        />
+      }
+      {displayHeader &&
+        <section className="osc-resource-overview-title-container">
+          <Heading4>{title}</Heading4>
+        </section>
+      }
     </>
   );
 };
@@ -138,7 +168,10 @@ const defaultItemRenderer = (
   }
 
   return (
-    <Button appearance="subtle-button" className="resource-card--link" onClick={() => onItemClick && onItemClick()}>
+    <Button
+      appearance="subtle-button"
+      className="resource-card--link"
+      onClick={() => onItemClick && onItemClick()}>
       <Image
         src={resource.images?.at(0)?.url || defaultImage}
         imageFooter={
@@ -157,11 +190,15 @@ const defaultItemRenderer = (
       <div>
         <Spacer size={1} />
         {props.displayTitle ? (
-          <Heading4>{elipsize(resource.title, props.titleMaxLength || 20)}</Heading4>
+          <Heading4>
+            {elipsize(resource.title, props.titleMaxLength || 20)}
+          </Heading4>
         ) : null}
 
         {props.displaySummary ? (
-          <Paragraph>{elipsize(resource.summary, props.summaryMaxLength || 20)}</Paragraph>
+          <Paragraph>
+            {elipsize(resource.summary, props.summaryMaxLength || 20)}
+          </Paragraph>
         ) : null}
 
         {props.displayDescription ? (
@@ -180,7 +217,11 @@ const defaultItemRenderer = (
         ) : null}
 
         {props.displayArguments ? (
-          <Icon icon="ri-message-line" variant="big" text={resource.commentCount} />
+          <Icon
+            icon="ri-message-line"
+            variant="big"
+            text={resource.commentCount}
+          />
         ) : null}
       </div>
     </Button>
@@ -192,6 +233,7 @@ function ResourceOverview({
   allowFiltering = true,
   displayType = 'cardrow',
   displayBanner = false,
+  displayMap = false,
   bannerText = 'Plannen',
   renderHeader = defaultHeaderRenderer,
   itemsPerPage = 20,
@@ -250,7 +292,9 @@ function ResourceOverview({
           let newUrl = props.itemLink.replace('[id]', resource.id);
           if (!newUrl.startsWith('http')) {
             if (!newUrl.startsWith('/')) {
-              newUrl = `${location.pathname}${location.pathname.endsWith('/') ? '' : '/'}${newUrl}`;
+              newUrl = `${location.pathname}${
+                location.pathname.endsWith('/') ? '' : '/'
+              }${newUrl}`;
             }
             newUrl = `${location.protocol}//${location.host}${newUrl}`;
           }
@@ -305,11 +349,13 @@ function ResourceOverview({
       />
 
       <div className="osc">
-        {displayBanner ? renderHeader(bannerText) : null}
+
+        {displayBanner || displayMap ? renderHeader(props, resources, bannerText, displayBanner, displayMap) : null}
 
         <section
-          className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
-            }`}>
+          className={`osc-resource-overview-content ${
+            !filterNeccesary ? 'full' : ''
+          }`}>
           {props.displaySearchText ? (
             <div className="osc-resourceoverview-search-container col-span-full">
               {props.textActiveSearch && search && (

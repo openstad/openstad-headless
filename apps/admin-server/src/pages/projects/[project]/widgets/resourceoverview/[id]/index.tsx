@@ -23,6 +23,11 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import WidgetResourcesMapContent from '../../resourcesmap/[id]/content';
+import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
+import { ResourceOverviewMapWidgetTabProps } from '../../resourcesmap/[id]';
+import WidgetResourcesMapButton from '../../resourcesmap/[id]/buttons';
+import { extractConfig } from '@/lib/sub-widget-helper';
 
 export const getServerSideProps = withApiUrl;
 
@@ -78,6 +83,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="display">Display</TabsTrigger>
+              <TabsTrigger value="map">Map widget</TabsTrigger>
               <TabsTrigger value="tags">Tags</TabsTrigger>
               <TabsTrigger value="search">Zoeken</TabsTrigger>
               <TabsTrigger value="sorting">Sorteren</TabsTrigger>
@@ -93,6 +99,42 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                 <TabsContent value="display" className="p-0">
                   <WidgetResourceOverviewDisplay {...totalPropPackage} />
                 </TabsContent>
+
+                <TabsContent value="map" className="p-0">
+                  <Tabs defaultValue="general">
+                    <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
+                      <TabsTrigger value="general">Kaart</TabsTrigger>
+                      <TabsTrigger value="buttons">knoppen</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="general" className="p-0">
+                      <WidgetResourcesMapMap
+                        {...extractConfig<
+                          ResourceOverviewWidgetProps,
+                          ResourceOverviewMapWidgetTabProps
+                        >({
+                          previewConfig,
+                          subWidgetKey: 'resourceOverviewMapWidget',
+                          updateConfig,
+                          updatePreview,
+                        })}
+                      />
+                    </TabsContent>
+                    <TabsContent value="buttons" className="p-0">
+                      <WidgetResourcesMapButton
+                        {...extractConfig<
+                          ResourceOverviewWidgetProps,
+                          ResourceOverviewMapWidgetTabProps
+                        >({
+                          previewConfig,
+                          subWidgetKey: 'resourceOverviewMapWidget',
+                          updateConfig,
+                          updatePreview,
+                        })}
+                      />
+                    </TabsContent>
+                  </Tabs>
+                </TabsContent>
+
                 <TabsContent value="sorting" className="p-0">
                   <WidgetResourceOverviewSorting {...totalPropPackage} />
                 </TabsContent>

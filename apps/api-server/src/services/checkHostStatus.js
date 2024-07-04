@@ -174,7 +174,7 @@ const checkHostStatus = async (conditions) => {
           hostStatus.ingress = true;
           const response = await updateIngress(ingress, k8sApi, project.config.uniqueId, project.url, namespace);
         } catch (error) {
-          console.error(`Error updating ingress for ${project.uniqueId} domain: ${project.url} : ${error}`);
+          console.error(`Error updating ingress for ${project.config.uniqueId} domain: ${project.url} : ${error}`);
         }
       // else if ip is not set but ingress is set, remove the ingress file
       } else  if (!hostStatus.dnsRecordIsSetToCorrectIp && ingress) {

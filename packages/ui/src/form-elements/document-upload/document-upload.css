@@ -2,8 +2,28 @@
  display: none !important;
 }
 
-html .filepond--item {
- height: auto !important;
+.filepond--root{
+    border: solid 1px #7b7b7b;
+}
+.filepond--root,
+.filepond--root .filepond--drop-label {
+  height: 90px;
+  margin: 0;
+}
+
+.filepond--list{
+    height: 55px;
+    overflow: clip;
+    pointer-events: none;
+}
+
+
+.filepond--file-wrapper.filepond--file-wrapper,
+.filepond--image-preview-wrapper {
+    height: 50px;
+}
+.filepond--item{
+    pointer-events: all;
 }
 
 html .filepond--file-status {
