@@ -89,6 +89,7 @@ function API(props = {}) {
     fetch: user.fetch.bind(self),
     fetchMe: user.fetchMe.bind(self),
     connectUser: user.connectUser.bind(self),
+    update: user.update.bind(self),
     logout: user.logout.bind(self),
   };
 

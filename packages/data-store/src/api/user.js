@@ -54,6 +54,31 @@ export default {
     return json.jwt;
 
   },
+
+  update: async function ({ projectId, user }) {
+    let url = `/api/project/${projectId}/user/${user.id}`;
+    let headers = {
+      'Content-Type': 'application/json'
+    };
+
+    let data = {
+      postcode: user.postalCode,
+      name: user.name,
+      fullName: user.name,
+      displayName: user.name,
+      address: user.address,
+      city: user.city,
+      nickName: user.nickname,
+    }
+
+    let json = await this.fetch(url, {
+      headers,
+      method: 'PUT',
+      body: JSON.stringify(data)
+    })
+
+    return json;
+  },
   
   logout: function({ url }) {
     url = url || `${this.apiUrl}/auth/project/${this.projectId}/logout?useAuth=oidc`;
