@@ -5,6 +5,8 @@ import { Paragraph, Heading } from '@utrecht/component-library-react';
 import React from 'react';
 import './activity.css';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
+import DataStore from '@openstad-headless/data-store/src';
+import {useState} from 'react';
 
 export type ActivityWidgetProps = BaseProps &
 ActivityProps &
@@ -19,7 +21,22 @@ export type ActivityProps = {
   currentSite?: Array<any>;
   otherSites?: Array<any>;
   truncate?: number;
+  api?: object;
+  projectId: string;
 };
+
+type ActivityData = {
+  date: string;
+  description: string;
+  title: string;
+  label: string;
+  site: string;
+}
+
+type ActivityDataStructure = {
+  currentSite: ActivityData[];
+  otherSites: ActivityData[];
+}
 
 function Activity({
   currentSite,
@@ -31,9 +48,66 @@ function Activity({
   noActivityTextOther,
   ...props
 }: ActivityProps) {
+  const [activityData, setActivityData] = useState<ActivityDataStructure>();
 
+  const datastore: any = new DataStore({
+      projectId: props.projectId,
+      api: props.api,
+  });
 
-  const listItem = (data: any, key: number) => {
+  // get userId from session storage, perhaps we should change this in the future.
+  const sessionData = sessionStorage.getItem('openstad');
+  const userId = sessionData ? JSON.parse(sessionData)[props.projectId]?.openStadUser?.id : null;
+  
+  const {
+      data: userActivityData,
+      error: activityError,
+      isLoading: activityDataLoading,
+  } = datastore.useUserActivity({ ...props, projectId: props.projectId, userId: userId});
+
+  const getActivityData = () => {
+    if(activityDataLoading === false && activityData === undefined ){
+      // Get all activities, and sort them by project id (other than this project id and current project id), data.activitiy is the array
+      const others = userActivityData.activity.filter((data: any) => data?.resource?.projectId != props.projectId);
+      const current = userActivityData.activity.filter((data: any) => data?.resource?.projectId == props.projectId);
+
+      let formattedCurrent: ActivityData[] = [];
+      let formattedOthers: ActivityData[] = [];
+
+      // format each activity like the activityData type
+      current.forEach((activity: any) => {
+        formattedCurrent.push({
+          date: activity?.createdAt ?? '',
+          description: activity?.description  ?? '-',
+          title: activity?.title  ?? '-',
+          label: activity?.label  ?? '-',
+          site: activity?.project?.url ?? ''
+        });
+      });
+
+      others.forEach((activity: any) => {
+        formattedOthers.push({
+          date: activity?.createdAt ?? '',
+          description: activity?.description ?? '-',
+          title: activity?.type?.label ?? '-',
+          label: activity?.type?.label ?? '-',
+          site: activity?.project?.url ?? ''
+        });
+      });
+
+      setActivityData({
+        currentSite: formattedCurrent,
+        otherSites: formattedOthers
+      });
+    }
+  }
+
+  // Init
+  React.useEffect(() => {
+    getActivityData();
+  }, [activityDataLoading]);
+  
+  const listItem = (data: ActivityData, key: number) => {
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const date = new Date(data.date);
 
@@ -66,12 +140,12 @@ function Activity({
 
         <ul className="user-acivity__list">
 
-          {!currentSite && (
+          {activityData === undefined || activityData.currentSite === undefined || activityData.currentSite.length === 0 && (
             noActivity( noActivityTextCurrent ? noActivityTextCurrent : 'U heeft geen activiteit op deze website.')
           )}
 
-          {currentSite && (
-            currentSite.map((item, key) => (
+          {activityData !== undefined && activityData.currentSite && (
+            activityData.currentSite.map((item, key) => (
               listItem(item, key)
             ))
           )}
@@ -82,12 +156,11 @@ function Activity({
         <Heading level={2}>{otherTitle ? otherTitle : 'Activiteit op andere websites'}</Heading>
         <ul className="user-acivity__list">
 
-          {!otherSites && (
+          {activityData === undefined || activityData.otherSites === undefined || activityData.otherSites.length === 0 && (
             noActivity( noActivityTextOther ? noActivityTextOther : 'U heeft geen activiteit op andere websites.')
           )}
-
-          {otherSites && (
-            otherSites.map((item, key) => (
+          {activityData !== undefined && activityData.otherSites && (
+            activityData.otherSites.map((item, key) => (
               listItem(item, key)
             ))
           )}
