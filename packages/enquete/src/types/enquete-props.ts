@@ -7,6 +7,7 @@ export type EnqueteProps = {
   description?: string;
   items?: Array<Item>;
   formVisibility?: string;
+  imageUrl?: string;
 };
 
 export type Item = {
@@ -26,6 +27,7 @@ export type Item = {
   text2?: string;
   key2?: string;
   options?: Array<Option>;
+  imageUpload?: string;
 };
 
 export type Option = {
