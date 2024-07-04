@@ -81,11 +81,10 @@ export default function WidgetEnqueteItems(
       setItems((currentItems) => [
         ...currentItems,
         {
-          trigger: `${
-            currentItems.length > 0
+          trigger: `${currentItems.length > 0
               ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
               : 1
-          }`,
+            }`,
           title: values.title,
           key: values.key,
           description: values.description,
@@ -115,22 +114,21 @@ export default function WidgetEnqueteItems(
         currentOptions.map((option) =>
           option.trigger === selectedOption.trigger
             ? {
-                ...option,
-                titles:
-                  values.options?.find((o) => o.trigger === option.trigger)
-                    ?.titles || [],
-              }
+              ...option,
+              titles:
+                values.options?.find((o) => o.trigger === option.trigger)
+                  ?.titles || [],
+            }
             : option
         )
       );
       setOption(null);
     } else {
       const newOption = {
-        trigger: `${
-          options.length > 0
+        trigger: `${options.length > 0
             ? parseInt(options[options.length - 1].trigger) + 1
             : 0
-        }`,
+          }`,
         titles: values.options?.[values.options.length - 1].titles || [],
       };
       setOptions((currentOptions) => [...currentOptions, newOption]);
@@ -171,7 +169,7 @@ export default function WidgetEnqueteItems(
 
   const { onFieldChanged } = props;
   useEffect(() => {
-      onFieldChanged('items', items);
+    onFieldChanged('items', items);
   }, [items]);
 
   // Sets form to selected item values when item is selected
@@ -316,45 +314,44 @@ export default function WidgetEnqueteItems(
                 <div className="flex flex-col gap-1">
                   {items.length > 0
                     ? items
-                        .sort(
-                          (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
-                        )
-                        .map((item, index) => (
-                          <div
-                            key={index}
-                            className={`flex cursor-pointer justify-between border border-secondary ${
-                              item.trigger == selectedItem?.trigger &&
-                              'bg-secondary'
+                      .sort(
+                        (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
+                      )
+                      .map((item, index) => (
+                        <div
+                          key={index}
+                          className={`flex cursor-pointer justify-between border border-secondary ${item.trigger == selectedItem?.trigger &&
+                            'bg-secondary'
                             }`}>
-                            <span className="flex gap-2 py-3 px-2">
-                              <ArrowUp
-                                className="cursor-pointer"
-                                onClick={() =>
-                                  handleAction('moveUp', item.trigger, true)
-                                }
-                              />
-                              <ArrowDown
-                                className="cursor-pointer"
-                                onClick={() =>
-                                  handleAction('moveDown', item.trigger, true)
-                                }
-                              />
-                            </span>
-                            <span
-                              className="gap-2 py-3 px-2 w-full"
-                              onClick={() => setItem(item)}>
-                              {`${item.title || 'Geen titel'}`}
-                            </span>
-                            <span className="gap-2 py-3 px-2">
-                              <X
-                                className="cursor-pointer"
-                                onClick={() =>
-                                  handleAction('delete', item.trigger, true)
-                                }
-                              />
-                            </span>
-                          </div>
-                        ))
+                          <span className="flex gap-2 py-3 px-2">
+                            <ArrowUp
+                              className="cursor-pointer"
+                              onClick={() =>
+                                handleAction('moveUp', item.trigger, true)
+                              }
+                            />
+                            <ArrowDown
+                              className="cursor-pointer"
+                              onClick={() =>
+                                handleAction('moveDown', item.trigger, true)
+                              }
+                            />
+                          </span>
+                          <span
+                            className="gap-2 py-3 px-2 w-full"
+                            onClick={() => setItem(item)}>
+                            {`${item.title || 'Geen titel'}`}
+                          </span>
+                          <span className="gap-2 py-3 px-2">
+                            <X
+                              className="cursor-pointer"
+                              onClick={() =>
+                                handleAction('delete', item.trigger, true)
+                              }
+                            />
+                          </span>
+                        </div>
+                      ))
                     : 'Geen items'}
                 </div>
               </div>
@@ -448,58 +445,57 @@ export default function WidgetEnqueteItems(
                     <div className="flex flex-col gap-1">
                       {options.length > 0
                         ? options
-                            .sort(
-                              (a, b) =>
-                                parseInt(a.trigger) - parseInt(b.trigger)
-                            )
-                            .map((option, index) => (
-                              <div
-                                key={index}
-                                className={`flex cursor-pointer justify-between border border-secondary ${
-                                  option.trigger == selectedOption?.trigger &&
-                                  'bg-secondary'
+                          .sort(
+                            (a, b) =>
+                              parseInt(a.trigger) - parseInt(b.trigger)
+                          )
+                          .map((option, index) => (
+                            <div
+                              key={index}
+                              className={`flex cursor-pointer justify-between border border-secondary ${option.trigger == selectedOption?.trigger &&
+                                'bg-secondary'
                                 }`}>
-                                <span className="flex gap-2 py-3 px-2">
-                                  <ArrowUp
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                      handleAction(
-                                        'moveUp',
-                                        option.trigger,
-                                        false
-                                      )
-                                    }
-                                  />
-                                  <ArrowDown
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                      handleAction(
-                                        'moveDown',
-                                        option.trigger,
-                                        false
-                                      )
-                                    }
-                                  />
-                                </span>
-                                <span
-                                  className="py-3 px-2 w-full"
-                                  onClick={() => setOption(option)}>
-                                  {option?.titles?.[0].text}
-                                </span>
-                                <span className="py-3 px-2">
-                                  <X
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                      handleAction(
-                                        'delete',
-                                        option.trigger,
-                                        false
-                                      )
-                                    }
-                                  />
-                                </span>
-                              </div>
-                            ))
+                              <span className="flex gap-2 py-3 px-2">
+                                <ArrowUp
+                                  className="cursor-pointer"
+                                  onClick={() =>
+                                    handleAction(
+                                      'moveUp',
+                                      option.trigger,
+                                      false
+                                    )
+                                  }
+                                />
+                                <ArrowDown
+                                  className="cursor-pointer"
+                                  onClick={() =>
+                                    handleAction(
+                                      'moveDown',
+                                      option.trigger,
+                                      false
+                                    )
+                                  }
+                                />
+                              </span>
+                              <span
+                                className="py-3 px-2 w-full"
+                                onClick={() => setOption(option)}>
+                                {option?.titles?.[0].text}
+                              </span>
+                              <span className="py-3 px-2">
+                                <X
+                                  className="cursor-pointer"
+                                  onClick={() =>
+                                    handleAction(
+                                      'delete',
+                                      option.trigger,
+                                      false
+                                    )
+                                  }
+                                />
+                              </span>
+                            </div>
+                          ))
                         : 'Geen options'}
                     </div>
                   </div>
@@ -537,15 +533,15 @@ export default function WidgetEnqueteItems(
                         control={form.control}
                         name="fieldKey"
                         render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                Key voor het opslaan
-                                <InfoDialog content={'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'} />
-                                </FormLabel>
-                              <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
-                              <Input {...field} />
-                              <FormMessage/>
-                            </FormItem>
+                          <FormItem>
+                            <FormLabel>
+                              Key voor het opslaan
+                              <InfoDialog content={'Voor de volgende types zijn deze velden altijd veplicht: Titel, Samenvatting en Beschrijving'} />
+                            </FormLabel>
+                            <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
+                            <Input {...field} />
+                            <FormMessage />
+                          </FormItem>
                         )}
                       />
                     )}
@@ -589,6 +585,7 @@ export default function WidgetEnqueteItems(
                                 Meerkeuze
                               </SelectItem>
                               <SelectItem value="scale">Schaal</SelectItem>
+                              <SelectItem value="imageUpload">Afbeelding upload</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -596,53 +593,53 @@ export default function WidgetEnqueteItems(
                       )}
                     />
                     {form.watch('questionType') === 'open' && (
-                        <>
-                          <FormField
-                              control={form.control}
-                              name="variant"
-                              render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Is het veld qua grootte 1 regel of een tekstvak?</FormLabel>
-                                    <Select
-                                        value={field.value || 'text input'}
-                                        onValueChange={field.onChange}>
-                                      <FormControl>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Kies een optie" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        <SelectItem value="text input">1 regel</SelectItem>
-                                        <SelectItem value="textarea">Tekstvak</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                  </FormItem>
-                              )}
-                          />
-                            <FormField
-                                control={form.control}
-                                name="minCharacters"
-                                render={({field}) => (
-                                    <FormItem>
-                                      <FormLabel>Minimaal aantal tekens</FormLabel>
-                                      <Input {...field} />
-                                      <FormMessage/>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="maxCharacters"
-                                render={({field}) => (
-                                    <FormItem>
-                                      <FormLabel>Maximaal aantal tekens</FormLabel>
-                                      <Input {...field} />
-                                      <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </>
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="variant"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Is het veld qua grootte 1 regel of een tekstvak?</FormLabel>
+                              <Select
+                                value={field.value || 'text input'}
+                                onValueChange={field.onChange}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="text input">1 regel</SelectItem>
+                                  <SelectItem value="textarea">Tekstvak</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="minCharacters"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Minimaal aantal tekens</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="maxCharacters"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Maximaal aantal tekens</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
                     )}
                     {form.watch('questionType') === 'images' && (
                       <>
@@ -659,7 +656,7 @@ export default function WidgetEnqueteItems(
                           }}
                         />
 
-                        { !!form.getValues('image1') && (
+                        {!!form.getValues('image1') && (
                           <div style={{ position: 'relative' }}>
                             <img src={form.getValues('image1')} />
                           </div>
@@ -701,7 +698,7 @@ export default function WidgetEnqueteItems(
                           }}
                         />
 
-                        { !!form.getValues('image2') && (
+                        {!!form.getValues('image2') && (
                           <div style={{ position: 'relative' }}>
                             <img src={form.getValues('image2')} />
                           </div>
@@ -729,7 +726,33 @@ export default function WidgetEnqueteItems(
                             </FormItem>
                           )}
                         />
-                    </>
+                      </>
+                    )}
+
+                    {form.watch('questionType') === 'imageUpload' && (
+                      <FormField
+                        control={form.control}
+                        name="variant"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Mogen er meerdere afbeeldingen tegelijkertijd geüpload worden?</FormLabel>
+                            <Select
+                              onValueChange={(e: string) => field.onChange(e === 'true')}
+                              value={field.value ? 'true' : 'false'}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="true">Ja</SelectItem>
+                                <SelectItem value="false">Nee</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     )}
 
                     {hasOptions() && (
@@ -759,7 +782,7 @@ export default function WidgetEnqueteItems(
                   <Button
                     className="w-fit mt-4"
                     type="submit"
-                    onClick={ (e) => {
+                    onClick={(e) => {
                       e.preventDefault();
                       onSubmit(form.getValues())
                     }}

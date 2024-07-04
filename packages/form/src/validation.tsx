@@ -4,11 +4,7 @@ import {CombinedFieldPropsWithType} from "./props";
 export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
     const fileSchema = z.object({
         name: z.string(),
-        type: z.string(),
-        size: z.number(),
-        lastModified: z.number(),
-        lastModifiedDate: z.date(),
-        webkitRelativePath: z.string(),
+        url: z.string()
     });
 
     switch (field.type) {

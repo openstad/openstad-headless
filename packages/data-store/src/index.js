@@ -50,15 +50,31 @@ function DataStore(props = {}) {
     return { type, ...props };
   };
 
-  self.useSWR = function (props, fetcherAsString) {
-    let fetcher = eval(`self.api.${fetcherAsString}`);
+  self.useSWR = function (props, fetcherAsString, options = {}) {
+    const fetcherPath = fetcherAsString.split('.');
+    let fetcher = self.api;
+    
+    // fetcherAsString can be a path to a fetcher function, e.g. 'resources.fetch'
+    // if so, we need to traverse the api object to find the fetcher function
+    if (fetcherPath.length > 1) {
+      for (let i = 0; i < fetcherPath.length; i++) {
+        if (!fetcher[fetcherPath[i]]) {
+          throw new Error(`uswSWF: fetcher ${fetcherAsString} not found`);
+        }
+        fetcher = fetcher[fetcherPath[i]];
+      }
+    // otherwise, fetcherAsString is the name of the fetcher function and we use that directly
+    } else {
+      fetcher = self.api[fetcherAsString];
+    }
+    
     let key = self.createKey(props, fetcherAsString);
 
     windowGlobal.OpenStadSWR[JSON.stringify(key, null, 2)] = true;
 
-    return useSWR(key, fetcher, {
-      keepPreviousData: true,
-    });
+    return useSWR(key, () =>
+      fetcher(props, { ...options, keepPreviousData: true })
+    );
   };
 
   const { mutate } = useSWRConfig();

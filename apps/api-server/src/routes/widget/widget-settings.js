@@ -165,6 +165,17 @@ let moduleDefinitions = {
       projectId: null
     }
   },
+  simplevoting: {
+    packageName: '@openstad-headless/simple-voting',
+    directory: 'simple-voting',
+    js: ['dist/simple-voting.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessSimpleVoting',
+    componentName: 'SimpleVoting',
+    defaultConfig: {
+      projectId: null
+    }
+  },
   resourcewithmap: {
     packageName: '@openstad-headless/resource-overview-with-map',
     directory: 'resource-overview-with-map',

@@ -27,6 +27,7 @@
     "@openstad-headless/resource-overview": "file:../../packages/resource-overview",
     "@openstad-headless/resource-overview-with-map": "file:../../packages/resource-overview-with-map",
     "@openstad-headless/stem-begroot": "file:../../packages/stem-begroot",
+    "@openstad-headless/simple-voting": "file:../../packages/simple-voting",
     "@openstad-headless/types": "file:../../packages/types",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",

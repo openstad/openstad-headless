@@ -152,6 +152,12 @@ const config: EnqueteWidgetProps = {
       key: 'waarom',
       questionType: 'open',
     },
+    {
+      trigger: '6',
+      title: 'Kies een mooie afbeelding',
+      key: 'image',
+      questionType: 'imageUpload',
+    }
   ],
   afterSubmitUrl: "http://localhost:5173/enquetes/[id]"
 };
