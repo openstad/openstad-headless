@@ -340,15 +340,17 @@ router
           return [];
         }))).filter(data => data !== null && data.length > 0).flat();
 
-        db.Notification.create({
-          type: "new published resource - admin update",
-          projectId: req.project.id,
-          data: {
-            userId: req.user.id,
-            resourceId: req.results.id,
-            emailReceivers: emailReceivers
-          }
-        })
+        if(emailReceivers.length > 0){
+          db.Notification.create({
+            type: "new published resource - admin update",
+            projectId: req.project.id,
+            data: {
+              userId: req.user.id,
+              resourceId: req.results.id,
+              emailReceivers: emailReceivers
+            }
+          })
+        }
       }
 
       if (sendConfirmationToAdmin) {
