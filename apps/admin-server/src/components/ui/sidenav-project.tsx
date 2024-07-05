@@ -140,6 +140,18 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Toegestane websites</span>
               </Button>
             </Link>
+            <Link href={`/projects/${project}/settings/design`}>
+              <Button
+                variant={
+                  location.includes('/settings/design')
+                    ? 'secondary'
+                    : 'ghost'
+                }
+                size="default"
+                className="w-full flex justify-start pl-8">
+                <span className="truncate">Vormgeving</span>
+              </Button>
+            </Link>
           </>
         ) : null}
         <Link href={`/projects/${project}/authentication`}>
