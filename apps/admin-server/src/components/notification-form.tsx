@@ -71,7 +71,7 @@ const initialData = `<mjml>
 
 const context = {
   user: 'John Doe',
-  loginurl: '##',
+  loginurl: '#',
   imagePath: process.env.EMAIL_ASSETS_URL
 };
 
