@@ -64,9 +64,7 @@ export const CheckboxList = <T extends { [key: string]: any }>({
                                     return (
                                         <FormItem
                                             key={`checkbox-${keyPerItem(item)}`}
-                                            className={`gap-x-0 gap-y-4 grid grid-cols-2 space-x-3 space-y-0 flex-col`}
-                                            style={{gridTemplateColumns: 'min-content auto'}}
-                                        >
+                                            className={`gap-x-0 gap-y-4 grid grid-cols-2 space-x-3 space-y-0 flex-col [grid-template-columns:min-content_auto]`}>
                                             <FormControl>
                                                 <Checkbox
                                                     checked={selectedPredicate(item)}
@@ -123,9 +121,7 @@ export const CheckboxList = <T extends { [key: string]: any }>({
                                                                 return (
                                                                     <FormItem
                                                                         key={`checkbox-${keyPerItem(item)}`}
-                                                                        className={`gap-x-0 gap-y-4 grid grid-cols-2 space-x-3 space-y-0 flex-col`}
-                                                                        style={{gridTemplateColumns: 'min-content auto'}}
-                                                                    >
+                                                                        className={`gap-x-0 gap-y-4 grid grid-cols-2 space-x-3 space-y-0 flex-col [grid-template-columns:min-content_auto]`}>
                                                                         <FormControl>
                                                                             <Checkbox
                                                                                 checked={selectedPredicate(item)}

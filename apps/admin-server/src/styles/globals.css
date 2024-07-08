@@ -96,6 +96,21 @@
   transform: translateY(-50%) rotate(180deg);
 }
 
+.infoIconStyle {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: #1671ef;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 10px;
+  color: #fff;
+  margin: 0 0 0 8px;
+  font-family: serif;
+  line-height: 1;
+}
+
 /* custom code editor */
 .editor {
   position: relative;
