@@ -1,4 +1,4 @@
-import React,  { useState } from 'react';
+import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
@@ -39,17 +39,17 @@ export default function ProjectSettingsComments() {
   const { project } = router.query;
   const { data, updateProject } = useProject();
 
-  const [ showCommentSettings, setShowCommentSettings ] = useState(false);
+  const [showCommentSettings, setShowCommentSettings] = useState(false);
 
   const defaults = useCallback(
     () => ({
-        canComment: data?.config?.comments?.canComment,
-        closedText: data?.config?.comments?.closedText,
-        canReply: data?.config?.comments?.canReply,
-        canLike: data?.config?.comments?.canLike,
-        descriptionMinLength: data?.config?.comments?.descriptionMinLength,
-        descriptionMaxLength: data?.config?.comments?.descriptionMaxLength,
-        adminLabel: data?.config?.comments?.adminLabel,
+      canComment: data?.config?.comments?.canComment,
+      closedText: data?.config?.comments?.closedText,
+      canReply: data?.config?.comments?.canReply,
+      canLike: data?.config?.comments?.canLike,
+      descriptionMinLength: data?.config?.comments?.descriptionMinLength,
+      descriptionMaxLength: data?.config?.comments?.descriptionMaxLength,
+      adminLabel: data?.config?.comments?.adminLabel,
     }),
     [data]
   );
@@ -228,23 +228,23 @@ export default function ProjectSettingsComments() {
 
               )}
 
-<FormField
-                  control={form.control}
-                  name="adminLabel"
-                  render={({ field }) => (
-                    <FormItem className="col-span-full md:col-span-1 flex flex-col">
+              <FormField
+                control={form.control}
+                name="adminLabel"
+                render={({ field }) => (
+                  <FormItem className="col-span-full md:col-span-1 flex flex-col">
 
 
-                      <FormLabel>Label dat wordt getoond bij reacties van beheerders
-                        <InfoDialog content={'Dit is de duiding die achter de gebruikersnaam van de beheerder komt te staan. Bijvoorbeeld: Webredactie'} />
-                      </FormLabel>
-                      <FormControl>
-                        <Input placeholder="typ een tekst" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormLabel>Label dat wordt getoond bij reacties van beheerders
+                      <InfoDialog content={'Dit is de duiding die achter de gebruikersnaam van de beheerder komt te staan. Bijvoorbeeld: Webredactie'} />
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="typ een tekst" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <Button type="submit" className="w-fit col-span-full">
                 Opslaan

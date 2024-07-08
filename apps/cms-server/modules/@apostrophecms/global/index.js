@@ -156,12 +156,6 @@ module.exports = {
         fileGroup: 'icons',
       },
 
-      cssExtras: {
-        type: 'string',
-        textarea: true,
-        def: '#logo-image {\n  max-height: 50px;\n}',
-        label: 'Extra CSS',
-      },
       customCssLink: {
         type: 'string',
         label: 'URL voor CSS imports (optioneel)',
@@ -297,7 +291,7 @@ module.exports = {
       },
       css: {
         label: 'Vormgeving',
-        fields: ['cssExtras', 'customCssLink', 'favicon', 'compactMenu'],
+        fields: ['customCssLink', 'favicon', 'compactMenu'],
       },
       login: {
         label: 'Gebruikers login',

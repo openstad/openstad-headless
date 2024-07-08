@@ -66,3 +66,15 @@ main {
     z-index: 99999999;
   }
 }
+
+// page logo
+#logo-image {
+  max-height: 50px;
+}
+
+.iconButton--container{
+  width: 100%;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+}
