@@ -23,6 +23,7 @@ module.exports = {
       buttons: {
         label: 'Buttons',
         type: 'array',
+        titleField: 'label',
         draggable: true,
         fields: {
           add: {
