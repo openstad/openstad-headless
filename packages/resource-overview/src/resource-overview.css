@@ -162,3 +162,7 @@ p.osc-searchtext {
 .status-label + .status-label::before {
   content: ', ';
 }
+
+.osc .map-container {
+  margin-bottom: 2rem;
+}
