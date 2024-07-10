@@ -1,11 +1,13 @@
+import DataStore from '@openstad-headless/data-store/src';
+import React from 'react';
 import { useState, useEffect } from 'react';
 import { LatLng, polygon } from 'leaflet';
-import { Polygon } from 'react-leaflet';
+import { Polygon, Popup } from 'react-leaflet';
 import type { AreaProps } from './types/area-props';
 import type { LocationType } from './types/location';
 import parseLocation from './lib/parse-location';
 
-function createCutoutPolygon(area: Array<LocationType>) {
+function createCutoutPolygon(area: Array<LocationType>, invert = true) {
   // polygon must defined from the south west corner to work with the outer box
 
   const extractedAreas = area.map(parseLocation);
@@ -20,8 +22,8 @@ function createCutoutPolygon(area: Array<LocationType>) {
     let x =
       Math.cos(center.lat) * Math.sin(point.lat) -
       Math.sin(center.lat) *
-        Math.cos(point.lat) *
-        Math.cos(point.lng - center.lng);
+      Math.cos(point.lat) *
+      Math.cos(point.lng - center.lng);
     let bearing = (Math.atan2(y, x) * 180) / Math.PI;
     if (45 - bearing < smallest) {
       smallest = 45 - bearing;
@@ -49,10 +51,21 @@ function createCutoutPolygon(area: Array<LocationType>) {
     { lat: 0, lng: -180 + delta1 },
   ];
 
-  let result: any = [
-    outerBox.map((obj) => [obj.lat, obj.lng]),
-    area.map((obj) => [obj.lat, obj.lng]),
-  ];
+  let result: any;
+
+  if (invert) {
+    result = [
+      outerBox.map((obj) => [obj.lat, obj.lng]),
+      area.map((obj) => [obj.lat, obj.lng]),
+    ];
+
+  } else {
+    result = [
+      area.map((obj) => [obj.lat, obj.lng]),
+    ];
+
+  }
+
 
   return result;
 }
@@ -83,6 +96,7 @@ export function isPointInArea(area: Array<LatLng>, point: LatLng) {
 
 export function Area({
   area = [],
+  areas,
   areaPolygonStyle = {
     color: '#d00',
     fillColor: '#000',
@@ -90,14 +104,78 @@ export function Area({
   },
   ...props
 }: AreaProps) {
-  const poly = createCutoutPolygon(area);
+  let poly;
+
+  if (area && area.length > 0) {
+    poly = createCutoutPolygon(area);
+  }
+
+
+  // areas bevat alle IDs (en namen) van de polygonen die je moet tonen
+  // met de useArea hook kun je alle areas ophalen uit de backend als je geen areaId meegeeft als parameterkun je 
+  // en vervolgens kun je filteren op de IDs die in areas zitten
+
+  const datastore = new DataStore({});
+  const { data: allAreas } = datastore.useAreas();
+
+
+  interface Area {
+    id: number;
+    name: string;
+  }
+  const multiPolygon: any[] = [];
+  const properties: Array[] = [];
+  const areaIds = areas?.map((item: Area) => item.id);
+  const filteredAreas = allAreas.filter((item: any) => areaIds?.includes(item.id));
+
+  if (filteredAreas) {
+
+    filteredAreas.forEach((item: any) => {
+      multiPolygon.push(item.polygon);
+      properties.push({ title: item.name });
+    });
+  }
+
+  console.log({ 'multiPolygon': multiPolygon });
+  console.log({ 'props': properties });
+
 
   return (
-    <Polygon
-      {...props}
-      pathOptions={areaPolygonStyle}
-      positions={poly}
-    />
+    <>
+      {multiPolygon.length > 0 ? (
+        multiPolygon.map((polygon, index) => (
+          <>
+            {console.log(polygon)}
+            <Polygon
+              key={index}
+              {...props}
+              pathOptions={areaPolygonStyle}
+              positions={polygon}
+              eventHandlers={{
+                mouseover: (e) => {
+                  e.target.setStyle({
+                    fillOpacity: 0.05,
+                  });
+                },
+                mouseout: (e) => {
+                  e.target.setStyle(areaPolygonStyle);
+                },
+              }}
+            >
+              {properties &&
+              <Popup className={'leaflet-popup'}>
+                {properties[index].title && <h2>{properties[index].title}</h2>}
+                {/* {properties[index].url && <a className="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action" href={properties[index].url}>Bekijk wijk</a>} */}
+              </Popup>
+            }
+            </Polygon>
+
+          </>
+        ))
+      ) : (
+        poly && <Polygon {...props} pathOptions={areaPolygonStyle} positions={poly} />
+      )}
+    </>
   );
 }
 

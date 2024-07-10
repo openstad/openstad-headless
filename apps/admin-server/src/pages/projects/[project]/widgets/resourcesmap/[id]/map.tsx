@@ -23,10 +23,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import useTags from '@/hooks/use-tags';
 import { useForm } from 'react-hook-form';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-import type {ResourceOverviewMapWidgetProps} from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props'
+import type { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props'
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import * as z from 'zod';
 import { ResourceOverviewMapWidgetTabProps } from '.';
+import { Textarea } from '@/components/ui/textarea';
+import useAreas from '@/hooks/use-areas';
+import { Checkbox } from '@openstad-headless/ui/src';
+import { CheckboxList } from '@/components/checkbox-list';
 
 type Tag = {
   id: number;
@@ -46,20 +50,24 @@ const formSchema = z.object({
   tilesVariant: z.string().optional(),
   width: z.string().optional(),
   height: z.string().optional(),
+  customPolygon: z.array(z.object({ id: z.number(), name: z.string() })).optional(),
 });
+
 
 type SchemaKey = keyof typeof formSchema.shape;
 
 export default function WidgetResourcesMapMap(
   props: ResourceOverviewMapWidgetTabProps &
-    EditFieldProps<ResourceOverviewMapWidgetTabProps>& {
+    EditFieldProps<ResourceOverviewMapWidgetTabProps> & {
       omitSchemaKeys?: Array<SchemaKey>;
+      customPolygon?: any;
     }
 ) {
 
   type FormData = z.infer<typeof formSchema>;
 
   async function onSubmit(values: FormData) {
+    console.log('on submit', values);
     props.updateConfig({ ...props, ...values });
   }
 
@@ -75,16 +83,20 @@ export default function WidgetResourcesMapMap(
       tilesVariant: props?.tilesVariant || '',
       width: props?.width || '',
       height: props?.height || '',
+      customPolygon: props?.customPolygon || [],
     },
   });
 
   const { data: tags } = useTags(props.projectId);
+  const { data: areas } = useAreas(props.projectId) as { data: { id: string, name: string }[] } ?? [];
+
+
   const [tagGroupNames, setGroupedNames] = useState<string[]>([]);
 
   useEffect(() => {
     if (Array.isArray(tags)) {
       const fetchedTags = tags as Array<Tag>;
-      let groupNames = fetchedTags.map( tag => tag.type );
+      let groupNames = fetchedTags.map(tag => tag.type);
       groupNames = groupNames.filter((value, index, array) => {
         return array.indexOf(value) == index;
       });
@@ -135,12 +147,12 @@ export default function WidgetResourcesMapMap(
                 </FormLabel>
                 <Select
                   onValueChange={(value) => {
-                      props.onFieldChanged(field.name, value);
-                      field.onChange(value);
-                    }}
+                    props.onFieldChanged(field.name, value);
+                    field.onChange(value);
+                  }}
                   value={field.value}>
                   <FormControl>
-                  <SelectTrigger>
+                    <SelectTrigger>
                       <SelectValue placeholder="Selecteer een optie" />
                     </SelectTrigger>
                   </FormControl>
@@ -199,7 +211,7 @@ export default function WidgetResourcesMapMap(
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                <SelectItem value="">Geen (gebruik alleen standaardiconen)</SelectItem>
+                    <SelectItem value="">Geen (gebruik alleen standaardiconen)</SelectItem>
                     {tagGroupNames.map(type => (
                       <SelectItem value={type} key={type}>{type}</SelectItem>
                     ))}
@@ -220,9 +232,9 @@ export default function WidgetResourcesMapMap(
                 </FormLabel>
                 <Select
                   onValueChange={(value) => {
-                      props.onFieldChanged(field.name, value);
-                      field.onChange(value);
-                    }}
+                    props.onFieldChanged(field.name, value);
+                    field.onChange(value);
+                  }}
                   value={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -288,6 +300,66 @@ export default function WidgetResourcesMapMap(
               </FormItem>
             )}
           />
+
+          {/* <FormField
+            control={form.control}
+            name="customPolygon"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Standaard polygoon overschrijven (GeoJSON)
+                </FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder=""
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          /> */}
+
+
+
+          <CheckboxList
+            form={form}
+            fieldName="customPolygon"
+            fieldLabel="Gebieden"
+            items={areas}
+            label={(t) => t.name + ' -- id:' + t.id}
+            keyPerItem={(t) => `${t.id}`}
+            layout="vertical"
+            selectedPredicate={(t) => {
+              const customPolygonValues = form.getValues('customPolygon');
+              if (Array.isArray(customPolygonValues)) {
+                return customPolygonValues.findIndex((tg) => tg.id === t.id) !== -1;
+              }
+              return false;
+            }}
+            onValueChange={(status, checked) => {
+              // Ensure we always work with an array, fallback to empty array if not
+              let values = form.getValues('customPolygon');
+              values = Array.isArray(values) ? values : []; // Fix applied here
+            
+              if (checked) {
+                const isAlreadyIncluded = values.some((item) => item.id === status.id);
+                if (!isAlreadyIncluded) {
+                  form.setValue('customPolygon', [...values, status]);
+                }
+                // Add the status object if checked is true and it's not already included
+              } else {
+                // Remove the status object if checked is false
+                const filteredValues = values.filter((item) => item.id !== status.id);
+                form.setValue('customPolygon', filteredValues);
+              }
+            }}
+          />
+
 
           <Button type="submit">Opslaan</Button>
         </form>
