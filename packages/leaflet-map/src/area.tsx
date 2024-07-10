@@ -124,7 +124,7 @@ export function Area({
     name: string;
   }
   const multiPolygon: any[] = [];
-  const properties: Array[] = [];
+  const properties: Array<any> = [];
   const areaIds = areas?.map((item: Area) => item.id);
   const filteredAreas = allAreas.filter((item: any) => areaIds?.includes(item.id));
 
@@ -135,10 +135,6 @@ export function Area({
       properties.push({ title: item.name });
     });
   }
-
-  console.log({ 'multiPolygon': multiPolygon });
-  console.log({ 'props': properties });
-
 
   return (
     <>

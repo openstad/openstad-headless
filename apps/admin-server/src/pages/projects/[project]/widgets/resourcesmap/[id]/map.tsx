@@ -104,6 +104,17 @@ export default function WidgetResourcesMapMap(
     }
   }, [tags]);
 
+
+  interface Area {
+    id: string | number; // Assuming id can be string or number
+    name: string;
+  }
+
+  interface CustomPolygon {
+    id: string | number;
+    // Add other properties of the status object as needed
+  }
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
@@ -331,30 +342,27 @@ export default function WidgetResourcesMapMap(
             fieldName="customPolygon"
             fieldLabel="Gebieden"
             items={areas}
-            label={(t) => t.name + ' -- id:' + t.id}
+            label={(t) => `${t.name} -- id:${t.id}`}
             keyPerItem={(t) => `${t.id}`}
             layout="vertical"
             selectedPredicate={(t) => {
               const customPolygonValues = form.getValues('customPolygon');
               if (Array.isArray(customPolygonValues)) {
-                return customPolygonValues.findIndex((tg) => tg.id === t.id) !== -1;
+                return customPolygonValues.findIndex((tg) => `${tg.id}` === `${t.id}`) !== -1;
               }
               return false;
             }}
             onValueChange={(status, checked) => {
-              // Ensure we always work with an array, fallback to empty array if not
               let values = form.getValues('customPolygon');
-              values = Array.isArray(values) ? values : []; // Fix applied here
-            
+              values = Array.isArray(values) ? values : [];
+
               if (checked) {
-                const isAlreadyIncluded = values.some((item) => item.id === status.id);
+                const isAlreadyIncluded = values.some((item) => `${item.id}` === `${status.id}`);
                 if (!isAlreadyIncluded) {
-                  form.setValue('customPolygon', [...values, status]);
+                  form.setValue('customPolygon', [...values, { ...status, id: typeof status.id === 'number' ? status.id : parseInt(status.id, 10) }]);
                 }
-                // Add the status object if checked is true and it's not already included
               } else {
-                // Remove the status object if checked is false
-                const filteredValues = values.filter((item) => item.id !== status.id);
+                const filteredValues = values.filter((item) => `${item.id}` !== `${status.id}`);
                 form.setValue('customPolygon', filteredValues);
               }
             }}
