@@ -29,5 +29,8 @@
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "prettier": "3.0.3",
     "promise-mysql": "^5.2.0"
+  },
+  "dependencies": {
+    "uuid": "^10.0.0"
   }
 }

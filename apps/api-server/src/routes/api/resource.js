@@ -87,6 +87,8 @@ router.all('*', function (req, res, next) {
 
   if (req.query.tags) {
     let tags = req.query.tags;
+    // if tags is not an array, make it an array
+    if (!Array.isArray(tags)) tags = [tags];
     req.scope.push({ method: ['selectTags', tags] });
     req.scope.push('includeTags');
   }
