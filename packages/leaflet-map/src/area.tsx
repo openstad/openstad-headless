@@ -110,14 +110,8 @@ export function Area({
     poly = createCutoutPolygon(area);
   }
 
-
-  // areas bevat alle IDs (en namen) van de polygonen die je moet tonen
-  // met de useArea hook kun je alle areas ophalen uit de backend als je geen areaId meegeeft als parameterkun je 
-  // en vervolgens kun je filteren op de IDs die in areas zitten
-
   const datastore = new DataStore({});
   const { data: allAreas } = datastore.useAreas();
-
 
   interface Area {
     id: number;
@@ -141,7 +135,6 @@ export function Area({
       {multiPolygon.length > 0 ? (
         multiPolygon.map((polygon, index) => (
           <>
-            {console.log(polygon)}
             <Polygon
               key={index}
               {...props}

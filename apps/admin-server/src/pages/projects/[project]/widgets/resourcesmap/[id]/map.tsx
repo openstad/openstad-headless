@@ -21,7 +21,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { zodResolver } from '@hookform/resolvers/zod';
 import useTags from '@/hooks/use-tags';
-import { useForm } from 'react-hook-form';
+import { useForm, useFormContext } from 'react-hook-form';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import type { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props'
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
@@ -29,8 +29,7 @@ import * as z from 'zod';
 import { ResourceOverviewMapWidgetTabProps } from '.';
 import { Textarea } from '@/components/ui/textarea';
 import useAreas from '@/hooks/use-areas';
-import { Checkbox } from '@openstad-headless/ui/src';
-import { CheckboxList } from '@/components/checkbox-list';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type Tag = {
   id: number;
@@ -51,6 +50,7 @@ const formSchema = z.object({
   width: z.string().optional(),
   height: z.string().optional(),
   customPolygon: z.array(z.object({ id: z.number(), name: z.string() })).optional(),
+  customPolygonUrl: z.array( z.string().optional()).optional()
 });
 
 
@@ -61,6 +61,7 @@ export default function WidgetResourcesMapMap(
     EditFieldProps<ResourceOverviewMapWidgetTabProps> & {
       omitSchemaKeys?: Array<SchemaKey>;
       customPolygon?: any;
+      customPolygonUrl?: any;
     }
 ) {
 
@@ -68,6 +69,19 @@ export default function WidgetResourcesMapMap(
 
   async function onSubmit(values: FormData) {
     console.log('on submit', values);
+
+// Combineer customPolygonUrl uit de values met customPolygon, zodat daar de URLs in staan, en sla customPolygonUrl niet op
+
+console.log(values?.customPolygonUrl)
+
+    const customPolygon = values?.customPolygonUrl?.map((item, key) => {
+      console.log({'value': item, key})
+
+    });
+
+    customPolygon
+    
+
     props.updateConfig({ ...props, ...values });
   }
 
@@ -84,6 +98,7 @@ export default function WidgetResourcesMapMap(
       width: props?.width || '',
       height: props?.height || '',
       customPolygon: props?.customPolygon || [],
+      customPolygonUrl: props?.customPolygonUrl || []
     },
   });
 
@@ -114,6 +129,12 @@ export default function WidgetResourcesMapMap(
     id: string | number;
     // Add other properties of the status object as needed
   }
+
+
+
+  useEffect(() => {
+    console.log (form.formState.errors, 'errors');
+  }, [form.formState.errors]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -312,61 +333,77 @@ export default function WidgetResourcesMapMap(
             )}
           />
 
-          {/* <FormField
-            control={form.control}
-            name="customPolygon"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Standaard polygoon overschrijven (GeoJSON)
-                </FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder=""
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
 
+          {areas?.map((item) => (
+            <FormField
+              key={item.id}
+              control={form.control}
+              name="customPolygon"
+              render={({ field }) => {
+                const isChecked = Array.isArray(field.value) && field.value.some(obj => obj.id === Number(item.id));
 
+                return (
+                  <FormItem
+                    key={item.id}
+                    className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={isChecked}
+                        onCheckedChange={(checked) => {
+                          let values = form.getValues('customPolygon') || [];
 
-          <CheckboxList
-            form={form}
-            fieldName="customPolygon"
-            fieldLabel="Gebieden"
-            items={areas}
-            label={(t) => `${t.name} -- id:${t.id}`}
-            keyPerItem={(t) => `${t.id}`}
-            layout="vertical"
-            selectedPredicate={(t) => {
-              const customPolygonValues = form.getValues('customPolygon');
-              if (Array.isArray(customPolygonValues)) {
-                return customPolygonValues.findIndex((tg) => `${tg.id}` === `${t.id}`) !== -1;
-              }
-              return false;
-            }}
-            onValueChange={(status, checked) => {
-              let values = form.getValues('customPolygon');
-              values = Array.isArray(values) ? values : [];
+                          console.log('on checked change', { checked, values });
+                          if (checked) {
+                            if (!values.some(obj => obj.id === Number(item.id))) {
+                              const { name } = item;
+                              form.setValue('customPolygon', [...values, { name, id: Number(item.id) }]);
+                            }
+                          } else {
+                            const filteredValues = values.filter(obj => obj.id !== Number(item.id));
+                            form.setValue('customPolygon', filteredValues);
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      {item.name}
+                    </FormLabel>
 
-              if (checked) {
-                const isAlreadyIncluded = values.some((item) => `${item.id}` === `${status.id}`);
-                if (!isAlreadyIncluded) {
-                  form.setValue('customPolygon', [...values, { ...status, id: typeof status.id === 'number' ? status.id : parseInt(status.id, 10) }]);
-                }
-              } else {
-                const filteredValues = values.filter((item) => `${item.id}` !== `${status.id}`);
-                form.setValue('customPolygon', filteredValues);
-              }
-            }}
-          />
+                    {isChecked && (
+                      <FormField
+                        control={form.control}
+                        name={`customPolygonUrl.${Number(item.id)}`}
+                        render={({ field }) => (
+                          
+                          <FormItem>
+                            <FormLabel>
+                              Add URL
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="url / path"
+                                type="text"
+                                {...field}
+                                onChange={(e) => {
+                                  let values = form.getValues('customPolygon') || [];
+                                  console.log(values);
+                                  console.log('on change', form.getValues('customPolygon'), form.getValues('customPolygonUrl'));
+                                  onFieldChange(field.name, e.target.value);
+                                  field.onChange(e);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+          )) || null}
 
 
           <Button type="submit">Opslaan</Button>
