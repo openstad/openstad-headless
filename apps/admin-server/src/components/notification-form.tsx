@@ -186,7 +186,6 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
 
   useEffect(() => {
     if (fieldValue) {
-      console.log(fieldValue)
       convertMJMLToHTML(nunjucks.renderString(fieldValue, context));
     }
   }, [fieldValue]);
