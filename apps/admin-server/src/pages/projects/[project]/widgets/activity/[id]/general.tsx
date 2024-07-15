@@ -139,7 +139,7 @@ export default function ActivityDisplay(
           name="noActivityTextOther"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Text wanneer er geen activiteit op andere sites is geweest</FormLabel>
+              <FormLabel>Tekst wanneer er geen activiteit op andere sites is geweest</FormLabel>
               <FormControl>
                 <Input
                   defaultValue={field.value}
