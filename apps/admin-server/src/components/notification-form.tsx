@@ -69,9 +69,16 @@ const initialData = `<mjml>
   </mjml>`;
 
 
+const getUserName = () => {
+  if (typeof window !== "undefined") {
+      const user = JSON.parse(sessionStorage.getItem('openstad') as string);
+      return user[Object.keys(user)[0]].openStadUser.name || 'Gebruiker';
+  }
+}
+
 const context = {
-  user: 'John Doe',
-  loginurl: '#',
+  user: getUserName(),
+  loginurl: 'https://openstad.nl/login',
   imagePath: process.env.EMAIL_ASSETS_URL
 };
 
@@ -259,19 +266,19 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
                 control={form.control}
                 name="body"
                 render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Inhoud</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Inhoud van de mail..."
-                          defaultValue={field.value.length > 0 ? field.value : initialData}
-                          rows={20}
-                          onKeyUpCapture={(e) => handleOnChange(e, field)}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                  <FormItem>
+                    <FormLabel>Inhoud</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Inhoud van de mail..."
+                        defaultValue={field.value.length > 0 ? field.value : initialData}
+                        rows={20}
+                        onKeyUpCapture={(e) => handleOnChange(e, field)}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
               <Button type="submit">Opslaan</Button>
