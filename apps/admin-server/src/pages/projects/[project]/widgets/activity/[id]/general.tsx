@@ -99,7 +99,7 @@ export default function ActivityDisplay(
           name="noActivityTextCurrent"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Text wanneer er geen activiteit op de huidige site is geweest</FormLabel>
+              <FormLabel>Tekst wanneer er geen activiteit op de huidige site is geweest</FormLabel>
               <FormControl>
                 <Input
                   defaultValue={field.value}
