@@ -156,7 +156,7 @@ export function Area({
               {properties &&
               <Popup className={'leaflet-popup'}>
                 {properties[index].title && <h3 className="utrecht-heading-3">{properties[index].title}</h3>}
-                {properties[index].url && <a className="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action" href={properties[index].url}>Bekijk wijk</a>}
+                {properties[index].url && <a className="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action" href={properties[index].url}>Lees verder</a>}
               </Popup>
             }
             </Polygon>
