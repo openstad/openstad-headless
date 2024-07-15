@@ -29,31 +29,31 @@ function Account({
   allowUserEdit = true,
   formData = {
     email: {
-      value: 'test@draad.nl',
+      value: '',
       label: 'E-mailadres',
     },
     name: {
-      value: 'John',
+      value: '',
       label: 'Naam',
     },
     straatnaam: {
-      value: 'Nieuwstraat',
+      value: '',
       label: 'Straatnaam',
     },
     huisnummer: {
-      value: '9',
+      value: '',
       label: 'Huisnummer',
     },
     postalCode: {
-      value: '1234AB',
+      value: '',
       label: 'Postcode',
     },
     city: {
-      value: 'Nijkerk',
+      value: '',
       label: 'Woonplaats',
     },
     nickname: {
-      value: 'johndoe12',
+      value: '',
       label: 'Schermnaam',
     }
   },
