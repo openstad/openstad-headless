@@ -10,6 +10,7 @@ public/uploads
 node_modules/
 .env
 .DS_Store
-*.md 
+*.md
 LICENSE
 images/
+documents/

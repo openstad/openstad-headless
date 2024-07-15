@@ -50,6 +50,7 @@ const MapField: FC<MapProps> = ({
     let areaId = props?.map?.areaId || false;
     const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];
 
+
     function calculateCenter(polygon: Point[]) {
         if (!polygon || polygon.length === 0) {
             return undefined;
@@ -103,6 +104,7 @@ const MapField: FC<MapProps> = ({
                   markerIcon={undefined}
                   centerOnEditorMarker={false}
                   autoZoomAndCenter='area'
+                  area={polygon}
                   {...zoom}
               />
             )}

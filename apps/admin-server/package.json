@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@faire/mjml-react": "^3.3.0",
+    "@codemirror/lang-javascript": "^6.2.2",
+    "@codemirror/state": "^6.4.1",
+    "@codemirror/view": "^6.28.4",
     "@hookform/resolvers": "^3.3.1",
     "@openstad-headless/agenda": "file:../../packages/agenda",
     "@openstad-headless/comments": "file:../../packages/comments",
@@ -42,6 +45,8 @@
     "@radix-ui/react-switch": "^1.0.3",
     "@radix-ui/react-tabs": "^1.0.4",
     "@tanstack/react-table": "^8.9.8",
+    "@uiw/codemirror-extensions-langs": "^4.23.0",
+    "@uiw/react-codemirror": "^4.23.0",
     "autoprefixer": "10.4.15",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
