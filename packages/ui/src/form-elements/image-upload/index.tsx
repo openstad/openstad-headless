@@ -89,7 +89,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                 value: uploadedImages,
             });
         }
-    }, [uploadedImages.length]);
+    }, [uploadedImages.length, setImages, setUploadedImages]);
 
     const acceptAttribute = allowedTypes
         ? allowedTypes

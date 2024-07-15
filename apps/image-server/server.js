@@ -184,7 +184,7 @@ const documentMulterConfig = {
       'application/vnd.openxmlformats-officedocument.presentationml.presentation'
     ];
 
-    if (allowedTypes.indexOf(file.mimetype) === -1) {
+    if (file.mimetype && allowedTypes.indexOf(file.mimetype) === -1 && !file.mimetype.startsWith('image/')) {
       req.fileValidationError = 'goes wrong on the mimetype';
       return cb(null, false, new Error('goes wrong on the mimetype'));
     }
