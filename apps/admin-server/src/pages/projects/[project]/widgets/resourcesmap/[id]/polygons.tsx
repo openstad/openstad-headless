@@ -37,7 +37,7 @@ export default function WidgetResourcesMapButton(
 
   async function onSubmit(values: FormData) {
     const customPolygon = values?.customPolygon?.map((item: any) => {
-      const url = values?.customPolygonUrl[item.id];
+      const url = values?.customPolygonUrl[item.id] ?? "";
       return { ...item, url };
     });
 
