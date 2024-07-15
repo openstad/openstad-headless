@@ -163,7 +163,6 @@ const FormMessage = React.forwardRef<
   let body: string | React.ReactNode = '';
 
   if (error && Array.isArray(error)) {
-    console.log ('err', error);
     body = error.map((e) => {
       return Object.keys(e).map((key) => `${key}: ${e[key]?.message}`).join(', ');
     }).join(', ');

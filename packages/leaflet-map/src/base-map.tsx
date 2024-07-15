@@ -56,7 +56,7 @@ const BaseMap = ({
 
   width = '100%',
   height = undefined,
-  customPolygon = [1, 4, 10],
+  customPolygon = [],
   ...props
 }: PropsWithChildren<BaseMapWidgetProps & { onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void }>) => {
 
