@@ -116,6 +116,7 @@ export function Area({
   interface Area {
     id: number;
     name: string;
+    url: string;
   }
   const multiPolygon: any[] = [];
   const properties: Array<any> = [];
@@ -123,10 +124,11 @@ export function Area({
   const filteredAreas = allAreas.filter((item: any) => areaIds?.includes(item.id));
 
   if (filteredAreas) {
-
     filteredAreas.forEach((item: any) => {
       multiPolygon.push(item.polygon);
-      properties.push({ title: item.name });
+    });
+    areas.forEach((item: any) => {
+      properties.push({ title: item.name, url: item.url  });
     });
   }
 
@@ -153,8 +155,8 @@ export function Area({
             >
               {properties &&
               <Popup className={'leaflet-popup'}>
-                {properties[index].title && <h2>{properties[index].title}</h2>}
-                {/* {properties[index].url && <a className="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action" href={properties[index].url}>Bekijk wijk</a>} */}
+                {properties[index].title && <h3 className="utrecht-heading-3">{properties[index].title}</h3>}
+                {properties[index].url && <a className="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action" href={properties[index].url}>Bekijk wijk</a>}
               </Popup>
             }
             </Polygon>
