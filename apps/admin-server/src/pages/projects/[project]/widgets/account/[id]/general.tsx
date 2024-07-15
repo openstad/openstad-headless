@@ -85,7 +85,7 @@ export default function AccountDisplay(
           name="maxLength"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Max aantal tekens</FormLabel>
+              <FormLabel>Maximum aantal tekens</FormLabel>
               <FormControl>
                 <Input
                   defaultValue={field.value}
