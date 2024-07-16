@@ -35,6 +35,7 @@ export type CommentsWidgetProps = BaseProps &
     descriptionMinLength?: number,
     descriptionMaxLength?: number,
     selectedComment?: Number | undefined;
+    customTitle?: string;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<

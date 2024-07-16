@@ -41,7 +41,7 @@ export default function ArgumentsForm(
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">{props.title || 'Formulier'}</Heading>
+        <Heading size="xl">{props.customTitle || 'Formulier'}</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
