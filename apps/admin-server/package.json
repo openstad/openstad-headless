@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@faire/mjml-react": "^3.3.0",
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/state": "^6.4.1",
     "@codemirror/view": "^6.28.4",
@@ -58,7 +59,9 @@
     "leaflet-draw": "^1.0.4",
     "lodash": "^4.17.21",
     "lucide-react": "^0.276.0",
+    "mjml-browser": "^4.15.3",
     "next": "^14.2.3",
+    "nunjucks": "^3.2.4",
     "pino": "^8.15.1",
     "postcss": "^8.4.38",
     "radix-ui": "^1.0.1",
@@ -82,6 +85,7 @@
     "@types/leaflet": "^1.9.6",
     "@types/leaflet-draw": "^1.0.9",
     "@types/lodash": "^4.14.202",
+    "@types/mjml-browser": "^4.15.0",
     "@types/node": "20.5.0",
     "@types/react": "18.2.25",
     "@types/react-csv": "^1.1.8",
