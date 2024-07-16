@@ -19,6 +19,7 @@ import useResources from '@/hooks/use-resources';
 import InfoDialog from "@/components/ui/info-hover";
 import { useEffect, useState } from "react";
 import * as React from "react";
+import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
@@ -27,7 +28,8 @@ const formSchema = z.object({
   zoom: z.number().optional(),
   minZoom: z.number().optional(),
   maxZoom: z.number().optional(),
-  url: z.string().optional(),
+  urlVisible: z.boolean().optional(),
+  accessibilityUrl: z.string().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -37,6 +39,7 @@ export default function DocumentGeneral(
 ) {
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
   const [disabled, setDisabled] = useState(false);
+  const [accessibilityUrlVisible, setAccessibilityUrlVisible] = useState(props.accessibilityUrlVisible || false);
 
   function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
@@ -54,7 +57,8 @@ export default function DocumentGeneral(
       zoom: props.zoom || 1,
       minZoom: props.minZoom || -6,
       maxZoom: props.maxZoom || 10,
-      url: props.url || '',
+      accessibilityUrlVisible: props.accessibilityUrlVisible || false,
+      accessibilityUrl: props.accessibilityUrl || '',
     },
   });
 
@@ -259,24 +263,47 @@ export default function DocumentGeneral(
 
         <FormField
           control={form.control}
-          name="url"
+          name="accessibilityUrlVisible"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Pagina met begleidende tekst</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="/path/to/page"
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
-                  }}
-                />
-              </FormControl>
+              <FormLabel>
+                Heeft een pagina met begeleidende tekst?
+              </FormLabel>
+              <Switch.Root
+                className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                onCheckedChange={(e: boolean) => {
+                  field.onChange(e);
+                  setAccessibilityUrlVisible(e)
+                }}
+                checked={field.value}>
+                <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+              </Switch.Root>
+              <FormMessage />
             </FormItem>
           )}
         />
-
+        {accessibilityUrlVisible && (
+          <FormField
+            control={form.control}
+            name="accessibilityUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Link naar pagina met begeleidende tekst</FormLabel>
+                <em className="text-xs">Maak gebruik van =[id] om de link dynamisch te maken. (pad/naar=[id])</em>
+                <FormControl>
+                  <Input
+                    placeholder="/path/to/page?openstadResourceId=[id]"
+                    defaultValue={field.value}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      onFieldChange(field.name, e.target.value);
+                    }}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        )}
         <Button
           type="submit"
           disabled={disabled}

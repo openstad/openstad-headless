@@ -40,7 +40,8 @@ export type DocumentMapProps = BaseProps &
     sentiment?: string;
     canComment?: boolean;
     requiredUserRole?: string;
-    url?: string;
+    accessibilityUrlVisible?: boolean;
+    accessibilityUrl?: string;
   };
 
 
@@ -53,6 +54,7 @@ function DocumentMap({
   documentWidth = 1920,
   documentHeight = 1080,
   sentiment = 'no sentiment',
+  accessibilityUrlVisible,
   ...props
 }: DocumentMapProps) {
 
@@ -230,12 +232,22 @@ function DocumentMap({
     );
   };
 
+  const getUrl = () => {
+    if(props.accessibilityUrl?.includes('[id]')) {
+      return props.accessibilityUrl?.split('[id]')[0] + resourceId + '#doc=' + window.location.href.split('/').reverse()[0];
+    }else{
+      return props.accessibilityUrl + '#doc=' + window.location.href.split('/').reverse()[0];
+    }
+  }
+
+
+
   return (
     <div className="documentMap--container">
       <div className="content" tabIndex={0} ref={contentRef}>
         <div className="documentMap--header">
           <div className="url-list">
-            {props.url ? <Link href={props.url} title="Bekijk tekstuele versie" target="_blank" id={randomId}>Bekijk tekstuele versie</Link> : null}
+            {props.accessibilityUrl ? <Link href={props.accessibilityUrl} title="Bekijk tekstuele versie" target="_blank" id={randomId}>Bekijk tekstuele versie</Link> : null}
             {originalID !== undefined ? <Link href={getOriginalUrl(originalID)} title="Bekijk originele versie" id={randomId}>Bekijk de versie met reacties</Link> : null}
           </div>
           {originalID === undefined && (
