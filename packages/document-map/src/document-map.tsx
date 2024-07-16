@@ -42,6 +42,10 @@ export type DocumentMapProps = BaseProps &
     requiredUserRole?: string;
     accessibilityUrlVisible?: boolean;
     accessibilityUrl?: string;
+    accessibilityUrlText?: string;
+    definitiveUrlVisible?: boolean;
+    definitiveUrl?: string;
+    definitiveUrlText?: string;
   };
 
 
@@ -55,6 +59,7 @@ function DocumentMap({
   documentHeight = 1080,
   sentiment = 'no sentiment',
   accessibilityUrlVisible,
+  definitiveUrlVisible,
   ...props
 }: DocumentMapProps) {
 
@@ -140,10 +145,14 @@ function DocumentMap({
   const generateRandomId = () => {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   }
+  const [backUrl, setBackUrl] = useState<string>();
 
 
   useEffect(() => {
     setRandomId(generateRandomId());
+    if (window.location.hash.includes('#doc')) {
+      setBackUrl(window.location.hash.split('=')[1] + '=' + window.location.hash.split('=')[2]);
+    }
   }, []);
 
   let args = {
@@ -167,14 +176,6 @@ function DocumentMap({
       setOriginalID(resource.extraData?.originalId)
     }
   }, [resource]);
-
-
-  const getOriginalUrl = (originalID: string) => {
-
-    console.log(window.location.pathname + window.location.search.split('=')[0] + '=' + originalID)
-
-    return window.location.pathname + window.location.search.split('=')[0] + '=' + originalID
-  }
 
 
   if (canComment === false) args.canComment = canComment;
@@ -233,22 +234,32 @@ function DocumentMap({
   };
 
   const getUrl = () => {
-    if(props.accessibilityUrl?.includes('[id]')) {
+    if (props.accessibilityUrl?.includes('[id]')) {
       return props.accessibilityUrl?.split('[id]')[0] + resourceId + '#doc=' + window.location.href.split('/').reverse()[0];
-    }else{
+    } else {
       return props.accessibilityUrl + '#doc=' + window.location.href.split('/').reverse()[0];
     }
   }
 
+  const getDefinitiveUrl = (originalID: string) => {
+    if (props.definitiveUrl?.includes('[id]')) {
+      return props.definitiveUrl?.split('[id]')[0] + originalID + '#doc=' + window.location.href.split('/').reverse()[0];
+    } else {
+      return props.definitiveUrl + '#doc=' + window.location.href.split('/').reverse()[0];
+    }
+  }
 
 
   return (
     <div className="documentMap--container">
       <div className="content" tabIndex={0} ref={contentRef}>
         <div className="documentMap--header">
-          <div className="url-list">
-            {props.accessibilityUrl ? <Link href={props.accessibilityUrl} title="Bekijk tekstuele versie" target="_blank" id={randomId}>Bekijk tekstuele versie</Link> : null}
-            {originalID !== undefined ? <Link href={getOriginalUrl(originalID)} title="Bekijk originele versie" id={randomId}>Bekijk de versie met reacties</Link> : null}
+          <div className='url-container'>
+            {backUrl ? <Link href={backUrl} title="Terug naar overzicht" id={randomId}>Terug</Link> : null}
+            <div className="url-list">
+              {accessibilityUrlVisible ? <Link href={getUrl()} title="Bekijk tekstuele versie" id={randomId}>{props.accessibilityUrlText}</Link> : null}
+              {definitiveUrlVisible && originalID !== undefined ? <Link href={getDefinitiveUrl(originalID)} title="Bekijk originele versie" id={randomId}>{props.definitiveUrlText}</Link> : null}
+            </div>
           </div>
           {originalID === undefined && (
             <div className='toggleMarkers'>
