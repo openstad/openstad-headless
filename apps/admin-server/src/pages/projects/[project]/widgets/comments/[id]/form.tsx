@@ -41,11 +41,11 @@ export default function ArgumentsForm(
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Formulier</Heading>
+        <Heading size="xl">{props.title || 'Formulier'}</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 lg:w-1/2">
+          className="space-y-4">
           <FormField
             control={form.control}
             name="formIntro"

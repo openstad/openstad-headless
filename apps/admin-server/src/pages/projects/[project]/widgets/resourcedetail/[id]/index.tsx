@@ -140,20 +140,41 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                     />
                   </TabsContent>
                   <TabsContent value="form" className="p-0">
-                    <ArgumentsForm
-                      {...extractConfig<
-                        ResourceDetailWidgetProps,
-                        ArgumentWidgetTabProps
-                      >({
-                        subWidgetKey: 'commentsWidget',
-                        previewConfig: previewConfig,
-                        updateConfig,
-                        updatePreview: (config) => console.log(config),
-                        extraChildConfig: {
-                          resourceId: previewConfig.resourceId,
-                        },
-                      })}
-                    />
+                    <div className="grid grid-cols-2">
+
+                      <ArgumentsForm
+                        title={'Formulier Links'}
+                        {...extractConfig<
+                          ResourceDetailWidgetProps,
+                          ArgumentWidgetTabProps
+                        >({
+                          subWidgetKey: 'commentsWidget',
+                          previewConfig: previewConfig,
+                          updateConfig,
+                          updatePreview: (config) => console.log(config),
+                          extraChildConfig: {
+                            resourceId: previewConfig.resourceId,
+                          },
+                        })}
+                      />
+
+                      <ArgumentsForm
+                        title={'Formulier Rechts'}
+                        {...extractConfig<
+                          ResourceDetailWidgetProps,
+                          ArgumentWidgetTabProps
+                        >({
+                          subWidgetKey: 'commentsWidget_multiple',
+                          previewConfig: previewConfig,
+                          updateConfig,
+                          updatePreview: (config) => console.log(config),
+                          extraChildConfig: {
+                            resourceId: previewConfig.resourceId,
+                          },
+                        })}
+                      />
+                    </div>
+
                   </TabsContent>
                 </Tabs>
               )}
