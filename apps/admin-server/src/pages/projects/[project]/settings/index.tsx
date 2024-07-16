@@ -34,6 +34,7 @@ const formSchema = z.object({
     message: 'De datum moet nog niet geweest zijn!',
   }),
   cssUrl: z.string().optional(),
+  nldsUrl: z.string().optional(),
   // We don't want to restrict this URL too much
   url: z.string().regex(/^(?:([a-z0-9.:]+))?$/g, {
     message: 'De URL mag alleen kleine letters, cijfers en punten bevatten. Tip: gebruik geen https:// voor de URL'
@@ -61,16 +62,17 @@ export default function ProjectSettings() {
 
 
       return {
-      name: data?.name || '',
-      endDate: data?.config?.project?.endDate
-        ? new Date(data?.config?.project?.endDate)
-        : new Date(currentDate.getFullYear(), currentDate.getMonth() + 3),
-      cssUrl: data?.config?.project?.cssUrl || '',
-      url: data?.url || '',
-      basicAuthActive: data?.config?.basicAuth?.active || false,
-      username: data?.config?.basicAuth?.username || '',
-      password: data?.config?.basicAuth?.password || '',
-    }
+        name: data?.name || '',
+        endDate: data?.config?.project?.endDate
+          ? new Date(data?.config?.project?.endDate)
+          : new Date(currentDate.getFullYear(), currentDate.getMonth() + 3),
+        nldsUrl: data?.config?.project?.nldsUrl || '',
+        cssUrl: data?.config?.project?.cssUrl || '',
+        url: data?.url || '',
+        basicAuthActive: data?.config?.basicAuth?.active || false,
+        username: data?.config?.basicAuth?.username || '',
+        password: data?.config?.basicAuth?.password || '',
+      }
     },
     [data]
   );
@@ -107,6 +109,7 @@ export default function ProjectSettings() {
         {
           project: {
             endDate: values.endDate,
+            nldsUrl: values.nldsUrl,
             cssUrl: values.cssUrl
           },
           basicAuth: {
@@ -199,6 +202,20 @@ export default function ProjectSettings() {
                     />
                     <FormField
                       control={form.control}
+                      name="nldsUrl"
+                      render={({ field }) => (
+                        <FormItem className="col-span-full md:col-span-1 flex flex-col">
+                          <FormLabel>Geef de URL voor de NLDS design tokens (css bestand)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Url" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
                       name="cssUrl"
                       render={({ field }) => (
                         <FormItem className="col-span-full md:col-span-1 flex flex-col">
@@ -241,28 +258,28 @@ export default function ProjectSettings() {
                       />
                     ) : null}
                     <div>
-                    <FormField
+                      <FormField
                         control={form.control}
                         name="basicAuthActive"
-                        render={ function ({ field }) {
+                        render={function ({ field }) {
                           setBasicAuthActive(field.value ?? false);
-                          return(
-                          <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                            <FormLabel>
-                              Wil je de website beveiligen met een gebruikersnaam en wachtwoord?
-                            </FormLabel>
-                            <Switch.Root
-                              className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
-                              onCheckedChange={(e: boolean) => {
-                                setBasicAuthActive(!basicAuthActive)
-                                field.onChange(e);
-                              }}
-                              checked={field.value}>
-                              <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                            </Switch.Root>
-                        </FormItem>)
-                      }}
-                    />
+                          return (
+                            <FormItem className="col-span-full md:col-span-1 flex flex-col">
+                              <FormLabel>
+                                Wil je de website beveiligen met een gebruikersnaam en wachtwoord?
+                              </FormLabel>
+                              <Switch.Root
+                                className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
+                                onCheckedChange={(e: boolean) => {
+                                  setBasicAuthActive(!basicAuthActive)
+                                  field.onChange(e);
+                                }}
+                                checked={field.value}>
+                                <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                              </Switch.Root>
+                            </FormItem>)
+                        }}
+                      />
                     </div>
                     {basicAuthActive ? (
                       <>

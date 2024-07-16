@@ -4,6 +4,12 @@
 </style>
 {% endif %}
 
+{% if data.global.customNldsLink %}
+  {% for link in data.global.customNldsLink %}
+    <link rel="stylesheet" href="{{ link.item }}">
+  {% endfor %}
+{% endif %}
+
 {% if data.global.customCssLink %}
   {% for link in data.global.customCssLink %}
     <link rel="stylesheet" href="{{ link.item }}">
