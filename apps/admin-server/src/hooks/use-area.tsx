@@ -3,7 +3,7 @@ import useSWR from 'swr';
 export default function useArea(areaId?: string) {
   let url = `/api/openstad/api/area/${areaId}`;
 
-  const areaSwr = useSWR(areaId ? url : null);
+  const areaSwr = useSWR( url );
 
   async function updateArea(name: string, geoJSON: string) {
     const res = await fetch(url, {
