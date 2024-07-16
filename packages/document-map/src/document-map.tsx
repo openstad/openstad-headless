@@ -46,6 +46,7 @@ export type DocumentMapProps = BaseProps &
     definitiveUrlVisible?: boolean;
     definitiveUrl?: string;
     definitiveUrlText?: string;
+    statusId?: string;
   };
 
 
@@ -60,6 +61,7 @@ function DocumentMap({
   sentiment = 'no sentiment',
   accessibilityUrlVisible,
   definitiveUrlVisible,
+  statusId,
   ...props
 }: DocumentMapProps) {
 
@@ -164,6 +166,7 @@ function DocumentMap({
 
   const [canComment, setCanComment] = useState(args.canComment)
   const [originalID, setOriginalID] = useState(undefined)
+  const [isDefinitive, setIsDefinitive] = useState<boolean>()
   useEffect(() => {
     if (!resource) return;
     let statuses = resource.statuses || [];
@@ -171,10 +174,14 @@ function DocumentMap({
       if (status.extraFunctionality?.canComment === false) {
         setCanComment(false)
       }
+      if(status.id === Number(statusId)) {
+        setIsDefinitive(true)
+      }
     }
     if (resource.extraData?.originalId) {
       setOriginalID(resource.extraData?.originalId)
     }
+
   }, [resource]);
 
 
@@ -258,10 +265,10 @@ function DocumentMap({
             {backUrl ? <Link href={backUrl} title="Terug naar overzicht" id={randomId}>Terug</Link> : null}
             <div className="url-list">
               {accessibilityUrlVisible ? <Link href={getUrl()} title="Bekijk tekstuele versie" id={randomId}>{props.accessibilityUrlText}</Link> : null}
-              {definitiveUrlVisible && originalID !== undefined ? <Link href={getDefinitiveUrl(originalID)} title="Bekijk originele versie" id={randomId}>{props.definitiveUrlText}</Link> : null}
+              {definitiveUrlVisible && originalID !== undefined && isDefinitive ? <Link href={getDefinitiveUrl(originalID)} title="Bekijk originele versie" id={randomId}>{props.definitiveUrlText}</Link> : null}
             </div>
           </div>
-          {originalID === undefined && (
+          {!isDefinitive && (
             <div className='toggleMarkers'>
               <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
               <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
@@ -274,7 +281,7 @@ function DocumentMap({
           {resource.description ? <Paragraph>{resource.description}</Paragraph> : null}
         </section>
 
-        {originalID === undefined && (
+        {!isDefinitive && (
           <Comments
             {...props}
             resourceId={resourceId || ''}
@@ -302,7 +309,7 @@ function DocumentMap({
             bounds={imageBounds}
             aria-describedby={randomId}
           />
-          {popupPosition && originalID === undefined && (
+          {popupPosition && !isDefinitive && (
             <Popup position={popupPosition}>
               {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
                 <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>

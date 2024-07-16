@@ -15,6 +15,7 @@ import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
 import DocumentGeneral from './general';
+import DocumentLinks from './links';
 
 export const getServerSideProps = withApiUrl;
 
@@ -67,11 +68,17 @@ export default function WidgetDateCountdownBar({
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
+              <TabsTrigger value="links">Links</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig ?
                 <DocumentGeneral {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
+                : null}
+            </TabsContent>
+            <TabsContent value="links" className="p-0">
+              {previewConfig ?
+                <DocumentLinks {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
                 : null}
             </TabsContent>
             <TabsContent value="publish" className="p-0">
