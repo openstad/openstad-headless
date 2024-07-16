@@ -288,7 +288,7 @@ export default function DocumentGeneral(
             name="url"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Link naar pagina</FormLabel>
+                <FormLabel>Link naar pagina met begeleidende tekst</FormLabel>
                 <em className="text-xs">Maak gebruik van =[id] om de link dynamisch te maken. (pad/naar=[id])</em>
                 <FormControl>
                   <Input
