@@ -147,9 +147,6 @@ function ResourceDetail({
     }
   };
 
-  console.log(props.commentsWidget?.useSentiments?.length)
-
-
   return (
     <section>
       <div
