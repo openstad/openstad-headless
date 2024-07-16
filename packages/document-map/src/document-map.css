@@ -126,3 +126,10 @@
 .--hideMarkers .leaflet-container .leaflet-marker-pane .leaflet-marker-icon {
   display: none;
 }
+
+
+.url-list{
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}

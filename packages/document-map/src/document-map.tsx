@@ -152,6 +152,7 @@ function DocumentMap({
   const { data: currentUser } = datastore.useCurrentUser({ ...args });
 
   const [canComment, setCanComment] = useState(args.canComment)
+  const [originalID, setOriginalID] = useState(undefined)
   useEffect(() => {
     if (!resource) return;
     let statuses = resource.statuses || [];
@@ -160,7 +161,20 @@ function DocumentMap({
         setCanComment(false)
       }
     }
+    if (resource.extraData?.originalId) {
+      setOriginalID(resource.extraData?.originalId)
+    }
   }, [resource]);
+
+
+  const getOriginalUrl = (originalID: string) => {
+
+    console.log(window.location.pathname + window.location.search.split('=')[0] + '=' + originalID)
+
+    return window.location.pathname + window.location.search.split('=')[0] + '=' + originalID
+  }
+
+
   if (canComment === false) args.canComment = canComment;
 
   interface ExtendedMarkerProps extends MarkerProps {
@@ -220,11 +234,16 @@ function DocumentMap({
     <div className="documentMap--container">
       <div className="content" tabIndex={0} ref={contentRef}>
         <div className="documentMap--header">
-          {props.url ? <Link href={props.url} title="Bekijk tekstuele versie" target="_blank" id={randomId}>Bekijk tekstuele versie.</Link> : null}
-          <div className='toggleMarkers'>
-            <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
-            <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
+          <div className="url-list">
+            {props.url ? <Link href={props.url} title="Bekijk tekstuele versie" target="_blank" id={randomId}>Bekijk tekstuele versie</Link> : null}
+            {originalID !== undefined ? <Link href={getOriginalUrl(originalID)} title="Bekijk originele versie" id={randomId}>Bekijk de versie met reacties</Link> : null}
           </div>
+          {originalID === undefined && (
+            <div className='toggleMarkers'>
+              <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
+              <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
+            </div>
+          )}
         </div>
         <section className="content-intro">
           {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
@@ -232,12 +251,14 @@ function DocumentMap({
           {resource.description ? <Paragraph>{resource.description}</Paragraph> : null}
         </section>
 
-        <Comments
-          {...props}
-          resourceId={resourceId || ''}
-          selectedComment={selectedCommentIndex}
-          showForm={false}
-        />
+        {originalID === undefined && (
+          <Comments
+            {...props}
+            resourceId={resourceId || ''}
+            selectedComment={selectedCommentIndex}
+            showForm={false}
+          />
+        )}
       </div>
       <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''}`}>
         <MapContainer center={[0, 0]} crs={CRS.Simple} maxZoom={maxZoom} minZoom={minZoom} zoom={zoom} >
@@ -258,7 +279,7 @@ function DocumentMap({
             bounds={imageBounds}
             aria-describedby={randomId}
           />
-          {popupPosition && (
+          {popupPosition && originalID === undefined && (
             <Popup position={popupPosition}>
               {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
                 <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
