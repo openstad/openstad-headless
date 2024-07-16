@@ -48,9 +48,10 @@ export default function ProjectAreaEdit() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const area = await updateArea(values.name, values.geoJSON);
+
     if (area) {
       toast.success('Polygoon aangepast!');
-      router.push(`/projects/${project}/areas`);
+      // router.push(`/projects/${project}/areas`);
     } else {
       toast.error('De polygoon die is meegegeven lijkt niet helemaal te kloppen.')
     }
