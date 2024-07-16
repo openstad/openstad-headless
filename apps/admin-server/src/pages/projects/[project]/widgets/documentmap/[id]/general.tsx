@@ -292,7 +292,7 @@ export default function DocumentGeneral(
                 <em className="text-xs">Maak gebruik van =[id] om de link dynamisch te maken. (pad/naar=[id])</em>
                 <FormControl>
                   <Input
-                    placeholder="/path/to/page"
+                    placeholder="/path/to/page?openstadResourceId=[id]"
                     defaultValue={field.value}
                     onChange={(e) => {
                       field.onChange(e);
