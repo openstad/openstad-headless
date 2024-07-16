@@ -29,7 +29,7 @@ const formSchema = z.object({
   minZoom: z.number().optional(),
   maxZoom: z.number().optional(),
   urlVisible: z.boolean().optional(),
-  url: z.string().optional(),
+  accessibilityUrl: z.string().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -39,7 +39,7 @@ export default function DocumentGeneral(
 ) {
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
   const [disabled, setDisabled] = useState(false);
-  const [urlVisible, setUrlVisible] = useState(props.urlVisible || false);
+  const [accessibilityUrlVisible, setAccessibilityUrlVisible] = useState(props.accessibilityUrlVisible || false);
 
   function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
@@ -57,8 +57,8 @@ export default function DocumentGeneral(
       zoom: props.zoom || 1,
       minZoom: props.minZoom || -6,
       maxZoom: props.maxZoom || 10,
-      urlVisible: props.urlVisible || false,
-      url: props.url || '',
+      accessibilityUrlVisible: props.accessibilityUrlVisible || false,
+      accessibilityUrl: props.accessibilityUrl || '',
     },
   });
 
@@ -263,7 +263,7 @@ export default function DocumentGeneral(
 
         <FormField
           control={form.control}
-          name="urlVisible"
+          name="accessibilityUrlVisible"
           render={({ field }) => (
             <FormItem>
               <FormLabel>
@@ -273,7 +273,7 @@ export default function DocumentGeneral(
                 className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                 onCheckedChange={(e: boolean) => {
                   field.onChange(e);
-                  setUrlVisible(e)
+                  setAccessibilityUrlVisible(e)
                 }}
                 checked={field.value}>
                 <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
@@ -282,10 +282,10 @@ export default function DocumentGeneral(
             </FormItem>
           )}
         />
-        {urlVisible && (
+        {accessibilityUrlVisible && (
           <FormField
             control={form.control}
-            name="url"
+            name="accessibilityUrl"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Link naar pagina met begeleidende tekst</FormLabel>
