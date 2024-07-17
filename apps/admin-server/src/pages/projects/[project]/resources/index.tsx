@@ -9,26 +9,22 @@ import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { toast } from 'react-hot-toast';
 import { sortTable, searchTable } from '@/components/ui/sortTable';
+import * as XLSX from 'xlsx';
 
 export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
   const { data, error, isLoading, remove } = useResources(project as string);
 
-  const exportData = (data: BlobPart, fileName: string, type: string) => {
-    // Create a link and download the file
-    const blob = new Blob([data], { type });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
+  const exportData = (data: any[], fileName: string) => {
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
 
+    XLSX.writeFile(workbook, fileName);
+  };
   function transform() {
-    const jsonData = JSON.stringify(data);
-    exportData(jsonData, `resources.json`, "application/json");
+    exportData(data, `resources.xlsx`);
   }
 
   const [filterData, setFilterData] = useState(data);
@@ -84,7 +80,7 @@ export default function ProjectResources() {
               <option value="no">Gestemd op nee</option>
               <option value="createdAt">Datum aangemaakt</option>
 
-              
+
             </select>
             <input
               type="text"
