@@ -46,7 +46,6 @@ export default function Users() {
     XLSX.writeFile(workbook, fileName);
   };
   function transform() {
-    console.log(data)
     exportData(data, `gebruikers.xlsx`);
   }
 
