@@ -16,6 +16,7 @@ import { MoreHorizontal } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useUniqueCodes from '@/hooks/use-unique-codes';
 import { searchTable, sortTable } from '@/components/ui/sortTable';
+import * as XLSX from 'xlsx';
 
 const headers = [
   { label: "ID", key: "id" },
@@ -31,6 +32,17 @@ export default function ProjectCodes() {
   const [filterData, setFilterData] = useState(uniquecodes?.data);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
+
+  const exportData = (data: any[], fileName: string) => {
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    XLSX.writeFile(workbook, fileName);
+  };
+  function transform() {
+    exportData(uniquecodes.data, `stemcodes.xlsx`);
+  }
 
   useEffect(() => {
     setFilterData(uniquecodes?.data);
@@ -53,17 +65,15 @@ export default function ProjectCodes() {
           },
         ]}
         action={
-          <div className="flex flex-row w-full md:w-auto my-auto">
+          <div className='flex flex-row w-full md:w-auto my-auto gap-4'>
             <Link href={`/projects/${project}/unique-codes/create`}>
               <Button variant="default" className="text-xs p-2 w-fit">
                 <Plus size="20" className="hidden md:flex" />
                 Stemcodes toevoegen
               </Button>
             </Link>
-            <Button variant="default" className="text-xs p-2 w-fit">
-              <CSVLink data={uniquecodes.data} headers={headers}>
-                Exporteer stemcodes
-              </CSVLink>
+            <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
+              Exporteer stemcodes
             </Button>
           </div>
         }>
