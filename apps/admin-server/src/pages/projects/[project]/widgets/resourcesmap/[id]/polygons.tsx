@@ -61,8 +61,8 @@ export default function WidgetResourcesMapButton(
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-      <Heading size="xl">Polygonen</Heading>
-      <Separator className="my-4" />
+        <Heading size="xl">Polygonen</Heading>
+        <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4 lg:w-1/2">
@@ -85,15 +85,17 @@ export default function WidgetResourcesMapButton(
                           checked={isChecked}
                           onCheckedChange={(checked) => {
                             let values = form.getValues('customPolygon') || [];
-
+                            
                             if (checked) {
                               if (!values.some(obj => obj.id === Number(item.id))) {
                                 const { name } = item;
                                 form.setValue('customPolygon', [...values, { name, id: Number(item.id) }]);
+                                props.onFieldChanged(field.name, [...values, { name, id: Number(item.id) }]);
                               }
                             } else {
                               const filteredValues = values.filter(obj => obj.id !== Number(item.id));
                               form.setValue('customPolygon', filteredValues);
+                              props.onFieldChanged('customPolygon', filteredValues);
                             }
                           }}
                         />
