@@ -63,6 +63,10 @@ export type ResourceDetailWidgetProps = {
       CommentsWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
+    commentsWidget_multiple?: Omit<
+    CommentsWidgetProps,
+    keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+  >;
     resourceDetailMap?: Omit<
       ResourceDetailMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -142,7 +146,6 @@ function ResourceDetail({
       return <div className="back-url"><Link href={url}>Terug naar het document</Link></div>
     }
   };
-
 
   return (
     <section>
@@ -338,17 +341,29 @@ function ResourceDetail({
       {Array.isArray(props.commentsWidget?.useSentiments) &&
         props.commentsWidget?.useSentiments?.length ? (
         <section className="resource-detail-comments-container">
-          {props.commentsWidget?.useSentiments?.map((sentiment) => (
+          <Comments
+            {...props}
+            resourceId={resourceId || ''}
+            title={props.commentsWidget?.title}
+            emptyListText={props.commentsWidget?.emptyListText}
+            formIntro={props.commentsWidget?.formIntro}
+            placeholder={props.commentsWidget?.placeholder}
+            sentiment={props.commentsWidget?.useSentiments[0]}
+          />
+
+          {props.commentsWidget?.useSentiments?.length > 1 && (
             <Comments
               {...props}
               resourceId={resourceId || ''}
-              title={props.commentsWidget?.title}
+              title={props.commentsWidget_multiple?.title}
               emptyListText={props.commentsWidget?.emptyListText}
-              formIntro={props.commentsWidget?.formIntro}
-              placeholder={props.commentsWidget?.placeholder}
-              sentiment={sentiment}
+              formIntro={props.commentsWidget_multiple?.formIntro}
+              placeholder={props.commentsWidget_multiple?.placeholder}
+              sentiment={props.commentsWidget?.useSentiments[1]}
             />
-          ))}
+          )}
+
+
         </section>
       ) : null}
     </section>
