@@ -96,3 +96,9 @@
 .filter-button.--up:after{
   transform: translateY(-50%) rotate(180deg);
 }
+
+.email-iframe{
+  height: 100%;
+  width: 100%;
+  border: solid 1px #eee;
+}

@@ -118,7 +118,12 @@ export default function WidgetResourceOverviewSorting(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Standaard manier van sorteren.</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange;
+                    props.onFieldChanged(field.name, value);
+                  }}
+                  value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Nieuwste eerst" />
@@ -165,20 +170,35 @@ export default function WidgetResourceOverviewSorting(
                                   ) > -1
                                 }
                                 onCheckedChange={(checked: any) => {
+
                                   return checked
-                                    ? field.onChange([
+                                    ? (
+                                      props.onFieldChanged(field.name, [
                                         ...field.value,
                                         {
                                           value: item.value,
                                           label: item.label,
                                         },
-                                      ])
-                                    : field.onChange(
+                                      ]),
+                                      field.onChange([
+                                        ...field.value,
+                                        {
+                                          value: item.value,
+                                          label: item.label,
+                                        },
+                                      ],
+                                      ))
+                                    : (
+                                      props.onFieldChanged(field.name, field.value?.filter(
+                                        (val) => val.value !== item.value,
+                                      )),
+                                      field.onChange(
                                         field.value?.filter(
-                                          (val) => val.value !== item.value
+                                          (val) => val.value !== item.value,
                                         )
-                                      );
+                                      ));
                                 }}
+
                               />
                             </FormControl>
                             <FormLabel className="font-normal">
