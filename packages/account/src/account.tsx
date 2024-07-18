@@ -121,6 +121,11 @@ function Account({
       delete copyObj.straatnaam; // Remove straatnaam from the object
     }
 
+    if(copyObj?.nickname !== undefined){
+      copyObj.nickName = copyObj.nickname;
+      delete copyObj.nickname;
+    }
+    
     // only get values and add id using the modified copyObj
     let updatedData = {
       ...Object.fromEntries(
@@ -168,7 +173,7 @@ function Account({
           },
           postalCode: {
             label: prev?.postalCode?.label,
-            value: currentUser?.data?.postalCode,
+            value: currentUser?.data?.postcode,
           },
           city: {
             label: prev?.city?.label,
@@ -176,7 +181,7 @@ function Account({
           },
           nickname: {
             label: prev?.nickname?.label,
-            value: currentUser?.data?.nickname,
+            value: currentUser?.data?.nickName,
           }
         }
       });

@@ -65,10 +65,9 @@ export default {
       postcode: user.postalCode,
       name: user.name,
       fullName: user.name,
-      displayName: user.name,
+      displayName: user.nickName,
       address: user.address,
       city: user.city,
-      nickName: user.nickname,
     }
 
     let json = await this.fetch(url, {
