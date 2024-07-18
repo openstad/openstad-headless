@@ -22,8 +22,6 @@ function Carousel({ images, title, size = 'large', fit = 'cover' }: Item) {
   const image = JSON.parse(images);
   const titleVisible = title === 'true' ? true : false;
 
-  console.log(title)
-
   const getSize = (size: any) => {
     switch (size) {
       case 'small':
