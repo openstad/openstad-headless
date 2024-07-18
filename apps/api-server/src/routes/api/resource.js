@@ -87,6 +87,8 @@ router.all('*', function (req, res, next) {
 
   if (req.query.tags) {
     let tags = req.query.tags;
+    // if tags is not an array, make it an array
+    if (!Array.isArray(tags)) tags = [tags];
     req.scope.push({ method: ['selectTags', tags] });
     req.scope.push('includeTags');
   }
@@ -326,11 +328,12 @@ router
   .post(async function (req, res, next) {
     const sendConfirmationToUser = typeof(req.body['confirmationUser']) !== 'undefined' ? req.body['confirmationUser'] : false;
     const sendConfirmationToAdmin = typeof(req.body['confirmationAdmin']) !== 'undefined' ? req.body['confirmationAdmin'] : false;
+
     res.json(req.results);
     if (!req.query.nomail && req.body['publishDate']) {
-      if (sendConfirmationToAdmin) {
-        const tags = await req.results.getTags();
-        
+      const tags = await req.results.getTags();
+      if(tags && tags.length > 0){
+        // Convert to csv string
         const emailReceivers = (await Promise.all(tags.flatMap(async (tag) => {
           const {useDifferentSubmitAddress, newSubmitAddress} = await tag.dataValues;
           if(useDifferentSubmitAddress && newSubmitAddress !== null){
@@ -339,16 +342,30 @@ router
           return [];
         }))).filter(data => data !== null && data.length > 0).flat();
 
+        if(emailReceivers.length > 0){
+          db.Notification.create({
+            type: "new published resource - admin update",
+            projectId: req.project.id,
+            data: {
+              userId: req.user.id,
+              resourceId: req.results.id,
+              emailReceivers: emailReceivers
+            }
+          })
+        }
+      }
+
+      if (sendConfirmationToAdmin) {
         db.Notification.create({
           type: "new published resource - admin update",
           projectId: req.project.id,
           data: {
             userId: req.user.id,
             resourceId: req.results.id,
-            emailReceivers: emailReceivers
           }
         })
       }
+      
       if (sendConfirmationToUser) {
         db.Notification.create({
           type: "new published resource - user feedback",

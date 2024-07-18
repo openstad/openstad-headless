@@ -79,7 +79,8 @@ export default function ProjectTagEdit() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if(values.useDifferentSubmitAddress && values.emails !== undefined && values.emails.length > 0) {
-      values.newSubmitAddress = values.emails.map((email: { address: any; }) => email.address).join(',');
+      const csv = values.emails.map((email: { address: any; }) => email.address).join(',');
+      values.newSubmitAddress = csv;
     }
 
     const tag = await updateTag(

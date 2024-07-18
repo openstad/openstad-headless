@@ -14,8 +14,7 @@ import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
-  Paragraph,
-  Heading, Heading2, ButtonGroup, ButtonLink,
+  Paragraph, Link, Heading, Heading2, ButtonGroup, ButtonLink,
 } from '@utrecht/component-library-react';
 import React from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
@@ -47,9 +46,9 @@ type booleanProps = {
 };
 
 export type ResourceDetailWidgetProps = {
-    documentsTitle?: string;
-    documentsDesc?: string;
-  } &
+  documentsTitle?: string;
+  documentsDesc?: string;
+} &
   BaseProps &
   ProjectSettingProps & {
     projectId?: string;
@@ -64,6 +63,10 @@ export type ResourceDetailWidgetProps = {
       CommentsWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
+    commentsWidget_multiple?: Omit<
+    CommentsWidgetProps,
+    keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+  >;
     resourceDetailMap?: Omit<
       ResourceDetailMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -136,6 +139,14 @@ function ResourceDetail({
 
   const defaultImage = !!tagDefaultResourceImage ? [{ url: tagDefaultResourceImage }] : [{ url: '' }];
 
+  const getPageHash = () => {
+    if (window.location.hash.includes('#doc')) {
+      const url = '/' + window.location.hash.split('=')[1] + '=' + window.location.hash.split('=')[2];
+
+      return <div className="back-url"><Link href={url}>Terug naar het document</Link></div>
+    }
+  };
+
   return (
     <section>
       <div
@@ -144,11 +155,12 @@ function ResourceDetail({
           : 'osc-resource-detail-container'
           }`}>
         <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
+          {getPageHash()}
           {resource ? (
             <article className="osc-resource-detail-content-items">
               {displayImage && (
                 <Carousel
-                  items={ ( Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : defaultImage}
+                  items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : defaultImage}
                   itemRenderer={(i) => (
                     <Image
                       src={i.url}
@@ -327,19 +339,31 @@ function ResourceDetail({
       <Spacer size={2} />
 
       {Array.isArray(props.commentsWidget?.useSentiments) &&
-      props.commentsWidget?.useSentiments?.length ? (
+        props.commentsWidget?.useSentiments?.length ? (
         <section className="resource-detail-comments-container">
-          {props.commentsWidget?.useSentiments?.map((sentiment) => (
+          <Comments
+            {...props}
+            resourceId={resourceId || ''}
+            title={props.commentsWidget?.title}
+            emptyListText={props.commentsWidget?.emptyListText}
+            formIntro={props.commentsWidget?.formIntro}
+            placeholder={props.commentsWidget?.placeholder}
+            sentiment={props.commentsWidget?.useSentiments[0]}
+          />
+
+          {props.commentsWidget?.useSentiments?.length > 1 && (
             <Comments
               {...props}
               resourceId={resourceId || ''}
-              title={props.commentsWidget?.title}
+              title={props.commentsWidget_multiple?.title}
               emptyListText={props.commentsWidget?.emptyListText}
-              formIntro={props.commentsWidget?.formIntro}
-              placeholder={props.commentsWidget?.placeholder}
-              sentiment={sentiment}
+              formIntro={props.commentsWidget_multiple?.formIntro}
+              placeholder={props.commentsWidget_multiple?.placeholder}
+              sentiment={props.commentsWidget?.useSentiments[1]}
             />
-          ))}
+          )}
+
+
         </section>
       ) : null}
     </section>

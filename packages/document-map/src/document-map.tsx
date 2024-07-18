@@ -40,7 +40,8 @@ export type DocumentMapProps = BaseProps &
     sentiment?: string;
     canComment?: boolean;
     requiredUserRole?: string;
-    url?: string;
+    accessibilityUrlVisible?: boolean;
+    accessibilityUrl?: string;
   };
 
 
@@ -53,6 +54,7 @@ function DocumentMap({
   documentWidth = 1920,
   documentHeight = 1080,
   sentiment = 'no sentiment',
+  accessibilityUrlVisible,
   ...props
 }: DocumentMapProps) {
 
@@ -216,11 +218,21 @@ function DocumentMap({
     );
   };
 
+  const getUrl = () => {
+    if(props.accessibilityUrl?.includes('[id]')) {
+      return props.accessibilityUrl?.split('[id]')[0] + resourceId + '#doc=' + window.location.href.split('/').reverse()[0];
+    }else{
+      return props.accessibilityUrl + '#doc=' + window.location.href.split('/').reverse()[0];
+    }
+  }
+
+
+
   return (
     <div className="documentMap--container">
       <div className="content" tabIndex={0} ref={contentRef}>
         <div className="documentMap--header">
-          {props.url ? <Link href={props.url} title="Bekijk tekstuele versie" target="_blank" id={randomId}>Bekijk tekstuele versie.</Link> : null}
+          {accessibilityUrlVisible ? <Link href={getUrl()} title="Bekijk tekstuele versie" id={randomId}>Bekijk tekstuele versie.</Link> : null}
           <div className='toggleMarkers'>
             <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
             <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>

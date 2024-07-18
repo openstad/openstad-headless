@@ -5,6 +5,7 @@ import resources from './resources';
 import tags from './tags';
 import user from './user';
 import area from './area';
+import areas from './areas';
 import userVote from './user-vote';
 import submissions from './submissions';
 import commentsByProject from './commentsByProject';
@@ -83,6 +84,10 @@ function API(props = {}) {
 
   self.area = {
     fetch: area.fetch.bind(self),
+  };
+
+  self.areas = {
+    fetch: areas.fetch.bind(self),
   };
 
   self.user = {

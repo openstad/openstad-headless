@@ -127,33 +127,70 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   </TabsContent>
 
                   <TabsContent value="list" className="p-0">
-                    <ArgumentsList
-                      {...extractConfig<
-                        ResourceDetailWidgetProps,
-                        ArgumentWidgetTabProps
-                      >({
-                        subWidgetKey: 'commentsWidget',
-                        previewConfig: previewConfig,
-                        updateConfig,
-                        updatePreview,
-                      })}
-                    />
+                    <div className="grid grid-cols-2">
+                      <ArgumentsList
+                        customTitle={'Titel Links'}
+                        {...extractConfig<
+                          ResourceDetailWidgetProps,
+                          ArgumentWidgetTabProps
+                        >({
+                          subWidgetKey: 'commentsWidget',
+                          previewConfig: previewConfig,
+                          updateConfig,
+                          updatePreview,
+                        })}
+                      />
+
+                      <ArgumentsList
+                        customTitle={'Titel Rechts'}
+                        {...extractConfig<
+                          ResourceDetailWidgetProps,
+                          ArgumentWidgetTabProps
+                        >({
+                          subWidgetKey: 'commentsWidget_multiple',
+                          previewConfig: previewConfig,
+                          updateConfig,
+                          updatePreview,
+                        })}
+                      />
+                    </div>
                   </TabsContent>
                   <TabsContent value="form" className="p-0">
-                    <ArgumentsForm
-                      {...extractConfig<
-                        ResourceDetailWidgetProps,
-                        ArgumentWidgetTabProps
-                      >({
-                        subWidgetKey: 'commentsWidget',
-                        previewConfig: previewConfig,
-                        updateConfig,
-                        updatePreview: (config) => console.log(config),
-                        extraChildConfig: {
-                          resourceId: previewConfig.resourceId,
-                        },
-                      })}
-                    />
+                    <div className="grid grid-cols-2">
+
+                      <ArgumentsForm
+                        customTitle={'Formulier Links'}
+                        {...extractConfig<
+                          ResourceDetailWidgetProps,
+                          ArgumentWidgetTabProps
+                        >({
+                          subWidgetKey: 'commentsWidget',
+                          previewConfig: previewConfig,
+                          updateConfig,
+                          updatePreview: (config) => console.log(config),
+                          extraChildConfig: {
+                            resourceId: previewConfig.resourceId,
+                          },
+                        })}
+                      />
+
+                      <ArgumentsForm
+                        customTitle={'Formulier Rechts'}
+                        {...extractConfig<
+                          ResourceDetailWidgetProps,
+                          ArgumentWidgetTabProps
+                        >({
+                          subWidgetKey: 'commentsWidget_multiple',
+                          previewConfig: previewConfig,
+                          updateConfig,
+                          updatePreview: (config) => console.log(config),
+                          extraChildConfig: {
+                            resourceId: previewConfig.resourceId,
+                          },
+                        })}
+                      />
+                    </div>
+
                   </TabsContent>
                 </Tabs>
               )}

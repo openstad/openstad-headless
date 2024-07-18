@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import {CodeEditor} from '@/components/ui/code-editor';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
@@ -199,13 +200,21 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     }),
     [existingData]
   );
-
+  const [extraData, setExtraData] = useState(existingData?.extraData || '');
   const form = useForm<FormType>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: defaults(),
   });
 
   function onSubmit(values: FormType) {
+    // Add extraData if its valid JSON
+    try{
+      if(extraData !== values.extraData){
+        values.extraData = JSON.parse(extraData);
+      }
+    }catch(e){
+    }
+
     onFormSubmit(values)
       .then(() => {
         toast.success(`Plan successvol ${id ? 'aangepast' : 'aangemaakt'}`);
@@ -626,6 +635,40 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               );
             }}
           />
+
+
+          <FormField
+            control={form.control}
+            name="extraData"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <Textarea
+                  className='hidden'
+                  hidden={true}
+                  name={'extraData'}
+                  value={extraData} // Bind the state to the Textarea value
+                  readOnly // Make the Textarea read-only since it's updated programmatically
+                />
+                <FormLabel>
+                  Extra data
+                </FormLabel>
+                <FormControl>
+                  <CodeEditor 
+                    initValue={existingData?.extraData} 
+                    onValueChange={(value) => {
+                      try {
+                        const parsedValue = JSON.parse(value); // Parse the JSON to make sure it's valid
+                        form.setValue('extraData', parsedValue); // Set the value of the field
+                        setExtraData(JSON.stringify(parsedValue));
+                      } catch (error) {
+                      }
+                    }}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
 
           <CheckboxList
             form={form}

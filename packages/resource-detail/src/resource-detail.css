@@ -12,6 +12,10 @@
   background-color: var(--nlds-default-background-color, #f0f4f8);
 }
 
+.resource-detail-side-column .aside--content .like-widget-container{
+  margin-top: 0;
+}
+
 .aside--content + .aside--content{
   margin-top: 1rem;
 }
@@ -111,6 +115,7 @@
 
 .resource-detail-modbreak-banner > section > *:first-child {
   font-weight: bold;
+}
 
 
 .resource-detail-content .utrecht-paragraph{
@@ -124,4 +129,12 @@
 
 .osc-resource-detail-content-item-row:empty{
   display: none;
+}
+
+.back-url{
+  padding: 0 1rem;
+  margin-bottom: 1rem;
+}
+.back-url a{
+  display: inline-block;
 }
