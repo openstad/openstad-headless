@@ -40,7 +40,7 @@ function RawResource(props: RawResourceWidgetProps) {
     props.stylingClasses?.map((stylingClass) => stylingClass.value).join(' ') ||
     '';
 
-  const render = (() => {
+  let render = (() => {
     if (props.rawInput) {
       if (resourceId) {
         return nunjucks.renderString(props.rawInput, {
@@ -69,6 +69,8 @@ function RawResource(props: RawResourceWidgetProps) {
     }
     return '';
   })();
+
+  render = render.replace(/&amp;amp;/g, '&');
 
   return (
     <div className="osc">
