@@ -1,0 +1,31 @@
+.carousel.--small {
+  --carousel-image-max-height: 200px;
+}
+.carousel.--medium {
+  --carousel-image-max-height: 400px;
+}
+.carousel.--large {
+  --carousel-image-max-height: 600px;
+}
+.carousel.--autoHeight {
+  --carousel-image-max-height: unset;
+}
+
+.carousel.--cover {
+  --carousel-image-object-fit: cover;
+}
+.carousel.--contain {
+  --carousel-image-object-fit: contain;
+}
+
+.carousel .osc .image-container > img {
+  object-fit: var(--carousel-image-object-fit, cover);
+  max-height: var(--carousel-image-max-height, unset);
+}
+
+.carousel .osc .carousel-button-container {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  margin-top: -26px;
+}
