@@ -25,7 +25,10 @@ export default function ProjectComments() {
     XLSX.writeFile(workbook, fileName);
   };
   function transform() {
-    exportData(comments, `reacties.xlsx`);
+    const today = new Date();
+    const projectId = router.query.project;
+    const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
+    exportData(data, `${projectId}_reacties_${formattedDate}.xlsx`);
   }
   useEffect(() => {
     if (data) {

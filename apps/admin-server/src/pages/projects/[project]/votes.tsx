@@ -27,7 +27,10 @@ export default function ProjectResources() {
     XLSX.writeFile(workbook, fileName);
   };
   function transform() {
-    exportData(data, `stemmen.xlsx`);
+    const today = new Date();
+    const projectId = router.query.project;
+    const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
+    exportData(data, `${projectId}_stemmen_${formattedDate}.xlsx`);
   }
 
   const { data: usersData } = useUsers();

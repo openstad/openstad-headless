@@ -40,8 +40,12 @@ export default function ProjectCodes() {
 
     XLSX.writeFile(workbook, fileName);
   };
+
   function transform() {
-    exportData(uniquecodes.data, `stemcodes.xlsx`);
+    const today = new Date();
+    const projectId = router.query.project;
+    const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
+    exportData(uniquecodes.data, `${projectId}_stemcodes_${formattedDate}.xlsx`);
   }
 
   useEffect(() => {

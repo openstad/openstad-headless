@@ -6,6 +6,7 @@ import { useUsers, type userType } from '@/hooks/use-users';
 import { Plus, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { sortTable, searchTable } from '@/components/ui/sortTable';
+import { useRouter } from 'next/router';
 import * as XLSX from 'xlsx';
 
 type mergedType = {
@@ -13,7 +14,7 @@ type mergedType = {
 }
 
 export default function Users() {
-
+  const router = useRouter();
   const { data } = useUsers();
   const [ users, setUsers ] = useState<userType[]>([]);
 
@@ -45,8 +46,12 @@ export default function Users() {
 
     XLSX.writeFile(workbook, fileName);
   };
+
   function transform() {
-    exportData(data, `gebruikers.xlsx`);
+    const today = new Date();
+    const projectId = router.query.project;
+    const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
+    exportData(data, `${projectId}_gebruikers_${formattedDate}.xlsx`);
   }
 
   return (
