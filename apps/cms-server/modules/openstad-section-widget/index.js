@@ -10,6 +10,7 @@ const contentWidgets = {
   'openstad-timeline': {},
   'openstad-image': {},
   'openstad-iconSection': {},
+  'openstad-carousel': {},
 };
 
 module.exports = {
