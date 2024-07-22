@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
     Form,
-    FormControl,
+    FormControl, FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -647,6 +647,7 @@ export default function WidgetResourceFormItems(
                                             />
                                         )}
                                         {form.watch('type') === 'tags' && (
+                                          <>
                                             <FormField
                                                 control={form.control}
                                                 name="tags"
@@ -692,6 +693,34 @@ export default function WidgetResourceFormItems(
                                                     )
                                                 }}
                                             />
+
+                                            <FormField
+                                                control={form.control}
+                                                name="fieldType"
+                                                render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Hoe wil je de tags weergeven in het formulier?</FormLabel>
+                                                    <FormDescription>De weergave heeft niet alleen invloed op het uiterlijk, maar ook op de werking. Met de keuze voor checkboxes sta je ook toe dat er meerdere tags gekozen kunnen worden.</FormDescription>
+                                                    <Select
+                                                        value={field.value}
+                                                        onValueChange={field.onChange}
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Kies type" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="select">Dropdown</SelectItem>
+                                                            <SelectItem value="checkbox">Checkbox</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                                >
+                                            </FormField>
+                                          </>
                                         )}
                                         {form.watch('type') !== 'none' && (
                                             <FormField
