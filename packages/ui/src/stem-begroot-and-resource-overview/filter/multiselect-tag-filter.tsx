@@ -36,11 +36,21 @@ const MultiSelectTagFilter = ({
     onlyIncludeIds,
   });
 
+  const randomId = Math.random().toString(36).substring(7);
+
+  function getRandomId(placeholder: string | undefined) {
+    if(placeholder && placeholder.length >= 1) {
+    return placeholder;
+    } else {
+    return randomId;
+    }
+  }
+
   return (
     <div className="form-element">
-      <FormLabel htmlFor={props.placeholder}>{props.placeholder}</FormLabel>
+      <FormLabel htmlFor={getRandomId(props.placeholder)}>{props.placeholder}</FormLabel>
       <MultiSelect
-        id={props.placeholder}
+        id={getRandomId(props.placeholder)}
         label={props.placeholder || ''}
         onItemSelected={(value) => {
           onUpdateFilter && onUpdateFilter(value);

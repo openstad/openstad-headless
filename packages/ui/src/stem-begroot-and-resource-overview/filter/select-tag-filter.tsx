@@ -33,12 +33,21 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
     if (!dataStore || !dataStore.useTags) {
       return <p>Cannot render tagfilter, missing data source</p>
     }
+    const randomId = Math.random().toString(36).substring(7);
+
+    function getRandomId(placeholder: string | undefined) {
+      if(placeholder && placeholder.length >= 1) {
+      return placeholder;
+      } else {
+      return randomId;
+      }
+    }
 
     return (
       <div className="form-element">
-        <FormLabel htmlFor={props.placeholder}>{props.placeholder}</FormLabel>
+        <FormLabel htmlFor={getRandomId(props.placeholder)}>{props.placeholder}</FormLabel>
         <Select
-          id={props.placeholder}
+          id={getRandomId(props.placeholder)}
           ref={ref}
           options={(tags || []).map((tag: TagDefinition) => ({
             value: tag.id,
