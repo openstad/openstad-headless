@@ -182,3 +182,29 @@ p.osc-searchtext {
 .osc.--compact .osc-resource-overview-content .osc-resource-overview-resource-collection{
     grid-template-columns: 1fr 1fr 1fr;
 }
+
+
+.resource-card--link{
+  position: relative;
+}
+.resource-card--link_trigger{
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  text-decoration: inherit;
+  font-family: inherit;
+  background: none;
+  text-align: left;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.resource-card--link_trigger:before{
+  content:'';
+  position: absolute;
+  inset: 0;
+}
+
+.resource-card--link_trigger:hover{
+  color: var(--utrecht-link-hover-color, var(--utrecht-link-color, inherit));
+}
