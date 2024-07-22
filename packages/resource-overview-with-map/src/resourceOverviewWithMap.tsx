@@ -18,7 +18,7 @@ export type ResourceOverviewWithMapWidgetProps = ResourceOverviewWidgetProps & R
 const ResourceOverviewWithMap = (props: ResourceOverviewWithMapWidgetProps) => {
   return (
     <div className="resourceOverviewWithMap-container">
-      <div className="detail-container" tabIndex={0}>
+      <div className="detail-container">
         <ResourceOverview {...props} />
       </div>
       <ResourceOverviewMap {...props} />

@@ -175,7 +175,7 @@ function ResourceDetailWithMap({
       {resource ? (
         <>
           <a href={backUrl} className="back-to-overview">Terug naar overzicht</a>
-          <article className="osc-resource-detail-content-items" tabIndex={0}>
+          <article className="osc-resource-detail-content-items">
             {displayImage && (
               <Carousel
                 items={ ( Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : defaultImage}
