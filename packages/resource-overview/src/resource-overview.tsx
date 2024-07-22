@@ -317,14 +317,10 @@ function ResourceOverview({
     (props.displaySearch || props.displaySorting || props.displayTagFilters);
 
   const getDisplayVariant = (variant: string) => {
-    switch (variant) {
-      case 'compact':
-        return ' --compact';
-      case 'default':
-        return ' --default';
-      default:
-        return '';
+    if (!variant) {
+      return ' ';
     }
+    return ` --${variant}`;
   }
 
   return (
