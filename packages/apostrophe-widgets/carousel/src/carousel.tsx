@@ -23,27 +23,17 @@ function Carousel({ images, title, size = 'large', fit = 'cover' }: Item) {
   const titleVisible = title === 'true' ? true : false;
 
   const getSize = (size: any) => {
-    switch (size) {
-      case 'small':
-        return ' --small';
-      case 'medium':
-        return ' --medium';
-      case 'large':
-        return ' --large';
-      default:
-        return ' ';
+    if (!size) {
+      return ' ';
     }
+    return ` --${size}`;
   }
 
   const getCover = (fit: any) => {
-    switch (fit) {
-      case 'contain':
-        return ' --contain';
-      case 'cover':
-        return ' --cover';
-      default:
-        return ' ';
+    if (!fit) {
+      return ' ';
     }
+    return ` --${fit}`;
   }
 
   return (
