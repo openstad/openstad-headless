@@ -12,7 +12,7 @@ import { Spacer } from '@openstad-headless/ui/src';
 export type CheckboxFieldProps = {
     title: string;
     description?: string;
-    choices: string[];
+    choices?: string[] | [{value: string, label: string}];
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
@@ -50,6 +50,16 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
         }
     };
 
+    if (choices) {
+        choices = choices?.map((choice) => {
+            if (typeof choice === 'string') {
+                return {value: choice, label: choice}
+            } else {
+                return choice;
+            }
+        }) as [{ value: string, label: string }];
+    }
+
     return (
         <div className="question">
             <Fieldset role="group">
@@ -74,13 +84,13 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                                     className="utrecht-form-field__input"
                                     id={`${fieldKey}_${index}`}
                                     name={fieldKey}
-                                    value={choice}
+                                    value={choice && choice.value}
                                     required={fieldRequired}
-                                    checked={selectedChoices.includes(choice)}
+                                    checked={choice && choice.value && selectedChoices.includes(choice.value)}
                                     onChange={handleChoiceChange}
                                     disabled={disabled}
                                 />
-                                <span>{choice}</span>
+                                <span>{choice && choice.label}</span>
                             </FormLabel>
                         </Paragraph>
                     </FormField>
