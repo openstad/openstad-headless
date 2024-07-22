@@ -14,7 +14,7 @@ import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetChoiceGuideItems from "@/pages/projects/[project]/widgets/choiceguide/[id]/items";
-import WidgetChoiceGuideQuestionGroups from "@/pages/projects/[project]/widgets/choiceguide/[id]/questionGroups";
+import WidgetChoiceGuideChoiceOptions from "@/pages/projects/[project]/widgets/choiceguide/[id]/choiceOptions";
 
 export const getServerSideProps = withApiUrl;
 
@@ -52,7 +52,7 @@ export default function WidgetChoiceGuide({
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="form">Instellingen</TabsTrigger>
               <TabsTrigger value="items">Velden</TabsTrigger>
-              <TabsTrigger value="questionGroups">Vraaggroepen</TabsTrigger>
+              <TabsTrigger value="choiceOptions">Keuze opties</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="form" className="p-0">
@@ -76,8 +76,8 @@ export default function WidgetChoiceGuide({
                 />
               )}
             </TabsContent>
-            <TabsContent value="questionGroups" className="p-0">
-              <WidgetChoiceGuideQuestionGroups />
+            <TabsContent value="choiceOptions" className="p-0">
+              <WidgetChoiceGuideChoiceOptions />
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />

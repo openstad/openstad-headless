@@ -10,7 +10,7 @@ const { refresh } = require('less');
 const REFRESH_PROJECTS_INTERVAL = 60000 * 5;
 const Url = require('node:url');
 const messageStreaming = require('./services/message-streaming');
-const basicAuth = require('express-basic-auth');
+// const basicAuth = require('express-basic-auth');
 
 let projects = {};
 let subscriptions = {}
@@ -231,16 +231,9 @@ app.use((req, res, next) => {
 
   let project = projectsVals.find(project => {
     let projectUrl = new URL(project.url).host;
-    return projectUrl === domain && project?.config?.basicAuth?.active;
+    return projectUrl === domain;
   });
 
-  if (project) {
-    console.log('Basic auth enabled for project: ', project.url);
-    return basicAuth({
-      users: { [project.config.basicAuth.username]: project.config.basicAuth.password },
-      challenge: true
-    })(req, res, next);
-  }
 
   next();
 });

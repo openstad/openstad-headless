@@ -22,11 +22,10 @@ import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import {undefinedToTrueOrProp, YesNoSelect} from "@/lib/form-widget-helpers";
+import {Textarea} from "@/components/ui/textarea";
 
 const formSchema = z.object({
-  noOfQuestionsToShow: z.number().int(),
-  startWithAllQuestionsAnswered: z.boolean(),
-  startWithAllQuestionsAnsweredAndConfirmed: z.boolean().optional(),
+  noOfQuestionsToShow: z.string().optional(),
   showPageCountAndCurrentPageInButton: z.boolean(),
   choicesType: z.enum(['default', 'minus-to-plus-100', 'plane', 'hidden']),
   imageAspectRatio: z.enum(['16x9', '1x1']),
@@ -37,6 +36,8 @@ const formSchema = z.object({
   choicesInBetweenPreferenceTitle: z.string().optional(),
   beforeUrl: z.string().optional(),
   afterUrl: z.string().optional(),
+  introTitle: z.string().optional(),
+  introDescription: z.string().optional(),
 });
 
 export default function ChoicesSelectorForm(props) {
@@ -50,9 +51,7 @@ export default function ChoicesSelectorForm(props) {
 
   const defaults = useCallback(
     () => ({
-      noOfQuestionsToShow: widget?.config?.[category]?.noOfQuestionsToShow || 100,
-      startWithAllQuestionsAnswered: undefinedToTrueOrProp(widget?.config?.[category]?.startWithAllQuestionsAnswered),
-      startWithAllQuestionsAnsweredAndConfirmed: undefinedToTrueOrProp(widget?.config?.[category]?.startWithAllQuestionsAnsweredAndConfirmed),
+      noOfQuestionsToShow: widget?.config?.[category]?.noOfQuestionsToShow || "100",
       showPageCountAndCurrentPageInButton: undefinedToTrueOrProp(widget?.config?.[category]?.showPageCountAndCurrentPageInButton),
       choicesType: widget?.config?.[category]?.choicesType || 'default',
       imageAspectRatio: widget?.config?.[category]?.imageAspectRatio || '16x9',
@@ -63,6 +62,8 @@ export default function ChoicesSelectorForm(props) {
       choicesInBetweenPreferenceTitle: widget?.config?.[category]?.choicesInBetweenPreferenceTitle || 'Je staat precies tussen meerdere voorkeuren in',
       beforeUrl: widget?.config?.[category]?.beforeUrl || '',
       afterUrl: widget?.config?.[category]?.afterUrl || '',
+      introTitle: widget?.config?.[category]?.introTitle || '',
+      introDescription: widget?.config?.[category]?.introDescription || '',
     }),
     [widget?.config]
   );
@@ -85,7 +86,6 @@ export default function ChoicesSelectorForm(props) {
     form.reset(defaults());
   }, [form, defaults]);
 
-  const watchStartWithAllQuestionsAnswered = form.watch('startWithAllQuestionsAnswered');
   const watchChoicesType = form.watch('choicesType');
 
   return (
@@ -108,42 +108,6 @@ export default function ChoicesSelectorForm(props) {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="startWithAllQuestionsAnswered"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Begin met alle vragen beantwoord op 50%</FormLabel>
-                {YesNoSelect(field, props)}
-              </FormItem>
-            )}
-          />
-          {watchStartWithAllQuestionsAnswered && (
-            <FormField
-              control={form.control}
-              name="startWithAllQuestionsAnsweredAndConfirmed"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>En die 50%</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value ? 'true' : 'false'}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecteer" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="true">
-                        Hoef je niet aan te passen, de vraag telt als beantwoord
-                      </SelectItem>
-                      <SelectItem value="false">
-                        Moet je aanpassen voor een vraag telt als beantwoord
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
-          )}
           <FormField
             control={form.control}
             name="showPageCountAndCurrentPageInButton"
@@ -291,6 +255,30 @@ export default function ChoicesSelectorForm(props) {
                 <FormLabel>URL van de resultaat pagina</FormLabel>
                 <FormControl>
                   <Input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="introTitle"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Titel inleiding</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="introDescription"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Beschrijving inleiding</FormLabel>
+                <FormControl>
+                  <Textarea {...field} />
                 </FormControl>
               </FormItem>
             )}

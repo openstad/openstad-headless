@@ -1,55 +1,51 @@
 import {FieldProps} from "@openstad-headless/form/src/props.js";
 import React from "react";
-import DataStore from "@openstad-headless/data-store/src";
 
 const getMinMaxByField = (key, data) => {
     return !!data && typeof data.resources !== 'undefined' && typeof data.resources[key] !== 'undefined' ? data.resources[key] : '';
 }
 
-export const InitializeFormFields = (items, data) => {
+export const InitializeFormFields = (items, data, startWithAllQuestionsAnswered = false) => {
     const formFields: FieldProps[] = [];
+
     if (typeof (items) === 'object' && items.length > 0
     ) {
-        const datastore = new DataStore({
-            projectId: data.projectId,
-            api: data.api,
-            config: { api: data.api },
-        });
         for (const item of items) {
-
-            if ( item.type === 'tags' ) {
-
-                const { data: tags } = datastore.useTags({
-                    projectId: data.projectId,
-                    type: item.tags,
-                });
-
-                item.options = !!tags ?
-                    tags
-                        .filter((tag: any) => tag.type === item.tags)
-                        .map((tag: any, index: number) => ({
-                            trigger: `${index}`,
-                            titles: [{text: tag.name, key: tag.name}],
-                            images: []
-                        }))
-                    : [];
-            }
+            const itemType = item.type === 'a-b-slider' ? 'range' : item.type;
+            const defaultValue = (
+              item.type === 'a-b-slider'
+              && startWithAllQuestionsAnswered
+            ) ? '50' : '';
 
             const fieldData: any = {
-                type: item.fieldType || item.type,
+                type: item.fieldType || itemType,
                 title: item.title,
                 description: item.description,
-                fieldKey: item.fieldKey,
+                fieldKey: `${item.type}-${item.trigger}`,
                 fieldRequired: item.fieldRequired,
                 minCharacters: getMinMaxByField(`${item.fieldKey}MinLength`, data) || item.minCharacters || '',
                 maxCharacters: getMinMaxByField(`${item.fieldKey}MaxLength`, data) || item.maxCharacters || '',
                 variant: item.variant,
                 multiple: item.multiple,
                 options: item.options,
-                rows: 5
+                defaultValue: defaultValue,
+                rows: 5,
+                showMoreInfo: item.multiple || false,
+                moreInfoButton: item.multiple || '',
+                moreInfoContent: item.multiple || '',
+                infoImage: item.infoImage || '',
+                titleA: item.labelA || '',
+                titleB: item.labelB || '',
+                descriptionA: item.sliderTitleUnderA || '',
+                descriptionB: item.sliderTitleUnderB || '',
+                labelA: item.explanationA || '',
+                labelB: item.explanationB || '',
+                imageA: item.imageA || '',
+                imageB: item.imageB || '',
+                showLabels: false
             };
 
-            switch (item.fieldType) {
+            switch (item.type) {
                 case 'checkbox':
                 case 'select':
                 case 'radiobox':
@@ -62,8 +58,8 @@ export const InitializeFormFields = (items, data) => {
                         });
                     }
                     break;
-                case 'upload':
-                    fieldData['allowedTypes'] = item.allowedTypes;
+                case 'imageUpload':
+                    fieldData['allowedTypes'] = item.allowedTypes || ["image/*"];
                     break;
             }
 

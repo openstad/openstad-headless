@@ -7,6 +7,8 @@ export type RangeSliderProps = {
     labelB: string;
     titleA: string;
     titleB: string;
+    imageA: string;
+    imageB: string;
     descriptionA?: string;
     descriptionB?: string;
     fieldRequired?: boolean;
@@ -28,6 +30,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
     titleB,
     descriptionA,
     descriptionB,
+    imageA,
+    imageB,
     fieldRequired= false,
     fieldKey,
     showLabels = true,
@@ -48,6 +52,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
                     <div className="a-b-info">
                         <p className="title">{titleA}</p>
                         <p className="description">{descriptionA}</p>
+
+                        {!!imageA && (<img src={imageA} alt={`${titleA} - ${descriptionA}`} />)}
                     </div>
                 </div>
                 <div className="a-b-title label-b">
@@ -55,6 +61,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
                     <div className="a-b-info">
                         <p className="title">{titleB}</p>
                         <p className="description">{descriptionB}</p>
+
+                        {!!imageB && (<img src={imageB} alt={`${titleB} - ${descriptionB}`} />)}
                     </div>
                 </div>
             </div>

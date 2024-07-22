@@ -271,10 +271,18 @@ function getWidgetJavascriptOutput(
 
   const data = JSON.parse(widgetConfig)
   const extraCss = data.project?.cssUrl ? `<link href="${data.project.cssUrl}" rel="stylesheet">` : '';
-  
+
+  console.log( '---' );
+
+  console.log( widgetSettings.js );
+
   widgetSettings.js.forEach((file) => {
+    console.log( `${widgetSettings.packageName}/${file}` );
+    console.log( require.resolve(`${widgetSettings.packageName}/${file}`) );
     widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
   });
+
+  console.log( '-end-' );
 
   widgetSettings.css.forEach((file) => {
     css += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');

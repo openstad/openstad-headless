@@ -142,6 +142,12 @@ export default function WidgetChoiceGuideItems(
     setActiveTab("1");
   }
 
+  console.log( 'ssss' )
+  console.log( widget?.config?.choiceOption?.choiceOptions )
+  console.log( widget?.config?.choiceOption )
+  console.log( widget?.config )
+  console.log( 'tttt' )
+
   // adds link to options array if no option is selected, otherwise updates the selected option
   function handleAddOption(values: FormData) {
     if (selectedOption) {
@@ -562,7 +568,7 @@ export default function WidgetChoiceGuideItems(
                 )}
               </div>
             ) : (
-              <div className="p-0 bg-transparent rounded-md flex flex-col justify-between col-span-2">
+              <div className="p-0 bg-transparent rounded-md flex flex-col justify-start col-span-2">
                 <div className="w-full px-4 py-3 bg-white border-b-0 mb-4 rounded-md improvised-tab-list flex gap-4">
                   <button
                     type="button"
@@ -1048,7 +1054,7 @@ export default function WidgetChoiceGuideItems(
                     </div>
                 </div>
 
-                <div className="p-0" style={{display: (activeTab === '2') ? 'block' : 'none'}}>
+                <div className="p-0" style={{display: (activeTab === '2') ? 'block' : 'none'}} >
                   <div className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
                     <Heading size="xl">Bepaal de weging per vraaggroep</Heading>
                     <Separator className="my-4" />
@@ -1059,9 +1065,9 @@ export default function WidgetChoiceGuideItems(
                       ))}
                     </div>
                     <div className="w-full mt-4 flex flex-col gap-y-4">
-                      {['checkbox', 'radiobox'].includes(form.watch('type')) ? (
+                      {['checkbox', 'radiobox', 'select'].includes(form.watch('type')) ? (
                         <>
-                          {widget?.config?.questionGroup?.questionGroups?.map((singleGroup, index) => (
+                          {widget?.config?.choiceOption?.choiceOptions?.map((singleGroup, index) => (
 
                             <div key={index} className="w-full col-span-full grid-cols-1 grid">
                               <Heading size="lg" className="mt-3">
@@ -1106,8 +1112,8 @@ export default function WidgetChoiceGuideItems(
                         </>
                       ) : (
                         <>
-                          {widget?.config?.questionGroup?.questionGroups?.map((singleGroup, index) => (
-                            <div className="w-full col-span-full grid-cols-3 grid gap-2 gap-y-2 items-center" key={index}>
+                          {widget?.config?.choiceOption?.choiceOptions?.map((singleGroup, index) => (
+                            <div className={`w-full col-span-full grid-cols-${dimensions.length + 1} grid gap-2 gap-y-2 items-center`} key={index}>
                               <p>
                                 {singleGroup.title}
                               </p>

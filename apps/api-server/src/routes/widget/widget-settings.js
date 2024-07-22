@@ -116,7 +116,7 @@ let moduleDefinitions = {
     js: ['dist/choiceguide.iife.js'],
     css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessChoiceGuide',
-    componentName: 'ChoiceGuideWidget',
+    componentName: 'ChoiceGuide',
     defaultConfig: {
       projectId: null,
     },

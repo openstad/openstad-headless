@@ -1,34 +1,33 @@
-import {defineConfig} from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
-// https://vitejs.dev/config/
-export default defineConfig(({command}) => {
-    // When running in dev mode, use the React plugin
+export default defineConfig(({ command }) => {
     if (command === 'serve') {
         return {
             plugins: [react()],
-        }
-    // During build, use the classic runtime and build as an IIFE so we can deliver it to the browser
+        };
     } else {
         return {
-            plugins: [react({jsxRuntime: 'classic'})],
+            plugins: [react({ jsxRuntime: 'classic' })],
             build: {
                 lib: {
                     formats: ['iife'],
-                    entry: 'src/choiceguide.tsx',
+                    entry: path.resolve(__dirname, 'src/choiceguide.tsx'), // Correct path to your entry file
                     name: 'OpenstadHeadlessChoiceGuide',
+                    fileName: 'choiceguide',
                 },
                 rollupOptions: {
-                    external: ['react', 'react-dom', 'remixicon/fonts/remixicon.css'],
+                    external: ['react', 'react-dom'],
                     output: {
                         globals: {
                             'react': 'React',
                             'react-dom': 'ReactDOM'
                         }
                     }
-                }
+                },
+                outDir: 'dist', // Ensures output is in the dist directory
             },
-        }
+        };
     }
-
-})
+});

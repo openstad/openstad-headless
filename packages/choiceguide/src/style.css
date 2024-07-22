@@ -1,0 +1,151 @@
+.osc-choiceguide-container {
+ width: 100%;
+ display: grid;
+ grid-template-columns: 3fr 1fr;
+}
+
+#choice-plane {
+ position: relative;
+ width: 100%;
+ height: auto;
+}
+
+#choice-plane .osc-point {
+ position: absolute;
+ top: 50px;
+ left: 50px;
+ margin: -11px 0 0 -11px;
+ width: 20px;
+ height: 20px;
+ border: 10px solid #bed200;
+ border-radius: 10px;
+}
+
+#choice-plane .osc-choice-plane {
+ position: relative;
+ width: 100%;
+ height: auto;
+ float: left;
+}
+
+#choice-plane .osc-choice-plane-background-image {
+ position: relative;
+ width: 100%;
+ height: 100%;
+ object-fit: cover;
+}
+
+.osc-choiceguide-container {
+ position: relative;
+}
+
+.osc-choiceguide-sidebar-container {
+ position: relative;
+ right: 0;
+ left: auto;
+}
+
+.osc-choices-container {
+ position: relative;
+ z-index: 50;
+ width: 220px;
+}
+
+@media only screen and (max-width: 600px) {
+ .osc-choices-container {
+  position: relative;
+  top: 0;
+  left: 0px;
+  width: 100%;
+ }
+
+ .osc-choices-container.sticky {
+  top: 0px;
+  box-shadow: 0 2px 8px 5px rgba(0, 0, 0, 0.1);
+ }
+}
+
+.osc-choices-container.sticky {
+ position: fixed;
+ top: 10px;
+ box-shadow: none;
+}
+
+.osc-choices-container h4 {
+ margin: 0 0 8px 0;
+ padding: 0;
+ font-size: 16px;
+ font-weight: 600;
+ text-align: center;
+}
+
+.osc-choices {
+ list-style-type: none;
+ margin: 0;
+ padding: 0;
+}
+
+.osc-choices li {
+ margin: 0;
+ padding: 12px 10px 15px 10px;
+ border-bottom: 2px solid #e5e5e5;
+}
+
+.osc-choice .osc-minmax-labels {
+ position: relative;
+ width: 100%;
+ margin-top: 3px;
+ font-weight: 500;
+ overflow: hidden;
+}
+
+.osc-choice .osc-min-label {
+ float: left;
+}
+
+.osc-choice .osc-max-label {
+ float: right;
+}
+
+.osc-choice-default .osc-choice-bar {
+ position: relative;
+ height: 14px;
+ width: 100%;
+ margin-top: 0px;
+ background-color: #e5e5e5;
+ border-radius: 7px;
+ overflow: hidden;
+}
+
+.osc-choice-default .osc-choice-bar-progress {
+ position: absolute;
+ top: 0;
+ left: 0;
+ height: 14px;
+ background-color: #bed200;
+ border-top-left-radius: 7px;
+}
+
+.osc-choice-default .osc-choice-bar.osc-from-center::after {
+ position: absolute;
+ top: -2px;
+ left: 50%;
+ width: 1px;
+ height: 18px;
+ background-color: #767676;
+ content: '';
+}
+
+.osc-choice-default .osc-choice-bar.osc-with-percentage {
+ width: calc(100% - 55px);
+ float: left;
+}
+
+.osc-choice-default .osc-percentage {
+ float: left;
+ width: 55px;
+ font-size: 16px;
+ font-weight: 600;
+ text-align: right;
+ color: black;
+}

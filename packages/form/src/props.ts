@@ -16,6 +16,7 @@ export type FormProps = {
     fields: Array<CombinedFieldProps>;
     submitText?: string;
     submitHandler: (values: { [p: string]: string | Record<number, never> | []}) => void;
+    getValuesOnChange: (values: { [p: string]: string | Record<number, never> | []}) => void;
     submitDisabled?: boolean;
     secondaryLabel?: string;
     secondaryHandler?: (values: { [p: string]: string | Record<number, never> | []}) => void;
