@@ -45,7 +45,7 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
 
     return (
       <div className="form-element">
-        <FormLabel htmlFor={getRandomId(props.placeholder)}>{props.placeholder}</FormLabel>
+        <FormLabel htmlFor={getRandomId(props.placeholder)}>{props.placeholder|| 'Selecteer item'}</FormLabel>
         <Select
           id={getRandomId(props.placeholder)}
           ref={ref}
