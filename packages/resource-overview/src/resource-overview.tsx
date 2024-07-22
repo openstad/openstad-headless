@@ -170,9 +170,9 @@ const defaultItemRenderer = (
 
   const getUrl = () => {
     let location = document.location;
-    let newUrl = props?.itemLink.replace('[id]', resource.id);
-    if (!newUrl.startsWith('http')) {
-      if (!newUrl.startsWith('/')) {
+    let newUrl = props?.itemLink?.replace('[id]', resource.id);
+    if (!newUrl?.startsWith('http')) {
+      if (!newUrl?.startsWith('/')) {
         newUrl = `${location.pathname}${
           location.pathname.endsWith('/') ? '' : '/'
         }${newUrl}`;
