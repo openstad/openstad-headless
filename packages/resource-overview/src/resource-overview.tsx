@@ -82,6 +82,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayDocuments?: boolean;
     documentsTitle?: string;
     documentsDesc?: string;
+    displayVariant?: string;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -242,6 +243,7 @@ function ResourceOverview({
   displayDocuments = false,
   documentsTitle = '',
   documentsDesc = '',
+  displayVariant = '',
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -314,6 +316,13 @@ function ResourceOverview({
     allowFiltering &&
     (props.displaySearch || props.displaySorting || props.displayTagFilters);
 
+  const getDisplayVariant = (variant: string) => {
+    if (!variant) {
+      return ' ';
+    }
+    return ` --${variant}`;
+  }
+
   return (
     <>
       <Dialog
@@ -348,7 +357,7 @@ function ResourceOverview({
         }
       />
 
-      <div className="osc">
+      <div className={`osc ${getDisplayVariant(displayVariant)}`}>
 
         {displayBanner || displayMap ? renderHeader(props, resources, bannerText, displayBanner, displayMap) : null}
 
