@@ -21,7 +21,7 @@ function adjustMenu() {
   if (document.getElementsByClassName('--compact').length > 0) {
     if (
       navContainer.offsetWidth + logo.offsetWidth >=
-      mainContainer.offsetWidth && !navContainer.classList.contains('--mobile')
+      mainContainer.offsetWidth
     ) {
       navContainer.classList.add('--mobile');
     } else {
