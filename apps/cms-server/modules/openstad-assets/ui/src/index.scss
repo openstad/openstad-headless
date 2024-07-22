@@ -41,7 +41,7 @@ body {
 }
 
 .utrecht-heading-1.utrecht-accordion__header {
-  --utrecht-heading-1-line-height: 0;
+  --utrecht-heading-1-line-height: unset;
 }
 
 // HACK: Dialog bug fix
