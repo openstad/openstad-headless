@@ -168,7 +168,7 @@ function ResourceDetail({
                         <div>
                           <Paragraph className="osc-resource-detail-content-item-status">
                             {resource.statuses
-                              ?.map((s: { label: string }) => s.label)
+                              ?.map((s: { name: string }) => s.name)
                               ?.join(', ')}
                           </Paragraph>
                         </div>
@@ -277,8 +277,8 @@ function ResourceDetail({
                   <Heading level={3} appearance="utrecht-heading-4">Status</Heading>
                   <Spacer size={0.5} />
                   <div className="resource-detail-pil-list-content">
-                    {resource.statuses?.map((s: { label: string }) => (
-                      <Pill light rounded text={s.label}></Pill>
+                    {resource.statuses?.map((s: { name: string }) => (
+                      <Pill light rounded text={s.name}></Pill>
                     ))}
                   </div>
 
