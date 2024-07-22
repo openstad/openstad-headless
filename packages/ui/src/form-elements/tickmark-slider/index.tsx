@@ -1,4 +1,4 @@
-import { FieldsetLegend, FormFieldDescription } from '@utrecht/component-library-react';
+import { FormLabel, FormFieldDescription , Paragraph} from '@utrecht/component-library-react';
 import React, { FC, useState } from 'react';
 import { Spacer } from '@openstad-headless/ui/src';
 
@@ -37,11 +37,9 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
 
     return (
         <div className="a-b-slider-container">
-            {title && (
-                <FieldsetLegend>
-                    {title}
-                </FieldsetLegend>
-            )}
+            <Paragraph className="utrecht-form-field__label">
+                <FormLabel htmlFor={`a-to-b-range--${index}`}>{title}</FormLabel>
+            </Paragraph>
             {description &&
                     <>
                     <FormFieldDescription>
