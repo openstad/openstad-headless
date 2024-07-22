@@ -13,8 +13,7 @@ export default () => {
   });
 };
 
-// Make mobile menu
-window.onload = function () {
+function adjustMenu() {
   const mainContainer = document.querySelector('.main-header-container');
   const navContainer = document.querySelector('.header_navbar-container');
   const mainMenuContainer = document.querySelector('#main-menu');
@@ -22,7 +21,7 @@ window.onload = function () {
   if (document.getElementsByClassName('--compact').length > 0) {
     if (
       navContainer.offsetWidth + logo.offsetWidth >=
-      mainContainer.offsetWidth
+      mainContainer.offsetWidth && !navContainer.classList.contains('--mobile')
     ) {
       navContainer.classList.add('--mobile');
     } else {
@@ -46,4 +45,7 @@ window.onload = function () {
       .querySelector('.header_navbar-container')
       .classList.toggle('--show');
   });
-};
+}
+
+window.onload = adjustMenu;
+window.onresize = adjustMenu;
