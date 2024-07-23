@@ -63,16 +63,18 @@ function ShareLinks({ title }: Item) {
         <LinkSocial
           external
           title={'Copy link'}
-          onClick={() => {
+          href={location.href}
+          onClick={(e) => {
+            e.preventDefault();
             navigator.clipboard.writeText(location.href);
           }}
           onKeyDown={(e) => {
+            e.preventDefault();
             if(e.key === 'Enter') {
               navigator.clipboard.writeText(location.href);
             }
           }}
           className='copy-link'
-          tabIndex={0}
         >
           <i className='icon --url'></i>
         </LinkSocial>
