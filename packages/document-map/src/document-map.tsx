@@ -230,7 +230,7 @@ function DocumentMap({
 
   return (
     <div className="documentMap--container">
-      <div className="content" tabIndex={0} ref={contentRef}>
+      <div className="content" ref={contentRef}>
         <div className="documentMap--header">
           {accessibilityUrlVisible ? <Link href={getUrl()} title="Bekijk tekstuele versie" id={randomId}>Bekijk tekstuele versie.</Link> : null}
           <div className='toggleMarkers'>
