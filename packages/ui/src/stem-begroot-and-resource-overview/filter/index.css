@@ -14,10 +14,9 @@
     align-self: end;
 }
 .osc-resources-filter > div.form-element > label{
-    height: 0;
-    width: 0;
-    overflow: clip;
-    display: block;
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: normal;
 }
 
 .osc-resources-filter > div > *{
