@@ -57,9 +57,6 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
           onValueChange={(value) => {
             onUpdateFilter && onUpdateFilter(value);
           }}>
-          {props.placeholder ? (
-            <option value={''}>{props.placeholder}</option>
-          ) : null}
         </Select>
       </div>
     );

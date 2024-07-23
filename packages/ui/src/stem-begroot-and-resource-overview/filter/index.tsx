@@ -174,7 +174,6 @@ export function Filters({
           <div className="form-element">
             <FormLabel htmlFor={'sortField'}>Sorteer op</FormLabel>
             <Select onValueChange={setSort} options={sorting} id="sortField">
-              <option value={''}>Sorteer op</option>
             </Select>
           </div>
         ) : null}
