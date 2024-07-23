@@ -77,6 +77,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     itemsPerPage?: number;
     textResults?: string;
     onlyIncludeTagIds?: string;
+    onlyIncludeStatusIds?: string;
     rawInput?: string;
     bannerText?: string;
     displayDocuments?: boolean;
@@ -240,6 +241,7 @@ function ResourceOverview({
   itemsPerPage = 20,
   textResults = 'Dit zijn de zoekresultaten voor [search]',
   onlyIncludeTagIds = '',
+  onlyIncludeStatusIds = '',
   displayDocuments = false,
   documentsTitle = '',
   documentsDesc = '',
@@ -258,10 +260,17 @@ function ResourceOverview({
     .filter((t) => t && !isNaN(+t.trim()))
     .map((t) => Number.parseInt(t));
 
+  const statusIdsToLimitResourcesTo = onlyIncludeStatusIds
+    .trim()
+    .split(',')
+    .filter((t) => t && !isNaN(+t.trim()))
+    .map((t) => Number.parseInt(t));
+
   const [open, setOpen] = React.useState(false);
 
   // Filters that when changed reupdate the useResources value automatically
   const [search, setSearch] = useState<string>('');
+  const [statuses, setStatuses] = useState<number[]>(statusIdsToLimitResourcesTo || []);
   const [tags, setTags] = useState<number[]>(tagIdsToLimitResourcesTo || []);
   const [page, setPage] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(itemsPerPage || 10);
@@ -276,6 +285,7 @@ function ResourceOverview({
     search,
     tags,
     sort,
+    statuses,
   });
 
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);

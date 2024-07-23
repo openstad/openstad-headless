@@ -661,6 +661,7 @@ module.exports = function (db, sequelize, DataTypes) {
           include: [
             {
               model: db.Status,
+              as: 'statuses',
               attributes: ['id', 'name'],
               through: { attributes: [] },
             },
