@@ -23,7 +23,8 @@ function ShareLinks({ title }: Item) {
           title={'Facebook'}
         >
           <i className='icon --facebook'></i>
-        </LinkSocial>
+          <span className='sr-only'>Facebook</span>
+          </LinkSocial>
 
         <LinkSocial
           external
@@ -32,7 +33,8 @@ function ShareLinks({ title }: Item) {
           title={'Twitter'}
         >
           <i className='icon --twitter'></i>
-        </LinkSocial>
+          <span className='sr-only'></span>
+          </LinkSocial>
 
         <LinkSocial
           external
@@ -40,7 +42,8 @@ function ShareLinks({ title }: Item) {
           title={'Mail'}
         >
           <i className='icon --mail'></i>
-        </LinkSocial>
+          <span className='sr-only'>Twitter</span>
+          </LinkSocial>
 
         <LinkSocial
           external
@@ -49,7 +52,8 @@ function ShareLinks({ title }: Item) {
           title={'Whatsapp'}
         >
           <i className='icon --whatsapp'></i>
-        </LinkSocial>
+          <span className='sr-only'>Whatsapp</span>
+          </LinkSocial>
 
         <LinkSocial
           external
@@ -58,7 +62,8 @@ function ShareLinks({ title }: Item) {
           title={'LinkedIn'}
         >
           <i className='icon --linkedin'></i>
-        </LinkSocial>
+          <span className='sr-only'>LinkedIn</span>
+          </LinkSocial>
 
         <LinkSocial
           external
@@ -69,14 +74,15 @@ function ShareLinks({ title }: Item) {
             navigator.clipboard.writeText(location.href);
           }}
           onKeyDown={(e) => {
-            e.preventDefault();
             if(e.key === 'Enter') {
+              e.preventDefault();
               navigator.clipboard.writeText(location.href);
             }
           }}
           className='copy-link'
         >
           <i className='icon --url'></i>
+          <span className='sr-only'>Copy link</span>
         </LinkSocial>
       </div>
     </div>
