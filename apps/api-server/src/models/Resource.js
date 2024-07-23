@@ -664,11 +664,13 @@ module.exports = function (db, sequelize, DataTypes) {
               as: 'statuses',
               attributes: ['id', 'name'],
               through: { attributes: [] },
+              where: {
+                id: {
+                  [db.Sequelize.Op.in]: statuses,
+                },
+              },
             },
           ],
-          where: {
-            id: statuses,
-          },
         };
       },
 
