@@ -170,8 +170,18 @@ const ResourceOverviewMap = ({
     maxZoom: props?.map?.maxZoom ? parseInt(props.map.maxZoom) : 20
   };
 
+  const skipMarkers = () => {
+    const nextFocus: HTMLButtonElement | null = document.querySelectorAll('.leaflet-control-zoom-in')[0] as HTMLButtonElement;
+
+    if (nextFocus) {
+      nextFocus.focus();
+    }
+  };
+
+
   return (
     <div className='map-container--buttons'>
+      <Button appearance='primary-action-button' className='skip-link' onClick={skipMarkers}>Skip markers</Button>
       <BaseMap
         {...props}
         {...zoom}
