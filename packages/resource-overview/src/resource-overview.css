@@ -207,6 +207,7 @@ p.osc-searchtext {
   content:'';
   position: absolute;
   inset: 0;
+  z-index: 1;
 }
 
 .resource-card--link_trigger:hover{
