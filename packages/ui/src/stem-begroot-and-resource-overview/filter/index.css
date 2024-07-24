@@ -51,3 +51,9 @@
     width: 100%;
     max-width: none;
 }
+
+.button-group{
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}

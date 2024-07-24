@@ -173,7 +173,11 @@ p.osc-searchtext {
 }
 
 .osc.--compact #stem-begroot-filter .osc-resources-filter.osc-flex-columned{
-    flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 208px);
+}
+.osc.--compact #stem-begroot-filter .osc-resources-filter.osc-flex-columned .button-group{
+  grid-column: span 2 / -1;
 }
 
 .osc.--compact #stem-begroot-filter {
