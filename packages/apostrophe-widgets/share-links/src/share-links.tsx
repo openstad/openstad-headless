@@ -24,7 +24,7 @@ function ShareLinks({ title }: Item) {
         >
           <i className='icon --facebook'></i>
           <span className='sr-only'>Facebook</span>
-          </LinkSocial>
+        </LinkSocial>
 
         <LinkSocial
           external
@@ -33,8 +33,8 @@ function ShareLinks({ title }: Item) {
           title={'Twitter'}
         >
           <i className='icon --twitter'></i>
-          <span className='sr-only'></span>
-          </LinkSocial>
+          <span className='sr-only'>Twitter</span>
+        </LinkSocial>
 
         <LinkSocial
           external
@@ -42,8 +42,8 @@ function ShareLinks({ title }: Item) {
           title={'Mail'}
         >
           <i className='icon --mail'></i>
-          <span className='sr-only'>Twitter</span>
-          </LinkSocial>
+          <span className='sr-only'>Mail</span>
+        </LinkSocial>
 
         <LinkSocial
           external
@@ -53,7 +53,7 @@ function ShareLinks({ title }: Item) {
         >
           <i className='icon --whatsapp'></i>
           <span className='sr-only'>Whatsapp</span>
-          </LinkSocial>
+        </LinkSocial>
 
         <LinkSocial
           external
@@ -63,7 +63,7 @@ function ShareLinks({ title }: Item) {
         >
           <i className='icon --linkedin'></i>
           <span className='sr-only'>LinkedIn</span>
-          </LinkSocial>
+        </LinkSocial>
 
         <LinkSocial
           external
@@ -74,7 +74,7 @@ function ShareLinks({ title }: Item) {
             navigator.clipboard.writeText(location.href);
           }}
           onKeyDown={(e) => {
-            if(e.key === 'Enter') {
+            if (e.key === 'Enter') {
               e.preventDefault();
               navigator.clipboard.writeText(location.href);
             }
