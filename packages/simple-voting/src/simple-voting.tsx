@@ -57,7 +57,6 @@ function SimpleVoting({ ...props }: SimpleVotingWidgetProps) {
     showInfoMenu: true,
     isSimpleView: true,
   }
-  console.log(config); 
   return (
     <>
       <StemBegroot
