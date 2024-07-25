@@ -65,7 +65,7 @@ export default {
       postcode: user.postalCode,
       name: user.name,
       fullName: user.name,
-      displayName: user.nickName,
+      nickName: user.nickName,
       address: user.address,
       city: user.city,
     }
