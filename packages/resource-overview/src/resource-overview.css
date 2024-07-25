@@ -7,7 +7,7 @@
 
 .osc-resource-overview-content {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: var(--resource-overview-content--grid-columms, 1fr 1fr 1fr);
   gap: 2rem;
 }
 
@@ -165,4 +165,20 @@ p.osc-searchtext {
 
 .osc .map-container {
   margin-bottom: 2rem;
+}
+
+
+.osc.--compact{
+  --resource-overview-content--grid-columms: 1fr 1fr;
+}
+
+.osc.--compact #stem-begroot-filter .osc-resources-filter.osc-flex-columned{
+    flex-direction: row;
+}
+
+.osc.--compact #stem-begroot-filter {
+    grid-column: 1 / -1;
+}
+.osc.--compact .osc-resource-overview-content .osc-resource-overview-resource-collection{
+    grid-template-columns: 1fr 1fr 1fr;
 }

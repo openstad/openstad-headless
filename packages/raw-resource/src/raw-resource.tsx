@@ -40,7 +40,7 @@ function RawResource(props: RawResourceWidgetProps) {
     props.stylingClasses?.map((stylingClass) => stylingClass.value).join(' ') ||
     '';
 
-  const render = (() => {
+  let render = (() => {
     if (props.rawInput) {
       if (resourceId) {
         return nunjucks.renderString(props.rawInput, {
@@ -48,7 +48,8 @@ function RawResource(props: RawResourceWidgetProps) {
           projectId: props.projectId,
           user: resource.user,
           startDateHumanized: resource.startDateHumanized,
-          status: resource.status,
+          status: resource.statuses,
+          tags: resource.tags,
           title: resource.title,
           summary: resource.summary,
           description: resource.description,
@@ -69,6 +70,8 @@ function RawResource(props: RawResourceWidgetProps) {
     }
     return '';
   })();
+
+  render = render.replace(/&amp;amp;/g, '&');
 
   return (
     <div className="osc">
