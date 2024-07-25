@@ -1,5 +1,15 @@
 import nunjucks from 'nunjucks';
 
+type Tag = {
+  label?: string;
+  name?: string;
+};
+
+type Status = {
+  label?: string;
+  name?: string;
+};
+
 // Custom filter functions
 function dump(obj: any): string {
   if (obj === null || obj === undefined) return '';
@@ -47,12 +57,12 @@ function replace(str: string, search: string, replacement: string): string {
 
 function tags(resource: any): string {
   if (!Array.isArray(resource.tags)) return '';
-  return resource.tags.map(tag => tag.label || tag.name).join(', ');
+  return resource.tags.map((tag: Tag) => tag.label || tag.name).join(', ');
 }
 
 function status(resource: any): string {
   if (!Array.isArray(resource.statuses)) return '';
-  return resource.statuses.map(status => status.label || status.name).join(', ');
+  return resource.statuses.map((status: Status) => status.label || status.name).join(', ');
 }
 
 // Apply filters to Nunjucks environment
