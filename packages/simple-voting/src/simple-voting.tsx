@@ -54,10 +54,10 @@ function SimpleVoting({ ...props }: SimpleVotingWidgetProps) {
       voteType: 'count',
       withExisting: 'error',
     },
-    showInfoMenu: false,
+    showInfoMenu: true,
     isSimpleView: true,
   }
-
+  console.log(config); 
   return (
     <>
       <StemBegroot
