@@ -61,7 +61,8 @@ export default function AccountDisplay(
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 lg:w-1/2">
 
-        <FormField
+        {/* Issues when saving the form, commented for now since they are not mandatory */}
+        {/* <FormField
           control={form.control}
           name="minLength"
           render={({ field }) => (
@@ -72,7 +73,6 @@ export default function AccountDisplay(
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
                   }}
                 />
               </FormControl>
@@ -91,13 +91,12 @@ export default function AccountDisplay(
                   defaultValue={field.value}
                   onChange={(e) => {
                     field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
                   }}
                 />
               </FormControl>
             </FormItem>
           )}
-        />
+        /> */}
 
         <FormField
           control={form.control}

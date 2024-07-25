@@ -5,6 +5,10 @@ import { AccountWidgetProps, Account } from './account.js';
 const config: AccountWidgetProps = {
   allowNickname: true,
   allowUserEdit: true,
+  api: {
+    url: import.meta.env.VITE_API_URL,
+  },
+  projectId: import.meta.env.VITE_PROJECT_ID || 2,
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
