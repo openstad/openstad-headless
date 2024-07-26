@@ -86,7 +86,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                                     name={fieldKey}
                                     value={choice && choice.value}
                                     required={fieldRequired}
-                                    checked={choice && choice.value && selectedChoices.includes(choice.value)}
+                                    checked={choice && choice.value ? selectedChoices.includes(choice.value) : false}
                                     onChange={handleChoiceChange}
                                     disabled={disabled}
                                 />
