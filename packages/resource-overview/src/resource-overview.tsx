@@ -1,5 +1,5 @@
 import './resource-overview.css';
-import React, { useCallback, useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import { Carousel, Icon, Paginator } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
@@ -264,22 +264,61 @@ function ResourceOverview({
   const [search, setSearch] = useState<string>('');
   const [tags, setTags] = useState<number[]>(tagIdsToLimitResourcesTo || []);
   const [page, setPage] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState<number>(itemsPerPage || 10);
   const [sort, setSort] = useState<string | undefined>(
     props.defaultSorting || undefined
   );
 
+  const [resources, setResources] = useState([]);
+  const [filteredResources, setFilteredResources] = useState([]);
+
   const { data: resourcesWithPagination } = datastore.useResources({
     ...props,
-    page,
-    pageSize,
     search,
     tags,
     sort,
   });
 
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
-  const resources = resourcesWithPagination.records || [];
+
+  useEffect(() => {
+    if (resourcesWithPagination) {
+      setResources(resourcesWithPagination.records || []);
+    }
+  }, [resourcesWithPagination, pageSize]);
+
+
+  useEffect(() => {
+    const filtered = resources && resources
+      ?.filter((resource: any) =>
+        tags.every((tag) => resource.tags && Array.isArray(resource.tags) && resource.tags.find(o => o.id === parseInt(tag)))
+      )
+      ?.sort((a: any, b: any) => {
+        if (sort === 'createdAt_desc') {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        if (sort === 'createdAt_asc') {
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        }
+        return 0;
+      });
+
+    setFilteredResources(filtered);
+  }, [resources, tags, search, sort]);
+
+  useEffect(() => {
+    if ( filteredResources ) {
+      const filtered: any = filteredResources || [];
+      const totalPagesCalc = Math.ceil(filtered?.length / pageSize);
+
+      if (totalPagesCalc !== totalPages) {
+        setTotalPages( totalPagesCalc );
+      }
+
+      setPage(0);
+    }
+  }, [filteredResources]);
 
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
   const isModerator = hasRole(currentUser, 'moderator');
@@ -331,7 +370,7 @@ function ResourceOverview({
         children={
           <Carousel
             startIndex={resourceDetailIndex}
-            items={resources && resources.length > 0 ? resources : []}
+            items={filteredResources && filteredResources?.length > 0 ? filteredResources : []}
             itemRenderer={(item) => (
               <GridderResourceDetail
                 resource={item}
@@ -359,7 +398,7 @@ function ResourceOverview({
 
       <div className={`osc ${getDisplayVariant(displayVariant)}`}>
 
-        {displayBanner || displayMap ? renderHeader(props, resources, bannerText, displayBanner, displayMap) : null}
+        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, displayMap) : null}
 
         <section
           className={`osc-resource-overview-content ${
@@ -405,25 +444,12 @@ function ResourceOverview({
           ) : null}
 
           <section className="osc-resource-overview-resource-collection">
-            {resources &&
-              resources
-                .filter((resource: any) =>
-                  tags.every((tag: number) => {
-                    return resource.tags || (Array.isArray(resource.tags) && resource.tags.includes(tag));
-                  })
-                )
-                .sort((a: any, b: any) => {
-                  if (sort === 'createdAt_desc') {
-                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-                  }
-                  if (sort === 'createdAt_asc') {
-                    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-                  }
-                  return 0;
-                })
-                .map((resource: any, index: number) => {
+            {filteredResources &&
+              filteredResources
+                ?.slice(page * pageSize, (page + 1) * pageSize)
+                ?.map((resource: any, index: number) => {
                   return (
-                    <React.Fragment key={`resource-item-${resource.title}`}>
+                    <React.Fragment key={`resource-item-${resource.id}`}>
                       {renderItem(resource, { ...props, displayType }, () => {
                         onResourceClick(resource, index);
                       })}
@@ -438,9 +464,9 @@ function ResourceOverview({
             <Spacer size={4} />
             <div className="osc-resource-overview-paginator col-span-full">
               <Paginator
-                page={resourcesWithPagination?.metadata?.page || 0}
-                totalPages={resourcesWithPagination?.metadata?.pageCount || 1}
-                onPageChange={(page) => setPage(page)}
+                page={page || 0}
+                totalPages={totalPages || 1}
+                onPageChange={(newPage) => setPage(newPage)}
               />
             </div>
           </>
