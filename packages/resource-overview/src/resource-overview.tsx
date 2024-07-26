@@ -292,7 +292,7 @@ function ResourceOverview({
   useEffect(() => {
     const filtered = resources && resources
       ?.filter((resource: any) =>
-        tags.every((tag) => resource.tags && Array.isArray(resource.tags) && resource.tags.find((o: { id: number }) => o.id === parseInt(tag)))
+        tags.every((tag) => resource.tags && Array.isArray(resource.tags) && resource.tags.find((o: { id: number }) => o.id === parseInt(tag.toString())))
       )
       ?.sort((a: any, b: any) => {
         if (sort === 'createdAt_desc') {
