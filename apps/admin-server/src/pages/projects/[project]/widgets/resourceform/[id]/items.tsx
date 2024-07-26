@@ -718,8 +718,7 @@ export default function WidgetResourceFormItems(
                                                     <FormMessage />
                                                 </FormItem>
                                                 )}
-                                                >
-                                            </FormField>
+                                            />
                                           </>
                                         )}
                                         {form.watch('type') !== 'none' && (
