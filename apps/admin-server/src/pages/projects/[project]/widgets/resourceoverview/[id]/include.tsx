@@ -74,12 +74,12 @@ export default function WidgetResourceOverviewInclude(
             items={tags}
             selectedPredicate={(t) =>
               form
-                .getValues('onlyIncludeTagIds')
-                .split(',')
-                .findIndex((tg) => tg === `${t.id}`) > -1
+                ?.getValues('onlyIncludeTagIds')
+                ?.split(',')
+                ?.findIndex((tg) => tg === `${t.id}`) > -1
             }
             onValueChange={(tag, checked) => {
-              const ids = form.getValues('onlyIncludeTagIds').split(',');
+              const ids = form.getValues('onlyIncludeTagIds')?.split(',');
               const idsToSave = (checked
                 ? [...ids, tag.id]
                 : ids.filter((id) => id !== `${tag.id}`)).join(',');
