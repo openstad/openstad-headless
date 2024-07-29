@@ -10,6 +10,7 @@ import userVote from './user-vote';
 import submissions from './submissions';
 import commentsByProject from './commentsByProject';
 import choiceGuideResults from './choiceGuideResults';
+import userActivity from './user-activity';
 
 const windowGlobal = typeof window !== "undefined" ? window : {};
 
@@ -101,6 +102,10 @@ function API(props = {}) {
   self.userVote = {
     fetch: userVote.fetch.bind(self),
     submitVote: userVote.submitVote.bind(self),
+  };
+
+  self.userActivity = {
+    fetch: userActivity.fetch.bind(self),
   };
 
   if (props.logMethods) {

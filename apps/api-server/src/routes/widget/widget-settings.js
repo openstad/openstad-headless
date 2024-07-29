@@ -209,6 +209,14 @@ let moduleDefinitions = {
       projectId: null,
     },
   },
+  activity: {
+    packageName: '@openstad-headless/activity',
+    directory: 'activity',
+    js: ['dist/activity.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessActivity',
+    componentName: 'Activity',
+  },
   account: {
     packageName: '@openstad-headless/account',
     directory: 'account',
