@@ -34,8 +34,11 @@ export default function CreateWidget({ }: WithApiUrlProps) {
     const { createWidget } = useWidgetsHook(projectId);
 
     const [name, setName] = useState<string>('');
+    const [filterSearchType, setFilterSearchType] = useState<string>('');
 
-
+    const filteredWidgets = widgetTypes.filter(widget =>
+        widget[1].toLowerCase().includes(filterSearchType.toLowerCase())
+    );
 
     async function submit(type: any, description: any) {
         if (!projectId) return;
@@ -72,8 +75,19 @@ export default function CreateWidget({ }: WithApiUrlProps) {
                     },
                 ]}>
                 <div className="container py-6">
-                    <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-3">
-                        {widgetTypes.map((type, key) => (
+                    <div className="float-right mb-4 flex gap-4">
+                        <p className="text-xs font-medium text-muted-foreground self-center">Filter op:</p>
+                        <input
+                            type="text"
+                            className='p-2 rounded'
+                            placeholder="Zoeken..."
+                            onChange={(e) => setFilterSearchType(e.target.value)}
+                        />
+                    </div>
+
+
+                    <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-3 clear-right">
+                        {filteredWidgets.map((type, key) => (
                             <Card key={key}>
                                 <CardHeader>
                                     {/* <img src='https://placehold.co/395x265' /> */}
