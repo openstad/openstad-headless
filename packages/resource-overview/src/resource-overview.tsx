@@ -241,7 +241,7 @@ function ResourceOverview({
   itemsPerPage = 20,
   textResults = 'Dit zijn de zoekresultaten voor [search]',
   onlyIncludeTagIds = '',
-  onlyIncludeStatusIds = [],
+  onlyIncludeStatusIds = '',
   displayDocuments = false,
   documentsTitle = '',
   documentsDesc = '',

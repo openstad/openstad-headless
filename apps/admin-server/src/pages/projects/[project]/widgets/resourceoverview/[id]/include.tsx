@@ -73,13 +73,14 @@ export default function WidgetResourceOverviewInclude(
             keyPerItem={(t) => `${t.id}`}
             items={tags}
             selectedPredicate={(t) =>
+              // @ts-ignore
               form
                 ?.getValues('onlyIncludeTagIds')
                 ?.split(',')
                 ?.findIndex((tg) => tg === `${t.id}`) > -1
             }
             onValueChange={(tag, checked) => {
-              const ids = form.getValues('onlyIncludeTagIds')?.split(',');
+              const ids = form.getValues('onlyIncludeTagIds')?.split(',') ?? [];
               const idsToSave = (checked
                 ? [...ids, tag.id]
                 : ids.filter((id) => id !== `${tag.id}`)).join(',');
@@ -98,13 +99,14 @@ export default function WidgetResourceOverviewInclude(
             keyPerItem={(t) => `${t.id}`}
             items={statuses}
             selectedPredicate={(t) =>
+              // @ts-ignore
               form
                 ?.getValues('onlyIncludeStatusIds')
                 ?.split(',')
                 ?.findIndex((tg) => tg === `${t.id}`) > -1
             }
             onValueChange={(status, checked) => {
-              const values = form.getValues('onlyIncludeStatusIds')?.split(',');
+              const values = form.getValues('onlyIncludeStatusIds')?.split(',') ?? [];
 
               const idsToSave = (checked
                 ? [...values, status.id]
