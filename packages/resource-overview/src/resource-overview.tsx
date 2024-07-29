@@ -78,6 +78,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     itemsPerPage?: number;
     textResults?: string;
     onlyIncludeTagIds?: string;
+    onlyIncludeStatusIds?: string;
     rawInput?: string;
     bannerText?: string;
     displayDocuments?: boolean;
@@ -247,6 +248,7 @@ function ResourceOverview({
   itemsPerPage = 20,
   textResults = 'Dit zijn de zoekresultaten voor [search]',
   onlyIncludeTagIds = '',
+  onlyIncludeStatusIds = '',
   displayDocuments = false,
   documentsTitle = '',
   documentsDesc = '',
@@ -265,10 +267,17 @@ function ResourceOverview({
     .filter((t) => t && !isNaN(+t.trim()))
     .map((t) => Number.parseInt(t));
 
+  const statusIdsToLimitResourcesTo = onlyIncludeStatusIds
+    .trim()
+    .split(',')
+    .filter((t) => t && !isNaN(+t.trim()))
+    .map((t) => Number.parseInt(t));
+
   const [open, setOpen] = React.useState(false);
 
   // Filters that when changed reupdate the useResources value automatically
   const [search, setSearch] = useState<string>('');
+  const [statuses, setStatuses] = useState<number[]>(statusIdsToLimitResourcesTo || []);
   const [tags, setTags] = useState<number[]>(tagIdsToLimitResourcesTo || []);
   const [page, setPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -301,6 +310,9 @@ function ResourceOverview({
       ?.filter((resource: any) =>
         tags.every((tag) => resource.tags && Array.isArray(resource.tags) && resource.tags.find((o: { id: number }) => o.id === parseInt(tag.toString())))
       )
+      ?.filter((resource: any) =>
+        (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0 ) || statusIdsToLimitResourcesTo.every((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses.find((o: { id: number }) => o.id === statusId))
+      )
       ?.sort((a: any, b: any) => {
         if (sort === 'createdAt_desc') {
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -312,7 +324,7 @@ function ResourceOverview({
       });
 
     setFilteredResources(filtered);
-  }, [resources, tags, search, sort]);
+  }, [resources, tags, statuses, search, sort]);
 
   useEffect(() => {
     if ( filteredResources ) {

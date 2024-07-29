@@ -6,6 +6,7 @@ export default function useResources(
     search = '',
     tags = [],
     sort = 'random',
+    statuses = []
   },
   options
 ) {
@@ -27,7 +28,7 @@ export default function useResources(
 
   // If you add a prop here, the also do it for filter
   const { data, error, isLoading } = self.useSWR(
-    { projectId, page, pageSize, search, tags, sort },
+    { projectId, page, pageSize, search, tags, sort, statuses },
     'resources.fetch',
     options
   );
