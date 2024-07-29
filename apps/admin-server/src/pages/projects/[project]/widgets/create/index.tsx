@@ -37,7 +37,7 @@ export default function CreateWidget({ }: WithApiUrlProps) {
     const [filterSearchType, setFilterSearchType] = useState<string>('');
 
     const filteredWidgets = widgetTypes.filter(widget =>
-        widget[1].toLowerCase().includes(filterSearchType.toLowerCase())
+        widget[1].name.toLowerCase().includes(filterSearchType.toLowerCase())
     );
 
     async function submit(type: any, description: any) {
@@ -90,25 +90,27 @@ export default function CreateWidget({ }: WithApiUrlProps) {
                         {filteredWidgets.map((type, key) => (
                             <Card key={key}>
                                 <CardHeader>
-                                    {/* <img src='https://placehold.co/395x265' /> */}
+                                    <img src={type[1].image} />
                                     <h2 className="text-lg font-regular">
-                                        <b>{key + 1}</b> {type[1]}
+                                        <b>{key + 1}</b> {type[1].name}
                                     </h2>
-                                    {/* <CardDescription>Korte beschrijving van dit component</CardDescription> */}
+                                    <CardDescription>{type[1].description}</CardDescription>
                                 </CardHeader>
                                 <CardFooter>
                                     <Dialog>
-                                        <DialogTrigger><Button>Widget kiezen</Button></DialogTrigger>
+                                        <DialogTrigger className='inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-3 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2'>
+                                            Widget kiezen
+                                        </DialogTrigger>
                                         <DialogContent>
                                             <DialogHeader>
-                                                <DialogTitle>{type[1]}</DialogTitle>
+                                                <DialogTitle>{type[1].name}</DialogTitle>
                                                 <DialogDescription>
-                                                    Geef de widget hier een logische naame, zodat deze makkelijk terug te vinden is.
+                                                    Geef de widget hier een logische naam, zodat deze makkelijk terug te vinden is.
                                                     <br />
                                                     <br />
                                                     <div className="grid w-full items-center gap-4">
                                                         <Label htmlFor="name">Naam</Label>
-                                                        <Input type="text" id="name" placeholder={type[1]} onChange={(e) => setName(e.target.value)} />
+                                                        <Input type="text" id="name" placeholder={type[1].name} onChange={(e) => setName(e.target.value)} />
                                                     </div>
                                                     <br />
                                                     <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">

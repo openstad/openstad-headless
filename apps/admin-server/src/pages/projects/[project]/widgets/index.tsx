@@ -111,7 +111,7 @@ export default function ProjectWidgets() {
                     <Paragraph className="my-auto -mr-16 lg:mr-0">{widget.id}</Paragraph>
                     <div className="">
                       <strong className="">
-                        {WidgetDefinitions[widget.type]}
+                        {WidgetDefinitions[widget.type].name}
                       </strong>
                       <Paragraph className="my-auto -mr-16 lg:mr-0">{widget.description}</Paragraph>
                     </div>
