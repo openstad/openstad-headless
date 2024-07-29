@@ -14,7 +14,7 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const filterBody = (req, res, next) => {
   const data = {};
-  const keys = ['password', 'name', 'nickName', 'email', 'phoneNumber', 'address', 'city', 'postcode', 'extraData', 'listableByRole', 'detailsViewableByRole'];
+  const keys = ['password', 'name', 'nickName', 'email', 'phoneNumber', 'address', 'city', 'postcode', 'extraData', 'listableByRole', 'detailsViewableByRole', 'firstname', 'lastname'];
 
   keys.forEach((key) => {
     if (typeof req.body[key] != 'undefined') {
@@ -441,14 +441,12 @@ router.route('/:userId(\\d+)')
     return next();
   })
   .put(async function (req, res, next) {
-
     let user = req.results;
     let userData = merge.recursive(true, req.body);
 
     try {
 
       if (user.idpUser?.identifier) {
-
         let updatedUserData = merge(true, userData, { id: user.idpUser && user.idpUser.identifier });
         if (req.results.idpUser.provider == req.authConfig.provider && req.adapter.service.updateUser) {
           updatedUserData = await req.adapter.service.updateUser({ authConfig: req.authConfig, userData: merge(true, userData, { id: user.idpUser && user.idpUser.identifier }) });
