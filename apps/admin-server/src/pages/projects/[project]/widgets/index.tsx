@@ -1,5 +1,4 @@
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
-import { CreateWidgetDialog } from '@/components/dialog-widget-create';
 import { PageLayout } from '@/components/ui/page-layout';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { Widget, useWidgetsHook } from '@/hooks/use-widgets';
