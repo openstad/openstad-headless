@@ -4,13 +4,14 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { Widget, useWidgetsHook } from '@/hooks/use-widgets';
 import { WidgetDefinitions } from '@/lib/widget-definitions';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { sortTable, searchTable } from '@/components/ui/sortTable';
+import { Button } from '@/components/ui/button';
 
 export default function ProjectWidgets() {
   const router = useRouter();
@@ -45,7 +46,14 @@ export default function ProjectWidgets() {
             url: `/projects/${project}/widgets`,
           },
         ]}
-        action={<CreateWidgetDialog projectId={project as string} />}>
+        action={
+          <Link href={`/projects/${project}/widgets/create`}>
+            <Button variant="default" className="flex w-fit">
+              <Plus size="20" className="hidden lg:flex" />
+              Widget toevoegen
+            </Button>
+          </Link>
+        }>
         <div className="container py-6">
 
 
