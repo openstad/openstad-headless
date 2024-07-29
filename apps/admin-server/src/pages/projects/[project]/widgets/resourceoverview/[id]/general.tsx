@@ -171,6 +171,28 @@ export default function WidgetResourceOverviewGeneral(
                     <li className="ml-4">{`{{progress}}`}</li>
                     <li className="ml-4">{`{{createDateHumanized}}`}</li>
                     <li className="ml-4">{`{{publishDateHumanized}}`}</li>
+                    <li className="ml-4">{`{{resource}} -> Bevat alle data van de resource`}</li>
+                  </ul>
+                  <br/>
+                  <h2>Te gebruiken filters:</h2>
+                  <ul className="list-disc">
+                    <li className="ml-4">{`{{ variable | dump }}: Laat de inhoud van een object zien.`}</li>
+                    <li
+                      className="ml-4">{`{{ variable | cleanArray }}: Maakt van een lijst een tekst met de waardes gescheiden door komma's. Bijvoorbeeld: "['Optie 1', 'Optie 2']" wordt omgezet naar: Optie 1, Optie 2`}</li>
+                    <li
+                      className="ml-4">{`{{ variable | capitalize }}: Zet de eerste letter in hoofdletters.`}</li>
+                    <li
+                      className="ml-4">{`{{ variable | truncate(10) }}: Kort een tekst in tot de opgegeven lengte. Na deze lengte wordt er '...' toegevoegd.`}</li>
+                    <li className="ml-4">{`{{ variable | lowercase }}: Zet een tekst om naar kleine letters.`}</li>
+                    <li className="ml-4">{`{{ variable | uppercase }}: Zet een tekst om naar hoofdletters.`}</li>
+                    <li
+                      className="ml-4">{`{{ variable | replace('zoek', 'vervang') }}: Vervangt een deel van de tekst door iets anders.`}</li>
+                  </ul>
+                  <br/>
+                  <h2>Overige functies:</h2>
+                  <ul className="list-disc">
+                    <li className="ml-4">{`{{ resource | tags }}: Laat alle gekoppelde tags zien gescheiden met komma's`}</li>
+                    <li className="ml-4">{`{{ resource | status }}: Laat alle gekoppelde statussen zien gescheiden met komma's`}</li>
                   </ul>
                 </div>
                 <FormControl>
