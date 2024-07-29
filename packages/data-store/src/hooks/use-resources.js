@@ -66,23 +66,26 @@ export default function useResources(
     });
   };
 
-  resources.records.create = function (newData) {
-    return self.mutate({ projectId }, 'resources.create', newData, {
-      action: 'create',
-    });
-  };
+  if (resources.records) {
+    resources.records.create = function (newData) {
+      return self.mutate({ projectId }, 'resources.create', newData, {
+        action: 'create',
+      });
+    };
 
-  resources.records.forEach(async (resource) => {
-    resource.update = function (newData) {
-      return self.mutate({ projectId }, 'resources.update', newData, {
-        action: 'update',
-      });
-    };
-    resource.delete = function () {
-      return self.mutate({ projectId }, 'resources.delete', resource, {
-        action: 'delete',
-      });
-    };
-  });
+    resources.records.forEach(async (resource) => {
+      resource.update = function (newData) {
+        return self.mutate({ projectId }, 'resources.update', newData, {
+          action: 'update',
+        });
+      };
+      resource.delete = function () {
+        return self.mutate({ projectId }, 'resources.delete', resource, {
+          action: 'delete',
+        });
+      };
+    });
+  }
+
   return { data: resources, error, isLoading, submitVotes, create };
 }

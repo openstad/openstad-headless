@@ -13,6 +13,7 @@ import { elipsize } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
 import { hasRole } from '@openstad-headless/lib';
 import nunjucks from 'nunjucks';
+import { applyFilters } from '../../raw-resource/includes/nunjucks-filters';
 import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map';
 
 import '@utrecht/component-library-css';
@@ -113,6 +114,11 @@ const defaultHeaderRenderer = (
   );
 };
 
+// Initialize Nunjucks environment
+const nunjucksEnv = new nunjucks.Environment();
+// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+applyFilters(nunjucksEnv);
+
 const defaultItemRenderer = (
   resource: any,
   props: ResourceOverviewWidgetProps,
@@ -124,9 +130,10 @@ const defaultItemRenderer = (
     }
 
     try {
-      const render = nunjucks.renderString(props.rawInput, {
+      const render = nunjucksEnv.renderString(props.rawInput, {
         // here you can add variables that are available in the template
         projectId: props.projectId,
+        resource: resource,
         user: resource.user,
         startDateHumanized: resource.startDateHumanized,
         status: resource.status,
