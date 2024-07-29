@@ -21,7 +21,10 @@ const ResourceOverviewWithMap = (props: ResourceOverviewWithMapWidgetProps) => {
       <div className="detail-container" tabIndex={0}>
         <ResourceOverview {...props} />
       </div>
-      <ResourceOverviewMap {...props} />
+      <ResourceOverviewMap
+          {...props}
+          {...props.resourceOverviewMapWidget}
+        />
     </div>
   );
 }
