@@ -96,8 +96,31 @@ const ImageUploadField: FC<ImageUploadProps> = ({
         : "";
 
 
+    function waitForElm(selector: any) {
+        return new Promise(resolve => {
+            if (document.querySelector(selector)) {
+                return resolve(document.querySelector(selector));
+            }
+
+            const observer = new MutationObserver(mutations => {
+                if (document.querySelector(selector)) {
+                    observer.disconnect();
+                    resolve(document.querySelector(selector));
+                }
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        });
+    }
+
+
+
     useEffect(() => {
-        setTimeout(() => {
+        waitForElm('.filepond--browser').then((elm: any) => {
+
             const inputItem = document.querySelectorAll('.filepond--browser');
             const label = document.querySelectorAll('.filepond--drop-label > label');
             inputItem.forEach((item: any) => {
@@ -106,9 +129,11 @@ const ImageUploadField: FC<ImageUploadProps> = ({
             label.forEach((item: any) => {
                 item.setAttribute('aria-hidden', 'false');
             });
-
-         }, 500);
+        });
     }, []);
+
+
+
 
 
     return (
