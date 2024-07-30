@@ -17,7 +17,13 @@ import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 const formSchema = z.object({
   displayBanner: z.boolean(),
   displayMap: z.boolean(),
@@ -34,6 +40,7 @@ const formSchema = z.object({
   displayDocuments: z.boolean(),
   documentsTitle: z.string().optional(),
   documentsDesc: z.string().optional(),
+  displayVariant: z.string().optional(),
   // displayRanking: z.boolean(),
   // displayLabel: z.boolean(),
   // displayShareButtons: z.boolean(),
@@ -71,6 +78,7 @@ export default function WidgetResourceOverviewDisplay(
       displayDocuments: props?.displayDocuments || false,
       documentsTitle: props?.documentsTitle || '',
       documentsDesc: props?.documentsDesc || '',
+      displayVariant: props?.displayVariant,
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -406,6 +414,40 @@ export default function WidgetResourceOverviewDisplay(
               </FormItem>
             )}
           /> */}
+
+          <FormField
+            control={form.control}
+            name="displayVariant"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Weergave versie</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    props.onFieldChanged(field.name, value);
+                  }}
+                  value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecteer een optie" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem
+                      value={'default'}>
+                      Standaard
+                    </SelectItem>
+                    <SelectItem
+                      value={'compact'}>
+                      Compact (3 koloms)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

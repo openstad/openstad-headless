@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -19,6 +18,7 @@ import * as z from 'zod';
 import { ResourceOverviewMapWidgetTabProps } from '.';
 import useAreas from '@/hooks/use-areas';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useRouter } from 'next/router';
 
 const formSchema = z.object({
   customPolygon: z.array(z.object({ id: z.number(), name: z.string() })).optional(),
@@ -55,14 +55,16 @@ export default function WidgetResourcesMapButton(
       customPolygonUrl: props?.customPolygonUrl || []
     },
   });
+  const router = useRouter();
+  const projectId = router.query.project as string;
 
-  const { data: areas } = useAreas(props.projectId) as { data: { id: string, name: string }[] } ?? [];
+  const { data: areas } = useAreas(props.projectId === undefined ? projectId : props.projectId) as { data: { id: string, name: string }[] } ?? [];
 
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-      <Heading size="xl">Polygonen</Heading>
-      <Separator className="my-4" />
+        <Heading size="xl">Polygonen</Heading>
+        <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4 lg:w-1/2">
@@ -90,10 +92,12 @@ export default function WidgetResourcesMapButton(
                               if (!values.some(obj => obj.id === Number(item.id))) {
                                 const { name } = item;
                                 form.setValue('customPolygon', [...values, { name, id: Number(item.id) }]);
+                                props.onFieldChanged(field.name, [...values, { name, id: Number(item.id) }]);
                               }
                             } else {
                               const filteredValues = values.filter(obj => obj.id !== Number(item.id));
                               form.setValue('customPolygon', filteredValues);
+                              props.onFieldChanged('customPolygon', filteredValues);
                             }
                           }}
                         />

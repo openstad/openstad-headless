@@ -23,6 +23,7 @@ type Point = {
   lat: number;
   lng: number;
 };
+;
 
 const ResourceOverviewMap = ({
   categorize = undefined,
@@ -41,7 +42,7 @@ const ResourceOverviewMap = ({
   if (!Array.isArray(givenResources)) {
     givenResources = undefined;
   }
-
+  
   const { data: resources } = datastore.useResources(
     {
       projectId: props.projectId,

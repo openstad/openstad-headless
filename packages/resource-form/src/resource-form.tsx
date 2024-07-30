@@ -42,7 +42,17 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         for (const key in formData) {
             if (formData.hasOwnProperty(key)) {
                 if (key.startsWith('tags[')) {
-                    tags.push(formData[key]);
+
+                    const tagsArray = JSON.parse(formData[key]);
+
+                    if (typeof tagsArray === 'object') {
+                        tagsArray?.map((value) => {
+                            tags.push(value);
+                        });
+                    } else if ( typeof tagsArray === 'string' || typeof tagsArray === 'number' ) {
+                        tags.push(tagsArray);
+                    }
+
                     delete formData[key];
                 }
             }

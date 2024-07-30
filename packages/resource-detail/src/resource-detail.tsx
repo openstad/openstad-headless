@@ -63,6 +63,10 @@ export type ResourceDetailWidgetProps = {
       CommentsWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
+    commentsWidget_multiple?: Omit<
+    CommentsWidgetProps,
+    keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+  >;
     resourceDetailMap?: Omit<
       ResourceDetailMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -143,7 +147,6 @@ function ResourceDetail({
     }
   };
 
-
   return (
     <section>
       <div
@@ -165,7 +168,7 @@ function ResourceDetail({
                         <div>
                           <Paragraph className="osc-resource-detail-content-item-status">
                             {resource.statuses
-                              ?.map((s: { label: string }) => s.label)
+                              ?.map((s: { name: string }) => s.name)
                               ?.join(', ')}
                           </Paragraph>
                         </div>
@@ -274,8 +277,8 @@ function ResourceDetail({
                   <Heading level={3} appearance="utrecht-heading-4">Status</Heading>
                   <Spacer size={0.5} />
                   <div className="resource-detail-pil-list-content">
-                    {resource.statuses?.map((s: { label: string }) => (
-                      <Pill light rounded text={s.label}></Pill>
+                    {resource.statuses?.map((s: { name: string }) => (
+                      <Pill light rounded text={s.name}></Pill>
                     ))}
                   </div>
 
@@ -338,17 +341,29 @@ function ResourceDetail({
       {Array.isArray(props.commentsWidget?.useSentiments) &&
         props.commentsWidget?.useSentiments?.length ? (
         <section className="resource-detail-comments-container">
-          {props.commentsWidget?.useSentiments?.map((sentiment) => (
+          <Comments
+            {...props}
+            resourceId={resourceId || ''}
+            title={props.commentsWidget?.title}
+            emptyListText={props.commentsWidget?.emptyListText}
+            formIntro={props.commentsWidget?.formIntro}
+            placeholder={props.commentsWidget?.placeholder}
+            sentiment={props.commentsWidget?.useSentiments[0]}
+          />
+
+          {props.commentsWidget?.useSentiments?.length > 1 && (
             <Comments
               {...props}
               resourceId={resourceId || ''}
-              title={props.commentsWidget?.title}
+              title={props.commentsWidget_multiple?.title}
               emptyListText={props.commentsWidget?.emptyListText}
-              formIntro={props.commentsWidget?.formIntro}
-              placeholder={props.commentsWidget?.placeholder}
-              sentiment={sentiment}
+              formIntro={props.commentsWidget_multiple?.formIntro}
+              placeholder={props.commentsWidget_multiple?.placeholder}
+              sentiment={props.commentsWidget?.useSentiments[1]}
             />
-          ))}
+          )}
+
+
         </section>
       ) : null}
     </section>

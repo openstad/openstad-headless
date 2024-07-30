@@ -1,5 +1,6 @@
 import type { LeafletMouseEvent } from 'leaflet';
-import { Marker as LeafletMarker, useMap } from 'react-leaflet'
+import { Marker as LeafletMarker } from 'react-leaflet'
+import { useMap } from 'react-leaflet/hooks';
 import type { MarkerProps } from './types/marker-props';
 import { addToClassname, removeFromClassName } from '../../lib/class-name.js';
 import MarkerIcon from './marker-icon';

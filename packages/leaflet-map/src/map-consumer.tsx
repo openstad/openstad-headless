@@ -1,4 +1,4 @@
-import { useMap } from 'react-leaflet';
+import { useMap } from 'react-leaflet/hooks';
 
 declare global {
     interface Window { oscMap: any; }

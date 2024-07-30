@@ -136,7 +136,12 @@ async function run(id, projectData, options, callback) {
   };
 
   if (process.env.MONGODB_URI) {
-    project.mongo.uri = process.env.MONGODB_URI.replace("{database}", project.shortName);
+    // Apply the MongoDB prefix (if given) to the database name,
+    // and ensure we don't exceed the MongoDB database name length limit
+    const dbPrefix = process.env.MONGODB_PREFIX ? process.env.MONGODB_PREFIX + (!process.env.MONGODB_PREFIX.endsWith('_') ? '_' : '') : '';
+    const dbName = (dbPrefix + (project.shortName)).substring(0, 63);
+    
+    project.mongo.uri = process.env.MONGODB_URI.replace("{database}", dbName);
   }
 
   const config = project;
