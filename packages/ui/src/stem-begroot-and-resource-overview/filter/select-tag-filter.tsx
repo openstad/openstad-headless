@@ -37,7 +37,7 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
 
     function getRandomId(placeholder: string | undefined) {
       if(placeholder && placeholder.length >= 1) {
-      return placeholder;
+      return placeholder.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-');
       } else {
       return randomId;
       }
