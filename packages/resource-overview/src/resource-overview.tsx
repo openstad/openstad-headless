@@ -196,7 +196,7 @@ const defaultItemRenderer = (
           className="resource-card--link">
 
           <Carousel
-            items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: 'https://dummyimage.com/600x400/f4f4f4/f4f4f4' }]}
+            items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: '' }]}
             itemRenderer={(i) => (
               <Image
                 src={i.url}
@@ -258,7 +258,7 @@ const defaultItemRenderer = (
       ) : (
         <div className="resource-card--link">
           <Carousel
-            items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: 'https://dummyimage.com/600x400/f4f4f4/f4f4f4' }]}
+            items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: '' }]}
             itemRenderer={(i) => (
               <Image
                 src={i.url}
