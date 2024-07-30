@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Carousel,
   Icon,
   Image,
   List,
@@ -75,20 +76,26 @@ export const StemBegrootResourceList = ({
         return (
           <>
             <article className="stem-begroot--container">
-              <Image src={resource.images?.at(0)?.url || defaultImage} />
-                <section className="stembegroot-content-item-header">
-                  <div className="stembegroot-content-item-header-taglist">
-                    <Heading level={2} appearance="utrecht-heading-6">Tags</Heading>
-                    <div className="pill-grid stembegroot">
-                      {(resource.tags as Array<{ type: string; name: string }>)
-                        ?.filter((t) => t.type !== 'status')
-                        ?.map((t) => <span>{t.name || 'Geen thema'}</span>)}
-                    </div>
+
+              <Carousel
+                items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: 'https://dummyimage.com/600x400/f4f4f4/f4f4f4' }]}
+                itemRenderer={(i) => (
+                  <Image src={i.url} />
+                )}
+              />
+              <section className="stembegroot-content-item-header">
+                <div className="stembegroot-content-item-header-taglist">
+                  <Heading level={2} appearance="utrecht-heading-6">Tags</Heading>
+                  <div className="pill-grid stembegroot">
+                    {(resource.tags as Array<{ type: string; name: string }>)
+                      ?.filter((t) => t.type !== 'status')
+                      ?.map((t) => <span>{t.name || 'Geen thema'}</span>)}
                   </div>
-                </section>
-                <Heading level={2} appearance="utrecht-heading-4">{resource.title}</Heading>
-                <Paragraph>{elipsize(resource.summary, 100)}</Paragraph>
-                <Paragraph>{elipsize(resource.description, 200)}</Paragraph>
+                </div>
+              </section>
+              <Heading level={2} appearance="utrecht-heading-4">{resource.title}</Heading>
+              <Paragraph>{elipsize(resource.summary, 100)}</Paragraph>
+              <Paragraph>{elipsize(resource.description, 200)}</Paragraph>
 
               {
                 originalUrl ? (

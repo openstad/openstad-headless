@@ -1,5 +1,5 @@
 import './resource-overview.css';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Carousel, Icon, Paginator } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
@@ -181,9 +181,8 @@ const defaultItemRenderer = (
     let newUrl = props?.itemLink?.replace('[id]', resource.id);
     if (!newUrl?.startsWith('http')) {
       if (!newUrl?.startsWith('/')) {
-        newUrl = `${location.pathname}${
-          location.pathname.endsWith('/') ? '' : '/'
-        }${newUrl}`;
+        newUrl = `${location.pathname}${location.pathname.endsWith('/') ? '' : '/'
+          }${newUrl}`;
       }
       newUrl = `${location.protocol}//${location.host}${newUrl}`;
     }
@@ -195,20 +194,27 @@ const defaultItemRenderer = (
       {props.displayType === 'cardrow' ? (
         <div
           className="resource-card--link">
-          <Image
-            src={resource.images?.at(0)?.url || defaultImage}
-            imageFooter={
-              props.displayStatusLabel && (
-                <div>
-                  <Paragraph className="osc-resource-overview-content-item-status">
-                    {resource.statuses?.map((statusTag: any) => (
-                      <span className="status-label">{statusTag.label}</span>
-                    ))}
-                  </Paragraph>
-                </div>
-              )
-            }
+
+          <Carousel
+            items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: 'https://dummyimage.com/600x400/f4f4f4/f4f4f4' }]}
+            itemRenderer={(i) => (
+              <Image
+                src={i.url}
+                imageFooter={
+                  props.displayStatusLabel && (
+                    <div>
+                      <Paragraph className="osc-resource-overview-content-item-status">
+                        {resource.statuses?.map((statusTag: any) => (
+                          <span className="status-label">{statusTag.label}</span>
+                        ))}
+                      </Paragraph>
+                    </div>
+                  )
+                }
+              />
+            )}
           />
+
 
           <div>
             <Spacer size={1} />
@@ -251,19 +257,24 @@ const defaultItemRenderer = (
 
       ) : (
         <div className="resource-card--link">
-          <Image
-            src={resource.images?.at(0)?.url || defaultImage}
-            imageFooter={
-              props.displayStatusLabel && (
-                <div>
-                  <Paragraph className="osc-resource-overview-content-item-status">
-                    {resource.statuses?.map((statusTag: any) => (
-                      <span className="status-label">{statusTag.label}</span>
-                    ))}
-                  </Paragraph>
-                </div>
-              )
-            }
+          <Carousel
+            items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: 'https://dummyimage.com/600x400/f4f4f4/f4f4f4' }]}
+            itemRenderer={(i) => (
+              <Image
+                src={i.url}
+                imageFooter={
+                  props.displayStatusLabel && (
+                    <div>
+                      <Paragraph className="osc-resource-overview-content-item-status">
+                        {resource.statuses?.map((statusTag: any) => (
+                          <span className="status-label">{statusTag.label}</span>
+                        ))}
+                      </Paragraph>
+                    </div>
+                  )
+                }
+              />
+            )}
           />
 
           <div>
@@ -384,7 +395,7 @@ function ResourceOverview({
         tags.every((tag) => resource.tags && Array.isArray(resource.tags) && resource.tags.find((o: { id: number }) => o.id === parseInt(tag.toString())))
       )
       ?.filter((resource: any) =>
-        (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0 ) || statusIdsToLimitResourcesTo.every((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses.find((o: { id: number }) => o.id === statusId))
+        (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0) || statusIdsToLimitResourcesTo.every((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses.find((o: { id: number }) => o.id === statusId))
       )
       ?.sort((a: any, b: any) => {
         if (sort === 'createdAt_desc') {
@@ -400,12 +411,12 @@ function ResourceOverview({
   }, [resources, tags, statuses, search, sort]);
 
   useEffect(() => {
-    if ( filteredResources ) {
+    if (filteredResources) {
       const filtered: any = filteredResources || [];
       const totalPagesCalc = Math.ceil(filtered?.length / pageSize);
 
       if (totalPagesCalc !== totalPages) {
-        setTotalPages( totalPagesCalc );
+        setTotalPages(totalPagesCalc);
       }
 
       setPage(0);
