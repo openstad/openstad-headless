@@ -27,12 +27,12 @@ export const WidgetDefinitions = {
   resourcesmap: {
     name: 'Resource overview map',
     description: 'Map showing resource overview',
-    image: '/widget_preview/resource_overview_preview.png',
+    image: '/widget_preview/resource_map_preview.png',
   },
   resourcedetailmap: {
     name: 'Resource detail map',
     description: 'Map showing resource details',
-    image: 'https://dummyimage.com/600x400/f4f4f4/000',
+    image: '/widget_preview/resource_map_preview.png',
   },
   counter: {
     name: 'Counter',
