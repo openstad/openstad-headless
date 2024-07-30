@@ -92,7 +92,7 @@ export default function CreateWidget({ }: WithApiUrlProps) {
                                 <CardHeader>
                                     <img src={type[1].image} />
                                     <h2 className="text-lg font-regular">
-                                        <b>{key + 1}</b> {type[1].name}
+                                        {type[1].name}
                                     </h2>
                                     <CardDescription>{type[1].description}</CardDescription>
                                 </CardHeader>
@@ -103,19 +103,23 @@ export default function CreateWidget({ }: WithApiUrlProps) {
                                         </DialogTrigger>
                                         <DialogContent>
                                             <DialogHeader>
-                                                <DialogTitle>{type[1].name}</DialogTitle>
+                                                <br />
+                                                <img src={type[1].image} alt="" />
+                                                <DialogTitle>
+                                                    {type[1].name}
+                                                </DialogTitle>
                                                 <DialogDescription>
-                                                    Geef de widget hier een logische naam, zodat deze makkelijk terug te vinden is.
-                                                    <br />
-                                                    <br />
-                                                    <div className="grid w-full items-center gap-4">
+                                                    <p className="mb-4">
+                                                        Geef de widget hier een logische naam, zodat deze makkelijk terug te vinden is.
+                                                    </p>
+                                                    <div className="grid w-full items-center gap-2 mt-4" style={{ background: '#f4f4f4', margin: '20px -24px -24px -24px', padding: '34px 24px', width: 'calc(100% + 48px)' }}>
                                                         <Label htmlFor="name">Naam</Label>
                                                         <Input type="text" id="name" placeholder={type[1].name} onChange={(e) => setName(e.target.value)} />
-                                                    </div>
-                                                    <br />
-                                                    <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
-                                                        <DialogTrigger>Annuleren</DialogTrigger>
-                                                        <Button onClick={() => submit(type[0], name)}>Aanmaken</Button>
+
+                                                        <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 mt-4">
+                                                            <DialogTrigger>Annuleren</DialogTrigger>
+                                                            <Button onClick={() => submit(type[0], name)}>Aanmaken</Button>
+                                                        </div>
                                                     </div>
                                                 </DialogDescription>
                                             </DialogHeader>
