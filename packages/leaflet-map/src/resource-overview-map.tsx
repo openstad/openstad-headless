@@ -1,7 +1,7 @@
 import 'remixicon/fonts/remixicon.css';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
-import { Button } from '@utrecht/component-library-react';
+import { Button, ButtonLink } from '@utrecht/component-library-react';
 
 import type { PropsWithChildren } from 'react';
 import { loadWidget } from '../../lib/load-widget';
@@ -42,7 +42,7 @@ const ResourceOverviewMap = ({
   if (!Array.isArray(givenResources)) {
     givenResources = undefined;
   }
-  
+
   const { data: resources } = datastore.useResources(
     {
       projectId: props.projectId,
@@ -102,34 +102,28 @@ const ResourceOverviewMap = ({
   let countButtonElement: React.JSX.Element = <></>;
   if (countButton?.show) {
     countButtonElement = (
-      <Button
-        appearance="primary-action-button"
-        className={`osc-resource-overview-map-button osc-first-button`}>
+      <div
+        className="utrecht-button utrecht-button--primary-action osc-resource-overview-map-button osc-first-button">
         <section className="resource-counter">
           {resources?.metadata?.totalCount}
         </section>
         <section className="resource-label">
           {countButton.label || 'plannen'}
         </section>
-      </Button>
+      </div>
     );
   }
 
   let ctaButtonElement: React.JSX.Element = <></>;
   if (ctaButton?.show) {
     ctaButtonElement = (
-      <Button
+      <ButtonLink
         appearance="primary-action-button"
-        onClick={(e) => {
-          if (ctaButton.href) {
-            document.location.href = ctaButton.href;
-          }
-        }}
-        className={`osc-resource-overview-map-button ${
-          countButtonElement ? 'osc-second-button' : 'osc-first-button'
-        }`}>
+        href={ctaButton.href}
+        className={`osc-resource-overview-map-button ${countButtonElement ? 'osc-second-button' : 'osc-first-button'
+          }`}>
         <section className="resource-label">{ctaButton.label}</section>
-      </Button>
+      </ButtonLink>
     );
   }
 
@@ -176,8 +170,18 @@ const ResourceOverviewMap = ({
     maxZoom: props?.map?.maxZoom ? parseInt(props.map.maxZoom) : 20
   };
 
+  const skipMarkers = () => {
+    const nextFocus: HTMLButtonElement | null = document.querySelectorAll('.leaflet-control-zoom-in')[0] as HTMLButtonElement;
+
+    if (nextFocus) {
+      nextFocus.focus();
+    }
+  };
+
+
   return (
-    <>
+    <div className='map-container--buttons'>
+      <Button appearance='primary-action-button' className='skip-link' onClick={skipMarkers}>Skip markers</Button>
       <BaseMap
         {...props}
         {...zoom}
@@ -186,10 +190,12 @@ const ResourceOverviewMap = ({
         categorize={{ categories, categorizeByField }}
         center={center}
         markers={currentMarkers}>
+      </BaseMap>
+      <div className='map-buttons'>
         {ctaButtonElement}
         {countButtonElement}
-      </BaseMap>
-    </>
+      </div>
+    </div>
   );
 };
 

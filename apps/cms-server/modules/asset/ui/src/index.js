@@ -13,32 +13,44 @@ export default () => {
   });
 };
 
-// Make mobile menu
-window.onload = function () {
+let isMobile = false;
+
+function adjustMenu() {
   const mainContainer = document.querySelector('.main-header-container');
   const navContainer = document.querySelector('.header_navbar-container');
   const mainMenuContainer = document.querySelector('#main-menu');
   const logo = document.querySelector('.main-header-container .col-xs-12');
-  if (document.getElementsByClassName('--compact').length > 0) {
-    if (
-      navContainer.offsetWidth + logo.offsetWidth >=
-      mainContainer.offsetWidth
-    ) {
-      navContainer.classList.add('--mobile');
+  const mobileThreshold = 1200;
+
+  if (window.innerWidth <= mobileThreshold) {
+    if (document.getElementsByClassName('--compact').length > 0) {
+      if (
+        navContainer.offsetWidth + logo.offsetWidth >=
+        mainContainer.offsetWidth
+      ) {
+        navContainer.classList.add('--mobile');
+        isMobile = true;
+      } else if (!isMobile) {
+        navContainer.classList.remove('--mobile');
+      }
     } else {
-      navContainer.classList.remove('--mobile');
+      if (mainMenuContainer.offsetWidth >= mainContainer.offsetWidth) {
+        document.getElementById('navbar').classList.add('--hidden');
+        navContainer.appendChild(
+          document.getElementById('navbar').cloneNode(true)
+        );
+        navContainer.classList.add('--mobile');
+        isMobile = true;
+      } else if (!isMobile) {
+        document.getElementById('navbar').classList.remove('--hidden');
+        navContainer.classList.remove('--mobile');
+      }
     }
   } else {
-    if (mainMenuContainer.offsetWidth >= mainContainer.offsetWidth) {
-      document.getElementById('navbar').classList.add('--hidden');
-      navContainer.appendChild(
-        document.getElementById('navbar').cloneNode(true)
-      );
-      navContainer.classList.add('--mobile');
-    } else {
-      document.getElementById('navbar').classList.remove('--hidden');
-      navContainer.classList.remove('--mobile');
-    }
+    // Remove mobile class when screen size gets larger
+    navContainer.classList.remove('--mobile');
+    document.getElementById('navbar').classList.remove('--hidden');
+    isMobile = false;
   }
 
   document.querySelector('.close-button').addEventListener('click', () => {
@@ -46,4 +58,7 @@ window.onload = function () {
       .querySelector('.header_navbar-container')
       .classList.toggle('--show');
   });
-};
+}
+
+window.onload = adjustMenu;
+window.onresize = adjustMenu;

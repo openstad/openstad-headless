@@ -26,6 +26,7 @@
   width: calc(100% + 2rem);
   padding-inline-start: 2rem;
   padding-inline-end: 2rem;
+  box-sizing: border-box;
 }
 
 .resourceOverviewWithMap-container .detail-container{
@@ -48,7 +49,7 @@
   .osc-resource-overview-resource-collection {
   grid-template-columns: 1fr !important;
 }
-.resourceOverviewWithMap-container .utrecht-button.resource-card--link {
+.resourceOverviewWithMap-container .resource-card--link {
   display: grid;
   grid-template-columns: 230px auto;
   border-bottom: solid 1px var(--nlds-default-border-color, #a9b2ba);

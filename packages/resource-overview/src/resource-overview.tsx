@@ -39,7 +39,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
       title?: string,
       displayHeader?: boolean,
       displayMap?: boolean
-    ) => React.JSX.Element;renderItem?: (
+    ) => React.JSX.Element; renderItem?: (
       resource: any,
       props: ResourceOverviewWidgetProps,
       onItemClick?: () => void
@@ -167,7 +167,7 @@ const defaultItemRenderer = (
   interface Tag {
     name: string;
     defaultResourceImage?: string;
-   }
+  }
 
   if (Array.isArray(resource?.tags)) {
     const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
@@ -176,64 +176,137 @@ const defaultItemRenderer = (
     defaultImage = tagWithImage?.defaultResourceImage || '';
   }
 
+  const getUrl = () => {
+    let location = document.location;
+    let newUrl = props?.itemLink?.replace('[id]', resource.id);
+    if (!newUrl?.startsWith('http')) {
+      if (!newUrl?.startsWith('/')) {
+        newUrl = `${location.pathname}${
+          location.pathname.endsWith('/') ? '' : '/'
+        }${newUrl}`;
+      }
+      newUrl = `${location.protocol}//${location.host}${newUrl}`;
+    }
+    return newUrl
+  }
+
   return (
-    <Button
-      appearance="subtle-button"
-      className="resource-card--link"
-      onClick={() => onItemClick && onItemClick()}>
-      <Image
-        src={resource.images?.at(0)?.url || defaultImage}
-        imageFooter={
-          props.displayStatusLabel && (
-            <div>
-              <Paragraph className="osc-resource-overview-content-item-status">
-                {resource.statuses?.map((statusTag: any) => (
-                  <span className="status-label">{statusTag.label}</span>
-                ))}
-              </Paragraph>
-            </div>
-          )
-        }
-      />
-
-      <div>
-        <Spacer size={1} />
-        {props.displayTitle ? (
-          <Heading4>
-            {elipsize(resource.title, props.titleMaxLength || 20)}
-          </Heading4>
-        ) : null}
-
-        {props.displaySummary ? (
-          <Paragraph>
-            {elipsize(resource.summary, props.summaryMaxLength || 20)}
-          </Paragraph>
-        ) : null}
-
-        {props.displayDescription ? (
-          <Paragraph className="osc-resource-overview-content-item-description">
-            {elipsize(resource.description, props.descriptionMaxLength || 30)}
-          </Paragraph>
-        ) : null}
-      </div>
-
-      <div className="osc-resource-overview-content-item-footer">
-        {props.displayVote ? (
-          <>
-            <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} />
-            <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} />
-          </>
-        ) : null}
-
-        {props.displayArguments ? (
-          <Icon
-            icon="ri-message-line"
-            variant="big"
-            text={resource.commentCount}
+    <>
+      {props.displayType === 'cardrow' ? (
+        <div
+          className="resource-card--link">
+          <Image
+            src={resource.images?.at(0)?.url || defaultImage}
+            imageFooter={
+              props.displayStatusLabel && (
+                <div>
+                  <Paragraph className="osc-resource-overview-content-item-status">
+                    {resource.statuses?.map((statusTag: any) => (
+                      <span className="status-label">{statusTag.label}</span>
+                    ))}
+                  </Paragraph>
+                </div>
+              )
+            }
           />
-        ) : null}
-      </div>
-    </Button>
+
+          <div>
+            <Spacer size={1} />
+            {props.displayTitle ? (
+              <Heading4>
+                <a href={getUrl()} className="resource-card--link_trigger"> {elipsize(resource.title, props.titleMaxLength || 20)} </a>
+              </Heading4>
+            ) : null}
+
+            {props.displaySummary ? (
+              <Paragraph>
+                {elipsize(resource.summary, props.summaryMaxLength || 20)}
+              </Paragraph>
+            ) : null}
+
+            {props.displayDescription ? (
+              <Paragraph className="osc-resource-overview-content-item-description">
+                {elipsize(resource.description, props.descriptionMaxLength || 30)}
+              </Paragraph>
+            ) : null}
+          </div>
+
+          <div className="osc-resource-overview-content-item-footer">
+            {props.displayVote ? (
+              <>
+                <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} />
+                <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} />
+              </>
+            ) : null}
+
+            {props.displayArguments ? (
+              <Icon
+                icon="ri-message-line"
+                variant="big"
+                text={resource.commentCount}
+              />
+            ) : null}
+          </div>
+        </div>
+
+      ) : (
+        <div className="resource-card--link">
+          <Image
+            src={resource.images?.at(0)?.url || defaultImage}
+            imageFooter={
+              props.displayStatusLabel && (
+                <div>
+                  <Paragraph className="osc-resource-overview-content-item-status">
+                    {resource.statuses?.map((statusTag: any) => (
+                      <span className="status-label">{statusTag.label}</span>
+                    ))}
+                  </Paragraph>
+                </div>
+              )
+            }
+          />
+
+          <div>
+            <Spacer size={1} />
+            {props.displayTitle ? (
+              <Heading4>
+                <button className="resource-card--link_trigger" onClick={() => onItemClick && onItemClick()}>{elipsize(resource.title, props.titleMaxLength || 20)}</button>
+              </Heading4>
+            ) : null}
+
+            {props.displaySummary ? (
+              <Paragraph>
+                {elipsize(resource.summary, props.summaryMaxLength || 20)}
+              </Paragraph>
+            ) : null}
+
+            {props.displayDescription ? (
+              <Paragraph className="osc-resource-overview-content-item-description">
+                {elipsize(resource.description, props.descriptionMaxLength || 30)}
+              </Paragraph>
+            ) : null}
+          </div>
+
+          <div className="osc-resource-overview-content-item-footer">
+            {props.displayVote ? (
+              <>
+                <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} />
+                <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} />
+              </>
+            ) : null}
+
+            {props.displayArguments ? (
+              <Icon
+                icon="ri-message-line"
+                variant="big"
+                text={resource.commentCount}
+              />
+            ) : null}
+          </div>
+        </div>
+      )}
+
+    </>
   );
 };
 
@@ -352,9 +425,8 @@ function ResourceOverview({
           let newUrl = props.itemLink.replace('[id]', resource.id);
           if (!newUrl.startsWith('http')) {
             if (!newUrl.startsWith('/')) {
-              newUrl = `${location.pathname}${
-                location.pathname.endsWith('/') ? '' : '/'
-              }${newUrl}`;
+              newUrl = `${location.pathname}${location.pathname.endsWith('/') ? '' : '/'
+                }${newUrl}`;
             }
             newUrl = `${location.protocol}//${location.host}${newUrl}`;
           }
@@ -420,11 +492,10 @@ function ResourceOverview({
         {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, displayMap) : null}
 
         <section
-          className={`osc-resource-overview-content ${
-            !filterNeccesary ? 'full' : ''
-          }`}>
+          className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
+            }`}>
           {props.displaySearchText ? (
-            <div className="osc-resourceoverview-search-container col-span-full">
+            <div className="osc-resourceoverview-search-container col-span-full" aria-live='polite'>
               {props.textActiveSearch && search && (
                 <Paragraph className="osc-searchtext">
                   {props.textActiveSearch

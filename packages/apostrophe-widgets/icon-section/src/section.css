@@ -5,16 +5,15 @@
 .icon-section .utrecht-button.utrecht-button--subtle.utrecht-accordion__button{
   background-color: var(--utrecht-button-primary-action-background-color);
   color: var(--utrecht-button-primary-action-color);
-  display: block;
   border-radius: var(--nlds-iconsection-border-radius, 0);
-  text-align: center;
+  justify-content: center !important;
+  grid-gap: 20px;
 }
-.icon-section .utrecht-accordion__button[aria-expanded]::after{
-  background-color: var(--utrecht-button-primary-action-color);
-  top: 50%;
-  transform: translateY(-50%);
-  right: 10px
+.icon-section .utrecht-button.utrecht-button--subtle.utrecht-accordion__button *{
+  color: var(--utrecht-button-primary-action-color);
+  fill: var(--utrecht-button-primary-action-color);
 }
+
 .icon-section .utrecht-accordion__panel{
   padding: revert;
   border: none;

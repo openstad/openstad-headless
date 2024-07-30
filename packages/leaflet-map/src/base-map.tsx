@@ -221,8 +221,6 @@ const BaseMap = ({
     aspectRatio: height ? undefined : 16 / 9,
   };
 
-  
-
   return (
     <>
       <div className="map-container" style={style}>
@@ -270,7 +268,6 @@ const BaseMap = ({
             }
           />
 
-          {props.children}
         </MapContainer>
       </div>
     </>
