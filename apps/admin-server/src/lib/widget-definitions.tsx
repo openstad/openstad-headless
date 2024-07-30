@@ -17,6 +17,8 @@ export const WidgetDefinitions = {
   resourcewithmap: 'Resource with map',
   resourcedetailwithmap: 'Resource detail with map',
   documentmap: 'Documents with comments',
+  activity: 'Gebruikers activiteit',
+  account: 'Account gegevens',
 };
 
 export type WidgetDefinition = keyof typeof WidgetDefinitions;

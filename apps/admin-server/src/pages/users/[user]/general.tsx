@@ -29,6 +29,8 @@ const formSchema = z.object({
   city: z.string().optional(),
   postcode: z.string().optional(),
   password: z.string().optional(),
+  firstname: z.string().optional(),
+  lastname: z.string().optional(),
 });
 
 export default function CreateUserGeneral() {
@@ -52,6 +54,8 @@ export default function CreateUserGeneral() {
       city: user?.city || '',
       postcode: user?.postcode || '',
       password: user?.password || '',
+      firstname: user?.firstname || '',
+      lastname: user?.lastname || '',
     }),
     [user]
   );
@@ -106,6 +110,34 @@ export default function CreateUserGeneral() {
             render={({ field }) => (
               <FormItem className="mt-auto">
                 <FormLabel>Volledige naam</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="firstname"
+            render={({ field }) => (
+              <FormItem className="mt-auto">
+                <FormLabel>Voornaam</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="lastname"
+            render={({ field }) => (
+              <FormItem className="mt-auto">
+                <FormLabel>Achternaam</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>

@@ -22,6 +22,8 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.18.1",
+    "@openstad-headless/account": "file:../../packages/account",
+    "@openstad-headless/activity": "file:../../packages/activity",
     "@openstad-headless/agenda": "file:../../packages/agenda",
     "@openstad-headless/comments": "file:../../packages/comments",
     "@openstad-headless/counter": "file:../../packages/counter",

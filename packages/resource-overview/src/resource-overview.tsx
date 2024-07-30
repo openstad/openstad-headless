@@ -1,5 +1,5 @@
 import './resource-overview.css';
-import React, { useCallback, useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import { Carousel, Icon, Paginator } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
@@ -13,6 +13,7 @@ import { elipsize } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
 import { hasRole } from '@openstad-headless/lib';
 import nunjucks from 'nunjucks';
+import { applyFilters } from '../../raw-resource/includes/nunjucks-filters';
 import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map';
 
 import '@utrecht/component-library-css';
@@ -77,6 +78,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     itemsPerPage?: number;
     textResults?: string;
     onlyIncludeTagIds?: string;
+    onlyIncludeStatusIds?: string;
     rawInput?: string;
     bannerText?: string;
     displayDocuments?: boolean;
@@ -112,6 +114,11 @@ const defaultHeaderRenderer = (
   );
 };
 
+// Initialize Nunjucks environment
+const nunjucksEnv = new nunjucks.Environment();
+// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+applyFilters(nunjucksEnv);
+
 const defaultItemRenderer = (
   resource: any,
   props: ResourceOverviewWidgetProps,
@@ -123,9 +130,10 @@ const defaultItemRenderer = (
     }
 
     try {
-      const render = nunjucks.renderString(props.rawInput, {
+      const render = nunjucksEnv.renderString(props.rawInput, {
         // here you can add variables that are available in the template
         projectId: props.projectId,
+        resource: resource,
         user: resource.user,
         startDateHumanized: resource.startDateHumanized,
         status: resource.status,
@@ -313,6 +321,7 @@ function ResourceOverview({
   itemsPerPage = 20,
   textResults = 'Dit zijn de zoekresultaten voor [search]',
   onlyIncludeTagIds = '',
+  onlyIncludeStatusIds = '',
   displayDocuments = false,
   documentsTitle = '',
   documentsDesc = '',
@@ -331,28 +340,77 @@ function ResourceOverview({
     .filter((t) => t && !isNaN(+t.trim()))
     .map((t) => Number.parseInt(t));
 
+  const statusIdsToLimitResourcesTo = onlyIncludeStatusIds
+    .trim()
+    .split(',')
+    .filter((t) => t && !isNaN(+t.trim()))
+    .map((t) => Number.parseInt(t));
+
   const [open, setOpen] = React.useState(false);
 
   // Filters that when changed reupdate the useResources value automatically
   const [search, setSearch] = useState<string>('');
+  const [statuses, setStatuses] = useState<number[]>(statusIdsToLimitResourcesTo || []);
   const [tags, setTags] = useState<number[]>(tagIdsToLimitResourcesTo || []);
   const [page, setPage] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState<number>(itemsPerPage || 10);
   const [sort, setSort] = useState<string | undefined>(
     props.defaultSorting || undefined
   );
 
+  const [resources, setResources] = useState([]);
+  const [filteredResources, setFilteredResources] = useState([]);
+
   const { data: resourcesWithPagination } = datastore.useResources({
     ...props,
-    page,
-    pageSize,
     search,
     tags,
     sort,
   });
 
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
-  const resources = resourcesWithPagination.records || [];
+
+  useEffect(() => {
+    if (resourcesWithPagination) {
+      setResources(resourcesWithPagination.records || []);
+    }
+  }, [resourcesWithPagination, pageSize]);
+
+
+  useEffect(() => {
+    const filtered = resources && resources
+      ?.filter((resource: any) =>
+        tags.every((tag) => resource.tags && Array.isArray(resource.tags) && resource.tags.find((o: { id: number }) => o.id === parseInt(tag.toString())))
+      )
+      ?.filter((resource: any) =>
+        (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0 ) || statusIdsToLimitResourcesTo.every((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses.find((o: { id: number }) => o.id === statusId))
+      )
+      ?.sort((a: any, b: any) => {
+        if (sort === 'createdAt_desc') {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        if (sort === 'createdAt_asc') {
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        }
+        return 0;
+      });
+
+    setFilteredResources(filtered);
+  }, [resources, tags, statuses, search, sort]);
+
+  useEffect(() => {
+    if ( filteredResources ) {
+      const filtered: any = filteredResources || [];
+      const totalPagesCalc = Math.ceil(filtered?.length / pageSize);
+
+      if (totalPagesCalc !== totalPages) {
+        setTotalPages( totalPagesCalc );
+      }
+
+      setPage(0);
+    }
+  }, [filteredResources]);
 
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
   const isModerator = hasRole(currentUser, 'moderator');
@@ -403,7 +461,7 @@ function ResourceOverview({
         children={
           <Carousel
             startIndex={resourceDetailIndex}
-            items={resources && resources.length > 0 ? resources : []}
+            items={filteredResources && filteredResources?.length > 0 ? filteredResources : []}
             itemRenderer={(item) => (
               <GridderResourceDetail
                 resource={item}
@@ -431,7 +489,7 @@ function ResourceOverview({
 
       <div className={`osc ${getDisplayVariant(displayVariant)}`}>
 
-        {displayBanner || displayMap ? renderHeader(props, resources, bannerText, displayBanner, displayMap) : null}
+        {displayBanner || displayMap ? renderHeader(props, (filteredResources || []), bannerText, displayBanner, displayMap) : null}
 
         <section
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
@@ -476,25 +534,12 @@ function ResourceOverview({
           ) : null}
 
           <section className="osc-resource-overview-resource-collection">
-            {resources &&
-              resources
-                .filter((resource: any) =>
-                  tags.every((tag: number) => {
-                    return resource.tags || (Array.isArray(resource.tags) && resource.tags.includes(tag));
-                  })
-                )
-                .sort((a: any, b: any) => {
-                  if (sort === 'createdAt_desc') {
-                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-                  }
-                  if (sort === 'createdAt_asc') {
-                    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-                  }
-                  return 0;
-                })
-                .map((resource: any, index: number) => {
+            {filteredResources &&
+              filteredResources
+                ?.slice(page * pageSize, (page + 1) * pageSize)
+                ?.map((resource: any, index: number) => {
                   return (
-                    <React.Fragment key={`resource-item-${resource.title}`}>
+                    <React.Fragment key={`resource-item-${resource.id}`}>
                       {renderItem(resource, { ...props, displayType }, () => {
                         onResourceClick(resource, index);
                       })}
@@ -509,9 +554,9 @@ function ResourceOverview({
             <Spacer size={4} />
             <div className="osc-resource-overview-paginator col-span-full">
               <Paginator
-                page={resourcesWithPagination?.metadata?.page || 0}
-                totalPages={resourcesWithPagination?.metadata?.pageCount || 1}
-                onPageChange={(page) => setPage(page)}
+                page={page || 0}
+                totalPages={totalPages || 1}
+                onPageChange={(newPage) => setPage(newPage)}
               />
             </div>
           </>
