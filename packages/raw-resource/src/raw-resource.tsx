@@ -26,7 +26,7 @@ export type RawResourceWidgetProps = BaseProps &
 function RawResource(props: RawResourceWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);
 
-  let resourceId: string|undefined = String(getResourceId({
+  let resourceId: string | undefined = String(getResourceId({
     resourceId: parseInt(props.resourceId || ''),
     url: document.location.href,
     targetUrl: props.resourceIdRelativePath,
@@ -39,12 +39,13 @@ function RawResource(props: RawResourceWidgetProps) {
     resourceId: resourceId,
     api: props.api,
   });
-  
-  const {data: resource} = resourceId ? datastore.useResource(props) : {data:null};
+
+  const { data: resource } = resourceId ? datastore.useResource(props) : { data: null };
 
   const stylingClasses =
     props.stylingClasses?.map((stylingClass) => stylingClass.value).join(' ') ||
     '';
+
 
   let render = (() => {
     if (props.rawInput) {
