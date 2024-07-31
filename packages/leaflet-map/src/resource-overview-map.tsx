@@ -103,7 +103,7 @@ const ResourceOverviewMap = ({
   if (countButton?.show) {
     countButtonElement = (
       <div
-        className="utrecht-button utrecht-button--primary-action osc-resource-overview-map-button osc-first-button">
+        className="utrecht-button utrecht-button--secondary-action osc-resource-overview-map-button osc-first-button">
         <section className="resource-counter">
           {resources?.metadata?.totalCount}
         </section>
