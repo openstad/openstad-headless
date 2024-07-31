@@ -71,7 +71,6 @@ export default function WidgetEnqueteItems(
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
-    console.log(values)
     if (selectedItem) {
       setItems((currentItems) =>
         currentItems.map((item) =>
