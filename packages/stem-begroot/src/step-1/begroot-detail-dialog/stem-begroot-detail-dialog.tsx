@@ -93,7 +93,6 @@ export const StemBegrootResourceDetailDialog = ({
                         : [{ location: resource.location }]
                     }
                     itemRenderer={(i) => {
-                      console.log(resource);
                       if (i.url) {
                         return <Image src={i.url} />
                       } else {
