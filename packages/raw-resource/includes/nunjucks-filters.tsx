@@ -60,6 +60,11 @@ function tags(resource: any): string {
   return resource.tags.map((tag: Tag) => tag.label || tag.name).join(', ');
 }
 
+function tagGroup(resource: any, type: any): string {
+  if (!Array.isArray(resource.tags)) return '';
+  return resource?.tags?.filter((tag: any) => tag.type === type).map((tag: Tag) => tag.label || tag.name).join(', ');
+}
+
 function status(resource: any): string {
   if (!Array.isArray(resource.statuses)) return '';
   return resource.statuses.map((status: Status) => status.label || status.name).join(', ');
@@ -76,4 +81,5 @@ export function applyFilters(env: nunjucks.Environment) {
   env.addFilter('replace', replace);
   env.addFilter('tags', tags);
   env.addFilter('status', status);
+  env.addFilter('tagGroup', tagGroup);
 }

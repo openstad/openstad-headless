@@ -149,6 +149,8 @@ export default function WidgetRawGeneral(
                     <li
                       className="ml-4">{`{{ resource | tags }}: Laat alle gekoppelde tags zien gescheiden met komma's`}</li>
                     <li
+                      className="ml-4">{`{{ resource | tagGroup('[type]') }}: Laat alle gekoppelde tags zien gescheiden met komma's`}</li>
+                    <li
                       className="ml-4">{`{{ resource | status }}: Laat alle gekoppelde statussen zien gescheiden met komma's`}</li>
                   </ul>
                 </div>
