@@ -17,16 +17,36 @@ export default function ProjectResources() {
   const { data, error, isLoading, remove } = useResources(project as string);
 
   const exportData = (data: any[], fileName: string) => {
+    const flattenObject = (obj: any, parent: string = '', res: any = {}) => {
+      for (let key in obj) {
+        const propName = parent ? `${parent}.${key}` : key;
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+          if (Array.isArray(obj[key])) {
+            res[propName] = obj[key].map((item: any) => JSON.stringify(item)).join(',');
+          } else {
+            flattenObject(obj[key], propName, res);
+          }
+        } else {
+          res[propName] = obj[key];
+        }
+      }
+      return res;
+    };
+  
+    const flattenedData = data.map(item => flattenObject(item));
+  
     const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    const worksheet = XLSX.utils.json_to_sheet(flattenedData);
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-
+  
     XLSX.writeFile(workbook, fileName);
   };
+
   function transform() {
     const today = new Date();
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
+    
     exportData(data, `${projectId}_resources_${formattedDate}.xlsx`);
   }
 
