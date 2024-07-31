@@ -61,7 +61,7 @@ export default function DocumentGeneral(
   return (
     <Form {...form} className="p-6 bg-white rounded-md">
       <Heading size="xl" className="mb-4">
-        Links naar andere pagina's / versies
+        Links naar andere pagina&apos;s / versies
       </Heading>
       <Separator className="mb-4" />
       <form
