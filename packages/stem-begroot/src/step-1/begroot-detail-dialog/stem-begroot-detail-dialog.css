@@ -59,3 +59,7 @@
 .pill-grid p {
   margin: 0;
 }
+
+.carousel-items .osc-begrootmodule-resource-detail .carousel-button-container{
+  z-index: 10;
+}
