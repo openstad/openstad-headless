@@ -29,3 +29,9 @@
   left: 1rem;
   z-index: 1;
 }
+
+.map-buttons .utrecht-button--secondary-action{
+  scale: 1 !important;
+  cursor: default !important;
+  border: none !important;
+}
