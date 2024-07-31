@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { sortTable, searchTable } from '@/components/ui/sortTable';
 import { Button } from '../../../../components/ui/button';
 import * as XLSX from 'xlsx';
+import flattenObject from "@/lib/export-helpers/flattenObject";
 
 
 export default function ProjectComments() {
@@ -18,21 +19,6 @@ export default function ProjectComments() {
   const [comments, setComments] = useState<any[]>([])
 
   const exportData = (data: any[], fileName: string) => {
-    const flattenObject = (obj: any, parent: string = '', res: any = {}) => {
-      for (let key in obj) {
-        const propName = parent ? `${parent}.${key}` : key;
-        if (typeof obj[key] === 'object' && obj[key] !== null) {
-          if (Array.isArray(obj[key])) {
-            res[propName] = obj[key].map((item: any) => JSON.stringify(item)).join(',');
-          } else {
-            flattenObject(obj[key], propName, res);
-          }
-        } else {
-          res[propName] = obj[key];
-        }
-      }
-      return res;
-    };
   
     const flattenedData = data.map(item => flattenObject(item));
   
