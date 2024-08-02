@@ -152,7 +152,10 @@ article.stem-begroot--container .price {
   );
 }
 
-#stem-begroot-resource-selections-list article.stem-begroot--container .price h3 {
+#stem-begroot-resource-selections-list
+  article.stem-begroot--container
+  .price
+  h3 {
   margin: 0;
   font-size: 0.875rem;
 }
@@ -200,16 +203,37 @@ article.stem-begroot--container .stembegroot--infolabels {
     display: none;
   }
 
-  .budget-used-list > *:last-child p:before{
-    content:'Over: '
+  .budget-used-list > *:last-child p:before {
+    content: 'Over: ';
   }
 }
 
 .stem-begroot--container .utrecht-paragraph + .utrecht-paragraph {
-  margin-top: .75rem;
-  opacity: .75;
+  margin-top: 0.75rem;
+  opacity: 0.75;
 }
 
 .stem-begroot--container .utrecht-paragraph {
-  margin-top: .75rem;
+  margin-top: 0.75rem;
+}
+
+section.osc-begrootmodule-resource-detail-photo .carousel-button-container {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  right: 10px;
+  z-index: 10;
+  display: flex;
+  justify-content: space-evenly;
+  transform: translateY(-50%);
+}
+section.osc-begrootmodule-resource-detail-photo
+  .carousel-button-container
+  .osc-carousel-next {
+  position: absolute;
+  right: 10px;
+  z-index: 1;
+  flex-grow: unset;
+  flex-shrink: unset;
+  left: unset;
 }
