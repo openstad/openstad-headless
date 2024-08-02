@@ -168,7 +168,7 @@ function Comments({
         ) : null}
 
         {/* {(args.canComment && hasRole(currentUser, args.requiredUserRole)) && type === 'resource' || hasRole(currentUser, 'moderator') && type === 'resource' ? ( */}
-        {args.canComment && args.showForm ? (
+        {args.canComment && args.showForm && hasRole(currentUser, args.requiredUserRole) ? (
           <div className="input-container">
             <CommentForm {...args} submitComment={submitComment} />
             <Spacer size={1} />

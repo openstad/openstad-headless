@@ -103,7 +103,6 @@
   font-size: 14px;
 }
 
-
 .documentMap--header {
   display: flex;
   gap: 0.5rem;
@@ -125,4 +124,22 @@
 
 .--hideMarkers .leaflet-container .leaflet-marker-pane .leaflet-marker-icon {
   display: none;
+}
+
+.url-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+a + .url-list:before {
+  content: ' | ';
+  position: absolute;
+  margin-left: -10px;
+}
+
+.url-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
