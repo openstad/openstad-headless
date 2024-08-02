@@ -2,6 +2,7 @@ import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 
 export type ChoiceGuideProps = BaseProps &
     ProjectSettingProps &
+    ExtraProjectSettings &
     ChoiceGuide;
 
 export type ChoiceGuide = {
@@ -22,6 +23,14 @@ export type ChoiceGuide = {
     introDescription?: string;
 };
 
+type ExtraProjectSettings = {
+    choiceGuide: ChoiceGuide;
+    choiceOption?: {
+        choiceOptions: ChoiceOptions[] };
+    items?: Array<Item>;
+    widgetId?: string;
+}
+
 export type ChoiceGuideSidebarProps = {
     choicesType: 'default' | 'minus-to-plus-100' | 'plane' | 'hidden';
     choicesPreferenceMinColor?: string;
@@ -37,6 +46,7 @@ export type ChoiceGuideSidebarProps = {
     image?: string;
     showPageCountAndCurrentPageInButton?: boolean;
     weights?: WeightOverview;
+    widgetId?: string;
 }
 
 export type Score = {
@@ -49,6 +59,7 @@ export type ChoiceOptions = {
     title?: string;
     description?: string;
     id?: string | number;
+    image?: string;
 };
 
 export type Item = {

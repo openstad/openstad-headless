@@ -26,6 +26,7 @@
  width: 100%;
  height: auto;
  float: left;
+ display: inline-block;
 }
 
 #choice-plane .osc-choice-plane-background-image {

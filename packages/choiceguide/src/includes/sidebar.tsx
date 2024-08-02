@@ -1,17 +1,46 @@
-import React from 'react';
-import { ChoiceGuideSidebarProps } from '../props';
+import React, { useState, useEffect } from 'react';
+import {ChoiceGuideSidebarProps, ChoiceOptions, Score} from '../props';
 import ChoiceItem from './sidebarItem';
+import {calculateScoreForItem} from "../parts/scoreUtils";
 
 const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
-  const baseSize = document.querySelector(`#choice-plane`)?.clientWidth || 180;
+  const [score, setScore] = useState<Score>({ x: 50, y: 50, z: 0 });
+
+  // Calculate score for this item
+  useEffect(() => {
+    const itemScore = calculateScoreForItem(
+      props.choiceOptions,
+      props.answers,
+      props.weights,
+      props.choicesType
+    );
+    setScore(itemScore);
+  }, [props.choiceOption, props.answers, props.weights]);
+
+  const baseSize = document.getElementById(`osc-choice-container-${props.widgetId || ""}`)?.clientWidth || 180;
 
   return (
-    <div className="osc-choices-container">
+    <div className="osc-choices-container" id={`osc-choice-container-${props.widgetId || ""}`}>
+      {props.choicesType === 'plane' ? (
+        <div id="choice-plane" className="osc-choice-plane" style={{ height: baseSize }}>
 
-      { !!props.choicesType && props.choicesType === 'plane' && (
-        <div id="choice-plane" className="osc-choice-plane" style={{ width: baseSize / 2, height: baseSize / 2 }}>
+          {Object.entries(props.choiceOptions || {}).map(([key, choiceOption], index) => {
+            const option: ChoiceOptions = choiceOption as ChoiceOptions;
 
-          <div className="osc-point" style={{ top: `${score.y}%`, left: `${score.x}%` }}></div>
+            let imageHTML = null;
+            let image = option && option.image || "";
+            if (image) {
+              imageHTML = (
+                <img className="osc-choice-plane-background-image" src={image} style={{ width: baseSize / 2, height: baseSize / 2 }}/>
+              );
+            }
+
+            return (
+              <div className="osc-choice-plane" style={{width: baseSize / 2, height: baseSize / 2}}>{imageHTML}</div>
+            )
+          })}
+
+          <div className="osc-point" style={{top: `${score.y}%`, left: `${score.x}%`}}></div>
         </div>
         ) : (
       <ul className="osc-choices">

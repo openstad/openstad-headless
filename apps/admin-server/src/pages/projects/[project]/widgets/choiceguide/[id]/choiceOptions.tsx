@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Button } from '../../../../../../components/ui/button';
 import { Input } from '../../../../../../components/ui/input';
 import {
@@ -15,21 +15,22 @@ import { X } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
 import { Spacer } from "@/components/ui/spacer";
 import AccordionUI from "@/components/ui/accordion";
+import { ImageUploader } from '@/components/image-uploader';
 
 const formSchema = z.object({
   choiceOptions: z.array(
     z.object({
       id: z.number(),
       title: z.string().optional(),
-      description: z.string().optional()
+      description: z.string().optional(),
+      image: z.string().optional(), // Add image field
     })
   ),
   weights: z.record(z.record(z.object({
     weightX: z.union([z.string(), z.number()]).optional(),
     weightY: z.union([z.string(), z.number()]).optional(),
     choice: z.record(z.object({
-      weightX: z.string().optional(),
-      weightY: z.string().optional(),
+      weight: z.union([z.string(), z.number()]).optional(),
     })).optional(),
   }))).optional(),
 });
@@ -173,6 +174,29 @@ export default function WidgetChoiceGuideChoiceOptions(props) {
                                 <Textarea rows={5} {...field} placeholder="Beschrijving van de keuze optie"
                                           value={field.value ?? ''}/>
                               </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <Spacer size={2}/>
+                        <FormField
+                          control={form.control}
+                          name={`choiceOptions.${index}.image`}
+                          render={({ field }) => (
+                            <FormItem className="col-span-full lg:col-span-1">
+                              <FormControl>
+                                <ImageUploader
+                                  form={form}
+                                  imageLabel="Upload hier een afbeelding"
+                                  fieldName={`choiceOptions.${index}.imageUploader`}
+                                  allowedTypes={["image/*"]}
+                                  onImageUploaded={(imageResult) => {
+                                    const result = typeof (imageResult.url) !== 'undefined' ? imageResult.url : '';
+                                    form.setValue(`choiceOptions.${index}.image`, result);
+                                    form.resetField(`choiceOptions.${index}.imageUploader`);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormMessage />
                             </FormItem>
                           )}
                         />

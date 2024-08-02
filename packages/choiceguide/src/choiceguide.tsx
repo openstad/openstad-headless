@@ -12,7 +12,7 @@ import { prepareAnwers } from "./parts/prepare-answers.js";
 import { FormValue } from "@openstad-headless/form/src/form";
 
 function ChoiceGuide(props: ChoiceGuideProps) {
-    const { choiceGuide, items, choiceOption } = props;
+    const { choiceGuide, items, choiceOption, widgetId } = props;
     const {
         submit: { submitButton, saveConceptButton } = {},
         introTitle,
@@ -156,6 +156,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                     choiceOptions={choiceOption?.choiceOptions}
                     weights={weights}
                     answers={answers}
+                    widgetId={widgetId}
                   />
               </div>
           </div>

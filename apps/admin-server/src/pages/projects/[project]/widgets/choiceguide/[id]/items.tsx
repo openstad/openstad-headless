@@ -142,12 +142,6 @@ export default function WidgetChoiceGuideItems(
     setActiveTab("1");
   }
 
-  console.log( 'ssss' )
-  console.log( widget?.config?.choiceOption?.choiceOptions )
-  console.log( widget?.config?.choiceOption )
-  console.log( widget?.config )
-  console.log( 'tttt' )
-
   // adds link to options array if no option is selected, otherwise updates the selected option
   function handleAddOption(values: FormData) {
     if (selectedOption) {
