@@ -94,6 +94,11 @@ export const WidgetDefinitions = {
     description: 'Account details module',
     image: '/widget_preview/account_preview.png',
   },
+  activity: {
+    name: 'User activity',
+    description: 'User activity module',
+    image: '/widget_preview/activity_preview.png',
+  },
 };
 
 export type WidgetDefinition = keyof typeof WidgetDefinitions;
