@@ -25,9 +25,9 @@
     --osc-radius: .25rem;
 }
 
-.osc, .osc * {
+/* .osc, .osc * {
     font-family:'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
-}
+} */
 
 /* .osc h1, .osc h2, .osc h3, .osc h4, .osc h5, .osc h6 {
     margin: 0;
