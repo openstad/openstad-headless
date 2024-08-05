@@ -47,17 +47,17 @@ export const WidgetDefinitions = {
   keuzewijzer: {
     name: 'Keuzewijzer',
     description: 'Decision guide module',
-    image: 'https://dummyimage.com/600x400/f4f4f4/000',
+    image: '/widget_preview/keuzewijzer_preview.png',
   },
   likes: {
     name: 'Like',
     description: 'Like module',
-    image: 'https://dummyimage.com/600x400/f4f4f4/000',
+    image: '/widget_preview/likes_preview.png',
   },
   rawresource: {
     name: 'Raw resource',
     description: 'Module for raw resources',
-    image: 'https://dummyimage.com/600x400/f4f4f4/000',
+    image: '/widget_preview/raw_resource_preview.png',
   },
   resourcedetail: {
     name: 'Resource detail',
@@ -92,7 +92,7 @@ export const WidgetDefinitions = {
   account: {
     name: 'Account gegevens',
     description: 'Account details module',
-    image: 'https://dummyimage.com/600x400/f4f4f4/000',
+    image: '/widget_preview/account_preview.png',
   },
 };
 
