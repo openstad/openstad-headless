@@ -67,7 +67,7 @@ export default function AccountDisplay(
           name="minLength"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Min aantal tekens</FormLabel>
+              <FormLabel>Minimum aantal tekens</FormLabel>
               <FormControl>
                 <Input
                   defaultValue={field.value}
@@ -85,7 +85,7 @@ export default function AccountDisplay(
           name="maxLength"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Max aantal tekens</FormLabel>
+              <FormLabel>Maximum aantal tekens</FormLabel>
               <FormControl>
                 <Input
                   defaultValue={field.value}

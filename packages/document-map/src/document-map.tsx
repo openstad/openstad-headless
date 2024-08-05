@@ -42,6 +42,11 @@ export type DocumentMapProps = BaseProps &
     requiredUserRole?: string;
     accessibilityUrlVisible?: boolean;
     accessibilityUrl?: string;
+    accessibilityUrlText?: string;
+    definitiveUrlVisible?: boolean;
+    definitiveUrl?: string;
+    definitiveUrlText?: string;
+    statusId?: string;
   };
 
 
@@ -55,6 +60,8 @@ function DocumentMap({
   documentHeight = 1080,
   sentiment = 'no sentiment',
   accessibilityUrlVisible,
+  definitiveUrlVisible,
+  statusId,
   ...props
 }: DocumentMapProps) {
 
@@ -140,10 +147,14 @@ function DocumentMap({
   const generateRandomId = () => {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   }
+  const [backUrl, setBackUrl] = useState<string>();
 
 
   useEffect(() => {
     setRandomId(generateRandomId());
+    if (window.location.hash.includes('#doc')) {
+      setBackUrl(window.location.hash.split('=')[1] + '=' + window.location.hash.split('=')[2]);
+    }
   }, []);
 
   let args = {
@@ -154,6 +165,8 @@ function DocumentMap({
   const { data: currentUser } = datastore.useCurrentUser({ ...args });
 
   const [canComment, setCanComment] = useState(args.canComment)
+  const [originalID, setOriginalID] = useState(undefined)
+  const [isDefinitive, setIsDefinitive] = useState<boolean>()
   useEffect(() => {
     if (!resource) return;
     let statuses = resource.statuses || [];
@@ -161,8 +174,17 @@ function DocumentMap({
       if (status.extraFunctionality?.canComment === false) {
         setCanComment(false)
       }
+      if(status.id === Number(statusId)) {
+        setIsDefinitive(true)
+      }
     }
+    if (resource.extraData?.originalId) {
+      setOriginalID(resource.extraData?.originalId)
+    }
+
   }, [resource]);
+
+
   if (canComment === false) args.canComment = canComment;
 
   interface ExtendedMarkerProps extends MarkerProps {
@@ -219,24 +241,39 @@ function DocumentMap({
   };
 
   const getUrl = () => {
-    if(props.accessibilityUrl?.includes('[id]')) {
+    if (props.accessibilityUrl?.includes('[id]')) {
       return props.accessibilityUrl?.split('[id]')[0] + resourceId + '#doc=' + window.location.href.split('/').reverse()[0];
-    }else{
+    } else {
       return props.accessibilityUrl + '#doc=' + window.location.href.split('/').reverse()[0];
     }
   }
 
+  const getDefinitiveUrl = (originalID: string) => {
+    if (props.definitiveUrl?.includes('[id]')) {
+      return props.definitiveUrl?.split('[id]')[0] + originalID + '#doc=' + window.location.href.split('/').reverse()[0];
+    } else {
+      return props.definitiveUrl + '#doc=' + window.location.href.split('/').reverse()[0];
+    }
+  }
 
 
   return (
     <div className="documentMap--container">
-      <div className="content" tabIndex={0} ref={contentRef}>
+      <div className="content" ref={contentRef}>
         <div className="documentMap--header">
-          {accessibilityUrlVisible ? <Link href={getUrl()} title="Bekijk tekstuele versie" id={randomId}>Bekijk tekstuele versie.</Link> : null}
-          <div className='toggleMarkers'>
-            <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
-            <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
+          <div className='url-container'>
+            {backUrl ? <Link href={backUrl} title="Terug naar overzicht" id={randomId}>Terug</Link> : null}
+            <div className="url-list">
+              {accessibilityUrlVisible ? <Link href={getUrl()} title="Bekijk tekstuele versie" id={randomId}>{props.accessibilityUrlText}</Link> : null}
+              {definitiveUrlVisible && originalID !== undefined && isDefinitive ? <Link href={getDefinitiveUrl(originalID)} title="Bekijk originele versie" id={randomId}>{props.definitiveUrlText}</Link> : null}
+            </div>
           </div>
+          {!isDefinitive && (
+            <div className='toggleMarkers'>
+              <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
+              <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
+            </div>
+          )}
         </div>
         <section className="content-intro">
           {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
@@ -244,12 +281,14 @@ function DocumentMap({
           {resource.description ? <Paragraph>{resource.description}</Paragraph> : null}
         </section>
 
-        <Comments
-          {...props}
-          resourceId={resourceId || ''}
-          selectedComment={selectedCommentIndex}
-          showForm={false}
-        />
+        {!isDefinitive && (
+          <Comments
+            {...props}
+            resourceId={resourceId || ''}
+            selectedComment={selectedCommentIndex}
+            showForm={false}
+          />
+        )}
       </div>
       <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''}`}>
         <MapContainer center={[0, 0]} crs={CRS.Simple} maxZoom={maxZoom} minZoom={minZoom} zoom={zoom} >
@@ -270,7 +309,7 @@ function DocumentMap({
             bounds={imageBounds}
             aria-describedby={randomId}
           />
-          {popupPosition && (
+          {popupPosition && !isDefinitive && (
             <Popup position={popupPosition}>
               {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
                 <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>

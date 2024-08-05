@@ -110,7 +110,7 @@ service.updateUser = async function({ authConfig, userData = {} }) {
   const unmapUserData = (userData) => {
     // make copy
     let unmapped = JSON.parse(JSON.stringify(userData));
-    if(typeof unmapped?.address !== 'undefined') {
+    if(typeof unmapped?.address !== 'undefined' && unmapped?.address !== null) {
       // Check if we can split the address into street and number
       const addressParts = unmapped.address.split(' ');
       if(addressParts.length > 1) {
@@ -121,7 +121,7 @@ service.updateUser = async function({ authConfig, userData = {} }) {
       }
 
       // Check displayName (nickName)
-      if(typeof unmapped?.displayName !== 'undefined'){
+      if(typeof unmapped?.displayName !== 'undefined' && unmapped?.displayName !== null) {
         unmapped.nickName = unmapped.displayName;
       }
     }

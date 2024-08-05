@@ -84,27 +84,30 @@ export const StemBegrootResourceDetailDialog = ({
             <>
               <div className="osc-begrootmodule-resource-detail">
                 <section className="osc-begrootmodule-resource-detail-photo">
-                  <Image
-                    src={resource.images?.at(0)?.url || defaultImage}
-                    style={{ aspectRatio: 16 / 9 }}
+
+                  <Carousel
+                    items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: '' }]}
+                    itemRenderer={(i) => (
+                      <Image src={i.url} />
+                    )}
                   />
                   {/* <div>
                     <Button className="osc-begrootmodule-load-map-button"></Button>
                   </div> */}
-                {isSimpleView === false && (
-                  <div className="osc-gridder-resource-detail-budget-theme-bar">
-                    <Heading4>Budget</Heading4>
-                    <Paragraph>&euro; {resource.budget > 0 ? resource.budget?.toLocaleString('nl-NL') : 0}</Paragraph>
-                    <Spacer size={1} />
-                    <Heading4>Tags</Heading4>
-                    <Spacer size={.5} />
-                    <div className="pill-grid">
-                      {(resource.tags as Array<{ type: string; name: string }>)
-                        ?.filter((t) => t.type !== 'status')
-                        ?.map((t) => <Pill text={t.name || 'Geen thema'} />)}
+                  {isSimpleView === false && (
+                    <div className="osc-gridder-resource-detail-budget-theme-bar">
+                      <Heading4>Budget</Heading4>
+                      <Paragraph>&euro; {resource.budget > 0 ? resource.budget?.toLocaleString('nl-NL') : 0}</Paragraph>
+                      <Spacer size={1} />
+                      <Heading4>Tags</Heading4>
+                      <Spacer size={.5} />
+                      <div className="pill-grid">
+                        {(resource.tags as Array<{ type: string; name: string }>)
+                          ?.filter((t) => t.type !== 'status')
+                          ?.map((t) => <Pill text={t.name || 'Geen thema'} />)}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
                 </section>
 
                 <section className="osc-begrootmodule-resource-detail-texts-and-actions-container">
@@ -119,7 +122,7 @@ export const StemBegrootResourceDetailDialog = ({
                     </div>
 
                     <Spacer size={2} />
-                    
+
                     {originalUrl ? (
                       <>
                         <Paragraph className="strong">

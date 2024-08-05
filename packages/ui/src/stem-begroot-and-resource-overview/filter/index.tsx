@@ -18,7 +18,7 @@ type Filter = {
 };
 
 type Props = {
-  className?:string;
+  className?: string;
   dataStore: any;
   resources: any;
   onUpdateFilter?: (filter: Filter) => void;
@@ -39,7 +39,7 @@ export function Filters({
   tagGroups = [],
   tagsLimitation = [],
   onUpdateFilter,
-  className='',
+  className = '',
   ...props
 }: Props) {
   const defaultFilter: Filter = {
@@ -58,7 +58,6 @@ export function Filters({
 
   function updateFilter(newFilter: Filter) {
     setFilter(newFilter);
-    onUpdateFilter && onUpdateFilter(newFilter);
   }
 
   function setTags(type: string, values: any[]) {
@@ -84,14 +83,14 @@ export function Filters({
   const updateTagListMultiple = (tagType: string, updatedTag: string) => {
     const existingTags = selectedOptions[tagType];
     const selected = [...(existingTags || [])];
-    
+
     if (selected.includes(updatedTag)) {
       const index = selected.indexOf(updatedTag);
       selected.splice(index, 1);
     } else {
       selected.push(updatedTag);
     }
-  
+
     setSelected({ ...selectedOptions, [tagType]: selected });
     setTags(tagType, selected);
   };
@@ -119,9 +118,16 @@ export function Filters({
     }
   }, [tagState]);
 
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    updateFilter(filter)
+    onUpdateFilter && onUpdateFilter(filter);
+  };
+
   return (
     <section id="stem-begroot-filter">
-      <div className={`osc-resources-filter ${className}`}>
+      <form className={`osc-resources-filter ${className}`} onSubmit={handleSubmit}>
         {props.displaySearch ? (
           <div className="form-element">
             <FormLabel htmlFor="search">Zoeken</FormLabel>
@@ -174,34 +180,38 @@ export function Filters({
           <div className="form-element">
             <FormLabel htmlFor={'sortField'}>Sorteer op</FormLabel>
             <Select onValueChange={setSort} options={sorting} id="sortField">
-              <option value={''}>Sorteer op</option>
             </Select>
           </div>
         ) : null}
 
-        <Button
-          appearance='primary-action-button'
-          onClick={() => {
-            const filterParent = document.querySelector('#stem-begroot-filter');
 
-            const singleSelects: NodeListOf<HTMLSelectElement> | undefined =
-              filterParent?.querySelectorAll(':scope select');
-            const inputsInFilter: NodeListOf<HTMLInputElement> | undefined =
-              filterParent?.querySelectorAll(':scope input');
+        <div className='button-group'>
+          <Button
+            appearance='secondary-action-button'
+            onClick={() => {
+              const filterParent = document.querySelector('#stem-begroot-filter');
 
-            if (singleSelects) {
-              singleSelects.forEach((s) => (s.selectedIndex = 0));
-            }
+              const singleSelects: NodeListOf<HTMLSelectElement> | undefined =
+                filterParent?.querySelectorAll(':scope select');
+              const inputsInFilter: NodeListOf<HTMLInputElement> | undefined =
+                filterParent?.querySelectorAll(':scope input');
 
-            if (inputsInFilter) {
-              inputsInFilter.forEach((i) => (i.value = ''));
-            }
-            setSelected({});
-            updateFilter(defaultFilter);
-          }}>
-          Wis alles
-        </Button>
-      </div>
+              if (singleSelects) {
+                singleSelects.forEach((s) => (s.selectedIndex = 0));
+              }
+
+              if (inputsInFilter) {
+                inputsInFilter.forEach((i) => (i.value = ''));
+              }
+              setSelected({});
+              updateFilter(defaultFilter)
+              onUpdateFilter && onUpdateFilter(defaultFilter);
+            }}>
+            Reset
+          </Button>
+          <Button type='submit' appearance='primary-action-button'>Toepassen</Button>
+        </div>
+      </form>
     </section>
   );
 }
