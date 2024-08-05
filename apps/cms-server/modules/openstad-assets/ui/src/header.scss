@@ -270,6 +270,7 @@ body:has(.--mobile.--show) {
   position: relative;
   padding: 0;
   justify-self: end;
+  align-self: end;
 
   &:before {
     content: '';
@@ -307,12 +308,12 @@ body:has(.--mobile.--show) {
   inset: 0;
   background-color: #fff;
   z-index: 99;
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto 1fr auto;
   padding: 2rem 10px 10px 10px;
   justify-items: start;
   overflow: auto;
+
+  display: flex;
+  flex-direction: column;
 
   .close-button {
     grid-row: 1;
