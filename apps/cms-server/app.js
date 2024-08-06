@@ -30,8 +30,6 @@ app.use('/:sitePrefix?/config-reset', async function (req, res, next) {
 
 function createReturnUrl(req, res) {
   
-  console.log (req.openstadDomain, req.sitePrefix, 'createReturnUrl');
-  
   // check in url if returnTo params is set for redirecting to page
   // req.session.returnTo = req.query.returnTo ? decodeURIComponent(req.query.returnTo) : null;
   //const thisHost = req.headers['x-forwarded-host'] || req.get('host');
@@ -62,7 +60,7 @@ async function setupProject(project) {
   // for convenience and speed we set the domain name as the key
   projects[domain] = project;
 
-  /*// add event subscription
+  // add event subscription
   if (!subscriptions[project.id]) {
     let subscriber = await messageStreaming.getSubscriber();
     if (subscriber) {
@@ -78,14 +76,14 @@ async function setupProject(project) {
     } else {
       console.log('No subscriber found');
     }
-  }*/
+  }
 
 }
 
-/*async function loadProject(projectId) {
+async function loadProject(projectId) {
   const project = await projectService.fetchOne(projectId);
   setupProject(project)
-}*/
+}
 
 async function loadProjects() {
   try {
@@ -99,7 +97,7 @@ async function loadProjects() {
     });
 
     // add event subscription
-    /*if (!subscriptions['all']) {
+    if (!subscriptions['all']) {
       let subscriber = await messageStreaming.getSubscriber();
       if (subscriber) {
         subscriptions['all'] = subscriber;
@@ -112,7 +110,7 @@ async function loadProjects() {
       } else {
         console.log('No subscriber found');
       }
-    }*/
+    }
 
     cleanUpProjects();
     
@@ -170,8 +168,6 @@ async function run(id, projectData, options, callback) {
     prefix: projectData.sitePrefix ? '/' + projectData.sitePrefix : false,
   };
   
-  console.log ('projectData', project.baseUrl, project.prefix);
-
   if (process.env.MONGODB_URI) {
     // Apply the MongoDB prefix (if given) to the database name,
     // and ensure we don't exceed the MongoDB database name length limit
@@ -339,8 +335,7 @@ app.use('/:sitePrefix', function (req, res, next) {
 
     const site = projects[domainAndPath] ? projects[domainAndPath] : false;
     
-    console.log ('siteprefix!', req.url, req.params, site);
-    
+
     
     if (site) {
       site.sitePrefix = req.params.sitePrefix;
@@ -348,9 +343,11 @@ app.use('/:sitePrefix', function (req, res, next) {
       req.site        = site;
       
       
+      // Remove the prefix from the URL
       req.url = req.url.replace(`/${req.params.sitePrefix}`, '');
       
-      // Reinitialize route parameters
+
+      // Reinitialize route parameters, so the next middleware will see the correct parameters
       req.app._router.handle(req, res, next);
       
     } else {
@@ -359,23 +356,9 @@ app.use('/:sitePrefix', function (req, res, next) {
     
 });
 
-app.use('*', (req, res, next) => {
-  console.log ('params after siteprefix', req.url, req.params);
-  next();
-})
-
-/*app.use('/:sitePrefix', function (req, res, next) {
-    if (req.site) {
-        console.log('serving')
-        return serveSite(req, res, req.site, req.forceRestart);
-    }
-
-    next();
-})*/
-
-app.use('/:sitePrefix?/:privileged(admin)?/login', function (req, res, next) {
-  console.log ('====> siteprefix privileged login!!');
-  const domainAndPath = req.openstadDomain + (req.params.sitePrefix ? '/' + req.params.sitePrefix : '');
+app.use('/:privileged(admin)?/login', function (req, res, next) {
+  const domainAndPath = req.openstadDomain + (req.sitePrefix ? '/' + req.sitePrefix : '');
+  console.log ('privileged login?', req.params.privileged, domainAndPath, req.url, req.para);
   const i = req.url.indexOf('?');
   let query = req.url.substr(i + 1);
   const protocol = req.headers['x-forwarded-proto'] || req.protocol;
@@ -386,12 +369,12 @@ app.use('/:sitePrefix?/:privileged(admin)?/login', function (req, res, next) {
   return res.redirect(url && query ? url + '?' + query : url);
 });
 
-app.get('/:sitePrefix?/auth/login', (req, res, next) => {
+app.get('/auth/login', (req, res, next) => {
 
   let returnUrl = createReturnUrl(req, res);
   returnUrl = encodeURIComponent(returnUrl + '?openstadlogintoken=[[jwt]]');
 
-  const domainAndPath = req.openstadDomain + (req.params.sitePrefix ? '/' + req.params.sitePrefix : '');
+  const domainAndPath = req.openstadDomain + (req.sitePrefix ? '/' + req.sitePrefix : '');
   const project = (projects[domainAndPath] ? projects[domainAndPath] : false);
 
   const apiUrl = process.env.API_URL;
@@ -403,8 +386,8 @@ app.get('/:sitePrefix?/auth/login', (req, res, next) => {
 
 });
 
-app.use('/:sitePrefix?/logout', function (req, res, next) {
-  const domainAndPath = req.openstadDomain;
+app.use('/logout', function (req, res, next) {
+  const domainAndPath = req.openstadDomain + (req.sitePrefix ? '/' + req.sitePrefix : '');
   const i = req.url.indexOf('?');
   let query = req.url.substr(i + 1);
   const protocol = req.headers['x-forwarded-proto'] || req.protocol;
@@ -412,11 +395,11 @@ app.use('/:sitePrefix?/logout', function (req, res, next) {
   return res.redirect(url && query ? url + '?' + query : url);
 });
 
-app.get('/:sitePrefix?/auth/logout', (req, res, next) => {
+app.get('/auth/logout', (req, res, next) => {
 
   let returnUrl = createReturnUrl(req, res);
 
-  let projectDomain = process.env.OVERWRITE_DOMAIN ? process.env.OVERWRITE_DOMAIN : req.openstadDomain;
+  const projectDomain =  process.env.OVERWRITE_DOMAIN ? process.env.OVERWRITE_DOMAIN : req.openstadDomain + (req.sitePrefix ? '/' + req.sitePrefix : '');
   const project = (projects[projectDomain] ? projects[projectDomain] : false);
 
   const apiUrl = process.env.API_URL;
@@ -428,22 +411,15 @@ app.get('/:sitePrefix?/auth/logout', (req, res, next) => {
 
 });
 
-app.use(async function (req, res){
+app.use(async function (req, res, next){
   const completeDomain = req.openstadDomain + (req.sitePrefix ? '/' + req.sitePrefix : '');
     if (projects[completeDomain]) {
       return await serveSite(req, res, projects[completeDomain], req.forceRestart);
     }
     
-    // 404, get first site and return it to get an apostrophe 404 page
-/*    const firstProject = Object.keys(projects)[0];
-    console.log ('====> project not found, serving first project for 404', firstProject);
-    if (firstProject) {
-      return await serveSite(req, res, projects[firstProject], req.forceRestart);
-    }*/
-
     // fallback to generic 404
-    res.status(404).send("Page not found");
-    return;
+    res.status(404).send(`Error: No project found for given URL ${req.openstadDomain}${req.url}`);
+    
 });
 
 //setInterval(loadProjects, REFRESH_PROJECTS_INTERVAL);
