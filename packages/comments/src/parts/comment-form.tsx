@@ -13,7 +13,7 @@ function CommentForm({
   descriptionMinLength = 30,
   descriptionMaxLength = 500,
   formIntro = 'Test',
-  placeholder = 'Type hier uw reactie',
+  placeholder = 'Typ hier uw reactie',
   parentId = 0,
   activeMode = '',
   sentiment = '',

@@ -46,7 +46,7 @@ function Comments({
   title = '[[nr]] reacties',
   sentiment = 'no sentiment',
   emptyListText = 'Nog geen reacties',
-  placeholder = 'type hier uw reactie',
+  placeholder = 'Typ hier uw reactie',
   formIntro = '',
   selectedComment,
   ...props
