@@ -23,8 +23,6 @@ import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
-  documentWidth: z.number().optional(),
-  documentHeight: z.number().optional(),
   zoom: z.number().optional(),
   minZoom: z.number().optional(),
   maxZoom: z.number().optional(),
@@ -51,8 +49,7 @@ export default function DocumentGeneral(
   const form = useForm<DocumentMapProps>({
     defaultValues: {
       resourceId: props.resourceId || undefined,
-      documentWidth: props.documentWidth || 1920,
-      documentHeight: props.documentHeight || 1080,
+
       zoom: props.zoom || 1,
       minZoom: props.minZoom || -6,
       maxZoom: props.maxZoom || 10,
@@ -134,48 +131,6 @@ export default function DocumentGeneral(
             )}
           />
         ) : null}
-
-
-        <FormField
-          control={form.control}
-          name="documentWidth"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Breedte van het document</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="1080"
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
-                  }}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="documentHeight"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Hoogte van het document</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="1920"
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
-                  }}
-                />
-              </FormControl>
-            </FormItem>
-
-          )}
-        />
 
         <FormField
           control={form.control}

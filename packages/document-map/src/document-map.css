@@ -103,6 +103,10 @@
   font-size: 14px;
 }
 
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup{
+  bottom: 10px !important; 
+}
+
 .documentMap--header {
   display: flex;
   gap: 0.5rem;
