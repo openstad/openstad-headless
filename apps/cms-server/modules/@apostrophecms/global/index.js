@@ -288,6 +288,15 @@ module.exports = {
           },
         },
       },
+      errorText: {
+        type: 'area',
+        label: 'Creeër een pagina die getoond wordt bij een 404 error',
+        options: {
+          widgets: {
+            'openstad-section': {},
+          }
+        }
+      },
     },
 
     group: {
@@ -314,6 +323,10 @@ module.exports = {
       footer: {
         label: 'Footer',
         fields: ['footerlinks'],
+      },
+      errorPage: {
+        label: '404 pagina',
+        fields: ['errorText'],
       },
     },
   },

@@ -5,8 +5,24 @@
 
 {% extends "layout.html" %}
 
-{% block title %}404 - Page not found{% endblock %}
+{% block title %}404 - Pagina niet gevonden{% endblock %}
 
 {% block main %}
-  We're sorry. We couldn't find the page you're looking for.
+
+  {% if data.global.errorText.items.length  %}
+  
+    {% area data.global, 'errorText' %}
+
+    {% else %}
+    <div class="section">
+      <div class="container">
+        <h1 class="utrecht-heading-1">404 - Pagina niet gevonden</h1>
+        <p class="utrecht-paragraph">De pagina die u zoekt is niet gevonden. Controleer de URL en probeer het opnieuw.</p>
+        <p class="utrecht-paragraph"><a class="utrecht-link" href="{{data.baseUrlWithPrefix}}/">Of keer terug naar de startpagina.</a></p>
+      </div>
+    </div>
+  {% endif %}
+
+  
+
 {% endblock %}
