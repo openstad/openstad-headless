@@ -100,7 +100,7 @@
   var openstadUserRole = '{{data.openstadUser.role}}';
   var hasModeratorRights = {{'true' if data.hasModeratorRights else  'false'}};
   var loggedIn = {{'true' if data.loggedIn else 'false'}};
-  var siteUrl = '{{data.siteUrl}}';
+  var siteUrl = '{{data.baseUrlWithPrefix}}';
 
   var currentPath = '{{data.currentPath}}';
   var currentPathname = '{{data.currentPathname}}';
@@ -131,7 +131,7 @@
   fbq('track', 'PageView');
 </script>
 <noscript>
-  <img height="1" width="1" style="display:none" 
+  <img height="1" width="1" style="display:none"
        src="https://www.facebook.com/tr?id={{data.global.siteConfig.public.fbPixel}}&ev=PageView&noscript=1"/>
 </noscript>
 <!-- End Facebook Pixel Code -->

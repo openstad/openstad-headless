@@ -2,6 +2,7 @@
 {% if data.global.arrangeMainMenu and data.global.arrangeMainMenu == 'manually' %}
 <div id="navbar"
       data-content='{{ data.global.mainMenuItems | json }}'
+      data-prefix='{{ data.prefix }}'
 ></div>
 {% else %}
 
@@ -14,7 +15,9 @@
       "title": "{{ data.home.title }}"
     }]'
     data-content='{{ menuData }}'
+    data-prefix='{{ data.prefix }}'
   ></div>
+
 {% endif %}
 
 {% endif %}

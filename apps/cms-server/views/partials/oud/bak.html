@@ -30,7 +30,7 @@ page or piece.') }}
 
 {% if data.global.applyPaletteStyling %}
 <link rel="stylesheet"
-  href="{{data.siteUrl}}/modules/apostrophe-global/palette-styles?v={{ data.global.paletteCounter or 'e' }}">
+  href="{{data.baseUrlWithPrefix}}/modules/apostrophe-global/palette-styles?v={{ data.global.paletteCounter or 'e' }}">
 {{ palette.stylesheetTag() }}
 {% endif %}
 
@@ -84,7 +84,7 @@ page or piece.') }}
   var hasModeratorRights = {{ 'true' if data.hasModeratorRights else  'false'}};
   var shouldTranslateOnEveryPage = '{{data.global.shouldAutoTranslate}}' === 'true';
   var currentPath = '{{data.currentPath}}';
-  var siteUrl = '{{data.siteUrl}}';
+  var siteUrl = '{{data.baseUrlWithPrefix}}';
   var currentPathname = '{{data.currentPathname}}';
   var ideaFormToSubmit;
   {% if data.formToSubmit %}
@@ -155,19 +155,19 @@ page or piece.') }}
 
         {% if data.global.siteLogo %}
         {% if data.global.siteLogo === 'amsterdam' %}
-        <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-container">
+        <a href="{{data.baseUrlWithPrefix}}{{logoLink}}/" class="logo-container">
           <img src="/modules/openstad-assets/img/andreas.svg" alt="logo">
           <div id="amsterdam">
             Gemeente<br>Amsterdam
           </div>
         </a>
         {% else %}
-        <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-uploaded logo-main-container">
+        <a href="{{data.baseUrlWithPrefix}}{{logoLink}}/" class="logo-uploaded logo-main-container">
           <img src="{{apos.attachments.url(data.global.siteLogo)}}" alt="logo" id="logo-image">
         </a>
         {% endif %}
         {% else %}
-        <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-default logo-main-container">
+        <a href="{{data.baseUrlWithPrefix}}{{logoLink}}/" class="logo-default logo-main-container">
           <img class="default" src="/modules/openstad-assets/img/logo-openstad.png" alt="logo" id="logo-image">
         </a>
         {% endif %}
@@ -186,11 +186,11 @@ page or piece.') }}
                 {% if data.global.displayLoginTopLink %}
                 <li>
                   {% if data.loggedIn %}
-                  <a href="{{data.siteUrl}}/oauth/logout" class="link-caret--black">
+                  <a href="{{data.baseUrlWithPrefix}}/oauth/logout" class="link-caret--black">
                     {{ __('Uitloggen') }}
                   </a>
                   {% else %}
-                  <a href="{{data.siteUrl}}/oauth/login" class="link-caret--black"">
+                  <a href="{{data.baseUrlWithPrefix}}/oauth/login" class="link-caret--black"">
                     <!-- <span class=" glyphicon glyphicon-user"></span> !-->
                     {{ __('Inloggen') }}
                   </a>
@@ -304,11 +304,11 @@ page or piece.') }}
             {% if data.global.displayLoginTopLink %}
             <li class="visible-xs">
               {% if data.loggedIn %}
-              <a href="{{data.siteUrl}}/oauth/logout" class="nav-link ">
+              <a href="{{data.baseUrlWithPrefix}}/oauth/logout" class="nav-link ">
                 {{ __('Uitloggen') }}
               </a>
               {% else %}
-              <a href="{{data.siteUrl}}/oauth/login" class="nav-link ">
+              <a href="{{data.baseUrlWithPrefix}}/oauth/login" class="nav-link ">
                 <!-- <span class="glyphicon glyphicon-user"></span>  !-->
                 {{ __('Inloggen') }}
               </a>
@@ -329,12 +329,12 @@ page or piece.') }}
               {% endif %}
               {% if data.global.displayMyAcount %}
               {% if data.loggedIn %}
-              <a href="{{data.siteUrl}}/oauth/logout" class="account logout-button" role="button">
+              <a href="{{data.baseUrlWithPrefix}}/oauth/logout" class="account logout-button" role="button">
                 <!-- <span class="glyphicon glyphicon-log-out"></span> !-->
                 {{ __('Uitloggen') }}
               </a>
               {% else %}
-              <a href="{{data.siteUrl}}/oauth/login" class="account" role="button">
+              <a href="{{data.baseUrlWithPrefix}}/oauth/login" class="account" role="button">
                 <!-- <span class="glyphicon glyphicon-user"></span>  !-->
                 <img src="/modules/openstad-assets/img/avatar.svg" />
                 {% if data.global.myAccountButtonText %} {{ data.global.myAccountButtonText | safe }} {% else %} {{
@@ -360,13 +360,13 @@ page or piece.') }}
         <nav class="" role="navigation">
           <div>
             {% if data.loggedIn %}
-            <a href="{{data.siteUrl}}/oauth/logout" class="logout-button" role="button">
+            <a href="{{data.baseUrlWithPrefix}}/oauth/logout" class="logout-button" role="button">
               <!--  <span class="glyphicon glyphicon-log-out"></span> !-->
               <img src="/modules/openstad-assets/img/avatar.svg" />
               {{ __('Uitloggen') }}
             </a>
             {% else %}
-            <a href="{{data.siteUrl}}/oauth/login" role="button">
+            <a href="{{data.baseUrlWithPrefix}}/oauth/login" role="button">
               <!-- <span class="glyphicon glyphicon-user"></span>  !-->
               {{ __('Mijn account') }}
             </a>

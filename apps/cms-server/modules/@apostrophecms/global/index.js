@@ -21,6 +21,7 @@ module.exports = {
         req.data.global.projectName = 'Openstad';
         req.project = self.apos.options.project;
         req.data.global.projectTitle = req.project.title;
+        req.data.prefix = self.apos.options.prefix || '';
 
         // system defaults
         let cmsDefaults = process.env.CMS_DEFAULTS;
@@ -308,7 +309,7 @@ module.exports = {
         fields: ['useCookieWarning', 'cookiePageLink'],
       },
       analitics: {
-        label: 'Analitics',
+        label: 'Analytics',
         fields: ['analyticsType', 'analyticsIdentifier', 'analyticsCodeBlock'],
       },
       footer: {

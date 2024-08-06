@@ -8,9 +8,10 @@ import './navBar.css';
 interface Item {
   home?: string;
   content: string;
+  prefix?: string;
 };
 
-function NavBar({ home, content }: Item) {
+function NavBar({ home, content, prefix = '' }: Item) {
 
   return (
     <div className='container'>
@@ -24,7 +25,7 @@ function NavBar({ home, content }: Item) {
           )}
           {JSON.parse(content).map((item: any, index: number) => {
             return (
-              <Link key={index} href={item.slug} aria-current="page">{item.title}</Link>
+              <Link key={index} href={`${prefix}${item.slug}`} aria-current="page">{item.title}</Link>
             )
           })}
         </nav>
