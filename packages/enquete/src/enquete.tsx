@@ -125,6 +125,9 @@ function Enquete(props: EnqueteWidgetProps) {
                     break;
                 case 'none':
                     fieldData['type'] = 'none';
+                    fieldData['image'] = item?.image || '';
+                    fieldData['imageAlt'] = item?.imageAlt || '';
+                    fieldData['imageDescription'] = item?.imageDescription || '';
                     break;
             }
 
