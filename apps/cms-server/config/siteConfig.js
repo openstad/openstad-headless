@@ -32,9 +32,6 @@ module.exports = {
         'default-page': {},
       },
     };
-
-    
-    console.log ('get siteconfig apos', siteConfig);
     
     return siteConfig;
   }
