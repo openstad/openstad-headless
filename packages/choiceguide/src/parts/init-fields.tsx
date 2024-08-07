@@ -5,17 +5,14 @@ const getMinMaxByField = (key, data) => {
     return !!data && typeof data.resources !== 'undefined' && typeof data.resources[key] !== 'undefined' ? data.resources[key] : '';
 }
 
-export const InitializeFormFields = (items, data, startWithAllQuestionsAnswered = false) => {
+export const InitializeFormFields = (items, data) => {
     const formFields: FieldProps[] = [];
 
     if (typeof (items) === 'object' && items.length > 0
     ) {
         for (const item of items) {
             const itemType = item.type === 'a-b-slider' ? 'range' : item.type;
-            const defaultValue = (
-              item.type === 'a-b-slider'
-              && startWithAllQuestionsAnswered
-            ) ? '50' : '';
+            const defaultValue = item.type === 'a-b-slider' ? '50' : '';
 
             const fieldData: any = {
                 type: item.fieldType || itemType,

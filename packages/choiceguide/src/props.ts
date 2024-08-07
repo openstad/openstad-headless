@@ -7,8 +7,6 @@ export type ChoiceGuideProps = BaseProps &
 
 export type ChoiceGuide = {
     noOfQuestionsToShow: string;
-    startWithAllQuestionsAnswered: boolean;
-    startWithAllQuestionsAnsweredAndConfirmed?: boolean;
     showPageCountAndCurrentPageInButton: boolean;
     choicesType: 'default' | 'minus-to-plus-100' | 'plane' | 'hidden';
     imageAspectRatio: '16x9' | '1x1';

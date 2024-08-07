@@ -1,5 +1,17 @@
 import {ChoiceOptions, Score} from "../props";
 
+export const calculateColor = (score: number, minColor = '#ff9100', maxColor = '#bed200') => {
+    const maxColorMatch = maxColor.match(/#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i);
+    const minColorMatch = minColor.match(/#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i);
+    if (maxColorMatch && minColorMatch) {
+        const r = parseInt(minColorMatch[1], 16) + (parseInt(maxColorMatch[1], 16) - parseInt(minColorMatch[1], 16)) * (score / 100);
+        const g = parseInt(minColorMatch[2], 16) + (parseInt(maxColorMatch[2], 16) - parseInt(minColorMatch[2], 16)) * (score / 100);
+        const b = parseInt(minColorMatch[3], 16) + (parseInt(maxColorMatch[3], 16) - parseInt(minColorMatch[3], 16)) * (score / 100);
+        return `rgb(${r},${g},${b})`;
+    }
+    return '#bed200';
+};
+
 export const calculateScoreForItem = (
   choiceOption: ChoiceOptions | ChoiceOptions[],
   answers: Record<string, string>,
