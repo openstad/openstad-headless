@@ -25,8 +25,8 @@ const formSchema = z.object({
   stemCodeTitleSuccess: z.string(),
   newsLetterTitle: z.string(),
   panelTitle: z.string(),
-  panelItem1: z.string(),
-  panelItem2: z.string(),
+  budgetChosenTitle: z.string(),
+  budgetRemainingTitle: z.string(),
 });
 
 type Formdata = z.infer<typeof formSchema>;
@@ -50,8 +50,8 @@ export default function BegrootmoduleText(
       stemCodeTitleSuccess: props.stemCodeTitleSuccess || 'Vul een andere stemcode in',
       newsLetterTitle: props.newsLetterTitle || 'Hou mij op de hoogte',
       panelTitle: props.panelTitle,
-      panelItem1: props.panelItem1,
-      panelItem2: props.panelItem2,
+      budgetChosenTitle: props.budgetChosenTitle,
+      budgetRemainingTitle: props.budgetRemainingTitle,
     },
   });
 
@@ -210,7 +210,7 @@ export default function BegrootmoduleText(
           />
           <FormField
             control={form.control}
-            name="panelItem1"
+            name="budgetChosenTitle"
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Regel 1</FormLabel>
@@ -229,7 +229,7 @@ export default function BegrootmoduleText(
           />
           <FormField
             control={form.control}
-            name="panelItem2"
+            name="budgetRemainingTitle"
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Regel 2</FormLabel>

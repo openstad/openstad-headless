@@ -19,8 +19,8 @@ export const StemBegrootBudgetList = ({
   step1Title,
   resourceCardTitle,
   panelTitle,
-  panelItem1,
-  panelItem2,
+  budgetChosenTitle,
+  budgetRemainingTitle,
 }: {
   allResourceInList: Array<any>
   selectedResources: Array<any>;
@@ -34,8 +34,8 @@ export const StemBegrootBudgetList = ({
   step1Title: string;
   resourceCardTitle: string;
   panelTitle?: string;
-  panelItem1?: string;
-  panelItem2?: string;
+  budgetChosenTitle?: string;
+  budgetRemainingTitle?: string;
 }) => {
   const budgetUsed = selectedResources.reduce(
     (total, cv) => total + cv.budget,
@@ -61,8 +61,8 @@ export const StemBegrootBudgetList = ({
             budgetUsed={budgetUsed}
             showInfoMenu={showInfoMenu}
             title={panelTitle}
-            item1={panelItem1}
-            item2={panelItem2}
+            budgetChosenTitle={budgetChosenTitle}
+            budgetRemainingTitle={budgetRemainingTitle}
           />
         </section>
       )}

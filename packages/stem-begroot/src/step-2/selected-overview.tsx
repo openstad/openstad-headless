@@ -16,8 +16,8 @@ type Props = {
   showInfoMenu?: boolean;
   step2Title: string;
   panelTitle?: string;
-  panelItem1?: string;
-  panelItem2?: string;
+  budgetChosenTitle?: string;
+  budgetRemainingTitle?: string;
 };
 
 export const BegrotenSelectedOverview = ({
@@ -30,8 +30,8 @@ export const BegrotenSelectedOverview = ({
   showInfoMenu,
   step2Title,
   panelTitle,
-  panelItem1,
-  panelItem2,
+  budgetChosenTitle,
+  budgetRemainingTitle,
 }: Props) => {
   return (
     <>
@@ -46,8 +46,8 @@ export const BegrotenSelectedOverview = ({
             budgetUsed={budgetUsed}
             showInfoMenu={showInfoMenu}
             title={panelTitle}
-            item1={panelItem1}
-            item2={panelItem2}
+            budgetChosenTitle={budgetChosenTitle}
+            budgetRemainingTitle={budgetRemainingTitle}
           />
         )}
       </div>

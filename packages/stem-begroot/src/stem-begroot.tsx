@@ -60,8 +60,8 @@ export type StemBegrootWidgetProps = BaseProps &
     stemCodeTitleSuccess: string;
     newsLetterTitle: string;
     panelTitle?: string;
-    panelItem1?: string;
-    panelItem2?: string;
+    budgetChosenTitle?: string;
+    budgetRemainingTitle?: string;
   };
 
 function StemBegroot({
@@ -318,8 +318,8 @@ function StemBegroot({
             <>
               <StemBegrootBudgetList
                 panelTitle={props.panelTitle}
-                panelItem1={props.panelItem1}
-                panelItem2={props.panelItem2}
+                budgetChosenTitle={props.budgetChosenTitle}
+                budgetRemainingTitle={props.budgetRemainingTitle}
                 step1Title={props.step1Title}
                 resourceCardTitle={props.resourceCardTitle}
                 introText={props.step1}
@@ -364,8 +364,8 @@ function StemBegroot({
               <Spacer size={1.5} />
               <BegrotenSelectedOverview
                 panelTitle={props.panelTitle}
-                panelItem1={props.panelItem1}
-                panelItem2={props.panelItem2}
+                budgetChosenTitle={props.budgetChosenTitle}
+                budgetRemainingTitle={props.budgetRemainingTitle}
                 step2Title={props.step2Title}
                 introText={props.step2}
                 budgetUsed={budgetUsed}
