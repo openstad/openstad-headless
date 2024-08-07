@@ -5,8 +5,9 @@ import { Heading5, Button } from "@utrecht/component-library-react";
 type Props = {
   loginUrl: string;
   step3success: string;
+  stemCodeTitleSuccess: string;
 };
-export const Step3Success = ({ step3success, ...props }: Props) => {
+export const Step3Success = ({ step3success, stemCodeTitleSuccess, ...props }: Props) => {
   return (
     <>
       <Spacer size={1.5} />
@@ -19,7 +20,7 @@ export const Step3Success = ({ step3success, ...props }: Props) => {
           const loginUrl = new URL(`${props.loginUrl}`);
           document.location.href = loginUrl.toString();
         }}>
-        Vul een andere stemcode in
+        {stemCodeTitleSuccess}
       </Button>
     </>
   );

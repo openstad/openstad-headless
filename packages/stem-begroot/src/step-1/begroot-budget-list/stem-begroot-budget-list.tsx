@@ -16,6 +16,11 @@ export const StemBegrootBudgetList = ({
   showInfoMenu,
   decideCanAddMore,
   onSelectedResourceRemove,
+  step1Title,
+  resourceCardTitle,
+  panelTitle,
+  panelItem1,
+  panelItem2,
 }: {
   allResourceInList: Array<any>
   selectedResources: Array<any>;
@@ -26,6 +31,11 @@ export const StemBegrootBudgetList = ({
   showInfoMenu?: boolean;
   decideCanAddMore: () => boolean;
   onSelectedResourceRemove: (resource: { id: number }) => void;
+  step1Title: string;
+  resourceCardTitle: string;
+  panelTitle?: string;
+  panelItem1?: string;
+  panelItem2?: string;
 }) => {
   const budgetUsed = selectedResources.reduce(
     (total, cv) => total + cv.budget,
@@ -50,11 +60,14 @@ export const StemBegrootBudgetList = ({
             maxBudget={maxBudget}
             budgetUsed={budgetUsed}
             showInfoMenu={showInfoMenu}
+            title={panelTitle}
+            item1={panelItem1}
+            item2={panelItem2}
           />
         </section>
       )}
       <section className="budget-list-container">
-        <Heading5>Uw selecties</Heading5>
+        <Heading5>{step1Title}</Heading5>
         {!canAddMore && allResourceInList.length > 0 ? (
           <Paragraph className="budget-list-status-text helptext error">
             {typeIsBudgeting
@@ -65,7 +78,7 @@ export const StemBegrootBudgetList = ({
 
         <Spacer size={1} />
         <div className="budget-list-selections">
-          <div className="budget-list-selection-indicaction-container">
+          <div className="budget-list-selection-indicaction-container" role="status">
             {selectedResources.map((resource) => {
               let defaultImage = '';
 
@@ -121,7 +134,7 @@ export const StemBegrootBudgetList = ({
                     });
                   }
                 }}>
-                  Selecteer een plan
+                  {resourceCardTitle}
               </Button>
             ) : null}
           </div>
