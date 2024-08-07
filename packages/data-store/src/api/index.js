@@ -2,6 +2,7 @@ import fetchx from './fetch';
 import resource from './resource';
 import comments from './comments';
 import resources from './resources';
+import choicesguide from "./choicesguide";
 import tags from './tags';
 import user from './user';
 import area from './area';
@@ -67,6 +68,11 @@ function API(props = {}) {
     delete: resources.delete.bind(self),
     create: resources.create.bind(self),
     submitLike: resources.submitLike.bind(self)
+  };
+
+  self.choicesguide = {
+    fetch: choicesguide.fetch.bind(self),
+    create: choicesguide.create.bind(self)
   };
 
   self.submissions = {

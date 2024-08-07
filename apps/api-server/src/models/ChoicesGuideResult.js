@@ -1,25 +1,15 @@
-const config                = require('config');
-const merge                 = require('merge');
-const getExtraDataConfig = require('../lib/sequelize-authorization/lib/getExtraDataConfig');
-
 module.exports = function( db, sequelize, DataTypes ) {
   let ChoicesGuideResult = sequelize.define('choices_guide_result', {
-
-    choicesGuideId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
 
     userId: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
 
-    extraData: getExtraDataConfig(DataTypes.JSON, 'choicesGuideResult'),
-
-    userFingerprint: {
-      type: DataTypes.TEXT,
-      allowNull: true,
+    widgetId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
     },
 
     result: {
@@ -62,76 +52,34 @@ module.exports = function( db, sequelize, DataTypes ) {
       }
     },
 
-  }, {
-
-    hooks: {
-
-      beforeValidate: function( instance, options ) {
-
-        return new Promise((resolve, reject) => {
-
-          if (instance.choicesGuideId) {
-            db.ChoicesGuide.scope('includeProject').findByPk(instance.choicesGuideId)
-              .then( (choicesGuide) => {
-                if (!choicesGuide) throw Error('ChoicesGuide niet gevonden');
-                instance.config = merge.recursive(true, config, choicesGuide.project.config);
-                return choicesGuide;
-              })
-              .then( (choicesGuide) => {
-                return resolve();
-              }).catch((err) => {
-                throw err;
-              });
-
-          } else {
-            instance.config = config;
-            return resolve();
-          }
-
-        });
-
-      },
-
-    },
-
-    individualHooks: true,
-
   });
 
   ChoicesGuideResult.scopes = function scopes() {
 
     return {
+      defaultScope: {},
 
-      forProjectId: function( projectId ) {
+      forProjectId: function (projectId) {
         return {
           where: {
-            choicesGuideId: [sequelize.literal(`select id FROM choicesGuides WHERE projectId = ${projectId}`)]
-          }
+            projectId: projectId,
+          },
         };
       },
-
-      includeChoicesGuide: function() {
-        return {
-          include: [{
-            model: db.ChoicesGuide,
-            attributes: ['id', '', 'status']
-          }]
-        };
-      },
-
       includeUser: {
-        include: [{
-          model: db.User,
-          as: 'user',
-          required: false
-        }]
+        include: [
+          {
+            model: db.User,
+            attributes: ['role', 'displayName', 'nickName', 'name', 'email'],
+          },
+        ],
       },
 
     };
   };
 
   ChoicesGuideResult.associate = function( models ) {
-    this.belongsTo(models.ChoicesGuide, { onDelete: 'CASCADE' });
+    this.belongsTo(models.Widget);
     this.belongsTo(models.User, { onDelete: 'CASCADE' });
   };
 

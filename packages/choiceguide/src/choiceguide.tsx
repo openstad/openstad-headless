@@ -8,7 +8,6 @@ import Form from "@openstad-headless/form/src/form";
 import { ChoiceGuideSidebar } from "./includes/sidebar.js";
 import './style.css';
 import { InitializeWeights } from "./parts/init-weights.js";
-import { prepareAnwers } from "./parts/prepare-answers.js";
 import { FormValue } from "@openstad-headless/form/src/form";
 
 function ChoiceGuide(props: ChoiceGuideProps) {
@@ -17,13 +16,11 @@ function ChoiceGuide(props: ChoiceGuideProps) {
         submit: { submitButton, saveConceptButton } = {},
         introTitle,
         introDescription,
-        projectId,
-        api,
-        startWithAllQuestionsAnswered,
-        noOfQuestionsToShow
+        noOfQuestionsToShow,
+        afterUrl
     } = choiceGuide;
 
-    const formFields = InitializeFormFields(items, props, startWithAllQuestionsAnswered);
+    const formFields = InitializeFormFields(items, props);
 
     const defaultAnswers = formFields.reduce((acc, item) => {
         acc[item.fieldKey] = item?.defaultValue;
@@ -87,8 +84,8 @@ function ChoiceGuide(props: ChoiceGuideProps) {
     }, []);
 
     const datastore: any = new DataStore({
-        projectId,
-        api,
+        projectId: props.projectId,
+        api: props.api,
     });
 
     const {
@@ -101,18 +98,40 @@ function ChoiceGuide(props: ChoiceGuideProps) {
     const totalPages = Math.ceil(formFields.length / questionsPerPage);
     const currentFields = formFields.slice(currentPage * questionsPerPage, (currentPage + 1) * questionsPerPage);
 
-    const onSubmit = (formData: any) => {
-        const newAnswers = prepareAnwers(formData, weights);
+    const notifySuccess = () =>
+      toast.success('Versturen gelukt', { position: 'bottom-center' });
+
+    const notifyFailed = () =>
+      toast.error('Versturen mislukt', { position: 'bottom-center' });
+
+    const { create: createChoiceguide } = datastore.useChoicesguide({
+        projectId: props.projectId,
+    });
+
+    const onSubmit = async (formData: any) => {
         setCompleteAnswers((prevAnswers) => ({
             ...prevAnswers,
-            ...newAnswers
+            ...formData
         }));
+
+        const finalAnswers = { ...completeAnswers, ...formData };
 
         if (currentPage < totalPages - 1) {
             setCurrentPage((prevPage) => prevPage + 1);
         } else {
-            console.log('Final submit', { ...completeAnswers, ...newAnswers });
-            toast.success('Formulier succesvol ingediend!');
+            try {
+                const result = await createChoiceguide(finalAnswers, props.projectId ,props.widgetId);
+                if (result) {
+                    notifySuccess();
+
+                    if(afterUrl) {
+                        location.href = afterUrl || '/';
+                    }
+                }
+            } catch (e) {
+                console.log('Error', e);
+                notifyFailed();
+            }
         }
     };
 
