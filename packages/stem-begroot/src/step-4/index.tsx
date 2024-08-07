@@ -7,11 +7,13 @@ type Props = {
   voteMessage: string;
   thankMessage: string;
   showNewsletterButton: boolean;
+  newsLetterTitle: string;
 };
 export const Step4 = ({
   showNewsletterButton,
   thankMessage,
   voteMessage,
+  newsLetterTitle
 }: Props) => {
   return (
     <>
@@ -27,7 +29,7 @@ export const Step4 = ({
             onClick={() => {
               // What should happen here?
             }}>
-            Hou mij op de hoogte
+            {newsLetterTitle}
           </Button>
         </>
       ) : null}

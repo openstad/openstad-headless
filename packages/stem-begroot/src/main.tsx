@@ -6,7 +6,7 @@ const config: StemBegrootWidgetProps = {
   api: {
     url: import.meta.env.VITE_API_URL,
   },
-  projectId: import.meta.env.VITE_PROJECT_ID || 2,
+  projectId: import.meta.env.VITE_PROJECT_ID || 5,
   login: {
     url: `${import.meta.env.VITE_API_URL}/auth/project/${
       import.meta.env.VITE_PROJECT_ID
@@ -52,6 +52,10 @@ const config: StemBegrootWidgetProps = {
   ],
   showInfoMenu: true,
   isSimpleView: false,
+  step1Title: 'Uw selecties',
+  resourceCardTitle: 'Selecteer een plan',
+  step2Title: 'Overzicht van mijn selectie',
+  stemCodeTitle: 'Vul je stemcode in',
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
