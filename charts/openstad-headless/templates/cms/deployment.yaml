@@ -43,6 +43,11 @@ spec:
               secretKeyRef:
                 key: mongodbUri
                 name: {{ template "openstad.cms.secret.fullname" . }}
+          - name: MONGODB_PREFIX
+            valueFrom:
+              secretKeyRef:
+                key: mongodbPrefix
+                name: {{ template "openstad.cms.secret.fullname" . }}
           - name: CMS_DEFAULTS
             value: "{}"
           # Inject extra environment variables
@@ -58,4 +63,3 @@ spec:
         - name: data-vol
           persistentVolumeClaim:
             claimName: cms-data-claim
-

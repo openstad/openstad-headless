@@ -14,12 +14,14 @@ import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
-  Paragraph,
-  Heading, Heading2, ButtonGroup, ButtonLink,
+  Paragraph, Link, Heading, Heading2, ButtonGroup, ButtonLink,
 } from '@utrecht/component-library-react';
 import React from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
-import { Comments, CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
+import {
+  Comments,
+  CommentsWidgetProps,
+} from '@openstad-headless/comments/src/comments';
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
 
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
@@ -28,6 +30,7 @@ type booleanProps = {
   [K in
   | 'displayImage'
   | 'displayTitle'
+  | 'displayModBreak'
   | 'displaySummary'
   | 'displayDescription'
   | 'displayUser'
@@ -43,9 +46,9 @@ type booleanProps = {
 };
 
 export type ResourceDetailWidgetProps = {
-    documentsTitle?: string;
-    documentsDesc?: string;
-  } &
+  documentsTitle?: string;
+  documentsDesc?: string;
+} &
   BaseProps &
   ProjectSettingProps & {
     projectId?: string;
@@ -60,11 +63,15 @@ export type ResourceDetailWidgetProps = {
       CommentsWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
+    commentsWidget_multiple?: Omit<
+    CommentsWidgetProps,
+    keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+  >;
     resourceDetailMap?: Omit<
       ResourceDetailMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
-  } ;
+  };
 
 type DocumentType = {
   name?: string;
@@ -74,6 +81,7 @@ type DocumentType = {
 function ResourceDetail({
   displayImage = true,
   displayTitle = true,
+  displayModBreak = true,
   displaySummary = true,
   displayDescription = true,
   displayUser = true,
@@ -131,6 +139,14 @@ function ResourceDetail({
 
   const defaultImage = !!tagDefaultResourceImage ? [{ url: tagDefaultResourceImage }] : [{ url: '' }];
 
+  const getPageHash = () => {
+    if (window.location.hash.includes('#doc')) {
+      const url = '/' + window.location.hash.split('=')[1] + '=' + window.location.hash.split('=')[2];
+
+      return <div className="back-url"><Link href={url}>Terug naar het document</Link></div>
+    }
+  };
+
   return (
     <section>
       <div
@@ -139,11 +155,12 @@ function ResourceDetail({
           : 'osc-resource-detail-container'
           }`}>
         <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
+          {getPageHash()}
           {resource ? (
             <article className="osc-resource-detail-content-items">
               {displayImage && (
                 <Carousel
-                  items={ ( Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : defaultImage}
+                  items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : defaultImage}
                   itemRenderer={(i) => (
                     <Image
                       src={i.url}
@@ -151,7 +168,7 @@ function ResourceDetail({
                         <div>
                           <Paragraph className="osc-resource-detail-content-item-status">
                             {resource.statuses
-                              ?.map((s: { label: string }) => s.label)
+                              ?.map((s: { name: string }) => s.name)
                               ?.join(', ')}
                           </Paragraph>
                         </div>
@@ -162,8 +179,22 @@ function ResourceDetail({
               )}
 
               {displayTitle && resource.title && (
-                <Heading level={1} appearance="utrecht-heading-2">{resource.title}</Heading>
+                <Heading level={1} appearance="utrecht-heading-2">
+                  {resource.title}
+                </Heading>
               )}
+
+              {displayModBreak && resource.modBreak && (
+                <div className="resource-detail-modbreak-banner">
+                  <section>
+                    <Heading level={2} appearance='utrecht-heading-6'>{props.resources.modbreakTitle}</Heading>
+                    <Heading level={2} appearance='utrecht-heading-6'>{resource.modBreakDateHumanized}</Heading>
+                  </section>
+                  <Spacer size={1} />
+                  <Heading level={2} appearance='utrecht-heading-6'>{resource.modBreak}</Heading>
+                </div>
+              )}
+
               <div className="osc-resource-detail-content-item-row">
                 {displayUser && resource?.user?.displayName && (
                   <div>
@@ -246,8 +277,8 @@ function ResourceDetail({
                   <Heading level={3} appearance="utrecht-heading-4">Status</Heading>
                   <Spacer size={0.5} />
                   <div className="resource-detail-pil-list-content">
-                    {resource.statuses?.map((s: { label: string }) => (
-                      <Pill light rounded text={s.label}></Pill>
+                    {resource.statuses?.map((s: { name: string }) => (
+                      <Pill light rounded text={s.name}></Pill>
                     ))}
                   </div>
 
@@ -307,19 +338,32 @@ function ResourceDetail({
 
       <Spacer size={2} />
 
-      {Array.isArray(props.commentsWidget?.useSentiments) && props.commentsWidget?.useSentiments?.length ? (
+      {Array.isArray(props.commentsWidget?.useSentiments) &&
+        props.commentsWidget?.useSentiments?.length ? (
         <section className="resource-detail-comments-container">
-          {props.commentsWidget?.useSentiments?.map(sentiment => (
+          <Comments
+            {...props}
+            resourceId={resourceId || ''}
+            title={props.commentsWidget?.title}
+            emptyListText={props.commentsWidget?.emptyListText}
+            formIntro={props.commentsWidget?.formIntro}
+            placeholder={props.commentsWidget?.placeholder}
+            sentiment={props.commentsWidget?.useSentiments[0]}
+          />
+
+          {props.commentsWidget?.useSentiments?.length > 1 && (
             <Comments
               {...props}
               resourceId={resourceId || ''}
-              title={props.commentsWidget?.title}
+              title={props.commentsWidget_multiple?.title}
               emptyListText={props.commentsWidget?.emptyListText}
-              formIntro={props.commentsWidget?.formIntro}
-              placeholder={props.commentsWidget?.placeholder}
-              sentiment={sentiment}
+              formIntro={props.commentsWidget_multiple?.formIntro}
+              placeholder={props.commentsWidget_multiple?.placeholder}
+              sentiment={props.commentsWidget?.useSentiments[1]}
             />
-          ))}
+          )}
+
+
         </section>
       ) : null}
     </section>

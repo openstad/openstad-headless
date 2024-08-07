@@ -13,8 +13,14 @@ export const StemBegrootBudgetList = ({
   maxBudget,
   typeIsBudgeting,
   maxNrOfResources,
+  showInfoMenu,
   decideCanAddMore,
   onSelectedResourceRemove,
+  step1Title,
+  resourceCardTitle,
+  panelTitle,
+  budgetChosenTitle,
+  budgetRemainingTitle,
 }: {
   allResourceInList: Array<any>
   selectedResources: Array<any>;
@@ -22,8 +28,14 @@ export const StemBegrootBudgetList = ({
   typeIsBudgeting: boolean;
   maxNrOfResources: number;
   introText?: string;
+  showInfoMenu?: boolean;
   decideCanAddMore: () => boolean;
   onSelectedResourceRemove: (resource: { id: number }) => void;
+  step1Title: string;
+  resourceCardTitle: string;
+  panelTitle?: string;
+  budgetChosenTitle?: string;
+  budgetRemainingTitle?: string;
 }) => {
   const budgetUsed = selectedResources.reduce(
     (total, cv) => total + cv.budget,
@@ -34,23 +46,28 @@ export const StemBegrootBudgetList = ({
 
   return (
     <>
-      <section className="stem-begroot-budget-list">
-        <div className="stem-begroot-budget-list-used-budgets">
-          <div className="stem-begroot-helptext-and-budget-section-helptext">
-            <Paragraph>{introText}</Paragraph>
+      {showInfoMenu && (
+        <section className="stem-begroot-budget-list">
+          <div className="stem-begroot-budget-list-used-budgets">
+            <div className="stem-begroot-helptext-and-budget-section-helptext">
+              <Paragraph>{introText}</Paragraph>
+            </div>
           </div>
-        </div>
-
-        <BudgetStatusPanel
-          typeIsBudgeting={typeIsBudgeting}
-          maxNrOfResources={maxNrOfResources}
-          nrOfResourcesSelected={selectedResources.length}
-          maxBudget={maxBudget}
-          budgetUsed={budgetUsed}
-        />
-      </section>
+          <BudgetStatusPanel
+            typeIsBudgeting={typeIsBudgeting}
+            maxNrOfResources={maxNrOfResources}
+            nrOfResourcesSelected={selectedResources.length}
+            maxBudget={maxBudget}
+            budgetUsed={budgetUsed}
+            showInfoMenu={showInfoMenu}
+            title={panelTitle}
+            budgetChosenTitle={budgetChosenTitle}
+            budgetRemainingTitle={budgetRemainingTitle}
+          />
+        </section>
+      )}
       <section className="budget-list-container">
-        <Heading5>Uw selecties</Heading5>
+        <Heading5>{step1Title}</Heading5>
         {!canAddMore && allResourceInList.length > 0 ? (
           <Paragraph className="budget-list-status-text helptext error">
             {typeIsBudgeting
@@ -61,7 +78,7 @@ export const StemBegrootBudgetList = ({
 
         <Spacer size={1} />
         <div className="budget-list-selections">
-          <div className="budget-list-selection-indicaction-container">
+          <div className="budget-list-selection-indicaction-container" role="status">
             {selectedResources.map((resource) => {
               let defaultImage = '';
 
@@ -117,7 +134,7 @@ export const StemBegrootBudgetList = ({
                     });
                   }
                 }}>
-                  Selecteer een plan
+                  {resourceCardTitle}
               </Button>
             ) : null}
           </div>

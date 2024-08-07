@@ -9,24 +9,44 @@ import { Paragraph } from "@utrecht/component-library-react";
 type Props = {
   steps: Array<string>;
   currentStep?: number;
+  isSimpleView?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>;
 const Stepper = (props: Props) => {
-  const { steps, currentStep = 0 } = props;
+  const { steps, currentStep = 0, isSimpleView } = props;
 
   return (
     <div {...props} className={`stepper ${props.className}`}>
       {steps.map((step, index) => (
         <React.Fragment key={step}>
-          <div className="step-container">
-            <div
-              className={`step-icon ${currentStep === index ? 'active' : ''} ${
-                currentStep > index ? 'done' : ''
-              }`}>
-              <Paragraph>{index + 1}</Paragraph>
-            </div>
-            <Paragraph> {step}</Paragraph>
-          </div>
-          <div className="step-divider"></div>
+          {isSimpleView === true && index !== 1 && (
+            <>
+              <div className="step-container">
+                <div
+                  className={`step-icon ${currentStep === index ? 'active' : ''} ${
+                    currentStep > index ? 'done' : ''
+                  }`}>
+                  <Paragraph>{index >= 1 ? index : 1}</Paragraph>
+                </div>
+                <Paragraph> {step}</Paragraph>
+              </div>
+              <div className="step-divider"></div>
+            </>
+          )}
+
+          {isSimpleView === false && (
+            <>
+              <div className="step-container">
+                <div
+                  className={`step-icon ${currentStep === index ? 'active' : ''} ${
+                    currentStep > index ? 'done' : ''
+                  }`}>
+                  <Paragraph>{index + 1}</Paragraph>
+                </div>
+                <Paragraph> {step}</Paragraph>
+              </div>
+              <div className="step-divider"></div>
+            </>
+          )}
         </React.Fragment>
       ))}
     </div>

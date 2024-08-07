@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import {CodeEditor} from '@/components/ui/code-editor';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
@@ -28,6 +29,7 @@ import useStatuses from '@/hooks/use-statuses';
 import { CheckboxList } from './checkbox-list';
 import { X } from 'lucide-react';
 import { useProject } from '@/hooks/use-project';
+import MapInput from '@/components/maps/leaflet-input';
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -112,7 +114,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   const { project, id } = router.query;
   const { data: projectData } = useProject();
 
-  const { data: existingData, error } = useResource(
+  const { data: existingData, error, mutate } = useResource(
     project as string,
     id as string
   );
@@ -198,17 +200,29 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     }),
     [existingData]
   );
-
+  const [extraData, setExtraData] = useState(existingData?.extraData || '');
   const form = useForm<FormType>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: defaults(),
   });
 
   function onSubmit(values: FormType) {
+    // Add extraData if its valid JSON
+    try{
+      if(extraData !== values.extraData){
+        values.extraData = JSON.parse(extraData);
+      }
+    }catch(e){
+    }
+
     onFormSubmit(values)
       .then(() => {
         toast.success(`Plan successvol ${id ? 'aangepast' : 'aangemaakt'}`);
         router.push(`/projects/${project}/resources`);
+
+        // SWR reload
+        const url = `/api/openstad/api/project/${project}/resource/${id}`;
+        mutate(url);
       })
       .catch((e) => {
         toast.error(`Plan kon niet ${id ? 'aangepast' : 'aangemaakt'} worden`);
@@ -254,6 +268,13 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     name: 'documents',
   });
 
+  const handleLocationSelect = useCallback((location: string) => {
+    if(location !== ''){
+      let formatted = location.split(',');
+      form.setValue('location', JSON.stringify({ lat: parseFloat(formatted[0]), lng: parseFloat(formatted[1]) }));
+    }
+  }, [form]);
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
@@ -261,7 +282,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-2/3 grid grid-cols-2 lg:auto-rows-fit" style={{gap: '2.5rem'}}>
+          className="lg:w-3/3 grid grid-cols-2 lg:auto-rows-fit" style={{gap: '2.5rem'}}>
           <FormField
             control={form.control}
             name="title"
@@ -528,13 +549,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             control={form.control}
             name="location"
             render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel>Locatie (optioneel)</FormLabel>
-                <FormControl>
-                  <Input placeholder="" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+              <MapInput onSelectLocation={handleLocationSelect} field={field} />
             )}
           />
 
@@ -620,6 +635,40 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               );
             }}
           />
+
+
+          <FormField
+            control={form.control}
+            name="extraData"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <Textarea
+                  className='hidden'
+                  hidden={true}
+                  name={'extraData'}
+                  value={extraData} // Bind the state to the Textarea value
+                  readOnly // Make the Textarea read-only since it's updated programmatically
+                />
+                <FormLabel>
+                  Extra data
+                </FormLabel>
+                <FormControl>
+                  <CodeEditor 
+                    initValue={existingData?.extraData} 
+                    onValueChange={(value) => {
+                      try {
+                        const parsedValue = JSON.parse(value); // Parse the JSON to make sure it's valid
+                        form.setValue('extraData', parsedValue); // Set the value of the field
+                        setExtraData(JSON.stringify(parsedValue));
+                      } catch (error) {
+                      }
+                    }}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
 
           <CheckboxList
             form={form}

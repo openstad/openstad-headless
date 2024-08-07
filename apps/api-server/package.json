@@ -22,6 +22,8 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.18.1",
+    "@openstad-headless/account": "file:../../packages/account",
+    "@openstad-headless/activity": "file:../../packages/activity",
     "@openstad-headless/agenda": "file:../../packages/agenda",
     "@openstad-headless/comments": "file:../../packages/comments",
     "@openstad-headless/choiceguide": "file:../../packages/choiceguide",
@@ -39,6 +41,7 @@
     "@openstad-headless/resource-overview": "file:../../packages/resource-overview",
     "@openstad-headless/resource-overview-with-map": "file:../../packages/resource-overview-with-map",
     "@openstad-headless/stem-begroot": "file:../../packages/stem-begroot",
+    "@openstad-headless/simple-voting": "file:../../packages/simple-voting",
     "@openstad-headless/ui": "file:../../packages/ui",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.20.2",

@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const Sequelize = require('sequelize');
 const db = require('../../db');
 const service = require('./service');
+const isRedirectAllowed = require('../../services/isRedirectAllowed');
 
 let router = express.Router({mergeParams: true});
 
@@ -75,28 +76,37 @@ router
 
 // ----------------------------------------------------------------------------------------------------
 // login
-
 router
   .route('(/project/:projectId)?/login')
-  .get(function (req, res, next) {
+  .get(async function (req, res, next) {
 
     // logout first?
     if (!req.query.forceNewLogin) return next();
-    let baseUrl = config.url
-    let backToHereUrl = baseUrl + '/auth/project/' + req.project.id + '/login?useAuth=' + req.authConfig.provider + '&redirectUri=' + encodeURIComponent(req.query.redirectUri)
-    backToHereUrl = encodeURIComponent(backToHereUrl)
-    let url = baseUrl + '/auth/project/' + req.project.id + '/logout?redirectUri=' + backToHereUrl;
-    return res.redirect(url)
 
+    // Check if redirect domain is allowed
+    if(req.query.redirectUri && req.project.id && await isRedirectAllowed(req.project.id, req.query.redirectUri)){
+      let baseUrl = config.url
+      let backToHereUrl = baseUrl + '/auth/project/' + req.project.id + '/login?useAuth=' + req.authConfig.provider + '&redirectUri=' + encodeURIComponent(req.query.redirectUri)
+      backToHereUrl = encodeURIComponent(backToHereUrl)
+      let url = baseUrl + '/auth/project/' + req.project.id + '/logout?redirectUri=' + backToHereUrl;
+      return res.redirect(url)
+    }else if(req.query.redirectUri){
+      return next(createError(403, 'redirectUri not found in allowlist.'));
+    }
+    return next();
   })
-  .get(function (req, res, next) {
+  .get(async function (req, res, next) {
 
-    // redirect to login server
-    let url = req.authConfig.serverUrl + req.authConfig.serverLoginPath;
-    url = url.replace(/\[\[clientId\]\]/, req.authConfig.clientId);
-    url = url.replace(/\[\[redirectUri\]\]/, encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.redirectUri));
-    res.redirect(url);
-
+    // Check if redirect domain is allowed
+    if(req.query.redirectUri && req.project.id && await isRedirectAllowed(req.project.id, req.query.redirectUri)){
+      let url = req.authConfig.serverUrl + req.authConfig.serverLoginPath;
+      url = url.replace(/\[\[clientId\]\]/, req.authConfig.clientId);
+      url = url.replace(/\[\[redirectUri\]\]/, encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.redirectUri));
+      res.redirect(url);
+    }else if(req.query.redirectUri){
+      return next(createError(403, 'redirectUri not found in allowlist.'));
+    }
+    return next();
   })
 
 // ----------------------------------------------------------------------------------------------------
@@ -283,7 +293,7 @@ router
     return next();
 
   })
-  .get(function (req, res, next) {
+  .get(async function (req, res, next) {
 
     // redirect to logout server
     if (req.authConfig.serverLogoutPath) {
@@ -295,9 +305,12 @@ router
       return res.redirect(url);
     }
 
-    // todo: isallowed
-    if (req.query.redirectUri) return res.redirect(req.query.redirectUri);
-
+    // Check if redirect domain is allowed
+    if(req.query.redirectUri && req.project.id && await isRedirectAllowed(req.project.id, req.query.redirectUri)){
+      return res.redirect(req.query.redirectUri);
+    }else if(req.query.redirectUri){
+      return next(createError(403, 'redirectUri not found in allowlist.'));
+    }
     return res.json({ logout: 'success' })
 
   });

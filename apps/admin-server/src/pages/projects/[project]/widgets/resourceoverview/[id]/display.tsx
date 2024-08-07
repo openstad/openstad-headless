@@ -17,9 +17,16 @@ import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 const formSchema = z.object({
   displayBanner: z.boolean(),
+  displayMap: z.boolean(),
   displayTitle: z.boolean(),
   titleMaxLength: z.coerce.number(),
   displayDescription: z.boolean(),
@@ -33,6 +40,7 @@ const formSchema = z.object({
   displayDocuments: z.boolean(),
   documentsTitle: z.string().optional(),
   documentsDesc: z.string().optional(),
+  displayVariant: z.string().optional(),
   // displayRanking: z.boolean(),
   // displayLabel: z.boolean(),
   // displayShareButtons: z.boolean(),
@@ -56,6 +64,7 @@ export default function WidgetResourceOverviewDisplay(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       displayBanner: props?.displayBanner || false,
+      displayMap: props?.displayMap || false,
       displayTitle: props?.displayTitle || false,
       bannerText: props?.bannerText,
       titleMaxLength: props?.titleMaxLength || 20,
@@ -69,6 +78,7 @@ export default function WidgetResourceOverviewDisplay(
       displayDocuments: props?.displayDocuments || false,
       documentsTitle: props?.documentsTitle || '',
       documentsDesc: props?.documentsDesc || '',
+      displayVariant: props?.displayVariant,
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -79,6 +89,7 @@ export default function WidgetResourceOverviewDisplay(
 
   const { watch } = form;
   const displayBanner = watch('displayBanner');
+  const displayMap = watch('displayMap');
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -125,6 +136,20 @@ export default function WidgetResourceOverviewDisplay(
                 )}
               />
             )}
+          </div>
+
+          <div className='col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8 w-full'>
+            <FormField
+              control={form.control}
+              name="displayMap"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Kaart weergeven</FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           <FormField
@@ -389,6 +414,40 @@ export default function WidgetResourceOverviewDisplay(
               </FormItem>
             )}
           /> */}
+
+          <FormField
+            control={form.control}
+            name="displayVariant"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Weergave versie</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    props.onFieldChanged(field.name, value);
+                  }}
+                  value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecteer een optie" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem
+                      value={'default'}>
+                      Standaard
+                    </SelectItem>
+                    <SelectItem
+                      value={'compact'}>
+                      Compact (3 koloms)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

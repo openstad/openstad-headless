@@ -6,6 +6,12 @@ import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { Spacer } from '@openstad-headless/ui/src';
 import nunjucks from 'nunjucks';
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
+import { applyFilters } from '../includes/nunjucks-filters';
+
+// Initialize Nunjucks environment
+const nunjucksEnv = new nunjucks.Environment();
+// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+applyFilters(nunjucksEnv);
 
 export type RawResourceWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -20,7 +26,7 @@ export type RawResourceWidgetProps = BaseProps &
 function RawResource(props: RawResourceWidgetProps) {
   const urlParams = new URLSearchParams(window.location.search);
 
-  let resourceId: string|undefined = String(getResourceId({
+  let resourceId: string | undefined = String(getResourceId({
     resourceId: parseInt(props.resourceId || ''),
     url: document.location.href,
     targetUrl: props.resourceIdRelativePath,
@@ -33,22 +39,25 @@ function RawResource(props: RawResourceWidgetProps) {
     resourceId: resourceId,
     api: props.api,
   });
-  
-  const {data: resource} = resourceId ? datastore.useResource(props) : {data:null};
+
+  const { data: resource } = resourceId ? datastore.useResource(props) : { data: null };
 
   const stylingClasses =
     props.stylingClasses?.map((stylingClass) => stylingClass.value).join(' ') ||
     '';
 
-  const render = (() => {
+
+  let render = (() => {
     if (props.rawInput) {
       if (resourceId) {
-        return nunjucks.renderString(props.rawInput, {
+        return nunjucksEnv.renderString(props.rawInput, {
           // here you can add variables that are available in the template
           projectId: props.projectId,
+          resource: resource,
           user: resource.user,
           startDateHumanized: resource.startDateHumanized,
-          status: resource.status,
+          status: resource.statuses,
+          tags: resource.tags,
           title: resource.title,
           summary: resource.summary,
           description: resource.description,
@@ -63,12 +72,14 @@ function RawResource(props: RawResourceWidgetProps) {
           publishDateHumanized: resource.publishDateHumanized,
         });
       }
-      return nunjucks.renderString(props.rawInput, {
+      return nunjucksEnv.renderString(props.rawInput, {
         projectId: props.projectId,
       });
     }
     return '';
   })();
+
+  render = render.replace(/&amp;amp;/g, '&');
 
   return (
     <div className="osc">

@@ -22,9 +22,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import useTags from '@/hooks/use-tags';
 import { useForm } from 'react-hook-form';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-import type {ResourceOverviewMapWidgetProps} from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props'
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import * as z from 'zod';
+import { ResourceOverviewMapWidgetTabProps } from '.';
 
 type Tag = {
   id: number;
@@ -38,14 +38,22 @@ const formSchema = z.object({
   categorize: z.object({
     categorizeByField: z.string().optional(),
   }),
+  clustering: z.object({
+    isActive: z.boolean().optional(),
+  }),
   tilesVariant: z.string().optional(),
   width: z.string().optional(),
   height: z.string().optional(),
 });
 
+
+type SchemaKey = keyof typeof formSchema.shape;
+
 export default function WidgetResourcesMapMap(
-  props: ResourceOverviewMapWidgetProps &
-    EditFieldProps<ResourceOverviewMapWidgetProps>
+  props: ResourceOverviewMapWidgetTabProps &
+    EditFieldProps<ResourceOverviewMapWidgetTabProps> & {
+      omitSchemaKeys?: Array<SchemaKey>;
+    }
 ) {
 
   type FormData = z.infer<typeof formSchema>;
@@ -61,27 +69,30 @@ export default function WidgetResourcesMapMap(
     defaultValues: {
       markerHref: props?.markerHref || '',
       autoZoomAndCenter: props?.autoZoomAndCenter || 'markers',
+      clustering: props?.clustering || {},
       categorize: props?.categorize || {},
       tilesVariant: props?.tilesVariant || '',
       width: props?.width || '',
-      height: props?.height || '',
+      height: props?.height || ''
     },
   });
 
   const { data: tags } = useTags(props.projectId);
+
+
   const [tagGroupNames, setGroupedNames] = useState<string[]>([]);
 
   useEffect(() => {
     if (Array.isArray(tags)) {
       const fetchedTags = tags as Array<Tag>;
-      let groupNames = fetchedTags.map( tag => tag.type );
+      let groupNames = fetchedTags.map(tag => tag.type);
       groupNames = groupNames.filter((value, index, array) => {
         return array.indexOf(value) == index;
       });
       setGroupedNames(groupNames);
     }
   }, [tags]);
-  
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
@@ -125,12 +136,12 @@ export default function WidgetResourcesMapMap(
                 </FormLabel>
                 <Select
                   onValueChange={(value) => {
-                      props.onFieldChanged(field.name, value);
-                      field.onChange(value);
-                    }}
+                    props.onFieldChanged(field.name, value);
+                    field.onChange(value);
+                  }}
                   value={field.value}>
                   <FormControl>
-                  <SelectTrigger>
+                    <SelectTrigger>
                       <SelectValue placeholder="Selecteer een optie" />
                     </SelectTrigger>
                   </FormControl>
@@ -145,19 +156,43 @@ export default function WidgetResourcesMapMap(
             )}
           />
 
+          {/*
+          <FormField
+            control={form.control}
+            name="clustering.isActive"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                Cluster icons die dicht bij elkaar liggen
+                </FormLabel>
+                <Switch.Root
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(value: boolean) => {
+                      props.onFieldChanged(field.name, value);
+                      field.onChange(value);
+                  }}
+                  checked={field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          */}
+
           <FormField
             control={form.control}
             name="categorize.categorizeByField"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                Gebruik tags van dit type om de resources te groeperen (dwz. gebruik de iconen en kleuren van de tag). (Dit wordt niet goed ge-update in de preview.)
+                  Gebruik tags van dit type om de resources te tonen, dwz. gebruik de iconen en kleuren van de tag.
                 </FormLabel>
                 <Select
                   onValueChange={(value) => {
-                      props.onFieldChanged(field.name, value);
-                      field.onChange(value);
-                    }}
+                    props.onFieldChanged(field.name, value);
+                    field.onChange(value);
+                  }}
                   value={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -165,7 +200,7 @@ export default function WidgetResourcesMapMap(
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="" disabled>Selecteer een optie</SelectItem>
+                    <SelectItem value="">Geen (gebruik alleen standaardiconen)</SelectItem>
                     {tagGroupNames.map(type => (
                       <SelectItem value={type} key={type}>{type}</SelectItem>
                     ))}
@@ -186,9 +221,9 @@ export default function WidgetResourcesMapMap(
                 </FormLabel>
                 <Select
                   onValueChange={(value) => {
-                      props.onFieldChanged(field.name, value);
-                      field.onChange(value);
-                    }}
+                    props.onFieldChanged(field.name, value);
+                    field.onChange(value);
+                  }}
                   value={field.value}>
                   <FormControl>
                     <SelectTrigger>

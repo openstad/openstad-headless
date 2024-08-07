@@ -136,6 +136,19 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     });
   }
 
+    // email assets requests: add jwt
+    if (jwt && req.nextUrl.pathname.startsWith('/email-assets')) {
+      let path = req.nextUrl.pathname.replace('/email-assets', '');
+      let query = searchParams ? '?' + searchParams.toString() : '';
+      query = query.replace(/openstadlogintoken=(?:.(?!&|$))+./, '');
+      const rewrittenUrl = `${process.env.EMAIL_ASSETS_URL}${path}${query}`;
+      return NextResponse.rewrite(rewrittenUrl, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      });
+    }
+
   return res;
 
 }

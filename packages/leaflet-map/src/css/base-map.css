@@ -14,3 +14,7 @@
 .osc-base-map-widget-container .osc-map-marker-cluster-faded {
   opacity: .35;
 }
+
+.leaflet-container a {
+  color: var(--_utrecht-button-appearance-color);
+}

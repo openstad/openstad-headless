@@ -24,6 +24,7 @@ import ArgumentsList from '../../comments/[id]/list';
 import { ArgumentWidgetTabProps } from '../../comments/[id]';
 import ArgumentsForm from '../../comments/[id]/form';
 import { LikeWidgetTabProps } from '../../likes/[id]';
+import { extractConfig } from '@/lib/sub-widget-helper';
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
@@ -37,39 +38,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
     useWidgetPreview<ResourceDetailWidgetProps>({
       projectId,
     });
-
-  function extractConfig<T>(
-    subWidgetKey: keyof Pick<
-      ResourceDetailWidgetProps,
-      'commentsWidget' | 'likeWidget'
-    >
-  ) {
-    if (!previewConfig) throw new Error();
-
-    return {
-      resourceId: previewConfig.resourceId || '',
-      ...previewConfig[subWidgetKey],
-      updateConfig: (config: T) =>
-        updateConfig({
-          ...previewConfig,
-          [subWidgetKey]: {
-            ...previewConfig[subWidgetKey],
-            ...config,
-          },
-        }),
-      onFieldChanged: (key: string, value: any) => {
-        if (previewConfig) {
-          updatePreview({
-            ...previewConfig,
-            [subWidgetKey]: {
-              ...previewConfig[subWidgetKey],
-              [key]: value,
-            },
-          });
-        }
-      },
-    };
-  }
 
   return (
     <div>
@@ -146,25 +114,83 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   <TabsContent value="general" className="p-0">
                     <ArgumentsGeneral
                       omitSchemaKeys={['resourceId', 'sentiment']}
-                      {...extractConfig<ArgumentWidgetTabProps>(
-                        'commentsWidget'
-                      )}
+                      {...extractConfig<
+                        ResourceDetailWidgetProps,
+                        ArgumentWidgetTabProps
+                      >({
+                        subWidgetKey: 'commentsWidget',
+                        previewConfig: previewConfig,
+                        updateConfig,
+                        updatePreview,
+                      })}
                     />
                   </TabsContent>
 
                   <TabsContent value="list" className="p-0">
-                    <ArgumentsList
-                      {...extractConfig<ArgumentWidgetTabProps>(
-                        'commentsWidget'
-                      )}
-                    />
+                    <div className="grid grid-cols-2">
+                      <ArgumentsList
+                        customTitle={'Titel Links'}
+                        {...extractConfig<
+                          ResourceDetailWidgetProps,
+                          ArgumentWidgetTabProps
+                        >({
+                          subWidgetKey: 'commentsWidget',
+                          previewConfig: previewConfig,
+                          updateConfig,
+                          updatePreview,
+                        })}
+                      />
+
+                      <ArgumentsList
+                        customTitle={'Titel Rechts'}
+                        {...extractConfig<
+                          ResourceDetailWidgetProps,
+                          ArgumentWidgetTabProps
+                        >({
+                          subWidgetKey: 'commentsWidget_multiple',
+                          previewConfig: previewConfig,
+                          updateConfig,
+                          updatePreview,
+                        })}
+                      />
+                    </div>
                   </TabsContent>
                   <TabsContent value="form" className="p-0">
-                    <ArgumentsForm
-                      {...extractConfig<ArgumentWidgetTabProps>(
-                        'commentsWidget'
-                      )}
-                    />
+                    <div className="grid grid-cols-2">
+
+                      <ArgumentsForm
+                        customTitle={'Formulier Links'}
+                        {...extractConfig<
+                          ResourceDetailWidgetProps,
+                          ArgumentWidgetTabProps
+                        >({
+                          subWidgetKey: 'commentsWidget',
+                          previewConfig: previewConfig,
+                          updateConfig,
+                          updatePreview: (config) => console.log(config),
+                          extraChildConfig: {
+                            resourceId: previewConfig.resourceId,
+                          },
+                        })}
+                      />
+
+                      <ArgumentsForm
+                        customTitle={'Formulier Rechts'}
+                        {...extractConfig<
+                          ResourceDetailWidgetProps,
+                          ArgumentWidgetTabProps
+                        >({
+                          subWidgetKey: 'commentsWidget_multiple',
+                          previewConfig: previewConfig,
+                          updateConfig,
+                          updatePreview: (config) => console.log(config),
+                          extraChildConfig: {
+                            resourceId: previewConfig.resourceId,
+                          },
+                        })}
+                      />
+                    </div>
+
                   </TabsContent>
                 </Tabs>
               )}
@@ -174,7 +200,15 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
               {previewConfig && (
                 <LikesDisplay
                   omitSchemaKeys={['resourceId']}
-                  {...extractConfig<LikeWidgetTabProps>('likeWidget')}
+                  {...extractConfig<
+                    ResourceDetailWidgetProps,
+                    LikeWidgetTabProps
+                  >({
+                    subWidgetKey: 'likeWidget',
+                    previewConfig: previewConfig,
+                    updateConfig,
+                    updatePreview,
+                  })}
                 />
               )}
             </TabsContent>

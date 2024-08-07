@@ -160,7 +160,15 @@ const FormMessage = React.forwardRef<
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, children, ...props }, ref) => {
   const { error, formMessageId } = useFormField();
-  const body = error ? String(error?.message) : children;
+  let body: string | React.ReactNode = '';
+
+  if (error && Array.isArray(error)) {
+    body = error.map((e) => {
+      return Object.keys(e).map((key) => `${key}: ${e[key]?.message}`).join(', ');
+    }).join(', ');
+  } else {
+    body = error ? String(error?.message) : children;
+  }
 
   if (!body) {
     return null;

@@ -23,6 +23,7 @@ module.exports = {
       buttons: {
         label: 'Buttons',
         type: 'array',
+        titleField: 'label',
         draggable: true,
         fields: {
           add: {
@@ -54,6 +55,21 @@ module.exports = {
                 {
                   label: 'subtle-button',
                   value: 'subtle-button'
+                }
+              ]
+            },
+            target: {
+              type: 'select',
+              label: 'Target',
+              def: '_self',
+              choices: [
+                {
+                  label: 'Self',
+                  value: '_self'
+                },
+                {
+                  label: 'Blank',
+                  value: '_blank'
                 }
               ]
             }

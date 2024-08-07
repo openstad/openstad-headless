@@ -87,12 +87,16 @@ router.all('*', function (req, res, next) {
 
   if (req.query.tags) {
     let tags = req.query.tags;
+    // if tags is not an array, make it an array
+    if (!Array.isArray(tags)) tags = [tags];
     req.scope.push({ method: ['selectTags', tags] });
     req.scope.push('includeTags');
   }
 
   if (req.query.statuses) {
     let statuses = req.query.statuses;
+    // if statuses is not an array, make it an array
+    if (!Array.isArray(statuses)) statuses = [statuses];
     req.scope.push({ method: ['selectStatuses', statuses] });
     req.scope.push('includeStatuses');
   }
@@ -210,6 +214,34 @@ router
       startDate: req.body.startDate || new Date(),
     };
 
+    // Check if resource has images and if so, check their domains
+    let imageServer = process.env.IMAGE_APP_URL;
+    if (!imageServer) {
+      console.log ('Error: No image server found, please provide IMAGE_APP_URL environment variable.');
+      return next(createError(500, 'No image server found'));
+    }
+    // Add protocol to IMAGE_APP_URL for `new URL` to work correctly.
+    if (!imageServer.startsWith('http://') && !imageServer.startsWith('https://')) {
+      imageServer = 'https://' + imageServer;
+    }
+    const hostname = new URL(imageServer).hostname;
+    if(data.images && data.images.length > 0) {
+      data.images.forEach(image => {
+        try{
+          // Add protocol to image URL for `new URL` to work correctly.
+          if (!image.url.startsWith('http://') && !image.url.startsWith('https://')) {
+            image.url = 'https://' + image.url;
+          }
+          const url = new URL(image.url);
+          if(url.hostname !== hostname) {
+            return next(createError(400, 'Invalid image url'));
+          }
+        } catch (err) {
+          return next(createError(400, 'Invalid image url'));
+        }
+      });
+    }
+
     let responseData;
     db.Resource.authorizeData(data, 'create', req.user, null, req.project)
       .create(data)
@@ -301,25 +333,41 @@ router
 
     res.json(req.results);
     if (!req.query.nomail && req.body['publishDate']) {
-      if (sendConfirmationToAdmin) {
-        const tags = await req.results.getTags();
-
-        const emailReceivers = (await Promise.all(tags.map(async (tag) => {
+      const tags = await req.results.getTags();
+      if(tags && tags.length > 0){
+        // Convert to csv string
+        const emailReceivers = (await Promise.all(tags.flatMap(async (tag) => {
           const {useDifferentSubmitAddress, newSubmitAddress} = await tag.dataValues;
+          if(useDifferentSubmitAddress && newSubmitAddress !== null){
+            return useDifferentSubmitAddress ? newSubmitAddress.split(',') : [];
+          }
+          return [];
+        }))).filter(data => data !== null && data.length > 0).flat();
 
-          return useDifferentSubmitAddress ? newSubmitAddress : null;
-        }))).filter(data => data !== null);
+        if(emailReceivers.length > 0){
+          db.Notification.create({
+            type: "new published resource - admin update",
+            projectId: req.project.id,
+            data: {
+              userId: req.user.id,
+              resourceId: req.results.id,
+              emailReceivers: emailReceivers
+            }
+          })
+        }
+      }
 
+      if (sendConfirmationToAdmin) {
         db.Notification.create({
           type: "new published resource - admin update",
           projectId: req.project.id,
           data: {
             userId: req.user.id,
             resourceId: req.results.id,
-            emailReceivers: emailReceivers
           }
         })
       }
+      
       if (sendConfirmationToUser) {
         db.Notification.create({
           type: "new published resource - user feedback",

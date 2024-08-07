@@ -24,7 +24,7 @@ export function SidenavProject({ className }: { className?: string }) {
         className
       )}>
       <div className="flex flex-col items-start justify-center h-24">
-        <Link href="/projects">
+        <Link href="javascript:history.back();">
           <div className="m-4 p-3 bg-secondary rounded">
             <ArrowLeft size={20} />
           </div>
@@ -128,10 +128,10 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Kaart instellingen</span>
               </Button>
             </Link>
-            <Link href={`/projects/${project}/settings/widgets`}>
+            <Link href={`/projects/${project}/settings/alloweddomains`}>
               <Button
                 variant={
-                  location.includes('/settings/widgets')
+                  location.includes('/settings/alloweddomains')
                     ? 'secondary'
                     : 'ghost'
                 }

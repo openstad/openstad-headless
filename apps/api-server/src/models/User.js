@@ -156,6 +156,36 @@ module.exports = function (db, sequelize, DataTypes) {
       }
     },
 
+    firstname: {
+      type: DataTypes.STRING(64),
+      auth: {
+        listableBy: ['moderator', 'owner'],
+        viewableBy: ['moderator', 'owner'],
+        createableBy: ['moderator', 'owner'],
+        updateableBy: ['moderator', 'owner'],
+      },
+      allowNull: true,
+      defaultValue: null,
+      set: function (value) {
+        this.setDataValue('firstname', sanitize.noTags(value));
+      }
+    },
+
+    lastname: {
+      type: DataTypes.STRING(64),
+      auth: {
+        listableBy: ['moderator', 'owner'],
+        viewableBy: ['moderator', 'owner'],
+        createableBy: ['moderator', 'owner'],
+        updateableBy: ['moderator', 'owner'],
+      },
+      allowNull: true,
+      defaultValue: null,
+      set: function (value) {
+        this.setDataValue('lastname', sanitize.noTags(value));
+      }
+    },
+
     listableByRole: {
       type: DataTypes.ENUM('admin', 'editor', 'moderator', 'member', 'anonymous', 'all'),
       defaultValue: null,

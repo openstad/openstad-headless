@@ -7,6 +7,9 @@ import Link from 'next/link';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import toast from 'react-hot-toast';
 import { sortTable, searchTable } from '@/components/ui/sortTable';
+import { Button } from '../../../../components/ui/button';
+import * as XLSX from 'xlsx';
+import flattenObject from "@/lib/export-helpers/flattenObject";
 
 
 export default function ProjectComments() {
@@ -15,6 +18,22 @@ export default function ProjectComments() {
   const { data, removeComment } = useComments(project as string);
   const [comments, setComments] = useState<any[]>([])
 
+  const exportData = (data: any[], fileName: string) => {
+  
+    const flattenedData = data.map(item => flattenObject(item));
+  
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(flattenedData);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+  
+    XLSX.writeFile(workbook, fileName);
+  };
+  function transform() {
+    const today = new Date();
+    const projectId = router.query.project;
+    const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
+    exportData(comments, `${projectId}_reacties_${formattedDate}.xlsx`);
+  }
   useEffect(() => {
     if (data) {
       let comments = []
@@ -56,7 +75,14 @@ export default function ProjectComments() {
             name: 'Reacties',
             url: `/projects/${project}/comments`,
           },
-        ]}>
+        ]}
+        action={
+          <div className='flex flex-row w-full md:w-auto my-auto gap-4'>
+            <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
+              Exporteer reacties
+            </Button>
+          </div>
+        }>
         <div className="container py-6">
 
           <div className="float-right mb-4 flex gap-4">

@@ -107,6 +107,28 @@ service.createUser = async function({ authConfig, userData = {} }) {
 service.updateUser = async function({ authConfig, userData = {} }) {
 
   // TODO: unmap userData
+  const unmapUserData = (userData) => {
+    // make copy
+    let unmapped = JSON.parse(JSON.stringify(userData));
+    if(typeof unmapped?.address !== 'undefined' && unmapped?.address !== null) {
+      // Check if we can split the address into street and number
+      const addressParts = unmapped.address.split(' ');
+      if(addressParts.length > 1) {
+        unmapped.streetName = addressParts.slice(0, -1).join(' ');
+        unmapped.houseNumber = addressParts.slice(-1).join(' ');
+      }else{
+        unmapped.streetName = userData.address;
+      }
+
+      // Check displayName (nickName)
+      if(typeof unmapped?.displayName !== 'undefined' && unmapped?.displayName !== null) {
+        unmapped.nickName = unmapped.displayName;
+      }
+    }
+    return unmapped
+  }
+
+  userData = unmapUserData(userData);
 
   if (!(userData && userData.id)) throw new Error('No user id found')
 
@@ -298,8 +320,8 @@ service.updateClient = async function({ authConfig, project }) {
         canCreateNewUsers: project.config.users?.canCreateNewUsers
       },
       styling: {
-        logo: project.config.styling?.logo,
-        favicon: project.config.styling?.favicon,
+        logo: authConfig?.config?.styling?.logo || project.config.styling?.logo,
+        favicon: authConfig?.config?.styling?.favicon || project.config.styling?.favicon,
         inlineCSS: project.config.styling?.inlineCSS,
         displayClientName: project.config.styling?.displayClientName,
       },

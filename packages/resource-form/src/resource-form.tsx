@@ -42,8 +42,21 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         for (const key in formData) {
             if (formData.hasOwnProperty(key)) {
                 if (key.startsWith('tags[')) {
-                    tags.push(formData[key]);
-                    delete formData[key];
+                    try {
+                        const tagsArray = JSON.parse(formData[key]);
+
+                        if (typeof tagsArray === 'object') {
+                            tagsArray?.map((value) => {
+                                tags.push(value);
+                            });
+                        } else if (typeof tagsArray === 'string' || typeof tagsArray === 'number') {
+                            tags.push(tagsArray);
+                        }
+                    } catch (error) {
+                        console.error(`Error parsing tags for key ${key}:`, error);
+                    } finally {
+                        delete formData[key];
+                    }
                 }
             }
         }
@@ -93,7 +106,15 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         try {
             const result = await createResource(finalFormData, props.widgetId);
             if (result) {
-                notifySuccess();
+                if(props.redirectUrl) {
+                    let redirectUrl = props.redirectUrl.replace("[id]", result.id);
+                    if (!redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')) {
+                        redirectUrl = document.location.origin + '/' + (redirectUrl.startsWith('/') ? redirectUrl.substring(1) : redirectUrl);
+                    }
+                    document.location.href = redirectUrl.replace("[id]", result.id)
+                } else {
+                    notifySuccess();
+                }
             }
         } catch (e) {
             notifyFailed();

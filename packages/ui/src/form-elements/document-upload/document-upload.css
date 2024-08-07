@@ -1,9 +1,8 @@
 .filepond--wrapper .filepond--credits {
  display: none !important;
 }
-
-html .filepond--item {
- height: auto !important;
+.filepond--item{
+    pointer-events: all;
 }
 
 html .filepond--file-status {

@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import useUsers from "@/hooks/use-users";
 import { sortTable, searchTable } from '@/components/ui/sortTable';
+import * as XLSX from 'xlsx';
 
 export default function ProjectResources() {
   const router = useRouter();
@@ -18,20 +19,18 @@ export default function ProjectResources() {
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
 
-  const exportData = (data: BlobPart, fileName: string, type: string) => {
-    // Create a link and download the file
-    const blob = new Blob([data], { type });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
+  const exportData = (data: any[], fileName: string) => {
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
 
+    XLSX.writeFile(workbook, fileName);
+  };
   function transform() {
-    const jsonData = JSON.stringify(data);
-    exportData(jsonData, `votes.json`, "application/json");
+    const today = new Date();
+    const projectId = router.query.project;
+    const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
+    exportData(data, `${projectId}_stemmen_${formattedDate}.xlsx`);
   }
 
   const { data: usersData } = useUsers();

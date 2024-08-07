@@ -646,11 +646,13 @@ module.exports = function (db, sequelize, DataTypes) {
               model: db.Tag,
               attributes: ['id', 'name'],
               through: { attributes: [] },
+              where: {
+                id: {
+                  [db.Sequelize.Op.in]: tags,
+                },
+              },
             },
           ],
-          where: {
-            id: tags,
-          },
         };
       },
 
@@ -659,13 +661,16 @@ module.exports = function (db, sequelize, DataTypes) {
           include: [
             {
               model: db.Status,
+              as: 'statuses',
               attributes: ['id', 'name'],
               through: { attributes: [] },
+              where: {
+                id: {
+                  [db.Sequelize.Op.in]: statuses,
+                },
+              },
             },
           ],
-          where: {
-            id: statuses,
-          },
         };
       },
 

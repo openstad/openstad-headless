@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 
 const formSchema = z.object({
   urls: z.array(z.object({
-    url: z.string().url(),
+    url: z.string()
   })),
 });
 
@@ -41,24 +41,24 @@ export default function ProjectSettingsWidgets() {
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading, updateProject } = useProject();
-  const [urls, setUrls] = useState<Url[]>(() => data?.config?.widgets?.allowedDomains || []);
+  const [urls, setUrls] = useState<Url[]>(() => data?.config?.allowedDomains || []);
 
   const defaults = useCallback(
     () => {
-      setUrls(data?.config?.widgets?.allowedDomains || []);
+      setUrls(data?.config?.allowedDomains || []);
     },
     [data]
   );
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
 
-    const out = values.urls.map((url) => url.url);
+    const out = values.urls.map((url) => {
+      return url.url.replace(/^https?:\/\//i, '');
+    });
 
     try {
       const project = await updateProject({
-        [category]: {
-          allowedDomains: out
-        },
+        allowedDomains: out
       });
       if (project) {
         toast.success('Project aangepast!');
@@ -78,13 +78,13 @@ export default function ProjectSettingsWidgets() {
     reset
   } = useZodForm({
     schema: formSchema,
-    defaultValues: { urls: data?.config?.widgets?.allowedDomains.map((url: any) => ({ url })) || [] },
+    defaultValues: { urls: (data?.config?.allowedDomains ?? []).map((url: any) => ({ url })) || [] },
   });
 
   useEffect(() => {
-    if (data?.config?.widgets?.allowedDomains) {
+    if (data?.config?.allowedDomains) {
       // set form values once the data is available
-      reset({ urls: data.config.widgets.allowedDomains.map((url: any) => ({ url })) });
+      reset({ urls: (data?.config?.allowedDomains ?? []).map((url: any) => ({ url })) });
     }
   }, [data, reset]);
 
@@ -108,7 +108,7 @@ export default function ProjectSettingsWidgets() {
           },
           {
             name: 'Toegestane websites',
-            url: `/projects/${project}/settings/widgets`,
+            url: `/projects/${project}/settings/alloweddomains`,
           },
         ]}
       >
@@ -142,7 +142,7 @@ export default function ProjectSettingsWidgets() {
               ))}
               <Button
                 className="w-fit col-span-full"
-                onClick={() => append({ url: "https://" })}
+                onClick={() => append({ url: "" })}
               >
                 URL toevoegen
               </Button>

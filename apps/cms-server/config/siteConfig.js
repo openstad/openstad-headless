@@ -6,6 +6,7 @@ const resourcesSchema = require('./resources.js').schemaFormat;
 module.exports = {
   get: (shortName, siteData, assetsIdentifier) => {
  
+    
     const siteConfig = {
       shortName: shortName,
       prefix: siteData.sitePrefix ? '/' + siteData.sitePrefix : false,
@@ -31,7 +32,7 @@ module.exports = {
         'default-page': {},
       },
     };
-
+    
     return siteConfig;
   }
 };

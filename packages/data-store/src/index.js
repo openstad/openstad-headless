@@ -5,6 +5,7 @@ import API from './api';
 import useResource from './hooks/use-resource.js';
 import useChoicesguide from './hooks/use-choicesguide';
 import useArea from './hooks/use-area.js';
+import useAreas from './hooks/use-areas.js';
 import useComments from './hooks/use-comments.js';
 import useResources from './hooks/use-resources.js';
 import useTags from './hooks/use-tags.js';
@@ -13,6 +14,7 @@ import useUserVote from './hooks/use-user-vote.js';
 import useSubmissions from './hooks/use-submissions.js';
 import useCommentsByProject from './hooks/use-comments-by-project';
 import useChoiceGuideResults from './hooks/use-choiceguide-results';
+import useUserActivity from './hooks/use-user-activity';
 
 const windowGlobal = typeof window !== 'undefined' ? window : {};
 
@@ -29,12 +31,14 @@ function DataStore(props = {}) {
   self.useComments = useComments.bind(self);
   self.useResources = useResources.bind(self);
   self.useArea = useArea.bind(self);
+  self.useAreas = useAreas.bind(self);
   self.useTags = useTags.bind(self);
   self.useCurrentUser = useCurrentUser.bind(self);
   self.useUserVote = useUserVote.bind(self);
   self.useSubmissions = useSubmissions.bind(self);
   self.useCommentsByProject = useCommentsByProject.bind(self);
   self.useChoiceGuideResults = useChoiceGuideResults.bind(self);
+  self.useUserActivity = useUserActivity.bind(self);
 
   // current user
   const {
@@ -52,15 +56,31 @@ function DataStore(props = {}) {
     return { type, ...props };
   };
 
-  self.useSWR = function (props, fetcherAsString) {
-    let fetcher = eval(`self.api.${fetcherAsString}`);
+  self.useSWR = function (props, fetcherAsString, options = {}) {
+    const fetcherPath = fetcherAsString.split('.');
+    let fetcher = self.api;
+    
+    // fetcherAsString can be a path to a fetcher function, e.g. 'resources.fetch'
+    // if so, we need to traverse the api object to find the fetcher function
+    if (fetcherPath.length > 1) {
+      for (let i = 0; i < fetcherPath.length; i++) {
+        if (!fetcher[fetcherPath[i]]) {
+          throw new Error(`uswSWF: fetcher ${fetcherAsString} not found`);
+        }
+        fetcher = fetcher[fetcherPath[i]];
+      }
+    // otherwise, fetcherAsString is the name of the fetcher function and we use that directly
+    } else {
+      fetcher = self.api[fetcherAsString];
+    }
+    
     let key = self.createKey(props, fetcherAsString);
 
     windowGlobal.OpenStadSWR[JSON.stringify(key, null, 2)] = true;
 
-    return useSWR(key, fetcher, {
-      keepPreviousData: true,
-    });
+    return useSWR(key, () =>
+      fetcher(props, { ...options, keepPreviousData: true })
+    );
   };
 
   const { mutate } = useSWRConfig();

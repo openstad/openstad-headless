@@ -19,15 +19,13 @@ import useResources from '@/hooks/use-resources';
 import InfoDialog from "@/components/ui/info-hover";
 import { useEffect, useState } from "react";
 import * as React from "react";
+import * as Switch from '@radix-ui/react-switch';
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
-  documentWidth: z.number().optional(),
-  documentHeight: z.number().optional(),
   zoom: z.number().optional(),
   minZoom: z.number().optional(),
   maxZoom: z.number().optional(),
-  url: z.string().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -37,6 +35,8 @@ export default function DocumentGeneral(
 ) {
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
   const [disabled, setDisabled] = useState(false);
+  const [accessibilityUrlVisible, setAccessibilityUrlVisible] = useState(props.accessibilityUrlVisible || false);
+  const [definitiveUrlVisible, setDefinitiveUrlVisible] = useState(props.definitiveUrlVisible || false);
 
   function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
@@ -49,12 +49,10 @@ export default function DocumentGeneral(
   const form = useForm<DocumentMapProps>({
     defaultValues: {
       resourceId: props.resourceId || undefined,
-      documentWidth: props.documentWidth || 1920,
-      documentHeight: props.documentHeight || 1080,
+
       zoom: props.zoom || 1,
       minZoom: props.minZoom || -6,
       maxZoom: props.maxZoom || 10,
-      url: props.url || '',
     },
   });
 
@@ -134,48 +132,6 @@ export default function DocumentGeneral(
           />
         ) : null}
 
-
-        <FormField
-          control={form.control}
-          name="documentWidth"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Breedte van het document</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="1080"
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
-                  }}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="documentHeight"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Hoogte van het document</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="1920"
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
-                  }}
-                />
-              </FormControl>
-            </FormItem>
-
-          )}
-        />
-
         <FormField
           control={form.control}
           name="zoom"
@@ -254,26 +210,6 @@ export default function DocumentGeneral(
               <FormMessage />
             </FormItem>
 
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Pagina met begleidende tekst</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="/path/to/page"
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
-                  }}
-                />
-              </FormControl>
-            </FormItem>
           )}
         />
 

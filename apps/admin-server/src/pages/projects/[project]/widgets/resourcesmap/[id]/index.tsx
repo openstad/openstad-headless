@@ -8,6 +8,7 @@ import {
 } from '../../../../../../components/ui/tabs';
 import WidgetResourcesMapMap from './map';
 import WidgetResourcesMapButtons from './buttons';
+import WidgetResourcesMapPolygons from './polygons';
 import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
@@ -18,16 +19,22 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 
 export const getServerSideProps = withApiUrl;
 
-export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
+export type ResourceOverviewMapWidgetTabProps = Omit<
+  ResourceOverviewMapWidgetProps,
+  keyof Omit<BaseProps, 'projectId'>
+>;
 
+export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig<ResourceOverviewMapWidgetProps>();
+  const { data: widget, updateConfig } =
+    useWidgetConfig<ResourceOverviewMapWidgetProps>();
   const { previewConfig, updatePreview } =
     useWidgetPreview<ResourceOverviewMapWidgetProps>({
       projectId,
@@ -41,10 +48,13 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
 
     onFieldChanged: (key: string, value: any) => {
       if (previewConfig) {
-        updatePreview({
+        let updatedConfig = {
           ...previewConfig,
           [key]: value,
-        });
+        }
+        if (key == 'categorize.categorizeByField') updatedConfig.categorize = { categorizeByField: value };
+        if (key == 'clustering.isActive') updatedConfig.clustering = { isActive: value };
+        updatePreview(updatedConfig);
       }
     },
     projectId,
@@ -73,19 +83,29 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="map">Kaart</TabsTrigger>
               <TabsTrigger value="button">Knoppen</TabsTrigger>
+              <TabsTrigger value="polygons">Polygonen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             {previewConfig ? (
               <>
-            <TabsContent value="map" className="p-0">
-              <WidgetResourcesMapMap {...totalPropPackage}/>
-            </TabsContent>
-            <TabsContent value="button" className="p-0">
-              <WidgetResourcesMapButtons {...totalPropPackage}/>
-            </TabsContent>
-            <TabsContent value="publish" className="p-0">
-              <WidgetPublish apiUrl={apiUrl} />
-            </TabsContent>
+                <TabsContent value="map" className="p-0">
+                  <WidgetResourcesMapMap
+                    {...totalPropPackage}
+                  />
+                </TabsContent>
+                <TabsContent value="button" className="p-0">
+                  <WidgetResourcesMapButtons
+                    {...totalPropPackage}
+                  />
+                </TabsContent>
+                <TabsContent value="polygons" className="p-0">
+                  <WidgetResourcesMapPolygons
+                    {...totalPropPackage}
+                  />
+                </TabsContent>
+                <TabsContent value="publish" className="p-0">
+                  <WidgetPublish apiUrl={apiUrl} />
+                </TabsContent>
               </>
             ) : null}
           </Tabs>

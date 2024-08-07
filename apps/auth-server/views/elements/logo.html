@@ -4,9 +4,9 @@
   {% include 'elements/amsterdam-logo.html' %}
 {% else %}
   {% if logo %}
-    <img id="logo-image" src="{{logo}}"  alt="Link naar hoofdpagina, afbeelding logo"/>
+    <img id="logo-image" src="{{logo}}"  alt="Link naar hoofdpagina, afbeelding logo test" style="max-width: 130px"/>
   {% else %}
-    <img class="default-logo" src="/img/logo-openstad.png" alt="Link naar hoofdpagina, afbeelding logo"/>
+    <img class="default-logo" src="/img/logo-openstad.png" alt="Link naar hoofdpagina, afbeelding logo test" style="max-width: 130px"/>
   {% endif %}
 {% if displayClientName %}
 <span class=" {{'subsitetitle' if logo === 'amsterdam-logo.html' else 'subsitetitle subsitetitle-default' }}">

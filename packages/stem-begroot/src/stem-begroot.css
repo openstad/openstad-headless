@@ -83,15 +83,17 @@
 }
 
 .budget-two-text-row-spaced {
-  display: grid;
-  grid-template-columns: auto auto;
-  justify-content: space-between;
-  align-items: center;
   padding: 10px 0;
 }
 
 .budget-two-text-row-spaced + .budget-two-text-row-spaced {
   border-top: solid 1px rgba(0, 0, 0, 0.15);
+}
+
+.budget-resource-container{
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
 }
 
 .budget-overview-panel {
@@ -127,6 +129,11 @@
 .osc-stem-begroot-paginator {
   display: flex;
   justify-content: center;
+}
+
+article.stem-begroot--container .carousel-button-container {
+  z-index: 10;
+  margin-top: -38px;
 }
 
 article.stem-begroot--container {

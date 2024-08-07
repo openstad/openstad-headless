@@ -1,0 +1,210 @@
+.begroot-step-panel {
+  padding: 1.5rem;
+  background-color: var(
+    --nlds-budget-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
+}
+
+.begroot-step-panel + * {
+  margin-top: var(--nlds-budget-spacing, 4rem);
+}
+
+#stem-begroot-resource-selections-list h3 {
+  margin-bottom: var(
+    --nlds-budget-resources-filter-heading-margin-bottom,
+    1rem
+  );
+  font-size: var(
+    --nlds-budget-resources-filter-heading-font-size,
+    var(--utrecht-heading-3-font-size, revert)
+  );
+  font-weight: var(
+    --utrecht-heading-3-font-weight,
+    var(--utrecht-heading-font-weight, bold)
+  );
+  color: var(
+    --nlds-budget-resources-filter-heading-color,
+    var(
+      --utrecht-heading-3-color,
+      var(--utrecht-heading-color, var(--utrecht-document-color, inherit))
+    )
+  );
+}
+
+.stembegroot-content-item-header {
+  background: var(
+    --nlds-tags-background-color,
+    var(--nlds-default-background-color)
+  );
+  padding: 10px;
+  border-radius: var(
+    --nlds-price-border-radius,
+    var(--utrecht-button-border-radius)
+  );
+}
+
+.stembegroot-content-item-header-taglist {
+}
+
+.stembegroot-content-item-header-taglist p {
+  margin: 0;
+}
+
+.stembegroot-content-item-header .pill-grid {
+  grid-gap: 0;
+}
+
+.stembegroot-content-item-header .pill-grid span:has(+ span):after {
+  content: ', ';
+}
+
+.osc-stem-begroot-content-item-footer {
+  display: flex;
+  gap: 1rem;
+  align-self: end;
+}
+
+.osc-stem-begroot-content-item-footer .osc-stem-begroot-item-action-btn {
+  flex-grow: 1;
+  width: 100%;
+  max-width: none;
+}
+
+.begroot-step-panel-navigation-section {
+  display: flex;
+  gap: 1rem;
+  justify-content: end;
+}
+
+.begroot-step-2-instruction-budget-status-panel {
+  display: grid;
+  grid-template-columns: var(--nlds--budget-budget-columns, 1fr auto);
+}
+
+.budget-two-text-row-spaced {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.budget-two-text-row-spaced + .budget-two-text-row-spaced {
+  border-top: solid 1px rgba(0, 0, 0, 0.15);
+}
+
+.budget-overview-panel {
+  /* background-color: var(--nlds-budget-overview-panel-background-color, #DBDFE5);
+  padding: var(--nlds-budget-overview-panel-padding, 1rem); */
+}
+
+.budget-two-text-row-spaced > * {
+  margin: 0;
+}
+
+.budget-overview-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.budget-unused-panel-step-2 {
+  background-color: var(
+    --nlds-budget-overview-panel-total-background-color,
+    #768391
+  );
+  padding: var(--nlds-budget-overview-panel-total-padding, 1rem);
+}
+
+.stem-begroot-filter {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--nlds-default-background-color, #f0f4f8);
+}
+
+.osc-stem-begroot-paginator {
+  display: flex;
+  justify-content: center;
+}
+
+article.stem-begroot--container {
+  position: relative;
+  display: grid;
+  grid-gap: 0.5rem;
+}
+article.stem-begroot--container .price {
+  background-color: var(
+    --nlds-price-background-color,
+    var(--nlds-tags-background-color, var(--nlds-default-background-color))
+  );
+  color: var(--nlds-price-color, var(--utrecht-button-primary-action-color));
+  padding: 7px 10px;
+  border-radius: var(
+    --nlds-price-border-radius,
+    var(--utrecht-button-border-radius)
+  );
+}
+
+#stem-begroot-resource-selections-list article.stem-begroot--container .price h3 {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+article.stem-begroot--container .stembegroot--infolabels {
+  display: flex;
+  grid-gap: 0.5rem;
+  align-items: center;
+}
+
+.stem-begroot--container .osc-stem-begroot-content-item-footer {
+  align-self: center;
+}
+
+@media only screen and (max-width: 768px) {
+  .stem-begroot-budget-list,
+  .begroot-step-2-instruction-budget-status-panel {
+    --nlds--budget-budget-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .osc-resources-filter {
+    flex-wrap: wrap;
+  }
+
+  .stepper {
+    flex-wrap: wrap;
+    grid-gap: 5px;
+  }
+
+  .osc-resources-filter > .utrecht-form-field {
+    width: 100%;
+  }
+
+  .osc-listview.osc-listview-template-columns-3 {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-gap: 10px;
+  }
+
+  .osc-stem-begroot-content-item-footer {
+    flex-wrap: wrap;
+  }
+
+  .budget-used-list > *:not(:last-child) {
+    display: none;
+  }
+
+  .budget-used-list > *:last-child p:before{
+    content:'Over: '
+  }
+}
+
+.stem-begroot--container .utrecht-paragraph + .utrecht-paragraph {
+  margin-top: .75rem;
+  opacity: .75;
+}
+
+.stem-begroot--container .utrecht-paragraph {
+  margin-top: .75rem;
+}

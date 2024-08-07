@@ -10,36 +10,48 @@
     </mj-image>
   </mj-column>
 </mj-section>
-<mj-raw>
-  <!-- Image Header -->
-</mj-raw>
-<mj-section>
-  <mj-column width="600px">
-    <mj-image src="{{imagePath}}/mail-header.jpg"></mj-image>
-  </mj-column>
-
-</mj-section>
-<mj-raw>
   <!-- Mail context -->
 </mj-raw>
 <mj-section>
   <mj-column width="400px">
-    <mj-text font-size="20px" font-family="Helvetica Neue">Inlogmail aangevraagd</mj-text>
-    <mj-text>Beste {{name or 'bezoeker'}},</mj-text>
-    <mj-text>{{path}}</mj-text>
-    <mj-text color="#525252">Voor {{clientName}} is een inloglink aangevraagd voor dit emailadres. Klik op de knop hieronder om automatisch in te loggen. De knop is 10 minuten geldig. </mj-text>
+    <mj-image src="{{imagePath}}/mail-header.jpg"></mj-image>
+  </mj-column>
+  <mj-column width="400px">
+    <mj-text font-size="20px" color="#111" font-family="helvetica"
+    >Inloggen vereist</mj-text
+  >
+    <mj-text           
+      font-size="14px"
+      line-height="22px"
+      color="#444"
+      font-family="helvetica">
+      Beste {{name or 'bezoeker'}},
+      </br>
+      Voor {{clientName}} is een inloglink aangevraagd voor dit emailadres. Klik op de knop hieronder om automatisch in te loggen. De knop is 10 minuten geldig. 
+    </mj-text>
     <mj-button background-color="#12B886" href="{{loginurl}}">Log in</mj-button>
+  </mj-column>
+  <mj-column width="400px">
+    <mj-text
+          font-size="14px"
+          line-height="22px"
+          color="#444"
+          font-family="helvetica"
+          >Of gebruik deze link in je browser:</mj-text>
+  </mj-column>
+  <mj-column  width="400px">
+    <mj-text
+          font-size="14px"
+          line-height="22px"
+          color="#444"
+          font-family="helvetica"
+          >{{loginurl}}</mj-text>
   </mj-column>
 </mj-section>
 <mj-raw>
   <!-- Alternate link -->
 </mj-raw>
 <mj-section>
-  <mj-column width="400px">
-    <mj-text>Of gebruik deze link in je browser:</mj-text>
-  </mj-column>
-  <mj-column>
-    <mj-text>{{loginurl}}</mj-text>
-  </mj-column>
+
 </mj-section>
 {% endblock %}

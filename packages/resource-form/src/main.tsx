@@ -22,7 +22,6 @@ const config: ResourceFormWidgetProps = {
     description:
         'Op de laatste digitale denktank waren 11 bewoners. We hebben hun mening gevraagd over ontwerpkeuzes voor de renovatie. Maar we vinden het belangrijk meer bewoners te horen over hun voorkeuren. Omdat we soms nog twijfels hoorden. Daarom deze extra vragenlijst voor jou. Laat je ons weten wat jouw voorkeuren zijn? Dan kunnen wij betere keuzes maken. Natuurlijk laten we je weten wat de uitkomst is van de vragenlijst en welke definitieve keuzes we gaan maken.',
     items: defaultFormValues,
-    afterSubmitUrl: "http://localhost:5173/enquetes/[id]",
 
     resourceType: 'resource',
     formName: 'testformname',

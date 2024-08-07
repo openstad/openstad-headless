@@ -51,6 +51,17 @@ export type StemBegrootWidgetProps = BaseProps &
     itemsPerPage?: number;
     onlyIncludeTagIds: string;
     resourceListColumns?: number;
+    showInfoMenu?: boolean;
+    isSimpleView?: boolean;
+    step1Title: string;
+    resourceCardTitle: string;
+    step2Title: string;
+    stemCodeTitle: string;
+    stemCodeTitleSuccess: string;
+    newsLetterTitle: string;
+    panelTitle?: string;
+    budgetChosenTitle?: string;
+    budgetRemainingTitle?: string;
   };
 
 function StemBegroot({
@@ -67,6 +78,7 @@ function StemBegroot({
   const [openDetailDialog, setOpenDetailDialog] = React.useState(false);
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [lastStep, setLastStep] = useState<number>(0);
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
   const [navAfterLogin, setNavAfterLogin] = useState<boolean>();
   const [shouldReloadSelectedResources, setReloadSelectedResources] =
@@ -124,6 +136,18 @@ function StemBegroot({
   const isAllowedToVote =
     props.votes.requiredUserRole &&
     hasRole(currentUser, props.votes.requiredUserRole);
+
+  useEffect(() => {
+    if (props.isSimpleView && currentStep === 1 && lastStep > currentStep) {
+      setCurrentStep(0); // Skip step 2
+    } else if (props.isSimpleView && currentStep === 1 && lastStep < currentStep) {
+      setCurrentStep(2); // Skip step 2
+    }
+
+    if (currentStep !== lastStep) {
+      setLastStep(currentStep);
+    }
+  }, [props.isSimpleView, currentStep]);
 
   // Check the pending state and if there are any resources, hint to  update the selected items
   useEffect(() => {
@@ -255,6 +279,7 @@ function StemBegroot({
         defineOriginalUrl={getOriginalResourceUrl}
         openDetailDialog={openDetailDialog}
         setOpenDetailDialog={setOpenDetailDialog}
+        isSimpleView={Boolean(props.isSimpleView)}
         onPrimaryButtonClick={(resource) => {
           session.remove('osc-resource-vote-pending');
 
@@ -277,9 +302,8 @@ function StemBegroot({
         <Stepper
           currentStep={currentStep}
           steps={['Kies', 'Overzicht', 'Stemcode', 'Stem']}
+          isSimpleView={props.isSimpleView}
         />
-
-
         <Spacer size={1} />
 
         {props.votes.voteType === 'budgeting' ?
@@ -293,7 +317,13 @@ function StemBegroot({
           {currentStep === 0 ? (
             <>
               <StemBegrootBudgetList
+                panelTitle={props.panelTitle}
+                budgetChosenTitle={props.budgetChosenTitle}
+                budgetRemainingTitle={props.budgetRemainingTitle}
+                step1Title={props.step1Title}
+                resourceCardTitle={props.resourceCardTitle}
                 introText={props.step1}
+                showInfoMenu={props.showInfoMenu}
                 maxBudget={props.votes.maxBudget}
                 allResourceInList={resources?.records}
                 selectedResources={selectedResources}
@@ -333,24 +363,30 @@ function StemBegroot({
             <>
               <Spacer size={1.5} />
               <BegrotenSelectedOverview
+                panelTitle={props.panelTitle}
+                budgetChosenTitle={props.budgetChosenTitle}
+                budgetRemainingTitle={props.budgetRemainingTitle}
+                step2Title={props.step2Title}
                 introText={props.step2}
                 budgetUsed={budgetUsed}
                 selectedResources={selectedResources}
                 maxBudget={props.votes.maxBudget}
                 maxNrOfResources={props.votes.maxResources || 0}
                 typeIsBudgeting={props.votes.voteType === 'budgeting'}
+                showInfoMenu={props.showInfoMenu}
               />
             </>
           ) : null}
 
           {currentStep === 2 ? (
-            <Step3 loginUrl={`${props?.login?.url}`} step3={props.step3} />
+            <Step3 loginUrl={`${props?.login?.url}`} step3={props.step3} stemCodeTitle={props.stemCodeTitle} />
           ) : null}
 
           {currentStep === 3 ? (
             <Step3Success
               loginUrl={`${props?.login?.url}`}
               step3success={props.step3success}
+              stemCodeTitleSuccess={props.stemCodeTitleSuccess}
             />
           ) : null}
 
@@ -362,6 +398,7 @@ function StemBegroot({
               thankMessage={props.thankMessage}
               voteMessage={props.voteMessage}
               showNewsletterButton={props.showNewsletterButton}
+              newsLetterTitle={props.newsLetterTitle}
             />
           ) : null}
 

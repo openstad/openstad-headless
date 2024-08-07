@@ -217,7 +217,7 @@ function getDefaultConfig(project, widgetType) {
     imageUrl: protocol + url,
   };
 
-  if (widgetType == 'resourcedetailmap' || widgetType ==  'resourcesmap' || widgetType ==  'editormap') {
+  if (widgetType == 'resourcedetailmap' || widgetType ==  'resourcesmap' || widgetType ==  'editormap' || widgetType ==  'resourceform') {
     result.area = project.area?.polygon
   }
 
@@ -234,6 +234,12 @@ function setConfigsToOutput(
   widgetConfig,
   widgetId
 ) {
+  
+  // Move general settings to the root to ensure we have the correct config
+  if (widgetConfig.hasOwnProperty('general')) {
+    widgetConfig = {...widgetConfig, ...widgetConfig.general};
+  }
+  
   let config = merge.recursive(
     {},
     widgetSettings.Config,
@@ -336,7 +342,7 @@ function getWidgetJavascriptOutput(
         const renderedWidgets = {};
         
         const currentScript = document.currentScript;
-          currentScript.insertAdjacentHTML('afterend', \`<div id="\${randomComponentId}" style="width: 100%; height: 100%;"></div>\`);
+          currentScript.insertAdjacentHTML('afterend', \`<div id="\${randomComponentId}"></div>\`);
 
           const redirectUri = encodeURI(window.location.href);
           
@@ -344,6 +350,7 @@ function getWidgetJavascriptOutput(
           
           document.querySelector('head').innerHTML += \`
             <style>${css}</style>
+            <style>#\${randomComponentId} { width: 100%; height: 100%; }</style>
             <link href="${remixIconCss}" rel="stylesheet">
             ${extraCss}
           \`;

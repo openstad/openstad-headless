@@ -177,6 +177,24 @@ module.exports = function (db, sequelize, DataTypes) {
           canComment: true,
           editableByUser: true,
         });
+
+        await db.Status.create({
+          projectId: instance.id,
+          name: 'closed',
+          seqnr: 20,
+          addToNewResources: false,
+          canComment: true,
+          editableByUser: true,
+        });
+
+        await db.Status.create({
+          projectId: instance.id,
+          name: 'accepted',
+          seqnr: 30,
+          addToNewResources: false,
+          canComment: true,
+          editableByUser: true,
+        });
       },
 
     },

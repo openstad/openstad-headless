@@ -1,11 +1,15 @@
-export default function useResources({
-  projectId,
-  page = 0,
-  pageSize = 20,
-  search = '',
-  tags = [],
-  sort = 'random',
-}) {
+export default function useResources(
+  {
+    projectId,
+    page = 0,
+    pageSize = 20,
+    search = '',
+    tags = [],
+    sort = 'random',
+    statuses = []
+  },
+  options
+) {
   let self = this;
 
   if (!projectId) {
@@ -24,8 +28,9 @@ export default function useResources({
 
   // If you add a prop here, the also do it for filter
   const { data, error, isLoading } = self.useSWR(
-    { projectId, page, pageSize, search, tags, sort },
-    'resources.fetch'
+    { projectId, page, pageSize, search, tags, sort, statuses },
+    'resources.fetch',
+    options
   );
 
   // add functionality
@@ -46,12 +51,12 @@ export default function useResources({
 
   const create = function (submittedData, widgetId) {
     return self.mutate(
-        { projectId },
-        'resources.create',
-        { submittedData, widgetId },
-        {
-          action: 'create',
-        }
+      { projectId },
+      'resources.create',
+      { submittedData, widgetId },
+      {
+        action: 'create',
+      }
     );
   };
 
@@ -61,23 +66,26 @@ export default function useResources({
     });
   };
 
-  resources.records.create = function (newData) {
-    return self.mutate({ projectId }, 'resources.create', newData, {
-      action: 'create',
-    });
-  };
+  if (resources.records) {
+    resources.records.create = function (newData) {
+      return self.mutate({ projectId }, 'resources.create', newData, {
+        action: 'create',
+      });
+    };
 
-  resources.records.forEach(async (resource) => {
-    resource.update = function (newData) {
-      return self.mutate({ projectId }, 'resources.update', newData, {
-        action: 'update',
-      });
-    };
-    resource.delete = function () {
-      return self.mutate({ projectId }, 'resources.delete', resource, {
-        action: 'delete',
-      });
-    };
-  });
-  return {data :resources, error, isLoading, submitVotes, create};
+    resources.records.forEach(async (resource) => {
+      resource.update = function (newData) {
+        return self.mutate({ projectId }, 'resources.update', newData, {
+          action: 'update',
+        });
+      };
+      resource.delete = function () {
+        return self.mutate({ projectId }, 'resources.delete', resource, {
+          action: 'delete',
+        });
+      };
+    });
+  }
+
+  return { data: resources, error, isLoading, submitVotes, create };
 }

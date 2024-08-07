@@ -6,13 +6,15 @@ import { useUsers, type userType } from '@/hooks/use-users';
 import { Plus, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { sortTable, searchTable } from '@/components/ui/sortTable';
+import { useRouter } from 'next/router';
+import * as XLSX from 'xlsx';
 
 type mergedType = {
   [key: string]: userType & { key?: string };
 }
 
 export default function Users() {
-
+  const router = useRouter();
   const { data } = useUsers();
   const [ users, setUsers ] = useState<userType[]>([]);
 
@@ -37,20 +39,19 @@ export default function Users() {
 
   if (!data) return null;
 
-  const exportData = (data: BlobPart, fileName: string, type: string) => {
-    // Create a link and download the file
-    const blob = new Blob([data], { type });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    window.URL.revokeObjectURL(url);
+  const exportData = (data: any[], fileName: string) => {
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    XLSX.writeFile(workbook, fileName);
   };
 
   function transform() {
-    const jsonData = JSON.stringify(data);
-    exportData(jsonData, `users.json`, "application/json");
+    const today = new Date();
+    const projectId = router.query.project;
+    const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
+    exportData(data, `${projectId}_gebruikers_${formattedDate}.xlsx`);
   }
 
   return (
@@ -64,7 +65,7 @@ export default function Users() {
           },
         ]}
         action={
-          <div className='flex flex-row w-full md:w-auto my-auto'>
+          <div className='flex flex-row w-full md:w-auto my-auto gap-4'>
             <Link href="/users/create">
               <Button variant="default" className="flex w-fit">
                 <Plus size="20" className="hidden lg:flex" />

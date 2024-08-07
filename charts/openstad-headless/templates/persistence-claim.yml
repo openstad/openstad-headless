@@ -42,7 +42,7 @@ spec:
   storageClassName: {{ .Values.persistence.storageClassName }}
 {{- end }}
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: {{ .Values.cms.volumes.data.size }}

@@ -11,7 +11,7 @@ import { Heading } from '@/components/ui/typography';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
+import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail-with-map/src/resourceDetailWithMap';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 

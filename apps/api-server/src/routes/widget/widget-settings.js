@@ -176,6 +176,17 @@ let moduleDefinitions = {
       projectId: null
     }
   },
+  simplevoting: {
+    packageName: '@openstad-headless/simple-voting',
+    directory: 'simple-voting',
+    js: ['dist/simple-voting.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessSimpleVoting',
+    componentName: 'SimpleVoting',
+    defaultConfig: {
+      projectId: null
+    }
+  },
   resourcewithmap: {
     packageName: '@openstad-headless/resource-overview-with-map',
     directory: 'resource-overview-with-map',
@@ -205,6 +216,25 @@ let moduleDefinitions = {
     css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessDocumentMap',
     componentName: 'DocumentMap',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
+  activity: {
+    packageName: '@openstad-headless/activity',
+    directory: 'activity',
+    js: ['dist/activity.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessActivity',
+    componentName: 'Activity',
+  },
+  account: {
+    packageName: '@openstad-headless/account',
+    directory: 'account',
+    js: ['dist/account.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessAccount',
+    componentName: 'Account',
     defaultConfig: {
       projectId: null,
     },

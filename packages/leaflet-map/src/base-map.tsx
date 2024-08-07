@@ -5,24 +5,21 @@ import type { PropsWithChildren } from 'react';
 import { loadWidget } from '../../lib/load-widget';
 import { LatLng, latLngBounds } from 'leaflet';
 import type { LeafletMouseEvent } from 'leaflet';
-import { MapContainer, useMapEvents } from 'react-leaflet';
+import { MapContainer } from 'react-leaflet/MapContainer';
+import { useMapEvents } from 'react-leaflet/hooks';
 import { MapConsumer, useMapRef } from './map-consumer';
 import TileLayer from './tile-layer';
 import { Area, isPointInArea } from './area';
 import Marker from './marker';
 import MarkerClusterGroup from './marker-cluster-group';
 import parseLocation from './lib/parse-location';
-import type {BaseMapWidgetProps} from './types/basemap-widget-props'
+import type { BaseMapWidgetProps } from './types/basemap-widget-props'
 // ToDo: import { searchAddressByLatLng, suggestAddresses, LookupLatLngByAddressId } from './lib/search.js';
-
 import 'leaflet/dist/leaflet.css';
 import './css/base-map.css';
-
 import type { MarkerProps } from './types/marker-props';
 import type { LocationType } from './types/location';
 import React from 'react';
-
-
 
 const BaseMap = ({
   iconCreateFunction = undefined,
@@ -60,7 +57,7 @@ const BaseMap = ({
 
   width = '100%',
   height = undefined,
-
+  customPolygon = [],
   ...props
 }: PropsWithChildren<BaseMapWidgetProps & { onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void }>) => {
 
@@ -75,7 +72,7 @@ const BaseMap = ({
   clustering = {
     isActive: false
   };
-  
+
   let [currentMarkers, setCurrentMarkers] = useState(markers);
   let [mapId] = useState(`${parseInt((Math.random() * 1e8) as any as string)}`);
   let [mapRef] = useMapRef(mapId);
@@ -139,7 +136,7 @@ const BaseMap = ({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [center, setBoundsAndCenter, mapRef]);
+  }, [mapRef, markers]);
 
   // markers
   useEffect(() => {
@@ -238,7 +235,7 @@ const BaseMap = ({
           <TileLayer {...tileLayerProps} />
 
           {area && area.length ? (
-            <Area area={area} areaPolygonStyle={areaPolygonStyle} />
+            <Area area={area} areas={customPolygon} areaPolygonStyle={areaPolygonStyle} />
           ) : null}
 
           {!!currentMarkers && currentMarkers.length > 0 && currentMarkers.map((data) => {
@@ -246,32 +243,31 @@ const BaseMap = ({
               clusterMarkers.push(data);
             } else if (data.lat && data.lng) {
               return (
-                  <Marker
-                      {...props}
-                      {...data}
-                      key={`marker-${data.markerId || data.lat + data.lng}`}
-                  />
+                <Marker
+                  {...props}
+                  {...data}
+                  key={`marker-${data.markerId || data.lat + data.lng}`}
+                />
               );
             }
           })}
 
           {clusterMarkers.length > 0 && (
-              <MarkerClusterGroup
-                  {...props}
-                  {...clustering}
-                  categorize={categorize}
-                  markers={clusterMarkers}
-              />
+            <MarkerClusterGroup
+              {...props}
+              {...clustering}
+              categorize={categorize}
+              markers={clusterMarkers}
+            />
           )}
 
           <MapEventsListener
             area={area}
             onClick={(e, map) =>
-              onClick && onClick({ ...e, isInArea: e.isInArea}, map)
+              onClick && onClick({ ...e, isInArea: e.isInArea }, map)
             }
           />
 
-          {props.children}
         </MapContainer>
       </div>
     </>

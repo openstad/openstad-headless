@@ -31,6 +31,7 @@ const formSchema = z.object({
   resourceListColumns: z.coerce.number({
     invalid_type_error: 'Alleen volledige nummers kunnen worden ingevoerd',
   }),
+  showInfoMenu: z.boolean(),
 });
 
 type Formdata = z.infer<typeof formSchema>;
@@ -54,6 +55,7 @@ export default function BegrootmoduleDisplay(
       showOriginalResource: props.showOriginalResource || false,
       originalResourceUrl: props.originalResourceUrl || '',
       resourceListColumns: props.resourceListColumns || 3,
+      showInfoMenu: props.showInfoMenu || false,
     },
   });
 
@@ -93,6 +95,17 @@ export default function BegrootmoduleDisplay(
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Weergeef de hoeveelheid stemmen</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="showInfoMenu"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Toon informatie teksten</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -161,6 +174,11 @@ export default function BegrootmoduleDisplay(
             }}
             items={[{ value: 1 }, { value: 2 }, { value: 3 }]}
           />
+
+
+
+
+
 
           <Button type="submit" className="w-fit col-span-full">
             Opslaan

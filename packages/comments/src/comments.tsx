@@ -35,6 +35,7 @@ export type CommentsWidgetProps = BaseProps &
     descriptionMinLength?: number,
     descriptionMaxLength?: number,
     selectedComment?: Number | undefined;
+    customTitle?: string;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -45,7 +46,7 @@ function Comments({
   title = '[[nr]] reacties',
   sentiment = 'no sentiment',
   emptyListText = 'Nog geen reacties',
-  placeholder = 'type hier uw reactie',
+  placeholder = 'Typ hier uw reactie',
   formIntro = '',
   selectedComment,
   ...props
@@ -167,7 +168,7 @@ function Comments({
         ) : null}
 
         {/* {(args.canComment && hasRole(currentUser, args.requiredUserRole)) && type === 'resource' || hasRole(currentUser, 'moderator') && type === 'resource' ? ( */}
-        {args.canComment && args.showForm ? (
+        {args.canComment && args.showForm && hasRole(currentUser, args.requiredUserRole) ? (
           <div className="input-container">
             <CommentForm {...args} submitComment={submitComment} />
             <Spacer size={1} />

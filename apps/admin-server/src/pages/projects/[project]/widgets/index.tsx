@@ -1,16 +1,16 @@
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
-import { CreateWidgetDialog } from '@/components/dialog-widget-create';
 import { PageLayout } from '@/components/ui/page-layout';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { Widget, useWidgetsHook } from '@/hooks/use-widgets';
 import { WidgetDefinitions } from '@/lib/widget-definitions';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { sortTable, searchTable } from '@/components/ui/sortTable';
+import { Button } from '@/components/ui/button';
 
 export default function ProjectWidgets() {
   const router = useRouter();
@@ -45,7 +45,14 @@ export default function ProjectWidgets() {
             url: `/projects/${project}/widgets`,
           },
         ]}
-        action={<CreateWidgetDialog projectId={project as string} />}>
+        action={
+          <Link href={`/projects/${project}/widgets/create`}>
+            <Button variant="default" className="flex w-fit">
+              <Plus size="20" className="hidden lg:flex" />
+              Widget toevoegen
+            </Button>
+          </Link>
+        }>
         <div className="container py-6">
 
 
@@ -104,7 +111,7 @@ export default function ProjectWidgets() {
                     <Paragraph className="my-auto -mr-16 lg:mr-0">{widget.id}</Paragraph>
                     <div className="">
                       <strong className="">
-                        {WidgetDefinitions[widget.type]}
+                        {WidgetDefinitions[widget.type].name}
                       </strong>
                       <Paragraph className="my-auto -mr-16 lg:mr-0">{widget.description}</Paragraph>
                     </div>
