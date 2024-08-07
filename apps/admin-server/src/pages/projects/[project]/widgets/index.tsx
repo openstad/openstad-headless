@@ -103,7 +103,8 @@ export default function ProjectWidgets() {
               <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
             </div>
             <ul>
-              {(data as Widget[])?.map((widget) => (
+              {(data as Widget[])?.map((widget) => {
+                return (
                 <Link
                   key={widget.id}
                   href={`/projects/${project}/widgets/${widget.type}/${widget.id}`}>
@@ -111,7 +112,7 @@ export default function ProjectWidgets() {
                     <Paragraph className="my-auto -mr-16 lg:mr-0">{widget.id}</Paragraph>
                     <div className="">
                       <strong className="">
-                        {WidgetDefinitions[widget.type].name}
+                        {WidgetDefinitions[widget.type]?.name}
                       </strong>
                       <Paragraph className="my-auto -mr-16 lg:mr-0">{widget.description}</Paragraph>
                     </div>
@@ -147,7 +148,7 @@ export default function ProjectWidgets() {
                     </Paragraph>
                   </li>
                 </Link>
-              ))}
+              )})}
             </ul>
           </div>
         </div>
