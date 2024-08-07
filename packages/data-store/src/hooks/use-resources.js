@@ -6,6 +6,7 @@ export default function useResources(
     search = '',
     tags = [],
     sort = 'random',
+    statuses = []
   },
   options
 ) {
@@ -27,7 +28,7 @@ export default function useResources(
 
   // If you add a prop here, the also do it for filter
   const { data, error, isLoading } = self.useSWR(
-    { projectId, page, pageSize, search, tags, sort },
+    { projectId, page, pageSize, search, tags, sort, statuses },
     'resources.fetch',
     options
   );
@@ -65,23 +66,26 @@ export default function useResources(
     });
   };
 
-  resources.records.create = function (newData) {
-    return self.mutate({ projectId }, 'resources.create', newData, {
-      action: 'create',
-    });
-  };
+  if (resources.records) {
+    resources.records.create = function (newData) {
+      return self.mutate({ projectId }, 'resources.create', newData, {
+        action: 'create',
+      });
+    };
 
-  resources.records.forEach(async (resource) => {
-    resource.update = function (newData) {
-      return self.mutate({ projectId }, 'resources.update', newData, {
-        action: 'update',
-      });
-    };
-    resource.delete = function () {
-      return self.mutate({ projectId }, 'resources.delete', resource, {
-        action: 'delete',
-      });
-    };
-  });
+    resources.records.forEach(async (resource) => {
+      resource.update = function (newData) {
+        return self.mutate({ projectId }, 'resources.update', newData, {
+          action: 'update',
+        });
+      };
+      resource.delete = function () {
+        return self.mutate({ projectId }, 'resources.delete', resource, {
+          action: 'delete',
+        });
+      };
+    });
+  }
+
   return { data: resources, error, isLoading, submitVotes, create };
 }

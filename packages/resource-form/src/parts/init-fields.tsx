@@ -58,7 +58,7 @@ export const InitializeFormFields = (items, data) => {
                         item.options.length > 0
                     ) {
                         fieldData['choices'] = item.options.map((option) => {
-                            return option.titles[0].key
+                            return { value: option.titles[0].key, label: option.titles[0].key }
                         });
                     }
                     break;
@@ -71,7 +71,7 @@ export const InitializeFormFields = (items, data) => {
                         item.options.length > 0
                     ) {
                         fieldData['choices'] = item.options.map((option) => {
-                            return option.titles[0].text
+                            return { value: (option.titles[0].key).toString(), label: option.titles[0].text }
                         });
                     }
                     break;

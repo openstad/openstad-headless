@@ -1,0 +1,6 @@
+.dialog--footer {
+  background: #eee;
+  margin: 20px -24px -24px -24px;
+  padding: 34px 24px;
+  width: calc(100% + 48px);
+}

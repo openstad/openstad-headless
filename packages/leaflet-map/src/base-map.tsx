@@ -5,7 +5,8 @@ import type { PropsWithChildren } from 'react';
 import { loadWidget } from '../../lib/load-widget';
 import { LatLng, latLngBounds } from 'leaflet';
 import type { LeafletMouseEvent } from 'leaflet';
-import { MapContainer, useMapEvents } from 'react-leaflet';
+import { MapContainer } from 'react-leaflet/MapContainer';
+import { useMapEvents } from 'react-leaflet/hooks';
 import { MapConsumer, useMapRef } from './map-consumer';
 import TileLayer from './tile-layer';
 import { Area, isPointInArea } from './area';
@@ -220,8 +221,6 @@ const BaseMap = ({
     aspectRatio: height ? undefined : 16 / 9,
   };
 
-  
-
   return (
     <>
       <div className="map-container" style={style}>
@@ -269,7 +268,6 @@ const BaseMap = ({
             }
           />
 
-          {props.children}
         </MapContainer>
       </div>
     </>

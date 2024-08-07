@@ -10,6 +10,7 @@ import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { toast } from 'react-hot-toast';
 import { sortTable, searchTable } from '@/components/ui/sortTable';
 import * as XLSX from 'xlsx';
+import flattenObject from "@/lib/export-helpers/flattenObject";
 
 export default function ProjectResources() {
   const router = useRouter();
@@ -17,16 +18,21 @@ export default function ProjectResources() {
   const { data, error, isLoading, remove } = useResources(project as string);
 
   const exportData = (data: any[], fileName: string) => {
+
+    const flattenedData = data.map(item => flattenObject(item));
+
     const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    const worksheet = XLSX.utils.json_to_sheet(flattenedData);
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
 
     XLSX.writeFile(workbook, fileName);
   };
+
   function transform() {
     const today = new Date();
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
+
     exportData(data, `${projectId}_resources_${formattedDate}.xlsx`);
   }
 

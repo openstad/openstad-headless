@@ -35,6 +35,7 @@ function Comment({
   const args = {
     comment,
     selected,
+    adminLabel,
     ...props,
   } as CommentProps;
 

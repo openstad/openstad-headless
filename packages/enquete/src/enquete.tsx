@@ -56,6 +56,7 @@ function Enquete(props: EnqueteWidgetProps) {
         || !props.formVisibility
     );
 
+
     const formFields: FieldProps[] = [];
     if (typeof (props) !== 'undefined'
         && typeof (props.items) === 'object'
@@ -110,6 +111,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['type'] = 'imageUpload';
                     fieldData['allowedTypes'] = ["image/*"];
                     fieldData['imageUrl'] = props?.imageUrl;
+                    fieldData['multiple'] = item.multiple;
                     break;
                 case 'scale':
                     fieldData['type'] = 'tickmark-slider';

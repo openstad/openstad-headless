@@ -95,6 +95,8 @@ router.all('*', function (req, res, next) {
 
   if (req.query.statuses) {
     let statuses = req.query.statuses;
+    // if statuses is not an array, make it an array
+    if (!Array.isArray(statuses)) statuses = [statuses];
     req.scope.push({ method: ['selectStatuses', statuses] });
     req.scope.push('includeStatuses');
   }

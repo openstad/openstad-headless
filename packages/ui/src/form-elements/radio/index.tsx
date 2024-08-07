@@ -12,7 +12,7 @@ import { Spacer } from '@openstad-headless/ui/src';
 export type RadioboxFieldProps = {
     title: string;
     description?: string;
-    choices: string[];
+    choices?: string[] | [{value: string, label: string}];
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
@@ -30,6 +30,17 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     onChange,
     disabled = false,
 }) => {
+
+    if (choices) {
+        choices = choices?.map((choice) => {
+            if (typeof choice === 'string') {
+                return {value: choice, label: choice}
+            } else {
+                return choice;
+            }
+        }) as [{ value: string, label: string }];
+    }
+
     return (
         <div className="question">
             <Fieldset role="radiogroup">
@@ -57,11 +68,12 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                                     required={fieldRequired}
                                     onChange={() => onChange ? onChange({
                                         name: fieldKey,
-                                        value: choice
+                                        value: choice.value
                                     }) : null}
                                     disabled={disabled}
+                                    value={choice && choice.value}
                                 />
-                                <span>{choice}</span>
+                                <span>{choice && choice.label}</span>
                             </FormLabel>
                         </Paragraph>
                     </FormField>

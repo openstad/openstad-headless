@@ -129,6 +129,11 @@
   justify-content: center;
 }
 
+article.stem-begroot--container .carousel-button-container {
+  z-index: 10;
+  margin-top: -38px;
+}
+
 article.stem-begroot--container {
   position: relative;
   display: grid;

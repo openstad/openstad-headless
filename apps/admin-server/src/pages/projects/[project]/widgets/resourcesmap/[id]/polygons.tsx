@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -19,6 +18,7 @@ import * as z from 'zod';
 import { ResourceOverviewMapWidgetTabProps } from '.';
 import useAreas from '@/hooks/use-areas';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useRouter } from 'next/router';
 
 const formSchema = z.object({
   customPolygon: z.array(z.object({ id: z.number(), name: z.string() })).optional(),
@@ -55,8 +55,10 @@ export default function WidgetResourcesMapButton(
       customPolygonUrl: props?.customPolygonUrl || []
     },
   });
+  const router = useRouter();
+  const projectId = router.query.project as string;
 
-  const { data: areas } = useAreas(props.projectId) as { data: { id: string, name: string }[] } ?? [];
+  const { data: areas } = useAreas(props.projectId === undefined ? projectId : props.projectId) as { data: { id: string, name: string }[] } ?? [];
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -85,7 +87,7 @@ export default function WidgetResourcesMapButton(
                           checked={isChecked}
                           onCheckedChange={(checked) => {
                             let values = form.getValues('customPolygon') || [];
-                            
+
                             if (checked) {
                               if (!values.some(obj => obj.id === Number(item.id))) {
                                 const { name } = item;

@@ -7,8 +7,10 @@ export const handleSubmit = (
     formValues: { [p: string]: string | Record<number, never> | [] },
     setFormErrors: React.Dispatch<React.SetStateAction<{ [p: string]: string | null }>>,
     submitHandler: (values: { [p: string]: string | Record<number, never> | [] }) => void
-) => {
+): string | null => {
     const errors: { [key: string]: string | null } = {};
+    let firstErrorKey: string | null = null;
+
     fields?.forEach((field) => {
         if (field.fieldKey) {
             const fieldValue = formValues[field.fieldKey];
@@ -31,6 +33,9 @@ export const handleSubmit = (
                     }
 
                     errors[field.fieldKey] = errorMessage;
+                    if (!firstErrorKey) {
+                        firstErrorKey = field.fieldKey;
+                    }
                 }
             }
         }
@@ -40,5 +45,8 @@ export const handleSubmit = (
 
     if (Object.values(errors).every((error) => error === null)) {
         submitHandler(formValues);
+        return null;
     }
+
+    return firstErrorKey;
 };

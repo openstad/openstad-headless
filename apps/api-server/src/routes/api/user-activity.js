@@ -123,8 +123,7 @@ router.route('/')
     return auth.can('Project', 'list')(req, res, next);
   })
   .get(function(req, res, next) {
-
-    if (!req.activities.includes('projects')) return next();
+    if (req.activities !== undefined && !req.activities.includes('projects')) return next();
     const projectIds = req.users.map(user => user.projectId);
     let where = { id: projectIds };
 

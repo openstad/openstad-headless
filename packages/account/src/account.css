@@ -1,0 +1,38 @@
+.account{
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin: 0 auto;
+}
+
+.account input{
+  max-width: unset;
+}
+
+.account > div{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 1rem;
+  position: relative;
+}
+
+.account > div + div{
+ border-block-start: solid 1px hsla(0, 0%, 0%, 0.10);
+ padding-top: 2rem;
+}
+
+.account > div:not(:has(h2)):has(.account-edit-button){
+  padding-top: 5rem;
+}
+
+
+.account h2,
+.account p{
+  grid-column: span 2;
+}
+
+.account .account-edit-button{
+  position: absolute;
+  top: 2rem;
+  right: 0;
+}

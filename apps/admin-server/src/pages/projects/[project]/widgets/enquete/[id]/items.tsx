@@ -55,6 +55,7 @@ const formSchema = z.object({
   image2Upload: z.string().optional(),
   text2: z.string().optional(),
   key2: z.string().optional(),
+  multiple: z.boolean().optional(),
 });
 
 export default function WidgetEnqueteItems(
@@ -100,9 +101,11 @@ export default function WidgetEnqueteItems(
           image2: values.image2 || '',
           text2: values.text2 || '',
           key2: values.key2 || '',
+          multiple: values.multiple || false,
         },
       ]);
     }
+
     form.reset(defaults);
     setOptions([]);
   }
@@ -154,6 +157,7 @@ export default function WidgetEnqueteItems(
     image2: '',
     text2: '',
     key2: '',
+    multiple: false,
   });
 
   const form = useForm<FormData>({
@@ -191,6 +195,7 @@ export default function WidgetEnqueteItems(
         image2: selectedItem.image2 || '',
         text2: selectedItem.text2 || '',
         key2: selectedItem.key2 || '',
+        multiple: selectedItem.multiple || false,
       });
       setOptions(selectedItem.options || []);
     }
@@ -732,7 +737,7 @@ export default function WidgetEnqueteItems(
                     {form.watch('questionType') === 'imageUpload' && (
                       <FormField
                         control={form.control}
-                        name="variant"
+                        name="multiple"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Mogen er meerdere afbeeldingen tegelijkertijd geüpload worden?</FormLabel>

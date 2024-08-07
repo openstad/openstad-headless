@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useRef, useState} from 'react';
 import type {CombinedFieldPropsWithType, ComponentFieldProps, FormProps} from "./props";
 import TextInput from "@openstad-headless/ui/src/form-elements/text";
 import RangeSlider from "@openstad-headless/ui/src/form-elements/a-b-slider";
@@ -42,11 +42,23 @@ function Form({
 
     const [formValues, setFormValues] = useState(initialFormValues);
     const [formErrors, setFormErrors] = useState<{ [key: string]: string | null }>({});
+    const formRef = useRef<HTMLFormElement>(null);
 
     const handleFormSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        handleSubmit(fields as unknown as Array<CombinedFieldPropsWithType>, formValues, setFormErrors, submitHandler);
+        const firstErrorKey = handleSubmit(fields as unknown as Array<CombinedFieldPropsWithType>, formValues, setFormErrors, submitHandler);
+
+        if (firstErrorKey && formRef.current) {
+            const errorElement = formRef.current.querySelector(`[name="${firstErrorKey}"]`);
+            if (errorElement) {
+                const elementPosition = errorElement.getBoundingClientRect().top + window.scrollY;
+                const offsetPosition = elementPosition - 100;
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        }
     };
 
     const handleInputChange = (event: { name: string, value: FormValue}) => {
@@ -91,7 +103,7 @@ function Form({
             <div className="form-widget-container">
                 {title && <h5 className="form-widget-title">{title}</h5>}
 
-                <form className="form-container" noValidate onSubmit={handleFormSubmit}>
+                <form className="form-container" noValidate onSubmit={handleFormSubmit} ref={formRef}>
                     {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */}
                     {fields.map((field: ComponentFieldProps, index: number) => (
                         <div className={`question question-type-${field.type}`} key={index}>

@@ -14,10 +14,10 @@
 				action="{{registerUrl}}"
 			>
           <div class="form-group">
-            <input type="text" name="name" id="name" placeholder="Naam" class="form-input" autofocus required >
+            <input type="text" name="name" id="name" placeholder="Naam" class="form-input" autofocus required autocomplete="given-name">
           </div>
           <div class="form-group">
-            <input type="text" name="postcode" id="postcode" placeholder="Postcode" class="form-input" autofocus required>
+            <input type="text" name="postcode" id="postcode" placeholder="Postcode" class="form-input" autofocus required autocomplete="postal-code">
           </div>
 					<input type="hidden" name="_csrf" value="{{csrfToken}}">
 					<input type="hidden" name="clientId" value="{{client.clientId}}">
