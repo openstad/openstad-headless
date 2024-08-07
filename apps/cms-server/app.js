@@ -22,7 +22,6 @@ let startUpQueue = [];
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-
 app.use('/:sitePrefix?/config-reset', async function (req, res, next) {
   await loadProjects();
   next();
@@ -253,6 +252,7 @@ app.use(async function (req, res, next) {
   next();
 });
 
+
 app.use(async function (req, res, next) {
   
     // format domain to our specification
@@ -356,9 +356,22 @@ app.use('/:sitePrefix', function (req, res, next) {
     
 });
 
+// Create a middleware function for basic authentication
+app.use((req, res, next) => {
+  
+  if (req.site && req.site.config?.basicAuth?.active && req.site.config?.basicAuth?.username && req.site.config?.basicAuth?.password) {
+    console.log('Basic auth enabled for project: ', req.site.url);
+    return basicAuth({
+      users: { [req.site.config.basicAuth.username]: req.site.config.basicAuth.password },
+      challenge: true
+    })(req, res, next);
+  }
+  
+  next();
+});
+
 app.use('/:privileged(admin)?/login', function (req, res, next) {
   const domainAndPath = req.openstadDomain + (req.sitePrefix ? '/' + req.sitePrefix : '');
-  console.log ('privileged login?', req.params.privileged, domainAndPath, req.url, req.para);
   const i = req.url.indexOf('?');
   let query = req.url.substr(i + 1);
   const protocol = req.headers['x-forwarded-proto'] || req.protocol;
@@ -422,6 +435,6 @@ app.use(async function (req, res, next){
     
 });
 
-//setInterval(loadProjects, REFRESH_PROJECTS_INTERVAL);
+setInterval(loadProjects, REFRESH_PROJECTS_INTERVAL);
 
 app.listen(process.env.PORT || 3000);
