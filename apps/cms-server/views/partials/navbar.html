@@ -4,6 +4,7 @@
 
 <div id="navbar"
       data-content='{{ mainMenu }}'
+      data-prefix='{{ data.prefix }}'
 ></div>
 {% else %}
 
@@ -17,6 +18,7 @@
       "title": "{{ data.home.title }}"
     }]'
     data-content='{{ menuData }}'
+    data-prefix='{{ data.prefix }}'
   ></div>
 {% endif %}
 

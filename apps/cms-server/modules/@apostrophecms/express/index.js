@@ -13,7 +13,6 @@ module.exports = {
        * since our top level is managing express
        */
       async listen() {
-        console.log('Dont do anything');
       }
     };
   }

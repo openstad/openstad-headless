@@ -1,5 +1,5 @@
 <header class="{{ 'amsterdam-header' if data.global.siteLogo === 'amsterdam' }} {{ '--compact' if data.global.compactMenu }}">
-      
+
       <div class="header-top-bar">
         <div class="container">
         {% if data.global.showLoginButton and not data.loggedIn %}
@@ -27,14 +27,14 @@
 
       <div class="col-xs-12">
         {% if data.global.siteLogo === 'amsterdam' %}
-        <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-container">
+        <a href="{{data.baseUrlWithPrefix}}{{logoLink}}/" class="logo-container">
           <img src="/modules/openstad-assets/img/andreas.svg" alt="logo">
           <div id="amsterdam">
             Gemeente<br>Amsterdam
           </div>
         </a>
         {% elif data.global.siteLogo %}
-        <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-uploaded logo-main-container">
+        <a href="{{data.baseUrlWithPrefix}}{{logoLink}}/" class="logo-uploaded logo-main-container">
           <img src="{{apos.attachment.url(data.global.siteLogo)}}" alt="Afbeelding van het logo, link naar de homepage" id="logo-image">
           {% if not data.global.hideSiteTitle %}
           {% if data.global.siteTitle.length > 0%}
@@ -45,8 +45,8 @@
         {% endif %}
         </a>
         {% else %}
-        <a href="{{data.siteUrl}}{{logoLink}}/" class="logo-default logo-main-container">
-          <img class="default" src="{{ apos.asset.url('/modules/openstad-assets/img/logo-openstad.png?v=1') }}" alt="Afbeelding van het logo, link naar de homepage" id="logo-image">
+        <a href="{{data.baseUrlWithPrefix}}{{logoLink}}/" class="logo-default logo-main-container">
+          <img class="default" src="/images/logo.png" alt="Afbeelding van het logo, link naar de homepage" id="logo-image">
         </a>
         {% endif %}
         <div class="header-side-container {{ 'without-site-title' if data.global.hideSiteTitle}}">
@@ -57,11 +57,11 @@
                 {% if data.global.displayLoginTopLink %}
                 <li>
                   {% if data.loggedIn %}
-                  <a href="{{data.siteUrl}}/oauth/logout" class="link-caret--black">
+                  <a href="{{data.baseUrlWithPrefix}}/oauth/logout" class="link-caret--black">
                     {{ __('Uitloggen') }}
                   </a>
                   {% else %}
-                  <a href="{{data.siteUrl}}/oauth/login" class="link-caret--black"">
+                  <a href="{{data.baseUrlWithPrefix}}/oauth/login" class="link-caret--black">
                     <!-- <span class=" glyphicon glyphicon-user"></span> !-->
                     {{ __('Inloggen') }}
                   </a>
@@ -110,13 +110,15 @@
                 "title": "{{ data.home.title }}"
               }]'
               data-content='{{ menuData }}'
+             data-prefix='{{ data.prefix }}'
             ></div>
           {% endif %}
 
           {% if data.global.ctaButtons.length > 0 %}
             <div class="cta-buttons">
               {% for ctaButton in data.global.ctaButtons %}
-              <a href="{{ctaButton.href}}" class="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--{{ctaButton.appearance}}">{{ctaButton.label}}</a>
+              {% set buttonHref = data.prefix + ctaButton.href if (ctaButton.href and ctaButton.href.startsWith('/'))  else ctaButton.href %}
+              <a href="{{buttonHref}}" class="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--{{ctaButton.appearance}}">{{ctaButton.label}}</a>
               {% endfor %}
               </div>
           {% endif %}
