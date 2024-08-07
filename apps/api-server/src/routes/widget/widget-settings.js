@@ -227,6 +227,9 @@ let moduleDefinitions = {
     css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessActivity',
     componentName: 'Activity',
+    defaultConfig: {
+      projectId: null,
+    },
   },
   account: {
     packageName: '@openstad-headless/account',
