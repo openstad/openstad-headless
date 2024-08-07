@@ -272,6 +272,12 @@ function getWidgetJavascriptOutput(
   const data = JSON.parse(widgetConfig)
   const extraCss = data.project?.cssUrl ? `<link href="${data.project.cssUrl}" rel="stylesheet">` : '';
 
+
+
+
+
+
+  // TODO: Fix this, it's a hack to get the ChoiceGuide to work
   if ( widgetSettings.componentName = 'ChoiceGuide' ) {
 
     widgetSettings.js.forEach((file) => {
@@ -303,6 +309,12 @@ function getWidgetJavascriptOutput(
       css += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
     });
   }
+
+  // End of to do
+
+
+
+
 
   // Rewrite the url to the images that we serve statically
   css = css.replaceAll(
