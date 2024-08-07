@@ -56,6 +56,10 @@ const formSchema = z.object({
   text2: z.string().optional(),
   key2: z.string().optional(),
   multiple: z.boolean().optional(),
+  image: z.string().optional(),
+  imageAlt: z.string().optional(),
+  imageDescription: z.string().optional(),
+  imageUpload: z.string().optional(),
 });
 
 export default function WidgetEnqueteItems(
@@ -102,6 +106,9 @@ export default function WidgetEnqueteItems(
           text2: values.text2 || '',
           key2: values.key2 || '',
           multiple: values.multiple || false,
+          image: values.image || '',
+          imageAlt: values.imageAlt || '',
+          imageDescription: values.imageDescription || '',
         },
       ]);
     }
@@ -158,6 +165,9 @@ export default function WidgetEnqueteItems(
     text2: '',
     key2: '',
     multiple: false,
+    image: '',
+    imageAlt: '',
+    imageDescription: ''
   });
 
   const form = useForm<FormData>({
@@ -196,6 +206,9 @@ export default function WidgetEnqueteItems(
         text2: selectedItem.text2 || '',
         key2: selectedItem.key2 || '',
         multiple: selectedItem.multiple || false,
+        image: selectedItem.image || '',
+        imageAlt: selectedItem.imageAlt || '',
+        imageDescription: selectedItem.imageDescription || '',
       });
       setOptions(selectedItem.options || []);
     }
@@ -646,7 +659,55 @@ export default function WidgetEnqueteItems(
                         />
                       </>
                     )}
-                    {form.watch('questionType') === 'images' && (
+
+                    { form.watch('questionType') === 'none' && (
+                      <>
+                        <ImageUploader
+                          form={form}
+                          fieldName="imageUpload"
+                          imageLabel="Afbeelding 1"
+                          allowedTypes={["image/*"]}
+                          onImageUploaded={(imageResult) => {
+                            const image = imageResult ? imageResult.url : '';
+
+                            form.setValue("image", image);
+                            form.resetField('imageUpload');
+                          }}
+                        />
+
+                        {!!form.getValues('image') && (
+                          <div style={{ position: 'relative' }}>
+                            <img src={form.getValues('image')} />
+                          </div>
+                        )}
+
+                        <FormField
+                          control={form.control}
+                          name="imageAlt"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Afbeelding beschrijving voor screenreaders</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="imageDescription"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Beschrijving afbeelding</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                      </>
+                    )}
+
+                    { form.watch('questionType') === 'images' && (
                       <>
                         <ImageUploader
                           form={form}
