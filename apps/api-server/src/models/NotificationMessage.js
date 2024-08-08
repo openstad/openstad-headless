@@ -56,8 +56,8 @@ module.exports = ( db, sequelize, DataTypes ) => {
   }, {
 
     hooks: {
-
       beforeValidate: async function (instance, options) {
+        console.log('beforeValidate hook called for NotificationMessage');
         if (options.data) {
           let template, templateData;
           try {
@@ -105,10 +105,7 @@ module.exports = ( db, sequelize, DataTypes ) => {
           }
 
           try {
-
-
             instance.subject = nunjucks.renderString(template.subject, { ...templateData });
-
             let body = nunjucks.renderString(template.body, { ...templateData });
             body = mjml2html(body);
             instance.body = body.html;
@@ -116,10 +113,8 @@ module.exports = ( db, sequelize, DataTypes ) => {
           } catch (err) {
             console.error('Error rendering template:', err);
           }
-
         }
       }
-
     }
 
   });
