@@ -113,7 +113,10 @@ module.exports = ( db, sequelize, DataTypes ) => {
 
             let recipients = instance.to.split(',').map(email => email.trim());
             await Promise.all(recipients.map(async (recipient) => {
-              let message = await db.NotificationMessage.create({ ...messageData, to: recipient });
+              let message = await db.NotificationMessage.create(
+                { ...messageData, to: recipient },
+                { data: messageData.data }
+              );
               await message.send();
             }));
 
