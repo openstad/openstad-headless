@@ -57,7 +57,7 @@ module.exports = ( db, sequelize, DataTypes ) => {
 
     hooks: {
       beforeValidate: async function (instance, options) {
-        console.log('beforeValidate hook called for NotificationMessage');
+        console.log('beforeValidate hook called for NotificationMessage', options);
         if (options.data) {
           let template, templateData;
           try {
