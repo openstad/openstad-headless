@@ -61,8 +61,6 @@ passport.use('url', new TokenStrategy({
     .then(async (token) => {
 
       if (token) {
-        await tokenUrl.invalidateTokensForUser(token.userId);
-
         db.User
           .findOne({ where: {id: token.userId} })
           .then(user => { return done(null, user) } )
