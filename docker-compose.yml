@@ -11,7 +11,7 @@ services:
       - API_DB_NAME=${API_DB_NAME}
     command:
       - mysqld
-      - --default-authentication-plugin=mysql_native_password
+      - --mysql_native_password=ON
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
     ports:
