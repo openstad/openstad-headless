@@ -134,13 +134,14 @@ module.exports = ( db, sequelize, DataTypes ) => {
     deleteableBy: 'admin',
   };
 
-  NotificationMessage.prototype.send = async function() {
+  NotificationMessage.prototype.send = async function () {
     try {
-      let engine = this.engine;
-      await sendMessage[engine]({ message: this });
+      console.log('Sending notification with engine:', this.engine);
+      await sendMessage[this.engine]({ message: this });
       await this.update({ status: 'sent' });
-    } catch(err) {
-      console.log('Send failed');
+      console.log('Notification sent successfully');
+    } catch (err) {
+      console.error('Send failed:', err);
       throw err;
     }
   }
