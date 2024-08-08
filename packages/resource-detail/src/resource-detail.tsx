@@ -199,7 +199,7 @@ function ResourceDetail({
                 {displayUser && resource?.user?.displayName && (
                   <div>
                     <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
-                      Gemaakt door
+                    Ingediend door
                     </Heading>
                     <span className="osc-resource-detail-content-item-text">
                       {resource.user.displayName}
