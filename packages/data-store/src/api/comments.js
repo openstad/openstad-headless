@@ -1,6 +1,13 @@
 export default {
-  fetch: async function ({ projectId, resourceId, sentiment }) {
+  fetch: async function ({ projectId, resourceId, sentiment, onlyIncludeTagIds, onlyExcludeTagIds }) {
     let url = `/api/project/${projectId}/resource/${resourceId}/comment?sentiment=${sentiment}&includeUser=1&includeUserVote=1&includeVoteCount=1&includeRepliesOnComments=1`;
+
+    if (onlyIncludeTagIds) {
+      url += `&onlyIncludeTagIds=${onlyIncludeTagIds}`;
+    }
+    if (onlyExcludeTagIds) {
+      url += `&onlyExcludeTagIds=${onlyExcludeTagIds}`;
+    }
 
     if (!projectId || !resourceId) {
       throw new Error(`No ${projectId ? 'projectId' : 'resourceId'} given`);

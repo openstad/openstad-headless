@@ -91,6 +91,13 @@ router.route('/')
       where.sentiment = sentiment;
     }
 
+    let onlyIncludeTagIds = req.query.onlyIncludeTagIds;
+    let onlyExcludeTagIds = req.query.onlyExcludeTagIds;
+
+    if (onlyIncludeTagIds || onlyExcludeTagIds) {
+      req.scope.push({ method: ['filterByTags', onlyIncludeTagIds, onlyExcludeTagIds] });
+    }
+
     return db.Comment
       .scope(...req.scope)
       .findAndCountAll(

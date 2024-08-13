@@ -2,6 +2,7 @@ var sanitize = require('../util/sanitize');
 var moment = require('moment-timezone');
 var config = require('config')
 const merge = require('merge');
+const { Op } = require('sequelize');
 
 // For detecting throwaway accounts in the email address validation.
 var emailBlackList = require('../../config/mail_blacklist')
@@ -268,6 +269,24 @@ module.exports = function( db, sequelize, DataTypes ) {
 				}]
 			},
 
+			filterByTags: function(onlyIncludeTagIds, onlyExcludeTagIds) {
+				let where = {};
+				if (onlyIncludeTagIds) {
+					where.id = { [Op.in]: onlyIncludeTagIds.split(',') };
+				}
+				if (onlyExcludeTagIds) {
+					where.id = { [Op.notIn]: onlyExcludeTagIds.split(',') };
+				}
+				return {
+					include: [{
+						model: db.Tag,
+						as: 'tags',
+						through: { attributes: [] },
+						where: where
+					}]
+				};
+			},
+
 		}
 	}
 
@@ -284,6 +303,12 @@ module.exports = function( db, sequelize, DataTypes ) {
 			as         : 'replies',
       onDelete: 'CASCADE',
       hooks: true,
+		});
+		this.belongsToMany(models.Tag, {
+			through: 'comment_tags',
+			as: 'tags',
+			foreignKey: 'commentId',
+			otherKey: 'tagId',
 		});
 	}
 

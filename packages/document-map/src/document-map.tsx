@@ -47,6 +47,8 @@ export type DocumentMapProps = BaseProps &
     definitiveUrl?: string;
     definitiveUrlText?: string;
     statusId?: string;
+    includeOrExclude?: string;
+    onlyIncludeOrExcludeTagIds?: string;
   };
 
 
@@ -60,6 +62,8 @@ function DocumentMap({
   accessibilityUrlVisible,
   definitiveUrlVisible,
   statusId,
+  includeOrExclude = 'include',
+  onlyIncludeOrExcludeTagIds = '',
   ...props
 }: DocumentMapProps) {
 
@@ -79,11 +83,17 @@ function DocumentMap({
     resourceId: resourceId,
   });
 
-  const { data: comments } = datastore.useComments({
+  const tagIds = !!onlyIncludeOrExcludeTagIds && onlyIncludeOrExcludeTagIds.startsWith(',') ? onlyIncludeOrExcludeTagIds.substring(1) : onlyIncludeOrExcludeTagIds;
+
+  const useCommentsData = {
     projectId: props.projectId,
     resourceId: resourceId,
     sentiment: sentiment,
-  });
+    onlyIncludeTagIds: includeOrExclude === 'include' ? tagIds : undefined,
+    onlyExcludeTagIds: includeOrExclude === 'exclude' ? tagIds : undefined,
+  };
+
+  const { data: comments } = datastore.useComments(useCommentsData);
 
   const [popupPosition, setPopupPosition] = useState<any>(null);
   const [selectedCommentIndex, setSelectedCommentIndex] = useState<Number>();
@@ -298,6 +308,8 @@ function DocumentMap({
         {!isDefinitive && (
           <Comments
             {...props}
+            includeOrExclude={includeOrExclude}
+            onlyIncludeOrExcludeTagIds={onlyIncludeOrExcludeTagIds}
             resourceId={resourceId || ''}
             selectedComment={selectedCommentIndex}
             showForm={false}
