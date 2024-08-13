@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import type {CombinedFieldPropsWithType, ComponentFieldProps, FormProps} from "./props";
 import TextInput from "@openstad-headless/ui/src/form-elements/text";
 import RangeSlider from "@openstad-headless/ui/src/form-elements/a-b-slider";

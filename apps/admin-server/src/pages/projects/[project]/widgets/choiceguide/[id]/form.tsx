@@ -23,6 +23,7 @@ import { Separator } from '@/components/ui/separator';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import {undefinedToTrueOrProp, YesNoSelect} from "@/lib/form-widget-helpers";
 import {Textarea} from "@/components/ui/textarea";
+import { ChoiceGuide } from '@openstad-headless/choiceguide/src/props';
 
 const formSchema = z.object({
   noOfQuestionsToShow: z.string().optional(),
@@ -40,7 +41,7 @@ const formSchema = z.object({
   introDescription: z.string().optional(),
 });
 
-export default function ChoicesSelectorForm(props) {
+export default function ChoicesSelectorForm(props: ChoiceGuide) {
   const category = 'choiceGuide';
 
   const {
@@ -117,6 +118,7 @@ export default function ChoicesSelectorForm(props) {
                   Wil je de voortgang van de pagina&apos;s te zien is in de
                   &apos;Volgende&apos; knop?
                 </FormLabel>
+                {/*@ts-ignore*/}
                 {YesNoSelect(field, props)}
               </FormItem>
             )}

@@ -1,15 +1,15 @@
 import { ProjectSettingProps, BaseProps } from '@openstad-headless/types';
 
-export type ChoiceGuideProps = BaseProps &
+export type ChoiceGuideProps = ChoiceGuide &
+    BaseProps &
     ProjectSettingProps &
-    ExtraProjectSettings &
-    ChoiceGuide;
+    ExtraProjectSettings;
 
 export type ChoiceGuide = {
-    noOfQuestionsToShow: string;
-    showPageCountAndCurrentPageInButton: boolean;
-    choicesType: 'default' | 'minus-to-plus-100' | 'plane' | 'hidden';
-    imageAspectRatio: '16x9' | '1x1';
+    noOfQuestionsToShow?: string;
+    showPageCountAndCurrentPageInButton?: boolean;
+    choicesType?: 'default' | 'minus-to-plus-100' | 'plane' | 'hidden';
+    imageAspectRatio?: '16x9' | '1x1';
     choicesPreferenceMinColor?: string;
     choicesPreferenceMaxColor?: string;
     choicesPreferenceTitle?: string;
@@ -67,44 +67,45 @@ export type Item = {
     type?: string;
     fieldType?: string;
     tags?: string;
-    fieldKey: string;
+    fieldKey?: string;
     fieldRequired?: boolean;
     onlyForModerator?: boolean;
     minCharacters?: string;
     maxCharacters?: string;
     variant?: string;
     multiple?: boolean;
-    images?: Array<{
-        image?: any;
-        src: string;
-    }>;
     options?: Array<Option>;
     sliderTitleUnderA?: string;
     sliderTitleUnderB?: string;
     explanationA?: string;
     explanationB?: string;
+    weights?: Record<string, Weight>;
+    showMoreInfo: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
+    infoImage?: string;
+    labelA?: string;
+    labelB?: string;
+    imageA?: string;
+    imageB?: string;
 };
 
 export type Option = {
     trigger: string;
     titles: Array<Title>;
-    images?: Array<{
-        image?: any;
-        src: string;
-    }>;
 };
 
 export type Title = {
     text: string;
     key: string;
-    weights: Record<string, Weight>;
+    weights?: Record<string, Weight>;
 };
 
 export type Weight = {
-    weightX: string | number;
-    weightY: string | number;
-    choice: Record<string, Weight>;
-} | {}
+    weightX?: string | number;
+    weightY?: string | number;
+    [key: string]: string | number | Weight | undefined;
+};
 
 export type DimensionWeights = Record<'x' | 'y', string | number>;
 export type ChoiceWeights = Record<string, DimensionWeights>;

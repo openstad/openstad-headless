@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Spacer } from "@/components/ui/spacer";
 import AccordionUI from "@/components/ui/accordion";
 import { ImageUploader } from '@/components/image-uploader';
+import {ChoiceOptions, Item, Weight} from "@openstad-headless/choiceguide/src/props";
 
 const formSchema = z.object({
   choiceOptions: z.array(
@@ -23,7 +24,8 @@ const formSchema = z.object({
       id: z.number(),
       title: z.string().optional(),
       description: z.string().optional(),
-      image: z.string().optional(), // Add image field
+      image: z.string().optional(),
+      imageUploader: z.string().optional(),
     })
   ),
   weights: z.record(z.record(z.object({
@@ -36,7 +38,7 @@ const formSchema = z.object({
 });
 
 
-export default function WidgetChoiceGuideChoiceOptions(props) {
+export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
   const category = 'choiceOption';
 
   const {
@@ -56,13 +58,13 @@ export default function WidgetChoiceGuideChoiceOptions(props) {
   const defaults = useCallback(
     () => {
       const choiceOptions = widget?.config?.[category]?.choiceOptions || [];
-      const weights = widget?.config?.items?.reduce((acc, item) => {
+      const weights = widget?.config?.items?.reduce((acc: Record<string, any>, item: Item) => {
         acc[item.trigger] = item.weights || {};
         return acc;
-      }, {}) || {};
+      }, {} as Record<string, any>) || {};
 
       if (choiceOptions.length > 0) {
-        nextIdRef.current = Math.max(...choiceOptions.map(group => group.id)) + 1;
+        nextIdRef.current = Math.max(...choiceOptions.map((group: ChoiceOptions) => group.id)) + 1;
       } else {
         nextIdRef.current = 1;
       }
@@ -90,7 +92,7 @@ export default function WidgetChoiceGuideChoiceOptions(props) {
   }, [form, defaults]);
 
   async function onSubmit(values: FormData) {
-    const updatedItems = widget?.config?.items.map(item => {
+    const updatedItems = widget?.config?.items.map((item: Item) => {
       const updatedWeights = values.weights?.[item.trigger] || item.weights;
       return { ...item, weights: updatedWeights };
     });
@@ -131,7 +133,6 @@ export default function WidgetChoiceGuideChoiceOptions(props) {
             return (
               <AccordionUI
                 key={field.reactKey}
-                className="w-fit lg:w-2/3 grid grid-cols-1 lg:grid-cols-2 gap-4"
                 items={[
                   {
                     header: title,
@@ -214,8 +215,8 @@ export default function WidgetChoiceGuideChoiceOptions(props) {
                                 </div>
                                 <div className="w-full mt-4 flex flex-col gap-y-4">
                                   {widget?.config?.items
-                                    ?.filter(item => !typeWithoutDimension.includes(item.type))
-                                    ?.map((item, itemIndex) => {
+                                    ?.filter((item: Item) => !typeWithoutDimension.includes(item.type ?? ""))
+                                    ?.map((item: Item, itemIndex: number) => {
                                     const fieldId = field.id;
                                     const weights = item?.weights || {};
                                     const weightsForChoice = weights[fieldId] || {};
@@ -223,7 +224,7 @@ export default function WidgetChoiceGuideChoiceOptions(props) {
                                     const defaultY = weightsForChoice?.weightY || 0;
 
 
-                                    if (['radiobox', 'checkbox', 'select'].includes(item.type)) {
+                                    if (['radiobox', 'checkbox', 'select'].includes(item.type ?? "")) {
                                       const choicesFields = weightsForChoice?.choice || {};
 
                                       return (

@@ -24,11 +24,17 @@ import {ArrowDown, ArrowUp, X} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { Item, Option, ResourceFormWidgetProps } from "@openstad-headless/resource-form/src/props";
 import useTags from "@/hooks/use-tags";
 import { useRouter } from "next/router";
 import {ImageUploader} from "@/components/image-uploader";
 import {useWidgetConfig} from "@/hooks/use-widget-config";
+import {Item, Option, ChoiceGuideProps, ChoiceOptions} from '@openstad-headless/choiceguide/src/props';
+
+const weightSchema: z.ZodSchema = z.object({
+  weightX: z.string().optional(),
+  weightY: z.string().optional(),
+  choice: z.record(z.lazy(() => weightSchema)).optional(),
+});
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -46,11 +52,16 @@ const formSchema = z.object({
     .array(
       z.object({
         trigger: z.string(),
-        titles: z.array(z.object({ text: z.string(), key: z.string() })),
+        titles: z.array(z.object({
+          text: z.string(),
+          key: z.string(),
+          weights: z.record(weightSchema).optional()
+        }))
       })
     )
     .optional(),
   infoImage: z.string().optional(),
+  uploadInfoImage: z.string().optional(),
   showMoreInfo: z.boolean().optional(),
   moreInfoButton: z.string().optional(),
   moreInfoContent: z.string().optional(),
@@ -62,19 +73,14 @@ const formSchema = z.object({
   explanationB: z.string().optional(),
   imageA: z.string().optional(),
   imageB: z.string().optional(),
-  weights: z.record(z.object({
-    weightX: z.string().optional(),
-    weightY: z.string().optional(),
-    choice: z.record(z.object({
-      weightX: z.string().optional(),
-      weightY: z.string().optional(),
-    })).optional(),
-  })).optional(),
+  imageUploadA: z.string().optional(),
+  imageUploadB: z.string().optional(),
+  weights: z.record(weightSchema).optional(),
 });
 
 
 export default function WidgetChoiceGuideItems(
-  props: ResourceFormWidgetProps & EditFieldProps<ResourceFormWidgetProps>
+  props: ChoiceGuideProps & EditFieldProps<ChoiceGuideProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
   const [items, setItems] = useState<Item[]>([]);
@@ -108,10 +114,7 @@ export default function WidgetChoiceGuideItems(
       setItems((currentItems) => [
         ...currentItems,
         {
-          trigger: `${currentItems.length > 0
-            ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
-            : 1
-          }`,
+          trigger: `${currentItems.length > 0 ? parseInt(currentItems[currentItems.length - 1].trigger) + 1 : 1}`,
           title: values.title,
           description: values.description,
           type: values.type,
@@ -121,9 +124,9 @@ export default function WidgetChoiceGuideItems(
           variant: values.variant || 'text input',
           multiple: values.multiple || false,
           options: values.options || [],
-          showMoreInfo: values.multiple || false,
-          moreInfoButton: values.multiple || '',
-          moreInfoContent: values.multiple || '',
+          showMoreInfo: values.showMoreInfo || false,
+          moreInfoButton: values.moreInfoButton || '',
+          moreInfoContent: values.moreInfoContent || '',
           infoImage: values.infoImage || '',
           labelA: values.labelA || '',
           labelB: values.labelB || '',
@@ -315,7 +318,7 @@ export default function WidgetChoiceGuideItems(
   }
 
   useEffect(() => {
-    const chosenType = form.watch('type');
+    const chosenType = form.watch('type') || "";
     const chosenConfig = widget?.config?.choiceGuide?.choicesType || 'default';
 
     let dimensions = chosenConfig === 'plane'
@@ -1059,9 +1062,9 @@ export default function WidgetChoiceGuideItems(
                       ))}
                     </div>
                     <div className="w-full mt-4 flex flex-col gap-y-4">
-                      {['checkbox', 'radiobox', 'select'].includes(form.watch('type')) ? (
+                      {['checkbox', 'radiobox', 'select'].includes(form.watch('type') || "") ? (
                         <>
-                          {widget?.config?.choiceOption?.choiceOptions?.map((singleGroup, index) => (
+                          {widget?.config?.choiceOption?.choiceOptions?.map((singleGroup: ChoiceOptions, index: number) => (
 
                             <div key={index} className="w-full col-span-full grid-cols-1 grid">
                               <Heading size="lg" className="mt-3">
@@ -1106,7 +1109,7 @@ export default function WidgetChoiceGuideItems(
                         </>
                       ) : (
                         <>
-                          {widget?.config?.choiceOption?.choiceOptions?.map((singleGroup, index) => (
+                          {widget?.config?.choiceOption?.choiceOptions?.map((singleGroup: ChoiceOptions, index: number) => (
                             <div className={`w-full col-span-full grid-cols-${dimensions.length + 1} grid gap-2 gap-y-2 items-center`} key={index}>
                               <p>
                                 {singleGroup.title}

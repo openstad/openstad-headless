@@ -56,7 +56,7 @@ export type Item = {
     variant?: string;
     multiple?: boolean;
     images?: Array<{
-        image?: any;
+        image?: never;
         src: string;
     }>;
     options?: Array<Option>;
@@ -66,7 +66,7 @@ export type Option = {
     trigger: string;
     titles: Array<Title>;
     images?: Array<{
-        image?: any;
+        image?: never;
         src: string;
     }>;
 };
@@ -74,7 +74,7 @@ export type Option = {
 export type Title = {
     text: string;
     key: string;
-    weights: Record<string, Weight>;
+    weights?: Record<string, Weight>;
 };
 
 type Weight = {

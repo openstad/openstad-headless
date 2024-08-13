@@ -60,9 +60,11 @@ export default function WidgetChoiceGuide({
             </TabsContent>
             <TabsContent value="items" className="p-0">
               {previewConfig && (
+                // @ts-ignore
                 <WidgetChoiceGuideItems
                   {...previewConfig}
                   updateConfig={(config) =>
+                    // @ts-ignore
                     updateConfig({ ...widget.config, ...config })
                   }
                   onFieldChanged={(key: string, value: any) => {
