@@ -1,7 +1,7 @@
 # Image used for building dependencies
-FROM node:18-slim as builder
+FROM node:18-slim AS builder
 ARG APP
-ENV WORKSPACE apps/${APP}
+ENV WORKSPACE=apps/${APP}
 
 LABEL org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}
 
@@ -11,6 +11,8 @@ WORKDIR /opt/openstad-headless
 # Install all base dependencies.# add perl for shell scripts
 RUN apt-get update && \
     apt-get install -y python3 make cmake git bash g++
+
+RUN npm update -g npm
 
 # Install app dependencies
 COPY --chown=node:node package*.json .
@@ -27,7 +29,7 @@ RUN npm run build-packages --if-present --prefix=$WORKSPACE
 #     npm run build --prefix=@openstad-headless/${APP} --if-present
 
 # Development image
-FROM builder as development
+FROM builder AS development
 ARG APP
 ENV WORKSPACE apps/${APP}
 # Create app directory
@@ -36,17 +38,17 @@ WORKDIR /opt/openstad-headless
 CMD ["npm", "run", "dev", "--prefix=${WORKSPACE}"]
 
 # Prepare production
-FROM builder as prepare-production
+FROM builder AS prepare-production
 ARG APP
-ENV WORKSPACE apps/${APP}
+ENV WORKSPACE=apps/${APP}
 RUN npm --prefix=apps/${APP} run build --if-present && \
     npm --prefix=apps/${APP} prune --production
 
 # Release image
-FROM node:18-slim as release
+FROM node:18-slim AS release
 ARG APP
 ARG PORT
-ENV WORKSPACE apps/${APP}
+ENV WORKSPACE=apps/${APP}
 
 WORKDIR /opt/openstad-headless
 
@@ -65,10 +67,10 @@ EXPOSE ${PORT}
 # Run the application
 CMD ["npm", "run", "start", "--prefix=${WORKSPACE}"]
 
-FROM release as release-with-packages
+FROM release AS release-with-packages
 ARG APP
 ARG PORT
-ENV WORKSPACE apps/${APP}
+ENV WORKSPACE=apps/${APP}
 
 WORKDIR /opt/openstad-headless
 
