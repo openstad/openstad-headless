@@ -175,10 +175,17 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
 
   let mailTemplate: any = nunjucks.renderString(templateData, context);
 
+  const [error, setError] = useState<string | null>(null);
+
   async function convertMJMLToHTML(data = mailTemplate) {
-    const mjml2html = (await import('mjml-browser')).default;
-    const htmlOutput = mjml2html(data).html;
-    setMjmlHtml(htmlOutput);
+    try {
+      const mjml2html = (await import('mjml-browser')).default;
+      const htmlOutput = mjml2html(data).html;
+      setMjmlHtml(htmlOutput);
+      setError(null);
+    } catch (err) {
+      setError('Er is een fout opgetreden bij het renderen van de template.');
+    }
   }
 
   useEffect(() => {
@@ -187,13 +194,21 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
 
   const handleOnChange = (e: any, field: any) => {
     if (e.target.value.length > 0) {
-      convertMJMLToHTML(nunjucks.renderString(e.target.value, context));
+      try {
+        convertMJMLToHTML(nunjucks.renderString(e.target.value, context));
+      } catch (err) {
+        setError('Er is een fout opgetreden bij het renderen van de template.');
+      }
     }
   }
 
   useEffect(() => {
     if (fieldValue) {
-      convertMJMLToHTML(nunjucks.renderString(fieldValue, context));
+      try {
+        convertMJMLToHTML(nunjucks.renderString(fieldValue, context));
+      } catch (err) {
+        setError('Er is een fout opgetreden bij het renderen van de template.');
+      }
     }
   }, [fieldValue]);
 
@@ -281,7 +296,8 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
                   </FormItem>
                 )}
               />
-              <Button type="submit">Opslaan</Button>
+              <Button type="submit" disabled={!!error}>Opslaan</Button>
+              {error && <p className="text-red-500">{error}</p>}
             </form>
             {notificationTitle === 'Inloggen via e-mail' && (
               <div className="p-4">
