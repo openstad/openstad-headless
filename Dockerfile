@@ -2,6 +2,7 @@
 FROM node:18-slim AS builder
 ARG APP
 ENV WORKSPACE=apps/${APP}
+ENV GITHUB_REPOSITORY=openstad/openstad-headless
 
 LABEL org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}
 
