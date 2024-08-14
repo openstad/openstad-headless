@@ -58,6 +58,7 @@ spec:
     metadata:
       name: "{{ .Release.Name }}-batch"
     spec:
+      ttlSecondsAfterFinished: 10
       serviceAccountName: openstad-secrets-sa
       volumes:
         - name: keys-volume
