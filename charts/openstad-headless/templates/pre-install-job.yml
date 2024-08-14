@@ -54,11 +54,11 @@ metadata:
     "helm.sh/hook-weight": "40"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
+  ttlSecondsAfterFinished: 10
   template:
     metadata:
       name: "{{ .Release.Name }}-batch"
     spec:
-      ttlSecondsAfterFinished: 10
       serviceAccountName: openstad-secrets-sa
       volumes:
         - name: keys-volume
