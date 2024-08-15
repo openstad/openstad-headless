@@ -1,0 +1,17 @@
+html #apos-modals .apos-modal__overlay + .apos-modal__inner {
+    .apos-link-control__dialog {
+        left: auto;
+        right: -15px;
+    }
+
+    .apos-link-control__dialog .apos-context-menu__tip {
+        left: auto;
+        right: 20px;
+    }
+
+    &,
+    .apos-modal__main,
+    .apos-modal__main .apos-modal__body {
+        overflow: visible;
+    }
+}
