@@ -59,7 +59,7 @@ export default function ProjectSubmissions() {
 
   const selectClick = (value: any) => {
     const ID = value !== "0" ? value?.split(" - ")[0] : "0";
-    const filteredData = ID === "0" ? data : data?.filter((submission: any) => (submission.widgetId).toString() === ID);
+    const filteredData = ID === "0" ? data : data?.filter((submission: any) => (submission.widgetId || 0).toString() === ID);
 
     setFilterData(filteredData);
     setActiveWidget(value);

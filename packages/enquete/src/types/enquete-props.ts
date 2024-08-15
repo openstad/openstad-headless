@@ -33,6 +33,8 @@ export type Item = {
   image?: string;
   imageAlt?: string;
   imageDescription?: string;
+  fieldRequired?: boolean;
+  showSmileys?: boolean;
 };
 
 export type Option = {

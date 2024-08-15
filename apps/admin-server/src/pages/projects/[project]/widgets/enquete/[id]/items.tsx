@@ -2,7 +2,7 @@ import { ImageUploader } from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -60,6 +60,8 @@ const formSchema = z.object({
   imageAlt: z.string().optional(),
   imageDescription: z.string().optional(),
   imageUpload: z.string().optional(),
+  fieldRequired: z.boolean().optional(),
+  showSmileys: z.boolean().optional(),
 });
 
 export default function WidgetEnqueteItems(
@@ -109,6 +111,8 @@ export default function WidgetEnqueteItems(
           image: values.image || '',
           imageAlt: values.imageAlt || '',
           imageDescription: values.imageDescription || '',
+          fieldRequired: values.fieldRequired || false,
+          showSmileys: values.showSmileys || false,
         },
       ]);
     }
@@ -167,7 +171,9 @@ export default function WidgetEnqueteItems(
     multiple: false,
     image: '',
     imageAlt: '',
-    imageDescription: ''
+    imageDescription: '',
+    fieldRequired: false,
+    showSmileys: false,
   });
 
   const form = useForm<FormData>({
@@ -209,6 +215,8 @@ export default function WidgetEnqueteItems(
         image: selectedItem.image || '',
         imageAlt: selectedItem.imageAlt || '',
         imageDescription: selectedItem.imageDescription || '',
+        fieldRequired: selectedItem.fieldRequired || false,
+        showSmileys: selectedItem.showSmileys || false,
       });
       setOptions(selectedItem.options || []);
     }
@@ -813,6 +821,65 @@ export default function WidgetEnqueteItems(
                               <SelectContent>
                                 <SelectItem value="true">Ja</SelectItem>
                                 <SelectItem value="false">Nee</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    <FormField
+                      control={form.control}
+                      name="fieldRequired"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Is dit veld verplicht?
+                          </FormLabel>
+                          <Select
+                            onValueChange={(e: string) => field.onChange(e === 'true')}
+                            value={field.value ? 'true' : 'false'}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Kies een optie" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="false">Nee</SelectItem>
+                              <SelectItem value="true">Ja</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {form.watch('questionType') === 'scale' && (
+                      <FormField
+                        control={form.control}
+                        name="showSmileys"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Wil je smileys tonen in plaats van een schaal?
+                            </FormLabel>
+                            <FormDescription>
+                              De schaal toont normaal gesproken een getal van 1 tot 5. Als je smileys wilt tonen, kies dan voor ja.
+                            </FormDescription>
+                            <Select
+                              onValueChange={(e: string) => field.onChange(e === 'true')}
+                              value={field.value ? 'true' : 'false'}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="false">Nee</SelectItem>
+                                <SelectItem value="true">Ja</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
