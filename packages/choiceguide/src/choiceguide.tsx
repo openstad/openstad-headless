@@ -46,43 +46,6 @@ function ChoiceGuide(props: ChoiceGuideProps) {
         setAnswers(updatedAnswers);
     }, [currentAnswers]);
 
-    // const handleScroll = () => {
-    //     if (sidebarRef.current && containerRef.current) {
-    //         const containerRect = containerRef.current.getBoundingClientRect();
-    //         const sidebarRect = sidebarRef.current.getBoundingClientRect();
-    //         const sidebarHeight = sidebarRef.current.offsetHeight;
-
-    //         // Determine the right offset
-    //         const containerRightOffset = window.innerWidth - containerRect.right;
-
-    //         // Check if the container's top is within view
-    //         if (containerRect.top <= 0 && containerRect.bottom > sidebarHeight) {
-    //             sidebarRef.current.style.position = 'fixed';
-    //             sidebarRef.current.style.top = '0';
-    //             sidebarRef.current.style.bottom = 'auto';
-    //             sidebarRef.current.style.right = `${containerRightOffset}px`;
-    //         } else if (containerRect.bottom <= sidebarHeight) {
-    //             sidebarRef.current.style.position = 'absolute';
-    //             sidebarRef.current.style.top = 'auto';
-    //             sidebarRef.current.style.bottom = '0';
-    //             sidebarRef.current.style.right = '0'; // Adjust for right alignment within the container
-    //         } else {
-    //             sidebarRef.current.style.position = 'absolute';
-    //             sidebarRef.current.style.top = '0';
-    //             sidebarRef.current.style.bottom = 'auto';
-    //             sidebarRef.current.style.right = '0'; // Reset right alignment within the container
-    //         }
-    //     }
-    // };
-
-
-    // useEffect(() => {
-    //     window.addEventListener('scroll', handleScroll);
-    //     return () => {
-    //         window.removeEventListener('scroll', handleScroll);
-    //     };
-    // }, []);
-
     const datastore: any = new DataStore({
         projectId: props.projectId,
         api: props.api,

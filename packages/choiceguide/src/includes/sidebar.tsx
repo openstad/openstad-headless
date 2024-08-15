@@ -20,7 +20,7 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
   const baseSize = document.getElementById(`osc-choice-container-${props.widgetId || ""}`)?.clientWidth || 180;
 
   return (
-    <div className="osc-choices-container" id={`osc-choice-container-${props.widgetId || ""}`}>
+    <div className="osc-choices-container" role="status" id={`osc-choice-container-${props.widgetId || ""}`} >
       {props.choicesType === 'plane' ? (
         <div id="choice-plane" className="osc-choice-plane" style={{ height: baseSize }}>
 
