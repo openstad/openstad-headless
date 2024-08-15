@@ -26,6 +26,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
     const { create: createResource } = datastore.useResources({
         projectId: props.projectId,
+        widgetId: props.widgetId,
     });
 
     const formFields = InitializeFormFields(props.items, props);

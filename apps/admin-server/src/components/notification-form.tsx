@@ -68,6 +68,28 @@ const initialData = `<mjml>
     </mj-body>
   </mjml>`;
 
+const initialDataResourceSubmission = `<mjml> 
+<mj-body> 
+<mj-section> 
+<mj-column> 
+<mj-image width="300px" src="{{imagePath}}/logo-openstad.png"></mj-image> 
+<mj-divider border-color="#666"></mj-divider> 
+
+<mj-text font-size="20px" color="#111" font-family="helvetica">Nieuwe inzending</mj-text><br>
+<mj-text font-size="16px" line-height="22px" color="#222" font-family="helvetica">Beste {{user.fullName | default('indiener')}},
+<br><br>
+Bedankt voor je inzending! Je inzending is goed ontvangen en staat nu online. Hieronder vind je een overzicht van je inzending.
+<br><br>
+</mj-text>
+<mj-text font-size="14px" line-height="22px" color="#444" font-family="helvetica">
+{{ submissionContent | safe }}
+</mj-text>
+
+ </mj-column> 
+ </mj-section> 
+ </mj-body> 
+ </mjml>`;
+
 
 const getUserName = () => {
   if (typeof window !== "undefined") {
@@ -134,7 +156,7 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
       engine: engine || "email",
       label: label || "",
       subject: subject || "",
-      body: body || "",
+      body: body || ( type === 'new published resource - user feedback' ? initialDataResourceSubmission : "" ),
     }),
     [engine, label, subject, body]
   )
