@@ -1,7 +1,7 @@
 .osc-choiceguide-container {
  width: 100%;
  display: grid;
- grid-template-columns: 3fr 1fr;
+ grid-template-columns: 2fr 1fr;
 }
 
 #choice-plane {
@@ -41,15 +41,16 @@
 }
 
 .osc-choiceguide-sidebar-container {
- position: relative;
- right: 0;
- left: auto;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    align-self: start;
 }
 
 .osc-choices-container {
  position: relative;
  z-index: 50;
- width: 220px;
+ width: 100%;
 }
 
 @media only screen and (max-width: 600px) {
