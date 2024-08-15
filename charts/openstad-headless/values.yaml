@@ -476,6 +476,9 @@ secrets:
   api:
     jwtSecret:
 
+  auth:
+    sessionSecret:
+
   cms:
     apiKey:
     mongodbUri:

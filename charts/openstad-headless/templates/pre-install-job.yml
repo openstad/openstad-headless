@@ -3,22 +3,13 @@ kind: ServiceAccount
 metadata:
   namespace: {{ .Release.Namespace }}
   name: openstad-secrets-sa
-  annotations:
-    # This is what defines this resource as a hook. Without this line, the
-    # job is considered part of the release.
-    "helm.sh/hook": pre-install
-    "helm.sh/hook-weight": "10"
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   namespace: {{ .Release.Namespace }}
   name: secret-creator
-  annotations:
-    # This is what defines this resource as a hook. Without this line, the
-    # job is considered part of the release.
-    "helm.sh/hook": pre-install
-    "helm.sh/hook-weight": "20"
 rules:
   - apiGroups: ['']
     resources: ['secrets']
@@ -29,11 +20,6 @@ kind: RoleBinding
 metadata:
   name: secret-creator-role-to-openstad-secrets-sa
   namespace: {{ .Release.Namespace }}
-  annotations:
-    # This is what defines this resource as a hook. Without this line, the
-    # job is considered part of the release.
-    "helm.sh/hook": pre-install
-    "helm.sh/hook-weight": "30"
 roleRef:
   apiGroup: ''
   kind: Role
@@ -54,6 +40,7 @@ metadata:
     "helm.sh/hook-weight": "40"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
+  ttlSecondsAfterFinished: 10
   template:
     metadata:
       name: "{{ .Release.Name }}-batch"
