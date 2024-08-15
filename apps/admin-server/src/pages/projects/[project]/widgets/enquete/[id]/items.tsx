@@ -74,6 +74,7 @@ export default function WidgetEnqueteItems(
   const [selectedOption, setOption] = useState<Option | null>(null);
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
   const [file, setFile] = useState<File>();
+  const [isFieldKeyUnique, setIsFieldKeyUnique] = useState(true);
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
@@ -326,6 +327,18 @@ export default function WidgetEnqueteItems(
     setSettingOptions(false);
   }
 
+  useEffect(() => {
+    const key = form.watch("fieldKey");
+
+    if (key) {
+      const isUnique = items.every((item) =>
+        (selectedItem && item.trigger === selectedItem.trigger) || item.fieldKey !== key
+      );
+
+      setIsFieldKeyUnique(isUnique);
+    }
+  }, [form.watch("fieldKey"), selectedItem]);
+
   return (
     <div>
       <Form {...form}>
@@ -566,7 +579,11 @@ export default function WidgetEnqueteItems(
                             </FormLabel>
                             <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
                             <Input {...field} />
-                            <FormMessage />
+                            {(!field.value || !isFieldKeyUnique) && (
+                              <FormMessage>
+                                { !field.value ? 'Key is verplicht' : 'Key moet uniek zijn' }
+                              </FormMessage>
+                            )}
                           </FormItem>
                         )}
                       />
@@ -901,29 +918,39 @@ export default function WidgetEnqueteItems(
                     )}
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  {selectedItem && (
+
+                <div>
+                  <div className="flex gap-2">
+                    {selectedItem && (
+                      <Button
+                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                        type="button"
+                        onClick={() => {
+                          resetForm();
+                        }}>
+                        Annuleer
+                      </Button>
+                    )}
+
                     <Button
-                      className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                      type="button"
-                      onClick={() => {
-                        resetForm();
-                      }}>
-                      Annuleer
+                      className="w-fit mt-4"
+                      type="submit"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onSubmit(form.getValues())
+                      }}
+                      disabled={(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'none'}
+                    >
+                      {selectedItem
+                        ? 'Sla wijzigingen op'
+                        : 'Voeg item toe aan lijst'}
                     </Button>
+                  </div>
+                  {(!form.watch('fieldKey') || !isFieldKeyUnique) && (
+                    <FormMessage>
+                      { !form.watch('fieldKey') ? 'Key is verplicht' : 'Key moet uniek zijn' }
+                    </FormMessage>
                   )}
-                  <Button
-                    className="w-fit mt-4"
-                    type="submit"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onSubmit(form.getValues())
-                    }}
-                  >
-                    {selectedItem
-                      ? 'Sla wijzigingen op'
-                      : 'Voeg item toe aan lijst'}
-                  </Button>
                 </div>
               </div>
             )}
