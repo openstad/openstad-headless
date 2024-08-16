@@ -17,7 +17,7 @@ import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview, FilePondPluginFileValidateType);
 
 const filePondSettings = {
-    labelIdle: "<span class='filepond--label-action'>Upload hier uw bestand(en)</span>",
+    labelIdle: "Upload hier uw bestand(en)",
     labelInvalidField: 'Veld bevat ongeldige bestanden',
     labelFileWaitingForSize: 'Wachtend op grootte',
     labelFileSizeNotAvailable: 'Grootte niet beschikbaar',
@@ -121,11 +121,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     useEffect(() => {
         waitForElm('.filepond--browser').then((elm: any) => {
 
-            const inputItem = document.querySelectorAll('.filepond--browser');
             const label = document.querySelectorAll('.filepond--drop-label > label');
-            inputItem.forEach((item: any) => {
-                item.setAttribute('tabindex', '-1');
-            });
             label.forEach((item: any) => {
                 item.setAttribute('aria-hidden', 'false');
             });

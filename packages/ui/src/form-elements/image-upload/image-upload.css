@@ -1,3 +1,12 @@
 .filepond--wrapper .filepond--credits {
  display: none !important;
 }
+
+.filepond--wrapper .filepond--browser:focus-visible{
+    height: 100%;
+    width: 100%;
+    opacity: 1;
+    outline-offset: 2px;
+    padding: 10px;
+    border-radius: 3px;
+}
