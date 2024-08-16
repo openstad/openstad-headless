@@ -2,7 +2,7 @@ import { ImageUploader } from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -60,6 +60,8 @@ const formSchema = z.object({
   imageAlt: z.string().optional(),
   imageDescription: z.string().optional(),
   imageUpload: z.string().optional(),
+  fieldRequired: z.boolean().optional(),
+  showSmileys: z.boolean().optional(),
 });
 
 export default function WidgetEnqueteItems(
@@ -72,6 +74,7 @@ export default function WidgetEnqueteItems(
   const [selectedOption, setOption] = useState<Option | null>(null);
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
   const [file, setFile] = useState<File>();
+  const [isFieldKeyUnique, setIsFieldKeyUnique] = useState(true);
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
@@ -109,6 +112,8 @@ export default function WidgetEnqueteItems(
           image: values.image || '',
           imageAlt: values.imageAlt || '',
           imageDescription: values.imageDescription || '',
+          fieldRequired: values.fieldRequired || false,
+          showSmileys: values.showSmileys || false,
         },
       ]);
     }
@@ -167,7 +172,9 @@ export default function WidgetEnqueteItems(
     multiple: false,
     image: '',
     imageAlt: '',
-    imageDescription: ''
+    imageDescription: '',
+    fieldRequired: false,
+    showSmileys: false,
   });
 
   const form = useForm<FormData>({
@@ -209,6 +216,8 @@ export default function WidgetEnqueteItems(
         image: selectedItem.image || '',
         imageAlt: selectedItem.imageAlt || '',
         imageDescription: selectedItem.imageDescription || '',
+        fieldRequired: selectedItem.fieldRequired || false,
+        showSmileys: selectedItem.showSmileys || false,
       });
       setOptions(selectedItem.options || []);
     }
@@ -317,6 +326,18 @@ export default function WidgetEnqueteItems(
     form.setValue('options', options);
     setSettingOptions(false);
   }
+
+  useEffect(() => {
+    const key = form.watch("fieldKey");
+
+    if (key) {
+      const isUnique = items.every((item) =>
+        (selectedItem && item.trigger === selectedItem.trigger) || item.fieldKey !== key
+      );
+
+      setIsFieldKeyUnique(isUnique);
+    }
+  }, [form.watch("fieldKey"), selectedItem]);
 
   return (
     <div>
@@ -558,7 +579,11 @@ export default function WidgetEnqueteItems(
                             </FormLabel>
                             <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
                             <Input {...field} />
-                            <FormMessage />
+                            {(!field.value || !isFieldKeyUnique) && (
+                              <FormMessage>
+                                { !field.value ? 'Key is verplicht' : 'Key moet uniek zijn' }
+                              </FormMessage>
+                            )}
                           </FormItem>
                         )}
                       />
@@ -821,6 +846,65 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
+                    <FormField
+                      control={form.control}
+                      name="fieldRequired"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Is dit veld verplicht?
+                          </FormLabel>
+                          <Select
+                            onValueChange={(e: string) => field.onChange(e === 'true')}
+                            value={field.value ? 'true' : 'false'}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Kies een optie" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="false">Nee</SelectItem>
+                              <SelectItem value="true">Ja</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {form.watch('questionType') === 'scale' && (
+                      <FormField
+                        control={form.control}
+                        name="showSmileys"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Wil je smileys tonen in plaats van een schaal?
+                            </FormLabel>
+                            <FormDescription>
+                              De schaal toont normaal gesproken een getal van 1 tot 5. Als je smileys wilt tonen, kies dan voor ja.
+                            </FormDescription>
+                            <Select
+                              onValueChange={(e: string) => field.onChange(e === 'true')}
+                              value={field.value ? 'true' : 'false'}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="false">Nee</SelectItem>
+                                <SelectItem value="true">Ja</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
                     {hasOptions() && (
                       <FormItem>
                         <Button
@@ -834,29 +918,39 @@ export default function WidgetEnqueteItems(
                     )}
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  {selectedItem && (
+
+                <div>
+                  <div className="flex gap-2">
+                    {selectedItem && (
+                      <Button
+                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                        type="button"
+                        onClick={() => {
+                          resetForm();
+                        }}>
+                        Annuleer
+                      </Button>
+                    )}
+
                     <Button
-                      className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                      type="button"
-                      onClick={() => {
-                        resetForm();
-                      }}>
-                      Annuleer
+                      className="w-fit mt-4"
+                      type="submit"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onSubmit(form.getValues())
+                      }}
+                      disabled={(!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('questionType') !== 'none'}
+                    >
+                      {selectedItem
+                        ? 'Sla wijzigingen op'
+                        : 'Voeg item toe aan lijst'}
                     </Button>
+                  </div>
+                  {(!form.watch('fieldKey') || !isFieldKeyUnique) && (
+                    <FormMessage>
+                      { !form.watch('fieldKey') ? 'Key is verplicht' : 'Key moet uniek zijn' }
+                    </FormMessage>
                   )}
-                  <Button
-                    className="w-fit mt-4"
-                    type="submit"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onSubmit(form.getValues())
-                    }}
-                  >
-                    {selectedItem
-                      ? 'Sla wijzigingen op'
-                      : 'Voeg item toe aan lijst'}
-                  </Button>
                 </div>
               </div>
             )}

@@ -174,8 +174,7 @@ admin:
   resources:
     # Max resources
     limits:
-      cpu: 500m
-      memory: 1Gi
+      memory: 500M
     # Min resources
     requests:
       cpu: 100m
@@ -230,8 +229,7 @@ auth:
   resources:
     # Max resources
     limits:
-      cpu: 300m
-      memory: 1Gi
+      memory: 500M
     # Min resources
     requests:
       cpu: 100m
@@ -295,8 +293,7 @@ api:
   resources:
     # Max resources
     limits:
-      cpu: 500m
-      memory: 1Gi
+      memory: 500M
     # Min resources
     requests:
       cpu: 250m
@@ -372,8 +369,7 @@ image:
   resources:
     # Max resources
     limits:
-      cpu: 500m
-      memory: 1Gi
+      memory: 500M
     # Min resources
     requests:
       cpu: 100m
@@ -437,12 +433,11 @@ cms:
   resources:
     # Max resources
     limits:
-      cpu: "1"
-      memory: 2Gi
+      memory: 1Gi
     # Min resources
     requests:
       cpu: 250m
-      memory: 500M
+      memory: 1Gi
 
   # Check whether the service is healthy:
   # First time after $(initialDelaySeconds) seconds.
