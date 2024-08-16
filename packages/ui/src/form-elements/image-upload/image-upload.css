@@ -10,3 +10,8 @@
     padding: 10px;
     border-radius: 3px;
 }
+
+.filepond--wrapper .filepond--drop-label,
+.filepond--wrapper .filepond--drop-label label{
+    cursor: pointer;
+}
