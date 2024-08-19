@@ -660,38 +660,39 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             />
           </div>
 
-
-          <FormField
-            control={form.control}
-            name="extraData"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <Textarea
-                  className='hidden'
-                  hidden={true}
-                  name={'extraData'}
-                  value={extraData} // Bind the state to the Textarea value
-                  readOnly // Make the Textarea read-only since it's updated programmatically
-                />
-                <FormLabel>
-                  Extra data
-                </FormLabel>
-                <FormControl>
-                  <CodeEditor
-                    initValue={existingData?.extraData}
-                    onValueChange={(value) => {
-                      try {
-                        const parsedValue = JSON.parse(value); // Parse the JSON to make sure it's valid
-                        form.setValue('extraData', parsedValue); // Set the value of the field
-                        setExtraData(JSON.stringify(parsedValue));
-                      } catch (error) {
-                      }
-                    }}
+          <div className="col-span-full lg:col-span-1">
+            <FormField
+              control={form.control}
+              name="extraData"
+              render={({ field }) => (
+                <FormItem>
+                  <Textarea
+                    className='hidden'
+                    hidden={true}
+                    name={'extraData'}
+                    value={extraData} // Bind the state to the Textarea value
+                    readOnly // Make the Textarea read-only since it's updated programmatically
                   />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+                  <FormLabel>
+                    Extra data
+                  </FormLabel>
+                  <FormControl>
+                    <CodeEditor
+                      initValue={existingData?.extraData}
+                      onValueChange={(value) => {
+                        try {
+                          const parsedValue = JSON.parse(value); // Parse the JSON to make sure it's valid
+                          form.setValue('extraData', parsedValue); // Set the value of the field
+                          setExtraData(JSON.stringify(parsedValue));
+                        } catch (error) {
+                        }
+                      }}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>
