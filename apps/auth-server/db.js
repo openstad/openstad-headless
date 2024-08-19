@@ -28,7 +28,7 @@ let sequelize = new Sequelize({
   // logging: console.log,
 
   pool: {
-    max: process.env.maxPoolSize || 5,
+    max: parseInt(process.env.DB_MAX_POOL_SIZE || process.env.maxPoolSize) || 5,
   },
 
 });

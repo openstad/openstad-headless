@@ -209,6 +209,12 @@ spec:
                 name: openstad-db-credentials
                 key: hostport
 
+          - name: DB_MAX_POOL_SIZE
+            valueFrom:
+              secretKeyRef:
+                name: openstad-db-credentials
+                key: maxPoolSize
+
           - name: DB_NAME
             valueFrom:
               secretKeyRef:
