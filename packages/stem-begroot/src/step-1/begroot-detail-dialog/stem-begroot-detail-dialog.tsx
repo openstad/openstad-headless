@@ -33,6 +33,7 @@ export const StemBegrootResourceDetailDialog = ({
   showOriginalResource,
   originalResourceUrl,
   isSimpleView,
+  areaId
 }: {
   openDetailDialog: boolean;
   setOpenDetailDialog: (condition: boolean) => void;
@@ -48,6 +49,7 @@ export const StemBegrootResourceDetailDialog = ({
   showOriginalResource: boolean;
   originalResourceUrl?: string;
   isSimpleView: boolean;
+  areaId: string; 
 }) => (
   <Dialog
     open={openDetailDialog}
@@ -100,10 +102,11 @@ export const StemBegrootResourceDetailDialog = ({
                           resourceId={resource.id}
                           {...resource}
                           center={resource.location}
-                          area={resource.resourceDetailMap?.area}
-                        />
+                          map={{'areaId': areaId}}
+                          />
                       }
                     }}
+
                   />
                   {/* <div>
                     <Button className="osc-begrootmodule-load-map-button"></Button>
