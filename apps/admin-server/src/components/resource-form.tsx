@@ -612,51 +612,53 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             />
           </div>
 
-          <CheckboxList
-            form={form}
-            fieldName="tags"
-            fieldLabel="Selecteer de gewenste tags die bij een resource weergegeven zullen
+          <div className="col-span-full lg:col-span-1">
+            <CheckboxList
+              form={form}
+              fieldName="tags"
+              fieldLabel="Selecteer de gewenste tags die bij een resource weergegeven zullen
                worden."
-            label={(t) => t.name}
-            keyForGrouping="type"
-            keyPerItem={(t) => `${t.id}`}
-            items={loadedTags}
-            layout="vertical"
-            selectedPredicate={(t) =>
-              form.getValues('tags').findIndex((tg) => tg === t.id) > -1
-            }
-            onValueChange={(tag, checked) => {
-              const values = form.getValues('tags');
-              form.setValue(
-                'tags',
-                checked
-                  ? [...values, tag.id]
-                  : values.filter((id) => id !== tag.id)
-              );
-            }}
-          />
+              label={(t) => t.name}
+              keyForGrouping="type"
+              keyPerItem={(t) => `${t.id}`}
+              items={loadedTags}
+              layout="vertical"
+              selectedPredicate={(t) =>
+                form.getValues('tags').findIndex((tg) => tg === t.id) > -1
+              }
+              onValueChange={(tag, checked) => {
+                const values = form.getValues('tags');
+                form.setValue(
+                  'tags',
+                  checked
+                    ? [...values, tag.id]
+                    : values.filter((id) => id !== tag.id)
+                );
+              }}
+            />
 
-          <CheckboxList
-            form={form}
-            fieldName="statuses"
-            fieldLabel="Status"
-            layout="vertical"
-            label={(t) => t.name}
-            keyPerItem={(t) => `${t.id}`}
-            items={loadedStatuses}
-            selectedPredicate={(t) =>
-              form.getValues('statuses').findIndex((tg) => tg === t.id) > -1
-            }
-            onValueChange={(status, checked) => {
-              const values = form.getValues('statuses');
-              form.setValue(
-                'statuses',
-                checked
-                  ? [...values, status.id]
-                  : values.filter((id) => id !== status.id)
-              );
-            }}
-          />
+            <CheckboxList
+              form={form}
+              fieldName="statuses"
+              fieldLabel="Status"
+              layout="vertical"
+              label={(t) => t.name}
+              keyPerItem={(t) => `${t.id}`}
+              items={loadedStatuses}
+              selectedPredicate={(t) =>
+                form.getValues('statuses').findIndex((tg) => tg === t.id) > -1
+              }
+              onValueChange={(status, checked) => {
+                const values = form.getValues('statuses');
+                form.setValue(
+                  'statuses',
+                  checked
+                    ? [...values, status.id]
+                    : values.filter((id) => id !== status.id)
+                );
+              }}
+            />
+          </div>
 
 
           <FormField
