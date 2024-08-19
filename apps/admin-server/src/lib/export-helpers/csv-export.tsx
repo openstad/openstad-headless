@@ -1,4 +1,27 @@
-export const exportDataToCSV = (data: any, widgetName: string) => {
+export const exportDataToCSV = (data: any, widgetName: string, selectedWidget: any) => {
+
+  if ( selectedWidget && selectedWidget?.config && selectedWidget?.config?.items ) {
+
+    const fieldKeyToTitleMap = selectedWidget?.config?.items.reduce((acc: any, item: any) => {
+      acc[item.fieldKey] = item.title;
+      return acc;
+    }, {});
+
+    data = data.map((row: any) => {
+      const updatedSubmittedData = Object.keys(row?.submittedData).reduce((acc: any, key: any) => {
+        const newKey = fieldKeyToTitleMap[key] || key;
+        acc[newKey] = row?.submittedData[key];
+        return acc;
+      }, {});
+
+      return {
+        ...row,
+        submittedData: updatedSubmittedData
+      };
+    });
+
+  }
+
   function transformString() {
     widgetName = widgetName.replace(/\s+/g, '-').toLowerCase();
     widgetName = widgetName.replace(/[^a-z0-9-]/g, '');

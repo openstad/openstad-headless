@@ -48,6 +48,11 @@ module.exports = function (db, sequelize, DataTypes) {
             : 0,
       },
 
+      widgetId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+
       userId: {
         type: DataTypes.INTEGER,
         auth: {
