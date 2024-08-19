@@ -90,10 +90,15 @@ export default function ProjectTags() {
 
           <div className="p-6 bg-white rounded-md clear-right">
 
-            <div className="grid grid-cols-1 lg:grid-cols-6 items-center py-2 px-2 border-b border-border">
+            <div className="grid grid-cols-1 lg:grid-cols-7 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex truncate">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('id', e, filterData))}>
                   ID
+                </button>
+              </ListHeading>
+              <ListHeading className="hidden lg:flex truncate">
+                <button className="filter-button" onClick={(e) => setFilterData(sortTable('seqnr', e, filterData))}>
+                  Volgorde
                 </button>
               </ListHeading>
               <ListHeading className="flex truncate">
@@ -117,8 +122,9 @@ export default function ProjectTags() {
                 <Link
                   href={`/projects/${project}/tags/${tag.id}`}
                   key={tag.id}>
-                  <li key={tag.id} className="grid grid-cols-2 lg:grid-cols-6 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                  <li key={tag.id} className="grid grid-cols-2 lg:grid-cols-7 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                     <Paragraph className="my-auto -mr-16 lg:mr-0">{tag.id || null}</Paragraph>
+                    <Paragraph className="hidden lg:flex truncate my-auto">{tag.seqnr || null}</Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">{tag.name || null}</Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">{tag.type}</Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">{tag.addToNewResources ? 'Ja' : 'Nee'}</Paragraph>
