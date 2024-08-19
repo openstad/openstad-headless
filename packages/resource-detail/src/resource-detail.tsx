@@ -356,7 +356,7 @@ function ResourceDetail({
               {...props}
               resourceId={resourceId || ''}
               title={props.commentsWidget_multiple?.title}
-              emptyListText={props.commentsWidget?.emptyListText}
+              emptyListText={props.commentsWidget_multiple?.emptyListText}
               formIntro={props.commentsWidget_multiple?.formIntro}
               placeholder={props.commentsWidget_multiple?.placeholder}
               sentiment={props.commentsWidget?.useSentiments[1]}
