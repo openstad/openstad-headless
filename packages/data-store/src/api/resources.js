@@ -41,11 +41,15 @@ export default {
     return { id: data.id };
   },
 
-  create: async function ({ projectId }, data) {
+  create: async function ({ projectId, widgetId }, data) {
     delete data.id;
 
     let url = `/api/project/${projectId}/resource`;
     let method = 'POST';
+
+    if (widgetId) {
+      data.widgetId = widgetId;
+    }
 
     let body = JSON.stringify(data);
 

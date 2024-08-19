@@ -9,9 +9,15 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
 
     switch (field.type) {
         case 'text':
-            const min = field.minCharacters || 0;
+            let min = field.minCharacters || 0;
             let minWarning = field.minCharactersWarning || 'Tekst moet minimaal {minCharacters} karakters bevatten';
-            minWarning = minWarning.replace('{minCharacters}', min.toString());
+
+            if (field.fieldRequired && min === 0) {
+                min = 1;
+                minWarning = field.requiredWarning || 'Dit veld is verplicht';
+            } else {
+                minWarning = minWarning.replace('{minCharacters}', min.toString());
+            }
 
             const max = field.maxCharacters || Infinity;
             let maxWarning = field.maxCharactersWarning || 'Tekst moet maximaal {maxCharacters} karakters bevatten';

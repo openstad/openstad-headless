@@ -8,8 +8,9 @@ import { Heading5, Paragraph, Button } from "@utrecht/component-library-react";
 type Props = {
   loginUrl: string;
   step3: string;
+  stemCodeTitle: string;
 };
-export const Step3 = ({ step3, ...props }: Props) => {
+export const Step3 = ({ step3, stemCodeTitle, ...props }: Props) => {
   return (
     <>
       <Heading5>Controleer stemcode</Heading5>

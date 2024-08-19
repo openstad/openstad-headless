@@ -37,7 +37,7 @@ module.exports = {
     return {
       async enrich(req, res, next) {
         const projectId = req.project.id;
-        req.data.global.logoutUrl = `${process.env.API_URL}/auth/project/${projectId}/logout?useAuth=default&redirectUri=${req.protocol}://${req.host}${req.url}/api/v1/openstad-auth/logout`;
+        req.data.global.logoutUrl = `${process.env.API_URL}/auth/project/${projectId}/logout?useAuth=default&redirectUri=${req.protocol}://${req.hostname}${req.url}/api/v1/openstad-auth/logout`;
         return next();
       },
       async authenticate (req, res, next) {
@@ -55,7 +55,7 @@ module.exports = {
         req.data.userCan = function (permission) {
           return self.apos.permissions.can(req, permission);
         };
-
+        
         if (req.query.openstadlogintoken) {
           const thisHost = req.headers['x-forwarded-host'] || req.get('host');
           const protocol = req.headers['x-forwarded-proto'] || req.protocol;
@@ -72,6 +72,12 @@ module.exports = {
           req.session.openstadLoginToken = req.query.openstadlogintoken;
           req.session.returnTo = null;
 
+          // Remove siteprefix from returnTo if returnTo starts with the siteprefix
+          // This is to prevent doubling of the siteprefix leading to 404s
+          if (req.sitePrefix && returnTo.startsWith(`/${req.sitePrefix}`)) {
+            returnTo = returnTo.replace(`/${req.sitePrefix}`, '');
+          }
+          
           req.session.save(() => {
             res.redirect(returnTo);
           });
@@ -80,7 +86,7 @@ module.exports = {
 
           const jwt = req.session.openstadLoginToken;
           const apiUrl = process.env.API_URL_INTERNAL || process.env.API_URL;
-
+          
           if (!jwt) {
             next();
           } else {
@@ -252,7 +258,7 @@ module.exports = {
               req.session.openstadUser = bak.openstadUser;
               req.session.openstadLoginToken = bak.openstadLoginToken;
               req.session.openstadLastJWTCheck = bak.openstadLastJWTCheck;
-              res.redirect(req.originalUrl);
+              res.redirect(req.url);
             });
           } catch (e) {
             console.log('errr', e);

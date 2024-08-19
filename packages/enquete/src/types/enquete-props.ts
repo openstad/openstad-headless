@@ -30,6 +30,11 @@ export type Item = {
   options?: Array<Option>;
   imageUpload?: string;
   multiple?: boolean;
+  image?: string;
+  imageAlt?: string;
+  imageDescription?: string;
+  fieldRequired?: boolean;
+  showSmileys?: boolean;
 };
 
 export type Option = {

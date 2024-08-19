@@ -56,8 +56,6 @@ function DocumentMap({
   maxZoom = 10,
   iconDefault,
   iconHighlight = 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309740_1280.png',
-  documentWidth = 1920,
-  documentHeight = 1080,
   sentiment = 'no sentiment',
   accessibilityUrlVisible,
   definitiveUrlVisible,
@@ -90,7 +88,23 @@ function DocumentMap({
   const [popupPosition, setPopupPosition] = useState<any>(null);
   const [selectedCommentIndex, setSelectedCommentIndex] = useState<Number>();
   const [selectedMarkerIndex, setSelectedMarkerIndex] = useState<Number>();
-  const imageBounds: LatLngBoundsLiteral = [[-documentHeight, -documentWidth], [documentHeight, documentWidth]];
+
+
+  const [docWidth, setDocumentWidth] = useState<number>(1920);
+  const [docHeight, setDocumentHeight] = useState<number>(1080)
+  const imageUrl = resource.images ? resource.images[0].url : '';
+  const img = new Image();
+  img.src = imageUrl;
+  img.onload = () => {
+    const imageWidth = img.width;
+    const imageHeight = img.height;
+    setDocumentWidth(imageWidth);
+    setDocumentHeight(imageHeight);
+  };
+  const verticalOffset = docHeight * .20;
+  const imageBounds: LatLngBoundsLiteral = [[-docHeight + verticalOffset, -docWidth/2], [verticalOffset, docWidth/2]];
+
+
   const contentRef = useRef<HTMLDivElement>(null);
   const [shortLengthError, setShortLengthError] = useState(false);
   const [longLengthError, setLongLengthError] = useState(false);
@@ -119,15 +133,15 @@ function DocumentMap({
     e.preventDefault();
     e.stopPropagation();
 
-    if (value.length < 30) {
+    if (value.length < props.comments?.descriptionMinLength) {
       setShortLengthError(true);
     }
 
-    if (value.length > 500) {
+    if (value.length > props.comments?.descriptionMaxLength) {
       setLongLengthError(true);
     }
 
-    if (value.length >= 30 && value.length <= 500) {
+    if (value.length >= props.comments?.descriptionMinLength && value.length <= props.comments?.descriptionMaxLength) {
 
       comments.create({
         description: value,
@@ -174,7 +188,7 @@ function DocumentMap({
       if (status.extraFunctionality?.canComment === false) {
         setCanComment(false)
       }
-      if(status.id === Number(statusId)) {
+      if (status.id === Number(statusId)) {
         setIsDefinitive(true)
       }
     }
@@ -291,7 +305,7 @@ function DocumentMap({
         )}
       </div>
       <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''}`}>
-        <MapContainer center={[0, 0]} crs={CRS.Simple} maxZoom={maxZoom} minZoom={minZoom} zoom={zoom} >
+        <MapContainer center={[0, 0]} crs={CRS.Simple} maxZoom={maxZoom} minZoom={minZoom} zoom={zoom}  >
           <MapEvents />
           {comments
             .filter((comment: any) => !!comment.location)
@@ -316,8 +330,8 @@ function DocumentMap({
               ) :
                 <form>
                   <FormLabel htmlFor="commentBox">Voeg een opmerking toe</FormLabel>
-                  {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal 30 tekens bevatten</Paragraph>}
-                  {longLengthError && <Paragraph className="--error">De opmerking mag maximaal 500 tekens bevatten</Paragraph>}
+                  {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
+                  {longLengthError && <Paragraph className="--error">De opmerking mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
                   <Textarea name="comment" rows={3} id="commentBox"></Textarea>
                   <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>Insturen</Button>
                 </form>}

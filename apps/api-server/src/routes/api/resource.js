@@ -212,6 +212,7 @@ router
       projectId: req.params.projectId,
       userId,
       startDate: req.body.startDate || new Date(),
+      widgetId: req.body.widgetId || null,
     };
 
     // Check if resource has images and if so, check their domains

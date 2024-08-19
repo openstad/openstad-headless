@@ -64,7 +64,7 @@ export default function WidgetEnqueteDisplay(
             name="displayDescription"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Enquête bechrijving weergeven</FormLabel>
+                <FormLabel>Enquête beschrijving weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

@@ -10,13 +10,17 @@ const isRedirectAllowed = async (projectId, redirectUri) => {
         if(!domain.startsWith('http://') && !domain.startsWith('https://')){
             domain = 'http://'+domain; // add http so we can parse the url
         }
-
-        let url = new URL(domain);
-        // remove wwww
-        if(url.host.startsWith('www.')){
-        url.host = url.hostname.slice(4);
+        try {
+            let url = new URL(domain);
+            // remove wwww
+            if (url.host.startsWith('www.')) {
+                url.host = url.hostname.slice(4);
+            }
+            return url.host;
+        } catch (e) {
+            console.log (`Error parsing allowed domain: ${domain}, project ID: ${projectId}`);
+            return false;
         }
-        return url.host;
     });
 
     if(allowedDomains.includes(new URL(redirectUri).host)){
