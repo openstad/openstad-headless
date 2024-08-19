@@ -75,7 +75,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Resource Overview',
+            name: 'Inzending overzicht tegels',
             url: `/projects/${projectId}/widgets/resourceoverview/${id}`,
           },
         ]}>
