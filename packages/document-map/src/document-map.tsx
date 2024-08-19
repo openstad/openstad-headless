@@ -17,13 +17,16 @@ import { loadWidget } from '@openstad-headless/lib/load-widget';
 import React, { useState, useRef, useEffect } from 'react';
 import './document-map.css';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { MapContainer, ImageOverlay, useMapEvents, Popup, Marker, MarkerProps } from 'react-leaflet';
-import { LatLngBoundsLiteral, CRS, Icon } from 'leaflet';
+import type { MarkerProps } from 'react-leaflet';
+import { MapContainer, ImageOverlay, useMapEvents, Popup, Marker } from 'react-leaflet';
+import type { LatLngBoundsLiteral} from 'leaflet';
+import { CRS, Icon } from 'leaflet';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 
 import 'leaflet/dist/leaflet.css';
 
 import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
+import { Filters } from "@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter";
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
@@ -49,6 +52,11 @@ export type DocumentMapProps = BaseProps &
     statusId?: string;
     includeOrExclude?: string;
     onlyIncludeOrExcludeTagIds?: string;
+    displayTagFilters?: boolean;
+    tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
+    extraFieldsTagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
+    displayTagGroupName?: boolean;
+    extraFieldsDisplayTagGroupName?: boolean;
   };
 
 
@@ -64,10 +72,14 @@ function DocumentMap({
   statusId,
   includeOrExclude = 'include',
   onlyIncludeOrExcludeTagIds = '',
+  displayTagFilters = false,
+  tagGroups = [],
+  extraFieldsTagGroups = [],
+  displayTagGroupName = false,
   ...props
 }: DocumentMapProps) {
 
-  let resourceId: string | undefined = String(getResourceId({
+  const resourceId: string | undefined = String(getResourceId({
     resourceId: parseInt(props.resourceId || ''),
     url: document.location.href,
     targetUrl: props.resourceIdRelativePath,
@@ -84,6 +96,27 @@ function DocumentMap({
   });
 
   const tagIds = !!onlyIncludeOrExcludeTagIds && onlyIncludeOrExcludeTagIds.startsWith(',') ? onlyIncludeOrExcludeTagIds.substring(1) : onlyIncludeOrExcludeTagIds;
+  const tagIdsArray = tagIds.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
+
+  const {data: allTags} = datastore.useTags({
+      projectId: props.projectId,
+      type: ''
+  });
+
+  let filteredTagIdsArray: Array<number> = [];
+
+  try {
+    if (includeOrExclude === 'exclude') {
+      const filteredTags = allTags.filter(tag => !tagIdsArray.includes( (tag.id) ));
+      const filteredTagIds = filteredTags.map(tag => tag.id);
+      filteredTagIdsArray = filteredTagIds;
+    } else if (includeOrExclude === 'include') {
+      filteredTagIdsArray = tagIdsArray;
+    }
+  } catch (error) {
+    console.error('Error processing tags:', error);
+  }
+
 
   const useCommentsData = {
     projectId: props.projectId,
@@ -95,9 +128,35 @@ function DocumentMap({
 
   const { data: comments } = datastore.useComments(useCommentsData);
 
+  const [allComments, setAllComments] = useState<Array<Comment>>(comments);
+  const [filteredComments, setFilteredComments] = useState<Array<Comment>>(comments);
+
+  const [tags, setTags] = useState<Array<number>>(tagIdsArray || []);
+  const [tagsString, setTagsString] = useState<string>(tagIds || '');
+
+  useEffect(() => {
+    setAllComments(comments);
+  }, [comments]);
+
+  useEffect(() => {
+    const filtered = allComments && allComments
+      .filter((comment: any) => {
+        if (tags.length === 0) {
+          return true;
+        }
+
+        return comment.tags.some((tag: any) => tags.includes(tag.id));
+      });
+
+    const tagsNewString = !!tags ? tags.join(',') : '';
+
+    setTagsString(tagsNewString);
+    setFilteredComments(filtered);
+  }, [tags, allComments]);
+
   const [popupPosition, setPopupPosition] = useState<any>(null);
-  const [selectedCommentIndex, setSelectedCommentIndex] = useState<Number>();
-  const [selectedMarkerIndex, setSelectedMarkerIndex] = useState<Number>();
+  const [selectedCommentIndex, setSelectedCommentIndex] = useState<number>();
+  const [selectedMarkerIndex, setSelectedMarkerIndex] = useState<number>();
 
 
   const [docWidth, setDocumentWidth] = useState<number>(1920);
@@ -122,7 +181,7 @@ function DocumentMap({
 
   const [toggleMarker, setToggleMarker] = useState(true);
 
-  const MapEvents = () => {
+  function MapEvents() {
     const map = useMapEvents({
       click: (e) => {
         setPopupPosition(e.latlng);
@@ -134,7 +193,7 @@ function DocumentMap({
     });
 
     return null;
-  };
+  }
 
   const addComment = (e: any, position: any) => {
     const value = e.target.previousSibling.value;
@@ -181,7 +240,7 @@ function DocumentMap({
     }
   }, []);
 
-  let args = {
+  const args = {
     canComment: typeof props.comments?.canComment != 'undefined' ? props.comments.canComment : true,
     requiredUserRole: props.comments?.requiredUserRole || 'member',
   }
@@ -193,8 +252,8 @@ function DocumentMap({
   const [isDefinitive, setIsDefinitive] = useState<boolean>()
   useEffect(() => {
     if (!resource) return;
-    let statuses = resource.statuses || [];
-    for (let status of statuses) {
+    const statuses = resource.statuses || [];
+    for (const status of statuses) {
       if (status.extraFunctionality?.canComment === false) {
         setCanComment(false)
       }
@@ -220,8 +279,8 @@ function DocumentMap({
     const markerRef = useRef<any>(null);
 
     const scrollToComment = (index: number) => {
-      const comments = Array.from(document.getElementsByClassName('comment-item'));
-      comments.forEach((comment) => comment.classList.remove('selected'));
+      const filteredComments = Array.from(document.getElementsByClassName('comment-item'));
+      filteredComments.forEach((comment) => comment.classList.remove('selected'));
 
       const commentElement = document.getElementById(`comment-${index}`);
       const commentPosition = commentElement?.offsetTop ?? 0;
@@ -234,8 +293,6 @@ function DocumentMap({
     return (
       <Marker
         {...props}
-        ref={markerRef}
-        icon={MarkerIcon({ icon: { className: index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon' } })}
         eventHandlers={{
           click: () => {
             if (index === selectedMarkerIndex) {
@@ -260,6 +317,8 @@ function DocumentMap({
             }
           }
         }}
+        icon={MarkerIcon({ icon: { className: index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon' } })}
+        ref={markerRef}
       />
     );
   };
@@ -285,23 +344,46 @@ function DocumentMap({
     <div className="documentMap--container">
       <div className="content" ref={contentRef}>
         <div className="documentMap--header">
+
+          {displayTagFilters && datastore ? (
+            <Filters
+              className="osc-flex-columned"
+              dataStore={datastore}
+              defaultSorting=""
+              displaySearch={false}
+              displaySorting={false}
+              displayTagFilters={displayTagFilters}
+              onUpdateFilter={(f) => {
+                if (f.tags.length === 0) {
+                  setTags(tagIdsArray);
+                } else {
+                  setTags(f.tags);
+                }
+              }}
+              resources={[]}
+              sorting={[]}
+              tagGroups={tagGroups}
+              tagsLimitation={filteredTagIdsArray}
+            />
+          ) : null}
+
           <div className='url-container'>
-            {backUrl ? <Link href={backUrl} title="Terug naar overzicht" id={randomId}>Terug</Link> : null}
+            {backUrl ? <Link href={backUrl} id={randomId} title="Terug naar overzicht">Terug</Link> : null}
             <div className="url-list">
-              {accessibilityUrlVisible ? <Link href={getUrl()} title="Bekijk tekstuele versie" id={randomId}>{props.accessibilityUrlText}</Link> : null}
-              {definitiveUrlVisible && originalID !== undefined && isDefinitive ? <Link href={getDefinitiveUrl(originalID)} title="Bekijk originele versie" id={randomId}>{props.definitiveUrlText}</Link> : null}
+              {accessibilityUrlVisible ? <Link href={getUrl()} id={randomId} title="Bekijk tekstuele versie">{props.accessibilityUrlText}</Link> : null}
+              {definitiveUrlVisible && originalID !== undefined && isDefinitive ? <Link href={getDefinitiveUrl(originalID)} id={randomId} title="Bekijk originele versie">{props.definitiveUrlText}</Link> : null}
             </div>
           </div>
           {!isDefinitive && (
             <div className='toggleMarkers'>
-              <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
+              <Checkbox defaultChecked id="toggleMarkers" onChange={() => setToggleMarker(!toggleMarker)} />
               <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
             </div>
           )}
         </div>
         <section className="content-intro">
           {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
-          {resource.summary ? <Heading level={2} appearance={'utrecht-heading-5'}>{resource.summary}</Heading> : null}
+          {resource.summary ? <Heading appearance="utrecht-heading-5" level={2}>{resource.summary}</Heading> : null}
           {resource.description ? <Paragraph>{resource.description}</Paragraph> : null}
         </section>
 
@@ -309,7 +391,7 @@ function DocumentMap({
           <Comments
             {...props}
             includeOrExclude={includeOrExclude}
-            onlyIncludeOrExcludeTagIds={onlyIncludeOrExcludeTagIds}
+            onlyIncludeOrExcludeTagIds={tagsString}
             resourceId={resourceId || ''}
             selectedComment={selectedCommentIndex}
             showForm={false}
@@ -319,21 +401,20 @@ function DocumentMap({
       <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''}`}>
         <MapContainer center={[0, 0]} crs={CRS.Simple} maxZoom={maxZoom} minZoom={minZoom} zoom={zoom}  >
           <MapEvents />
-          {comments
+          {filteredComments && filteredComments
             .filter((comment: any) => !!comment.location)
             .map((comment: any, index: number) => (
               <MarkerWithId
-                key={index}
                 id={`marker-${index}`}
                 index={index}
+                key={index}
                 position={comment.location}
-              >
-              </MarkerWithId>
+               />
             ))}
           <ImageOverlay
-            url={resource.images ? resource.images[0].url : ''}
-            bounds={imageBounds}
             aria-describedby={randomId}
+            bounds={imageBounds}
+            url={resource.images ? resource.images[0].url : ''}
           />
           {popupPosition && !isDefinitive && (
             <Popup position={popupPosition}>
@@ -344,8 +425,26 @@ function DocumentMap({
                   <FormLabel htmlFor="commentBox">Voeg een opmerking toe</FormLabel>
                   {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
                   {longLengthError && <Paragraph className="--error">De opmerking mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
-                  <Textarea name="comment" rows={3} id="commentBox"></Textarea>
-                  <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>Insturen</Button>
+                  <Textarea id="commentBox" name="comment" rows={3} />
+
+                  { extraFieldsTagGroups
+                    && Array.isArray(extraFieldsTagGroups)
+                    && extraFieldsTagGroups.length > 0
+                    && extraFieldsTagGroups.map((group: { label: string | undefined, type: string }, index) => {
+                    return (
+                      <div key={group.type}>
+                        <FormLabel htmlFor={group.type}>{group.label}</FormLabel>
+                        <select id={group.type} name={group.type}>
+                          <option value="">Selecteer een optie</option>
+                          {allTags?.filter(tag => tag.type === group.type).map(tag => (
+                            <option key={tag.id} value={tag.id}>{tag.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )
+                  })}
+
+                  <Button appearance="primary-action-button" onClick={(e) => addComment(e, popupPosition)} type="submit">Insturen</Button>
                 </form>}
 
             </Popup>
