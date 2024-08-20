@@ -167,7 +167,7 @@ function DocumentMap({
   useEffect(() => {
     setRandomId(generateRandomId());
     if (window.location.hash.includes('#doc')) {
-      setBackUrl(window.location.hash.split('=')[1] + '=' + window.location.hash.split('=')[2]);
+      setBackUrl('/' + window.location.hash.split('=')[1] + (window.location.hash.split('=')[2] !== undefined ? '=' + window.location.hash.split('=')[2] : ''));
     }
   }, []);
 
@@ -263,6 +263,7 @@ function DocumentMap({
   }
 
   const getDefinitiveUrl = (originalID: string) => {
+    console.log(resourceId, props.definitiveUrl)
     if (props.definitiveUrl?.includes('[id]')) {
       return props.definitiveUrl?.split('[id]')[0] + originalID + '#doc=' + window.location.href.split('/').reverse()[0];
     } else {
