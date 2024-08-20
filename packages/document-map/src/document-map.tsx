@@ -323,7 +323,7 @@ function DocumentMap({
                   {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
                   {longLengthError && <Paragraph className="--error">De opmerking mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
                   <Textarea name="comment" rows={3} id="commentBox"></Textarea>
-                  <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>Insturen</Button>
+                  <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>Verzenden</Button>
                 </form>}
 
             </Popup>

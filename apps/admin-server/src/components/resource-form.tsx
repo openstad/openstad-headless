@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import {CodeEditor} from '@/components/ui/code-editor';
+import { CodeEditor } from '@/components/ui/code-editor';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
@@ -23,7 +23,7 @@ import { SimpleCalendar } from '@/components/simple-calender-popup';
 import useResource from '@/hooks/use-resource';
 import toast from 'react-hot-toast';
 import { ImageUploader } from './image-uploader';
-import {DocumentUploader} from './document-uploader';
+import { DocumentUploader } from './document-uploader';
 import useTags from '@/hooks/use-tags';
 import useStatuses from '@/hooks/use-statuses';
 import { CheckboxList } from './checkbox-list';
@@ -208,11 +208,11 @@ export default function ResourceForm({ onFormSubmit }: Props) {
 
   function onSubmit(values: FormType) {
     // Add extraData if its valid JSON
-    try{
-      if(extraData !== values.extraData){
+    try {
+      if (extraData !== values.extraData) {
         values.extraData = JSON.parse(extraData);
       }
-    }catch(e){
+    } catch (e) {
     }
 
     onFormSubmit(values)
@@ -233,7 +233,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     if (existingData) {
       form.reset(defaults());
     } else {
-      let resetValues:{ tags?: number[]; statuses?: number[]; } = {};
+      let resetValues: { tags?: number[]; statuses?: number[]; } = {};
       if (projectData?.config?.resources?.defaultTagIds) {
         const selectedTags = form.getValues('tags') || [];
 
@@ -269,7 +269,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   });
 
   const handleLocationSelect = useCallback((location: string) => {
-    if(location !== ''){
+    if (location !== '') {
       let formatted = location.split(',');
       form.setValue('location', JSON.stringify({ lat: parseFloat(formatted[0]), lng: parseFloat(formatted[1]) }));
     }
@@ -282,7 +282,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-3/3 grid grid-cols-2 lg:auto-rows-fit" style={{gap: '2.5rem'}}>
+          className="lg:w-3/3 grid grid-cols-2 lg:auto-rows-fit" style={{ gap: '2.5rem' }}>
           <FormField
             control={form.control}
             name="title"
@@ -357,34 +357,34 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             }}
           />
 
-            <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
-              {imageFields.length > 0 && (
-                <>
+          <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
+            {imageFields.length > 0 && (
+              <>
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeeldingen</label>
                 <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
-                    {imageFields.map(({ id, url }, index) => {
-                        return (
-                            <div key={id} style={{ position: 'relative' }}>
-                                <img src={url} alt={url} />
-                                <Button
-                                    color="red"
-                                    onClick={() => {
-                                        removeImage(index);
-                                    }}
-                                    style={{
-                                        position: 'absolute',
-                                        right: 0,
-                                        top: 0,
-                                    }}>
-                                    <X size={24} />
-                                </Button>
-                            </div>
-                        );
-                    })}
+                  {imageFields.map(({ id, url }, index) => {
+                    return (
+                      <div key={id} style={{ position: 'relative' }}>
+                        <img src={url} alt={url} />
+                        <Button
+                          color="red"
+                          onClick={() => {
+                            removeImage(index);
+                          }}
+                          style={{
+                            position: 'absolute',
+                            right: 0,
+                            top: 0,
+                          }}>
+                          <X size={24} />
+                        </Button>
+                      </div>
+                    );
+                  })}
                 </section>
-                </>
-              )}
-             </div>
+              </>
+            )}
+          </div>
 
           <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
             {documentFields.length > 0 && (
@@ -394,32 +394,32 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                   {documentFields.map(({ id, url, name }, index) => {
                     return (
                       <div key={id} style={{ position: 'relative', display: 'flex', flexWrap: 'wrap' }}>
-                        <div style={{ position: 'relative', display: 'flex'}}>
-                        <Button
-                          color="red"
-                          onClick={() => {
-                            removeFile(index);
-                          }}
-                          style={{
-                            position: 'relative',
-                            right: 0,
-                            top: 0,
-                            padding: '0 4px',
-                            marginRight: '5px'
-                          }}>
-                          <X size={24} />
-                        </Button>
-                        <p>
-                          <a style={{
+                        <div style={{ position: 'relative', display: 'flex' }}>
+                          <Button
+                            color="red"
+                            onClick={() => {
+                              removeFile(index);
+                            }}
+                            style={{
+                              position: 'relative',
+                              right: 0,
+                              top: 0,
+                              padding: '0 4px',
+                              marginRight: '5px'
+                            }}>
+                            <X size={24} />
+                          </Button>
+                          <p>
+                            <a style={{
                               color: 'blue',
                               textDecoration: 'underline',
                               fontSize: '15px',
                               lineHeight: '1.2'
                             }}
-                            href={url} target="_blank">
-                            {url}
-                          </a>
-                        </p>
+                              href={url} target="_blank">
+                              {url}
+                            </a>
+                          </p>
                         </div>
                         <Input
                           style={{
@@ -451,7 +451,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                   })}
                 </section>
               </>
-              )}
+            )}
           </div>
           <FormField
             control={form.control}
@@ -612,85 +612,87 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             />
           </div>
 
-          <CheckboxList
-            form={form}
-            fieldName="tags"
-            fieldLabel="Selecteer de gewenste tags die bij een resource weergegeven zullen
+          <div className="col-span-full lg:col-span-1">
+            <CheckboxList
+              form={form}
+              fieldName="tags"
+              fieldLabel="Selecteer de gewenste tags die bij een resource weergegeven zullen
                worden."
-            label={(t) => t.name}
-            keyForGrouping="type"
-            keyPerItem={(t) => `${t.id}`}
-            items={loadedTags}
-            layout="vertical"
-            selectedPredicate={(t) =>
-              form.getValues('tags').findIndex((tg) => tg === t.id) > -1
-            }
-            onValueChange={(tag, checked) => {
-              const values = form.getValues('tags');
-              form.setValue(
-                'tags',
-                checked
-                  ? [...values, tag.id]
-                  : values.filter((id) => id !== tag.id)
-              );
-            }}
-          />
+              label={(t) => t.name}
+              keyForGrouping="type"
+              keyPerItem={(t) => `${t.id}`}
+              items={loadedTags}
+              layout="vertical"
+              selectedPredicate={(t) =>
+                form.getValues('tags').findIndex((tg) => tg === t.id) > -1
+              }
+              onValueChange={(tag, checked) => {
+                const values = form.getValues('tags');
+                form.setValue(
+                  'tags',
+                  checked
+                    ? [...values, tag.id]
+                    : values.filter((id) => id !== tag.id)
+                );
+              }}
+            />
 
+            <CheckboxList
+              form={form}
+              fieldName="statuses"
+              fieldLabel="Status"
+              layout="vertical"
+              label={(t) => t.name}
+              keyPerItem={(t) => `${t.id}`}
+              items={loadedStatuses}
+              selectedPredicate={(t) =>
+                form.getValues('statuses').findIndex((tg) => tg === t.id) > -1
+              }
+              onValueChange={(status, checked) => {
+                const values = form.getValues('statuses');
+                form.setValue(
+                  'statuses',
+                  checked
+                    ? [...values, status.id]
+                    : values.filter((id) => id !== status.id)
+                );
+              }}
+            />
+          </div>
 
-          <FormField
-            control={form.control}
-            name="extraData"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <Textarea
-                  className='hidden'
-                  hidden={true}
-                  name={'extraData'}
-                  value={extraData} // Bind the state to the Textarea value
-                  readOnly // Make the Textarea read-only since it's updated programmatically
-                />
-                <FormLabel>
-                  Extra data
-                </FormLabel>
-                <FormControl>
-                  <CodeEditor 
-                    initValue={existingData?.extraData} 
-                    onValueChange={(value) => {
-                      try {
-                        const parsedValue = JSON.parse(value); // Parse the JSON to make sure it's valid
-                        form.setValue('extraData', parsedValue); // Set the value of the field
-                        setExtraData(JSON.stringify(parsedValue));
-                      } catch (error) {
-                      }
-                    }}
+          <div className="col-span-full lg:col-span-1">
+            <FormField
+              control={form.control}
+              name="extraData"
+              render={({ field }) => (
+                <FormItem>
+                  <Textarea
+                    className='hidden'
+                    hidden={true}
+                    name={'extraData'}
+                    value={extraData} // Bind the state to the Textarea value
+                    readOnly // Make the Textarea read-only since it's updated programmatically
                   />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-
-          <CheckboxList
-            form={form}
-            fieldName="statuses"
-            fieldLabel="Status"
-            layout="vertical"
-            label={(t) => t.name}
-            keyPerItem={(t) => `${t.id}`}
-            items={loadedStatuses}
-            selectedPredicate={(t) =>
-              form.getValues('statuses').findIndex((tg) => tg === t.id) > -1
-            }
-            onValueChange={(status, checked) => {
-              const values = form.getValues('statuses');
-              form.setValue(
-                'statuses',
-                checked
-                  ? [...values, status.id]
-                  : values.filter((id) => id !== status.id)
-              );
-            }}
-          />
+                  <FormLabel>
+                    Extra data
+                  </FormLabel>
+                  <FormControl>
+                    <CodeEditor
+                      initValue={existingData?.extraData}
+                      onValueChange={(value) => {
+                        try {
+                          const parsedValue = JSON.parse(value); // Parse the JSON to make sure it's valid
+                          form.setValue('extraData', parsedValue); // Set the value of the field
+                          setExtraData(JSON.stringify(parsedValue));
+                        } catch (error) {
+                        }
+                      }}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

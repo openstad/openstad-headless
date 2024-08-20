@@ -112,9 +112,9 @@ export default function ProjectWidgets() {
                     <Paragraph className="my-auto -mr-16 lg:mr-0">{widget.id}</Paragraph>
                     <div className="">
                       <strong className="">
-                        {WidgetDefinitions[widget.type]?.name}
+                        {widget.description}
                       </strong>
-                      <Paragraph className="my-auto -mr-16 lg:mr-0">{widget.description}</Paragraph>
+                      <Paragraph className="my-auto -mr-16 lg:mr-0">{WidgetDefinitions[widget.type]?.name}</Paragraph>
                     </div>
                     <Paragraph className="hidden lg:flex truncate my-auto">
                       {new Date(widget.createdAt).toLocaleDateString("nl-NL")}
