@@ -125,7 +125,7 @@
   bottom: 10px !important;
 }
 
-.documentMap--header {
+.documentMap--header:not(:has(:empty)) {
   display: flex;
   gap: 0.5rem;
   cursor: pointer;
