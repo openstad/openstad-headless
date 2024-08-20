@@ -21,6 +21,7 @@ import { useRouter } from 'next/router';
 import { getApiFetchMethodNames } from '@openstad-headless/data-store/src/api/index';
 import useTag from '@/hooks/use-tags';
 import toast from 'react-hot-toast';
+import InfoDialog from '@/components/ui/info-hover';
 
 const formSchema = z.object({
   name: z.string(),
@@ -121,7 +122,10 @@ export default function ProjectTagCreate() {
                 name="seqnr"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Sequence nummer</FormLabel>
+                    <FormLabel>
+                      Sequence nummer
+                      <InfoDialog content={'Dit nummer bepaalt de volgorde waarin de tags worden getoond. Automatisch worden tientallen gegenereerd, zodat je later ruimte hebt om tags tussen te voegen.'} />
+                      </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="" {...field} />
                     </FormControl>
