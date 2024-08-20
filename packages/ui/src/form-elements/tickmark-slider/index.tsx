@@ -65,7 +65,6 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 max={maxCharacters}
                 value={value}
                 step="1"
-                list={`form-field-tickmarks-${index}`}
                 id={`a-to-b-range--${index}`}
                 name={fieldKey}
                 required={fieldRequired}
@@ -81,13 +80,6 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 aria-label={`Selecteer een waarde tussen 1 en ${fieldOptions.length}`}
                 disabled={disabled}
             />
-            <datalist id={`form-field-tickmarks-${index}`}>
-                {fieldOptions.map((option, key) => (
-                    <option key={key} value={option.value}>
-                        {option.label}
-                    </option>
-                ))}
-            </datalist>
             <div className={`range-slider-labels ${showSmileys && 'smiley-scale'}`}>
                 {fieldOptions.map((option, key) => (
                     <label key={key} htmlFor={`a-to-b-range--${index}`} className={value === option.value ? 'active' : ''}>
