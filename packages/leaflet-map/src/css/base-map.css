@@ -18,3 +18,6 @@
 .leaflet-container a {
   color: var(--_utrecht-button-appearance-color);
 }
+.leaflet-bottom.leaflet-right{
+  display: none;
+}

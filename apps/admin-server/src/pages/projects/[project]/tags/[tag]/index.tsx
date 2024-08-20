@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import {useForm, useFieldArray, Controller} from 'react-hook-form';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {undefinedToTrueOrProp, YesNoSelect} from '@/lib/form-widget-helpers';
+import { undefinedToTrueOrProp, YesNoSelect } from '@/lib/form-widget-helpers';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
@@ -23,8 +23,9 @@ import { useRouter } from 'next/router';
 import useTag from '@/hooks/use-tag';
 import { useCallback, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import {ImageUploader} from "@/components/image-uploader";
-import {X} from "lucide-react";
+import { ImageUploader } from "@/components/image-uploader";
+import { X } from "lucide-react";
+import InfoDialog from '@/components/ui/info-hover';
 
 const formSchema = z.object({
   name: z.string(),
@@ -78,7 +79,7 @@ export default function ProjectTagEdit() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if(values.useDifferentSubmitAddress && values.emails !== undefined && values.emails.length > 0) {
+    if (values.useDifferentSubmitAddress && values.emails !== undefined && values.emails.length > 0) {
       const csv = values.emails.map((email: { address: any; }) => email.address).join(',');
       values.newSubmitAddress = csv;
     }
@@ -112,10 +113,10 @@ export default function ProjectTagEdit() {
   useEffect(() => {
     const useDifferentSubmitAddress = form.watch('useDifferentSubmitAddress');
 
-    if ( !useDifferentSubmitAddress ) {
+    if (!useDifferentSubmitAddress) {
       form.setValue('newSubmitAddress', '');
     }
-  }, [ form.watch('useDifferentSubmitAddress') ]);
+  }, [form.watch('useDifferentSubmitAddress')]);
 
   useEffect(() => {
     form.reset(defaults());
@@ -192,7 +193,10 @@ export default function ProjectTagEdit() {
                       name="seqnr"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Sequence nummer</FormLabel>
+                          <FormLabel>
+                            Sequence nummer
+                            <InfoDialog content={'Dit nummer bepaalt de volgorde waarin de tags worden getoond. Automatisch worden tientallen gegenereerd, zodat je later ruimte hebt om tags tussen te voegen.'} />
+                          </FormLabel>
                           <FormControl>
                             <Input type="number" placeholder="" {...field} />
                           </FormControl>
@@ -351,9 +355,9 @@ export default function ProjectTagEdit() {
                         <button type="button" onClick={() => append({ address: '' })}>Add Email</button>
                       </>
                     )}
-                  <Button className="w-fit col-span-full" type="submit">
-                    Opslaan
-                  </Button>
+                    <Button className="w-fit col-span-full" type="submit">
+                      Opslaan
+                    </Button>
                   </form>
                 </Form>
               </div>
@@ -385,22 +389,22 @@ export default function ProjectTagEdit() {
                       <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Afbeeldingen</label>
                       <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
                         {!!form.watch('defaultResourceImage') && (
-                            <div style={{ position: 'relative' }}>
-                              <img src={form.watch('defaultResourceImage')} alt={form.watch('defaultResourceImage')} />
-                              <Button
-                                color="red"
-                                onClick={() => {
-                                  form.setValue('defaultResourceImage', '');
-                                }}
-                                style={{
-                                  position: 'absolute',
-                                  right: 0,
-                                  top: 0,
-                                }}>
-                                <X size={24} />
-                              </Button>
-                            </div>
-                          )}
+                          <div style={{ position: 'relative' }}>
+                            <img src={form.watch('defaultResourceImage')} alt={form.watch('defaultResourceImage')} />
+                            <Button
+                              color="red"
+                              onClick={() => {
+                                form.setValue('defaultResourceImage', '');
+                              }}
+                              style={{
+                                position: 'absolute',
+                                right: 0,
+                                top: 0,
+                              }}>
+                              <X size={24} />
+                            </Button>
+                          </div>
+                        )}
                       </section>
                     </div>
 
