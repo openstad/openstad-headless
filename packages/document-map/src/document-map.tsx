@@ -102,7 +102,7 @@ function DocumentMap({
     setDocumentHeight(imageHeight);
   };
   const verticalOffset = docHeight * .20;
-  const imageBounds: LatLngBoundsLiteral = [[-docHeight + verticalOffset, -docWidth/2], [verticalOffset, docWidth/2]];
+  const imageBounds: LatLngBoundsLiteral = [[-docHeight + verticalOffset, -docWidth / 2], [verticalOffset, docWidth / 2]];
 
 
   const contentRef = useRef<HTMLDivElement>(null);
@@ -273,38 +273,28 @@ function DocumentMap({
 
   return (
     <div className="documentMap--container">
-      <div className="content" ref={contentRef}>
-        <div className="documentMap--header">
-          <div className='url-container'>
-            {backUrl ? <Link href={backUrl} title="Terug naar overzicht" id={randomId}>Terug</Link> : null}
-            <div className="url-list">
-              {accessibilityUrlVisible ? <Link href={getUrl()} title="Bekijk tekstuele versie" id={randomId}>{props.accessibilityUrlText}</Link> : null}
-              {definitiveUrlVisible && originalID !== undefined && isDefinitive ? <Link href={getDefinitiveUrl(originalID)} title="Bekijk originele versie" id={randomId}>{props.definitiveUrlText}</Link> : null}
-            </div>
-          </div>
-          {!isDefinitive && (
-            <div className='toggleMarkers'>
-              <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
-              <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
-            </div>
-          )}
-        </div>
-        <section className="content-intro">
-          {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
-          {resource.summary ? <Heading level={2} appearance={'utrecht-heading-5'}>{resource.summary}</Heading> : null}
-          {resource.description ? <Paragraph>{resource.description}</Paragraph> : null}
-        </section>
-
-        {!isDefinitive && (
-          <Comments
-            {...props}
-            resourceId={resourceId || ''}
-            selectedComment={selectedCommentIndex}
-            showForm={false}
-          />
-        )}
-      </div>
       <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''}`}>
+        <div className="content-container">
+          <div className="documentMap--header">
+            <div className='url-container'>
+              {backUrl ? <Link href={backUrl} title="Terug naar overzicht" id={randomId}>Terug</Link> : null}
+              <div className="url-list">
+                {accessibilityUrlVisible ? <Link href={getUrl()} title="Bekijk tekstuele versie" id={randomId}>{props.accessibilityUrlText}</Link> : null}
+                {definitiveUrlVisible && originalID !== undefined && isDefinitive ? <Link href={getDefinitiveUrl(originalID)} title="Bekijk originele versie" id={randomId}>{props.definitiveUrlText}</Link> : null}
+              </div>
+            </div>
+            {!isDefinitive && (
+              <div className='toggleMarkers'>
+                <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
+                <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
+              </div>
+            )}
+          </div>
+          <section className="content-intro">
+            {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
+            {resource.summary ? <Paragraph>{resource.summary}</Paragraph> : null}
+          </section>
+        </div>
         <MapContainer center={[0, 0]} crs={CRS.Simple} maxZoom={maxZoom} minZoom={minZoom} zoom={zoom}  >
           <MapEvents />
           {comments
@@ -339,6 +329,17 @@ function DocumentMap({
             </Popup>
           )}
         </MapContainer>
+      </div>
+      <div className="content" ref={contentRef}>
+
+        {!isDefinitive && (
+          <Comments
+            {...props}
+            resourceId={resourceId || ''}
+            selectedComment={selectedCommentIndex}
+            showForm={false}
+          />
+        )}
       </div>
     </div>
   );
