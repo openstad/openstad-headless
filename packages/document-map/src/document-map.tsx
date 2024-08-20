@@ -24,6 +24,7 @@ import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import 'leaflet/dist/leaflet.css';
 
 import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
+import { Dialog, Spacer } from '@openstad-headless/ui/src';
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
@@ -271,6 +272,16 @@ function DocumentMap({
     }
   }
 
+  const toggleHelperDialog = (open: boolean) => {
+    const dialog = document.querySelector('dialog.helper-dialog') as HTMLDialogElement;
+    if (dialog) {
+      if (open) {
+        dialog.showModal();
+      } else {
+        dialog.close();
+      }
+    }
+  };
 
   return (
     <div className="documentMap--container">
@@ -330,6 +341,12 @@ function DocumentMap({
             </Popup>
           )}
         </MapContainer>
+
+        <Button className='info-trigger' appearance='primary-action-button' onClick={() => toggleHelperDialog(true)}>
+          <i className="ri-information-fill"></i>
+          <span className="sr-only">Hoe werkt het?</span>
+        </Button>
+
       </div>
       <div className="content" ref={contentRef}>
 
@@ -342,7 +359,19 @@ function DocumentMap({
           />
         )}
       </div>
+      <dialog className='helper-dialog'>
+        <div className="info-dialog">
+          <Heading level={2}>Hoe werkt het?</Heading>
+          <Paragraph>Op deze afbeelding kun je opmerkingen plaatsen. Klik op de afbeelding om een opmerking toe te voegen. Klik op een marker om de bijbehorende opmerkingen te bekijken.</Paragraph>
+          <Spacer size={1} />
+          <Button appearance='secondary-action-button' onClick={() => toggleHelperDialog(false)}>
+            <i className="ri-close-fill"></i>
+            <span>Info venster sluiten</span>
+          </Button>
+        </div>
+      </dialog>
     </div>
+
   );
 }
 

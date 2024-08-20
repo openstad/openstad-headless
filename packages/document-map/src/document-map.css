@@ -23,6 +23,9 @@
   overflow: auto;
   padding: 2rem;
 }
+.documentMap--container .content:empty {
+  display: none;
+}
 
 .documentMap--container .content .content-intro {
   margin-block-end: 2rem;
@@ -37,7 +40,9 @@
   flex-direction: column;
   background: #dddddd;
   gap: 1rem;
+  position: relative;
 }
+
 
 .documentMap--container .map-container .content-container {
   align-self: start;
@@ -47,6 +52,7 @@
 .documentMap--container .map-container .leaflet-container {
   width: 100%;
   height: 100%;
+  z-index: 1;
 }
 
 .documentMap--container .map-container form {
@@ -158,4 +164,29 @@ a + .url-list:before {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+
+.documentMap--container .map-container button.info-trigger{
+  position: absolute;
+  z-index: 1;
+  bottom: 10px;
+  left: 10px;
+  width: max-content;
+  font-size: 22px;
+  padding: 0;
+}
+
+
+.documentMap--container dialog{
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  border: none;
+  max-width: 550px;
+  padding: 2rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.documentMap--container dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
 }
