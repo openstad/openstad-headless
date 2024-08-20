@@ -29,11 +29,11 @@ export const WidgetDefinitions = {
     description: 'Map showing resource overview',
     image: '/widget_preview/resource_map_preview.png',
   },
-  // resourcedetailmap: {
-  //   name: 'Resource detail map',
-  //   description: 'Map showing resource details',
-  //   image: '/widget_preview/resource_map_preview.png',
-  // },
+  resourcedetailmap: {
+    name: 'Resource detail map',
+    description: 'Map showing resource details',
+    image: '/widget_preview/resource_map_preview.png',
+  },
   counter: {
     name: 'Counter',
     description: 'Counter module',
