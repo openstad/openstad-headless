@@ -295,12 +295,6 @@ function DocumentMap({
                 {definitiveUrlVisible && originalID !== undefined && isDefinitive ? <Link href={getDefinitiveUrl(originalID)} title="Bekijk originele versie" id={randomId}>{props.definitiveUrlText}</Link> : null}
               </div>
             </div>
-            {!isDefinitive && (
-              <div className='toggleMarkers'>
-                <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
-                <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
-              </div>
-            )}
           </div>
           <section className="content-intro">
             {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
@@ -349,7 +343,12 @@ function DocumentMap({
 
       </div>
       <div className="content" ref={contentRef}>
-
+        {!isDefinitive && (
+          <div className='toggleMarkers'>
+            <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
+            <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
+          </div>
+        )}
         {!isDefinitive && (
           <Comments
             {...props}

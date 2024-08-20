@@ -136,14 +136,11 @@
   align-items: center;
 }
 
-.documentMap--header .toggleMarkers {
+.toggleMarkers {
   display: flex;
   gap: 0.5rem;
+  float: right;
 }
-.documentMap--header .toggleMarkers:only-child {
-  margin-left: auto;
-}
-
 .--hideMarkers .leaflet-container .leaflet-marker-pane .leaflet-marker-icon {
   display: none;
 }
