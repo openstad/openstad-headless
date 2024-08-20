@@ -60,7 +60,7 @@ export default function WidgetDateCountdownBar({
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Document met opmerkingen',
+            name: 'Interactieve afbeelding',
             url: `/projects/${projectId}/widgets/documentmap/${id}`,
           },
         ]}>
