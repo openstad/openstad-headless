@@ -147,3 +147,55 @@ a + .url-list:before {
   flex-direction: column;
   gap: 0.5rem;
 }
+
+.documentMap--container .map-container .multi-select > button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: #000;
+}
+
+.documentMap--container .map-container .multi-select > button .icon p {
+  display: none;
+}
+
+.documentMap--container .map-container .multi-select > button .icon i::before {
+  color: #000;
+}
+
+.documentMap--container .map-container .leaflet-popup-content .utrecht-paragraph {
+  margin: 0 0 8px;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.documentMap--container .map-container .leaflet-popup-content .utrecht-form-field--checkbox {
+  display: block;
+}
+
+.documentMap--container .map-container .leaflet-popup-content .utrecht-paragraph .utrecht-checkbox {
+  width: 18px;
+  height: 18px;
+  min-block-size: 18px;
+  min-inline-size: 18px;
+}
+
+.documentMap--container .map-container .leaflet-popup-content .utrecht-paragraph label {
+  font-size: 14px;
+}
+
+.documentMap--container .map-container .leaflet-popup-content .multiselect-container {
+  margin-top: 10px;
+}
+
+.documentMap--container .map-container .leaflet-popup-content .multi-select {
+  border: 1px solid rgb(102, 102, 102);
+  padding: 8px 16px;
+}
+
+.documentMap--container .map-container .leaflet-popup-content .multi-select > button {
+  border: none;
+  padding: 0;
+  min-block-size: 30px;
+}

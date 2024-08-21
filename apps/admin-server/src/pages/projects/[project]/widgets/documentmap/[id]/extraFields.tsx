@@ -26,8 +26,9 @@ const formSchema = z.object({
   extraFieldsTagGroups: z
     .array(
       z.object({
-        type: z.string(),
-        label: z.string().optional()
+        type: z.string().optional(),
+        label: z.string().optional(),
+        multiple: z.boolean().optional(),
       })
     )
     .refine((value) => value.some((item) => item), {
@@ -78,7 +79,7 @@ export default function DocumentExtraFields(
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-2/3 grid grid-cols-1 gap-4">
+          className="lg:w-full grid grid-cols-1 gap-4">
 
           <FormField
             control={form.control}
@@ -92,7 +93,7 @@ export default function DocumentExtraFields(
                     Het label veld fungeert als een titel boven de dropdown die onder het reactieveld komt.
                   </FormDescription>
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-4">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-4">
                   {(tagGroupNames || []).map((groupName, index) => (
                     <>
                       <FormField
@@ -175,6 +176,48 @@ export default function DocumentExtraFields(
                                   }}
                                 />
                               </FormControl>
+                            </FormItem>
+                          );
+                        }}
+                      />
+
+                      <FormField
+                        key={`parent${groupName}-multiple`}
+                        control={form.control}
+                        name="extraFieldsTagGroups"
+                        render={({ field }) => {
+                          return (
+                            <FormItem
+                              key={groupName}
+                              className="flex flex-row items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  disabled={
+                                    field.value.find(
+                                      (g) => g.type === groupName
+                                    ) === undefined
+                                  }
+                                  checked={
+                                    field.value?.findIndex(
+                                      (el) =>
+                                        el.type === groupName && el.multiple
+                                    ) > -1
+                                  }
+                                  onCheckedChange={(checked: any) => {
+                                    const groups = handleTagCheckboxGroupChange(
+                                      groupName,
+                                      checked,
+                                      field.value,
+                                      'multiple'
+                                    );
+                                    field.onChange(groups);
+                                    props.onFieldChanged(field.name, groups);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Mag de gebruiker meerdere tags selecteren?
+                              </FormLabel>
                             </FormItem>
                           );
                         }}

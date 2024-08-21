@@ -27,6 +27,8 @@ import 'leaflet/dist/leaflet.css';
 
 import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
 import { Filters } from "@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter";
+import SelectField from "@openstad-headless/ui/src/form-elements/select";
+import {MultiSelect} from "@openstad-headless/ui/src";
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
@@ -133,6 +135,11 @@ function DocumentMap({
 
   const [tags, setTags] = useState<Array<number>>(tagIdsArray || []);
   const [tagsString, setTagsString] = useState<string>(tagIds || '');
+  const [commentValue, setCommentValue] = useState<string>('');
+
+  const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCommentValue(e.target.value);
+  };
 
   useEffect(() => {
     setAllComments(comments);
@@ -157,7 +164,21 @@ function DocumentMap({
   const [popupPosition, setPopupPosition] = useState<any>(null);
   const [selectedCommentIndex, setSelectedCommentIndex] = useState<number>();
   const [selectedMarkerIndex, setSelectedMarkerIndex] = useState<number>();
+  const [selectedOptions, setSelected] = useState<Array<number>>([]);
 
+  const updateTagListMultiple = (tagId: number) => {
+    const tagAlreadySelected = selectedOptions.includes(tagId);
+    const selected = [...selectedOptions];
+
+    if (tagAlreadySelected) {
+      const index = selected.indexOf(tagId);
+      selected.splice(index, 1);
+    } else {
+      selected.push(tagId);
+    }
+
+    setSelected(selected);
+  };
 
   const [docWidth, setDocumentWidth] = useState<number>(1920);
   const [docHeight, setDocumentHeight] = useState<number>(1080)
@@ -196,32 +217,37 @@ function DocumentMap({
   }
 
   const addComment = (e: any, position: any) => {
-    const value = e.target.previousSibling.value;
-    setShortLengthError(false);
-    setLongLengthError(false);
     e.preventDefault();
     e.stopPropagation();
 
-    if (value.length < props.comments?.descriptionMinLength) {
+    setShortLengthError(false);
+    setLongLengthError(false);
+
+    if (commentValue.length < props.comments?.descriptionMinLength) {
       setShortLengthError(true);
     }
 
-    if (value.length > props.comments?.descriptionMaxLength) {
+    if (commentValue.length > props.comments?.descriptionMaxLength) {
       setLongLengthError(true);
     }
 
-    if (value.length >= props.comments?.descriptionMinLength && value.length <= props.comments?.descriptionMaxLength) {
-
+    if (
+        commentValue.length >= props.comments?.descriptionMinLength
+        && commentValue.length <= props.comments?.descriptionMaxLength
+    ) {
       comments.create({
-        description: value,
+        description: commentValue,
         location: position,
         createdAt: new Date(),
         sentiment: 'no sentiment',
+        tags: selectedOptions,
       });
 
-      setPopupPosition(null)
+      setPopupPosition(null);
+      setCommentValue('');
       setShortLengthError(false);
       setLongLengthError(false);
+      setSelected([]);
     } else {
       return;
     }
@@ -425,21 +451,48 @@ function DocumentMap({
                   <FormLabel htmlFor="commentBox">Voeg een opmerking toe</FormLabel>
                   {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
                   {longLengthError && <Paragraph className="--error">De opmerking mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
-                  <Textarea id="commentBox" name="comment" rows={3} />
+                  <Textarea
+                      id="commentBox"
+                      name="comment"
+                      onChange={handleCommentChange}
+                      rows={3}
+                      value={commentValue}
+                  />
 
                   { extraFieldsTagGroups
                     && Array.isArray(extraFieldsTagGroups)
                     && extraFieldsTagGroups.length > 0
-                    && extraFieldsTagGroups.map((group: { label: string | undefined, type: string }, index) => {
+                    && extraFieldsTagGroups.map((group: { label: string | undefined, type: string, multiple: boolean }, index) => {
                     return (
                       <div key={group.type}>
                         <FormLabel htmlFor={group.type}>{group.label}</FormLabel>
-                        <select id={group.type} name={group.type}>
-                          <option value="">Selecteer een optie</option>
-                          {allTags?.filter(tag => tag.type === group.type).map(tag => (
-                            <option key={tag.id} value={tag.id}>{tag.name}</option>
-                          ))}
-                        </select>
+
+                        { group && group.multiple ? (
+                          <MultiSelect
+                              label={'Selecteer een optie'}
+                              onItemSelected={(value) => {
+                                updateTagListMultiple(value);
+                              }}
+                              options={(allTags?.filter(tag => tag.type === group.type).map(tag => ({
+                                value: tag.id,
+                                label: tag.name,
+                                checked: selectedOptions.includes(tag.id),
+                              })))}
+                          />
+
+                        ) : (
+                          <SelectField
+                            choices={(allTags?.filter(tag => tag.type === group.type).map(tag => ({
+                              value: tag.id,
+                              label: tag.name
+                            })))}
+                            fieldKey={`tag[${group.type}]`}
+                            onChange={(e) => {
+                              const selectedTag = e.value;
+                              updateTagListMultiple(selectedTag);
+                            }}
+                          />
+                        ) }
                       </div>
                     )
                   })}

@@ -309,6 +309,7 @@ module.exports = function( db, sequelize, DataTypes ) {
 			as: 'tags',
 			foreignKey: 'commentId',
 			otherKey: 'tagId',
+			constraints: false,
 		});
 	}
 

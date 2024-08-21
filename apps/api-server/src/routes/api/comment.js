@@ -159,20 +159,31 @@ router.route('/')
     db.Comment
       .authorizeData(data, 'create', req.user)
       .create(data)
-      .then(result => {
+      .then(async result => {
+        // Handle tags
+        let tags = req.body.tags || [];
+        if (!Array.isArray(tags)) tags = [tags];
+        tags = tags.filter(tag => !Number.isNaN(parseInt(tag)));
+        tags = tags.map(tag => parseInt(tag));
+        tags = tags.filter((value, index) => tags.indexOf(value) === index);
+        if (tags.length) {
+          await result.setTags(tags);
+        }
+
+        const scopes = [
+          'defaultScope',
+          'includeResource',
+          { method: ['includeVoteCount', 'comment'] },
+          { method: ['includeUserVote', 'comment', req.user.id] }
+        ];
 
         db.Comment
-          .scope(
-            'defaultScope',
-            'includeResource',
-            { method: ['includeVoteCount', 'comment'] },
-            { method: ['includeUserVote', 'comment', req.user.id] },
-          )
+          .scope(...scopes)
           .findByPk(result.id)
           .then(function(comment) {
             res.json(comment);
-          });
-
+          })
+          .catch(next);
       })
       .catch(next);
 
