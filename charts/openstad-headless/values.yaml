@@ -154,7 +154,6 @@ admin:
   ingress:
     enabled: true # Whether there is a ingress for this service
     annotations:
-      kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/proxy-body-size: 128m
       nginx.ingress.kubernetes.io/configuration-snippet: |
         more_set_headers "X-Content-Type-Options: nosniff";
@@ -163,6 +162,7 @@ admin:
         more_set_headers "Referrer-Policy: same-origin";
     extraLabels: {}
     hosts: []
+    ingressClassName: nginx
     tls:
       secretName: openstad-tls-admin
       hosts: []
@@ -210,7 +210,6 @@ auth:
   ingress:
     enabled: true # Whether there is a ingress for this service
     annotations:
-      kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/configuration-snippet: |
         more_set_headers "X-Content-Type-Options: nosniff";
         more_set_headers "X-Frame-Options: SAMEORIGIN";
@@ -218,6 +217,7 @@ auth:
         more_set_headers "Referrer-Policy: same-origin";
     extraLabels: {}
     hosts: []
+    ingressClassName: nginx
     tls:
       secretName: openstad-tls-auth
       hosts: []
@@ -273,7 +273,6 @@ api:
   ingress:
     enabled: true # Whether there is a ingress for this service
     annotations:
-      kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/proxy-body-size: 128m
       nginx.ingress.kubernetes.io/configuration-snippet: |
         more_set_headers "X-Content-Type-Options: nosniff";
@@ -282,6 +281,7 @@ api:
         more_set_headers "Referrer-Policy: same-origin";
     extraLabels: {}
     hosts: []
+    ingressClassName: nginx
     tls:
       secretName: openstad-tls-api
       hosts: []
@@ -339,7 +339,6 @@ image:
   ingress:
     enabled: true # Whether there is a ingress for this service
     annotations:
-      kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/proxy-body-size: 128m
       nginx.ingress.kubernetes.io/configuration-snippet: |
         more_set_headers "X-Content-Type-Options: nosniff";
@@ -348,6 +347,7 @@ image:
         more_set_headers "Referrer-Policy: same-origin";
     extraLabels: {}
     hosts: []
+    ingressClassName: nginx
     tls:
       secretName: openstad-tls-image
       hosts: []
@@ -413,7 +413,6 @@ cms:
   ingress:
     enabled: true # Whether there is a ingress for this service
     annotations:
-      kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/proxy-body-size: 128m
       nginx.ingress.kubernetes.io/configuration-snippet: |
         more_set_headers "X-Content-Type-Options: nosniff";
@@ -422,6 +421,7 @@ cms:
         more_set_headers "Referrer-Policy: same-origin";
     extraLabels: {}
     hosts: []
+    ingressClassName: nginx
     tls:
       secretName: openstad-tls-cms
       hosts: []
