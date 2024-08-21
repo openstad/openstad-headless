@@ -4,18 +4,6 @@ require('dotenv').config({ path: '.env' })
 const db = require('../db');
 
 const { Umzug, SequelizeStorage } = require('umzug');
-const umzug = new Umzug({
-  migrations: {
-    glob: './migrations/*.js',
-    params: [
-            db.sequelize.getQueryInterface(),
-            db.Sequelize // Sequelize constructor - the required module
-        ],
-     },
-  context: db.sequelize.getQueryInterface(),
-  storage: new SequelizeStorage({ sequelize: db.sequelize, tableName : 'migrations' }),
-  logger: console,
-});
 
 (async () => {
 
@@ -39,6 +27,19 @@ const umzug = new Umzug({
   
   try {
 
+    const umzug = new Umzug({
+      migrations: {
+        glob: './migrations/*.js',
+        params: [
+                db.sequelize.getQueryInterface(),
+                db.Sequelize // Sequelize constructor - the required module
+            ],
+         },
+      context: db.sequelize.getQueryInterface(),
+      storage: new SequelizeStorage({ sequelize: db.sequelize, tableName : 'migrations' }),
+      logger: console,
+    });
+    
     console.log('Create database...');
     await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true })
     await db.sequelize.sync({ force: true });
