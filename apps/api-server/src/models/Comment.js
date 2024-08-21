@@ -198,11 +198,15 @@ module.exports = function( db, sequelize, DataTypes ) {
 				let commentVoteThreshold = 5; // todo: configureerbaar
 				return {
 					include: [{
-						model      : db.Comment,
+						model: db.Comment.scope(
+							'defaultScope',
+							{ method: ['includeVoteCount', 'replies'] },
+							{ method: ['includeUserVote', 'replies', userId] },
+						  ),
 						as         : 'replies',
 						required   : false,
             // force attribs because the automatic list is incomplete
-					  attributes : ['id', 'parentId', 'resourceId', 'userId', 'sentiment', 'description', 'label', 'createdAt', 'updatedAt', 'createDateHumanized']
+					  attributes : ['id', 'parentId', 'resourceId', 'userId', 'sentiment', 'description', 'label', 'createdAt', 'updatedAt', 'createDateHumanized', 'hasUserVoted', 'yes']
 					}],
 					where: {
 						parentId: null
@@ -318,7 +322,7 @@ module.exports = function( db, sequelize, DataTypes ) {
     deleteableBy: ['moderator','owner'],
     canVote: function(user, self) {
       // TODO: ik denk dat je alleen moet kunnen voten bij resource.isOpen, maar dat doet hij nu ook niet. Sterker: hij checkt nu alleen maar op parentId.
-      if (userHasRole(user, 'member') && self.id && !self.parentId) {
+      if (userHasRole(user, 'member') && self.id) {
         return true;
       }
       return false;

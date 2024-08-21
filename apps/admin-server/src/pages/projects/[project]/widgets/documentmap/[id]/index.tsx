@@ -16,6 +16,9 @@ import WidgetPublish from '@/components/widget-publish';
 import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
 import DocumentGeneral from './general';
 import DocumentLinks from './links';
+import LikesDisplay from '../../likes/[id]/weergave';
+import { LikeWidgetTabProps } from '../../likes/[id]';
+import { extractConfig } from '@/lib/sub-widget-helper';
 
 export const getServerSideProps = withApiUrl;
 
@@ -69,6 +72,7 @@ export default function WidgetDateCountdownBar({
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="links">Links</TabsTrigger>
+              <TabsTrigger value="likes">Likes widget</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -80,6 +84,22 @@ export default function WidgetDateCountdownBar({
               {previewConfig ?
                 <DocumentLinks {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
                 : null}
+            </TabsContent>
+            <TabsContent value="likes" className="p-0">
+              {previewConfig && (
+                <LikesDisplay
+                  omitSchemaKeys={['resourceId']}
+                  {...extractConfig<
+                    DocumentMapProps,
+                    LikeWidgetTabProps
+                  >({
+                    subWidgetKey: 'likeWidget',
+                    previewConfig: previewConfig,
+                    updateConfig,
+                    updatePreview,
+                  })}
+                />
+              )}
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />

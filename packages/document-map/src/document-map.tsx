@@ -22,9 +22,10 @@ import { LatLngBoundsLiteral, CRS, Icon } from 'leaflet';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 
 import 'leaflet/dist/leaflet.css';
+import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 
 import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
-import { Dialog, Spacer } from '@openstad-headless/ui/src';
+import { Spacer } from '@openstad-headless/ui/src';
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
@@ -48,6 +49,11 @@ export type DocumentMapProps = BaseProps &
     definitiveUrl?: string;
     definitiveUrlText?: string;
     statusId?: string;
+    displayLikes?: boolean;
+    likeWidget?: Omit<
+      LikeWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
   };
 
 
@@ -61,6 +67,7 @@ function DocumentMap({
   accessibilityUrlVisible,
   definitiveUrlVisible,
   statusId,
+  displayLikes = true,
   ...props
 }: DocumentMapProps) {
 
@@ -344,10 +351,30 @@ function DocumentMap({
       </div>
       <div className="content" ref={contentRef}>
         {!isDefinitive && (
-          <div className='toggleMarkers'>
-            <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
-            <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
-          </div>
+          <>
+            {displayLikes && (
+              <>
+                <Likes
+                  {...props}
+                  resourceId={resourceId || ''}
+                  title={props.likeWidget?.title}
+                  yesLabel={props.likeWidget?.yesLabel}
+                  noLabel={props.likeWidget?.noLabel}
+                  hideCounters={props.likeWidget?.hideCounters}
+                  variant={props.likeWidget?.variant}
+                  showProgressBar={props.likeWidget?.showProgressBar}
+                  progressBarDescription={
+                    props.likeWidget?.progressBarDescription
+                  }
+                />
+                <Spacer size={1} />
+              </>
+            )}
+            <div className='toggleMarkers'>
+              <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
+              <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
+            </div>
+          </>
         )}
         {!isDefinitive && (
           <Comments

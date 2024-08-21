@@ -198,3 +198,8 @@ a + .url-list:before {
   justify-self: center;
   width: 100%;
 }
+
+.documentMap--container .like-widget-container{
+  padding: 0;
+  background: none;
+}
