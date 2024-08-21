@@ -40,13 +40,14 @@ metadata:
     "helm.sh/hook-weight": "30"
     "helm.sh/hook-delete-policy": before-hook-creation
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
-roleRef:
-  apiGroup: ''
-  kind: Role
-  name: secret-creator
 subjects:
   - kind: ServiceAccount
     name: openstad-secrets-sa
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: secret-creator
 ---
 apiVersion: batch/v1
 kind: Job
