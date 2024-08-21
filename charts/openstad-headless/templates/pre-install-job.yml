@@ -8,7 +8,8 @@ metadata:
     # job is considered part of the release.
     "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "10"
-    argocd.argoproj.io/hook-delete-policy: HookFailed
+    "helm.sh/hook-delete-policy": before-hook-creation
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -20,7 +21,8 @@ metadata:
     # job is considered part of the release.
     "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "20"
-    argocd.argoproj.io/hook-delete-policy: HookFailed
+    "helm.sh/hook-delete-policy": before-hook-creation
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 rules:
   - apiGroups: ['']
     resources: ['secrets']
@@ -36,6 +38,8 @@ metadata:
     # job is considered part of the release.
     "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "30"
+    "helm.sh/hook-delete-policy": before-hook-creation
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 roleRef:
   apiGroup: ''
   kind: Role
