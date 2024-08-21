@@ -184,8 +184,8 @@ function Comment({
       )}
 
       {args.comment.parentId && (
+        console.log(args.comment),
         <>
-          {console.log(args.comment)}
           <section className="comment-item-footer">
             <Paragraph className="comment-reaction-strong-text">
               {args.comment.createDateHumanized}
