@@ -11,6 +11,7 @@
 {% if not data.global.compactMenu %}
 {% set menuData = data.home._children | json | replace("'", "&#39;") %}
 
+
   <div id="navbar"
     data-home='
     [{
@@ -20,6 +21,11 @@
     data-content='{{ menuData }}'
     data-prefix='{{ data.prefix }}'
   ></div>
+
+    <script>
+      console.log( document.getElementById('navbar').getAttribute('data-content'));
+    </script>
+
 {% endif %}
 
 {% endif %}
