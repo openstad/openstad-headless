@@ -28,6 +28,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 
 spec:
+  ingressClassName: {{ .Values.api.ingress.ingressClassName }}
   rules:
 {{- range $host := .Values.api.ingress.hosts }}
     - host: {{ 1 }}
