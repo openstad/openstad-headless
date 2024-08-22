@@ -36,8 +36,7 @@ export type CommentsWidgetProps = BaseProps &
     descriptionMaxLength?: number,
     selectedComment?: Number | undefined;
     customTitle?: string;
-    includeOrExclude?: string;
-    onlyIncludeOrExcludeTagIds?: string;
+    onlyIncludeTags?: string;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -51,8 +50,6 @@ function Comments({
   placeholder = 'Typ hier uw reactie',
   formIntro = '',
   selectedComment,
-  includeOrExclude = 'include',
-  onlyIncludeOrExcludeTagIds = '',
   ...props
 }: CommentsWidgetProps) {
 
@@ -85,14 +82,11 @@ function Comments({
     api: props.api,
   });
 
-  const tagIds = !!onlyIncludeOrExcludeTagIds && onlyIncludeOrExcludeTagIds.startsWith(',') ? onlyIncludeOrExcludeTagIds.substring(1) : onlyIncludeOrExcludeTagIds;
-
   const useCommentsData = {
     projectId: props.projectId,
     resourceId: resourceId,
     sentiment: args.sentiment,
-    onlyIncludeTagIds: includeOrExclude === 'include' ? tagIds : undefined,
-    onlyExcludeTagIds: includeOrExclude === 'exclude' ? tagIds : undefined,
+    onlyIncludeTagIds: props.onlyIncludeTags || undefined,
   };
 
   const { data: comments } = datastore.useComments(useCommentsData);

@@ -269,19 +269,17 @@ module.exports = function( db, sequelize, DataTypes ) {
 				}]
 			},
 
-			filterByTags: function(onlyIncludeTagIds, onlyExcludeTagIds) {
+			filterByTags: function(onlyIncludeTagIds) {
 				let where = {};
 				if (onlyIncludeTagIds) {
 					where.id = { [Op.in]: onlyIncludeTagIds.split(',') };
-				}
-				if (onlyExcludeTagIds) {
-					where.id = { [Op.notIn]: onlyExcludeTagIds.split(',') };
 				}
 				return {
 					include: [{
 						model: db.Tag,
 						as: 'tags',
 						through: { attributes: [] },
+						required: !!onlyIncludeTagIds,
 						where: where
 					}]
 				};

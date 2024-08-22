@@ -29,6 +29,7 @@ import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
 import { Filters } from "@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter";
 import SelectField from "@openstad-headless/ui/src/form-elements/select";
 import {MultiSelect} from "@openstad-headless/ui/src";
+import toast, {Toaster} from "react-hot-toast";
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
@@ -98,43 +99,58 @@ function DocumentMap({
   });
 
   const tagIds = !!onlyIncludeOrExcludeTagIds && onlyIncludeOrExcludeTagIds.startsWith(',') ? onlyIncludeOrExcludeTagIds.substring(1) : onlyIncludeOrExcludeTagIds;
-  const tagIdsArray = tagIds.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
 
   const {data: allTags} = datastore.useTags({
-      projectId: props.projectId,
-      type: ''
+    projectId: props.projectId,
+    type: ''
   });
 
-  let filteredTagIdsArray: Array<number> = [];
+  const tagIdsArray = tagIds.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
 
-  try {
-    if (includeOrExclude === 'exclude') {
-      const filteredTags = allTags.filter(tag => !tagIdsArray.includes( (tag.id) ));
-      const filteredTagIds = filteredTags.map(tag => tag.id);
-      filteredTagIdsArray = filteredTagIds;
-    } else if (includeOrExclude === 'include') {
-      filteredTagIdsArray = tagIdsArray;
+  function determineTags(includeOrExclude: string, allTags: any, tagIdsArray: Array<number>) {
+    let filteredTagIdsArray: Array<number> = [];
+    try {
+      if (includeOrExclude === 'exclude' && tagIdsArray.length > 0 ) {
+        const filteredTags = allTags.filter(tag => !tagIdsArray.includes((tag.id)));
+        const filteredTagIds = filteredTags.map(tag => tag.id);
+        filteredTagIdsArray = filteredTagIds;
+      } else if (includeOrExclude === 'include') {
+        filteredTagIdsArray = tagIdsArray;
+      }
+
+      const filteredTagsIdsString = filteredTagIdsArray.join(',');
+
+      return {
+        tagsString: filteredTagsIdsString || '',
+        tags: filteredTagIdsArray || []
+      };
+
+    } catch (error) {
+      console.error('Error processing tags:', error);
+
+      return {
+          tagsString: '',
+          tags: []
+      };
     }
-  } catch (error) {
-    console.error('Error processing tags:', error);
   }
 
+  const { tagsString: filteredTagsIdsString, tags: filteredTagIdsArray } = determineTags(includeOrExclude, allTags, tagIdsArray);
+
+  const [selectedTags, setSelectedTags] = useState<Array<number>>([]);
+  const [selectedTagsString, setSelectedTagsString] = useState<string>('');
 
   const useCommentsData = {
     projectId: props.projectId,
     resourceId: resourceId,
     sentiment: sentiment,
-    onlyIncludeTagIds: includeOrExclude === 'include' ? tagIds : undefined,
-    onlyExcludeTagIds: includeOrExclude === 'exclude' ? tagIds : undefined,
+    onlyIncludeTagIds: filteredTagsIdsString || undefined,
   };
 
   const { data: comments } = datastore.useComments(useCommentsData);
 
   const [allComments, setAllComments] = useState<Array<Comment>>(comments);
   const [filteredComments, setFilteredComments] = useState<Array<Comment>>(comments);
-
-  const [tags, setTags] = useState<Array<number>>(tagIdsArray || []);
-  const [tagsString, setTagsString] = useState<string>(tagIds || '');
   const [commentValue, setCommentValue] = useState<string>('');
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -146,20 +162,27 @@ function DocumentMap({
   }, [comments]);
 
   useEffect(() => {
+    const selectedTagsForFiltering = Array.isArray(selectedTags) ? selectedTags : [];
+    const originalTagsForFiltering = Array.isArray(filteredTagIdsArray) ? filteredTagIdsArray : [];
+
+    const allTagsToFilter = selectedTagsForFiltering.length > 0 ? selectedTagsForFiltering : originalTagsForFiltering;
+
     const filtered = allComments && allComments
-      .filter((comment: any) => {
-        if (tags.length === 0) {
-          return true;
-        }
+        .filter((comment: any) => {
+          if (allTagsToFilter.length === 0) {
+            return true;
+          } else if (typeof comment.tags === 'undefined') {
+            return false;
+          }
 
-        return comment.tags.some((tag: any) => tags.includes(tag.id));
-      });
+          return comment?.tags.some((tag: any) => allTagsToFilter.includes(tag.id));
+        });
 
-    const tagsNewString = !!tags ? tags.join(',') : '';
+    const tagsNewString = !!allTagsToFilter ? allTagsToFilter.join(',') : '';
 
-    setTagsString(tagsNewString);
+    setSelectedTagsString(tagsNewString);
     setFilteredComments(filtered);
-  }, [tags, allComments]);
+  }, [selectedTags, allComments]);
 
   const [popupPosition, setPopupPosition] = useState<any>(null);
   const [selectedCommentIndex, setSelectedCommentIndex] = useState<number>();
@@ -216,7 +239,13 @@ function DocumentMap({
     return null;
   }
 
-  const addComment = (e: any, position: any) => {
+  const notifySuccess = () =>
+      toast.success('Je reactie is succescvol geplaatst!', { position: 'top-center' });
+
+  const notifyFailed = () =>
+      toast.error('Je reactie kon niet geplaatst worden', { position: 'top-center' });
+
+  const addComment = async (e: any, position: any) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -235,19 +264,31 @@ function DocumentMap({
         commentValue.length >= props.comments?.descriptionMinLength
         && commentValue.length <= props.comments?.descriptionMaxLength
     ) {
-      comments.create({
-        description: commentValue,
-        location: position,
-        createdAt: new Date(),
-        sentiment: 'no sentiment',
-        tags: selectedOptions,
-      });
+      try {
+        const newComment = await comments.create({
+          description: commentValue,
+          location: position,
+          createdAt: new Date(),
+          sentiment: 'no sentiment',
+          tags: selectedOptions,
+        });
 
-      setPopupPosition(null);
-      setCommentValue('');
-      setShortLengthError(false);
-      setLongLengthError(false);
-      setSelected([]);
+        const addNewCommentToComments = [...filteredComments, newComment];
+
+        setFilteredComments(addNewCommentToComments);
+        setPopupPosition(null);
+        setCommentValue('');
+        setShortLengthError(false);
+        setLongLengthError(false);
+        setSelected([]);
+        setSelectedCommentIndex( addNewCommentToComments.length - 1 );
+        setSelectedMarkerIndex( addNewCommentToComments.length - 1 );
+
+        notifySuccess();
+      } catch (error) {
+        notifyFailed();
+        console.error('Error creating comment:', error);
+      }
     } else {
       return;
     }
@@ -381,9 +422,9 @@ function DocumentMap({
               displayTagFilters={displayTagFilters}
               onUpdateFilter={(f) => {
                 if (f.tags.length === 0) {
-                  setTags(tagIdsArray);
+                  setSelectedTags([]);
                 } else {
-                  setTags(f.tags);
+                  setSelectedTags(f.tags);
                 }
               }}
               resources={[]}
@@ -416,8 +457,7 @@ function DocumentMap({
         {!isDefinitive && (
           <Comments
             {...props}
-            includeOrExclude={includeOrExclude}
-            onlyIncludeOrExcludeTagIds={tagsString}
+            onlyIncludeTags={selectedTagsString || filteredTagsIdsString || ''}
             resourceId={resourceId || ''}
             selectedComment={selectedCommentIndex}
             showForm={false}
@@ -503,6 +543,7 @@ function DocumentMap({
             </Popup>
           )}
         </MapContainer>
+        <Toaster />
       </div>
     </div>
   );

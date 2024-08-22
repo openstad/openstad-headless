@@ -80,7 +80,7 @@ export default function DocumentInclude(
                 </FormDescription>
                 <Select
                   onValueChange={field.onChange}
-                  value={field.value}
+                  value={field.value || 'include'}
                 >
                   <FormControl>
                     <SelectTrigger>
