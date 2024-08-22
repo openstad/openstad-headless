@@ -90,6 +90,8 @@ function DocumentMap({
     targetUrl: props.resourceIdRelativePath,
   })); // todo: make it a number throughout the code
 
+  //test
+
   const datastore = new DataStore({
     projectId: props.projectId,
     api: props.api,
