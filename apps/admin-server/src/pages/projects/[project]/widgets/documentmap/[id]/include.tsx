@@ -10,9 +10,7 @@ import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import useStatuses from "@/hooks/use-statuses";
 import React from "react";
-import {YesNoSelect} from "@/lib/form-widget-helpers";
 import {Spacer} from "@/components/ui/spacer";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
@@ -30,12 +28,6 @@ export default function DocumentInclude(
   async function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
   }
-
-  const { data: loadedStatuses } = useStatuses(props.projectId);
-  let statuses = (loadedStatuses || []) as {
-    id: number;
-    name: string;
-  }[];
 
   const { data: loadedTags } = useTags(props.projectId);
   const tags = (loadedTags || []) as Array<{
@@ -127,33 +119,6 @@ export default function DocumentInclude(
 
               form.setValue('onlyIncludeOrExcludeTagIds', idsToSave);
               props.onFieldChanged("onlyIncludeOrExcludeTagIds", idsToSave);
-            }}
-          />
-
-          <CheckboxList
-            form={form}
-            fieldName="onlyIncludeStatusIds"
-            fieldLabel="Geef enkel de resources met de volgende status weer:"
-            layout="vertical"
-            label={(t) => t.name}
-            keyPerItem={(t) => `${t.id}`}
-            items={statuses}
-            selectedPredicate={(t) =>
-              // @ts-ignore
-              form
-                ?.getValues('onlyIncludeStatusIds')
-                ?.split(',')
-                ?.findIndex((tg) => tg === `${t.id}`) > -1
-            }
-            onValueChange={(status, checked) => {
-              const values = form.getValues('onlyIncludeStatusIds')?.split(',') ?? [];
-
-              const idsToSave = (checked
-                ? [...values, status.id]
-                : values.filter((id) => id !== `${status.id}`)).join(',');
-
-              form.setValue('onlyIncludeStatusIds', idsToSave);
-              props.onFieldChanged("onlyIncludeStatusIds", idsToSave);
             }}
           />
 

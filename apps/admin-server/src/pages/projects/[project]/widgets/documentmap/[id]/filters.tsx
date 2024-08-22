@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl, FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
@@ -18,14 +18,13 @@ import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
 
 const formSchema = z.object({
-  displayTagFilters: z.boolean(),
   tagGroups: z
     .array(
       z.object({
@@ -36,8 +35,7 @@ const formSchema = z.object({
     )
     .refine((value) => value.some((item) => item), {
       message: 'You have to select at least one item.',
-    }),
-  displayTagGroupName: z.boolean(),
+    })
 });
 
 type Tag = {
@@ -72,31 +70,18 @@ export default function DocumentFilters(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      displayTagFilters: props?.displayTagFilters || false,
       tagGroups: props.tagGroups || [],
-      displayTagGroupName: props?.displayTagGroupName || false,
     },
   });
 
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Tags</Heading>
+        <Heading size="xl">Filters boven alle reacties</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-full grid grid-cols-1 gap-4">
-          <FormField
-            control={form.control}
-            name="displayTagFilters"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Wordt het filteren op tags weergegeven?</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           <FormField
             control={form.control}
@@ -105,6 +90,10 @@ export default function DocumentFilters(
               <FormItem className="col-span-full">
                 <div>
                   <FormLabel>Selecteer de gewenste tag groepen</FormLabel>
+                    <FormDescription>
+                        Selecteer de gewenste tag groepen die als filter verschijnen boven de reacties.<br />
+                        Het label veld fungeert als een titel boven de dropdown van het filter.
+                    </FormDescription>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-4">
                   {(tagGroupNames || []).map((groupName, index) => (
