@@ -19,6 +19,7 @@ import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
 import { Button, ButtonLink } from '@utrecht/component-library-react';
+import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
 type booleanProps = {
@@ -231,6 +232,11 @@ function ResourceDetailWithMap({
                 <Paragraph>{resource.description}</Paragraph>
               )}
             </div>
+            {displaySocials ? (
+                <div className="resource-detail-side-section">
+                  <ShareLinks title={'Deel dit'} />
+                </div>
+              ) : null}
           </article>
           {displayLocation && resource.location && (
             <div className="map-container--buttons">

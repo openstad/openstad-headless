@@ -500,6 +500,7 @@ function DocumentMap({
                   <FormLabel htmlFor="commentBox">Voeg een opmerking toe</FormLabel>
                   {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
                   {longLengthError && <Paragraph className="--error">De opmerking mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
+
                   <Textarea
                       id="commentBox"
                       name="comment"
@@ -548,7 +549,7 @@ function DocumentMap({
                     )
                   })}
 
-                  <Button appearance="primary-action-button" onClick={(e) => addComment(e, popupPosition)} type="submit">Insturen</Button>
+                  <Button appearance="primary-action-button" onClick={(e) => addComment(e, popupPosition)} type="submit">Verzenden</Button>
                 </form>}
 
             </Popup>

@@ -49,7 +49,7 @@ export default function WidgetResourceForm({
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Resource Form',
+            name: 'Inzending formulier',
             url: `/projects/${projectId}/widgets/resourceform/${id}`,
           },
         ]}>

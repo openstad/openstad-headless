@@ -24,6 +24,9 @@ const Select = forwardRef<HTMLSelectElement, Props>(
           ((e) => onValueChange && onValueChange(e.target.value))
         }>
         {props.children}
+          <SelectOption className="select-item" value={''}>
+            Selecteer optie
+          </SelectOption>
 
         {selectOptions.map((option) => (
           <React.Fragment key={`select-item-${option.label}`}>

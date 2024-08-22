@@ -53,7 +53,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Resource Detail',
+            name: 'Inzending detailpagina',
             url: `/projects/${projectId}/widgets/resourcedetail/${id}`,
           },
         ]}>

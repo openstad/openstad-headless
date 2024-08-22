@@ -24,6 +24,8 @@ export default function ProjectSubmissions() {
   const [activeWidget, setActiveWidget] = useState("0");
   const [allWidgets, setAllWidgets] = useState<{ id: number; name: string }[]>([]);
 
+  const [selectedWidget, setSelectedWidget] = useState<any>(null);
+
   useEffect(() => {
     let loadedSubmissions = (data || []) as { createdAt: string }[];
 
@@ -59,10 +61,13 @@ export default function ProjectSubmissions() {
 
   const selectClick = (value: any) => {
     const ID = value !== "0" ? value?.split(" - ")[0] : "0";
-    const filteredData = ID === "0" ? data : data?.filter((submission: any) => (submission.widgetId).toString() === ID);
+    const filteredData = ID === "0" ? data : data?.filter((submission: any) => (submission.widgetId || 0).toString() === ID);
 
     setFilterData(filteredData);
     setActiveWidget(value);
+
+    const selectedWidget = widgetData.find((widget: any) => widget.id.toString() === ID);
+    setSelectedWidget(selectedWidget);
   }
 
   if (!data) return null;
@@ -104,7 +109,7 @@ export default function ProjectSubmissions() {
             <Button
               className="text-xs p-2"
               type="submit"
-              onClick={() => exportDataToCSV(filterData, activeWidget)}
+              onClick={() => exportDataToCSV(filterData, activeWidget, selectedWidget)}
               disabled={activeWidget === "0"}
             >
               Exporteer inzendingen .csv

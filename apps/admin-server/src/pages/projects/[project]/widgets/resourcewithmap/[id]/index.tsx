@@ -74,7 +74,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Resource with map',
+            name: 'Interactieve kaart',
             url: `/projects/${projectId}/widgets/resourcewithmap/${id}`,
           },
         ]}>

@@ -75,7 +75,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Resource Overview',
+            name: 'Inzending overzicht tegels',
             url: `/projects/${projectId}/widgets/resourceoverview/${id}`,
           },
         ]}>
@@ -106,7 +106,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
                       <TabsTrigger value="general">Kaart</TabsTrigger>
                       <TabsTrigger value="polygons">Polygonen</TabsTrigger>
-                      <TabsTrigger value="buttons">knoppen</TabsTrigger>
+                      <TabsTrigger value="buttons">Knoppen</TabsTrigger>
                     </TabsList>
                     <TabsContent value="general" className="p-0">
                       <WidgetResourcesMapMap

@@ -62,7 +62,7 @@ export default function WidgetResourceDetailMap({
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Resources detail map',
+            name: 'Inzending overzicht kaart',
             url: `/projects/${projectId}/widgets/resourcedetailmap/${id}`,
           },
         ]}>
