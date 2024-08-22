@@ -60,6 +60,7 @@ export type DocumentMapProps = BaseProps &
     extraFieldsTagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     displayTagGroupName?: boolean;
     extraFieldsDisplayTagGroupName?: boolean;
+    defaultTags?: string;
   };
 
 
@@ -79,6 +80,7 @@ function DocumentMap({
   tagGroups = [],
   extraFieldsTagGroups = [],
   displayTagGroupName = false,
+  defaultTags = '',
   ...props
 }: DocumentMapProps) {
 
@@ -265,15 +267,22 @@ function DocumentMap({
         && commentValue.length <= props.comments?.descriptionMaxLength
     ) {
       try {
+        const defaultTagsArray = defaultTags
+            ? defaultTags.split(',').map(tag => parseInt(tag.trim(), 10)).filter(tag => !isNaN(tag))
+            : [];
+
+        const allTags = Array.from(new Set([...defaultTagsArray, ...selectedOptions]));
+
         const newComment = await comments.create({
           description: commentValue,
           location: position,
           createdAt: new Date(),
           sentiment: 'no sentiment',
-          tags: selectedOptions,
+          tags: allTags,
         });
 
         const addNewCommentToComments = [...filteredComments, newComment];
+        const newIndex = addNewCommentToComments.length - 1;
 
         setFilteredComments(addNewCommentToComments);
         setPopupPosition(null);
@@ -281,8 +290,8 @@ function DocumentMap({
         setShortLengthError(false);
         setLongLengthError(false);
         setSelected([]);
-        setSelectedCommentIndex( addNewCommentToComments.length - 1 );
-        setSelectedMarkerIndex( addNewCommentToComments.length - 1 );
+        setSelectedCommentIndex( newIndex );
+        setSelectedMarkerIndex( newIndex );
 
         notifySuccess();
       } catch (error) {
@@ -528,7 +537,9 @@ function DocumentMap({
                             })))}
                             fieldKey={`tag[${group.type}]`}
                             onChange={(e) => {
-                              const selectedTag = e.value;
+                              let selectedTag = e.value;
+                              selectedTag = isNaN(selectedTag) ? parseInt(selectedTag, 10) : selectedTag;
+
                               updateTagListMultiple(selectedTag);
                             }}
                           />
