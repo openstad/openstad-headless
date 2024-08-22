@@ -421,28 +421,6 @@ function DocumentMap({
       <div className="content" ref={contentRef}>
         <div className="documentMap--header">
 
-          {displayTagFilters && datastore ? (
-            <Filters
-              className="osc-flex-columned"
-              dataStore={datastore}
-              defaultSorting=""
-              displaySearch={false}
-              displaySorting={false}
-              displayTagFilters={displayTagFilters}
-              onUpdateFilter={(f) => {
-                if (f.tags.length === 0) {
-                  setSelectedTags([]);
-                } else {
-                  setSelectedTags(f.tags);
-                }
-              }}
-              resources={[]}
-              sorting={[]}
-              tagGroups={tagGroups}
-              tagsLimitation={filteredTagIdsArray}
-            />
-          ) : null}
-
           <div className='url-container'>
             {backUrl ? <Link href={backUrl} id={randomId} title="Terug naar overzicht">Terug</Link> : null}
             <div className="url-list">
@@ -462,6 +440,28 @@ function DocumentMap({
           {resource.summary ? <Heading appearance="utrecht-heading-5" level={2}>{resource.summary}</Heading> : null}
           {resource.description ? <Paragraph>{resource.description}</Paragraph> : null}
         </section>
+
+        {(tagGroups && Array.isArray(tagGroups) && tagGroups.length > 0 && datastore) ? (
+            <Filters
+                className="osc-flex-columned"
+                dataStore={datastore}
+                defaultSorting=""
+                displaySearch={false}
+                displaySorting={false}
+                displayTagFilters={displayTagFilters}
+                onUpdateFilter={(f) => {
+                  if (f.tags.length === 0) {
+                    setSelectedTags([]);
+                  } else {
+                    setSelectedTags(f.tags);
+                  }
+                }}
+                resources={[]}
+                sorting={[]}
+                tagGroups={tagGroups}
+                tagsLimitation={filteredTagIdsArray}
+            />
+        ) : null}
 
         {!isDefinitive && (
           <Comments

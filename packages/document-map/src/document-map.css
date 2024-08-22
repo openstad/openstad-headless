@@ -148,54 +148,64 @@ a + .url-list:before {
   gap: 0.5rem;
 }
 
-.documentMap--container .map-container .multi-select > button {
+.documentMap--container .multi-select > button {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   color: #000;
 }
 
-.documentMap--container .map-container .multi-select > button .icon p {
+.documentMap--container .multi-select > button .icon p {
   display: none;
 }
 
-.documentMap--container .map-container .multi-select > button .icon i::before {
+.documentMap--container .multi-select > button .icon i::before {
   color: #000;
 }
 
-.documentMap--container .map-container .leaflet-popup-content .utrecht-paragraph {
+.documentMap--container .multi-select .utrecht-paragraph {
   margin: 0 0 8px;
   display: flex;
   flex-direction: row-reverse;
   justify-content: flex-end;
 }
 
-.documentMap--container .map-container .leaflet-popup-content .utrecht-form-field--checkbox {
+.documentMap--container .multi-select .utrecht-form-field--checkbox {
   display: block;
 }
 
-.documentMap--container .map-container .leaflet-popup-content .utrecht-paragraph .utrecht-checkbox {
+.documentMap--container .multi-select .utrecht-paragraph .utrecht-checkbox {
   width: 18px;
   height: 18px;
   min-block-size: 18px;
   min-inline-size: 18px;
 }
 
-.documentMap--container .map-container .leaflet-popup-content .utrecht-paragraph label {
+.documentMap--container .multi-select .utrecht-paragraph label {
   font-size: 14px;
 }
 
-.documentMap--container .map-container .leaflet-popup-content .multiselect-container {
+.documentMap--container .multi-select .multiselect-container {
   margin-top: 10px;
 }
 
-.documentMap--container .map-container .leaflet-popup-content .multi-select {
+.documentMap--container .multi-select {
   border: 1px solid rgb(102, 102, 102);
   padding: 8px 16px;
+  background-color: white;
 }
 
-.documentMap--container .map-container .leaflet-popup-content .multi-select > button {
+.documentMap--container .multi-select > button{
   border: none;
   padding: 0;
   min-block-size: 30px;
+  background-color: transparent !important;
+  max-inline-size: none;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.documentMap--container #stem-begroot-filter {
+  margin-block-end: 1rem;
 }
