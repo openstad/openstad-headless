@@ -113,8 +113,8 @@ function DocumentMap({
     let filteredTagIdsArray: Array<number> = [];
     try {
       if (includeOrExclude === 'exclude' && tagIdsArray.length > 0 ) {
-        const filteredTags = allTags.filter(tag => !tagIdsArray.includes((tag.id)));
-        const filteredTagIds = filteredTags.map(tag => tag.id);
+        const filteredTags = allTags.filter((tag: {id: number}) => !tagIdsArray.includes((tag.id)));
+        const filteredTagIds = filteredTags.map((tag: {id: number}) => tag.id);
         filteredTagIdsArray = filteredTagIds;
       } else if (includeOrExclude === 'include') {
         filteredTagIdsArray = tagIdsArray;
@@ -512,38 +512,38 @@ function DocumentMap({
                   { extraFieldsTagGroups
                     && Array.isArray(extraFieldsTagGroups)
                     && extraFieldsTagGroups.length > 0
-                    && extraFieldsTagGroups.map((group: { label: string | undefined, type: string, multiple: boolean }, index) => {
+                    && extraFieldsTagGroups.map((group: { type: string; label?: string; multiple: boolean }, index) => {
                     return (
                       <div key={group.type}>
                         <FormLabel htmlFor={group.type}>{group.label}</FormLabel>
 
                         { group && group.multiple ? (
-                          <MultiSelect
-                              label={'Selecteer een optie'}
-                              onItemSelected={(value) => {
-                                updateTagListMultiple(value);
-                              }}
-                              options={(allTags?.filter(tag => tag.type === group.type).map(tag => ({
-                                value: tag.id,
-                                label: tag.name,
-                                checked: selectedOptions.includes(tag.id),
-                              })))}
-                          />
+                            <MultiSelect
+                                label={'Selecteer een optie'}
+                                onItemSelected={(optionValue: string) => {
+                                  const value = parseInt(optionValue, 10);
+                                  updateTagListMultiple(value);
+                                }}
+                                options={(allTags?.filter((tag: {type: string}) => tag.type === group.type).map((tag: {id: number, name: string}) => ({
+                                  value: tag.id,
+                                  label: tag.name,
+                                  checked: selectedOptions.includes(tag.id),
+                                })))}
+                            />
 
                         ) : (
-                          <SelectField
-                            choices={(allTags?.filter(tag => tag.type === group.type).map(tag => ({
-                              value: tag.id,
-                              label: tag.name
-                            })))}
-                            fieldKey={`tag[${group.type}]`}
-                            onChange={(e) => {
-                              let selectedTag = e.value;
-                              selectedTag = isNaN(selectedTag) ? parseInt(selectedTag, 10) : selectedTag;
+                            <SelectField
+                                choices={(allTags?.filter((tag: {type: string}) => tag.type === group.type).map((tag: {id: string | number, name: string}) => ({
+                                  value: tag.id,
+                                  label: tag.name
+                                })))}
+                                fieldKey={`tag[${group.type}]`}
+                                onChange={(e: { name: string; value: string | [] | Record<number, never>; }) => {
+                                  let selectedTag = e.value as string;
 
-                              updateTagListMultiple(selectedTag);
-                            }}
-                          />
+                                  updateTagListMultiple( parseInt(selectedTag, 10) );
+                                }}
+                            />
                         ) }
                       </div>
                     )

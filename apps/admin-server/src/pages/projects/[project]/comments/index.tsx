@@ -38,9 +38,9 @@ export default function ProjectComments() {
     exportData(filterData, `${projectId}_reacties_${formattedDate}.xlsx`);
   }
 
-  function categorizeTags(tags) {
+  function categorizeTags(tags: { type: string, name: string }[] ) {
     if (!tags) return {};
-    return tags.reduce((acc, tag) => {
+    return tags.reduce((acc: any, tag: { type: string, name: string }) => {
       if (!acc[tag.type]) {
         acc[tag.type] = [];
       }

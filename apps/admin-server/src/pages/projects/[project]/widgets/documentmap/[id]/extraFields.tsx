@@ -27,9 +27,9 @@ const formSchema = z.object({
   extraFieldsTagGroups: z
       .array(
           z.object({
-            type: z.string().optional(),
+            type: z.string(),
             label: z.string().optional(),
-            multiple: z.boolean().optional(),
+            multiple: z.boolean().default(false),
           })
       )
       .refine((value) => value.some((item) => item), {
