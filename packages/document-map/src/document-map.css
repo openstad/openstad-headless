@@ -204,6 +204,7 @@ a + .url-list:before {
   width: 100%;
   display: flex;
   justify-content: space-between;
+  color: black !important;
 }
 
 .documentMap--container #stem-begroot-filter {
