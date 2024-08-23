@@ -139,7 +139,7 @@ export function Filters({
             />
           </div>
         ) : null}
-        {props.displayTagFilters ? (
+        {( props.displayTagFilters && tagGroups && Array.isArray(tagGroups) && tagGroups.length > 0) ? (
           <>
             {tagGroups.map((tagGroup, index) => {
               if (tagGroup.multiple) {
