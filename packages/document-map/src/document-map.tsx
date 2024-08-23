@@ -55,7 +55,6 @@ export type DocumentMapProps = BaseProps &
     statusId?: string;
     includeOrExclude?: string;
     onlyIncludeOrExcludeTagIds?: string;
-    displayTagFilters?: boolean;
     tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     extraFieldsTagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     displayTagGroupName?: boolean;
@@ -76,7 +75,6 @@ function DocumentMap({
   statusId,
   includeOrExclude = 'include',
   onlyIncludeOrExcludeTagIds = '',
-  displayTagFilters = false,
   tagGroups = [],
   extraFieldsTagGroups = [],
   displayTagGroupName = false,
@@ -450,7 +448,7 @@ function DocumentMap({
                 defaultSorting=""
                 displaySearch={false}
                 displaySorting={false}
-                displayTagFilters={displayTagFilters}
+                displayTagFilters={true}
                 onUpdateFilter={(f) => {
                   if (f.tags.length === 0) {
                     setSelectedTags([]);
