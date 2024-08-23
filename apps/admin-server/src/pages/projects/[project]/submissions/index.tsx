@@ -187,7 +187,7 @@ export default function ProjectSubmissions() {
                         style={{textDecoration: 'underline'}}
                          onClick={(e) => {
                            e.preventDefault();
-                           router.push(`/projects/${project}/widgets/${widgetType}/${submission.widgetId}`);
+                           router.push(`/projects/${project}/submissions/${submission.widgetId}?dataId=${submission.id}`);
                          }}
                       >
                         {submission.widgetId} | {widgetName}
