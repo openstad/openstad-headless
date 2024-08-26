@@ -70,22 +70,45 @@ export const exportDataToCSV = (data: any, widgetName: string, selectedWidget: a
 
   const headerRow = [...columns].join(';');
 
+  const flattenObject = (obj: any, parentKey = '', res: any = {}) => {
+    for (let key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const propName = parentKey ? `${parentKey}.${key}` : key;
+        if (Array.isArray(obj[key])) {
+          res[propName] = obj[key].map((item: any) => {
+            if (typeof item === 'object' && item !== null) {
+              return JSON.stringify(item);
+            }
+            return item;
+          }).join(', ');
+        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+          flattenObject(obj[key], propName, res);
+        } else {
+          res[propName] = obj[key];
+        }
+      }
+    }
+    return res;
+  };
+  
   const dataRows = data.map((row: any) => {
+    const flattenedSubmittedData = flattenObject(row.submittedData);
     const rowData = {
-      ID: row.id,
-      'Aangemaakt op' : row.createdAt,
-      'Project ID' : row.projectId,
-      'Widget' : widgetName,
-      'Gebruikers ID' : row.userId,
-      ...row.submittedData,
+      ID: row.id || ' ',
+      'Aangemaakt op': row.createdAt || ' ',
+      'Project ID': row.projectId || ' ',
+      'Widget': widgetName || ' ',
+      'Gebruikers ID': row.userId || ' ',
+      ...flattenedSubmittedData,
     };
-
+  
     return createRow(rowData, columns);
   });
 
   const csv = [headerRow, ...dataRows].join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = window.URL.createObjectURL(blob);
+
 
   const a = document.createElement('a');
   a.href = url;
