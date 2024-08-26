@@ -141,13 +141,12 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
     name: string,
     loginurl: string,
     imagePath: string,
-    submissionContent: string
   };
   const [mailContext, setMailContext] = useState<MailContextType>({
     user: { name: 'Gebruiker', fullName: 'Gebruiker' },
     name: 'Gebruiker',
     loginurl: 'https://openstad.nl/login',
-    imagePath: process.env.EMAIL_ASSETS_URL,
+    imagePath: process.env.EMAIL_ASSETS_URL || '',
   });
 
   useEffect(() => {
