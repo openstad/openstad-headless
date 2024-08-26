@@ -356,6 +356,17 @@ app.use('/:sitePrefix', function (req, res, next) {
     
 });
 
+// Add site to request object if we don't have a prefix
+// This fixes a bug where basicAuth would only apply to subdirectories
+app.use((req, res, next) => {
+  if (!req.site) {
+    if (projects[req.openstadDomain]) {
+      req.site = projects[req.openstadDomain];
+    }
+  }
+  next();
+});
+
 // Create a middleware function for basic authentication
 app.use((req, res, next) => {
   

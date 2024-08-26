@@ -149,6 +149,14 @@ module.exports = function (db, sequelize, DataTypes) {
       constraints: false,
     });
 
+    this.belongsToMany(models.Comment, {
+      through: 'comment_tags',
+      as: 'comments',
+      foreignKey: 'tagId',
+      otherKey: 'commentId',
+      constraints: false,
+    });
+
     this.belongsTo(models.Project, { onDelete: 'CASCADE' });
   };
 
