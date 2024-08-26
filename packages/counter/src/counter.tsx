@@ -63,9 +63,7 @@ function Counter({
     let filteredTagIdsArray: Array<number> = [];
     try {
       if (includeOrExclude === 'exclude' && tagIdsArray.length > 0 ) {
-        const filteredTags = allTags.filter((tag: {id: number}) => !tagIdsArray.includes((tag.id)));
-        const filteredTagIds = filteredTags.map((tag: {id: number}) => tag.id);
-        filteredTagIdsArray = filteredTagIds;
+        filteredTagIdsArray = allTags.filter((tag: {id: number}) => !tagIdsArray.includes((tag.id))).map((tag: {id: number}) => tag.id);
       } else if (includeOrExclude === 'include') {
         filteredTagIdsArray = tagIdsArray;
       }
