@@ -35,7 +35,7 @@ const formSchema = z.object({
   }),
   cssUrl: z.string().optional(),
   // We don't want to restrict this URL too much
-  url: z.string().regex(/^(?:([a-z0-9.:-_\/]+))?$/g, {
+  url: z.string().regex(/^(?:([a-z0-9.:\-_\/]+))?$/g, {
     message: 'De URL mag alleen kleine letters, cijfers, punten, dubbele punten, koppeltekens, onderstrepingstekens en schuine strepen bevatten.'
   }).optional(),
   basicAuthActive: z.coerce.boolean().optional(),
