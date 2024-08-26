@@ -47,8 +47,6 @@ type Tag = {
 export default function DocumentExtraFields(
   props: DocumentMapProps &
     EditFieldProps<DocumentMapProps>,
-    extraFieldsTagGroups: { type: string; label?: string; multiple: boolean }[],
-    defaultTags: string
 ) {
   type FormData = z.infer<typeof formSchema>;
   const { data: tags } = useTags(props.projectId);
@@ -71,8 +69,8 @@ export default function DocumentExtraFields(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      extraFieldsTagGroups: extraFieldsTagGroups || [],
-      defaultTags: defaultTags || '',
+      extraFieldsTagGroups: props.extraFieldsTagGroups || [],
+      defaultTags: props?.defaultTags || '',
     },
   });
 

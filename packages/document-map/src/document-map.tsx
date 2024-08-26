@@ -51,6 +51,10 @@ export type DocumentMapProps = BaseProps &
     statusId?: string;
     displayLikes?: boolean;
     tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
+    extraFieldsTagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
+    defaultTags?: string;
+    includeOrExclude?: string;
+    onlyIncludeOrExcludeTagIds?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
