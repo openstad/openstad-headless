@@ -12,7 +12,7 @@ interface LeafletComponents {
 interface MapComponentProps {
   onSelectLocation?: (location: string) => void;
   field: any;
-  center: { lat: number; lng: number };
+  center?: { lat: number; lng: number };
 }
 
 const MapInput: React.FC<MapComponentProps> = ({ onSelectLocation, field, center = {lat: 52.129507, lng:4.670647} }) => {
