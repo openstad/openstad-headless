@@ -239,7 +239,7 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
   useEffect(() => {
     if (fieldValue) {
       try {
-        convertMJMLToHTML(nunjucks.renderString(fieldValue, context));
+        convertMJMLToHTML(nunjucks.renderString(fieldValue, mailContext));
       } catch (err) {
         setError('Er is een fout opgetreden bij het renderen van de template.');
       }
