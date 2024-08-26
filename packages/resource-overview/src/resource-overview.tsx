@@ -85,6 +85,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     documentsTitle?: string;
     documentsDesc?: string;
     displayVariant?: string;
+    onFilteredResourcesChange?: (filteredResources: any[]) => void;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -337,6 +338,7 @@ function ResourceOverview({
   documentsTitle = '',
   documentsDesc = '',
   displayVariant = '',
+  onFilteredResourcesChange,
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -374,6 +376,7 @@ function ResourceOverview({
   const [filteredResources, setFilteredResources] = useState([]);
 
   const { data: resourcesWithPagination } = datastore.useResources({
+    pageSize: 999999,
     ...props,
     search,
     tags,
@@ -390,22 +393,26 @@ function ResourceOverview({
 
 
   useEffect(() => {
-    const filtered = resources && resources
-      ?.filter((resource: any) =>
-        tags.every((tag) => resource.tags && Array.isArray(resource.tags) && resource.tags.find((o: { id: number }) => o.id === parseInt(tag.toString())))
-      )
-      ?.filter((resource: any) =>
-        (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0) || statusIdsToLimitResourcesTo.every((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses.find((o: { id: number }) => o.id === statusId))
-      )
-      ?.sort((a: any, b: any) => {
-        if (sort === 'createdAt_desc') {
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        }
-        if (sort === 'createdAt_asc') {
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        }
-        return 0;
-      });
+    const filtered = resources && (
+        tags.length === 0
+            ? resources
+            : resources
+                ?.filter((resource: any) =>
+                    tags.some((tag) => resource.tags && Array.isArray(resource.tags) && resource.tags.find((o: { id: number }) => o.id === parseInt(tag.toString())))
+                )
+        )
+        ?.filter((resource: any) =>
+            (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0) || statusIdsToLimitResourcesTo.some((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses.find((o: { id: number }) => o.id === statusId))
+        )
+        ?.sort((a: any, b: any) => {
+          if (sort === 'createdAt_desc') {
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          }
+          if (sort === 'createdAt_asc') {
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          }
+          return 0;
+        });
 
     setFilteredResources(filtered);
   }, [resources, tags, statuses, search, sort]);
@@ -420,6 +427,10 @@ function ResourceOverview({
       }
 
       setPage(0);
+
+      if (onFilteredResourcesChange) {
+        onFilteredResourcesChange(filtered);
+      }
     }
   }, [filteredResources]);
 
