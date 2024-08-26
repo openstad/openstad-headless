@@ -391,18 +391,42 @@ function ResourceOverview({
     }
   }, [resourcesWithPagination, pageSize]);
 
+  const {data: allTags} = datastore.useTags({
+    projectId: props.projectId,
+    type: ''
+  });
 
   useEffect(() => {
+    // @ts-ignore
+    const intTags = tags.map(tag => parseInt(tag, 10));
+
+    const groupedTags: { [key: string]: number[] } = {};
+
+    intTags.forEach(tagId => {
+      // @ts-ignore
+      const tag = allTags.find(tag => tag.id === tagId);
+      if (tag) {
+        const tagType = tag.type;
+        if (!groupedTags[tagType]) {
+          groupedTags[tagType] = [];
+        }
+        groupedTags[tagType].push(tagId);
+      }
+    });
+
     const filtered = resources && (
-        tags.length === 0
+        Object.keys(groupedTags).length === 0
             ? resources
-            : resources
-                ?.filter((resource: any) =>
-                    tags.some((tag) => resource.tags && Array.isArray(resource.tags) && resource.tags.find((o: { id: number }) => o.id === parseInt(tag.toString())))
-                )
-        )
+            : resources.filter((resource: any) => {
+              return Object.keys(groupedTags).every(tagType => {
+                return groupedTags[tagType].some(tagId =>
+                    resource.tags && Array.isArray(resource.tags) && resource.tags.some((o: { id: number }) => o.id === tagId)
+                );
+              });
+            })
+    )
         ?.filter((resource: any) =>
-            (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0) || statusIdsToLimitResourcesTo.some((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses.find((o: { id: number }) => o.id === statusId))
+            (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0) || statusIdsToLimitResourcesTo.some((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses.some((o: { id: number }) => o.id === statusId))
         )
         ?.sort((a: any, b: any) => {
           if (sort === 'createdAt_desc') {
@@ -415,7 +439,7 @@ function ResourceOverview({
         });
 
     setFilteredResources(filtered);
-  }, [resources, tags, statuses, search, sort]);
+  }, [resources, tags, statuses, search, sort, allTags]);
 
   useEffect(() => {
     if (filteredResources) {
