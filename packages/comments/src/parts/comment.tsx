@@ -86,10 +86,10 @@ function Comment({
     const markerIcons = Array.from(document.getElementsByClassName('leaflet-marker-icon'));
     const comments = Array.from(document.getElementsByClassName('comment-item'));
     const isAlreadySelected = markerIcons[index]?.classList.contains('--highlightedIcon');
-  
+
     markerIcons.forEach((markerIcon) => markerIcon.classList.remove('--highlightedIcon'));
     comments.forEach((comment) => comment.classList.remove('selected'));
-  
+
     if (!isAlreadySelected) {
       markerIcons[index]?.classList.toggle('--highlightedIcon');
       document.getElementById(`comment-${index}`)?.classList.toggle('selected');
@@ -183,13 +183,41 @@ function Comment({
         </section>
       )}
 
+      {args.comment.parentId && (
+        <>
+          <section className="comment-item-footer">
+            <Paragraph className="comment-reaction-strong-text">
+              {args.comment.createDateHumanized}
+            </Paragraph>
+            <ButtonGroup>
+              {widgetContext.canLike && (
+                canLike() ? (
+                  <Button
+                    appearance='secondary-action-button'
+                    className={args.comment.hasUserVoted ? `active` : ''}
+                    onClick={() => args.comment.submitLike()}>
+                    <i className={args.comment.hasUserVoted ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
+                    Mee eens (<span>{args.comment.yes || 0}</span>)
+                  </Button>
+                ) : (
+                  <Button disabled>
+                    <i className="ri-thumb-up-line"></i>
+                    Mee eens (<span>{args.comment.yes || 0}</span>)
+                  </Button>
+                )
+              )}
+            </ButtonGroup>
+          </section>
+        </>
+      )}
+
       <Spacer size={1} />
 
       {args.comment.replies &&
         args.comment.replies.map((reply, index) => {
           return (
             <div className="reaction-container" key={index}>
-              <Comment {...args} showDateSeperately={true} comment={reply} />
+              <Comment {...args} showDateSeperately={false} comment={reply} />
             </div>
           );
         })}
