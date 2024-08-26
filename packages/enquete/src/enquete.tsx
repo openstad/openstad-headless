@@ -138,6 +138,9 @@ function Enquete(props: EnqueteWidgetProps) {
                           }
                         });
                     break;
+                case 'map':
+                    fieldData['type'] = 'map';
+                    break;
                 case 'none':
                     fieldData['type'] = 'none';
                     fieldData['image'] = item?.image || '';
@@ -183,6 +186,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     title=""
                     submitText="Versturen"
                     submitDisabled={!hasRole(currentUser, 'member') && formOnlyVisibleForUsers}
+                    {...props}
                 />
             </div>
 

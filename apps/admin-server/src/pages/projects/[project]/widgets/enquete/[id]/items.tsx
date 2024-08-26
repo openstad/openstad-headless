@@ -653,6 +653,7 @@ export default function WidgetEnqueteItems(
                               <SelectItem value="multiple">
                                 Meerkeuze
                               </SelectItem>
+                              <SelectItem value="map">Locatie</SelectItem>
                               <SelectItem value="scale">Schaal</SelectItem>
                               <SelectItem value="imageUpload">Afbeelding upload</SelectItem>
                             </SelectContent>
