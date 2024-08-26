@@ -49,11 +49,12 @@ export default function ProjectStatusEdit() {
     const Content = ({ sub }: any) => {
         const renderValue = (value: any) => {
             if (typeof value === 'object' && value !== null) {
-                console.log(value);
                 return (
                     <div className="grid grid-cols-3 gap-4">
                         {Object.entries(value).map((val, key) => (
-                            <img key={key} src={value[key].url} className="w-full h-auto" />
+                            <a href={value[key].url} title={value[key].name} target={'_blank'}>
+                                <img key={key} src={value[key].url} className="w-full h-auto" />
+                            </a>
                         ))}
                     </div>
                 );
