@@ -88,7 +88,11 @@ function Enquete(props: EnqueteWidgetProps) {
                         item.options.length > 0
                     ) {
                         fieldData['choices'] = item.options.map((option) => {
-                            return option.titles[0].key
+                            return {
+                                value: option.titles[0].key,
+                                label: option.titles[0].key,
+                                isOtherOption: option.titles[0].isOtherOption
+                            };
                         });
                     }
                     break;
