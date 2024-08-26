@@ -54,7 +54,6 @@ export default function ProjectStatusEdit() {
                 if (value.lat && value.lng) {
                     return (
                         <div className={'w-full'}>
-                            <div>{`Latitude: ${value.lat}, Longitude: ${value.lng}`}</div>
                             <MapInput field={{ value: JSON.stringify({ lat: value.lat, lng: value.lng }) }} center={{'lat': value.lat, 'lng':value.lng}} />
                         </div>
                     );
@@ -84,7 +83,7 @@ export default function ProjectStatusEdit() {
                     {Object.entries(sub).map(([key, value]) => (
                         <tr key={key} className="even:bg-gray-50">
                             <td className="align-top p-2.5 w-40"><strong>{key}</strong></td>
-                            <td>{renderValue(value)}</td>
+                            <td className="align-top p-2.5">{renderValue(value)}</td>
                         </tr>
                     ))}
                 </tbody>
