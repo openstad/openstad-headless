@@ -53,7 +53,6 @@ export default function WidgetResourceOverviewDisplay(
     EditFieldProps<ResourceOverviewWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
-
   async function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
   }
