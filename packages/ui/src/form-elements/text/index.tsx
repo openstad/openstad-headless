@@ -60,9 +60,11 @@ const TextInput: FC<TextInputProps> = ({
 
     return (
         <FormField type="text">
-            <Paragraph className="utrecht-form-field__label">
-                <FormLabel htmlFor={randomID}>{title}</FormLabel>
-            </Paragraph>
+            {title && (
+                <Paragraph className="utrecht-form-field__label">
+                    <FormLabel htmlFor={randomID}>{title}</FormLabel>
+                </Paragraph>
+            )}
             {description &&
                 <>
                     <FormFieldDescription>
