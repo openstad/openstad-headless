@@ -52,7 +52,7 @@ export default function ProjectStatusEdit() {
                 return (
                     <div className="grid grid-cols-3 gap-4">
                         {Object.entries(value).map((val, key) => (
-                            <a href={value[key].url} title={value[key].name} target={'_blank'}>
+                            <a href={value[key].url} title={value[key].name} target={'_blank'} key={key}>
                                 <img key={key} src={value[key].url} alt='' className="w-full h-auto" />
                             </a>
                         ))}
