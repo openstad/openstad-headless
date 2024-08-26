@@ -2,6 +2,7 @@ import * as React from 'react';
 import { PageLayout } from '@/components/ui/page-layout';
 import { useRouter } from 'next/router';
 import useSubmissions from '@/hooks/use-submission';
+import MapInput from '@/components/maps/leaflet-input';
 
 export default function ProjectStatusEdit() {
     const router = useRouter();
@@ -49,15 +50,30 @@ export default function ProjectStatusEdit() {
     const Content = ({ sub }: any) => {
         const renderValue = (value: any) => {
             if (typeof value === 'object' && value !== null) {
-                return (
-                    <div className="grid grid-cols-3 gap-4">
-                        {Object.entries(value).map((val, key) => (
-                            <a href={value[key].url} title={value[key].name} target={'_blank'} key={key}>
-                                <img key={key} src={value[key].url} alt='' className="w-full h-auto" />
-                            </a>
-                        ))}
-                    </div>
-                );
+
+                if (value.lat && value.lng) {
+                    return (
+                        <div className={'w-full'}>
+                            <div>{`Latitude: ${value.lat}, Longitude: ${value.lng}`}</div>
+                            <MapInput field={{ value: JSON.stringify({ lat: value.lat, lng: value.lng }) }} center={{'lat': value.lat, 'lng':value.lng}} />
+                        </div>
+                    );
+                }
+
+                if (value[0]?.url && value[0]?.name) {
+                    return (
+                        <div className="grid grid-cols-3 gap-4">
+                            {Object.entries(value).map(([key, val]) => (
+                                <a href={value[key].url} title={value[key].name} target={'_blank'} key={key}>
+                                    <img src={value[key].url} alt={value[key].name} className="w-full h-auto" />
+                                </a>
+                            ))}
+                        </div>
+                    )
+                }
+
+                return null;
+
             }
             return value;
         };
