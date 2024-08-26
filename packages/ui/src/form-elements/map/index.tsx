@@ -47,6 +47,8 @@ const MapField: FC<MapProps> = ({
         projectId: props.projectId
     });
 
+    console.log(props.projectId)
+
     let areaId = props?.map?.areaId || false;
     const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];
 

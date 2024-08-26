@@ -182,6 +182,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     title=""
                     submitText="Versturen"
                     submitDisabled={!hasRole(currentUser, 'member') && formOnlyVisibleForUsers}
+                    {...props}
                 />
             </div>
 
