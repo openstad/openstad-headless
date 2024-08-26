@@ -2,7 +2,7 @@ import 'remixicon/fonts/remixicon.css';
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import React from 'react';
+import React, { useState } from 'react';
 import './resourceOverviewWithMap.css';
 import {
   ResourceOverview,
@@ -16,17 +16,23 @@ import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/s
 export type ResourceOverviewWithMapWidgetProps = ResourceOverviewWidgetProps & ResourceOverviewMapWidgetProps;
 
 const ResourceOverviewWithMap = (props: ResourceOverviewWithMapWidgetProps) => {
-  return (
-    <div className="resourceOverviewWithMap-container">
-      <div className="detail-container">
-        <ResourceOverview {...props} />
-      </div>
-      <ResourceOverviewMap
-          {...props}
-          {...props.resourceOverviewMapWidget}
-        />
-    </div>
-  );
+    const [filteredResources, setFilteredResources] = useState<any[]>([]);
+
+    return (
+        <div className="resourceOverviewWithMap-container">
+            <div className="detail-container">
+                <ResourceOverview
+                    {...props}
+                    onFilteredResourcesChange={setFilteredResources} // Pass the callback function
+                />
+            </div>
+            <ResourceOverviewMap
+                {...props}
+                {...props.resourceOverviewMapWidget}
+                givenResources={filteredResources.length > 0 ? filteredResources : undefined}
+            />
+        </div>
+    );
 }
 
 ResourceOverviewWithMap.loadWidget = loadWidget;
