@@ -46,7 +46,7 @@ type Tag = {
 
 export default function DocumentExtraFields(
   props: DocumentMapProps &
-    EditFieldProps<DocumentMapProps>
+    EditFieldProps<DocumentMapProps>,
 ) {
   type FormData = z.infer<typeof formSchema>;
   const { data: tags } = useTags(props.projectId);

@@ -20,6 +20,7 @@ import InfoDialog from "@/components/ui/info-hover";
 import { useEffect, useState } from "react";
 import * as React from "react";
 import * as Switch from '@radix-ui/react-switch';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
@@ -210,6 +211,18 @@ export default function DocumentGeneral(
               <FormMessage />
             </FormItem>
 
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="displayLikes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Toon de likes widget</FormLabel>
+              {YesNoSelect(field, props)}
+              <FormMessage />
+            </FormItem>
           )}
         />
 
