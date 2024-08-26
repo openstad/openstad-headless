@@ -134,6 +134,9 @@ function Enquete(props: EnqueteWidgetProps) {
                           }
                         });
                     break;
+                case 'map':
+                    fieldData['type'] = 'map';
+                    break;
                 case 'none':
                     fieldData['type'] = 'none';
                     fieldData['image'] = item?.image || '';
