@@ -50,7 +50,7 @@ const initialData = `<mjml>
       <mj-section>
         <mj-column width="400px">
           <mj-text font-size="20px" font-family="Helvetica Neue">Inlogmail aangevraagd</mj-text>
-          <mj-text>Beste {{user}},</mj-text>
+          <mj-text>Beste {{name or 'bezoeker'}},</mj-text>
           <mj-text color="#525252">Voor Admin panel is een inloglink aangevraagd voor dit emailadres. Klik op de knop hieronder om automatisch in te loggen. De knop is 10 minuten geldig. </mj-text>
           <mj-button background-color="#12B886" href="{{loginurl}}">Log in</mj-button>
         </mj-column>
@@ -90,20 +90,6 @@ Bedankt voor je inzending! Je inzending is goed ontvangen en staat nu online. Hi
  </mj-section> 
  </mj-body> 
  </mjml>`;
-
-
-const getUserName = async () => {
-  const user = await fetchSessionUser();
-  return user?.name ?? 'Gebruiker';
-}
-
-const context = {
-  user: await getUserName(),
-  loginurl: 'https://openstad.nl/login',
-  imagePath: process.env.EMAIL_ASSETS_URL
-};
-
-
 
 type Props = {
   type:
@@ -150,6 +136,34 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
   const { data, create, update } = useNotificationTemplate(project as string)
   const notificationTitle = notificationTypes[type];
 
+  type mailContextType = {
+    user: { name: string, fullName: string },
+    name: string,
+    loginurl: string,
+    imagePath: string,
+    submissionContent: string
+  };
+  const [mailContext, setMailContext] = useState<MailContextType>({
+    user: { name: 'Gebruiker', fullName: 'Gebruiker' },
+    name: 'Gebruiker',
+    loginurl: 'https://openstad.nl/login',
+    imagePath: process.env.EMAIL_ASSETS_URL,
+  });
+
+  useEffect(() => {
+    async function setUserNameInMailContext() {
+      const user = await fetchSessionUser();
+
+      if (user && user.name) {
+        setMailContext((prev: mailContextType) => {
+          return { ...prev, user: { name: user.name, fullName: user.name }, name: user.name };
+        });
+      }
+    }
+
+    setUserNameInMailContext();
+  }, []);
+
   const defaults = React.useCallback(
     () => ({
       engine: engine || "email",
@@ -194,7 +208,7 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
   const [templateData, setTemplateData] = useState(initialData);
   const [mjmlHtml, setMjmlHtml] = useState('');
 
-  let mailTemplate: any = nunjucks.renderString(templateData, context);
+  let mailTemplate: any = nunjucks.renderString(templateData, mailContext);
 
   const [error, setError] = useState<string | null>(null);
 
@@ -211,12 +225,12 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
 
   useEffect(() => {
     convertMJMLToHTML();
-  }, []);
+  }, [mailContext]);
 
   const handleOnChange = (e: any, field: any) => {
     if (e.target.value.length > 0) {
       try {
-        convertMJMLToHTML(nunjucks.renderString(e.target.value, context));
+        convertMJMLToHTML(nunjucks.renderString(e.target.value, mailContext));
       } catch (err) {
         setError('Er is een fout opgetreden bij het renderen van de template.');
       }
