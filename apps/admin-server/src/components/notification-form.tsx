@@ -136,7 +136,7 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
   const { data, create, update } = useNotificationTemplate(project as string)
   const notificationTitle = notificationTypes[type];
 
-  type mailContextType = {
+  type MailContextType = {
     user: { name: string, fullName: string },
     name: string,
     loginurl: string,
@@ -155,7 +155,7 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
       const user = await fetchSessionUser();
 
       if (user && user.name) {
-        setMailContext((prev: mailContextType) => {
+        setMailContext((prev: MailContextType) => {
           return { ...prev, user: { name: user.name, fullName: user.name }, name: user.name };
         });
       }
