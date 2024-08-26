@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/form';
 
 import useNotificationTemplate from '@/hooks/use-notification-template';
+import { fetchSessionUser } from '@/auth';
 
 const initialData = `<mjml>
     <mj-body>
@@ -91,15 +92,13 @@ Bedankt voor je inzending! Je inzending is goed ontvangen en staat nu online. Hi
  </mjml>`;
 
 
-const getUserName = () => {
-  if (typeof window !== "undefined") {
-      const user = JSON.parse(sessionStorage.getItem('openstad') as string);
-      return user[Object.keys(user)[0]].openStadUser.name || 'Gebruiker';
-  }
+const getUserName = async () => {
+  const user = await fetchSessionUser();
+  return user?.name ?? 'Gebruiker';
 }
 
 const context = {
-  user: getUserName(),
+  user: await getUserName(),
   loginurl: 'https://openstad.nl/login',
   imagePath: process.env.EMAIL_ASSETS_URL
 };
