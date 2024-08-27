@@ -5,9 +5,10 @@ import useSubmissions from '@/hooks/use-submission';
 import MapInput from '@/components/maps/leaflet-input';
 
 // import { htmlToProsemirrorNode } from 'remirror';
-import { BoldExtension, ItalicExtension, UnderlineExtension, BulletListExtension, OrderedListExtension } from 'remirror/extensions';
+// import { BoldExtension, ItalicExtension, UnderlineExtension, BulletListExtension, OrderedListExtension } from 'remirror/extensions';
 import { Remirror, ThemeProvider, useRemirror } from '@remirror/react';
 import { RemirrorJSON } from 'remirror';
+import { parse } from 'path';
 
 export default function ProjectStatusEdit() {
     const router = useRouter();
@@ -52,19 +53,6 @@ export default function ProjectStatusEdit() {
         );
     };
 
-    const remirrorJsonFromStorage = {
-        type: 'doc',
-        content: [
-            {
-                type: 'paragraph',
-                content: [
-                    { type: 'text', text: 'Hello ' },
-                    { type: 'text', marks: [{ type: 'italic' }], text: 'word' },
-                ],
-            },
-        ],
-    };
-
     const handleError = (errors: any): RemirrorJSON => {
         console.error('Error processing content:', errors);
         return {
@@ -73,20 +61,14 @@ export default function ProjectStatusEdit() {
         };
     };
 
-    const extensions = () => [
-        new BoldExtension({}),
-        new ItalicExtension({}),
-        new UnderlineExtension({}),
-        new BulletListExtension({}),
-        new OrderedListExtension({}),
-    ];
+    // const extensions = () => [
+    //     new BoldExtension({}),
+    //     new ItalicExtension({}),
+    //     new UnderlineExtension({}),
+    //     new BulletListExtension({}),
+    //     new OrderedListExtension({}),
+    // ];
 
-    const { manager, state } = useRemirror({
-        extensions: extensions,
-        stringHandler: 'html',
-        content: remirrorJsonFromStorage,
-        onError: handleError,
-    });
 
     const Content = ({ sub }: any) => {
         const renderValue = (value: any) => {
@@ -95,15 +77,53 @@ export default function ProjectStatusEdit() {
             if (typeof value === 'string' && value !== null) {
                 try {
                     if (JSON.parse(value).textarea !== undefined) {
-                        const parsedValue = JSON.parse(value);
-                        console.log(JSON.parse(value).textarea)
+
+                        const { manager, state } = useRemirror({
+                            // extensions: extensions,
+                            onError: handleError,
+                            stringHandler: 'html',
+                            content: {
+                                type: 'doc',
+                                // content: [JSON.parse(value).textarea],
+                                content: [
+                                    {
+                                        type: 'paragraph',
+                                        content: [
+                                            {
+                                                type: "paragraph",
+                                                content: [
+                                                    {
+                                                        type: "text",
+                                                        text: "Dit is een open vraag"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                type: "paragraph",
+                                            },
+                                            {
+                                                type: "paragraph",
+                                                content: [
+                                                    {
+                                                        type: "text",
+                                                        text: "Dit is een open vraag"
+                                                    }
+                                                ]
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        });
+
                         return (
                             <div className="w-full">
                                 <ThemeProvider>
                                     <Remirror
                                         manager={manager}
                                         state={state}
-                                        onChange={(parameter) => { }}
+                                        onChange={(p) => { }}
+                                        editable={false}
                                     />
                                 </ThemeProvider>
                             </div>
