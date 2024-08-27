@@ -19,6 +19,7 @@ import * as React from "react";
 
 const formSchema = z.object({
     addCommentText: z.string().optional(),
+    addMarkerText: z.string().optional(),
 });
 
 export default function DocumentContent(
@@ -35,6 +36,7 @@ export default function DocumentContent(
         resolver: zodResolver<any>(formSchema),
         defaultValues: {
             addCommentText: props?.addCommentText || 'Voeg een opmerking toe',
+            addMarkerText: props?.addMarkerText || 'Toon markers',
         },
     });
 
@@ -54,6 +56,22 @@ export default function DocumentContent(
                             <FormItem>
                                 <FormLabel>
                                     Als de gebruiker een reactie kan toevoegen, wat is de tekst die boven het veld staan?
+                                </FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="addMarkerText"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    De gebruiker kan de markers aan- of uitzetten. Wat is de tekst van de knop?
                                 </FormLabel>
                                 <FormControl>
                                     <Input {...field} />

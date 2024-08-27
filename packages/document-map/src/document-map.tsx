@@ -61,6 +61,7 @@ export type DocumentMapProps = BaseProps &
     extraFieldsDisplayTagGroupName?: boolean;
     onlyIncludeOrExcludeTagIds?: string;
     addCommentText?: string;
+    addMarkerText?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -85,6 +86,7 @@ function DocumentMap({
   extraFieldsTagGroups = [],
   defaultTags = '',
   addCommentText = 'Voeg een opmerking toe',
+  addMarkerText = 'Toon Markers',
   ...props
 }: DocumentMapProps) {
 
@@ -248,10 +250,10 @@ function DocumentMap({
   };
 
   const notifySuccess = () =>
-      toast.success('Je reactie is succescvol geplaatst!', { position: 'top-center' });
+      toast.success('Uw reactie is succesvol geplaatst!', { position: 'top-center' });
 
   const notifyFailed = () =>
-      toast.error('Je reactie kon niet geplaatst worden', { position: 'top-center' });
+      toast.error('Uw reactie kon niet geplaatst worden', { position: 'top-center' });
 
   const addComment = async (e: any, position: any) => {
     e.preventDefault();
@@ -560,7 +562,7 @@ function DocumentMap({
             )}
             <div className='toggleMarkers'>
               <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
-              <FormLabel htmlFor="toggleMarkers"> <Paragraph>Toon Markers</Paragraph> </FormLabel>
+              <FormLabel htmlFor="toggleMarkers"> <Paragraph>{ addMarkerText }</Paragraph> </FormLabel>
             </div>
           </>
         )}
