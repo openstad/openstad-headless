@@ -60,6 +60,7 @@ export type DocumentMapProps = BaseProps &
     includeOrExclude?: string;
     extraFieldsDisplayTagGroupName?: boolean;
     onlyIncludeOrExcludeTagIds?: string;
+    addCommentText?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -83,6 +84,7 @@ function DocumentMap({
   tagGroups = [],
   extraFieldsTagGroups = [],
   defaultTags = '',
+  addCommentText = 'Voeg een opmerking toe',
   ...props
 }: DocumentMapProps) {
 
@@ -471,7 +473,7 @@ function DocumentMap({
                 <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
               ) :
                 <form>
-                  <FormLabel htmlFor="commentBox">Voeg een opmerking toe</FormLabel>
+                  <FormLabel htmlFor="commentBox">{ addCommentText }</FormLabel>
                   {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
                   {longLengthError && <Paragraph className="--error">De opmerking mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
 
