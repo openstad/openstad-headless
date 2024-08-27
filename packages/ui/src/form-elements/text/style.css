@@ -15,3 +15,7 @@
  margin: 0;
 
 }
+
+.rte-editor .remirror-editor-wrapper > div{
+    background: #fff;
+}

@@ -4,6 +4,11 @@ import { useRouter } from 'next/router';
 import useSubmissions from '@/hooks/use-submission';
 import MapInput from '@/components/maps/leaflet-input';
 
+// import { htmlToProsemirrorNode } from 'remirror';
+import { BoldExtension, ItalicExtension, UnderlineExtension, BulletListExtension, OrderedListExtension } from 'remirror/extensions';
+import { Remirror, ThemeProvider, useRemirror } from '@remirror/react';
+import { RemirrorJSON } from 'remirror';
+
 export default function ProjectStatusEdit() {
     const router = useRouter();
     const { project, id, dataId } = router.query;
@@ -47,14 +52,75 @@ export default function ProjectStatusEdit() {
         );
     };
 
+    const remirrorJsonFromStorage = {
+        type: 'doc',
+        content: [
+            {
+                type: 'paragraph',
+                content: [
+                    { type: 'text', text: 'Hello ' },
+                    { type: 'text', marks: [{ type: 'italic' }], text: 'word' },
+                ],
+            },
+        ],
+    };
+
+    const handleError = (errors: any): RemirrorJSON => {
+        console.error('Error processing content:', errors);
+        return {
+            type: 'doc',
+            content: [],
+        };
+    };
+
+    const extensions = () => [
+        new BoldExtension({}),
+        new ItalicExtension({}),
+        new UnderlineExtension({}),
+        new BulletListExtension({}),
+        new OrderedListExtension({}),
+    ];
+
+    const { manager, state } = useRemirror({
+        extensions: extensions,
+        stringHandler: 'html',
+        content: remirrorJsonFromStorage,
+        onError: handleError,
+    });
+
     const Content = ({ sub }: any) => {
         const renderValue = (value: any) => {
+
+
+            if (typeof value === 'string' && value !== null) {
+                try {
+                    if (JSON.parse(value).textarea !== undefined) {
+                        const parsedValue = JSON.parse(value);
+                        console.log(JSON.parse(value).textarea)
+                        return (
+                            <div className="w-full">
+                                <ThemeProvider>
+                                    <Remirror
+                                        manager={manager}
+                                        state={state}
+                                        onChange={(parameter) => { }}
+                                    />
+                                </ThemeProvider>
+                            </div>
+                        )
+                    }
+                } catch (e) {
+                    return value;
+                }
+
+            }
+
             if (typeof value === 'object' && value !== null) {
 
                 if (value.lat && value.lng) {
                     return (
                         <div className={'w-full'}>
-                            <MapInput field={{ value: JSON.stringify({ lat: value.lat, lng: value.lng }) }} center={{'lat': value.lat, 'lng':value.lng}} />
+                            <MapInput field={{ value: JSON.stringify({ lat: value.lat, lng: value.lng }) }} center={{ 'lat': value.lat, 'lng': value.lng }} />
                         </div>
                     );
                 }
@@ -70,6 +136,7 @@ export default function ProjectStatusEdit() {
                         </div>
                     )
                 }
+
 
                 return null;
 

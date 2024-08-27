@@ -3,6 +3,12 @@ import { FormField, FormFieldDescription, FormLabel, Paragraph, Textarea, Textbo
 import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
 
+import 'remirror/styles/all.css';
+import { htmlToProsemirrorNode } from 'remirror';
+import { BoldExtension, ItalicExtension, BulletListExtension, OrderedListExtension, UnderlineExtension, PlaceholderExtension } from 'remirror/extensions';
+import { OnChangeJSON, Remirror, ThemeProvider, useRemirror } from '@remirror/react';
+import { ToggleBoldButton, ToggleItalicButton, ListButtonGroup, ToggleUnderlineButton, Toolbar } from '@remirror/react-ui';
+
 export type TextInputProps = {
     title: string;
     description?: string;
@@ -22,6 +28,7 @@ export type TextInputProps = {
     onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
 }
 
+
 const TextInput: FC<TextInputProps> = ({
     title,
     description,
@@ -30,8 +37,8 @@ const TextInput: FC<TextInputProps> = ({
     fieldRequired = false,
     placeholder = '',
     defaultValue = '',
-    onChange,
     disabled = false,
+    onChange,
     minCharacters = 0,
     minCharactersWarning = 'Nog minimaal {minCharacters} tekens',
     maxCharacters = 0,
@@ -58,6 +65,21 @@ const TextInput: FC<TextInputProps> = ({
 
     const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
 
+    const extensions = () => [
+        new BoldExtension({}),
+        new ItalicExtension({}),
+        new UnderlineExtension({}),
+        new BulletListExtension({}),
+        new OrderedListExtension({}),
+        new PlaceholderExtension({ placeholder: placeholder }),
+    ];
+
+    const { manager, state } = useRemirror({
+        extensions: extensions,
+        stringHandler: htmlToProsemirrorNode,
+    });
+
+
     return (
         <FormField type="text">
             {title && (
@@ -74,7 +96,7 @@ const TextInput: FC<TextInputProps> = ({
                 </>
             }
             <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}>
-                <InputComponent
+                {/* <InputComponent
                     id={randomID}
                     name={fieldKey}
                     required={fieldRequired}
@@ -94,9 +116,40 @@ const TextInput: FC<TextInputProps> = ({
                     rows={rows}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
-                />
+                /> */}
+
+                <ThemeProvider>
+                    <Remirror
+                        manager={manager}
+                        autoFocus
+                        onChange={(e: any) => characterHelpText(e.helpers.getText().length)}
+                        initialContent={state}
+                        autoRender='end'
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
+                    >
+                        <Toolbar>
+                            <ToggleBoldButton />
+                            <ToggleItalicButton />
+                            <ToggleUnderlineButton />
+                            <ListButtonGroup />
+                        </Toolbar>
+
+                        <OnChangeJSON
+                            onChange={(e) => {
+                                if (onChange) {
+                                    onChange({
+                                        name: fieldKey,
+                                        value: JSON.stringify({textarea: e.content}),
+                                    });
+                                }
+                            }}
+                        />
+                    </Remirror>
+                </ThemeProvider>
+
                 {isFocused && helpText &&
-                  <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
+                    <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
                 }
             </div>
         </FormField>
