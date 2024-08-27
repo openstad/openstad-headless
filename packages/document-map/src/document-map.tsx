@@ -25,6 +25,10 @@ import 'leaflet/dist/leaflet.css';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 
 import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
+import { Filters } from "@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter";
+import SelectField from "@openstad-headless/ui/src/form-elements/select";
+import {MultiSelect} from "@openstad-headless/ui/src";
+import toast, {Toaster} from "react-hot-toast";
 import { Spacer } from '@openstad-headless/ui/src';
 
 export type DocumentMapProps = BaseProps &
@@ -54,6 +58,7 @@ export type DocumentMapProps = BaseProps &
     extraFieldsTagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     defaultTags?: string;
     includeOrExclude?: string;
+    extraFieldsDisplayTagGroupName?: boolean;
     onlyIncludeOrExcludeTagIds?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
@@ -73,6 +78,11 @@ function DocumentMap({
   definitiveUrlVisible,
   statusId,
   displayLikes = true,
+  includeOrExclude = 'include',
+  onlyIncludeOrExcludeTagIds = '',
+  tagGroups = [],
+  extraFieldsTagGroups = [],
+  defaultTags = '',
   ...props
 }: DocumentMapProps) {
 
@@ -92,15 +102,111 @@ function DocumentMap({
     resourceId: resourceId,
   });
 
-  const { data: comments } = datastore.useComments({
+  const tagIds = !!onlyIncludeOrExcludeTagIds && onlyIncludeOrExcludeTagIds.startsWith(',') ? onlyIncludeOrExcludeTagIds.substring(1) : onlyIncludeOrExcludeTagIds;
+
+  const {data: allTags} = datastore.useTags({
+    projectId: props.projectId,
+    type: ''
+  });
+
+  const tagIdsArray = tagIds.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
+
+  function determineTags(includeOrExclude: string, allTags: any, tagIdsArray: Array<number>) {
+    let filteredTagIdsArray: Array<number> = [];
+    try {
+      if (includeOrExclude === 'exclude' && tagIdsArray.length > 0 ) {
+        const filteredTags = allTags.filter((tag: {id: number}) => !tagIdsArray.includes((tag.id)));
+        const filteredTagIds = filteredTags.map((tag: {id: number}) => tag.id);
+        filteredTagIdsArray = filteredTagIds;
+      } else if (includeOrExclude === 'include') {
+        filteredTagIdsArray = tagIdsArray;
+      }
+
+      const filteredTagsIdsString = filteredTagIdsArray.join(',');
+
+      return {
+        tagsString: filteredTagsIdsString || '',
+        tags: filteredTagIdsArray || []
+      };
+
+    } catch (error) {
+      console.error('Error processing tags:', error);
+
+      return {
+        tagsString: '',
+        tags: []
+      };
+    }
+  }
+
+  const { tagsString: filteredTagsIdsString, tags: filteredTagIdsArray } = determineTags(includeOrExclude, allTags, tagIdsArray);
+
+  const [selectedTags, setSelectedTags] = useState<Array<number>>([]);
+  const [selectedTagsString, setSelectedTagsString] = useState<string>('');
+
+  const useCommentsData = {
     projectId: props.projectId,
     resourceId: resourceId,
     sentiment: sentiment,
-  });
+    onlyIncludeTagIds: filteredTagsIdsString || undefined,
+  };
+
+  const { data: comments } = datastore.useComments(useCommentsData);
+
+  const [allComments, setAllComments] = useState<Array<Comment>>(comments);
+  const [filteredComments, setFilteredComments] = useState<Array<Comment>>(comments);
+  const [commentValue, setCommentValue] = useState<string>('');
+
+  const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCommentValue(e.target.value);
+  };
+
+  useEffect(() => {
+    setAllComments(comments);
+  }, [comments]);
+
+  useEffect(() => {
+    const selectedTagsForFiltering = Array.isArray(selectedTags) ? selectedTags : [];
+    const originalTagsForFiltering = Array.isArray(filteredTagIdsArray) ? filteredTagIdsArray : [];
+    const allTagsToFilter = selectedTagsForFiltering.length > 0 ? selectedTagsForFiltering : originalTagsForFiltering;
+
+    const finalAllTagsToFilter = allTagsToFilter.map((tag: string | number) => typeof(tag) === 'string' ? parseInt(tag, 10) : tag);
+
+    const filtered = allComments && allComments
+        .filter((comment: any) => {
+          if (finalAllTagsToFilter.length === 0) {
+            return true;
+          } else if (typeof comment.tags === 'undefined') {
+            return false;
+          }
+
+          return comment?.tags.some((tag: any) => finalAllTagsToFilter.includes(tag.id));
+        });
+
+    const tagsNewString = !!finalAllTagsToFilter ? finalAllTagsToFilter.join(',') : '';
+
+    setSelectedTagsString(tagsNewString);
+    setFilteredComments(filtered);
+  }, [selectedTags, allComments]);
 
   const [popupPosition, setPopupPosition] = useState<any>(null);
-  const [selectedCommentIndex, setSelectedCommentIndex] = useState<Number>();
-  const [selectedMarkerIndex, setSelectedMarkerIndex] = useState<Number>();
+  const [selectedCommentIndex, setSelectedCommentIndex] = useState<number>();
+  const [selectedMarkerIndex, setSelectedMarkerIndex] = useState<number>();
+  const [selectedOptions, setSelected] = useState<Array<number>>([]);
+
+  const updateTagListMultiple = (tagId: number) => {
+    const tagAlreadySelected = selectedOptions.includes(tagId);
+    const selected = [...selectedOptions];
+
+    if (tagAlreadySelected) {
+      const index = selected.indexOf(tagId);
+      selected.splice(index, 1);
+    } else {
+      selected.push(tagId);
+    }
+
+    setSelected(selected);
+  };
 
 
   const [docWidth, setDocumentWidth] = useState<number>(1920);
@@ -139,33 +245,62 @@ function DocumentMap({
     return null;
   };
 
-  const addComment = (e: any, position: any) => {
-    const value = e.target.previousSibling.value;
-    setShortLengthError(false);
-    setLongLengthError(false);
+  const notifySuccess = () =>
+      toast.success('Je reactie is succescvol geplaatst!', { position: 'top-center' });
+
+  const notifyFailed = () =>
+      toast.error('Je reactie kon niet geplaatst worden', { position: 'top-center' });
+
+  const addComment = async (e: any, position: any) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (value.length < props.comments?.descriptionMinLength) {
+    setShortLengthError(false);
+    setLongLengthError(false);
+
+    if (commentValue.length < props.comments?.descriptionMinLength) {
       setShortLengthError(true);
     }
 
-    if (value.length > props.comments?.descriptionMaxLength) {
+    if (commentValue.length > props.comments?.descriptionMaxLength) {
       setLongLengthError(true);
     }
+    if (
+        commentValue.length >= props.comments?.descriptionMinLength
+        && commentValue.length <= props.comments?.descriptionMaxLength
+    ) {
+      try {
+        const defaultTagsArray = defaultTags
+            ? defaultTags.split(',').map(tag => parseInt(tag.trim(), 10)).filter(tag => !isNaN(tag))
+            : [];
 
-    if (value.length >= props.comments?.descriptionMinLength && value.length <= props.comments?.descriptionMaxLength) {
+        const allTags = Array.from(new Set([...defaultTagsArray, ...selectedOptions]));
 
-      comments.create({
-        description: value,
-        location: position,
-        createdAt: new Date(),
-        sentiment: 'no sentiment',
-      });
+        const newComment = await comments.create({
+          description: commentValue,
+          location: position,
+          createdAt: new Date(),
+          sentiment: 'no sentiment',
+          tags: allTags,
+        });
 
-      setPopupPosition(null)
-      setShortLengthError(false);
-      setLongLengthError(false);
+        const addNewCommentToComments = [...filteredComments, newComment];
+        const newIndex = addNewCommentToComments.length - 1;
+
+        setFilteredComments(addNewCommentToComments);
+        setPopupPosition(null);
+        setCommentValue('');
+        setShortLengthError(false);
+        setLongLengthError(false);
+        setSelected([]);
+        setSelectedCommentIndex( newIndex );
+        setSelectedMarkerIndex( newIndex );
+
+        notifySuccess();
+      } catch (error) {
+        notifyFailed();
+        console.error('Error creating comment:', error);
+      }
     } else {
       return;
     }
@@ -223,8 +358,8 @@ function DocumentMap({
     const markerRef = useRef<any>(null);
 
     const scrollToComment = (index: number) => {
-      const comments = Array.from(document.getElementsByClassName('comment-item'));
-      comments.forEach((comment) => comment.classList.remove('selected'));
+      const filteredComments = Array.from(document.getElementsByClassName('comment-item'));
+      filteredComments.forEach((comment) => comment.classList.remove('selected'));
 
       const commentElement = document.getElementById(`comment-${index}`);
       const commentPosition = commentElement?.offsetTop ?? 0;
@@ -276,7 +411,6 @@ function DocumentMap({
   }
 
   const getDefinitiveUrl = (originalID: string) => {
-    console.log(resourceId, props.definitiveUrl)
     if (props.definitiveUrl?.includes('[id]')) {
       return props.definitiveUrl?.split('[id]')[0] + originalID + '#doc=' + window.location.href.split('/').reverse()[0];
     } else {
@@ -315,7 +449,7 @@ function DocumentMap({
         </div>
         <MapContainer center={[0, 0]} crs={CRS.Simple} maxZoom={maxZoom} minZoom={minZoom} zoom={zoom}  >
           <MapEvents />
-          {comments
+          {filteredComments && filteredComments
             .filter((comment: any) => !!comment.location)
             .map((comment: any, index: number) => (
               <MarkerWithId
@@ -340,7 +474,54 @@ function DocumentMap({
                   <FormLabel htmlFor="commentBox">Voeg een opmerking toe</FormLabel>
                   {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
                   {longLengthError && <Paragraph className="--error">De opmerking mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
-                  <Textarea name="comment" rows={3} id="commentBox"></Textarea>
+
+                  <Textarea
+                      id="commentBox"
+                      name="comment"
+                      onChange={handleCommentChange}
+                      rows={3}
+                      value={commentValue}
+                  />
+
+                  { extraFieldsTagGroups
+                      && Array.isArray(extraFieldsTagGroups)
+                      && extraFieldsTagGroups.length > 0
+                      && extraFieldsTagGroups.map((group: { type: string; label?: string; multiple: boolean }, index) => {
+                        return (
+                            <div key={group.type}>
+                              <FormLabel htmlFor={group.type}>{group.label}</FormLabel>
+
+                              { group && group.multiple ? (
+                                  <MultiSelect
+                                      label={'Selecteer een optie'}
+                                      onItemSelected={(optionValue: string) => {
+                                        const value = parseInt(optionValue, 10);
+                                        updateTagListMultiple(value);
+                                      }}
+                                      options={(allTags?.filter((tag: {type: string}) => tag.type === group.type).map((tag: {id: number, name: string}) => ({
+                                        value: tag.id,
+                                        label: tag.name,
+                                        checked: selectedOptions.includes(tag.id),
+                                      })))}
+                                  />
+
+                              ) : (
+                                  <SelectField
+                                      choices={(allTags?.filter((tag: {type: string}) => tag.type === group.type).map((tag: {id: string | number, name: string}) => ({
+                                        value: tag.id,
+                                        label: tag.name
+                                      })))}
+                                      fieldKey={`tag[${group.type}]`}
+                                      onChange={(e: { name: string; value: string | [] | Record<number, never>; }) => {
+                                        let selectedTag = e.value as string;
+
+                                        updateTagListMultiple( parseInt(selectedTag, 10) );
+                                      }}
+                                  />
+                              ) }
+                            </div>
+                        )
+                      })}
                   <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>Verzenden</Button>
                 </form>}
 
@@ -381,12 +562,36 @@ function DocumentMap({
             </div>
           </>
         )}
+
+        {(tagGroups && Array.isArray(tagGroups) && tagGroups.length > 0 && datastore) ? (
+            <Filters
+                className="osc-flex-columned"
+                dataStore={datastore}
+                defaultSorting=""
+                displaySearch={false}
+                displaySorting={false}
+                displayTagFilters={true}
+                onUpdateFilter={(f) => {
+                  if (f.tags.length === 0) {
+                    setSelectedTags([]);
+                  } else {
+                    setSelectedTags(f.tags);
+                  }
+                }}
+                resources={[]}
+                sorting={[]}
+                tagGroups={tagGroups}
+                tagsLimitation={filteredTagIdsArray}
+            />
+        ) : null}
+
         {!isDefinitive && (
           <Comments
             {...props}
             resourceId={resourceId || ''}
             selectedComment={selectedCommentIndex}
             showForm={false}
+            onlyIncludeTags={selectedTagsString || filteredTagsIdsString || ''}
           />
         )}
       </div>

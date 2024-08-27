@@ -19,6 +19,9 @@ import DocumentLinks from './links';
 import LikesDisplay from '../../likes/[id]/weergave';
 import { LikeWidgetTabProps } from '../../likes/[id]';
 import { extractConfig } from '@/lib/sub-widget-helper';
+import DocumentInclude from './include';
+import DocumentExtraFields from './extraFields';
+import DocumentFilters from './filters';
 
 export const getServerSideProps = withApiUrl;
 
@@ -73,6 +76,9 @@ export default function WidgetDateCountdownBar({
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="links">Links</TabsTrigger>
               <TabsTrigger value="likes">Likes widget</TabsTrigger>
+              <TabsTrigger value="include">Inclusief / exclusief</TabsTrigger>
+              <TabsTrigger value="filters">Filters</TabsTrigger>
+              <TabsTrigger value="extraFields">Extra velden</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -84,6 +90,21 @@ export default function WidgetDateCountdownBar({
               {previewConfig ?
                 <DocumentLinks {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
                 : null}
+            </TabsContent>
+            <TabsContent value="include" className="p-0">
+              {previewConfig ?
+                  <DocumentInclude {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
+                  : null}
+            </TabsContent>
+            <TabsContent value="filters" className="p-0">
+              {previewConfig ?
+                  <DocumentFilters {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
+                  : null}
+            </TabsContent>
+            <TabsContent value="extraFields" className="p-0">
+              {previewConfig ?
+                  <DocumentExtraFields {...totalPropPackage} projectId={projectId as string} {...previewConfig} />
+                  : null}
             </TabsContent>
             <TabsContent value="likes" className="p-0">
               {previewConfig && (
