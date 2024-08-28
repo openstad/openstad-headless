@@ -101,13 +101,14 @@ function Comment({
     const maxAttempts = 10;
     const interval = 100;
 
+    // @ts-ignore
     await args.comment.submitLike().then((newData) => {
       const newVotes = newData.yes;
       const oldVotes = args.comment.yes;
 
       // Refreshing the likes so it gets updated eventually
       const tryToRefreshComments = () => {
-        if (!widgetContext && !widgetContext.setRefreshComments) {
+        if (!widgetContext || !widgetContext.setRefreshComments) {
           clearInterval(intervalId);
         } else if (oldVotes !== newVotes && attempts < maxAttempts) {
           attempts++;

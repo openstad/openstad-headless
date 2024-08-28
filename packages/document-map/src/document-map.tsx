@@ -644,8 +644,8 @@ function DocumentMap({
             onlyIncludeTags={selectedTagsString || filteredTagsIdsString || ''}
             resourceId={resourceId || ''}
             selectedComment={selectedCommentIndex}
-            showForm={false}
             setRefreshComments={setRefreshComments}
+            showForm={false}
           />
         )}
       </div>

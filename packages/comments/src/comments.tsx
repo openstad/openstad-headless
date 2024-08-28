@@ -37,7 +37,7 @@ export type CommentsWidgetProps = BaseProps &
     selectedComment?: Number | undefined;
     customTitle?: string;
     onlyIncludeTags?: string;
-    setRefreshComments: React.Dispatch<React.SetStateAction<boolean>>;
+    setRefreshComments?: React.Dispatch<React.SetStateAction<boolean>>;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
@@ -62,6 +62,7 @@ function Comments({
   })); // todo: make it a number throughout the code
 
   let args = {
+    setRefreshComments,
     title,
     sentiment,
     emptyListText,
@@ -132,8 +133,11 @@ function Comments({
       console.log(err);
     }
   }
-  return (
-    <CommentWidgetContext.Provider value={{ ...args, setRefreshComments }}>
+
+    const defaultSetRefreshComments = () => {};
+
+    return (
+    <CommentWidgetContext.Provider value={{ ...args, setRefreshComments: setRefreshComments || defaultSetRefreshComments }}>
       <section className="osc">
         <Heading3 className="comments-title">
           {comments && title.replace(/\[\[nr\]\]/, comments.length)}
