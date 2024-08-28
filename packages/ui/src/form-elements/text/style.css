@@ -19,3 +19,48 @@
 .rte-editor .remirror-editor-wrapper > div{
     background: #fff;
 }
+
+.osc .remirror-theme {
+    box-sizing: border-box;
+    border-style: solid;
+    padding: .5rem;
+    border-width: var(--utrecht-textarea-border-width, var(--utrecht-form-control-border-width));
+    border-block-end-width: var(--utrecht-textarea-border-bottom-width, var(--utrecht-textarea-border-width, var(--utrecht-form-control-border-width)));
+    border-color: var(--utrecht-textarea-border-color, var(--utrecht-form-control-border-color));
+    border-radius: var(--utrecht-textarea-border-radius, var(--utrecht-form-control-border-radius, 0));
+    background-color: var(--utrecht-textarea-background-color, var(--utrecht-form-control-background-color));
+}
+.osc .remirror-theme:focus-within {
+    --_utrecht-focus-ring-box-shadow: 0 0 0 var(--utrecht-focus-outline-width, 0) var(--utrecht-focus-inverse-outline-color, transparent);
+    background-color: var(--utrecht-textarea-focus-background-color, var(--utrecht-form-control-focus-background-color, var(--utrecht-textarea-background-color, var(--utrecht-form-control-background-color))));
+    border-color: var(--utrecht-textarea-focus-border-color, var(--utrecht-form-control-focus-border-color, var(--utrecht-textarea-border-color, var(--utrecht-form-control-border-color))));
+    box-shadow: var(--_utrecht-focus-ring-box-shadow);
+    color: var(--utrecht-textarea-focus-color, var(--utrecht-form-control-focus-color, var(--utrecht-textarea-color, var(--utrecht-form-control-color))));
+    outline-color: var(--utrecht-focus-outline-color, revert);
+    outline-offset: var(--utrecht-focus-outline-offset, revert);
+    outline-style: var(--utrecht-focus-outline-style, revert);
+    outline-width: var(--utrecht-focus-outline-width, revert);
+}
+
+.osc .remirror-theme .remirror-editor-wrapper{
+    padding-top: 0;
+}
+.osc .remirror-theme .ProseMirror{
+    border-radius: 0;
+    border: none;
+    box-shadow: none; 
+    padding-inline: 0;
+}
+
+.osc .remirror-theme .ProseMirror:active, 
+.osc .remirror-theme .ProseMirror:focus{
+    box-shadow: none; 
+}
+
+.osc .remirror-theme > div{
+    gap: 5px;
+}
+.osc .remirror-theme > div > div{
+    gap: 5px;
+    margin: 0;
+}

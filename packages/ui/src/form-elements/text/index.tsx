@@ -9,6 +9,7 @@ import { BoldExtension, ItalicExtension, BulletListExtension, OrderedListExtensi
 import { OnChangeJSON, Remirror, ThemeProvider, useRemirror } from '@remirror/react';
 import { ToggleBoldButton, ToggleItalicButton, ListButtonGroup, ToggleUnderlineButton, Toolbar } from '@remirror/react-ui';
 
+
 export type TextInputProps = {
     title: string;
     description?: string;

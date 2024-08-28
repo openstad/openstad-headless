@@ -5,7 +5,7 @@ import useSubmissions from '@/hooks/use-submission';
 import MapInput from '@/components/maps/leaflet-input';
 
 // import { htmlToProsemirrorNode } from 'remirror';
-// import { BoldExtension, ItalicExtension, UnderlineExtension, BulletListExtension, OrderedListExtension } from 'remirror/extensions';
+import { BoldExtension, ItalicExtension, UnderlineExtension, BulletListExtension, OrderedListExtension } from 'remirror/extensions';
 import { Remirror, ThemeProvider, useRemirror } from '@remirror/react';
 import { RemirrorJSON } from 'remirror';
 import { parse } from 'path';
@@ -61,13 +61,13 @@ export default function ProjectStatusEdit() {
         };
     };
 
-    // const extensions = () => [
-    //     new BoldExtension({}),
-    //     new ItalicExtension({}),
-    //     new UnderlineExtension({}),
-    //     new BulletListExtension({}),
-    //     new OrderedListExtension({}),
-    // ];
+    const extensions = () => [
+        new BoldExtension({}),
+        new ItalicExtension({}),
+        new UnderlineExtension({}),
+        new BulletListExtension({}),
+        new OrderedListExtension({}),
+    ];
 
 
     const Content = ({ sub }: any) => {
@@ -77,42 +77,13 @@ export default function ProjectStatusEdit() {
             if (typeof value === 'string' && value !== null) {
                 try {
                     if (JSON.parse(value).textarea !== undefined) {
-
                         const { manager, state } = useRemirror({
-                            // extensions: extensions,
+                            extensions: extensions,
                             onError: handleError,
                             stringHandler: 'html',
                             content: {
                                 type: 'doc',
-                                // content: [JSON.parse(value).textarea],
-                                content: [
-                                    {
-                                        type: 'paragraph',
-                                        content: [
-                                            {
-                                                type: "paragraph",
-                                                content: [
-                                                    {
-                                                        type: "text",
-                                                        text: "Dit is een open vraag"
-                                                    }
-                                                ]
-                                            },
-                                            {
-                                                type: "paragraph",
-                                            },
-                                            {
-                                                type: "paragraph",
-                                                content: [
-                                                    {
-                                                        type: "text",
-                                                        text: "Dit is een open vraag"
-                                                    }
-                                                ]
-                                            },
-                                        ],
-                                    },
-                                ],
+                                content: JSON.parse(value).textarea,
                             },
                         });
 
