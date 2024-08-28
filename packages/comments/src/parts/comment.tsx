@@ -96,6 +96,35 @@ function Comment({
     }
   }
 
+  async function handleLike() {
+    let attempts = 0;
+    const maxAttempts = 10;
+    const interval = 100;
+
+    await args.comment.submitLike().then((newData) => {
+      const newVotes = newData.yes;
+      const oldVotes = args.comment.yes;
+
+      // Refreshing the likes so it gets updated eventually
+      const tryToRefreshComments = () => {
+        if (!widgetContext && !widgetContext.setRefreshComments) {
+          clearInterval(intervalId);
+        } else if (oldVotes !== newVotes && attempts < maxAttempts) {
+          attempts++;
+          if (widgetContext && widgetContext.setRefreshComments) {
+            widgetContext.setRefreshComments((prev) => !prev);
+          }
+        } else if (attempts < maxAttempts) {
+          attempts++;
+        } else {
+          clearInterval(intervalId);
+        }
+      }
+
+      const intervalId = setInterval(tryToRefreshComments, interval);
+    });
+  }
+
   return (
     <article className={`comment-item ${selected ? 'selected' : ''}`} id={`comment-${index}`} onClick={findLocation(index || 0)}>
       <section className="comment-item-header">
@@ -154,7 +183,7 @@ function Comment({
                 <Button
                   appearance='secondary-action-button'
                   className={args.comment.hasUserVoted ? `active` : ''}
-                  onClick={() => args.comment.submitLike()}>
+                  onClick={handleLike}>
                   <i className={args.comment.hasUserVoted ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
                   Mee eens (<span>{args.comment.yes || 0}</span>)
                 </Button>
@@ -188,7 +217,7 @@ function Comment({
                   <Button
                     appearance='secondary-action-button'
                     className={args.comment.hasUserVoted ? `active` : ''}
-                    onClick={() => args.comment.submitLike()}>
+                    onClick={handleLike}>
                     <i className={args.comment.hasUserVoted ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
                     Mee eens (<span>{args.comment.yes || 0}</span>)
                   </Button>

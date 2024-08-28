@@ -454,6 +454,10 @@ function DocumentMap({
     }
   };
 
+  useEffect(() => {
+    console.log( 'refreshComments document map', refreshComments );
+  }, [refreshComments]);
+
   return (
     <div className="documentMap--container">
       <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''}`}>
@@ -618,6 +622,7 @@ function DocumentMap({
             resourceId={resourceId || ''}
             selectedComment={selectedCommentIndex}
             showForm={false}
+            setRefreshComments={setRefreshComments}
           />
         )}
       </div>
