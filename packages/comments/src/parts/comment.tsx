@@ -114,14 +114,7 @@ function Comment({
                     args.comment.delete(args.comment.id);
                 },
               },
-            ]}>
-            <Button appearance="subtle-button">
-              <div>
-                <i className="ri-more-fill"></i>
-                <span className="sr-only">Bewerken</span>
-              </div>
-            </Button>
-          </DropDownMenu>
+            ]}/>
         ) : null}
       </section>
 
