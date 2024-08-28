@@ -64,6 +64,7 @@ export type DocumentMapProps = BaseProps &
     addMarkerText?: string;
     submitCommentText?: string;
     displayResourceInfo?: string;
+    displayMapSide?: string;
     displayResourceDescription?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
@@ -92,6 +93,7 @@ function DocumentMap({
   addMarkerText = 'Toon Markers',
   submitCommentText = 'Versturen',
   displayResourceInfo = 'left',
+  displayMapSide = 'left',
   displayResourceDescription = 'no',
   ...props
 }: DocumentMapProps) {
@@ -463,7 +465,7 @@ function DocumentMap({
 
   return (
     <div className="documentMap--container">
-      <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''}`}>
+      <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
 
         { (displayResourceInfo === 'left' || accessibilityUrlVisible || backUrl || (definitiveUrlVisible && originalID !== undefined && isDefinitive)) && (
           <div className="content-container">

@@ -24,6 +24,7 @@ const formSchema = z.object({
     submitCommentText: z.string().optional(),
     displayResourceInfo: z.string().optional(),
     displayResourceDescription: z.string().optional(),
+    displayMapSide: z.string().optional(),
 });
 
 export default function DocumentContent(
@@ -43,6 +44,7 @@ export default function DocumentContent(
             addMarkerText: props?.addMarkerText || 'Toon markers',
             submitCommentText: props?.submitCommentText || 'Versturen',
             displayResourceInfo: props?.displayResourceInfo || 'left',
+            displayMapSide: props?.displayMapSide || 'left',
             displayResourceDescription: props?.displayResourceDescription || 'no',
         },
     });
@@ -124,6 +126,33 @@ export default function DocumentContent(
                                     <SelectContent>
                                         <SelectItem value="left"><strong>Links</strong>: Aan de linkerkant zal de info boven de kaart getoond worden</SelectItem>
                                         <SelectItem value="right"><strong>Rechts</strong>: Aan de rechterkant zal de info boven de reacties getoond worden</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="displayMapSide"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Aan welke kant wil je de map tonen?
+                                </FormLabel>
+                                <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value || 'left'}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Links" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="left">Links</SelectItem>
+                                        <SelectItem value="right">Rechts</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
