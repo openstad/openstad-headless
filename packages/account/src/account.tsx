@@ -83,7 +83,7 @@ function Account({
     },
     nickname: {
       value: '',
-      label: 'Schermnaam',
+      label: 'Gebruikersnaam',
     }
   },
   ...props
