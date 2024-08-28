@@ -365,7 +365,7 @@ function DocumentMap({
   const scrollToComment = (index: number) => {
     let attempts = 0;
     const maxAttempts = 10;
-    const interval = 100; // 500ms
+    const interval = 100;
 
     const tryScrollToComment = () => {
       const filteredComments = Array.from(document.getElementsByClassName('comment-item'));
@@ -377,11 +377,7 @@ function DocumentMap({
 
       const commentElement = document.getElementById(`comment-${index}`);
       if (commentElement) {
-        const commentPosition = commentElement?.offsetTop ?? 0;
-        const containerPosition = contentRef.current?.offsetTop ?? 0;
-        const scrollPosition = commentPosition - containerPosition;
-
-        contentRef.current?.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+        commentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         clearInterval(intervalId);
       } else if (attempts < maxAttempts) {
         attempts++;
