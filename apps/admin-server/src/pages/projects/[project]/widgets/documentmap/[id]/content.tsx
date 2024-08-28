@@ -20,6 +20,7 @@ import * as React from "react";
 const formSchema = z.object({
     addCommentText: z.string().optional(),
     addMarkerText: z.string().optional(),
+    submitCommentText: z.string().optional(),
 });
 
 export default function DocumentContent(
@@ -37,6 +38,7 @@ export default function DocumentContent(
         defaultValues: {
             addCommentText: props?.addCommentText || 'Voeg een opmerking toe',
             addMarkerText: props?.addMarkerText || 'Toon markers',
+            submitCommentText: props?.submitCommentText || 'Versturen',
         },
     });
 
@@ -72,6 +74,22 @@ export default function DocumentContent(
                             <FormItem>
                                 <FormLabel>
                                     De gebruiker kan de markers aan- of uitzetten. Wat is de tekst van de knop?
+                                </FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="submitCommentText"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Wat is de tekst in de knop voor het insturen van een reactie?
                                 </FormLabel>
                                 <FormControl>
                                     <Input {...field} />

@@ -62,6 +62,7 @@ export type DocumentMapProps = BaseProps &
     onlyIncludeOrExcludeTagIds?: string;
     addCommentText?: string;
     addMarkerText?: string;
+    submitCommentText?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -87,6 +88,7 @@ function DocumentMap({
   defaultTags = '',
   addCommentText = 'Voeg een opmerking toe',
   addMarkerText = 'Toon Markers',
+  submitCommentText = 'Versturen',
   ...props
 }: DocumentMapProps) {
 
@@ -545,7 +547,7 @@ function DocumentMap({
                             </div>
                         )
                       })}
-                  <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>Verzenden</Button>
+                  <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>{ submitCommentText }</Button>
                 </form>}
 
             </Popup>
