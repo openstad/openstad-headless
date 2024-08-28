@@ -160,6 +160,7 @@ function DocumentMap({
   const [allComments, setAllComments] = useState<Array<Comment>>(comments);
   const [filteredComments, setFilteredComments] = useState<Array<Comment>>(comments);
   const [commentValue, setCommentValue] = useState<string>('');
+  const [refreshComments, setRefreshComments] = useState(false);
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCommentValue(e.target.value);
@@ -300,6 +301,9 @@ function DocumentMap({
         setSelectedCommentIndex( newIndex );
         setSelectedMarkerIndex( newIndex );
 
+        setRefreshComments(prev => !prev);
+        scrollToComment( newIndex );
+
         notifySuccess();
       } catch (error) {
         notifyFailed();
@@ -358,20 +362,39 @@ function DocumentMap({
     index: number;
   }
 
-  const MarkerWithId: React.FC<ExtendedMarkerProps> = ({ id, index, ...props }) => {
-    const markerRef = useRef<any>(null);
+  const scrollToComment = (index: number) => {
+    let attempts = 0;
+    const maxAttempts = 10;
+    const interval = 100; // 500ms
 
-    const scrollToComment = (index: number) => {
+    const tryScrollToComment = () => {
       const filteredComments = Array.from(document.getElementsByClassName('comment-item'));
-      filteredComments.forEach((comment) => comment.classList.remove('selected'));
+      filteredComments.forEach((comment, i) => {
+        if (i !== index) {
+          comment.classList.remove('selected');
+        }
+      });
 
       const commentElement = document.getElementById(`comment-${index}`);
-      const commentPosition = commentElement?.offsetTop ?? 0;
-      const containerPosition = contentRef.current?.offsetTop ?? 0;
-      const scrollPosition = commentPosition - containerPosition;
+      if (commentElement) {
+        const commentPosition = commentElement?.offsetTop ?? 0;
+        const containerPosition = contentRef.current?.offsetTop ?? 0;
+        const scrollPosition = commentPosition - containerPosition;
 
-      contentRef.current?.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+        contentRef.current?.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+        clearInterval(intervalId);
+      } else if (attempts < maxAttempts) {
+        attempts++;
+      } else {
+        clearInterval(intervalId);
+      }
     };
+
+    const intervalId = setInterval(tryScrollToComment, interval);
+  };
+
+  const MarkerWithId: React.FC<ExtendedMarkerProps> = ({ id, index, ...props }) => {
+    const markerRef = useRef<any>(null);
 
     return (
       <Marker
@@ -592,10 +615,11 @@ function DocumentMap({
         {!isDefinitive && (
           <Comments
             {...props}
+            key={refreshComments ? 'refresh' : 'no-refresh'}
+            onlyIncludeTags={selectedTagsString || filteredTagsIdsString || ''}
             resourceId={resourceId || ''}
             selectedComment={selectedCommentIndex}
             showForm={false}
-            onlyIncludeTags={selectedTagsString || filteredTagsIdsString || ''}
           />
         )}
       </div>
