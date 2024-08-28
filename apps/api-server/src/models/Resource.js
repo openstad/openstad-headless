@@ -194,7 +194,7 @@ module.exports = function (db, sequelize, DataTypes) {
           },
         },
         set: function (text) {
-          this.setDataValue('description', sanitize.content(text.trim()));
+          this.setDataValue('description', text);
         },
       },
 

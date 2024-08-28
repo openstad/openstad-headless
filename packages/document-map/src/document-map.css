@@ -269,3 +269,7 @@ a + .url-list:before {
   margin-top: 15px;
   display: inline-block;
 }
+
+.documentMap--container .map-container + .content .content-intro {
+  display: inline-block;
+}

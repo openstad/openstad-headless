@@ -63,6 +63,8 @@ export type DocumentMapProps = BaseProps &
     addCommentText?: string;
     addMarkerText?: string;
     submitCommentText?: string;
+    displayResourceInfo?: string;
+    displayResourceDescription?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -89,6 +91,8 @@ function DocumentMap({
   addCommentText = 'Voeg een opmerking toe',
   addMarkerText = 'Toon Markers',
   submitCommentText = 'Versturen',
+  displayResourceInfo = 'left',
+  displayResourceDescription = 'no',
   ...props
 }: DocumentMapProps) {
 
@@ -103,7 +107,7 @@ function DocumentMap({
     api: props.api,
   });
 
-  const { data: resource } = datastore.useResource({
+  const {data: resource} = datastore.useResource({
     projectId: props.projectId,
     resourceId: resourceId,
   });
@@ -120,9 +124,9 @@ function DocumentMap({
   function determineTags(includeOrExclude: string, allTags: any, tagIdsArray: Array<number>) {
     let filteredTagIdsArray: Array<number> = [];
     try {
-      if (includeOrExclude === 'exclude' && tagIdsArray.length > 0 ) {
-        const filteredTags = allTags.filter((tag: {id: number}) => !tagIdsArray.includes((tag.id)));
-        const filteredTagIds = filteredTags.map((tag: {id: number}) => tag.id);
+      if (includeOrExclude === 'exclude' && tagIdsArray.length > 0) {
+        const filteredTags = allTags.filter((tag: { id: number }) => !tagIdsArray.includes((tag.id)));
+        const filteredTagIds = filteredTags.map((tag: { id: number }) => tag.id);
         filteredTagIdsArray = filteredTagIds;
       } else if (includeOrExclude === 'include') {
         filteredTagIdsArray = tagIdsArray;
@@ -145,7 +149,10 @@ function DocumentMap({
     }
   }
 
-  const { tagsString: filteredTagsIdsString, tags: filteredTagIdsArray } = determineTags(includeOrExclude, allTags, tagIdsArray);
+  const {
+    tagsString: filteredTagsIdsString,
+    tags: filteredTagIdsArray
+  } = determineTags(includeOrExclude, allTags, tagIdsArray);
 
   const [selectedTags, setSelectedTags] = useState<Array<number>>([]);
   const [selectedTagsString, setSelectedTagsString] = useState<string>('');
@@ -157,7 +164,7 @@ function DocumentMap({
     onlyIncludeTagIds: filteredTagsIdsString || undefined,
   };
 
-  const { data: comments } = datastore.useComments(useCommentsData);
+  const {data: comments} = datastore.useComments(useCommentsData);
 
   const [allComments, setAllComments] = useState<Array<Comment>>(comments);
   const [filteredComments, setFilteredComments] = useState<Array<Comment>>(comments);
@@ -177,7 +184,7 @@ function DocumentMap({
     const originalTagsForFiltering = Array.isArray(filteredTagIdsArray) ? filteredTagIdsArray : [];
     const allTagsToFilter = selectedTagsForFiltering.length > 0 ? selectedTagsForFiltering : originalTagsForFiltering;
 
-    const finalAllTagsToFilter = allTagsToFilter.map((tag: string | number) => typeof(tag) === 'string' ? parseInt(tag, 10) : tag);
+    const finalAllTagsToFilter = allTagsToFilter.map((tag: string | number) => typeof (tag) === 'string' ? parseInt(tag, 10) : tag);
 
     const filtered = allComments && allComments
         .filter((comment: any) => {
@@ -253,10 +260,10 @@ function DocumentMap({
   };
 
   const notifySuccess = () =>
-      toast.success('Uw reactie is succesvol geplaatst!', { position: 'top-center' });
+      toast.success('Uw reactie is succesvol geplaatst!', {position: 'top-center'});
 
   const notifyFailed = () =>
-      toast.error('Uw reactie kon niet geplaatst worden', { position: 'top-center' });
+      toast.error('Uw reactie kon niet geplaatst worden', {position: 'top-center'});
 
   const addComment = async (e: any, position: any) => {
     e.preventDefault();
@@ -300,11 +307,11 @@ function DocumentMap({
         setShortLengthError(false);
         setLongLengthError(false);
         setSelected([]);
-        setSelectedCommentIndex( newIndex );
-        setSelectedMarkerIndex( newIndex );
+        setSelectedCommentIndex(newIndex);
+        setSelectedMarkerIndex(newIndex);
 
         setRefreshComments(prev => !prev);
-        scrollToComment( newIndex );
+        scrollToComment(newIndex);
 
         notifySuccess();
       } catch (error) {
@@ -334,7 +341,7 @@ function DocumentMap({
     requiredUserRole: props.comments?.requiredUserRole || 'member',
   }
 
-  const { data: currentUser } = datastore.useCurrentUser({ ...args });
+  const {data: currentUser} = datastore.useCurrentUser({...args});
 
   const [canComment, setCanComment] = useState(args.canComment)
   const [originalID, setOriginalID] = useState(undefined)
@@ -379,7 +386,7 @@ function DocumentMap({
 
       const commentElement = document.getElementById(`comment-${index}`);
       if (commentElement) {
-        commentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        commentElement.scrollIntoView({behavior: 'smooth', block: 'start'});
         clearInterval(intervalId);
       } else if (attempts < maxAttempts) {
         attempts++;
@@ -391,39 +398,39 @@ function DocumentMap({
     const intervalId = setInterval(tryScrollToComment, interval);
   };
 
-  const MarkerWithId: React.FC<ExtendedMarkerProps> = ({ id, index, ...props }) => {
+  const MarkerWithId: React.FC<ExtendedMarkerProps> = ({id, index, ...props}) => {
     const markerRef = useRef<any>(null);
 
     return (
-      <Marker
-        {...props}
-        ref={markerRef}
-        icon={MarkerIcon({ icon: { className: index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon' } })}
-        eventHandlers={{
-          click: () => {
-            if (index === selectedMarkerIndex) {
-              setSelectedMarkerIndex(-1);
-              setSelectedCommentIndex(-1);
-            } else {
-              setSelectedMarkerIndex(index);
-              setSelectedCommentIndex(index);
-              scrollToComment(index);
-            }
-          },
-          keydown: (e: L.LeafletKeyboardEvent) => {
-            if (e.originalEvent.key === 'Enter') {
-              if (index === selectedMarkerIndex) {
-                setSelectedMarkerIndex(-1);
-                setSelectedCommentIndex(-1);
-              } else {
-                setSelectedMarkerIndex(index);
-                setSelectedCommentIndex(index);
-                scrollToComment(index);
+        <Marker
+            {...props}
+            ref={markerRef}
+            icon={MarkerIcon({icon: {className: index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon'}})}
+            eventHandlers={{
+              click: () => {
+                if (index === selectedMarkerIndex) {
+                  setSelectedMarkerIndex(-1);
+                  setSelectedCommentIndex(-1);
+                } else {
+                  setSelectedMarkerIndex(index);
+                  setSelectedCommentIndex(index);
+                  scrollToComment(index);
+                }
+              },
+              keydown: (e: L.LeafletKeyboardEvent) => {
+                if (e.originalEvent.key === 'Enter') {
+                  if (index === selectedMarkerIndex) {
+                    setSelectedMarkerIndex(-1);
+                    setSelectedCommentIndex(-1);
+                  } else {
+                    setSelectedMarkerIndex(index);
+                    setSelectedCommentIndex(index);
+                    scrollToComment(index);
+                  }
+                }
               }
-            }
-          }
-        }}
-      />
+            }}
+        />
     );
   };
 
@@ -457,21 +464,29 @@ function DocumentMap({
   return (
     <div className="documentMap--container">
       <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''}`}>
-        <div className="content-container">
-          <div className="documentMap--header">
-            <div className='url-container'>
-              {backUrl ? <Link href={backUrl} title="Terug naar overzicht" id={randomId}>Terug</Link> : null}
-              <div className="url-list">
-                {accessibilityUrlVisible ? <Link href={getUrl()} title="Bekijk tekstuele versie" id={randomId}>{props.accessibilityUrlText}</Link> : null}
-                {definitiveUrlVisible && originalID !== undefined && isDefinitive ? <Link href={getDefinitiveUrl(originalID)} title="Bekijk originele versie" id={randomId}>{props.definitiveUrlText}</Link> : null}
+
+        { (displayResourceInfo === 'left' || accessibilityUrlVisible || backUrl || (definitiveUrlVisible && originalID !== undefined && isDefinitive)) && (
+          <div className="content-container">
+            <div className="documentMap--header">
+              <div className='url-container'>
+                {backUrl ? <Link href={backUrl} title="Terug naar overzicht" id={randomId}>Terug</Link> : null}
+                <div className="url-list">
+                  {accessibilityUrlVisible ? <Link href={getUrl()} title="Bekijk tekstuele versie" id={randomId}>{props.accessibilityUrlText}</Link> : null}
+                  {definitiveUrlVisible && originalID !== undefined && isDefinitive ? <Link href={getDefinitiveUrl(originalID)} title="Bekijk originele versie" id={randomId}>{props.definitiveUrlText}</Link> : null}
+                </div>
               </div>
             </div>
+            { displayResourceInfo === 'left' && (
+              <section className="content-intro">
+                {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
+                {resource.summary ? <Paragraph>{resource.summary}</Paragraph> : null}
+
+                {( displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
+              </section>
+            ) }
           </div>
-          <section className="content-intro">
-            {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
-            {resource.summary ? <Paragraph>{resource.summary}</Paragraph> : null}
-          </section>
-        </div>
+        )}
+
         <MapContainer center={[0, 0]} crs={CRS.Simple} maxZoom={maxZoom} minZoom={minZoom} zoom={zoom}  >
           <MapEvents />
           {filteredComments && filteredComments
@@ -587,6 +602,16 @@ function DocumentMap({
             </div>
           </>
         )}
+
+        { displayResourceInfo === 'right' && (
+            <section className="content-intro">
+              {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
+              {resource.summary ? <Paragraph>{resource.summary}</Paragraph> : null}
+
+              {( displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
+
+            </section>
+        ) }
 
         {(tagGroups && Array.isArray(tagGroups) && tagGroups.length > 0 && datastore) ? (
             <Filters

@@ -16,11 +16,14 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
 import * as React from "react";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 const formSchema = z.object({
     addCommentText: z.string().optional(),
     addMarkerText: z.string().optional(),
     submitCommentText: z.string().optional(),
+    displayResourceInfo: z.string().optional(),
+    displayResourceDescription: z.string().optional(),
 });
 
 export default function DocumentContent(
@@ -39,6 +42,8 @@ export default function DocumentContent(
             addCommentText: props?.addCommentText || 'Voeg een opmerking toe',
             addMarkerText: props?.addMarkerText || 'Toon markers',
             submitCommentText: props?.submitCommentText || 'Versturen',
+            displayResourceInfo: props?.displayResourceInfo || 'left',
+            displayResourceDescription: props?.displayResourceDescription || 'no',
         },
     });
 
@@ -94,6 +99,60 @@ export default function DocumentContent(
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="displayResourceInfo"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Aan welke kant wil je de info van de resource tonen?
+                                </FormLabel>
+                                <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value || 'left'}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Links" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="left"><strong>Links</strong>: Aan de linkerkant zal de info boven de kaart getoond worden</SelectItem>
+                                        <SelectItem value="right"><strong>Rechts</strong>: Aan de rechterkant zal de info boven de reacties getoond worden</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="displayResourceDescription"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Wil je de beschrijving van de resource tonen?
+                                </FormLabel>
+                                <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value || 'left'}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Links" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="no">Nee</SelectItem>
+                                        <SelectItem value="yes">Ja</SelectItem>
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                             </FormItem>
                         )}
