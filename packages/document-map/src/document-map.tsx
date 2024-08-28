@@ -454,10 +454,6 @@ function DocumentMap({
     }
   };
 
-  useEffect(() => {
-    console.log( 'refreshComments document map', refreshComments );
-  }, [refreshComments]);
-
   return (
     <div className="documentMap--container">
       <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''}`}>
