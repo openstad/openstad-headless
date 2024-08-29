@@ -96,6 +96,7 @@ type Props = {
   | 'login email'
   | 'login sms'
   | 'new published resource - user feedback'
+  | 'new published resource - admin update'
   | 'updated resource - user feedback'
   | 'user account about to expire';
   engine?: 'email' | 'sms';
@@ -109,6 +110,7 @@ const notificationTypes = {
   'login email': 'Inloggen via e-mail',
   'login sms': 'Inloggen via sms',
   'new published resource - user feedback': 'Nieuwe resource gepubliceerd - Notificatie naar de gebruiker',
+  'new published resource - admin update': 'Nieuwe resource gepubliceerd - Notificatie naar de admin',
   'updated resource - user feedback': 'Resource bijgewerkt - Notificatie naar de gebruiker',
   'user account about to expire': 'Gebruikersaccount staat op het punt te verlopen'
 };
