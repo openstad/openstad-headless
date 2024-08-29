@@ -1,6 +1,6 @@
 import React from 'react';
 import hasRole from '../../lib/has-role';
-import {ResourceFormWidgetProps} from "./props.js";
+import type {ResourceFormWidgetProps} from "./props.js";
 import {Banner, Button, Spacer} from "@openstad-headless/ui/src/index.js";
 import {InitializeFormFields} from "./parts/init-fields.js";
 import toast, { Toaster } from 'react-hot-toast';
@@ -126,11 +126,9 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     return (
         <div className="osc">
             <div className="osc-resource-form-item-content">
-                {props.displayTitle && props.title && <h4>{props.title}</h4>}
+                {props.displayTitle && props.title ? <h4>{props.title}</h4> : null}
                 <div className="osc-resource-form-item-description">
-                    {props.displayDescription && props.description && (
-                        <p>{props.description}</p>
-                    )}
+                    {props.displayDescription && props.description ? <p>{props.description}</p> : null}
                 </div>
 
                 {!hasRole(currentUser, 'member') ? (
@@ -151,10 +149,10 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                 ) : (
                     <Form
                         fields={formFields}
-                        title=""
-                        submitText={submitButton || "Versturen"}
-                        submitHandler={onSubmit}
                         secondaryLabel={saveConceptButton || ""}
+                        submitHandler={onSubmit}
+                        submitText={submitButton || "Versturen"}
+                        title=""
                         {...props}
                     />
                 )}
