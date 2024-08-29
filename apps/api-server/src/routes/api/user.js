@@ -448,6 +448,8 @@ router.route('/:userId(\\d+)')
 
       if (user.idpUser?.identifier) {
         let updatedUserData = merge(true, userData, { id: user.idpUser && user.idpUser.identifier });
+        const updatedUserDataForProject = merge.recursive({}, updatedUserData);
+
         if (req.results.idpUser.provider == req.authConfig.provider && req.adapter.service.updateUser) {
           updatedUserData = await req.adapter.service.updateUser({ authConfig: req.authConfig, userData: merge(true, userData, { id: user.idpUser && user.idpUser.identifier }) });
         }
@@ -469,11 +471,11 @@ router.route('/:userId(\\d+)')
             })
 
         for (let apiUser of apiUsers) {
-          let data = apiUser.projectId == req.params.projectId ? updatedUserData : synchronizedUpdatedUserData;
-          let result = await apiUser
-              .authorizeData(userData, 'update', req.user)
-              .update(userData)
-        };
+          let data = apiUser.projectId == req.params.projectId ? updatedUserDataForProject : synchronizedUpdatedUserData;
+          let authorizedData = await apiUser.authorizeData(data, 'update', req.user);
+
+          await apiUser.update(authorizedData);
+        }
 
       } else {
 
