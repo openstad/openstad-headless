@@ -357,8 +357,8 @@ function getWidgetJavascriptOutput(
           }
           
           document.querySelector('head').innerHTML += \`
-            <style>${css}</style>
             <link href="${remixIconCss}" rel="stylesheet">
+            <link href="${apiUrl}/api/project/\${config.projectId}/widget-css/${widgetType}" rel="stylesheet">
             ${extraCssFile}
             \${customCss}
           \`;
