@@ -450,5 +450,19 @@ router.route('/:projectId(\\d+)/:willOrDo(will|do)-anonymize-all-users')
     res.json(req.results);
   })
 
+router.route('/:projectId(\\d+)/css/:componentId?')
+  .get(function (req, res, next) {
+    console.log ('get css', req.project.config.project.cssCustom);
+    
+    let css = req.project?.config?.project?.cssCustom || '';
+    
+    if (req.params.componentId) {
+      css += `\n\n#${req.params.componentId} { width: 100%; height: 100%; }`
+    }
+    
+    res.setHeader('Content-Type', 'text/css');
+    res.send(css);
+  });
+
 
 module.exports = router;
