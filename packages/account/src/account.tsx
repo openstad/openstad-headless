@@ -19,12 +19,18 @@ export type AccountProps = {
   maxLength?: number;
   allowUserEdit?: boolean;
   formData?: object;
+  overview_title?: string;
+  overview_description?: string;
+  info_title?: string;
+  info_description?: string;
+  user_title?: string;
+  user_description?: string;
 };
 
 type FormData = {
   email: {
     label: string | undefined;
-    value: string| undefined;
+    value: string | undefined;
   };
   name?: {
     label: string | undefined;
@@ -52,10 +58,16 @@ type FormData = {
   };
 }
 function Account({
-  allowNickname = true,
+  allowNickname = false,
   minLength = 2,
   maxLength = 140,
   allowUserEdit = true,
+  overview_title,
+  overview_description,
+  info_title,
+  info_description,
+  user_title,
+  user_description,
   formData = {
     email: {
       value: '',
@@ -83,7 +95,7 @@ function Account({
     },
     nickname: {
       value: '',
-      label: 'Schermnaam',
+      label: 'Gebruikersnaam',
     }
   },
   ...props
@@ -102,7 +114,7 @@ function Account({
     api: props.api,
   });
 
-  const currentUser =  datastore.useCurrentUser({ ...props, projectId: props.projectId });
+  const currentUser = datastore.useCurrentUser({ ...props, projectId: props.projectId });
 
   const saveUserData = async (data: any) => {
     if (currentUser?.data?.id === undefined) {
@@ -111,7 +123,7 @@ function Account({
 
     // Change street and number to address
     const copyObj = Object.assign({}, data) as { [key: string]: any }; // Changed type to any to accommodate different value types
-    if(copyObj.huisnummer !== undefined && copyObj.straatnaam !== undefined){
+    if (copyObj.huisnummer !== undefined && copyObj.straatnaam !== undefined) {
       console.log(copyObj.straatnaam);
       copyObj.address = {
         label: 'Adres',
@@ -121,11 +133,11 @@ function Account({
       delete copyObj.straatnaam; // Remove straatnaam from the object
     }
 
-    if(copyObj?.nickname !== undefined){
+    if (copyObj?.nickname !== undefined) {
       copyObj.nickName = copyObj.nickname;
       delete copyObj.nickname;
     }
-    
+
     // only get values and add id using the modified copyObj
     let updatedData = {
       ...Object.fromEntries(
@@ -133,9 +145,9 @@ function Account({
       ),
       id: currentUser?.data?.id,
     };
-  
+
     await datastore.api.user.update({
-      projectId: props.projectId, 
+      projectId: props.projectId,
       user: {
         ...updatedData,
       }
@@ -143,7 +155,7 @@ function Account({
   }
 
   useEffect(() => {
-    if(currentUser !== undefined && currentUser?.data !== undefined && fetchedUser === false){
+    if (currentUser !== undefined && currentUser?.data !== undefined && fetchedUser === false) {
       setFetchedUser(currentUser);
 
       // Assuming address is a string like "Main Street 24"
@@ -200,26 +212,32 @@ function Account({
   return (
     <section className="account">
       <div>
-      {Object.entries(formData).map((field, index) => (
-            field[0] === 'email' && (
-              <FormFieldTextbox
-                label={field[1].label}
-                name={field[1].label}
-                description="Niet aanpasbaar"
-                placeholder={field[1].label}
-                maxLength={maxLength}
-                minLength={minLength}
-                value={userFormData?.email?.value}
-                readOnly
-                key={index}
-              />
-            )
-          ))}
+        {overview_title && <Heading level={2}>{overview_title}</Heading>}
+        {overview_description && <Paragraph>{overview_description}</Paragraph>}
+
+        {Object.entries(formData).map((field, index) => (
+          field[0] === 'email' && (
+            <FormFieldTextbox
+              label={field[1].label}
+              name={field[1].label}
+              description="Niet aanpasbaar"
+              placeholder={field[1].label}
+              maxLength={maxLength}
+              minLength={minLength}
+              value={userFormData?.email?.value}
+              readOnly
+              key={index}
+            />
+          )
+        ))}
       </div>
       <div>
+        {info_title &&  <Heading level={2}>{info_title}</Heading>}
+        {info_description && <Paragraph> {info_description} </Paragraph>}
+
         {allowUserEdit && (
           <Button className="account-edit-button" appearance={'primary-action-button'} onClick={() => {
-            if(canEditUser){
+            if (canEditUser) {
               saveUserData(userFormData);
             }
             setCanEditUser(!canEditUser);
@@ -255,14 +273,12 @@ function Account({
       </div>
       {allowNickname && (
         <div>
-          <Heading level={2}>Mijn gegevens voor deze site</Heading>
-          <Paragraph>
-            Deze gegevens zijn alleen van toepassing op deze website.
-          </Paragraph>
+          {user_title && <Heading level={2}>{user_title}</Heading>}
+          {user_description && <Paragraph>{user_description}</Paragraph>}
 
           {allowUserEdit && (
             <Button className="account-edit-button" appearance={'primary-action-button'} onClick={() => {
-              if(canEditNickname){
+              if (canEditNickname) {
                 saveUserData(userFormData);
               }
               setCanEditNickname(!canEditNickname)

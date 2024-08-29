@@ -9,6 +9,7 @@ import { AccountWidgetProps } from '@openstad-headless/account/src/account';
 import WidgetPublish from '@/components/widget-publish';
 import { WithApiUrlProps, withApiUrl } from '@/lib/server-side-props-definition';
 import AccountDisplay from './general';
+import AccountContent from './content';
 
 export const getServerSideProps = withApiUrl
 
@@ -46,11 +47,30 @@ export default function WidgetCounter({
             <Tabs defaultValue='display'>
               <TabsList className='w-full bg-white border-b-0 mb-4 rounded-md'>
                 <TabsTrigger value="display">Instellingen</TabsTrigger>
+                <TabsTrigger value="content">Content</TabsTrigger>
                 <TabsTrigger value="publish">Publiceren</TabsTrigger>
               </TabsList>
               <TabsContent value='display' className='p-0'>
                 {previewConfig ? (
                   <AccountDisplay
+                  {...previewConfig}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
+                  }
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
+                />
+                ) : null}
+              </TabsContent>
+              <TabsContent value='content' className='p-0'>
+                {previewConfig ? (
+                  <AccountContent
                   {...previewConfig}
                   updateConfig={(config) =>
                     updateConfig({ ...widget.config, ...config })

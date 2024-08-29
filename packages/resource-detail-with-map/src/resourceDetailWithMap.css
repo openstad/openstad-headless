@@ -125,3 +125,18 @@
   bottom: 76px;
 }
 
+
+@media only screen and (max-width: 1000px) {
+  .osc-resource-detail-grid{
+    grid-template-rows: auto 250px auto;
+  }
+  .map-container--buttons{
+    grid-column:  1 / -1;
+    grid-row: 2;
+  }
+  .osc-resource-detail-grid .osc-resource-detail-content-items{
+    grid-row: 3;
+    grid-column: 1 / -1;
+    padding-inline: 0;
+  }
+}

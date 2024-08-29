@@ -286,7 +286,7 @@ function getWidgetJavascriptOutput(
 
 
   // TODO: Fix this, it's a hack to get the ChoiceGuide to work
-  if ( widgetSettings.componentName = 'ChoiceGuide' ) {
+  if ( widgetSettings.componentName === 'ChoiceGuide' ) {
 
     widgetSettings.js.forEach((file) => {
       const filePath = path.resolve(__dirname, '../../../../../packages/choiceguide', file);
