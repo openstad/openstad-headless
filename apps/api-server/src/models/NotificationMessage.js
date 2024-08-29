@@ -57,11 +57,9 @@ module.exports = ( db, sequelize, DataTypes ) => {
 
     hooks: {
       beforeValidate: async function (instance, options) {
-        console.log('beforeValidate hook called for NotificationMessage', options);
         if (options.data) {
           let template, templateData;
           try {
-            console.log('Fetching template for projectId:', instance.projectId, 'and type:', instance.type);
             template = await db.NotificationTemplate.findOne({
               where: {
                 projectId: instance.projectId,
@@ -69,7 +67,6 @@ module.exports = ( db, sequelize, DataTypes ) => {
               }
             });
             if (!template) {
-              console.log('Template not found in database, reading from file');
               let file = await fs.readFile(`src/notifications/default-templates/${instance.type}`);
               file = file.toString();
               let match = file.match(/<subject>((?:.|\r|\n)*)<\/subject>(?:.|\r|\n)*<body>((?:.|\r|\n)*)<\/body>/)
@@ -78,8 +75,6 @@ module.exports = ( db, sequelize, DataTypes ) => {
               if (subject && body) template = { subject, body };
             }
             if (!template) throw new Error('Notification template not found');
-
-            console.log('Template found:', template);
 
             templateData = options.data;
             templateData.project = await db.Project.scope('includeConfig', 'includeEmailConfig').findByPk(instance.projectId);
@@ -96,11 +91,7 @@ module.exports = ( db, sequelize, DataTypes ) => {
                 }
               }
             }
-
-            console.log('Template data prepared:', templateData);
-
           } catch (err) {
-            console.error('Error fetching template or data:', err);
             throw err;
           }
 
@@ -109,9 +100,7 @@ module.exports = ( db, sequelize, DataTypes ) => {
             let body = nunjucks.renderString(template.body, { ...templateData });
             body = mjml2html(body);
             instance.body = body.html;
-            console.log('Template rendered successfully:', { subject: instance.subject, body: instance.body });
           } catch (err) {
-            console.error('Error rendering template:', err);
           }
         }
       }
@@ -133,10 +122,8 @@ module.exports = ( db, sequelize, DataTypes ) => {
 
   NotificationMessage.prototype.send = async function () {
     try {
-      console.log('Sending notification with engine:', this.engine);
       await sendMessage[this.engine]({ message: this });
       await this.update({ status: 'sent' });
-      console.log('Notification sent successfully');
     } catch (err) {
       console.error('Send failed:', err);
       throw err;

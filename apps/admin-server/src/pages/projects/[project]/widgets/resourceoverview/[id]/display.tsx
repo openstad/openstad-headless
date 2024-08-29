@@ -53,7 +53,6 @@ export default function WidgetResourceOverviewDisplay(
     EditFieldProps<ResourceOverviewWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
-
   async function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
   }
@@ -220,12 +219,13 @@ export default function WidgetResourceOverviewDisplay(
             )}
           /> */}
 
+
           <FormField
             control={form.control}
-            name="displayDescription"
+            name="displaySummary"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Resource beschrijving weergeven</FormLabel>
+                <FormLabel>Resource samenvatting weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -257,15 +257,16 @@ export default function WidgetResourceOverviewDisplay(
 
           <FormField
             control={form.control}
-            name="displaySummary"
+            name="displayDescription"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Resource samenvatting weergeven</FormLabel>
+                <FormLabel>Resource beschrijving weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
           />
+
 
           <FormField
             control={form.control}

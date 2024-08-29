@@ -1,12 +1,12 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl, FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import {
   Select,
@@ -28,6 +28,9 @@ import { useRouter } from 'next/router';
 import useChoiceGuides from '@/hooks/use-choiceguides';
 import useResources from '@/hooks/use-resources';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
+import useTags from "@/hooks/use-tags";
+import {Spacer} from "@/components/ui/spacer";
+import {CheckboxList} from "@/components/checkbox-list";
 
 const formSchema = z.object({
   label: z.string().optional(),
@@ -45,6 +48,8 @@ const formSchema = z.object({
   id: z.string().optional(),
   choiceGuideId: z.string().optional(),
   resourceId: z.string().optional(),
+  includeOrExclude: z.string().optional(),
+  onlyIncludeOrExcludeTagIds: z.string().optional()
 });
 type Formdata = z.infer<typeof formSchema>;
 
@@ -64,6 +69,13 @@ export default function CounterDisplay(
     props.updateConfig({ ...props, ...values });
   }
 
+   const { data: loadedTags } = useTags(props.projectId);
+   const tags = (loadedTags || []) as Array<{
+      id: string;
+      name: string;
+      type?: string;
+   }>;
+
   const form = useForm<Formdata>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
@@ -73,6 +85,8 @@ export default function CounterDisplay(
       opinion: props?.opinion || '',
       choiceGuideId: props?.choiceGuideId,
       resourceId: props?.resourceId,
+      includeOrExclude: props?.includeOrExclude || 'include',
+      onlyIncludeOrExcludeTagIds: props?.onlyIncludeOrExcludeTagIds || '',
     },
   });
 
@@ -84,7 +98,8 @@ export default function CounterDisplay(
       <Separator className="mb-4" />
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4 lg:w-1/2">
+        className="space-y-2 lg:w-full grid grid-cols-1" style={{gap: '2.5rem'}}>
+          <div className="space-y-4 lg:w-1/2">
         <FormField
           control={form.control}
           name="label"
@@ -236,6 +251,87 @@ export default function CounterDisplay(
             noSelection="Selecteer uw gewenste keuzewijzer"
           />
         ) : null}
+          </div>
+
+        {props.counterType === 'resource' ? (<>
+                <Separator  className="my-0" />
+            <div className="space-y-4 lg:w-full">
+                <FormField
+                    control={form.control}
+                    name="includeOrExclude"
+                    render={({field}) => (
+                        <FormItem>
+                            <FormLabel>
+                                Toon reacties gekoppeld aan onderstaande tags
+                            </FormLabel>
+                            <FormDescription>
+                                Gebruik het selectievakje om te kiezen hoe de geselecteerde tags de weergave van
+                                reacties
+                                beïnvloeden:
+                                <br/>
+                                <br/>
+                                Maak je keuze op basis van hoe je de reacties wilt filteren in relatie tot de
+                                geselecteerde tags.
+                                <br/>
+                                <br/>
+                            </FormDescription>
+                            <Select
+                                onValueChange={field.onChange}
+                                value={field.value || 'include'}
+                            >
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Inclusief"/>
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="include"><strong>Inclusief</strong>: Als je deze optie kiest,
+                                        worden alleen de
+                                        reacties getoond die gekoppeld zijn aan de
+                                        geselecteerde tags.</SelectItem>
+                                    <SelectItem value="exclude"><strong>Exclusief</strong>: Als je deze optie kiest,
+                                        worden juist de
+                                        reacties die gekoppeld zijn aan de
+                                        geselecteerde tags niet getoond.</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage/>
+                        </FormItem>
+                    )}
+                />
+
+                <Spacer/>
+
+                <CheckboxList
+                    form={form}
+                    fieldName="onlyIncludeOrExcludeTagIds"
+                    fieldLabel="Geef enkel de resources met de volgende tags weer:"
+                    label={(t) => t.name}
+                    keyForGrouping="type"
+                    keyPerItem={(t) => `${t.id}`}
+                    items={tags}
+                    selectedPredicate={(t) =>
+                        // @ts-ignore
+                        form
+                            ?.getValues('onlyIncludeOrExcludeTagIds')
+                            ?.split(',')
+                            ?.findIndex((tg) => tg === `${t.id}`) > -1
+                    }
+                    onValueChange={(tag, checked) => {
+                        const ids = form.getValues('onlyIncludeOrExcludeTagIds')?.split(',') ?? [];
+
+                        const idsToSave = (checked
+                            ? [...ids, tag.id]
+                            : ids.filter((id) => id !== `${tag.id}`)).join(',');
+
+                        form.setValue('onlyIncludeOrExcludeTagIds', idsToSave);
+                        props.onFieldChanged("onlyIncludeOrExcludeTagIds", idsToSave);
+                    }}
+                />
+            </div>
+            </>
+        ) : null}
+
         <Button className="w-fit col-span-full" type="submit">
           Opslaan
         </Button>

@@ -33,6 +33,8 @@ export type Item = {
   image?: string;
   imageAlt?: string;
   imageDescription?: string;
+  fieldRequired?: boolean;
+  showSmileys?: boolean;
 };
 
 export type Option = {
@@ -43,4 +45,5 @@ export type Option = {
 export type Title = {
   text: string;
   key: string;
+  isOtherOption?: boolean;
 };

@@ -64,11 +64,11 @@ module.exports = {
               def: '_self',
               choices: [
                 {
-                  label: 'Self',
+                  label: 'Zelfde pagina',
                   value: '_self'
                 },
                 {
-                  label: 'Blank',
+                  label: 'Nieuw tabblad',
                   value: '_blank'
                 }
               ]

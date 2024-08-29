@@ -85,6 +85,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     documentsTitle?: string;
     documentsDesc?: string;
     displayVariant?: string;
+    onFilteredResourcesChange?: (filteredResources: any[]) => void;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -337,6 +338,7 @@ function ResourceOverview({
   documentsTitle = '',
   documentsDesc = '',
   displayVariant = '',
+  onFilteredResourcesChange,
   ...props
 }: ResourceOverviewWidgetProps) {
   const datastore = new DataStore({
@@ -374,6 +376,7 @@ function ResourceOverview({
   const [filteredResources, setFilteredResources] = useState([]);
 
   const { data: resourcesWithPagination } = datastore.useResources({
+    pageSize: 999999,
     ...props,
     search,
     tags,
@@ -388,27 +391,55 @@ function ResourceOverview({
     }
   }, [resourcesWithPagination, pageSize]);
 
+  const {data: allTags} = datastore.useTags({
+    projectId: props.projectId,
+    type: ''
+  });
 
   useEffect(() => {
-    const filtered = resources && resources
-      ?.filter((resource: any) =>
-        tags.every((tag) => resource.tags && Array.isArray(resource.tags) && resource.tags.find((o: { id: number }) => o.id === parseInt(tag.toString())))
-      )
-      ?.filter((resource: any) =>
-        (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0) || statusIdsToLimitResourcesTo.every((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses.find((o: { id: number }) => o.id === statusId))
-      )
-      ?.sort((a: any, b: any) => {
-        if (sort === 'createdAt_desc') {
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    // @ts-ignore
+    const intTags = tags.map(tag => parseInt(tag, 10));
+
+    const groupedTags: { [key: string]: number[] } = {};
+
+    intTags.forEach(tagId => {
+      // @ts-ignore
+      const tag = allTags.find(tag => tag.id === tagId);
+      if (tag) {
+        const tagType = tag.type;
+        if (!groupedTags[tagType]) {
+          groupedTags[tagType] = [];
         }
-        if (sort === 'createdAt_asc') {
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        }
-        return 0;
-      });
+        groupedTags[tagType].push(tagId);
+      }
+    });
+
+    const filtered = resources && (
+        Object.keys(groupedTags).length === 0
+            ? resources
+            : resources.filter((resource: any) => {
+              return Object.keys(groupedTags).every(tagType => {
+                return groupedTags[tagType].some(tagId =>
+                    resource.tags && Array.isArray(resource.tags) && resource.tags.some((o: { id: number }) => o.id === tagId)
+                );
+              });
+            })
+    )
+        ?.filter((resource: any) =>
+            (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0) || statusIdsToLimitResourcesTo.some((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses.some((o: { id: number }) => o.id === statusId))
+        )
+        ?.sort((a: any, b: any) => {
+          if (sort === 'createdAt_desc') {
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          }
+          if (sort === 'createdAt_asc') {
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          }
+          return 0;
+        });
 
     setFilteredResources(filtered);
-  }, [resources, tags, statuses, search, sort]);
+  }, [resources, tags, statuses, search, sort, allTags]);
 
   useEffect(() => {
     if (filteredResources) {
@@ -420,6 +451,10 @@ function ResourceOverview({
       }
 
       setPage(0);
+
+      if (onFilteredResourcesChange) {
+        onFilteredResourcesChange(filtered);
+      }
     }
   }, [filteredResources]);
 
@@ -506,7 +541,7 @@ function ResourceOverview({
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
             }`}>
           {props.displaySearchText ? (
-            <div className="osc-resourceoverview-search-container col-span-full" aria-live='polite'>
+            <div className="osc-resourceoverview-search-container col-span-full"  role="status">
               {props.textActiveSearch && search && (
                 <Paragraph className="osc-searchtext">
                   {props.textActiveSearch

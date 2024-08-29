@@ -16,6 +16,7 @@ import { Dialog } from '@openstad-headless/ui/src';
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
 import { Button, Paragraph, Strong, Link, Heading5, Heading4, Heading1 } from "@utrecht/component-library-react";
+import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
 
 export const StemBegrootResourceDetailDialog = ({
   openDetailDialog,
@@ -32,6 +33,7 @@ export const StemBegrootResourceDetailDialog = ({
   showOriginalResource,
   originalResourceUrl,
   isSimpleView,
+  areaId
 }: {
   openDetailDialog: boolean;
   setOpenDetailDialog: (condition: boolean) => void;
@@ -47,6 +49,7 @@ export const StemBegrootResourceDetailDialog = ({
   showOriginalResource: boolean;
   originalResourceUrl?: string;
   isSimpleView: boolean;
+  areaId: string; 
 }) => (
   <Dialog
     open={openDetailDialog}
@@ -86,10 +89,24 @@ export const StemBegrootResourceDetailDialog = ({
                 <section className="osc-begrootmodule-resource-detail-photo">
 
                   <Carousel
-                    items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: '' }]}
-                    itemRenderer={(i) => (
-                      <Image src={i.url} />
-                    )}
+                    items={
+                      Array.isArray(resource.images) && resource.images.length > 0
+                        ? [...resource.images, { resource: resource }]
+                        : [{ location: resource.location }]
+                    }
+                    itemRenderer={(i) => {
+                      if (i.url) {
+                        return <Image src={i.url} />
+                      } else {
+                        return <ResourceDetailMap
+                          resourceId={resource.id}
+                          {...resource}
+                          center={resource.location}
+                          map={{'areaId': areaId}}
+                          />
+                      }
+                    }}
+
                   />
                   {/* <div>
                     <Button className="osc-begrootmodule-load-map-button"></Button>

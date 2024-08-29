@@ -17,5 +17,14 @@ module.exports = {
         label: 'Blog page',
       },
     ],
+    builders: {
+      children: true,
+      ancestors: {
+        children: {
+          depth: 2,
+          relationships: false
+        }
+      }
+    }
   },
 };

@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/form';
 
 import useNotificationTemplate from '@/hooks/use-notification-template';
+import { fetchSessionUser } from '@/auth';
 
 const initialData = `<mjml>
     <mj-body>
@@ -49,7 +50,7 @@ const initialData = `<mjml>
       <mj-section>
         <mj-column width="400px">
           <mj-text font-size="20px" font-family="Helvetica Neue">Inlogmail aangevraagd</mj-text>
-          <mj-text>Beste {{user}},</mj-text>
+          <mj-text>Beste {{name or 'bezoeker'}},</mj-text>
           <mj-text color="#525252">Voor Admin panel is een inloglink aangevraagd voor dit emailadres. Klik op de knop hieronder om automatisch in te loggen. De knop is 10 minuten geldig. </mj-text>
           <mj-button background-color="#12B886" href="{{loginurl}}">Log in</mj-button>
         </mj-column>
@@ -68,21 +69,27 @@ const initialData = `<mjml>
     </mj-body>
   </mjml>`;
 
+const initialDataResourceSubmission = `<mjml> 
+<mj-body> 
+<mj-section> 
+<mj-column> 
+<mj-image width="300px" src="{{imagePath}}/logo-openstad.png"></mj-image> 
+<mj-divider border-color="#666"></mj-divider> 
 
-const getUserName = () => {
-  if (typeof window !== "undefined") {
-      const user = JSON.parse(sessionStorage.getItem('openstad') as string);
-      return user[Object.keys(user)[0]].openStadUser.name || 'Gebruiker';
-  }
-}
+<mj-text font-size="20px" color="#111" font-family="helvetica">Nieuwe inzending</mj-text><br>
+<mj-text font-size="16px" line-height="22px" color="#222" font-family="helvetica">Beste {{user.fullName | default('indiener')}},
+<br><br>
+Bedankt voor je inzending! Je inzending is goed ontvangen en staat nu online. Hieronder vind je een overzicht van je inzending.
+<br><br>
+</mj-text>
+<mj-text font-size="14px" line-height="22px" color="#444" font-family="helvetica">
+{{ submissionContent | safe }}
+</mj-text>
 
-const context = {
-  user: getUserName(),
-  loginurl: 'https://openstad.nl/login',
-  imagePath: process.env.EMAIL_ASSETS_URL
-};
-
-
+ </mj-column> 
+ </mj-section> 
+ </mj-body> 
+ </mjml>`;
 
 type Props = {
   type:
@@ -129,12 +136,39 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
   const { data, create, update } = useNotificationTemplate(project as string)
   const notificationTitle = notificationTypes[type];
 
+  type MailContextType = {
+    user: { name: string, fullName: string },
+    name: string,
+    loginurl: string,
+    imagePath: string,
+  };
+  const [mailContext, setMailContext] = useState<MailContextType>({
+    user: { name: 'Gebruiker', fullName: 'Gebruiker' },
+    name: 'Gebruiker',
+    loginurl: 'https://openstad.nl/login',
+    imagePath: process.env.EMAIL_ASSETS_URL || '',
+  });
+
+  useEffect(() => {
+    async function setUserNameInMailContext() {
+      const user = await fetchSessionUser();
+
+      if (user && user.name) {
+        setMailContext((prev: MailContextType) => {
+          return { ...prev, user: { name: user.name, fullName: user.name }, name: user.name };
+        });
+      }
+    }
+
+    setUserNameInMailContext();
+  }, []);
+
   const defaults = React.useCallback(
     () => ({
       engine: engine || "email",
       label: label || "",
       subject: subject || "",
-      body: body || "",
+      body: body || ( type === 'new published resource - user feedback' ? initialDataResourceSubmission : "" ),
     }),
     [engine, label, subject, body]
   )
@@ -173,27 +207,42 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
   const [templateData, setTemplateData] = useState(initialData);
   const [mjmlHtml, setMjmlHtml] = useState('');
 
-  let mailTemplate: any = nunjucks.renderString(templateData, context);
+  let mailTemplate: any = nunjucks.renderString(templateData, mailContext);
+
+  const [error, setError] = useState<string | null>(null);
 
   async function convertMJMLToHTML(data = mailTemplate) {
-    const mjml2html = (await import('mjml-browser')).default;
-    const htmlOutput = mjml2html(data).html;
-    setMjmlHtml(htmlOutput);
+    try {
+      const mjml2html = (await import('mjml-browser')).default;
+      const htmlOutput = mjml2html(data).html;
+      setMjmlHtml(htmlOutput);
+      setError(null);
+    } catch (err) {
+      setError('Er is een fout opgetreden bij het renderen van de template.');
+    }
   }
 
   useEffect(() => {
     convertMJMLToHTML();
-  }, []);
+  }, [mailContext]);
 
   const handleOnChange = (e: any, field: any) => {
     if (e.target.value.length > 0) {
-      convertMJMLToHTML(nunjucks.renderString(e.target.value, context));
+      try {
+        convertMJMLToHTML(nunjucks.renderString(e.target.value, mailContext));
+      } catch (err) {
+        setError('Er is een fout opgetreden bij het renderen van de template.');
+      }
     }
   }
 
   useEffect(() => {
     if (fieldValue) {
-      convertMJMLToHTML(nunjucks.renderString(fieldValue, context));
+      try {
+        convertMJMLToHTML(nunjucks.renderString(fieldValue, mailContext));
+      } catch (err) {
+        setError('Er is een fout opgetreden bij het renderen van de template.');
+      }
     }
   }, [fieldValue]);
 
@@ -281,7 +330,8 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
                   </FormItem>
                 )}
               />
-              <Button type="submit">Opslaan</Button>
+              <Button type="submit" disabled={!!error}>Opslaan</Button>
+              {error && <p className="text-red-500">{error}</p>}
             </form>
             {notificationTitle === 'Inloggen via e-mail' && (
               <div className="p-4">

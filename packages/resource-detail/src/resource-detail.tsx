@@ -141,7 +141,7 @@ function ResourceDetail({
 
   const getPageHash = () => {
     if (window.location.hash.includes('#doc')) {
-      const url = '/' + window.location.hash.split('=')[1] + '=' + window.location.hash.split('=')[2];
+      const url = '/' + window.location.hash.split('=')[1] + (window.location.hash.split('=')[2] !== undefined ? '=' + window.location.hash.split('=')[2] : '');
 
       return <div className="back-url"><Link href={url}>Terug naar het document</Link></div>
     }
@@ -356,7 +356,7 @@ function ResourceDetail({
               {...props}
               resourceId={resourceId || ''}
               title={props.commentsWidget_multiple?.title}
-              emptyListText={props.commentsWidget?.emptyListText}
+              emptyListText={props.commentsWidget_multiple?.emptyListText}
               formIntro={props.commentsWidget_multiple?.formIntro}
               placeholder={props.commentsWidget_multiple?.placeholder}
               sentiment={props.commentsWidget?.useSentiments[1]}

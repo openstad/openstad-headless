@@ -38,7 +38,7 @@ export default function WidgetActivity({
             url: `/projects/${projectId}/widgets`
           },
           {
-            name: 'Activity',
+            name: 'Gebruikersactiviteit',
             url: `/projects/${projectId}/widgets/activity/${id}`
           }
         ]}>

@@ -75,6 +75,8 @@ function StemBegroot({
     api: props.api,
   });
 
+
+
   const [openDetailDialog, setOpenDetailDialog] = React.useState(false);
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(0);
@@ -268,6 +270,7 @@ function StemBegroot({
   return (
     <>
       <StemBegrootResourceDetailDialog
+        areaId={props.map.areaId}
         displayPriceLabel={props.displayPriceLabel}
         displayRanking={props.displayRanking}
         showVoteCount={props.showVoteCount}

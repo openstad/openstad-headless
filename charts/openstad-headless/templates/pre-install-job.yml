@@ -1,3 +1,4 @@
+{{- if not .Values.disablePreInstall }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -54,6 +55,7 @@ metadata:
     "helm.sh/hook-weight": "40"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
+  ttlSecondsAfterFinished: 10
   template:
     metadata:
       name: "{{ .Release.Name }}-batch"
@@ -82,3 +84,4 @@ spec:
               kubectl -n "{{ .Release.Namespace }}" create secret generic openstad-auth-certificates --from-file ./privatekey.pem --from-file ./certrequest.csr --from-file ./certificate.pem;
               echo "Secrets are stored";
       restartPolicy: Never
+{{- end }}

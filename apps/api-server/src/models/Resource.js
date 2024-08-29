@@ -48,6 +48,11 @@ module.exports = function (db, sequelize, DataTypes) {
             : 0,
       },
 
+      widgetId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+
       userId: {
         type: DataTypes.INTEGER,
         auth: {
@@ -575,6 +580,7 @@ module.exports = function (db, sequelize, DataTypes) {
               model: db.Comment.scope(
                 'defaultScope',
                 { method: ['includeVoteCount', 'commentsAgainst'] },
+                { method: ['filterByTags', ''] },
                 { method: ['includeUserVote', 'commentsAgainst', userId] },
                 'includeRepliesOnComments'
               ),
@@ -589,6 +595,7 @@ module.exports = function (db, sequelize, DataTypes) {
               model: db.Comment.scope(
                 'defaultScope',
                 { method: ['includeVoteCount', 'commentsFor'] },
+                { method: ['filterByTags', ''] },
                 { method: ['includeUserVote', 'commentsFor', userId] },
                 'includeRepliesOnComments'
               ),
@@ -596,6 +603,21 @@ module.exports = function (db, sequelize, DataTypes) {
               required: false,
               where: {
                 sentiment: 'for',
+                parentId: null,
+              },
+            },
+            {
+              model: db.Comment.scope(
+                'defaultScope',
+                { method: ['includeVoteCount', 'commentsNoSentiment'] },
+                { method: ['filterByTags', ''] },
+                { method: ['includeUserVote', 'commentsNoSentiment', userId] },
+                'includeRepliesOnComments'
+              ),
+              as: 'commentsNoSentiment',
+              required: false,
+              where: {
+                sentiment: 'no sentiment',
                 parentId: null,
               },
             },
@@ -608,10 +630,15 @@ module.exports = function (db, sequelize, DataTypes) {
             sequelize.literal(
               `GREATEST(0, \`commentsFor.yes\` - ${commentVoteThreshold}) DESC`
             ),
+            sequelize.literal(
+              `GREATEST(0, \`commentsNoSentiment.yes\` - ${commentVoteThreshold}) DESC`
+            ),
             sequelize.literal('commentsAgainst.parentId'),
             sequelize.literal('commentsFor.parentId'),
+            sequelize.literal('commentsNoSentiment.parentId'),
             sequelize.literal('commentsAgainst.createdAt'),
             sequelize.literal('commentsFor.createdAt'),
+            sequelize.literal('commentsNoSentiment.createdAt'),
           ],
         };
       },
@@ -806,6 +833,7 @@ module.exports = function (db, sequelize, DataTypes) {
       onDelete: 'CASCADE',
     });
     this.hasMany(models.Comment, { as: 'commentsFor', onDelete: 'CASCADE' });
+    this.hasMany(models.Comment, { as: 'commentsNoSentiment', onDelete: 'CASCADE' });
     this.hasOne(models.Poll, {
       as: 'poll',
       foreignKey: 'resourceId',
@@ -944,6 +972,10 @@ module.exports = function (db, sequelize, DataTypes) {
 
       if (data.commentsFor) {
         data.commentsFor = hideEmailsForNormalUsers(data.commentsFor);
+      }
+
+      if (data.commentsNoSentiment) {
+        data.commentsNoSentiment = hideEmailsForNormalUsers(data.commentsNoSentiment);
       }
 
       data.can = {};

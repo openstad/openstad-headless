@@ -1,4 +1,27 @@
-export const exportDataToCSV = (data: any, widgetName: string) => {
+export const exportDataToCSV = (data: any, widgetName: string, selectedWidget: any) => {
+
+  if ( selectedWidget && selectedWidget?.config && selectedWidget?.config?.items ) {
+
+    const fieldKeyToTitleMap = selectedWidget?.config?.items.reduce((acc: any, item: any) => {
+      acc[item.fieldKey] = item.title;
+      return acc;
+    }, {});
+
+    data = data.map((row: any) => {
+      const updatedSubmittedData = Object.keys(row?.submittedData).reduce((acc: any, key: any) => {
+        const newKey = fieldKeyToTitleMap[key] || key;
+        acc[newKey] = row?.submittedData[key];
+        return acc;
+      }, {});
+
+      return {
+        ...row,
+        submittedData: updatedSubmittedData
+      };
+    });
+
+  }
+
   function transformString() {
     widgetName = widgetName.replace(/\s+/g, '-').toLowerCase();
     widgetName = widgetName.replace(/[^a-z0-9-]/g, '');
@@ -49,20 +72,31 @@ export const exportDataToCSV = (data: any, widgetName: string) => {
 
   const dataRows = data.map((row: any) => {
     const rowData = {
-      ID: row.id,
-      'Aangemaakt op' : row.createdAt,
-      'Project ID' : row.projectId,
-      'Widget' : widgetName,
-      'Gebruikers ID' : row.userId,
-      ...row.submittedData,
+      ID: row.id || ' ',
+      'Aangemaakt op': row.createdAt || ' ',
+      'Project ID': row.projectId || ' ',
+      'Widget': widgetName || ' ',
+      'Gebruikers ID': row.userId || ' ',
+      ...Object.fromEntries(
+        Object.entries(row.submittedData).map(([key, value]) => {
+          if (typeof value === 'object' && value !== null) {
+            const flattenedValue = Object.entries(value)
+              .map(([subKey, subValue]) => `${subKey}: ${subValue.url || subValue}`)
+              .join(', ');
+            return [key, flattenedValue];
+          } else {
+            return [key, JSON.stringify(value)];
+          }
+        })
+      ),
     };
-
     return createRow(rowData, columns);
   });
 
   const csv = [headerRow, ...dataRows].join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = window.URL.createObjectURL(blob);
+
 
   const a = document.createElement('a');
   a.href = url;
