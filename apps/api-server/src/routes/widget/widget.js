@@ -373,7 +373,7 @@ function getWidgetJavascriptOutput(
             renderedWidgets[randomComponentId] = true;
             
             ${widgetOutput}
-            //${widgetSettings.functionName}.${widgetSettings.componentName}.loadWidget(randomComponentId, config);
+            ${widgetSettings.functionName}.${widgetSettings.componentName}.loadWidget(randomComponentId, config);
           }
           
           ${reactCheck}

@@ -452,8 +452,6 @@ router.route('/:projectId(\\d+)/:willOrDo(will|do)-anonymize-all-users')
 
 router.route('/:projectId(\\d+)/css/:componentId?')
   .get(function (req, res, next) {
-    console.log ('get css', req.project.config.project.cssCustom);
-    
     let css = req.project?.config?.project?.cssCustom || '';
     
     if (req.params.componentId) {
