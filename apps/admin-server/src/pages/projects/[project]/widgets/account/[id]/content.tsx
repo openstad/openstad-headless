@@ -71,7 +71,7 @@ export default function AccountContent(
           name="overview_title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Titel van het overzicht</FormLabel>
+              <FormLabel>Overzicht titel</FormLabel>
               <FormControl>
                 <Input
                   defaultValue={field.value}
@@ -89,7 +89,7 @@ export default function AccountContent(
           name="overview_description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Beschrijving van het overzicht</FormLabel>
+              <FormLabel>Overzicht beschrijving</FormLabel>
               <FormControl>
                 <Input
                   defaultValue={field.value}
@@ -108,7 +108,7 @@ export default function AccountContent(
           name="info_title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Titel van het overzicht</FormLabel>
+              <FormLabel>Persoonlijke gegevens titel</FormLabel>
               <FormControl>
                 <Input
                   defaultValue={field.value}
@@ -126,7 +126,7 @@ export default function AccountContent(
           name="info_description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Beschrijving van het overzicht</FormLabel>
+              <FormLabel>Persoonlijke gegevens beschrijving</FormLabel>
               <FormControl>
                 <Input
                   defaultValue={field.value}
@@ -146,7 +146,7 @@ export default function AccountContent(
           name="user_title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Titel van het overzicht</FormLabel>
+              <FormLabel>Gebruikersnaam titel </FormLabel>
               <FormControl>
                 <Input
                   defaultValue={field.value}
@@ -164,7 +164,7 @@ export default function AccountContent(
           name="user_description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Beschrijving van het overzicht</FormLabel>
+              <FormLabel>Gebruikersnaam beschrijving</FormLabel>
               <FormControl>
                 <Input
                   defaultValue={field.value }
