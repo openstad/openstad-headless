@@ -1,6 +1,20 @@
 import type { ZodType } from "zod";
-import {getSchemaForField} from "./validation.js";
-import type {CombinedFieldPropsWithType} from "./props";
+import { getSchemaForField } from "./validation.js";
+import type { CombinedFieldPropsWithType } from "./props";
+
+function combineTextStrings(parsedValue: { [key: string]: any }): string {
+    let combinedText = '';
+
+    for (const key in parsedValue) {
+        if (key === 'text' && typeof parsedValue[key] === 'string') {
+            combinedText += parsedValue[key];
+        } else if (typeof parsedValue[key] === 'object' && parsedValue[key] !== null) {
+            combinedText += combineTextStrings(parsedValue[key]);
+        }
+    }
+
+    return combinedText;
+}
 
 export const handleSubmit = (
     fields: Array<CombinedFieldPropsWithType>,
@@ -18,7 +32,22 @@ export const handleSubmit = (
 
             if (fieldSchema) {
                 try {
-                    fieldSchema.parse(fieldValue);
+                    console.log(fieldValue)
+                    if (typeof fieldValue === 'string' && fieldValue !== null) {
+                        try {
+                            const parsedValue = JSON.parse(fieldValue);
+                            console.log(parsedValue);
+                            if (parsedValue.textarea !== undefined) {
+                                console.log(combineTextStrings(parsedValue.textarea))
+                                fieldSchema.parse(combineTextStrings(parsedValue.textarea));
+                            }
+                        } catch (e) {
+                            fieldSchema.parse(fieldValue);
+                        }
+                    }else{
+                        fieldSchema.parse(fieldValue);
+                    }
+
                 } catch (error) {
                     let errorMessage = null;
 

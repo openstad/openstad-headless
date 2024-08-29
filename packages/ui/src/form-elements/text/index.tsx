@@ -80,7 +80,6 @@ const TextInput: FC<TextInputProps> = ({
         stringHandler: htmlToProsemirrorNode,
     });
 
-
     return (
         <FormField type="text">
             {title && (
@@ -97,57 +96,66 @@ const TextInput: FC<TextInputProps> = ({
                 </>
             }
             <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}>
-                {/* <InputComponent
-                    id={randomID}
-                    name={fieldKey}
-                    required={fieldRequired}
-                    type="text"
-                    placeholder={placeholder}
-                    defaultValue={defaultValue}
-                    onChange={(e) => {
-                        if (onChange) {
-                            onChange({
-                                name: fieldKey,
-                                value: e.target.value,
-                            });
-                        }
-                        characterHelpText(e.target.value.length)
-                    }}
-                    disabled={disabled}
-                    rows={rows}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                /> */}
-
-                <ThemeProvider>
-                    <Remirror
-                        manager={manager}
-                        autoFocus
-                        onChange={(e: any) => characterHelpText(e.helpers.getText().length)}
-                        initialContent={state}
-                        autoRender='end'
+                {InputComponent.displayName === 'Textbox' && (
+                    <InputComponent
+                        id={randomID}
+                        name={fieldKey}
+                        required={fieldRequired}
+                        type="text"
+                        placeholder={placeholder}
+                        defaultValue={defaultValue}
+                        onChange={(e) => {
+                            if (onChange) {
+                                onChange({
+                                    name: fieldKey,
+                                    value: e.target.value,
+                                });
+                            }
+                            characterHelpText(e.target.value.length)
+                        }}
+                        disabled={disabled}
+                        rows={rows}
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => setIsFocused(false)}
-                    >
-                        <Toolbar>
-                            <ToggleBoldButton />
-                            <ToggleItalicButton />
-                            <ToggleUnderlineButton />
-                            <ListButtonGroup />
-                        </Toolbar>
+                    />
 
-                        <OnChangeJSON
-                            onChange={(e) => {
-                                if (onChange) {
-                                    onChange({
-                                        name: fieldKey,
-                                        value: JSON.stringify({textarea: e.content}),
-                                    });
-                                }
-                            }}
-                        />
-                    </Remirror>
-                </ThemeProvider>
+                )}
+                {InputComponent.displayName === 'Textarea' && (
+                    <ThemeProvider>
+                        <Remirror
+                            manager={manager}
+                            autoFocus
+                            onChange={(e: any) => characterHelpText(e.helpers.getText().length)}
+                            initialContent={state}
+                            autoRender='end'
+                            onFocus={() => setIsFocused(true)}
+                            onBlur={() => setIsFocused(false)}
+                            placeholder={placeholder}
+                            editable={!disabled}
+                        >
+                            <Toolbar>
+                                <ToggleBoldButton />
+                                <ToggleItalicButton />
+                                <ToggleUnderlineButton />
+                                <ListButtonGroup />
+                            </Toolbar>
+
+                            <OnChangeJSON
+                                onChange={(e) => {
+                                    if (onChange) {
+                                        console.log(JSON.stringify({ textarea: e.content }).length ),
+                                        console.log(JSON.stringify({ textarea: e.content }) ),
+                                        onChange(
+                                            {
+                                            name: fieldKey,
+                                            value: JSON.stringify({ textarea: e.content }),
+                                        });
+                                    }
+                                }}
+                            />
+                        </Remirror>
+                    </ThemeProvider>
+                )}
 
                 {isFocused && helpText &&
                     <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
