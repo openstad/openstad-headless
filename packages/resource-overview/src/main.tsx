@@ -24,6 +24,7 @@ const config: ResourceOverviewWidgetProps = {
   displayBanner: true,
   bannerText: 'Dit is een title',
   displayStatusLabel: true,
+  displayVariant: 'compact',
   api: {
     url: import.meta.env.VITE_API_URL,
   },

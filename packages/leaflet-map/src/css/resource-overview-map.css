@@ -1,7 +1,7 @@
 .osc-resource-overview-map-button {
 }
 
-.osc-resource-overview-map-button.osc-first-button {
+/* .osc-resource-overview-map-button.osc-first-button {
   position: absolute;
   z-index: 1000;
   min-width: 200px;
@@ -15,5 +15,23 @@
   min-width: 200px;
   left: 20px;
   bottom: 76px;
+} */
+
+.map-container--buttons{
+  position: relative;
+}
+.map-buttons{
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 1;
 }
 
+.map-buttons .utrecht-button--secondary-action{
+  scale: 1 !important;
+  cursor: default !important;
+  border: none !important;
+}

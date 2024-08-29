@@ -1,0 +1,89 @@
+.question-type-range {
+  margin: 1rem 0;
+}
+.question-type-range .a-b-slider-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-inline-size: var(
+    --utrecht-textbox-max-inline-size,
+    var(--utrecht-form-control-max-inline-size)
+  );
+}
+
+.question-type-range .a-b-slider-container > * {
+  grid-column: 1 / -1;
+}
+
+.question-type-range .a-b-info-container,
+.question-type-range .a-b-label-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.question-type-range .label-b {
+  text-align: end;
+}
+
+.question-type-range .a-b-title {
+  width: 100%;
+}
+.question-type-range .a-b-info .title {
+  font-weight: bold;
+}
+.question-type-range .a-b-info .description {
+  font-weight: 400;
+}
+
+.question-type-range input {
+  grid-column: 1 / -1;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.question-type-range figure {
+  aspect-ratio: 4/3;
+  width: 100%;
+}
+.question-type-range figure img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+input[type='range'].a-to-b-range {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    background: #ddd;
+    outline: none;
+    transition: opacity 0.2s;
+    border-radius: 10px;
+  }
+  
+  input[type='range'].a-to-b-range:focus::-webkit-slider-thumb {
+    outline: 2px solid var(--utrecht-button-primary-action-active-background-color);
+    outline-offset: 2px;
+  }
+  
+  input[type='range'].a-to-b-range:focus::-moz-range-thumb {
+    outline: 2px solid var(--utrecht-button-primary-action-active-background-color);
+    outline-offset: 2px;
+  }
+  
+  input[type='range'].a-to-b-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: var(--utrecht-button-primary-action-active-background-color);
+    cursor: pointer;
+    border-radius: 50%;
+  }
+  
+  input[type='range'].a-to-b-range::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: var(--utrecht-button-primary-action-active-background-color);
+    cursor: pointer;
+    border-radius: 50%;
+  }

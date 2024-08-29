@@ -15,7 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import * as Switch from '@radix-ui/react-switch';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
@@ -23,7 +22,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import useTags from '@/hooks/use-tags';
 import { useForm } from 'react-hook-form';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-import type {ResourceOverviewMapWidgetProps} from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props'
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import * as z from 'zod';
 import { ResourceOverviewMapWidgetTabProps } from '.';
@@ -48,11 +46,12 @@ const formSchema = z.object({
   height: z.string().optional(),
 });
 
+
 type SchemaKey = keyof typeof formSchema.shape;
 
 export default function WidgetResourcesMapMap(
   props: ResourceOverviewMapWidgetTabProps &
-    EditFieldProps<ResourceOverviewMapWidgetTabProps>& {
+    EditFieldProps<ResourceOverviewMapWidgetTabProps> & {
       omitSchemaKeys?: Array<SchemaKey>;
     }
 ) {
@@ -74,17 +73,19 @@ export default function WidgetResourcesMapMap(
       categorize: props?.categorize || {},
       tilesVariant: props?.tilesVariant || '',
       width: props?.width || '',
-      height: props?.height || '',
+      height: props?.height || ''
     },
   });
 
   const { data: tags } = useTags(props.projectId);
+
+
   const [tagGroupNames, setGroupedNames] = useState<string[]>([]);
 
   useEffect(() => {
     if (Array.isArray(tags)) {
       const fetchedTags = tags as Array<Tag>;
-      let groupNames = fetchedTags.map( tag => tag.type );
+      let groupNames = fetchedTags.map(tag => tag.type);
       groupNames = groupNames.filter((value, index, array) => {
         return array.indexOf(value) == index;
       });
@@ -135,12 +136,12 @@ export default function WidgetResourcesMapMap(
                 </FormLabel>
                 <Select
                   onValueChange={(value) => {
-                      props.onFieldChanged(field.name, value);
-                      field.onChange(value);
-                    }}
+                    props.onFieldChanged(field.name, value);
+                    field.onChange(value);
+                  }}
                   value={field.value}>
                   <FormControl>
-                  <SelectTrigger>
+                    <SelectTrigger>
                       <SelectValue placeholder="Selecteer een optie" />
                     </SelectTrigger>
                   </FormControl>
@@ -199,7 +200,7 @@ export default function WidgetResourcesMapMap(
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                <SelectItem value="">Geen (gebruik alleen standaardiconen)</SelectItem>
+                    <SelectItem value="">Geen (gebruik alleen standaardiconen)</SelectItem>
                     {tagGroupNames.map(type => (
                       <SelectItem value={type} key={type}>{type}</SelectItem>
                     ))}
@@ -220,9 +221,9 @@ export default function WidgetResourcesMapMap(
                 </FormLabel>
                 <Select
                   onValueChange={(value) => {
-                      props.onFieldChanged(field.name, value);
-                      field.onChange(value);
-                    }}
+                    props.onFieldChanged(field.name, value);
+                    field.onChange(value);
+                  }}
                   value={field.value}>
                   <FormControl>
                     <SelectTrigger>

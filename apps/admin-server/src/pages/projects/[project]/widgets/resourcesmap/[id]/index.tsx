@@ -8,6 +8,7 @@ import {
 } from '../../../../../../components/ui/tabs';
 import WidgetResourcesMapMap from './map';
 import WidgetResourcesMapButtons from './buttons';
+import WidgetResourcesMapPolygons from './polygons';
 import { useRouter } from 'next/router';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
@@ -82,6 +83,7 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="map">Kaart</TabsTrigger>
               <TabsTrigger value="button">Knoppen</TabsTrigger>
+              <TabsTrigger value="polygons">Polygonen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             {previewConfig ? (
@@ -93,6 +95,11 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
                 </TabsContent>
                 <TabsContent value="button" className="p-0">
                   <WidgetResourcesMapButtons
+                    {...totalPropPackage}
+                  />
+                </TabsContent>
+                <TabsContent value="polygons" className="p-0">
+                  <WidgetResourcesMapPolygons
                     {...totalPropPackage}
                   />
                 </TabsContent>

@@ -27,6 +27,7 @@ import WidgetResourcesMapContent from '../../resourcesmap/[id]/content';
 import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
 import { ResourceOverviewMapWidgetTabProps } from '../../resourcesmap/[id]';
 import WidgetResourcesMapButton from '../../resourcesmap/[id]/buttons';
+import WidgetResourcesMapPolygons from '../../resourcesmap/[id]/polygons';
 import { extractConfig } from '@/lib/sub-widget-helper';
 
 export const getServerSideProps = withApiUrl;
@@ -50,6 +51,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
       updateConfig({ ...widget.config, ...config }),
 
     onFieldChanged: (key: string, value: any) => {
+      console.log('onFieldChanged', key, value);
       if (previewConfig) {
         updatePreview({
           ...previewConfig,
@@ -74,7 +76,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Resource Overview',
+            name: 'Inzending overzicht tegels',
             url: `/projects/${projectId}/widgets/resourceoverview/${id}`,
           },
         ]}>
@@ -104,7 +106,8 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                   <Tabs defaultValue="general">
                     <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
                       <TabsTrigger value="general">Kaart</TabsTrigger>
-                      <TabsTrigger value="buttons">knoppen</TabsTrigger>
+                      <TabsTrigger value="polygons">Polygonen</TabsTrigger>
+                      <TabsTrigger value="buttons">Knoppen</TabsTrigger>
                     </TabsList>
                     <TabsContent value="general" className="p-0">
                       <WidgetResourcesMapMap
@@ -112,7 +115,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                           ResourceOverviewWidgetProps,
                           ResourceOverviewMapWidgetTabProps
                         >({
-                          previewConfig,
+                          previewConfig: previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
                           updateConfig,
                           updatePreview,
@@ -121,6 +124,19 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     </TabsContent>
                     <TabsContent value="buttons" className="p-0">
                       <WidgetResourcesMapButton
+                        {...extractConfig<
+                          ResourceOverviewWidgetProps,
+                          ResourceOverviewMapWidgetTabProps
+                        >({
+                          previewConfig: previewConfig,
+                          subWidgetKey: 'resourceOverviewMapWidget',
+                          updateConfig,
+                          updatePreview,
+                        })}
+                      />
+                    </TabsContent>
+                    <TabsContent value="polygons" className="p-0">
+                      <WidgetResourcesMapPolygons
                         {...extractConfig<
                           ResourceOverviewWidgetProps,
                           ResourceOverviewMapWidgetTabProps

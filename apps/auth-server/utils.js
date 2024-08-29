@@ -2,7 +2,7 @@
 
 const fs   = require('fs');
 const path = require('path');
-const uuid = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 const jwt  = require('jsonwebtoken');
 
 const certPath = process.env.TEST_CERTS ? 'test/test-certs/' : 'certs/';
@@ -25,7 +25,7 @@ const publicKey =  fs.readFileSync(path.join(__dirname, certPath + '/certificate
  */
 exports.createToken = ({ exp = 3600, sub = '' } = {}) => {
   const token = jwt.sign({
-    jti : uuid(),
+    jti : uuidv4(),
     sub,
     exp : Math.floor(Date.now() / 1000) + exp,
   }, privateKey, {

@@ -33,26 +33,33 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
     if (!dataStore || !dataStore.useTags) {
       return <p>Cannot render tagfilter, missing data source</p>
     }
+    const randomId = Math.random().toString(36).substring(7);
 
+    function getRandomId(placeholder: string | undefined) {
+      if(placeholder && placeholder.length >= 1) {
+      return placeholder.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-');
+      } else {
+      return randomId;
+      }
+    }
     return (
-      <div className="form-element">
-        <FormLabel htmlFor={props.placeholder}>{props.placeholder}</FormLabel>
-        <Select
-          id={props.placeholder}
-          ref={ref}
-          options={(tags || []).map((tag: TagDefinition) => ({
-            value: tag.id,
-            label: tag.name,
-          }))}
-          title={props.title}
-          onValueChange={(value) => {
-            onUpdateFilter && onUpdateFilter(value);
-          }}>
-          {props.placeholder ? (
-            <option value={''}>{props.placeholder}</option>
-          ) : null}
-        </Select>
-      </div>
+      tags.length > 0 && (
+        <div className="form-element">
+          <FormLabel htmlFor={getRandomId(props.placeholder)}>{props.placeholder|| 'Selecteer item'}</FormLabel>
+          <Select
+            id={getRandomId(props.placeholder)}
+            ref={ref}
+            options={(tags || []).map((tag: TagDefinition) => ({
+              value: tag.id,
+              label: tag.name,
+            }))}
+            title={props.title}
+            onValueChange={(value) => {
+              onUpdateFilter && onUpdateFilter(value);
+            }}>
+          </Select>
+        </div>
+      )
     );
   }
 );

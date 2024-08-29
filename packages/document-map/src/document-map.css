@@ -19,9 +19,18 @@
   }
 }
 
+@media only screen and (min-width: 1001px) {
+  .documentMap--container .map-container.right {
+    order: 1;
+  }
+}
+
 .documentMap--container .content {
   overflow: auto;
   padding: 2rem;
+}
+.documentMap--container .content:empty {
+  display: none;
 }
 
 .documentMap--container .content .content-intro {
@@ -32,9 +41,24 @@
   margin-block-start: 0.5rem;
 }
 
-.documentMap--container .map-container > div {
+.documentMap--container .map-container {
+  display: flex;
+  flex-direction: column;
+  background: #dddddd;
+  gap: 1rem;
+  position: relative;
+}
+
+
+.documentMap--container .map-container .content-container {
+  align-self: start;
+  padding: 30px;
+  width: calc(100% - 60px);
+}
+.documentMap--container .map-container .leaflet-container {
   width: 100%;
   height: 100%;
+  z-index: 1;
 }
 
 .documentMap--container .map-container form {
@@ -103,26 +127,155 @@
   font-size: 14px;
 }
 
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
+  bottom: 10px !important;
+}
 
-.documentMap--header {
+.documentMap--header:not(:has(:empty)) {
   display: flex;
   gap: 0.5rem;
   cursor: pointer;
   justify-content: space-between;
   margin-bottom: 20px;
-  border-bottom: solid 1px #f3f3f3;
+  border-bottom: solid 1px rgba(0, 0, 0, 0.075);
   padding-bottom: 20px;
   align-items: center;
 }
 
-.documentMap--header .toggleMarkers {
+.toggleMarkers {
   display: flex;
   gap: 0.5rem;
+  float: right;
 }
-.documentMap--header .toggleMarkers:only-child {
-  margin-left: auto;
-}
-
 .--hideMarkers .leaflet-container .leaflet-marker-pane .leaflet-marker-icon {
   display: none;
+}
+
+.url-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+a + .url-list:before {
+  content: ' | ';
+  position: absolute;
+  margin-left: -10px;
+}
+
+.url-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+
+.documentMap--container .map-container button.info-trigger{
+  position: absolute;
+  z-index: 1;
+  bottom: 10px;
+  left: 10px;
+  width: max-content;
+  font-size: 22px;
+  padding: 0;
+}
+
+
+.documentMap--container dialog{
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  border: none;
+  max-width: 550px;
+  padding: 2rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.documentMap--container dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+
+.documentMap--container:has(.content:empty){
+  grid-template-columns: 1fr;
+  background: #dddddd;
+}
+.documentMap--container:has(.content:empty) .map-container{
+  max-width: 1140px;
+  justify-self: center;
+  width: 100%;
+}
+
+.documentMap--container .like-widget-container{
+  padding: 0;
+  background: none;
+}
+
+.documentMap--container .multi-select > button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: #000;
+}
+
+.documentMap--container .multi-select > button .icon p {
+  display: none;
+}
+
+.documentMap--container .multi-select > button .icon i::before {
+  color: #000;
+}
+
+.documentMap--container .multi-select .utrecht-paragraph {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  margin: 0 0 8px !important;
+}
+
+.documentMap--container .multi-select .utrecht-form-field--checkbox {
+  display: block;
+}
+
+.documentMap--container .multi-select .utrecht-paragraph .utrecht-checkbox {
+  width: 18px;
+  height: 18px;
+  min-block-size: 18px;
+  min-inline-size: 18px;
+}
+
+.documentMap--container .multi-select .utrecht-paragraph label {
+  font-size: 14px;
+}
+
+.documentMap--container .multi-select .multiselect-container {
+  margin-top: 10px;
+}
+
+.documentMap--container .multi-select {
+  border: 1px solid rgb(102, 102, 102);
+  padding: 8px 16px;
+  background-color: white;
+}
+
+.documentMap--container .multi-select > button{
+  border: none;
+  padding: 0;
+  min-block-size: 30px;
+  background-color: transparent !important;
+  color: black !important;
+  max-inline-size: none;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.documentMap--container #stem-begroot-filter {
+  margin-block-end: 1rem;
+  width: 100%;
+  margin-top: 15px;
+  display: inline-block;
+}
+
+.documentMap--container .map-container + .content .content-intro {
+  display: inline-block;
 }

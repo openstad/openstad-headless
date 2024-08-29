@@ -6,17 +6,30 @@ export type InfoFieldProps = {
     description?: string;
     fieldKey?: string;
     type?: string;
+    image?: string;
+    imageAlt?: string;
+    imageDescription?: string;
 }
 
 const InfoField: FC<InfoFieldProps> = ({
    title = '',
-   description = ''
+   description = '',
+   image = '',
+   imageAlt = '',
+   imageDescription = '',
 }) => {
     return (
-        <div className="info-field-container">
-          {title && <Paragraph><Strong>{title}</Strong></Paragraph>}
-          {description && <Paragraph>{description}</Paragraph>}
-        </div>
+      <div className="info-field-container">
+        {title && <Paragraph><Strong>{title}</Strong></Paragraph>}
+        {description && <Paragraph>{description}</Paragraph>}
+
+        <figure>
+          <img src={image} alt={imageAlt}/>
+          {imageDescription && (
+            <figcaption>{imageDescription}</figcaption>
+          )}
+        </figure>
+      </div>
     );
 };
 

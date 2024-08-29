@@ -81,6 +81,7 @@ router
   .put(async function (req, res, next) {
     const widget = req.widget;
     const config = { ...widget.config, ...(req.body?.config || {}) };
+    const description = req.body?.description ?? widget.description;
     const typesToSanitize = ['rawresource', 'resourceoverview'];
 
     if (config) {
@@ -89,7 +90,7 @@ router
       if (typesToSanitize.includes(widget.dataValues.type)) {
         widget.dataValues.config.rawInput = sanitize.content(widget.dataValues.config.rawInput);
     }            
-      widget.update({ config }).then((result) => res.json(result));
+      widget.update({ config, description }).then((result) => res.json(result));
     }
   })
 

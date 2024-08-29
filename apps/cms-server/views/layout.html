@@ -1,6 +1,6 @@
 {% extends data.outerLayout %}
-
-{% set title = [ data.global.siteTitle, ' - ', data.piece.title or data.page.title ] | join %}
+{% block locale %}nl{% endblock %}
+{% set title = [ data.piece.title or data.page.title, ' - ', data.global.siteTitle] | join %}
 {% block title %}
 {{ title }}
 {% if not title %}

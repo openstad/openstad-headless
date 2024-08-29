@@ -39,7 +39,35 @@ export function useWidgetsHook(projectId?: string) {
     }
   }
 
-  return { ...widgetsSwr, createWidget, remove };
+  async function updateWidget(id: number, body: any) {
+    const updateUrl = `/api/openstad/api/project/${projectId}/widgets/${id}`;
+
+    const res = await fetch(updateUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (res.ok) {
+      const existingData = [...widgetsSwr.data];
+      const updatedList = existingData.filter((ed) => ed.id === id);
+
+      updatedList[0].description = body.description;
+      widgetsSwr.mutate(updatedList);
+
+      console.log({new: widgetsSwr.data});
+      return widgetsSwr.data;
+
+    } else {
+      throw new Error('Could not update the widget');
+    }
+
+  }
+
+
+  return { ...widgetsSwr, createWidget, updateWidget, remove };
 }
 
 export type Widget = {

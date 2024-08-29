@@ -56,14 +56,10 @@ module.exports = ( db, sequelize, DataTypes ) => {
   }, {
 
     hooks: {
-
       beforeValidate: async function (instance, options) {
-        if (options.data) { // create subject and body
-
+        if (options.data) {
           let template, templateData;
           try {
-            
-            // template
             template = await db.NotificationTemplate.findOne({
               where: {
                 projectId: instance.projectId,
@@ -80,7 +76,6 @@ module.exports = ( db, sequelize, DataTypes ) => {
             }
             if (!template) throw new Error('Notification template not found');
 
-            // fetch data
             templateData = options.data;
             templateData.project = await db.Project.scope('includeConfig', 'includeEmailConfig').findByPk(instance.projectId);
             let keys = ['resource', 'user', 'comment', 'submission'];
@@ -90,34 +85,25 @@ module.exports = ( db, sequelize, DataTypes ) => {
               if (options.data[idkey]) {
                 if (Array.isArray(options.data[idkey]) && options.data[idkey].length == 1) options.data[idkey] = options.data[idkey][0];
                 if (Array.isArray(options.data[idkey])) {
-                  templateData[`${key}s`] = await db[model].findAll({where: { id: options.data[idkey] }});
+                  templateData[`${key}s`] = await db[model].findAll({ where: { id: options.data[idkey] } });
                 } else {
-                  templateData[key] = await db[model].findByPk( options.data[idkey] );
+                  templateData[key] = await db[model].findByPk(options.data[idkey]);
                 }
               }
             }
-
-          } catch(err) {
+          } catch (err) {
             throw err;
           }
 
           try {
-
-            // parse template
-            instance.subject = nunjucks.renderString(template.subject, {...templateData});
-
-            let body = nunjucks.renderString(template.body, {...templateData});
+            instance.subject = nunjucks.renderString(template.subject, { ...templateData });
+            let body = nunjucks.renderString(template.body, { ...templateData });
             body = mjml2html(body);
             instance.body = body.html;
-
-          } catch(err) {
-            // do not crash on a render error
-            console.log(err);
+          } catch (err) {
           }
-          
         }
       }
-
     }
 
   });
@@ -134,13 +120,12 @@ module.exports = ( db, sequelize, DataTypes ) => {
     deleteableBy: 'admin',
   };
 
-  NotificationMessage.prototype.send = async function() {
+  NotificationMessage.prototype.send = async function () {
     try {
-      let engine = this.engine;
-      await sendMessage[engine]({ message: this });
+      await sendMessage[this.engine]({ message: this });
       await this.update({ status: 'sent' });
-    } catch(err) {
-      console.log('Send failed');
+    } catch (err) {
+      console.error('Send failed:', err);
       throw err;
     }
   }

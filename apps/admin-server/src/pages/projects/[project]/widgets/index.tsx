@@ -1,16 +1,17 @@
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
-import { CreateWidgetDialog } from '@/components/dialog-widget-create';
+import { RenameResourceDialog } from '@/components/dialog-resource-rename';
 import { PageLayout } from '@/components/ui/page-layout';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { Widget, useWidgetsHook } from '@/hooks/use-widgets';
 import { WidgetDefinitions } from '@/lib/widget-definitions';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { sortTable, searchTable } from '@/components/ui/sortTable';
+import { Button } from '@/components/ui/button';
 
 export default function ProjectWidgets() {
   const router = useRouter();
@@ -45,7 +46,14 @@ export default function ProjectWidgets() {
             url: `/projects/${project}/widgets`,
           },
         ]}
-        action={<CreateWidgetDialog projectId={project as string} />}>
+        action={
+          <Link href={`/projects/${project}/widgets/create`}>
+            <Button variant="default" className="flex w-fit">
+              <Plus size="20" className="hidden lg:flex" />
+              Widget toevoegen
+            </Button>
+          </Link>
+        }>
         <div className="container py-6">
 
 
@@ -72,7 +80,7 @@ export default function ProjectWidgets() {
           </div>
 
           <div className="p-6 bg-white rounded-md clear-right">
-            <div className="grid grid-cols-2 lg:grid-cols-[40px_repeat(5,1fr)] items-left py-2 px-2 border-b border-border">
+            <div className="grid grid-cols-2 lg:grid-cols-[40px_repeat(5,1fr)_60px] items-left py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex">
                 <button className="filter-button" onClick={(e) => setData(sortTable('id', e, data))}>
                   ID
@@ -93,54 +101,69 @@ export default function ProjectWidgets() {
                   Gewijzigd op
                 </button>
               </ListHeading>
-              <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
+
             </div>
             <ul>
-              {(data as Widget[])?.map((widget) => (
-                <Link
-                  key={widget.id}
-                  href={`/projects/${project}/widgets/${widget.type}/${widget.id}`}>
-                  <li className="grid grid-cols-2 lg:grid-cols-[40px_repeat(5,1fr)] py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
-                    <Paragraph className="my-auto -mr-16 lg:mr-0">{widget.id}</Paragraph>
-                    <div className="">
-                      <strong className="">
-                        {WidgetDefinitions[widget.type]}
-                      </strong>
-                      <Paragraph className="my-auto -mr-16 lg:mr-0">{widget.description}</Paragraph>
-                    </div>
-                    <Paragraph className="hidden lg:flex truncate my-auto">
-                      {new Date(widget.createdAt).toLocaleDateString("nl-NL")}
-                    </Paragraph>
-                    <Paragraph className="hidden lg:flex truncate my-auto lg:-mr-16">
-                      {new Date(widget.updatedAt).toLocaleDateString("nl-NL")}
+              {(data as Widget[])?.map((widget) => {
+                return (
+                  <Link
+                    key={widget.id}
+                    href={`/projects/${project}/widgets/${widget.type}/${widget.id}`}>
+                    <li className="grid grid-cols-2 lg:grid-cols-[40px_repeat(5,1fr)_60px] py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
+                      <Paragraph className="my-auto -mr-16 lg:mr-0">{widget.id}</Paragraph>
+                      <div className="">
+                        <strong className="">
+                          {widget.description}
+                        </strong>
+                        <Paragraph className="my-auto -mr-16 lg:mr-0">{WidgetDefinitions[widget.type]?.name}</Paragraph>
+                      </div>
+                      <Paragraph className="hidden lg:flex truncate my-auto">
+                        {new Date(widget.createdAt).toLocaleDateString("nl-NL")}
+                      </Paragraph>
+                      <Paragraph className="hidden lg:flex truncate my-auto lg:-mr-16">
+                        {new Date(widget.updatedAt).toLocaleDateString("nl-NL")}
 
-                    </Paragraph>
-                    <div
-                      className="hidden lg:flex ml-auto"
-                      onClick={(e) => e.preventDefault()}>
-                      <RemoveResourceDialog
-                        header="Widget verwijderen"
-                        message="Weet je zeker dat je deze widget wilt verwijderen?"
-                        onDeleteAccepted={() =>
-                          remove(widget.id)
-                            .then(() =>
-                              toast.success('Widget successvol verwijderd')
-                            )
-                            .catch((e) =>
-                              toast.error('Widget kon niet worden verwijderd')
-                            )
-                        }
-                      />
-                    </div>
-                    <Paragraph className="flex">
-                      <ChevronRight
-                        strokeWidth={1.5}
-                        className="w-5 h-5 my-auto ml-auto"
-                      />
-                    </Paragraph>
-                  </li>
-                </Link>
-              ))}
+                      </Paragraph>
+                      <div></div>
+                      <div className='flex'>
+                        <div
+                          className="hidden lg:flex ml-auto"
+                          onClick={(e) => e.preventDefault()}>
+                          <RenameResourceDialog
+                            header="Widget Bewerken"
+                            widget={widget}
+                          />
+                        </div>
+
+                        <div
+                          className="hidden lg:flex ml-auto"
+                          onClick={(e) => e.preventDefault()}>
+                          <RemoveResourceDialog
+                            header="Widget verwijderen"
+                            message="Weet je zeker dat je deze widget wilt verwijderen?"
+                            onDeleteAccepted={() =>
+                              remove(widget.id)
+                                .then(() =>
+                                  toast.success('Widget successvol verwijderd')
+                                )
+                                .catch((e) =>
+                                  toast.error('Widget kon niet worden verwijderd')
+                                )
+                            }
+                          />
+
+                        </div>
+                      </div>
+                      <Paragraph className="flex">
+                        <ChevronRight
+                          strokeWidth={1.5}
+                          className="w-5 h-5 my-auto ml-auto"
+                        />
+                      </Paragraph>
+                    </li>
+                  </Link>
+                )
+              })}
             </ul>
           </div>
         </div>

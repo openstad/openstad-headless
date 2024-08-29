@@ -130,3 +130,11 @@
 .osc-resource-detail-content-item-row:empty{
   display: none;
 }
+
+.back-url{
+  padding: 0 1rem;
+  margin-bottom: 1rem;
+}
+.back-url a{
+  display: inline-block;
+}

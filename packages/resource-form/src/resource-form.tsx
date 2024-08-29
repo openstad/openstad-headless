@@ -1,6 +1,6 @@
 import React from 'react';
 import hasRole from '../../lib/has-role';
-import {ResourceFormWidgetProps} from "./props.js";
+import type {ResourceFormWidgetProps} from "./props.js";
 import {Banner, Button, Spacer} from "@openstad-headless/ui/src/index.js";
 import {InitializeFormFields} from "./parts/init-fields.js";
 import toast, { Toaster } from 'react-hot-toast';
@@ -26,6 +26,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
     const { create: createResource } = datastore.useResources({
         projectId: props.projectId,
+        widgetId: props.widgetId,
     });
 
     const formFields = InitializeFormFields(props.items, props);
@@ -42,8 +43,21 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         for (const key in formData) {
             if (formData.hasOwnProperty(key)) {
                 if (key.startsWith('tags[')) {
-                    tags.push(formData[key]);
-                    delete formData[key];
+                    try {
+                        const tagsArray = JSON.parse(formData[key]);
+
+                        if (typeof tagsArray === 'object') {
+                            tagsArray?.map((value) => {
+                                tags.push(value);
+                            });
+                        } else if (typeof tagsArray === 'string' || typeof tagsArray === 'number') {
+                            tags.push(tagsArray);
+                        }
+                    } catch (error) {
+                        console.error(`Error parsing tags for key ${key}:`, error);
+                    } finally {
+                        delete formData[key];
+                    }
                 }
             }
         }
@@ -112,11 +126,9 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     return (
         <div className="osc">
             <div className="osc-resource-form-item-content">
-                {props.displayTitle && props.title && <h4>{props.title}</h4>}
+                {props.displayTitle && props.title ? <h4>{props.title}</h4> : null}
                 <div className="osc-resource-form-item-description">
-                    {props.displayDescription && props.description && (
-                        <p>{props.description}</p>
-                    )}
+                    {props.displayDescription && props.description ? <p>{props.description}</p> : null}
                 </div>
 
                 {!hasRole(currentUser, 'member') ? (
@@ -137,10 +149,10 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                 ) : (
                     <Form
                         fields={formFields}
-                        title=""
-                        submitText={submitButton || "Versturen"}
-                        submitHandler={onSubmit}
                         secondaryLabel={saveConceptButton || ""}
+                        submitHandler={onSubmit}
+                        submitText={submitButton || "Versturen"}
+                        title=""
                         {...props}
                     />
                 )}

@@ -1,12 +1,16 @@
 export default {
   fetch: async function (
-    { projectId, page, pageSize, search, tags, sort },
+    { projectId, page, pageSize, search, tags, sort, statuses },
     options
   ) {
     const params = new URLSearchParams();
 
     if (Array.isArray(tags) && tags.length > 0) {
       tags.forEach((tag) => params.append('tags', tag));
+    }
+
+    if (Array.isArray(statuses) && statuses.length > 0) {
+      statuses.forEach((status) => params.append('statuses', status));
     }
 
     if (search) {
@@ -37,11 +41,15 @@ export default {
     return { id: data.id };
   },
 
-  create: async function ({ projectId }, data) {
+  create: async function ({ projectId, widgetId }, data) {
     delete data.id;
 
     let url = `/api/project/${projectId}/resource`;
     let method = 'POST';
+
+    if (widgetId) {
+      data.widgetId = widgetId;
+    }
 
     let body = JSON.stringify(data);
 

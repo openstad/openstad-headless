@@ -8,6 +8,7 @@ export type EnqueteProps = {
   items?: Array<Item>;
   formVisibility?: string;
   imageUrl?: string;
+  multiple?: boolean;
 };
 
 export type Item = {
@@ -28,6 +29,12 @@ export type Item = {
   key2?: string;
   options?: Array<Option>;
   imageUpload?: string;
+  multiple?: boolean;
+  image?: string;
+  imageAlt?: string;
+  imageDescription?: string;
+  fieldRequired?: boolean;
+  showSmileys?: boolean;
 };
 
 export type Option = {
@@ -38,4 +45,5 @@ export type Option = {
 export type Title = {
   text: string;
   key: string;
+  isOtherOption?: boolean;
 };

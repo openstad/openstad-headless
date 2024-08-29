@@ -17,7 +17,7 @@ import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview, FilePondPluginFileValidateType);
 
 const filePondSettings = {
-    labelIdle: "Sleep afbeelding(en) naar deze plek of <span class='filepond--label-action'>klik hier</span>",
+    labelIdle: "Upload hier uw bestand(en)",
     labelInvalidField: 'Veld bevat ongeldige bestanden',
     labelFileWaitingForSize: 'Wachtend op grootte',
     labelFileSizeNotAvailable: 'Grootte niet beschikbaar',
@@ -95,10 +95,47 @@ const ImageUploadField: FC<ImageUploadProps> = ({
         ? allowedTypes
         : "";
 
+
+    function waitForElm(selector: any) {
+        return new Promise(resolve => {
+            if (document.querySelector(selector)) {
+                return resolve(document.querySelector(selector));
+            }
+
+            const observer = new MutationObserver(mutations => {
+                if (document.querySelector(selector)) {
+                    observer.disconnect();
+                    resolve(document.querySelector(selector));
+                }
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        });
+    }
+
+
+
+    useEffect(() => {
+        waitForElm('.filepond--browser').then((elm: any) => {
+
+            const label = document.querySelectorAll('.filepond--drop-label > label');
+            label.forEach((item: any) => {
+                item.setAttribute('aria-hidden', 'false');
+            });
+        });
+    }, []);
+
+
+
+
+
     return (
         <FormField type="text">
             <Paragraph className="utrecht-form-field__label">
-                <FormLabel htmlFor={randomID}>{title}</FormLabel>
+                {title}
             </Paragraph>
             <FormFieldDescription>{description}</FormFieldDescription>
             <div className="utrecht-form-field__input">

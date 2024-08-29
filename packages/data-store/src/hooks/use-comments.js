@@ -3,6 +3,7 @@ export default function useComments(props) {
   const projectId = props.projectId;
   const resourceId = props.resourceId;
   const sentiment = props.sentiment || null;
+  const onlyIncludeTagIds = props.onlyIncludeTagIds || null;
 
   let dataToReturn = [];
   let errorToReturn = undefined;
@@ -10,7 +11,7 @@ export default function useComments(props) {
 
   if (resourceId && resourceId !== '0') {
     const { data, error, isLoading } = self.useSWR(
-      { projectId, resourceId, sentiment },
+      { projectId, resourceId, sentiment, onlyIncludeTagIds },
       'comments.fetch'
     );
 

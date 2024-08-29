@@ -54,3 +54,10 @@
     margin-top: 10px;
     flex-wrap: wrap;
 }
+
+.sr-only{
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    display: block;
+}

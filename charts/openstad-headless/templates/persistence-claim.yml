@@ -10,7 +10,7 @@ spec:
   storageClassName: {{ .Values.persistence.storageClassName }}
 {{- end }}
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: {{ .Values.image.volumes.data.size }}
@@ -26,7 +26,7 @@ spec:
   storageClassName: {{ .Values.persistence.storageClassName }}
 {{- end }}
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: {{ .Values.image.volumes.data.size }}
@@ -42,7 +42,7 @@ spec:
   storageClassName: {{ .Values.persistence.storageClassName }}
 {{- end }}
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: {{ .Values.cms.volumes.data.size }}

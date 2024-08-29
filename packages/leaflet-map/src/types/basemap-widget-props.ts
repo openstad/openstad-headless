@@ -5,4 +5,5 @@ import type { MapPropsType } from '../types/index';
 export type BaseMapWidgetProps = BaseProps &
   ProjectSettingProps & {
     resourceId?: string;
+    customPolygon?: any;
   } & MapPropsType;

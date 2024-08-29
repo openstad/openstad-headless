@@ -1,7 +1,7 @@
 version: '3.4'
 services:
   openstad-mysql:
-    image: mysql:8
+    image: mysql:8.4
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE:-openstad-no-db}
@@ -11,7 +11,7 @@ services:
       - API_DB_NAME=${API_DB_NAME}
     command:
       - mysqld
-      - --default-authentication-plugin=mysql_native_password
+      - --mysql_native_password=ON
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
     ports:
@@ -102,6 +102,7 @@ services:
       - ./packages:/opt/openstad-headless/packages
       - /opt/openstad-headless/packages/agenda/node_modules
       - /opt/openstad-headless/packages/comments/node_modules
+      - /opt/openstad-headless/packages/choiceguide/node_modules
       - /opt/openstad-headless/packages/configs/node_modules
       - /opt/openstad-headless/packages/data-store/node_modules
       - /opt/openstad-headless/packages/date-countdown-bar/node_modules
@@ -226,6 +227,7 @@ services:
       - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}
       - API_FIXED_AUTH_KEY=${API_FIXED_AUTH_KEY}
       - PORT=${ADMIN_PORT}
+      - EMAIL_ASSETS_URL=${EMAIL_ASSETS_URL}
     ports:
       - '${ADMIN_PORT}:${ADMIN_PORT}'
     volumes:

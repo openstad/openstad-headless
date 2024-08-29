@@ -3,6 +3,7 @@ const sortFunctions = {
     'createdAt': (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     'date-modified': (a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
     'id': (a: any, b: any) => b.id - a.id,
+    'seqnr': (a: any, b: any) => b.seqnr - a.seqnr,
     'resourceId': (a: any, b: any) => b.resourceId - a.resourceId,
     'type': (a: any, b: any) => b.type.toLowerCase().localeCompare(a.type.toLowerCase()),
     'resource': (a: any, b: any) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()),

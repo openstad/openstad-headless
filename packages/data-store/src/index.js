@@ -3,7 +3,9 @@ import { useSWRConfig } from 'swr';
 import useSWR from 'swr';
 import API from './api';
 import useResource from './hooks/use-resource.js';
+import useChoicesguide from './hooks/use-choicesguide';
 import useArea from './hooks/use-area.js';
+import useAreas from './hooks/use-areas.js';
 import useComments from './hooks/use-comments.js';
 import useResources from './hooks/use-resources.js';
 import useTags from './hooks/use-tags.js';
@@ -12,6 +14,7 @@ import useUserVote from './hooks/use-user-vote.js';
 import useSubmissions from './hooks/use-submissions.js';
 import useCommentsByProject from './hooks/use-comments-by-project';
 import useChoiceGuideResults from './hooks/use-choiceguide-results';
+import useUserActivity from './hooks/use-user-activity';
 
 const windowGlobal = typeof window !== 'undefined' ? window : {};
 
@@ -24,15 +27,18 @@ function DataStore(props = {}) {
 
   // hooks
   self.useResource = useResource.bind(self);
+  self.useChoicesguide = useChoicesguide.bind(self);
   self.useComments = useComments.bind(self);
   self.useResources = useResources.bind(self);
   self.useArea = useArea.bind(self);
+  self.useAreas = useAreas.bind(self);
   self.useTags = useTags.bind(self);
   self.useCurrentUser = useCurrentUser.bind(self);
   self.useUserVote = useUserVote.bind(self);
   self.useSubmissions = useSubmissions.bind(self);
   self.useCommentsByProject = useCommentsByProject.bind(self);
   self.useChoiceGuideResults = useChoiceGuideResults.bind(self);
+  self.useUserActivity = useUserActivity.bind(self);
 
   // current user
   const {

@@ -87,12 +87,16 @@ router.all('*', function (req, res, next) {
 
   if (req.query.tags) {
     let tags = req.query.tags;
+    // if tags is not an array, make it an array
+    if (!Array.isArray(tags)) tags = [tags];
     req.scope.push({ method: ['selectTags', tags] });
     req.scope.push('includeTags');
   }
 
   if (req.query.statuses) {
     let statuses = req.query.statuses;
+    // if statuses is not an array, make it an array
+    if (!Array.isArray(statuses)) statuses = [statuses];
     req.scope.push({ method: ['selectStatuses', statuses] });
     req.scope.push('includeStatuses');
   }
@@ -208,6 +212,7 @@ router
       projectId: req.params.projectId,
       userId,
       startDate: req.body.startDate || new Date(),
+      widgetId: req.body.widgetId || null,
     };
 
     // Check if resource has images and if so, check their domains

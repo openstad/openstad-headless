@@ -17,7 +17,7 @@ export const BudgetUsedList = ({
 
   return (
     <>
-      <div className="budget-used-list">
+      <div className="budget-used-list" role="status">
         {sortedBudgets.map((budget, index) => (
           <div
             key={`budget-item-${budget}-${index}`}
@@ -32,7 +32,7 @@ export const BudgetUsedList = ({
           <Paragraph>&euro;{Math.max(maxBudget - budgetUsed, 0).toLocaleString('nl-NL')}</Paragraph>
         </div>
       </div>
-      <div className="total-budget">
+      <div className="total-budget" role="status">
         <Paragraph>Totaal: &euro;{maxBudget.toLocaleString('nl-NL')},</Paragraph>
         <Paragraph>Gebruikt: &euro;{budgetUsed.toLocaleString('nl-NL')}</Paragraph>
       </div>

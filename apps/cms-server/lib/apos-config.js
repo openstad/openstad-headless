@@ -1,5 +1,6 @@
 module.exports = {
   modules: {
+    '@apostrophecms/seo': {},
     '@apostrophecms/rich-text-widget': {
       options: {
         className: 'bp-rich-text'
@@ -28,5 +29,6 @@ module.exports = {
       }
     },
     'openstad-image-widget': { },
+    'openstad-carousel-widget': { },
   }
 };

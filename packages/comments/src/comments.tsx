@@ -35,19 +35,23 @@ export type CommentsWidgetProps = BaseProps &
     descriptionMinLength?: number,
     descriptionMaxLength?: number,
     selectedComment?: Number | undefined;
+    customTitle?: string;
+    onlyIncludeTags?: string;
+    setRefreshComments?: React.Dispatch<React.SetStateAction<boolean>>;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
-  CommentsWidgetProps | undefined
+    (CommentsWidgetProps & {setRefreshComments: React.Dispatch<React.SetStateAction<boolean>> }) | undefined
 >(undefined);
 
 function Comments({
   title = '[[nr]] reacties',
   sentiment = 'no sentiment',
-  emptyListText = 'Nog geen reacties',
-  placeholder = 'type hier uw reactie',
+  emptyListText = 'Nog geen reacties geplaatst.',
+  placeholder = 'Typ hier uw reactie',
   formIntro = '',
   selectedComment,
+  setRefreshComments,
   ...props
 }: CommentsWidgetProps) {
 
@@ -58,6 +62,7 @@ function Comments({
   })); // todo: make it a number throughout the code
 
   let args = {
+    setRefreshComments,
     title,
     sentiment,
     emptyListText,
@@ -80,11 +85,14 @@ function Comments({
     api: props.api,
   });
 
-  const { data: comments } = datastore.useComments({
+  const useCommentsData = {
     projectId: props.projectId,
     resourceId: resourceId,
     sentiment: args.sentiment,
-  });
+    onlyIncludeTagIds: props.onlyIncludeTags || undefined,
+  };
+
+  const { data: comments } = datastore.useComments(useCommentsData);
 
   const { data: resource } = datastore.useResource({
     projectId: props.projectId,
@@ -125,8 +133,11 @@ function Comments({
       console.log(err);
     }
   }
-  return (
-    <CommentWidgetContext.Provider value={args}>
+
+    const defaultSetRefreshComments = () => {};
+
+    return (
+    <CommentWidgetContext.Provider value={{ ...args, setRefreshComments: setRefreshComments || defaultSetRefreshComments }}>
       <section className="osc">
         <Heading3 className="comments-title">
           {comments && title.replace(/\[\[nr\]\]/, comments.length)}
@@ -167,7 +178,7 @@ function Comments({
         ) : null}
 
         {/* {(args.canComment && hasRole(currentUser, args.requiredUserRole)) && type === 'resource' || hasRole(currentUser, 'moderator') && type === 'resource' ? ( */}
-        {args.canComment && args.showForm ? (
+        {args.canComment && args.showForm && hasRole(currentUser, args.requiredUserRole) ? (
           <div className="input-container">
             <CommentForm {...args} submitComment={submitComment} />
             <Spacer size={1} />
@@ -180,8 +191,8 @@ function Comments({
           <Paragraph>{emptyListText}</Paragraph>
         ) : null}
         {(comments || []).map((comment: any, index: number) => {
-          let attributes = { ...args, comment, submitComment };
-          return <Comment {...attributes} key={index} selected={selectedComment === index} index={index} />;
+          let attributes = { ...args, comment, submitComment, setRefreshComments };
+          return <Comment {...attributes} index={index} key={index} selected={selectedComment === index}  />;
         })}
       </section>
     </CommentWidgetContext.Provider>

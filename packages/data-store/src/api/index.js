@@ -2,13 +2,16 @@ import fetchx from './fetch';
 import resource from './resource';
 import comments from './comments';
 import resources from './resources';
+import choicesguide from "./choicesguide";
 import tags from './tags';
 import user from './user';
 import area from './area';
+import areas from './areas';
 import userVote from './user-vote';
 import submissions from './submissions';
 import commentsByProject from './commentsByProject';
 import choiceGuideResults from './choiceGuideResults';
+import userActivity from './user-activity';
 
 const windowGlobal = typeof window !== "undefined" ? window : {};
 
@@ -69,6 +72,11 @@ function API(props = {}) {
     submitLike: resources.submitLike.bind(self)
   };
 
+  self.choicesguide = {
+    fetch: choicesguide.fetch.bind(self),
+    create: choicesguide.create.bind(self)
+  };
+
   self.submissions = {
     fetch: submissions.fetch.bind(self),
     create: submissions.create.bind(self)
@@ -85,16 +93,25 @@ function API(props = {}) {
     fetch: area.fetch.bind(self),
   };
 
+  self.areas = {
+    fetch: areas.fetch.bind(self),
+  };
+
   self.user = {
     fetch: user.fetch.bind(self),
     fetchMe: user.fetchMe.bind(self),
     connectUser: user.connectUser.bind(self),
+    update: user.update.bind(self),
     logout: user.logout.bind(self),
   };
 
   self.userVote = {
     fetch: userVote.fetch.bind(self),
     submitVote: userVote.submitVote.bind(self),
+  };
+
+  self.userActivity = {
+    fetch: userActivity.fetch.bind(self),
   };
 
   if (props.logMethods) {

@@ -5,7 +5,7 @@
 		<div class="upper-box card-body">
 			<h1>
 				{% if title %}
-					{{title}}
+					{{title | safe}}
 				{% else %}
 					Aanvullende gegevens
 				{% endif %}
@@ -33,6 +33,7 @@
           class="input-{{requiredField.key}} input-field"
           {{'autofocus' if first}}
 		  id="input_field"
+		  autocomplete="on"
           />
 				</div>
         {% set first = false %}
@@ -40,7 +41,7 @@
 
         <button class="btn btn-primary">
 					{% if buttonText %}
-						{{buttonText}}
+						{{buttonText | safe}}
 					{% else %}
 						Opslaan
 					{% endif %}
@@ -50,7 +51,7 @@
 					<br />
 
 					{% if info %}
-						{{info}}
+						{{info | safe}}
 					{% else %}
 						Waarom willen we dit weten? Omdat we graag inzicht krijgen in waar de actieve gebruikers van deze site vandaan komen.
 					{% endif %}

@@ -23,6 +23,7 @@ module.exports = {
       buttons: {
         label: 'Buttons',
         type: 'array',
+        titleField: 'label',
         draggable: true,
         fields: {
           add: {
@@ -63,11 +64,11 @@ module.exports = {
               def: '_self',
               choices: [
                 {
-                  label: 'Self',
+                  label: 'Zelfde pagina',
                   value: '_self'
                 },
                 {
-                  label: 'Blank',
+                  label: 'Nieuw tabblad',
                   value: '_blank'
                 }
               ]

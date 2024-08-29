@@ -9,19 +9,11 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
-import type {ResourceOverviewMapWidgetProps} from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props'
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import * as z from 'zod';
 import * as Switch from '@radix-ui/react-switch';
@@ -44,9 +36,9 @@ type SchemaKey = keyof typeof formSchema.shape;
 
 export default function WidgetResourcesMapButton(
   props: ResourceOverviewMapWidgetTabProps &
-  EditFieldProps<ResourceOverviewMapWidgetTabProps>& {
-    omitSchemaKeys?: Array<SchemaKey>;
-  }
+    EditFieldProps<ResourceOverviewMapWidgetTabProps> & {
+      omitSchemaKeys?: Array<SchemaKey>;
+    }
 ) {
 
   type FormData = z.infer<typeof formSchema>;
@@ -83,14 +75,20 @@ export default function WidgetResourcesMapButton(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                Toon een &apos;Call To Action&apos; knop
+                  Toon een &apos;Call To Action&apos; knop
                 </FormLabel>
                 <Switch.Root
                   className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                   onCheckedChange={(e: boolean) => {
-                      props.onFieldChanged(field.name, e);
-                      field.onChange(e);
-                      setShowCtaFields(e);
+                    field.onChange(e);
+                    setShowCtaFields(e);
+                    props.onFieldChanged('ctaButton',
+                      {
+                        show: e,
+                        label: props?.ctaButton?.label,
+                        href: props?.ctaButton?.href,
+                      }
+                    )
                   }}
                   checked={field.value}>
                   <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
@@ -101,55 +99,67 @@ export default function WidgetResourcesMapButton(
           />
 
           {showCtaFields ?
-          <>
-          <FormField
-            control={form.control}
-            name="ctaButton.label"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Tekst op de knop
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Bijv: Stuur nu je plan in"
-                    type="text"
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-            />
-          <FormField
-            control={form.control}
-            name="ctaButton.href"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Link
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Bijv: /resource-formulier"
-                    type="text"
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          </>
-          : null }
+            <>
+              <FormField
+                control={form.control}
+                name="ctaButton.label"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Tekst op de knop
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Bijv: Stuur nu je plan in"
+                        type="text"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          props.onFieldChanged('ctaButton',
+                            {
+                              show: props?.ctaButton?.show,
+                              label: e.target.value,
+                              href: props?.ctaButton?.href,
+                            }
+                          )
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="ctaButton.href"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Link
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Bijv: /resource-formulier"
+                        type="text"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          props.onFieldChanged('ctaButton',
+                            {
+                              show: props?.ctaButton?.show,
+                              label: props?.countButton?.label,
+                              href: e.target.value,
+                            }
+                          )
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+            : null}
 
           <Heading size="xl">Aantal resources</Heading>
           <FormField
@@ -163,9 +173,14 @@ export default function WidgetResourcesMapButton(
                 <Switch.Root
                   className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                   onCheckedChange={(e: boolean) => {
-                      props.onFieldChanged(field.name, e);
-                      field.onChange(e);
-                      setShowCountFields(e);
+                    field.onChange(e);
+                    setShowCountFields(e);
+                    props.onFieldChanged('countButton',
+                      {
+                        show: e,
+                        label: props?.countButton?.label,
+                      }
+                    )
                   }}
                   checked={field.value}>
                   <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
@@ -176,32 +191,37 @@ export default function WidgetResourcesMapButton(
           />
 
           {showCountFields ?
-          <>
-          <FormField
-            control={form.control}
-            name="countButton.label"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Tekst op de knop
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Bijv: plannen"
-                    type="text"
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-            />
-          </>
-          : null }
+            <>
+              <FormField
+                control={form.control}
+                name="countButton.label"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Tekst op de knop
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Bijv: plannen"
+                        type="text"
+                        {...field}
+                        onChange={(e) => {
+                          props.onFieldChanged('countButton',
+                            {
+                              show: props?.countButton?.show,
+                              label: e.target.value,
+                            }
+                          )
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+            : null}
 
           <Button type="submit">Opslaan</Button>
         </form>

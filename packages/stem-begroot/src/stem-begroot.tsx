@@ -53,6 +53,15 @@ export type StemBegrootWidgetProps = BaseProps &
     resourceListColumns?: number;
     showInfoMenu?: boolean;
     isSimpleView?: boolean;
+    step1Title: string;
+    resourceCardTitle: string;
+    step2Title: string;
+    stemCodeTitle: string;
+    stemCodeTitleSuccess: string;
+    newsLetterTitle: string;
+    panelTitle?: string;
+    budgetChosenTitle?: string;
+    budgetRemainingTitle?: string;
   };
 
 function StemBegroot({
@@ -65,6 +74,8 @@ function StemBegroot({
     projectId: props.projectId,
     api: props.api,
   });
+
+
 
   const [openDetailDialog, setOpenDetailDialog] = React.useState(false);
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
@@ -129,13 +140,13 @@ function StemBegroot({
     hasRole(currentUser, props.votes.requiredUserRole);
 
   useEffect(() => {
-    if(props.isSimpleView && currentStep === 1 && lastStep > currentStep){
+    if (props.isSimpleView && currentStep === 1 && lastStep > currentStep) {
       setCurrentStep(0); // Skip step 2
-    }else if(props.isSimpleView && currentStep === 1 && lastStep < currentStep){
+    } else if (props.isSimpleView && currentStep === 1 && lastStep < currentStep) {
       setCurrentStep(2); // Skip step 2
     }
 
-    if(currentStep !== lastStep){
+    if (currentStep !== lastStep) {
       setLastStep(currentStep);
     }
   }, [props.isSimpleView, currentStep]);
@@ -259,6 +270,7 @@ function StemBegroot({
   return (
     <>
       <StemBegrootResourceDetailDialog
+        areaId={props.map.areaId}
         displayPriceLabel={props.displayPriceLabel}
         displayRanking={props.displayRanking}
         showVoteCount={props.showVoteCount}
@@ -291,10 +303,10 @@ function StemBegroot({
 
       <div className="osc">
         <Stepper
-            currentStep={currentStep}
-            steps={['Kies', 'Overzicht', 'Stemcode', 'Stem']}
-            isSimpleView={props.isSimpleView}
-          />
+          currentStep={currentStep}
+          steps={['Kies', 'Overzicht', 'Stemcode', 'Stem']}
+          isSimpleView={props.isSimpleView}
+        />
         <Spacer size={1} />
 
         {props.votes.voteType === 'budgeting' ?
@@ -308,6 +320,11 @@ function StemBegroot({
           {currentStep === 0 ? (
             <>
               <StemBegrootBudgetList
+                panelTitle={props.panelTitle}
+                budgetChosenTitle={props.budgetChosenTitle}
+                budgetRemainingTitle={props.budgetRemainingTitle}
+                step1Title={props.step1Title}
+                resourceCardTitle={props.resourceCardTitle}
                 introText={props.step1}
                 showInfoMenu={props.showInfoMenu}
                 maxBudget={props.votes.maxBudget}
@@ -349,6 +366,10 @@ function StemBegroot({
             <>
               <Spacer size={1.5} />
               <BegrotenSelectedOverview
+                panelTitle={props.panelTitle}
+                budgetChosenTitle={props.budgetChosenTitle}
+                budgetRemainingTitle={props.budgetRemainingTitle}
+                step2Title={props.step2Title}
                 introText={props.step2}
                 budgetUsed={budgetUsed}
                 selectedResources={selectedResources}
@@ -361,13 +382,14 @@ function StemBegroot({
           ) : null}
 
           {currentStep === 2 ? (
-            <Step3 loginUrl={`${props?.login?.url}`} step3={props.step3} />
+            <Step3 loginUrl={`${props?.login?.url}`} step3={props.step3} stemCodeTitle={props.stemCodeTitle} />
           ) : null}
 
           {currentStep === 3 ? (
             <Step3Success
               loginUrl={`${props?.login?.url}`}
               step3success={props.step3success}
+              stemCodeTitleSuccess={props.stemCodeTitleSuccess}
             />
           ) : null}
 
@@ -379,6 +401,7 @@ function StemBegroot({
               thankMessage={props.thankMessage}
               voteMessage={props.voteMessage}
               showNewsletterButton={props.showNewsletterButton}
+              newsLetterTitle={props.newsLetterTitle}
             />
           ) : null}
 

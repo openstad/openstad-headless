@@ -110,6 +110,17 @@ let moduleDefinitions = {
       projectId: null,
     },
   },
+  choiceguide: {
+    packageName: '@openstad-headless/choiceguide',
+    directory: 'choiceguide',
+    js: ['dist/choiceguide.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessChoiceGuide',
+    componentName: 'ChoiceGuide',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
   editormap: {
     packageName: '@openstad-headless/leaflet-map',
     directory: 'leaflet-map',
@@ -205,6 +216,28 @@ let moduleDefinitions = {
     css: ['dist/style.css'],
     functionName: 'OpenstadHeadlessDocumentMap',
     componentName: 'DocumentMap',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
+  activity: {
+    packageName: '@openstad-headless/activity',
+    directory: 'activity',
+    js: ['dist/activity.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessActivity',
+    componentName: 'Activity',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
+  account: {
+    packageName: '@openstad-headless/account',
+    directory: 'account',
+    js: ['dist/account.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessAccount',
+    componentName: 'Account',
     defaultConfig: {
       projectId: null,
     },

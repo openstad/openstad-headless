@@ -1,25 +1,28 @@
-const config = require('config');
 const nodemailer = require('nodemailer');
+require('dotenv').config();
 
 module.exports = async function sendMessage({ message }) {
-
   try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.MAIL_TRANSPORT_SMTP_HOST,
+      port: process.env.MAIL_TRANSPORT_SMTP_PORT,
+      secure: process.env.MAIL_TRANSPORT_SMTP_REQUIRESSL === 'true', // true for 465, false for other ports
+      auth: {
+        user: process.env.MAIL_TRANSPORT_SMTP_AUTH_USER,
+        pass: process.env.MAIL_TRANSPORT_SMTP_AUTH_PASS
+      }
+    });
 
-    let method = config.mail.method;
-    let transporter = await nodemailer.createTransport(config.mail.transport[method]);
-
-    // TODO: attachments?
-
-    let result = await transporter.sendMail({
+    await transporter.sendMail({
       from: message.from,
       to: message.to,
       subject: message.subject,
       text: message.text,
       html: message.body,
     });
-    console.log(result);
 
-  } catch(err) {
+  } catch (err) {
+    console.error(err);
     throw err;
   }
 }

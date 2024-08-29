@@ -120,7 +120,7 @@ export function CreateWidgetDialog({ projectId }: Props) {
                         <SelectContent className='overflow-y-auto max-h-[16rem]'>
                           {widgetTypes.map((type) => (
                             <SelectItem key={type[0]} value={type[0]}>
-                              {type[1]}
+                              {type[1].name}
                             </SelectItem>
                           ))}
                         </SelectContent>

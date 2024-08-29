@@ -35,6 +35,7 @@ function Comment({
   const args = {
     comment,
     selected,
+    adminLabel,
     ...props,
   } as CommentProps;
 
@@ -85,14 +86,44 @@ function Comment({
     const markerIcons = Array.from(document.getElementsByClassName('leaflet-marker-icon'));
     const comments = Array.from(document.getElementsByClassName('comment-item'));
     const isAlreadySelected = markerIcons[index]?.classList.contains('--highlightedIcon');
-  
+
     markerIcons.forEach((markerIcon) => markerIcon.classList.remove('--highlightedIcon'));
     comments.forEach((comment) => comment.classList.remove('selected'));
-  
+
     if (!isAlreadySelected) {
       markerIcons[index]?.classList.toggle('--highlightedIcon');
       document.getElementById(`comment-${index}`)?.classList.toggle('selected');
     }
+  }
+
+  async function handleLike() {
+    let attempts = 0;
+    const maxAttempts = 10;
+    const interval = 100;
+
+    // @ts-ignore
+    await args.comment.submitLike().then((newData) => {
+      const newVotes = newData.yes;
+      const oldVotes = args.comment.yes;
+
+      // Refreshing the likes so it gets updated eventually
+      const tryToRefreshComments = () => {
+        if (!widgetContext || !widgetContext.setRefreshComments) {
+          clearInterval(intervalId);
+        } else if (oldVotes !== newVotes && attempts < maxAttempts) {
+          attempts++;
+          if (widgetContext && widgetContext.setRefreshComments) {
+            widgetContext.setRefreshComments((prev) => !prev);
+          }
+        } else if (attempts < maxAttempts) {
+          attempts++;
+        } else {
+          clearInterval(intervalId);
+        }
+      }
+
+      const intervalId = setInterval(tryToRefreshComments, interval);
+    });
   }
 
   return (
@@ -113,14 +144,7 @@ function Comment({
                     args.comment.delete(args.comment.id);
                 },
               },
-            ]}>
-            <Button appearance="subtle-button">
-              <div>
-                <i className="ri-more-fill"></i>
-                <span className="sr-only">Bewerken</span>
-              </div>
-            </Button>
-          </DropDownMenu>
+            ]}/>
         ) : null}
       </section>
 
@@ -160,7 +184,7 @@ function Comment({
                 <Button
                   appearance='secondary-action-button'
                   className={args.comment.hasUserVoted ? `active` : ''}
-                  onClick={() => args.comment.submitLike()}>
+                  onClick={handleLike}>
                   <i className={args.comment.hasUserVoted ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
                   Mee eens (<span>{args.comment.yes || 0}</span>)
                 </Button>
@@ -182,13 +206,41 @@ function Comment({
         </section>
       )}
 
+      {args.comment.parentId && (
+        <>
+          <section className="comment-item-footer">
+            <Paragraph className="comment-reaction-strong-text">
+              {args.comment.createDateHumanized}
+            </Paragraph>
+            <ButtonGroup>
+              {widgetContext.canLike && (
+                canLike() ? (
+                  <Button
+                    appearance='secondary-action-button'
+                    className={args.comment.hasUserVoted ? `active` : ''}
+                    onClick={handleLike}>
+                    <i className={args.comment.hasUserVoted ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
+                    Mee eens (<span>{args.comment.yes || 0}</span>)
+                  </Button>
+                ) : (
+                  <Button disabled>
+                    <i className="ri-thumb-up-line"></i>
+                    Mee eens (<span>{args.comment.yes || 0}</span>)
+                  </Button>
+                )
+              )}
+            </ButtonGroup>
+          </section>
+        </>
+      )}
+
       <Spacer size={1} />
 
       {args.comment.replies &&
         args.comment.replies.map((reply, index) => {
           return (
             <div className="reaction-container" key={index}>
-              <Comment {...args} showDateSeperately={true} comment={reply} />
+              <Comment {...args} showDateSeperately={false} comment={reply} />
             </div>
           );
         })}

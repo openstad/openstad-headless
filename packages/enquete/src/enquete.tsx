@@ -56,6 +56,7 @@ function Enquete(props: EnqueteWidgetProps) {
         || !props.formVisibility
     );
 
+
     const formFields: FieldProps[] = [];
     if (typeof (props) !== 'undefined'
         && typeof (props.items) === 'object'
@@ -67,6 +68,7 @@ function Enquete(props: EnqueteWidgetProps) {
                 description: item.description,
                 fieldKey: item.fieldKey,
                 disabled: !hasRole(currentUser, 'member') && formOnlyVisibleForUsers,
+                fieldRequired: item.fieldRequired,
             };
 
             switch (item.questionType) {
@@ -86,7 +88,11 @@ function Enquete(props: EnqueteWidgetProps) {
                         item.options.length > 0
                     ) {
                         fieldData['choices'] = item.options.map((option) => {
-                            return option.titles[0].key
+                            return {
+                                value: option.titles[0].key,
+                                label: option.titles[0].key,
+                                isOtherOption: option.titles[0].isOtherOption
+                            };
                         });
                     }
                     break;
@@ -110,19 +116,36 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['type'] = 'imageUpload';
                     fieldData['allowedTypes'] = ["image/*"];
                     fieldData['imageUrl'] = props?.imageUrl;
+                    fieldData['multiple'] = item.multiple;
                     break;
                 case 'scale':
                     fieldData['type'] = 'tickmark-slider';
-                    fieldData['fieldOptions'] = [
-                        { value: '1', label: 1 },
-                        { value: '2', label: 2 },
-                        { value: '3', label: 3 },
-                        { value: '4', label: 4 },
-                        { value: '5', label: 5 },
-                    ];
+                    fieldData['showSmileys'] = item.showSmileys;
+
+                    const labelOptions = [
+                      <Icon icon="ri-emotion-unhappy-line" key={1} />,
+                      <Icon icon="ri-emotion-sad-line" key={2} />,
+                      <Icon icon="ri-emotion-normal-line" key={3} />,
+                      <Icon icon="ri-emotion-happy-line" key={4} />,
+                      <Icon icon="ri-emotion-laugh-line" key={5} />
+                    ]
+
+                    fieldData['fieldOptions'] = labelOptions.map((label, index) => {
+                        const currentValue = index + 1;
+                          return {
+                            value: currentValue,
+                            label: item.showSmileys ? label : currentValue,
+                          }
+                        });
+                    break;
+                case 'map':
+                    fieldData['type'] = 'map';
                     break;
                 case 'none':
                     fieldData['type'] = 'none';
+                    fieldData['image'] = item?.image || '';
+                    fieldData['imageAlt'] = item?.imageAlt || '';
+                    fieldData['imageDescription'] = item?.imageDescription || '';
                     break;
             }
 
@@ -163,6 +186,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     title=""
                     submitText="Versturen"
                     submitDisabled={!hasRole(currentUser, 'member') && formOnlyVisibleForUsers}
+                    {...props}
                 />
             </div>
 

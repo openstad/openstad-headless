@@ -14,6 +14,10 @@ type Props = {
   introText?: string;
   typeIsBudgeting: boolean;
   showInfoMenu?: boolean;
+  step2Title: string;
+  panelTitle?: string;
+  budgetChosenTitle?: string;
+  budgetRemainingTitle?: string;
 };
 
 export const BegrotenSelectedOverview = ({
@@ -23,7 +27,11 @@ export const BegrotenSelectedOverview = ({
   selectedResources,
   introText = '',
   typeIsBudgeting,
-  showInfoMenu
+  showInfoMenu,
+  step2Title,
+  panelTitle,
+  budgetChosenTitle,
+  budgetRemainingTitle,
 }: Props) => {
   return (
     <>
@@ -37,13 +45,16 @@ export const BegrotenSelectedOverview = ({
             maxBudget={maxBudget}
             budgetUsed={budgetUsed}
             showInfoMenu={showInfoMenu}
-        />
+            title={panelTitle}
+            budgetChosenTitle={budgetChosenTitle}
+            budgetRemainingTitle={budgetRemainingTitle}
+          />
         )}
       </div>
 
       <Spacer size={1.5} />
       <div className="budget-overview-panel">
-        <Heading5>Overzicht van mijn selectie</Heading5>
+        <Heading5>{step2Title}</Heading5>
         <Spacer size={1} />
 
         {selectedResources.map((resource) => {
@@ -67,13 +78,16 @@ export const BegrotenSelectedOverview = ({
                   className="budget-overview-image"
                   src={resource.images?.at(0)?.url || defaultImage}
                 />
-                <Paragraph>{resource.title}</Paragraph>
+                <div className="budget-resource-container">
+                  <Paragraph>{resource.title}</Paragraph>
+                  {typeIsBudgeting ? (
+                    <Paragraph>
+                      <Strong>&euro;{resource.budget?.toLocaleString('nl-NL') || 0}</Strong>
+                    </Paragraph>
+                  ) : null}
+                </div>
               </section>
-              {typeIsBudgeting ? (
-                <Paragraph>
-                  <Strong>&euro;{resource.budget?.toLocaleString('nl-NL') || 0}</Strong>
-                </Paragraph>
-              ) : null}
+
             </div>
           )
         })}

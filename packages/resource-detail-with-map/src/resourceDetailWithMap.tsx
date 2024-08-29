@@ -18,7 +18,8 @@ import React from 'react';
 import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
-import { Button } from '@utrecht/component-library-react';
+import { Button, ButtonLink } from '@utrecht/component-library-react';
+import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
 type booleanProps = {
@@ -40,9 +41,9 @@ type booleanProps = {
 };
 
 export type ResourceDetailWidgetProps = {
-    documentsTitle?: string;
-    documentsDesc?: string;
-  } & BaseProps &
+  documentsTitle?: string;
+  documentsDesc?: string;
+} & BaseProps &
   ProjectSettingProps & {
     projectId?: string;
     resourceId?: string;
@@ -117,37 +118,31 @@ function ResourceDetailWithMap({
   });
 
 
-  let countButtonElement:React.JSX.Element|null = null;
+  let countButtonElement: React.JSX.Element = <></>;
   if (countButton?.show) {
     countButtonElement = (
-      <Button
-        appearance="primary-action-button"
-        className={`osc-resource-overview-map-button osc-first-button`}>
+      <div
+        className="utrecht-button utrecht-button--secondary-action osc-resource-overview-map-button osc-first-button">
         <section className="resource-counter">
           {resources?.metadata?.totalCount}
         </section>
         <section className="resource-label">
           {countButton.label || 'plannen'}
         </section>
-      </Button>
+      </div>
     );
   }
 
-  let ctaButtonElement:React.JSX.Element|null = null;
+  let ctaButtonElement: React.JSX.Element = <></>;
   if (ctaButton?.show) {
     ctaButtonElement = (
-      <Button
+      <ButtonLink
         appearance="primary-action-button"
-        onClick={(e) => {
-          if (ctaButton.href) {
-            document.location.href = ctaButton.href;
-          }
-        }}
-        className={`osc-resource-overview-map-button ${
-          countButtonElement ? 'osc-second-button' : 'osc-first-button'
-        }`}>
+        href={ctaButton.href}
+        className={`osc-resource-overview-map-button ${countButtonElement ? 'osc-second-button' : 'osc-first-button'
+          }`}>
         <section className="resource-label">{ctaButton.label}</section>
-      </Button>
+      </ButtonLink>
     );
   }
 
@@ -159,7 +154,7 @@ function ResourceDetailWithMap({
   interface Tag {
     name: string;
     defaultResourceImage?: string;
-   }
+  }
 
   if (Array.isArray(resource?.tags)) {
     const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
@@ -175,10 +170,10 @@ function ResourceDetailWithMap({
       {resource ? (
         <>
           <a href={backUrl} className="back-to-overview">Terug naar overzicht</a>
-          <article className="osc-resource-detail-content-items" tabIndex={0}>
+          <article className="osc-resource-detail-content-items">
             {displayImage && (
               <Carousel
-                items={ ( Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : defaultImage}
+                items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : defaultImage}
                 itemRenderer={(i) => (
                   <Image
                     src={i.url}
@@ -203,7 +198,7 @@ function ResourceDetailWithMap({
               {displayUser && resource?.user?.displayName && (
                 <div>
                   <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
-                    Gemaakt door
+                  Ingediend door
                   </Heading>
                   <span className="osc-resource-detail-content-item-text">
                     {resource.user.displayName}
@@ -237,19 +232,26 @@ function ResourceDetailWithMap({
                 <Paragraph>{resource.description}</Paragraph>
               )}
             </div>
+            {displaySocials ? (
+                <div className="resource-detail-side-section">
+                  <ShareLinks title={'Deel dit'} />
+                </div>
+              ) : null}
           </article>
           {displayLocation && resource.location && (
-            <>
+            <div className="map-container--buttons">
               <ResourceDetailMap
                 resourceId={props.resourceId || '0'}
                 {...props}
                 center={resource.location}
                 area={props.resourceDetailMap?.area}
               >
+              </ResourceDetailMap>
+              <div className="map-buttons">
                 {ctaButtonElement}
                 {countButtonElement}
-              </ResourceDetailMap>
-            </>
+              </div>
+            </div>
           )}
         </>
       ) : (

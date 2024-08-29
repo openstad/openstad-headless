@@ -24,7 +24,7 @@ export function SidenavProject({ className }: { className?: string }) {
         className
       )}>
       <div className="flex flex-col items-start justify-center h-24">
-        <Link href="/projects">
+        <Link href="javascript:history.back();">
           <div className="m-4 p-3 bg-secondary rounded">
             <ArrowLeft size={20} />
           </div>
@@ -279,6 +279,14 @@ export function SidenavProject({ className }: { className?: string }) {
             className="w-full flex justify-start"
             onClick={(e) => {}}>
             <span className="truncate">Formulier inzendingen</span>
+          </Button>
+        </Link>
+        <Link href={`/projects/${project}/choiceguide-results`}>
+          <Button
+            variant={location.includes('/choiceguide-results') ? 'secondary' : 'ghost'}
+            className="w-full flex justify-start"
+            onClick={(e) => {}}>
+            <span className="truncate">Keuzewijzer inzendingen</span>
           </Button>
         </Link>
         <Link href={`/projects/${project}/notifications`}>
