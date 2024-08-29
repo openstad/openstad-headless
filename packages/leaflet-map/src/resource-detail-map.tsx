@@ -27,6 +27,7 @@ const ResourceDetailMap = ({
     config: { api: props.api },
   });
 
+
   const urlParams = new URLSearchParams(window.location.search);
   resourceId =
     resourceId || ( urlParams.get('openstadResourceId')
@@ -55,6 +56,7 @@ const ResourceDetailMap = ({
   const { data: areas } = datastore.useArea({
     projectId: props.projectId
   });
+  
 
   let areaId = props?.map?.areaId || false;
   const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];

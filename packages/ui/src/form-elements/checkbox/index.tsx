@@ -8,11 +8,12 @@ import {
     Paragraph, FormFieldDescription,
 } from "@utrecht/component-library-react";
 import { Spacer } from '@openstad-headless/ui/src';
+import TextInput from "../text";
 
 export type CheckboxFieldProps = {
     title: string;
     description?: string;
-    choices?: string[] | [{value: string, label: string}];
+    choices?: { value: string, label: string, isOtherOption?: boolean }[];
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
@@ -31,6 +32,17 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        disabled = false,
 }) => {
     const [selectedChoices, setSelectedChoices] = useState<string[]>([]);
+    const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
+
+    useEffect(() => {
+        const initialOtherOptionValues: { [key: string]: string } = {};
+        choices?.forEach((choice, index) => {
+            if (choice.isOtherOption) {
+                initialOtherOptionValues[`${fieldKey}_${index}_other`] = "";
+            }
+        });
+        setOtherOptionValues(initialOtherOptionValues);
+    }, [choices, fieldKey]);
 
     useEffect(() => {
         if (onChange) {
@@ -41,23 +53,46 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
         }
     } , [selectedChoices]);
 
-    const handleChoiceChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const handleChoiceChange = (event: React.ChangeEvent<HTMLInputElement>, index: number): void => {
         const choiceValue = event.target.value;
         if (event.target.checked) {
             setSelectedChoices([...selectedChoices, choiceValue]);
         } else {
             setSelectedChoices(selectedChoices.filter((choice) => choice !== choiceValue));
+            if (otherOptionValues.hasOwnProperty(`${fieldKey}_${index}_other`)) {
+                otherOptionValues[`${fieldKey}_${index}_other`] = "";
+                setOtherOptionValues({ ...otherOptionValues });
+                if (onChange) {
+                    onChange({
+                        name: `${fieldKey}_${index}_other`,
+                        value: ""
+                    });
+                }
+            }
+        }
+    };
+
+    const handleOtherOptionChange = (e: { name: string, value: string }) => {
+        setOtherOptionValues({
+            ...otherOptionValues,
+            [e.name]: e.value
+        });
+        if (onChange) {
+            onChange({
+                name: e.name,
+                value: e.value
+            });
         }
     };
 
     if (choices) {
-        choices = choices?.map((choice) => {
+        choices = choices.map((choice) => {
             if (typeof choice === 'string') {
-                return {value: choice, label: choice}
+                return { value: choice, label: choice }
             } else {
                 return choice;
             }
-        }) as [{ value: string, label: string }];
+        }) as [{ value: string, label: string, isOtherOption?: boolean }];
     }
 
     return (
@@ -77,23 +112,37 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                 }
 
                 {choices?.map((choice, index) => (
-                    <FormField type="checkbox" key={index}>
-                        <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
-                            <FormLabel htmlFor={`${fieldKey}_${index}`} type="checkbox" className="--label-grid">
-                                <Checkbox
-                                    className="utrecht-form-field__input"
-                                    id={`${fieldKey}_${index}`}
-                                    name={fieldKey}
-                                    value={choice && choice.value}
-                                    required={fieldRequired}
-                                    checked={choice && choice.value ? selectedChoices.includes(choice.value) : false}
-                                    onChange={handleChoiceChange}
-                                    disabled={disabled}
+                    <>
+                        <FormField type="checkbox" key={index}>
+                            <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
+                                <FormLabel htmlFor={`${fieldKey}_${index}`} type="checkbox" className="--label-grid">
+                                    <Checkbox
+                                        className="utrecht-form-field__input"
+                                        id={`${fieldKey}_${index}`}
+                                        name={fieldKey}
+                                        value={choice && choice.value}
+                                        required={fieldRequired}
+                                        checked={choice && choice.value ? selectedChoices.includes(choice.value) : false}
+                                        onChange={(e) => handleChoiceChange(e, index)}
+                                        disabled={disabled}
+                                    />
+                                    <span>{choice && choice.label}</span>
+                                </FormLabel>
+                            </Paragraph>
+                        </FormField>
+                        {choice.isOtherOption && selectedChoices.includes(choice.value) && (
+                            <div style={{ marginTop: '10px', marginBottom: '15px' }}>
+                                <TextInput
+                                    type="text"
+                                    // @ts-ignore
+                                    onChange={(e: { name: string; value: string }) => handleOtherOptionChange(e)}
+                                    fieldKey={`${fieldKey}_${index}_other`}
+                                    title=""
+                                    defaultValue={otherOptionValues[`${fieldKey}_${index}_other`]}
                                 />
-                                <span>{choice && choice.label}</span>
-                            </FormLabel>
-                        </Paragraph>
-                    </FormField>
+                            </div>
+                        )}
+                    </>
                 ))}
             </Fieldset>
         </div>

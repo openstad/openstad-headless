@@ -97,7 +97,7 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
     useEffect(() => {
         const allDocuments = [];
 
-        if ( documents.length > 0 && uploadedDocuments.length > 0 ) {
+        if (documents.length > 0 && uploadedDocuments.length > 0) {
             for (let i = 0; i < documents.length; i++) {
                 const file = documents[i].file;
                 if (file && file.name) {
@@ -117,6 +117,42 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
             });
         }
     }, [documents.length, uploadedDocuments.length]);
+
+    function waitForElm(selector: any) {
+        return new Promise(resolve => {
+            if (document.querySelector(selector)) {
+                return resolve(document.querySelector(selector));
+            }
+
+            const observer = new MutationObserver(mutations => {
+                if (document.querySelector(selector)) {
+                    observer.disconnect();
+                    resolve(document.querySelector(selector));
+                }
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        });
+    }
+
+
+
+    useEffect(() => {
+        waitForElm('.filepond--browser').then((elm: any) => {
+
+            const label = document.querySelectorAll('.filepond--drop-label > label');
+            const span = document.querySelectorAll('.filepond--drop-label > label > span');
+            label.forEach((item: any) => {
+                item.setAttribute('aria-hidden', 'false');
+            });
+            span.forEach((item: any) => {
+                item.removeAttribute('tabindex');
+            });
+        });
+    }, []);
 
     return (
         <FormField type="text">

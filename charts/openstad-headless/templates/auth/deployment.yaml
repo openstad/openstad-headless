@@ -183,7 +183,7 @@ spec:
         image: {{ .Values.auth.deploymentContainer.image }}
         command: ["/bin/bash", "-c"]
         args:
-          - nc $DB_HOST $DB_PORT -z -w1 && npm run --prefix apps/auth-server migrate-database
+          - nc $DB_HOST $DB_PORT -z -w1 && npm run --prefix apps/auth-server init-database -- --only-if-empty && npm run --prefix apps/auth-server migrate-database
         env:
           - name: DB_USER
             valueFrom:
@@ -208,6 +208,12 @@ spec:
               secretKeyRef:
                 name: openstad-db-credentials
                 key: hostport
+
+          - name: DB_MAX_POOL_SIZE
+            valueFrom:
+              secretKeyRef:
+                name: openstad-db-credentials
+                key: maxPoolSize
 
           - name: DB_NAME
             valueFrom:

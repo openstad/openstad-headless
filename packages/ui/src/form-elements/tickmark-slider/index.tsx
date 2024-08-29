@@ -1,6 +1,7 @@
 import { FormLabel, FormFieldDescription , Paragraph} from '@utrecht/component-library-react';
 import React, { FC, useState } from 'react';
 import { Spacer } from '@openstad-headless/ui/src';
+import './style.css';
 
 export type TickmarkSliderProps = {
     index: number;
@@ -15,6 +16,7 @@ export type TickmarkSliderProps = {
     disabled?: boolean;
     onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
     type?: string;
+    showSmileys?: boolean;
 }
 
 const TickmarkSlider: FC<TickmarkSliderProps> = ({
@@ -22,6 +24,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
     description = '',
     fieldOptions = [],
     fieldRequired = false,
+    showSmileys = false,
     fieldKey,
     imageSrc = '',
     imageAlt = '',
@@ -62,7 +65,6 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 max={maxCharacters}
                 value={value}
                 step="1"
-                list={`form-field-tickmarks-${index}`}
                 id={`a-to-b-range--${index}`}
                 name={fieldKey}
                 required={fieldRequired}
@@ -78,14 +80,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 aria-label={`Selecteer een waarde tussen 1 en ${fieldOptions.length}`}
                 disabled={disabled}
             />
-            <datalist id={`form-field-tickmarks-${index}`}>
-                {fieldOptions.map((option, key) => (
-                    <option key={key} value={option.value}>
-                        {option.label}
-                    </option>
-                ))}
-            </datalist>
-            <div className="range-slider-labels">
+            <div className={`range-slider-labels ${showSmileys && 'smiley-scale'}`}>
                 {fieldOptions.map((option, key) => (
                     <label key={key} htmlFor={`a-to-b-range--${index}`} className={value === option.value ? 'active' : ''}>
                         {option.label}

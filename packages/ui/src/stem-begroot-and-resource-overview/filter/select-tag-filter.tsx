@@ -42,23 +42,24 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
       return randomId;
       }
     }
-
     return (
-      <div className="form-element">
-        <FormLabel htmlFor={getRandomId(props.placeholder)}>{props.placeholder|| 'Selecteer item'}</FormLabel>
-        <Select
-          id={getRandomId(props.placeholder)}
-          ref={ref}
-          options={(tags || []).map((tag: TagDefinition) => ({
-            value: tag.id,
-            label: tag.name,
-          }))}
-          title={props.title}
-          onValueChange={(value) => {
-            onUpdateFilter && onUpdateFilter(value);
-          }}>
-        </Select>
-      </div>
+      tags.length > 0 && (
+        <div className="form-element">
+          <FormLabel htmlFor={getRandomId(props.placeholder)}>{props.placeholder|| 'Selecteer item'}</FormLabel>
+          <Select
+            id={getRandomId(props.placeholder)}
+            ref={ref}
+            options={(tags || []).map((tag: TagDefinition) => ({
+              value: tag.id,
+              label: tag.name,
+            }))}
+            title={props.title}
+            onValueChange={(value) => {
+              onUpdateFilter && onUpdateFilter(value);
+            }}>
+          </Select>
+        </div>
+      )
     );
   }
 );

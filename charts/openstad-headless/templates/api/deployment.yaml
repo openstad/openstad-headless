@@ -55,6 +55,12 @@ spec:
                 name: openstad-db-credentials
                 key: hostport
 
+          - name: DB_MAX_POOL_SIZE
+            valueFrom:
+              secretKeyRef:
+                name: openstad-db-credentials
+                key: maxPoolSize
+
           - name: DB_NAME
             valueFrom:
               secretKeyRef:
@@ -185,7 +191,7 @@ spec:
       initContainers:
         - command: ["/bin/bash", "-c"]
           args:
-            - nc $DB_HOST $DB_PORT -z -w1 && npm run --prefix apps/api-server migrate-database
+            - nc $DB_HOST $DB_PORT -z -w1 && npm run --prefix apps/api-server init-database -- --only-if-empty && npm run --prefix apps/api-server migrate-database
           env:
             - name: URL
               value: https://{{ template "openstad.api.url" . }}

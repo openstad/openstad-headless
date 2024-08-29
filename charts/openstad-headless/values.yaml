@@ -154,7 +154,6 @@ admin:
   ingress:
     enabled: true # Whether there is a ingress for this service
     annotations:
-      kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/proxy-body-size: 128m
       nginx.ingress.kubernetes.io/configuration-snippet: |
         more_set_headers "X-Content-Type-Options: nosniff";
@@ -163,6 +162,7 @@ admin:
         more_set_headers "Referrer-Policy: same-origin";
     extraLabels: {}
     hosts: []
+    ingressClassName: nginx
     tls:
       secretName: openstad-tls-admin
       hosts: []
@@ -174,8 +174,7 @@ admin:
   resources:
     # Max resources
     limits:
-      cpu: 500m
-      memory: 1Gi
+      memory: 500M
     # Min resources
     requests:
       cpu: 100m
@@ -211,7 +210,6 @@ auth:
   ingress:
     enabled: true # Whether there is a ingress for this service
     annotations:
-      kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/configuration-snippet: |
         more_set_headers "X-Content-Type-Options: nosniff";
         more_set_headers "X-Frame-Options: SAMEORIGIN";
@@ -219,6 +217,7 @@ auth:
         more_set_headers "Referrer-Policy: same-origin";
     extraLabels: {}
     hosts: []
+    ingressClassName: nginx
     tls:
       secretName: openstad-tls-auth
       hosts: []
@@ -230,8 +229,7 @@ auth:
   resources:
     # Max resources
     limits:
-      cpu: 300m
-      memory: 1Gi
+      memory: 500M
     # Min resources
     requests:
       cpu: 100m
@@ -275,7 +273,6 @@ api:
   ingress:
     enabled: true # Whether there is a ingress for this service
     annotations:
-      kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/proxy-body-size: 128m
       nginx.ingress.kubernetes.io/configuration-snippet: |
         more_set_headers "X-Content-Type-Options: nosniff";
@@ -284,6 +281,7 @@ api:
         more_set_headers "Referrer-Policy: same-origin";
     extraLabels: {}
     hosts: []
+    ingressClassName: nginx
     tls:
       secretName: openstad-tls-api
       hosts: []
@@ -295,8 +293,7 @@ api:
   resources:
     # Max resources
     limits:
-      cpu: 500m
-      memory: 1Gi
+      memory: 500M
     # Min resources
     requests:
       cpu: 250m
@@ -342,7 +339,6 @@ image:
   ingress:
     enabled: true # Whether there is a ingress for this service
     annotations:
-      kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/proxy-body-size: 128m
       nginx.ingress.kubernetes.io/configuration-snippet: |
         more_set_headers "X-Content-Type-Options: nosniff";
@@ -351,6 +347,7 @@ image:
         more_set_headers "Referrer-Policy: same-origin";
     extraLabels: {}
     hosts: []
+    ingressClassName: nginx
     tls:
       secretName: openstad-tls-image
       hosts: []
@@ -372,8 +369,7 @@ image:
   resources:
     # Max resources
     limits:
-      cpu: 500m
-      memory: 1Gi
+      memory: 500M
     # Min resources
     requests:
       cpu: 100m
@@ -417,7 +413,6 @@ cms:
   ingress:
     enabled: true # Whether there is a ingress for this service
     annotations:
-      kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/proxy-body-size: 128m
       nginx.ingress.kubernetes.io/configuration-snippet: |
         more_set_headers "X-Content-Type-Options: nosniff";
@@ -426,6 +421,7 @@ cms:
         more_set_headers "Referrer-Policy: same-origin";
     extraLabels: {}
     hosts: []
+    ingressClassName: nginx
     tls:
       secretName: openstad-tls-cms
       hosts: []
@@ -437,12 +433,11 @@ cms:
   resources:
     # Max resources
     limits:
-      cpu: "1"
-      memory: 2Gi
+      memory: 1Gi
     # Min resources
     requests:
       cpu: 250m
-      memory: 500M
+      memory: 1Gi
 
   # Check whether the service is healthy:
   # First time after $(initialDelaySeconds) seconds.
@@ -475,6 +470,9 @@ secrets:
 
   api:
     jwtSecret:
+
+  auth:
+    sessionSecret:
 
   cms:
     apiKey:

@@ -70,6 +70,7 @@ export default function WidgetResourceFormItems(
     const [selectedOption, setOption] = useState<Option | null>(null);
     const [settingOptions, setSettingOptions] = useState<boolean>(false);
     const [file, setFile] = useState<File>();
+    const [isFieldKeyUnique, setIsFieldKeyUnique] = useState(true);
 
     const router = useRouter();
     const { project } = router.query;
@@ -334,6 +335,18 @@ export default function WidgetResourceFormItems(
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [form.watch("type")]);
+
+    useEffect(() => {
+        const key = form.watch("fieldKey");
+
+        if (key) {
+            const isUnique = items.every((item) =>
+              (selectedItem && item.trigger === selectedItem.trigger) || item.fieldKey !== key
+            );
+
+            setIsFieldKeyUnique(isUnique);
+        }
+    }, [form.watch("fieldKey"), selectedItem]);
 
     return (
         <div>
@@ -640,7 +653,11 @@ export default function WidgetResourceFormItems(
                                                             <em className='text-xs'>Deze moet uniek zijn bijvoorbeeld: ‘samenvatting’</em>
 
                                                             <Input {...field} disabled={!!fieldKey} />
-                                                            <FormMessage />
+                                                            {(!field.value || !isFieldKeyUnique) && (
+                                                              <FormMessage>
+                                                                  { !field.value ? 'Key is verplicht' : 'Key moet uniek zijn' }
+                                                              </FormMessage>
+                                                            )}
                                                         </FormItem>
                                                     )
                                                 }}
@@ -887,22 +904,34 @@ export default function WidgetResourceFormItems(
                                         )}
                                     </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    {selectedItem && (
+
+                                <div>
+                                    <div className="flex gap-2">
+                                        {selectedItem && (
+                                            <Button
+                                                className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                                                type="button"
+                                                onClick={() => {
+                                                    resetForm();
+                                                }}>
+                                                Annuleer
+                                            </Button>
+                                        )}
                                         <Button
-                                            className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                                            type="button"
-                                            onClick={() => {
-                                                resetForm();
-                                            }}>
-                                            Annuleer
+                                            className="w-fit mt-4"
+                                            type="submit"
+                                            disabled={(form.watch('type') === 'tags' && allTags.length === 0) || ((!form.watch('fieldKey') || !isFieldKeyUnique) && form.watch('type') !== 'none')}
+                                        >
+                                            {selectedItem
+                                                ? 'Sla wijzigingen op'
+                                                : 'Voeg item toe aan lijst'}
                                         </Button>
+                                    </div>
+                                    {(!form.watch('fieldKey') || !isFieldKeyUnique) && (
+                                      <FormMessage>
+                                          { !form.watch('fieldKey') ? 'Key is verplicht' : 'Key moet uniek zijn' }
+                                      </FormMessage>
                                     )}
-                                    <Button className="w-fit mt-4" type="submit" disabled={form.watch('type') === 'tags' && allTags.length === 0}>
-                                        {selectedItem
-                                            ? 'Sla wijzigingen op'
-                                            : 'Voeg item toe aan lijst'}
-                                    </Button>
                                 </div>
                             </div>
                         )}
