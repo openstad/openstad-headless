@@ -7,8 +7,8 @@ import { Separator } from '@/components/ui/separator';
 import AccordionUI from "@/components/ui/accordion";
 
 export default function ProjectNotifications() {
-  type NotificationType = 'login email' | 'login sms' | 'new published resource - user feedback' | 'updated resource - user feedback' | 'user account about to expire';
-  const defaultDefinitions: { [type in NotificationType]: any[] } = { "login email": [], "login sms": [], "new published resource - user feedback": [], "updated resource - user feedback": [], "user account about to expire": [] };
+  type NotificationType = 'login email' | 'login sms' | 'new published resource - user feedback' | 'new published resource - admin update' | 'updated resource - user feedback' | 'user account about to expire';
+  const defaultDefinitions: { [type in NotificationType]: any[] } = { "login email": [], "login sms": [], "new published resource - user feedback": [], "new published resource - admin update": [], "updated resource - user feedback": [], "user account about to expire": [] };
   const [typeDefinitions, setTypeDefinitions] = React.useState<{ [type in NotificationType]: any[] }>(defaultDefinitions);
 
   const router = useRouter();
