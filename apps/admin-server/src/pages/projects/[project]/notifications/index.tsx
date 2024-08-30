@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { PageLayout } from '@/components/ui/page-layout';
 import { useRouter } from 'next/router';
-import useNotificationTemplate from '@/hooks/use-notification-template'
+import useNotificationTemplate from '@/hooks/use-notification-template';
 import { NotificationForm } from '@/components/notification-form';
 import { Separator } from '@/components/ui/separator';
 import AccordionUI from "@/components/ui/accordion";
@@ -36,12 +36,14 @@ export default function ProjectNotifications() {
       const currentTypeDefinitions = Object.assign({}, defaultDefinitions);
 
       data.forEach(template => {
-        currentTypeDefinitions[template.type as NotificationType].push(template);
+        if (template.type in currentTypeDefinitions) {
+          currentTypeDefinitions[template.type as NotificationType].push(template);
+        }
       });
 
       setTypeDefinitions(currentTypeDefinitions);
     }
-  }, [data, defaultDefinitions])
+  }, [data]);
 
   return (
     <div>
@@ -133,7 +135,7 @@ export default function ProjectNotifications() {
             </div>
 
               {Object.entries(typeDefinitions).map(([type, templateList], index) => (
-                  <React.Fragment key={type}>
+                  <React.Fragment key={index}>
                     {templateList.length === 0 && (
                         <div key={type}>
                           <NotificationForm type={type as NotificationType} />

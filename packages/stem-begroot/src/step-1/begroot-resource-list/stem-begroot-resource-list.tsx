@@ -73,12 +73,15 @@ export const StemBegrootResourceList = ({
           defaultImage = tagWithImage?.defaultResourceImage || '';
         }
 
+        const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
+        const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
+
         return (
           <>
-            <article className="stem-begroot--container">
+            <article className={`stem-begroot--container ${hasImages}`}>
 
               <Carousel
-                items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: '' }]}
+                items={resourceImages}
                 itemRenderer={(i) => (
                   <Image src={i.url} />
                 )}

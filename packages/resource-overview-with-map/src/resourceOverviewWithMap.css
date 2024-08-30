@@ -72,14 +72,35 @@
 }
 
 @media only screen and (max-width: 1000px) {
+
   .resourceOverviewWithMap-container {
     grid-template-columns: 1fr;
     height: auto;
-    grid-template-rows: 300px auto;
+    grid-template-rows: 250px auto;
   }
 
   .resourceOverviewWithMap-container .map-container{
     grid-row: 1;
   }
+  .resourceOverviewWithMap-container .detail-container{
+    grid-row: 2;
+  }
 
+  .resourceOverviewWithMap-container .map-buttons{
+    flex-direction: row;
+  }
+
+  .resourceOverviewWithMap-container .osc-resource-overview-content #stem-begroot-filter .osc-resources-filter.osc-flex-columned{
+    padding-inline: 1rem;
+  }
+
+}
+
+@media only screen and (max-width: 768px) {
+  .resourceOverviewWithMap-container .resource-card--link{
+    display: block;
+  }
+  .osc .image-container>img {
+    aspect-ratio: 16/5;
+  }
 }

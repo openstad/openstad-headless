@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import type {CombinedFieldPropsWithType, ComponentFieldProps, FormProps} from "./props";
 import TextInput from "@openstad-headless/ui/src/form-elements/text";
 import RangeSlider from "@openstad-headless/ui/src/form-elements/a-b-slider";
@@ -16,6 +16,8 @@ import InfoField from "@openstad-headless/ui/src/form-elements/info";
 import { FormFieldErrorMessage, Button } from "@utrecht/component-library-react";
 import './form.css'
 
+export type FormValue = string | Record<number, never> | [];
+
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
 
@@ -27,10 +29,9 @@ function Form({
       submitDisabled = false,
       secondaryLabel = '',
       secondaryHandler = () => {},
+      getValuesOnChange = () => {},
       ...props
 }: FormProps) {
-    type FormValue = string | Record<number, never> | [];
-
     const initialFormValues: { [key: string]: FormValue } = {};
     fields.forEach((field) => {
         if (field.fieldKey) {
@@ -65,6 +66,12 @@ function Form({
         const { name, value } = event;
         setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
     };
+
+    useEffect(() => {
+        if (getValuesOnChange) {
+            getValuesOnChange(formValues)
+        }
+    }, [formValues]);
 
     const componentMap: { [key: string]: React.ComponentType<ComponentFieldProps> } = {
         text: TextInput as React.ComponentType<ComponentFieldProps>,

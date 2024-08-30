@@ -4,6 +4,11 @@ export const WidgetDefinitions = {
     description: 'agenda module',
     image: '/widget_preview/agenda_preview.png',
   },
+  choiceguide: {
+    name: 'Keuzewijzer',
+    description: 'Keuzewijzer module',
+    image: '/widget_preview/choiceguide_preview.png',
+  },
   comments: {
     name: 'Reacties',
     description: 'Reactie module',

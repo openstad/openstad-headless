@@ -103,7 +103,7 @@ export default function AccountDisplay(
           name="allowNickname"
           render={({ field }) => (
             <FormItem className="col-span-1">
-              <FormLabel>Schermnaam toestaan</FormLabel>
+              <FormLabel>Gebruikersnaam toestaan</FormLabel>
               {YesNoSelect(field, props)}
               <FormMessage />
             </FormItem>

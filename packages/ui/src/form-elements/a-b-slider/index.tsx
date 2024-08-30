@@ -1,4 +1,6 @@
-import React, {FC} from 'react';
+import React, { FC } from 'react';
+import './a-b-slider.css'
+import { Paragraph, Strong } from "@utrecht/component-library-react";
 
 export type RangeSliderProps = {
     title: string;
@@ -7,6 +9,8 @@ export type RangeSliderProps = {
     labelB: string;
     titleA: string;
     titleB: string;
+    imageA: string;
+    imageB: string;
     descriptionA?: string;
     descriptionB?: string;
     fieldRequired?: boolean;
@@ -16,28 +20,33 @@ export type RangeSliderProps = {
     maxCharacters?: number;
     disabled?: boolean;
     type?: string;
-    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
 }
 
+
 const RangeSlider: FC<RangeSliderProps> = ({
-    title= '',
-    description= '',
+    title = '',
+    description = '',
     labelA,
     labelB,
     titleA,
     titleB,
     descriptionA,
     descriptionB,
-    fieldRequired= false,
+    imageA,
+    imageB,
+    fieldRequired = false,
     fieldKey,
     showLabels = true,
     onChange,
     disabled = false,
 }) => {
+    const randomId = Math.random().toString(36).substring(7);
+
     return (
         <div className="a-b-slider-container">
             {title && (
-                <h3 className="a-b-question">{title}</h3>
+                <Paragraph><Strong>            <label htmlFor={randomId}>{title}</label></Strong></Paragraph>
             )}
             {description && (
                 <p>{description}</p>
@@ -46,26 +55,30 @@ const RangeSlider: FC<RangeSliderProps> = ({
                 <div className="a-b-title label-a">
                     {showLabels && (<p className="label">A</p>)}
                     <div className="a-b-info">
-                        <p className="title">{titleA}</p>
-                        <p className="description">{descriptionA}</p>
+                        <Paragraph><Strong>{titleA}</Strong></Paragraph>
+                        <Paragraph>{descriptionA}</Paragraph>
+                        {!!imageA && (<figure><img src={imageA} alt={`${titleA} - ${descriptionA}`} /></figure>)}
                     </div>
                 </div>
                 <div className="a-b-title label-b">
                     {showLabels && (<p className="label">B</p>)}
                     <div className="a-b-info">
-                        <p className="title">{titleB}</p>
-                        <p className="description">{descriptionB}</p>
+                        <Paragraph><Strong>{titleB}</Strong></Paragraph>
+                        <Paragraph>{descriptionB}</Paragraph>
+                        {!!imageB && (<figure><img src={imageB} alt={`${titleB} - ${descriptionB}`} /></figure>)}
                     </div>
                 </div>
             </div>
+
             <input
                 type="range"
                 min="0"
                 max="100"
-                step="1"
-                id="a-to-b-range"
+                step="5"
+                className="a-to-b-range"
                 name={fieldKey}
                 required={fieldRequired}
+                id={randomId}
                 onChange={(e) => {
                     if (onChange) {
                         onChange({
@@ -77,18 +90,18 @@ const RangeSlider: FC<RangeSliderProps> = ({
                 aria-label={`Selecteer een waarde tussen 1 en 100 voor ${titleA} en ${titleB}`}
                 disabled={disabled}
             />
-            <p id="a-b-description" className="a-b-description visually-hidden">
+            <Paragraph id="a-b-description" className="a-b-description visually-hidden">
                 Deze slider vertegenwoordigt de waarde voor {titleA} aan de linkerkant en de waarde voor {titleB} aan de rechterkant.
-            </p>
+            </Paragraph>
             <div className="a-b-label-container">
-                <p className="a-b-label label-a">
+                <Paragraph className="a-b-label label-a">
                     {showLabels && (<span className="label">A.</span>)}
                     <span className="label">{labelA}</span>
-                </p>
-                <p className="a-b-label label-b">
+                </Paragraph>
+                <Paragraph className="a-b-label label-b">
                     {showLabels && (<span className="label">B.</span>)}
                     <span className="label">{labelB}</span>
-                </p>
+                </Paragraph>
             </div>
         </div>
     );
