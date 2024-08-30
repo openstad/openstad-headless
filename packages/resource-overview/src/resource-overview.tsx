@@ -190,6 +190,40 @@ const defaultItemRenderer = (
     return newUrl
   }
 
+  function combineTextStrings(parsedValue: { [key: string]: any }): string {
+    let combinedText = '';
+
+    for (const key in parsedValue) {
+      if (key === 'text' && typeof parsedValue[key] === 'string') {
+        combinedText += parsedValue[key];
+      } else if (typeof parsedValue[key] === 'object' && parsedValue[key] !== null) {
+        combinedText += combineTextStrings(parsedValue[key]);
+      }
+    }
+
+    return combinedText;
+  }
+
+
+  const getContent = (content: any) => {
+
+    if (typeof content === 'string' && content !== null) {
+      try {
+        const parsedValue = JSON.parse(content);
+        console.log(parsedValue);
+        if (parsedValue.textarea !== undefined) {
+          console.log(combineTextStrings(parsedValue.textarea))
+          return combineTextStrings(parsedValue.textarea)
+        }
+      } catch (e) {
+        return content
+      }
+    } else {
+      return content
+
+    }
+  }
+
   return (
     <>
       {props.displayType === 'cardrow' ? (
@@ -227,13 +261,13 @@ const defaultItemRenderer = (
 
             {props.displaySummary ? (
               <Paragraph>
-                {elipsize(resource.summary, props.summaryMaxLength || 20)}
+                {elipsize(getContent(resource.summary), props.summaryMaxLength || 20)}
               </Paragraph>
             ) : null}
 
             {props.displayDescription ? (
               <Paragraph className="osc-resource-overview-content-item-description">
-                {elipsize(resource.description, props.descriptionMaxLength || 30)}
+                {elipsize(getContent(resource.description), props.descriptionMaxLength || 30)}
               </Paragraph>
             ) : null}
           </div>
@@ -391,7 +425,7 @@ function ResourceOverview({
     }
   }, [resourcesWithPagination, pageSize]);
 
-  const {data: allTags} = datastore.useTags({
+  const { data: allTags } = datastore.useTags({
     projectId: props.projectId,
     type: ''
   });
@@ -415,28 +449,28 @@ function ResourceOverview({
     });
 
     const filtered = resources && (
-        Object.keys(groupedTags).length === 0
-            ? resources
-            : resources.filter((resource: any) => {
-              return Object.keys(groupedTags).every(tagType => {
-                return groupedTags[tagType].some(tagId =>
-                    resource.tags && Array.isArray(resource.tags) && resource.tags.some((o: { id: number }) => o.id === tagId)
-                );
-              });
-            })
+      Object.keys(groupedTags).length === 0
+        ? resources
+        : resources.filter((resource: any) => {
+          return Object.keys(groupedTags).every(tagType => {
+            return groupedTags[tagType].some(tagId =>
+              resource.tags && Array.isArray(resource.tags) && resource.tags.some((o: { id: number }) => o.id === tagId)
+            );
+          });
+        })
     )
-        ?.filter((resource: any) =>
-            (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0) || statusIdsToLimitResourcesTo.some((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses.some((o: { id: number }) => o.id === statusId))
-        )
-        ?.sort((a: any, b: any) => {
-          if (sort === 'createdAt_desc') {
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-          }
-          if (sort === 'createdAt_asc') {
-            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-          }
-          return 0;
-        });
+      ?.filter((resource: any) =>
+        (!statusIdsToLimitResourcesTo || statusIdsToLimitResourcesTo.length === 0) || statusIdsToLimitResourcesTo.some((statusId) => resource.statuses && Array.isArray(resource.statuses) && resource.statuses.some((o: { id: number }) => o.id === statusId))
+      )
+      ?.sort((a: any, b: any) => {
+        if (sort === 'createdAt_desc') {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        if (sort === 'createdAt_asc') {
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        }
+        return 0;
+      });
 
     setFilteredResources(filtered);
   }, [resources, tags, statuses, search, sort, allTags]);
@@ -541,7 +575,7 @@ function ResourceOverview({
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
             }`}>
           {props.displaySearchText ? (
-            <div className="osc-resourceoverview-search-container col-span-full"  role="status">
+            <div className="osc-resourceoverview-search-container col-span-full" role="status">
               {props.textActiveSearch && search && (
                 <Paragraph className="osc-searchtext">
                   {props.textActiveSearch

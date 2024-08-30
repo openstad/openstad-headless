@@ -231,14 +231,10 @@ function ResourceDetail({
               </div>
               <div className="resource-detail-content">
                 {displaySummary && (
-                  <Heading level={2} appearance='utrecht-heading-4'>
-
-                    {resourceContent(resource.summary)}
-
-                  </Heading>
+                  resourceContent(resource.summary, 'heading')
                 )}
                 {displayDescription && (
-                  resourceContent(resource.description)
+                  resourceContent(resource.description, 'paragraph')
                 )}
               </div>
               {displayLocation && resource.location && (

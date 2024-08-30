@@ -32,13 +32,10 @@ export const handleSubmit = (
 
             if (fieldSchema) {
                 try {
-                    console.log(fieldValue)
                     if (typeof fieldValue === 'string' && fieldValue !== null) {
                         try {
                             const parsedValue = JSON.parse(fieldValue);
-                            console.log(parsedValue);
                             if (parsedValue.textarea !== undefined) {
-                                console.log(combineTextStrings(parsedValue.textarea))
                                 fieldSchema.parse(combineTextStrings(parsedValue.textarea));
                             }
                         } catch (e) {

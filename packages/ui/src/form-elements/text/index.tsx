@@ -143,8 +143,6 @@ const TextInput: FC<TextInputProps> = ({
                             <OnChangeJSON
                                 onChange={(e) => {
                                     if (onChange) {
-                                        console.log(JSON.stringify({ textarea: e.content }).length ),
-                                        console.log(JSON.stringify({ textarea: e.content }) ),
                                         onChange(
                                             {
                                             name: fieldKey,

@@ -20,7 +20,7 @@
     background: #fff;
 }
 
-.osc .remirror-theme {
+.osc:not(.osc-resource-detail-column-container) .remirror-theme {
     box-sizing: border-box;
     border-style: solid;
     padding: .5rem;
@@ -30,7 +30,7 @@
     border-radius: var(--utrecht-textarea-border-radius, var(--utrecht-form-control-border-radius, 0));
     background-color: var(--utrecht-textarea-background-color, var(--utrecht-form-control-background-color));
 }
-.osc .remirror-theme:focus-within {
+.osc:not(.osc-resource-detail-column-container) .remirror-theme:focus-within {
     --_utrecht-focus-ring-box-shadow: 0 0 0 var(--utrecht-focus-outline-width, 0) var(--utrecht-focus-inverse-outline-color, transparent);
     background-color: var(--utrecht-textarea-focus-background-color, var(--utrecht-form-control-focus-background-color, var(--utrecht-textarea-background-color, var(--utrecht-form-control-background-color))));
     border-color: var(--utrecht-textarea-focus-border-color, var(--utrecht-form-control-focus-border-color, var(--utrecht-textarea-border-color, var(--utrecht-form-control-border-color))));
@@ -42,25 +42,53 @@
     outline-width: var(--utrecht-focus-outline-width, revert);
 }
 
-.osc .remirror-theme .remirror-editor-wrapper{
+.osc:not(.osc-resource-detail-column-container) .remirror-theme .remirror-editor-wrapper{
     padding-top: 0;
 }
-.osc .remirror-theme .ProseMirror{
+.osc:not(.osc-resource-detail-column-container) .remirror-theme .ProseMirror{
     border-radius: 0;
     border: none;
     box-shadow: none; 
     padding-inline: 0;
 }
 
-.osc .remirror-theme .ProseMirror:active, 
-.osc .remirror-theme .ProseMirror:focus{
+.osc:not(.osc-resource-detail-column-container) .remirror-theme .ProseMirror:active, 
+.osc:not(.osc-resource-detail-column-container) .remirror-theme .ProseMirror:focus{
     box-shadow: none; 
 }
 
-.osc .remirror-theme > div{
+.osc:not(.osc-resource-detail-column-container) .remirror-theme > div{
     gap: 5px;
 }
-.osc .remirror-theme > div > div{
+.osc:not(.osc-resource-detail-column-container) .remirror-theme > div > div{
     gap: 5px;
     margin: 0;
+}
+
+
+.osc.osc-resource-detail-column-container .remirror-editor-wrapper{
+    padding:0;
+}
+.osc.osc-resource-detail-column-container .remirror-theme .ProseMirror{
+    min-height: revert;
+    box-shadow: revert;
+    padding: revert;
+    border-radius: revert;
+    outline: revert;
+    overflow: revert;
+}
+.osc.osc-resource-detail-column-container .remirror-theme .ProseMirror:active,
+.osc.osc-resource-detail-column-container .remirror-theme .ProseMirror:focus {
+    box-shadow: revert;
+}
+
+/* Add NLDS styling */
+.osc.osc-resource-detail-column-container .remirror-theme .ProseMirror p{
+    color: var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit));
+    font-family: var(--utrecht-paragraph-font-family, var(--utrecht-document-font-family, inherit));
+    font-size: var(--utrecht-paragraph-font-size, var(--utrecht-document-font-size, inherit));
+    font-weight: var(--utrecht-paragraph-font-weight, inherit);
+    line-height: var(--utrecht-paragraph-line-height, var(--utrecht-document-line-height, inherit));
+    margin-block-end: calc(var(--utrecht-space-around, 0)* var(--utrecht-paragraph-margin-block-end, 0));
+    margin-block-start: calc(var(--utrecht-space-around, 0)* var(--utrecht-paragraph-margin-block-start, 0));
 }
