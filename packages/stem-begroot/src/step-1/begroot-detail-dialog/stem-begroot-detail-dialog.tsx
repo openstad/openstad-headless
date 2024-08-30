@@ -83,17 +83,27 @@ export const StemBegrootResourceDetailDialog = ({
             defaultImage = tagWithImage?.defaultResourceImage || '';
           }
 
+          let resourceImages = (Array.isArray(resource.images) && resource.images.length > 0)
+              ? [...resource.images, { resource: resource }]
+              : ( resource.location
+                    ? [{ location: resource.location }]
+                    : ''
+                );
+
+          let hasImages = '' ;
+
+          if ( resourceImages === '' ) {
+            resourceImages = [{ url: defaultImage || '' }];
+            hasImages = 'resource-has-no-images';
+          }
+
           return (
             <>
               <div className="osc-begrootmodule-resource-detail">
-                <section className="osc-begrootmodule-resource-detail-photo">
+                <section className={`osc-begrootmodule-resource-detail-photo ${hasImages}`}>
 
                   <Carousel
-                    items={
-                      Array.isArray(resource.images) && resource.images.length > 0
-                        ? [...resource.images, { resource: resource }]
-                        : [{ location: resource.location }]
-                    }
+                    items={resourceImages}
                     itemRenderer={(i) => {
                       if (i.url) {
                         return <Image src={i.url} />

@@ -61,12 +61,15 @@ export const GridderResourceDetail = ({
     defaultImage = tagWithImage?.defaultResourceImage || '';
   }
 
+  const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images?.at(0)?.url : defaultImage;
+  const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
+
   return (
     <>
       <div className="osc-gridder-resource-detail">
-        <section className="osc-gridder-resource-detail-photo">
+        <section className={`osc-gridder-resource-detail-photo ${hasImages}`}>
           <Image
-            src={resource.images?.at(0)?.url || defaultImage}
+            src={resourceImages}
             style={{ aspectRatio: 16 / 9 }}
           />
           {/* <div>
