@@ -197,7 +197,7 @@ const defaultItemRenderer = (
     <>
       {props.displayType === 'cardrow' ? (
         <div
-          className={`resource - card--link ${hasImages}`}>
+          className={`resource-card--link ${hasImages}`}>
 
           <Carousel
             items={resourceImages}
