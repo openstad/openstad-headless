@@ -106,10 +106,10 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                     if (!redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')) {
                         redirectUrl = document.location.origin + '/' + (redirectUrl.startsWith('/') ? redirectUrl.substring(1) : redirectUrl);
                     }
-                    document.location.href = redirectUrl.replace("[id]", result.id)
+                    document.location.href = redirectUrl.replace("[id]", result.id);
+                } else {
+                    setDisableSubmit(false);
                 }
-
-                setDisableSubmit(false);
             }
         } catch (e) {
             notifyFailed();
