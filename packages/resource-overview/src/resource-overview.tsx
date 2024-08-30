@@ -190,14 +190,17 @@ const defaultItemRenderer = (
     return newUrl
   }
 
+  const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
+  const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
+
   return (
     <>
       {props.displayType === 'cardrow' ? (
         <div
-          className="resource-card--link">
+          className={`resource - card--link ${hasImages}`}>
 
           <Carousel
-            items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: '' }]}
+            items={resourceImages}
             itemRenderer={(i) => (
               <Image
                 src={i.url}
@@ -257,9 +260,9 @@ const defaultItemRenderer = (
         </div>
 
       ) : (
-        <div className="resource-card--link">
+        <div className={`resource-card--link ${hasImages}`}>
           <Carousel
-            items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: '' }]}
+            items={resourceImages}
             itemRenderer={(i) => (
               <Image
                 src={i.url}
