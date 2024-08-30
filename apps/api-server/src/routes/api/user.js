@@ -470,12 +470,41 @@ router.route('/:userId(\\d+)')
               }
             })
 
-        for (let apiUser of apiUsers) {
+        apiUsers.forEach((apiUser, i) => {
+          return new Promise((resolve, reject) => {
           let data = apiUser.projectId == req.params.projectId ? updatedUserDataForProject : synchronizedUpdatedUserData;
-          let authorizedData = await apiUser.authorizeData(data, 'update', req.user);
 
-          await apiUser.update(authorizedData);
-        }
+          apiUser
+            .authorizeData(data, 'update', req.user)
+            .update(data)
+            .then((result) => {
+              resolve();
+            })
+            .catch((err) => {
+              resolve(err);
+            })
+          })
+        })
+
+        apiUsers.forEach((apiUser, i) => {
+          return new Promise((resolve, reject) => {
+            let data = apiUser.projectId == req.params.projectId ? updatedUserDataForProject : synchronizedUpdatedUserData;
+
+            if (req.user.can('update', apiUser)) {
+              apiUser
+                .authorizeData(data, 'update', req.user)
+                .update(data)
+                .then((result) => {
+                  resolve();
+                })
+                .catch((err) => {
+                  resolve(err);
+                });
+            } else {
+              resolve(new Error('User not authorized to update nickName'));
+            }
+          });
+        });
 
       } else {
 
