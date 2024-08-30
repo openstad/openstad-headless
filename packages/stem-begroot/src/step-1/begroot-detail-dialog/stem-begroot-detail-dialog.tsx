@@ -83,19 +83,22 @@ export const StemBegrootResourceDetailDialog = ({
             defaultImage = tagWithImage?.defaultResourceImage || '';
           }
 
-          let resourceImages = (Array.isArray(resource.images) && resource.images.length > 0)
-              ? [...resource.images, { resource: resource }]
-              : ( resource.location
-                    ? [{ location: resource.location }]
-                    : ''
-                );
+            let resourceImages: any[] = [];
 
-          let hasImages = '' ;
+            if (resource.location) {
+                resourceImages.push({ location: resource.location });
+            }
 
-          if ( resourceImages === '' ) {
-            resourceImages = [{ url: defaultImage || '' }];
-            hasImages = 'resource-has-no-images';
-          }
+            if (Array.isArray(resource.images) && resource.images.length > 0) {
+                resourceImages = [...resource.images, ...resourceImages];
+            }
+
+            let hasImages = '';
+
+            if (resourceImages.length === 0) {
+                resourceImages = [{ url: defaultImage || '' }];
+                hasImages = 'resource-has-no-images';
+            }
 
           return (
             <>
