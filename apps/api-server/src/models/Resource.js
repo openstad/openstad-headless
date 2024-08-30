@@ -141,8 +141,40 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: !this.publishDate,
         validate: {
           textLength(value) {
-            // We need to undo the sanitization before we can check the length
-            let len = htmlToText.fromString(value).length;
+            let len;
+
+            function combineTextStrings(parsedValue) {
+              let combinedText = '';
+
+              for (const key in parsedValue) {
+                if (key === 'text' && typeof parsedValue[key] === 'string') {
+                  combinedText += parsedValue[key];
+                } else if (
+                  typeof parsedValue[key] === 'object' &&
+                  parsedValue[key] !== null
+                ) {
+                  combinedText += combineTextStrings(parsedValue[key]);
+                }
+              }
+
+              return combinedText;
+            }
+
+            if (typeof value === 'string') {
+              try {
+                const parsedValue = JSON.parse(value);
+                console.log(parsedValue);
+                if (parsedValue.textarea !== undefined) {
+                  console.log(combineTextStrings(parsedValue.textarea));
+                  len = combineTextStrings(parsedValue.textarea).length;
+                }
+              } catch (e) {
+                len = htmlToText.fromString(value).length;
+              }
+            } else {
+              len = htmlToText.fromString(value).length;
+            }
+
             let summaryMinLength =
               (this.config &&
                 this.config.resources &&
@@ -323,7 +355,6 @@ module.exports = function (db, sequelize, DataTypes) {
           }
         },
       },
-
     },
     {
       hooks: {
@@ -331,12 +362,9 @@ module.exports = function (db, sequelize, DataTypes) {
         beforeValidate: beforeValidateHook,
         beforeDestroy: beforeValidateHook,
 
-        afterCreate: function (instance, options) {
-        },
+        afterCreate: function (instance, options) {},
 
-        afterUpdate: function (instance, options) {
-        },
-        
+        afterUpdate: function (instance, options) {},
       },
 
       individualHooks: true,
@@ -820,7 +848,6 @@ module.exports = function (db, sequelize, DataTypes) {
           exclude: ['modBreak'],
         },
       },
-
     };
   };
 
@@ -833,7 +860,10 @@ module.exports = function (db, sequelize, DataTypes) {
       onDelete: 'CASCADE',
     });
     this.hasMany(models.Comment, { as: 'commentsFor', onDelete: 'CASCADE' });
-    this.hasMany(models.Comment, { as: 'commentsNoSentiment', onDelete: 'CASCADE' });
+    this.hasMany(models.Comment, {
+      as: 'commentsNoSentiment',
+      onDelete: 'CASCADE',
+    });
     this.hasOne(models.Poll, {
       as: 'poll',
       foreignKey: 'resourceId',
@@ -865,7 +895,6 @@ module.exports = function (db, sequelize, DataTypes) {
   };
 
   let canMutate = function (user, self) {
-
     if (
       userHasRole(user, 'editor', self.userId) ||
       userHasRole(user, 'admin', self.userId) ||
@@ -877,7 +906,7 @@ module.exports = function (db, sequelize, DataTypes) {
     let editableByUser = true;
     let statuses = self.statuses || [];
     for (let status of statuses) {
-      if ( status.extraFunctionality?.editableByUser === false ) {
+      if (status.extraFunctionality?.editableByUser === false) {
         editableByUser = false;
       }
     }
@@ -886,7 +915,6 @@ module.exports = function (db, sequelize, DataTypes) {
     }
 
     // canEditAfterFirstLikeOrComment is handled in the validate hook
-
   };
 
   Resource.auth = Resource.prototype.auth = {
@@ -915,7 +943,7 @@ module.exports = function (db, sequelize, DataTypes) {
     },
     canComment: function canComment(self) {
       if (!self) return false;
-      if ( self.project?.config?.comments?.canComment === false ) {
+      if (self.project?.config?.comments?.canComment === false) {
         // project config: comments is closed
         return false;
       }
@@ -924,13 +952,13 @@ module.exports = function (db, sequelize, DataTypes) {
       // status
       let statuses = self.statuses || [];
       for (let status of statuses) {
-        if ( status.extraFunctionality?.canComment === false ) {
+        if (status.extraFunctionality?.canComment === false) {
           return false;
         }
       }
       return true;
     },
-    canMutateStatus: function canMutateStatus (user, self) {
+    canMutateStatus: function canMutateStatus(user, self) {
       if (!user || !self) return false;
       if (!self.auth.canUpdate(user, self)) return false;
       return userHasRole(user, 'moderator');
@@ -975,7 +1003,9 @@ module.exports = function (db, sequelize, DataTypes) {
       }
 
       if (data.commentsNoSentiment) {
-        data.commentsNoSentiment = hideEmailsForNormalUsers(data.commentsNoSentiment);
+        data.commentsNoSentiment = hideEmailsForNormalUsers(
+          data.commentsNoSentiment
+        );
       }
 
       data.can = {};

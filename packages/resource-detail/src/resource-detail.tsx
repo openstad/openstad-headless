@@ -26,6 +26,8 @@ import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src
 
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
+import { resourceContent } from './resource-content.js'
+
 type booleanProps = {
   [K in
   | 'displayImage'
@@ -64,9 +66,9 @@ export type ResourceDetailWidgetProps = {
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
     commentsWidget_multiple?: Omit<
-    CommentsWidgetProps,
-    keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
-  >;
+      CommentsWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
     resourceDetailMap?: Omit<
       ResourceDetailMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -199,7 +201,7 @@ function ResourceDetail({
                 {displayUser && resource?.user?.displayName && (
                   <div>
                     <Heading level={2} appearance='utrecht-heading-6' className="osc-resource-detail-content-item-title">
-                    Ingediend door
+                      Ingediend door
                     </Heading>
                     <span className="osc-resource-detail-content-item-text">
                       {resource.user.displayName}
@@ -228,9 +230,15 @@ function ResourceDetail({
                 )}
               </div>
               <div className="resource-detail-content">
-                {displaySummary && <Heading level={2} appearance='utrecht-heading-4'>{resource.summary}</Heading>}
+                {displaySummary && (
+                  <Heading level={2} appearance='utrecht-heading-4'>
+
+                    {resourceContent(resource.summary)}
+
+                  </Heading>
+                )}
                 {displayDescription && (
-                  <Paragraph>{resource.description}</Paragraph>
+                  resourceContent(resource.description)
                 )}
               </div>
               {displayLocation && resource.location && (

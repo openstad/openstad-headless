@@ -8,7 +8,7 @@ import MapInput from '@/components/maps/leaflet-input';
 import { BoldExtension, ItalicExtension, UnderlineExtension, BulletListExtension, OrderedListExtension } from 'remirror/extensions';
 import { Remirror, ThemeProvider, useRemirror } from '@remirror/react';
 import { RemirrorJSON } from 'remirror';
-import { parse } from 'path';
+
 
 export default function ProjectStatusEdit() {
     const router = useRouter();
