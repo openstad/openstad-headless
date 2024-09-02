@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useEffect } from "react";
 import { FormField, FormFieldDescription, FormLabel, Paragraph, Textarea, Textbox } from "@utrecht/component-library-react";
 import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
@@ -20,6 +20,7 @@ export type TextInputProps = {
     rows?: TextInputProps['variant'] extends 'textarea' ? number : undefined;
     type?: string;
     onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+    reset?: (resetFn: () => void) => void;
 }
 
 const TextInput: FC<TextInputProps> = ({
@@ -37,12 +38,20 @@ const TextInput: FC<TextInputProps> = ({
     maxCharacters = 0,
     maxCharactersWarning = 'Je hebt nog {maxCharacters} tekens over',
     rows,
+    reset,
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const InputComponent = variant === 'textarea' ? Textarea : Textbox;
 
     const [isFocused, setIsFocused] = useState(false);
     const [helpText, setHelpText] = useState('');
+    const [value, setValue] = useState(defaultValue);
+
+    useEffect(() => {
+        if (reset) {
+            reset(() => setValue(defaultValue));
+        }
+    }, [reset, defaultValue]);
 
     const characterHelpText = (count: number) => {
         let helpText = '';
@@ -80,8 +89,9 @@ const TextInput: FC<TextInputProps> = ({
                     required={fieldRequired}
                     type="text"
                     placeholder={placeholder}
-                    defaultValue={defaultValue}
+                    value={value}
                     onChange={(e) => {
+                        setValue(e.target.value);
                         if (onChange) {
                             onChange({
                                 name: fieldKey,

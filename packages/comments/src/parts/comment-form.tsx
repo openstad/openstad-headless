@@ -17,6 +17,7 @@ function CommentForm({
   parentId = 0,
   activeMode = '',
   sentiment = '',
+  disableSubmit = false,
   ...props
 }: CommentFormProps) {
   const commentsContext = useContext(CommentWidgetContext);
@@ -84,6 +85,7 @@ function CommentForm({
       {args.formIntro && <p>{args.formIntro}</p>}
       <Form
         fields={formFields}
+        submitDisabled={disableSubmit}
         submitHandler={props.submitComment}
         submitText="Verstuur"
         title=""
