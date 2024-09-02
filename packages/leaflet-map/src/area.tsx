@@ -125,23 +125,26 @@ export function Area({
 
   if (filteredAreas) {
     filteredAreas.forEach((item: any) => {
-      multiPolygon.push(item.polygon);
+      multiPolygon.push({ title: item.name, polygon: item.polygon });
     });
     areas.forEach((item: any) => {
-      properties.push({ title: item.name, url: item.url  });
+      const existingItem = multiPolygon.find((polygonItem) => polygonItem.title === item.name);
+      if (existingItem) {
+        existingItem.url = item.url;
+      }
     });
   }
 
   return (
     <>
       {multiPolygon.length > 0 ? (
-        multiPolygon.map((polygon, index) => (
+        multiPolygon.map((item, index) => (
           <>
             <Polygon
               key={index}
               {...props}
               pathOptions={areaPolygonStyle}
-              positions={polygon}
+              positions={item.polygon}
               eventHandlers={{
                 mouseover: (e) => {
                   e.target.setStyle({
@@ -153,11 +156,13 @@ export function Area({
                 },
               }}
             >
-              {properties &&
+              {item.title &&
+              <>
               <Popup className={'leaflet-popup'}>
-                {properties[index].title && <h3 className="utrecht-heading-3">{properties[index].title}</h3>}
-                {properties[index].url && <a className="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action" href={properties[index].url}>Lees verder</a>}
+                {item.title && <h3 className="utrecht-heading-3">{item.title}</h3>}
+                {item.url && <a className="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action" href={item.url}>Lees verder</a>}
               </Popup>
+              </>
             }
             </Polygon>
 
