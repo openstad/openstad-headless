@@ -10,6 +10,8 @@ import './style.css';
 import { InitializeWeights } from "./parts/init-weights.js";
 import { FormValue } from "@openstad-headless/form/src/form";
 
+import { Heading4, Paragraph } from "@utrecht/component-library-react";
+
 function ChoiceGuide(props: ChoiceGuideProps) {
     const { choiceGuide, items, choiceOption, widgetId } = props;
     const {
@@ -103,10 +105,10 @@ function ChoiceGuide(props: ChoiceGuideProps) {
           <div className="osc-choiceguide-container" ref={containerRef}>
               <div className="osc-choiceguide-form">
                   <div className="osc-choiceguide-intro">
-                      {introTitle && <h4>{introTitle}</h4>}
+                      {introTitle && <Heading4>{introTitle}</Heading4>}
                       <div className="osc-choiceguide-intro-description">
                           {introDescription && (
-                            <p>{introDescription}</p>
+                            <Paragraph>{introDescription}</Paragraph>
                           )}
                       </div>
                   </div>
