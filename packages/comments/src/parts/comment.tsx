@@ -28,6 +28,7 @@ function Comment({
   type,
   index,
   adminLabel,
+  disableSubmit = false,
   ...props
 }: CommentProps) {
   const widgetContext = useContext(CommentWidgetContext);
@@ -153,6 +154,7 @@ function Comment({
           {...args}
           activeMode="edit"
           comment={args.comment}
+          disableSubmit={disableSubmit}
           placeholder={widgetContext.placeholder}
           submitComment={(e) => {
             if (props.submitComment) {
@@ -240,7 +242,7 @@ function Comment({
         args.comment.replies.map((reply, index) => {
           return (
             <div className="reaction-container" key={index}>
-              <Comment {...args} showDateSeperately={false} comment={reply} />
+              <Comment {...args} comment={reply} disableSubmit={disableSubmit} showDateSeperately={false} />
             </div>
           );
         })}
@@ -251,6 +253,7 @@ function Comment({
             <CommentForm
               {...args}
               activeMode="reply"
+              disableSubmit={disableSubmit}
               formIntro="Reageer op deze reactie"
               parentId={args.comment.id}
               placeholder={widgetContext.placeholder}

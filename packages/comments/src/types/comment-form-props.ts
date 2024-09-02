@@ -10,4 +10,5 @@ export type CommentFormProps = {
   parentId?: number;
   sentiment?: string;
   submitComment: (e: any) => void;
+  disableSubmit?: boolean;
 };
