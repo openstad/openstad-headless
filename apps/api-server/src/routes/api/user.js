@@ -472,22 +472,6 @@ router.route('/:userId(\\d+)')
 
         apiUsers.forEach((apiUser, i) => {
           return new Promise((resolve, reject) => {
-          let data = apiUser.projectId == req.params.projectId ? updatedUserDataForProject : synchronizedUpdatedUserData;
-
-          apiUser
-            .authorizeData(data, 'update', req.user)
-            .update(data)
-            .then((result) => {
-              resolve();
-            })
-            .catch((err) => {
-              resolve(err);
-            })
-          })
-        })
-
-        apiUsers.forEach((apiUser, i) => {
-          return new Promise((resolve, reject) => {
             let data = apiUser.projectId == req.params.projectId ? updatedUserDataForProject : synchronizedUpdatedUserData;
 
             if (req.user.can('update', apiUser)) {
