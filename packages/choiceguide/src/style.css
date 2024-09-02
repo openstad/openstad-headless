@@ -5,6 +5,20 @@
   gap: 1.5rem;
 }
 
+@media screen and (max-width: 768px) {
+  .osc-choiceguide-container {
+    grid-template-columns: 1fr;
+  }
+
+  .osc-choiceguide-container .osc-choiceguide-form {
+    grid-row: 1;
+  }
+  .osc-choiceguide-container .osc-choiceguide-sidebar-container {
+    grid-row: 2;
+    position: relative;
+  }
+}
+
 #choice-plane {
   position: relative;
   width: 100%;
@@ -87,6 +101,7 @@
   list-style-type: none;
   margin: 0;
   padding: 0;
+  background: #fff;
   border: 2px solid #e5e5e5;
 }
 
