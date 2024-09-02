@@ -149,7 +149,7 @@ function ResourceDetailWithMap({
 
   if (!resource) return null;
 
-  let tagDefaultResourceImage = '';
+  let defaultImage = '';
 
   interface Tag {
     name: string;
@@ -160,20 +160,21 @@ function ResourceDetailWithMap({
     const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
 
     const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
-    tagDefaultResourceImage = tagWithImage?.defaultResourceImage;
+    defaultImage = tagWithImage?.defaultResourceImage || '';
   }
 
-  const defaultImage = !!tagDefaultResourceImage ? [{ url: tagDefaultResourceImage }] : [{ url: '' }];
+  const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
+  const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
 
   return (
     <section className="osc-resource-detail-content osc-resource-detail-grid">
       {resource ? (
         <>
           <a href={backUrl} className="back-to-overview">Terug naar overzicht</a>
-          <article className="osc-resource-detail-content-items">
+          <article className={`osc-resource-detail-content-items ${hasImages}`}>
             {displayImage && (
               <Carousel
-                items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : defaultImage}
+                items={resourceImages}
                 itemRenderer={(i) => (
                   <Image
                     src={i.url}

@@ -277,14 +277,50 @@ function getWidgetJavascriptOutput(
 
   const data = JSON.parse(widgetConfig)
   const extraCss = data.project?.cssUrl ? `<link href="${data.project.cssUrl}" rel="stylesheet">` : '';
-  
-  widgetSettings.js.forEach((file) => {
-    widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
-  });
 
-  widgetSettings.css.forEach((file) => {
-    css += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
-  });
+
+
+
+
+
+  // TODO: Fix this, it's a hack to get the ChoiceGuide to work
+  if ( widgetSettings.componentName === 'ChoiceGuide' ) {
+
+    widgetSettings.js.forEach((file) => {
+      const filePath = path.resolve(__dirname, '../../../../../packages/choiceguide', file);
+      if (!fs.existsSync(filePath)) {
+        console.error(`JS file not found: ${filePath}`);
+      } else {
+        widgetOutput += fs.readFileSync(filePath, 'utf8');
+      }
+    });
+
+    widgetSettings.css.forEach((file) => {
+      const filePath = path.resolve(__dirname, '../../../../../packages/choiceguide', file);
+      if (!fs.existsSync(filePath)) {
+        console.error(`CSS file not found: ${filePath}`);
+      } else {
+        css += fs.readFileSync(filePath, 'utf8');
+      }
+    });
+
+  } else {
+    widgetSettings.js.forEach((file) => {
+      console.log(`${widgetSettings.packageName}/${file}`);
+      console.log(require.resolve(`${widgetSettings.packageName}/${file}`));
+      widgetOutput += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
+    });
+
+    widgetSettings.css.forEach((file) => {
+      css += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
+    });
+  }
+
+  // End of to do
+
+
+
+
 
   // Rewrite the url to the images that we serve statically
   css = css.replaceAll(

@@ -3,6 +3,7 @@ import { useSWRConfig } from 'swr';
 import useSWR from 'swr';
 import API from './api';
 import useResource from './hooks/use-resource.js';
+import useChoicesguide from './hooks/use-choicesguide';
 import useArea from './hooks/use-area.js';
 import useAreas from './hooks/use-areas.js';
 import useComments from './hooks/use-comments.js';
@@ -26,6 +27,7 @@ function DataStore(props = {}) {
 
   // hooks
   self.useResource = useResource.bind(self);
+  self.useChoicesguide = useChoicesguide.bind(self);
   self.useComments = useComments.bind(self);
   self.useResources = useResources.bind(self);
   self.useArea = useArea.bind(self);

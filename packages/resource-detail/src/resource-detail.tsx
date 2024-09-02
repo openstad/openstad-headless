@@ -125,7 +125,7 @@ function ResourceDetail({
   const shouldHaveSideColumn =
     displayLikes || displayTags || displayStatus || displaySocials || displayDocuments;
 
-  let tagDefaultResourceImage = '';
+  let defaultImage = '';
 
   interface Tag {
     name: string;
@@ -136,10 +136,11 @@ function ResourceDetail({
     const sortedTags = resource.tags.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name));
 
     const tagWithImage = sortedTags.find((tag: Tag) => tag.defaultResourceImage);
-    tagDefaultResourceImage = tagWithImage?.defaultResourceImage;
+    defaultImage = tagWithImage?.defaultResourceImage || '';
   }
 
-  const defaultImage = !!tagDefaultResourceImage ? [{ url: tagDefaultResourceImage }] : [{ url: '' }];
+  const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
+  const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
 
   const getPageHash = () => {
     if (window.location.hash.includes('#doc')) {
@@ -159,10 +160,10 @@ function ResourceDetail({
         <section className="osc-resource-detail-content osc-resource-detail-content--span-2">
           {getPageHash()}
           {resource ? (
-            <article className="osc-resource-detail-content-items">
+            <article className={`osc-resource-detail-content-items ${hasImages}`}>
               {displayImage && (
                 <Carousel
-                  items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : defaultImage}
+                  items={resourceImages}
                   itemRenderer={(i) => (
                     <Image
                       src={i.url}

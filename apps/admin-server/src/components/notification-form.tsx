@@ -96,6 +96,7 @@ type Props = {
   | 'login email'
   | 'login sms'
   | 'new published resource - user feedback'
+  | 'new published resource - admin update'
   | 'updated resource - user feedback'
   | 'user account about to expire';
   engine?: 'email' | 'sms';
@@ -109,6 +110,7 @@ const notificationTypes = {
   'login email': 'Inloggen via e-mail',
   'login sms': 'Inloggen via sms',
   'new published resource - user feedback': 'Nieuwe resource gepubliceerd - Notificatie naar de gebruiker',
+  'new published resource - admin update': 'Nieuwe resource gepubliceerd - Notificatie naar de admin',
   'updated resource - user feedback': 'Resource bijgewerkt - Notificatie naar de gebruiker',
   'user account about to expire': 'Gebruikersaccount staat op het punt te verlopen'
 };
@@ -163,12 +165,16 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
     setUserNameInMailContext();
   }, []);
 
+  const defaultValueBody = body
+      || ( type === 'new published resource - user feedback' ? initialDataResourceSubmission : "" )
+      || ( type === 'login email' ? initialData : "" )
+
   const defaults = React.useCallback(
     () => ({
       engine: engine || "email",
       label: label || "",
       subject: subject || "",
-      body: body || ( type === 'new published resource - user feedback' ? initialDataResourceSubmission : "" ),
+      body: defaultValueBody
     }),
     [engine, label, subject, body]
   )
@@ -204,7 +210,7 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
     }
   }
 
-  const [templateData, setTemplateData] = useState(initialData);
+  const [templateData, setTemplateData] = useState(defaultValueBody || "");
   const [mjmlHtml, setMjmlHtml] = useState('');
 
   let mailTemplate: any = nunjucks.renderString(templateData, mailContext);
@@ -212,6 +218,11 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
   const [error, setError] = useState<string | null>(null);
 
   async function convertMJMLToHTML(data = mailTemplate) {
+    if ( data === '' ) {
+      setMjmlHtml("<p style='text-align: center;'>Inhoud is leeg.</p>");
+      return;
+    }
+
     try {
       const mjml2html = (await import('mjml-browser')).default;
       const htmlOutput = mjml2html(data).html;
@@ -320,7 +331,7 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
                     <FormControl>
                       <Textarea
                         placeholder="Inhoud van de mail..."
-                        defaultValue={field.value.length > 0 ? field.value : initialData}
+                        defaultValue={field.value.length > 0 ? field.value : body}
                         rows={20}
                         onKeyUpCapture={(e) => handleOnChange(e, field)}
                         {...field}
@@ -333,11 +344,11 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
               <Button type="submit" disabled={!!error}>Opslaan</Button>
               {error && <p className="text-red-500">{error}</p>}
             </form>
-            {notificationTitle === 'Inloggen via e-mail' && (
+
               <div className="p-4">
                 <iframe className='email-iframe' srcDoc={mjmlHtml} height={500} width={500}></iframe>
               </div>
-            )}
+
           </div>
         </Form>
       </div>

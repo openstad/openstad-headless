@@ -4,7 +4,7 @@
         <div class="container">
         {% if data.global.showLoginButton and not data.loggedIn %}
         <div class="login-button">
-          <a href="/login">{{data.global.loginButtonLabel}}</a>
+          <a href="{{data.baseUrlWithPrefix}}/login">{{data.global.loginButtonLabel}}</a>
         </div>
       {% endif %}
 
@@ -16,7 +16,7 @@
 
       {% if data.loggedIn %}
         <div class="logout-button">
-          <a href="/logout">{{ data.global.logoutButtonLabel | replace('[[name]]', data.openstadUser.displayName) | replace('[[displayName]]', data.openstadUser.displayName) }}</a>
+          <a href="{{data.baseUrlWithPrefix}}/logout">{{ data.global.logoutButtonLabel | replace('[[name]]', data.openstadUser.displayName) | replace('[[displayName]]', data.openstadUser.displayName) }}</a>
         </div>
       {% endif %}
     </div>
