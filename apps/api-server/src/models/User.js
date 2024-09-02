@@ -132,12 +132,7 @@ module.exports = function (db, sequelize, DataTypes) {
         updateableBy: ['moderator', 'owner'],
       },
       set: function (value) {
-        if (this.project && this.project.config && this.project.config.users && this.project.config.users.allowUseOfNicknames) {
-          this.setDataValue('nickName', sanitize.noTags(value));
-        } else {
-          value = this.getDataValue('nickName');
-          this.setDataValue('nickName', value);
-        }
+        this.setDataValue('nickName', sanitize.noTags(value));
       }
     },
 
