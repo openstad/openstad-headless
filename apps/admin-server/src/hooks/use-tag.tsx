@@ -17,7 +17,8 @@ export default function useTags(projectId?: string, id?: string) {
     listIcon: string | undefined,
     useDifferentSubmitAddress: boolean | undefined,
     newSubmitAddress: string | undefined,
-    defaultResourceImage: string | undefined
+    defaultResourceImage: string | undefined,
+    documentMapIconColor: string | undefined
   ) {
     const res = await fetch(url, {
       method: 'PUT',
@@ -38,7 +39,8 @@ export default function useTags(projectId?: string, id?: string) {
         listIcon,
         useDifferentSubmitAddress,
         newSubmitAddress,
-        defaultResourceImage
+        defaultResourceImage,
+        documentMapIconColor
       }),
     });
 

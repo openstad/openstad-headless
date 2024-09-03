@@ -373,6 +373,7 @@ function DocumentMap({
   interface ExtendedMarkerProps extends MarkerProps {
     id: string;
     index: number;
+    color: string;
   }
 
   const scrollToComment = (index: number) => {
@@ -390,7 +391,7 @@ function DocumentMap({
 
       const commentElement = document.getElementById(`comment-${index}`);
       if (commentElement) {
-        commentElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        commentElement.scrollIntoView({behavior: 'smooth', block: 'end'});
         clearInterval(intervalId);
       } else if (attempts < maxAttempts) {
         attempts++;
@@ -402,14 +403,20 @@ function DocumentMap({
     const intervalId = setInterval(tryScrollToComment, interval);
   };
 
-  const MarkerWithId: React.FC<ExtendedMarkerProps> = ({id, index, ...props}) => {
+  const MarkerWithId: React.FC<ExtendedMarkerProps> = ({ id, index, color, ...props }) => {
     const markerRef = useRef<any>(null);
+    const isDefaultColor = color === '#555588';
 
     return (
         <Marker
             {...props}
             ref={markerRef}
-            icon={MarkerIcon({icon: {className: index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon'}})}
+            icon={MarkerIcon({
+              icon: {
+                className: `${index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon'} ${isDefaultColor ? 'basic-icon' : ''}`,
+                color: !isDefaultColor ? color : undefined,
+              },
+            })}
             eventHandlers={{
               click: () => {
                 if (index === selectedMarkerIndex) {
@@ -505,16 +512,22 @@ function DocumentMap({
         <MapContainer center={[0, 0]} crs={CRS.Simple} maxZoom={maxZoom} minZoom={minZoom} zoom={zoom}  >
           <MapEvents />
           {filteredComments && filteredComments
-            .filter((comment: any) => !!comment.location)
-            .map((comment: any, index: number) => (
-              <MarkerWithId
-                key={index}
-                id={`marker-${index}`}
-                index={index}
-                position={comment.location}
-              >
-              </MarkerWithId>
-            ))}
+              .filter((comment: any) => !!comment.location)
+              .map((comment: any, index: number) => {
+
+                const firstTag = comment.tags && comment.tags[0];
+                const documentMapIconColor = firstTag && firstTag.documentMapIconColor ? firstTag.documentMapIconColor : '#555588';
+
+                return (
+                    <MarkerWithId
+                        key={index}
+                        id={`marker-${index}`}
+                        index={index}
+                        position={comment.location}
+                        color={documentMapIconColor}
+                    />
+                );
+              })}
           <ImageOverlay
             url={resource.images ? resource.images[0].url : ''}
             bounds={imageBounds}

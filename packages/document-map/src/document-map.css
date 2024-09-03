@@ -126,10 +126,14 @@
 }
 
 .leaflet-container .leaflet-marker-pane .leaflet-marker-icon.--highlightedIcon {
-  filter: hue-rotate(92deg) saturate(2);
   z-index: 999;
   opacity: 1;
 }
+
+.leaflet-container .leaflet-marker-pane .leaflet-marker-icon.basic-icon.--highlightedIcon {
+  filter: hue-rotate(92deg) saturate(2);
+}
+
 .leaflet-popup-content p.--error {
   margin: 0;
   color: #d30000;
