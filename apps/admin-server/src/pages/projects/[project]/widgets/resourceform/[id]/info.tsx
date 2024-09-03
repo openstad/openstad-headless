@@ -73,7 +73,7 @@ export default function WidgetResourceFormInfo() {
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Display</Heading>
+        <Heading size="xl">Weergave</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -83,7 +83,7 @@ export default function WidgetResourceFormInfo() {
             name="viewable"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Wie kan deze form te zien krijgen?</FormLabel>
+                <FormLabel>Wie kan dit formulier te zien krijgen?</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}>
@@ -140,7 +140,7 @@ export default function WidgetResourceFormInfo() {
             name="loginButtonText"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Login button tekst</FormLabel>
+                <FormLabel>Login knoptekst</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>

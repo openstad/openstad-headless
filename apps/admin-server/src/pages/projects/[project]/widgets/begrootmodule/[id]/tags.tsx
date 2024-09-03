@@ -89,7 +89,7 @@ export default function WidgetStemBegrootOverviewTags(
             name="displayTagFilters"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Wordt het filteren op tags weergegeven?</FormLabel>
+                <FormLabel>Filteren op tags weergeven?</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

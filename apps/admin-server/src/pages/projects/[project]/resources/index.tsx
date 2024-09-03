@@ -49,14 +49,14 @@ export default function ProjectResources() {
   return (
     <div>
       <PageLayout
-        pageHeader="Resources"
+        pageHeader="Inzendingen"
         breadcrumbs={[
           {
             name: 'Projecten',
             url: '/projects',
           },
           {
-            name: 'Resources',
+            name: 'Inzendingen',
             url: `/projects/${project}/resources`,
           },
         ]}
@@ -66,11 +66,11 @@ export default function ProjectResources() {
               href={`/projects/${project}/resources/create`}>
               <Button variant="default" className='text-xs p-2 w-fit'>
                 <Plus size="20" className="hidden lg:flex" />
-                Resource toevoegen
+                Inzending toevoegen
               </Button>
             </Link>
             <Button className="text-xs p-2 w-fit" type="submit" onClick={transform}>
-              Exporteer resources
+              Exporteer inzendingen
             </Button>
           </div>
         }>
@@ -84,7 +84,7 @@ export default function ProjectResources() {
             >
               <option value="">Alles</option>
               <option value="id">Stem ID</option>
-              <option value="title">Resources</option>
+              <option value="title">Inzendingen</option>
               <option value="yes">Gestemd op ja</option>
               <option value="no">Gestemd op nee</option>
               <option value="createdAt">Datum aangemaakt</option>
@@ -108,7 +108,7 @@ export default function ProjectResources() {
               </ListHeading>
               <ListHeading className="hidden lg:flex">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('resource', e, filterData))}>
-                  Resources
+                  Inzendingen
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-1">
@@ -154,15 +154,15 @@ export default function ProjectResources() {
                       className="hidden lg:flex ml-auto"
                       onClick={(e) => e.preventDefault()}>
                       <RemoveResourceDialog
-                        header="Resource verwijderen"
-                        message="Weet je zeker dat je deze resource wilt verwijderen?"
+                        header="Inzending verwijderen"
+                        message="Weet je zeker dat je deze inzending wilt verwijderen?"
                         onDeleteAccepted={() =>
                           remove(resource.id)
                             .then(() =>
-                              toast.success('Resource successvol verwijderd')
+                              toast.success('Inzending successvol verwijderd')
                             )
                             .catch((e) =>
-                              toast.error('Resource kon niet worden verwijderd')
+                              toast.error('Inzending kon niet worden verwijderd')
                             )
                         }
                       />

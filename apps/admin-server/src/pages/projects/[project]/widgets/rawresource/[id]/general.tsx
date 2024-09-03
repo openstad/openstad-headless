@@ -76,7 +76,7 @@ export default function WidgetRawGeneral(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Resource</FormLabel>
-                <FormDescription>Indien er geen resource is gekoppeld, wordt er gecontroleerd of er een resource aanwezig is in de URL. In dat geval zal deze resource automatisch worden gekoppeld.</FormDescription>
+                <FormDescription>Als er geen resource gekoppeld is, wordt gecontroleerd of er een resource aanwezig is in de URL. In dat geval wordt deze resource automatisch gekoppeld.</FormDescription>
                 <Select
                   onValueChange={(e) => {
                     field.onChange(e);

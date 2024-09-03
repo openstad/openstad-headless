@@ -26,11 +26,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 const twoFactorRoles = [
   {
     id: 'admin',
-    label: 'Administrator',
+    label: 'Beheerder',
   },
   {
     id: 'member',
-    label: 'Member',
+    label: 'lid',
   },
   {
     id: 'moderator',
@@ -38,7 +38,7 @@ const twoFactorRoles = [
   },
   {
     id: 'editor',
-    label: 'Editor',
+    label: 'Bewerker',
   },
 ];
 
@@ -137,20 +137,20 @@ export default function ProjectAuthentication2FA() {
             url: '/projects/1/authentication',
           },
           {
-            name: 'Two Factor Authentication',
+            name: 'Tweestapsverificatie',
             url: '/projects/1/authentication/2fa',
           },
         ]}>
         <div className="container py-6">
           <Form {...form} className="p-6 bg-white rounded-md">
-            <Heading size="xl">Two Factor Authentication</Heading>
+            <Heading size="xl">Tweestapsverificatie</Heading>
             <Separator className="my-4" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-4 lg:w-1/2">
               <div>
                 <FormLabel>
-                  Gebruikers met de onderstaande rollen moeten inloggen met Two Factor Authentication:
+                  Gebruikers met de onderstaande rollen moeten inloggen met Tweestapsverificatie:
                 </FormLabel>
               </div>
 
@@ -207,7 +207,7 @@ export default function ProjectAuthentication2FA() {
               <Separator className="my-4" />
               <div>
                 <FormLabel>
-                  Als een gebruiker Two Factor Authentication moet invullen dan doet die dat op een pagina met deze teksten:
+                  Als een gebruiker Tweestapsverificatie moet invullen dan doet die dat op een pagina met deze teksten:
                 </FormLabel>
               </div>
 
@@ -270,7 +270,7 @@ export default function ProjectAuthentication2FA() {
               <Separator className="my-4" />
               <div>
                 <FormLabel>
-                  Als een gebruiker Two Factor Authentication moet configureren dan doet die dat op een pagina met deze teksten:
+                  Als een gebruiker Tweestapsverificatie moet configureren dan doet die dat op een pagina met deze teksten:
                 </FormLabel>
               </div>
 

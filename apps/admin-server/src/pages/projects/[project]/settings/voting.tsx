@@ -145,7 +145,7 @@ useEffect(() => {
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>
-                      Is het aantal stemmen op een resource te zien voor alle bezoekers?
+                      Kunnen bezoekers het aantal stemmen op een inzending zien?
                     </FormLabel>
                     <Switch.Root
                       className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
@@ -164,7 +164,7 @@ useEffect(() => {
                 name="isActive"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
-                    <FormLabel>Is het mogelijk voor bezoekers om te stemmen op een resource?</FormLabel>
+                    <FormLabel>Kunnen bezoekers stemmen op een inzending?</FormLabel>
                     <Switch.Root
                       className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                       onCheckedChange={(e: boolean) => {
@@ -183,7 +183,7 @@ useEffect(() => {
                 render={({ field }) => (
                   <FormItem className="col-span-full">
                     <FormLabel>
-                      Wat moet er gebeuren als iemand twee keer stemt op dezelfde resource?
+                      Wat moet er gebeuren als iemand twee keer stemt op dezelfde inzending?
                     </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
@@ -208,7 +208,7 @@ useEffect(() => {
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>
-                      Wat voor gebruikers hebben het recht om te stemmen?
+                      Welke gebruikers mogen stemmen?
                     </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
@@ -235,7 +235,7 @@ useEffect(() => {
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>
-                      Wat voor type stemmen wordt er gebruikt?
+                      Wat voor soort stem kunnen bezoekers uitbrengen?
                     </FormLabel>
                     <Select onValueChange={(e) => {
                       field.onChange(e);

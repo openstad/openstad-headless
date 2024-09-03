@@ -173,16 +173,16 @@ export default function ProjectSettingsResource() {
             url: `/projects/${project}/settings`,
           },
           {
-            name: 'Resource',
+            name: 'Inzending',
             url: `/projects/${project}/settings/resource`,
           },
         ]}>
         <div className="container py-6">
           <Form {...form} className="p-6 bg-white rounded-md">
-            <Heading size="xl">Resource instellingen</Heading>
+            <Heading size="xl">Inzendingsinstellingen</Heading>
             <Separator className="my-4" />
             <p className="text-gray-500">
-              Met resources bedoelen we het type inzendingen dat gebruikers doen in dit project. <br/>Denk aan: ideeën, plannen, tips of knelpunten. Dit is afhankelijk van het type input wat je wilt uitvragen.
+            Met resources bedoelen we het type inzending(en) voor dit project. <br /> Denk aan ideeën, plannen, tips of knelpunten. Dit is afhankelijk van wat je wilt uitvragen voor dit project. 
             </p>
             <br/>
             <form
@@ -194,7 +194,7 @@ export default function ProjectSettingsResource() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Is het mogelijk om een resource in te sturen?
+                      Is inzenden mogelijk?
                     </FormLabel>
                     {YesNoSelect(field, {})}
                     <FormMessage />
@@ -221,7 +221,7 @@ export default function ProjectSettingsResource() {
                 name="titleMinLength"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
-                    <FormLabel>Minimum lengte van titel</FormLabel>
+                    <FormLabel>Minimum lengte van de titel</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="10" {...field} />
                     </FormControl>
@@ -234,7 +234,7 @@ export default function ProjectSettingsResource() {
                 name="titleMaxLength"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
-                    <FormLabel>Maximum lengte van titel</FormLabel>
+                    <FormLabel>Maximum lengte van de titel</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="50" {...field} />
                     </FormControl>
@@ -247,7 +247,7 @@ export default function ProjectSettingsResource() {
                 name="summaryMinLength"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
-                    <FormLabel>Minimum lengte van samenvatting</FormLabel>
+                    <FormLabel>Minimum lengte van de samenvatting</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="20" {...field} />
                     </FormControl>
@@ -260,7 +260,7 @@ export default function ProjectSettingsResource() {
                 name="summaryMaxLength"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
-                    <FormLabel>Maximum lengte van samenvatting</FormLabel>
+                    <FormLabel>Maximum lengte van de samenvatting</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="140" {...field} />
                     </FormControl>
@@ -355,7 +355,7 @@ export default function ProjectSettingsResource() {
               <CheckboxList
                 form={form}
                 fieldName="statusGroups"
-                fieldLabel="Selecteer de statusen die standaard op resource gezet zullen worden"
+                fieldLabel="Selecteer de statussen die standaard op de inzending gezet worden."
                 label={(t) => t.name}
                 keyPerItem={(t) => `${t.id}`}
                 items={statuses}

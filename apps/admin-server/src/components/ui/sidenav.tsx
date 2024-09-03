@@ -93,7 +93,7 @@ export function Sidenav({
                 location.startsWith('/issues') ? 'text-brand' : 'text-foreground'
               }
             />
-            {narrow ? '' : 'Issues'}
+            {narrow ? '' : 'Problemen'}
           </Button>
         </Link>
         ) : null }

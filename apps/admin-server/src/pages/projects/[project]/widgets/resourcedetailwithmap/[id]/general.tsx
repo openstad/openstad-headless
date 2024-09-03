@@ -80,7 +80,7 @@ export default function WidgetResourceDetailGeneral(
           <FormObjectSelectField
             form={form}
             fieldName="resourceId"
-            fieldLabel="Koppel aan een specifieke resource"
+            fieldLabel="Koppel aan een specifieke inzending"
             items={resources}
             keyForValue="id"
             label={(resource) => `${resource.id} ${resource.title}`}
@@ -97,9 +97,9 @@ export default function WidgetResourceDetailGeneral(
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Geen specifieke resource gekoppeld?
+                    Geen specifieke inzending gekoppeld?
                   </FormLabel>
-                  <em className="text-xs">Beschrijf hoe de resource gehaald wordt uit de url: (/pad/naar/[id]) of laat leeg om terug te vallen op ?openstadResourceId</em>
+                  <em className="text-xs">Beschrijf hoe de inzending gehaald wordt uit de url: (/pad/naar/[id]) of laat leeg om terug te vallen op ?openstadResourceId</em>
                   <FormControl>
                     <Input {...field} onChange={(e) => {
                       onFieldChange(field.name, e.target.value);

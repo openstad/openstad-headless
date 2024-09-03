@@ -161,8 +161,7 @@ export default function ProjectSettingsAnonymization() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Anonimiseer gebruikers x dagen na het einde van het
-                            project
+                            Na hoeveel dagen na het einde van het project worden gebruikers geanonimiseerd?
                             <InfoDialog content={'Na het aantal ingevoerde dagen worden automatisch alle voor- en achternamen van gebruikers van de website aangepast naar "gebruiker verwijderd".'} />
                           </FormLabel>
                           <FormControl>
@@ -178,8 +177,7 @@ export default function ProjectSettingsAnonymization() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Na hoeveel dagen aan inactiviteit worden gebruikers
-                            gewaarschuwd?
+                            Na hoeveel dagen inactiviteit krijgen gebruikers een waarschuwing?
                             <InfoDialog content={'Na het ingevoerde aantal dagen krijgen geregistreerde gebruikers van het project automatisch een mailtje dat hun account geanonimiseerd gaat worden. De tekst van deze mail kun je hieronder aanpassen.'} />
                           </FormLabel>
                           <FormControl>
@@ -211,7 +209,7 @@ export default function ProjectSettingsAnonymization() {
               </div>
               <div className="p-6 bg-white rounded-md mt-4">
                 <Form {...emailForm}>
-                  <Heading size="xl">Waarschuwings e-mail <InfoDialog content={'Content voor een waarschuwings email'} /></Heading>
+                  <Heading size="xl">Waarschuwingsmail inactiviteit<InfoDialog content={'Content voor een waarschuwings email'} /></Heading>
                   
 
                   <Separator className="my-4" />
@@ -258,8 +256,7 @@ export default function ProjectSettingsAnonymization() {
                   <b> kan niet ongedaan gemaakt worden</b>.
                 </div>
                 <div className="mt-2">
-                  Het project moet eerst aangemerkt staan als beëindigd voordat
-                  deze actie uitgevoerd kan worden.
+                  Het project moet eerst zijn beëindigd voordat deze actie uitgevoerd kan worden.
                 </div>
                 <Button
                   variant={'destructive'}

@@ -117,7 +117,7 @@ export default function WidgetResourceOverviewSorting(
             name="defaultSorting"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Standaard manier van sorteren.</FormLabel>
+                <FormLabel>Standaard manier van sorteren</FormLabel>
                 <Select
                   onValueChange={(value) => {
                     field.onChange;
