@@ -521,7 +521,20 @@ function DocumentMap({
           {popupPosition && !isDefinitive && (
             <Popup position={popupPosition}>
               {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
+                  <>
                 <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
+                  <Spacer size={1} />
+                    <Button
+                    appearance="primary-action-button"
+                    onClick={() => {
+                      if (props.login?.url) {
+                        document.location.href = props.login?.url;
+                      }
+                    }}
+                    type="button">
+                    Inloggen
+                  </Button>
+                </>
               ) :
                 <form>
                   <div>
