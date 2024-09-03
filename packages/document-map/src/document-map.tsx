@@ -392,13 +392,16 @@ function DocumentMap({
       const commentElement = document.getElementById(`comment-${index}`);
       const containerElement = document.querySelector('.document-map-info-container');
 
+      const commentEl = commentElement as HTMLElement;
+      const containerEl = containerElement as HTMLElement;
+
       if (commentElement && containerElement) {
-        containerElement.scrollTo({
-          top: commentElement.offsetTop - containerElement.offsetTop,
+        containerEl.scrollTo({
+          top: commentEl.offsetTop - containerEl.offsetTop,
           behavior: 'smooth'
         });
 
-        commentElement.classList.add('selected');
+        commentEl.classList.add('selected');
 
         clearInterval(intervalId);
       } else if (attempts < maxAttempts) {
