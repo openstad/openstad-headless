@@ -27,6 +27,9 @@
   padding-inline-start: 2rem;
   padding-inline-end: 2rem;
   box-sizing: border-box;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 }
 
 .resourceOverviewWithMap-container .detail-container{
@@ -73,6 +76,13 @@
 .osc-filter-search-bar.utrecht-textbox{
   max-width: revert;
   width: 100%;
+}
+
+@media only screen and (max-width: 1400px) {
+  .resourceOverviewWithMap-container {
+    grid-template-columns: 3fr 2fr; 
+  }
+
 }
 
 @media only screen and (max-width: 1000px) {
