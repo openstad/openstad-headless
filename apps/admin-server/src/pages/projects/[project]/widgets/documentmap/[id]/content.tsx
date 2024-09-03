@@ -25,6 +25,7 @@ const formSchema = z.object({
     displayResourceInfo: z.string().optional(),
     displayResourceDescription: z.string().optional(),
     displayMapSide: z.string().optional(),
+    infoPopupContent: z.string().optional(),
 });
 
 export default function DocumentContent(
@@ -46,6 +47,7 @@ export default function DocumentContent(
             displayResourceInfo: props?.displayResourceInfo || 'left',
             displayMapSide: props?.displayMapSide || 'left',
             displayResourceDescription: props?.displayResourceDescription || 'no',
+            infoPopupContent: props?.infoPopupContent || 'Op deze afbeelding kun je opmerkingen plaatsen. Klik op de afbeelding om een opmerking toe te voegen. Klik op een marker om de bijbehorende opmerkingen te bekijken.',
         },
     });
 
@@ -182,6 +184,22 @@ export default function DocumentContent(
                                         <SelectItem value="yes">Ja</SelectItem>
                                     </SelectContent>
                                 </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="infoPopupContent"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Wat is de helptekst die in de info pop-up staat?
+                                </FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}

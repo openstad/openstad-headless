@@ -66,6 +66,7 @@ export type DocumentMapProps = BaseProps &
     displayResourceInfo?: string;
     displayMapSide?: string;
     displayResourceDescription?: string;
+    infoPopupContent?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -95,6 +96,7 @@ function DocumentMap({
   displayResourceInfo = 'left',
   displayMapSide = 'left',
   displayResourceDescription = 'no',
+  infoPopupContent = 'Op deze afbeelding kun je opmerkingen plaatsen. Klik op de afbeelding om een opmerking toe te voegen. Klik op een marker om de bijbehorende opmerkingen te bekijken.',
   ...props
 }: DocumentMapProps) {
 
@@ -678,7 +680,7 @@ function DocumentMap({
       <dialog className='helper-dialog'>
         <div className="info-dialog">
           <Heading level={2}>Hoe werkt het?</Heading>
-          <Paragraph>Op deze afbeelding kun je opmerkingen plaatsen. Klik op de afbeelding om een opmerking toe te voegen. Klik op een marker om de bijbehorende opmerkingen te bekijken.</Paragraph>
+          <Paragraph>{ infoPopupContent }</Paragraph>
           <Spacer size={1} />
           <Button appearance='secondary-action-button' onClick={() => toggleHelperDialog(false)}>
             <i className="ri-close-fill"></i>
