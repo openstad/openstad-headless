@@ -489,6 +489,17 @@ function DocumentMap({
           </div>
         )}
 
+        { displayResourceInfo === 'right' && (
+            <div className="content-container mobileonly">
+                <section className="content-intro">
+                  {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
+                  {resource.summary ? <Paragraph>{resource.summary}</Paragraph> : null}
+
+                  {( displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
+                </section>
+            </div>
+        )}
+
         <MapContainer center={[0, 0]} crs={CRS.Simple} maxZoom={maxZoom} minZoom={minZoom} zoom={zoom}  >
           <MapEvents />
           {filteredComments && filteredComments
@@ -513,17 +524,19 @@ function DocumentMap({
                 <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
               ) :
                 <form>
-                  <FormLabel htmlFor="commentBox">{ addCommentText }</FormLabel>
-                  {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
-                  {longLengthError && <Paragraph className="--error">De opmerking mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
+                  <div>
+                    <FormLabel htmlFor="commentBox">{ addCommentText }</FormLabel>
+                    {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
+                    {longLengthError && <Paragraph className="--error">De opmerking mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
 
-                  <Textarea
-                      id="commentBox"
-                      name="comment"
-                      onChange={handleCommentChange}
-                      rows={3}
-                      value={commentValue}
-                  />
+                    <Textarea
+                        id="commentBox"
+                        name="comment"
+                        onChange={handleCommentChange}
+                        rows={3}
+                        value={commentValue}
+                    />
+                  </div>
 
                   { extraFieldsTagGroups
                       && Array.isArray(extraFieldsTagGroups)
@@ -606,7 +619,7 @@ function DocumentMap({
         )}
 
         { displayResourceInfo === 'right' && (
-            <section className="content-intro">
+            <section className="content-intro desktoponly">
               {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
               {resource.summary ? <Paragraph>{resource.summary}</Paragraph> : null}
 
