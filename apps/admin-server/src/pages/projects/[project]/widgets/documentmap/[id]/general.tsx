@@ -133,32 +133,6 @@ export default function DocumentGeneral(
           />
         ) : null}
 
-        <FormField
-          control={form.control}
-          name="zoom"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Standaard zoomwaarde
-                <InfoDialog
-                  content="Dit is de standaard zoomwaarde van de kaart. Een kleinere waarde betekent dat de kaart verder is uitgezoomd, waardoor een groter gebied zichtbaar is."
-                />
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="1"
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-
-          )}
-        />
 
         <FormField
           control={form.control}
