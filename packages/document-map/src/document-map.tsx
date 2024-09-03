@@ -66,6 +66,7 @@ export type DocumentMapProps = BaseProps &
     displayResourceInfo?: string;
     displayMapSide?: string;
     displayResourceDescription?: string;
+    infoPopupContent?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -95,6 +96,7 @@ function DocumentMap({
   displayResourceInfo = 'left',
   displayMapSide = 'left',
   displayResourceDescription = 'no',
+  infoPopupContent = 'Op deze afbeelding kun je opmerkingen plaatsen. Klik op de afbeelding om een opmerking toe te voegen. Klik op een marker om de bijbehorende opmerkingen te bekijken.',
   ...props
 }: DocumentMapProps) {
 
@@ -489,6 +491,17 @@ function DocumentMap({
           </div>
         )}
 
+        { displayResourceInfo === 'right' && (
+            <div className="content-container mobileonly">
+                <section className="content-intro">
+                  {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
+                  {resource.summary ? <Paragraph>{resource.summary}</Paragraph> : null}
+
+                  {( displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
+                </section>
+            </div>
+        )}
+
         <MapContainer center={[0, 0]} crs={CRS.Simple} maxZoom={maxZoom} minZoom={minZoom} zoom={zoom}  >
           <MapEvents />
           {filteredComments && filteredComments
@@ -510,20 +523,35 @@ function DocumentMap({
           {popupPosition && !isDefinitive && (
             <Popup position={popupPosition}>
               {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
+                  <>
                 <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
+                  <Spacer size={1} />
+                    <Button
+                    appearance="primary-action-button"
+                    onClick={() => {
+                      if (props.login?.url) {
+                        document.location.href = props.login?.url;
+                      }
+                    }}
+                    type="button">
+                    Inloggen
+                  </Button>
+                </>
               ) :
                 <form>
-                  <FormLabel htmlFor="commentBox">{ addCommentText }</FormLabel>
-                  {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
-                  {longLengthError && <Paragraph className="--error">De opmerking mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
+                  <div>
+                    <FormLabel htmlFor="commentBox">{ addCommentText }</FormLabel>
+                    {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
+                    {longLengthError && <Paragraph className="--error">De opmerking mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
 
-                  <Textarea
-                      id="commentBox"
-                      name="comment"
-                      onChange={handleCommentChange}
-                      rows={3}
-                      value={commentValue}
-                  />
+                    <Textarea
+                        id="commentBox"
+                        name="comment"
+                        onChange={handleCommentChange}
+                        rows={3}
+                        value={commentValue}
+                    />
+                  </div>
 
                   { extraFieldsTagGroups
                       && Array.isArray(extraFieldsTagGroups)
@@ -606,7 +634,7 @@ function DocumentMap({
         )}
 
         { displayResourceInfo === 'right' && (
-            <section className="content-intro">
+            <section className="content-intro desktoponly">
               {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
               {resource.summary ? <Paragraph>{resource.summary}</Paragraph> : null}
 
@@ -652,7 +680,7 @@ function DocumentMap({
       <dialog className='helper-dialog'>
         <div className="info-dialog">
           <Heading level={2}>Hoe werkt het?</Heading>
-          <Paragraph>Op deze afbeelding kun je opmerkingen plaatsen. Klik op de afbeelding om een opmerking toe te voegen. Klik op een marker om de bijbehorende opmerkingen te bekijken.</Paragraph>
+          <Paragraph>{ infoPopupContent }</Paragraph>
           <Spacer size={1} />
           <Button appearance='secondary-action-button' onClick={() => toggleHelperDialog(false)}>
             <i className="ri-close-fill"></i>
