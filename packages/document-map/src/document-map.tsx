@@ -244,7 +244,7 @@ function DocumentMap({
     setDocumentHeight(imageHeight);
   };
 
-  
+
   const imageBounds: LatLngBoundsLiteral = [
     [0, docWidth / 2],
     [-docHeight, -docWidth / 2]
@@ -269,14 +269,16 @@ function DocumentMap({
       },
     });
 
-    
-useEffect(() => {
-  if (map && imageBounds && !isBoundsSet) {
-    map.fitBounds(imageBounds);
-    map.scrollWheelZoom.disable();
-    setIsBoundsSet(true);
-  }
-}, [map, imageBounds, isBoundsSet]);
+
+    const panOffset = map.getSize().y * -0.1; // Adjust the 0.1 value to control the amount of upward pan
+    useEffect(() => {
+      if (map && imageBounds && !isBoundsSet) {
+        map.fitBounds(imageBounds);
+        map.scrollWheelZoom.disable();
+        setIsBoundsSet(true);
+        map.panBy([0, -panOffset]);
+      }
+    }, [map, imageBounds, isBoundsSet]);
 
     return null;
   };
