@@ -68,6 +68,7 @@ router
       useDifferentSubmitAddress: req.params.useDifferentSubmitAddress,
       newSubmitAddress: req.params.newSubmitAddress,
       defaultResourceImage: req.params.defaultResourceImage,
+      documentMapIconColor: req.params.documentMapIconColor || '#000000',
     };
 
     db.Tag.authorizeData(data, 'create', req.user)
