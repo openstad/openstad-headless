@@ -305,7 +305,7 @@ export default function ProjectTagEdit() {
                           control={form.control}
                           name="documentMapIconColor"
                           render={({ field }) => {
-                              const handleColorChange = (e) => {
+                              const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                                   const newColor = e.target.value;
                                   field.onChange(newColor);
                               };
