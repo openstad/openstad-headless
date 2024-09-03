@@ -390,8 +390,16 @@ function DocumentMap({
       });
 
       const commentElement = document.getElementById(`comment-${index}`);
-      if (commentElement) {
-        commentElement.scrollIntoView({behavior: 'smooth', block: 'end'});
+      const containerElement = document.querySelector('.document-map-info-container');
+
+      if (commentElement && containerElement) {
+        containerElement.scrollTo({
+          top: commentElement.offsetTop - containerElement.offsetTop,
+          behavior: 'smooth'
+        });
+
+        commentElement.classList.add('selected');
+
         clearInterval(intervalId);
       } else if (attempts < maxAttempts) {
         attempts++;
@@ -618,7 +626,7 @@ function DocumentMap({
         </Button>
 
       </div>
-      <div className="content" ref={contentRef}>
+      <div className="content document-map-info-container" ref={contentRef}>
         {!isDefinitive && (
           <>
             {displayLikes && (
