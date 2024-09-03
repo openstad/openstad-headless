@@ -52,7 +52,7 @@ function Comments({
   placeholder = 'Typ hier uw reactie',
   formIntro = '',
   selectedComment,
-  setRefreshComments,
+  setRefreshComments = () => {},
   ...props
 }: CommentsWidgetProps) {
 
@@ -122,6 +122,8 @@ function Comments({
   const notifyFailed = () =>
       toast.error('Reactie plaatsen mislukt', { position: 'bottom-center' });
 
+  const defaultSetRefreshComments = () => {};
+
   async function submitComment(formData: any) {
     setDisableSubmit(true);
     const formDataCopy = { ...formData };
@@ -145,14 +147,14 @@ function Comments({
         notifySuccess();
         setDisableSubmit(false);
       }
+
+      setRefreshComments(prev => !prev);
     } catch (err: any) {
       console.log(err);
       notifyFailed();
       setDisableSubmit(false);
     }
   }
-
-    const defaultSetRefreshComments = () => {};
 
     return (
     <CommentWidgetContext.Provider value={{ ...args, setRefreshComments: setRefreshComments || defaultSetRefreshComments }}>
