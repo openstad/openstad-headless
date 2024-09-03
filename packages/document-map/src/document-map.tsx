@@ -390,7 +390,7 @@ function DocumentMap({
 
       const commentElement = document.getElementById(`comment-${index}`);
       if (commentElement) {
-        commentElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        commentElement.scrollIntoView({behavior: 'smooth', block: 'end'});
         clearInterval(intervalId);
       } else if (attempts < maxAttempts) {
         attempts++;
