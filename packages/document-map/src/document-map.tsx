@@ -67,6 +67,8 @@ export type DocumentMapProps = BaseProps &
     displayMapSide?: string;
     displayResourceDescription?: string;
     infoPopupContent?: string;
+    emptyListText?: string;
+    loginText?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -97,6 +99,8 @@ function DocumentMap({
   displayMapSide = 'left',
   displayResourceDescription = 'no',
   infoPopupContent = 'Op deze afbeelding kun je opmerkingen plaatsen. Klik op de afbeelding om een opmerking toe te voegen. Klik op een marker om de bijbehorende opmerkingen te bekijken.',
+  loginText = 'Inloggen om deel te nemen aan de discussie',
+  emptyListText = 'Nog geen reacties geplaatst',
   ...props
 }: DocumentMapProps) {
 
@@ -708,6 +712,8 @@ function DocumentMap({
             resourceId={resourceId || ''}
             selectedComment={selectedCommentIndex}
             setRefreshComments={setRefreshComments}
+            emptyListText={emptyListText}
+            loginText={loginText}
             showForm={false}
           />
         )}
