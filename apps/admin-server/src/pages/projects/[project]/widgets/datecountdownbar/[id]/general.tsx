@@ -86,7 +86,7 @@ export default function CountdownBarGeneral(
           name="beforeText"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Text links van de dagen kaart(en)</FormLabel>
+              <FormLabel>Tekst links van de dagen kaart(en)</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Bijv: Het is voorbij over"
@@ -106,7 +106,7 @@ export default function CountdownBarGeneral(
           name="afterText"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Text rechts van de dagen kaart(en)</FormLabel>
+              <FormLabel>Tekst rechts van de dagen kaart(en)</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Bijv: dagen"
@@ -154,7 +154,7 @@ export default function CountdownBarGeneral(
             name="showLabels"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Labels weergeven</FormLabel>
+                <FormLabel>Toon labels</FormLabel>
                 <Switch.Root
                   className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                   onCheckedChange={(e: boolean) => {

@@ -36,7 +36,7 @@ export default function ProjectStatuses() {
             url: '/projects'
           },
           {
-            name: 'Statuses',
+            name: 'Statussen',
             url: `/projects/${project}/statuses`,
           },
         ]}

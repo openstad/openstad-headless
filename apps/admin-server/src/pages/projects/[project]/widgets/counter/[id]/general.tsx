@@ -157,16 +157,16 @@ export default function CounterDisplay(
                 </FormControl>
                 <SelectContent className='overflow-y-auto max-h-[16rem]'>
                   <SelectItem value="resource">
-                    Hoeveelheid resources
+                    Aantal inzendingen
                   </SelectItem>
                   <SelectItem value="vote">Hoeveelheid stemmen</SelectItem>
                   <SelectItem value="votedUsers">
                     Hoeveelheid gestemde gebruikers
                   </SelectItem>
                   <SelectItem value="static">Vaste waarde</SelectItem>
-                  <SelectItem value="argument">Hoeveelheid comments</SelectItem>
+                  <SelectItem value="argument">Aantal reacties</SelectItem>
                   <SelectItem value="submission">
-                    Hoeveelheid submissies op keuzewijzer
+                    Aantal inzendingen keuzewijzer
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -179,7 +179,7 @@ export default function CounterDisplay(
             <FormObjectSelectField
               form={form}
               fieldName="resourceId"
-              fieldLabel="Koppel aan een specifieke resource"
+              fieldLabel="Koppel aan een specifieke inzending"
               items={resources}
               keyForValue="id"
               label={(resource) => `${resource.id} ${resource.title}`}

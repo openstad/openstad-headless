@@ -130,7 +130,7 @@ export default function ProjectSettingsMap() {
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>
-                      Wat is het niveau tot hoever gebruikers mogen uitzoomen?
+                      Tot welk niveau mogen gebruikers uitzoomen?
                       <InfoDialog content="Gebruik een waarde tussen 7 en 20 om het zoomniveau in te stellen. Bij niveau 7 is heel Nederland zichtbaar, terwijl niveau 20 het maximale detailniveau vertegenwoordigt, waarbij je kunt inzoomen tot individuele huizen." />
                     </FormLabel>
                     <FormControl>
@@ -147,7 +147,7 @@ export default function ProjectSettingsMap() {
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>
-                      Wat is het niveau tot hoever gebruikers mogen inzoomen?
+                      Tot welk niveau mogen gebruikers inzoomen?
                       <InfoDialog content="Gebruik een waarde tussen 7 en 20 om het zoomniveau in te stellen. Bij niveau 7 is heel Nederland zichtbaar, terwijl niveau 20 het maximale detailniveau vertegenwoordigt, waarbij je kunt inzoomen tot individuele huizen." />
                     </FormLabel>
                     <FormControl>

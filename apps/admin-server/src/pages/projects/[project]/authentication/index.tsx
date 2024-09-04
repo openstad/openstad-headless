@@ -153,7 +153,7 @@ export default function ProjectAuthentication() {
               <Heading size="xl">Authenticatie instellingen</Heading>
               <Separator className="my-4" />
               <p className="text-gray-500">
-                Hier bepaal je op welke wijze gebruikers zich moeten authenticeren in het project.
+                Hier bepaal je op welke manier gebruikers zich moeten authentificeren voor dit project.
               </p>
               <br/>
               <form

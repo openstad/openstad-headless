@@ -28,10 +28,10 @@ export default function Projects() {
   return (
     <div>
       <PageLayout
-        pageHeader="Issues"
+        pageHeader="Problemen"
         breadcrumbs={[
           {
-            name: 'Issues',
+            name: 'Problemen',
             url: '/issues',
           },
         ]}>
@@ -86,7 +86,7 @@ export default function Projects() {
                       </Paragraph>
                       <Paragraph className="hidden lg:flex -mr-16">
                         { project.issue == 'Project has ended but is not yet anonymized' && 'De gebruikers van het project moeten geanonimiseerd worden.' }
-                        { project.issue == 'Project endDate is in the past but projectHasEnded is not set' && 'De einddatum van het project is in het verleden maar het project is nog niet beëindigd' }
+                        { project.issue == 'Project endDate is in the past but projectHasEnded is not set' && 'De einddatum van het project ligt in het verleden maar het project is nog niet beëindigd' }
                       </Paragraph>
                       <Paragraph className="flex">
                         <ChevronRight

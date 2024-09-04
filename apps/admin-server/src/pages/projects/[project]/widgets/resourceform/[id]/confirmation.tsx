@@ -71,8 +71,7 @@ export default function WidgetResourceFormConfirmation() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Krijgt de gebruiker een bevestiging voordat het opgeleverd
-                  wordt?
+                  Krijgt de gebruiker een bevestiging voordat de inzending/het plan opgeleverd wordt?
                 </FormLabel>
                 <Switch.Root
                       className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
@@ -92,8 +91,7 @@ export default function WidgetResourceFormConfirmation() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Krijgt een administrator een bevestiging voordat het
-                  opgeleverd wordt?
+                  Krijgt de beheerder een bevestiging voordat de inzending/het plan opgeleverd wordt?
                 </FormLabel>
                 <Switch.Root
                       className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"

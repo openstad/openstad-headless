@@ -117,7 +117,7 @@ export default function ProjectSettingsWidgets() {
             <Heading size="xl">Toegestane websites</Heading>
             <Separator className="my-4" />
             <p className="text-gray-500">
-              Hier kun je de URLs instellen waar de widgets van dit project op mogen draaien.
+              Hier kun je de URL’s instellen waar de widgets van dit project op mogen draaien.
             </p>
             <p className="text-gray-500">
               Let op: Widgets werken alleen op externe websites als de URL van de betreffende website hier is toegevoegd.

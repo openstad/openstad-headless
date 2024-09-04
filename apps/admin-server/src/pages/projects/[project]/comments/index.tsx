@@ -174,7 +174,7 @@ export default function ProjectComments() {
             >
               <option value="">Alles</option>
               <option value="id">Reactie ID</option>
-              <option value="resourceId">Resource ID</option>
+              <option value="resourceId">Inzending ID</option>
               <option value="description">Reactie</option>
               <option value="createdAt">Geplaatst op</option>
               <option value="sentiment">Sentiment</option>
@@ -202,7 +202,7 @@ export default function ProjectComments() {
                   const sortedData = sortTable('resourceId', e, filterData);
                   setFilterData(sortedData ? sortedData : []);
                 }}>
-                  Resource ID
+                  Inzending ID
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex lg:col-span-3">

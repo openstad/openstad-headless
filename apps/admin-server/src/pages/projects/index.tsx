@@ -24,10 +24,10 @@ export default function Projects() {
   if (!data) return (
     <div>
       <PageLayout
-        pageHeader="Projects"
+        pageHeader="Projecten"
         breadcrumbs={[
           {
-            name: 'Projects',
+            name: 'Projecten',
             url: '/projects',
           },
         ]}
@@ -47,10 +47,10 @@ export default function Projects() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projects"
+        pageHeader="Projecten"
         breadcrumbs={[
           {
-            name: 'Projects',
+            name: 'Projecten',
             url: '/projects',
           },
         ]}
@@ -95,7 +95,7 @@ export default function Projects() {
               </ListHeading>
               <ListHeading className="hidden lg:flex">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('issues', e, filterData))}>
-                  Issues
+                  Problemen
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">
@@ -110,7 +110,7 @@ export default function Projects() {
               </ListHeading>
               <ListHeading className="hidden lg:flex">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('resources', e, filterData))}>
-                  Resources
+                  Inzendingen
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">

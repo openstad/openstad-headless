@@ -100,7 +100,7 @@ export default function ProjectSettingsNotifications() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Vanaf welk e-mailadres kunnen de notificaties verstuurd worden?
+                      Vanaf welk mailadres worden de notificaties verstuurd?
                       <InfoDialog content={'Let op: dit werkt alleen als de domeininstellingen voor dit e-mailadres correct geconfigureerd zijn. Tip: maak hiervoor gebruik van Flowmailer of Sendgrid.'} />
                     </FormLabel>
                     <FormControl>
