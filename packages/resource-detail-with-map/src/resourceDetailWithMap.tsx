@@ -20,6 +20,7 @@ import { CommentsWidgetProps } from '@openstad-headless/comments/src/comments';
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
 import { Button, ButtonLink } from '@utrecht/component-library-react';
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
+import { remirrorRender } from '@openstad-headless/ui/src/remirrorRender';
 
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
 type booleanProps = {
@@ -228,10 +229,12 @@ function ResourceDetailWithMap({
               )}
             </div>
             <div className="resource-detail-content">
-              {displaySummary && <Heading level={2} appearance='utrecht-heading-4'>{resource.summary}</Heading>}
-              {displayDescription && (
-                <Paragraph>{resource.description}</Paragraph>
-              )}
+            {displaySummary && (
+                  remirrorRender(resource.summary, 'heading')
+                )}
+                {displayDescription && (
+                  remirrorRender(resource.description, 'paragraph')
+                )}
             </div>
             {displaySocials ? (
                 <div className="resource-detail-side-section">

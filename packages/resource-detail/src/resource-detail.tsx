@@ -26,7 +26,7 @@ import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src
 
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
-import { resourceContent } from './resource-content.js'
+import { remirrorRender } from '@openstad-headless/ui/src/remirrorRender';
 
 type booleanProps = {
   [K in
@@ -232,10 +232,10 @@ function ResourceDetail({
               </div>
               <div className="resource-detail-content">
                 {displaySummary && (
-                  resourceContent(resource.summary, 'heading')
+                  remirrorRender(resource.summary, 'heading')
                 )}
                 {displayDescription && (
-                  resourceContent(resource.description, 'paragraph')
+                  remirrorRender(resource.description, 'paragraph')
                 )}
               </div>
               {displayLocation && resource.location && (

@@ -16,6 +16,8 @@ import nunjucks from 'nunjucks';
 import { applyFilters } from '../../raw-resource/includes/nunjucks-filters';
 import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map';
 
+import {remirrorCombineText} from '@openstad-headless/ui/src/remirrorRender';
+
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import {
@@ -190,39 +192,6 @@ const defaultItemRenderer = (
     return newUrl
   }
 
-  function combineTextStrings(parsedValue: { [key: string]: any }): string {
-    let combinedText = '';
-
-    for (const key in parsedValue) {
-      if (key === 'text' && typeof parsedValue[key] === 'string') {
-        combinedText += parsedValue[key];
-      } else if (typeof parsedValue[key] === 'object' && parsedValue[key] !== null) {
-        combinedText += combineTextStrings(parsedValue[key]);
-      }
-    }
-
-    return combinedText;
-  }
-
-
-  const getContent = (content: any) => {
-
-    if (typeof content === 'string' && content !== null) {
-      try {
-        const parsedValue = JSON.parse(content);
-        console.log(parsedValue);
-        if (parsedValue.textarea !== undefined) {
-          console.log(combineTextStrings(parsedValue.textarea))
-          return combineTextStrings(parsedValue.textarea)
-        }
-      } catch (e) {
-        return content
-      }
-    } else {
-      return content
-
-    }
-  }
   const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
   const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
 
@@ -263,13 +232,13 @@ const defaultItemRenderer = (
 
             {props.displaySummary ? (
               <Paragraph>
-                {elipsize(getContent(resource.summary), props.summaryMaxLength || 20)}
+                {elipsize(remirrorCombineText(resource.summary), props.summaryMaxLength || 20)}
               </Paragraph>
             ) : null}
 
             {props.displayDescription ? (
               <Paragraph className="osc-resource-overview-content-item-description">
-                {elipsize(getContent(resource.description), props.descriptionMaxLength || 30)}
+                {elipsize(remirrorCombineText(resource.description), props.descriptionMaxLength || 30)}
               </Paragraph>
             ) : null}
           </div>
@@ -324,13 +293,13 @@ const defaultItemRenderer = (
 
             {props.displaySummary ? (
               <Paragraph>
-                {elipsize(resource.summary, props.summaryMaxLength || 20)}
+                {elipsize(remirrorCombineText(resource.summary), props.summaryMaxLength || 20)}
               </Paragraph>
             ) : null}
 
             {props.displayDescription ? (
               <Paragraph className="osc-resource-overview-content-item-description">
-                {elipsize(resource.description, props.descriptionMaxLength || 30)}
+                {elipsize(remirrorCombineText(resource.description), props.descriptionMaxLength || 30)}
               </Paragraph>
             ) : null}
           </div>
