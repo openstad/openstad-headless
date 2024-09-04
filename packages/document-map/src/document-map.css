@@ -10,7 +10,7 @@
     height: auto;
   }
 
-  .documentMap--container .map-container {
+  .openstad-component-widget .documentMap--container .map-container .leaflet-container {
     height: 500px;
   }
 
