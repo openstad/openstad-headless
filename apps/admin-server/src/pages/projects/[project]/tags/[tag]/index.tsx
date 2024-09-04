@@ -21,11 +21,12 @@ import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
 import useTag from '@/hooks/use-tag';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { ImageUploader } from "@/components/image-uploader";
 import { X } from "lucide-react";
 import InfoDialog from '@/components/ui/info-hover';
+import ColorPicker from '@/components/colorpicker';
 
 const formSchema = z.object({
   name: z.string(),
@@ -40,6 +41,7 @@ const formSchema = z.object({
   useDifferentSubmitAddress: z.boolean().optional(),
   image: z.string().optional(),
   defaultResourceImage: z.string().optional(),
+  documentMapIconColor: z.string().optional(),
   newSubmitAddress: z.string().optional(),
   emails: z.array(z.object({ address: z.string() })).optional(),
 });
@@ -68,6 +70,7 @@ export default function ProjectTagEdit() {
         ? data.newSubmitAddress.split(',').map((address: string) => ({ address: address.trim() }))
         : [{ address: '' }],
       defaultResourceImage: data?.defaultResourceImage || '',
+      documentMapIconColor: data?.documentMapIconColor || '#555588',
     }),
     [data]
   );
@@ -96,7 +99,8 @@ export default function ProjectTagEdit() {
       values.listIcon,
       values.useDifferentSubmitAddress,
       values.newSubmitAddress,
-      values.defaultResourceImage
+      values.defaultResourceImage,
+      values.documentMapIconColor
     );
     if (tag) {
       toast.success('Tag aangepast!');
@@ -297,6 +301,36 @@ export default function ProjectTagEdit() {
                         </FormItem>
                       )}
                     />
+                      <FormField
+                          control={form.control}
+                          name="documentMapIconColor"
+                          render={({ field }) => {
+                              const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                                  const newColor = e.target.value;
+                                  field.onChange(newColor);
+                              };
+
+                              const handleResetColor = () => {
+                                  const resetColor = "#555588";
+                                  field.onChange(resetColor);
+                              };
+
+                              return (
+                                  <FormItem>
+                                      <FormLabel>Interactieve afbeelding icon kleur</FormLabel>
+                                      <FormControl>
+                                          <div>
+                                              <ColorPicker value={field.value || "#555588"} onChange={handleColorChange} />
+                                              <button type="button" onClick={handleResetColor}>
+                                                  Reset
+                                              </button>
+                                          </div>
+                                      </FormControl>
+                                      <FormMessage />
+                                  </FormItem>
+                              );
+                          }}
+                      />
                     <Button className="w-fit col-span-full" type="submit">
                       Opslaan
                     </Button>

@@ -106,3 +106,47 @@
 .skip-link{
   display: none !important;
 }
+
+.color-picker-container {
+  display: inline-flex;
+  align-items: center;
+  width: 120px;
+  max-width: 120px;
+  padding: 4px 12px;
+  border: 1px solid #bfc9d9;
+  border-radius: 4px;
+  margin-right: 15px;
+}
+
+.color-picker-container input[type="color"] {
+  margin-right: 8px;
+  -webkit-appearance: none;
+  border: none;
+  width: auto;
+  height: auto;
+  cursor: pointer;
+  background: none;
+  outline: none;
+}
+
+.color-picker-container input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+  width: 30px;
+  height: 30px;
+}
+
+.color-picker-container input[type="color"]::-webkit-color-swatch {
+  border: 1px solid #bfc9d9;
+  border-radius: 50px;
+  padding: 0;
+}
+
+.color-picker-container input[type="text"] {
+  border: none;
+  width: 100%;
+  font-size: 14px;
+}
+
+.color-picker-component-container {
+  display: flex;
+}
