@@ -8,4 +8,5 @@ export type CommentProps = {
   showDateSeperately?: boolean;
   submitComment?: (e: any) => void;
   adminLabel?: string;
+  disableSubmit?: boolean;
 };

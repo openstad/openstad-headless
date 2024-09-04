@@ -40,7 +40,7 @@ export default function WidgetResourceOverviewSearch(
       displaySearch: props.displaySearch || false,
       displaySearchText: props.displaySearchText || false,
       textActiveSearch:
-        props.textActiveSearch || 'Je ziet hier zoekresultaten voor [zoekterm]',
+        props.textActiveSearch || 'Bekijk de tekstresultaten voor [zoekterm]',
     },
   });
 
@@ -59,7 +59,7 @@ export default function WidgetResourceOverviewSearch(
             name="displaySearch"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Zoekbalk weergeven</FormLabel>
+                <FormLabel>Zoekveld weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -71,7 +71,7 @@ export default function WidgetResourceOverviewSearch(
             name="displaySearchText"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Zoektext weergeven</FormLabel>
+                <FormLabel>Zoektekst weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

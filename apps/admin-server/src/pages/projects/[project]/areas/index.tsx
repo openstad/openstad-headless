@@ -41,7 +41,7 @@ export default function ProjectAreas() {
           <Link href={`/projects/${project}/areas/create`}>
             <Button variant="default" className="flex w-fit">
               <Plus size="20" className="hidden lg:flex" />
-              Polygon toevoegen
+              Polygoon toevoegen
             </Button>
           </Link>
         }>

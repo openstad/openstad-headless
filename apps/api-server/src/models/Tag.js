@@ -85,6 +85,11 @@ module.exports = function (db, sequelize, DataTypes) {
       defaultResourceImage: {
         type: DataTypes.TEXT,
         allowNull: true,
+      },
+
+      documentMapIconColor: {
+        type: DataTypes.TEXT,
+        allowNull: true,
       }
 
 	  }, {

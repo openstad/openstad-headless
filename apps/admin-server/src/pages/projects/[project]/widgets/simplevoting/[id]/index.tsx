@@ -80,7 +80,7 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="search">Zoeken</TabsTrigger>
               <TabsTrigger value="tags">Tags</TabsTrigger>
               <TabsTrigger value="sorting">Sorteer opties</TabsTrigger>
-              <TabsTrigger value="pagination">Pagination</TabsTrigger>
+              <TabsTrigger value="pagination">Paginering</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
 

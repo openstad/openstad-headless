@@ -200,7 +200,7 @@ export default function ProjectAuthentication() {
                   <Separator className="my-4" />
                   <div>
                     <FormLabel>
-                      Als een gebruiker inlogt met een unieke code dan doet die dat op een een pagina met deze teksten:
+                      Deze teksten staan op de pagina waar gebruikers met een unieke code inloggen.
                     </FormLabel>
                   </div>
                   <form
@@ -586,7 +586,7 @@ export default function ProjectAuthentication() {
                     <Separator className="my-4" />
                     <div>
                       <FormLabel>
-                        Als een gebruiker inlogt met een unieke code dan doet die dat op een een pagina met deze teksten:
+                        Deze teksten staan op de pagina waar gebruikers met een wachtwoord inloggen.
                       </FormLabel>
                     </div>
                     <form

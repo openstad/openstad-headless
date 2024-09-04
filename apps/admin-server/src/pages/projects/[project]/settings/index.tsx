@@ -195,14 +195,14 @@ export default function ProjectSettings() {
                       form={form}
                       fieldName="endDate"
                       label="Einddatum"
-                      fieldInfo="Plannen indienen, reacties plaatsen of liken is na deze datum niet meer mogelijk."
+                      fieldInfo="Na deze datum is het automatisch niet meer mogelijk om plannen in te dienen, reacties te plaatsen en te stemmen."
                     />
                     <FormField
                       control={form.control}
                       name="cssUrl"
                       render={({ field }) => (
                         <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                          <FormLabel>Geef de URL voor de huisstijl op (css bestand)</FormLabel>
+                          <FormLabel>Huisstijl URL (CSS bestand)</FormLabel>
                           <FormControl>
                             <Input placeholder="Url" {...field} />
                           </FormControl>
@@ -307,7 +307,7 @@ export default function ProjectSettings() {
                 <Separator className="my-4" />
                 <div className="space-y-4">
                   <div>
-                    Als u het project beëindigt worden automatisch de mogelijkheden voor inzenden, reageren en stemmen gesloten.
+                    Wanneer je het project beëindigt, sluiten automatisch de mogelijkheden om plannen in te dienen, reacties te plaatsen en te stemmen.
                   </div>
                   <div>
                     Project beëindigen
@@ -338,8 +338,7 @@ export default function ProjectSettings() {
                     <b> kan niet ongedaan gemaakt worden</b>.
                   </div>
                   <div className="space-y-2">
-                    Het project moet eerst aangemerkt staan als beëindigd
-                    voordat deze actie uitgevoerd kan worden.
+                  Het project moet eerst zijn beëindigd voordat deze actie uitgevoerd kan worden.
                   </div>
                   <Button
                     variant={'destructive'}

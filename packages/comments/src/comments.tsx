@@ -13,6 +13,7 @@ import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import { Button, Paragraph, Heading3, Heading } from '@utrecht/component-library-react';
 import { CommentFormProps } from './types/comment-form-props';
+import toast, {Toaster} from "react-hot-toast";
 
 // This type holds all properties needed for this component to work
 export type CommentsWidgetProps = BaseProps &
@@ -51,7 +52,7 @@ function Comments({
   placeholder = 'Typ hier uw reactie',
   formIntro = '',
   selectedComment,
-  setRefreshComments,
+  setRefreshComments = () => {},
   ...props
 }: CommentsWidgetProps) {
 
@@ -100,6 +101,8 @@ function Comments({
   });
 
   const [canComment, setCanComment] = useState(args.canComment)
+  const [disableSubmit, setDisableSubmit] = useState(false);
+
   useEffect(() => {
     if (!resource) return;
     let statuses = resource.statuses || [];
@@ -113,7 +116,16 @@ function Comments({
 
   const { data: currentUser } = datastore.useCurrentUser({ ...args });
 
+  const notifySuccess = () =>
+      toast.success('Reactie succesvol geplaatst', { position: 'bottom-center' });
+
+  const notifyFailed = () =>
+      toast.error('Reactie plaatsen mislukt', { position: 'bottom-center' });
+
+  const defaultSetRefreshComments = () => {};
+
   async function submitComment(formData: any) {
+    setDisableSubmit(true);
     const formDataCopy = { ...formData };
 
     formDataCopy.resourceId = `${resourceId}`;
@@ -126,15 +138,23 @@ function Comments({
           comment = parent.replies.find((c: any) => c.id == formDataCopy.id);
         }
         await comment.update(formDataCopy);
+
+        notifySuccess();
+        setDisableSubmit(false);
       } else {
         await comments.create(formDataCopy);
+
+        notifySuccess();
+        setDisableSubmit(false);
       }
+
+      setRefreshComments(prev => !prev);
     } catch (err: any) {
       console.log(err);
+      notifyFailed();
+      setDisableSubmit(false);
     }
   }
-
-    const defaultSetRefreshComments = () => {};
 
     return (
     <CommentWidgetContext.Provider value={{ ...args, setRefreshComments: setRefreshComments || defaultSetRefreshComments }}>
@@ -180,7 +200,7 @@ function Comments({
         {/* {(args.canComment && hasRole(currentUser, args.requiredUserRole)) && type === 'resource' || hasRole(currentUser, 'moderator') && type === 'resource' ? ( */}
         {args.canComment && args.showForm && hasRole(currentUser, args.requiredUserRole) ? (
           <div className="input-container">
-            <CommentForm {...args} submitComment={submitComment} />
+            <CommentForm {...args} disableSubmit={disableSubmit} submitComment={submitComment} />
             <Spacer size={1} />
           </div>
         ) : null}
@@ -192,8 +212,9 @@ function Comments({
         ) : null}
         {(comments || []).map((comment: any, index: number) => {
           let attributes = { ...args, comment, submitComment, setRefreshComments };
-          return <Comment {...attributes} index={index} key={index} selected={selectedComment === index}  />;
+          return <Comment {...attributes} disableSubmit={disableSubmit} index={index} key={index} selected={selectedComment === index}  />;
         })}
+        <Toaster />
       </section>
     </CommentWidgetContext.Provider>
   );

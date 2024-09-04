@@ -66,6 +66,7 @@ export type DocumentMapProps = BaseProps &
     displayResourceInfo?: string;
     displayMapSide?: string;
     displayResourceDescription?: string;
+    infoPopupContent?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -95,6 +96,7 @@ function DocumentMap({
   displayResourceInfo = 'left',
   displayMapSide = 'left',
   displayResourceDescription = 'no',
+  infoPopupContent = 'Op deze afbeelding kun je opmerkingen plaatsen. Klik op de afbeelding om een opmerking toe te voegen. Klik op een marker om de bijbehorende opmerkingen te bekijken.',
   ...props
 }: DocumentMapProps) {
 
@@ -371,6 +373,7 @@ function DocumentMap({
   interface ExtendedMarkerProps extends MarkerProps {
     id: string;
     index: number;
+    color: string;
   }
 
   const scrollToComment = (index: number) => {
@@ -387,8 +390,30 @@ function DocumentMap({
       });
 
       const commentElement = document.getElementById(`comment-${index}`);
-      if (commentElement) {
-        commentElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      const containerElement = document.querySelector('.document-map-info-container');
+
+      const commentEl = commentElement as HTMLElement;
+      const containerEl = containerElement as HTMLElement;
+
+      if (commentElement && containerElement) {
+        const commentRect = commentEl.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const commentTop = commentRect.top + scrollTop;
+
+        if (window.innerWidth <= 1000) {
+          window.scrollTo({
+            top: commentTop,
+            behavior: 'smooth'
+          });
+        } else {
+          containerEl.scrollTo({
+            top: commentEl.offsetTop - containerEl.offsetTop,
+            behavior: 'smooth'
+          });
+        }
+
+        commentEl.classList.add('selected');
+
         clearInterval(intervalId);
       } else if (attempts < maxAttempts) {
         attempts++;
@@ -400,14 +425,20 @@ function DocumentMap({
     const intervalId = setInterval(tryScrollToComment, interval);
   };
 
-  const MarkerWithId: React.FC<ExtendedMarkerProps> = ({id, index, ...props}) => {
+  const MarkerWithId: React.FC<ExtendedMarkerProps> = ({ id, index, color, ...props }) => {
     const markerRef = useRef<any>(null);
+    const isDefaultColor = color === '#555588';
 
     return (
         <Marker
             {...props}
             ref={markerRef}
-            icon={MarkerIcon({icon: {className: index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon'}})}
+            icon={MarkerIcon({
+              icon: {
+                className: `${index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon'} ${isDefaultColor ? 'basic-icon' : ''}`,
+                color: !isDefaultColor ? color : undefined,
+              },
+            })}
             eventHandlers={{
               click: () => {
                 if (index === selectedMarkerIndex) {
@@ -489,19 +520,36 @@ function DocumentMap({
           </div>
         )}
 
+        { displayResourceInfo === 'right' && (
+            <div className="content-container mobileonly">
+                <section className="content-intro">
+                  {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
+                  {resource.summary ? <Paragraph>{resource.summary}</Paragraph> : null}
+
+                  {( displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
+                </section>
+            </div>
+        )}
+
         <MapContainer center={[0, 0]} crs={CRS.Simple} maxZoom={maxZoom} minZoom={minZoom} zoom={zoom}  >
           <MapEvents />
           {filteredComments && filteredComments
-            .filter((comment: any) => !!comment.location)
-            .map((comment: any, index: number) => (
-              <MarkerWithId
-                key={index}
-                id={`marker-${index}`}
-                index={index}
-                position={comment.location}
-              >
-              </MarkerWithId>
-            ))}
+              .filter((comment: any) => !!comment.location)
+              .map((comment: any, index: number) => {
+
+                const firstTag = comment.tags && comment.tags[0];
+                const documentMapIconColor = firstTag && firstTag.documentMapIconColor ? firstTag.documentMapIconColor : '#555588';
+
+                return (
+                    <MarkerWithId
+                        key={index}
+                        id={`marker-${index}`}
+                        index={index}
+                        position={comment.location}
+                        color={documentMapIconColor}
+                    />
+                );
+              })}
           <ImageOverlay
             url={resource.images ? resource.images[0].url : ''}
             bounds={imageBounds}
@@ -510,20 +558,35 @@ function DocumentMap({
           {popupPosition && !isDefinitive && (
             <Popup position={popupPosition}>
               {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
+                  <>
                 <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
+                  <Spacer size={1} />
+                    <Button
+                    appearance="primary-action-button"
+                    onClick={() => {
+                      if (props.login?.url) {
+                        document.location.href = props.login?.url;
+                      }
+                    }}
+                    type="button">
+                    Inloggen
+                  </Button>
+                </>
               ) :
                 <form>
-                  <FormLabel htmlFor="commentBox">{ addCommentText }</FormLabel>
-                  {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
-                  {longLengthError && <Paragraph className="--error">De opmerking mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
+                  <div>
+                    <FormLabel htmlFor="commentBox">{ addCommentText }</FormLabel>
+                    {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
+                    {longLengthError && <Paragraph className="--error">De opmerking mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
 
-                  <Textarea
-                      id="commentBox"
-                      name="comment"
-                      onChange={handleCommentChange}
-                      rows={3}
-                      value={commentValue}
-                  />
+                    <Textarea
+                        id="commentBox"
+                        name="comment"
+                        onChange={handleCommentChange}
+                        rows={3}
+                        value={commentValue}
+                    />
+                  </div>
 
                   { extraFieldsTagGroups
                       && Array.isArray(extraFieldsTagGroups)
@@ -577,7 +640,7 @@ function DocumentMap({
         </Button>
 
       </div>
-      <div className="content" ref={contentRef}>
+      <div className="content document-map-info-container" ref={contentRef}>
         {!isDefinitive && (
           <>
             {displayLikes && (
@@ -606,7 +669,7 @@ function DocumentMap({
         )}
 
         { displayResourceInfo === 'right' && (
-            <section className="content-intro">
+            <section className="content-intro desktoponly">
               {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
               {resource.summary ? <Paragraph>{resource.summary}</Paragraph> : null}
 
@@ -652,7 +715,7 @@ function DocumentMap({
       <dialog className='helper-dialog'>
         <div className="info-dialog">
           <Heading level={2}>Hoe werkt het?</Heading>
-          <Paragraph>Op deze afbeelding kun je opmerkingen plaatsen. Klik op de afbeelding om een opmerking toe te voegen. Klik op een marker om de bijbehorende opmerkingen te bekijken.</Paragraph>
+          <Paragraph>{ infoPopupContent }</Paragraph>
           <Spacer size={1} />
           <Button appearance='secondary-action-button' onClick={() => toggleHelperDialog(false)}>
             <i className="ri-close-fill"></i>

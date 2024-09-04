@@ -10,18 +10,27 @@
     height: auto;
   }
 
-  .documentMap--container .map-container {
-    height: 500px;
+  .documentMap--container .map-container .leaflet-container {
+    height: 500px !important;
   }
+
   .documentMap--container .content {
     height: auto;
     overflow: visible;
+  }
+
+  .documentMap--container .content-intro.desktoponly {
+    display: none !important;
   }
 }
 
 @media only screen and (min-width: 1001px) {
   .documentMap--container .map-container.right {
     order: 1;
+  }
+
+  .documentMap--container .content-container.mobileonly {
+    display: none !important;
   }
 }
 
@@ -63,11 +72,12 @@
 
 .documentMap--container .map-container form {
   display: grid;
-  grid-gap: 10px;
+  grid-gap: 15px;
 }
 
 .documentMap--container .map-container textarea {
   width: 300px;
+  margin-top: 8px;
 }
 .documentMap--container .map-container button {
   width: 100%;
@@ -116,10 +126,14 @@
 }
 
 .leaflet-container .leaflet-marker-pane .leaflet-marker-icon.--highlightedIcon {
-  filter: hue-rotate(92deg) saturate(2);
   z-index: 999;
   opacity: 1;
 }
+
+.leaflet-container .leaflet-marker-pane .leaflet-marker-icon.basic-icon.--highlightedIcon {
+  filter: hue-rotate(92deg) saturate(2);
+}
+
 .leaflet-popup-content p.--error {
   margin: 0;
   color: #d30000;
@@ -215,6 +229,8 @@ a + .url-list:before {
   align-items: center;
   justify-content: flex-start;
   color: #000;
+  scale: 1 !important;
+  font-size: 15px;
 }
 
 .documentMap--container .multi-select > button .icon p {
@@ -244,7 +260,7 @@ a + .url-list:before {
 }
 
 .documentMap--container .multi-select .utrecht-paragraph label {
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .documentMap--container .multi-select .multiselect-container {
@@ -252,9 +268,10 @@ a + .url-list:before {
 }
 
 .documentMap--container .multi-select {
-  border: 1px solid rgb(102, 102, 102);
+  border: 1px solid rgb(102, 102, 102) !important;
   padding: 8px 16px;
   background-color: white;
+  margin-top: 8px;
 }
 
 .documentMap--container .multi-select > button{
@@ -278,4 +295,37 @@ a + .url-list:before {
 
 .documentMap--container .map-container + .content .content-intro {
   display: inline-block;
+}
+
+.documentMap--container form .utrecht-form-field > label + p {
+  position: relative;
+}
+
+.documentMap--container form .utrecht-form-field > label + p::before {
+  content: '';
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3C!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--%3E%3Cpath d='M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z'/%3E%3C/svg%3E");
+  background-size: 10px;
+  background-repeat: no-repeat;
+  background-position: right .5rem center;
+  right: 14px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: inline-block;
+  width: 25px;
+  height: 15px;
+}
+
+.documentMap--container form .utrecht-form-field > label + p {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.documentMap--container form .utrecht-form-field > label + p select {
+  border: 1px solid rgb(102,102,102);
+  padding: 10px 12px;
+  font-size: 15px;
+  color: black;
+  border-radius: 0;
 }

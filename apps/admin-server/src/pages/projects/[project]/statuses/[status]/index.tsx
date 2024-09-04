@@ -95,7 +95,7 @@ export default function ProjectStatusEdit() {
             url: '/projects',
           },
           {
-            name: 'Statuses',
+            name: 'Statussen',
             url: `/projects/${project}/statuses`,
           },
           {

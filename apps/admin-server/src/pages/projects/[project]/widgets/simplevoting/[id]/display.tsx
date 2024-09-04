@@ -70,7 +70,7 @@ export default function SimpleVotingDisplay(
             name="displayRanking"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Weergeef de ranking</FormLabel>
+                <FormLabel>Weergeef de volgorde</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -81,7 +81,7 @@ export default function SimpleVotingDisplay(
             name="displayPriceLabel"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Weergeef de prijslabel</FormLabel>
+                <FormLabel>Weergeef het prijslabel</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -122,7 +122,7 @@ export default function SimpleVotingDisplay(
             name="showOriginalResource"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Display de URL van het originele resource</FormLabel>
+                <FormLabel>Weergeef de URL van de originele inzending</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -134,7 +134,7 @@ export default function SimpleVotingDisplay(
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>
-                  URL waar het resource oorspronkelijk vandaan is gehaald
+                  URL van de oorspronkelijke inzending
                   <InfoDialog content={'TODO'} />
                 </FormLabel>
                 <FormControl>
@@ -155,7 +155,7 @@ export default function SimpleVotingDisplay(
             form={form}
             fieldName="resourceListColumns"
             keyForValue="value"
-            fieldLabel="Selecteer het maximaal aantal kolommen voor de resource lijst"
+            fieldLabel="Inzendingslijst"
             onFieldChanged={(key, value) => {
               onFieldChange(key, value);
             }}
