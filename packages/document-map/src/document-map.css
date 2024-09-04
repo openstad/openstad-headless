@@ -10,7 +10,7 @@
     height: auto;
   }
 
-  .documentMap--container .map-container {
+  .openstad-component-widget .documentMap--container .map-container .leaflet-container {
     height: 500px;
   }
 
@@ -230,6 +230,7 @@ a + .url-list:before {
   justify-content: flex-start;
   color: #000;
   scale: 1 !important;
+  font-size: 15px;
 }
 
 .documentMap--container .multi-select > button .icon p {
@@ -259,7 +260,7 @@ a + .url-list:before {
 }
 
 .documentMap--container .multi-select .utrecht-paragraph label {
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .documentMap--container .multi-select .multiselect-container {
@@ -322,6 +323,9 @@ a + .url-list:before {
 }
 
 .documentMap--container form .utrecht-form-field > label + p select {
-  border-bottom: 1px solid black;
+  border: 1px solid rgb(102,102,102);
   padding: 10px 12px;
+  font-size: 15px;
+  color: black;
+  border-radius: 0;
 }

@@ -84,3 +84,19 @@
   letter-spacing: .5px;
   text-transform: capitalize;
 }
+
+.comment-item .reaction-container .form-container {
+ grid-gap: 0;
+}
+
+.comment-item .reaction-container .form-container .question-type-hidden {
+ clip: rect(1px, 1px, 1px, 1px);
+ -webkit-clip-path: inset(50%);
+ clip-path: inset(50%);
+ height: 1px;
+ width: 1px;
+ margin: -1px;
+ overflow: hidden;
+ padding: 0;
+ position: absolute;
+}

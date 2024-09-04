@@ -396,10 +396,21 @@ function DocumentMap({
       const containerEl = containerElement as HTMLElement;
 
       if (commentElement && containerElement) {
-        containerEl.scrollTo({
-          top: commentEl.offsetTop - containerEl.offsetTop,
-          behavior: 'smooth'
-        });
+        const commentRect = commentEl.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const commentTop = commentRect.top + scrollTop;
+
+        if (window.innerWidth <= 1000) {
+          window.scrollTo({
+            top: commentTop,
+            behavior: 'smooth'
+          });
+        } else {
+          containerEl.scrollTo({
+            top: commentEl.offsetTop - containerEl.offsetTop,
+            behavior: 'smooth'
+          });
+        }
 
         commentEl.classList.add('selected');
 
