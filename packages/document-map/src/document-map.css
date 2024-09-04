@@ -322,6 +322,13 @@ a + .url-list:before {
 }
 
 .documentMap--container form .utrecht-form-field > label + p select {
-  border-bottom: 1px solid black;
+  border: 1px solid rgb(102,102,102);
   padding: 10px 12px;
+  font-size: 16px;
+  color: black;
+  border-radius: 0;
+}
+
+.documentMap--container form .utrecht-form-field > label + p select:focus {
+  font-size: 14px;
 }
