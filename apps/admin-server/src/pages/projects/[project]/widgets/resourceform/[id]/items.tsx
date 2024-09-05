@@ -29,6 +29,7 @@ import { defaultFormValues } from "@openstad-headless/resource-form/src/parts/de
 import useTags from "@/hooks/use-tags";
 import { useRouter } from "next/router";
 import InfoDialog from '@/components/ui/info-hover';
+import {Checkbox} from "@/components/ui/checkbox";
 
 const formSchema = z.object({
     trigger: z.string(),
@@ -51,7 +52,7 @@ const formSchema = z.object({
         .array(
             z.object({
                 trigger: z.string(),
-                titles: z.array(z.object({ text: z.string(), key: z.string() })),
+                titles: z.array(z.object({ text: z.string(), key: z.string(), isOtherOption: z.boolean().optional() })),
                 images: z
                     .array(z.object({ image: z.any().optional(), src: z.string() }))
                     .optional(),
@@ -441,6 +442,31 @@ export default function WidgetResourceFormItems(
                                                             <Input {...field} />
                                                             <FormMessage />
                                                         </FormItem>
+                                                    )}
+                                                />
+
+                                                <FormField
+                                                    control={form.control}
+                                                    // @ts-ignore
+                                                    name={`options.${options.length - 1}.isOtherOption`}
+                                                    render={({ field }) => (
+                                                        <>
+                                                            <FormItem
+                                                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexDirection: 'row', marginTop: '10px' }}>
+                                                                <Checkbox
+                                                                    onCheckedChange={(checked: boolean) => {
+                                                                        form.setValue(`options.${options.length - 1}.titles.0.isOtherOption`, checked );
+                                                                    }}
+                                                                />
+                                                                <FormLabel
+                                                                    style={{ marginTop: 0, marginLeft: '6px' }}>Is &apos;Anders, namelijk...&apos;</FormLabel>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                            <FormDescription>
+                                                                Als je deze optie selecteert, wordt er automatisch een tekstveld toegevoegd aan het formulier.
+                                                                Het tekstveld wordt zichtbaar wanneer deze optie wordt geselecteerd.
+                                                            </FormDescription>
+                                                        </>
                                                     )}
                                                 />
                                             </>
