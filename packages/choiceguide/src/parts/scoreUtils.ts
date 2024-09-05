@@ -82,7 +82,11 @@ export const calculateScoreForItem = (
                             if (isNaN(number)) return;
 
                             const fieldValue = Number(userAnswer);
-                            const rangeCalc = isNaN(fieldValue) ? '' : (fieldValue / 100) * number;
+
+                            const reverseValue = optionWeights.hasOwnProperty('ab') && optionWeights.ab === 'A';
+                            const valueBasedOnAB = reverseValue ? (100 - fieldValue) : fieldValue;
+
+                            const rangeCalc = isNaN(valueBasedOnAB) ? '' : (valueBasedOnAB / 100) * number;
 
                             const finalNumber = rangeCalc === '' ? number : rangeCalc;
 
