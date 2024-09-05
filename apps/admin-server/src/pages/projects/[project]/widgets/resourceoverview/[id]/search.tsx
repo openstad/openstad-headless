@@ -60,7 +60,7 @@ export default function WidgetResourceOverviewSearch(
             name="displaySearch"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Zoekbalk weergeven</FormLabel>
+                <FormLabel>Zoekveld weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -72,7 +72,7 @@ export default function WidgetResourceOverviewSearch(
             name="displaySearchText"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Zoektext weergeven</FormLabel>
+                <FormLabel>Zoektekst weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

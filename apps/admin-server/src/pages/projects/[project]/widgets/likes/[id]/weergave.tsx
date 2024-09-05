@@ -101,7 +101,7 @@ export default function LikesDisplay({
           <FormObjectSelectField
             form={form}
             fieldName="resourceId"
-            fieldLabel="Koppel aan een specifieke resource"
+            fieldLabel="Koppel aan een specifieke inzending"
             items={resources}
             keyForValue="id"
             label={(resource) => `${resource.id} ${resource.title}`}
@@ -236,7 +236,7 @@ export default function LikesDisplay({
             name="showProgressBar"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Weergeef progressie balk</FormLabel>
+                <FormLabel>Voortgang balk weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -251,7 +251,7 @@ export default function LikesDisplay({
             name="progressBarDescription"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Progress balk informatie</FormLabel>
+                <FormLabel>Voortgang balk informatie</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Wat representeert de progressie balk?"

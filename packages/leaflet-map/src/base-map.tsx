@@ -136,7 +136,7 @@ const BaseMap = ({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapRef, markers]);
+  }, [mapRef, area]);
 
   // markers
   useEffect(() => {

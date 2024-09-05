@@ -93,7 +93,7 @@ export default function WidgetResourceOverviewInclude(
           <CheckboxList
             form={form}
             fieldName="onlyIncludeStatusIds"
-            fieldLabel="Geef enkel de resources met de volgende status weer:"
+            fieldLabel="Geef enkel de inzendingen met de volgende status weer:"
             layout="vertical"
             label={(t) => t.name}
             keyPerItem={(t) => `${t.id}`}

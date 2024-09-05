@@ -46,7 +46,7 @@ export default function WidgetResourceOverviewPagination(
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Pagination</Heading>
+        <Heading size="xl">Paginering</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -56,7 +56,7 @@ export default function WidgetResourceOverviewPagination(
             name="displayPagination"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Paginatie tonen</FormLabel>
+                <FormLabel>Paginering tonen</FormLabel>
                 <FormControl>
                   <Switch.Root
                     className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"

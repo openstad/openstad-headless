@@ -207,7 +207,7 @@ export default function CreateUserGeneral() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel>Wachtwoord</FormLabel>
                 <FormControl>
                   <Input type="password" {...field} />
                 </FormControl>

@@ -113,7 +113,7 @@ export function SidenavProject({ className }: { className?: string }) {
                 }
                 size="default"
                 className="w-full flex justify-start pl-8">
-                <span className="truncate">Resource instellingen</span>
+                <span className="truncate">Inzendingsinstellingen</span>
               </Button>
             </Link>
             <Link href={`/projects/${project}/settings/map`}>
@@ -210,7 +210,7 @@ export function SidenavProject({ className }: { className?: string }) {
             variant={location.includes('/resources') ? 'secondary' : 'ghost'}
             className="w-full flex justify-start"
             onClick={(e) => {}}>
-            <span className="truncate">Resources</span>
+            <span className="truncate">Inzendingen</span>
           </Button>
         </Link>
         <Link href={`/projects/${project}/unique-codes`}>
@@ -250,7 +250,7 @@ export function SidenavProject({ className }: { className?: string }) {
             variant={location.includes('/statuses') ? 'secondary' : 'ghost'}
             className="w-full flex justify-start"
             onClick={(e) => {}}>
-            <span className="truncate">Statuses</span>
+            <span className="truncate">Statussen</span>
           </Button>
         </Link>
         <Link href={`/projects/${project}/comments`}>

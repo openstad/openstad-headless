@@ -97,7 +97,7 @@ export default function WidgetResourceOverviewDisplay(
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Display</Heading>
+        <Heading size="xl">Weergave</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -160,7 +160,7 @@ export default function WidgetResourceOverviewDisplay(
             name="displayTitle"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Resource titel weergeven</FormLabel>
+                <FormLabel>Titel inzending weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -229,7 +229,7 @@ export default function WidgetResourceOverviewDisplay(
             name="displaySummary"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Resource samenvatting weergeven</FormLabel>
+                <FormLabel>Samenvatting inzending weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -264,7 +264,7 @@ export default function WidgetResourceOverviewDisplay(
             name="displayDescription"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Resource beschrijving weergeven</FormLabel>
+                <FormLabel>Beschrijving inzending weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
