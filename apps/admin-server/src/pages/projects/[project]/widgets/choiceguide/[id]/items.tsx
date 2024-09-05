@@ -105,10 +105,18 @@ export default function WidgetChoiceGuideItems(
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
     if (selectedItem) {
+
+      // Ensure weights are defined
+      const selectedItemWeights = selectedItem.weights || {};
+      const valuesWeights = values.weights || {};
+
+      // Merge weights
+      const mergedWeights = { ...selectedItemWeights, ...valuesWeights };
+
       setItems((currentItems) =>
-        currentItems.map((item) =>
-          item.trigger === selectedItem.trigger ? { ...item, ...values } : item
-        )
+          currentItems.map((item) =>
+              item.trigger === selectedItem.trigger ? { ...item, ...values, weights: mergedWeights } : item
+          )
       );
       setItem(null);
     } else {
