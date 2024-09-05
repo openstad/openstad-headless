@@ -19,6 +19,7 @@ const config: DocumentMapProps = {
   zoom: 0,
   titleTekst: 'Dit is een interactief document.',
   introTekst: 'Klik op de markers om de opmerkingen te bekijken.',
+  largeDoc: true,
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

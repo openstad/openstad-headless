@@ -226,6 +226,18 @@ export default function DocumentGeneral(
           )}
         />
 
+        <FormField
+          control={form.control}
+          name="largeDoc"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Grotere weergave voor het document</FormLabel>
+              {YesNoSelect(field, props)}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Button
           type="submit"
           disabled={disabled}
