@@ -22,6 +22,7 @@ const formSchema = z.object({
   displaySearch: z.boolean(),
   displaySearchText: z.boolean(),
   textActiveSearch: z.string(),
+  searchPlaceholder: z.string(),
 });
 
 export default function WidgetResourceOverviewSearch(
@@ -39,8 +40,8 @@ export default function WidgetResourceOverviewSearch(
     defaultValues: {
       displaySearch: props.displaySearch || false,
       displaySearchText: props.displaySearchText || false,
-      textActiveSearch:
-        props.textActiveSearch || 'Bekijk de tekstresultaten voor [zoekterm]',
+      textActiveSearch: props.textActiveSearch || 'Je ziet hier zoekresultaten voor [zoekterm]',
+      searchPlaceholder: props.searchPlaceholder || 'Zoeken',
     },
   });
 
@@ -84,6 +85,26 @@ export default function WidgetResourceOverviewSearch(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Tekst voor actieve resultaten</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="searchPlaceholder"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tekst voor zoekveld placeholder</FormLabel>
                 <FormControl>
                   <Input
                     {...field}

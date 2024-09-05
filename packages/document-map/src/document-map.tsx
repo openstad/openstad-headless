@@ -701,6 +701,10 @@ function DocumentMap({
                 sorting={[]}
                 tagGroups={tagGroups}
                 tagsLimitation={filteredTagIdsArray}
+                resetText="Reset"
+                applyText="Toepassen"
+                searchPlaceholder="Zoeken"
+
             />
         ) : null}
 
