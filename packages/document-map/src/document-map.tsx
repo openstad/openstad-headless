@@ -685,25 +685,29 @@ function DocumentMap({
         )}
 
         {(tagGroups && Array.isArray(tagGroups) && tagGroups.length > 0 && datastore) ? (
-          <Filters
-            className="osc-flex-columned"
-            dataStore={datastore}
-            defaultSorting=""
-            displaySearch={false}
-            displaySorting={false}
-            displayTagFilters={true}
-            onUpdateFilter={(f) => {
-              if (f.tags.length === 0) {
-                setSelectedTags([]);
-              } else {
-                setSelectedTags(f.tags);
-              }
-            }}
-            resources={[]}
-            sorting={[]}
-            tagGroups={tagGroups}
-            tagsLimitation={filteredTagIdsArray}
-          />
+            <Filters
+                className="osc-flex-columned"
+                dataStore={datastore}
+                defaultSorting=""
+                displaySearch={false}
+                displaySorting={false}
+                displayTagFilters={true}
+                onUpdateFilter={(f) => {
+                  if (f.tags.length === 0) {
+                    setSelectedTags([]);
+                  } else {
+                    setSelectedTags(f.tags);
+                  }
+                }}
+                resources={[]}
+                sorting={[]}
+                tagGroups={tagGroups}
+                tagsLimitation={filteredTagIdsArray}
+                resetText="Reset"
+                applyText="Toepassen"
+                searchPlaceholder="Zoeken"
+
+            />
         ) : null}
 
         {!isDefinitive && (
