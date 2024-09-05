@@ -67,8 +67,6 @@ export type DocumentMapProps = BaseProps &
     displayMapSide?: string;
     displayResourceDescription?: string;
     infoPopupContent?: string;
-    emptyListText?: string;
-    loginText?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -100,8 +98,6 @@ function DocumentMap({
   displayMapSide = 'left',
   displayResourceDescription = 'no',
   infoPopupContent = 'Op deze afbeelding kun je opmerkingen plaatsen. Klik op de afbeelding om een opmerking toe te voegen. Klik op een marker om de bijbehorende opmerkingen te bekijken.',
-  loginText = 'Inloggen om deel te nemen aan de discussie',
-  emptyListText = 'Nog geen reacties geplaatst',
   largeDoc = false,
   ...props
 }: DocumentMapProps) {
@@ -185,6 +181,7 @@ function DocumentMap({
     setCommentValue(e.target.value);
   };
 
+
   useEffect(() => {
     setAllComments(comments);
   }, [comments]);
@@ -235,17 +232,25 @@ function DocumentMap({
 
   const [docWidth, setDocumentWidth] = useState<number>(1920);
   const [docHeight, setDocumentHeight] = useState<number>(1080)
+  const [isBoundsSet, setIsBoundsSet] = useState(false);
+  const leafletMapRef = useRef<HTMLDivElement>(null);
+
   const imageUrl = resource.images ? resource.images[0].url : '';
   const img = new Image();
   img.src = imageUrl;
   img.onload = () => {
-    const imageWidth = img.width;
-    const imageHeight = img.height;
+    const containerWidth = leafletMapRef.current?.offsetWidth || 1920;
+    const imageWidth = containerWidth * 0.8;
+    const imageHeight = (img.height / img.width) * imageWidth;
     setDocumentWidth(imageWidth);
     setDocumentHeight(imageHeight);
   };
-  const verticalOffset = docHeight * .20;
-  const imageBounds: LatLngBoundsLiteral = [[-docHeight + verticalOffset, -docWidth / 2], [verticalOffset, docWidth / 2]];
+
+  
+  const imageBounds: LatLngBoundsLiteral = [
+    [0, docWidth / 2],
+    [-docHeight, -docWidth / 2]
+  ];
 
 
   const contentRef = useRef<HTMLDivElement>(null);
@@ -265,6 +270,15 @@ function DocumentMap({
         setSelectedMarkerIndex(-1);
       },
     });
+
+    
+useEffect(() => {
+  if (map && imageBounds && !isBoundsSet) {
+    map.fitBounds(imageBounds);
+    map.scrollWheelZoom.disable();
+    setIsBoundsSet(true);
+  }
+}, [map, imageBounds, isBoundsSet]);
 
     return null;
   };
@@ -379,7 +393,6 @@ function DocumentMap({
   interface ExtendedMarkerProps extends MarkerProps {
     id: string;
     index: number;
-    color: string;
   }
 
   const scrollToComment = (index: number) => {
@@ -396,30 +409,8 @@ function DocumentMap({
       });
 
       const commentElement = document.getElementById(`comment-${index}`);
-      const containerElement = document.querySelector('.document-map-info-container');
-
-      const commentEl = commentElement as HTMLElement;
-      const containerEl = containerElement as HTMLElement;
-
-      if (commentElement && containerElement) {
-        const commentRect = commentEl.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const commentTop = commentRect.top + scrollTop;
-
-        if (window.innerWidth <= 1000) {
-          window.scrollTo({
-            top: commentTop,
-            behavior: 'smooth'
-          });
-        } else {
-          containerEl.scrollTo({
-            top: commentEl.offsetTop - containerEl.offsetTop,
-            behavior: 'smooth'
-          });
-        }
-
-        commentEl.classList.add('selected');
-
+      if (commentElement) {
+        commentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         clearInterval(intervalId);
       } else if (attempts < maxAttempts) {
         attempts++;
@@ -431,20 +422,14 @@ function DocumentMap({
     const intervalId = setInterval(tryScrollToComment, interval);
   };
 
-  const MarkerWithId: React.FC<ExtendedMarkerProps> = ({ id, index, color, ...props }) => {
+  const MarkerWithId: React.FC<ExtendedMarkerProps> = ({ id, index, ...props }) => {
     const markerRef = useRef<any>(null);
-    const isDefaultColor = color === '#555588';
 
     return (
       <Marker
         {...props}
         ref={markerRef}
-        icon={MarkerIcon({
-          icon: {
-            className: `${index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon'} ${isDefaultColor ? 'basic-icon' : ''}`,
-            color: !isDefaultColor ? color : undefined,
-          },
-        })}
+        icon={MarkerIcon({ icon: { className: index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon' } })}
         eventHandlers={{
           click: () => {
             if (index === selectedMarkerIndex) {
@@ -501,7 +486,7 @@ function DocumentMap({
   };
 
   return (
-    <div className={`documentMap--container ${largeDoc ? ' --largeDoc' : ''}`}>
+    <div className={`documentMap--container ${largeDoc ? '--largeDoc' :''}`}>
       <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
 
         {(displayResourceInfo === 'left' || accessibilityUrlVisible || backUrl || (definitiveUrlVisible && originalID !== undefined && isDefinitive)) && (
@@ -536,117 +521,118 @@ function DocumentMap({
             </section>
           </div>
         )}
-        <div className="document-container">
-          <MapContainer center={[0, 0]} crs={CRS.Simple} maxZoom={maxZoom} minZoom={minZoom} zoom={zoom}  >
-            <MapEvents />
-            {filteredComments && filteredComments
-              .filter((comment: any) => !!comment.location)
-              .map((comment: any, index: number) => {
+      <div className='document-container'>
+        <MapContainer
+          center={[0, 0]}
+          crs={CRS.Simple}
+          maxZoom={maxZoom}
+          minZoom={minZoom}
+          zoom={zoom}
+          zoomSnap={0}
+        >
+          <MapEvents />
+          {filteredComments && filteredComments
+            .filter((comment: any) => !!comment.location)
+            .map((comment: any, index: number) => (
+              <MarkerWithId
+                key={index}
+                id={`marker-${index}`}
+                index={index}
+                position={comment.location}
+              >
+              </MarkerWithId>
+            ))}
+          <ImageOverlay
+            url={resource.images ? resource.images[0].url : ''}
+            bounds={imageBounds}
+            aria-describedby={randomId}
+          />
+          {popupPosition && !isDefinitive && (
+            <Popup position={popupPosition}>
+              {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
+                <>
+                  <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
+                  <Spacer size={1} />
+                  <Button
+                    appearance="primary-action-button"
+                    onClick={() => {
+                      if (props.login?.url) {
+                        document.location.href = props.login?.url;
+                      }
+                    }}
+                    type="button">
+                    Inloggen
+                  </Button>
+                </>
+              ) :
+                <form>
+                  <div>
+                    <FormLabel htmlFor="commentBox">{addCommentText}</FormLabel>
+                    {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
+                    {longLengthError && <Paragraph className="--error">De opmerking mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
 
-                const firstTag = comment.tags && comment.tags[0];
-                const documentMapIconColor = firstTag && firstTag.documentMapIconColor ? firstTag.documentMapIconColor : '#555588';
+                    <Textarea
+                      id="commentBox"
+                      name="comment"
+                      onChange={handleCommentChange}
+                      rows={3}
+                      value={commentValue}
+                    />
+                  </div>
 
-                return (
-                  <MarkerWithId
-                    key={index}
-                    id={`marker-${index}`}
-                    index={index}
-                    position={comment.location}
-                    color={documentMapIconColor}
-                  />
-                );
-              })}
-            <ImageOverlay
-              url={resource.images ? resource.images[0].url : ''}
-              bounds={imageBounds}
-              aria-describedby={randomId}
-            />
-            {popupPosition && !isDefinitive && (
-              <Popup position={popupPosition}>
-                {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
-                  <>
-                    <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
-                    <Spacer size={1} />
-                    <Button
-                      appearance="primary-action-button"
-                      onClick={() => {
-                        if (props.login?.url) {
-                          document.location.href = props.login?.url;
-                        }
-                      }}
-                      type="button">
-                      Inloggen
-                    </Button>
-                  </>
-                ) :
-                  <form>
-                    <div>
-                      <FormLabel htmlFor="commentBox">{addCommentText}</FormLabel>
-                      {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
-                      {longLengthError && <Paragraph className="--error">De opmerking mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
+                  {extraFieldsTagGroups
+                    && Array.isArray(extraFieldsTagGroups)
+                    && extraFieldsTagGroups.length > 0
+                    && extraFieldsTagGroups.map((group: { type: string; label?: string; multiple: boolean }, index) => {
+                      return (
+                        <div key={group.type}>
+                          <FormLabel htmlFor={group.type}>{group.label}</FormLabel>
 
-                      <Textarea
-                        id="commentBox"
-                        name="comment"
-                        onChange={handleCommentChange}
-                        rows={3}
-                        value={commentValue}
-                      />
-                    </div>
+                          {group && group.multiple ? (
+                            <MultiSelect
+                              label={'Selecteer een optie'}
+                              onItemSelected={(optionValue: string) => {
+                                const value = parseInt(optionValue, 10);
+                                updateTagListMultiple(value);
+                              }}
+                              options={(allTags?.filter((tag: { type: string }) => tag.type === group.type).map((tag: { id: number, name: string }) => ({
+                                value: tag.id,
+                                label: tag.name,
+                                checked: selectedOptions.includes(tag.id),
+                              })))}
+                            />
 
-                    {extraFieldsTagGroups
-                      && Array.isArray(extraFieldsTagGroups)
-                      && extraFieldsTagGroups.length > 0
-                      && extraFieldsTagGroups.map((group: { type: string; label?: string; multiple: boolean }, index) => {
-                        return (
-                          <div key={group.type}>
-                            <FormLabel htmlFor={group.type}>{group.label}</FormLabel>
+                          ) : (
+                            <SelectField
+                              choices={(allTags?.filter((tag: { type: string }) => tag.type === group.type).map((tag: { id: string | number, name: string }) => ({
+                                value: tag.id,
+                                label: tag.name
+                              })))}
+                              fieldKey={`tag[${group.type}]`}
+                              onChange={(e: { name: string; value: string | [] | Record<number, never>; }) => {
+                                let selectedTag = e.value as string;
 
-                            {group && group.multiple ? (
-                              <MultiSelect
-                                label={'Selecteer een optie'}
-                                onItemSelected={(optionValue: string) => {
-                                  const value = parseInt(optionValue, 10);
-                                  updateTagListMultiple(value);
-                                }}
-                                options={(allTags?.filter((tag: { type: string }) => tag.type === group.type).map((tag: { id: number, name: string }) => ({
-                                  value: tag.id,
-                                  label: tag.name,
-                                  checked: selectedOptions.includes(tag.id),
-                                })))}
-                              />
+                                updateTagListMultiple(parseInt(selectedTag, 10));
+                              }}
+                            />
+                          )}
+                        </div>
+                      )
+                    })}
+                  <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>{submitCommentText}</Button>
+                </form>}
 
-                            ) : (
-                              <SelectField
-                                choices={(allTags?.filter((tag: { type: string }) => tag.type === group.type).map((tag: { id: string | number, name: string }) => ({
-                                  value: tag.id,
-                                  label: tag.name
-                                })))}
-                                fieldKey={`tag[${group.type}]`}
-                                onChange={(e: { name: string; value: string | [] | Record<number, never>; }) => {
-                                  let selectedTag = e.value as string;
+            </Popup>
+          )}
+        </MapContainer>
 
-                                  updateTagListMultiple(parseInt(selectedTag, 10));
-                                }}
-                              />
-                            )}
-                          </div>
-                        )
-                      })}
-                    <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>{submitCommentText}</Button>
-                  </form>}
-
-              </Popup>
-            )}
-          </MapContainer>
-
-          <Button className='info-trigger' appearance='primary-action-button' onClick={() => toggleHelperDialog(true)}>
-            <i className="ri-information-line"></i>
-            <span className="sr-only">Hoe werkt het?</span>
-          </Button>
+        <Button className='info-trigger' appearance='primary-action-button' onClick={() => toggleHelperDialog(true)}>
+          <i className="ri-information-line"></i>
+          <span className="sr-only">Hoe werkt het?</span>
+        </Button>
         </div>
       </div>
-      <div className="content document-map-info-container" ref={contentRef}>
+      <div className="content" ref={contentRef}>
         {!isDefinitive && (
           <>
             {displayLikes && (
@@ -685,29 +671,28 @@ function DocumentMap({
         )}
 
         {(tagGroups && Array.isArray(tagGroups) && tagGroups.length > 0 && datastore) ? (
-            <Filters
-                className="osc-flex-columned"
-                dataStore={datastore}
-                defaultSorting=""
-                displaySearch={false}
-                displaySorting={false}
-                displayTagFilters={true}
-                onUpdateFilter={(f) => {
-                  if (f.tags.length === 0) {
-                    setSelectedTags([]);
-                  } else {
-                    setSelectedTags(f.tags);
-                  }
-                }}
-                resources={[]}
-                sorting={[]}
-                tagGroups={tagGroups}
-                tagsLimitation={filteredTagIdsArray}
-                resetText="Reset"
-                applyText="Toepassen"
-                searchPlaceholder="Zoeken"
-
-            />
+          <Filters
+            className="osc-flex-columned"
+            dataStore={datastore}
+            defaultSorting=""
+            displaySearch={false}
+            displaySorting={false}
+            displayTagFilters={true}
+            searchPlaceholder='Zoeken'
+            applyText='Toepassen'
+            resetText='Reset'
+            onUpdateFilter={(f) => {
+              if (f.tags.length === 0) {
+                setSelectedTags([]);
+              } else {
+                setSelectedTags(f.tags);
+              }
+            }}
+            resources={[]}
+            sorting={[]}
+            tagGroups={tagGroups}
+            tagsLimitation={filteredTagIdsArray}
+          />
         ) : null}
 
         {!isDefinitive && (
@@ -718,8 +703,6 @@ function DocumentMap({
             resourceId={resourceId || ''}
             selectedComment={selectedCommentIndex}
             setRefreshComments={setRefreshComments}
-            emptyListText={emptyListText}
-            loginText={loginText}
             showForm={false}
           />
         )}
@@ -743,4 +726,3 @@ function DocumentMap({
 DocumentMap.loadWidget = loadWidget;
 
 export { DocumentMap };
-
