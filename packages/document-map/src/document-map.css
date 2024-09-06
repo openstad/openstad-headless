@@ -56,8 +56,6 @@
 .documentMap--container .map-container {
   display: flex;
   flex-direction: column;
-  background: #dddddd;
-  gap: 1rem;
   position: relative;
 }
 
@@ -73,6 +71,7 @@
   width: 100%;
   height: 100%;
   z-index: 1;
+  background: #808080;
 }
 
 .documentMap--container .map-container form {

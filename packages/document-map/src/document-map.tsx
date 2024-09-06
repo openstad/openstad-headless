@@ -72,6 +72,8 @@ export type DocumentMapProps = BaseProps &
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
     largeDoc?: boolean;
+    emptyListText?: string;
+    loginText?: string;
   };
 
 
