@@ -28,6 +28,7 @@ const formSchema = z.object({
     infoPopupContent: z.string().optional(),
     emptyListText: z.string().optional(),
     loginText: z.string().optional(),
+    largeDoc: z.boolean().optional(),
 });
 
 export default function DocumentContent(
@@ -52,6 +53,7 @@ export default function DocumentContent(
             infoPopupContent: props?.infoPopupContent || 'Op deze afbeelding kun je opmerkingen plaatsen. Klik op de afbeelding om een opmerking toe te voegen. Klik op een marker om de bijbehorende opmerkingen te bekijken.',
             emptyListText: props?.emptyListText || 'Nog geen reacties geplaatst',
             loginText: props?.loginText || 'Inloggen om deel te nemen aan de discussie',
+            largeDoc: props?.largeDoc || false,
         },
     });
 
