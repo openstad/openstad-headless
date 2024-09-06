@@ -78,6 +78,7 @@ export type DocumentMapProps = BaseProps &
     loginText?: string;
     backUrlContent?: string;
     backUrlText?: string;
+
   };
 
 
@@ -105,6 +106,8 @@ function DocumentMap({
   displayResourceDescription = 'no',
   infoPopupContent = 'Op deze afbeelding kun je reacties plaatsen. Klik op de afbeelding om een reactie toe te voegen. Klik op een marker om de bijbehorende reacties te bekijken.',
   largeDoc = false,
+  loginText = 'Inloggen om deel te nemen aan de discussie',
+  emptyListText = 'Nog geen reacties geplaatst',
   ...props
 }: DocumentMapProps) {
 
@@ -402,6 +405,7 @@ function DocumentMap({
   interface ExtendedMarkerProps extends MarkerProps {
     id: string;
     index: number;
+    color: string;
   }
 
   const scrollToComment = (index: number) => {
@@ -419,330 +423,366 @@ function DocumentMap({
 
       const commentElement = document.getElementById(`comment-${index}`);
       if (commentElement) {
-        commentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        clearInterval(intervalId);
-      } else if (attempts < maxAttempts) {
-        attempts++;
+        const containerElement = document.querySelector('.document-map-info-container');
+
+        const commentEl = commentElement as HTMLElement;
+        const containerEl = containerElement as HTMLElement;
+
+        if (commentElement && containerElement) {
+          const commentRect = commentEl.getBoundingClientRect();
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          const commentTop = commentRect.top + scrollTop;
+
+          if (window.innerWidth <= 1000) {
+            window.scrollTo({
+              top: commentTop,
+              behavior: 'smooth'
+            });
+          } else {
+            containerEl.scrollTo({
+              top: commentEl.offsetTop - containerEl.offsetTop,
+              behavior: 'smooth'
+            });
+          }
+
+          commentEl.classList.add('selected');
+          clearInterval(intervalId);
+        } else if (attempts < maxAttempts) {
+          attempts++;
+        } else {
+          clearInterval(intervalId);
+        }
+      };
+    }
+      const intervalId = setInterval(tryScrollToComment, interval);
+    };
+
+    const MarkerWithId: React.FC<ExtendedMarkerProps> = ({ id, index, color, ...props }) => {
+      const markerRef = useRef<any>(null);
+      const isDefaultColor = color === '#555588';
+  
+      return (
+          <Marker
+              {...props}
+              ref={markerRef}
+              icon={MarkerIcon({
+                icon: {
+                  className: `${index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon'} ${isDefaultColor ? 'basic-icon' : ''}`,
+                  color: !isDefaultColor ? color : undefined,
+                },
+              })}
+              eventHandlers={{
+                click: () => {
+                  if (index === selectedMarkerIndex) {
+                    setSelectedMarkerIndex(-1);
+                    setSelectedCommentIndex(-1);
+                  } else {
+                    setSelectedMarkerIndex(index);
+                    setSelectedCommentIndex(index);
+                    scrollToComment(index);
+                  }
+                },
+                keydown: (e: L.LeafletKeyboardEvent) => {
+                  if (e.originalEvent.key === 'Enter') {
+                    if (index === selectedMarkerIndex) {
+                      setSelectedMarkerIndex(-1);
+                      setSelectedCommentIndex(-1);
+                    } else {
+                      setSelectedMarkerIndex(index);
+                      setSelectedCommentIndex(index);
+                      scrollToComment(index);
+                    }
+                  }
+                }
+              }}
+          />
+      );
+    };
+
+    const getUrl = () => {
+      if (props.accessibilityUrl?.includes('[id]')) {
+        return props.accessibilityUrl?.split('[id]')[0] + resourceId + '#doc=' + window.location.href.split('/').reverse()[0];
       } else {
-        clearInterval(intervalId);
+        return props.accessibilityUrl + '#doc=' + window.location.href.split('/').reverse()[0];
+      }
+    }
+
+    const getDefinitiveUrl = (originalID: string) => {
+      if (props.definitiveUrl?.includes('[id]')) {
+        return props.definitiveUrl?.split('[id]')[0] + originalID + '#doc=' + window.location.href.split('/').reverse()[0];
+      } else {
+        return props.definitiveUrl + '#doc=' + window.location.href.split('/').reverse()[0];
+      }
+    }
+
+    const toggleHelperDialog = (open: boolean) => {
+      const dialog = document.querySelector('dialog.helper-dialog') as HTMLDialogElement;
+      if (dialog) {
+        if (open) {
+          dialog.showModal();
+        } else {
+          dialog.close();
+        }
       }
     };
 
-    const intervalId = setInterval(tryScrollToComment, interval);
-  };
-
-  const MarkerWithId: React.FC<ExtendedMarkerProps> = ({ id, index, ...props }) => {
-    const markerRef = useRef<any>(null);
-
     return (
-      <Marker
-        {...props}
-        ref={markerRef}
-        icon={MarkerIcon({ icon: { className: index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon' } })}
-        eventHandlers={{
-          click: () => {
-            if (index === selectedMarkerIndex) {
-              setSelectedMarkerIndex(-1);
-              setSelectedCommentIndex(-1);
-            } else {
-              setSelectedMarkerIndex(index);
-              setSelectedCommentIndex(index);
-              scrollToComment(index);
-            }
-          },
-          keydown: (e: L.LeafletKeyboardEvent) => {
-            if (e.originalEvent.key === 'Enter') {
-              if (index === selectedMarkerIndex) {
-                setSelectedMarkerIndex(-1);
-                setSelectedCommentIndex(-1);
-              } else {
-                setSelectedMarkerIndex(index);
-                setSelectedCommentIndex(index);
-                scrollToComment(index);
-              }
-            }
-          }
-        }}
-      />
-    );
-  };
+      <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
+        <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
 
-  const getUrl = () => {
-    if (props.accessibilityUrl?.includes('[id]')) {
-      return props.accessibilityUrl?.split('[id]')[0] + resourceId + '#doc=' + window.location.href.split('/').reverse()[0];
-    } else {
-      return props.accessibilityUrl + '#doc=' + window.location.href.split('/').reverse()[0];
-    }
-  }
-
-  const getDefinitiveUrl = (originalID: string) => {
-    if (props.definitiveUrl?.includes('[id]')) {
-      return props.definitiveUrl?.split('[id]')[0] + originalID + '#doc=' + window.location.href.split('/').reverse()[0];
-    } else {
-      return props.definitiveUrl + '#doc=' + window.location.href.split('/').reverse()[0];
-    }
-  }
-
-  const toggleHelperDialog = (open: boolean) => {
-    const dialog = document.querySelector('dialog.helper-dialog') as HTMLDialogElement;
-    if (dialog) {
-      if (open) {
-        dialog.showModal();
-      } else {
-        dialog.close();
-      }
-    }
-  };
-
-  return (
-    <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
-      <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
-
-        {(displayResourceInfo === 'left' || accessibilityUrlVisible || backUrl || (definitiveUrlVisible && originalID !== undefined && isDefinitive)) && (
-          <div className="content-container">
-            <div className="documentMap--header">
-              <div className='url-container'>
-                <div className="url-list">
-                  {accessibilityUrlVisible ? <Link href={getUrl()} title="Bekijk tekstuele versie" id={randomId}>{props.accessibilityUrlText}</Link> : null}
-                  {definitiveUrlVisible && originalID !== undefined && isDefinitive ? <Link href={getDefinitiveUrl(originalID)} title="Bekijk originele versie" id={randomId}>{props.definitiveUrlText}</Link> : null}
+          {(displayResourceInfo === 'left' || accessibilityUrlVisible || backUrl || (definitiveUrlVisible && originalID !== undefined && isDefinitive)) && (
+            <div className="content-container">
+              <div className="documentMap--header">
+                <div className='url-container'>
+                  <div className="url-list">
+                    {accessibilityUrlVisible ? <Link href={getUrl()} title="Bekijk tekstuele versie" id={randomId}>{props.accessibilityUrlText}</Link> : null}
+                    {definitiveUrlVisible && originalID !== undefined && isDefinitive ? <Link href={getDefinitiveUrl(originalID)} title="Bekijk originele versie" id={randomId}>{props.definitiveUrlText}</Link> : null}
+                  </div>
                 </div>
               </div>
+              {displayResourceInfo === 'left' && (
+                <section className="content-intro">
+                  {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
+                  {resource.summary ? <Paragraph>{resource.summary}</Paragraph> : null}
+
+                  {(displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
+                </section>
+              )}
             </div>
-            {displayResourceInfo === 'left' && (
+          )}
+
+          {displayResourceInfo === 'right' && (
+            <div className="content-container mobileonly">
               <section className="content-intro">
                 {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
                 {resource.summary ? <Paragraph>{resource.summary}</Paragraph> : null}
 
                 {(displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
               </section>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+          <div className='document-container'>
+            <MapContainer
+              center={[0, 0]}
+              crs={CRS.Simple}
+              maxZoom={maxZoom}
+              minZoom={minZoom}
+              zoom={zoom}
+              zoomSnap={0}
+            >
+              <MapEvents />
+              {filteredComments && filteredComments
+                .filter((comment: any) => !!comment.location)
+                .map((comment: any, index: number) => {
 
-        {displayResourceInfo === 'right' && (
-          <div className="content-container mobileonly">
-            <section className="content-intro">
+                  const firstTag = comment.tags && comment.tags[0];
+                  const documentMapIconColor = firstTag && firstTag.documentMapIconColor ? firstTag.documentMapIconColor : '#555588';
+  
+                  return (
+                      <MarkerWithId
+                          key={index}
+                          id={`marker-${index}`}
+                          index={index}
+                          position={comment.location}
+                          color={documentMapIconColor}
+                      />
+                  );
+                })}
+              <ImageOverlay
+                url={resource.images ? resource.images[0].url : ''}
+                bounds={imageBounds}
+                aria-describedby={randomId}
+              />
+              {popupPosition && !isDefinitive && (
+                <Popup position={popupPosition}>
+                  {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
+                    <>
+                      <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
+                      <Spacer size={1} />
+                      <Button
+                        appearance="primary-action-button"
+                        onClick={() => {
+                          if (props.login?.url) {
+                            document.location.href = props.login?.url;
+                          }
+                        }}
+                        type="button">
+                        Inloggen
+                      </Button>
+                    </>
+                  ) :
+                    <form>
+                      <div>
+                        <FormLabel htmlFor="commentBox">{addCommentText}</FormLabel>
+                        {shortLengthError && <Paragraph className="--error">De reactie moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
+                        {longLengthError && <Paragraph className="--error">De reactie mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
+
+                        <Textarea
+                          id="commentBox"
+                          name="comment"
+                          onChange={handleCommentChange}
+                          rows={3}
+                          value={commentValue}
+                        />
+                      </div>
+
+                      {extraFieldsTagGroups
+                        && Array.isArray(extraFieldsTagGroups)
+                        && extraFieldsTagGroups.length > 0
+                        && extraFieldsTagGroups.map((group: { type: string; label?: string; multiple: boolean }, index) => {
+                          return (
+                            <div key={group.type}>
+                              <FormLabel htmlFor={group.type}>{group.label}</FormLabel>
+
+                              {group && group.multiple ? (
+                                <MultiSelect
+                                  label={'Selecteer een optie'}
+                                  onItemSelected={(optionValue: string) => {
+                                    const value = parseInt(optionValue, 10);
+                                    updateTagListMultiple(value);
+                                  }}
+                                  options={(allTags?.filter((tag: { type: string }) => tag.type === group.type).map((tag: { id: number, name: string }) => ({
+                                    value: tag.id,
+                                    label: tag.name,
+                                    checked: selectedOptions.includes(tag.id),
+                                  })))}
+                                />
+
+                              ) : (
+                                <SelectField
+                                  choices={(allTags?.filter((tag: { type: string }) => tag.type === group.type).map((tag: { id: string | number, name: string }) => ({
+                                    value: tag.id,
+                                    label: tag.name
+                                  })))}
+                                  fieldKey={`tag[${group.type}]`}
+                                  onChange={(e: { name: string; value: string | [] | Record<number, never>; }) => {
+                                    let selectedTag = e.value as string;
+
+                                    updateTagListMultiple(parseInt(selectedTag, 10));
+                                  }}
+                                />
+                              )}
+                            </div>
+                          )
+                        })}
+                      <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>{submitCommentText}</Button>
+                    </form>}
+
+                </Popup>
+              )}
+            </MapContainer>
+
+            <Button className='info-trigger' appearance='primary-action-button' onClick={() => toggleHelperDialog(true)}>
+              <i className="ri-information-line"></i>
+              <span className="sr-only">Hoe werkt het?</span>
+            </Button>
+          </div>
+        </div>
+        <div className="content document-map-info-container" ref={contentRef}>
+          {!isDefinitive && (
+            <>
+              {displayLikes && canComment && (
+                <>
+                  <Likes
+                    {...props}
+                    resourceId={resourceId || ''}
+                    title={props.likeWidget?.title}
+                    yesLabel={props.likeWidget?.yesLabel}
+                    noLabel={props.likeWidget?.noLabel}
+                    hideCounters={props.likeWidget?.hideCounters}
+                    variant={props.likeWidget?.variant}
+                    showProgressBar={props.likeWidget?.showProgressBar}
+                    progressBarDescription={
+                      props.likeWidget?.progressBarDescription
+                    }
+                  />
+                  <Spacer size={1} />
+                </>
+              )}
+              {backUrl !== undefined && (
+                <div className="osc back-url-container">
+                  <div className="banner">
+                    <Spacer size={2} />
+                    <Heading6>{props.backUrlContent}</Heading6>
+                    <Spacer size={1} />
+                    <ButtonLink appearance="primary-action-button" href={backUrl} title="Terug naar overzicht" id={randomId}>{props.backUrlText}</ButtonLink>
+                    <Spacer size={2} />
+                  </div>
+                  <Spacer size={2} />
+                </div>
+              )}
+              <div className='toggleMarkers'>
+                <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
+                <FormLabel htmlFor="toggleMarkers"> <Paragraph>{addMarkerText}</Paragraph> </FormLabel>
+              </div>
+            </>
+          )}
+
+          {displayResourceInfo === 'right' && (
+            <section className="content-intro desktoponly">
               {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
               {resource.summary ? <Paragraph>{resource.summary}</Paragraph> : null}
 
               {(displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
+
             </section>
-          </div>
-        )}
-        <div className='document-container'>
-          <MapContainer
-            center={[0, 0]}
-            crs={CRS.Simple}
-            maxZoom={maxZoom}
-            minZoom={minZoom}
-            zoom={zoom}
-            zoomSnap={0}
-          >
-            <MapEvents />
-            {filteredComments && filteredComments
-              .filter((comment: any) => !!comment.location)
-              .map((comment: any, index: number) => (
-                <MarkerWithId
-                  key={index}
-                  id={`marker-${index}`}
-                  index={index}
-                  position={comment.location}
-                >
-                </MarkerWithId>
-              ))}
-            <ImageOverlay
-              url={resource.images ? resource.images[0].url : ''}
-              bounds={imageBounds}
-              aria-describedby={randomId}
+          )}
+
+          {(tagGroups && Array.isArray(tagGroups) && tagGroups.length > 0 && datastore) ? (
+            <Filters
+              className="osc-flex-columned"
+              dataStore={datastore}
+              defaultSorting=""
+              displaySearch={false}
+              displaySorting={false}
+              displayTagFilters={true}
+              searchPlaceholder='Zoeken'
+              applyText='Toepassen'
+              resetText='Reset'
+              onUpdateFilter={(f) => {
+                if (f.tags.length === 0) {
+                  setSelectedTags([]);
+                } else {
+                  setSelectedTags(f.tags);
+                }
+              }}
+              resources={[]}
+              sorting={[]}
+              tagGroups={tagGroups}
+              tagsLimitation={filteredTagIdsArray}
             />
-            {popupPosition && !isDefinitive && (
-              <Popup position={popupPosition}>
-                {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
-                  <>
-                    <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
-                    <Spacer size={1} />
-                    <Button
-                      appearance="primary-action-button"
-                      onClick={() => {
-                        if (props.login?.url) {
-                          document.location.href = props.login?.url;
-                        }
-                      }}
-                      type="button">
-                      Inloggen
-                    </Button>
-                  </>
-                ) :
-                  <form>
-                    <div>
-                      <FormLabel htmlFor="commentBox">{addCommentText}</FormLabel>
-                      {shortLengthError && <Paragraph className="--error">De reactie moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
-                      {longLengthError && <Paragraph className="--error">De reactie mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
+          ) : null}
 
-                      <Textarea
-                        id="commentBox"
-                        name="comment"
-                        onChange={handleCommentChange}
-                        rows={3}
-                        value={commentValue}
-                      />
-                    </div>
-
-                    {extraFieldsTagGroups
-                      && Array.isArray(extraFieldsTagGroups)
-                      && extraFieldsTagGroups.length > 0
-                      && extraFieldsTagGroups.map((group: { type: string; label?: string; multiple: boolean }, index) => {
-                        return (
-                          <div key={group.type}>
-                            <FormLabel htmlFor={group.type}>{group.label}</FormLabel>
-
-                            {group && group.multiple ? (
-                              <MultiSelect
-                                label={'Selecteer een optie'}
-                                onItemSelected={(optionValue: string) => {
-                                  const value = parseInt(optionValue, 10);
-                                  updateTagListMultiple(value);
-                                }}
-                                options={(allTags?.filter((tag: { type: string }) => tag.type === group.type).map((tag: { id: number, name: string }) => ({
-                                  value: tag.id,
-                                  label: tag.name,
-                                  checked: selectedOptions.includes(tag.id),
-                                })))}
-                              />
-
-                            ) : (
-                              <SelectField
-                                choices={(allTags?.filter((tag: { type: string }) => tag.type === group.type).map((tag: { id: string | number, name: string }) => ({
-                                  value: tag.id,
-                                  label: tag.name
-                                })))}
-                                fieldKey={`tag[${group.type}]`}
-                                onChange={(e: { name: string; value: string | [] | Record<number, never>; }) => {
-                                  let selectedTag = e.value as string;
-
-                                  updateTagListMultiple(parseInt(selectedTag, 10));
-                                }}
-                              />
-                            )}
-                          </div>
-                        )
-                      })}
-                    <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>{submitCommentText}</Button>
-                  </form>}
-
-              </Popup>
-            )}
-          </MapContainer>
-
-          <Button className='info-trigger' appearance='primary-action-button' onClick={() => toggleHelperDialog(true)}>
-            <i className="ri-information-line"></i>
-            <span className="sr-only">Hoe werkt het?</span>
-          </Button>
+          {!isDefinitive && (
+            <Comments
+              {...props}
+              key={refreshComments ? 'refresh' : 'no-refresh'}
+              onlyIncludeTags={selectedTagsString || filteredTagsIdsString || ''}
+              resourceId={resourceId || ''}
+              selectedComment={selectedCommentIndex}
+              setRefreshComments={setRefreshComments}
+              showForm={false}
+              emptyListText={emptyListText}
+              loginText={loginText}
+            />
+          )}
         </div>
+        <dialog className='helper-dialog'>
+          <div className="info-dialog">
+            <Heading level={2}>Hoe werkt het?</Heading>
+            <Paragraph>{infoPopupContent}</Paragraph>
+            <Spacer size={1} />
+            <Button appearance='secondary-action-button' onClick={() => toggleHelperDialog(false)}>
+              <i className="ri-close-fill"></i>
+              <span>Info venster sluiten</span>
+            </Button>
+          </div>
+        </dialog>
       </div>
-      <div className="content" ref={contentRef}>
-        {!isDefinitive && (
-          <>
-            {displayLikes && canComment && (
-              <>
-                <Likes
-                  {...props}
-                  resourceId={resourceId || ''}
-                  title={props.likeWidget?.title}
-                  yesLabel={props.likeWidget?.yesLabel}
-                  noLabel={props.likeWidget?.noLabel}
-                  hideCounters={props.likeWidget?.hideCounters}
-                  variant={props.likeWidget?.variant}
-                  showProgressBar={props.likeWidget?.showProgressBar}
-                  progressBarDescription={
-                    props.likeWidget?.progressBarDescription
-                  }
-                />
-                <Spacer size={1} />
-              </>
-            )}
-            {backUrl !== undefined && (
-              <div className="osc back-url-container">
-                <div className="banner">
-                  <Spacer size={2} />
-                  <Heading6>{props.backUrlContent}</Heading6>
-                  <Spacer size={1} />
-                  <ButtonLink appearance="primary-action-button" href={backUrl} title="Terug naar overzicht" id={randomId}>{props.backUrlText}</ButtonLink>
-                  <Spacer size={2} />
-                </div>
-                <Spacer size={2} />
-              </div>
-            )}
-            <div className='toggleMarkers'>
-              <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
-              <FormLabel htmlFor="toggleMarkers"> <Paragraph>{addMarkerText}</Paragraph> </FormLabel>
-            </div>
-          </>
-        )}
 
-        {displayResourceInfo === 'right' && (
-          <section className="content-intro desktoponly">
-            {resource.title ? <Heading level={1}>{resource.title}</Heading> : null}
-            {resource.summary ? <Paragraph>{resource.summary}</Paragraph> : null}
+    );
+  }
 
-            {(displayResourceDescription === 'yes' && resource.description) ? <Paragraph dangerouslySetInnerHTML={{ __html: resource.description }} /> : null}
+  DocumentMap.loadWidget = loadWidget;
 
-          </section>
-        )}
-
-        {(tagGroups && Array.isArray(tagGroups) && tagGroups.length > 0 && datastore) ? (
-          <Filters
-            className="osc-flex-columned"
-            dataStore={datastore}
-            defaultSorting=""
-            displaySearch={false}
-            displaySorting={false}
-            displayTagFilters={true}
-            searchPlaceholder='Zoeken'
-            applyText='Toepassen'
-            resetText='Reset'
-            onUpdateFilter={(f) => {
-              if (f.tags.length === 0) {
-                setSelectedTags([]);
-              } else {
-                setSelectedTags(f.tags);
-              }
-            }}
-            resources={[]}
-            sorting={[]}
-            tagGroups={tagGroups}
-            tagsLimitation={filteredTagIdsArray}
-          />
-        ) : null}
-
-        {!isDefinitive && (
-          <Comments
-            {...props}
-            key={refreshComments ? 'refresh' : 'no-refresh'}
-            onlyIncludeTags={selectedTagsString || filteredTagsIdsString || ''}
-            resourceId={resourceId || ''}
-            selectedComment={selectedCommentIndex}
-            setRefreshComments={setRefreshComments}
-            showForm={false}
-          />
-        )}
-      </div>
-      <dialog className='helper-dialog'>
-        <div className="info-dialog">
-          <Heading level={2}>Hoe werkt het?</Heading>
-          <Paragraph>{infoPopupContent}</Paragraph>
-          <Spacer size={1} />
-          <Button appearance='secondary-action-button' onClick={() => toggleHelperDialog(false)}>
-            <i className="ri-close-fill"></i>
-            <span>Info venster sluiten</span>
-          </Button>
-        </div>
-      </dialog>
-    </div>
-
-  );
-}
-
-DocumentMap.loadWidget = loadWidget;
-
-export { DocumentMap };
+  export { DocumentMap };
