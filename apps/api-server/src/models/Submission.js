@@ -30,23 +30,6 @@ module.exports = function (db, sequelize, DataTypes) {
         default: {},
         allowNull: false,
       },
-    },
-    {
-      hooks: {
-        afterCreate: (instance, options) => {
-          try {
-            db.Notification.create({
-              type: "submission",
-			        projectId: instance.projectId,
-              data: {
-                submissionId: instance.id
-              }
-					  })
-          } catch (error) {
-            console.error(error);
-          }
-        },
-      },
     }
   );
 
