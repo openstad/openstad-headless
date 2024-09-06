@@ -38,6 +38,7 @@ export type CommentsWidgetProps = BaseProps &
     selectedComment?: Number | undefined;
     customTitle?: string;
     onlyIncludeTags?: string;
+    loginText?: string;
     setRefreshComments?: React.Dispatch<React.SetStateAction<boolean>>;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
@@ -52,6 +53,7 @@ function Comments({
   placeholder = 'Typ hier uw reactie',
   formIntro = '',
   selectedComment,
+  loginText = 'Inloggen om deel te nemen aan de discussie.',
   setRefreshComments = () => {},
   ...props
 }: CommentsWidgetProps) {
@@ -181,7 +183,7 @@ function Comments({
 
         {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
           <Banner className="big">
-            <Heading level={4} appearance='utrecht-heading-6'>Inloggen om deel te nemen aan de discussie.</Heading>
+            <Heading level={4} appearance='utrecht-heading-6'>{ loginText }</Heading>
             <Spacer size={1} />
             <Button
               appearance="primary-action-button"

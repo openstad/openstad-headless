@@ -8,11 +8,13 @@ import { Select as NLDS_Select, SelectOption } from "@utrecht/component-library-
 type Props = {
   onValueChange?: (resource: any) => void;
   options?: Array<{ value: string; label: string }>;
+  disableDefaultOption?: boolean;
 } & React.SelectHTMLAttributes<HTMLSelectElement>;
 
 const Select = forwardRef<HTMLSelectElement, Props>(
   ({ onValueChange, ...props }, ref) => {
     const selectOptions = props.options ?? [];
+    const disableDefaultOption = props.disableDefaultOption || false;
 
     return (
       <NLDS_Select
@@ -24,9 +26,12 @@ const Select = forwardRef<HTMLSelectElement, Props>(
           ((e) => onValueChange && onValueChange(e.target.value))
         }>
         {props.children}
-          <SelectOption className="select-item" value={''}>
-            Selecteer optie
-          </SelectOption>
+
+          {!disableDefaultOption && (
+              <SelectOption className="select-item" value={''}>
+                Selecteer optie
+              </SelectOption>
+          )}
 
         {selectOptions.map((option) => (
           <React.Fragment key={`select-item-${option.label}`}>

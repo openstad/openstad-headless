@@ -62,6 +62,9 @@ export type StemBegrootWidgetProps = BaseProps &
     panelTitle?: string;
     budgetChosenTitle?: string;
     budgetRemainingTitle?: string;
+    resetText?: string;
+    applyText?: string;
+    searchPlaceholder?: string;
   };
 
 function StemBegroot({
@@ -474,6 +477,9 @@ function StemBegroot({
                       displaySorting={props.displaySorting || false}
                       displaySearch={props.displaySearch || false}
                       displayTagFilters={props.displayTagFilters || false}
+                      searchPlaceholder={props.searchPlaceholder || 'Zoeken'}
+                      resetText={props.resetText || 'Reset'}
+                      applyText={props.applyText || 'Toepassen'}
                       tagGroups={props.tagGroups || []}
                       itemsPerPage={itemsPerPage}
                       resources={resources}

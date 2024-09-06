@@ -32,7 +32,7 @@ const BaseMap = ({
 
   autoZoomAndCenter = undefined,
 
-  zoom = 14,
+  zoom = 7,
   scrollWheelZoom = true,
   center = {
     lat: 52.37104644463586,
@@ -60,11 +60,11 @@ const BaseMap = ({
   customPolygon = [],
   ...props
 }: PropsWithChildren<BaseMapWidgetProps & { onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void }>) => {
-
   const definedCenterPoint =
     center.lat && center.lng
       ? { lat: center.lat, lng: center.lng }
       : { lat: 52.37104644463586, lng: 4.900402911007405 };
+      
 
   // clustering geeft errors; ik begrijp niet waarom: het gebeurd alleen in de gebuilde widgets, niet in de dev componenten
   // het lijkt een timing issue, waarbij niet alles in de juiste volgporde wordt geladen
@@ -136,7 +136,7 @@ const BaseMap = ({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapRef, markers]);
+  }, [mapRef, area]);
 
   // markers
   useEffect(() => {

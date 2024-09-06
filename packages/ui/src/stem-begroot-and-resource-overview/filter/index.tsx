@@ -30,6 +30,9 @@ type Props = {
   displayTagFilters: boolean;
   tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
   tagsLimitation?: Array<number>;
+  searchPlaceholder: string;
+  resetText: string;
+  applyText: string;
 };
 
 export function Filters({
@@ -134,7 +137,7 @@ export function Filters({
             <Input
               onChange={(e) => search(e.target.value)}
               className="osc-filter-search-bar"
-              placeholder="Zoeken"
+              placeholder={props.searchPlaceholder}
               id='search'
             />
           </div>
@@ -177,11 +180,16 @@ export function Filters({
         ) : null}
 
         {props.displaySorting ? (
-          <div className="form-element">
-            <FormLabel htmlFor={'sortField'}>Sorteer op</FormLabel>
-            <Select onValueChange={setSort} options={sorting} id="sortField">
-            </Select>
-          </div>
+            <div className="form-element">
+              <FormLabel htmlFor={'sortField'}>Sorteer op</FormLabel>
+              <Select
+                  onValueChange={setSort}
+                  options={sorting}
+                  id="sortField"
+                  defaultValue={props.defaultSorting || 'createdAt_desc'}
+                  disableDefaultOption={true}
+              />
+            </div>
         ) : null}
 
 
@@ -207,9 +215,9 @@ export function Filters({
               updateFilter(defaultFilter)
               onUpdateFilter && onUpdateFilter(defaultFilter);
             }}>
-            Reset
+            {props.resetText}
           </Button>
-          <Button type='submit' appearance='primary-action-button'>Toepassen</Button>
+          <Button type='submit' appearance='primary-action-button'>{props.applyText}</Button>
         </div>
       </form>
     </section>

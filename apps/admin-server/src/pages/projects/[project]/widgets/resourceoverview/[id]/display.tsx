@@ -41,6 +41,8 @@ const formSchema = z.object({
   documentsTitle: z.string().optional(),
   documentsDesc: z.string().optional(),
   displayVariant: z.string().optional(),
+  applyText: z.string().optional(),
+  resetText: z.string().optional(),
   // displayRanking: z.boolean(),
   // displayLabel: z.boolean(),
   // displayShareButtons: z.boolean(),
@@ -78,6 +80,8 @@ export default function WidgetResourceOverviewDisplay(
       documentsTitle: props?.documentsTitle || '',
       documentsDesc: props?.documentsDesc || '',
       displayVariant: props?.displayVariant,
+      applyText: props?.applyText || 'Toepassen',
+      resetText: props?.resetText || 'Reset',
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -444,6 +448,53 @@ export default function WidgetResourceOverviewDisplay(
                     </SelectItem>
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div></div>
+
+          <FormField
+            control={form.control}
+            name="applyText"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Tekst voor het toepassen van de filters
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="resetText"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Tekst voor het resetten van de filters
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

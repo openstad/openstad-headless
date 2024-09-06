@@ -74,6 +74,7 @@ export type Option = {
 export type Title = {
     text: string;
     key: string;
+    isOtherOption?: boolean;
     weights?: Record<string, Weight>;
 };
 

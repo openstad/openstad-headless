@@ -70,6 +70,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displaySearch?: boolean;
     displaySearchText?: boolean;
     textActiveSearch?: string;
+    searchPlaceholder?: string;
     itemLink?: string;
     sorting: Array<{ value: string; label: string }>;
     displayTagFilters?: boolean;
@@ -87,6 +88,8 @@ export type ResourceOverviewWidgetProps = BaseProps &
     documentsTitle?: string;
     documentsDesc?: string;
     displayVariant?: string;
+    resetText?: string;
+    applyText?: string;
     onFilteredResourcesChange?: (filteredResources: any[]) => void;
   };
 
@@ -567,6 +570,9 @@ function ResourceOverview({
               defaultSorting={props.defaultSorting || ''}
               displayTagFilters={props.displayTagFilters || false}
               displaySearch={props.displaySearch || false}
+              searchPlaceholder={props.searchPlaceholder || 'Zoeken'}
+              resetText={props.resetText || 'Reset'}
+              applyText={props.applyText || 'Toepassen'}
               tagGroups={props.tagGroups || []}
               itemsPerPage={itemsPerPage}
               resources={resources}

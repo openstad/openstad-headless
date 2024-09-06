@@ -38,7 +38,7 @@
     gap: 1rem;
 }
 
-.osc-resources-filter.osc-flex-columned > .osc-filter-search-bar{
+.osc-filter-search-bar{
     max-width: unset;
 }
 
