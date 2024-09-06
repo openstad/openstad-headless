@@ -12,6 +12,10 @@
     grid-template-columns: 1fr;
     height: auto;
   }
+  .documentMap--container.--largeDoc{
+    grid-template-columns: 1fr;
+    height: auto;
+  }
 
   .documentMap--container .map-container .leaflet-container {
     height: 500px !important;
