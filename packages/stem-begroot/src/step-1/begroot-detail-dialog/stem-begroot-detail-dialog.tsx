@@ -17,6 +17,7 @@ import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
 import { Button, Paragraph, Strong, Link, Heading5, Heading4, Heading1 } from "@utrecht/component-library-react";
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
+import { remirrorRender } from '@openstad-headless/ui/src/remirrorRender';
 
 export const StemBegrootResourceDetailDialog = ({
   openDetailDialog,
@@ -146,8 +147,8 @@ export const StemBegrootResourceDetailDialog = ({
                     <div>
                       <div>
                         <Heading1>{resource.title}</Heading1>
-                        <Paragraph className="strong">{resource.summary}</Paragraph>
-                        <Paragraph>{resource.description}</Paragraph>
+                        <Paragraph>{remirrorRender(resource.summary, 'paragraph')}</Paragraph>
+                        <Paragraph>{remirrorRender(resource.description, 'paragraph')}</Paragraph>
                       </div>
                     </div>
 

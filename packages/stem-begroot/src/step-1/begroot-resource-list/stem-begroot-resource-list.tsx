@@ -13,6 +13,7 @@ import { elipsize } from '@openstad-headless/lib/ui-helpers';
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
 import { Button, Paragraph, Link, Heading5, Heading } from "@utrecht/component-library-react";
+import {remirrorCombineText} from '@openstad-headless/ui/src/remirrorRender';
 
 export const StemBegrootResourceList = ({
   resources,
@@ -97,8 +98,8 @@ export const StemBegrootResourceList = ({
                 </div>
               </section>
               <Heading level={2} appearance="utrecht-heading-4">{resource.title}</Heading>
-              <Paragraph>{elipsize(resource.summary, 100)}</Paragraph>
-              <Paragraph>{elipsize(resource.description, 200)}</Paragraph>
+              <Paragraph>{elipsize(remirrorCombineText(resource.summary), 100)}</Paragraph>
+              <Paragraph>{elipsize(remirrorCombineText(resource.description), 200)}</Paragraph>
 
               {
                 originalUrl ? (

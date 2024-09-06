@@ -30,7 +30,7 @@ import SelectField from "@openstad-headless/ui/src/form-elements/select";
 import {MultiSelect} from "@openstad-headless/ui/src";
 import toast, {Toaster} from "react-hot-toast";
 import { Spacer } from '@openstad-headless/ui/src';
-
+import { remirrorRender } from '@openstad-headless/ui/src/remirrorRender';
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
