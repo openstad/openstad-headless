@@ -191,10 +191,7 @@ function DocumentMap({
   };
 
 
-  const [init, setInit] = useState(false);
   useEffect(() => {
-    if (init) return;
-    setInit(true);
     setAllComments(comments);
   }, [comments]);
 
