@@ -45,20 +45,80 @@ router.route('/')
 // ---------------
   .post(auth.can('Submission', 'create'))
 	.post(function(req, res, next) {
-		const data = {
-			submittedData     : req.body.submittedData,
-			projectId      			: req.params.projectId,
-			widgetId      			: req.body.widgetId || null,
-			userId      			: req.user.id,
+		let data = {
+			submittedData: req.body.submittedData,
+			projectId: req.params.projectId,
+			widgetId: req.body.widgetId || null,
+			userId: req.user.id,
 		};
+
+		req.sendConfirmationToUser = data.submittedData.confirmationUser || false;
+		req.userEmailAddress = data.submittedData.userEmailAddress || '';
+		req.sendConfirmationToAdmin = data.submittedData.confirmationAdmin || false;
+		req.overwriteEmailAddress = data.submittedData.overwriteEmailAddress || '';
+
+		delete data.submittedData.confirmationUser;
+		delete data.submittedData.userEmailAddress;
+		delete data.submittedData.confirmationAdmin;
+		delete data.submittedData.overwriteEmailAddress;
 
 		db.Submission
 			.authorizeData(data, 'create', req.user)
 			.create(data)
 			.then(result => {
 				res.json(result);
-			})
+				req.results = result
+				return next();
+			});
 	})
+	.post(async function (req, res, next) {
+		const sendConfirmationToUser = req.sendConfirmationToUser;
+		const userEmailAddress = req.userEmailAddress;
+		const sendConfirmationToAdmin = req.sendConfirmationToAdmin;
+		const overwriteEmailAddress = req.overwriteEmailAddress;
+
+		if (sendConfirmationToAdmin) {
+			const emailReceivers = overwriteEmailAddress
+				.split(',')
+				.map(email => email.trim())
+				.filter(email => email.length > 0);
+
+			const notificationData = {
+				submissionId: req.results.id
+			};
+
+			if ( emailReceivers.length > 0 ) {
+				notificationData.emailReceivers = emailReceivers;
+			}
+
+			db.Notification.create({
+				type: "new enquete - admin",
+				projectId: req.project.id,
+				data: notificationData
+			})
+
+		}
+
+		if (sendConfirmationToUser) {
+			const notificationData = {
+					type: "new enquete - user",
+					projectId: req.project.id,
+					data: {
+						submissionId: req.results.id
+					}
+			};
+
+			if ( !!userEmailAddress ) {
+				notificationData.to = userEmailAddress;
+			} else {
+				notificationData.data.userId = req?.user?.id || 0
+			}
+
+			if (userEmailAddress || notificationData.data.userId) {
+				db.Notification.create(notificationData)
+			}
+		}
+	});
 
 	// with one existing submission
 	// --------------------------
