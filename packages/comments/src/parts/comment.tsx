@@ -12,6 +12,7 @@ import "@utrecht/design-tokens/dist/root.css";
 import { Paragraph, Heading, Button, ButtonGroup } from "@utrecht/component-library-react";
 import { CommentProps } from '../types/comment-props';
 import { CommentWidgetContext } from '../comments';
+import { remirrorRender } from '@openstad-headless/ui/src/remirrorRender/index.js';
 
 function Comment({
   comment = {
@@ -166,7 +167,7 @@ function Comment({
       ) : (
         <>
           <Spacer size={0.25} />
-          <Paragraph className="comment-reaction-text">{args.comment.description}</Paragraph>
+          {remirrorRender(args.comment.description, 'paragraph')}
           <Spacer size={0.25} />
           {showDateSeperately && (
             <Paragraph className="comment-reaction-strong-text">

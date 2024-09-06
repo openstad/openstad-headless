@@ -100,3 +100,8 @@
  padding: 0;
  position: absolute;
 }
+
+.comment-item .remirror-theme{
+  background: unset;
+  padding: 0;
+}
