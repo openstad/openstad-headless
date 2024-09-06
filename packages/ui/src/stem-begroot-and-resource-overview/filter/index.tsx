@@ -180,11 +180,16 @@ export function Filters({
         ) : null}
 
         {props.displaySorting ? (
-          <div className="form-element">
-            <FormLabel htmlFor={'sortField'}>Sorteer op</FormLabel>
-            <Select onValueChange={setSort} options={sorting} id="sortField">
-            </Select>
-          </div>
+            <div className="form-element">
+              <FormLabel htmlFor={'sortField'}>Sorteer op</FormLabel>
+              <Select
+                  onValueChange={setSort}
+                  options={sorting}
+                  id="sortField"
+                  defaultValue={props.defaultSorting || 'createdAt_desc'}
+                  disableDefaultOption={true}
+              />
+            </div>
         ) : null}
 
 
