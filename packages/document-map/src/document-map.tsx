@@ -188,7 +188,10 @@ function DocumentMap({
   };
 
 
+  const [init, setInit] = useState(false);
   useEffect(() => {
+    if (init) return;
+    setInit(true);
     setAllComments(comments);
   }, [comments]);
 
@@ -659,7 +662,6 @@ function DocumentMap({
               </>
             )}
             {backUrl !== undefined && (
-              console.log(backUrl),
               <div className="osc back-url-container">
                 <div className="banner">
                   <Spacer size={2} />
