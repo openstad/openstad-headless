@@ -120,7 +120,7 @@ export default function WidgetResourceOverviewSorting(
                 <FormLabel>Standaard manier van sorteren</FormLabel>
                 <Select
                   onValueChange={(value) => {
-                    field.onChange;
+                    field.onChange(value);
                     props.onFieldChanged(field.name, value);
                   }}
                   value={field.value}>
