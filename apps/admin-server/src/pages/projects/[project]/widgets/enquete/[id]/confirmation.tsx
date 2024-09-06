@@ -70,7 +70,7 @@ export default function WidgetEnqueteConfirmation() {
     const confirmationUserError = visibility === 'always' && (
         items.length === 0
             ? 'Je moet eerst velden aanmaken om dit te kunnen doen.'
-            : !items.some(item => item.questionType === 'open')
+            : !items.some((item: {questionType: string}) => item.questionType === 'open')
                 ? 'Je moet eerst een tekstveld aanmaken om dit te kunnen doen.'
                 : null
     );
@@ -119,7 +119,7 @@ export default function WidgetEnqueteConfirmation() {
                                 <FormItem>
                                     <FormLabel>Welk veld moet er worden gebruikt voor de bevestiging naar de gebruiker</FormLabel>
                                     <FormDescription>
-                                        In de 'Weergave' opties is ingesteld dat je niet hoeft in te loggen om dit formulier te zien. Hierdoor kan iedereen het formulier invullen en is er geen e-mailadres van de gebruiker beschikbaar om de notificatie naartoe te sturen. Kies hier een veld uit het formulier dat gebruikt wordt om de bevestiging naar de gebruiker te sturen.
+                                        In de &apos;Weergave&apos; opties is ingesteld dat je niet hoeft in te loggen om dit formulier te zien. Hierdoor kan iedereen het formulier invullen en is er geen e-mailadres van de gebruiker beschikbaar om de notificatie naartoe te sturen. Kies hier een veld uit het formulier dat gebruikt wordt om de bevestiging naar de gebruiker te sturen.
                                     </FormDescription>
                                     <Select
                                         value={field.value || ''}
@@ -131,8 +131,8 @@ export default function WidgetEnqueteConfirmation() {
                                         </FormControl>
                                         <SelectContent>
                                             {items
-                                                .filter(item => item.questionType === 'open')
-                                                .map(item => (
+                                                .filter((item: {questionType: string}) => item.questionType === 'open')
+                                                .map((item: {fieldKey: string, title: string}) => (
                                                     <SelectItem key={item.fieldKey} value={item.fieldKey}>
                                                         {item.title}
                                                     </SelectItem>
