@@ -485,6 +485,7 @@ useEffect(() => {
     }
   };
 
+  console.log(definitiveUrlVisible, originalID)
   return (
     <div className={`documentMap--container ${largeDoc ? '--largeDoc' :''}`}>
       <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
@@ -635,7 +636,7 @@ useEffect(() => {
       <div className="content" ref={contentRef}>
         {!isDefinitive && (
           <>
-            {displayLikes && (
+            {displayLikes && canComment && (
               <>
                 <Likes
                   {...props}

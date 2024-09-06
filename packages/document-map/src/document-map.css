@@ -219,12 +219,16 @@ a + .url-list:before {
 
 .documentMap--container:has(.content:empty) {
   grid-template-columns: 1fr;
-  background: #dddddd;
+  
 }
 .documentMap--container:has(.content:empty) .map-container {
   max-width: 1140px;
   justify-self: center;
   width: 100%;
+}
+.documentMap--container:has(.content:empty) .content-container {
+  border-right: 0;
+  border-bottom: 1px solid #ddd;
 }
 
 .documentMap--container .like-widget-container {
