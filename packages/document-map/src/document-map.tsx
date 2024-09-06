@@ -7,8 +7,10 @@ import '@utrecht/design-tokens/dist/root.css';
 import {
   Paragraph,
   Heading,
+  Heading6,
   Textarea,
   Button,
+  ButtonLink,
   FormLabel,
   Checkbox,
   Link
@@ -74,6 +76,8 @@ export type DocumentMapProps = BaseProps &
     largeDoc?: boolean;
     emptyListText?: string;
     loginText?: string;
+    backUrlContent?: string;
+    backUrlText?: string;
   };
 
 
@@ -93,13 +97,13 @@ function DocumentMap({
   tagGroups = [],
   extraFieldsTagGroups = [],
   defaultTags = '',
-  addCommentText = 'Voeg een opmerking toe',
+  addCommentText = 'Voeg een reactie toe',
   addMarkerText = 'Toon Markers',
   submitCommentText = 'Versturen',
   displayResourceInfo = 'left',
   displayMapSide = 'left',
   displayResourceDescription = 'no',
-  infoPopupContent = 'Op deze afbeelding kun je opmerkingen plaatsen. Klik op de afbeelding om een opmerking toe te voegen. Klik op een marker om de bijbehorende opmerkingen te bekijken.',
+  infoPopupContent = 'Op deze afbeelding kun je reacties plaatsen. Klik op de afbeelding om een reactie toe te voegen. Klik op een marker om de bijbehorende reacties te bekijken.',
   largeDoc = false,
   ...props
 }: DocumentMapProps) {
@@ -248,7 +252,7 @@ function DocumentMap({
     setDocumentHeight(imageHeight);
   };
 
-  
+
   const imageBounds: LatLngBoundsLiteral = [
     [0, docWidth / 2],
     [-docHeight, -docWidth / 2]
@@ -273,14 +277,14 @@ function DocumentMap({
       },
     });
 
-    
-useEffect(() => {
-  if (map && imageBounds && !isBoundsSet) {
-    map.fitBounds(imageBounds);
-    map.scrollWheelZoom.disable();
-    setIsBoundsSet(true);
-  }
-}, [map, imageBounds, isBoundsSet]);
+
+    useEffect(() => {
+      if (map && imageBounds && !isBoundsSet) {
+        map.fitBounds(imageBounds);
+        map.scrollWheelZoom.disable();
+        setIsBoundsSet(true);
+      }
+    }, [map, imageBounds, isBoundsSet]);
 
     return null;
   };
@@ -487,16 +491,14 @@ useEffect(() => {
     }
   };
 
-  console.log(definitiveUrlVisible, originalID)
   return (
-    <div className={`documentMap--container ${largeDoc ? '--largeDoc' :''}`}>
+    <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
       <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
 
         {(displayResourceInfo === 'left' || accessibilityUrlVisible || backUrl || (definitiveUrlVisible && originalID !== undefined && isDefinitive)) && (
           <div className="content-container">
             <div className="documentMap--header">
               <div className='url-container'>
-                {backUrl ? <Link href={backUrl} title="Terug naar overzicht" id={randomId}>Terug</Link> : null}
                 <div className="url-list">
                   {accessibilityUrlVisible ? <Link href={getUrl()} title="Bekijk tekstuele versie" id={randomId}>{props.accessibilityUrlText}</Link> : null}
                   {definitiveUrlVisible && originalID !== undefined && isDefinitive ? <Link href={getDefinitiveUrl(originalID)} title="Bekijk originele versie" id={randomId}>{props.definitiveUrlText}</Link> : null}
@@ -524,115 +526,115 @@ useEffect(() => {
             </section>
           </div>
         )}
-      <div className='document-container'>
-        <MapContainer
-          center={[0, 0]}
-          crs={CRS.Simple}
-          maxZoom={maxZoom}
-          minZoom={minZoom}
-          zoom={zoom}
-          zoomSnap={0}
-        >
-          <MapEvents />
-          {filteredComments && filteredComments
-            .filter((comment: any) => !!comment.location)
-            .map((comment: any, index: number) => (
-              <MarkerWithId
-                key={index}
-                id={`marker-${index}`}
-                index={index}
-                position={comment.location}
-              >
-              </MarkerWithId>
-            ))}
-          <ImageOverlay
-            url={resource.images ? resource.images[0].url : ''}
-            bounds={imageBounds}
-            aria-describedby={randomId}
-          />
-          {popupPosition && !isDefinitive && (
-            <Popup position={popupPosition}>
-              {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
-                <>
-                  <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
-                  <Spacer size={1} />
-                  <Button
-                    appearance="primary-action-button"
-                    onClick={() => {
-                      if (props.login?.url) {
-                        document.location.href = props.login?.url;
-                      }
-                    }}
-                    type="button">
-                    Inloggen
-                  </Button>
-                </>
-              ) :
-                <form>
-                  <div>
-                    <FormLabel htmlFor="commentBox">{addCommentText}</FormLabel>
-                    {shortLengthError && <Paragraph className="--error">De opmerking moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
-                    {longLengthError && <Paragraph className="--error">De opmerking mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
+        <div className='document-container'>
+          <MapContainer
+            center={[0, 0]}
+            crs={CRS.Simple}
+            maxZoom={maxZoom}
+            minZoom={minZoom}
+            zoom={zoom}
+            zoomSnap={0}
+          >
+            <MapEvents />
+            {filteredComments && filteredComments
+              .filter((comment: any) => !!comment.location)
+              .map((comment: any, index: number) => (
+                <MarkerWithId
+                  key={index}
+                  id={`marker-${index}`}
+                  index={index}
+                  position={comment.location}
+                >
+                </MarkerWithId>
+              ))}
+            <ImageOverlay
+              url={resource.images ? resource.images[0].url : ''}
+              bounds={imageBounds}
+              aria-describedby={randomId}
+            />
+            {popupPosition && !isDefinitive && (
+              <Popup position={popupPosition}>
+                {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
+                  <>
+                    <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
+                    <Spacer size={1} />
+                    <Button
+                      appearance="primary-action-button"
+                      onClick={() => {
+                        if (props.login?.url) {
+                          document.location.href = props.login?.url;
+                        }
+                      }}
+                      type="button">
+                      Inloggen
+                    </Button>
+                  </>
+                ) :
+                  <form>
+                    <div>
+                      <FormLabel htmlFor="commentBox">{addCommentText}</FormLabel>
+                      {shortLengthError && <Paragraph className="--error">De reactie moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
+                      {longLengthError && <Paragraph className="--error">De reactie mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
 
-                    <Textarea
-                      id="commentBox"
-                      name="comment"
-                      onChange={handleCommentChange}
-                      rows={3}
-                      value={commentValue}
-                    />
-                  </div>
+                      <Textarea
+                        id="commentBox"
+                        name="comment"
+                        onChange={handleCommentChange}
+                        rows={3}
+                        value={commentValue}
+                      />
+                    </div>
 
-                  {extraFieldsTagGroups
-                    && Array.isArray(extraFieldsTagGroups)
-                    && extraFieldsTagGroups.length > 0
-                    && extraFieldsTagGroups.map((group: { type: string; label?: string; multiple: boolean }, index) => {
-                      return (
-                        <div key={group.type}>
-                          <FormLabel htmlFor={group.type}>{group.label}</FormLabel>
+                    {extraFieldsTagGroups
+                      && Array.isArray(extraFieldsTagGroups)
+                      && extraFieldsTagGroups.length > 0
+                      && extraFieldsTagGroups.map((group: { type: string; label?: string; multiple: boolean }, index) => {
+                        return (
+                          <div key={group.type}>
+                            <FormLabel htmlFor={group.type}>{group.label}</FormLabel>
 
-                          {group && group.multiple ? (
-                            <MultiSelect
-                              label={'Selecteer een optie'}
-                              onItemSelected={(optionValue: string) => {
-                                const value = parseInt(optionValue, 10);
-                                updateTagListMultiple(value);
-                              }}
-                              options={(allTags?.filter((tag: { type: string }) => tag.type === group.type).map((tag: { id: number, name: string }) => ({
-                                value: tag.id,
-                                label: tag.name,
-                                checked: selectedOptions.includes(tag.id),
-                              })))}
-                            />
+                            {group && group.multiple ? (
+                              <MultiSelect
+                                label={'Selecteer een optie'}
+                                onItemSelected={(optionValue: string) => {
+                                  const value = parseInt(optionValue, 10);
+                                  updateTagListMultiple(value);
+                                }}
+                                options={(allTags?.filter((tag: { type: string }) => tag.type === group.type).map((tag: { id: number, name: string }) => ({
+                                  value: tag.id,
+                                  label: tag.name,
+                                  checked: selectedOptions.includes(tag.id),
+                                })))}
+                              />
 
-                          ) : (
-                            <SelectField
-                              choices={(allTags?.filter((tag: { type: string }) => tag.type === group.type).map((tag: { id: string | number, name: string }) => ({
-                                value: tag.id,
-                                label: tag.name
-                              })))}
-                              fieldKey={`tag[${group.type}]`}
-                              onChange={(e: { name: string; value: string | [] | Record<number, never>; }) => {
-                                let selectedTag = e.value as string;
+                            ) : (
+                              <SelectField
+                                choices={(allTags?.filter((tag: { type: string }) => tag.type === group.type).map((tag: { id: string | number, name: string }) => ({
+                                  value: tag.id,
+                                  label: tag.name
+                                })))}
+                                fieldKey={`tag[${group.type}]`}
+                                onChange={(e: { name: string; value: string | [] | Record<number, never>; }) => {
+                                  let selectedTag = e.value as string;
 
-                                updateTagListMultiple(parseInt(selectedTag, 10));
-                              }}
-                            />
-                          )}
-                        </div>
-                      )
-                    })}
-                  <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>{submitCommentText}</Button>
-                </form>}
+                                  updateTagListMultiple(parseInt(selectedTag, 10));
+                                }}
+                              />
+                            )}
+                          </div>
+                        )
+                      })}
+                    <Button appearance="primary-action-button" type="submit" onClick={(e) => addComment(e, popupPosition)}>{submitCommentText}</Button>
+                  </form>}
 
-            </Popup>
-          )}
-        </MapContainer>
+              </Popup>
+            )}
+          </MapContainer>
 
-        <Button className='info-trigger' appearance='primary-action-button' onClick={() => toggleHelperDialog(true)}>
-          <i className="ri-information-line"></i>
-          <span className="sr-only">Hoe werkt het?</span>
-        </Button>
+          <Button className='info-trigger' appearance='primary-action-button' onClick={() => toggleHelperDialog(true)}>
+            <i className="ri-information-line"></i>
+            <span className="sr-only">Hoe werkt het?</span>
+          </Button>
         </div>
       </div>
       <div className="content" ref={contentRef}>
@@ -655,6 +657,19 @@ useEffect(() => {
                 />
                 <Spacer size={1} />
               </>
+            )}
+            {backUrl !== undefined && (
+              console.log(backUrl),
+              <div className="osc back-url-container">
+                <div className="banner">
+                  <Spacer size={2} />
+                  <Heading6>{props.backUrlContent}</Heading6>
+                  <Spacer size={1} />
+                  <ButtonLink appearance="primary-action-button" href={backUrl} title="Terug naar overzicht" id={randomId}>{props.backUrlText}</ButtonLink>
+                  <Spacer size={2} />
+                </div>
+                <Spacer size={2} />
+              </div>
             )}
             <div className='toggleMarkers'>
               <Checkbox id="toggleMarkers" defaultChecked onChange={() => setToggleMarker(!toggleMarker)} />
