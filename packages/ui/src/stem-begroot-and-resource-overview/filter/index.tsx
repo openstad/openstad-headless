@@ -56,6 +56,7 @@ export function Filters({
   const [tagState, setTagState] = useState<{ [key: string]: Array<number> }>();
   const [filter, setFilter] = useState<Filter>(defaultFilter);
   const [selectedOptions, setSelected] = useState<{ [key: string]: any }>({});
+  const [activeTags, setActiveTags] = useState<Array<{ type: string; id: number; label: string }>>([]);
 
   const search = useDebounce(setSearch, 300);
 
@@ -96,6 +97,7 @@ export function Filters({
 
     setSelected({ ...selectedOptions, [tagType]: selected });
     setTags(tagType, selected);
+    updateActiveTags(tagType, selected);
   };
 
   const updateTagListSingle = (tagType: string, updatedTag: string) => {
@@ -109,7 +111,32 @@ export function Filters({
     }
     setSelected({ ...selectedOptions, [tagType]: selected });
     setTags(tagType, selected);
+    updateActiveTags(tagType, selected);
   };
+
+  function updateActiveTags(tagType: string, selected: any[]) {
+    const newActiveTags = selected.map(id => ({ type: tagType, id, label: id.toString() }));
+    setActiveTags(prevTags => [...prevTags.filter(tag => tag.type !== tagType), ...newActiveTags]);
+  }
+
+  function removeActiveTag(tagType: string, tagId: number) {
+    const updatedTags = activeTags.filter(tag => !(tag.type === tagType && tag.id === tagId));
+    setActiveTags(updatedTags);
+    const updatedSelectedOptions = {
+      ...selectedOptions,
+      [tagType]: selectedOptions[tagType].filter((id: number) => id !== tagId)
+    };
+    setSelected(updatedSelectedOptions);
+    setTags(tagType, updatedSelectedOptions[tagType]);
+
+    const updatedFilter = {
+      ...filter,
+      tags: Object.values(updatedSelectedOptions).flat()
+    };
+
+    setFilter(updatedFilter);
+    handleSubmit(updatedFilter);
+  }
 
   useEffect(() => {
     if (tagState) {
@@ -121,11 +148,11 @@ export function Filters({
     }
   }, [tagState]);
 
-
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
-    updateFilter(filter)
-    onUpdateFilter && onUpdateFilter(filter);
+  const handleSubmit = (e?: any, updatedFilter?: Filter) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const filterToSubmit = updatedFilter || filter;
+    updateFilter(filterToSubmit);
+    onUpdateFilter && onUpdateFilter(filterToSubmit);
   };
 
   return (
@@ -212,6 +239,7 @@ export function Filters({
                 inputsInFilter.forEach((i) => (i.value = ''));
               }
               setSelected({});
+              setActiveTags([]);
               updateFilter(defaultFilter)
               onUpdateFilter && onUpdateFilter(defaultFilter);
             }}>
@@ -220,6 +248,20 @@ export function Filters({
           <Button type='submit' appearance='primary-action-button'>{props.applyText}</Button>
         </div>
       </form>
+
+        {activeTags.length > 0 && (
+            <div className="active-tags">
+              <h4>Actieve Tags:</h4>
+              <ul>
+                {activeTags.map(tag => (
+                    <li key={`${tag.type}-${tag.id}`}>
+                      {tag.label}
+                      <button onClick={() => removeActiveTag(tag.type, tag.id)}>x</button>
+                    </li>
+                ))}
+              </ul>
+            </div>
+        )}
     </section>
   );
 }

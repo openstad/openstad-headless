@@ -575,6 +575,9 @@ function ResourceOverview({
               itemsPerPage={itemsPerPage}
               resources={resources}
               onUpdateFilter={(f) => {
+
+                console.log( 'f?', f );
+
                 if (f.tags.length === 0) {
                   setTags(tagIdsToLimitResourcesTo);
                 } else {
