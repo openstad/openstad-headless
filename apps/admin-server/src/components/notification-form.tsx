@@ -98,7 +98,9 @@ type Props = {
   | 'new published resource - user feedback'
   | 'new published resource - admin update'
   | 'updated resource - user feedback'
-  | 'user account about to expire';
+  | 'user account about to expire'
+  | 'new enquete - admin'
+  | 'new enquete - user';
   engine?: 'email' | 'sms';
   id?: string;
   label?: string;
@@ -112,7 +114,9 @@ const notificationTypes = {
   'new published resource - user feedback': 'Nieuwe resource gepubliceerd - Notificatie naar de gebruiker',
   'new published resource - admin update': 'Nieuwe resource gepubliceerd - Notificatie naar de admin',
   'updated resource - user feedback': 'Resource bijgewerkt - Notificatie naar de gebruiker',
-  'user account about to expire': 'Gebruikersaccount staat op het punt te verlopen'
+  'user account about to expire': 'Gebruikersaccount staat op het punt te verlopen',
+  'new enquete - admin': 'Nieuwe formulier inzending - Notificatie naar de admin',
+  'new enquete - user': 'Nieuwe formulier inzending - Notificatie naar de gebruiker'
 };
 
 const formSchema = z.object({

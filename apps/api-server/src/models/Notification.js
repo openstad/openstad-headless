@@ -66,7 +66,17 @@ module.exports = ( db, sequelize, DataTypes ) => {
         // to
         let user;
         if (!instance.to) {
-          let managerTypes = ['new published resource - admin update', 'updated resource - admin update', 'project issues warning', 'new or updated comment - admin update', 'submission', 'action', 'message by carrier pigeon'];
+          let managerTypes = [
+            'new published resource - admin update',
+            'updated resource - admin update',
+            'new enquete - admin',
+            'project issues warning',
+            'new or updated comment - admin update',
+            'submission',
+            'action',
+            'message by carrier pigeon'
+          ];
+
           if (managerTypes.find(type => type == instance.type)) {
             let defaultRecipient = project.emailConfig?.notifications?.projectmanagerAddress;
 
@@ -99,7 +109,22 @@ module.exports = ( db, sequelize, DataTypes ) => {
           await instance.update({ status: 'pending' });
           
           // send immediatly or wait for cron
-          let immediateTypes = ['new concept resource - user feedback', 'new published resource - user feedback', 'updated resource - user feedback', 'new published resource - admin update', 'updated resource - admin update', 'login email', 'login sms', 'user account about to expire', 'project issues warning', 'system issues warning', 'action', 'message by carrier pigeon'];
+          let immediateTypes = [
+            'new concept resource - user feedback',
+            'new published resource - user feedback',
+            'updated resource - user feedback',
+            'new enquete - admin',
+            'new enquete - user',
+            'new published resource - admin update',
+            'updated resource - admin update',
+            'login email', 'login sms',
+            'user account about to expire',
+            'project issues warning',
+            'system issues warning',
+            'action',
+            'message by carrier pigeon'
+          ];
+
           if (immediateTypes.find(type => type == instance.type)) {
             let messageData = {
               projectId: instance.projectId,
@@ -115,7 +140,7 @@ module.exports = ( db, sequelize, DataTypes ) => {
               include: [{ model: db.Tag, attributes: ['name', 'type'] }]
             });
 
-            const widget = await db.Widget.findByPk(resource.widgetId);
+            const widget = !!resource ? await db.Widget.findByPk(resource.widgetId) : instance.widgetId || null;
 
             let htmlContent = '';
 
