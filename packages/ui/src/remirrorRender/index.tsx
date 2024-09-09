@@ -4,7 +4,7 @@ import { BoldExtension, ItalicExtension, UnderlineExtension, BulletListExtension
 import {
   Paragraph
 } from '@utrecht/component-library-react';
-
+import 'remirror/styles/all.css';
 
 // Below is the code to render remirror as parsed html content
 const handleError = (errors: any) => {
@@ -63,14 +63,14 @@ export const remirrorRender = (value: any, type: string) => {
 
   return (
     typeof textareaContent !== 'string' ? (
-      <ThemeProvider>
+      // <ThemeProvider>
         <Remirror
           manager={manager}
           state={state}
           onChange={(p) => { }}
           editable={false}
         />
-      </ThemeProvider>
+      // </ThemeProvider>
     ) : (
       type === 'paragraph' ? <Paragraph>{textareaContent}</Paragraph> : <Paragraph><strong>{textareaContent}</strong></Paragraph>
     )
