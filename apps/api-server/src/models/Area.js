@@ -19,12 +19,14 @@ module.exports = function( db, sequelize, DataTypes ) {
             return polygon.map(({ lat, lng }) => [lat, lng]);
           });
 
-          const formattedMultiPolygon = {
-            type: "MultiPolygon",
-            coordinates: formattedPolygons.map(polygon => [polygon])
+          const type = formattedPolygons.length > 1 ? 'MultiPolygon' : 'Polygon';
+
+          const formattedGeometry = {
+            type: type,
+            coordinates: type === 'Polygon' ? [formattedPolygons[0]] : formattedPolygons.map(polygon => [polygon])
           };
 
-          this.setDataValue('polygon', formattedMultiPolygon);
+          this.setDataValue('polygon', formattedGeometry);
         }
       },
       get: function () {
