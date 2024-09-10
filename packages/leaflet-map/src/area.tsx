@@ -7,7 +7,7 @@ import type { AreaProps } from './types/area-props';
 import type { LocationType } from './types/location';
 import parseLocation from './lib/parse-location';
 
-import { difference, polygon as tPolygon } from 'turf';
+import { difference, polygon as tPolygon, featureCollection } from 'turf';
 
 function createCutoutPolygon(area: Array<LocationType>, invert = true) {
   // polygon must defined from the south west corner to work with the outer box
@@ -125,102 +125,6 @@ export function Area({
   },
   ...props
 }: AreaProps) {
-
-  const [cutoutData, setCutoutData] = useState([]);
-
-  const geojsonFeatureCollection = {
-    "type": "FeatureCollection",
-    "features": [
-      {
-        "type": "Feature",
-        "properties": {
-          "name": "Centrum Barneveld",
-          "AREA": 56
-        },
-        "geometry": {
-          "type": "Polygon",
-          "coordinates": [
-            [
-              [5.583856, 52.138654],
-              [5.584671, 52.143932],
-              [5.589308, 52.144786],
-              [5.595818, 52.142228],
-              [5.597979, 52.137078],
-              [5.591812, 52.134750],
-              [5.585781, 52.136890],
-              [5.583856, 52.138654]  // Sluit de polygoon
-            ]
-          ]
-        }
-      },
-      {
-        "type": "Feature",
-        "properties": {
-          "name": "Barneveld Noord",
-          "AREA": 45
-        },
-        "geometry": {
-          "type": "Polygon",
-          "coordinates": [
-            [
-              [5.587501, 52.153780],
-              [5.589755, 52.157503],
-              [5.594382, 52.156240],
-              [5.598095, 52.153080],
-              [5.596284, 52.150793],
-              [5.590908, 52.151590],
-              [5.587501, 52.153780]  // Sluit de polygoon
-            ]
-          ]
-        }
-      },
-      {
-        "type": "Feature",
-        "properties": {
-          "name": "Voorthuizen",
-          "AREA": 75
-        },
-        "geometry": {
-          "type": "Polygon",
-          "coordinates": [
-            [
-              [5.605741, 52.184752],
-              [5.610080, 52.187238],
-              [5.616000, 52.186456],
-              [5.619283, 52.183892],
-              [5.614422, 52.181445],
-              [5.609383, 52.181705],
-              [5.605741, 52.184752]  // Sluit de polygoon
-            ]
-          ]
-        }
-      }
-    ]
-  };
-
-  useEffect(() => {
-    const processedPolygons = geojsonFeatureCollection.features.map((feature) => {
-      if (feature.geometry.type === 'Polygon') {
-        const coordinates = feature.geometry.coordinates[0].map(([lng, lat]) => ({ lat, lng })); // Converteer naar lat/lng objecten
-        return coordinates;
-      }
-      return null;
-    });
-
-    const validPolygons = processedPolygons.filter(p => p !== null);
-
-    const cutout = createCutoutPolygonMulti(validPolygons);
-
-    setCutoutData(cutout);
-  }, []);
-
-
-  let poly;
-
-  if (area && area.length > 0) {
-    poly = createCutoutPolygon(area);
-  }
-
   const datastore = new DataStore({});
   const { data: allAreas } = datastore.useAreas();
 
@@ -229,10 +133,65 @@ export function Area({
     name: string;
     url: string;
   }
+
   const multiPolygon: any[] = [];
   const properties: Array<any> = [];
   const areaIds = areas?.map((item: Area) => item.id);
   const filteredAreas = allAreas.filter((item: any) => areaIds?.includes(item.id));
+  const [isLoaded, setIsLoaded] = useState(false);
+  
+  const [cutoutData, setCutoutData] = useState([]);
+
+  const features = filteredAreas.map(area => {
+    const coordinates = area.polygon.map(point => [point.lng, point.lat]);
+    return {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [coordinates]
+      },
+      properties: {
+        id: area.id,
+        name: area.name,
+        createdAt: area.createdAt,
+        updatedAt: area.updatedAt,
+        deletedAt: area.deletedAt
+      }
+    };
+  });
+
+  const featureCollectionResult = featureCollection(features);
+
+  useEffect(() => {
+    if (isLoaded) {
+      const processedPolygons = featureCollectionResult.features.map((feature) => {
+        if (feature.geometry.type === 'Polygon') {
+          const coordinates = feature.geometry.coordinates[0].map(([lng, lat]) => ({ lat, lng }));
+          return coordinates;
+        }
+        return null;
+      });
+
+      const validPolygons = processedPolygons.filter(p => p !== null);
+
+      const cutout = createCutoutPolygonMulti(validPolygons);
+
+      setCutoutData(cutout);
+    }
+  }, [isLoaded, featureCollectionResult]);
+
+  useEffect(() => {
+    if (filteredAreas.length > 0) {
+      setIsLoaded(true);
+    }
+  }, [filteredAreas]);
+
+
+  let poly;
+
+  if (area && area.length > 0) {
+    poly = createCutoutPolygon(area);
+  }
 
   if (filteredAreas) {
     filteredAreas.forEach((item: any) => {
@@ -246,50 +205,50 @@ export function Area({
     });
   }
 
-    return (
-        <>
-          {cutoutData.length > 0 ? (
-              <Polygon
-                  {...props}
-                  positions={cutoutData.map(ring => ring.map(([lng, lat]) => [lat, lng]))}  // Render both outer and inner rings
-                  pathOptions={{ color: 'black', fillOpacity: 0.6 }}
-              />
-          ) : multiPolygon.length > 0 ? (
-                multiPolygon.map((item, index) => (
-                    <>
-                        <Polygon
-                            key={index}
-                            {...props}
-                            pathOptions={areaPolygonStyle}
-                            positions={item.polygon}
-                            eventHandlers={{
-                                mouseover: (e) => {
-                                    e.target.setStyle({
-                                        fillOpacity: 0.05,
-                                    });
-                                },
-                                mouseout: (e) => {
-                                    e.target.setStyle(areaPolygonStyle);
-                                },
-                            }}
-                        >
-                            {item.title &&
-                              <>
-                                <Popup className={'leaflet-popup'}>
-                                    {item.title && <h3 className="utrecht-heading-3">{item.title}</h3>}
-                                    {item.url && <a className="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action" href={item.url}>Lees verder</a>}
-                                </Popup>
-                              </>
-                            }
-                        </Polygon>
+  return (
+    <>
+      {multiPolygon.length > 0 ? (
+        multiPolygon.map((item, index) => (
+          <>
+            <Polygon
+              key={index}
+              {...props}
+              pathOptions={areaPolygonStyle}
+              positions={item.polygon}
+              eventHandlers={{
+                mouseover: (e) => {
+                  e.target.setStyle({
+                    fillOpacity: 0.05,
+                  });
+                },
+                mouseout: (e) => {
+                  e.target.setStyle(areaPolygonStyle);
+                },
+              }}
+            >
+              {item.title &&
+                <>
+                  <Popup className={'leaflet-popup'}>
+                    {item.title && <h3 className="utrecht-heading-3">{item.title}</h3>}
+                    {item.url && <a className="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action" href={item.url}>Lees verder</a>}
+                  </Popup>
+                </>
+              }
+            </Polygon>
 
-                    </>
-                ))
-            ) : (
-                poly && <Polygon {...props} pathOptions={areaPolygonStyle} positions={poly} />
-            )}
-        </>
-    );
+          </>
+        ))
+      ) : cutoutData.length > 0 ? (
+        <Polygon
+          {...props}
+          positions={cutoutData.map(ring => ring.map(([lng, lat]) => [lat, lng]))}  // Render both outer and inner rings
+          pathOptions={areaPolygonStyle}
+        />
+      ) : (
+        poly && <Polygon {...props} pathOptions={areaPolygonStyle} positions={poly} />
+      )}
+    </>
+  );
 }
 
 export default Area;
