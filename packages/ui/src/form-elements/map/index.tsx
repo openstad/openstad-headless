@@ -1,25 +1,25 @@
-import React, {FC} from "react";
-import {FormField, FormFieldDescription, FormLabel, Paragraph} from "@utrecht/component-library-react";
+import React, { FC } from "react";
+import { FormField, FormFieldDescription, FormLabel, Paragraph } from "@utrecht/component-library-react";
 import './map.css';
-import {EditorMap} from "@openstad-headless/leaflet-map/src/editor-map";
+import { EditorMap } from "@openstad-headless/leaflet-map/src/editor-map";
 import DataStore from '@openstad-headless/data-store/src';
-import {BaseProps} from "@openstad-headless/types/base-props.js";
-import type {AreaProps} from '@openstad-headless/leaflet-map/src/types/area-props';
-import {ProjectSettingProps} from "@openstad-headless/types/project-setting-props.js";
-import {LocationType} from "@openstad-headless/leaflet-map/src/types/location";
+import { BaseProps } from "@openstad-headless/types/base-props.js";
+import type { AreaProps } from '@openstad-headless/leaflet-map/src/types/area-props';
+import { ProjectSettingProps } from "@openstad-headless/types/project-setting-props.js";
+import { LocationType } from "@openstad-headless/leaflet-map/src/types/location";
 
 export type MapProps = BaseProps &
     AreaProps &
     ProjectSettingProps & {
-    title: string;
-    description: string;
-    fieldKey: string;
-    fieldRequired: boolean;
-    disabled?: boolean;
-    type?: string;
-    onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
-    requiredWarning?: string;
-}
+        title: string;
+        description: string;
+        fieldKey: string;
+        fieldRequired: boolean;
+        disabled?: boolean;
+        type?: string;
+        onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+        requiredWarning?: string;
+    }
 
 type Point = {
     lat: number;
@@ -30,7 +30,7 @@ const MapField: FC<MapProps> = ({
     title,
     description,
     fieldKey,
-    fieldRequired= false,
+    fieldRequired = false,
     onChange,
     disabled = false,
     ...props
@@ -51,65 +51,98 @@ const MapField: FC<MapProps> = ({
     const polygon = areaId && Array.isArray(areas) && areas.length > 0 ? (areas.find(area => (area.id).toString() === areaId) || {}).polygon : [];
 
 
-    function calculateCenter(polygon: Point[]) {
-        if (!polygon || polygon.length === 0) {
-            return undefined;
-        }
+    // function calculateCenter(polygon: Point[]) {
+    //     if (!polygon || polygon.length === 0) {
+    //         return undefined;
+    //     }
 
-        let minX = Infinity;
-        let maxX = -Infinity;
-        let minY = Infinity;
-        let maxY = -Infinity;
+    //     let minX = Infinity;
+    //     let maxX = -Infinity;
+    //     let minY = Infinity;
+    //     let maxY = -Infinity;
 
-        polygon.forEach(point => {
-            if (point.lng < minX) minX = point.lng;
-            if (point.lng > maxX) maxX = point.lng;
-            if (point.lat < minY) minY = point.lat;
-            if (point.lat > maxY) maxY = point.lat;
-        });
+    //     polygon.forEach(point => {
+    //         if (point.lng < minX) minX = point.lng;
+    //         if (point.lng > maxX) maxX = point.lng;
+    //         if (point.lat < minY) minY = point.lat;
+    //         if (point.lat > maxY) maxY = point.lat;
+    //     });
 
-        const avgLat = (minY + maxY) / 2;
-        const avgLng = (minX + maxX) / 2;
+    //     const avgLat = (minY + maxY) / 2;
+    //     const avgLng = (minX + maxX) / 2;
 
-        return {lat: avgLat, lng: avgLng};
-    }
+    //     return {lat: avgLat, lng: avgLng};
+    // }
 
-    let center: LocationType | undefined = undefined;
-    if (!!props.area && Array.isArray(props.area) && props.area.length > 0) {
-      center = calculateCenter(props.area);
-    }
+    // let center: LocationType | undefined = undefined;
+    // if (!!props.area && Array.isArray(props.area) && props.area.length > 0) {
+    //   center = calculateCenter(props.area);
+    // }
 
     const zoom = {
         minZoom: props?.map?.minZoom ? parseInt(props.map.minZoom) : 7,
         maxZoom: props?.map?.maxZoom ? parseInt(props.map.maxZoom) : 20
-    }; 
+    };
+
+
+
+    function calculateCenterFromMultipleArrays(arraysOfPoints: Point[][]): Point | undefined {
+        if (!arraysOfPoints || arraysOfPoints.length === 0) {
+            return { lat: 0, lng: 0 }; // Standaard waarde als de array leeg is
+        }
+
+        let totalPoints: Point[] = [];
+        arraysOfPoints.forEach(points => {
+            totalPoints = totalPoints.concat(points);
+        });
+
+        if (totalPoints.length === 0) {
+            return { lat: 0, lng: 0 }; // Standaard waarde als de array leeg is
+        }
+
+        let sumLat = 0;
+        let sumLng = 0;
+
+        totalPoints.forEach(point => {
+            sumLat += point.lat;
+            sumLng += point.lng;
+        });
+
+        const avgLat = sumLat / totalPoints.length;
+        const avgLng = sumLng / totalPoints.length;
+
+        return { lat: avgLat, lng: avgLng };
+    }
+
+
+    let center: Point | undefined = calculateCenterFromMultipleArrays(polygon);
 
     return (
-      <FormField type="text">
-          <Paragraph className="utrecht-form-field__label">
-              <FormLabel htmlFor={randomID}>{title}</FormLabel>
-          </Paragraph>
-          <FormFieldDescription>{description}</FormFieldDescription>
-          <div
-            className="form-field-map-container"
-            id={`map`}
-          >
-            {((areaId && polygon.length) || !areaId) && (
-              <EditorMap
-                  {...props}
-                  fieldName={fieldKey}
-                  center={center}
-                  onChange={onChange}
-                  fieldRequired={fieldRequired}
-                  markerIcon={undefined}
-                  centerOnEditorMarker={false}
-                  autoZoomAndCenter='area'
-                  area={polygon}
-                  {...zoom}
-              />
-            )}
-          </div>
-      </FormField>
+        <FormField type="text">
+            <Paragraph className="utrecht-form-field__label">
+                <FormLabel htmlFor={randomID}>{title}</FormLabel>
+            </Paragraph>
+            <FormFieldDescription>{description}</FormFieldDescription>
+            <div
+                className="form-field-map-container"
+                id={`map`}
+            >
+                {((areaId && polygon.length) || !areaId) && (
+                    <EditorMap
+                        {...props}
+                        fieldName={fieldKey}
+                        center={center}
+                        onChange={onChange}
+                        fieldRequired={fieldRequired}
+                        markerIcon={undefined}
+                        centerOnEditorMarker={false}
+                        autoZoomAndCenter='area'
+                        area={polygon}
+                        {...zoom}
+                    />
+                )}
+            </div>
+        </FormField>
     );
 }
 

@@ -69,28 +69,27 @@ export function Area({
     url: string;
   }
 
-  const [poly, setPoly] = useState([]);
-
+  const [poly, setPoly] = useState<LatLng[][]>([]);
+  
   useEffect(() => {
     if (area && area.length > 0) {
-      let validPolygons = [];
-
+      let validPolygons: LatLng[][] = [];
+  
       if (Array.isArray(area[0])) {
         validPolygons = area.map((polygon: any) =>
             polygon.map(({ lat, lng }) => ({ lat, lng }))
         );
       } else {
-        validPolygons = [area.map(({ lat, lng }) => ({ lat, lng }))];
+        validPolygons = [area.map(({ lat, lng }) => new LatLng(lat, lng))];
       }
-
+  
       const cutout = createCutoutPolygonMulti(validPolygons);
-
+  
       setPoly(cutout);
     }
   }, [area]);
   
   const multiPolygon: any[] = [];
-  const properties: Array<any> = [];
   const areaIds = areas?.map((item: Area) => item.id);
   const filteredAreas = allAreas.filter((item: any) => areaIds?.includes(item.id));
 
@@ -105,6 +104,7 @@ export function Area({
       }
     });
   }
+
 
 
     return (
@@ -145,7 +145,7 @@ export function Area({
                     <Polygon
                         {...props}
                         positions={poly.map(ring => ring?.map(([lng, lat]) => [lat, lng]))}
-                        pathOptions={{ color: 'black', fillOpacity: 0.6 }}
+                        pathOptions={areaPolygonStyle}
                     />
                 )
             )}
