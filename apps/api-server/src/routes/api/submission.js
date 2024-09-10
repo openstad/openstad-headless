@@ -56,6 +56,7 @@ router.route('/')
 		req.userEmailAddress = data.submittedData.userEmailAddress || '';
 		req.sendConfirmationToAdmin = data.submittedData.confirmationAdmin || false;
 		req.overwriteEmailAddress = data.submittedData.overwriteEmailAddress || '';
+		req.widgetId = data.widgetId;
 
 		delete data.submittedData.confirmationUser;
 		delete data.submittedData.userEmailAddress;
@@ -84,7 +85,8 @@ router.route('/')
 				.filter(email => email.length > 0);
 
 			const notificationData = {
-				submissionId: req.results.id
+				submissionId: req.results.id,
+				widgetId: req.widgetId
 			};
 
 			if ( emailReceivers.length > 0 ) {
@@ -104,7 +106,8 @@ router.route('/')
 					type: "new enquete - user",
 					projectId: req.project.id,
 					data: {
-						submissionId: req.results.id
+						submissionId: req.results.id,
+						widgetId: req.widgetId
 					}
 			};
 
