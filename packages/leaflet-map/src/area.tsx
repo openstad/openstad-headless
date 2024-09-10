@@ -60,6 +60,14 @@ export function Area({
   },
   ...props
 }: AreaProps) {
+  const datastore = new DataStore({});
+  const { data: allAreas } = datastore.useAreas();
+
+  interface Area {
+    id: number;
+    name: string;
+    url: string;
+  }
 
   const [poly, setPoly] = useState([]);
 
@@ -80,15 +88,7 @@ export function Area({
       setPoly(cutout);
     }
   }, [area]);
-
-  const datastore = new DataStore({});
-  const { data: allAreas } = datastore.useAreas();
-
-  interface Area {
-    id: number;
-    name: string;
-    url: string;
-  }
+  
   const multiPolygon: any[] = [];
   const properties: Array<any> = [];
   const areaIds = areas?.map((item: Area) => item.id);
@@ -105,6 +105,7 @@ export function Area({
       }
     });
   }
+
 
     return (
         <>
