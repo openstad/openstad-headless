@@ -103,8 +103,6 @@ router.route('/')
 
     req.scope.push({ method: ['filterByTags', onlyIncludeTagIds] });
 
-    console.log( 'scope', req.scope );
-
     return db.Comment
       .scope(...req.scope)
       .findAndCountAll(
@@ -114,8 +112,6 @@ router.route('/')
         },
       )
       .then(function(result) {
-
-        console.log( 'result.count', result.count );
         req.results = result.rows;
         req.dbQuery.count = result.count;
         return next();
