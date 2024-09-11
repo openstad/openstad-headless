@@ -76,9 +76,9 @@ const ResourceOverviewMap = ({
       let marker: MarkerProps = {
         location: { ...resource.location } || undefined,
       };
-      const markerLatLng = parseLocation(marker); // unify location format
-      marker.lat = markerLatLng.lat;
-      marker.lng = markerLatLng.lng;
+      const markerLatLng: any = parseLocation(marker); // unify location format
+      marker.lat = markerLatLng[0].lat;
+      marker.lng = markerLatLng[0].lng;
 
       if (marker.lat && marker.lng && markerHref) {
         marker.href = markerHref.replace(/\[id\]/, resource.id);
