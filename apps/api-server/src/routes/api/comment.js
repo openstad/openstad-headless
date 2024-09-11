@@ -19,6 +19,14 @@ router
       req.scope.push({ method: ['includeRepliesOnComments', req.user.id] });
     }
 
+    if (req.query.includeTags) {
+      req.scope.push('includeTags');
+    }
+
+    if (req.query.includeAllComments) {
+      req.scope.push('includeAllComments');
+    }
+
     if (req.query.includeVoteCount) {
       req.scope.push({ method: ['includeVoteCount', 'comment'] });
     }
@@ -95,6 +103,8 @@ router.route('/')
 
     req.scope.push({ method: ['filterByTags', onlyIncludeTagIds] });
 
+    console.log( 'scope', req.scope );
+
     return db.Comment
       .scope(...req.scope)
       .findAndCountAll(
@@ -104,6 +114,8 @@ router.route('/')
         },
       )
       .then(function(result) {
+
+        console.log( 'result.count', result.count );
         req.results = result.rows;
         req.dbQuery.count = result.count;
         return next();
