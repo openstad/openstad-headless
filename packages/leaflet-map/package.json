@@ -32,6 +32,7 @@
     "@types/react": "^18.2.78",
     "@types/react-dom": "^18.2.7",
     "@types/react-leaflet-markercluster": "^3.0.4",
+    "@types/turf": "^3.5.32",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.0.3",
