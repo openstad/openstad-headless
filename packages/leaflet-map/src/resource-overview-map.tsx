@@ -181,7 +181,7 @@ const ResourceOverviewMap = ({
 
   return (
     <div className='map-container--buttons'>
-      <Button appearance='primary-action-button' className='skip-link' onClick={skipMarkers}>Skip markers</Button>
+      <Button appearance='primary-action-button' className='skip-link' onClick={skipMarkers}>Sla kaart over</Button>
       <BaseMap
         {...props}
         {...zoom}

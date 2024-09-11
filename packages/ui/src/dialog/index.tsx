@@ -20,7 +20,7 @@ export const Dialog = ({
             <IconButton
               className="subtle-button"
               icon="ri-close-line"
-              aria-label="Close"
+              aria-label="Sluiten"
             />
           </RadixDialog.Close>
         </div>
