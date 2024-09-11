@@ -87,7 +87,7 @@ export function Area({
 
       if (Array.isArray(area[0])) {
         validPolygons = area.map((polygon: any) =>
-          polygon.map(({ lat, lng }) => ({ lat, lng }))
+          polygon.map(({ lat, lng }: { lat: number, lng: number }) => ({ lat, lng }))
         );
       } else {
         validPolygons = [area.map(({ lat, lng }) => new LatLng(lat, lng))];
