@@ -204,6 +204,7 @@ const defaultItemRenderer = (
 
           <Carousel
             items={resourceImages}
+            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
             itemRenderer={(i) => (
               <Image
                 src={i.url}
@@ -266,6 +267,7 @@ const defaultItemRenderer = (
         <div className={`resource-card--link ${hasImages}`}>
           <Carousel
             items={resourceImages}
+            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
             itemRenderer={(i) => (
               <Image
                 src={i.url}
@@ -514,6 +516,7 @@ function ResourceOverview({
           <Carousel
             startIndex={resourceDetailIndex}
             items={filteredResources && filteredResources?.length > 0 ? filteredResources : []}
+            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
             itemRenderer={(item) => (
               <GridderResourceDetail
                 resource={item}

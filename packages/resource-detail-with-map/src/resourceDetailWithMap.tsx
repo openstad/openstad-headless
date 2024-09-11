@@ -175,6 +175,7 @@ function ResourceDetailWithMap({
             {displayImage && (
               <Carousel
                 items={resourceImages}
+                buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
                 itemRenderer={(i) => (
                   <Image
                     src={i.url}

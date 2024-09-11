@@ -9,12 +9,17 @@ type Props = {
   startIndex?: number;
   previousButton?: HTMLButtonElement;
   nextButton?: HTMLButtonElement;
+  buttonText?: {
+    next?: string;
+    previous?: string;
+  }
 } & React.HTMLAttributes<HTMLDivElement>;
 
 export function Carousel({
   startIndex = 0,
   items = [],
   itemRenderer,
+  buttonText,
   ...props
 }: Props) {
   const [index, setIndex] = useState<number>(startIndex);
@@ -34,7 +39,7 @@ export function Carousel({
               className="primary-action-button"
               icon="ri-arrow-left-s-line"
               disabled={index === 0}
-              text={'Vorige slide'}
+              text={buttonText?.previous || 'Vorige slide'}
               iconOnly={true}
               onClick={() => setIndex(index - 1)}
             />
@@ -44,7 +49,7 @@ export function Carousel({
               className="primary-action-button"
               icon="ri-arrow-right-s-line"
               disabled={index === items.length - 1}
-              text={'Volgende slide'}
+              text={buttonText?.next || 'Volgende slide'}
               iconOnly={true}
               onClick={() => setIndex(index + 1)}
             />
