@@ -550,9 +550,9 @@ function ResourceOverview({
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
             }`}>
           {props.displaySearchText ? (
-            <div className="osc-resourceoverview-search-container col-span-full"  role="status">
+            <div className="osc-resourceoverview-search-container col-span-full">
               {props.textActiveSearch && search && (
-                <Paragraph className="osc-searchtext">
+                <Paragraph className="osc-searchtext" role="status">
                   {props.textActiveSearch
                     .replace('[search]', search)
                     .replace('[zoekterm]', search)}
