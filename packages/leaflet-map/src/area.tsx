@@ -79,7 +79,7 @@ export function Area({
     url: string;
   }
 
-  const [poly, setPoly] = useState<LatLng[][]>([]);
+  const [poly, setPoly] = useState<any>([]);
 
   useEffect(() => {
     if (area && area.length > 0) {
@@ -154,7 +154,7 @@ export function Area({
         poly && (
           <Polygon
             {...props}
-            positions={poly.map(ring => ring?.map(([lng, lat]) => [lat, lng]))}
+            positions={poly.map((ring: any) => ring?.map(([lng, lat]: [number, number]) => [lat, lng]))}
             pathOptions={areaPolygonStyle}
           />
         )
