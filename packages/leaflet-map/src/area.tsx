@@ -7,7 +7,7 @@ import type { AreaProps } from './types/area-props';
 
 import { difference, polygon as tPolygon } from 'turf';
 
-function createCutoutPolygonMulti(areas) {
+function createCutoutPolygonMulti(areas: any) {
   const outerBox = tPolygon([[
     [-180, -90],
     [180, -90],
@@ -18,20 +18,31 @@ function createCutoutPolygonMulti(areas) {
 
   let cutoutPolygon = outerBox;
 
-  areas.forEach(area => {
-    const innerPolygon = tPolygon([area.map(({ lat, lng }) => [lng, lat])]);
+  areas.forEach((area: any) => {
+    const innerPolygon = tPolygon([area.map(({ lat, lng }: { lat: number, lng: number }) => [lng, lat])]);
     cutoutPolygon = difference(cutoutPolygon, innerPolygon) || cutoutPolygon;
   });
 
   return cutoutPolygon.geometry.coordinates;
 }
 
-export function isPointInArea(area: Array<LatLng>, point: LatLng) {
+export function isPointInArea(area: Array<Array<LatLng>> | Array<LatLng>, point: LatLng) {
   if (!point) return false;
   if (!area) return true;
 
-  // taken from http://pietschsoft.com/post/2008/07/02/Virtual-Earth-Polygon-Search-Is-Point-Within-Polygon
+  if (Array.isArray(area[0])) {
+    for (let poly of area) {
+      if (isPointInSinglePolygon(Array.isArray(poly) ? poly : [poly], point)) {
+        return true;
+      }
+    }
+    return false;
+  } else {
+    return isPointInSinglePolygon(area as Array<LatLng>, point);
+  }
+}
 
+function isPointInSinglePolygon(area: Array<LatLng>, point: LatLng) {
   let x = point.lat,
     y = point.lng;
 
@@ -49,7 +60,6 @@ export function isPointInArea(area: Array<LatLng>, point: LatLng) {
 
   return inside;
 }
-
 export function Area({
   area = [],
   areas,
@@ -70,25 +80,25 @@ export function Area({
   }
 
   const [poly, setPoly] = useState<LatLng[][]>([]);
-  
+
   useEffect(() => {
     if (area && area.length > 0) {
       let validPolygons: LatLng[][] = [];
-  
+
       if (Array.isArray(area[0])) {
         validPolygons = area.map((polygon: any) =>
-            polygon.map(({ lat, lng }) => ({ lat, lng }))
+          polygon.map(({ lat, lng }) => ({ lat, lng }))
         );
       } else {
         validPolygons = [area.map(({ lat, lng }) => new LatLng(lat, lng))];
       }
-  
+
       const cutout = createCutoutPolygonMulti(validPolygons);
-  
+
       setPoly(cutout);
     }
   }, [area]);
-  
+
   const multiPolygon: any[] = [];
   const areaIds = areas?.map((item: Area) => item.id);
   const filteredAreas = allAreas.filter((item: any) => areaIds?.includes(item.id));
@@ -107,50 +117,50 @@ export function Area({
 
 
 
-    return (
-        <>
-              {multiPolygon.length > 0 ? (
-                multiPolygon.map((item, index) => (
-                    <>
-                        <Polygon
-                            key={index}
-                            {...props}
-                            pathOptions={areaPolygonStyle}
-                            positions={item.polygon}
-                            eventHandlers={{
-                                mouseover: (e) => {
-                                    e.target.setStyle({
-                                        fillOpacity: 0.05,
-                                    });
-                                },
-                                mouseout: (e) => {
-                                    e.target.setStyle(areaPolygonStyle);
-                                },
-                            }}
-                        >
-                            {item.title &&
-                              <>
-                                <Popup className={'leaflet-popup'}>
-                                    {item.title && <h3 className="utrecht-heading-3">{item.title}</h3>}
-                                    {item.url && <a className="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action" href={item.url}>Lees verder</a>}
-                                </Popup>
-                              </>
-                            }
-                        </Polygon>
+  return (
+    <>
+      {multiPolygon.length > 0 ? (
+        multiPolygon.map((item, index) => (
+          <>
+            <Polygon
+              key={index}
+              {...props}
+              pathOptions={areaPolygonStyle}
+              positions={item.polygon}
+              eventHandlers={{
+                mouseover: (e) => {
+                  e.target.setStyle({
+                    fillOpacity: 0.05,
+                  });
+                },
+                mouseout: (e) => {
+                  e.target.setStyle(areaPolygonStyle);
+                },
+              }}
+            >
+              {item.title &&
+                <>
+                  <Popup className={'leaflet-popup'}>
+                    {item.title && <h3 className="utrecht-heading-3">{item.title}</h3>}
+                    {item.url && <a className="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action" href={item.url}>Lees verder</a>}
+                  </Popup>
+                </>
+              }
+            </Polygon>
 
-                    </>
-                ))
-            ) : (
-                poly && (
-                    <Polygon
-                        {...props}
-                        positions={poly.map(ring => ring?.map(([lng, lat]) => [lat, lng]))}
-                        pathOptions={areaPolygonStyle}
-                    />
-                )
-            )}
-        </>
-    );
+          </>
+        ))
+      ) : (
+        poly && (
+          <Polygon
+            {...props}
+            positions={poly.map(ring => ring?.map(([lng, lat]) => [lat, lng]))}
+            pathOptions={areaPolygonStyle}
+          />
+        )
+      )}
+    </>
+  );
 }
 
 export default Area;

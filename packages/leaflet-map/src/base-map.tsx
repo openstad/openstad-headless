@@ -302,7 +302,7 @@ function MapEventsListener({
       console.log('ONLOAD');
     },
     click: (e: LeafletMouseEvent) => {
-      const areaLatLngs = area.map(parseLocation);
+      const areaLatLngs = area.map(parseLocation) as LatLng[];
       let isInArea =
         !(area && area.length) || isPointInArea(areaLatLngs, e.latlng);
       let customEvent = new CustomEvent('osc-map-click', {
