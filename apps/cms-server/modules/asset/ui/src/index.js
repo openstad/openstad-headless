@@ -36,9 +36,6 @@ function adjustMenu() {
     } else {
       if (mainMenuContainer.offsetWidth >= mainContainer.offsetWidth) {
         document.getElementById('navbar').classList.add('--hidden');
-        navContainer.appendChild(
-          document.getElementById('navbar').cloneNode(true)
-        );
         navContainer.classList.add('--mobile');
         isMobile = true;
       } else if (!isMobile) {

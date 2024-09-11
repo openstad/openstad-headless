@@ -13,6 +13,7 @@
   text-decoration: none;
   color: var(--nlds-main-menu-item-color, #000);
   border-bottom: solid 2px transparent;
+  white-space: nowrap;
 }
 #navbar .container #main-menu .level-1:hover,
 #navbar .container #main-menu .level-1:focus-visible {
