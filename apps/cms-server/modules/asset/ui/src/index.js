@@ -24,6 +24,7 @@ function adjustMenu() {
   const closeButton = document.querySelector('.close-button');
   const closeButtonSpan = document.querySelector('.close-button span');
   const navbar = document.getElementById('navbar');
+  const header = document.querySelector('.main-header-container');
 
   if (window.innerWidth <= mobileThreshold) {
     if (document.getElementsByClassName('--compact').length > 0) {
@@ -56,6 +57,13 @@ function adjustMenu() {
   closeButton.setAttribute('aria-expanded', 'false');
   mainMenuContainer.setAttribute('aria-hidden', 'true');
 
+  function closeMenu() {
+    closeButton.setAttribute('aria-expanded', 'false');
+    mainMenuContainer.setAttribute('aria-hidden', 'true');
+    navContainer.classList.remove('--show');
+    closeButtonSpan.textContent = 'Menu tonen';
+  }
+
   closeButton.addEventListener('click', () => {
     const isExpanded = closeButton.getAttribute('aria-expanded') === 'true';
     closeButton.setAttribute('aria-expanded', !isExpanded);
@@ -64,7 +72,26 @@ function adjustMenu() {
     navContainer.classList.toggle('--show');
     closeButtonSpan.textContent = isExpanded ? 'Menu tonen' : 'Menu verbergen';
   });
+
+  navbar.addEventListener('focusout', (event) => {
+    if (!navbar.contains(event.relatedTarget) && !header.contains(event.relatedTarget)) {
+      closeMenu();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeMenu();
+    }
+  });
+
+  header.addEventListener('focusin', () => {
+    // Do nothing, just to ensure focus is detected
+  });
 }
+
+window.onload = adjustMenu;
+window.onresize = adjustMenu;
 
 window.onload = adjustMenu;
 window.onresize = adjustMenu;
