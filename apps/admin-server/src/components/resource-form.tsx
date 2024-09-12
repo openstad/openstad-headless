@@ -179,7 +179,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         : new Date(),
       publishDate: existingData?.publishDate
         ? new Date(existingData.publishDate)
-        : undefined,
+        : new Date(),
 
       modBreak: existingData?.modBreak || '',
       modBreakUserId: existingData?.modBreakUserId || undefined,
