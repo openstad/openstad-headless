@@ -84,6 +84,7 @@ const MapField: FC<MapProps> = ({
         maxZoom: props?.map?.maxZoom ? parseInt(props.map.maxZoom) : 20
     }; 
 
+
     return (
       <FormField type="text">
           <Paragraph className="utrecht-form-field__label">
