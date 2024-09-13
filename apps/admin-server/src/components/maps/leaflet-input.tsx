@@ -84,7 +84,7 @@ const MapInput: React.FC<MapComponentProps> = ({ onSelectLocation, field, center
     <div>
         <MapContainer       
             center={center}
-            zoom={10}
+            zoom={7}
             scrollWheelZoom={false}
             style={{ height: '600px', width: '100%' }}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
