@@ -33,6 +33,7 @@ type Props = {
   searchPlaceholder: string;
   resetText: string;
   applyText: string;
+  showActiveTags?: boolean;
 };
 
 export function Filters({
@@ -43,6 +44,7 @@ export function Filters({
   tagsLimitation = [],
   onUpdateFilter,
   className = '',
+  showActiveTags = false,
   ...props
 }: Props) {
   const defaultFilter: Filter = {
@@ -56,6 +58,7 @@ export function Filters({
   const [tagState, setTagState] = useState<{ [key: string]: Array<number> }>();
   const [filter, setFilter] = useState<Filter>(defaultFilter);
   const [selectedOptions, setSelected] = useState<{ [key: string]: any }>({});
+  const [newActiveTagsDraft, setNewActiveTagsDraft] = useState<Array<{ type: string; id: number; label: string }>>([]);
   const [activeTags, setActiveTags] = useState<Array<{ type: string; id: number; label: string }>>([]);
 
   const search = useDebounce(setSearch, 300);
@@ -84,9 +87,18 @@ export function Filters({
     });
   }
 
-  const updateTagListMultiple = (tagType: string, updatedTag: string) => {
+  const updateTagListMultiple = (tagType: string, updatedTag: number, updatedLabel?: string) => {
     const existingTags = selectedOptions[tagType];
+    const selectedDraft: {type?: string, id: number, label?: string}[] = [...(newActiveTagsDraft || [])];
     const selected = [...(existingTags || [])];
+
+    const tagIndex = selectedDraft.findIndex((tag: {type?: string, id: number, label?: string}) => tag.id === updatedTag);
+
+    if (tagIndex !== -1) {
+      selectedDraft.splice(tagIndex, 1);
+    } else {
+      selectedDraft.push({ id: updatedTag, label: updatedLabel, type: tagType });
+    }
 
     if (selected.includes(updatedTag)) {
       const index = selected.indexOf(updatedTag);
@@ -97,7 +109,9 @@ export function Filters({
 
     setSelected({ ...selectedOptions, [tagType]: selected });
     setTags(tagType, selected);
-    updateActiveTags(tagType, selected);
+
+    // @ts-ignore
+    setNewActiveTagsDraft(selectedDraft);
   };
 
   const updateTagListSingle = (tagType: string, updatedTag: string) => {
@@ -111,20 +125,15 @@ export function Filters({
     }
     setSelected({ ...selectedOptions, [tagType]: selected });
     setTags(tagType, selected);
-    updateActiveTags(tagType, selected);
-  };
-
-  function updateActiveTags(tagType: string, selected: any[]) {
-    const newActiveTags = selected.map(id => ({ type: tagType, id, label: id.toString() }));
-    setActiveTags(prevTags => [...prevTags.filter(tag => tag.type !== tagType), ...newActiveTags]);
   }
 
   function removeActiveTag(tagType: string, tagId: number) {
-    const updatedTags = activeTags.filter(tag => !(tag.type === tagType && tag.id === tagId));
-    setActiveTags(updatedTags);
+    const updatedTags = newActiveTagsDraft.filter(tag => !(tag.type === tagType && tag.id === tagId));
+    setNewActiveTagsDraft(updatedTags);
+
     const updatedSelectedOptions = {
       ...selectedOptions,
-      [tagType]: selectedOptions[tagType].filter((id: number) => id !== tagId)
+      [tagType]: (selectedOptions[tagType] || []).filter((id: number) => id !== tagId),
     };
     setSelected(updatedSelectedOptions);
     setTags(tagType, updatedSelectedOptions[tagType]);
@@ -135,7 +144,7 @@ export function Filters({
     };
 
     setFilter(updatedFilter);
-    handleSubmit(updatedFilter);
+    handleSubmit('', updatedFilter, updatedTags);
   }
 
   useEffect(() => {
@@ -148,11 +157,17 @@ export function Filters({
     }
   }, [tagState]);
 
-  const handleSubmit = (e?: any, updatedFilter?: Filter) => {
+  const handleSubmit = (e?: any, updatedFilter?: Filter, updatedTags?: any) => {
     if (e && e.preventDefault) e.preventDefault();
     const filterToSubmit = updatedFilter || filter;
     updateFilter(filterToSubmit);
     onUpdateFilter && onUpdateFilter(filterToSubmit);
+
+    if (updatedTags) {
+      setActiveTags(updatedTags);
+    } else {
+      setActiveTags(newActiveTagsDraft);
+    }
   };
 
   return (
@@ -181,8 +196,8 @@ export function Filters({
                     tagType={tagGroup.type}
                     placeholder={tagGroup.label}
                     onlyIncludeIds={tagsLimitation}
-                    onUpdateFilter={(updatedTag) => {
-                      updateTagListMultiple(tagGroup.type, updatedTag)
+                    onUpdateFilter={(updatedTag, updatedLabel) => {
+                      updateTagListMultiple(tagGroup.type, updatedTag, updatedLabel);
                     }}
                   />
                 );
@@ -239,6 +254,7 @@ export function Filters({
                 inputsInFilter.forEach((i) => (i.value = ''));
               }
               setSelected({});
+              setNewActiveTagsDraft([]);
               setActiveTags([]);
               updateFilter(defaultFilter)
               onUpdateFilter && onUpdateFilter(defaultFilter);
@@ -249,12 +265,11 @@ export function Filters({
         </div>
       </form>
 
-        {activeTags.length > 0 && (
+        {(activeTags.length > 0 && showActiveTags) && (
             <div className="active-tags">
-              <h4>Actieve Tags:</h4>
               <ul>
                 {activeTags.map(tag => (
-                    <li key={`${tag.type}-${tag.id}`}>
+                    <li key={`${tag.type}-${tag.id}`} className={tag.type}>
                       {tag.label}
                       <button onClick={() => removeActiveTag(tag.type, tag.id)}>x</button>
                     </li>
