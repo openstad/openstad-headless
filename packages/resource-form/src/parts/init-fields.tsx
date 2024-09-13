@@ -46,7 +46,8 @@ export const InitializeFormFields = (items, data) => {
                 variant: item.variant,
                 multiple: item.multiple,
                 options: item.options,
-                rows: 5
+                rows: 5,
+                placeholder: item.placeholder
             };
 
             switch (item.type) {
