@@ -137,11 +137,15 @@ const BaseMap = ({
 
   // auto zoom and center on init
   useEffect(() => {
+
     if (!mapRef) return;
     if (autoZoomAndCenter) {
-      if (autoZoomAndCenter === 'area' && area) {
+    if (autoZoomAndCenter === 'area' && area) {
         const updatedArea = Array.isArray(area[0]) ? area : [area];
-        return setBoundsAndCenter(updatedArea as any);
+        // Korte timeout om te zorgen dat de animatie te zien is. (inzomen van heel NL naar je polygoon)
+        setTimeout(() => {
+          return setBoundsAndCenter(updatedArea as any);
+        }, 200);
       }
       if (currentMarkers?.length) {
         return setBoundsAndCenter(currentMarkers as any);
