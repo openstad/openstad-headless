@@ -146,6 +146,11 @@ export default function ProjectNotifications() {
                 Voor een overzicht van ingevulde waardes van een resource kan dit gebruikt worden:<br />
                 &#123;&#123; submissionContent | safe &#125;&#125;
               </p>
+              <br />
+              <p>
+                Voor een overzicht van ingevulde waardes van een enquete kan dit gebruikt worden:<br />
+                &#123;&#123; enqueteContent | safe &#125;&#125;
+              </p>
 
             <br />
                 </>)

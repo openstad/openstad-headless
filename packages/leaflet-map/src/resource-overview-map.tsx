@@ -76,7 +76,7 @@ const ResourceOverviewMap = ({
       let marker: MarkerProps = {
         location: { ...resource.location } || undefined,
       };
-      const markerLatLng = parseLocation(marker); // unify location format
+      const markerLatLng: any = parseLocation(marker); // unify location format
       marker.lat = markerLatLng.lat;
       marker.lng = markerLatLng.lng;
 

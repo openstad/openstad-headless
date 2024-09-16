@@ -1,27 +1,32 @@
 const convertDbPolygonToLatLng = require('./convert-db-polygon-to-lat-lng');
 
 exports.formatPolygonToGeoJson = (polygons) => {
+  if (!polygons) return { "type": "FeatureCollection", "features": [] };
 
-  //geoJSON has many more features, we just use this template because this is what
-  //most generators and public data gives you and it looks is for the uploader and we can refer to a standard
-  //but we don't save property for instance, it might be an resource to look into it for the future
+  const polygonsArray = Array.isArray(polygons[0]) ? polygons : [polygons];
+
+  const features = polygonsArray.map(polygon => ({
+    "type": "Feature",
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [polygon.map(point => [point.lng, point.lat])] // Zet lng/lat om naar de juiste volgorde
+    }
+  }));
+
   return {
     "type": "FeatureCollection",
-    "features": [
-      {
-        "type": "Feature",
-        "geometry": {
-          "type": "Polygon",
-          "coordinates": polygons ? [polygons.map((polygon) => {
-            return [polygon.lng, polygon.lat];
-          })] : []
-        }
-      }
-    ]
+    "features": features
   };
-}
+};
 
 exports.formatGeoJsonToPolygon = (geoJSON) => {
-  if (!geoJSON || !geoJSON.features || !geoJSON.features[0] || !geoJSON.features[0].geometry || !geoJSON.features[0].geometry.coordinates || !geoJSON.features[0].geometry.coordinates[0]) return {};
-  return convertDbPolygonToLatLng(geoJSON.features[0].geometry, 1, 0);
+  if (!geoJSON || !geoJSON.features || geoJSON.features.length === 0) return [];
+
+  return geoJSON.features.map(feature => {
+    if (feature.geometry && feature.geometry.type === 'Polygon') {
+      return convertDbPolygonToLatLng(feature.geometry, 1, 0);
+    }
+    return [];
+  });
 }
+

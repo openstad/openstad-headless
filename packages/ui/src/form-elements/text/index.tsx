@@ -29,7 +29,7 @@ const TextInput: FC<TextInputProps> = ({
     variant,
     fieldKey,
     fieldRequired = false,
-    placeholder = '',
+    placeholder,
     defaultValue = '',
     onChange,
     disabled = false,
@@ -66,7 +66,6 @@ const TextInput: FC<TextInputProps> = ({
     }
 
     const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
-
     return (
         <FormField type="text">
             {title && (

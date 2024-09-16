@@ -91,6 +91,68 @@ Bedankt voor je inzending! Je inzending is goed ontvangen en staat nu online. Hi
  </mj-body> 
  </mjml>`;
 
+const initialDataEnqueteSubmissionUser = `<mjml>
+  <mj-body background-color="#f6f6f7">
+    <mj-section background-color="#ffffff" padding="20px">
+      <mj-column>
+        <mj-text font-size="20px" color="#333333" font-family="Helvetica" align="center">
+          Bedankt voor je Inzending
+        </mj-text>
+        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
+<mj-divider border-width="0" padding="10px" />
+
+        <mj-text font-size="16px" color="#555555" font-family="Helvetica">
+          Bedankt voor het invullen van onze enquête! Hieronder vind je een overzicht van je ingevulde gegevens.
+        </mj-text>
+<mj-divider border-width="0" padding="10px" />
+
+        {{ enqueteContent | safe }}
+<mj-divider border-width="0" padding="10px" />
+
+        <mj-text font-size="16px" color="#555555" font-family="Helvetica">
+          We nemen zo snel mogelijk contact met je op als dat nodig is.
+        </mj-text>
+<mj-divider border-width="0" padding="10px" />
+        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
+        <mj-text font-size="14px" color="#999999" font-family="Helvetica" align="center">
+          Als je vragen hebt, neem dan contact op via <a href="mailto:support@website.nl">support@website.nl</a>.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
+`;
+
+const initialDataEnqueteSubmissionAdmin = `<mjml>
+  <mj-body background-color="#f6f6f7">
+    <mj-section background-color="#ffffff" padding="20px">
+      <mj-column>
+        <mj-text font-size="20px" color="#333333" font-family="Helvetica" align="center">
+          Nieuwe Enquête Inzending
+        </mj-text>
+        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
+<mj-divider border-width="0" padding="10px" />
+        <mj-text font-size="16px" color="#555555" font-family="Helvetica">
+          Hallo Admin,
+        </mj-text>
+        <mj-text font-size="16px" color="#555555" font-family="Helvetica">
+          Er is een nieuwe inzending ontvangen van de enquête op de website.
+        </mj-text>
+<mj-divider border-width="0" padding="10px" />
+
+        {{ enqueteContent | safe }}
+        
+<mj-divider border-width="0" padding="10px" />
+        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
+        <mj-text font-size="14px" color="#999999" font-family="Helvetica" align="center">
+          Dit is een automatisch bericht, antwoorden op deze e-mail is niet mogelijk.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
+`;
+
 type Props = {
   type:
   | 'login email'
@@ -172,6 +234,8 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
   const defaultValueBody = body
       || ( type === 'new published resource - user feedback' ? initialDataResourceSubmission : "" )
       || ( type === 'login email' ? initialData : "" )
+      || ( type === 'new enquete - admin' ? initialDataEnqueteSubmissionAdmin : "" )
+      || ( type === 'new enquete - user' ? initialDataEnqueteSubmissionUser : "" )
 
   const defaults = React.useCallback(
     () => ({

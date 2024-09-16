@@ -23,7 +23,7 @@ export default function BaseMap({
     <MapContainer
       style={{ height: '400px', width: '100%' }}
       center={{ lat: 52.129507, lng: 4.670647 }}
-      zoom={10}
+      zoom={7}
       scrollWheelZoom={false}>
       <FeatureGroup>
         {/* <EditControl

@@ -136,29 +136,87 @@ module.exports = ( db, sequelize, DataTypes ) => {
               }
             };
 
-            const resource = await db.Resource.findByPk(instance.data.resourceId, {
-              include: [{ model: db.Tag, attributes: ['name', 'type'] }]
-            });
-
-            const widget = !!resource ? await db.Widget.findByPk(resource.widgetId) : instance.widgetId || null;
 
             let htmlContent = '';
 
-            if ( widget && widget.dataValues.config && widget.dataValues.config.items ) {
-            const widgetItems = widget.dataValues.config.items;
+            if ( instance.data.resourceId ) {
+              const resource = await db.Resource.findByPk(instance.data.resourceId, {
+                include: [{model: db.Tag, attributes: ['name', 'type']}]
+              });
 
-              const questionsAndAnswers = widgetItems.map(item => {
-                const question = item.title || item.fieldKey;
-                const fieldKey = item.fieldKey;
-                let answer = resource[fieldKey] || resource.extraData?.[fieldKey] || '';
+              const widget = !!resource ? await db.Widget.findByPk(resource.widgetId) : instance.widgetId || null;
 
-                if (fieldKey.includes('[') && fieldKey.includes(']')) {
-                  const [mainKey, subKey] = fieldKey.split(/[\[\]]/).filter(Boolean);
-                  if (mainKey === 'tags') {
-                    const tags = resource.tags.filter(tag => tag.type === subKey);
-                    answer = tags.map(tag => tag.name).join(', ');
+              if (widget && widget.dataValues.config && widget.dataValues.config.items) {
+                const widgetItems = widget.dataValues.config.items;
+
+                const questionsAndAnswers = widgetItems.map(item => {
+                  const question = item.title || item.fieldKey;
+                  const fieldKey = item.fieldKey;
+                  let answer = resource[fieldKey] || resource.extraData?.[fieldKey] || '';
+
+                  if (fieldKey.includes('[') && fieldKey.includes(']')) {
+                    const [mainKey, subKey] = fieldKey.split(/[\[\]]/).filter(Boolean);
+                    if (mainKey === 'tags') {
+                      const tags = resource.tags.filter(tag => tag.type === subKey);
+                      answer = tags.map(tag => tag.name).join(', ');
+                    }
+                  } else {
+                    if (typeof answer === 'string' && answer.startsWith('[') && answer.endsWith(']')) {
+                      try {
+                        const parsedAnswer = JSON.parse(answer);
+                        if (Array.isArray(parsedAnswer)) {
+                          answer = parsedAnswer.length ? parsedAnswer.join(', ') : '';
+                        }
+                      } catch (e) {
+                        // If parsing fails, keep the original answer
+                      }
+                    } else if (Array.isArray(answer)) {
+                      answer = answer.length ? answer.join(', ') : '';
+                    } else if (typeof answer === 'object' && answer !== null) {
+                      answer = Object.entries(answer).map(([key, value]) => `${key}: ${value}`).join(', ');
+                    }
                   }
-                } else {
+
+                  return {question, answer};
+                });
+
+                htmlContent = `
+                  <mj-table cellpadding="5" border="1px solid black" width="100%">
+                    <tbody>
+                      ${questionsAndAnswers.map(qa => `
+                        <tr style="background-color: #f0f0f0;">
+                          <td style="padding: 10px; font-weight: bold;">${qa.question}</td>
+                        </tr>
+                        <tr style="background-color: #ffffff;">
+                          <td style="padding: 10px;">
+                            ${qa.answer}
+                            <br/>
+                          </td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </mj-table>
+                `;
+              }
+            }
+
+
+            let htmlContentEnquete = '';
+
+            if ( instance.data.submissionId ) {
+              const submission = await db.Submission.findByPk(instance.data.submissionId);
+
+              const widget = !!instance.data.widgetId ? await db.Widget.findByPk(instance.data.widgetId) : null;
+
+              if (widget && widget.dataValues.config && widget.dataValues.config.items && submission && submission.dataValues && submission.dataValues.submittedData) {
+                const widgetItems = widget.dataValues.config.items;
+                const submittedData = submission.dataValues.submittedData;
+
+                const questionsAndAnswers = widgetItems.map(item => {
+                  const question = item.title || item.fieldKey;
+                  const fieldKey = item.fieldKey;
+                  let answer = submittedData[fieldKey] || '';
+
                   if (typeof answer === 'string' && answer.startsWith('[') && answer.endsWith(']')) {
                     try {
                       const parsedAnswer = JSON.parse(answer);
@@ -173,13 +231,13 @@ module.exports = ( db, sequelize, DataTypes ) => {
                   } else if (typeof answer === 'object' && answer !== null) {
                     answer = Object.entries(answer).map(([key, value]) => `${key}: ${value}`).join(', ');
                   }
-                }
 
-                return { question, answer };
-              });
 
-              htmlContent = `
-                  <table style="border: 1px solid black; border-collapse: collapse;" width="100%" cellpadding="5">
+                  return {question, answer};
+                });
+
+                htmlContentEnquete = `
+                  <mj-table cellpadding="5" border="1px solid black" width="100%">
                     <tbody>
                       ${questionsAndAnswers.map(qa => `
                         <tr style="background-color: #f0f0f0;">
@@ -193,8 +251,9 @@ module.exports = ( db, sequelize, DataTypes ) => {
                         </tr>
                       `).join('')}
                     </tbody>
-                  </table>
+                  </mj-table>
                 `;
+              }
             }
 
             let recipients = instance.to && instance.to.split(',').map(email => email.trim());
@@ -202,7 +261,7 @@ module.exports = ( db, sequelize, DataTypes ) => {
               await Promise.all(recipients.map(async (recipient) => {
                 let message = await db.NotificationMessage.create(
                   {...messageData, to: recipient},
-                  {data: {...messageData.data, submissionContent: htmlContent}}
+                  {data: {...messageData.data, submissionContent: htmlContent, enqueteContent: htmlContentEnquete}}
                 );
                 await message.send();
               }));
