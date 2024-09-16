@@ -21,27 +21,31 @@ module.exports = function({ searchfields = ['title', 'summary', 'description'] }
     search.forEach((criterium) => {
 
       let key = Object.keys(criterium)[0];
-      let value = criterium[key];
-      // todo: optional { fields: [], value: '' } construct
+      let value = criterium[key].toLowerCase(); // Converteer naar lowercase voor case-insensitieve vergelijking
 
       let useSearchFields;
       if (key == 'text') {
         useSearchFields = searchfields;
       } else {
-        useSearchFields = searchfields.filter( field => field == key );
+        useSearchFields = searchfields.filter(field => field == key);
       }
 
-      let threshold = -1000; // todo: tamelijk arbitrair; misschien moet je hem kunnen meesturen
-      if (value.length < 4) threshold = -10000;
-      if (value.length < 3) threshold = -20000;
+      // Split de zoekwaarde op in losse woorden
+      let searchTerms = value.split(' ');
 
-      let searchResult = fuzzysort.go(value, list, {
-        threshold,
-        keys: useSearchFields,
+      let allResults = [];
+
+      searchTerms.forEach(term => {
+        let searchResult = fuzzysort.go(term, list, {
+          keys: useSearchFields,
+          threshold: -200,
+          allowTypo: true
+        });
+
+        allResults.push(...searchResult);
       });
-      
-      results.push( searchResult );
 
+      results.push(allResults);
     });
 
     // mergen van de resultaten
