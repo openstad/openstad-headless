@@ -196,6 +196,12 @@ const defaultItemRenderer = (
   const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
   const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
 
+  const firstStatus = resource.statuses && resource.statuses.length > 0 ? resource.statuses[0] : null;
+  const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
+  const backgroundColorClass = firstStatus && firstStatus.backgroundColor ? `bgColor-${firstStatus.backgroundColor}` : '';
+
+  const statusClasses = `${colorClass} ${backgroundColorClass}`.trim();
+
   return (
     <>
       {props.displayType === 'cardrow' ? (
@@ -209,14 +215,16 @@ const defaultItemRenderer = (
                 src={i.url}
                 imageFooter={
                   props.displayStatusLabel && (
-                    <div>
+                    <div
+                        className={`${hasImages} ${statusClasses}`}
+                    >
                       <Paragraph className="osc-resource-overview-content-item-status">
                         {resource.statuses?.map((statusTag: any) => (
                           <span className="status-label">{statusTag.label}</span>
                         ))}
                       </Paragraph>
                     </div>
-                  )
+                    )
                 }
               />
             )}
@@ -224,10 +232,10 @@ const defaultItemRenderer = (
 
 
           <div>
-            <Spacer size={1} />
+            <Spacer size={1}/>
             {props.displayTitle ? (
-              <Heading4>
-                <a href={getUrl()} className="resource-card--link_trigger"> {elipsize(resource.title, props.titleMaxLength || 20)} </a>
+                <Heading4>
+                  <a href={getUrl()} className="resource-card--link_trigger"> {elipsize(resource.title, props.titleMaxLength || 20)} </a>
               </Heading4>
             ) : null}
 
@@ -271,7 +279,9 @@ const defaultItemRenderer = (
                 src={i.url}
                 imageFooter={
                   props.displayStatusLabel && (
-                    <div>
+                    <div
+                      className={`${hasImages} ${statusClasses}`}
+                    >
                       <Paragraph className="osc-resource-overview-content-item-status">
                         {resource.statuses?.map((statusTag: any) => (
                           <span className="status-label">{statusTag.label}</span>
