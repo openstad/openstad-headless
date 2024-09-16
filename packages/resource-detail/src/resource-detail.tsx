@@ -239,6 +239,7 @@ function ResourceDetail({
                   <Heading level={2} appearance="utrecht-heading-2">Plaats</Heading>
                   <ResourceDetailMap
                     resourceId={props.resourceId || '0'}
+                    resourceIdRelativePath={props.resourceIdRelativePath || 'openstadResourceId'}
                     {...props}
                     center={resource.location}
                     area={props.resourceDetailMap?.area}
@@ -261,6 +262,7 @@ function ResourceDetail({
                     title={props.likeWidget?.title}
                     yesLabel={props.likeWidget?.yesLabel}
                     noLabel={props.likeWidget?.noLabel}
+                    displayDislike={props.likeWidget?.displayDislike}
                     hideCounters={props.likeWidget?.hideCounters}
                     variant={props.likeWidget?.variant}
                     showProgressBar={props.likeWidget?.showProgressBar}
