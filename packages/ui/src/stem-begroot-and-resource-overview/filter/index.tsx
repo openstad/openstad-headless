@@ -8,7 +8,7 @@ import './index.css';
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
 import { Button, FormLabel } from "@utrecht/component-library-react";
-
+import { IconButton } from '@openstad-headless/ui/src';
 type Filter = {
   tags: Array<number>;
   search: { text: string };
@@ -89,10 +89,10 @@ export function Filters({
 
   const updateTagListMultiple = (tagType: string, updatedTag: number, updatedLabel?: string) => {
     const existingTags = selectedOptions[tagType];
-    const selectedDraft: {type?: string, id: number, label?: string}[] = [...(newActiveTagsDraft || [])];
+    const selectedDraft: { type?: string, id: number, label?: string }[] = [...(newActiveTagsDraft || [])];
     const selected = [...(existingTags || [])];
 
-    const tagIndex = selectedDraft.findIndex((tag: {type?: string, id: number, label?: string}) => tag.id === updatedTag);
+    const tagIndex = selectedDraft.findIndex((tag: { type?: string, id: number, label?: string }) => tag.id === updatedTag);
 
     if (tagIndex !== -1) {
       selectedDraft.splice(tagIndex, 1);
@@ -184,7 +184,7 @@ export function Filters({
             />
           </div>
         ) : null}
-        {( props.displayTagFilters && tagGroups && Array.isArray(tagGroups) && tagGroups.length > 0) ? (
+        {(props.displayTagFilters && tagGroups && Array.isArray(tagGroups) && tagGroups.length > 0) ? (
           <>
             {tagGroups.map((tagGroup, index) => {
               if (tagGroup.multiple) {
@@ -222,16 +222,16 @@ export function Filters({
         ) : null}
 
         {props.displaySorting ? (
-            <div className="form-element">
-              <FormLabel htmlFor={'sortField'}>Sorteer op</FormLabel>
-              <Select
-                  onValueChange={setSort}
-                  options={sorting}
-                  id="sortField"
-                  defaultValue={props.defaultSorting || 'createdAt_desc'}
-                  disableDefaultOption={true}
-              />
-            </div>
+          <div className="form-element">
+            <FormLabel htmlFor={'sortField'}>Sorteer op</FormLabel>
+            <Select
+              onValueChange={setSort}
+              options={sorting}
+              id="sortField"
+              defaultValue={props.defaultSorting || 'createdAt_desc'}
+              disableDefaultOption={true}
+            />
+          </div>
         ) : null}
 
 
@@ -265,18 +265,24 @@ export function Filters({
         </div>
       </form>
 
-        {(activeTags.length > 0 && showActiveTags) && (
-            <div className="active-tags">
-              <ul>
-                {activeTags.map(tag => (
-                    <li key={`${tag.type}-${tag.id}`} className={tag.type}>
-                      {tag.label}
-                      <button onClick={() => removeActiveTag(tag.type, tag.id)}>x</button>
-                    </li>
-                ))}
-              </ul>
-            </div>
-        )}
+      {(activeTags.length > 0 && showActiveTags) && (
+        <div className="active-tags">
+          <ul>
+            {activeTags.map(tag => (
+              <li key={`${tag.type}-${tag.id}`} className={tag.type} role="status">
+                {tag.label}
+                <IconButton
+                  onClick={() => removeActiveTag(tag.type, tag.id)}
+                  className="subtle-button"
+                  icon="ri-close-line"
+                  iconOnly={true}
+                  text='Filter verwijderen'
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }
