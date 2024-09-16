@@ -31,9 +31,9 @@ module.exports = function({ searchfields = ['title', 'summary', 'description'] }
         useSearchFields = searchfields.filter( field => field == key );
       }
 
-      let threshold = -5000;  // todo: tamelijk arbitrair; misschien moet je hem kunnen meesturen
-      if (value.length < 4) threshold = -20000;
-      if (value.length < 3) threshold = -50000;
+      let threshold = -1000; // todo: tamelijk arbitrair; misschien moet je hem kunnen meesturen
+      if (value.length < 4) threshold = -10000;
+      if (value.length < 3) threshold = -20000;
 
       let searchResult = fuzzysort.go(value, list, {
         threshold,
