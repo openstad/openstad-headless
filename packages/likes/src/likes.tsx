@@ -80,8 +80,6 @@ function Likes({
     { type: 'no', label: noLabel, icon: 'ri-thumb-down-line' },
   ];
 
-  console.log( 'display dislike', displayDislike );
-
   if (!displayDislike) {
       supportedLikeTypes.pop();
   }

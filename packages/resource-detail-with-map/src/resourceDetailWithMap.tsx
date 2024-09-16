@@ -246,6 +246,7 @@ function ResourceDetailWithMap({
                 {...props}
                 center={resource.location}
                 area={props.resourceDetailMap?.area}
+                resourceIdRelativePath={props.resourceIdRelativePath || 'openstadResourceId'}
               >
               </ResourceDetailMap>
               <div className="map-buttons">
