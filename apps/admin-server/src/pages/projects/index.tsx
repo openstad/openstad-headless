@@ -72,7 +72,7 @@ export default function Projects() {
               onChange={(e) => setFilterSearchType(e.target.value)}
             >
               <option value="">Alles</option>
-              <option value="name">Project naam</option>
+              <option value="name">Projectnaam</option>
               <option value="issues">Issues</option>
               <option value="config.votes.isActive">Stemmen</option>
               <option value="config.comments.canComment">Gestemd op nee</option>
