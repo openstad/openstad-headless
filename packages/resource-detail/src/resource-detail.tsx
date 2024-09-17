@@ -148,6 +148,13 @@ function ResourceDetail({
     }
   };
 
+  // props.commentsWidget?.useSentiments can be undefined, an array or a string with an arrayß
+  let useSentiments = props.commentsWidget?.useSentiments;
+  if (!!useSentiments && typeof useSentiments === 'string') {
+    useSentiments = JSON.parse(useSentiments);
+  }
+
+
   return (
     <section>
       <div
@@ -341,8 +348,8 @@ function ResourceDetail({
 
       <Spacer size={2} />
 
-      {Array.isArray(props.commentsWidget?.useSentiments) &&
-        props.commentsWidget?.useSentiments?.length ? (
+      {Array.isArray(useSentiments) &&
+        useSentiments?.length ? (
         <section className="resource-detail-comments-container">
           <Comments
             {...props}
@@ -351,10 +358,10 @@ function ResourceDetail({
             emptyListText={props.commentsWidget?.emptyListText}
             formIntro={props.commentsWidget?.formIntro}
             placeholder={props.commentsWidget?.placeholder}
-            sentiment={props.commentsWidget?.useSentiments[0]}
+            sentiment={useSentiments[0]}
           />
 
-          {props.commentsWidget?.useSentiments?.length > 1 && (
+          {useSentiments?.length > 1 && (
             <Comments
               {...props}
               resourceId={resourceId || ''}
@@ -362,7 +369,7 @@ function ResourceDetail({
               emptyListText={props.commentsWidget_multiple?.emptyListText}
               formIntro={props.commentsWidget_multiple?.formIntro}
               placeholder={props.commentsWidget_multiple?.placeholder}
-              sentiment={props.commentsWidget?.useSentiments[1]}
+              sentiment={useSentiments[1]}
             />
           )}
 
