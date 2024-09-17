@@ -10,9 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@openstad-headless/types": "file:../types",
     "@openstad-headless/data-store": "file:../data-store",
     "@openstad-headless/lib": "file:../lib",
+    "@openstad-headless/types": "file:../types",
     "@openstad-headless/ui": "file:../ui",
     "@utrecht/component-library-css": "^3.0.1-alpha.18",
     "@utrecht/component-library-react": "^3.0.1-alpha.18",
@@ -22,7 +22,8 @@
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",
     "react-leaflet-cluster": "^2.1.0",
-    "remixicon": "^3.5.0"
+    "remixicon": "^3.5.0",
+    "turf": "^3.0.14"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^12.3.4",
@@ -31,6 +32,7 @@
     "@types/react": "^18.2.78",
     "@types/react-dom": "^18.2.7",
     "@types/react-leaflet-markercluster": "^3.0.4",
+    "@types/turf": "^3.5.32",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.0.3",

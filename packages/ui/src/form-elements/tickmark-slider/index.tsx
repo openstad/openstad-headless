@@ -1,4 +1,4 @@
-import { FormLabel, FormFieldDescription , Paragraph} from '@utrecht/component-library-react';
+import {FormLabel, FormFieldDescription, Paragraph, AccordionProvider} from '@utrecht/component-library-react';
 import React, { FC, useState } from 'react';
 import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
@@ -17,6 +17,10 @@ export type TickmarkSliderProps = {
     onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
     type?: string;
     showSmileys?: boolean;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
+    infoImage?: string;
 }
 
 const TickmarkSlider: FC<TickmarkSliderProps> = ({
@@ -32,11 +36,22 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
     onChange,
     index,
     disabled = false,
+    showMoreInfo = false,
+    moreInfoButton = 'Meer informatie',
+    moreInfoContent = '',
+   infoImage = '',
 }) => {
     const defaultValue = Math.ceil(fieldOptions.length / 2).toString();
     const [value, setValue] = useState<string>(defaultValue);
 
     const maxCharacters = fieldOptions.length > 0 ? fieldOptions.length.toString() : "1";
+
+    class HtmlContent extends React.Component<{ html: any }> {
+        render() {
+            let {html} = this.props;
+            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+        }
+    }
 
     return (
         <div className="a-b-slider-container">
@@ -51,6 +66,30 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                     <Spacer size={.5} />
                 </>
             }
+
+            {showMoreInfo && (
+                <>
+                    <AccordionProvider
+                        sections={[
+                            {
+                                headingLevel: 3,
+                                body: <HtmlContent html={moreInfoContent} />,
+                                expanded: undefined,
+                                label: moreInfoButton,
+                            }
+                        ]}
+                    />
+                    <Spacer size={.5} />
+                </>
+            )}
+
+            {infoImage && (
+                <figure className="info-image-container">
+                    <img src={infoImage} alt=""/>
+                    <Spacer size={.5} />
+                </figure>
+            )}
+
             {imageSrc && (
                 <figure>
                     <img src={imageSrc} alt={imageAlt} />

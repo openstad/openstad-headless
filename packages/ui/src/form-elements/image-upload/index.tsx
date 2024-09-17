@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useState } from "react";
 import {
+    AccordionProvider,
     FormField,
     FormFieldDescription,
     FormLabel,
@@ -14,6 +15,7 @@ import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orien
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
+import {Spacer} from "../../spacer";
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview, FilePondPluginFileValidateType);
 
 const filePondSettings = {
@@ -62,6 +64,10 @@ export type ImageUploadProps = {
     type?: string;
     onChange?: (e: { name: string; value: { name: string; url: string }[] }) => void;
     imageUrl?: string;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
+    infoImage?: string;
 }
 
 const ImageUploadField: FC<ImageUploadProps> = ({
@@ -73,6 +79,10 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     onChange,
     allowedTypes = ['image/*'],
     disabled = false,
+    showMoreInfo = false,
+    moreInfoButton = 'Meer informatie',
+    moreInfoContent = '',
+   infoImage = '',
     ...props
 }) => {
     const randomID =
@@ -81,6 +91,13 @@ const ImageUploadField: FC<ImageUploadProps> = ({
 
     const [files, setImages] = useState<FilePondFile[]>([]);
     const [uploadedImages, setUploadedImages] = useState<{ name: string, url: string }[]>([]);
+
+    class HtmlContent extends React.Component<{ html: any }> {
+        render() {
+            let {html} = this.props;
+            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+        }
+    }
 
     useEffect(() => {
         if (onChange) {
@@ -138,6 +155,30 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                 {title}
             </Paragraph>
             <FormFieldDescription>{description}</FormFieldDescription>
+
+            {showMoreInfo && (
+                <>
+                    <AccordionProvider
+                        sections={[
+                            {
+                                headingLevel: 3,
+                                body: <HtmlContent html={moreInfoContent} />,
+                                expanded: undefined,
+                                label: moreInfoButton,
+                            }
+                        ]}
+                    />
+                    <Spacer size={.5} />
+                </>
+            )}
+
+            {infoImage && (
+                <figure className="info-image-container">
+                    <img src={infoImage} alt=""/>
+                    <Spacer size={.5} />
+                </figure>
+            )}
+
             <div className="utrecht-form-field__input">
                 <FilePond
                     files={files.map(file => file.file)}

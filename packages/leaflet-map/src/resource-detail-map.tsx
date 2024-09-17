@@ -16,10 +16,11 @@ const ResourceDetailMap = ({
   marker = undefined,
   markerIcon = undefined,
   center = undefined,
+  resourceIdRelativePath = 'openstadResourceId',
   ...props
 }: PropsWithChildren<ResourceDetailMapWidgetProps>) => {
 
-  props.zoom ||= 15;
+  props.zoom ||= 7;
 
   const datastore = new DataStore({
     projectId: props.projectId,
@@ -29,10 +30,16 @@ const ResourceDetailMap = ({
 
 
   const urlParams = new URLSearchParams(window.location.search);
-  resourceId =
-    resourceId || ( urlParams.get('openstadResourceId')
-      ? urlParams.get('openstadResourceId') as string
-      : undefined );
+
+  resourceId = resourceId || urlParams.get(resourceIdRelativePath);
+
+  if (!resourceId && resourceIdRelativePath.includes('[id]')) {
+    const paramNameMatch = resourceIdRelativePath.match(/\[([^\]]+)\]/);
+    if (paramNameMatch && paramNameMatch[1]) {
+      const paramName = paramNameMatch[1];
+      resourceId = urlParams.get(paramName);
+    }
+  }
 
   const { data: resource } = datastore.useResource({
     projectId: props.projectId,

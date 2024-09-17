@@ -1,9 +1,8 @@
 const config = require('config');
-const fuzzysort = require('fuzzysort');
 
 module.exports = function({ searchfields = ['title', 'summary', 'description'] }) {
 
-  return function( req, res, next ) {
+  return function(req, res, next) {
 
     let search = req.query.search;
 
@@ -13,63 +12,40 @@ module.exports = function({ searchfields = ['title', 'summary', 'description'] }
     let list = req.results;
 
     // if results is not defined something weird happened
-    if (typeof list === 'undefined') return next('No reaults defined to search in');
+    if (typeof list === 'undefined') return next('No results defined to search in');
 
     let results = [];
 
-    if ( !Array.isArray(search) ) search = [ search ];
+    if (!Array.isArray(search)) search = [search];
     search.forEach((criterium) => {
 
       let key = Object.keys(criterium)[0];
-      let value = criterium[key];
-      // todo: optional { fields: [], value: '' } construct
+      let value = criterium[key].toLowerCase(); // Converteer naar lowercase voor case-insensitieve vergelijking
 
       let useSearchFields;
-      if (key == 'text') {
+      if (key === 'text') {
         useSearchFields = searchfields;
       } else {
-        useSearchFields = searchfields.filter( field => field == key );
+        useSearchFields = searchfields.filter(field => field === key);
       }
 
-      let threshold = -5000;  // todo: tamelijk arbitrair; misschien moet je hem kunnen meesturen
-      if (value.length < 4) threshold = -20000;
-      if (value.length < 3) threshold = -50000;
+      let searchTerms = value.split(' ');
 
-      let searchResult = fuzzysort.go(value, list, {
-        threshold,
-        keys: useSearchFields,
+      let searchResult = list.filter(item => {
+        return searchTerms.every(term => {
+          return useSearchFields.some(field => {
+            return item[field] && item[field].toLowerCase().includes(term);
+          });
+        });
       });
-      
-      results.push( searchResult );
 
+      results.push(...searchResult);
     });
 
-    // mergen van de resultaten
-    let merged = [];
-    if (results.length == 1) {
-      merged = results[0];
-    } else {
-      merged = [];
-      for (let i=0; i<results.length; i++) {
-        results[i].map( result => {
-          let found = merged.find( elem => elem.obj.id == result.obj.id );
-          if (found) {
-            // use highest score
-            found.score = Math.max(found.score, result.score)
-          } else {
-            merged.push(result)
-          }
-        })
-      }
 
-    }
+    let merged = Array.from(new Set(results));
 
-    if (!req.dbQuery.order) {
-      merged = merged.sort( (a,b) => b.score - a.score )
-    }
-    merged = merged.map(elem => elem.obj);
-
-    req.results = merged
+    req.results = merged;
 
     return next();
 

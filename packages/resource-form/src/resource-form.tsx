@@ -7,6 +7,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
 import Form from "@openstad-headless/form/src/form";
+import { Heading } from '@utrecht/component-library-react';
 
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const { submitButton, saveConceptButton} = props.submit  || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
@@ -129,7 +130,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                 {!hasRole(currentUser, 'member') ? (
                     <>
                         <Banner className="big">
-                            <h6>{loginText || 'Inloggen om deel te nemen.'}</h6>
+                            <Heading level={4} appearance='utrecht-heading-6'>{loginText || 'Inloggen om deel te nemen.'}</Heading>
                             <Spacer size={1} />
                             <Button
                                 type="button"

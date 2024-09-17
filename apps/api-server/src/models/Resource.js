@@ -519,7 +519,7 @@ module.exports = function (db, sequelize, DataTypes) {
           {
             model: db.Status,
             as: 'statuses',
-            attributes: ['id', 'name', 'label', 'extraFunctionality'],
+            attributes: ['id', 'name', 'label', 'extraFunctionality', 'color', 'backgroundColor'],
             through: { attributes: [] },
             required: false,
           },
@@ -659,7 +659,7 @@ module.exports = function (db, sequelize, DataTypes) {
           {
             model: db.Status,
             as: 'statuses',
-            attributes: ['id', 'name', 'label', 'extraFunctionality'],
+            attributes: ['id', 'name', 'label', 'extraFunctionality', 'color', 'backgroundColor'],
             through: { attributes: [] },
             required: false,
           },

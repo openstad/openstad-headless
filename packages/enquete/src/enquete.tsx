@@ -92,6 +92,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['minCharacters'] = item.minCharacters || '';
                     fieldData['maxCharacters'] = item.maxCharacters || '';
                     fieldData['rows'] = 5;
+                    fieldData['placeholder'] = item.placeholder || '';
                     break;
                 case 'multiplechoice':
                 case 'multiple':

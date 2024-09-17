@@ -1,7 +1,12 @@
 import useSWR from 'swr';
 
-export default function useComments(projectId?: string) {
-  const url = `/api/openstad/api/project/${projectId}/resource?includeComments=1&includeRepliesOnComments=1`;
+export default function useComments(projectId?: string, includes?: string, getFromComments?: boolean) {
+  const includeString = includes ? includes : '?includeComments=1&includeRepliesOnComments=1';
+  getFromComments = getFromComments ? getFromComments : false;
+
+  const url = getFromComments
+      ? `/api/openstad/api/project/${projectId}/comment${includeString}`
+      : `/api/openstad/api/project/${projectId}/resource${includeString}`;
 
   const commentListSwr = useSWR(projectId ? url : null);
 

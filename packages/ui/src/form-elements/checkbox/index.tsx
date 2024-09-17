@@ -5,7 +5,7 @@ import {
     FormField,
     FormLabel,
     Checkbox,
-    Paragraph, FormFieldDescription,
+    Paragraph, FormFieldDescription, AccordionProvider,
 } from "@utrecht/component-library-react";
 import { Spacer } from '@openstad-headless/ui/src';
 import TextInput from "../text";
@@ -20,6 +20,10 @@ export type CheckboxFieldProps = {
     disabled?: boolean;
     type?: string;
     onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
+    infoImage?: string;
 }
 
 const CheckboxField: FC<CheckboxFieldProps> = ({
@@ -30,6 +34,10 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        fieldKey,
        onChange,
        disabled = false,
+       showMoreInfo = false,
+       moreInfoButton = 'Meer informatie',
+       moreInfoContent = '',
+   infoImage = '',
 }) => {
     const [selectedChoices, setSelectedChoices] = useState<string[]>([]);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
@@ -52,6 +60,13 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
             });
         }
     } , [selectedChoices]);
+
+    class HtmlContent extends React.Component<{ html: any }> {
+        render() {
+            let {html} = this.props;
+            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+        }
+    }
 
     const handleChoiceChange = (event: React.ChangeEvent<HTMLInputElement>, index: number): void => {
         const choiceValue = event.target.value;
@@ -110,6 +125,29 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                     <Spacer size={.5} />
                     </>
                 }
+
+                {showMoreInfo && (
+                    <>
+                        <AccordionProvider
+                            sections={[
+                                {
+                                    headingLevel: 3,
+                                    body: <HtmlContent html={moreInfoContent} />,
+                                    expanded: undefined,
+                                    label: moreInfoButton,
+                                }
+                            ]}
+                        />
+                        <Spacer size={.5} />
+                    </>
+                )}
+
+                {infoImage && (
+                    <figure className="info-image-container">
+                        <img src={infoImage} alt=""/>
+                        <Spacer size={.5} />
+                    </figure>
+                )}
 
                 {choices?.map((choice, index) => (
                     <>
