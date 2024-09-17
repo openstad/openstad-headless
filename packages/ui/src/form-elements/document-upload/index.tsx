@@ -16,6 +16,7 @@ import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orien
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
+import {Spacer} from "../../spacer";
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview, FilePondPluginFileValidateType);
 
 const filePondSettings = {
@@ -187,6 +188,14 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                     ]}
                 />
             )}
+
+            {infoImage && (
+                <figure className="info-image-container">
+                    <img src={infoImage} alt=""/>
+                    <Spacer size={.5} />
+                </figure>
+            )}
+
             <div className="utrecht-form-field__input">
                 <FilePond
                     files={documents.map(file => file.file)}

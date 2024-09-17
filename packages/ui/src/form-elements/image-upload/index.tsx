@@ -172,6 +172,13 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                 </>
             )}
 
+            {infoImage && (
+                <figure className="info-image-container">
+                    <img src={infoImage} alt=""/>
+                    <Spacer size={.5} />
+                </figure>
+            )}
+
             <div className="utrecht-form-field__input">
                 <FilePond
                     files={files.map(file => file.file)}

@@ -105,7 +105,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                                         }) : null}
                                         disabled={disabled}
                                     />
-                                    <figure className="info-image-container">
+                                    <figure>
                                         <img src={choice.imageSrc} alt={choice.imageAlt} />
                                         {choice.label && (
                                             <figcaption>{choice.label}</figcaption>
