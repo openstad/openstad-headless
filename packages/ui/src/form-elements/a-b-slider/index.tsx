@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import './a-b-slider.css'
-import { Paragraph, Strong } from "@utrecht/component-library-react";
+import {Accordion, AccordionProvider, AccordionSection, Paragraph, Strong} from "@utrecht/component-library-react";
 
 export type RangeSliderProps = {
     title: string;
@@ -21,6 +21,9 @@ export type RangeSliderProps = {
     disabled?: boolean;
     type?: string;
     onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
 }
 
 
@@ -40,8 +43,18 @@ const RangeSlider: FC<RangeSliderProps> = ({
     showLabels = true,
     onChange,
     disabled = false,
+    showMoreInfo = false,
+    moreInfoButton = 'Meer informatie',
+    moreInfoContent = '',
 }) => {
     const randomId = Math.random().toString(36).substring(7);
+
+    class HtmlContent extends React.Component<{ html: any }> {
+        render() {
+            let {html} = this.props;
+            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+        }
+    }
 
     return (
         <div className="a-b-slider-container">
@@ -50,6 +63,18 @@ const RangeSlider: FC<RangeSliderProps> = ({
             )}
             {description && (
                 <p>{description}</p>
+            )}
+            {showMoreInfo && (
+                <AccordionProvider
+                    sections={[
+                        {
+                            headingLevel: 3,
+                            body: <HtmlContent html={moreInfoContent} />,
+                            expanded: undefined,
+                            label: moreInfoButton,
+                        }
+                    ]}
+                 />
             )}
             <div className="a-b-info-container">
                 <div className="a-b-title label-a">

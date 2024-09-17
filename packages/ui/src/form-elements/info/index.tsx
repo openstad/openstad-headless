@@ -1,5 +1,6 @@
 import React, { FC } from "react";
-import {Paragraph, Strong} from "@utrecht/component-library-react";
+import {AccordionProvider, Paragraph, Strong} from "@utrecht/component-library-react";
+import {Spacer} from "../../spacer";
 
 export type InfoFieldProps = {
     title?: string;
@@ -9,6 +10,9 @@ export type InfoFieldProps = {
     image?: string;
     imageAlt?: string;
     imageDescription?: string;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
 }
 
 const InfoField: FC<InfoFieldProps> = ({
@@ -17,11 +21,37 @@ const InfoField: FC<InfoFieldProps> = ({
    image = '',
    imageAlt = '',
    imageDescription = '',
+   showMoreInfo = false,
+   moreInfoButton = 'Meer informatie',
+   moreInfoContent = '',
 }) => {
+    class HtmlContent extends React.Component<{ html: any }> {
+        render() {
+            let {html} = this.props;
+            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+        }
+    }
+
     return (
       <div className="info-field-container">
         {title && <Paragraph><Strong>{title}</Strong></Paragraph>}
         {description && <Paragraph>{description}</Paragraph>}
+
+          {showMoreInfo && (
+              <>
+                  <AccordionProvider
+                      sections={[
+                          {
+                              headingLevel: 3,
+                              body: <HtmlContent html={moreInfoContent} />,
+                              expanded: undefined,
+                              label: moreInfoButton,
+                          }
+                      ]}
+                  />
+                  <Spacer size={.5} />
+              </>
+          )}
 
         <figure>
           <img src={image} alt={imageAlt}/>

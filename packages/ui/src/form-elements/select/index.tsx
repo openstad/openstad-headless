@@ -1,4 +1,5 @@
 import {
+    AccordionProvider,
     FormField,
     FormFieldDescription,
     FormLabel,
@@ -21,6 +22,9 @@ export type SelectFieldProps = {
     disabled?: boolean;
     onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
     type?: string;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
 }
 
 const SelectField: FC<SelectFieldProps> = ({
@@ -32,6 +36,9 @@ const SelectField: FC<SelectFieldProps> = ({
       fieldRequired= false,
       onChange,
       disabled = false,
+      showMoreInfo = false,
+      moreInfoButton = 'Meer informatie',
+      moreInfoContent = '',
 }) => {
     choices = choices.map((choice) => {
       if (typeof choice === 'string') {
@@ -40,6 +47,14 @@ const SelectField: FC<SelectFieldProps> = ({
         return choice;
       }
     }) as [{value: string, label: string}];
+
+    class HtmlContent extends React.Component<{ html: any }> {
+        render() {
+            let {html} = this.props;
+            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+        }
+    }
+
     return (
         <FormField type="select">
             <FormLabel htmlFor={fieldKey}>{title}</FormLabel>
@@ -51,6 +66,23 @@ const SelectField: FC<SelectFieldProps> = ({
                     <Spacer size={.5} />
                 </>
             }
+
+            {showMoreInfo && (
+                <>
+                    <AccordionProvider
+                        sections={[
+                            {
+                                headingLevel: 3,
+                                body: <HtmlContent html={moreInfoContent} />,
+                                expanded: undefined,
+                                label: moreInfoButton,
+                            }
+                        ]}
+                    />
+                    <Spacer size={.5} />
+                </>
+            )}
+
             <Paragraph className="utrecht-form-field__input">
                 <Select
                     className="form-item"

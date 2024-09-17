@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState } from "react";
 import toast, { Toaster } from 'react-hot-toast';
 import {
+    AccordionProvider,
     FormField,
     FormFieldDescription,
     FormLabel,
@@ -63,6 +64,9 @@ export type DocumentUploadProps = {
     type?: string;
     onChange?: (e: { name: string; value: { name: string; url: string }[] }) => void;
     imageUrl?: string;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
 }
 
 const DocumentUploadField: FC<DocumentUploadProps> = ({
@@ -81,6 +85,9 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
         'application/vnd.openxmlformats-officedocument.presentationml.presentation'
     ],
     disabled = false,
+    showMoreInfo = false,
+    moreInfoButton = 'Meer informatie',
+    moreInfoContent = '',
     ...props
 }) => {
     const randomID =
@@ -93,6 +100,13 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
     const acceptAttribute = allowedTypes
         ? allowedTypes
         : "";
+
+    class HtmlContent extends React.Component<{ html: any }> {
+        render() {
+            let {html} = this.props;
+            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+        }
+    }
 
     useEffect(() => {
         const allDocuments = [];
@@ -160,6 +174,17 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                 <FormLabel htmlFor={randomID}>{title}</FormLabel>
             </Paragraph>
             <FormFieldDescription>{description}</FormFieldDescription>
+            {showMoreInfo && (
+                <AccordionProvider
+                    sections={[
+                        {
+                            body: <HtmlContent html={moreInfoContent} />,
+                            expanded: undefined,
+                            label: moreInfoButton,
+                        }
+                    ]}
+                />
+            )}
             <div className="utrecht-form-field__input">
                 <FilePond
                     files={documents.map(file => file.file)}

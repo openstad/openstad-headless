@@ -1,5 +1,13 @@
 import React, { FC, useState, useEffect } from "react";
-import { FormField, FormFieldDescription, FormLabel, Paragraph, Textarea, Textbox } from "@utrecht/component-library-react";
+import {
+    AccordionProvider,
+    FormField,
+    FormFieldDescription,
+    FormLabel,
+    Paragraph,
+    Textarea,
+    Textbox
+} from "@utrecht/component-library-react";
 import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
 
@@ -21,6 +29,9 @@ export type TextInputProps = {
     type?: string;
     onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
     reset?: (resetFn: () => void) => void;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
 }
 
 const TextInput: FC<TextInputProps> = ({
@@ -39,9 +50,19 @@ const TextInput: FC<TextInputProps> = ({
     maxCharactersWarning = 'Je hebt nog {maxCharacters} tekens over',
     rows,
     reset,
+    showMoreInfo = false,
+    moreInfoButton = 'Meer informatie',
+    moreInfoContent = '',
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const InputComponent = variant === 'textarea' ? Textarea : Textbox;
+
+    class HtmlContent extends React.Component<{ html: any }> {
+        render() {
+            let {html} = this.props;
+            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+        }
+    }
 
     const [isFocused, setIsFocused] = useState(false);
     const [helpText, setHelpText] = useState('');
@@ -81,6 +102,23 @@ const TextInput: FC<TextInputProps> = ({
                     <Spacer size={.5} />
                 </>
             }
+
+            {showMoreInfo && (
+                <>
+                    <AccordionProvider
+                        sections={[
+                            {
+                                headingLevel: 3,
+                                body: <HtmlContent html={moreInfoContent} />,
+                                expanded: undefined,
+                                label: moreInfoButton,
+                            }
+                        ]}
+                    />
+                    <Spacer size={.5} />
+                </>
+            )}
+
             <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}>
                 <InputComponent
                     id={randomID}
