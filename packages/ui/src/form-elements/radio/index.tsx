@@ -138,6 +138,13 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                     </>
                 )}
 
+                {infoImage && (
+                    <figure className="info-image-container">
+                        <img src={infoImage} alt=""/>
+                        <Spacer size={.5} />
+                    </figure>
+                )}
+
                 {choices?.map((choice, index) => (
                     <>
                         <FormField type="radio" key={index}>

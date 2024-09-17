@@ -85,6 +85,13 @@ const SelectField: FC<SelectFieldProps> = ({
                 </>
             )}
 
+            {infoImage && (
+                <figure className="info-image-container">
+                    <img src={infoImage} alt=""/>
+                    <Spacer size={.5} />
+                </figure>
+            )}
+
             <Paragraph className="utrecht-form-field__input">
                 <Select
                     className="form-item"
