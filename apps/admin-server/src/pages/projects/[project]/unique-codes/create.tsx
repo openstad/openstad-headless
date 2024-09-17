@@ -55,11 +55,11 @@ export default function ProjectCodeCreate() {
           },
           {
             name: 'Stemcodes',
-            url: `/projects/${project}/codes`,
+            url: `/projects/${project}/unique-codes`,
           },
           {
             name: 'Stemcodes toevoegen',
-            url: `/projects/${project}/codes/create`,
+            url: `/projects/${project}/unique-codes/create`,
           },
         ]}>
         <div className="container py-6">
