@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import './a-b-slider.css'
 import { Paragraph, Strong } from "@utrecht/component-library-react";
 
@@ -42,6 +42,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
     disabled = false,
 }) => {
     const randomId = Math.random().toString(36).substring(7);
+    const [rangeValue, setRangeValue] = useState(undefined);
 
     return (
         <div className="a-b-slider-container">
@@ -69,27 +70,48 @@ const RangeSlider: FC<RangeSliderProps> = ({
                     </div>
                 </div>
             </div>
+            <div className='range-bar-container'>
+                <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="5"
+                    className="a-to-b-range"
+                    name={fieldKey}
+                    required={fieldRequired}
+                    id={randomId}
+                    onChange={(e) => {
+                        setRangeValue(parseInt(e.target.value) as any);
+                        if (onChange) {
+                            onChange({
+                                name: fieldKey,
+                                value: e.target.value,
+                            });
+                        }
+                    }}
+                    aria-label={`Selecteer een waarde tussen 1 en 100 voor ${titleA} en ${titleB}`}
+                    disabled={disabled}
+                />
+                <div className="slider_line-container"
+                    style={{
+                        marginLeft: rangeValue !== undefined ? rangeValue <= 50 ? '0' : '50%' : '0',
+                        transform: rangeValue !== undefined ? rangeValue <= 50 ? 'rotate(180deg) translateX(50%)' : 'rotate(0) translateX(0)' : '0',
+                        marginTop: `-24px`,
+                        pointerEvents: 'none',
+                        height: '8px',
+                    }}
+                >
+                    <div
+                        className="slider_line-container--bar"
+                        style={{
+                            width: rangeValue !== undefined ? rangeValue <= 50 ? `${(50 - rangeValue)}%` : `${(rangeValue - 50) * 2}%` : '0%',
+                            height: '8px',
+                            backgroundColor: '#1371EF',
+                        }}
+                    ></div>
+                </div>
+            </div>
 
-            <input
-                type="range"
-                min="0"
-                max="100"
-                step="5"
-                className="a-to-b-range"
-                name={fieldKey}
-                required={fieldRequired}
-                id={randomId}
-                onChange={(e) => {
-                    if (onChange) {
-                        onChange({
-                            name: fieldKey,
-                            value: e.target.value,
-                        });
-                    }
-                }}
-                aria-label={`Selecteer een waarde tussen 1 en 100 voor ${titleA} en ${titleB}`}
-                disabled={disabled}
-            />
             <Paragraph id="a-b-description" className="a-b-description visually-hidden">
                 Deze slider vertegenwoordigt de waarde voor {titleA} aan de linkerkant en de waarde voor {titleB} aan de rechterkant.
             </Paragraph>
