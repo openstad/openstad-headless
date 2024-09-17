@@ -34,7 +34,7 @@ const ResourceDetailMap = ({
   resourceId = resourceId || urlParams.get(resourceIdRelativePath);
 
   if (!resourceId && resourceIdRelativePath.includes('[id]')) {
-    const paramNameMatch = resourceIdRelativePath.match(/\[([^\]]+)\]/);
+    const paramNameMatch = resourceIdRelativePath.match(/\[(.*?)\]/);
     if (paramNameMatch && paramNameMatch[1]) {
       const paramName = paramNameMatch[1];
       resourceId = urlParams.get(paramName);
