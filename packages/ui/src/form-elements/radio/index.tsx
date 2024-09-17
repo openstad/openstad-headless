@@ -6,7 +6,7 @@ import {
     FormLabel,
     RadioButton,
     Paragraph,
-    FormFieldDescription
+    FormFieldDescription, AccordionProvider
 } from "@utrecht/component-library-react";
 import { Spacer } from '@openstad-headless/ui/src';
 import TextInput from "../text";
@@ -22,6 +22,10 @@ export type RadioboxFieldProps = {
     disabled?: boolean;
     type?: string;
     onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
+    infoImage?: string;
 }
 
 const RadioboxField: FC<RadioboxFieldProps> = ({
@@ -32,9 +36,20 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     fieldKey,
     onChange,
     disabled = false,
+    showMoreInfo = false,
+    moreInfoButton = 'Meer informatie',
+    moreInfoContent = '',
+   infoImage = '',
 }) => {
     const [selectedOption, setSelectedOption] = useState<string>("");
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
+
+    class HtmlContent extends React.Component<{ html: any }> {
+        render() {
+            let {html} = this.props;
+            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+        }
+    }
 
     useEffect(() => {
         const initialOtherOptionValues: { [key: string]: string } = {};
@@ -106,6 +121,29 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                         <Spacer size={.5} />
                     </>
                 }
+
+                {showMoreInfo && (
+                    <>
+                        <AccordionProvider
+                            sections={[
+                                {
+                                    headingLevel: 3,
+                                    body: <HtmlContent html={moreInfoContent} />,
+                                    expanded: undefined,
+                                    label: moreInfoButton,
+                                }
+                            ]}
+                        />
+                        <Spacer size={.5} />
+                    </>
+                )}
+
+                {infoImage && (
+                    <figure className="info-image-container">
+                        <img src={infoImage} alt=""/>
+                        <Spacer size={.5} />
+                    </figure>
+                )}
 
                 {choices?.map((choice, index) => (
                     <>

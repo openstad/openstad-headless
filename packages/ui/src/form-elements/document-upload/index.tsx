@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState } from "react";
 import toast, { Toaster } from 'react-hot-toast';
 import {
+    AccordionProvider,
     FormField,
     FormFieldDescription,
     FormLabel,
@@ -15,6 +16,7 @@ import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orien
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
+import {Spacer} from "../../spacer";
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview, FilePondPluginFileValidateType);
 
 const filePondSettings = {
@@ -63,6 +65,10 @@ export type DocumentUploadProps = {
     type?: string;
     onChange?: (e: { name: string; value: { name: string; url: string }[] }) => void;
     imageUrl?: string;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
+    infoImage?: string;
 }
 
 const DocumentUploadField: FC<DocumentUploadProps> = ({
@@ -81,6 +87,10 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
         'application/vnd.openxmlformats-officedocument.presentationml.presentation'
     ],
     disabled = false,
+    showMoreInfo = false,
+    moreInfoButton = 'Meer informatie',
+    moreInfoContent = '',
+   infoImage = '',
     ...props
 }) => {
     const randomID =
@@ -93,6 +103,13 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
     const acceptAttribute = allowedTypes
         ? allowedTypes
         : "";
+
+    class HtmlContent extends React.Component<{ html: any }> {
+        render() {
+            let {html} = this.props;
+            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+        }
+    }
 
     useEffect(() => {
         const allDocuments = [];
@@ -160,6 +177,25 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                 <FormLabel htmlFor={randomID}>{title}</FormLabel>
             </Paragraph>
             <FormFieldDescription>{description}</FormFieldDescription>
+            {showMoreInfo && (
+                <AccordionProvider
+                    sections={[
+                        {
+                            body: <HtmlContent html={moreInfoContent} />,
+                            expanded: undefined,
+                            label: moreInfoButton,
+                        }
+                    ]}
+                />
+            )}
+
+            {infoImage && (
+                <figure className="info-image-container">
+                    <img src={infoImage} alt=""/>
+                    <Spacer size={.5} />
+                </figure>
+            )}
+
             <div className="utrecht-form-field__input">
                 <FilePond
                     files={documents.map(file => file.file)}

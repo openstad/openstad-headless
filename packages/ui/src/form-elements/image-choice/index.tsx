@@ -5,8 +5,9 @@ import {
     FormField,
     FormLabel,
     RadioButton,
-    Paragraph, FormFieldDescription,
+    Paragraph, FormFieldDescription, AccordionProvider,
 } from "@utrecht/component-library-react";
+import {Spacer} from "../../spacer";
 
 export type ImageChoiceFieldProps = {
     title: string;
@@ -18,6 +19,10 @@ export type ImageChoiceFieldProps = {
     disabled?: boolean;
     type?: string;
     onChange?: (e: {name: string, value: string | Record<number, never> | []}) => void;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
+    infoImage?: string;
 }
 
 export type ChoiceItem = {
@@ -36,7 +41,18 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     fieldKey,
     onChange,
     disabled = false,
+    showMoreInfo = false,
+    moreInfoButton = 'Meer informatie',
+    moreInfoContent = '',
+   infoImage = '',
 }) => {
+    class HtmlContent extends React.Component<{ html: any }> {
+        render() {
+            let {html} = this.props;
+            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+        }
+    }
+
     return (
         <div className="question">
             <Fieldset>
@@ -49,6 +65,29 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                         {description}
                     </FormFieldDescription>
                 }
+
+                {showMoreInfo && (
+                    <>
+                        <AccordionProvider
+                            sections={[
+                                {
+                                    headingLevel: 3,
+                                    body: <HtmlContent html={moreInfoContent} />,
+                                    expanded: undefined,
+                                    label: moreInfoButton,
+                                }
+                            ]}
+                        />
+                        <Spacer size={.5} />
+                    </>
+                )}
+
+                {infoImage && (
+                    <figure className="info-image-container">
+                        <img src={infoImage} alt=""/>
+                        <Spacer size={.5} />
+                    </figure>
+                )}
 
                 <div className={"image-choice-container"}>
                     {choices?.map((choice, index) => (

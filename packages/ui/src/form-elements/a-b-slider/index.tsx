@@ -1,6 +1,7 @@
 import React, { FC, useState } from 'react';
 import './a-b-slider.css'
-import { Paragraph, Strong } from "@utrecht/component-library-react";
+import {Accordion, AccordionProvider, AccordionSection, Paragraph, Strong} from "@utrecht/component-library-react";
+import {Spacer} from "../../spacer";
 
 export type RangeSliderProps = {
     title: string;
@@ -21,6 +22,10 @@ export type RangeSliderProps = {
     disabled?: boolean;
     type?: string;
     onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
+    infoImage?: string;
 }
 
 
@@ -40,9 +45,20 @@ const RangeSlider: FC<RangeSliderProps> = ({
     showLabels = true,
     onChange,
     disabled = false,
+    showMoreInfo = false,
+    moreInfoButton = 'Meer informatie',
+    moreInfoContent = '',
+   infoImage = '',
 }) => {
     const randomId = Math.random().toString(36).substring(7);
     const [rangeValue, setRangeValue] = useState(undefined);
+
+    class HtmlContent extends React.Component<{ html: any }> {
+        render() {
+            let {html} = this.props;
+            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+        }
+    }
 
     return (
         <div className="a-b-slider-container">
@@ -52,6 +68,29 @@ const RangeSlider: FC<RangeSliderProps> = ({
             {description && (
                 <p>{description}</p>
             )}
+            {showMoreInfo && (
+                <>
+                    <AccordionProvider
+                        sections={[
+                            {
+                                headingLevel: 3,
+                                body: <HtmlContent html={moreInfoContent} />,
+                                expanded: undefined,
+                                label: moreInfoButton,
+                            }
+                        ]}
+                    />
+                    <Spacer size={.5} />
+                </>
+            )}
+
+            {infoImage && (
+                <figure className="info-image-container">
+                    <img src={infoImage} alt=""/>
+                    <Spacer size={.5} />
+                </figure>
+            )}
+
             <div className="a-b-info-container">
                 <div className="a-b-title label-a">
                     {showLabels && (<p className="label">A</p>)}
