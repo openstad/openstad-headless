@@ -99,6 +99,10 @@ const ResourceOverviewMap = ({
       return marker;
     }) || [];
 
+  if (givenResources) {
+    resources.metadata.totalCount = givenResources.length;
+  }
+
   let countButtonElement: React.JSX.Element = <></>;
   if (countButton?.show) {
     countButtonElement = (
