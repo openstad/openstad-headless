@@ -83,6 +83,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     rawInput?: string;
     bannerText?: string;
     displayDocuments?: boolean;
+    showActiveTags?: boolean;
     documentsTitle?: string;
     documentsDesc?: string;
     displayVariant?: string;
@@ -351,6 +352,7 @@ function ResourceOverview({
   onlyIncludeTagIds = '',
   onlyIncludeStatusIds = '',
   displayDocuments = false,
+  showActiveTags = false,
   documentsTitle = '',
   documentsDesc = '',
   displayVariant = '',
@@ -584,6 +586,7 @@ function ResourceOverview({
               tagGroups={props.tagGroups || []}
               itemsPerPage={itemsPerPage}
               resources={resources}
+              showActiveTags={showActiveTags}
               onUpdateFilter={(f) => {
                 if (f.tags.length === 0) {
                   setTags(tagIdsToLimitResourcesTo);

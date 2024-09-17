@@ -20,6 +20,7 @@ export type FormProps = {
     submitDisabled?: boolean;
     secondaryLabel?: string;
     secondaryHandler?: (values: { [p: string]: string | Record<number, never> | []}) => void;
+    placeholder?: string;
 }
 
 type CombinedFieldPropsWithType =

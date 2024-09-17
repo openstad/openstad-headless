@@ -36,6 +36,7 @@ export type Item = {
   imageDescription?: string;
   fieldRequired?: boolean;
   showSmileys?: boolean;
+  placeholder?: string;
 };
 
 export type Option = {

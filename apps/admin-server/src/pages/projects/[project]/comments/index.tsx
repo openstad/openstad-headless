@@ -17,7 +17,7 @@ import useResources from "@/hooks/use-resources";
 export default function ProjectComments() {
   const router = useRouter();
   const { project } = router.query;
-  const { data, removeComment } = useComments(project as string);
+  const { data, removeComment } = useComments(project as string, '?includeAllComments=1&includeTags', true);
   const { data: resources } = useResources(project as string);
   const [comments, setComments] = useState<any[]>([])
 
@@ -52,35 +52,38 @@ export default function ProjectComments() {
   useEffect(() => {
     if (data) {
       let comments = [];
+
       for (let i = 0; i < data.length; i++) {
-        if (data[i]?.commentsFor) {
-          for (let j = 0; j < data[i]?.commentsFor.length; j++) {
-            comments.push({
-              ...data[i]?.commentsFor[j],
-              tags: categorizeTags(data[i]?.commentsFor[j].tags),
-            });
-          }
-        }
-        if (data[i]?.commentsAgainst) {
-          for (let k = 0; k < data[i]?.commentsAgainst.length; k++) {
-            comments.push({
-              ...data[i]?.commentsAgainst[k],
-              tags: categorizeTags(data[i]?.commentsAgainst[k].tags),
-            });
-          }
-        }
-        if (data[i]?.commentsNoSentiment) {
-          for (let l = 0; l < data[i]?.commentsNoSentiment.length; l++) {
-            comments.push({
-              ...data[i]?.commentsNoSentiment[l],
-              tags: categorizeTags(data[i]?.commentsNoSentiment[l].tags),
-            });
-          }
-        }
+        comments.push({
+          ...data[i],
+          tags: categorizeTags(data[i]?.tags),
+        });
       }
+
       setComments(comments);
     }
   }, [data]);
+
+  function nestComments(comments: any) {
+    const commentMap: any = {};
+    const nestedComments: any = [];
+
+    comments.forEach((comment: any) => {
+      commentMap[comment.id] = { ...comment, replies: [] };
+    });
+
+    comments.forEach((comment: any) => {
+      if (comment.parentId === null) {
+        nestedComments.push(commentMap[comment.id]);
+      } else {
+        if (commentMap[comment.parentId]) {
+          commentMap[comment.parentId].replies.push(commentMap[comment.id]);
+        }
+      }
+    });
+
+    return nestedComments;
+  }
 
 
   const [filterData, setFilterData] = useState(comments);
@@ -91,7 +94,8 @@ export default function ProjectComments() {
   const [allResources, setAllResources] = useState<{ id: number; name: string }[]>([]);
 
   useEffect(() => {
-    setFilterData(comments);
+    const nested = nestComments(comments);
+    setFilterData(nested);
   }, [comments]);
 
   useEffect(() => {
@@ -122,8 +126,58 @@ export default function ProjectComments() {
     const ID = value !== "0" ? value?.split(" - ")[0] : "0";
     const filteredData = ID === "0" ? comments : comments?.filter((comment: any) => (comment.resourceId).toString() === ID);
 
-    setFilterData(filteredData);
+    const nested = nestComments(filteredData);
+    setFilterData(nested);
     setActiveResource(value);
+  }
+
+  function renderComments(comments: any, pre = '') {
+    return (
+        <ul>
+          {comments.map((comment: any) => (
+              <React.Fragment key={comment.id}>
+                <li className={`grid grid-cols-3 lg:grid-cols-9 items-center py-3 px-2`}>
+                  <div className="col-span-1 truncate">
+                    <Paragraph>{comment.id}</Paragraph>
+                  </div>
+                  <Paragraph className="hidden lg:flex truncate lg:col-span-1 -mr-16">
+                    <a
+                        onClick={(e) => {
+                          e.preventDefault();
+                          router.push(`/projects/${project}/resources/${comment.resourceId}`);
+                        }}
+                        style={{ textDecoration: 'underline', zIndex: '1' }}>{comment.resourceId}
+                    </a>
+                  </Paragraph>
+                  <Paragraph className="hidden lg:flex truncate lg:col-span-3" style={{marginRight: '1rem'}}>
+                    {pre && (<span style={{paddingRight: '15px'}}>{pre}</span>)} {comment.description}
+                  </Paragraph>
+                  <Paragraph className="hidden lg:flex truncate lg:col-span-2">
+                    {comment.createdAt}
+                  </Paragraph>
+                  <Paragraph className="hidden lg:flex truncate lg:col-span-1">
+                    {comment.sentiment}
+                  </Paragraph>
+                  <div className="hidden lg:col-span-1 lg:flex ml-auto">
+                    <RemoveResourceDialog
+                        header="Reactie verwijderen"
+                        message="Weet je zeker dat je deze reactie wilt verwijderen?"
+                        onDeleteAccepted={() =>
+                            removeComment(comment.id)
+                                .then(() => toast.success('Reactie succesvol verwijderd'))
+                                .catch((e) => toast.error('Reactie kon niet worden verwijderd'))
+                        }
+                    />
+                  </div>
+                </li>
+
+                {comment.replies && comment.replies.length > 0 && (
+                    <span>{renderComments(comment.replies, "└")}</span>
+                )}
+              </React.Fragment>
+          ))}
+        </ul>
+    );
   }
 
   return (
@@ -230,55 +284,7 @@ export default function ProjectComments() {
                 </button>
               </ListHeading>
             </div>
-            <ul>
-              {filterData?.map((comment: any) => (
-                <Link href={`/projects/${project}/comments/${comment.id}`} key={comment.id}>
-                  <li key={comment.id} className="grid grid-cols-3 lg:grid-cols-9 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
-                    <div className="col-span-1 truncate">
-                      <Paragraph>{comment.id}</Paragraph>
-                    </div>
-                    <Paragraph className="hidden lg:flex truncate lg:col-span-1 -mr-16">
-                      <a
-                        onClick={(e) => {
-                          e.preventDefault();
-                          router.push(`/projects/${project}/resources/${comment.resourceId}`);
-                        }}
-                        style={{ textDecoration: 'underline', zIndex: '1' }}>{comment.resourceId}
-                      </a>
-                    </Paragraph>
-                    <Paragraph
-                        className="hidden lg:flex truncate lg:col-span-3"
-                        style={{marginRight: '1rem'}}
-                    >
-                      {comment.description}
-                    </Paragraph>
-                    <Paragraph className="hidden lg:flex truncate lg:col-span-2">
-                      {comment.createdAt}
-                    </Paragraph>
-                    <Paragraph className="hidden lg:flex truncate lg:col-span-1">
-                      {comment.sentiment}
-                    </Paragraph>
-                    <div
-                      className="hidden lg:col-span-1 lg:flex ml-auto"
-                      onClick={(e) => e.preventDefault()}>
-                      <RemoveResourceDialog
-                        header="Reactie verwijderen"
-                        message="Weet je zeker dat je deze reactie wilt verwijderen?"
-                        onDeleteAccepted={() =>
-                          removeComment(comment.id)
-                            .then(() =>
-                              toast.success('Reactie successvol verwijderd')
-                            )
-                            .catch((e) =>
-                              toast.error('Reactie kon niet worden verwijderd')
-                            )
-                        }
-                      />
-                    </div>
-                  </li>
-                </Link>
-              ))}
-            </ul>
+            {renderComments(filterData)}
           </div>
         </div>
       </PageLayout>

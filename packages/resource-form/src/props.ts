@@ -15,6 +15,7 @@ export type ResourceFormWidget = {
     info?: Info;
     confirmation?: Confirmation;
     redirectUrl?: string,
+    placeholder?: string,
 };
 
 export type General = {
@@ -60,6 +61,7 @@ export type Item = {
         src: string;
     }>;
     options?: Array<Option>;
+    placeholder?: string,
 };
 
 export type Option = {

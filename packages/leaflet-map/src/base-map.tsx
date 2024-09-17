@@ -78,39 +78,53 @@ const BaseMap = ({
   let [mapRef] = useMapRef(mapId);
 
   const setBoundsAndCenter = useCallback(
-    (points: Array<LocationType>) => {
-      let poly: LocationType[] = [];
-      if (points && Array.isArray(points)) {
-        points.forEach(function (point: LocationType) {
-          parseLocation(point);
-          if (point.lat) {
-            poly.push(point);
+    (polygons: Array<Array<LocationType>>) => {
+      let allPolygons: LocationType[][] = [];
+  
+      if (polygons && Array.isArray(polygons)) {
+        polygons.forEach((points: Array<LocationType>) => {
+          let poly: LocationType[] = [];
+          if (points && Array.isArray(points)) {
+            points.forEach((point: LocationType) => {
+              parseLocation(point);
+              if (point.lat) {
+                poly.push(point);
+              }
+            });
+          }
+          if (poly.length > 0) {
+            allPolygons.push(poly);
           }
         });
       }
-
-      if (poly.length == 0) {
+  
+      if (allPolygons.length == 0) {
         mapRef.panTo(
           new LatLng(definedCenterPoint.lat, definedCenterPoint.lng)
         );
         return;
       }
-
-      if (poly.length == 1 && poly[0].lat && poly[0].lng) {
-        mapRef.panTo(new LatLng(poly[0].lat, poly[0].lng));
+  
+      if (allPolygons.length == 1 && allPolygons[0].length == 1 && allPolygons[0][0].lat && allPolygons[0][0].lng) {
+        mapRef.panTo(new LatLng(allPolygons[0][0].lat, allPolygons[0][0].lng));
         return;
       }
-
-      let bounds = latLngBounds(
-        poly.map(
-          (p) =>
-            new LatLng(
-              p.lat || definedCenterPoint.lat,
-              p.lng || definedCenterPoint.lng
-            )
-        )
-      );
-      mapRef.fitBounds(bounds);
+  
+      let combinedBounds = latLngBounds([]);
+      allPolygons.forEach((poly) => {
+        let bounds = latLngBounds(
+          poly.map(
+            (p) =>
+              new LatLng(
+                p.lat || definedCenterPoint.lat,
+                p.lng || definedCenterPoint.lng
+              )
+          )
+        );
+        combinedBounds.extend(bounds);
+      });
+  
+      mapRef.fitBounds(combinedBounds);
     },
     [center, mapRef]
   );
@@ -123,16 +137,21 @@ const BaseMap = ({
 
   // auto zoom and center on init
   useEffect(() => {
+
     if (!mapRef) return;
     if (autoZoomAndCenter) {
-      if (autoZoomAndCenter == 'area' && area) {
-        return setBoundsAndCenter(area);
+    if (autoZoomAndCenter === 'area' && area) {
+        const updatedArea = Array.isArray(area[0]) ? area : [area];
+        // Korte timeout om te zorgen dat de animatie te zien is. (inzomen van heel NL naar je polygoon)
+        setTimeout(() => {
+          return setBoundsAndCenter(updatedArea as any);
+        }, 200);
       }
       if (currentMarkers?.length) {
-        return setBoundsAndCenter(currentMarkers);
+        return setBoundsAndCenter(currentMarkers as any);
       }
       if (center) {
-        setBoundsAndCenter([center]);
+        setBoundsAndCenter([center] as any);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -220,7 +239,6 @@ const BaseMap = ({
     height: height || undefined,
     aspectRatio: height ? undefined : 16 / 9,
   };
-
   return (
     <>
       <div className="map-container" style={style}>
@@ -288,7 +306,7 @@ function MapEventsListener({
       console.log('ONLOAD');
     },
     click: (e: LeafletMouseEvent) => {
-      const areaLatLngs = area.map(parseLocation);
+      const areaLatLngs = area.map(parseLocation) as LatLng[];
       let isInArea =
         !(area && area.length) || isPointInArea(areaLatLngs, e.latlng);
       let customEvent = new CustomEvent('osc-map-click', {

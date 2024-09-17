@@ -20,7 +20,7 @@ const ResourceDetailMap = ({
   ...props
 }: PropsWithChildren<ResourceDetailMapWidgetProps>) => {
 
-  props.zoom ||= 15;
+  props.zoom ||= 7;
 
   const datastore = new DataStore({
     projectId: props.projectId,
