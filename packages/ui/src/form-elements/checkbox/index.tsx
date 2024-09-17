@@ -23,6 +23,7 @@ export type CheckboxFieldProps = {
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
+    infoImage?: string;
 }
 
 const CheckboxField: FC<CheckboxFieldProps> = ({
@@ -36,6 +37,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
        showMoreInfo = false,
        moreInfoButton = 'Meer informatie',
        moreInfoContent = '',
+   infoImage = '',
 }) => {
     const [selectedChoices, setSelectedChoices] = useState<string[]>([]);
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});
@@ -138,6 +140,13 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                         />
                         <Spacer size={.5} />
                     </>
+                )}
+
+                {infoImage && (
+                    <figure className="info-image-container">
+                        <img src={infoImage} alt=""/>
+                        <Spacer size={.5} />
+                    </figure>
                 )}
 
                 {choices?.map((choice, index) => (

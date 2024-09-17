@@ -67,6 +67,7 @@ export type ImageUploadProps = {
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
+    infoImage?: string;
 }
 
 const ImageUploadField: FC<ImageUploadProps> = ({
@@ -81,6 +82,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     showMoreInfo = false,
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
+   infoImage = '',
     ...props
 }) => {
     const randomID =

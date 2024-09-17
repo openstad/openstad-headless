@@ -13,6 +13,7 @@ export type InfoFieldProps = {
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
+    infoImage?: string;
 }
 
 const InfoField: FC<InfoFieldProps> = ({
@@ -24,6 +25,7 @@ const InfoField: FC<InfoFieldProps> = ({
    showMoreInfo = false,
    moreInfoButton = 'Meer informatie',
    moreInfoContent = '',
+   infoImage = '',
 }) => {
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
@@ -53,7 +55,14 @@ const InfoField: FC<InfoFieldProps> = ({
               </>
           )}
 
-        <figure>
+          {infoImage && (
+              <figure className="info-image-container">
+                  <img src={infoImage} alt=""/>
+                  <Spacer size={.5} />
+              </figure>
+          )}
+
+        <figure className="info-image-container">
           <img src={image} alt={imageAlt}/>
           {imageDescription && (
             <figcaption>{imageDescription}</figcaption>

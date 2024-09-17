@@ -1,6 +1,6 @@
 .utrecht-accordion__button {
  position: relative;
- padding-right: 2rem; /* Zorg dat er ruimte is voor de chevron */
+ padding-right: 2rem;
 }
 
 .utrecht-accordion__button::before {
@@ -20,4 +20,8 @@
 
 .utrecht-accordion__button[aria-expanded="true"]::before {
  transform: translateY(-50%) rotate(-45deg);
+}
+
+figure.info-image-container {
+ aspect-ratio: unset;
 }

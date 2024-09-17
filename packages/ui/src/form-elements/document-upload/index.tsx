@@ -67,6 +67,7 @@ export type DocumentUploadProps = {
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
+    infoImage?: string;
 }
 
 const DocumentUploadField: FC<DocumentUploadProps> = ({
@@ -88,6 +89,7 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
     showMoreInfo = false,
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
+   infoImage = '',
     ...props
 }) => {
     const randomID =

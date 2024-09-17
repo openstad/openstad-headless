@@ -32,6 +32,7 @@ export type TextInputProps = {
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
+    infoImage?: string;
 }
 
 const TextInput: FC<TextInputProps> = ({
@@ -53,6 +54,7 @@ const TextInput: FC<TextInputProps> = ({
     showMoreInfo = false,
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
+   infoImage = '',
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const InputComponent = variant === 'textarea' ? Textarea : Textbox;
@@ -117,6 +119,13 @@ const TextInput: FC<TextInputProps> = ({
                     />
                     <Spacer size={.5} />
                 </>
+            )}
+
+            {infoImage && (
+                <figure className="info-image-container">
+                    <img src={infoImage} alt=""/>
+                    <Spacer size={.5} />
+                </figure>
             )}
 
             <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}>

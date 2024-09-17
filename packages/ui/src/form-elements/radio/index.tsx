@@ -25,6 +25,7 @@ export type RadioboxFieldProps = {
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
+    infoImage?: string;
 }
 
 const RadioboxField: FC<RadioboxFieldProps> = ({
@@ -38,6 +39,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     showMoreInfo = false,
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
+   infoImage = '',
 }) => {
     const [selectedOption, setSelectedOption] = useState<string>("");
     const [otherOptionValues, setOtherOptionValues] = useState<{ [key: string]: string }>({});

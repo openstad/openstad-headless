@@ -25,6 +25,7 @@ export type SelectFieldProps = {
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
+    infoImage?: string;
 }
 
 const SelectField: FC<SelectFieldProps> = ({
@@ -39,6 +40,7 @@ const SelectField: FC<SelectFieldProps> = ({
       showMoreInfo = false,
       moreInfoButton = 'Meer informatie',
       moreInfoContent = '',
+   infoImage = '',
 }) => {
     choices = choices.map((choice) => {
       if (typeof choice === 'string') {

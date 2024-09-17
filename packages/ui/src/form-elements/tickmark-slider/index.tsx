@@ -20,6 +20,7 @@ export type TickmarkSliderProps = {
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
+    infoImage?: string;
 }
 
 const TickmarkSlider: FC<TickmarkSliderProps> = ({
@@ -38,6 +39,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
     showMoreInfo = false,
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
+   infoImage = '',
 }) => {
     const defaultValue = Math.ceil(fieldOptions.length / 2).toString();
     const [value, setValue] = useState<string>(defaultValue);
@@ -81,8 +83,15 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 </>
             )}
 
+            {infoImage && (
+                <figure className="info-image-container">
+                    <img src={infoImage} alt=""/>
+                    <Spacer size={.5} />
+                </figure>
+            )}
+
             {imageSrc && (
-                <figure>
+                <figure className="info-image-container">
                     <img src={imageSrc} alt={imageAlt} />
                     {imageDescription && (
                         <figcaption>{imageDescription}</figcaption>

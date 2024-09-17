@@ -29,6 +29,7 @@ export type MapProps = BaseProps &
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
+    infoImage?: string;
 }
 
 type Point = {
@@ -46,6 +47,7 @@ const MapField: FC<MapProps> = ({
     showMoreInfo = false,
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
+    infoImage = '',
     ...props
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -126,6 +128,13 @@ const MapField: FC<MapProps> = ({
                   />
                   <Spacer size={.5} />
               </>
+          )}
+
+          {infoImage && (
+              <figure className="info-image-container">
+                  <img src={infoImage} alt=""/>
+                  <Spacer size={.5} />
+              </figure>
           )}
 
           <div

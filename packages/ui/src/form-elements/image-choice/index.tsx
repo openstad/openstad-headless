@@ -22,6 +22,7 @@ export type ImageChoiceFieldProps = {
     showMoreInfo?: boolean;
     moreInfoButton?: string;
     moreInfoContent?: string;
+    infoImage?: string;
 }
 
 export type ChoiceItem = {
@@ -43,6 +44,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     showMoreInfo = false,
     moreInfoButton = 'Meer informatie',
     moreInfoContent = '',
+   infoImage = '',
 }) => {
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
@@ -80,6 +82,13 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                     </>
                 )}
 
+                {infoImage && (
+                    <figure className="info-image-container">
+                        <img src={infoImage} alt=""/>
+                        <Spacer size={.5} />
+                    </figure>
+                )}
+
                 <div className={"image-choice-container"}>
                     {choices?.map((choice, index) => (
                         <FormField type="radio" key={index}>
@@ -96,7 +105,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                                         }) : null}
                                         disabled={disabled}
                                     />
-                                    <figure>
+                                    <figure className="info-image-container">
                                         <img src={choice.imageSrc} alt={choice.imageAlt} />
                                         {choice.label && (
                                             <figcaption>{choice.label}</figcaption>
