@@ -317,11 +317,18 @@ export default function WidgetResourceFormItems(
         const defaultFormItem = defaultFormValues.find((item) => item.type === form.watch('type'));
 
         if (defaultFormItem) {
-            ['fieldKey', 'title', 'description', 'fieldType'].forEach((key) => {
-                if (form.watch(key) === '') {
-                    form.setValue(key, defaultFormItem[key] || '');
-                }
-            });
+            if (form.watch('fieldKey') === '') {
+                form.setValue('fieldKey', defaultFormItem.fieldKey || '');
+            }
+            if (form.watch('title') === '') {
+                form.setValue('title', defaultFormItem.title || '');
+            }
+            if (form.watch('description') === '') {
+                form.setValue('description', defaultFormItem.description || '');
+            }
+            if (form.watch('fieldType') === '') {
+                form.setValue('fieldType', defaultFormItem.fieldType || '');
+            }
 
             if (defaultFormItem.fieldType === 'text') {
                 const variant = (defaultFormItem.type === 'summary' || defaultFormItem.type === 'description') ? 'textarea' : 'text input';
