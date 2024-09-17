@@ -358,6 +358,7 @@ function ResourceDetail({
             emptyListText={props.commentsWidget?.emptyListText}
             formIntro={props.commentsWidget?.formIntro}
             placeholder={props.commentsWidget?.placeholder}
+            loginText={props.commentsWidget?.loginText}
             sentiment={useSentiments[0]}
           />
 
@@ -369,6 +370,7 @@ function ResourceDetail({
               emptyListText={props.commentsWidget_multiple?.emptyListText}
               formIntro={props.commentsWidget_multiple?.formIntro}
               placeholder={props.commentsWidget_multiple?.placeholder}
+              loginText={props.commentsWidget_multiple?.loginText}
               sentiment={useSentiments[1]}
             />
           )}
