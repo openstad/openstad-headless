@@ -1,6 +1,4 @@
 const fs = require('fs');
-const util = require('util');
-const imgDb = require('promise-mysql');
 const execute = require('./execute');
 
 module.exports = async function setupAdminServer(actions) {

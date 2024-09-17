@@ -1,6 +1,5 @@
 const fs = require('fs');
-const util = require('util');
-const apiDb = require('promise-mysql');
+const apiDb = require('mysql2/promise');
 const execute = require('./execute');
 
 module.exports = async function setupApi(actions) {
