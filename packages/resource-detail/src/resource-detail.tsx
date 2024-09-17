@@ -154,6 +154,11 @@ function ResourceDetail({
     useSentiments = JSON.parse(useSentiments);
   }
 
+  const firstStatus = resource.statuses && resource.statuses.length > 0 ? resource.statuses[0] : null;
+  const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
+  const backgroundColorClass = firstStatus && firstStatus.backgroundColor ? `bgColor-${firstStatus.backgroundColor}` : '';
+
+  const statusClasses = `${colorClass} ${backgroundColorClass}`.trim();
 
   return (
     <section>
@@ -174,7 +179,7 @@ function ResourceDetail({
                       src={i.url}
                       imageFooter={
                         <div>
-                          <Paragraph className="osc-resource-detail-content-item-status">
+                          <Paragraph className={`osc-resource-detail-content-item-status ${statusClasses}`}>
                             {resource.statuses
                               ?.map((s: { name: string }) => s.name)
                               ?.join(', ')}
