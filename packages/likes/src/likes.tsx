@@ -30,6 +30,7 @@ export type LikeProps = {
   variant?: 'small' | 'medium' | 'large';
   yesLabel?: string;
   noLabel?: string;
+  displayDislike?: boolean;
   hideCounters?: boolean;
   showProgressBar?: boolean;
   progressBarDescription?: string;
@@ -41,6 +42,7 @@ function Likes({
   hideCounters,
   yesLabel = 'Voor',
   noLabel = 'Tegen',
+  displayDislike = false,
   showProgressBar = true,
   ...props
 }: LikeWidgetProps) {
@@ -77,6 +79,11 @@ function Likes({
     { type: 'yes', label: yesLabel, icon: 'ri-thumb-up-line' },
     { type: 'no', label: noLabel, icon: 'ri-thumb-down-line' },
   ];
+
+  if (!displayDislike) {
+      supportedLikeTypes.pop();
+  }
+
 
   useEffect(() => {
     let pending = session.get('osc-resource-vote-pending');

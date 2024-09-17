@@ -85,6 +85,29 @@ export default function ProjectStatusEdit() {
     form.reset(defaults());
   }, [form, defaults]);
 
+    const colors = [
+        { value: 'FFFFFF', label: 'Wit' },
+        { value: '000000', label: 'Zwart' },
+        { value: 'FF0000', label: 'Rood' },
+        { value: '00FF00', label: 'Groen' },
+        { value: '0000FF', label: 'Blauw' },
+        { value: 'FFFF00', label: 'Geel' },
+        { value: 'FFA500', label: 'Oranje' },
+        { value: '800080', label: 'Paars' },
+        { value: 'FFC0CB', label: 'Roze' },
+        { value: 'A52A2A', label: 'Bruin' },
+        { value: '808080', label: 'Grijs' },
+        { value: '00FFFF', label: 'Cyaan' },
+        { value: 'FFD700', label: 'Goud' },
+        { value: 'ADFF2F', label: 'Limoen' },
+        { value: '4B0082', label: 'Indigo' },
+        { value: '8B4513', label: 'Sienna' },
+        { value: 'FA8072', label: 'Zalm' },
+        { value: '20B2AA', label: 'Lichtzeegroen' },
+        { value: '4682B4', label: 'Staalblauw' },
+        { value: 'D3D3D3', label: 'Lichtgrijs' }
+    ];
+
   return (
     <div>
       <PageLayout
@@ -176,32 +199,65 @@ export default function ProjectStatusEdit() {
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="lg:w-1/2 grid grid-cols-1 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="backgroundColor"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Achtergrond kleur</FormLabel>
-                          <FormControl>
-                            <Input placeholder="" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="color"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tekst kleur</FormLabel>
-                          <FormControl>
-                            <Input placeholder="" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      <FormField
+                          control={form.control}
+                          name="backgroundColor"
+                          render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Achtergrond kleur</FormLabel>
+                                  <Select
+                                      onValueChange={(value) => {
+                                          field.onChange(value);
+                                      }}
+                                      value={field.value}
+                                  >
+                                      <FormControl>
+                                          <SelectTrigger>
+                                              <SelectValue placeholder="Selecteer een kleur" />
+                                          </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent style={{height: '250px', overflow: 'auto'}}>
+                                          {colors.map((color) => (
+                                              <SelectItem key={color.value} value={color.value}>
+                                                  <span style={{ width: '10px', height: '10px', display: 'inline-block', backgroundColor: `#${color.value}`, border: '1px solid black' ,marginRight: '8px' }}></span>{color.label}
+                                              </SelectItem>
+                                          ))}
+                                      </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                              </FormItem>
+                          )}
+                      />
+
+                      <FormField
+                          control={form.control}
+                          name="color"
+                          render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Tekst kleur</FormLabel>
+                                  <Select
+                                      onValueChange={(value) => {
+                                          field.onChange(value);
+                                      }}
+                                      value={field.value}
+                                  >
+                                      <FormControl>
+                                          <SelectTrigger>
+                                              <SelectValue placeholder="Selecteer een kleur" />
+                                          </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent style={{height: '250px', overflow: 'auto'}}>
+                                          {colors.map((color) => (
+                                              <SelectItem key={color.value} value={color.value}>
+                                                  <span style={{ width: '10px', height: '10px', display: 'inline-block', backgroundColor: color.value, border: '1px solid black' ,marginRight: '8px' }}></span>{color.label}
+                                              </SelectItem>
+                                          ))}
+                                      </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                              </FormItem>
+                          )}
+                      />
                     <FormField
                       control={form.control}
                       name="label"

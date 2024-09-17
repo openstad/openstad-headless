@@ -19,6 +19,7 @@ import { ArgumentWidgetTabProps } from '.';
 const formSchema = z.object({
   formIntro: z.string(),
   placeholder: z.string(),
+  loginText: z.string().optional(),
 });
 
 export default function ArgumentsForm(
@@ -28,6 +29,7 @@ export default function ArgumentsForm(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       formIntro: props.formIntro || 'Typ hier de intro tekst',
+      loginText: props.loginText || 'Inloggen om deel te nemen aan de discussie.',
       placeholder: props?.placeholder || 'Typ hier uw reactie.',
     },
   });
@@ -73,6 +75,25 @@ export default function ArgumentsForm(
                 <FormControl>
                   <Input
                     placeholder="Dit wordt weergegeven wanneer er nog niets is ingevuld door de gebruiker."
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="loginText"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Placeholder tekst</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Dit wordt weergegeven wanneer de gebruiker nog niet is ingelogd."
                     {...field}
                     onChange={(e) => {
                       onFieldChange(field.name, e.target.value);
