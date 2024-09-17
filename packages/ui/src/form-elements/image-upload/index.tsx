@@ -154,7 +154,10 @@ const ImageUploadField: FC<ImageUploadProps> = ({
             <Paragraph className="utrecht-form-field__label">
                 {title}
             </Paragraph>
-            <FormFieldDescription>{description}</FormFieldDescription>
+
+            {description &&
+                <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
+            }
 
             {showMoreInfo && (
                 <>

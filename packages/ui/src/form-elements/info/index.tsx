@@ -37,7 +37,9 @@ const InfoField: FC<InfoFieldProps> = ({
     return (
       <div className="info-field-container">
         {title && <Paragraph><Strong>{title}</Strong></Paragraph>}
-        {description && <Paragraph>{description}</Paragraph>}
+          {description &&
+            <Paragraph dangerouslySetInnerHTML={{__html: description}} />
+          }
 
           {showMoreInfo && (
               <>
