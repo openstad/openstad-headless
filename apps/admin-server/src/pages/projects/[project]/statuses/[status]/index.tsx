@@ -88,15 +88,15 @@ export default function ProjectStatusEdit() {
     const colors = [
         { value: 'FFFFFF', label: 'Wit' },
         { value: '000000', label: 'Zwart' },
-        { value: 'FF0000', label: 'Rood' },
-        { value: '00FF00', label: 'Groen' },
-        { value: '0000FF', label: 'Blauw' },
-        { value: 'FFFF00', label: 'Geel' },
-        { value: 'FFA500', label: 'Oranje' },
-        { value: '800080', label: 'Paars' },
-        { value: 'FFC0CB', label: 'Roze' },
+        { value: 'EC673E', label: 'Rood' },
+        { value: '7DB47B', label: 'Groen' },
+        { value: '98BFE6', label: 'Blauw' },
+        { value: 'FAE065', label: 'Geel' },
+        { value: 'F59A02', label: 'Oranje' },
+        { value: 'B078AF', label: 'Paars' },
+        { value: 'E881B0', label: 'Roze' },
         { value: 'A52A2A', label: 'Bruin' },
-        { value: '808080', label: 'Grijs' },
+        { value: 'D1D1D1', label: 'Grijs' },
         { value: '00FFFF', label: 'Cyaan' },
         { value: 'FFD700', label: 'Goud' },
         { value: 'ADFF2F', label: 'Limoen' },
@@ -249,7 +249,7 @@ export default function ProjectStatusEdit() {
                                       <SelectContent style={{height: '250px', overflow: 'auto'}}>
                                           {colors.map((color) => (
                                               <SelectItem key={color.value} value={color.value}>
-                                                  <span style={{ width: '10px', height: '10px', display: 'inline-block', backgroundColor: color.value, border: '1px solid black' ,marginRight: '8px' }}></span>{color.label}
+                                                  <span style={{ width: '10px', height: '10px', display: 'inline-block', backgroundColor: `#${color.value}`, border: '1px solid black' ,marginRight: '8px' }}></span>{color.label}
                                               </SelectItem>
                                           ))}
                                       </SelectContent>
