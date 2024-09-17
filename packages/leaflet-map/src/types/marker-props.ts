@@ -19,5 +19,6 @@ export type MarkerProps =
   onDragStart?: (e: LeafletMouseEvent, map: any) => void,
   onDragEnd?: (e: LeafletMouseEvent, map: any) => void,
   data?: any,
+  color?: string;
 };
 

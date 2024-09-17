@@ -317,7 +317,7 @@ export default function ProjectTagEdit() {
 
                               return (
                                   <FormItem>
-                                      <FormLabel>Interactieve afbeelding icon kleur</FormLabel>
+                                      <FormLabel>Icon kleur op de kaart</FormLabel>
                                       <FormControl>
                                           <div>
                                               <ColorPicker value={field.value || "#555588"} onChange={handleColorChange} />
