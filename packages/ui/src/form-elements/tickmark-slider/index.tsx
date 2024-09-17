@@ -91,7 +91,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
             )}
 
             {imageSrc && (
-                <figure className="info-image-container">
+                <figure>
                     <img src={imageSrc} alt={imageAlt} />
                     {imageDescription && (
                         <figcaption>{imageDescription}</figcaption>
