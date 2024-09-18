@@ -61,9 +61,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                 </FieldsetLegend>
 
                 {description &&
-                    <FormFieldDescription>
-                        {description}
-                    </FormFieldDescription>
+                  <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
                 }
 
                 {showMoreInfo && (

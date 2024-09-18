@@ -198,7 +198,11 @@ const BaseMap = ({
 
       // fallback on defaultIcon
       if (!markerData.icon && defaultIcon) {
-        markerData.icon = defaultIcon;
+        if (markerData.color) {
+          markerData.icon = { ...defaultIcon, color: markerData.color };
+        } else {
+          markerData.icon = defaultIcon;
+        }
       }
 
       markerData.onClick = markerData.onClick

@@ -91,9 +91,17 @@ const ResourceOverviewMap = ({
         }
       }
 
+      const firstTag = resource.tags && resource.tags[0];
+      const MapIconColor = firstTag && firstTag.documentMapIconColor ? firstTag.documentMapIconColor : '';
+
       // Set the resource name
       marker.icon = {
         title: resource.title ?? 'Locatie pin',
+      }
+
+      // Set the icon color
+      if (MapIconColor) {
+        marker.icon.color = MapIconColor;
       }
 
       return marker;

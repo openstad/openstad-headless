@@ -152,9 +152,12 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     return (
         <FormField type="text">
             <Paragraph className="utrecht-form-field__label">
-                {title}
+                <FormLabel htmlFor={randomID}>{title}</FormLabel>
             </Paragraph>
-            <FormFieldDescription>{description}</FormFieldDescription>
+
+            {description &&
+                <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
+            }
 
             {showMoreInfo && (
                 <>

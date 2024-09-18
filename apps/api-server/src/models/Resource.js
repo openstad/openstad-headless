@@ -647,7 +647,7 @@ module.exports = function (db, sequelize, DataTypes) {
         include: [
           {
             model: db.Tag,
-            attributes: ['id', 'type', 'name', 'label', 'defaultResourceImage'],
+            attributes: ['id', 'type', 'name', 'label', 'defaultResourceImage', 'documentMapIconColor'],
             through: { attributes: [] },
             required: false,
           },

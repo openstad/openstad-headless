@@ -115,9 +115,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
 
                 {description &&
                     <>
-                        <FormFieldDescription>
-                            {description}
-                        </FormFieldDescription>
+                        <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
                         <Spacer size={.5} />
                     </>
                 }

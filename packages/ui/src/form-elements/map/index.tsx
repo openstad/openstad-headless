@@ -112,7 +112,9 @@ const MapField: FC<MapProps> = ({
           <Paragraph className="utrecht-form-field__label">
               <FormLabel htmlFor={randomID}>{title}</FormLabel>
           </Paragraph>
-          <FormFieldDescription>{description}</FormFieldDescription>
+          {description &&
+            <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
+          }
 
           {showMoreInfo && (
               <>

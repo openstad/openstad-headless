@@ -62,9 +62,7 @@ const SelectField: FC<SelectFieldProps> = ({
             <FormLabel htmlFor={fieldKey}>{title}</FormLabel>
             {description &&
                 <>
-                    <FormFieldDescription>
-                        {description}
-                    </FormFieldDescription>
+                    <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
                     <Spacer size={.5} />
                 </>
             }

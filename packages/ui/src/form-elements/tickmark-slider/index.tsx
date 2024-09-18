@@ -59,10 +59,8 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                 <FormLabel htmlFor={`a-to-b-range--${index}`}>{title}</FormLabel>
             </Paragraph>
             {description &&
-                    <>
-                    <FormFieldDescription>
-                        {description}
-                    </FormFieldDescription>
+                <>
+                    <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
                     <Spacer size={.5} />
                 </>
             }
