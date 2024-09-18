@@ -69,7 +69,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
     const notifyFailed = () =>
       toast.error('Versturen mislukt', { position: 'bottom-center' });
 
-    const { create: createChoiceguide } = datastore.useChoicesguide({
+    const { create: createChoicesguideResult } = datastore.useChoicesguide({
         projectId: props.projectId,
     });
 
@@ -85,7 +85,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
             setCurrentPage((prevPage) => prevPage + 1);
         } else {
             try {
-                const result = await createChoiceguide(finalAnswers, props.projectId ,props.widgetId);
+                const result = await createChoicesguideResult(finalAnswers ,props.widgetId);
                 if (result) {
                     notifySuccess();
 
