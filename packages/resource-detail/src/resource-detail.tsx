@@ -16,7 +16,7 @@ import '@utrecht/design-tokens/dist/root.css';
 import {
   Paragraph, Link, Heading, Heading2, ButtonGroup, ButtonLink,
 } from '@utrecht/component-library-react';
-import React from 'react';
+import React, { useState } from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import {
   Comments,
@@ -98,6 +98,7 @@ function ResourceDetail({
   documentsDesc = '',
   ...props
 }: ResourceDetailWidgetProps) {
+  const [refreshComments, setRefreshComments] = useState(false);
 
   let resourceId: string | undefined = String(getResourceId({
     resourceId: parseInt(props.resourceId || ''),
@@ -358,6 +359,8 @@ function ResourceDetail({
         <section className="resource-detail-comments-container">
           <Comments
             {...props}
+            key={refreshComments ? 'refresh1' : 'no-refresh1'}
+            setRefreshComments={setRefreshComments}
             resourceId={resourceId || ''}
             title={props.commentsWidget?.title}
             emptyListText={props.commentsWidget?.emptyListText}
@@ -370,6 +373,8 @@ function ResourceDetail({
           {useSentiments?.length > 1 && (
             <Comments
               {...props}
+              key={refreshComments ? 'refresh2' : 'no-refresh2'}
+              setRefreshComments={setRefreshComments}
               resourceId={resourceId || ''}
               title={props.commentsWidget_multiple?.title}
               emptyListText={props.commentsWidget_multiple?.emptyListText}
