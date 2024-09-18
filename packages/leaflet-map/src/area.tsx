@@ -8,22 +8,28 @@ import type { AreaProps } from './types/area-props';
 import { difference, polygon as tPolygon } from 'turf';
 
 function createCutoutPolygonMulti(areas: any) {
-  const outerBox = tPolygon([[
+  const outerBoxCoordinates = [
     [-180, -90],
     [180, -90],
     [180, 90],
     [-180, 90],
     [-180, -90]
-  ]]);
+  ];
 
-  let cutoutPolygon = outerBox;
+  const outerBox = tPolygon([outerBoxCoordinates]);
+
+  let cutOutCoordinates = [outerBoxCoordinates];
 
   areas.forEach((area: any) => {
     const innerPolygon = tPolygon([area.map(({ lat, lng }: { lat: number, lng: number }) => [lng, lat])]);
-    cutoutPolygon = difference(cutoutPolygon, innerPolygon) || cutoutPolygon;
+    const newCutOut = difference(outerBox, innerPolygon) || outerBox;
+
+    if (newCutOut?.geometry?.coordinates && newCutOut?.geometry?.coordinates.length > 1) {
+      cutOutCoordinates.push(newCutOut?.geometry?.coordinates[1]);
+    }
   });
 
-  return cutoutPolygon.geometry.coordinates;
+  return cutOutCoordinates;
 }
 
 export function isPointInArea(area: Array<Array<LatLng>> | Array<LatLng>, point: LatLng) {
