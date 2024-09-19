@@ -251,7 +251,7 @@ function ResourceDetail({
                 <>
                   <Heading level={2} appearance="utrecht-heading-2">Plaats</Heading>
                   <ResourceDetailMap
-                    resourceId={props.resourceId || '0'}
+                    resourceId={resource.id || resourceId || '0'}
                     resourceIdRelativePath={props.resourceIdRelativePath || 'openstadResourceId'}
                     {...props}
                     center={resource.location}
