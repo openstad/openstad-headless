@@ -56,7 +56,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
     class HtmlContent extends React.Component<{ html: any }> {
         render() {
             let {html} = this.props;
-            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+            return <Paragraph dangerouslySetInnerHTML={{__html: html}}/>;
         }
     }
 
@@ -66,7 +66,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
                 <Paragraph><Strong>            <label htmlFor={randomId}>{title}</label></Strong></Paragraph>
             )}
             {description && (
-                <p dangerouslySetInnerHTML={{__html: description}}></p>
+                <Paragraph dangerouslySetInnerHTML={{__html: description}}></Paragraph>
             )}
             {showMoreInfo && (
                 <>
