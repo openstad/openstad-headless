@@ -9,6 +9,7 @@ const focusActiveResource = () => {
   if (activeResource) {
     setTimeout(() => {
       (activeResource as HTMLElement).focus();
+      activeResource.classList.remove('active-resource');
     }, 100);
   }
 };
