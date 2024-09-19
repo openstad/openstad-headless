@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '../../../../../../components/ui/button';
-import { Input } from '../../../../../../components/ui/input';
 import {
   Form,
   FormControl,
@@ -20,16 +19,18 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Heading } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
-import {undefinedToTrueOrProp, YesNoSelect} from "@/lib/form-widget-helpers";
 import { ChoiceGuideResultsProps } from '@openstad-headless/choiceguide-results/src/props';
 import {useWidgetsHook} from "@/hooks/use-widgets";
 import {useRouter} from "next/router";
+import {EditFieldProps} from "@/lib/form-widget-helpers/EditFieldProps";
 
 const formSchema = z.object({
     choiceguideWidgetId: z.string().optional(),
 });
 
-export default function ChoiceGuideResultSettings(props: ChoiceGuideResultsProps) {
+export default function ChoiceGuideResultSettings(
+    props: ChoiceGuideResultsProps & EditFieldProps<ChoiceGuideResultsProps>
+) {
   const router = useRouter();
   const { project } = router.query;
 

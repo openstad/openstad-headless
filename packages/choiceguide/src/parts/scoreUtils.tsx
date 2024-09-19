@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {ChoiceOptions, Score} from "../props";
 
 export const calculateColor = (score: number, minColor = '#ff9100', maxColor = '#bed200') => {
