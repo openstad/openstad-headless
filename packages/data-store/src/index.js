@@ -15,6 +15,7 @@ import useSubmissions from './hooks/use-submissions.js';
 import useCommentsByProject from './hooks/use-comments-by-project';
 import useChoiceGuideResults from './hooks/use-choiceguide-results';
 import useUserActivity from './hooks/use-user-activity';
+import useWidget from "./hooks/use-widget";
 
 const windowGlobal = typeof window !== 'undefined' ? window : {};
 
@@ -39,6 +40,7 @@ function DataStore(props = {}) {
   self.useCommentsByProject = useCommentsByProject.bind(self);
   self.useChoiceGuideResults = useChoiceGuideResults.bind(self);
   self.useUserActivity = useUserActivity.bind(self);
+  self.useWidget = useWidget.bind(self);
 
   // current user
   const {

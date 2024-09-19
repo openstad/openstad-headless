@@ -24,6 +24,8 @@ export default function ProjectChoiceGuideResults() {
   const [activeWidget, setActiveWidget] = useState("0");
   const [allWidgets, setAllWidgets] = useState<{ id: number; name: string }[]>([]);
 
+  const [selectedWidget, setSelectedWidget] = useState<any>(null);
+
   useEffect(() => {
     let loadedChoiceGuideResults = (data || []) as { createdAt: string }[];
 
@@ -63,6 +65,9 @@ export default function ProjectChoiceGuideResults() {
 
     setFilterData(filteredData);
     setActiveWidget(value);
+
+    const selectedWidget = widgetData.find((widget: any) => widget.id.toString() === ID);
+    setSelectedWidget(selectedWidget);
   }
 
   if (!data) return null;
@@ -104,7 +109,7 @@ export default function ProjectChoiceGuideResults() {
             <Button
               className="text-xs p-2"
               type="submit"
-              onClick={() => exportChoiceGuideToCSV(filterData, activeWidget)}
+              onClick={() => exportChoiceGuideToCSV(filterData, activeWidget, selectedWidget)}
               disabled={activeWidget === "0"}
             >
               Exporteer inzendingen .csv

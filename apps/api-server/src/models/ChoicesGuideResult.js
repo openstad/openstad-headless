@@ -6,6 +6,12 @@ module.exports = function( db, sequelize, DataTypes ) {
       allowNull: true,
     },
 
+    projectId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+
     widgetId: {
       type: DataTypes.INTEGER,
       allowNull: false,

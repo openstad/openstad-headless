@@ -19,6 +19,10 @@
   }
 }
 
+figure.info-image-container {
+  max-height: 300px;
+}
+
 #choice-plane {
   position: relative;
   width: 100%;
