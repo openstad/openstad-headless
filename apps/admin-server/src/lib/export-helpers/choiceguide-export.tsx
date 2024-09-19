@@ -6,7 +6,7 @@ export const exportChoiceGuideToCSV = (data: any, widgetName: string, selectedWi
 
     const items = selectedWidget?.config?.items || [];
     const choiceOptions = selectedWidget?.config?.choiceOption?.choiceOptions || [];
-    const choiceType = selectedWidget?.config?.choicesType || 'defaultChoiceType'; // Vervang met een geschikte default waarde
+    const choiceType = selectedWidget?.config?.choicesType || 'default';
 
     let weights: any = {};
     try {
@@ -23,9 +23,9 @@ export const exportChoiceGuideToCSV = (data: any, widgetName: string, selectedWi
       let title = item.title || `Item ${index + 1}`;
 
       if (item.type === 'a-b-slider') {
-        const explanationA = item.explanationA || 'No explanation A';
-        const explanationB = item.explanationB || 'No explanation B';
-        title = `${title}   A: ${explanationA} - B: ${explanationB}`;
+        const explanationA = item.explanationA || 'A';
+        const explanationB = item.explanationB || 'B';
+        title = `${title}   ${explanationA} - ${explanationB}`;
       }
 
       const newKey = item.type + '-' + (index + 1);
