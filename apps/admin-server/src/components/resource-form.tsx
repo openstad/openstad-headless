@@ -37,73 +37,83 @@ const minError = (field: string, nr: number) =>
 const maxError = (field: string, nr: number) =>
   `${field} mag maximaal ${nr} karakters bevatten`;
 
-const formSchema = z.object({
-  userId: z.coerce
-    .number({ invalid_type_error: onlyNumbersMessage })
-    .optional(),
-
-  title: z
-    .string()
-    .min(10, minError('Titel', 10))
-    .max(50, maxError('Titel', 50))
-    .default(''),
-  summary: z
-    .string()
-    .min(20, minError('Samenvatting', 20))
-    .max(140, maxError('Samenvatting', 140))
-    .default(''),
-  description: z
-    .string()
-    .min(140, minError('Beschrijving', 140))
-    .max(5000, maxError('Beschrijving', 5000))
-    .default(''),
-
-  budget: z.coerce
-    .number({ invalid_type_error: onlyNumbersMessage })
-    .default(0),
-  budgetMin: z.coerce
-    .number({ invalid_type_error: onlyNumbersMessage })
-    .optional(),
-  budgetMax: z.coerce
-    .number({ invalid_type_error: onlyNumbersMessage })
-    .optional(),
-  budgetInterval: z.coerce
-    .number({ invalid_type_error: onlyNumbersMessage })
-    .optional(),
-
-  startDate: z.date(),
-  publishDate: z.date().optional(),
-
-  modBreak: z.coerce.string().optional(),
-  modBreakUserId: z.coerce
-    .number({ invalid_type_error: onlyNumbersMessage })
-    .optional(),
-  modBreakDate: z.date().optional(),
-
-  location: z.string().optional(),
-  image: z.string().optional(),
-  images: z
-    .array(z.object({ url: z.string() }))
-    .optional()
-    .default([]),
-  document: z.string().optional(),
-  documents: z
-    .array(z.object({ url: z.string().optional(), name: z.string().optional() }))
-    .optional()
-    .default([]),
-
-  extraData: z
-    .object({
-      originalId: z.coerce
+const baseSchema = z.object({
+    userId: z.coerce
         .number({ invalid_type_error: onlyNumbersMessage })
         .optional(),
-    })
-    .default({}),
-  tags: z.number().array().default([]),
-  statuses: z.number().array().default([]),
+
+    title: z.string().default(''),
+    summary: z.string().default(''),
+    description: z.string().default(''),
+
+    budget: z.coerce
+        .number({ invalid_type_error: onlyNumbersMessage })
+        .default(0),
+    budgetMin: z.coerce
+        .number({ invalid_type_error: onlyNumbersMessage })
+        .optional(),
+    budgetMax: z.coerce
+        .number({ invalid_type_error: onlyNumbersMessage })
+        .optional(),
+    budgetInterval: z.coerce
+        .number({ invalid_type_error: onlyNumbersMessage })
+        .optional(),
+
+    startDate: z.date(),
+    publishDate: z.date().optional(),
+
+    modBreak: z.coerce.string().optional(),
+    modBreakUserId: z.coerce
+        .number({ invalid_type_error: onlyNumbersMessage })
+        .optional(),
+    modBreakDate: z.date().optional(),
+
+    location: z.string().optional(),
+    image: z.string().optional(),
+    images: z
+        .array(z.object({ url: z.string() }))
+        .optional()
+        .default([]),
+    document: z.string().optional(),
+    documents: z
+        .array(z.object({ url: z.string().optional(), name: z.string().optional() }))
+        .optional()
+        .default([]),
+
+    extraData: z
+        .object({
+            originalId: z.coerce
+                .number({ invalid_type_error: onlyNumbersMessage })
+                .optional(),
+        })
+        .default({}),
+    tags: z.number().array().default([]),
+    statuses: z.number().array().default([]),
 });
 
-type FormType = z.infer<typeof formSchema>;
+const formSchema = (
+    titleLimits: { min: number; max: number },
+    summaryLimits: { min: number; max: number },
+    descriptionLimits: { min: number; max: number }
+) => baseSchema.extend({
+    title: z
+        .string()
+        .min(titleLimits.min, minError('Titel', titleLimits.min))
+        .max(titleLimits.max, maxError('Titel', titleLimits.max))
+        .default(''),
+    summary: z
+        .string()
+        .min(summaryLimits.min, minError('Samenvatting', summaryLimits.min))
+        .max(summaryLimits.max, maxError('Samenvatting', summaryLimits.max))
+        .default(''),
+    description: z
+        .string()
+        .min(descriptionLimits.min, minError('Beschrijving', descriptionLimits.min))
+        .max(descriptionLimits.max, maxError('Beschrijving', descriptionLimits.max))
+        .default(''),
+});
+
+type FormType = z.infer<typeof baseSchema>;
 
 type Props = {
   onFormSubmit: (body: FormType) => Promise<any>;
@@ -118,6 +128,21 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     project as string,
     id as string
   );
+
+  const titleLimits = {
+    min: projectData?.config?.resources?.titleMinLength || 10,
+    max: projectData?.config?.resources?.titleMaxLength || 50,
+  };
+
+  const summaryLimits = {
+    min: projectData?.config?.resources?.summaryMinLength || 20,
+    max: projectData?.config?.resources?.summaryMaxLength || 140,
+  };
+
+  const descriptionLimits = {
+    min: projectData?.config?.resources?.descriptionMinLength || 140,
+    max: projectData?.config?.resources?.descriptionMaxLength || 5000,
+  };
 
   const { data: tags, error: tagError } = useTags(project as string);
   const { data: statuses, error: statusError } = useStatuses(project as string);
@@ -202,7 +227,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   );
   const [extraData, setExtraData] = useState(existingData?.extraData || '');
   const form = useForm<FormType>({
-    resolver: zodResolver<any>(formSchema),
+    resolver: zodResolver<any>(formSchema(titleLimits, summaryLimits, descriptionLimits)),
     defaultValues: defaults(),
   });
 
