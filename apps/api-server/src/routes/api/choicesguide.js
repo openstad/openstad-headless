@@ -118,6 +118,7 @@ router.route('/')
       result: req.body.submittedData,
 			widgetId: req.body.widgetId,
 			projectId: req.params.projectId,
+			createdAt: new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Amsterdam' })),
     };
 
 		db.ChoicesGuideResult
