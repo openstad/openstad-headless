@@ -30,6 +30,7 @@ function Form({
       secondaryLabel = '',
       secondaryHandler = () => {},
       getValuesOnChange = () => {},
+      allowResetAfterSubmit = true,
       ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: FormValue } = {};
@@ -65,7 +66,7 @@ function Form({
                     behavior: 'smooth'
                 });
             }
-        } else {
+        } else if (allowResetAfterSubmit) {
             resetForm();
         }
     };

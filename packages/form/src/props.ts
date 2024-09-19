@@ -18,6 +18,7 @@ export type FormProps = {
     submitHandler: (values: { [p: string]: string | Record<number, never> | []}) => void;
     getValuesOnChange?: (values: { [p: string]: string | Record<number, never> | []}) => void;
     submitDisabled?: boolean;
+    allowResetAfterSubmit?: boolean;
     secondaryLabel?: string;
     secondaryHandler?: (values: { [p: string]: string | Record<number, never> | []}) => void;
     placeholder?: string;

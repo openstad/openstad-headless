@@ -127,6 +127,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                     submitHandler={onSubmit}
                     secondaryLabel={saveConceptButton || ""}
                     getValuesOnChange={setCurrentAnswers}
+                    allowResetAfterSubmit={false}
                     {...props}
                   />
                   <Toaster />
