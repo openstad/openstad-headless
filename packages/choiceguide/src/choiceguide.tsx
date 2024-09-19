@@ -84,6 +84,14 @@ function ChoiceGuide(props: ChoiceGuideProps) {
         if (currentPage < totalPages - 1) {
             setCurrentPage((prevPage) => prevPage + 1);
         } else {
+
+            const projectId = props.projectId; // Assume projectId is available in props
+            const widgetId = props.widgetId;
+            const storageKey = `choiceguide-${projectId}-${widgetId}`;
+
+            // Store in local storage
+            localStorage.setItem(storageKey, JSON.stringify(finalAnswers));
+
             try {
                 const result = await createChoicesguideResult(finalAnswers ,props.widgetId);
                 if (result) {
