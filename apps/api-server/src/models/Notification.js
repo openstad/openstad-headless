@@ -161,6 +161,7 @@ module.exports = ( db, sequelize, DataTypes ) => {
                       answer = tags.map(tag => tag.name).join(', ');
                     }
                   } else {
+
                     if (typeof answer === 'string' && answer.startsWith('[') && answer.endsWith(']')) {
                       try {
                         const parsedAnswer = JSON.parse(answer);
@@ -171,10 +172,20 @@ module.exports = ( db, sequelize, DataTypes ) => {
                         // If parsing fails, keep the original answer
                       }
                     } else if (Array.isArray(answer)) {
-                      answer = answer.length ? answer.join(', ') : '';
+                      // Check if the elements are objects with a 'url' field
+                      if (answer.every(item => typeof item === 'object' && item !== null && 'url' in item)) {
+                        // Determine if the field is for images or documents based on the fieldKey
+                        answer = answer.map((item, index) => {
+                          const name = item.name || (fieldKey === 'images' ? `Afbeelding ${index + 1}` : `Document ${index + 1}`);
+                          return `<a href="${item.url}" target="_blank">${name}</a>`;
+                        }).join(', ');
+                      } else {
+                        answer = answer.join(', ');
+                      }
                     } else if (typeof answer === 'object' && answer !== null) {
                       answer = Object.entries(answer).map(([key, value]) => `${key}: ${value}`).join(', ');
                     }
+
                   }
 
                   return {question, answer};
@@ -227,7 +238,16 @@ module.exports = ( db, sequelize, DataTypes ) => {
                       // If parsing fails, keep the original answer
                     }
                   } else if (Array.isArray(answer)) {
-                    answer = answer.length ? answer.join(', ') : '';
+                    // Check if the elements are objects with a 'url' field
+                    if (answer.every(item => typeof item === 'object' && item !== null && 'url' in item)) {
+                      // Determine if the field is for images or documents based on the fieldKey
+                      answer = answer.map((item, index) => {
+                        const name = item.name || (fieldKey === 'images' ? `Afbeelding ${index + 1}` : `Document ${index + 1}`);
+                        return `<a href="${item.url}" target="_blank">${name}</a>`;
+                      }).join(', ');
+                    } else {
+                      answer = answer.join(', ');
+                    }
                   } else if (typeof answer === 'object' && answer !== null) {
                     answer = Object.entries(answer).map(([key, value]) => `${key}: ${value}`).join(', ');
                   }

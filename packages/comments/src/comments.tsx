@@ -182,21 +182,29 @@ function Comments({
         ) : null}
 
         {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
-          <Banner className="big">
-            <Heading level={4} appearance='utrecht-heading-6'>{ loginText }</Heading>
-            <Spacer size={1} />
-            <Button
-              appearance="primary-action-button"
-              onClick={() => {
-                // login
-                if (args.login?.url) {
-                  document.location.href = args.login.url;
-                }
-              }}
-              type="button">
-              Inloggen
-            </Button>
-          </Banner>
+            <>
+              {formIntro && (
+                <>
+                  <p>{formIntro}</p>
+                  <Spacer size={1} />
+                </>
+              )}
+              <Banner className="big">
+                <Heading level={4} appearance='utrecht-heading-6'>{ loginText }</Heading>
+                <Spacer size={1} />
+                <Button
+                  appearance="primary-action-button"
+                  onClick={() => {
+                    // login
+                    if (args.login?.url) {
+                      document.location.href = args.login.url;
+                    }
+                  }}
+                  type="button">
+                  Inloggen
+                </Button>
+              </Banner>
+            </>
         ) : null}
 
         {/* {(args.canComment && hasRole(currentUser, args.requiredUserRole)) && type === 'resource' || hasRole(currentUser, 'moderator') && type === 'resource' ? ( */}

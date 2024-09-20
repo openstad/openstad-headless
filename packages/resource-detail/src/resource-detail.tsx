@@ -16,7 +16,7 @@ import '@utrecht/design-tokens/dist/root.css';
 import {
   Paragraph, Link, Heading, Heading2, ButtonGroup, ButtonLink,
 } from '@utrecht/component-library-react';
-import React from 'react';
+import React, { useState } from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import {
   Comments,
@@ -98,6 +98,7 @@ function ResourceDetail({
   documentsDesc = '',
   ...props
 }: ResourceDetailWidgetProps) {
+  const [refreshComments, setRefreshComments] = useState(false);
 
   let resourceId: string | undefined = String(getResourceId({
     resourceId: parseInt(props.resourceId || ''),
@@ -148,6 +149,18 @@ function ResourceDetail({
     }
   };
 
+  // props.commentsWidget?.useSentiments can be undefined, an array or a string with an arrayß
+  let useSentiments = props.commentsWidget?.useSentiments;
+  if (!!useSentiments && typeof useSentiments === 'string') {
+    useSentiments = JSON.parse(useSentiments);
+  }
+
+  const firstStatus = resource.statuses && resource.statuses.length > 0 ? resource.statuses[0] : null;
+  const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
+  const backgroundColorClass = firstStatus && firstStatus.backgroundColor ? `bgColor-${firstStatus.backgroundColor}` : '';
+
+  const statusClasses = `${colorClass} ${backgroundColorClass}`.trim();
+
   return (
     <section>
       <div
@@ -168,7 +181,7 @@ function ResourceDetail({
                       src={i.url}
                       imageFooter={
                         <div>
-                          <Paragraph className="osc-resource-detail-content-item-status">
+                          <Paragraph className={`osc-resource-detail-content-item-status ${statusClasses}`}>
                             {resource.statuses
                               ?.map((s: { name: string }) => s.name)
                               ?.join(', ')}
@@ -239,7 +252,8 @@ function ResourceDetail({
                 <>
                   <Heading level={2} appearance="utrecht-heading-2">Plaats</Heading>
                   <ResourceDetailMap
-                    resourceId={props.resourceId || '0'}
+                    resourceId={resource.id || resourceId || '0'}
+                    resourceIdRelativePath={props.resourceIdRelativePath || 'openstadResourceId'}
                     {...props}
                     center={resource.location}
                     area={props.resourceDetailMap?.area}
@@ -262,6 +276,7 @@ function ResourceDetail({
                     title={props.likeWidget?.title}
                     yesLabel={props.likeWidget?.yesLabel}
                     noLabel={props.likeWidget?.noLabel}
+                    displayDislike={props.likeWidget?.displayDislike}
                     hideCounters={props.likeWidget?.hideCounters}
                     variant={props.likeWidget?.variant}
                     showProgressBar={props.likeWidget?.showProgressBar}
@@ -340,28 +355,34 @@ function ResourceDetail({
 
       <Spacer size={2} />
 
-      {Array.isArray(props.commentsWidget?.useSentiments) &&
-        props.commentsWidget?.useSentiments?.length ? (
+      {Array.isArray(useSentiments) &&
+        useSentiments?.length ? (
         <section className="resource-detail-comments-container">
           <Comments
             {...props}
+            key={refreshComments ? 'refresh1' : 'no-refresh1'}
+            setRefreshComments={setRefreshComments}
             resourceId={resourceId || ''}
             title={props.commentsWidget?.title}
             emptyListText={props.commentsWidget?.emptyListText}
             formIntro={props.commentsWidget?.formIntro}
             placeholder={props.commentsWidget?.placeholder}
-            sentiment={props.commentsWidget?.useSentiments[0]}
+            loginText={props.commentsWidget?.loginText}
+            sentiment={useSentiments[0]}
           />
 
-          {props.commentsWidget?.useSentiments?.length > 1 && (
+          {useSentiments?.length > 1 && (
             <Comments
               {...props}
+              key={refreshComments ? 'refresh2' : 'no-refresh2'}
+              setRefreshComments={setRefreshComments}
               resourceId={resourceId || ''}
               title={props.commentsWidget_multiple?.title}
               emptyListText={props.commentsWidget_multiple?.emptyListText}
               formIntro={props.commentsWidget_multiple?.formIntro}
               placeholder={props.commentsWidget_multiple?.placeholder}
-              sentiment={props.commentsWidget?.useSentiments[1]}
+              loginText={props.commentsWidget_multiple?.loginText}
+              sentiment={useSentiments[1]}
             />
           )}
 

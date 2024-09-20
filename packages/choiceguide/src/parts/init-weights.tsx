@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {ChoiceOptions, WeightOverview} from '../props';
 
 export const InitializeWeights = (items: any[], choiceOptions: ChoiceOptions[]) => {
@@ -12,6 +13,7 @@ export const InitializeWeights = (items: any[], choiceOptions: ChoiceOptions[]) 
       const { trigger, weights: itemWeights = {} } = item;
       const triggerKey = `${item.type}-${trigger}`
 
+      // @ts-ignore
       if (
         itemWeights
         && trigger

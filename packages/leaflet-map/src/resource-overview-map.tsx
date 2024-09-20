@@ -76,7 +76,7 @@ const ResourceOverviewMap = ({
       let marker: MarkerProps = {
         location: { ...resource.location } || undefined,
       };
-      const markerLatLng = parseLocation(marker); // unify location format
+      const markerLatLng: any = parseLocation(marker); // unify location format
       marker.lat = markerLatLng.lat;
       marker.lng = markerLatLng.lng;
 
@@ -91,13 +91,25 @@ const ResourceOverviewMap = ({
         }
       }
 
+      const firstTag = resource.tags && resource.tags[0];
+      const MapIconColor = firstTag && firstTag.documentMapIconColor ? firstTag.documentMapIconColor : '';
+
       // Set the resource name
       marker.icon = {
         title: resource.title ?? 'Locatie pin',
       }
 
+      // Set the icon color
+      if (MapIconColor) {
+        marker.icon.color = MapIconColor;
+      }
+
       return marker;
     }) || [];
+
+  if (givenResources) {
+    resources.metadata.totalCount = givenResources.length;
+  }
 
   let countButtonElement: React.JSX.Element = <></>;
   if (countButton?.show) {

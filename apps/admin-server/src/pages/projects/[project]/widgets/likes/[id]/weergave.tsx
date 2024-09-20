@@ -38,6 +38,7 @@ const formSchema = z.object({
   noLabel: z.string(),
   hideCounters: z.boolean(),
   showProgressBar: z.boolean(),
+  displayDislike: z.boolean().optional(),
   progressBarDescription: z.string().optional(),
   resourceId: z.string().optional(),
 });
@@ -81,6 +82,7 @@ export default function LikesDisplay({
       variant: props?.variant || 'medium',
       yesLabel: props?.yesLabel || 'Ja',
       noLabel: props?.noLabel || 'Nee',
+      displayDislike: props?.displayDislike || false,
       hideCounters: props?.hideCounters || false,
       showProgressBar: props?.showProgressBar || true,
       progressBarDescription: props?.progressBarDescription || '',
@@ -214,6 +216,29 @@ export default function LikesDisplay({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Moet het aantal stemmen verborgen worden?</FormLabel>
+                <Switch.Root
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                    field.onChange(e);
+                    props.onFieldChanged(field.name, e);
+                  }}
+                  checked={field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {conditionallyRenderField(
+          'displayDislike',
+          <FormField
+            control={form.control}
+            name="displayDislike"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Wil je de dislike button tonen?</FormLabel>
                 <Switch.Root
                   className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                   onCheckedChange={(e: boolean) => {
