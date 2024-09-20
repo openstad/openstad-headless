@@ -242,7 +242,7 @@ function ResourceDetailWithMap({
           {displayLocation && resource.location && (
             <div className="map-container--buttons">
               <ResourceDetailMap
-                resourceId={props.resourceId || '0'}
+                resourceId={props.resourceId || resourceId || resource.id || '0'}
                 {...props}
                 center={resource.location}
                 area={props.resourceDetailMap?.area}
