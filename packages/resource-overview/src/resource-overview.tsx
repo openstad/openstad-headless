@@ -211,6 +211,7 @@ const defaultItemRenderer = (
 
           <Carousel
             items={resourceImages}
+            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
             itemRenderer={(i) => (
               <Image
                 src={i.url}
@@ -275,6 +276,7 @@ const defaultItemRenderer = (
         <div className={`resource-card--link ${hasImages}`}>
           <Carousel
             items={resourceImages}
+            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
             itemRenderer={(i) => (
               <Image
                 src={i.url}
@@ -526,6 +528,7 @@ function ResourceOverview({
           <Carousel
             startIndex={resourceDetailIndex}
             items={filteredResources && filteredResources?.length > 0 ? filteredResources : []}
+            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
             itemRenderer={(item) => (
               <GridderResourceDetail
                 resource={item}
@@ -559,9 +562,9 @@ function ResourceOverview({
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
             }`}>
           {props.displaySearchText ? (
-            <div className="osc-resourceoverview-search-container col-span-full"  role="status">
+            <div className="osc-resourceoverview-search-container col-span-full">
               {props.textActiveSearch && search && (
-                <Paragraph className="osc-searchtext">
+                <Paragraph className="osc-searchtext" role="status">
                   {props.textActiveSearch
                     .replace('[search]', search)
                     .replace('[zoekterm]', search)}

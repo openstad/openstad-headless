@@ -21,6 +21,10 @@ function adjustMenu() {
   const mainMenuContainer = document.querySelector('#main-menu');
   const logo = document.querySelector('.main-header-container .col-xs-12');
   const mobileThreshold = 1200;
+  const closeButton = document.querySelector('.close-button');
+  const closeButtonSpan = document.querySelector('.close-button span');
+  const navbar = document.getElementById('navbar');
+  const header = document.querySelector('.main-header-container');
 
   if (window.innerWidth <= mobileThreshold) {
     if (document.getElementsByClassName('--compact').length > 0) {
@@ -35,30 +39,59 @@ function adjustMenu() {
       }
     } else {
       if (mainMenuContainer.offsetWidth >= mainContainer.offsetWidth) {
-        document.getElementById('navbar').classList.add('--hidden');
-        navContainer.appendChild(
-          document.getElementById('navbar').cloneNode(true)
-        );
+        navbar.classList.add('--hidden');
         navContainer.classList.add('--mobile');
         isMobile = true;
       } else if (!isMobile) {
-        document.getElementById('navbar').classList.remove('--hidden');
+        navbar.classList.remove('--hidden');
         navContainer.classList.remove('--mobile');
       }
     }
   } else {
-    // Remove mobile class when screen size gets larger
     navContainer.classList.remove('--mobile');
-    document.getElementById('navbar').classList.remove('--hidden');
+    navbar.classList.remove('--hidden');
     isMobile = false;
   }
 
-  document.querySelector('.close-button').addEventListener('click', () => {
-    document
-      .querySelector('.header_navbar-container')
-      .classList.toggle('--show');
+  closeButton.setAttribute('aria-controls', 'main-menu');
+  closeButton.setAttribute('aria-expanded', 'false');
+  mainMenuContainer.setAttribute('aria-hidden', 'true');
+
+  function closeMenu() {
+    closeButton.setAttribute('aria-expanded', 'false');
+    mainMenuContainer.setAttribute('aria-hidden', 'true');
+    navContainer.classList.remove('--show');
+    closeButtonSpan.textContent = 'Menu tonen';
+  }
+
+  closeButton.addEventListener('click', () => {
+    const isExpanded = closeButton.getAttribute('aria-expanded') === 'true';
+    closeButton.setAttribute('aria-expanded', !isExpanded);
+    mainMenuContainer.setAttribute('aria-hidden', isExpanded);
+
+    navContainer.classList.toggle('--show');
+    closeButtonSpan.textContent = isExpanded ? 'Menu tonen' : 'Menu verbergen';
+  });
+
+  navbar.addEventListener('focusout', (event) => {
+    if (!navbar.contains(event.relatedTarget) && !header.contains(event.relatedTarget)) {
+      closeMenu();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeMenu();
+    }
+  });
+
+  header.addEventListener('focusin', () => {
+    // Do nothing, just to ensure focus is detected
   });
 }
+
+window.onload = adjustMenu;
+window.onresize = adjustMenu;
 
 window.onload = adjustMenu;
 window.onresize = adjustMenu;

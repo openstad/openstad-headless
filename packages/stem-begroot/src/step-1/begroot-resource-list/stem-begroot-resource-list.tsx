@@ -82,6 +82,7 @@ export const StemBegrootResourceList = ({
 
               <Carousel
                 items={resourceImages}
+                buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
                 itemRenderer={(i) => (
                   <Image src={i.url} />
                 )}
@@ -148,8 +149,9 @@ export const StemBegrootResourceList = ({
                 <Button
                   appearance='secondary-action-button'
                   className="osc-stem-begroot-item-action-btn"
-                  onClick={() => {
+                  onClick={(e) => {
                     onResourcePlainClicked(resource, index);
+                    e.currentTarget.classList.add('active-resource');
                   }}>
                   Lees meer
                 </Button>

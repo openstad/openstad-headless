@@ -114,14 +114,13 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
                         });
                     }
                 }}
-                aria-label={`Selecteer een waarde tussen 1 en ${fieldOptions.length}`}
                 disabled={disabled}
             />
-            <div className={`range-slider-labels ${showSmileys && 'smiley-scale'}`}>
+            <div className={`range-slider-labels ${showSmileys && 'smiley-scale'}`} aria-hidden="true">
                 {fieldOptions.map((option, key) => (
-                    <label key={key} htmlFor={`a-to-b-range--${index}`} className={value === option.value ? 'active' : ''}>
+                    <span key={key} className={value === option.value ? 'active' : ''}>
                         {option.label}
-                    </label>
+                    </span>
                 ))}
             </div>
         </div>

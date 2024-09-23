@@ -137,7 +137,7 @@ export const StemBegrootBudgetList = ({
                     });
                   }
                 }}>
-                  {resourceCardTitle}
+                  {resourceCardTitle || 'Selecteer een plan'}
               </Button>
             ) : null}
           </div>
