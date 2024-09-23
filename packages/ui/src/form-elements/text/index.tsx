@@ -1,5 +1,13 @@
-import React, { FC, useState } from "react";
-import { FormField, FormFieldDescription, FormLabel, Paragraph, Textarea, Textbox } from "@utrecht/component-library-react";
+import React, { FC, useState, useEffect } from "react";
+import {
+    AccordionProvider,
+    FormField,
+    FormFieldDescription,
+    FormLabel,
+    Paragraph,
+    Textarea,
+    Textbox
+} from "@utrecht/component-library-react";
 import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
 
@@ -20,6 +28,11 @@ export type TextInputProps = {
     rows?: TextInputProps['variant'] extends 'textarea' ? number : undefined;
     type?: string;
     onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+    reset?: (resetFn: () => void) => void;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
+    infoImage?: string;
 }
 
 const TextInput: FC<TextInputProps> = ({
@@ -28,7 +41,7 @@ const TextInput: FC<TextInputProps> = ({
     variant,
     fieldKey,
     fieldRequired = false,
-    placeholder = '',
+    placeholder,
     defaultValue = '',
     onChange,
     disabled = false,
@@ -37,12 +50,31 @@ const TextInput: FC<TextInputProps> = ({
     maxCharacters = 0,
     maxCharactersWarning = 'Je hebt nog {maxCharacters} tekens over',
     rows,
+    reset,
+    showMoreInfo = false,
+    moreInfoButton = 'Meer informatie',
+    moreInfoContent = '',
+   infoImage = '',
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const InputComponent = variant === 'textarea' ? Textarea : Textbox;
 
+    class HtmlContent extends React.Component<{ html: any }> {
+        render() {
+            let {html} = this.props;
+            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+        }
+    }
+
     const [isFocused, setIsFocused] = useState(false);
     const [helpText, setHelpText] = useState('');
+    const [value, setValue] = useState(defaultValue);
+
+    useEffect(() => {
+        if (reset) {
+            reset(() => setValue(defaultValue));
+        }
+    }, [reset, defaultValue]);
 
     const characterHelpText = (count: number) => {
         let helpText = '';
@@ -57,7 +89,6 @@ const TextInput: FC<TextInputProps> = ({
     }
 
     const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
-
     return (
         <FormField type="text">
             {title && (
@@ -67,12 +98,34 @@ const TextInput: FC<TextInputProps> = ({
             )}
             {description &&
                 <>
-                    <FormFieldDescription>
-                        {description}
-                    </FormFieldDescription>
+                    <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
                     <Spacer size={.5} />
                 </>
             }
+
+            {showMoreInfo && (
+                <>
+                    <AccordionProvider
+                        sections={[
+                            {
+                                headingLevel: 3,
+                                body: <HtmlContent html={moreInfoContent} />,
+                                expanded: undefined,
+                                label: moreInfoButton,
+                            }
+                        ]}
+                    />
+                    <Spacer size={.5} />
+                </>
+            )}
+
+            {infoImage && (
+                <figure className="info-image-container">
+                    <img src={infoImage} alt=""/>
+                    <Spacer size={.5} />
+                </figure>
+            )}
+
             <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}>
                 <InputComponent
                     id={randomID}
@@ -80,8 +133,9 @@ const TextInput: FC<TextInputProps> = ({
                     required={fieldRequired}
                     type="text"
                     placeholder={placeholder}
-                    defaultValue={defaultValue}
+                    value={value}
                     onChange={(e) => {
+                        setValue(e.target.value);
                         if (onChange) {
                             onChange({
                                 name: fieldKey,

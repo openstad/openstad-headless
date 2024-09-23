@@ -1,6 +1,5 @@
 const fs = require('fs').promises;
-const util = require('util');
-const authDb = require('promise-mysql');
+const authDb = require('mysql2/promise');
 const execute = require('./execute');
 
 module.exports = async function setupAuthServer(actions) {

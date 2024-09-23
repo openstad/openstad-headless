@@ -305,6 +305,48 @@ body:has(.--mobile.--show) {
   }
 }
 
+header:has(.header_navbar-container.--show)~#navbar {
+  align-self: start;
+  width: 100%;
+  background: transparent;
+  padding: 0;
+  display: block;
+  z-index: 11;
+  padding-top: 40px;
+
+  .container {
+    max-width: none;
+  }
+
+  #main-menu {
+    display: block;
+
+    a {
+      display: block;
+    }
+
+    .item-container:has(.toggle-submenu) {
+      display: grid;
+      grid-template-columns: 1fr auto;
+    }
+
+    .toggle-submenu {
+      pointer-events: all;
+      margin: 0;
+      border: solid 1px #ddd;
+    }
+
+    .submenu {
+      position: relative;
+      width: 100%;
+      grid-column: 1 / -1;
+      top: 0;
+      box-shadow: none;
+      background: #eee;
+    }
+  }
+}
+
 .header_navbar-container.--show {
   position: fixed;
   inset: 0;

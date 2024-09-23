@@ -39,7 +39,26 @@ function Enquete(props: EnqueteWidgetProps) {
         isLoading: currentUserIsLoading,
     } = datastore.useCurrentUser({ ...props });
 
+    const formOnlyVisibleForUsers = (
+        (!!props.formVisibility && props.formVisibility === 'users')
+        || !props.formVisibility
+    );
+
     async function onSubmit(formData: any) {
+        formData.confirmationUser = props?.confirmation?.confirmationUser || false;
+        formData.confirmationAdmin = props?.confirmation?.confirmationAdmin || false;
+        formData.overwriteEmailAddress = (formData.confirmationAdmin && props?.confirmation?.overwriteEmailAddress) ? props?.confirmation?.overwriteEmailAddress : '';
+
+        const getUserEmailFromField = formData.confirmationUser && !formOnlyVisibleForUsers;
+
+        if (getUserEmailFromField) {
+            const userEmailAddressFieldKey = props?.confirmation?.userEmailAddress || null;
+
+            if (formData.hasOwnProperty(userEmailAddressFieldKey) && userEmailAddressFieldKey) {
+                formData.userEmailAddress = formData[userEmailAddressFieldKey] || '';
+            }
+        }
+
         const result = await createSubmission(formData, props.widgetId);
 
         if (result) {
@@ -50,11 +69,6 @@ function Enquete(props: EnqueteWidgetProps) {
             }
         }
     }
-
-    const formOnlyVisibleForUsers = (
-        (!!props.formVisibility && props.formVisibility === 'users')
-        || !props.formVisibility
-    );
 
 
     const formFields: FieldProps[] = [];
@@ -78,6 +92,7 @@ function Enquete(props: EnqueteWidgetProps) {
                     fieldData['minCharacters'] = item.minCharacters || '';
                     fieldData['maxCharacters'] = item.maxCharacters || '';
                     fieldData['rows'] = 5;
+                    fieldData['placeholder'] = item.placeholder || '';
                     break;
                 case 'multiplechoice':
                 case 'multiple':

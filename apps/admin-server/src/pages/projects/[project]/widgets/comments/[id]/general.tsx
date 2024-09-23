@@ -87,7 +87,7 @@ export default function ArgumentsGeneral({
             <FormObjectSelectField
               form={form}
               fieldName="resourceId"
-              fieldLabel="Koppel aan een specifieke resource"
+              fieldLabel="Koppel aan een specifieke inzending"
               items={resources}
               keyForValue="id"
               label={(resource) => `${resource.id} ${resource.title}`}

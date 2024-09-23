@@ -64,7 +64,7 @@ export default function WidgetResourceDetailDisplay(
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Display</Heading>
+        <Heading size="xl">Weergave</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -199,7 +199,7 @@ export default function WidgetResourceDetailDisplay(
             name="displaySocials"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Social share opties weergeven</FormLabel>
+                <FormLabel>Delen via social media opties weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

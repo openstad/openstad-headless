@@ -17,7 +17,7 @@ export function MultiSelect({
   options: Array<{ value: string; label: string; checked?: boolean }>;
   defaultOpen?: boolean;
   id?: string;
-  onItemSelected: (optionValue: string) => void;
+  onItemSelected: (optionValue: string, optionLabel?: string) => void;
 }) {
 
   const [isOpen, setOpen] = useState<boolean>(defaultOpen || false);
@@ -56,7 +56,8 @@ export function MultiSelect({
               <div
                 onClick={() => {
                   const value = option.value;
-                  onItemSelected(value);
+                  const label = option.label;
+                  onItemSelected(value, label);
                 }}
                 key={`multi-select-item-${option.label}`}>
                 <FormField type="checkbox">

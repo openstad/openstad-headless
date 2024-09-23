@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {ChoiceOptions, WeightOverview} from '../props';
 
 export const InitializeWeights = (items: any[], choiceOptions: ChoiceOptions[]) => {
@@ -12,6 +13,7 @@ export const InitializeWeights = (items: any[], choiceOptions: ChoiceOptions[]) 
       const { trigger, weights: itemWeights = {} } = item;
       const triggerKey = `${item.type}-${trigger}`
 
+      // @ts-ignore
       if (
         itemWeights
         && trigger
@@ -29,10 +31,12 @@ export const InitializeWeights = (items: any[], choiceOptions: ChoiceOptions[]) 
 
         const groupWeights = itemWeights[id];
 
-        ['weightX', 'weightY'].forEach((key) => {
+        ['weightX', 'weightY', 'weightAB'].forEach((key) => {
           if (groupWeights[key] !== undefined) {
             const dimension = key.replace('weight', '').toLowerCase();
-            weights[id][triggerKey][dimension] = parseInt(groupWeights[key], 10);
+            const value = dimension === 'ab' ? groupWeights[key] : parseInt(groupWeights[key], 10);
+
+            weights[id][triggerKey][dimension] = value;
           }
         });
 

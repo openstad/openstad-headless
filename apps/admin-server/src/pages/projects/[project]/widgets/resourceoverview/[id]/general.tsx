@@ -66,7 +66,7 @@ export default function WidgetResourceOverviewGeneral(
             name="resourceType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Resource type</FormLabel>
+                <FormLabel>Soort inzending</FormLabel>
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value);
@@ -91,7 +91,7 @@ export default function WidgetResourceOverviewGeneral(
             name="displayType"
             render={({ field }) => (
               <FormItem className="col-span-full">
-                <FormLabel>Display type</FormLabel>
+                <FormLabel>Weergavetype</FormLabel>
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value);
@@ -105,10 +105,10 @@ export default function WidgetResourceOverviewGeneral(
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="cardrow">
-                      Cards op een row - Linkt naar items op een andere pagina.
+                      Inzending op een nieuwe pagina openen.
                     </SelectItem>
                     <SelectItem value="cardgrid">
-                      Cards op een grid - Opent items op dezelfde pagina.
+                      Inzendingen op de huidige pagina tonen, in een dialog.
                     </SelectItem>
                     <SelectItem value="raw">
                       Creëer je eigen template.
@@ -126,7 +126,7 @@ export default function WidgetResourceOverviewGeneral(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Link (relatief) naar de specifieke resource
+                  Link (relatief) naar de specifieke inzending
                 </FormLabel>
                 <FormControl>
                   <Input

@@ -27,7 +27,7 @@ export default function WidgetActivity({
   return (
     <div>
       <PageLayout
-        pageHeader='Project naam'
+        pageHeader='Projectnaam'
         breadcrumbs={[
           {
             name: 'Projecten',

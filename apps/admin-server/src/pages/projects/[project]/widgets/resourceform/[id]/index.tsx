@@ -38,7 +38,7 @@ export default function WidgetResourceForm({
   return (
     <div >
       <PageLayout
-        pageHeader="Project naam"
+        pageHeader="Projectnaam"
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -60,7 +60,7 @@ export default function WidgetResourceForm({
               <TabsTrigger value="items">Formulier velden</TabsTrigger>
               <TabsTrigger value="submit">Opleveren</TabsTrigger>
               <TabsTrigger value="confirmation">Bevestiging</TabsTrigger>
-              <TabsTrigger value="info">Display</TabsTrigger>
+              <TabsTrigger value="info">Weergave</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">

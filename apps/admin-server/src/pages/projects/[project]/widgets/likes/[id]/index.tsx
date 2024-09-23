@@ -35,7 +35,7 @@ export default function WidgetLikes({
   return (
     <div>
       <PageLayout
-        pageHeader="Project naam"
+        pageHeader="Projectnaam"
         breadcrumbs={[
           {
             name: 'Projecten',

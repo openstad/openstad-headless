@@ -30,6 +30,7 @@ function Form({
       secondaryLabel = '',
       secondaryHandler = () => {},
       getValuesOnChange = () => {},
+      allowResetAfterSubmit = true,
       ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: FormValue } = {};
@@ -44,10 +45,16 @@ function Form({
     const [formValues, setFormValues] = useState(initialFormValues);
     const [formErrors, setFormErrors] = useState<{ [key: string]: string | null }>({});
     const formRef = useRef<HTMLFormElement>(null);
+    const resetFunctions = useRef<Array<() => void>>([]);
 
     const handleFormSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        const firstErrorKey = handleSubmit(fields as unknown as Array<CombinedFieldPropsWithType>, formValues, setFormErrors, submitHandler);
+        const firstErrorKey = handleSubmit(
+            fields as unknown as Array<CombinedFieldPropsWithType>,
+            formValues,
+            setFormErrors,
+            submitHandler
+        );
 
         if (firstErrorKey && formRef.current) {
             const errorElement = formRef.current.querySelector(`[name="${firstErrorKey}"]`);
@@ -59,12 +66,20 @@ function Form({
                     behavior: 'smooth'
                 });
             }
+        } else if (allowResetAfterSubmit) {
+            resetForm();
         }
     };
 
     const handleInputChange = (event: { name: string, value: FormValue}) => {
         const { name, value } = event;
         setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
+    };
+
+    const resetForm = () => {
+        setFormValues(initialFormValues);
+        setFormErrors({});
+        resetFunctions.current.forEach(reset => reset());
     };
 
     useEffect(() => {
@@ -99,6 +114,7 @@ function Form({
                     {...field}
                     index={index}
                     onChange={handleInputChange}
+                    reset={(resetFn: () => void) => resetFunctions.current.push(resetFn)}
                     {...props}
                 />
             );

@@ -95,13 +95,10 @@ export default function ProjectDuplicate() {
                   Gebruik deze knop om de gegevens van je project te dupliceren.
                 </p>
                 <p>
-                  Bij het dupliceren van je project zal er een compleet
-                  identieke versie van het project aangemaakt worden in de
-                  database.
+                  Bij het dupliceren van je project wordt er een compleet identieke versie van het project aangemaakt in de database.
                 </p>
                 <p>
-                  Hou er wel rekening mee dat de gewenste gebruikers van het
-                  project eerst aan het project gekoppeld moeten worden.
+                  Hou er wel rekening mee dat de gewenste gebruikers van het project eerst aan het project gekoppeld moeten worden.
                 </p>
                 <br />
                 <FormField

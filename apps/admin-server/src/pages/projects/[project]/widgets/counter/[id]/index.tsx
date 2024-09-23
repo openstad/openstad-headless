@@ -27,7 +27,7 @@ export default function WidgetCounter({
   return (
     <div>
       <PageLayout
-        pageHeader='Project naam'
+        pageHeader='Projectnaam'
         breadcrumbs={[
           {
             name: 'Projecten',

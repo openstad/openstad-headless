@@ -46,7 +46,8 @@ export const InitializeFormFields = (items, data) => {
                 variant: item.variant,
                 multiple: item.multiple,
                 options: item.options,
-                rows: 5
+                rows: 5,
+                placeholder: item.placeholder
             };
 
             switch (item.type) {
@@ -58,7 +59,7 @@ export const InitializeFormFields = (items, data) => {
                         item.options.length > 0
                     ) {
                         fieldData['choices'] = item.options.map((option) => {
-                            return { value: option.titles[0].key, label: option.titles[0].key }
+                            return { value: option.titles[0].key, label: option.titles[0].key, isOtherOption: option.titles[0].isOtherOption}
                         });
                     }
                     break;

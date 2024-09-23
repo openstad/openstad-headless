@@ -243,3 +243,25 @@ section.osc-begrootmodule-resource-detail-photo
   flex-shrink: unset;
   left: unset;
 }
+
+#stem-begroot-resource-selections-list .stem-begroot--container.resource-has-no-images .image-container,
+.budget-list-container .budget-list-selections .budget-list-selection-indicaction-container .budget-list-selection-indicaction.resource-has-no-images.image-container,
+.budget-overview-panel .budget-two-text-row-spaced .budget-overview-row.resource-has-no-images .image-container,
+.osc-begrootmodule-resource-detail .osc-begrootmodule-resource-detail-photo.resource-has-no-images .image-container {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 16 / 9;
+  background-color: #e6e6e6;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='121' height='106' viewBox='0 0 121 106' fill='none'%3E%3Cpath d='M36.625 21.125C42.7188 21.125 47.875 26.2812 47.875 32.375C47.875 38.7031 42.7188 43.625 36.625 43.625C30.2969 43.625 25.375 38.7031 25.375 32.375C25.375 26.2812 30.2969 21.125 36.625 21.125ZM105.766 0.5C114.203 0.5 120.766 7.29688 120.766 15.5V90.5C120.766 98.9375 113.969 105.5 105.766 105.5H15.7656C7.5625 105.5 0.765625 98.9375 0.765625 90.5V15.5C0.765625 7.29688 7.5625 0.5 15.7656 0.5H105.766ZM109.516 89.0938V15.5C109.516 13.625 107.875 11.75 105.766 11.75H15.7656C13.8906 11.75 12.0156 13.625 12.0156 15.5L12.25 90.5L29.8281 68.4688C30.7656 67.5312 31.9375 66.8281 33.3438 66.8281C34.75 66.8281 35.9219 67.5312 36.8594 68.4688L45.5312 79.25L70.375 45.5C71.3125 44.3281 72.4844 43.625 74.125 43.625C75.5312 43.625 76.7031 44.3281 77.4062 45.5L109.516 89.0938Z' fill='%23AAAAAA'/%3E%3C/svg%3E");
+  background-size: 9%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+#stem-begroot-resource-selections-list .stem-begroot--container.resource-has-no-images .image-container img,
+.budget-list-container .budget-list-selections .budget-list-selection-indicaction-container .budget-list-selection-indicaction.resource-has-no-images.image-container img,
+.budget-overview-panel .budget-two-text-row-spaced .budget-overview-row.resource-has-no-images .image-container img,
+.osc-begrootmodule-resource-detail .osc-begrootmodule-resource-detail-photo.resource-has-no-images .image-container img {
+  display: none;
+}

@@ -57,6 +57,7 @@ export const StemBegrootResourceDetailDialog = ({
     children={
       <Carousel
         startIndex={resourceDetailIndex}
+        buttonText={{ next: 'Volgende inzending', previous: 'Vorige inzending' }}
         items={resources && resources.length > 0 ? resources : []}
         itemRenderer={(resource) => {
           const theme = resource.tags
@@ -83,17 +84,31 @@ export const StemBegrootResourceDetailDialog = ({
             defaultImage = tagWithImage?.defaultResourceImage || '';
           }
 
+            let resourceImages: any[] = [];
+
+            if (resource.location) {
+                resourceImages.push({ location: resource.location });
+            }
+
+            if (Array.isArray(resource.images) && resource.images.length > 0) {
+                resourceImages = [...resource.images, ...resourceImages];
+            }
+
+            let hasImages = '';
+
+            if (resourceImages.length === 0) {
+                resourceImages = [{ url: defaultImage || '' }];
+                hasImages = 'resource-has-no-images';
+            }
+
           return (
             <>
               <div className="osc-begrootmodule-resource-detail">
-                <section className="osc-begrootmodule-resource-detail-photo">
+                <section className={`osc-begrootmodule-resource-detail-photo ${hasImages}`}>
 
                   <Carousel
-                    items={
-                      Array.isArray(resource.images) && resource.images.length > 0
-                        ? [...resource.images, { resource: resource }]
-                        : [{ location: resource.location }]
-                    }
+                    items={resourceImages}
+                    buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
                     itemRenderer={(i) => {
                       if (i.url) {
                         return <Image src={i.url} />

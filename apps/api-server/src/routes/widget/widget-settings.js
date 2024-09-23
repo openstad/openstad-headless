@@ -121,6 +121,17 @@ let moduleDefinitions = {
       projectId: null,
     },
   },
+  choiceguideResults: {
+    packageName: '@openstad-headless/choiceguide-results',
+    directory: 'choiceguide-results',
+    js: ['dist/choiceguide-results.iife.js'],
+    css: ['dist/style.css'],
+    functionName: 'OpenstadHeadlessChoiceGuideResults',
+    componentName: 'ChoiceGuideResults',
+    defaultConfig: {
+      projectId: null,
+    },
+  },
   editormap: {
     packageName: '@openstad-headless/leaflet-map',
     directory: 'leaflet-map',

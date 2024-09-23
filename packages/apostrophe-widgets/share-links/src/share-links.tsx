@@ -67,7 +67,7 @@ function ShareLinks({ title }: Item) {
 
         <LinkSocial
           external
-          title={'Copy link'}
+          title={'Kopieer link'}
           href={location.href}
           onClick={(e) => {
             e.preventDefault();
@@ -82,7 +82,7 @@ function ShareLinks({ title }: Item) {
           className='copy-link'
         >
           <i className='icon --url'></i>
-          <span className='sr-only'>Copy link</span>
+          <span className='sr-only'>Kopieer link</span>
         </LinkSocial>
       </div>
     </div>

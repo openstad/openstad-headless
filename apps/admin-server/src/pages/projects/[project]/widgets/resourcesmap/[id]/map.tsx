@@ -96,7 +96,7 @@ export default function WidgetResourcesMapMap(
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Map</Heading>
+        <Heading size="xl">Kaart</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -108,7 +108,7 @@ export default function WidgetResourcesMapMap(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Link naar de specifieke resource
+                  Link naar de specifieke inzending
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -186,7 +186,7 @@ export default function WidgetResourcesMapMap(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Gebruik tags van dit type om de resources te tonen, dwz. gebruik de iconen en kleuren van de tag.
+                  Gebruik tags van dit type (gebruik de iconen en kleuren van de tag) om de inzending te tonen.
                 </FormLabel>
                 <Select
                   onValueChange={(value) => {

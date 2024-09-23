@@ -101,7 +101,7 @@ export default function DocumentGeneral(
         <FormObjectSelectField
           form={form}
           fieldName="resourceId"
-          fieldLabel="Koppel aan een specifieke resource"
+          fieldLabel="Koppel aan een specifieke inzending"
           items={resources}
           keyForValue="id"
           label={(resource) => `${resource.id} ${resource.title}`}
@@ -118,9 +118,9 @@ export default function DocumentGeneral(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Geen specifieke resource gekoppeld?
+                  Geen specifieke inzending gekoppeld?
                 </FormLabel>
-                <em className="text-xs">Beschrijf hoe de resource gehaald wordt uit de url: (/pad/naar/[id]) of laat leeg om terug te vallen op ?openstadResourceId</em>
+                <em className="text-xs">Beschrijf hoe de inzending gehaald wordt uit de url: (/pad/naar/[id]) of laat leeg om terug te vallen op ?openstadResourceId</em>
                 <FormControl>
                   <Input {...field} onChange={(e) => {
                     onFieldChange(field.name, e.target.value);
@@ -133,32 +133,6 @@ export default function DocumentGeneral(
           />
         ) : null}
 
-        <FormField
-          control={form.control}
-          name="zoom"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Standaard zoomwaarde
-                <InfoDialog
-                  content="Dit is de standaard zoomwaarde van de kaart. Een kleinere waarde betekent dat de kaart verder is uitgezoomd, waardoor een groter gebied zichtbaar is."
-                />
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="1"
-                  defaultValue={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onFieldChange(field.name, e.target.value);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-
-          )}
-        />
 
         <FormField
           control={form.control}
@@ -220,6 +194,18 @@ export default function DocumentGeneral(
           render={({ field }) => (
             <FormItem>
               <FormLabel>Toon de likes widget</FormLabel>
+              {YesNoSelect(field, props)}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="largeDoc"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Grotere weergave voor het document</FormLabel>
               {YesNoSelect(field, props)}
               <FormMessage />
             </FormItem>

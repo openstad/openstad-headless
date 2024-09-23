@@ -28,6 +28,8 @@ const formSchema = z.object({
   definitiveUrlVisible: z.boolean().optional(),
   definitiveUrl: z.string().optional(),
   definitiveUrlText: z.string().optional(),
+  backUrlContent: z.string().optional(),
+  backUrlText: z.string().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -55,6 +57,8 @@ export default function DocumentGeneral(
       definitiveUrlVisible: props.definitiveUrlVisible || false,
       definitiveUrl: props.definitiveUrl || '',
       definitiveUrlText: props.definitiveUrlText || '',
+      backUrlContent: props.backUrlContent || 'Je bekijkt nu de versie met reacties',
+      backUrlText: props.backUrlText || 'Bekijk de verbeterde versie',
     },
   });
 
@@ -215,6 +219,51 @@ export default function DocumentGeneral(
 
           </>
         )}
+
+
+        <FormField
+          control={form.control}
+          name="backUrlContent"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Terug naar definitieve versie, begeleidende tekst
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Bekijk definitieve versie"
+                  defaultValue={field.value}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    onFieldChange(field.name, e.target.value);
+                  }}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="backUrlText"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Terug naar definitieve versie, link tekst
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Bekijk definitieve versie"
+                  defaultValue={field.value}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    onFieldChange(field.name, e.target.value);
+                  }}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
         <Button
           type="submit"
           disabled={disabled}

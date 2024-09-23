@@ -1,6 +1,7 @@
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import './a-b-slider.css'
-import { Paragraph, Strong } from "@utrecht/component-library-react";
+import {Accordion, AccordionProvider, AccordionSection, Paragraph, Strong} from "@utrecht/component-library-react";
+import {Spacer} from "../../spacer";
 
 export type RangeSliderProps = {
     title: string;
@@ -21,6 +22,10 @@ export type RangeSliderProps = {
     disabled?: boolean;
     type?: string;
     onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
+    infoImage?: string;
 }
 
 
@@ -40,17 +45,39 @@ const RangeSlider: FC<RangeSliderProps> = ({
     showLabels = true,
     onChange,
     disabled = false,
+    showMoreInfo = false,
+    moreInfoButton = 'Meer informatie',
+    moreInfoContent = '',
+   infoImage = '',
 }) => {
     const randomId = Math.random().toString(36).substring(7);
+    const [rangeValue, setRangeValue] = useState(undefined);
+
+    class HtmlContent extends React.Component<{ html: any }> {
+        render() {
+            let {html} = this.props;
+            return <Paragraph dangerouslySetInnerHTML={{__html: html}}/>;
+        }
+    }
 
     return (
         <div className="a-b-slider-container">
+
+            {infoImage && (
+                <figure className="info-image-container">
+                    <img src={infoImage} alt=""/>
+                    <Spacer size={.5} />
+                </figure>
+            )}
+
+
             {title && (
                 <Paragraph><Strong>            <label htmlFor={randomId}>{title}</label></Strong></Paragraph>
             )}
             {description && (
-                <p>{description}</p>
+                <Paragraph dangerouslySetInnerHTML={{__html: description}}></Paragraph>
             )}
+
             <div className="a-b-info-container">
                 <div className="a-b-title label-a">
                     {showLabels && (<p className="label">A</p>)}
@@ -70,26 +97,68 @@ const RangeSlider: FC<RangeSliderProps> = ({
                 </div>
             </div>
 
-            <input
-                type="range"
-                min="0"
-                max="100"
-                step="5"
-                className="a-to-b-range"
-                name={fieldKey}
-                required={fieldRequired}
-                id={randomId}
-                onChange={(e) => {
-                    if (onChange) {
-                        onChange({
-                            name: fieldKey,
-                            value: e.target.value,
-                        });
-                    }
-                }}
-                aria-label={`Selecteer een waarde tussen 1 en 100 voor ${titleA} en ${titleB}`}
-                disabled={disabled}
-            />
+            {showMoreInfo && (
+                <>
+                    <Spacer size={1.5} />
+                    <AccordionProvider
+                        sections={[
+                            {
+                                headingLevel: 3,
+                                body: <HtmlContent html={moreInfoContent} />,
+                                expanded: undefined,
+                                label: moreInfoButton,
+                            }
+                        ]}
+                    />
+                    <Spacer size={1.5} />
+                </>
+            )}
+
+
+            <div className='range-bar-container'>
+                <div className="end-labels"></div>
+                <div className="a-b-labels"></div>
+                <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="5"
+                    className="a-to-b-range"
+                    name={fieldKey}
+                    required={fieldRequired}
+                    id={randomId}
+                    onChange={(e) => {
+                        setRangeValue(parseInt(e.target.value) as any);
+                        if (onChange) {
+                            onChange({
+                                name: fieldKey,
+                                value: e.target.value,
+                            });
+                        }
+                    }}
+                    aria-label={`Selecteer een waarde tussen 1 en 100 voor ${titleA} en ${titleB}`}
+                    disabled={disabled}
+                />
+                <div className="slider_line-container"
+                    style={{
+                        marginLeft: rangeValue !== undefined ? rangeValue <= 50 ? '0' : '50%' : '0',
+                        transform: rangeValue !== undefined ? rangeValue <= 50 ? 'rotate(180deg) translateX(50%)' : 'rotate(0) translateX(0)' : '0',
+                        marginTop: `-24px`,
+                        pointerEvents: 'none',
+                        height: '8px',
+                    }}
+                >
+                    <div
+                        className="slider_line-container--bar"
+                        style={{
+                            width: rangeValue !== undefined ? rangeValue <= 50 ? `${(50 - rangeValue)}%` : `${(rangeValue - 50) * 2}%` : '0%',
+                            height: '8px',
+                            backgroundColor: '#1371EF',
+                        }}
+                    ></div>
+                </div>
+            </div>
+
             <Paragraph id="a-b-description" className="a-b-description visually-hidden">
                 Deze slider vertegenwoordigt de waarde voor {titleA} aan de linkerkant en de waarde voor {titleB} aan de rechterkant.
             </Paragraph>

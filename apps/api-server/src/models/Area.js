@@ -13,12 +13,21 @@ module.exports = function( db, sequelize, DataTypes ) {
     polygon: {
       type: DataTypes.GEOMETRY,
       allowNull: false,
-      set: function (polygon) {
-        polygon = polygon ? polygon.map(polygon => {
-          return [polygon.lat, polygon.lng];
-        }) : [];
-        const formattedPolygon = {"type": "Polygon", coordinates: [polygon]};
-        this.setDataValue('polygon',formattedPolygon);
+      set: function (featureCollection) {
+        if (Array.isArray(featureCollection) && featureCollection.length > 0) {
+          const formattedPolygons = featureCollection.map(polygon => {
+            return polygon.map(({ lat, lng }) => [lat, lng]);
+          });
+
+          const type = formattedPolygons.length > 1 ? 'MultiPolygon' : 'Polygon';
+
+          const formattedGeometry = {
+            type: type,
+            coordinates: type === 'Polygon' ? [formattedPolygons[0]] : formattedPolygons.map(polygon => [polygon])
+          };
+
+          this.setDataValue('polygon', formattedGeometry);
+        }
       },
       get: function () {
         return convertDbPolygonToLatLng(this.getDataValue('polygon'));

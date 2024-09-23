@@ -21,6 +21,7 @@
     "@openstad-headless/comments": "file:../../packages/comments",
     "@openstad-headless/counter": "file:../../packages/counter",
     "@openstad-headless/choiceguide": "file:../../packages/choiceguide",
+    "@openstad-headless/choiceguide-results": "file:../../packages/choiceguide-results",
     "@openstad-headless/date-countdown-bar": "file:../../packages/date-countdown-bar",
     "@openstad-headless/document-map": "file:../../packages/document-map",
     "@openstad-headless/enquete": "file:../../packages/enquete",

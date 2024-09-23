@@ -25,6 +25,10 @@ const formSchema = z.object({
     displayResourceInfo: z.string().optional(),
     displayResourceDescription: z.string().optional(),
     displayMapSide: z.string().optional(),
+    infoPopupContent: z.string().optional(),
+    emptyListText: z.string().optional(),
+    loginText: z.string().optional(),
+    largeDoc: z.boolean().optional(),
 });
 
 export default function DocumentContent(
@@ -46,6 +50,10 @@ export default function DocumentContent(
             displayResourceInfo: props?.displayResourceInfo || 'left',
             displayMapSide: props?.displayMapSide || 'left',
             displayResourceDescription: props?.displayResourceDescription || 'no',
+            infoPopupContent: props?.infoPopupContent || 'Op deze afbeelding kun je opmerkingen plaatsen. Klik op de afbeelding om een opmerking toe te voegen. Klik op een marker om de bijbehorende opmerkingen te bekijken.',
+            emptyListText: props?.emptyListText || 'Nog geen reacties geplaatst',
+            loginText: props?.loginText || 'Inloggen om deel te nemen aan de discussie',
+            largeDoc: props?.largeDoc || false,
         },
     });
 
@@ -182,6 +190,54 @@ export default function DocumentContent(
                                         <SelectItem value="yes">Ja</SelectItem>
                                     </SelectContent>
                                 </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="infoPopupContent"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Wat is de helptekst die in de info pop-up staat?
+                                </FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="emptyListText"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Wat is de tekst bij het reactie overzicht wanneer er nog geen reacties zijn?
+                                </FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="loginText"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Wat is de tekst bij het reactie overzicht wanneer je niet bent ingelogd?
+                                </FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}

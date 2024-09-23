@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import hasRole from '../../lib/has-role';
 import type {ResourceFormWidgetProps} from "./props.js";
 import {Banner, Button, Spacer} from "@openstad-headless/ui/src/index.js";
@@ -7,11 +7,13 @@ import toast, { Toaster } from 'react-hot-toast';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
 import Form from "@openstad-headless/form/src/form";
+import { Heading } from '@utrecht/component-library-react';
 
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const { submitButton, saveConceptButton} = props.submit  || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
     const { loginText, loginButtonText} = props.info  || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
     const { confirmationUser, confirmationAdmin} = props.confirmation  || {};
+    const [disableSubmit, setDisableSubmit] = useState(false);
 
     const datastore: any = new DataStore({
         projectId: props.projectId,
@@ -91,34 +93,28 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     }
 
     async function onSubmit(formData: any) {
-        // TODO: Redirect user to afterSubmitUrl when set
-        // const result = await createResource(formData, widgetId);
-
-        // if (result) {
-        //     if(props.afterSubmitUrl) {
-        //         location.href = props.afterSubmitUrl.replace("[id]", result.id)
-        //     } else {
-        //         notifyCreate();
-        //     }
-        // }
+        setDisableSubmit(true);
 
         const finalFormData = configureFormData(formData, true);
 
         try {
             const result = await createResource(finalFormData, props.widgetId);
             if (result) {
+                notifySuccess();
+
                 if(props.redirectUrl) {
                     let redirectUrl = props.redirectUrl.replace("[id]", result.id);
                     if (!redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')) {
                         redirectUrl = document.location.origin + '/' + (redirectUrl.startsWith('/') ? redirectUrl.substring(1) : redirectUrl);
                     }
-                    document.location.href = redirectUrl.replace("[id]", result.id)
+                    document.location.href = redirectUrl.replace("[id]", result.id);
                 } else {
-                    notifySuccess();
+                    setDisableSubmit(false);
                 }
             }
         } catch (e) {
             notifyFailed();
+            setDisableSubmit(false);
         }
     }
 
@@ -134,7 +130,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                 {!hasRole(currentUser, 'member') ? (
                     <>
                         <Banner className="big">
-                            <h6>{loginText || 'Inloggen om deel te nemen.'}</h6>
+                            <Heading level={4} appearance='utrecht-heading-6'>{loginText || 'Inloggen om deel te nemen.'}</Heading>
                             <Spacer size={1} />
                             <Button
                                 type="button"
@@ -153,6 +149,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                         submitHandler={onSubmit}
                         submitText={submitButton || "Versturen"}
                         title=""
+                        submitDisabled={disableSubmit}
                         {...props}
                     />
                 )}

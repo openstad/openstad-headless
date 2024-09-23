@@ -68,6 +68,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displaySearch?: boolean;
     displaySearchText?: boolean;
     textActiveSearch?: string;
+    searchPlaceholder?: string;
     itemLink?: string;
     sorting: Array<{ value: string; label: string }>;
     displayTagFilters?: boolean;
@@ -82,9 +83,12 @@ export type ResourceOverviewWidgetProps = BaseProps &
     rawInput?: string;
     bannerText?: string;
     displayDocuments?: boolean;
+    showActiveTags?: boolean;
     documentsTitle?: string;
     documentsDesc?: string;
     displayVariant?: string;
+    resetText?: string;
+    applyText?: string;
     onFilteredResourcesChange?: (filteredResources: any[]) => void;
   };
 
@@ -190,27 +194,39 @@ const defaultItemRenderer = (
     return newUrl
   }
 
+  const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
+  const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
+
+  const firstStatus = resource.statuses && resource.statuses.length > 0 ? resource.statuses[0] : null;
+  const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
+  const backgroundColorClass = firstStatus && firstStatus.backgroundColor ? `bgColor-${firstStatus.backgroundColor}` : '';
+
+  const statusClasses = `${colorClass} ${backgroundColorClass}`.trim();
+
   return (
     <>
       {props.displayType === 'cardrow' ? (
         <div
-          className="resource-card--link">
+          className={`resource-card--link ${hasImages}`}>
 
           <Carousel
-            items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: '' }]}
+            items={resourceImages}
+            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
             itemRenderer={(i) => (
               <Image
                 src={i.url}
                 imageFooter={
                   props.displayStatusLabel && (
-                    <div>
+                    <div
+                        className={`${hasImages} ${statusClasses}`}
+                    >
                       <Paragraph className="osc-resource-overview-content-item-status">
                         {resource.statuses?.map((statusTag: any) => (
                           <span className="status-label">{statusTag.label}</span>
                         ))}
                       </Paragraph>
                     </div>
-                  )
+                    )
                 }
               />
             )}
@@ -218,10 +234,10 @@ const defaultItemRenderer = (
 
 
           <div>
-            <Spacer size={1} />
+            <Spacer size={1}/>
             {props.displayTitle ? (
-              <Heading4>
-                <a href={getUrl()} className="resource-card--link_trigger"> {elipsize(resource.title, props.titleMaxLength || 20)} </a>
+                <Heading4>
+                  <a href={getUrl()} className="resource-card--link_trigger"> {elipsize(resource.title, props.titleMaxLength || 20)} </a>
               </Heading4>
             ) : null}
 
@@ -257,15 +273,18 @@ const defaultItemRenderer = (
         </div>
 
       ) : (
-        <div className="resource-card--link">
+        <div className={`resource-card--link ${hasImages}`}>
           <Carousel
-            items={(Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: '' }]}
+            items={resourceImages}
+            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
             itemRenderer={(i) => (
               <Image
                 src={i.url}
                 imageFooter={
                   props.displayStatusLabel && (
-                    <div>
+                    <div
+                      className={`${hasImages} ${statusClasses}`}
+                    >
                       <Paragraph className="osc-resource-overview-content-item-status">
                         {resource.statuses?.map((statusTag: any) => (
                           <span className="status-label">{statusTag.label}</span>
@@ -335,6 +354,7 @@ function ResourceOverview({
   onlyIncludeTagIds = '',
   onlyIncludeStatusIds = '',
   displayDocuments = false,
+  showActiveTags = false,
   documentsTitle = '',
   documentsDesc = '',
   displayVariant = '',
@@ -508,6 +528,7 @@ function ResourceOverview({
           <Carousel
             startIndex={resourceDetailIndex}
             items={filteredResources && filteredResources?.length > 0 ? filteredResources : []}
+            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
             itemRenderer={(item) => (
               <GridderResourceDetail
                 resource={item}
@@ -541,9 +562,9 @@ function ResourceOverview({
           className={`osc-resource-overview-content ${!filterNeccesary ? 'full' : ''
             }`}>
           {props.displaySearchText ? (
-            <div className="osc-resourceoverview-search-container col-span-full"  role="status">
+            <div className="osc-resourceoverview-search-container col-span-full">
               {props.textActiveSearch && search && (
-                <Paragraph className="osc-searchtext">
+                <Paragraph className="osc-searchtext" role="status">
                   {props.textActiveSearch
                     .replace('[search]', search)
                     .replace('[zoekterm]', search)}
@@ -562,9 +583,13 @@ function ResourceOverview({
               defaultSorting={props.defaultSorting || ''}
               displayTagFilters={props.displayTagFilters || false}
               displaySearch={props.displaySearch || false}
+              searchPlaceholder={props.searchPlaceholder || 'Zoeken'}
+              resetText={props.resetText || 'Reset'}
+              applyText={props.applyText || 'Toepassen'}
               tagGroups={props.tagGroups || []}
               itemsPerPage={itemsPerPage}
               resources={resources}
+              showActiveTags={showActiveTags}
               onUpdateFilter={(f) => {
                 if (f.tags.length === 0) {
                   setTags(tagIdsToLimitResourcesTo);

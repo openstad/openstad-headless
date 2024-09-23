@@ -235,16 +235,16 @@ export default function ProjectSettingsComments() {
                   <FormItem className="col-span-full md:col-span-1 flex flex-col">
 
 
-                    <FormLabel>Label dat wordt getoond bij reacties van beheerders
-                      <InfoDialog content={'Dit is de duiding die achter de gebruikersnaam van de beheerder komt te staan. Bijvoorbeeld: Webredactie'} />
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="typ een tekst" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormLabel>Label bij reacties van beheerders
+                        <InfoDialog content={`Dit is de beschrijving die achter de gebruikersnaam van de beheerder komt te staan. Bijvoorbeeld 'webredactie'.`} />
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="typ een tekst" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
               <Button type="submit" className="w-fit col-span-full">
                 Opslaan

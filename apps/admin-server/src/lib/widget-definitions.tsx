@@ -1,32 +1,37 @@
 export const WidgetDefinitions = {
   agenda: {
     name: 'Agenda',
-    description: 'agenda module',
+    description: 'agendamodule',
     image: '/widget_preview/agenda_preview.png',
   },
   choiceguide: {
     name: 'Keuzewijzer',
-    description: 'Keuzewijzer module',
-    image: '/widget_preview/choiceguide_preview.png',
+    description: 'Keuzewijzermodule',
+    image: '/widget_preview/keuzewijzer_preview.png',
+  },
+  choiceguideResults: {
+    name: 'Keuzewijzer resultaat',
+    description: 'Keuzewijzer resultaat',
+    image: '/widget_preview/keuzewijzer_preview.png',
   },
   comments: {
     name: 'Reacties',
-    description: 'Reactie module',
+    description: 'Reactiemodule',
     image: '/widget_preview/arguments_preview.png',
   },
   begrootmodule: {
     name: 'Begrootmodule',
-    description: 'Module for budgeting',
+    description: 'Module voor begroten',
     image: '/widget_preview/begrootmodule_preview.png',
   },
   simplevoting: {
     name: 'Stemmodule',
-    description: 'Simple voting module',
+    description: 'Module om te stemmen',
     image: '/widget_preview/stemmodule_preview.png',
   },
   enquete: {
-    name: 'Enquete',
-    description: 'Survey module',
+    name: 'Enquête',
+    description: 'Enquête module',
     image: '/widget_preview/enquete_preview.png',
   },
   resourcesmap: {
@@ -40,23 +45,23 @@ export const WidgetDefinitions = {
     image: '/widget_preview/resource_map_preview.png',
   },
   counter: {
-    name: 'Counter',
-    description: 'Counter module',
+    name: 'Teller',
+    description: 'Tellermodule',
     image: '/widget_preview/counter_preview.png',
   },
   datecountdownbar: {
     name: 'Aftelbalk',
-    description: 'Bar showing countdown to a date',
+    description: 'Balk die aftelt tot een zelf in te stellen datum',
     image: '/widget_preview/date_count_down_preview.png',
   },
-  keuzewijzer: {
-    name: 'Keuzewijzer',
-    description: 'Decision guide module',
-    image: '/widget_preview/keuzewijzer_preview.png',
-  },
+  // keuzewijzer: {
+  //   name: 'Keuzewijzer',
+  //   description: 'Decision guide module',
+  //   image: '/widget_preview/keuzewijzer_preview.png',
+  // },
   likes: {
     name: 'Like',
-    description: 'Like module',
+    description: 'Likemodule',
     image: '/widget_preview/likes_preview.png',
   },
   rawresource: {
@@ -70,8 +75,8 @@ export const WidgetDefinitions = {
     image: '/widget_preview/resource_detail_preview.png',
   },
   resourceform: {
-    name: 'Inzending formulier',
-    description: 'Form for resource input',
+    name: 'Inzendingformulier',
+    description: 'Formulier om inzending informatie op te vragen',
     image: '/widget_preview/resource_form_preview.png',
   },
   resourceoverview: {
@@ -96,12 +101,12 @@ export const WidgetDefinitions = {
   },
   account: {
     name: 'Accountgegevens',
-    description: 'Account details module',
+    description: 'Accountdetailmodule',
     image: '/widget_preview/account_preview.png',
   },
   activity: {
     name: 'Gebruikersactiviteit',
-    description: 'User activity module',
+    description: 'Module voor gebruikersactiviteit',
     image: '/widget_preview/activity_preview.png',
   },
 };

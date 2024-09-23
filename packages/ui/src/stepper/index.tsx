@@ -15,7 +15,7 @@ const Stepper = (props: Props) => {
   const { steps, currentStep = 0, isSimpleView } = props;
 
   return (
-    <div {...props} className={`stepper ${props.className}`}>
+    <div {...props} className={`stepper ${props.className}`} aria-hidden="true">
       {steps.map((step, index) => (
         <React.Fragment key={step}>
           {isSimpleView === true && index !== 1 && (

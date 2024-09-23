@@ -34,7 +34,7 @@ export default function WidgetBaseMap({
   return (
     <div>
       <PageLayout
-        pageHeader="Project naam"
+        pageHeader="Projectnaam"
         breadcrumbs={[
           {
             name: 'Projecten',

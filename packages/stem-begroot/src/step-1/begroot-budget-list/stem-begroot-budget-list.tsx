@@ -92,6 +92,9 @@ export const StemBegrootBudgetList = ({
                 defaultImage = tagWithImage?.defaultResourceImage || '';
               }
 
+              const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images?.at(0)?.url : defaultImage;
+              const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
+
               return (
                 <Image
                   imageHeader={
@@ -108,8 +111,8 @@ export const StemBegrootBudgetList = ({
                     </div>
                   }
                   key={`resource-detail-image-${resource.id}`}
-                  className="budget-list-selection-indicaction"
-                  src={resource.images?.at(0)?.url || defaultImage}
+                  className={`budget-list-selection-indicaction ${hasImages}`}
+                  src={resourceImages}
                 />
               )
             })}
@@ -128,7 +131,7 @@ export const StemBegrootBudgetList = ({
                     });
                   }
                 }}>
-                  {resourceCardTitle}
+                  {resourceCardTitle || 'Selecteer een plan'}
               </Button>
             ) : null}
           </div>

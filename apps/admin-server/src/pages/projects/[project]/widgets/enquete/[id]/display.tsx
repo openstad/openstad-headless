@@ -43,7 +43,7 @@ export default function WidgetEnqueteDisplay(
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Display</Heading>
+        <Heading size="xl">Weergave</Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}

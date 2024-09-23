@@ -10,6 +10,8 @@ import './style.css';
 import { InitializeWeights } from "./parts/init-weights.js";
 import { FormValue } from "@openstad-headless/form/src/form";
 
+import { Heading4, Paragraph } from "@utrecht/component-library-react";
+
 function ChoiceGuide(props: ChoiceGuideProps) {
     const { choiceGuide, items, choiceOption, widgetId } = props;
     const {
@@ -67,7 +69,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
     const notifyFailed = () =>
       toast.error('Versturen mislukt', { position: 'bottom-center' });
 
-    const { create: createChoiceguide } = datastore.useChoicesguide({
+    const { create: createChoicesguideResult } = datastore.useChoicesguide({
         projectId: props.projectId,
     });
 
@@ -82,8 +84,16 @@ function ChoiceGuide(props: ChoiceGuideProps) {
         if (currentPage < totalPages - 1) {
             setCurrentPage((prevPage) => prevPage + 1);
         } else {
+
+            const projectId = props.projectId; // Assume projectId is available in props
+            const widgetId = props.widgetId;
+            const storageKey = `choiceguide-${projectId}-${widgetId}`;
+
+            // Store in local storage
+            localStorage.setItem(storageKey, JSON.stringify(finalAnswers));
+
             try {
-                const result = await createChoiceguide(finalAnswers, props.projectId ,props.widgetId);
+                const result = await createChoicesguideResult(finalAnswers ,props.widgetId);
                 if (result) {
                     notifySuccess();
 
@@ -103,10 +113,10 @@ function ChoiceGuide(props: ChoiceGuideProps) {
           <div className="osc-choiceguide-container" ref={containerRef}>
               <div className="osc-choiceguide-form">
                   <div className="osc-choiceguide-intro">
-                      {introTitle && <h4>{introTitle}</h4>}
+                      {introTitle && <Heading4>{introTitle}</Heading4>}
                       <div className="osc-choiceguide-intro-description">
                           {introDescription && (
-                            <p>{introDescription}</p>
+                            <Paragraph>{introDescription}</Paragraph>
                           )}
                       </div>
                   </div>
@@ -117,6 +127,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                     submitHandler={onSubmit}
                     secondaryLabel={saveConceptButton || ""}
                     getValuesOnChange={setCurrentAnswers}
+                    allowResetAfterSubmit={false}
                     {...props}
                   />
                   <Toaster />

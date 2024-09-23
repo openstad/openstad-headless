@@ -19,6 +19,14 @@ router
       req.scope.push({ method: ['includeRepliesOnComments', req.user.id] });
     }
 
+    if (req.query.includeTags) {
+      req.scope.push('includeTags');
+    }
+
+    if (req.query.includeAllComments) {
+      req.scope.push('includeAllComments');
+    }
+
     if (req.query.includeVoteCount) {
       req.scope.push({ method: ['includeVoteCount', 'comment'] });
     }

@@ -91,13 +91,78 @@ Bedankt voor je inzending! Je inzending is goed ontvangen en staat nu online. Hi
  </mj-body> 
  </mjml>`;
 
+const initialDataEnqueteSubmissionUser = `<mjml>
+  <mj-body background-color="#f6f6f7">
+    <mj-section background-color="#ffffff" padding="20px">
+      <mj-column>
+        <mj-text font-size="20px" color="#333333" font-family="Helvetica" align="center">
+          Bedankt voor je Inzending
+        </mj-text>
+        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
+<mj-divider border-width="0" padding="10px" />
+
+        <mj-text font-size="16px" color="#555555" font-family="Helvetica">
+          Bedankt voor het invullen van onze enquête! Hieronder vind je een overzicht van je ingevulde gegevens.
+        </mj-text>
+<mj-divider border-width="0" padding="10px" />
+
+        {{ enqueteContent | safe }}
+<mj-divider border-width="0" padding="10px" />
+
+        <mj-text font-size="16px" color="#555555" font-family="Helvetica">
+          We nemen zo snel mogelijk contact met je op als dat nodig is.
+        </mj-text>
+<mj-divider border-width="0" padding="10px" />
+        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
+        <mj-text font-size="14px" color="#999999" font-family="Helvetica" align="center">
+          Als je vragen hebt, neem dan contact op via <a href="mailto:support@website.nl">support@website.nl</a>.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
+`;
+
+const initialDataEnqueteSubmissionAdmin = `<mjml>
+  <mj-body background-color="#f6f6f7">
+    <mj-section background-color="#ffffff" padding="20px">
+      <mj-column>
+        <mj-text font-size="20px" color="#333333" font-family="Helvetica" align="center">
+          Nieuwe Enquête Inzending
+        </mj-text>
+        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
+<mj-divider border-width="0" padding="10px" />
+        <mj-text font-size="16px" color="#555555" font-family="Helvetica">
+          Hallo Admin,
+        </mj-text>
+        <mj-text font-size="16px" color="#555555" font-family="Helvetica">
+          Er is een nieuwe inzending ontvangen van de enquête op de website.
+        </mj-text>
+<mj-divider border-width="0" padding="10px" />
+
+        {{ enqueteContent | safe }}
+        
+<mj-divider border-width="0" padding="10px" />
+        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
+        <mj-text font-size="14px" color="#999999" font-family="Helvetica" align="center">
+          Dit is een automatisch bericht, antwoorden op deze e-mail is niet mogelijk.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
+`;
+
 type Props = {
   type:
   | 'login email'
   | 'login sms'
   | 'new published resource - user feedback'
+  | 'new published resource - admin update'
   | 'updated resource - user feedback'
-  | 'user account about to expire';
+  | 'user account about to expire'
+  | 'new enquete - admin'
+  | 'new enquete - user';
   engine?: 'email' | 'sms';
   id?: string;
   label?: string;
@@ -109,8 +174,11 @@ const notificationTypes = {
   'login email': 'Inloggen via e-mail',
   'login sms': 'Inloggen via sms',
   'new published resource - user feedback': 'Nieuwe resource gepubliceerd - Notificatie naar de gebruiker',
+  'new published resource - admin update': 'Nieuwe resource gepubliceerd - Notificatie naar de admin',
   'updated resource - user feedback': 'Resource bijgewerkt - Notificatie naar de gebruiker',
-  'user account about to expire': 'Gebruikersaccount staat op het punt te verlopen'
+  'user account about to expire': 'Gebruikersaccount staat op het punt te verlopen',
+  'new enquete - admin': 'Nieuwe formulier inzending - Notificatie naar de admin',
+  'new enquete - user': 'Nieuwe formulier inzending - Notificatie naar de gebruiker'
 };
 
 const formSchema = z.object({
@@ -163,12 +231,18 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
     setUserNameInMailContext();
   }, []);
 
+  const defaultValueBody = body
+      || ( type === 'new published resource - user feedback' ? initialDataResourceSubmission : "" )
+      || ( type === 'login email' ? initialData : "" )
+      || ( type === 'new enquete - admin' ? initialDataEnqueteSubmissionAdmin : "" )
+      || ( type === 'new enquete - user' ? initialDataEnqueteSubmissionUser : "" )
+
   const defaults = React.useCallback(
     () => ({
       engine: engine || "email",
       label: label || "",
       subject: subject || "",
-      body: body || ( type === 'new published resource - user feedback' ? initialDataResourceSubmission : "" ),
+      body: defaultValueBody
     }),
     [engine, label, subject, body]
   )
@@ -204,7 +278,7 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
     }
   }
 
-  const [templateData, setTemplateData] = useState(initialData);
+  const [templateData, setTemplateData] = useState(defaultValueBody || "");
   const [mjmlHtml, setMjmlHtml] = useState('');
 
   let mailTemplate: any = nunjucks.renderString(templateData, mailContext);
@@ -212,6 +286,11 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
   const [error, setError] = useState<string | null>(null);
 
   async function convertMJMLToHTML(data = mailTemplate) {
+    if ( data === '' ) {
+      setMjmlHtml("<p style='text-align: center;'>Inhoud is leeg.</p>");
+      return;
+    }
+
     try {
       const mjml2html = (await import('mjml-browser')).default;
       const htmlOutput = mjml2html(data).html;
@@ -320,7 +399,7 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
                     <FormControl>
                       <Textarea
                         placeholder="Inhoud van de mail..."
-                        defaultValue={field.value.length > 0 ? field.value : initialData}
+                        defaultValue={field.value.length > 0 ? field.value : body}
                         rows={20}
                         onKeyUpCapture={(e) => handleOnChange(e, field)}
                         {...field}
@@ -333,11 +412,11 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
               <Button type="submit" disabled={!!error}>Opslaan</Button>
               {error && <p className="text-red-500">{error}</p>}
             </form>
-            {notificationTitle === 'Inloggen via e-mail' && (
+
               <div className="p-4">
                 <iframe className='email-iframe' srcDoc={mjmlHtml} height={500} width={500}></iframe>
               </div>
-            )}
+
           </div>
         </Form>
       </div>

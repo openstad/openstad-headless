@@ -65,7 +65,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        pageHeader="Project naam"
+        pageHeader="Projectnaam"
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -84,12 +84,12 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
-              <TabsTrigger value="display">Display</TabsTrigger>
-              <TabsTrigger value="map">Map widget</TabsTrigger>
+              <TabsTrigger value="display">Weergave</TabsTrigger>
+              <TabsTrigger value="map">Kaart widget</TabsTrigger>
               <TabsTrigger value="tags">Tags</TabsTrigger>
               <TabsTrigger value="search">Zoeken</TabsTrigger>
               <TabsTrigger value="sorting">Sorteren</TabsTrigger>
-              <TabsTrigger value="pagination">Pagination</TabsTrigger>
+              <TabsTrigger value="pagination">Paginering</TabsTrigger>
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>

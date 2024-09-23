@@ -33,7 +33,7 @@ export default function WidgetAgenda({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        pageHeader="Project naam"
+        pageHeader="Projectnaam"
         breadcrumbs={[
           {
             name: 'Projecten',
@@ -53,7 +53,7 @@ export default function WidgetAgenda({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="items">Items</TabsTrigger>
-              <TabsTrigger value="display">Display</TabsTrigger>
+              <TabsTrigger value="display">Weergave</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">

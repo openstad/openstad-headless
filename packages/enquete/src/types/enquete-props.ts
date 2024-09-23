@@ -9,6 +9,7 @@ export type EnqueteProps = {
   formVisibility?: string;
   imageUrl?: string;
   multiple?: boolean;
+  confirmation?: Confirmation;
 };
 
 export type Item = {
@@ -35,6 +36,7 @@ export type Item = {
   imageDescription?: string;
   fieldRequired?: boolean;
   showSmileys?: boolean;
+  placeholder?: string;
 };
 
 export type Option = {
@@ -46,4 +48,11 @@ export type Title = {
   text: string;
   key: string;
   isOtherOption?: boolean;
+};
+
+export type Confirmation = {
+  confirmationUser?: boolean;
+  confirmationAdmin?: boolean;
+  overwriteEmailAddress?: string;
+  userEmailAddress?: string;
 };

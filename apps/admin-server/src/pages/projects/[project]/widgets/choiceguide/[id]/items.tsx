@@ -33,6 +33,7 @@ import {Item, Option, ChoiceGuideProps, ChoiceOptions} from '@openstad-headless/
 const weightSchema: z.ZodSchema = z.object({
   weightX: z.string().optional(),
   weightY: z.string().optional(),
+  weightAB: z.string().optional(),
   choice: z.record(z.lazy(() => weightSchema)).optional(),
 });
 
@@ -104,10 +105,21 @@ export default function WidgetChoiceGuideItems(
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
     if (selectedItem) {
+
+      // Ensure weights are defined
+      const selectedItemWeights = selectedItem.weights || {};
+      const valuesWeights = values.weights || {};
+
+      Object.keys(valuesWeights).forEach((key) => {
+        if (valuesWeights[key] !== undefined) {
+          selectedItemWeights[key] = valuesWeights[key];
+        }
+      });
+
       setItems((currentItems) =>
-        currentItems.map((item) =>
-          item.trigger === selectedItem.trigger ? { ...item, ...values } : item
-        )
+          currentItems.map((item) =>
+              item.trigger === selectedItem.trigger ? { ...item, ...values, weights: selectedItemWeights } : item
+          )
       );
       setItem(null);
     } else {
@@ -673,6 +685,7 @@ export default function WidgetChoiceGuideItems(
                           form={form}
                           imageLabel="Upload een afbeelding voor boven de vraag"
                           fieldName="uploadInfoImage"
+                          description="Let op: de afbeelding wordt afgesneden op 300px hoogte. Het is handig om de afbeelding op voorhand zelf bij te snijden tot deze hoogte."
                           allowedTypes={["image/*"]}
                           onImageUploaded={(imageResult) => {
                             const result = typeof (imageResult.url) !== 'undefined' ? imageResult.url : '';
@@ -1055,11 +1068,16 @@ export default function WidgetChoiceGuideItems(
                   <div className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
                     <Heading size="xl">Bepaal de weging per vraaggroep</Heading>
                     <Separator className="my-4" />
-                    <div className={`w-full col-span-full grid-cols-${dimensions.length + 1} grid gap-2 gap-y-2`} >
+                    <div className={`w-full col-span-full grid-cols-${dimensions.length + (form.watch('type') === 'a-b-slider' ? 2 : 1)} grid gap-2 gap-y-2`} >
                       <Heading size="lg">Vraaggroep titel</Heading>
                       {dimensions.length > 0 && dimensions.map((XY, i) => (
                         <Heading key={i} size="lg">Weging {XY}</Heading>
                       ))}
+
+                      {form.watch('type') === 'a-b-slider' && (
+                        <Heading size="lg">Weging A of B</Heading>
+                      )}
+
                     </div>
                     <div className="w-full mt-4 flex flex-col gap-y-4">
                       {['checkbox', 'radiobox', 'select'].includes(form.watch('type') || "") ? (
@@ -1070,7 +1088,7 @@ export default function WidgetChoiceGuideItems(
                               <Heading size="lg" className="mt-3">
                                 {singleGroup.title}
                               </Heading>
-                              <div className={`w-full col-span-full grid-cols-${dimensions.length + 1} grid gap-2 gap-y-2 items-center`} key={index}>
+                              <div className={`w-full col-span-full grid-cols-${dimensions.length + (form.watch('type') === 'a-b-slider' ? 2 : 1)} grid gap-2 gap-y-2 items-center`} key={index}>
 
                                 {options.length > 0 && options.map((option, j) => (
                                   <React.Fragment key={j}>
@@ -1110,32 +1128,78 @@ export default function WidgetChoiceGuideItems(
                       ) : (
                         <>
                           {widget?.config?.choiceOption?.choiceOptions?.map((singleGroup: ChoiceOptions, index: number) => (
-                            <div className={`w-full col-span-full grid-cols-${dimensions.length + 1} grid gap-2 gap-y-2 items-center`} key={index}>
+                            <div className={`w-full col-span-full grid-cols-${dimensions.length + (form.watch('type') === 'a-b-slider' ? 2 : 1)} grid gap-2 gap-y-2 items-center`} key={index}>
                               <p>
                                 {singleGroup.title}
                               </p>
                               {dimensions.length > 0 && dimensions.map((XY, i) => (
-                                <FormField
-                                  control={form.control}
-                                  name={`weights.${singleGroup.id}.weight${XY}`}
-                                  key={i}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormControl>
-                                        <div className={`weight-${XY.toLowerCase()}-container`}>
-                                          <Input
-                                            type="number"
-                                            min={0}
-                                            max={100}
-                                            {...field}
-                                            value={ field.value ?? 0 }
-                                          />
-                                        </div>
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
+                                  <>
+                                    <FormField
+                                      control={form.control}
+                                      name={`weights.${singleGroup.id}.weight${XY}`}
+                                      key={i}
+                                      render={({ field }) => {
+                                        const value = field.value ?? 0;
+                                        const watchValue = form.watch(`weights.${singleGroup.id}.weight${XY}`);
+
+                                        if ( value !== watchValue ) {
+                                          form.setValue(`weights.${singleGroup.id}.weight${XY}`, field.value ?? 0);
+                                        }
+
+                                        return (
+                                            <FormItem>
+                                              <FormControl>
+                                                <div className={`weight-${XY.toLowerCase()}-container`}>
+                                                  <Input
+                                                      type="number"
+                                                      min={0}
+                                                      max={100}
+                                                      {...field}
+                                                      value={field.value ?? 0}
+                                                  />
+                                                </div>
+                                              </FormControl>
+                                              <FormMessage/>
+                                            </FormItem>
+                                        )
+                                      }}
+                                    />
+                                    <FormField
+                                      control={form.control}
+                                      name={`weights.${singleGroup.id}.weightAB`}
+                                      key={i}
+                                      render={({ field }) => {
+                                        const value = field.value || 'A';
+                                        const watchValue = form.watch(`weights.${singleGroup.id}.weightAB`);
+
+                                        if ( value !== watchValue ) {
+                                          form.setValue(`weights.${singleGroup.id}.weightAB`, field.value || 'A');
+                                        }
+
+                                        return (
+                                            <FormItem>
+                                              <FormControl>
+                                                <Select
+                                                    onValueChange={(e: string) => field.onChange(e)}
+                                                    value={field.value || 'A'}
+                                                >
+                                                  <FormControl>
+                                                    <SelectTrigger>
+                                                      <SelectValue placeholder="Kies een optie"/>
+                                                    </SelectTrigger>
+                                                  </FormControl>
+                                                  <SelectContent>
+                                                    <SelectItem value="A">A</SelectItem>
+                                                    <SelectItem value="B">B</SelectItem>
+                                                  </SelectContent>
+                                                </Select>
+                                              </FormControl>
+                                              <FormMessage/>
+                                            </FormItem>
+                                        )
+                                      }}
+                                      />
+                                  </>
                               ))}
                             </div>
                           ))}

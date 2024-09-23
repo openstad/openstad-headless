@@ -24,10 +24,10 @@ export default function Projects() {
   if (!data) return (
     <div>
       <PageLayout
-        pageHeader="Projects"
+        pageHeader="Projecten"
         breadcrumbs={[
           {
-            name: 'Projects',
+            name: 'Projecten',
             url: '/projects',
           },
         ]}
@@ -47,10 +47,10 @@ export default function Projects() {
   return (
     <div>
       <PageLayout
-        pageHeader="Projects"
+        pageHeader="Projecten"
         breadcrumbs={[
           {
-            name: 'Projects',
+            name: 'Projecten',
             url: '/projects',
           },
         ]}
@@ -72,7 +72,7 @@ export default function Projects() {
               onChange={(e) => setFilterSearchType(e.target.value)}
             >
               <option value="">Alles</option>
-              <option value="name">Project naam</option>
+              <option value="name">Projectnaam</option>
               <option value="issues">Issues</option>
               <option value="config.votes.isActive">Stemmen</option>
               <option value="config.comments.canComment">Gestemd op nee</option>
@@ -95,7 +95,7 @@ export default function Projects() {
               </ListHeading>
               <ListHeading className="hidden lg:flex">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('issues', e, filterData))}>
-                  Issues
+                  Problemen
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">
@@ -110,7 +110,7 @@ export default function Projects() {
               </ListHeading>
               <ListHeading className="hidden lg:flex">
                 <button className="filter-button" onClick={(e) => setFilterData(sortTable('resources', e, filterData))}>
-                  Resources
+                  Inzendingen
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">

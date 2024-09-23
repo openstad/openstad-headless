@@ -171,6 +171,12 @@ p.osc-searchtext {
   content: ', ';
 }
 
+.status-label {
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
 .osc .map-container {
   margin-bottom: 2rem;
 }
@@ -229,3 +235,65 @@ p.osc-searchtext {
   z-index: 10;
   margin-top: -38px;
 }
+
+.osc-resource-overview-content .resource-has-no-images .osc-carousel .carousel-items .image-container,
+.osc-carousel .carousel-items .osc-gridder-resource-detail .resource-has-no-images .image-container {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 16 / 9;
+  background-color: #e6e6e6;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='121' height='106' viewBox='0 0 121 106' fill='none'%3E%3Cpath d='M36.625 21.125C42.7188 21.125 47.875 26.2812 47.875 32.375C47.875 38.7031 42.7188 43.625 36.625 43.625C30.2969 43.625 25.375 38.7031 25.375 32.375C25.375 26.2812 30.2969 21.125 36.625 21.125ZM105.766 0.5C114.203 0.5 120.766 7.29688 120.766 15.5V90.5C120.766 98.9375 113.969 105.5 105.766 105.5H15.7656C7.5625 105.5 0.765625 98.9375 0.765625 90.5V15.5C0.765625 7.29688 7.5625 0.5 15.7656 0.5H105.766ZM109.516 89.0938V15.5C109.516 13.625 107.875 11.75 105.766 11.75H15.7656C13.8906 11.75 12.0156 13.625 12.0156 15.5L12.25 90.5L29.8281 68.4688C30.7656 67.5312 31.9375 66.8281 33.3438 66.8281C34.75 66.8281 35.9219 67.5312 36.8594 68.4688L45.5312 79.25L70.375 45.5C71.3125 44.3281 72.4844 43.625 74.125 43.625C75.5312 43.625 76.7031 44.3281 77.4062 45.5L109.516 89.0938Z' fill='%23AAAAAA'/%3E%3C/svg%3E");
+  background-size: 9%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.osc-resource-overview-content .resource-has-no-images .osc-carousel .carousel-items .image-container img,
+.osc-carousel .carousel-items .osc-gridder-resource-detail .resource-has-no-images .image-container img {
+  display: none;
+}
+
+/* Text Colors */
+.color-FFFFFF { color: #FFFFFF; }
+.color-000000 { color: #000000; }
+.color-EC673E { color: #EC673E; }
+.color-7DB47B { color: #7DB47B; }
+.color-98BFE6 { color: #98BFE6; }
+.color-FAE065 { color: #FAE065; }
+.color-F59A02 { color: #F59A02; }
+.color-B078AF { color: #B078AF; }
+.color-E881B0 { color: #E881B0; }
+.color-A52A2A { color: #A52A2A; }
+.color-D1D1D1 { color: #D1D1D1; }
+.color-00FFFF { color: #00FFFF; }
+.color-FFD700 { color: #FFD700; }
+.color-ADFF2F { color: #ADFF2F; }
+.color-4B0082 { color: #4B0082; }
+.color-8B4513 { color: #8B4513; }
+.color-FA8072 { color: #FA8072; }
+.color-20B2AA { color: #20B2AA; }
+.color-4682B4 { color: #4682B4; }
+.color-D3D3D3 { color: #D3D3D3; }
+
+/* Background Colors */
+.bgColor-FFFFFF { background-color: #FFFFFF; }
+.bgColor-000000 { background-color: #000000; }
+.bgColor-EC673E { background-color: #EC673E; }
+.bgColor-7DB47B { background-color: #7DB47B; }
+.bgColor-98BFE6 { background-color: #98BFE6; }
+.bgColor-FAE065 { background-color: #FAE065; }
+.bgColor-F59A02 { background-color: #F59A02; }
+.bgColor-B078AF { background-color: #B078AF; }
+.bgColor-E881B0 { background-color: #E881B0; }
+.bgColor-A52A2A { background-color: #A52A2A; }
+.bgColor-D1D1D1 { background-color: #D1D1D1; }
+.bgColor-00FFFF { background-color: #00FFFF; }
+.bgColor-FFD700 { background-color: #FFD700; }
+.bgColor-ADFF2F { background-color: #ADFF2F; }
+.bgColor-4B0082 { background-color: #4B0082; }
+.bgColor-8B4513 { background-color: #8B4513; }
+.bgColor-FA8072 { background-color: #FA8072; }
+.bgColor-20B2AA { background-color: #20B2AA; }
+.bgColor-4682B4 { background-color: #4682B4; }
+.bgColor-D3D3D3 { background-color: #D3D3D3; }
