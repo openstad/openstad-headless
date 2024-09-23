@@ -62,33 +62,20 @@ const RangeSlider: FC<RangeSliderProps> = ({
 
     return (
         <div className="a-b-slider-container">
-            {title && (
-                <Paragraph><Strong>            <label htmlFor={randomId}>{title}</label></Strong></Paragraph>
-            )}
-            {description && (
-                <Paragraph dangerouslySetInnerHTML={{__html: description}}></Paragraph>
-            )}
-            {showMoreInfo && (
-                <>
-                    <AccordionProvider
-                        sections={[
-                            {
-                                headingLevel: 3,
-                                body: <HtmlContent html={moreInfoContent} />,
-                                expanded: undefined,
-                                label: moreInfoButton,
-                            }
-                        ]}
-                    />
-                    <Spacer size={.5} />
-                </>
-            )}
 
             {infoImage && (
                 <figure className="info-image-container">
                     <img src={infoImage} alt=""/>
                     <Spacer size={.5} />
                 </figure>
+            )}
+
+
+            {title && (
+                <Paragraph><Strong>            <label htmlFor={randomId}>{title}</label></Strong></Paragraph>
+            )}
+            {description && (
+                <Paragraph dangerouslySetInnerHTML={{__html: description}}></Paragraph>
             )}
 
             <div className="a-b-info-container">
@@ -109,7 +96,28 @@ const RangeSlider: FC<RangeSliderProps> = ({
                     </div>
                 </div>
             </div>
+
+            {showMoreInfo && (
+                <>
+                    <Spacer size={1.5} />
+                    <AccordionProvider
+                        sections={[
+                            {
+                                headingLevel: 3,
+                                body: <HtmlContent html={moreInfoContent} />,
+                                expanded: undefined,
+                                label: moreInfoButton,
+                            }
+                        ]}
+                    />
+                    <Spacer size={1.5} />
+                </>
+            )}
+
+
             <div className='range-bar-container'>
+                <div className="end-labels"></div>
+                <div className="a-b-labels"></div>
                 <input
                     type="range"
                     min="0"
