@@ -33,7 +33,6 @@ const formSchema = z.object({
   endDate: z.date().min(new Date(), {
     message: 'De datum moet nog niet geweest zijn!',
   }),
-  cssUrl: z.string().optional(),
   // We don't want to restrict this URL too much
   url: z.string().regex(/^(?:([a-z0-9.:\-_\/]+))?$/g, {
     message: 'De URL mag alleen kleine letters, cijfers, punten, dubbele punten, koppeltekens, onderstrepingstekens en schuine strepen bevatten.'
@@ -65,7 +64,6 @@ export default function ProjectSettings() {
       endDate: data?.config?.project?.endDate
         ? new Date(data?.config?.project?.endDate)
         : new Date(currentDate.getFullYear(), currentDate.getMonth() + 3),
-      cssUrl: data?.config?.project?.cssUrl || '',
       url: data?.url || '',
       basicAuthActive: data?.config?.basicAuth?.active || false,
       username: data?.config?.basicAuth?.username || '',
@@ -106,8 +104,7 @@ export default function ProjectSettings() {
       const project = await updateProject(
         {
           project: {
-            endDate: values.endDate,
-            cssUrl: values.cssUrl
+            endDate: values.endDate
           },
           basicAuth: {
             active: values.basicAuthActive,
@@ -196,19 +193,6 @@ export default function ProjectSettings() {
                       fieldName="endDate"
                       label="Einddatum"
                       fieldInfo="Na deze datum is het automatisch niet meer mogelijk om plannen in te dienen, reacties te plaatsen en te stemmen."
-                    />
-                    <FormField
-                      control={form.control}
-                      name="cssUrl"
-                      render={({ field }) => (
-                        <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                          <FormLabel>Huisstijl URL (CSS bestand)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Url" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
                     />
 
                     <div>

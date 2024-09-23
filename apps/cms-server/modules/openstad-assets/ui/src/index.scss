@@ -67,6 +67,18 @@ main {
   }
 }
 
+// page logo
+#logo-image {
+  max-height: 50px;
+}
+
+.iconButton--container{
+  width: 100%;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+}
+
 @media screen and (max-width: 540px) {
     #main{
       max-width: 95%;

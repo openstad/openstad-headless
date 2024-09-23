@@ -15,6 +15,10 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const removeProtocolFromUrl = require('../../middleware/remove-protocol-from-url');
 const messageStreaming = require('../../services/message-streaming');
 const service = require('../../adapter/openstad/service');
+const fs = require('fs');
+const getWidgetSettings = require('./../widget/widget-settings');
+const widgetDefinitions = getWidgetSettings();
+const createError = require('http-errors');
 
 let router = express.Router({mergeParams: true});
 
@@ -449,6 +453,40 @@ router.route('/:projectId(\\d+)/:willOrDo(will|do)-anonymize-all-users')
   .put(function (req, res, next) {
     res.json(req.results);
   })
+
+router.route('/:projectId(\\d+)/css/:componentId?')
+  .get(function (req, res, next) {
+    let css = req.project?.config?.project?.cssCustom || '';
+    
+    if (req.params.componentId) {
+      css += `\n\n#${req.params.componentId} { width: 100%; height: 100%; }`
+    }
+    
+    res.setHeader('Content-Type', 'text/css');
+    res.send(css);
+  });
+
+router.route('/:projectId(\\d+)/widget-css/:widgetType')
+  .get(function (req, res, next) {
+    if (!req.params.widgetType) return next(createError(400, 'Invalid widget type given for fetching settings'));
+    
+    let widgetSettings = widgetDefinitions[req.params.widgetType];
+
+    if (!widgetSettings) {
+      return next(
+        createError(400, 'Invalid widget type given for fetching settings')
+      );
+    }
+    
+    let css = '';
+    
+    widgetSettings.css.forEach((file) => {
+      css += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
+    });
+    
+    res.setHeader('Content-Type', 'text/css');
+    res.send(css);
+  });
 
 
 module.exports = router;

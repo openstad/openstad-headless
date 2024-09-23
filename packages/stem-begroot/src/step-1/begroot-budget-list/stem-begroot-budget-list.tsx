@@ -98,13 +98,7 @@ export const StemBegrootBudgetList = ({
               return (
                 <Image
                   imageHeader={
-                    <div
-                      style={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'end',
-                        alignItems: 'center',
-                      }}>
+                    <div className='iconButton--container'>
                       <IconButton
                         onClick={() => {
                           onSelectedResourceRemove(resource);
