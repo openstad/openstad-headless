@@ -38,7 +38,7 @@ export default function WidgetResourceForm({
   return (
     <div >
       <PageLayout
-        pageHeader="Project naam"
+        pageHeader="Projectnaam"
         breadcrumbs={[
           {
             name: 'Projecten',
