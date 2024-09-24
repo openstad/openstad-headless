@@ -78,7 +78,7 @@ export type DocumentMapProps = BaseProps &
     loginText?: string;
     backUrlContent?: string;
     backUrlText?: string;
-
+    infoPopupButtonText?: string;
   };
 
 
@@ -108,6 +108,7 @@ function DocumentMap({
   largeDoc = false,
   loginText = 'Inloggen om deel te nemen aan de discussie',
   emptyListText = 'Nog geen reacties geplaatst',
+  infoPopupButtonText = '',
   ...props
 }: DocumentMapProps) {
 
@@ -669,9 +670,12 @@ function DocumentMap({
               )}
             </MapContainer>
 
-            <Button className='info-trigger' appearance='primary-action-button' onClick={() => toggleHelperDialog(true)}>
+            <Button className={`info-trigger ${infoPopupButtonText ? 'button-has-text' : ''}`} appearance='primary-action-button' onClick={() => toggleHelperDialog(true)}>
               <i className="ri-information-line"></i>
-              <span className="sr-only">Hoe werkt het?</span>
+              {infoPopupButtonText && (
+                  <span className="trigger-text">{infoPopupButtonText}</span>
+              )}
+              <span className="sr-only">{infoPopupButtonText || 'Hoe werkt het?'}</span>
             </Button>
           </div>
         </div>
