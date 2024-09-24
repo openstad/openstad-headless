@@ -3,7 +3,7 @@ import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import { Button, ButtonLink } from '@utrecht/component-library-react';
 
-import type { PropsWithChildren } from 'react';
+import {PropsWithChildren, useEffect} from 'react';
 import { loadWidget } from '../../lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
 import parseLocation from './lib/parse-location';
@@ -16,7 +16,7 @@ import type { MarkerProps } from './types/marker-props';
 import type { CategoriesType } from './types/categorize';
 import type { ResourceOverviewMapWidgetProps } from './types/resource-overview-map-widget-props';
 import { BaseMap } from './base-map';
-import React from 'react';
+import React, { useState } from 'react';
 import { LocationType } from '@openstad-headless/leaflet-map/src/types/location.js';
 
 type Point = {
@@ -149,17 +149,21 @@ const ResourceOverviewMap = ({
       ? (areas.find((area) => area.id.toString() === areaId) || {}).polygon
       : [];
 
-  function calculateCenter(polygon: Point[]) {
+  function calculateCenter(polygon: Point[] | Point[][]) {
     if (!polygon || polygon.length === 0) {
       return undefined;
     }
+
+    const flatPolygon = Array.isArray(polygon[0])
+      ? (polygon as Point[][]).flat()
+      : (polygon as Point[]);
 
     let minX = Infinity;
     let maxX = -Infinity;
     let minY = Infinity;
     let maxY = -Infinity;
 
-    polygon.forEach((point) => {
+    flatPolygon.forEach((point) => {
       if (point.lng < minX) minX = point.lng;
       if (point.lng > maxX) maxX = point.lng;
       if (point.lat < minY) minY = point.lat;
@@ -172,10 +176,13 @@ const ResourceOverviewMap = ({
     return { lat: avgLat, lng: avgLng };
   }
 
-  let center: LocationType | undefined = undefined;
-  if (!!props.area && Array.isArray(props.area) && props.area.length > 0) {
-    center = calculateCenter(props.area);
-  }
+  const [center, setCenter] = useState<LocationType | undefined>(undefined);
+
+  useEffect(() => {
+    if (!!polygon) {
+      setCenter( calculateCenter(polygon) );
+    }
+  }, [polygon, areas]);
 
   const zoom = {
     minZoom: props?.map?.minZoom ? parseInt(props.map.minZoom) : 7,
@@ -191,7 +198,7 @@ const ResourceOverviewMap = ({
   };
 
 
-  return (
+  return ((polygon && center) || !areaId) ? (
     <div className='map-container--buttons'>
       <Button appearance='primary-action-button' className='skip-link' onClick={skipMarkers}>Sla kaart over</Button>
       <BaseMap
@@ -208,7 +215,7 @@ const ResourceOverviewMap = ({
         {countButtonElement}
       </div>
     </div>
-  );
+  ) : null;
 };
 
 ResourceOverviewMap.loadWidget = loadWidget;
