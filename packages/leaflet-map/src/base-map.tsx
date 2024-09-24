@@ -334,7 +334,10 @@ function MapEventsListener({
       window.dispatchEvent(customEvent);
 
       if (onClick) {
-        onClick({ ...e, isInArea }, map);
+        if (onClick && typeof onClick == 'string') {
+          onClick = eval(onClick);
+        }
+        onClick && onClick({ ...e, isInArea }, map);
       }
     },
   });
