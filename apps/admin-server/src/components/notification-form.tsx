@@ -24,6 +24,10 @@ import {
 
 import useNotificationTemplate from '@/hooks/use-notification-template';
 import { fetchSessionUser } from '@/auth';
+import { applyFilters } from '@openstad-headless/raw-resource/includes/nunjucks-filters';
+
+const nunjucksEnv = new nunjucks.Environment();
+applyFilters(nunjucksEnv);
 
 const initialData = `<mjml>
     <mj-body>
@@ -209,12 +213,16 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
     name: string,
     loginurl: string,
     imagePath: string,
+    resource: any,
   };
   const [mailContext, setMailContext] = useState<MailContextType>({
     user: { name: 'Gebruiker', fullName: 'Gebruiker' },
     name: 'Gebruiker',
     loginurl: 'https://openstad.nl/login',
     imagePath: process.env.EMAIL_ASSETS_URL || '',
+    resource: {
+      tags: []
+    },
   });
 
   useEffect(() => {
@@ -281,7 +289,7 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
   const [templateData, setTemplateData] = useState(defaultValueBody || "");
   const [mjmlHtml, setMjmlHtml] = useState('');
 
-  let mailTemplate: any = nunjucks.renderString(templateData, mailContext);
+  let mailTemplate: any = nunjucksEnv.renderString(templateData, mailContext);
 
   const [error, setError] = useState<string | null>(null);
 
@@ -308,7 +316,7 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
   const handleOnChange = (e: any, field: any) => {
     if (e.target.value.length > 0) {
       try {
-        convertMJMLToHTML(nunjucks.renderString(e.target.value, mailContext));
+        convertMJMLToHTML(nunjucksEnv.renderString(e.target.value, mailContext));
       } catch (err) {
         setError('Er is een fout opgetreden bij het renderen van de template.');
       }
@@ -318,7 +326,7 @@ export function NotificationForm({ type, engine, id, label, subject, body }: Pro
   useEffect(() => {
     if (fieldValue) {
       try {
-        convertMJMLToHTML(nunjucks.renderString(fieldValue, mailContext));
+        convertMJMLToHTML(nunjucksEnv.renderString(fieldValue, mailContext));
       } catch (err) {
         setError('Er is een fout opgetreden bij het renderen van de template.');
       }
