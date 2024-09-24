@@ -1,3 +1,9 @@
+{% if data.global.cssExtras %}
+<style>
+  {{data.global.cssExtras}}
+</style>
+{% endif %}
+
 {% if data.global.customCssLink %}
   {% for link in data.global.customCssLink %}
     <link rel="stylesheet" href="{{ link.item }}">
