@@ -288,6 +288,7 @@ const BaseMap = ({
             onClick={(e, map) =>
               onClick && onClick({ ...e, isInArea: e.isInArea }, map)
             }
+            onMarkerClick={onMarkerClick}
           />
 
         </MapContainer>
@@ -299,24 +300,39 @@ const BaseMap = ({
 type MapEventsListenerProps = {
   area?: Array<LocationType>;
   onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void;
+  onMarkerClick?: (e: LeafletMouseEvent, map: any) => void,
 };
 
 function MapEventsListener({
   area = [],
   onClick = undefined,
+  onMarkerClick = undefined,
 }: MapEventsListenerProps) {
   const map = useMapEvents({
     load: () => {
       console.log('ONLOAD');
     },
     click: (e: LeafletMouseEvent) => {
+      const targetElement = e.originalEvent.target as HTMLElement;
+      const isMarkerClick = targetElement.closest('.leaflet-marker-icon');
+
+      if (isMarkerClick && onMarkerClick) {
+        let customEvent = new CustomEvent('osc-marker-click', { detail: e });
+        window.dispatchEvent(customEvent);
+
+        onMarkerClick(e, map);
+
+        return; // Prevent further execution (e.g., placing a new marker)
+      }
+
       const areaLatLngs = area.map(parseLocation) as LatLng[];
-      let isInArea =
-        !(area && area.length) || isPointInArea(areaLatLngs, e.latlng);
+      let isInArea = !(area && area.length) || isPointInArea(areaLatLngs, e.latlng);
+
       let customEvent = new CustomEvent('osc-map-click', {
         detail: { ...e, isInArea },
       });
       window.dispatchEvent(customEvent);
+
       if (onClick) {
         if (onClick && typeof onClick == 'string') {
           onClick = eval(onClick);
