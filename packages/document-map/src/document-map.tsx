@@ -692,6 +692,7 @@ function DocumentMap({
                     progressBarDescription={
                       props.likeWidget?.progressBarDescription
                     }
+                    displayDislike={props.likeWidget?.displayDislike}
                   />
                   <Spacer size={1} />
                 </>
