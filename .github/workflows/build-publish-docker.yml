@@ -88,7 +88,7 @@ jobs:
       - name: Install yq
         run: sudo snap install yq --channel=v4/stable
 
-      - name: [PROD] Set images and commit
+      - name: "[PROD] Set images and commit"
         if: github.ref == 'refs/heads/main'
         run: |
           git config --global user.email github@ci.push && \
@@ -103,7 +103,7 @@ jobs:
           git commit -m "ci: prod release ${{ needs.build-and-push-docker-image.outputs.image_tag }}" && \
           git push origin main
 
-      - name: [ACC] Set images and commit
+      - name: "[ACC] Set images and commit"
         if: github.ref == 'refs/heads/develop'
         run: |
           git config --global user.email github@ci.push && \
@@ -116,7 +116,7 @@ jobs:
           /snap/bin/yq -i '.image.deploymentContainer.image = "ghcr.io/${{ github.repository_owner }}/image-server:${{ needs.build-and-push-docker-image.outputs.image_tag }}"' ./operations/deployments/openstad-headless/environments/acc/images.yml && \
           git add operations/deployments/openstad-headless/environments/acc/images.yml && \
           git commit -m "ci: acc release ${{ needs.build-and-push-docker-image.outputs.image_tag }}" && \
-          git push origin main
+          git push origin develop
 
       - name: Display images in Github Action
         run: |
