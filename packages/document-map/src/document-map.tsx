@@ -524,6 +524,43 @@ function DocumentMap({
       }
     };
 
+    const [showButton, setShowButton] = useState(false);
+    const containerRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+      const handleScroll = () => {
+        if (containerRef.current) {
+          const containerTop = containerRef.current.offsetTop;
+          const currentScroll = window.scrollY;
+
+          if (currentScroll > containerTop) {
+            setShowButton(true);
+          } else {
+            setShowButton(false);
+          }
+        }
+      };
+
+      window.addEventListener('scroll', handleScroll);
+
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+      };
+    }, []);
+
+    const scrollToTop = () => {
+      if (containerRef.current) {
+        const container = containerRef.current as HTMLElement;
+        const containerRect = container.getBoundingClientRect();
+        const scrollPosition = window.pageYOffset + containerRect.top;
+
+        window.scrollTo({
+          top: scrollPosition,
+          behavior: 'smooth',
+        });
+      }
+    };
+
     return (
       <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
         <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
@@ -575,7 +612,7 @@ function DocumentMap({
 
                   const firstTag = comment.tags && comment.tags[0];
                   const documentMapIconColor = firstTag && firstTag.documentMapIconColor ? firstTag.documentMapIconColor : '#555588';
-  
+
                   return (
                       <MarkerWithId
                           key={index}
@@ -753,18 +790,20 @@ function DocumentMap({
           ) : null}
 
           {!isDefinitive && (
-            <Comments
-              {...props}
-              key={refreshComments ? 'refresh' : 'no-refresh'}
-              onlyIncludeTags={selectedTagsString || filteredTagsIdsString || ''}
-              resourceId={resourceId || ''}
-              selectedComment={selectedCommentIndex}
-              setRefreshComments={setRefreshComments}
-              showForm={false}
-              emptyListText={emptyListText}
-              loginText={loginText}
-              closedText={closedText}
-            />
+            <div ref={containerRef}>
+              <Comments
+                {...props}
+                key={refreshComments ? 'refresh' : 'no-refresh'}
+                onlyIncludeTags={selectedTagsString || filteredTagsIdsString || ''}
+                resourceId={resourceId || ''}
+                selectedComment={selectedCommentIndex}
+                setRefreshComments={setRefreshComments}
+                showForm={false}
+                emptyListText={emptyListText}
+                loginText={loginText}
+                closedText={closedText}
+              />
+            </div>
           )}
         </div>
         <dialog className='helper-dialog'>
@@ -778,6 +817,13 @@ function DocumentMap({
             </Button>
           </div>
         </dialog>
+
+        <button
+            className={`back-to-top ${showButton ? "show" : ""}`}
+            onClick={scrollToTop}
+        >
+          <i className="ri-arrow-up-line"></i>
+        </button>
       </div>
 
     );
