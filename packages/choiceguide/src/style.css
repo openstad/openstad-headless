@@ -21,8 +21,6 @@
 
 figure.info-image-container {
   max-height: 300px;
-  margin: -1.5rem -1.5rem 1.5rem -1.5rem;
-  width: calc(100% + 3rem);
 }
 
 #choice-plane {
