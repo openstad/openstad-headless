@@ -79,6 +79,7 @@ export type DocumentMapProps = BaseProps &
     backUrlContent?: string;
     backUrlText?: string;
     infoPopupButtonText?: string;
+    openInfoPopupOnInit?: string;
   };
 
 
@@ -109,6 +110,7 @@ function DocumentMap({
   loginText = 'Inloggen om deel te nemen aan de discussie',
   emptyListText = 'Nog geen reacties geplaatst',
   infoPopupButtonText = '',
+  openInfoPopupOnInit = 'no',
   ...props
 }: DocumentMapProps) {
 
@@ -513,16 +515,73 @@ function DocumentMap({
       }
     }
 
-    const toggleHelperDialog = (open: boolean) => {
-      const dialog = document.querySelector('dialog.helper-dialog') as HTMLDialogElement;
-      if (dialog) {
-        if (open) {
-          dialog.showModal();
-        } else {
-          dialog.close();
+  const modalRef = useRef<HTMLDivElement | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [manualFocus, setManualFocus] = useState(false);
+
+  const setModalOpen = (state: boolean) => {
+    setIsModalOpen(state);
+    setManualFocus(state);
+  };
+
+  const trapFocus = (event: KeyboardEvent) => {
+    if (!modalRef.current || !isModalOpen) return;
+
+    const focusableElements = modalRef.current.querySelectorAll(
+        'a[href], button, textarea, input, select'
+    );
+    const firstElement = focusableElements[0] as HTMLElement;
+    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+    if (event.key === 'Tab') {
+      if (event.shiftKey) {
+        if (document.activeElement === firstElement) {
+          lastElement.focus();
+          event.preventDefault();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          firstElement.focus();
+          event.preventDefault();
         }
       }
+    }
+  };
+
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setModalOpen(false);
+      }
     };
+
+    if (isModalOpen) {
+      document.addEventListener('keydown', trapFocus);
+      document.addEventListener('keydown', handleEsc);
+    } else {
+      document.removeEventListener('keydown', trapFocus);
+      document.removeEventListener('keydown', handleEsc);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', trapFocus);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [isModalOpen]);
+
+  // Focus management when modal opens
+  useEffect(() => {
+    if (isModalOpen && modalRef.current && manualFocus) {
+      modalRef.current.focus();
+    }
+  }, [isModalOpen]);
+
+  useEffect(() => {
+    if (openInfoPopupOnInit === 'yes') {
+      setIsModalOpen(true);
+      setManualFocus(false);
+    }
+  }, []);
 
     return (
       <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
@@ -670,13 +729,36 @@ function DocumentMap({
               )}
             </MapContainer>
 
-            <Button className={`info-trigger ${infoPopupButtonText ? 'button-has-text' : ''}`} appearance='primary-action-button' onClick={() => toggleHelperDialog(true)}>
+            <Button className={`info-trigger ${infoPopupButtonText ? 'button-has-text' : ''}`}
+                    appearance='primary-action-button' onClick={() => setModalOpen(true)}>
               <i className="ri-information-line"></i>
               {infoPopupButtonText && (
                   <span className="trigger-text">{infoPopupButtonText}</span>
               )}
               <span className="sr-only">{infoPopupButtonText || 'Hoe werkt het?'}</span>
             </Button>
+
+
+            <div className="modal-overlay" aria-hidden={isModalOpen ? "false" : "true"}>
+              <div
+                  ref={modalRef}
+                  className="modal"
+                  role="dialog"
+                  aria-labelledby="modal-title"
+                  aria-modal="true"
+                  tabIndex={-1}
+              >
+                <Heading level={2}>Hoe werkt het?</Heading>
+                <Paragraph>{infoPopupContent}</Paragraph>
+                <Spacer size={1}/>
+                <Button appearance='secondary-action-button' aria-label="Close Modal" onClick={() => setModalOpen(false)}>
+                  <i className="ri-close-fill"></i>
+                  <span>Info venster sluiten</span>
+                </Button>
+              </div>
+            </div>
+
+
           </div>
         </div>
         <div className="content document-map-info-container" ref={contentRef}>
@@ -768,17 +850,6 @@ function DocumentMap({
             />
           )}
         </div>
-        <dialog className='helper-dialog'>
-          <div className="info-dialog">
-            <Heading level={2}>Hoe werkt het?</Heading>
-            <Paragraph>{infoPopupContent}</Paragraph>
-            <Spacer size={1} />
-            <Button appearance='secondary-action-button' onClick={() => toggleHelperDialog(false)}>
-              <i className="ri-close-fill"></i>
-              <span>Info venster sluiten</span>
-            </Button>
-          </div>
-        </dialog>
       </div>
 
     );

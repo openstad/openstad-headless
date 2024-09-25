@@ -30,6 +30,7 @@ const formSchema = z.object({
     loginText: z.string().optional(),
     largeDoc: z.boolean().optional(),
     infoPopupButtonText: z.string().optional(),
+    openInfoPopupOnInit: z.string().optional(),
 });
 
 export default function DocumentContent(
@@ -51,6 +52,7 @@ export default function DocumentContent(
             displayResourceInfo: props?.displayResourceInfo || 'left',
             displayMapSide: props?.displayMapSide || 'left',
             displayResourceDescription: props?.displayResourceDescription || 'no',
+            openInfoPopupOnInit: props?.openInfoPopupOnInit || 'no',
             infoPopupContent: props?.infoPopupContent || 'Op deze afbeelding kun je opmerkingen plaatsen. Klik op de afbeelding om een opmerking toe te voegen. Klik op een marker om de bijbehorende opmerkingen te bekijken.',
             emptyListText: props?.emptyListText || 'Nog geen reacties geplaatst',
             loginText: props?.loginText || 'Inloggen om deel te nemen aan de discussie',
@@ -195,11 +197,11 @@ export default function DocumentContent(
                                 </FormLabel>
                                 <Select
                                     onValueChange={field.onChange}
-                                    value={field.value || 'left'}
+                                    value={field.value || 'no'}
                                 >
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Links" />
+                                            <SelectValue placeholder="no" />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
@@ -242,6 +244,33 @@ export default function DocumentContent(
                     />
 
                     <Heading size="lg" className="mt-8 mb-2">Pop-up Info</Heading>
+
+                    <FormField
+                        control={form.control}
+                        name="openInfoPopupOnInit"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Wil je dat de info pop-up standaard open staat wanneer de widget wordt ingeladen?
+                                </FormLabel>
+                                <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value || 'no'}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Nee" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="no">Nee</SelectItem>
+                                        <SelectItem value="yes">Ja</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
                     <FormField
                         control={form.control}
