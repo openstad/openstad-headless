@@ -78,7 +78,7 @@ export type DocumentMapProps = BaseProps &
     loginText?: string;
     backUrlContent?: string;
     backUrlText?: string;
-
+    closedText?: string;
   };
 
 
@@ -108,6 +108,7 @@ function DocumentMap({
   largeDoc = false,
   loginText = 'Inloggen om deel te nemen aan de discussie',
   emptyListText = 'Nog geen reacties geplaatst',
+  closedText = 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
   ...props
 }: DocumentMapProps) {
 
@@ -762,6 +763,7 @@ function DocumentMap({
               showForm={false}
               emptyListText={emptyListText}
               loginText={loginText}
+              closedText={closedText}
             />
           )}
         </div>

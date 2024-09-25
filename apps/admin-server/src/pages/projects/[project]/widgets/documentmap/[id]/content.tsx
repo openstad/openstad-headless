@@ -28,6 +28,7 @@ const formSchema = z.object({
     infoPopupContent: z.string().optional(),
     emptyListText: z.string().optional(),
     loginText: z.string().optional(),
+    closedText: z.string().optional(),
     largeDoc: z.boolean().optional(),
 });
 
@@ -53,6 +54,7 @@ export default function DocumentContent(
             infoPopupContent: props?.infoPopupContent || 'Op deze afbeelding kun je opmerkingen plaatsen. Klik op de afbeelding om een opmerking toe te voegen. Klik op een marker om de bijbehorende opmerkingen te bekijken.',
             emptyListText: props?.emptyListText || 'Nog geen reacties geplaatst',
             loginText: props?.loginText || 'Inloggen om deel te nemen aan de discussie',
+            closedText: props?.closedText || 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
             largeDoc: props?.largeDoc || false,
         },
     });
@@ -73,6 +75,22 @@ export default function DocumentContent(
                             <FormItem>
                                 <FormLabel>
                                     Als de gebruiker een reactie kan toevoegen, wat is de tekst die boven het veld staan?
+                                </FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="closedText"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Welke tekst wil je tonen wanneer het niet meer mogelijk is om te reageren?
                                 </FormLabel>
                                 <FormControl>
                                     <Input {...field} />
