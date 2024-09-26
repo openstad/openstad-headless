@@ -19,6 +19,7 @@ import { ArgumentWidgetTabProps } from '.';
 const formSchema = z.object({
   title: z.string(),
   emptyListText: z.string(),
+  closedText: z.string(),
 });
 
 type SchemaKey = keyof typeof formSchema.shape;
@@ -42,6 +43,7 @@ export default function ArgumentsList({
     defaultValues: {
       title: props?.title || '',
       emptyListText: props?.emptyListText || 'Nog geen reacties geplaatst.',
+      closedText: props?.closedText || 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
     },
   });
 
@@ -87,6 +89,25 @@ export default function ArgumentsList({
                 <FormControl>
                   <Input
                     placeholder="Dit wordt weergegeven wanneer er geen reacties zijn."
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="closedText"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Welke tekst wil je tonen wanneer het niet meer mogelijk is om te reageren?</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Dit wordt weergegeven wanneer het reageren niet meer mogelijk is."
                     {...field}
                     onChange={(e) => {
                       onFieldChange(field.name, e.target.value);
