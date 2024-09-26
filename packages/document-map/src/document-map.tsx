@@ -264,9 +264,27 @@ function DocumentMap({
 
 
   const contentRef = useRef<HTMLDivElement>(null);
-  const [shortLengthError, setShortLengthError] = useState(false);
-  const [longLengthError, setLongLengthError] = useState(false);
   const [randomId, setRandomId] = useState('');
+  const [helpText, setHelpText] = useState('');
+
+  const characterHelpText = (count: number) => {
+    let helpText = '';
+
+    const min = props.comments?.descriptionMinLength || 0;
+    let minWarning = `Nog minimaal ${min - count} karakters`;
+
+    const max = props.comments?.descriptionMaxLength || Infinity;
+
+    if (count < min) {
+      helpText = minWarning;
+    } else if (count > max) {
+      helpText = `Je hebt ${count - max} karakters teveel`;
+    } else {
+      helpText = '';
+    }
+
+    setHelpText(helpText);
+  };
 
   const [toggleMarker, setToggleMarker] = useState(true);
 
@@ -303,16 +321,8 @@ function DocumentMap({
     e.preventDefault();
     e.stopPropagation();
 
-    setShortLengthError(false);
-    setLongLengthError(false);
+    characterHelpText(commentValue.length);
 
-    if (commentValue.length < props.comments?.descriptionMinLength) {
-      setShortLengthError(true);
-    }
-
-    if (commentValue.length > props.comments?.descriptionMaxLength) {
-      setLongLengthError(true);
-    }
     if (
       commentValue.length >= props.comments?.descriptionMinLength
       && commentValue.length <= props.comments?.descriptionMaxLength
@@ -338,8 +348,7 @@ function DocumentMap({
         setFilteredComments(addNewCommentToComments);
         setPopupPosition(null);
         setCommentValue('');
-        setShortLengthError(false);
-        setLongLengthError(false);
+        setHelpText('');
         setSelected([]);
         setSelectedCommentIndex(newIndex);
         setSelectedMarkerIndex(newIndex);
@@ -649,8 +658,7 @@ function DocumentMap({
                     <form>
                       <div>
                         <FormLabel htmlFor="commentBox">{addCommentText}</FormLabel>
-                        {shortLengthError && <Paragraph className="--error">De reactie moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
-                        {longLengthError && <Paragraph className="--error">De reactie mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
+                        {helpText && <Paragraph className="--error">{helpText}</Paragraph>}
 
                         <Textarea
                           id="commentBox"
