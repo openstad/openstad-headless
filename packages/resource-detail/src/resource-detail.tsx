@@ -368,6 +368,7 @@ function ResourceDetail({
             formIntro={props.commentsWidget?.formIntro}
             placeholder={props.commentsWidget?.placeholder}
             loginText={props.commentsWidget?.loginText}
+            closedText={props.commentsWidget?.closedText}
             sentiment={useSentiments[0]}
           />
 
@@ -382,6 +383,7 @@ function ResourceDetail({
               formIntro={props.commentsWidget_multiple?.formIntro}
               placeholder={props.commentsWidget_multiple?.placeholder}
               loginText={props.commentsWidget_multiple?.loginText}
+              closedText={props.commentsWidget_multiple?.closedText}
               sentiment={useSentiments[1]}
             />
           )}

@@ -376,3 +376,30 @@ a + .url-list:before {
   color: black;
   border-radius: 0;
 }
+
+@media only screen and (min-width: 1001px) {
+  .back-to-top {
+    display: none !important;
+  }
+}
+
+.back-to-top:not(.show) {
+  display: none !important;
+}
+
+.back-to-top {
+  position: sticky;
+  bottom: 20px;
+  background-color: var(--utrecht-button-background-color, white);
+  color: var(--utrecht-button-color, black);
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: 0 0 10px #0000001a;
+  width: 35px;
+  height: 35px;
+  padding: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
