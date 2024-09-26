@@ -902,24 +902,6 @@ function DocumentMap({
           )}
         </div>
 
-        <dialog className='helper-dialog'>
-          <div className="info-dialog">
-            <Heading level={2}>Hoe werkt het?</Heading>
-            <Paragraph>{infoPopupContent}</Paragraph>
-            <Spacer size={1} />
-            <Button appearance='secondary-action-button' onClick={() => toggleHelperDialog(false)}>
-              <i className="ri-close-fill"></i>
-              <span>Info venster sluiten</span>
-            </Button>
-          </div>
-        </dialog>
-
-        <button
-            className={`back-to-top ${showButton ? "show" : ""}`}
-            onClick={scrollToTop}
-        >
-          <i className="ri-arrow-up-line"></i>
-        </button>
       </div>
 
     );
