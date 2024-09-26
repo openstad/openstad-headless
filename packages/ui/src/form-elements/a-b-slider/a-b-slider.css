@@ -51,54 +51,6 @@
 }
 
 
-  .range-bar-container .end-labels{
-    width: 100%;
-    position: relative;
-    transform: translateY(26px);
-  }
-  .range-bar-container .end-labels:before{
-    content: "";
-    width: 20px;
-    height: 20px;
-    background: #fff;
-    border: solid 3px #eeeeee;
-    border-radius: 50%;
-    position: absolute;
-    left: 0;
-    top: 0;
-
-  }
-  .range-bar-container .end-labels:after{
-    content: "";
-    width: 20px;
-    height: 20px;
-    background: #fff;
-    border: solid 3px #eeeeee;
-    border-radius: 50%;
-    position: absolute;
-    right: 0;
-    top: 0;
-  }
-  .range-bar-container .a-b-labels{
-    position: relative;
-    font-weight: 700;
-    width: 100%;
-  }
-
-  .range-bar-container .a-b-labels:before{
-    content: 'A';
-    position: absolute;
-    display: block;
-    top: -10px;
-    left: 0;
-  }
-  .range-bar-container .a-b-labels:after{
-    content: 'B';
-    position: absolute;
-    display: block;
-    top: -10px;
-    right: 0;
-  }
   .range-bar-container{
     margin-bottom: 1rem;
   }

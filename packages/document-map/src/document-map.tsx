@@ -79,6 +79,7 @@ export type DocumentMapProps = BaseProps &
     backUrlContent?: string;
     backUrlText?: string;
     infoPopupButtonText?: string;
+    closedText?: string;
   };
 
 
@@ -109,6 +110,7 @@ function DocumentMap({
   loginText = 'Inloggen om deel te nemen aan de discussie',
   emptyListText = 'Nog geen reacties geplaatst',
   infoPopupButtonText = '',
+  closedText = 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
   ...props
 }: DocumentMapProps) {
 
@@ -264,9 +266,27 @@ function DocumentMap({
 
 
   const contentRef = useRef<HTMLDivElement>(null);
-  const [shortLengthError, setShortLengthError] = useState(false);
-  const [longLengthError, setLongLengthError] = useState(false);
   const [randomId, setRandomId] = useState('');
+  const [helpText, setHelpText] = useState('');
+
+  const characterHelpText = (count: number) => {
+    let helpText = '';
+
+    const min = props.comments?.descriptionMinLength || 0;
+    let minWarning = `Nog minimaal ${min - count} karakters`;
+
+    const max = props.comments?.descriptionMaxLength || Infinity;
+
+    if (count < min) {
+      helpText = minWarning;
+    } else if (count > max) {
+      helpText = `Je hebt ${count - max} karakters teveel`;
+    } else {
+      helpText = '';
+    }
+
+    setHelpText(helpText);
+  };
 
   const [toggleMarker, setToggleMarker] = useState(true);
 
@@ -303,16 +323,8 @@ function DocumentMap({
     e.preventDefault();
     e.stopPropagation();
 
-    setShortLengthError(false);
-    setLongLengthError(false);
+    characterHelpText(commentValue.length);
 
-    if (commentValue.length < props.comments?.descriptionMinLength) {
-      setShortLengthError(true);
-    }
-
-    if (commentValue.length > props.comments?.descriptionMaxLength) {
-      setLongLengthError(true);
-    }
     if (
       commentValue.length >= props.comments?.descriptionMinLength
       && commentValue.length <= props.comments?.descriptionMaxLength
@@ -338,8 +350,7 @@ function DocumentMap({
         setFilteredComments(addNewCommentToComments);
         setPopupPosition(null);
         setCommentValue('');
-        setShortLengthError(false);
-        setLongLengthError(false);
+        setHelpText('');
         setSelected([]);
         setSelectedCommentIndex(newIndex);
         setSelectedMarkerIndex(newIndex);
@@ -524,6 +535,43 @@ function DocumentMap({
       }
     };
 
+    const [showButton, setShowButton] = useState(false);
+    const containerRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+      const handleScroll = () => {
+        if (containerRef.current) {
+          const containerTop = containerRef.current.offsetTop;
+          const currentScroll = window.scrollY;
+
+          if (currentScroll > containerTop) {
+            setShowButton(true);
+          } else {
+            setShowButton(false);
+          }
+        }
+      };
+
+      window.addEventListener('scroll', handleScroll);
+
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+      };
+    }, []);
+
+    const scrollToTop = () => {
+      if (containerRef.current) {
+        const container = containerRef.current as HTMLElement;
+        const containerRect = container.getBoundingClientRect();
+        const scrollPosition = window.pageYOffset + containerRect.top;
+
+        window.scrollTo({
+          top: scrollPosition,
+          behavior: 'smooth',
+        });
+      }
+    };
+
     return (
       <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
         <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
@@ -575,7 +623,7 @@ function DocumentMap({
 
                   const firstTag = comment.tags && comment.tags[0];
                   const documentMapIconColor = firstTag && firstTag.documentMapIconColor ? firstTag.documentMapIconColor : '#555588';
-  
+
                   return (
                       <MarkerWithId
                           key={index}
@@ -612,8 +660,7 @@ function DocumentMap({
                     <form>
                       <div>
                         <FormLabel htmlFor="commentBox">{addCommentText}</FormLabel>
-                        {shortLengthError && <Paragraph className="--error">De reactie moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
-                        {longLengthError && <Paragraph className="--error">De reactie mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
+                        {helpText && <Paragraph className="--error">{helpText}</Paragraph>}
 
                         <Textarea
                           id="commentBox"
@@ -696,6 +743,7 @@ function DocumentMap({
                     progressBarDescription={
                       props.likeWidget?.progressBarDescription
                     }
+                    displayDislike={props.likeWidget?.displayDislike}
                   />
                   <Spacer size={1} />
                 </>
@@ -755,17 +803,20 @@ function DocumentMap({
           ) : null}
 
           {!isDefinitive && (
-            <Comments
-              {...props}
-              key={refreshComments ? 'refresh' : 'no-refresh'}
-              onlyIncludeTags={selectedTagsString || filteredTagsIdsString || ''}
-              resourceId={resourceId || ''}
-              selectedComment={selectedCommentIndex}
-              setRefreshComments={setRefreshComments}
-              showForm={false}
-              emptyListText={emptyListText}
-              loginText={loginText}
-            />
+            <div ref={containerRef}>
+              <Comments
+                {...props}
+                key={refreshComments ? 'refresh' : 'no-refresh'}
+                onlyIncludeTags={selectedTagsString || filteredTagsIdsString || ''}
+                resourceId={resourceId || ''}
+                selectedComment={selectedCommentIndex}
+                setRefreshComments={setRefreshComments}
+                showForm={false}
+                emptyListText={emptyListText}
+                loginText={loginText}
+                closedText={closedText}
+              />
+            </div>
           )}
         </div>
         <dialog className='helper-dialog'>
@@ -779,6 +830,13 @@ function DocumentMap({
             </Button>
           </div>
         </dialog>
+
+        <button
+            className={`back-to-top ${showButton ? "show" : ""}`}
+            onClick={scrollToTop}
+        >
+          <i className="ri-arrow-up-line"></i>
+        </button>
       </div>
 
     );
