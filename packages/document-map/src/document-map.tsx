@@ -78,7 +78,9 @@ export type DocumentMapProps = BaseProps &
     loginText?: string;
     backUrlContent?: string;
     backUrlText?: string;
-
+    infoPopupButtonText?: string;
+    openInfoPopupOnInit?: string;
+    closedText?: string;
   };
 
 
@@ -108,6 +110,9 @@ function DocumentMap({
   largeDoc = false,
   loginText = 'Inloggen om deel te nemen aan de discussie',
   emptyListText = 'Nog geen reacties geplaatst',
+  infoPopupButtonText = '',
+  openInfoPopupOnInit = 'no',
+  closedText = 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
   ...props
 }: DocumentMapProps) {
 
@@ -263,9 +268,27 @@ function DocumentMap({
 
 
   const contentRef = useRef<HTMLDivElement>(null);
-  const [shortLengthError, setShortLengthError] = useState(false);
-  const [longLengthError, setLongLengthError] = useState(false);
   const [randomId, setRandomId] = useState('');
+  const [helpText, setHelpText] = useState('');
+
+  const characterHelpText = (count: number) => {
+    let helpText = '';
+
+    const min = props.comments?.descriptionMinLength || 0;
+    let minWarning = `Nog minimaal ${min - count} karakters`;
+
+    const max = props.comments?.descriptionMaxLength || Infinity;
+
+    if (count < min) {
+      helpText = minWarning;
+    } else if (count > max) {
+      helpText = `Je hebt ${count - max} karakters teveel`;
+    } else {
+      helpText = '';
+    }
+
+    setHelpText(helpText);
+  };
 
   const [toggleMarker, setToggleMarker] = useState(true);
 
@@ -302,16 +325,8 @@ function DocumentMap({
     e.preventDefault();
     e.stopPropagation();
 
-    setShortLengthError(false);
-    setLongLengthError(false);
+    characterHelpText(commentValue.length);
 
-    if (commentValue.length < props.comments?.descriptionMinLength) {
-      setShortLengthError(true);
-    }
-
-    if (commentValue.length > props.comments?.descriptionMaxLength) {
-      setLongLengthError(true);
-    }
     if (
       commentValue.length >= props.comments?.descriptionMinLength
       && commentValue.length <= props.comments?.descriptionMaxLength
@@ -337,8 +352,7 @@ function DocumentMap({
         setFilteredComments(addNewCommentToComments);
         setPopupPosition(null);
         setCommentValue('');
-        setShortLengthError(false);
-        setLongLengthError(false);
+        setHelpText('');
         setSelected([]);
         setSelectedCommentIndex(newIndex);
         setSelectedMarkerIndex(newIndex);
@@ -512,14 +526,108 @@ function DocumentMap({
       }
     }
 
-    const toggleHelperDialog = (open: boolean) => {
-      const dialog = document.querySelector('dialog.helper-dialog') as HTMLDialogElement;
-      if (dialog) {
-        if (open) {
-          dialog.showModal();
+    const modalRef = useRef<HTMLDivElement | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [manualFocus, setManualFocus] = useState(false);
+
+    const setModalOpen = (state: boolean) => {
+      setIsModalOpen(state);
+      setManualFocus(state);
+    };
+
+    const trapFocus = (event: KeyboardEvent) => {
+      if (!modalRef.current || !isModalOpen) return;
+
+      const focusableElements = modalRef.current.querySelectorAll(
+          'a[href], button, textarea, input, select'
+      );
+      const firstElement = focusableElements[0] as HTMLElement;
+      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+      if (event.key === 'Tab') {
+        if (event.shiftKey) {
+          if (document.activeElement === firstElement) {
+            lastElement.focus();
+            event.preventDefault();
+          }
         } else {
-          dialog.close();
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            event.preventDefault();
+          }
         }
+      }
+    };
+
+    useEffect(() => {
+      const handleEsc = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          setModalOpen(false);
+        }
+      };
+
+      if (isModalOpen) {
+        document.addEventListener('keydown', trapFocus);
+        document.addEventListener('keydown', handleEsc);
+      } else {
+        document.removeEventListener('keydown', trapFocus);
+        document.removeEventListener('keydown', handleEsc);
+      }
+
+      return () => {
+        document.removeEventListener('keydown', trapFocus);
+        document.removeEventListener('keydown', handleEsc);
+      };
+    }, [isModalOpen]);
+
+    // Focus management when modal opens
+    useEffect(() => {
+      if (isModalOpen && modalRef.current && manualFocus) {
+        modalRef.current.focus();
+      }
+    }, [isModalOpen]);
+
+    useEffect(() => {
+      if (openInfoPopupOnInit === 'yes') {
+        setIsModalOpen(true);
+        setManualFocus(false);
+      }
+    }, []);
+  
+    const [showButton, setShowButton] = useState(false);
+    const containerRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+      const handleScroll = () => {
+        if (containerRef.current) {
+          const containerTop = containerRef.current.offsetTop;
+          const currentScroll = window.scrollY;
+
+          if (currentScroll > containerTop) {
+            setShowButton(true);
+          } else {
+            setShowButton(false);
+          }
+        }
+      };
+
+      window.addEventListener('scroll', handleScroll);
+
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+      };
+    }, []);
+
+    const scrollToTop = () => {
+      if (containerRef.current) {
+        const container = containerRef.current as HTMLElement;
+        const containerRect = container.getBoundingClientRect();
+        const scrollPosition = window.pageYOffset + containerRect.top;
+
+        window.scrollTo({
+          top: scrollPosition,
+          behavior: 'smooth',
+        });
       }
     };
 
@@ -574,7 +682,7 @@ function DocumentMap({
 
                   const firstTag = comment.tags && comment.tags[0];
                   const documentMapIconColor = firstTag && firstTag.documentMapIconColor ? firstTag.documentMapIconColor : '#555588';
-  
+
                   return (
                       <MarkerWithId
                           key={index}
@@ -611,8 +719,7 @@ function DocumentMap({
                     <form>
                       <div>
                         <FormLabel htmlFor="commentBox">{addCommentText}</FormLabel>
-                        {shortLengthError && <Paragraph className="--error">De reactie moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
-                        {longLengthError && <Paragraph className="--error">De reactie mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
+                        {helpText && <Paragraph className="--error">{helpText}</Paragraph>}
 
                         <Textarea
                           id="commentBox"
@@ -669,10 +776,36 @@ function DocumentMap({
               )}
             </MapContainer>
 
-            <Button className='info-trigger' appearance='primary-action-button' onClick={() => toggleHelperDialog(true)}>
+            <Button className={`info-trigger ${infoPopupButtonText ? 'button-has-text' : ''}`}
+                    appearance='primary-action-button' onClick={() => setModalOpen(true)}>
               <i className="ri-information-line"></i>
-              <span className="sr-only">Hoe werkt het?</span>
+              {infoPopupButtonText && (
+                  <span className="trigger-text">{infoPopupButtonText}</span>
+              )}
+              <span className="sr-only">{infoPopupButtonText || 'Hoe werkt het?'}</span>
             </Button>
+
+
+            <div className="modal-overlay" aria-hidden={isModalOpen ? "false" : "true"}>
+              <div
+                  ref={modalRef}
+                  className="modal"
+                  role="dialog"
+                  aria-labelledby="modal-title"
+                  aria-modal="true"
+                  tabIndex={-1}
+              >
+                <Heading level={2}>Hoe werkt het?</Heading>
+                <Paragraph>{infoPopupContent}</Paragraph>
+                <Spacer size={1}/>
+                <Button appearance='secondary-action-button' aria-label="Close Modal" onClick={() => setModalOpen(false)}>
+                  <i className="ri-close-fill"></i>
+                  <span>Info venster sluiten</span>
+                </Button>
+              </div>
+            </div>
+
+
           </div>
         </div>
         <div className="content document-map-info-container" ref={contentRef}>
@@ -692,6 +825,7 @@ function DocumentMap({
                     progressBarDescription={
                       props.likeWidget?.progressBarDescription
                     }
+                    displayDislike={props.likeWidget?.displayDislike}
                   />
                   <Spacer size={1} />
                 </>
@@ -751,30 +885,23 @@ function DocumentMap({
           ) : null}
 
           {!isDefinitive && (
-            <Comments
-              {...props}
-              key={refreshComments ? 'refresh' : 'no-refresh'}
-              onlyIncludeTags={selectedTagsString || filteredTagsIdsString || ''}
-              resourceId={resourceId || ''}
-              selectedComment={selectedCommentIndex}
-              setRefreshComments={setRefreshComments}
-              showForm={false}
-              emptyListText={emptyListText}
-              loginText={loginText}
-            />
+            <div ref={containerRef}>
+              <Comments
+                {...props}
+                key={refreshComments ? 'refresh' : 'no-refresh'}
+                onlyIncludeTags={selectedTagsString || filteredTagsIdsString || ''}
+                resourceId={resourceId || ''}
+                selectedComment={selectedCommentIndex}
+                setRefreshComments={setRefreshComments}
+                showForm={false}
+                emptyListText={emptyListText}
+                loginText={loginText}
+                closedText={closedText}
+              />
+            </div>
           )}
         </div>
-        <dialog className='helper-dialog'>
-          <div className="info-dialog">
-            <Heading level={2}>Hoe werkt het?</Heading>
-            <Paragraph>{infoPopupContent}</Paragraph>
-            <Spacer size={1} />
-            <Button appearance='secondary-action-button' onClick={() => toggleHelperDialog(false)}>
-              <i className="ri-close-fill"></i>
-              <span>Info venster sluiten</span>
-            </Button>
-          </div>
-        </dialog>
+
       </div>
 
     );
