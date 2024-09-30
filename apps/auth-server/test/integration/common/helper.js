@@ -54,7 +54,7 @@ module.exports = {
    * @returns {Promise} OAuthPassword resolved
    */
   postOAuthPassword : (scope) => {
-    const basicAuth = new Buffer(`${clientId}:${clientSecret}`).toString('base64');
+    const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
     return post(token, {
       form : {
         username,
@@ -74,7 +74,7 @@ module.exports = {
    * @returns {Promise}  post resolved
    */
   postOAuthClient: (scope) => {
-    const basicAuth = new Buffer(`${clientId}:${clientSecret}`).toString('base64');
+    const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
     return post(token, {
       form : {
         username,
@@ -94,7 +94,7 @@ module.exports = {
    * @returns {Promise} refresh token resolved
    */
   postRefeshToken: (refreshToken) => {
-    const basicAuth = new Buffer(`${clientId}:${clientSecret}`).toString('base64');
+    const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
     return post(
       token, {
         form : {
