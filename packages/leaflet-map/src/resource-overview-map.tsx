@@ -74,7 +74,7 @@ const ResourceOverviewMap = ({
     allResources.map((resource: any) => {
       // TODO: types/resource does not exist yet
       let marker: MarkerProps = {
-        location: { ...resource.location } || undefined,
+        location: resource?.location ? { ...resource.location } : undefined,
       };
       const markerLatLng: any = parseLocation(marker); // unify location format
       marker.lat = markerLatLng.lat;

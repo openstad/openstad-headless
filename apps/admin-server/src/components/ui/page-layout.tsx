@@ -13,7 +13,7 @@ export function PageLayout({
   breadcrumbs,
   action,
 }: {
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   pageHeader: string;
   breadcrumbs: any;
