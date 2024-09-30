@@ -50,12 +50,12 @@ spec:
                 name: {{ template "openstad.cms.secret.fullname" . }}
           - name: CMS_DEFAULTS
             value: "{}"
+          - name: NODE_ENV
+            value: development
           # Inject extra environment variables
           {{- if .Values.cms.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.cms.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}
-        command: ["/bin/sh", "-c"]
-        args: ["cd /opt/openstad-headless/apps/cms-server && node app @apostrophecms/asset:build && npm run start --prefix=${WORKSPACE}"]
         resources:
 {{ toYaml .Values.cms.resources | indent 12 }}
         volumeMounts:
