@@ -44,25 +44,33 @@
 
 // image component
 .image-component {
-  --image-height: 12.5rem;
   --image-width: 100%;
-  --image-object-fit: fill;
+  --image-object-fit: none;
 
   height: var(--image-height);
   object-fit: var(--image-object-fit);
   width: var(--image-width);
 
+  &.--xsmall {
+    --image-height: 9.375rem;
+  }
+
   &.--small {
-    --image-height: 12.5rem;
+    --image-height: 15.625rem;
   }
 
   &.--normal {
-    --image-height: 31.25rem;
+    --image-height: 21.875rem;
   }
 
   &.--large {
-    --image-height: 50rem;
+    --image-height: 28.125rem;
   }
+
+  &.--xlarge {
+    --image-height: 34.375rem;
+  }
+
 
   &.--contain {
     --image-object-fit: contain;
@@ -77,7 +85,7 @@
   }
 
   &.--none {
-    --image-object-fit: unset;
+    --image-object-fit: none;
   }
 }
 

@@ -31,16 +31,24 @@ module.exports = {
         label: 'Hoogte',
         choices: [
           {
-            label: 'klein',
+            label: 'Extra klein',
+            value: '--xsmall',
+          },
+          {
+            label: 'Klein',
             value: '--small',
           },
           {
-            label: 'middel',
+            label: 'Normaal',
             value: '--normal',
           },
           {
-            label: 'groot',
+            label: 'Groot',
             value: '--large',
+          },
+          {
+            label: 'Extra groot',
+            value: '--xlarge',
           }
         ],
         required: true,
@@ -48,7 +56,7 @@ module.exports = {
 
       objectFit: {
         type: 'select',
-        def: '--fill',
+        def: '--none',
         label: 'Weergave',
         choices: [
           {
