@@ -523,6 +523,26 @@ function DocumentMap({
       }
     };
 
+    const extendedBounds: LatLngBoundsLiteral = [
+      [imageBounds[0][0] + (docHeight * .2), imageBounds[0][1] + (docWidth * .2)],
+      [imageBounds[1][0] - (docHeight * .2), imageBounds[1][1] - (docWidth * .2)]
+    ];
+
+    const mapRef = useRef<any>(null);
+
+    useEffect(() => {
+      console.log( 'popupPosition', popupPosition );
+
+      const map = mapRef.current;
+      if (map) {
+        if (popupPosition) {
+          map.setMaxBounds( [] );
+        } else {
+          map.setMaxBounds(extendedBounds);
+        }
+      }
+    }, [popupPosition]);
+
     return (
       <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
         <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
@@ -560,12 +580,14 @@ function DocumentMap({
           )}
           <div className='document-container'>
             <MapContainer
-              center={[0, 0]}
-              crs={CRS.Simple}
-              maxZoom={maxZoom}
-              minZoom={minZoom}
-              zoom={zoom}
-              zoomSnap={0}
+                ref={mapRef}
+                center={[0, 0]}
+                crs={CRS.Simple}
+                maxZoom={maxZoom}
+                minZoom={minZoom}
+                zoom={zoom}
+                zoomSnap={0}
+                maxBounds={popupPosition ? [] : extendedBounds} // Zorg voor grotere bounds, zodat de afbeelding niet volledig uit beeld kan verdwijnen
             >
               <MapEvents />
               {filteredComments && filteredComments
@@ -591,7 +613,12 @@ function DocumentMap({
                 aria-describedby={randomId}
               />
               {popupPosition && !isDefinitive && (
-                <Popup position={popupPosition}>
+                <Popup
+                  position={popupPosition}
+                  eventHandlers={{
+                    popupclose: () => setPopupPosition(null),
+                  }}
+                >
                   {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
                     <>
                       <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
