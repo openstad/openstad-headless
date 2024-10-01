@@ -11,6 +11,22 @@ module.exports = function( req, res, next ) {
 	} catch(err) {	}
 
 	let allowedDomains = (req.project && req.project.config && req.project.config.allowedDomains) || config.allowedDomains;
+	allowedDomains = allowedDomains || [];
+
+	try {
+		const baseUrlHost = process.env.BASE_DOMAIN || process.env.HOSTNAME;
+console.log( 'BASE BASE BASE', baseUrlHost );
+
+		if ( !!baseUrlHost ) {
+			allowedDomains.push(baseUrlHost);
+			allowedDomains.push('auth.' + baseUrlHost);
+			allowedDomains.push('api.' + baseUrlHost);
+			allowedDomains.push('admin.' + baseUrlHost);
+		}
+	} catch(err) {
+		console.error('Error processing allowed domains:', err);
+	}
+
 	if ( !allowedDomains || allowedDomains.indexOf(domain) === -1) {
 		url = config.url || req.protocol + '://' + req.hostname;
 	}
