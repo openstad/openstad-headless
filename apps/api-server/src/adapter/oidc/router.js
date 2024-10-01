@@ -243,7 +243,6 @@ router
 
       try {
         const baseUrlHost = process.env.BASE_DOMAIN || process.env.HOSTNAME;
-console.log( 'BASE BASE BASE', baseUrlHost );
 
         if ( !!baseUrlHost ) {
           allowedDomains.push(baseUrlHost);
