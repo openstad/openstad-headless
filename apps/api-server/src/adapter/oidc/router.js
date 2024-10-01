@@ -250,14 +250,14 @@ router
           allowedDomains.push('api.' + baseUrlHost);
           allowedDomains.push('admin.' + baseUrlHost);
         }
-      } catch(err) {}
+      } catch(err) {
+        console.error('Error processing allowed domains:', err);
+      }
 
       let redirectUrlHost = '';
       try {
         redirectUrlHost = new URL(url).hostname;
-      } catch (err) {
-        console.error('Error processing allowed domains:', err);
-      }
+      } catch (err) {}
 
       // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
       return allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1;
