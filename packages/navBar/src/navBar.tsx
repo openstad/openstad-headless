@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -13,13 +13,24 @@ interface Item {
 
 function NavBar({ home, content, prefix = '' }: Item) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const event = new Event('navBarLoaded');
+    document.dispatchEvent(event);
+  }, [])
+
   return (
     <div className='container'>
       <nav id="main-menu">
         {home && (
           JSON.parse(home).map((item: any, index: number) => {
             return (
-              <Link className="level-1" key={index} href={item._url} aria-current="page">{item.title}</Link>
+              <div
+                key={index}
+                className="item-container"
+              >
+                <Link className="level-1" key={index} href={item._url} aria-current="page">{item.title}</Link>
+              </div>
             )
           })
         )}
