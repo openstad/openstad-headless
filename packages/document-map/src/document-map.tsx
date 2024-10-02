@@ -902,6 +902,13 @@ function DocumentMap({
           )}
         </div>
 
+        <button
+              className={`back-to-top ${showButton ? "show" : ""}`}
+              onClick={scrollToTop}
+          >
+            <i className="ri-arrow-up-line"></i>
+          </button>
+
       </div>
 
     );
