@@ -2,7 +2,9 @@ export default () => {
   apos.util.onReady(() => {
     const nav = document.querySelector('#navbar');
     const footer = document.querySelector('#footer-container');
-
+    
+    document.addEventListener('navBarLoaded', adjustMenu);
+    
     if (typeof nav !== 'undefined') {
       NavBar.NavBar.loadWidgetOnElement(nav, { ...nav.dataset });
     }
@@ -90,8 +92,4 @@ function adjustMenu() {
   });
 }
 
-window.onload = adjustMenu;
-window.onresize = adjustMenu;
-
-window.onload = adjustMenu;
 window.onresize = adjustMenu;
