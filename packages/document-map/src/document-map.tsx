@@ -691,7 +691,7 @@ function DocumentMap({
                 minZoom={minZoom}
                 zoom={zoom}
                 zoomSnap={0}
-                maxBounds={popupPosition ? [] : extendedBounds} // Zorg voor grotere bounds, zodat de afbeelding niet volledig uit beeld kan verdwijnen
+                maxBounds={popupPosition ? [] : extendedBounds}
             >
               <MapEvents />
               {filteredComments && filteredComments
