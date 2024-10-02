@@ -15,6 +15,9 @@ module.exports = `
       const script = document.createElement('script');
       script.src = '${reactDomJs}';
       script.onload = function() {
+        if (typeof window.createRoot === 'undefined' && typeof ReactDOM !== 'undefined' && typeof ReactDOM.createRoot !== 'undefined') {
+          window.createRoot = ReactDOM.createRoot;
+        }
         document.addEventListener('OpenStadReactLoaded', renderWidget);
         triggerEvent();
       }
