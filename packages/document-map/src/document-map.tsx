@@ -565,8 +565,6 @@ function DocumentMap({
     const mapRef = useRef<any>(null);
 
     useEffect(() => {
-      console.log( 'popupPosition', popupPosition );
-
       const map = mapRef.current;
       if (map) {
         if (popupPosition) {
