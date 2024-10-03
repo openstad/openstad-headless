@@ -47,7 +47,7 @@ export default function ProjectSettings() {
 
   const router = useRouter();
   const { project } = router.query;
-  const { data, isLoading, updateProject } = useProject();
+  const { data, isLoading, updateProject } = useProject(['includeInstallationUrls']);
 
   const [checkboxInitial, setCheckboxInitial] = useState(true);
   const [showUrl, setShowUrl] = useState(false);
@@ -150,9 +150,38 @@ export default function ProjectSettings() {
     toast.success(`${toastStart} gekopieerd naar klembord`);
   };
 
-  const apiUrl = process.env.API_URL;
+  const [apiUrl, setApiUrl] = useState('');
+  const [imgUrl, setImgUrl] = useState('');
+  const [cdnUrls, setCdnUrls] = useState<string[]>([]);
 
-  const cspHeader = `Content-Security-Policy: default-src 'self'; script-src 'self' ${apiUrl}; style-src 'self' ${apiUrl}; img-src 'self' data:; font-src 'self'; connect-src 'self';`;
+  useEffect(() => {
+    if (!data || typeof data == 'undefined') return;
+
+    setApiUrl(data.installationUrls?.api || '');
+    setImgUrl(data.installationUrls?.img || '');
+
+    const cdns = ['unpkg.com'];
+
+    if (process.env.REACT_CDN) {
+      let reactCdn = process.env.REACT_CDN;
+      if (!reactCdn.startsWith('http')) {
+        reactCdn = `https://${reactCdn}`;
+      }
+      cdns.push(new URL(reactCdn).host);
+    }
+
+    if (process.env.REACT_DOM_CDN) {
+      let reactDomCdn = process.env.REACT_DOM_CDN;
+      if (!reactDomCdn.startsWith('http')) {
+        reactDomCdn = `https://${reactDomCdn}`;
+      }
+      cdns.push(new URL(reactDomCdn).host);
+    }
+
+    setCdnUrls(cdns);
+  }, [data]);
+
+  const cspHeader = `Content-Security-Policy: default-src 'self'; script-src 'self' ${apiUrl} ${cdnUrls.join(' ')}; style-src 'self' ${apiUrl}; img-src 'self' ${imgUrl} data:; font-src 'self'; connect-src 'self';`;
 
   return (
     <div>
