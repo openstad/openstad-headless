@@ -135,6 +135,8 @@ services:
     environment:
       - APP_URL=${AUTH_APP_URL}
       - PORT=${AUTH_PORT}
+      - CMS_URL=${CMS_URL}
+      - BASE_DOMAIN=${BASE_DOMAIN}
       # - ADMIN_REDIRECT_URL=${AUTH_ADMIN_REDIRECT_URL}
       - DB_HOST=${AUTH_DB_HOST}
       - DB_USER=${AUTH_DB_USER}

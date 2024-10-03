@@ -75,6 +75,10 @@ router
     if (req.query.includeAreas) {
       req.scope.push('includeAreas');
     }
+    
+    if (req.query.includeInstallationUrls) {
+      req.scope.push('includeInstallationUrls');
+    }
 
     return next();
 

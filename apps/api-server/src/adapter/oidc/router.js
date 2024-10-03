@@ -7,6 +7,7 @@ const Sequelize = require('sequelize');
 const db = require('../../db');
 const service = require('./service');
 const isRedirectAllowed = require('../../services/isRedirectAllowed');
+const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
 
 let router = express.Router({mergeParams: true});
 
@@ -239,11 +240,12 @@ router
 
     // todo: deze afvanging moet veel eerder!!!
     const isAllowedRedirectDomain = (url, allowedDomains) => {
+      allowedDomains = prefillAllowedDomains(allowedDomains || []);
+
       let redirectUrlHost = '';
       try {
-        redirectUrlHost = new URL(url).hostname;
-      } catch (err) {
-      }
+        redirectUrlHost = new URL(url).host;
+      } catch (err) {}
 
       // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
       return allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1;

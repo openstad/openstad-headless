@@ -1,4 +1,5 @@
 const config = require('config');
+const prefillAllowedDomains = require('../services/prefillAllowedDomains');
 const URL    = require('url').URL;
 
 module.exports = function( req, res, next ) {
@@ -7,12 +8,14 @@ module.exports = function( req, res, next ) {
 
 	let domain = ''
 	try {
-		domain = new URL(url).hostname;
+		domain = new URL(url).host;
 	} catch(err) {	}
 
 	let allowedDomains = (req.project && req.project.config && req.project.config.allowedDomains) || config.allowedDomains;
+	allowedDomains = prefillAllowedDomains(allowedDomains || []);
+
 	if ( !allowedDomains || allowedDomains.indexOf(domain) === -1) {
-		url = config.url || req.protocol + '://' + req.hostname;
+		url = config.url || req.protocol + '://' + req.host;
 	}
 
 	if (config.dev && config.dev['Header-Access-Control-Allow-Origin'] && process.env.NODE_ENV == 'development') {

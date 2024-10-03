@@ -9,6 +9,52 @@ const memoryStorage = require('../../memoryStorage');
 const utils         = require('../../utils');
 const validate      = require('../../validate');
 
+const prefillAllowedDomains = function (allowedDomains) {
+  try {
+    if ( process.env.BASE_DOMAIN ) {
+      let baseDomain = process.env.BASE_DOMAIN;
+      if (baseDomain.indexOf('http') !== 0) {
+        baseDomain = 'https://' + baseDomain;
+      }
+      const baseUrl = new URL(baseDomain);
+      allowedDomains.push(baseUrl.host);
+    }
+    
+    if (process.env.APP_URL) {
+      let appUrl = process.env.APP_URL;
+      if (appUrl.indexOf('http') !== 0) {
+        appUrl = 'https://' + appUrl;
+      }
+      const url = new URL(appUrl);
+      allowedDomains.push(url.host);
+    }
+    
+    if (process.env.CMS_URL) {
+      const cmsUrl = new URL(process.env.CMS_URL);
+      allowedDomains.push(cmsUrl.host);
+    }
+    
+    if (process.env.API_URL) {
+      const apiUrl = new URL(process.env.API_URL);
+      allowedDomains.push(apiUrl.host);
+    }
+    
+    if (process.env.ADMIN_URL) {
+      let adminUrl = process.env.ADMIN_URL;
+      if (adminUrl.indexOf('http') !== 0) {
+        adminUrl = 'https://' + adminUrl;
+      }
+      const url = new URL(adminUrl);
+      allowedDomains.push(url.host);
+    }
+  } catch(err) {
+    console.error('Error processing allowed domains:', err);
+    return [...new Set(allowedDomains)];
+  }
+  
+  return [...new Set(allowedDomains)];
+}
+
 // Register supported grant types.
 //
 // OAuth 2.0 specifies a framework that allows users to grant client
@@ -174,8 +220,8 @@ exports.authorization = [
         /**
          * Check if redirectURI same host as registered
          */
-        const allowedDomains = client.allowedDomains ? client.allowedDomains : false;
-        const redirectUrlHost = new URL(redirectURI).hostname;
+        const allowedDomains = prefillAllowedDomains(client.allowedDomains ? client.allowedDomains : []);
+        const redirectUrlHost = new URL(redirectURI).host;
 
         //console.log('===> allowedDomains', allowedDomains, redirectUrlHost);
 
