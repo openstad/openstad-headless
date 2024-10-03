@@ -1,5 +1,12 @@
 export default () => {
   apos.util.onReady(() => {
+    const logoutDataElement = document.getElementById('logout-data');
+    window.logoutUrl = logoutDataElement.getAttribute('data-logout-url');
+    
+    if (typeof process == 'undefined') {
+      window.process = { env: {NODE_ENV: 'production'} };
+    }
+    
     const nav = document.querySelector('#navbar');
     const footer = document.querySelector('#footer-container');
     
@@ -14,6 +21,12 @@ export default () => {
     }
   });
 };
+
+window.setCookieConsent(allowCookies) {
+    var date = new Date();
+    document.cookie = "openstad-cookie-consent=" + (allowCookies ? '1' : '-1') + '; path=/; expires=Thu, 31 Dec '+(date.getFullYear() + 5)+' 23:59:00 UTC;';
+    document.location.reload();
+  };
 
 let isMobile = false;
 
