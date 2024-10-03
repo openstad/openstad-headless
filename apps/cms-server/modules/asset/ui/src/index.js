@@ -3,10 +3,6 @@ export default () => {
     const logoutDataElement = document.getElementById('logout-data');
     window.logoutUrl = logoutDataElement.getAttribute('data-logout-url');
     
-    if (typeof process == 'undefined') {
-      window.process = { env: {NODE_ENV: 'production'} };
-    }
-    
     const nav = document.querySelector('#navbar');
     const footer = document.querySelector('#footer-container');
     
@@ -21,6 +17,10 @@ export default () => {
     }
   });
 };
+
+if (typeof window.process == 'undefined') {
+  window.process = { env: {NODE_ENV: 'production'} };
+}
 
 window.setCookieConsent = function (allowCookies) {
     let date = new Date();
