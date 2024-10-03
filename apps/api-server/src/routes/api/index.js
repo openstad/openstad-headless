@@ -59,6 +59,8 @@ router.use( '/lock', require('./lock') );
 // To do test and fix log API
 //router.use( '/project/:projectId(\\d+)/log', require('./log') );
 
+router.use( '/upload', require('./upload') );
+
 router.use( '/image', require('./image-verification-link') );
 
 router.use( '/document', require('./document-verification-link') );

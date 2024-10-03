@@ -127,6 +127,11 @@ spec:
           - name: IMAGE_APP_URL
             value: https://{{ template "openstad.image.url" . }}
 
+          - name: IMAGE_APP_URL_INTERNAL
+            value: http://{{ printf "%s.%s.svc.cluster.local:%d" (include "openstad.image.fullname" .) .Release.Namespace (.Values.image.service.httpPort | int) }}
+
+
+
           - name: IMAGE_VERIFICATION_TOKEN
             valueFrom:
               secretKeyRef:
