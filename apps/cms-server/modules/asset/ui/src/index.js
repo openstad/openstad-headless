@@ -22,8 +22,8 @@ export default () => {
   });
 };
 
-window.setCookieConsent(allowCookies) {
-    var date = new Date();
+window.setCookieConsent = function (allowCookies) {
+    let date = new Date();
     document.cookie = "openstad-cookie-consent=" + (allowCookies ? '1' : '-1') + '; path=/; expires=Thu, 31 Dec '+(date.getFullYear() + 5)+' 23:59:00 UTC;';
     document.location.reload();
   };
