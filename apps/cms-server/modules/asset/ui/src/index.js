@@ -15,6 +15,22 @@ export default () => {
     if (typeof footer !== 'undefined') {
       Footer.Footer.loadWidgetOnElement(footer, { ...footer.dataset });
     }
+    
+    const allowCookieButton = document.querySelector('#allow-cookie-button');
+    if (allowCookieButton) {
+      allowCookieButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.setCookieConsent(true);
+      });
+    }
+    
+    const denyCookieButton = document.querySelector('#deny-cookie-button');
+    if (denyCookieButton) {
+      denyCookieButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.setCookieConsent(false);
+      });
+    }
   });
 };
 
