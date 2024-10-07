@@ -244,8 +244,8 @@ function DocumentMap({
   };
 
 
-  const [docWidth, setDocumentWidth] = useState<number>(1920);
-  const [docHeight, setDocumentHeight] = useState<number>(1080)
+  const [docWidth, setDocumentWidth] = useState<number>(0);
+  const [docHeight, setDocumentHeight] = useState<number>(0)
   const [isBoundsSet, setIsBoundsSet] = useState(false);
   const leafletMapRef = useRef<HTMLDivElement>(null);
 
@@ -260,12 +260,23 @@ function DocumentMap({
     setDocumentHeight(imageHeight);
   };
 
+  const [bounds, setBounds] = useState<Array<Array<number>> | null>(null);
 
-  const imageBounds: LatLngBoundsLiteral = [
-    [0, docWidth / 2],
-    [-docHeight, -docWidth / 2]
-  ];
+  useEffect(() => {
+    if (!docWidth || !docHeight) return;
 
+    const basicBounds: LatLngBoundsLiteral = [
+      [0, docWidth / 2],
+      [-docHeight, -docWidth / 2]
+    ];
+
+    const extendedBounds: LatLngBoundsLiteral = [
+      [basicBounds[0][0] + (docHeight * .2), basicBounds[0][1] + (docWidth * .2)],
+      [basicBounds[1][0] - (docHeight * .2), basicBounds[1][1] - (docWidth * .2)]
+    ];
+
+    setBounds(extendedBounds);
+  }, [docWidth, docHeight]);
 
   const contentRef = useRef<HTMLDivElement>(null);
   const [randomId, setRandomId] = useState('');
@@ -300,17 +311,18 @@ function DocumentMap({
       popupclose: () => {
         setSelectedCommentIndex(-1);
         setSelectedMarkerIndex(-1);
+        setPopupPosition(null);
       },
     });
 
 
     useEffect(() => {
-      if (map && imageBounds && !isBoundsSet) {
-        map.fitBounds(imageBounds);
+      if (map && bounds && !!docHeight && !!docWidth && !isBoundsSet) {
+        map.fitBounds(bounds);
         map.scrollWheelZoom.disable();
         setIsBoundsSet(true);
       }
-    }, [map, imageBounds, isBoundsSet]);
+    }, [map, bounds, isBoundsSet]);
 
     return null;
   };
@@ -557,10 +569,6 @@ function DocumentMap({
       }
     };
 
-    const extendedBounds: LatLngBoundsLiteral = [
-      [imageBounds[0][0] + (docHeight * .2), imageBounds[0][1] + (docWidth * .2)],
-      [imageBounds[1][0] - (docHeight * .2), imageBounds[1][1] - (docWidth * .2)]
-    ];
 
     const mapRef = useRef<any>(null);
 
@@ -570,7 +578,8 @@ function DocumentMap({
         if (popupPosition) {
           map.setMaxBounds( [] );
         } else {
-          map.setMaxBounds(extendedBounds);
+          map.fitBounds(bounds);
+          map.setMaxBounds(bounds);
         }
       }
     }, [popupPosition]);
@@ -647,7 +656,7 @@ function DocumentMap({
       }
     };
 
-    return (
+    return !bounds ? null : (
       <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
         <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
 
@@ -691,7 +700,7 @@ function DocumentMap({
                 minZoom={minZoom}
                 zoom={zoom}
                 zoomSnap={0}
-                maxBounds={popupPosition ? [] : extendedBounds}
+                maxBounds={popupPosition ? [] : bounds}
             >
               <MapEvents />
               {filteredComments && filteredComments
@@ -713,7 +722,7 @@ function DocumentMap({
                 })}
               <ImageOverlay
                 url={resource.images ? resource.images[0].url : ''}
-                bounds={imageBounds}
+                bounds={bounds}
                 aria-describedby={randomId}
               />
               {popupPosition && !isDefinitive && (
