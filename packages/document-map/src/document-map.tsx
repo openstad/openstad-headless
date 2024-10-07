@@ -250,8 +250,8 @@ function DocumentMap({
   };
 
 
-  const [docWidth, setDocumentWidth] = useState<number>(1920);
-  const [docHeight, setDocumentHeight] = useState<number>(1080)
+  const [docWidth, setDocumentWidth] = useState<number>(0);
+  const [docHeight, setDocumentHeight] = useState<number>(0)
   const [isBoundsSet, setIsBoundsSet] = useState(false);
   const leafletMapRef = useRef<HTMLDivElement>(null);
 
@@ -266,12 +266,23 @@ function DocumentMap({
     setDocumentHeight(imageHeight);
   };
 
+  const [bounds, setBounds] = useState<Array<Array<number>> | null>(null);
 
-  const imageBounds: LatLngBoundsLiteral = [
-    [0, docWidth / 2],
-    [-docHeight, -docWidth / 2]
-  ];
+  useEffect(() => {
+    if (!docWidth || !docHeight) return;
 
+    const basicBounds: LatLngBoundsLiteral = [
+      [0, docWidth / 2],
+      [-docHeight, -docWidth / 2]
+    ];
+
+    const extendedBounds: LatLngBoundsLiteral = [
+      [basicBounds[0][0] + (docHeight * .2), basicBounds[0][1] + (docWidth * .2)],
+      [basicBounds[1][0] - (docHeight * .2), basicBounds[1][1] - (docWidth * .2)]
+    ];
+
+    setBounds(extendedBounds as number[][]);
+  }, [docWidth, docHeight]);
 
   const contentRef = useRef<HTMLDivElement>(null);
   const [randomId, setRandomId] = useState('');
@@ -306,17 +317,18 @@ function DocumentMap({
       popupclose: () => {
         setSelectedCommentIndex(-1);
         setSelectedMarkerIndex(-1);
+        setPopupPosition(null);
       },
     });
 
 
     useEffect(() => {
-      if (map && imageBounds && !isBoundsSet) {
-        map.fitBounds(imageBounds);
+      if (map && bounds && !!docHeight && !!docWidth && !isBoundsSet) {
+        map.fitBounds(bounds as LatLngBoundsLiteral);
         map.scrollWheelZoom.disable();
         setIsBoundsSet(true);
       }
-    }, [map, imageBounds, isBoundsSet]);
+    }, [map, bounds, isBoundsSet]);
 
     return null;
   };
@@ -563,6 +575,21 @@ function DocumentMap({
       }
     };
 
+
+    const mapRef = useRef<any>(null);
+
+    useEffect(() => {
+      const map = mapRef.current;
+      if (map) {
+        if (popupPosition) {
+          map.setMaxBounds( [] );
+        } else {
+          map.fitBounds(bounds);
+          map.setMaxBounds(bounds);
+        }
+      }
+    }, [popupPosition]);
+
     useEffect(() => {
       const handleEsc = (event: KeyboardEvent) => {
         if (event.key === 'Escape') {
@@ -635,7 +662,7 @@ function DocumentMap({
       }
     };
 
-    return (
+    return !bounds ? null : (
       <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
         <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
 
@@ -672,12 +699,14 @@ function DocumentMap({
           )}
           <div className='document-container'>
             <MapContainer
-              center={[0, 0]}
-              crs={CRS.Simple}
-              maxZoom={maxZoom}
-              minZoom={minZoom}
-              zoom={zoom}
-              zoomSnap={0}
+                ref={mapRef}
+                center={[0, 0]}
+                crs={CRS.Simple}
+                maxZoom={maxZoom}
+                minZoom={minZoom}
+                zoom={zoom}
+                zoomSnap={0}
+                maxBounds={popupPosition ? undefined : bounds as LatLngBoundsLiteral}
             >
               <MapEvents />
               {filteredComments && filteredComments
@@ -699,11 +728,16 @@ function DocumentMap({
                 })}
               <ImageOverlay
                 url={resource.images ? resource.images[0].url : ''}
-                bounds={imageBounds}
+                bounds={bounds as LatLngBoundsLiteral}
                 aria-describedby={randomId}
               />
               {popupPosition && !isDefinitive && (
-                <Popup position={popupPosition}>
+                <Popup
+                  position={popupPosition}
+                  eventHandlers={{
+                    popupclose: () => setPopupPosition(null),
+                  }}
+                >
                   {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
                     <>
                       <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
