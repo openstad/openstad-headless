@@ -1,5 +1,3 @@
 {% if data.globalOpenStadUser %}
-<script>
-const globalOpenStadUser = {{data.globalOpenStadUser | dump | safe }}
-</script>
+<div id="global-openstad-user" data-id="{{data.globalOpenStadUser.id}}" data-role="{{data.globalOpenStadUser.role}}" data-jwt="{{data.globalOpenStadUser.jwt}}"></div>
 {% endif %}
