@@ -275,7 +275,7 @@ function DocumentMap({
       [basicBounds[1][0] - (docHeight * .2), basicBounds[1][1] - (docWidth * .2)]
     ];
 
-    setBounds(extendedBounds);
+    setBounds(extendedBounds as number[][]);
   }, [docWidth, docHeight]);
 
   const contentRef = useRef<HTMLDivElement>(null);
@@ -318,7 +318,7 @@ function DocumentMap({
 
     useEffect(() => {
       if (map && bounds && !!docHeight && !!docWidth && !isBoundsSet) {
-        map.fitBounds(bounds);
+        map.fitBounds(bounds as LatLngBoundsLiteral);
         map.scrollWheelZoom.disable();
         setIsBoundsSet(true);
       }
@@ -700,7 +700,7 @@ function DocumentMap({
                 minZoom={minZoom}
                 zoom={zoom}
                 zoomSnap={0}
-                maxBounds={popupPosition ? [] : bounds}
+                maxBounds={popupPosition ? undefined : bounds as LatLngBoundsLiteral}
             >
               <MapEvents />
               {filteredComments && filteredComments
@@ -722,7 +722,7 @@ function DocumentMap({
                 })}
               <ImageOverlay
                 url={resource.images ? resource.images[0].url : ''}
-                bounds={bounds}
+                bounds={bounds as LatLngBoundsLiteral}
                 aria-describedby={randomId}
               />
               {popupPosition && !isDefinitive && (
