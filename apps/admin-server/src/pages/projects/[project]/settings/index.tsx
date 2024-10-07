@@ -153,9 +153,16 @@ export default function ProjectSettings() {
   const [apiUrl, setApiUrl] = useState('');
   const [imgUrl, setImgUrl] = useState('');
   const [cdnUrls, setCdnUrls] = useState<string[]>([]);
+  const [cssUrl, setCssUrl] = useState('');
 
   useEffect(() => {
     if (!data || typeof data == 'undefined') return;
+
+    setCssUrl(data?.config?.project?.cssUrl || '');
+
+    if (data.config?.project?.cssUrl) {
+      setCssUrl(new URL(data.config.project.cssUrl).host);
+    }
 
     setApiUrl(data.installationUrls?.api || '');
     setImgUrl(data.installationUrls?.img || '');
@@ -181,7 +188,7 @@ export default function ProjectSettings() {
     setCdnUrls(cdns);
   }, [data]);
 
-  const cspHeader = `Content-Security-Policy: default-src 'self'; script-src 'self' ${apiUrl} ${cdnUrls.join(' ')}; style-src 'self' ${apiUrl}; img-src 'self' ${imgUrl} data:; font-src 'self'; connect-src 'self';`;
+  const cspHeader = `Content-Security-Policy: default-src 'self'; script-src 'self' ${apiUrl} ${cdnUrls.join(' ')}; style-src 'self' ${apiUrl} ${cdnUrls.join(' ')} ${cssUrl}; img-src 'self' ${imgUrl} data:; font-src ${cdnUrls.join(' ')} 'self'; connect-src ${apiUrl} 'self';`;
 
   return (
     <div>
