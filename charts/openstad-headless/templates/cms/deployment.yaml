@@ -51,7 +51,7 @@ spec:
           - name: CMS_DEFAULTS
             value: "{}"
           - name: NODE_ENV
-            value: development
+            value: production
           # Inject extra environment variables
           {{- if .Values.cms.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.cms.extraEnvVars "context" $) | nindent 10 }}
