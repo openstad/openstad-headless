@@ -1,7 +1,8 @@
 export default () => {
   apos.util.onReady(() => {
     const globalOpenstadUserElement = document.getElementById('global-openstad-user');
-    window.globalOpenstadUser = {...globalOpenstadUserElement.dataset};
+    
+    window.globalOpenStadUser = globalOpenstadUserElement ? {...globalOpenstadUserElement.dataset} : null;
     
     const logoutDataElement = document.getElementById('logout-data');
     window.logoutUrl = logoutDataElement.getAttribute('data-logout-url');
