@@ -193,6 +193,12 @@ function DocumentMap({
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCommentValue(e.target.value);
+
+    if (e.target.value.length > 0) {
+      characterHelpText(e.target.value.length);
+    } else {
+      setHelpText('');
+    }
   };
 
 
@@ -324,8 +330,6 @@ function DocumentMap({
   const addComment = async (e: any, position: any) => {
     e.preventDefault();
     e.stopPropagation();
-
-    characterHelpText(commentValue.length);
 
     if (
       commentValue.length >= props.comments?.descriptionMinLength
@@ -901,6 +905,13 @@ function DocumentMap({
             </div>
           )}
         </div>
+
+        <button
+              className={`back-to-top ${showButton ? "show" : ""}`}
+              onClick={scrollToTop}
+          >
+            <i className="ri-arrow-up-line"></i>
+          </button>
 
       </div>
 
