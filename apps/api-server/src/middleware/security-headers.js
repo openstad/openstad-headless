@@ -16,8 +16,15 @@ module.exports = function( req, res, next ) {
 
 	if ( !allowedDomains || allowedDomains.indexOf(domain) === -1) {
 		url = config.url || req.protocol + '://' + req.host;
+		
+		// Exception for URLs without project - we allow all origins
+		// see project middleware for list of exceptions
+		if (req.headers && req.headers.origin && (req.path.match('^(/api/repo|/api/template|/api/area|/api/widget|/api/image|/api/document|/api/widget-type|/widget|/api/upload|/$)') || req.path.match('^(/api/lock(/[^/]*)?)$') || (req.path.match('^(/api/user)') && req.method == 'GET'))) {
+				url = req.headers.origin;
+				console.log ('no project, allowing origin', url);
+			}
 	}
-
+	
 	if (config.dev && config.dev['Header-Access-Control-Allow-Origin'] && process.env.NODE_ENV == 'development') {
     res.header('Access-Control-Allow-Origin', config.dev['Header-Access-Control-Allow-Origin'] );
   } else {
