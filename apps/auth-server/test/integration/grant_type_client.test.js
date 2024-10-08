@@ -31,7 +31,7 @@ describe('Grant Type Client', () => {
 
 
   it('should get an 401 when asking for an access token', (done) => {
-    const basicAuth = new Buffer(`${clientId}:${clientSecret}`).toString('base64');
+    const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
     agent.post(token, {
       form: {
