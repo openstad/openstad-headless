@@ -89,7 +89,7 @@ function DataStore(props = {}) {
   self.mutate = async function (props, fetcherAsString, newData, options) {
     // TODO: meesturen mutate options
 
-    let fetcher = eval(`self.api.${fetcherAsString}`);
+    let fetcher = fetcherAsString.split('.').reduce((obj, key) => obj[key], self.api);
     let key = self.createKey(props, fetcherAsString);
 
     let defaultOptions = {
