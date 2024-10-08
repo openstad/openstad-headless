@@ -90,6 +90,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     resetText?: string;
     applyText?: string;
     onFilteredResourcesChange?: (filteredResources: any[]) => void;
+    displayLikeButton?: boolean;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -355,6 +356,7 @@ function ResourceOverview({
   onlyIncludeStatusIds = '',
   displayDocuments = false,
   showActiveTags = false,
+  displayLikeButton = false,
   documentsTitle = '',
   documentsDesc = '',
   displayVariant = '',
@@ -537,6 +539,7 @@ function ResourceOverview({
                 displayDocuments={displayDocuments}
                 documentsTitle={documentsTitle}
                 documentsDesc={documentsDesc}
+                displayLikeButton={displayLikeButton}
                 onRemoveClick={(resource) => {
                   try {
                     resource

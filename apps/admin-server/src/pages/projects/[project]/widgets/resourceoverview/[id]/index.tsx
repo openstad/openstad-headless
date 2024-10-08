@@ -29,6 +29,8 @@ import { ResourceOverviewMapWidgetTabProps } from '../../resourcesmap/[id]';
 import WidgetResourcesMapButton from '../../resourcesmap/[id]/buttons';
 import WidgetResourcesMapPolygons from '../../resourcesmap/[id]/polygons';
 import { extractConfig } from '@/lib/sub-widget-helper';
+import LikesDisplay from "@/pages/projects/[project]/widgets/likes/[id]/weergave";
+import {LikeWidgetTabProps} from "@/pages/projects/[project]/widgets/likes/[id]";
 
 export const getServerSideProps = withApiUrl;
 
@@ -91,6 +93,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="sorting">Sorteren</TabsTrigger>
               <TabsTrigger value="pagination">Paginering</TabsTrigger>
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
+              <TabsTrigger value="likes">Likes widget</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             {previewConfig ? (
@@ -165,6 +168,22 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                 </TabsContent>
                 <TabsContent value="include" className="p-0">
                   <WidgetResourceOverviewInclude {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="likes" className="p-0">
+                  {previewConfig && (
+                      <LikesDisplay
+                          omitSchemaKeys={['resourceId']}
+                          {...extractConfig<
+                              ResourceDetailWidgetProps,
+                              LikeWidgetTabProps
+                          >({
+                            subWidgetKey: 'likeWidget',
+                            previewConfig: previewConfig,
+                            updateConfig,
+                            updatePreview,
+                          })}
+                      />
+                  )}
                 </TabsContent>
                 <TabsContent value="publish" className="p-0">
                   <WidgetPublish apiUrl={apiUrl} />
