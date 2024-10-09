@@ -194,7 +194,7 @@ function ResourceDetailWithMap({
             )}
 
             {displayTitle && resource.title && (
-              <Heading level={1} appearance="utrecht-heading-2">{resource.title}</Heading>
+              <Heading level={1} appearance="utrecht-heading-2" dangerouslySetInnerHTML={{__html: resource.title}}/>
             )}
             <div className="osc-resource-detail-content-item-row">
               {displayUser && resource?.user?.displayName && (
@@ -229,9 +229,9 @@ function ResourceDetailWithMap({
               )}
             </div>
             <div className="resource-detail-content">
-              {displaySummary && <Heading level={2} appearance='utrecht-heading-4'>{resource.summary}</Heading>}
+              {displaySummary && <Heading level={2} appearance='utrecht-heading-4' dangerouslySetInnerHTML={{__html: resource.summary}} />}
               {displayDescription && (
-                <Paragraph>{resource.description}</Paragraph>
+                <Paragraph dangerouslySetInnerHTML={{__html: resource.description}}/>
               )}
             </div>
             {displaySocials ? (

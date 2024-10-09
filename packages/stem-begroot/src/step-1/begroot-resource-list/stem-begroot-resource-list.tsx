@@ -8,7 +8,7 @@ import {
   Spacer,
 } from '@openstad-headless/ui/src';
 
-import { elipsize } from '@openstad-headless/lib/ui-helpers';
+import {elipsizeHTML} from '@openstad-headless/lib/ui-helpers';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -97,9 +97,9 @@ export const StemBegrootResourceList = ({
                   </div>
                 </div>
               </section>
-              <Heading level={2} appearance="utrecht-heading-4">{resource.title}</Heading>
-              <Paragraph>{elipsize(resource.summary, 100)}</Paragraph>
-              <Paragraph>{elipsize(resource.description, 200)}</Paragraph>
+              <Heading level={2} appearance="utrecht-heading-4" dangerouslySetInnerHTML={{__html: resource.title}}/>
+              <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.summary, 100)}}/>
+              <Paragraph dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.description, 200)}}/>
 
               {
                 originalUrl ? (
