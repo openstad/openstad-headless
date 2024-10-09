@@ -29,6 +29,8 @@ import { ResourceOverviewMapWidgetTabProps } from '../../resourcesmap/[id]';
 import WidgetResourcesMapButton from '../../resourcesmap/[id]/buttons';
 import WidgetResourcesMapPolygons from '../../resourcesmap/[id]/polygons';
 import { extractConfig } from '@/lib/sub-widget-helper';
+import LikesDisplay from "@/pages/projects/[project]/widgets/likes/[id]/weergave";
+import {LikeWidgetTabProps} from "@/pages/projects/[project]/widgets/likes/[id]";
 
 export const getServerSideProps = withApiUrl;
 
@@ -91,6 +93,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="sorting">Sorteren</TabsTrigger>
               <TabsTrigger value="pagination">Paginering</TabsTrigger>
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
+              <TabsTrigger value="likes">Likes widget</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             {previewConfig ? (
@@ -165,6 +168,28 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                 </TabsContent>
                 <TabsContent value="include" className="p-0">
                   <WidgetResourceOverviewInclude {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="likes" className="p-0">
+                  {previewConfig && (
+                    <>
+                    <p style={{backgroundColor: 'orange', color: 'white', fontSize: '14px',  fontWeight: 'bold', marginBottom: '5px', padding: '5px 10px', width: 'auto', display: 'inline-block', borderRadius: '6px'}}>
+                      Let op! Deze instellingen zijn voor het type weergave &apos;Inzendingen op de huidige pagina tonen, in een dialog.&apos;<br />
+                      Bij het tabje &apos;Weergave&apos; moet je ook aangevinkt hebben dat je likes wilt tonen.
+                      Als beide niet zo zijn ingesteld, dan zullen de likes niet getoond worden.
+                    </p>
+                      <LikesDisplay
+                          omitSchemaKeys={['resourceId']}
+                          {...extractConfig<
+                              ResourceOverviewWidgetProps,
+                              LikeWidgetTabProps
+                          >({
+                            subWidgetKey: 'resourceOverviewMapWidget',
+                            previewConfig: previewConfig,
+                            updateConfig,
+                            updatePreview,
+                          })}
+                      /></>
+                  )}
                 </TabsContent>
                 <TabsContent value="publish" className="p-0">
                   <WidgetPublish apiUrl={apiUrl} />

@@ -43,6 +43,7 @@ const formSchema = z.object({
   displayVariant: z.string().optional(),
   applyText: z.string().optional(),
   resetText: z.string().optional(),
+  displayLikeButton: z.boolean(),
   // displayRanking: z.boolean(),
   // displayLabel: z.boolean(),
   // displayShareButtons: z.boolean(),
@@ -82,6 +83,7 @@ export default function WidgetResourceOverviewDisplay(
       displayVariant: props?.displayVariant,
       applyText: props?.applyText || 'Toepassen',
       resetText: props?.resetText || 'Reset',
+      displayLikeButton: props?.displayLikeButton || false,
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -495,6 +497,20 @@ export default function WidgetResourceOverviewDisplay(
                     }}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayLikeButton"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Like button weergeven in de dialog
+                </FormLabel>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
