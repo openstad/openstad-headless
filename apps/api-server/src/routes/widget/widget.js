@@ -214,7 +214,7 @@ function getDefaultConfig(project, widgetType) {
       url: logoutUrl,
     },
     projectId: project.id,
-    imageUrl: config.url + '/api/upload',
+    imageUrl: config.url + `/api/project/${project.id}/upload`,
   };
 
   if (widgetType == 'resourcedetailmap' || widgetType ==  'resourcesmap' || widgetType ==  'editormap' || widgetType ==  'resourceform') {

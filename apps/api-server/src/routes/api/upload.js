@@ -13,7 +13,7 @@ const imageProxyMw = createProxyMiddleware({
   target: imageAppUrl,
   changeOrigin: true,
   pathRewrite: {
-    '^/api/upload': '',
+    '^/api/project/([0-9]+)/upload': '',
   },
   headers: {
     'image-token': process.env.IMAGE_VERIFICATION_TOKEN,
