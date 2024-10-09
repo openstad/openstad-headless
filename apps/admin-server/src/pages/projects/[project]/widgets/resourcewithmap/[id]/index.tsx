@@ -26,6 +26,7 @@ import WidgetResourceOverviewTags from '../../resourceoverview/[id]/tags';
 import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
 import WidgetResourcesMapButtons from '../../resourcesmap/[id]/buttons';
 import WidgetResourcesMapPolygons from '../../resourcesmap/[id]/polygons';
+import WidgetResourcesMapDatalayers from '../../resourcesmap/[id]/datalayers';
 import { extractConfig } from '@/lib/sub-widget-helper';
 import { ResourceOverviewMapWidgetTabProps } from '../../resourcesmap/[id]';
 
@@ -145,6 +146,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
                       <TabsTrigger value="map">Kaart</TabsTrigger>
                       <TabsTrigger value="polygons">Polygonen</TabsTrigger>
+                      <TabsTrigger value="datalayers">Kaartlagen</TabsTrigger>
                       <TabsTrigger value="button">Knoppen</TabsTrigger>
                     </TabsList>
 
@@ -176,6 +178,19 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     </TabsContent>
                     <TabsContent value="polygons" className="p-0">
                       <WidgetResourcesMapPolygons
+                        {...extractConfig<
+                          ResourceOverviewWidgetProps,
+                          ResourceOverviewMapWidgetTabProps
+                        >({
+                          previewConfig,
+                          subWidgetKey: 'resourceOverviewMapWidget',
+                          updateConfig,
+                          updatePreview,
+                        })}
+                      />
+                    </TabsContent>
+                    <TabsContent value="datalayers" className="p-0">
+                      <WidgetResourcesMapDatalayers
                         {...extractConfig<
                           ResourceOverviewWidgetProps,
                           ResourceOverviewMapWidgetTabProps
