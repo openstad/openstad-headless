@@ -6,6 +6,10 @@ import { Sidenav } from './sidenav';
 import { SidenavProject } from './sidenav-project';
 import { useRouter } from 'next/router';
 
+function pathIsSpecificProject(pathname: string) {
+  return pathname.startsWith('/projects/[project]')
+}
+
 export function PageLayout({
   children,
   className,
@@ -19,25 +23,17 @@ export function PageLayout({
   breadcrumbs: any;
   action?: ReactNode;
 }) {
-  const [openSideMenu, setOpenSideMenu] = useState(false);
-
   const router = useRouter();
-  const [location, setLocation] = useState('');
-  const [hasProjectSidenav, setHasProjectSidenav] = useState(false);
+  const [hasProjectSidenav, setHasProjectSidenav] = useState(pathIsSpecificProject(router.pathname));
 
   useEffect(() => {
-    setHasProjectSidenav(location.startsWith('/projects/[project]'));
-  }, [location]);
-
-  useEffect(() => {
-    setLocation(router.pathname);
+    setHasProjectSidenav(pathIsSpecificProject(router.pathname));
   }, [router]);
 
   return (
     <main className="flex flex-row min-h-screen bg-muted">
       <Sidenav
         narrow={hasProjectSidenav}
-        className={openSideMenu ? 'translate-x-0' : ''}
       />
       {hasProjectSidenav ? <SidenavProject /> : null}
       <section className="col-span-full w-full">
