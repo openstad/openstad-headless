@@ -185,7 +185,8 @@ const BaseMap = ({
                   title: titel,
                   description: inhoud,
                   markerId: `${parseInt((Math.random() * 1e8).toString())}`,
-                  isVisible: true
+                  isVisible: true,
+                  isClustered: true,
                 };
 
                 markerData.icon = L.icon({
