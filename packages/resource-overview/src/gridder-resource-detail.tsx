@@ -108,9 +108,9 @@ export const GridderResourceDetail = ({
         <section className="osc-gridder-resource-detail-texts-and-actions-container">
           <div>
             <div>
-              <Heading1>{resource.title}</Heading1>
-              <Paragraph className="strong">{resource.summary}</Paragraph>
-              <Paragraph>{resource.description}</Paragraph>
+              <Heading1 dangerouslySetInnerHTML={{__html: resource.title}}></Heading1>
+              <Paragraph className="strong" dangerouslySetInnerHTML={{__html: resource.summary}}></Paragraph>
+              <Paragraph dangerouslySetInnerHTML={{__html: resource.description}}></Paragraph>
             </div>
           </div>
 
@@ -142,6 +142,25 @@ export const GridderResourceDetail = ({
           )}
           <Spacer size={2} />
           <div className="osc-gridder-resource-detail-actions">
+
+            { displayLikeButton && (
+              <Likes
+                {...props}
+                title={props.likeWidget?.title}
+                yesLabel={props.likeWidget?.yesLabel}
+                noLabel={props.likeWidget?.noLabel}
+                displayDislike={props.likeWidget?.displayDislike}
+                hideCounters={props.likeWidget?.hideCounters}
+                variant={props.likeWidget?.variant}
+                showProgressBar={props.likeWidget?.showProgressBar}
+                progressBarDescription={
+                  props.likeWidget?.progressBarDescription
+                }
+                resourceId={resource.id}
+                setRefreshComments={setRefreshComments}
+              />
+            )}
+
             <Button
               appearance="primary-action-button"
               disabled={!isModerator && !loginUrl}
@@ -155,22 +174,6 @@ export const GridderResourceDetail = ({
               }}>
               {isModerator ? 'Verwijder' : 'Inloggen'}
             </Button>
-
-            { displayLikeButton && (
-                <Likes
-                    {...props}
-                    title={props.likeWidget?.title}
-                    yesLabel={props.likeWidget?.yesLabel}
-                    noLabel={props.likeWidget?.noLabel}
-                    displayDislike={props.likeWidget?.displayDislike}
-                    hideCounters={props.likeWidget?.hideCounters}
-                    variant={props.likeWidget?.variant}
-                    showProgressBar={props.likeWidget?.showProgressBar}
-                    progressBarDescription={
-                      props.likeWidget?.progressBarDescription
-                    }
-                />
-            )}
 
           </div>
         </section>

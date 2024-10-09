@@ -552,6 +552,7 @@ function ResourceOverview({
                     console.error(e);
                   }
                 }}
+                {...props}
               />
             )}></Carousel>
         }
