@@ -23,7 +23,9 @@ const imageProxyMw = createProxyMiddleware({
 router
   .route('/images|/image|/document|/documents')
   .post((req, res, next) => {
-    if (!req.user) {
+    // check if req.user is set
+    if (!req.user || !req.user?.id) {
+      console.log ('upload path: no user found', req.user);
       return res.status(401).send('Unauthorized');
     }
     next();
