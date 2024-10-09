@@ -173,17 +173,17 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                   {previewConfig && (
                     <>
                     <p style={{backgroundColor: 'orange', color: 'white', fontSize: '14px',  fontWeight: 'bold', marginBottom: '5px', padding: '5px 10px', width: 'auto', display: 'inline-block', borderRadius: '6px'}}>
-                      Let op! Deze instellingen zijn voor het type weergave 'Inzendingen op de huidige pagina tonen, in een dialog.'<br />
-                      Bij het tabje 'Weergave' moet je ook aangevinkt hebben dat je likes wilt tonen.
+                      Let op! Deze instellingen zijn voor het type weergave &apos;Inzendingen op de huidige pagina tonen, in een dialog.&apos;<br />
+                      Bij het tabje &apos;Weergave&apos; moet je ook aangevinkt hebben dat je likes wilt tonen.
                       Als beide niet zo zijn ingesteld, dan zullen de likes niet getoond worden.
                     </p>
                       <LikesDisplay
                           omitSchemaKeys={['resourceId']}
                           {...extractConfig<
-                              ResourceDetailWidgetProps,
+                              ResourceOverviewWidgetProps,
                               LikeWidgetTabProps
                           >({
-                            subWidgetKey: 'likeWidget',
+                            subWidgetKey: 'resourceOverviewMapWidget',
                             previewConfig: previewConfig,
                             updateConfig,
                             updatePreview,

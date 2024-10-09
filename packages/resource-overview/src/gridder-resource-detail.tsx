@@ -157,7 +157,6 @@ export const GridderResourceDetail = ({
                   props.likeWidget?.progressBarDescription
                 }
                 resourceId={resource.id}
-                setRefreshComments={setRefreshComments}
               />
             )}
 
