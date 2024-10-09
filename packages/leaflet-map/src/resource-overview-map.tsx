@@ -14,7 +14,7 @@ import './css/resource-overview-map.css';
 
 import type { MarkerProps } from './types/marker-props';
 import type { CategoriesType } from './types/categorize';
-import type { ResourceOverviewMapWidgetProps } from './types/resource-overview-map-widget-props';
+import type {DataLayer, ResourceOverviewMapWidgetProps } from './types/resource-overview-map-widget-props';
 import { BaseMap } from './base-map';
 import React, { useState } from 'react';
 import { LocationType } from '@openstad-headless/leaflet-map/src/types/location.js';
@@ -149,6 +149,29 @@ const ResourceOverviewMap = ({
       ? (areas.find((area) => area.id.toString() === areaId) || {}).polygon
       : [];
 
+  const { data: datalayers } = datastore.useDatalayer({
+    projectId: props.projectId,
+  });
+
+  const mapDataLayers: { layer: any; icon?: any }[] = [];
+  const selectedDataLayers = props?.resourceOverviewMapWidget?.datalayer || [];
+
+  if (selectedDataLayers && Array.isArray(selectedDataLayers) && Array.isArray(datalayers) && datalayers.length > 0) {
+    selectedDataLayers.forEach((selectedDataLayer: DataLayer) => {
+      const foundDatalayer = datalayers.find((datalayer: DataLayer) => {
+        const isMatch = datalayer.id === selectedDataLayer.id;
+        return isMatch;
+      });
+
+      if (foundDatalayer) {
+        mapDataLayers.push({
+          layer: foundDatalayer.layer,
+          icon: foundDatalayer.icon,
+        });
+      }
+    });
+  }
+
   function calculateCenter(polygon: Point[] | Point[][]) {
     if (!polygon || polygon.length === 0) {
       return undefined;
@@ -205,6 +228,7 @@ const ResourceOverviewMap = ({
         {...props}
         {...zoom}
         area={polygon}
+        mapDataLayers={mapDataLayers}
         autoZoomAndCenter="area"
         categorize={{ categories, categorizeByField }}
         center={center}

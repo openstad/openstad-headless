@@ -67,6 +67,9 @@ router.use( '/document', require('./document-verification-link') );
 router.use( '/project/:projectId(\\d+)/area', require('./area') );
 router.use( '/area', require('./area') );
 
+router.use( '/project/:projectId(\\d+)/datalayer', require('./datalayer') );
+router.use( '/datalayer', require('./datalayer') );
+
 router.use( '/repo', require('./template') ); // backwards compatibility
 router.use( '/template', require('./template') );
 

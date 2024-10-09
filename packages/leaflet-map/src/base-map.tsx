@@ -20,6 +20,7 @@ import './css/base-map.css';
 import type { MarkerProps } from './types/marker-props';
 import type { LocationType } from './types/location';
 import React from 'react';
+import L from 'leaflet';
 
 const BaseMap = ({
   iconCreateFunction = undefined,
@@ -58,6 +59,7 @@ const BaseMap = ({
   width = '100%',
   height = undefined,
   customPolygon = [],
+  mapDataLayers = [],
   ...props
 }: PropsWithChildren<BaseMapWidgetProps & { onClick?: (e: LeafletMouseEvent & { isInArea: boolean }, map: object) => void }>) => {
   const definedCenterPoint =
@@ -159,18 +161,56 @@ const BaseMap = ({
 
   // markers
   useEffect(() => {
-    if (markers.length == 0 && currentMarkers.length == 0) return;
+    if ((markers.length === 0 && currentMarkers.length === 0) && mapDataLayers.length === 0) return;
 
     let result = [...markers];
+
+    if (mapDataLayers.length > 0) {
+      mapDataLayers?.forEach((dataLayer: any) => {
+        const records = dataLayer?.layer?.result?.records;
+
+        if (records && Array.isArray(records)) {
+          records.forEach((record) => {
+            const {lat, lon, titel, inhoud} = record;
+            const long = lon || record.long
+
+            if (lat && long) {
+              let icon = dataLayer?.icon;
+              icon = (!!icon && icon.length > 0) ? icon[0].url : undefined;
+
+              if (icon) {
+                let markerData: MarkerProps = {
+                  lat,
+                  lng: long,
+                  title: titel,
+                  description: inhoud,
+                  markerId: `${parseInt((Math.random() * 1e8).toString())}`,
+                  isVisible: true,
+                  isClustered: true,
+                };
+
+                markerData.icon = L.icon({
+                  iconUrl: icon,
+                  iconSize: [30, 40],
+                  iconAnchor: [15, 40],
+                  className: 'custom-image-icon',
+                });
+
+                result.push(markerData);
+              }
+            }
+          });
+        }
+      });
+    }
+
     result.map((marker, i) => {
       // unify location format
       parseLocation(marker);
 
       // add
       let markerData: MarkerProps = { ...marker };
-      markerData.markerId = `${parseInt(
-        (Math.random() * 1e8) as any as string
-      )}`;
+      markerData.markerId = `${parseInt((Math.random() * 1e8).toString())}`;
 
       // iconCreateFunction
       markerData.iconCreateFunction =
@@ -220,9 +260,7 @@ const BaseMap = ({
     });
 
     setCurrentMarkers(result);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [markers]);
+  }, [markers, mapDataLayers]);
 
   let clusterMarkers: MarkerProps[] = [];
 

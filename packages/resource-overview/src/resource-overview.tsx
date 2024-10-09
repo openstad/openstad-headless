@@ -23,7 +23,7 @@ import {
   Paragraph,
   Button,
 } from '@utrecht/component-library-react';
-import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
+import { ResourceOverviewMapWidgetProps, dataLayerArray } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -32,7 +32,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     resourceOverviewMapWidget?: Omit<
       ResourceOverviewMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'projectId'
-    >;
+    > & dataLayerArray;
     renderHeader?: (
       widgetProps: ResourceOverviewWidgetProps,
       resources?: any,

@@ -21,19 +21,28 @@ export default function MarkerIcon({
   // todo: afvangen of icon en defaultIcon nu al een LeafletIcon of LeafletDivIcon zijn
 
   if (!icon) icon = defaultIcon;
-  
+
   if (icon) {
+    let iconOptions = icon.options || icon;
 
     try {
-      icon = JSON.parse(icon as string);
-    } catch(err) {}
+      iconOptions = JSON.parse(iconOptions as string);
+    } catch (err) {
+      // Het icoon is geen JSON, ga verder met de huidige waarde
+    }
 
-    if (!icon.iconSize && icon.width && icon.height) icon.iconSize = [icon.width, icon.height]
-    if (!icon.iconAnchor && icon.anchor) icon.iconAnchor = icon.anchor;
+    if (!iconOptions.iconSize && iconOptions.width && iconOptions.height) {
+      iconOptions.iconSize = [iconOptions.width, iconOptions.height];
+    }
+    if (!iconOptions.iconAnchor && iconOptions.anchor) {
+      iconOptions.iconAnchor = iconOptions.anchor;
+    }
 
-    if (icon.iconUrl) result = new LeafletIcon(icon);
-    if (icon.html) result = LeafletDivIcon(icon);
-
+    if (iconOptions.iconUrl) {
+      result = new LeafletIcon(iconOptions);
+    } else if (iconOptions.html) {
+      result = LeafletDivIcon(iconOptions);
+    }
   }
 
   if (!result) {

@@ -13,7 +13,7 @@ const getProjectId = (path) => {
 module.exports = function( req, res, next ) {
 
   // deze paden mogen dit overslaan
-  if (req.path.match('^(/api/repo|/api/template|/api/area|/api/widget|/api/image|/api/document|/api/widget-type|/widget|/$)')) return next();
+  if (req.path.match('^(/api/repo|/api/template|/api/area|/api/datalayer|/api/widget|/api/image|/api/document|/api/widget-type|/widget|/$)')) return next();
   if (req.path.match('^(/api/lock(/[^/]*)?)$')) return next();
   if ((req.path.match('^(/api/user)') && ( req.method == 'GET' ))) return next();
 

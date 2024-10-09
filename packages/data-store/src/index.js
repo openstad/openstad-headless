@@ -5,6 +5,7 @@ import API from './api';
 import useResource from './hooks/use-resource.js';
 import useChoicesguide from './hooks/use-choicesguide';
 import useArea from './hooks/use-area.js';
+import useDatalayer from './hooks/use-datalayer.js';
 import useAreas from './hooks/use-areas.js';
 import useComments from './hooks/use-comments.js';
 import useResources from './hooks/use-resources.js';
@@ -32,6 +33,7 @@ function DataStore(props = {}) {
   self.useComments = useComments.bind(self);
   self.useResources = useResources.bind(self);
   self.useArea = useArea.bind(self);
+  self.useDatalayer = useDatalayer.bind(self);
   self.useAreas = useAreas.bind(self);
   self.useTags = useTags.bind(self);
   self.useCurrentUser = useCurrentUser.bind(self);
