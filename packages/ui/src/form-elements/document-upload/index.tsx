@@ -17,6 +17,7 @@ import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import {Spacer} from "../../spacer";
+import DataStore from '@openstad-headless/data-store/src';
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview, FilePondPluginFileValidateType);
 
 const filePondSettings = {
@@ -93,6 +94,7 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
    infoImage = '',
     ...props
 }) => {
+    const datastore = new DataStore({ props });
     const randomID =
         Math.random().toString(36).substring(2, 15) +
         Math.random().toString(36).substring(2, 15);
@@ -209,6 +211,9 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                         process: {
                             url: props?.imageUrl + '/documents',
                             method: 'POST',
+                            headers: {
+                                'Authorization': 'Bearer ' + datastore.api?.currentUserJWT,
+                            },
                             onload: (response: any) => {
                                 const currentDocuments = [...uploadedDocuments];
                                 currentDocuments.push(JSON.parse(response)[0]);
