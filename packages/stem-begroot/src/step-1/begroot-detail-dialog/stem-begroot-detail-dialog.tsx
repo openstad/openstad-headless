@@ -147,9 +147,9 @@ export const StemBegrootResourceDetailDialog = ({
 
                     <div>
                       <div>
-                        <Heading1>{resource.title}</Heading1>
-                        <Paragraph className="strong">{resource.summary}</Paragraph>
-                        <Paragraph>{resource.description}</Paragraph>
+                        <Heading1 dangerouslySetInnerHTML={{__html: resource.title}}/>
+                        <Paragraph className="strong" dangerouslySetInnerHTML={{__html: resource.summary}}/>
+                        <Paragraph dangerouslySetInnerHTML={{__html: resource.description}}/>
                       </div>
                     </div>
 
