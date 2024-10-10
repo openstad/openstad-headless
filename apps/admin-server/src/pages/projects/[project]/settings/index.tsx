@@ -167,7 +167,7 @@ export default function ProjectSettings() {
     setApiUrl(data.installationUrls?.api || '');
     setImgUrl(data.installationUrls?.img || '');
 
-    const cdns = ['unpkg.com'];
+    const cdns = ['unpkg.com', 'openstad-cdn.nl'];
 
     if (process.env.REACT_CDN) {
       let reactCdn = process.env.REACT_CDN;
