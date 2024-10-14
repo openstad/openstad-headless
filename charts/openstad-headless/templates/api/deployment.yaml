@@ -134,8 +134,8 @@ spec:
                 name: {{ template "openstad.image.secret.fullname" . }}
           
           - name: NODE_ENV
-            value: development
-          
+            value: production
+
           - name: CMS_URL
             value: https://{{ template "openstad.cms.url" . }}
 
@@ -297,7 +297,7 @@ spec:
                   name: {{ template "openstad.image.secret.fullname" . }}
             
             - name: NODE_ENV
-              value: development
+              value: production
 
             - name: CMS_URL
               value: https://{{ template "openstad.cms.url" . }}
