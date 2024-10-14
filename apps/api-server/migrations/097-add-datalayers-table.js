@@ -16,7 +16,7 @@ module.exports = {
       },
       layer: {
         type: Sequelize.JSON,
-        allowNull: false,
+        allowNull: true,
       },
       icon: {
         type: Sequelize.JSON,

@@ -5,13 +5,19 @@ export default function useArea(layerId?: string) {
 
     const datalayerSwr = useSWR( url );
 
-    async function updateDatalayer(name: string, layer: string, icon: any) {
+    async function updateDatalayer(data: { name: string; layer?: string; icon?: { url: string }[]; webserviceUrl?: string; useRealtimeWebservice?: boolean }) {
         const res = await fetch(url, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ name: name, layer: JSON.parse(layer), icon: icon}),
+            body: JSON.stringify({
+                name: data.name,
+                layer: data.layer ? JSON.parse(data.layer) : null,
+                icon: data.icon || [],
+                webserviceUrl: data.webserviceUrl || null,
+                useRealtimeWebservice: data.useRealtimeWebservice || false
+            }),
         });
 
         return await res.json();

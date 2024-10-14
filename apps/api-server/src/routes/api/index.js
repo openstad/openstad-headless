@@ -73,4 +73,10 @@ router.use( '/datalayer', require('./datalayer') );
 router.use( '/repo', require('./template') ); // backwards compatibility
 router.use( '/template', require('./template') );
 
+// proxy for the leaflet datalayer webservice. This retrieves the data from the webservice and returns it to the client
+router.use( '/proxy', require('./proxy') );
+
+// update datalayer with new data from webservice
+router.use( '/update-datalayer', require('./update-datalayer') );
+
 module.exports = router;

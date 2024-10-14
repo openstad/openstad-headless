@@ -15,8 +15,19 @@ module.exports = function (db, sequelize, DataTypes) {
 
       layer: {
         type: DataTypes.JSON,
-        allowNull: false,
+        allowNull: true,
         defaultValue: {},
+      },
+
+      useRealtimeWebservice: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        defaultValue: false,
+      },
+
+      webserviceUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
 
       icon: {

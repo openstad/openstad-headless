@@ -5,13 +5,19 @@ export default function useDatalayers(projectId?: string) {
 
     const datalayerSwr = useSWR(projectId ? url : null);
 
-    async function createDatalayer(name: string, layer: string) {
-        const res = await fetch(url, {
+    async function createDatalayer(data: { name: string; layer?: string; icon?: { url: string }[]; webserviceUrl?: string; useRealtimeWebservice?: boolean }) {
+        const res = await fetch(url!, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ name: name, layer: JSON.parse(layer) }),
+            body: JSON.stringify({
+                name: data.name,
+                layer: data.layer ? JSON.parse(data.layer) : null,
+                icon: data.icon || [],
+                webserviceUrl: data.webserviceUrl || null,
+                useRealtimeWebservice: data.useRealtimeWebservice || false
+            }),
         });
         return await res.json();
     }

@@ -40,7 +40,6 @@ router.route('/')
   .post(auth.can('Datalayer', 'create'))
   .post(function(req, res, next) {
     if (!req.body.name) return next(createError(401, 'Geen naam opgegeven'));
-    if (!req.body.layer) return next(createError(401, 'Geen kaartlaag opgegeven'));
     return next();
   })
   .post(function(req, res, next) {

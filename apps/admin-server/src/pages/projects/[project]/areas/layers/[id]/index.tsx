@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import {useFieldArray, useForm} from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -20,8 +20,9 @@ import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/router';
 import useDatalayer from '@/hooks/use-datalayer';
 import toast from 'react-hot-toast';
-import {ImageUploader} from "@/components/image-uploader";
-import {X} from "lucide-react";
+import { ImageUploader } from "@/components/image-uploader";
+import { X } from "lucide-react";
+import {undefinedToTrueOrProp, YesNoSelect} from "@/lib/form-widget-helpers";
 
 const formSchema = z.object({
   name: z.string(),
@@ -30,6 +31,8 @@ const formSchema = z.object({
     .array(z.object({ url: z.string() }))
     .optional()
     .default([]),
+  webserviceUrl: z.string().optional(),
+  useRealtimeWebservice: z.boolean().default(false),
   iconUploader: z.string(),
 });
 
@@ -39,12 +42,17 @@ export default function ProjectDatalayerEdit() {
   const { data, isLoading, updateDatalayer } = useDatalayer(
     id as string
   );
+  const [isLoadingWebserviceData, setIsLoadingWebserviceData] = useState(false);
+  const [fetchError, setFetchError] = useState('');
+  const [progress, setProgress] = useState(0);
 
   const defaults = useCallback(
     () => ({
-      name: data?.name || null,
-      layer: JSON.stringify(data?.layer),
-      icon: data?.icon || null,
+      name: data?.name || '',
+      layer: JSON.stringify(data?.layer) || '',
+      icon: data?.icon || [],
+      webserviceUrl: data?.webserviceUrl || '',
+      useRealtimeWebservice: undefinedToTrueOrProp(data?.useRealtimeWebservice),
       iconUploader: '',
     }),
     [data]
@@ -56,7 +64,7 @@ export default function ProjectDatalayerEdit() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const datalayer = await updateDatalayer(values.name, values.layer, values.icon);
+    const datalayer = await updateDatalayer({ ...values });
 
     if (datalayer) {
       toast.success('Kaartlaag aangepast!');
@@ -74,6 +82,89 @@ export default function ProjectDatalayerEdit() {
     control: form.control,
     name: 'icon',
   });
+
+  function updateProgress(value: number) {
+    setProgress((prev) => Math.min(prev + value, 100));
+  }
+
+  function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async function getSupportedParams(url: string) {
+    const testParams = [
+      { key: 'limit', value: 999999 },
+      { key: 'page_size', value: 999999 },
+      { key: 'all', value: true },
+      { key: 'fetch_all', value: true },
+      { key: 'offset', value: 0 },
+      { key: 'page', value: 1 },
+      { key: 'sort', value: 'created_at desc' }
+    ];
+
+    const supportedParams = {};
+    const increment = 100 / (testParams.length - 1);
+
+    for (const param of testParams) {
+      // Wait a bit to prevent rate limiting (and to make the progress bar more interesting)
+      await sleep(200);
+
+      const testUrl = new URL(url, 'http://localhost');
+      testUrl.searchParams.append(param.key, String(param.value));
+
+      const encodedUrl = encodeURIComponent(testUrl.toString());
+      const proxyUrl = `/api/openstad/api/proxy?url=${encodedUrl}`;
+
+      try {
+        const response = await fetch(proxyUrl);
+        if (response.ok) {
+          // Parameter wordt ondersteund
+          supportedParams[param.key] = param.value;
+        }
+      } catch (error) {
+      }
+
+      updateProgress(increment);
+    }
+
+    return supportedParams;
+  }
+
+  async function getWebserviceData() {
+    const webserviceUrl = form.getValues('webserviceUrl');
+    if (!webserviceUrl) {
+      toast.error('Voer eerst een geldige Webservice URL in.');
+      return;
+    }
+
+    setIsLoadingWebserviceData(true);
+    setFetchError('');
+    setProgress(0);
+
+    try {
+      const supportedParams = await getSupportedParams(webserviceUrl);
+      const urlObj = new URL(webserviceUrl, 'http://localhost');
+
+      for (const [key, value] of Object.entries(supportedParams)) {
+        urlObj.searchParams.append(key, String(value));
+      }
+
+      const encodedUrl = encodeURIComponent(urlObj.toString());
+
+      const response = await fetch(`/api/openstad/api/proxy?url=${encodedUrl}`);
+      if (!response.ok) {
+        throw new Error('Fout bij het ophalen van de data.');
+      }
+      const data = await response.json();
+      form.setValue('layer', JSON.stringify(data, null, 2));
+      toast.success('Webservice succesvol opgehaald!');
+    } catch (error) {
+      setFetchError('Kan de webservice niet bereiken.');
+    } finally {
+      setIsLoadingWebserviceData(false);
+      setTimeout(() => setProgress(0), 1000);
+    }
+  }
 
   return (
     <div>
@@ -154,19 +245,79 @@ export default function ProjectDatalayerEdit() {
                 )}
               </div>
 
+
               <FormField
                 control={form.control}
-                name="layer"
-                render={({field}) => (
+                name="useRealtimeWebservice"
+                render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Kaartlaag</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="" {...field} />
-                    </FormControl>
-                    <FormMessage/>
+                    <FormLabel>
+                      Wil je dat de data wordt opgehaald via een webservice?
+                    </FormLabel>
+                    {YesNoSelect(field, {})}
                   </FormItem>
                 )}
               />
+
+              { form.watch('useRealtimeWebservice') && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="webserviceUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Webservice URL</FormLabel>
+                        <FormDescription>
+                          Vul hier de URL in van de webservice die je wilt gebruiken om realtime data op te halen.
+                          Wanneer deze optie is ingeschakeld, zal de webservice automatisch gegevens blijven ophalen en bijwerken.
+                          De opgegeven URL moet verwijzen naar een API of andere service die actuele gegevens levert.
+                          Zorg ervoor dat de URL correct is en dat de webservice beschikbaar is, zodat de data succesvol kan worden opgehaald en weergegeven.
+                          Je kunt controleren of de webservice correct werkt door op de knop 'Haal data op' te klikken.
+                        </FormDescription>
+                        <FormControl>
+                          <Input placeholder="" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    onClick={getWebserviceData}
+                    disabled={isLoadingWebserviceData}
+                    className="mt-2"
+                  >
+                    {isLoadingWebserviceData ? 'Laden...' : 'Haal data op'}
+                  </Button>
+                  {isLoadingWebserviceData && (
+                    <div className="relative w-full h-2 bg-gray-200 rounded">
+                      <div
+                        className="absolute top-0 left-0 h-full bg-blue-500 rounded transition-width duration-500"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  )}
+                  {fetchError && <p className="text-red-500 mt-2">{fetchError}</p>}
+                </>
+              )}
+
+              <FormField
+                control={form.control}
+                name="layer"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kaartlaag</FormLabel>
+                    <p>
+                      Hier kun je een kaartlaag toevoegen. Een kaartlaag is een extra set informatie die je op de kaart wilt tonen, bijvoorbeeld een route, punten of gebieden. Om deze kaartlaag te maken, moet je een JSON-bestand uploaden.
+                    </p>
+                    <FormControl>
+                      <Textarea placeholder="" {...field} rows={12}/>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <Button className="w-fit col-span-full" type="submit">
                 Opslaan
               </Button>
