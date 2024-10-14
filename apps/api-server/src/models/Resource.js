@@ -668,18 +668,14 @@ module.exports = function (db, sequelize, DataTypes) {
 
       selectTags: function (tags) {
         return {
-          include: [
-            {
-              model: db.Tag,
-              attributes: ['id', 'name'],
-              through: { attributes: [] },
-              where: {
-                id: {
-                  [db.Sequelize.Op.in]: tags,
-                },
-              },
+          where: {
+            id: {
+              [db.Sequelize.Op.in]: db.Sequelize.literal(`
+                (SELECT resourceId FROM resource_tags 
+                WHERE tagId IN (${tags.map(tag => `'${tag}'`).join(', ')}))
+              `),
             },
-          ],
+          },
         };
       },
 
