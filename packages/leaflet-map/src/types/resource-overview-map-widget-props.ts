@@ -24,10 +24,12 @@ export type ResourceOverviewMapWidgetProps = BaseProps &
 
 export type dataLayerArray = {
   datalayer?: DataLayer[];
+  enableOnOffSwitching?: boolean;
 }
 
 export type DataLayer = {
   id: number | string;
   layer: any;
   icon: any;
+  name: string;
 };

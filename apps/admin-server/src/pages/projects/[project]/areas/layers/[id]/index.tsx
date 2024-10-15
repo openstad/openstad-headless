@@ -121,9 +121,7 @@ export default function ProjectDatalayerEdit() {
                 description="De ideale afmetingen voor een icoon zijn 30x40 pixels."
                 allowedTypes={['image/*']}
                 onImageUploaded={(imageResult) => {
-                  let array = [...(form.getValues('icon') || [])];
-                  array.push(imageResult);
-                  form.setValue('icon', array);
+                  form.setValue('icon', [imageResult]);
                   form.resetField('iconUploader');
                   form.trigger('icon');
                 }}

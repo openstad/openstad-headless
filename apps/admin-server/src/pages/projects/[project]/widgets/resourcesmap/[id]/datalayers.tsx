@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import {
-    Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
+    Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,
 } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,8 +12,10 @@ import { ResourceOverviewMapWidgetTabProps } from '.';
 import { useRouter } from 'next/router';
 import useDatalayers from "@/hooks/use-datalayers";
 import {Checkbox} from "@/components/ui/checkbox";
+import {YesNoSelect} from "@/lib/form-widget-helpers";
 
 const formSchema = z.object({
+    enableOnOffSwitching: z.boolean().optional(),
     datalayer: z.array(z.object({
         id: z.number(),
         name: z.string()
@@ -24,6 +26,7 @@ export default function WidgetResourcesMapDatalayers(
     props: ResourceOverviewMapWidgetTabProps &
         EditFieldProps<ResourceOverviewMapWidgetTabProps> & {
         datalayer?: any;
+        enableOnOffSwitching?: boolean;
     }
 ) {
 
@@ -37,6 +40,7 @@ export default function WidgetResourcesMapDatalayers(
         resolver: zodResolver<any>(formSchema),
         defaultValues: {
             datalayer: props?.datalayer || '',
+            enableOnOffSwitching: props?.enableOnOffSwitching || false,
         },
     });
     const router = useRouter();
@@ -97,6 +101,21 @@ export default function WidgetResourcesMapDatalayers(
                       />
                     )) || null}
 
+                    <FormField
+                      control={form.control}
+                      name="enableOnOffSwitching"
+                      render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Wil je dat het mogelijk is om de kaartlagen aan en uit te zetten?</FormLabel>
+                            <FormDescription>
+                                Als je dit aanvinkt kunnen gebruikers de kaartlagen aan en uit zetten.
+                                De kaartlagen worden getoond in een legenda.
+                            </FormDescription>
+                            {YesNoSelect(field, props)}
+                            <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                     <Button type="submit">Opslaan</Button>
                 </form>

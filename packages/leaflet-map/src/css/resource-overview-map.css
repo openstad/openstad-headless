@@ -35,3 +35,48 @@
   cursor: default !important;
   border: none !important;
 }
+
+.map-container--buttons .legend {
+  list-style: none;
+  padding: 8px;
+  margin: 0;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  bottom: 1rem;
+  right: 1rem;
+  left: auto;
+  z-index: 5;
+  background-color: white;
+}
+
+.map-container--buttons .legend-item {
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+}
+
+.map-container--buttons .legend-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.map-container--buttons .legend-info {
+  display: flex;
+  align-items: center;
+  margin-left: 5px;
+}
+
+.map-container--buttons .legend-icon {
+  width: 10px;
+  height: 13px;
+  margin-right: 5px;
+  display: inline-block;
+}
+
+.map-container--buttons input[type="checkbox"] {
+  margin-right: 3px;
+}
