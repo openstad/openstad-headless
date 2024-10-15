@@ -153,20 +153,25 @@ const ResourceOverviewMap = ({
     projectId: props.projectId,
   });
 
-  const mapDataLayers: { layer: any; icon?: any }[] = [];
+  const mapDataLayers: { layer: any; icon?: any, name: string, id: string }[] = [];
   const selectedDataLayers = props?.resourceOverviewMapWidget?.datalayer || [];
+  const showOnOffButtons = props?.resourceOverviewMapWidget?.enableOnOffSwitching || false;
 
   if (selectedDataLayers && Array.isArray(selectedDataLayers) && Array.isArray(datalayers) && datalayers.length > 0) {
-    selectedDataLayers.forEach((selectedDataLayer: DataLayer) => {
+    selectedDataLayers.forEach((selectedDataLayer: DataLayer, index: number) => {
       const foundDatalayer = datalayers.find((datalayer: DataLayer) => {
         const isMatch = datalayer.id === selectedDataLayer.id;
         return isMatch;
       });
 
       if (foundDatalayer) {
+        const stableId = `layer-${index}`;
+
         mapDataLayers.push({
           layer: foundDatalayer.layer,
           icon: foundDatalayer.icon,
+          name: selectedDataLayer.name,
+          id: stableId
         });
       }
     });
@@ -220,15 +225,55 @@ const ResourceOverviewMap = ({
     }
   };
 
+  const [activeLayers, setActiveLayers] = useState<{ [key: string]: boolean }>({});
+
+  useEffect(() => {
+    if (mapDataLayers.length > 0 && Object.keys(activeLayers).length === 0) {
+      const initialLayers = mapDataLayers.reduce((acc, layer) => {
+        acc[layer.id] = true; // Zet alle lagen standaard aan
+        return acc;
+      }, {} as { [key: string]: boolean });
+
+      setActiveLayers(initialLayers);
+    }
+  }, [mapDataLayers]);
+
+  const toggleLayer = (id: string) => {
+    setActiveLayers(prevState => ({
+      ...prevState,
+      [id]: !prevState[id],
+    }));
+  };
+
+  const visibleMapDataLayers = mapDataLayers.filter(layer => activeLayers[layer.id]);
 
   return ((polygon && center) || !areaId) ? (
     <div className='map-container--buttons'>
       <Button appearance='primary-action-button' className='skip-link' onClick={skipMarkers}>Sla kaart over</Button>
+      {showOnOffButtons && mapDataLayers.length > 0 && (
+        <ul className="legend">
+          {mapDataLayers.map(layer => (
+            <li key={layer.id} className="legend-item">
+              <label className="legend-label">
+                <input
+                  type="checkbox"
+                  checked={!!activeLayers[layer.id]}
+                  onChange={() => toggleLayer(layer.id)}
+                />
+                <div className="legend-info">
+                  {(layer.icon && layer.icon[0] && layer.icon[0].url) && <img src={layer.icon[0].url} alt="Layer icon" className="legend-icon"/>}
+                  <span>{layer.name || 'Naamloze laag'}</span>
+                </div>
+              </label>
+            </li>
+          ))}
+        </ul>
+      )}
       <BaseMap
         {...props}
         {...zoom}
         area={polygon}
-        mapDataLayers={mapDataLayers}
+        mapDataLayers={visibleMapDataLayers}
         autoZoomAndCenter="area"
         categorize={{ categories, categorizeByField }}
         center={center}
