@@ -13,12 +13,14 @@ import { useRouter } from 'next/router';
 import useDatalayers from "@/hooks/use-datalayers";
 import {Checkbox} from "@/components/ui/checkbox";
 import {YesNoSelect} from "@/lib/form-widget-helpers";
+import { useEffect } from 'react';
 
 const formSchema = z.object({
     enableOnOffSwitching: z.boolean().optional(),
     datalayer: z.array(z.object({
         id: z.number(),
-        name: z.string()
+        name: z.string(),
+        activeOnInit: z.boolean().optional(),
     })).optional(),
 });
 
@@ -27,6 +29,7 @@ export default function WidgetResourcesMapDatalayers(
         EditFieldProps<ResourceOverviewMapWidgetTabProps> & {
         datalayer?: any;
         enableOnOffSwitching?: boolean;
+        activeOnInit?: boolean;
     }
 ) {
 
@@ -41,12 +44,24 @@ export default function WidgetResourcesMapDatalayers(
         defaultValues: {
             datalayer: props?.datalayer || '',
             enableOnOffSwitching: props?.enableOnOffSwitching || false,
+            activeOnInit: props?.activeOnInit !== undefined ? props.activeOnInit : true,
         },
     });
     const router = useRouter();
     const projectId = router.query.project as string;
 
     const { data: datalayers } = useDatalayers(props.projectId === undefined ? projectId : props.projectId) as { data: { id: string, name: string }[] } ?? [];
+
+  useEffect(() => {
+    if (!form.getValues('enableOnOffSwitching')) {
+      const updatedLayers = (form.getValues('datalayer') || []).map((layer) => {
+        const { activeOnInit, ...rest } = layer;
+        return rest;
+      });
+      form.setValue('datalayer', updatedLayers);
+      props.onFieldChanged('datalayer', updatedLayers);
+    }
+  }, [form.getValues('enableOnOffSwitching')]);
 
     return (
         <div className="p-6 bg-white rounded-md">
@@ -58,49 +73,84 @@ export default function WidgetResourcesMapDatalayers(
                     className="space-y-4 lg:w-1/2">
 
                     {datalayers?.map((item) => (
-                      <FormField
-                        key={item.id}
-                        control={form.control}
-                        name="datalayer"
-                        render={({ field }) => {
+                      <div key={item.id}>
+                        <FormField
+                          control={form.control}
+                          name="datalayer"
+                          render={({field}) => {
                             const isChecked = Array.isArray(field.value) && field.value.some(obj => obj.id === Number(item.id));
 
                             return (
-                              <FormItem
-                                key={item.id}
-                                className="flex flex-column items-start space-x-0 space-y-3">
-                                  <div className='flex flex-row items-start space-x-3 space-y-0'>
-                                      <FormControl>
-                                          <Checkbox
-                                            checked={isChecked}
-                                            onCheckedChange={(checked) => {
-                                                let values = form.getValues('datalayer') || [];
+                              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={isChecked}
+                                    onCheckedChange={(checked) => {
+                                      let values = form.getValues('datalayer') || [];
 
-                                                if (checked) {
-                                                    if (!values.some(obj => obj.id === Number(item.id))) {
-                                                        const { name } = item;
-                                                        form.setValue('datalayer', [...values, { name, id: Number(item.id) }]);
-                                                        props.onFieldChanged(field.name, [...values, { name, id: Number(item.id) }]);
-                                                    }
-                                                } else {
-                                                    const filteredValues = values.filter(obj => obj.id !== Number(item.id));
-                                                    form.setValue('datalayer', filteredValues);
-                                                    props.onFieldChanged('datalayer', filteredValues);
-                                                }
-                                            }}
-                                          />
-                                      </FormControl>
-                                      <FormLabel className="font-normal">
-                                          {item.name}
-                                      </FormLabel>
-                                  </div>
-                                  <FormMessage />
+                                      if (checked) {
+                                        if (!values.some(obj => obj.id === Number(item.id))) {
+                                          const {name} = item;
+                                          form.setValue('datalayer', [...values, {name, id: Number(item.id)}]);
+                                          props.onFieldChanged(field.name, [...values, {name, id: Number(item.id)}]);
+                                        }
+                                      } else {
+                                        const filteredValues = values.filter(obj => obj.id !== Number(item.id));
+                                        form.setValue('datalayer', filteredValues);
+                                        props.onFieldChanged('datalayer', filteredValues);
+                                      }
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                  {item.name}
+                                </FormLabel>
+                                <FormMessage/>
                               </FormItem>
                             );
-                        }}
-                      />
+                          }}
+                        />
+
+                        {(
+                          form.getValues('enableOnOffSwitching') &&
+                          Array.isArray(form.getValues('datalayer')) &&
+                          form.getValues('datalayer').some(obj => obj.id === Number(item.id))
+                        ) && (
+                            <FormField
+                              control={form.control}
+                              name={`activeOnInit_${item.id}`}
+                              render={({field}) => {
+                                const activeOnInit = form.getValues('datalayer')
+                                  .find(obj => obj.id === Number(item.id))?.activeOnInit ?? true;
+
+                                return (
+                                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={activeOnInit}
+                                        onCheckedChange={(checked) => {
+                                          let values = form.getValues('datalayer') || [];
+                                          const updatedValues = values.map(obj =>
+                                            obj.id === Number(item.id) ? {...obj, activeOnInit: checked} : obj
+                                          );
+                                          form.setValue('datalayer', updatedValues);
+                                          props.onFieldChanged('datalayer', updatedValues);
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      Deze laag standaard tonen bij het openen van de kaart
+                                    </FormLabel>
+                                    <FormMessage/>
+                                  </FormItem>
+                                );
+                              }}
+                            />
+                          )}
+                      </div>
                     )) || null}
 
+                    <br />
                     <FormField
                       control={form.control}
                       name="enableOnOffSwitching"

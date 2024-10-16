@@ -171,6 +171,7 @@ const ResourceOverviewMap = ({
           layer: foundDatalayer.layer,
           icon: foundDatalayer.icon,
           name: selectedDataLayer.name,
+          activeOnInit: typeof(selectedDataLayer?.activeOnInit) === 'boolean' ? selectedDataLayer.activeOnInit : true,
           id: stableId
         });
       }
@@ -230,7 +231,7 @@ const ResourceOverviewMap = ({
   useEffect(() => {
     if (mapDataLayers.length > 0 && Object.keys(activeLayers).length === 0) {
       const initialLayers = mapDataLayers.reduce((acc, layer) => {
-        acc[layer.id] = true; // Zet alle lagen standaard aan
+        acc[layer.id] = layer.activeOnInit;
         return acc;
       }, {} as { [key: string]: boolean });
 
@@ -250,16 +251,18 @@ const ResourceOverviewMap = ({
   return ((polygon && center) || !areaId) ? (
     <div className='map-container--buttons'>
       <Button appearance='primary-action-button' className='skip-link' onClick={skipMarkers}>Sla kaart over</Button>
-      {showOnOffButtons && mapDataLayers.length > 0 && (
+      { mapDataLayers.length > 0 && (
         <ul className="legend">
           {mapDataLayers.map(layer => (
             <li key={layer.id} className="legend-item">
               <label className="legend-label">
-                <input
-                  type="checkbox"
-                  checked={!!activeLayers[layer.id]}
-                  onChange={() => toggleLayer(layer.id)}
-                />
+                {showOnOffButtons && (
+                  <input
+                    type="checkbox"
+                    checked={!!activeLayers[layer.id]}
+                    onChange={() => toggleLayer(layer.id)}
+                  />
+                )}
                 <div className="legend-info">
                   {(layer.icon && layer.icon[0] && layer.icon[0].url) && <img src={layer.icon[0].url} alt="Layer icon" className="legend-icon"/>}
                   <span>{layer.name || 'Naamloze laag'}</span>
