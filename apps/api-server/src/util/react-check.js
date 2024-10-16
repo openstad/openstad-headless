@@ -6,12 +6,12 @@ const reactDomJs =
   'https://unpkg.com/react-dom@{VERSION}/umd/react-dom.production.min.js';
 
 module.exports = `
-  function triggerEvent() {
-    document.dispatchEvent(new CustomEvent('OpenStadReactLoaded'));
+  function triggerEvent(event) {
+    document.dispatchEvent(new CustomEvent(event));
   }
   
   function checkReactDom() {
-    if (!hasReactDom && !window.OpenStadReactLoaded) {
+    if (!hasReactDom && !window.OpenStadReactDOMLoaded) {
     
       if (!reactVersion) {
         reactVersion = React.version;
@@ -30,8 +30,8 @@ module.exports = `
         if (typeof window.createRoot === 'undefined' && typeof ReactDOM !== 'undefined' && typeof ReactDOM.createRoot !== 'undefined') {
           window.createRoot = ReactDOM.createRoot;
         }
-        document.addEventListener('OpenStadReactLoaded', renderWidget);
-        triggerEvent();
+        document.addEventListener('OpenStadReactDomLoaded', renderWidget);
+        triggerEvent('OpenStadReactDomLoaded');
       }
       document.body.appendChild(script);
       window.OpenStadReactDOMLoaded = true;
@@ -42,8 +42,8 @@ module.exports = `
       throw new Error('ReactDOM version 18 is required');
     } else {
       window.OpenStadReactDOMLoaded = true;
-      document.addEventListener('OpenStadReactLoaded', renderWidget);
-      triggerEvent();
+      document.addEventListener('OpenStadReactDomLoaded', renderWidget);
+      triggerEvent('OpenStadReactDomLoaded');
     }
   }
 
@@ -62,6 +62,9 @@ module.exports = `
     window.OpenStadReactLoaded = true;
   } else if (hasReact && React.version.substr(0, 2) < '18') {
     throw new Error('React version 18 is required');
+  } else if (!hasReact && window.OpenStadReactLoaded) {
+    // React has been loaded by a previous component on the page, render the widget when ReactDOM is loaded
+    document.addEventListener('OpenStadReactDomLoaded', renderWidget);
   } else {
     checkReactDom();
   }
