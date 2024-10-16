@@ -1,6 +1,6 @@
 const reactJs =
   process.env.REACT_CDN ||
-  'https://unpkg.com/react@18.2.0/umd/react.production.min.js';
+  'https://unpkg.com/react@18.3.1/umd/react.production.min.js';
 const reactDomJs =
   process.env.REACT_DOM_CDN ||
   'https://unpkg.com/react-dom@{VERSION}/umd/react-dom.production.min.js';
@@ -13,9 +13,7 @@ module.exports = `
   function checkReactDom() {
     if (!hasReactDom && !window.OpenStadReactDOMLoaded) {
     
-      if (!reactVersion) {
-        reactVersion = React.version;
-      }
+      let reactVersion = React.version;
       
       // Get same version of react-dom as react, ensuring we have a xx.x.x format
       if (!/18\.\d{1,2}\.\d{1,2}/.test(reactVersion) === false) {
@@ -23,7 +21,7 @@ module.exports = `
       }
       
       const reactDomUrl = '${reactDomJs}'.replace('{VERSION}', reactVersion);
-    
+      
       const script = document.createElement('script');
       script.src = reactDomUrl;
       script.onload = function() {
@@ -48,9 +46,9 @@ module.exports = `
   }
 
   const hasReact = typeof React !== 'undefined';
+  const hasReactWithScheduler = hasReact && typeof React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED !== 'undefined' && typeof React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.Scheduler !== 'undefined' && typeof React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.Scheduler.unstable_scheduleCallback !== 'undefined';
   const hasReactDom = typeof ReactDOM !== 'undefined';
-  let reactVersion = hasReact ? React.version : '';
-
+  
   if (!hasReact && !window.OpenStadReactLoaded) {
     const script = document.createElement('script');
     script.src = '${reactJs}';
@@ -62,10 +60,19 @@ module.exports = `
     window.OpenStadReactLoaded = true;
   } else if (hasReact && React.version.substr(0, 2) < '18') {
     throw new Error('React version 18 is required');
-  } else if (!hasReact && window.OpenStadReactLoaded) {
+  } else if (hasReact && !hasReactWithScheduler && !window.OpenStadReactLoaded) {
+    console.log ('Loading React 18.3.1 UMD version -- current version is without Scheduler which means React DOM won\\'t load correctly.');
+    
+    const script = document.createElement('script');
+    script.src = '${reactJs}';
+    script.onload = (e) => {
+      checkReactDom();
+    }
+    
+    document.body.appendChild(script);
+    window.OpenStadReactLoaded = true;
+  } else {
     // React has been loaded by a previous component on the page, render the widget when ReactDOM is loaded
     document.addEventListener('OpenStadReactDomLoaded', renderWidget);
-  } else {
-    checkReactDom();
   }
 `;
