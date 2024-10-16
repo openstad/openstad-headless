@@ -153,7 +153,7 @@ const ResourceOverviewMap = ({
     projectId: props.projectId,
   });
 
-  const mapDataLayers: { layer: any; icon?: any, name: string, id: string }[] = [];
+  const mapDataLayers: { layer: any; icon?: any, name: string, id: string, activeOnInit: boolean }[] = [];
   const selectedDataLayers = props?.resourceOverviewMapWidget?.datalayer || [];
   const showOnOffButtons = props?.resourceOverviewMapWidget?.enableOnOffSwitching || false;
 

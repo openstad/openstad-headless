@@ -22,7 +22,7 @@ const formSchema = z.object({
         name: z.string(),
         activeOnInit: z.boolean().optional(),
     })).optional(),
-});
+}).catchall(z.boolean().optional());
 
 export default function WidgetResourcesMapDatalayers(
     props: ResourceOverviewMapWidgetTabProps &
@@ -44,7 +44,6 @@ export default function WidgetResourcesMapDatalayers(
         defaultValues: {
             datalayer: props?.datalayer || '',
             enableOnOffSwitching: props?.enableOnOffSwitching || false,
-            activeOnInit: props?.activeOnInit !== undefined ? props.activeOnInit : true,
         },
     });
     const router = useRouter();
@@ -114,14 +113,14 @@ export default function WidgetResourcesMapDatalayers(
                         {(
                           form.getValues('enableOnOffSwitching') &&
                           Array.isArray(form.getValues('datalayer')) &&
-                          form.getValues('datalayer').some(obj => obj.id === Number(item.id))
+                          form.getValues('datalayer')?.some(obj => obj.id === Number(item.id))
                         ) && (
                             <FormField
                               control={form.control}
                               name={`activeOnInit_${item.id}`}
                               render={({field}) => {
                                 const activeOnInit = form.getValues('datalayer')
-                                  .find(obj => obj.id === Number(item.id))?.activeOnInit ?? true;
+                                  ?.find(obj => obj.id === Number(item.id))?.activeOnInit ?? true;
 
                                 return (
                                   <FormItem className="flex flex-row items-start space-x-3 space-y-0">
@@ -131,7 +130,7 @@ export default function WidgetResourcesMapDatalayers(
                                         onCheckedChange={(checked) => {
                                           let values = form.getValues('datalayer') || [];
                                           const updatedValues = values.map(obj =>
-                                            obj.id === Number(item.id) ? {...obj, activeOnInit: checked} : obj
+                                            obj.id === Number(item.id) ? { ...obj, activeOnInit: !!checked } : obj
                                           );
                                           form.setValue('datalayer', updatedValues);
                                           props.onFieldChanged('datalayer', updatedValues);

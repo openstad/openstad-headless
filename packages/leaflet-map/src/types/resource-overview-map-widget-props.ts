@@ -32,4 +32,5 @@ export type DataLayer = {
   layer: any;
   icon: any;
   name: string;
+  activeOnInit?: boolean;
 };
