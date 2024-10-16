@@ -11,7 +11,7 @@ module.exports = `
   }
   
   function checkReactDom() {
-    if (!hasReactDom && !reactDomLoaded) {
+    if (!hasReactDom && !window.OpenStadReactLoaded) {
     
       if (!reactVersion) {
         reactVersion = React.version;
@@ -34,24 +34,24 @@ module.exports = `
         triggerEvent();
       }
       document.body.appendChild(script);
+      window.OpenStadReactDOMLoaded = true;
     } else if (
         typeof ReactDOM !== 'undefined' &&
         ReactDOM.version.substr(0, 2) !== '18'
     ) {
       throw new Error('ReactDOM version 18 is required');
     } else {
+      window.OpenStadReactDOMLoaded = true;
       document.addEventListener('OpenStadReactLoaded', renderWidget);
       triggerEvent();
     }
   }
 
   const hasReact = typeof React !== 'undefined';
-  const reactLoaded = window.OpenStadReactLoaded;
   const hasReactDom = typeof ReactDOM !== 'undefined';
-  const reactDomLoaded = window.OSReactDomLoaded;
   let reactVersion = hasReact ? React.version : '';
 
-  if (!hasReact && !reactLoaded) {
+  if (!hasReact && !window.OpenStadReactLoaded) {
     const script = document.createElement('script');
     script.src = '${reactJs}';
     script.onload = (e) => {
