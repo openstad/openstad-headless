@@ -18,6 +18,7 @@ import type {DataLayer, ResourceOverviewMapWidgetProps } from './types/resource-
 import { BaseMap } from './base-map';
 import React, { useState } from 'react';
 import { LocationType } from '@openstad-headless/leaflet-map/src/types/location.js';
+import L from 'leaflet';
 
 type Point = {
   lat: number;
@@ -91,7 +92,11 @@ const ResourceOverviewMap = ({
         }
       }
 
+      const firstStatus = resource.statuses && resource.statuses[0];
+      let MapIconImage = firstStatus && firstStatus.mapIcon ? firstStatus.mapIcon : '';
+
       const firstTag = resource.tags && resource.tags[0];
+      MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : '';
       const MapIconColor = firstTag && firstTag.documentMapIconColor ? firstTag.documentMapIconColor : '';
 
       // Set the resource name
@@ -102,6 +107,16 @@ const ResourceOverviewMap = ({
       // Set the icon color
       if (MapIconColor) {
         marker.icon.color = MapIconColor;
+      }
+
+      // Set the icon
+      if (MapIconImage) {
+        marker.icon = L.icon({
+          iconUrl: MapIconImage,
+          iconSize: [30, 40],
+          iconAnchor: [15, 40],
+          className: 'custom-image-icon',
+        });
       }
 
       return marker;
