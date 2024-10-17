@@ -34,6 +34,9 @@ function Form({
       ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: FormValue } = {};
+
+    console.log( 'Fields', fields );
+
     fields.forEach((field) => {
         if (field.fieldKey) {
             //@ts-expect-error
@@ -111,11 +114,11 @@ function Form({
         if (Component) {
             return (
                 <Component
-                    {...field}
+                    {...props}
                     index={index}
                     onChange={handleInputChange}
                     reset={(resetFn: () => void) => resetFunctions.current.push(resetFn)}
-                    {...props}
+                    {...field}
                 />
             );
         }
