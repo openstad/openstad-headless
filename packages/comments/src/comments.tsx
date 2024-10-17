@@ -39,24 +39,30 @@ export type CommentsWidgetProps = BaseProps &
     customTitle?: string;
     onlyIncludeTags?: string;
     loginText?: string;
-    setRefreshComments?: React.Dispatch<React.SetStateAction<boolean>>;
+    setRefreshComments?: React.Dispatch<any>;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
 export const CommentWidgetContext = createContext<
     (CommentsWidgetProps & {setRefreshComments: React.Dispatch<React.SetStateAction<boolean>> }) | undefined
 >(undefined);
 
-function Comments({
-  title = '[[nr]] reacties',
-  sentiment = 'no sentiment',
-  emptyListText = 'Nog geen reacties geplaatst.',
-  placeholder = 'Typ hier uw reactie',
-  formIntro = '',
+function CommentsInner({
+  title,
+  sentiment,
+  emptyListText,
+  placeholder,
+  formIntro,
   selectedComment,
-  loginText = 'Inloggen om deel te nemen aan de discussie.',
-  setRefreshComments = () => {},
+  loginText,
+  setRefreshComments: parentSetRefreshComments = () => {}, // parent setter as fallback
   ...props
 }: CommentsWidgetProps) {
+  const [refreshKey, setRefreshKey] = useState(0); // Key for SWR refresh
+
+  const refreshComments = () => {
+    setRefreshKey(prevKey => prevKey + 1); // Increment the key to trigger a refresh
+    parentSetRefreshComments((prev: boolean) => !prev); // Trigger any parent-level refresh logic
+  };
 
   let resourceId = String(getResourceId({
     resourceId: parseInt(props.resourceId || ''),
@@ -65,7 +71,7 @@ function Comments({
   })); // todo: make it a number throughout the code
 
   let args = {
-    setRefreshComments,
+    parentSetRefreshComments,
     title,
     sentiment,
     emptyListText,
@@ -93,6 +99,7 @@ function Comments({
     resourceId: resourceId,
     sentiment: args.sentiment,
     onlyIncludeTagIds: props.onlyIncludeTags || undefined,
+    refreshKey
   };
 
   const { data: comments } = datastore.useComments(useCommentsData);
@@ -150,7 +157,7 @@ function Comments({
         setDisableSubmit(false);
       }
 
-      setRefreshComments(prev => !prev);
+      refreshComments();
     } catch (err: any) {
       console.log(err);
       notifyFailed();
@@ -159,10 +166,10 @@ function Comments({
   }
 
     return (
-    <CommentWidgetContext.Provider value={{ ...args, setRefreshComments: setRefreshComments || defaultSetRefreshComments }}>
+    <CommentWidgetContext.Provider value={{ ...args, setRefreshComments: refreshComments || defaultSetRefreshComments }}>
       <section className="osc">
         <Heading3 className="comments-title">
-          {comments && title.replace(/\[\[nr\]\]/, comments.length)}
+          {comments && title?.replace(/\[\[nr\]\]/, comments.length)}
           {!comments && title}
         </Heading3>
 
@@ -221,12 +228,53 @@ function Comments({
           <Paragraph>{emptyListText}</Paragraph>
         ) : null}
         {(comments || []).map((comment: any, index: number) => {
-          let attributes = { ...args, comment, submitComment, setRefreshComments };
-          return <Comment {...attributes} disableSubmit={disableSubmit} index={index} key={index} selected={selectedComment === index}  />;
+          let attributes = { ...args, comment, submitComment, setRefreshComments: refreshComments };
+          return <Comment {...attributes} disableSubmit={disableSubmit} index={index} key={index} selected={selectedComment === index} />;
         })}
         <Toaster />
       </section>
     </CommentWidgetContext.Provider>
+  );
+}
+
+function Comments({
+  title = '[[nr]] reacties',
+  sentiment = 'no sentiment',
+  emptyListText = 'Nog geen reacties geplaatst.',
+  placeholder = 'Typ hier uw reactie',
+  formIntro = '',
+  selectedComment,
+  loginText = 'Inloggen om deel te nemen aan de discussie.',
+  setRefreshComments = () => {},
+  ...props
+}: CommentsWidgetProps) {
+  const [refreshKey, setRefreshKey] = useState(false);
+
+  const triggerRefresh = () => {
+    setRefreshKey((prevKey) => !prevKey);
+  };
+
+  useEffect(() => {
+    if (typeof setRefreshComments === 'function') {
+      setRefreshComments(triggerRefresh);
+    }
+  }, [setRefreshComments]);
+
+  return (
+    <div>
+      <CommentsInner
+        key={refreshKey ? 'refresh' : 'no-refresh'}
+        title={title}
+        sentiment={sentiment}
+        emptyListText={emptyListText}
+        placeholder={placeholder}
+        formIntro={formIntro}
+        selectedComment={selectedComment}
+        loginText={loginText}
+        setRefreshComments={triggerRefresh}
+        {...props}
+      />
+    </div>
   );
 }
 
