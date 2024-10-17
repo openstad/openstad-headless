@@ -34,9 +34,6 @@ function Form({
       ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: FormValue } = {};
-
-    console.log( 'Fields', fields );
-
     fields.forEach((field) => {
         if (field.fieldKey) {
             //@ts-expect-error
