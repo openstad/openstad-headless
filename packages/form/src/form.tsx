@@ -111,11 +111,11 @@ function Form({
         if (Component) {
             return (
                 <Component
-                    {...field}
+                    {...props}
                     index={index}
                     onChange={handleInputChange}
                     reset={(resetFn: () => void) => resetFunctions.current.push(resetFn)}
-                    {...props}
+                    {...field}
                 />
             );
         }
