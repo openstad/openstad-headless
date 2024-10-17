@@ -174,8 +174,23 @@ exports.authorization = [
         /**
          * Check if redirectURI same host as registered
          */
-        const allowedDomains = client.allowedDomains ? client.allowedDomains : false;
+        const allowedDomains = client.allowedDomains ? client.allowedDomains : [];
         const redirectUrlHost = new URL(redirectURI).hostname;
+
+        try {
+          let baseUrlHost = process.env.APP_URL || '';
+
+          if (baseUrlHost) {
+            baseUrlHost = baseUrlHost.replace(/^(https?:\/\/)?(www\.)?(auth\.)?/, '');
+
+            allowedDomains.push(baseUrlHost);
+            allowedDomains.push('auth.' + baseUrlHost);
+            allowedDomains.push('api.' + baseUrlHost);
+            allowedDomains.push('admin.' + baseUrlHost);
+          }
+        } catch (err) {
+          console.error('Error processing allowed domains:', err);
+        }
 
         //console.log('===> allowedDomains', allowedDomains, redirectUrlHost);
 

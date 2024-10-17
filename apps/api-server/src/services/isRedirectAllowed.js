@@ -5,6 +5,20 @@ const isRedirectAllowed = async (projectId, redirectUri) => {
     const project = await db.Project.findByPk(projectId);
     if(!project) return false;
     let allowedDomains = project?.config?.allowedDomains || [];
+
+    try {
+        const baseUrlHost = process.env.BASE_DOMAIN || process.env.HOSTNAME;
+
+        if ( !!baseUrlHost ) {
+            allowedDomains.push(baseUrlHost);
+            allowedDomains.push('auth.' + baseUrlHost);
+            allowedDomains.push('api.' + baseUrlHost);
+            allowedDomains.push('admin.' + baseUrlHost);
+        }
+    } catch(err) {
+        console.error('Error processing allowed domains:', err);
+    }
+
     allowedDomains = allowedDomains.map(domain => {
         // check if url has http or https and add http if not
         if(!domain.startsWith('http://') && !domain.startsWith('https://')){
