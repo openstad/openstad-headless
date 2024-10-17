@@ -1,4 +1,5 @@
 import {Comment} from '@openstad-headless/types';
+import React, { Dispatch, SetStateAction } from "react";
 
 export type CommentProps = {
   comment: Comment;
@@ -7,6 +8,7 @@ export type CommentProps = {
   index?: number;
   showDateSeperately?: boolean;
   submitComment?: (e: any) => void;
+  setRefreshComments: () => void;
   adminLabel?: string;
   disableSubmit?: boolean;
 };

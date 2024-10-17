@@ -29,6 +29,7 @@ function Comment({
   index,
   adminLabel,
   disableSubmit = false,
+  setRefreshComments,
   ...props
 }: CommentProps) {
   const widgetContext = useContext(CommentWidgetContext);
@@ -114,7 +115,7 @@ function Comment({
         } else if (oldVotes !== newVotes && attempts < maxAttempts) {
           attempts++;
           if (widgetContext && widgetContext.setRefreshComments) {
-            widgetContext.setRefreshComments((prev) => !prev);
+            widgetContext.setRefreshComments((prev: boolean) => !prev);
           }
         } else if (attempts < maxAttempts) {
           attempts++;
