@@ -36,7 +36,8 @@ const formSchema = z.object({
   backgroundColor: z.string().optional(),
   color: z.string().optional(),
   label: z.string().optional(),
-  mapIcon: z.string().max(5000).optional(),
+  mapIcon: z.string().optional(),
+  mapIconUploader: z.string().optional(),
   listIcon: z.string().optional(),
   useDifferentSubmitAddress: z.boolean().optional(),
   image: z.string().optional(),
@@ -64,6 +65,7 @@ export default function ProjectTagEdit() {
       color: data?.color || undefined,
       label: data?.label || undefined,
       mapIcon: data?.mapIcon || undefined,
+      mapIconUploader: '',
       listIcon: data?.listIcon || undefined,
       useDifferentSubmitAddress: undefinedToTrueOrProp(data?.useDifferentSubmitAddress),
       emails: data?.newSubmitAddress
@@ -76,9 +78,7 @@ export default function ProjectTagEdit() {
   );
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: {
-      newSubmitAddress: data?.newSubmitAddress || '',
-    },
+    defaultValues: defaults(),
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -275,19 +275,44 @@ export default function ProjectTagEdit() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="mapIcon"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Kaart icon</FormLabel>
-                          <FormControl>
-                            <Input placeholder="" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <ImageUploader
+                      form={form}
+                      fieldName="mapIconUploader"
+                      imageLabel="Icoon op de kaart"
+                      description="De geüploade afbeelding wordt automatisch ingesteld als de marker op de kaart voor de resource die aan deze tag is gekoppeld. De ideale afmetingen voor een icoon zijn 30x40 pixels. Het ideale type is een .png of .svg"
+                      allowedTypes={['image/*']}
+                      onImageUploaded={(imageResult) => {
+                        const result = typeof (imageResult.url) !== 'undefined' ? imageResult.url : '';
+                        form.setValue('mapIcon', result);
+                        form.resetField('mapIconUploader');
+                        form.trigger('mapIcon');
+                      }}
                     />
+                    <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
+                      {!!form.watch('mapIcon') && (
+                        <>
+                          <label
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Geüpload icoon</label>
+                          <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
+                                <div className="relative">
+                                  <img src={form.watch('mapIcon')} alt=""/>
+                                  <Button
+                                    color="red"
+                                    onClick={() => {
+                                      form.setValue('mapIcon', '');
+                                    }}
+                                    className="absolute right-0 top-0">
+                                    <X size={24}/>
+                                  </Button>
+                                </div>
+                          </section>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
                     <FormField
                       control={form.control}
                       name="listIcon"

@@ -519,7 +519,7 @@ module.exports = function (db, sequelize, DataTypes) {
           {
             model: db.Status,
             as: 'statuses',
-            attributes: ['id', 'name', 'label', 'extraFunctionality', 'color', 'backgroundColor'],
+            attributes: ['id', 'name', 'label', 'extraFunctionality', 'color', 'backgroundColor', 'mapIcon'],
             through: { attributes: [] },
             required: false,
           },
@@ -647,7 +647,7 @@ module.exports = function (db, sequelize, DataTypes) {
         include: [
           {
             model: db.Tag,
-            attributes: ['id', 'type', 'name', 'label', 'defaultResourceImage', 'documentMapIconColor'],
+            attributes: ['id', 'type', 'name', 'label', 'defaultResourceImage', 'documentMapIconColor', 'mapIcon'],
             through: { attributes: [] },
             required: false,
           },
@@ -659,7 +659,7 @@ module.exports = function (db, sequelize, DataTypes) {
           {
             model: db.Status,
             as: 'statuses',
-            attributes: ['id', 'name', 'label', 'extraFunctionality', 'color', 'backgroundColor'],
+            attributes: ['id', 'name', 'label', 'extraFunctionality', 'color', 'backgroundColor', 'mapIcon'],
             through: { attributes: [] },
             required: false,
           },
