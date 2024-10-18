@@ -71,16 +71,8 @@ module.exports = `
     
     document.body.appendChild(script);
     window.OpenStadReactLoaded = true;
-  } else if (hasReact && hasReactWithScheduler && !hasReactDom) {
-    window.OpenStadReactLoaded = true;
-    checkReactDom();
-  } else if (hasReact && hasReactWithScheduler && hasReactDom) {
+  } else {
+    // React has been loaded by a previous component on the page, render the widget when ReactDOM is loaded
     document.addEventListener('OpenStadReactDomLoaded', renderWidget);
-  
-    if (!window.OpenStadReactDOMLoaded) {
-      window.OpenStadReactLoaded = true;
-      window.OpenStadReactDOMLoaded = true;
-      triggerEvent('OpenStadReactDomLoaded');
-    }
   }
 `;

@@ -96,7 +96,7 @@ const ResourceOverviewMap = ({
       let MapIconImage = firstStatus && firstStatus.mapIcon ? firstStatus.mapIcon : '';
 
       const firstTag = resource.tags && resource.tags[0];
-      MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : '';
+      MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : MapIconImage;
       const MapIconColor = firstTag && firstTag.documentMapIconColor ? firstTag.documentMapIconColor : '';
 
       // Set the resource name
