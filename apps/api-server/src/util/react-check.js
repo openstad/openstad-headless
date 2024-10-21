@@ -25,6 +25,11 @@ module.exports = `
         return;
       }
       
+      if (typeof React === 'undefined') {
+        document.addEventListener('OpenStadReactDomLoaded', renderWidget);
+        return;
+      }
+      
       window.OpenStadReactDOMIsLoading = true;
     
       let reactVersion = React.version;
