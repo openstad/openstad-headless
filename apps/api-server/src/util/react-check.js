@@ -81,6 +81,7 @@ module.exports = `
     if (typeof window.OpenStadReactDomLoadedEventHasFired === 'undefined' || !window.OpenStadReactDomLoadedEventHasFired) {
       // React has been loaded by a previous component on the page, render the widget when ReactDOM is loaded
       document.addEventListener('OpenStadReactDomLoaded', renderWidget);
+      checkReactDom();
     } else {
       renderWidget();
     }
