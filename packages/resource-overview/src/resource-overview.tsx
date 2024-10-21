@@ -257,8 +257,8 @@ const defaultItemRenderer = (
           <div className="osc-resource-overview-content-item-footer">
             {props.displayVote ? (
               <>
-                <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} />
-                <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} />
+                <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} description='Stemmen voor'/>
+                <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} description='Stemmen tegen'/>
               </>
             ) : null}
 
@@ -267,6 +267,7 @@ const defaultItemRenderer = (
                 icon="ri-message-line"
                 variant="big"
                 text={resource.commentCount}
+                description='Aantal reacties'
               />
             ) : null}
           </div>

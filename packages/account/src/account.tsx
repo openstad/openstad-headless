@@ -105,7 +105,7 @@ function Account({
 
   const [canEditNickname, setCanEditNickname] = useState(false);
   const [canEditUser, setCanEditUser] = useState(false);
-  const [editButtonText] = useState([['Bewerken'], ['Opslaan']]);
+  const [editButtonText] = useState([['Gegevens bewerken'], ['Gegevens opslaan']]);
   const [userFormData, setUserFormData] = useState<FormData>(formData as FormData);
   const [fetchedUser, setFetchedUser] = useState(false);
 
@@ -232,17 +232,8 @@ function Account({
         ))}
       </div>
       <div>
-        {info_title &&  <Heading level={2}>{info_title}</Heading>}
+        {info_title && <Heading level={2}>{info_title}</Heading>}
         {info_description && <Paragraph> {info_description} </Paragraph>}
-
-        {allowUserEdit && (
-          <Button className="account-edit-button" appearance={'primary-action-button'} onClick={() => {
-            if (canEditUser) {
-              saveUserData(userFormData);
-            }
-            setCanEditUser(!canEditUser);
-          }}>{canEditUser ? editButtonText[1] : editButtonText[0]}</Button>
-        )}
 
         {Object.entries(userFormData).map((field, index) => (
           field[0] !== 'nickname' && field[0] !== 'email' && (
@@ -269,21 +260,21 @@ function Account({
           )
         ))}
 
+        {allowUserEdit && (
+          <Button className="account-edit-button" appearance={'primary-action-button'} onClick={() => {
+            if (canEditUser) {
+              saveUserData(userFormData);
+            }
+            setCanEditUser(!canEditUser);
+          }}>{canEditUser ? editButtonText[1] : editButtonText[0]}</Button>
+        )}
+
 
       </div>
       {allowNickname && (
         <div>
           {user_title && <Heading level={2}>{user_title}</Heading>}
           {user_description && <Paragraph>{user_description}</Paragraph>}
-
-          {allowUserEdit && (
-            <Button className="account-edit-button" appearance={'primary-action-button'} onClick={() => {
-              if (canEditNickname) {
-                saveUserData(userFormData);
-              }
-              setCanEditNickname(!canEditNickname)
-            }}>{canEditNickname ? editButtonText[1] : editButtonText[0]}</Button>
-          )}
 
           {Object.entries(formData).map((field, index) => (
             field[0] === 'nickname' && (
@@ -309,6 +300,16 @@ function Account({
               />
             )
           ))}
+
+
+          {allowUserEdit && (
+            <Button className="account-edit-button" appearance={'primary-action-button'} onClick={() => {
+              if (canEditNickname) {
+                saveUserData(userFormData);
+              }
+              setCanEditNickname(!canEditNickname)
+            }}>{canEditNickname ? editButtonText[1] : editButtonText[0]}</Button>
+          )}
 
         </div>
       )}

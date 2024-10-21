@@ -148,6 +148,7 @@ const TextInput: FC<TextInputProps> = ({
                     rows={rows}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
+                    autoComplete="on"
                 />
                 {isFocused && helpText &&
                   <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
