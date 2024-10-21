@@ -54,6 +54,8 @@ export type ResourceDetailWidgetProps = {
     projectId?: string;
     resourceId?: string;
     resourceIdRelativePath?: string;
+    backUrlIdRelativePath?: string;
+    backUrlText?: string;
   } & booleanProps & {
     likeWidget?: Omit<
       LikeWidgetProps,
