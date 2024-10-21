@@ -253,7 +253,7 @@ const BaseMap = ({
                   description: inhoud,
                   markerId: `${parseInt((Math.random() * 1e8).toString())}`,
                   isVisible: true,
-                  isClustered: true,
+                  isClustered: false,
                 };
 
                 markerData.icon = L.icon({
@@ -294,7 +294,7 @@ const BaseMap = ({
                   description: Locatieaanduiding,
                   markerId: `${parseInt((Math.random() * 1e8).toString())}`,
                   isVisible: true,
-                  isClustered: true,
+                  isClustered: false,
                 };
 
                 markerData.icon = L.icon({
@@ -361,7 +361,7 @@ const BaseMap = ({
       markerData.isVisible = true;
 
       if (clustering && clustering.isActive && !markerData.doNotCluster) {
-        markerData.isClustered = true;
+        markerData.isClustered = false;
       }
 
       result[i] = markerData;
