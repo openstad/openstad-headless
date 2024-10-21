@@ -71,6 +71,9 @@ main {
 #logo-image {
   max-height: 50px;
 }
+#logo-image:focus-within{
+  outline: var(--utrecht-focus-outline-width) var(--utrecht-focus-outline-style) var(--utrecht-focus-outline-color);
+}
 
 .iconButton--container{
   width: 100%;
