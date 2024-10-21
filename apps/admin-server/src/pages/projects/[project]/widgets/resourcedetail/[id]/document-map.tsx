@@ -43,7 +43,7 @@ export default function WidgetResourceDetailDocumentMap(
 
   const defaults = useCallback(
     () => ({
-      backUrlText: props?.backUrlText || undefined,
+      backUrlText: props?.backUrlText || 'Terug naar het document',
       backUrlIdRelativePath: props?.backUrlIdRelativePath || undefined
     }),
     [props?.backUrlText, props?.backUrlIdRelativePath]
