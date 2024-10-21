@@ -584,7 +584,6 @@ function DocumentMap({
         if (popupPosition) {
           map.setMaxBounds( [] );
         } else {
-          map.fitBounds(bounds);
           map.setMaxBounds(bounds);
         }
       }
