@@ -60,10 +60,10 @@ module.exports = `
       window.OpenStadReactDOMLoaded = true;
       
       if (typeof window.OpenStadReactDomLoadedEventHasFired === 'undefined' || !window.OpenStadReactDomLoadedEventHasFired) {
-      console.log ('typeof window.OpenStadReactDomLoadedEventHasFired === 'undefined' || !window.OpenStadReactDomLoadedEventHasFired');
+      console.log ('typeof window.OpenStadReactDomLoadedEventHasFired === undefined || !window.OpenStadReactDomLoadedEventHasFired');
         document.addEventListener('OpenStadReactDomLoaded', renderWidget);
       } else {
-      console.log ('else van typeof window.OpenStadReactDomLoadedEventHasFired === 'undefined' || !window.OpenStadReactDomLoadedEventHasFired');
+      console.log ('else van typeof window.OpenStadReactDomLoadedEventHasFired === undefined || !window.OpenStadReactDomLoadedEventHasFired');
         renderWidget();
       }
     }
@@ -103,11 +103,11 @@ module.exports = `
   } else {
   console.log ('react check else');
     if (typeof window.OpenStadReactDomLoadedEventHasFired === 'undefined' || !window.OpenStadReactDomLoadedEventHasFired) {
-    console.log ('typeof window.OpenStadReactDomLoadedEventHasFired === 'undefined' || !window.OpenStadReactDomLoadedEventHasFired');
+    console.log ('typeof window.OpenStadReactDomLoadedEventHasFired === undefined || !window.OpenStadReactDomLoadedEventHasFired');
       // React has been loaded by a previous component on the page, render the widget when ReactDOM is loaded
       checkReactDom();
     } else {
-    console.log ('else van typeof window.OpenStadReactDomLoadedEventHasFired === 'undefined' || !window.OpenStadReactDomLoadedEventHasFired');
+    console.log ('else van typeof window.OpenStadReactDomLoadedEventHasFired === undefined || !window.OpenStadReactDomLoadedEventHasFired');
       renderWidget();
     }
   }
