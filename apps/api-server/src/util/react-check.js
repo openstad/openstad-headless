@@ -70,9 +70,10 @@ module.exports = `
   const hasReact = typeof React !== 'undefined';
   const hasReactWithScheduler = hasReact && typeof React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED !== 'undefined' && typeof React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.Scheduler !== 'undefined' && typeof React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.Scheduler.unstable_scheduleCallback !== 'undefined';
   const hasReactDom = typeof ReactDOM !== 'undefined';
-  const isLocalhost = window.location.hostname === 'localhost';
   
-  if (!hasReact && !window.OpenStadReactLoaded) {
+  if ( hasReact && hasReactWithScheduler && hasReactDom ) {
+    renderWidget();
+  } else if (!hasReact && !window.OpenStadReactLoaded) {
     const script = document.createElement('script');
     script.src = '${reactJs}';
     script.onload = (e) => {
@@ -93,22 +94,6 @@ module.exports = `
     
     document.body.appendChild(script);
     window.OpenStadReactLoaded = true;
-  } else if ( isLocalhost) {
-
-      // For localhost the loading process is different.
-      if (hasReact && hasReactWithScheduler && !hasReactDom) {
-        window.OpenStadReactLoaded = true;
-        checkReactDom();
-      } else if (hasReact && hasReactWithScheduler && hasReactDom) {
-        document.addEventListener('OpenStadReactDomLoaded', renderWidget);
-      
-        if (!window.OpenStadReactDOMLoaded) {
-          window.OpenStadReactLoaded = true;
-          window.OpenStadReactDOMLoaded = true;
-          triggerEvent('OpenStadReactDomLoaded');
-        }
-      }
-      
   } else {
     if (typeof window.OpenStadReactDomLoadedEventHasFired === 'undefined' || !window.OpenStadReactDomLoadedEventHasFired) {
       // React has been loaded by a previous component on the page, render the widget when ReactDOM is loaded
