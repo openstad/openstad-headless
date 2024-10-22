@@ -664,6 +664,10 @@ function DocumentMap({
       }
     };
 
+    const configVotingEnabled = props?.votes?.isActive || false;
+    const votingEnabled = configVotingEnabled && args.canComment;
+
+
     return !bounds ? null : (
       <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
         <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
@@ -733,14 +737,14 @@ function DocumentMap({
                 bounds={bounds as LatLngBoundsLiteral}
                 aria-describedby={randomId}
               />
-              {popupPosition && !isDefinitive && (
+              {(popupPosition && !isDefinitive && args.canComment) && (
                 <Popup
                   position={popupPosition}
                   eventHandlers={{
                     popupclose: () => setPopupPosition(null),
                   }}
                 >
-                  {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
+                  { !hasRole(currentUser, args.requiredUserRole) ? (
                     <>
                       <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
                       <Spacer size={1} />
@@ -816,42 +820,45 @@ function DocumentMap({
               )}
             </MapContainer>
 
-            <Button className={`info-trigger ${infoPopupButtonText ? 'button-has-text' : ''}`}
-                    appearance='primary-action-button' onClick={() => setModalOpen(true)}>
-              <i className="ri-information-line"></i>
-              {infoPopupButtonText && (
-                  <span className="trigger-text">{infoPopupButtonText}</span>
-              )}
-              <span className="sr-only">{infoPopupButtonText || 'Hoe werkt het?'}</span>
-            </Button>
-
-
-            <div className="modal-overlay" aria-hidden={isModalOpen ? "false" : "true"}>
-              <div
-                  ref={modalRef}
-                  className="modal"
-                  role="dialog"
-                  aria-labelledby="modal-title"
-                  aria-modal="true"
-                  tabIndex={-1}
-              >
-                <Heading level={2}>Hoe werkt het?</Heading>
-                <Paragraph>{infoPopupContent}</Paragraph>
-                <Spacer size={1}/>
-                <Button appearance='secondary-action-button' aria-label="Close Modal" onClick={() => setModalOpen(false)}>
-                  <i className="ri-close-fill"></i>
-                  <span>Info venster sluiten</span>
+            { !!args.canComment && (
+              <>
+                <Button className={`info-trigger ${infoPopupButtonText ? 'button-has-text' : ''}`}
+                        appearance='primary-action-button' onClick={() => setModalOpen(true)}>
+                  <i className="ri-information-line"></i>
+                  {infoPopupButtonText && (
+                      <span className="trigger-text">{infoPopupButtonText}</span>
+                  )}
+                  <span className="sr-only">{infoPopupButtonText || 'Hoe werkt het?'}</span>
                 </Button>
-              </div>
-            </div>
 
+
+                <div className="modal-overlay" aria-hidden={isModalOpen ? "false" : "true"}>
+                  <div
+                      ref={modalRef}
+                      className="modal"
+                      role="dialog"
+                      aria-labelledby="modal-title"
+                      aria-modal="true"
+                      tabIndex={-1}
+                  >
+                    <Heading level={2}>Hoe werkt het?</Heading>
+                    <Paragraph>{infoPopupContent}</Paragraph>
+                    <Spacer size={1}/>
+                    <Button appearance='secondary-action-button' aria-label="Close Modal" onClick={() => setModalOpen(false)}>
+                      <i className="ri-close-fill"></i>
+                      <span>Info venster sluiten</span>
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
 
           </div>
         </div>
         <div className="content document-map-info-container" ref={contentRef}>
           {!isDefinitive && (
             <>
-              {displayLikes && canComment && (
+              {displayLikes && (
                 <>
                   <Likes
                     {...props}
@@ -866,6 +873,7 @@ function DocumentMap({
                       props.likeWidget?.progressBarDescription
                     }
                     displayDislike={props.likeWidget?.displayDislike}
+                    disabled={!votingEnabled}
                   />
                   <Spacer size={1} />
                 </>
