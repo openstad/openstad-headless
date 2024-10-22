@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button';
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel, FormMessage,
+  Form,
+  FormControl, FormDescription,
+  FormField,
+  FormItem,
+  FormLabel, FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
@@ -32,6 +32,7 @@ const formSchema = z.object({
     largeDoc: z.boolean().optional(),
     infoPopupButtonText: z.string().optional(),
     openInfoPopupOnInit: z.string().optional(),
+    relativePathPrepend: z.string().optional(),
 });
 
 export default function DocumentContent(
@@ -60,6 +61,7 @@ export default function DocumentContent(
             closedText: props?.closedText || 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
             largeDoc: props?.largeDoc || false,
             infoPopupButtonText: props?.infoPopupButtonText || '',
+            relativePathPrepend: props?.relativePathPrepend || '',
         },
     });
 
@@ -330,6 +332,29 @@ export default function DocumentContent(
                                 <FormLabel>
                                     Wat is de tekst voor de knop die de info pop-up opent?
                                 </FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <Heading size="lg" className="mt-8 mb-2">Doorverwijzing</Heading>
+
+                    <FormField
+                        control={form.control}
+                        name="relativePathPrepend"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Relatief pad naar document
+                                </FormLabel>
+                              <FormDescription>
+                                Mist er een gedeelte van de URL? Voeg het hier toe (Bijvoorbeeld: /projecten).
+                                Dit wordt gebruikt bij het doorverwijzen naar de inzending.
+                                Dit is vooral belangrijk als de homepagina een &quot;/&quot; bevat, zoals bijvoorbeeld https://openstad.nl/projecten
+                              </FormDescription>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>

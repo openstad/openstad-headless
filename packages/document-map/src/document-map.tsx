@@ -81,6 +81,7 @@ export type DocumentMapProps = BaseProps &
     infoPopupButtonText?: string;
     openInfoPopupOnInit?: string;
     closedText?: string;
+    relativePathPrepend?: string;
   };
 
 
@@ -113,6 +114,7 @@ function DocumentMap({
   infoPopupButtonText = '',
   openInfoPopupOnInit = 'no',
   closedText = 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
+  relativePathPrepend = '',
   ...props
 }: DocumentMapProps) {
 
@@ -395,7 +397,7 @@ function DocumentMap({
   useEffect(() => {
     setRandomId(generateRandomId());
     if (window.location.hash.includes('#doc')) {
-      setBackUrl('/' + window.location.hash.split('=')[1] + (window.location.hash.split('=')[2] !== undefined ? '=' + window.location.hash.split('=')[2] : ''));
+      setBackUrl(relativePathPrepend + '/' + window.location.hash.split('=')[1] + (window.location.hash.split('=')[2] !== undefined ? '=' + window.location.hash.split('=')[2] : ''));
     }
   }, []);
 
@@ -871,13 +873,20 @@ function DocumentMap({
               {backUrl !== undefined && (
                 <div className="osc back-url-container">
                   <div className="banner">
-                    <Spacer size={2} />
+                    <Spacer size={2}/>
                     <Heading6>{props.backUrlContent}</Heading6>
-                    <Spacer size={1} />
-                    <ButtonLink appearance="primary-action-button" href={backUrl} title="Terug naar overzicht" id={randomId}>{props.backUrlText}</ButtonLink>
-                    <Spacer size={2} />
+                    <Spacer size={1}/>
+                    <a
+                      href={backUrl}
+                      className="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action"
+                      title="Terug naar overzicht"
+                      id={randomId}
+                    >
+                      {props.backUrlText}
+                    </a>
+                    <Spacer size={2}/>
                   </div>
-                  <Spacer size={2} />
+                  <Spacer size={2}/>
                 </div>
               )}
               <div className='toggleMarkers'>
