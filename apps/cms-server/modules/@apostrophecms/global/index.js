@@ -71,6 +71,12 @@ module.exports = {
         fileGroup: 'images',
       },
 
+      logoAltText: {
+        type: 'string',
+        label: 'Logo alt text',
+        default: 'Afbeelding van het logo, link naar de homepage',
+      },
+
       ctaButtons: {
         label: 'Header buttons',
         type: 'array',
@@ -297,7 +303,7 @@ module.exports = {
     group: {
       basics: {
         label: 'Algemene instellingen',
-        fields: ['siteTitle', 'hideSiteTitle',  'siteLogo', 'ctaButtons'],
+        fields: ['siteTitle', 'hideSiteTitle',  'siteLogo', 'logoAltText', 'ctaButtons'],
       },
       css: {
         label: 'Vormgeving',

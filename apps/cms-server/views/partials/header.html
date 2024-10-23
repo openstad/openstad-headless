@@ -35,7 +35,7 @@
         </a>
         {% elif data.global.siteLogo %}
         <a href="{{data.baseUrlWithPrefix}}{{logoLink}}/" class="logo-uploaded logo-main-container">
-          <img src="{{apos.attachment.url(data.global.siteLogo)}}" alt="Afbeelding van het logo, link naar de homepage" id="logo-image">
+          <img src="{{apos.attachment.url(data.global.siteLogo)}}" alt="{{data.global.logoAltText}}" id="logo-image">
           {% if not data.global.hideSiteTitle %}
           {% if data.global.siteTitle.length > 0%}
           <h2 class="header-subtitle">
@@ -46,7 +46,7 @@
         </a>
         {% else %}
         <a href="{{data.baseUrlWithPrefix}}{{logoLink}}/" class="logo-default logo-main-container">
-          <img class="default" src="/images/logo.png" alt="Afbeelding van het logo, link naar de homepage" id="logo-image">
+          <img class="default" src="/images/logo.png" alt="{{data.global.logoAltText}}" id="logo-image">
         </a>
         {% endif %}
         <div class="header-side-container {{ 'without-site-title' if data.global.hideSiteTitle}}">

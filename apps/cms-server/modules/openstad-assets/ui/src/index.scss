@@ -56,13 +56,13 @@ main {
   background: #fff;
 }
 
-.skip-link{
+.skip-link {
   position: absolute;
   z-index: -1;
   top: 10px;
   left: 10px;
 
-  &:focus-visible{
+  &:focus-visible {
     z-index: 99999999;
   }
 }
@@ -72,7 +72,11 @@ main {
   max-height: 50px;
 }
 
-.iconButton--container{
+*:focus-visible {
+  outline: var(--utrecht-focus-outline-width) var(--utrecht-focus-outline-style) var(--utrecht-focus-outline-color);
+}
+
+.iconButton--container {
   width: 100%;
   display: flex;
   justify-content: end;
@@ -80,8 +84,8 @@ main {
 }
 
 @media screen and (max-width: 540px) {
-    #main{
-      max-width: 95%;
-      margin: 0 auto;
-    }
+  #main {
+    max-width: 95%;
+    margin: 0 auto;
+  }
 }
