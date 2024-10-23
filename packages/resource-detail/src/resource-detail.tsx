@@ -54,6 +54,8 @@ export type ResourceDetailWidgetProps = {
     projectId?: string;
     resourceId?: string;
     resourceIdRelativePath?: string;
+    backUrlIdRelativePath?: string;
+    backUrlText?: string;
   } & booleanProps & {
     likeWidget?: Omit<
       LikeWidgetProps,
@@ -96,6 +98,8 @@ function ResourceDetail({
   displayDocuments = true,
   documentsTitle = '',
   documentsDesc = '',
+  backUrlText = 'Terug naar het document',
+  backUrlIdRelativePath = '',
   ...props
 }: ResourceDetailWidgetProps) {
   const [refreshComments, setRefreshComments] = useState(false);
@@ -141,11 +145,51 @@ function ResourceDetail({
   const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
   const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
 
+  const getIdFromHash = () => {
+    try {
+      const hash = window.location.hash;
+
+      if (hash && hash.includes('#doc=')) {
+        const docParams = hash.split('#doc=')[1];
+
+        const cleanDocParams = docParams.split('#')[0];
+
+        if (cleanDocParams && cleanDocParams.includes('?')) {
+          const queryParams = cleanDocParams.split('?')[1];
+
+          if (queryParams) {
+            const params = queryParams.split('&');
+
+            for (const param of params) {
+              const [key, value] = param.split('=');
+
+              if (value && !isNaN(Number(value))) {
+                return value;
+              }
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error while parsing the hash:', error);
+    }
+
+    return null;
+  };
+
   const getPageHash = () => {
     if (window.location.hash.includes('#doc')) {
-      const url = '/' + window.location.hash.split('=')[1] + (window.location.hash.split('=')[2] !== undefined ? '=' + window.location.hash.split('=')[2] : '');
+      let url = '/' + window.location.hash.split('=')[1] + (window.location.hash.split('=')[2] !== undefined ? '=' + window.location.hash.split('=')[2] : '');
 
-      return <div className="back-url"><Link href={url}>Terug naar het document</Link></div>
+      if ( backUrlIdRelativePath ) {
+        const backUrlId = getIdFromHash();
+
+        if (backUrlId) {
+          url = backUrlIdRelativePath.replace('[id]', backUrlId);
+        }
+      }
+
+      return <div className="back-url"><Link href={url}>{backUrlText}</Link></div>
     }
   };
 

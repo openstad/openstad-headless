@@ -25,6 +25,7 @@ import { ArgumentWidgetTabProps } from '../../comments/[id]';
 import ArgumentsForm from '../../comments/[id]/form';
 import { LikeWidgetTabProps } from '../../likes/[id]';
 import { extractConfig } from '@/lib/sub-widget-helper';
+import WidgetResourceDetailDocumentMap from "@/pages/projects/[project]/widgets/resourcedetail/[id]/document-map";
 export const getServerSideProps = withApiUrl;
 
 export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
@@ -64,6 +65,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="display">Weergave</TabsTrigger>
               <TabsTrigger value="comments">Reacties widget</TabsTrigger>
               <TabsTrigger value="likes">Likes widget</TabsTrigger>
+              <TabsTrigger value="document-map">Interactieve afbeelding</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
@@ -209,6 +211,25 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                     updateConfig,
                     updatePreview,
                   })}
+                />
+              )}
+            </TabsContent>
+
+            <TabsContent value="document-map" className="p-0">
+              {previewConfig && (
+                <WidgetResourceDetailDocumentMap
+                  {...previewConfig}
+                  updateConfig={(config) =>
+                    updateConfig({ ...widget.config, ...config })
+                  }
+                  onFieldChanged={(key, value) => {
+                    if (previewConfig) {
+                      updatePreview({
+                        ...previewConfig,
+                        [key]: value,
+                      });
+                    }
+                  }}
                 />
               )}
             </TabsContent>

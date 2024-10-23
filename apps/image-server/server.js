@@ -19,6 +19,9 @@ const imageMulterConfig = {
     }
 
     cb(null, true);
+  },
+  limits: {
+    fileSize: 20 * 1024 * 1024,  // 20MB max file size
   }
 }
 
@@ -47,6 +50,11 @@ const imageSteamConfig = {
       "cacheArtifacts": process.env.CACHE_ARTIFACTS || true
     },
   },
+  "imageLimits": {
+    "maxInputPixels": 100000000,
+    "maxWidth": 10000,
+    "maxHeight": 10000
+  },
   "throttle": {
     "ccProcessors": process.env.THROTTLE_CC_PROCESSORS || 4,
     "ccPrefetchers": process.env.THROTTLE_CC_PREFETCHER || 20,
@@ -55,18 +63,27 @@ const imageSteamConfig = {
   log: {
     errors: true
   },
-  router: {
-    originalSteps: {
-      metadata: {
-        enabled: 'false',
-      },
+  "router": {
+    "originalSteps": {
+      "resize": {
+        "width": "10000",
+        "height": "10000",
+        "max": "true",
+        "canGrow": "true"
+      }
     },
-    hqOriginalSteps: {
-      metadata: {
-        enabled: 'false',
-      },
+    "hqOriginalSteps": {
+      "resize": {
+        "width": "10000",
+        "height": "10000",
+        "max": "true",
+        "canGrow": "true"
+      }
     },
   },
+  processor: {
+    maxSize: { width: 10000, height: 10000 },
+  }
 };
 
 imageMulterConfig.dest = process.env.IMAGES_DIR || 'images/';

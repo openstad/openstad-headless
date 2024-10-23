@@ -81,6 +81,8 @@ export type DocumentMapProps = BaseProps &
     infoPopupButtonText?: string;
     openInfoPopupOnInit?: string;
     closedText?: string;
+    relativePathPrepend?: string;
+    entireDocumentVisible?: 'entirely' | 'onlyTop';
   };
 
 
@@ -113,6 +115,8 @@ function DocumentMap({
   infoPopupButtonText = '',
   openInfoPopupOnInit = 'no',
   closedText = 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
+  relativePathPrepend = '',
+  entireDocumentVisible = 'onlyTop',
   ...props
 }: DocumentMapProps) {
 
@@ -324,7 +328,20 @@ function DocumentMap({
 
     useEffect(() => {
       if (map && bounds && !!docHeight && !!docWidth && !isBoundsSet) {
-        map.fitBounds(bounds as LatLngBoundsLiteral);
+        if (entireDocumentVisible === 'entirely') {
+          map.fitBounds(bounds as LatLngBoundsLiteral);
+        } else {
+          map.setMaxBounds(bounds as LatLngBoundsLiteral);
+          const topLeft = bounds[0];
+          const topRight = [bounds[0][0], bounds[1][1]];
+
+          const topBounds: LatLngBoundsLiteral = [
+            [topLeft[0], topLeft[1]],
+            [topRight[0], topRight[1]]
+          ];
+
+          map.flyToBounds(topBounds, { animate: true, duration: 0.2 });
+        }
         map.scrollWheelZoom.disable();
         setIsBoundsSet(true);
       }
@@ -395,7 +412,7 @@ function DocumentMap({
   useEffect(() => {
     setRandomId(generateRandomId());
     if (window.location.hash.includes('#doc')) {
-      setBackUrl('/' + window.location.hash.split('=')[1] + (window.location.hash.split('=')[2] !== undefined ? '=' + window.location.hash.split('=')[2] : ''));
+      setBackUrl(relativePathPrepend + '/' + window.location.hash.split('=')[1] + (window.location.hash.split('=')[2] !== undefined ? '=' + window.location.hash.split('=')[2] : ''));
     }
   }, []);
 
@@ -584,7 +601,6 @@ function DocumentMap({
         if (popupPosition) {
           map.setMaxBounds( [] );
         } else {
-          map.fitBounds(bounds);
           map.setMaxBounds(bounds);
         }
       }
@@ -662,6 +678,10 @@ function DocumentMap({
       }
     };
 
+    const configVotingEnabled = props?.votes?.isActive || false;
+    const votingEnabled = configVotingEnabled && args.canComment;
+
+
     return !bounds ? null : (
       <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
         <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
@@ -731,14 +751,14 @@ function DocumentMap({
                 bounds={bounds as LatLngBoundsLiteral}
                 aria-describedby={randomId}
               />
-              {popupPosition && !isDefinitive && (
+              {(popupPosition && !isDefinitive && args.canComment) && (
                 <Popup
                   position={popupPosition}
                   eventHandlers={{
                     popupclose: () => setPopupPosition(null),
                   }}
                 >
-                  {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
+                  { !hasRole(currentUser, args.requiredUserRole) ? (
                     <>
                       <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
                       <Spacer size={1} />
@@ -814,42 +834,45 @@ function DocumentMap({
               )}
             </MapContainer>
 
-            <Button className={`info-trigger ${infoPopupButtonText ? 'button-has-text' : ''}`}
-                    appearance='primary-action-button' onClick={() => setModalOpen(true)}>
-              <i className="ri-information-line"></i>
-              {infoPopupButtonText && (
-                  <span className="trigger-text">{infoPopupButtonText}</span>
-              )}
-              <span className="sr-only">{infoPopupButtonText || 'Hoe werkt het?'}</span>
-            </Button>
-
-
-            <div className="modal-overlay" aria-hidden={isModalOpen ? "false" : "true"}>
-              <div
-                  ref={modalRef}
-                  className="modal"
-                  role="dialog"
-                  aria-labelledby="modal-title"
-                  aria-modal="true"
-                  tabIndex={-1}
-              >
-                <Heading level={2}>Hoe werkt het?</Heading>
-                <Paragraph>{infoPopupContent}</Paragraph>
-                <Spacer size={1}/>
-                <Button appearance='secondary-action-button' aria-label="Close Modal" onClick={() => setModalOpen(false)}>
-                  <i className="ri-close-fill"></i>
-                  <span>Info venster sluiten</span>
+            { !!args.canComment && (
+              <>
+                <Button className={`info-trigger ${infoPopupButtonText ? 'button-has-text' : ''}`}
+                        appearance='primary-action-button' onClick={() => setModalOpen(true)}>
+                  <i className="ri-information-line"></i>
+                  {infoPopupButtonText && (
+                      <span className="trigger-text">{infoPopupButtonText}</span>
+                  )}
+                  <span className="sr-only">{infoPopupButtonText || 'Hoe werkt het?'}</span>
                 </Button>
-              </div>
-            </div>
 
+
+                <div className="modal-overlay" aria-hidden={isModalOpen ? "false" : "true"}>
+                  <div
+                      ref={modalRef}
+                      className="modal"
+                      role="dialog"
+                      aria-labelledby="modal-title"
+                      aria-modal="true"
+                      tabIndex={-1}
+                  >
+                    <Heading level={2}>Hoe werkt het?</Heading>
+                    <Paragraph>{infoPopupContent}</Paragraph>
+                    <Spacer size={1}/>
+                    <Button appearance='secondary-action-button' aria-label="Close Modal" onClick={() => setModalOpen(false)}>
+                      <i className="ri-close-fill"></i>
+                      <span>Info venster sluiten</span>
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
 
           </div>
         </div>
         <div className="content document-map-info-container" ref={contentRef}>
           {!isDefinitive && (
             <>
-              {displayLikes && canComment && (
+              {displayLikes && (
                 <>
                   <Likes
                     {...props}
@@ -864,6 +887,7 @@ function DocumentMap({
                       props.likeWidget?.progressBarDescription
                     }
                     displayDislike={props.likeWidget?.displayDislike}
+                    disabled={!votingEnabled}
                   />
                   <Spacer size={1} />
                 </>
@@ -871,13 +895,20 @@ function DocumentMap({
               {backUrl !== undefined && (
                 <div className="osc back-url-container">
                   <div className="banner">
-                    <Spacer size={2} />
+                    <Spacer size={2}/>
                     <Heading6>{props.backUrlContent}</Heading6>
-                    <Spacer size={1} />
-                    <ButtonLink appearance="primary-action-button" href={backUrl} title="Terug naar overzicht" id={randomId}>{props.backUrlText}</ButtonLink>
-                    <Spacer size={2} />
+                    <Spacer size={1}/>
+                    <a
+                      href={backUrl}
+                      className="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action"
+                      title="Terug naar overzicht"
+                      id={randomId}
+                    >
+                      {props.backUrlText}
+                    </a>
+                    <Spacer size={2}/>
                   </div>
-                  <Spacer size={2} />
+                  <Spacer size={2}/>
                 </div>
               )}
               <div className='toggleMarkers'>
