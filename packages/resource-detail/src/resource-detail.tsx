@@ -183,7 +183,7 @@ function ResourceDetail({
         const backUrlId = getIdFromHash();
 
         if (backUrlId) {
-          url = url.replace('[id]', backUrlId);
+          url = backUrlIdRelativePath.replace('[id]', backUrlId);
         }
       }
 
