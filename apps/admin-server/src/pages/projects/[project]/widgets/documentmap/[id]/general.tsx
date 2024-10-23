@@ -21,9 +21,11 @@ import { useEffect, useState } from "react";
 import * as React from "react";
 import * as Switch from '@radix-ui/react-switch';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
+  entireDocumentVisible: z.enum(['entirely', 'onlyTop']).optional(),
   zoom: z.number().optional(),
   minZoom: z.number().optional(),
   maxZoom: z.number().optional(),
@@ -54,6 +56,7 @@ export default function DocumentGeneral(
       zoom: props.zoom || 1,
       minZoom: props.minZoom || -6,
       maxZoom: props.maxZoom || 10,
+      entireDocumentVisible: props.entireDocumentVisible || 'entirely',
     },
   });
 
@@ -208,6 +211,32 @@ export default function DocumentGeneral(
               <FormLabel>Grotere weergave voor het document</FormLabel>
               {YesNoSelect(field, props)}
               <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="entireDocumentVisible"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Welk gedeelte van de afbeelding moet zichtbaar zijn als de widget is ingeladen?</FormLabel>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  props.onFieldChanged(field.name, value);
+                }}
+                value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Standaard" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="entirely">Hele afbeelding zichtbaar</SelectItem>
+                  <SelectItem value="onlyTop">Focus op de bovenkant</SelectItem>
+                </SelectContent>
+              </Select>
             </FormItem>
           )}
         />
