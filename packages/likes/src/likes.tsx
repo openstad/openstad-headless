@@ -34,6 +34,7 @@ export type LikeProps = {
   hideCounters?: boolean;
   showProgressBar?: boolean;
   progressBarDescription?: string;
+  disabled?: boolean;
 };
 
 function Likes({
@@ -44,6 +45,7 @@ function Likes({
   noLabel = 'Tegen',
   displayDislike = false,
   showProgressBar = true,
+  disabled = false,
   ...props
 }: LikeWidgetProps) {
 
@@ -149,7 +151,10 @@ function Likes({
                 resource?.userVote?.opinion === likeVariant.type
                   ? 'selected'
                   : ''
-              } ${hideCounters ? 'osc-no-counter' : ''}`}>
+                } ${hideCounters ? 'osc-no-counter' : ''}`
+              }
+              disabled={disabled}
+            >
               <section className="like-kind">
                 <i className={likeVariant.icon}></i>
                 {variant === 'small' ? null : likeVariant.label}

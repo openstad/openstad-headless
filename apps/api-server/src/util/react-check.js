@@ -78,8 +78,10 @@ module.exports = `
   const hasReactWithScheduler = hasReact && typeof React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED !== 'undefined' && typeof React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.Scheduler !== 'undefined' && typeof React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.Scheduler.unstable_scheduleCallback !== 'undefined';
   const hasReactDom = typeof ReactDOM !== 'undefined';
   
-  if (!hasReact && !window.OpenStadReactLoaded) {
-  console.log ('!hasReact && !window.OpenStadReactLoaded');
+
+  if ( hasReact && hasReactWithScheduler && hasReactDom ) {
+    renderWidget();
+  } else if (!hasReact && !window.OpenStadReactLoaded) {
     const script = document.createElement('script');
     script.src = '${reactJs}';
     script.onload = (e) => {
