@@ -377,15 +377,19 @@ router.route('/:projectId') //(\\d+)
 
 // delete project
 // ---------
-	.delete(auth.can('Project', 'delete'))
-	.delete(function(req, res, next) {
-		req.results
-			.destroy()
-			.then(() => {
-				res.json({ "project": "deleted" });
-			})
-			.catch(next);
-	})
+  .delete(auth.can('Project', 'delete'))
+  .delete(async function(req, res, next) {
+    const project = await db.Project.findOne({ where: { id: req.params.projectId } });
+    if (!project) return next(new Error('Project not found'));
+
+    try {
+      await project.destroy();
+      res.json({ success: true });
+    } catch (err) {
+      next(err);
+    }
+  })
+
 
 // export a project
 // -------------------
