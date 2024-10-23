@@ -82,6 +82,7 @@ export type DocumentMapProps = BaseProps &
     openInfoPopupOnInit?: string;
     closedText?: string;
     relativePathPrepend?: string;
+    entireDocumentVisible?: 'entirely' | 'onlyTop';
   };
 
 
@@ -115,6 +116,7 @@ function DocumentMap({
   openInfoPopupOnInit = 'no',
   closedText = 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
   relativePathPrepend = '',
+  entireDocumentVisible = 'onlyTop',
   ...props
 }: DocumentMapProps) {
 
@@ -326,7 +328,20 @@ function DocumentMap({
 
     useEffect(() => {
       if (map && bounds && !!docHeight && !!docWidth && !isBoundsSet) {
-        map.fitBounds(bounds as LatLngBoundsLiteral);
+        if (entireDocumentVisible === 'entirely') {
+          map.fitBounds(bounds as LatLngBoundsLiteral);
+        } else {
+          map.setMaxBounds(bounds as LatLngBoundsLiteral);
+          const topLeft = bounds[0];
+          const topRight = [bounds[0][0], bounds[1][1]];
+
+          const topBounds: LatLngBoundsLiteral = [
+            [topLeft[0], topLeft[1]],
+            [topRight[0], topRight[1]]
+          ];
+
+          map.flyToBounds(topBounds, { animate: true, duration: 0.2 });
+        }
         map.scrollWheelZoom.disable();
         setIsBoundsSet(true);
       }
