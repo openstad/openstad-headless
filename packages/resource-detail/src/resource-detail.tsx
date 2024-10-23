@@ -152,8 +152,10 @@ function ResourceDetail({
       if (hash && hash.includes('#doc=')) {
         const docParams = hash.split('#doc=')[1];
 
-        if (docParams && docParams.includes('?')) {
-          const queryParams = docParams.split('?')[1];
+        const cleanDocParams = docParams.split('#')[0];
+
+        if (cleanDocParams && cleanDocParams.includes('?')) {
+          const queryParams = cleanDocParams.split('?')[1];
 
           if (queryParams) {
             const params = queryParams.split('&');
@@ -161,7 +163,7 @@ function ResourceDetail({
             for (const param of params) {
               const [key, value] = param.split('=');
 
-              if (key && value && !isNaN(Number(value))) {
+              if (value && !isNaN(Number(value))) {
                 return value;
               }
             }
