@@ -350,6 +350,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
 
           <ImageUploader
             form={form}
+            project={project as string}
             fieldName="image"
             allowedTypes={['image/*']}
             onImageUploaded={(imageResult) => {
@@ -363,6 +364,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
 
           <DocumentUploader
             form={form}
+            project={project as string}
             fieldName="document"
             allowedTypes={[
               'application/pdf',

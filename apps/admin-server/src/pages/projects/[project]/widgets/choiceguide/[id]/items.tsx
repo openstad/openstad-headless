@@ -683,6 +683,7 @@ export default function WidgetChoiceGuideItems(
                       <div className="col-span-full md:col-span-1 flex flex-col">
                         <ImageUploader
                           form={form}
+                          project={project as string}
                           imageLabel="Upload een afbeelding voor boven de vraag"
                           fieldName="uploadInfoImage"
                           description="Let op: de afbeelding wordt afgesneden op 300px hoogte. Het is handig om de afbeelding op voorhand zelf bij te snijden tot deze hoogte."
@@ -973,6 +974,7 @@ export default function WidgetChoiceGuideItems(
                           <div className="col-span-full md:col-span-1 flex flex-col">
                             <ImageUploader
                               form={form}
+                              project={project as string}
                               imageLabel="Upload hier afbeelding A"
                               fieldName="imageUploadA"
                               allowedTypes={["image/*"]}
@@ -987,6 +989,7 @@ export default function WidgetChoiceGuideItems(
                           <div className="col-span-full md:col-span-1 flex flex-col">
                             <ImageUploader
                               form={form}
+                              project={project as string}
                               imageLabel="Upload hier afbeelding B"
                               fieldName="imageUploadB"
                               allowedTypes={["image/*"]}

@@ -408,6 +408,7 @@ export default function ProjectTagEdit() {
 
                     <ImageUploader
                       form={form}
+                      project={project as string}
                       imageLabel="Upload hier een afbeelding die vervolgens automatisch wordt ingesteld als de standaardafbeelding voor de resource die aan deze tag is gekoppeld"
                       fieldName="image"
                       allowedTypes={["image/*"]}
