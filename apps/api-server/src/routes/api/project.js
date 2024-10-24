@@ -381,6 +381,7 @@ router.route('/:projectId') //(\\d+)
   .delete(async function(req, res, next) {
     const project = await db.Project.findOne({ where: { id: req.params.projectId } });
     if (!project) return next(new Error('Project not found'));
+    if (!project?.config?.project?.projectHasEnded) { return next(new Error('Project has not ended yet')) }
 
     try {
       await project.destroy();
