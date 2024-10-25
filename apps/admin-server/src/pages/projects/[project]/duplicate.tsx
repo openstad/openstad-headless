@@ -130,7 +130,7 @@ export default function ProjectDuplicate() {
 
       setTimeout(() => {
         if (newId) {
-          router.push(`/projects/${newId}`);
+          router.push(`/projects/${newId}/widgets`);
         }
       }, 4000);
     } else {
