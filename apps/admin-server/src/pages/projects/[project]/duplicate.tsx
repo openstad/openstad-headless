@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { PageLayout } from '../../../components/ui/page-layout';
 import { Button } from '../../../components/ui/button';
 import { useRouter } from 'next/router';
@@ -29,6 +29,7 @@ export default function ProjectDuplicate() {
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading } = useProject();
+  const [errors, setErrors] = useState<string[]>([]);
 
   const defaults = useCallback(
     () => ({
@@ -48,25 +49,111 @@ export default function ProjectDuplicate() {
 
   if (!data) return null;
 
+  async function fetchData( url: string) {
+    let response = await fetch(url) || [];
+
+    if (!response.ok) {
+      return [];
+    }
+
+    let data = await response.json();
+
+    if (!Array.isArray(data)) {
+      return [];
+    }
+    return data.map((item) => {
+      if (item.deletedAt) {
+        return null;
+      }
+      delete item.projectId;
+      item.originalId = item.id;
+      delete item.id;
+      return item;
+    })
+  }
+
+  type DuplicateData = {
+    areaId: number;
+    config: any;
+    emailConfig: any;
+    hostStatus: any;
+    name: string;
+    title: string;
+    widgets: any[];
+    tags: any[];
+    statuses: any[];
+    resources: any[];
+    resourceSettings: boolean;
+  };
+
   async function duplicate(values: z.infer<typeof formSchema>) {
-    const duplicateData = {
+    const duplicateData: DuplicateData = {
       areaId: data.areaId,
       config: data.config,
       emailConfig: data.emailConfig,
       hostStatus: data.hostStatus,
       name: values.name,
       title: data.title,
+      widgets: [],
+      tags: [],
+      statuses: [],
+      resources: [],
+      resourceSettings: false,
     };
 
-    await fetch(`/api/openstad/api/project`, {
+    const widgets = await fetchData(`/api/openstad/api/project/${data.id}/widgets`);
+    duplicateData.widgets = widgets;
+
+    const tags = await fetchData(`/api/openstad/api/project/${data.id}/tag`);
+    duplicateData.tags = tags;
+
+    const statuses = await fetchData(`/api/openstad/api/project/${data.id}/status`);
+    duplicateData.statuses = statuses;
+
+    const resources = await fetchData(`/api/openstad/api/project/${data.id}/resource?includeTags=1&includeStatus=1`);
+    duplicateData.resources = resources;
+
+    duplicateData.resourceSettings = duplicateData?.config?.resources || {};
+
+    if (Array.isArray(resources) && resources.length > 0) {
+      // Set the canAddNewResources to true to prevent the API from returning an error
+      duplicateData.config = duplicateData.config || {};
+      duplicateData.config.resources = duplicateData.config.resources || {};
+      duplicateData.config.resources.canAddNewResources = true;
+
+      // Set min and max for title, description and summary to prevent the API from returning an error
+      duplicateData.config.resources.titleMaxLength = 10000;
+      duplicateData.config.resources.titleMinLength = 1;
+      duplicateData.config.resources.summaryMaxLength = 10000;
+      duplicateData.config.resources.summaryMinLength = 1;
+      duplicateData.config.resources.descriptionMaxLength = 10000;
+      duplicateData.config.resources.descriptionMinLength = 1;
+    }
+
+    const response = await fetch(`/api/openstad/api/project`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(duplicateData),
     });
-    toast.success('Er is een kopie van het project aangemaakt.')
-    router.push('/projects');
+
+    if (response.ok) {
+      const newId = await response.json();
+      toast.success('Er is een kopie van het project aangemaakt. Je wordt nu doorgestuurd naar de projecten pagina.', {
+        duration: 5000
+      });
+
+      setTimeout(() => {
+        if (newId) {
+          router.push(`/projects/${newId}/widgets`);
+        }
+      }, 4000);
+    } else {
+      const errorData = await response.json();
+      setErrors(errorData.errors || ['Er is een fout opgetreden bij het dupliceren van het project.']);
+      toast.error('Er is een fout opgetreden bij het dupliceren van het project.');
+    }
   }
 
   return (
@@ -118,6 +205,15 @@ export default function ProjectDuplicate() {
                   Opslaan
                 </Button>
               </form>
+              {errors.length > 0 && (
+                <div className="mt-4 text-red-600">
+                  <ul>
+                    {errors.map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <br />
             </Form>
           </div>
