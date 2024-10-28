@@ -51,26 +51,43 @@ export default function ProjectDuplicate() {
 
   async function fetchData( url: string) {
     let response = await fetch(url) || [];
-    if (response.ok) {
-      let data = await response.json();
 
-      if (!Array.isArray(data)) {
-        return data;
-      }
-      return data.map((item) => {
-        if (item.deletedAt) {
-          return null;
-        }
-        delete item.projectId;
-        item.originalId = item.id;
-        delete item.id;
-        return item;
-      })
+    if (!response.ok) {
+      return [];
     }
+
+    let data = await response.json();
+
+    if (!Array.isArray(data)) {
+      return [];
+    }
+    return data.map((item) => {
+      if (item.deletedAt) {
+        return null;
+      }
+      delete item.projectId;
+      item.originalId = item.id;
+      delete item.id;
+      return item;
+    })
   }
 
+  type DuplicateData = {
+    areaId: number;
+    config: any;
+    emailConfig: any;
+    hostStatus: any;
+    name: string;
+    title: string;
+    widgets: any[];
+    tags: any[];
+    statuses: any[];
+    resources: any[];
+    resourceSettings: boolean;
+  };
+
   async function duplicate(values: z.infer<typeof formSchema>) {
-    const duplicateData = {
+    const duplicateData: DuplicateData = {
       areaId: data.areaId,
       config: data.config,
       emailConfig: data.emailConfig,
