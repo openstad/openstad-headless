@@ -54,19 +54,18 @@ export default function ProjectDuplicate() {
     if (response.ok) {
       let data = await response.json();
 
-      data = Array.isArray(data) ? data.map((item) => {
+      if (!Array.isArray(data)) {
+        return data;
+      }
+      return data.map((item) => {
         if (item.deletedAt) {
           return null;
         }
         delete item.projectId;
-
         item.originalId = item.id;
         delete item.id;
-
         return item;
-      }) : [];
-
-      return data;
+      })
     }
   }
 
