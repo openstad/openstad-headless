@@ -58,6 +58,151 @@ async function getProject(req, res, next, include = []) {
   }
 }
 
+// Function to create tags
+async function createTags(req, tagMap, errors) {
+  for (const tag of req.tags) {
+    try {
+      const newTag = await db.Tag.create({ ...tag, projectId: req.projectId });
+      tagMap[tag.originalId] = newTag.id;
+    } catch (error) {
+      errors.push({ step: 'Create tags', error: error.message });
+    }
+  }
+}
+
+// Function to create statuses
+async function createStatuses(req, statusMap, errors) {
+  for (const status of req.statuses) {
+    try {
+      const newStatus = await db.Status.create({ ...status, projectId: req.projectId });
+      statusMap[status.originalId] = newStatus.id;
+    } catch (error) {
+      errors.push({ step: 'Create statuses', error: error.message });
+    }
+  }
+}
+
+// Function to create widgets
+async function createWidgets(req, widgetMap, newWidgets, errors) {
+  for (const widget of req.widgets) {
+    try {
+      const newWidget = await db.Widget.create({ ...widget, projectId: req.projectId });
+      widgetMap[widget.originalId] = newWidget.id;
+      newWidgets.push(newWidget);
+    } catch (error) {
+      errors.push({ step: 'Create widgets', error: error.message });
+    }
+  }
+}
+
+// Function to create resources
+async function createResources(req, resourceMap, widgetMap, tagMap, statusMap, errors) {
+  for (const resource of req.resources) {
+    try {
+      const updateWidgetIds = (singleResource) => {
+        for (const key in singleResource) {
+          if (typeof singleResource[key] === 'object' && singleResource[key] !== null) {
+            updateWidgetIds(singleResource[key]);
+          } else if (key === "widgetId") {
+            singleResource[key] = widgetMap[singleResource[key]];
+          }
+        }
+        return singleResource;
+      }
+
+      const updatedResource = updateWidgetIds(resource);
+
+      const newResource = await db.Resource.create({ ...updatedResource, projectId: req.projectId });
+      resourceMap[resource.originalId] = newResource.id;
+
+      if (resource.tags) {
+        const validTagIds = await getValidTags(req.projectId, resource.tags.map(tag => tagMap[tag.id]));
+        await newResource.setTags(validTagIds);
+      }
+      if (resource.statuses) {
+        const validStatusIds = await getValidStatuses(req.projectId, resource.statuses.map(status => statusMap[status.id]));
+        await newResource.setStatuses(validStatusIds);
+      }
+    } catch (error) {
+      errors.push({ step: 'Create resources', error: error.message });
+    }
+  }
+}
+
+// Function to update widget IDs in an object
+function updateWidgetIds(obj, widgetMap, resourceMap, tagMap, statusMap, projectId) {
+  for (const key in obj) {
+    if (typeof obj[key] === 'object' && obj[key] !== null) {
+      updateWidgetIds(obj[key], widgetMap, resourceMap, tagMap, statusMap, projectId);
+    } else {
+      if (key === 'projectId') {
+        obj[key] = projectId;
+      }
+      if (key === 'resourceId') {
+        obj[key] = resourceMap[obj[key]];
+      }
+      if (key.includes('tag') || key.includes('Tag')) {
+        if (obj[key]) {
+          let tagValue = typeof obj[key] === 'number' ? obj[key].toString() : obj[key];
+          if (typeof tagValue === 'string' && tagValue !== '') {
+            tagValue = tagValue.split(',').map(id => tagMap[id] || id).join(',');
+            obj[key] = tagValue;
+          }
+        }
+      }
+      if (key.includes('status') || key.includes('Status')) {
+        if (obj[key]) {
+          let statusValue = typeof obj[key] === 'number' ? obj[key].toString() : obj[key];
+          if (typeof statusValue === 'string' && statusValue !== '') {
+            statusValue = statusValue.split(',').map(id => statusMap[id] || id).join(',');
+            obj[key] = statusValue;
+          }
+        }
+      }
+      if (key === 'choiceguideWidgetId') {
+        obj[key] = widgetMap[obj[key]];
+      }
+    }
+  }
+}
+
+// Function to update widget
+async function updateWidget(widgetId, updatedData, errors) {
+  try {
+    await db.Widget.update(updatedData, {
+      where: { id: widgetId }
+    });
+  } catch (error) {
+    errors.push({ step: 'Update widget', error: error.message });
+  }
+}
+
+// Function to update widget IDs in new widgets
+async function updateWidgetIdsInNewWidgets(newWidgets, widgetMap, resourceMap, tagMap, statusMap, projectId, errors) {
+  for (const widget of newWidgets) {
+    try {
+      const updatedData = { config: widget.config };
+      updateWidgetIds(updatedData, widgetMap, resourceMap, tagMap, statusMap, projectId);
+      await updateWidget(widget.id, updatedData, errors);
+    } catch (error) {
+      errors.push({ step: 'Update widget IDs in new widgets', error: error.message });
+    }
+  }
+}
+
+// Function to revert the config resource settings
+async function revertConfigResourceSettings(req, errors) {
+  try {
+    const project = await db.Project.findOne({ where: { id: req.projectId } });
+    const newConfig = project?.config || {};
+    newConfig.resources = req.resourceSettings || {};
+
+    await project.update({ config: newConfig });
+  } catch (error) {
+    errors.push({ step: 'Revert config resource settings', error: error.message });
+  }
+}
+
 // scopes
 // ------
 router
@@ -209,144 +354,18 @@ router.route('/')
     try {
       req.query.nomail = true;
 
-      // Create tags
       const tagMap = {};
-      for (const tag of req.tags) {
-        try {
-          const newTag = await db.Tag.create({ ...tag, projectId: req.projectId });
-          tagMap[tag.originalId] = newTag.id;
-        } catch (error) {
-          errors.push({ step: 'Create tags', error: error.message });
-        }
-      }
-
-      // Create statuses
       const statusMap = {};
-      for (const status of req.statuses) {
-        try {
-          const newStatus = await db.Status.create({ ...status, projectId: req.projectId });
-          statusMap[status.originalId] = newStatus.id;
-        } catch (error) {
-          errors.push({ step: 'Create statuses', error: error.message });
-        }
-      }
-
-      // Create new widgets and store their new IDs
       const widgetMap = {};
       const newWidgets = [];
-      for (const widget of req.widgets) {
-        try {
-          const newWidget = await db.Widget.create({ ...widget, projectId: req.projectId });
-          widgetMap[widget.originalId] = newWidget.id;
-          newWidgets.push(newWidget);
-        } catch (error) {
-          errors.push({ step: 'Create widgets', error: error.message });
-        }
-      }
-
-      // Create resources
       const resourceMap = {};
-      for (const resource of req.resources) {
-        try {
-          const updateWidgetIds = (singleResource) => {
-            for (const key in singleResource) {
-              if (typeof singleResource[key] === 'object' && singleResource[key] !== null) {
-                updateWidgetIds(singleResource[key]);
-              } else if (key === "widgetId") {
-                singleResource[key] = widgetMap[singleResource[key]];
-              }
-            }
-            return singleResource;
-          }
 
-          const updatedResource = updateWidgetIds(resource);
-
-          const newResource = await db.Resource.create({ ...updatedResource, projectId: req.projectId });
-          resourceMap[resource.originalId] = newResource.id;
-
-          if (resource.tags) {
-            const validTagIds = await getValidTags(req.projectId, resource.tags.map(tag => tagMap[tag.id]));
-            await newResource.setTags(validTagIds);
-          }
-          if (resource.statuses) {
-            const validStatusIds = await getValidStatuses(req.projectId, resource.statuses.map(status => statusMap[status.id]));
-            await newResource.setStatuses(validStatusIds);
-          }
-        } catch (error) {
-          errors.push({ step: 'Create resources', error: error.message });
-        }
-      }
-
-      // Update widget IDs in widget config
-      const updateWidgetIds = (obj) => {
-        for (const key in obj) {
-          if (typeof obj[key] === 'object' && obj[key] !== null) {
-            updateWidgetIds(obj[key]);
-          } else {
-            if (key === 'projectId') {
-              obj[key] = req.projectId;
-            }
-            if (key === 'resourceId') {
-              obj[key] = resourceMap[obj[key]];
-            }
-            if (key.includes('tag') || key.includes('Tag')) {
-              if (obj[key]) {
-                let tagValue = typeof obj[key] === 'number' ? obj[key].toString() : obj[key];
-                if (typeof tagValue === 'string' && tagValue !== '') {
-                  tagValue = tagValue.split(',').map(id => tagMap[id] || id).join(',');
-                  obj[key] = tagValue;
-                }
-              }
-            }
-
-            if (key.includes('status') || key.includes('Status')) {
-              if (obj[key]) {
-                let statusValue = typeof obj[key] === 'number' ? obj[key].toString() : obj[key];
-                if (typeof statusValue === 'string' && statusValue !== '') {
-                  statusValue = statusValue.split(',').map(id => statusMap[id] || id).join(',');
-                  obj[key] = statusValue;
-                }
-              }
-            }
-            if (key === 'choiceguideWidgetId') {
-              obj[key] = widgetMap[obj[key]];
-            }
-          }
-        }
-      };
-
-      // Update widget function
-      async function updateWidget(widgetId, updatedData) {
-        try {
-          await db.Widget.update(updatedData, {
-            where: { id: widgetId }
-          });
-        } catch (error) {
-          errors.push({ step: 'Update widget', error: error.message });
-        }
-      }
-
-      // Update widget IDs in new widgets
-      for (const widget of newWidgets) {
-        try {
-          const updatedData = { config: widget.config };
-          updateWidgetIds(updatedData);
-          await updateWidget(widget.id, updatedData);
-        } catch (error) {
-          errors.push({ step: 'Update widget IDs in new widgets', error: error.message });
-        }
-      }
-
-      // Revert the config resource settings
-      try {
-        const project = await db.Project.findOne({ where: { id: req.projectId } });
-        const newConfig = project?.config || {};
-        newConfig.resources = req.resourceSettings || {};
-
-        await project.update({ config: newConfig });
-      } catch (error) {
-        errors.push({ step: 'Revert config resource settings', error: error.message });
-      }
+      await createTags(req, tagMap, errors);
+      await createStatuses(req, statusMap, errors);
+      await createWidgets(req, widgetMap, newWidgets, errors);
+      await createResources(req, resourceMap, widgetMap, tagMap, statusMap, errors);
+      await updateWidgetIdsInNewWidgets(newWidgets, widgetMap, resourceMap, tagMap, statusMap, req.projectId, errors);
+      await revertConfigResourceSettings(req, errors);
 
       if (errors.length > 0) {
         return res.status(500).json({ errors });
