@@ -88,6 +88,44 @@ const TextInput: FC<TextInputProps> = ({
         setHelpText(helpText);
     }
 
+    const getType = (fieldKey: string) => {
+        switch (fieldKey) {
+            case 'email':
+                return 'email';
+            case 'tel':
+                return 'tel';
+            case 'password':
+                return 'password';
+            default:
+                return 'text';
+        }
+    }
+
+    const getAutocomplete = (fieldKey: string) => {
+        switch (fieldKey.toLocaleLowerCase()) {
+            case 'mail':
+                return 'email';
+            case 'tel':
+                return 'tel';
+            case 'password':
+                return 'current-password';
+            case 'voornaam':
+                return 'given-name';
+            case 'achternaam':
+                return 'family-name';
+            case 'straatnaam':
+                return 'street-address';
+            case 'postcode':
+                return 'postal-code';
+            case 'woonplaats':
+                return 'address-level2';
+            case 'land':
+                return 'country';
+            default:
+                return 'on';
+        }
+    }
+
     const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
     return (
         <FormField type="text">
@@ -131,7 +169,7 @@ const TextInput: FC<TextInputProps> = ({
                     id={randomID}
                     name={fieldKey}
                     required={fieldRequired}
-                    type="text"
+                    type={getType(fieldKey)}
                     placeholder={placeholder}
                     value={value}
                     onChange={(e) => {
@@ -148,7 +186,7 @@ const TextInput: FC<TextInputProps> = ({
                     rows={rows}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
-                    autoComplete="on"
+                    autoComplete={getAutocomplete(fieldKey)}
                 />
                 {isFocused && helpText &&
                   <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
