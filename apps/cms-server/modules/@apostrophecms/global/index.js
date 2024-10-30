@@ -110,6 +110,24 @@ module.exports = {
         },
       },
 
+      topMenuButtons: {
+        label: 'Topmenu buttons',
+        type: 'array',
+        draggable: true,
+        fields: {
+          add: {
+            label: {
+              label: 'Label',
+              type: 'string',
+            },
+            href: {
+              label: 'Url',
+              type: 'string',
+            },
+          },
+        },
+      },
+
       showLoginButton: {
         type: 'boolean',
         def: 'false',
@@ -303,15 +321,15 @@ module.exports = {
     group: {
       basics: {
         label: 'Algemene instellingen',
-        fields: ['siteTitle', 'hideSiteTitle',  'siteLogo', 'logoAltText', 'ctaButtons'],
+        fields: ['siteTitle', 'hideSiteTitle',  'siteLogo', 'logoAltText'],
       },
       css: {
         label: 'Vormgeving',
         fields: ['customCssLink', 'favicon', 'compactMenu'],
       },
       login: {
-        label: 'Gebruikers login',
-        fields: ['showLoginButton', 'loginButtonLabel', 'showAccountButton', 'accountButtonHref', 'accountButtonLabel', 'logoutButtonLabel'],
+        label: 'Menu instellingen',
+        fields: ['showLoginButton', 'loginButtonLabel', 'showAccountButton', 'accountButtonHref', 'accountButtonLabel', 'logoutButtonLabel', 'ctaButtons', 'topMenuButtons'],
       },
       cookies: {
         label: 'Cookie instellingen',
