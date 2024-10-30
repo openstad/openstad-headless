@@ -95,8 +95,30 @@ async function createWidgets(req, widgetMap, newWidgets, errors) {
   }
 }
 
+// Function to get or create a user
+async function getOrCreateUser(userId, userMap, projectId) {
+  if (userMap[userId]) {
+    return userMap[userId];
+  }
+
+  const user = await db.User.findOne({ where: { id: userId }, raw: true });
+
+  if ( !user ) {
+    const newUser = await db.User.create({ idpUser: { provider: 'anonymous', identifier: 'anonymous' }, projectId });
+    userMap[userId] = newUser.id;
+    return newUser.id;
+  }
+
+  delete user.id;
+  user.projectId = projectId;
+  const newUser = await db.User.create(user);
+
+  userMap[userId] = newUser.id;
+  return newUser.id;
+}
+
 // Function to create resources
-async function createResources(req, resourceMap, widgetMap, tagMap, statusMap, errors) {
+async function createResources(req, resourceMap, widgetMap, tagMap, statusMap, userMap, errors) {
   for (const resource of req.resources) {
     try {
       const updateWidgetIds = (singleResource) => {
@@ -111,6 +133,10 @@ async function createResources(req, resourceMap, widgetMap, tagMap, statusMap, e
       }
 
       const updatedResource = updateWidgetIds(resource);
+
+      // Retrieve or create the user and update the userId in the resource
+      const newUserId = await getOrCreateUser(updatedResource.userId, userMap, req.projectId);
+      updatedResource.userId = newUserId;
 
       const newResource = await db.Resource.create({ ...updatedResource, projectId: req.projectId });
       resourceMap[resource.originalId] = newResource.id;
@@ -203,6 +229,81 @@ async function revertConfigResourceSettings(req, errors) {
   }
 }
 
+// Endpoint to delete duplicated project and its associated data
+router.route('/delete-duplicated-data')
+  .post(auth.can('Project', 'delete'))
+  .post(async function(req, res, next) {
+    const { projectId, tagMap, statusMap, widgetMap, resourceMap, userMap } = req.body;
+
+    try {
+      // Delete duplicated tags
+      if (Object.keys(tagMap).length > 0) {
+        for (const tagId of Object.values(tagMap)) {
+          if (tagId) {
+            await db.Tag.destroy({ where: { id: tagId } });
+          }
+        }
+      }
+
+      // Delete duplicated statuses
+      if (Object.keys(statusMap).length > 0) {
+        for (const statusId of Object.values(statusMap)) {
+          if (statusId) {
+            await db.Status.destroy({ where: { id: statusId } });
+          }
+        }
+      }
+
+      // Delete duplicated widgets
+      if (Object.keys(widgetMap).length > 0) {
+        for (const widgetId of Object.values(widgetMap)) {
+          if (widgetId) {
+            await db.Widget.destroy({ where: { id: widgetId } });
+          }
+        }
+      }
+
+      // Delete duplicated resources
+      if (Object.keys(resourceMap).length > 0) {
+        for (const resourceId of Object.values(resourceMap)) {
+          if (resourceId) {
+            await db.Resource.destroy({ where: { id: resourceId } });
+          }
+        }
+      }
+
+      // Delete duplicated resources
+      if (Object.keys(userMap).length > 0) {
+        for (const userId of Object.values(userMap)) {
+          if (userId) {
+            await db.User.destroy({ where: { id: userId } });
+          }
+        }
+      }
+
+      // Delete the duplicated project
+      const project = await db.Project.findOne({ where: { id: projectId } });
+      if (!project) return next(new Error('Project not found'));
+      if (!project?.config?.project?.projectHasEnded) {
+        const updatedConfig = {
+          ...project.config,
+          project: {
+            ...project.config.project,
+            projectHasEnded: true,
+          }
+        };
+
+        await project.update({ config: updatedConfig });
+      }
+
+      await project.destroy();
+
+      res.json({ success: true });
+    } catch (err) {
+      next(err);
+    }
+  });
+
 // scopes
 // ------
 router
@@ -294,6 +395,7 @@ router.route('/')
     req.statuses = req.body.statuses || [];
     req.resources = req.body.resources || [];
     req.resourceSettings = req.body.resourceSettings || {};
+    req.skipDefaultStatuses = req.body.skipDefaultStatuses || false;
 
     delete req.body.widgets;
     delete req.body.tags;
@@ -335,7 +437,7 @@ router.route('/')
 	})
 	.post(function(req, res, next) {
 		db.Project
-			.create({ emailConfig: {}, ...req.body })
+			.create({ emailConfig: {}, ...req.body}, { skipDefaultStatuses: req.skipDefaultStatuses })
 			.then(result => {
         req.results = result;
         req.projectId = result.id;
@@ -357,18 +459,30 @@ router.route('/')
       const tagMap = {};
       const statusMap = {};
       const widgetMap = {};
+      const userMap = {};
       const newWidgets = [];
       const resourceMap = {};
 
       await createTags(req, tagMap, errors);
       await createStatuses(req, statusMap, errors);
       await createWidgets(req, widgetMap, newWidgets, errors);
-      await createResources(req, resourceMap, widgetMap, tagMap, statusMap, errors);
+      await createResources(req, resourceMap, widgetMap, tagMap, statusMap, userMap, errors);
       await updateWidgetIdsInNewWidgets(newWidgets, widgetMap, resourceMap, tagMap, statusMap, req.projectId, errors);
       await revertConfigResourceSettings(req, errors);
 
       if (errors.length > 0) {
-        return res.status(500).json({ errors });
+        return res.status(500).json({
+          errors: errors,
+          duplicatedData: {
+            projectId: req.projectId,
+            tagMap: tagMap,
+            statusMap: statusMap,
+            widgetMap: widgetMap,
+            userMap: userMap,
+            resourceMap: resourceMap,
+            newWidgets: newWidgets,
+          }
+        });
       }
 
       res.json(req.projectId);
