@@ -118,6 +118,9 @@ export default function CreateUserProjects() {
                 } else {
                   user = users.find((user:any) => user.projectId == project.id);
                 }
+
+                const cannotCreateNewUsers = project?.config?.users?.canCreateNewUsers === false;
+
                 return (
                   <li key={project.id} className="grid grid-cols-1 lg:grid-cols-2 items-center py-3 h-fit hover:bg-secondary-background hover:cursor-pointer border-b border-border">
                     <Paragraph className="truncate">{project.name}</Paragraph>
@@ -127,6 +130,7 @@ export default function CreateUserProjects() {
                         addProject={(roleId) => {
                           addProject(project.id, roleId);
                         }}
+                        disabled={cannotCreateNewUsers}
                       />
                     </Paragraph>
                   </li>
