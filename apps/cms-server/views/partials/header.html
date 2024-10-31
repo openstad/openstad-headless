@@ -2,24 +2,36 @@
 
       <div class="header-top-bar">
         <div class="container">
-        {% if data.global.showLoginButton and not data.loggedIn %}
-        <div class="login-button">
-          <a href="{{data.baseUrlWithPrefix}}/login">{{data.global.loginButtonLabel}}</a>
-        </div>
-      {% endif %}
+          <div class="topmenu-dynamic-container">
+            {% if data.global.topMenuButtons.length > 0 %}
+              {% for topMenuButton in data.global.topMenuButtons %}
+                {% set buttonHref = data.prefix + topMenuButton.href if (topMenuButton.href and topMenuButton.href.startsWith('/'))  else topMenuButton.href %}
+                <div class="topmenu-buttons">
+                  <a href="{{buttonHref}}">{{topMenuButton.label}}</a>
+                </div>
+              {% endfor %}
+            {% endif %}
+          </div>
+          <div class="topmenu-static-container">
+            {% if data.global.showLoginButton and not data.loggedIn %}
+              <div class="login-button">
+                <a href="{{data.baseUrlWithPrefix}}/login">{{data.global.loginButtonLabel}}</a>
+              </div>
+            {% endif %}
 
-      {% if data.global.showAccountButton and data.loggedIn %}
-        <div class="account-button">
-          <a href="{{data.global.accountButtonHref}}">{{ data.global.accountButtonLabel | replace('[[name]]', data.openstadUser.displayName) | replace('[[displayName]]', data.openstadUser.displayName) }}</a>
-        </div>
-      {% endif %}
+            {% if data.global.showAccountButton and data.loggedIn %}
+              <div class="account-button">
+                <a href="{{data.global.accountButtonHref}}">{{ data.global.accountButtonLabel | replace('[[name]]', data.openstadUser.displayName) | replace('[[displayName]]', data.openstadUser.displayName) }}</a>
+              </div>
+            {% endif %}
 
-      {% if data.loggedIn %}
-        <div class="logout-button">
-          <a href="{{data.baseUrlWithPrefix}}/logout">{{ data.global.logoutButtonLabel | replace('[[name]]', data.openstadUser.displayName) | replace('[[displayName]]', data.openstadUser.displayName) }}</a>
+            {% if data.loggedIn %}
+              <div class="logout-button">
+                <a href="{{data.baseUrlWithPrefix}}/logout">{{ data.global.logoutButtonLabel | replace('[[name]]', data.openstadUser.displayName) | replace('[[displayName]]', data.openstadUser.displayName) }}</a>
+              </div>
+            {% endif %}
+          </div>
         </div>
-      {% endif %}
-    </div>
       </div>
   <div class="container relative main-header-container">
 

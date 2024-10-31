@@ -441,9 +441,15 @@ header:has(.header_navbar-container.--show)~#navbar {
 
   .container {
     display: flex;
-    justify-content: end;
+    justify-content: space-between;
     align-items: center;
     gap: 10px;
+
+    & > div {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
   }
 
   a {
