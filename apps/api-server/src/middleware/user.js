@@ -124,7 +124,7 @@ async function getUserInstance({ authConfig, authProvider, userId, isFixed, proj
     }
 
     if (!dbUser || ( !dbUser.idpUser || !dbUser.idpUser.accesstoken ) ) {
-      return {};
+      return dbUser;
     }
 
   } catch(err) {
