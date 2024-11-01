@@ -63,6 +63,10 @@ module.exports = ( db, sequelize, DataTypes ) => {
           instance.from = project.emailConfig?.notifications?.fromAddress;
         }
 
+        if ( project.emailConfig?.notifications?.fromName && !!project.emailConfig?.notifications?.fromName ) {
+          instance.from = `"${project.emailConfig.notifications.fromName}" <${instance.from}>`;
+        }
+
         // to
         let user;
         if (!instance.to) {
