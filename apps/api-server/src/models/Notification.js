@@ -196,10 +196,10 @@ module.exports = ( db, sequelize, DataTypes ) => {
                     <tbody>
                       ${questionsAndAnswers.map(qa => `
                         <tr style="background-color: #f0f0f0;">
-                          <td style="padding: 10px; font-weight: bold;">${qa.question}</td>
+                          <td style="padding: 10px; font-weight: bold; color: #000; font-size: 13px;font-family: Roboto;">${qa.question}</td>
                         </tr>
                         <tr style="background-color: #ffffff;">
-                          <td style="padding: 10px;">
+                          <td style="padding: 10px; color: #000; font-size: 13px;font-family: Roboto;">
                             ${qa.answer}
                             <br/>
                           </td>
@@ -261,10 +261,10 @@ module.exports = ( db, sequelize, DataTypes ) => {
                     <tbody>
                       ${questionsAndAnswers.map(qa => `
                         <tr style="background-color: #f0f0f0;">
-                          <td style="padding: 10px; font-weight: bold;">${qa.question}</td>
+                          <td style="padding: 10px; font-weight: bold; color: #000; font-size: 13px;font-family: Roboto;">${qa.question}</td>
                         </tr>
                         <tr style="background-color: #ffffff;">
-                          <td style="padding: 10px;">
+                          <td style="padding: 10px; color: #000; font-size: 13px;font-family: Roboto;">
                             ${qa.answer}
                             <br/>
                           </td>
