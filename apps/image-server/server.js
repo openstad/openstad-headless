@@ -228,7 +228,12 @@ app.get('/document/*',
  */
 app.post('/document',
   documentUpload.single('document'), (req, res, next) => {
-    const fileName = createFilename(req.file.originalname);
+    const fileName = req?.file?.filename || '';
+
+    // Check if the filename is not empty
+    if (!fileName) {
+      return res.status(400).send(JSON.stringify({ error: 'No file uploaded' }));
+    }
 
     let url = `${process.env.APP_URL}/document/${encodeURIComponent(fileName)}`;
 
