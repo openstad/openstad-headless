@@ -78,9 +78,8 @@ export const BegrotenSelectedOverview = ({
             <div key={`budget-overview-row-${resource.id}`} className="budget-two-text-row-spaced">
               <section className={`budget-overview-row ${hasImages}`}>
                 <Image
-                  height={'4rem'}
-                  width={'4rem'}
-                  src={resourceImages}
+                  className="budget-overview-image"
+                  src={resource.images?.at(0)?.url || defaultImage}
                 />
                 <div className="budget-resource-container">
                   <Paragraph>{resource.title}</Paragraph>

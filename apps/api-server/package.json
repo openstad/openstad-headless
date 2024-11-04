@@ -26,6 +26,7 @@
     "@openstad-headless/activity": "file:../../packages/activity",
     "@openstad-headless/agenda": "file:../../packages/agenda",
     "@openstad-headless/choiceguide": "file:../../packages/choiceguide",
+    "@openstad-headless/choiceguide-results": "file:../../packages/choiceguide-results",
     "@openstad-headless/comments": "file:../../packages/comments",
     "@openstad-headless/counter": "file:../../packages/counter",
     "@openstad-headless/datastore": "file:../../packages/data-store",

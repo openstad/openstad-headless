@@ -3,7 +3,7 @@ import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import { Button, ButtonLink } from '@utrecht/component-library-react';
 
-import type { PropsWithChildren } from 'react';
+import {PropsWithChildren, useEffect} from 'react';
 import { loadWidget } from '../../lib/load-widget';
 import DataStore from '@openstad-headless/data-store/src';
 import parseLocation from './lib/parse-location';
@@ -14,10 +14,11 @@ import './css/resource-overview-map.css';
 
 import type { MarkerProps } from './types/marker-props';
 import type { CategoriesType } from './types/categorize';
-import type { ResourceOverviewMapWidgetProps } from './types/resource-overview-map-widget-props';
+import type {DataLayer, ResourceOverviewMapWidgetProps } from './types/resource-overview-map-widget-props';
 import { BaseMap } from './base-map';
-import React from 'react';
+import React, { useState } from 'react';
 import { LocationType } from '@openstad-headless/leaflet-map/src/types/location.js';
+import L from 'leaflet';
 
 type Point = {
   lat: number;
@@ -76,7 +77,7 @@ const ResourceOverviewMap = ({
       let marker: MarkerProps = {
         location: { ...resource.location } || undefined,
       };
-      const markerLatLng = parseLocation(marker); // unify location format
+      const markerLatLng: any = parseLocation(marker); // unify location format
       marker.lat = markerLatLng.lat;
       marker.lng = markerLatLng.lng;
 
@@ -91,13 +92,39 @@ const ResourceOverviewMap = ({
         }
       }
 
+      const firstStatus = resource.statuses && resource.statuses[0];
+      let MapIconImage = firstStatus && firstStatus.mapIcon ? firstStatus.mapIcon : '';
+
+      const firstTag = resource.tags && resource.tags[0];
+      MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : MapIconImage;
+      const MapIconColor = firstTag && firstTag.documentMapIconColor ? firstTag.documentMapIconColor : '';
+
       // Set the resource name
       marker.icon = {
         title: resource.title ?? 'Locatie pin',
       }
 
+      // Set the icon color
+      if (MapIconColor) {
+        marker.icon.color = MapIconColor;
+      }
+
+      // Set the icon
+      if (MapIconImage) {
+        marker.icon = L.icon({
+          iconUrl: MapIconImage,
+          iconSize: [30, 40],
+          iconAnchor: [15, 40],
+          className: 'custom-image-icon',
+        });
+      }
+
       return marker;
     }) || [];
+
+  if (givenResources) {
+    resources.metadata.totalCount = givenResources.length;
+  }
 
   let countButtonElement: React.JSX.Element = <></>;
   if (countButton?.show) {
@@ -137,17 +164,50 @@ const ResourceOverviewMap = ({
       ? (areas.find((area) => area.id.toString() === areaId) || {}).polygon
       : [];
 
-  function calculateCenter(polygon: Point[]) {
+  const { data: datalayers } = datastore.useDatalayer({
+    projectId: props.projectId,
+  });
+
+  const mapDataLayers: { layer: any; icon?: any, name: string, id: string, activeOnInit: boolean }[] = [];
+  const selectedDataLayers = props?.resourceOverviewMapWidget?.datalayer || [];
+  const showOnOffButtons = props?.resourceOverviewMapWidget?.enableOnOffSwitching || false;
+
+  if (selectedDataLayers && Array.isArray(selectedDataLayers) && Array.isArray(datalayers) && datalayers.length > 0) {
+    selectedDataLayers.forEach((selectedDataLayer: DataLayer, index: number) => {
+      const foundDatalayer = datalayers.find((datalayer: DataLayer) => {
+        const isMatch = datalayer.id === selectedDataLayer.id;
+        return isMatch;
+      });
+
+      if (foundDatalayer) {
+        const stableId = `layer-${index}`;
+
+        mapDataLayers.push({
+          layer: foundDatalayer.layer,
+          icon: foundDatalayer.icon,
+          name: selectedDataLayer.name,
+          activeOnInit: typeof(selectedDataLayer?.activeOnInit) === 'boolean' ? selectedDataLayer.activeOnInit : true,
+          id: stableId
+        });
+      }
+    });
+  }
+
+  function calculateCenter(polygon: Point[] | Point[][]) {
     if (!polygon || polygon.length === 0) {
       return undefined;
     }
+
+    const flatPolygon = Array.isArray(polygon[0])
+      ? (polygon as Point[][]).flat()
+      : (polygon as Point[]);
 
     let minX = Infinity;
     let maxX = -Infinity;
     let minY = Infinity;
     let maxY = -Infinity;
 
-    polygon.forEach((point) => {
+    flatPolygon.forEach((point) => {
       if (point.lng < minX) minX = point.lng;
       if (point.lng > maxX) maxX = point.lng;
       if (point.lat < minY) minY = point.lat;
@@ -160,10 +220,13 @@ const ResourceOverviewMap = ({
     return { lat: avgLat, lng: avgLng };
   }
 
-  let center: LocationType | undefined = undefined;
-  if (!!props.area && Array.isArray(props.area) && props.area.length > 0) {
-    center = calculateCenter(props.area);
-  }
+  const [center, setCenter] = useState<LocationType | undefined>(undefined);
+
+  useEffect(() => {
+    if (!!polygon) {
+      setCenter( calculateCenter(polygon) );
+    }
+  }, [polygon, areas]);
 
   const zoom = {
     minZoom: props?.map?.minZoom ? parseInt(props.map.minZoom) : 7,
@@ -178,14 +241,57 @@ const ResourceOverviewMap = ({
     }
   };
 
+  const [activeLayers, setActiveLayers] = useState<{ [key: string]: boolean }>({});
 
-  return (
+  useEffect(() => {
+    if (mapDataLayers.length > 0 && Object.keys(activeLayers).length === 0) {
+      const initialLayers = mapDataLayers.reduce((acc, layer) => {
+        acc[layer.id] = layer.activeOnInit;
+        return acc;
+      }, {} as { [key: string]: boolean });
+
+      setActiveLayers(initialLayers);
+    }
+  }, [mapDataLayers]);
+
+  const toggleLayer = (id: string) => {
+    setActiveLayers(prevState => ({
+      ...prevState,
+      [id]: !prevState[id],
+    }));
+  };
+
+  const visibleMapDataLayers = mapDataLayers.filter(layer => activeLayers[layer.id]);
+
+  return ((polygon && center) || !areaId) ? (
     <div className='map-container--buttons'>
-      <Button appearance='primary-action-button' className='skip-link' onClick={skipMarkers}>Skip markers</Button>
+      <Button appearance='primary-action-button' className='skip-link' onClick={skipMarkers}>Sla kaart over</Button>
+      { mapDataLayers.length > 0 && (
+        <ul className="legend">
+          {mapDataLayers.map(layer => (
+            <li key={layer.id} className="legend-item">
+              <label className="legend-label">
+                {showOnOffButtons && (
+                  <input
+                    type="checkbox"
+                    checked={!!activeLayers[layer.id]}
+                    onChange={() => toggleLayer(layer.id)}
+                  />
+                )}
+                <div className="legend-info">
+                  {(layer.icon && layer.icon[0] && layer.icon[0].url) && <img src={layer.icon[0].url} alt="Layer icon" className="legend-icon"/>}
+                  <span>{layer.name || 'Naamloze laag'}</span>
+                </div>
+              </label>
+            </li>
+          ))}
+        </ul>
+      )}
       <BaseMap
         {...props}
         {...zoom}
         area={polygon}
+        mapDataLayers={visibleMapDataLayers}
         autoZoomAndCenter="area"
         categorize={{ categories, categorizeByField }}
         center={center}
@@ -196,7 +302,7 @@ const ResourceOverviewMap = ({
         {countButtonElement}
       </div>
     </div>
-  );
+  ) : null;
 };
 
 ResourceOverviewMap.loadWidget = loadWidget;

@@ -58,6 +58,7 @@ export const StemBegrootResourceDetailDialog = ({
     children={
       <Carousel
         startIndex={resourceDetailIndex}
+        buttonText={{ next: 'Volgende inzending', previous: 'Vorige inzending' }}
         items={resources && resources.length > 0 ? resources : []}
         itemRenderer={(resource) => {
           const theme = resource.tags
@@ -108,6 +109,7 @@ export const StemBegrootResourceDetailDialog = ({
 
                   <Carousel
                     items={resourceImages}
+                    buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
                     itemRenderer={(i) => {
                       if (i.url) {
                         return <Image src={i.url} />

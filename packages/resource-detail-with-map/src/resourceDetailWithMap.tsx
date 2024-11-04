@@ -176,6 +176,7 @@ function ResourceDetailWithMap({
             {displayImage && (
               <Carousel
                 items={resourceImages}
+                buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
                 itemRenderer={(i) => (
                   <Image
                     src={i.url}
@@ -194,7 +195,7 @@ function ResourceDetailWithMap({
             )}
 
             {displayTitle && resource.title && (
-              <Heading level={1} appearance="utrecht-heading-2">{resource.title}</Heading>
+              <Heading level={1} appearance="utrecht-heading-2" dangerouslySetInnerHTML={{__html: resource.title}}/>
             )}
             <div className="osc-resource-detail-content-item-row">
               {displayUser && resource?.user?.displayName && (
@@ -245,10 +246,11 @@ function ResourceDetailWithMap({
           {displayLocation && resource.location && (
             <div className="map-container--buttons">
               <ResourceDetailMap
-                resourceId={props.resourceId || '0'}
+                resourceId={props.resourceId || resourceId || resource.id || '0'}
                 {...props}
                 center={resource.location}
                 area={props.resourceDetailMap?.area}
+                resourceIdRelativePath={props.resourceIdRelativePath || 'openstadResourceId'}
               >
               </ResourceDetailMap>
               <div className="map-buttons">

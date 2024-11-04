@@ -12,7 +12,7 @@ type Props = {
   tagType: string;
   placeholder?: string;
   selected?: number[];
-  onUpdateFilter?: (filter: string) => void;
+  onUpdateFilter?: (filter: any, label?: string) => void;
   onlyIncludeIds?: number[];
 };
 
@@ -52,8 +52,8 @@ const MultiSelectTagFilter = ({
       <MultiSelect
         id={getRandomId(props.placeholder)}
         label={props.placeholder || ''}
-        onItemSelected={(value) => {
-          onUpdateFilter && onUpdateFilter(value);
+        onItemSelected={(value, label) => {
+          onUpdateFilter && onUpdateFilter(value, label);
         }}
         options={(tags || []).map((tag: TagDefinition) => ({
           value: tag.id,

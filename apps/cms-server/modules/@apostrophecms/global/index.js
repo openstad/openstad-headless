@@ -71,6 +71,12 @@ module.exports = {
         fileGroup: 'images',
       },
 
+      logoAltText: {
+        type: 'string',
+        label: 'Logo alt text',
+        default: 'Afbeelding van het logo, link naar de homepage',
+      },
+
       ctaButtons: {
         label: 'Header buttons',
         type: 'array',
@@ -99,6 +105,24 @@ module.exports = {
                   value: 'secondary-action',
                 },
               ],
+            },
+          },
+        },
+      },
+
+      topMenuButtons: {
+        label: 'Topmenu buttons',
+        type: 'array',
+        draggable: true,
+        fields: {
+          add: {
+            label: {
+              label: 'Label',
+              type: 'string',
+            },
+            href: {
+              label: 'Url',
+              type: 'string',
             },
           },
         },
@@ -157,12 +181,6 @@ module.exports = {
         fileGroup: 'icons',
       },
 
-      cssExtras: {
-        type: 'string',
-        textarea: true,
-        def: '#logo-image {\n  max-height: 50px;\n}',
-        label: 'Extra CSS',
-      },
       customCssLink: {
         type: 'string',
         label: 'URL voor CSS imports (optioneel)',
@@ -303,15 +321,15 @@ module.exports = {
     group: {
       basics: {
         label: 'Algemene instellingen',
-        fields: ['siteTitle', 'hideSiteTitle',  'siteLogo', 'ctaButtons'],
+        fields: ['siteTitle', 'hideSiteTitle',  'siteLogo', 'logoAltText'],
       },
       css: {
         label: 'Vormgeving',
-        fields: ['cssExtras', 'customCssLink', 'favicon', 'compactMenu'],
+        fields: ['customCssLink', 'favicon', 'compactMenu'],
       },
       login: {
-        label: 'Gebruikers login',
-        fields: ['showLoginButton', 'loginButtonLabel', 'showAccountButton', 'accountButtonHref', 'accountButtonLabel', 'logoutButtonLabel'],
+        label: 'Menu instellingen',
+        fields: ['showLoginButton', 'loginButtonLabel', 'showAccountButton', 'accountButtonHref', 'accountButtonLabel', 'logoutButtonLabel', 'ctaButtons', 'topMenuButtons'],
       },
       cookies: {
         label: 'Cookie instellingen',

@@ -69,7 +69,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
     const notifyFailed = () =>
       toast.error('Versturen mislukt', { position: 'bottom-center' });
 
-    const { create: createChoiceguide } = datastore.useChoicesguide({
+    const { create: createChoicesguideResult } = datastore.useChoicesguide({
         projectId: props.projectId,
     });
 
@@ -84,8 +84,16 @@ function ChoiceGuide(props: ChoiceGuideProps) {
         if (currentPage < totalPages - 1) {
             setCurrentPage((prevPage) => prevPage + 1);
         } else {
+
+            const projectId = props.projectId; // Assume projectId is available in props
+            const widgetId = props.widgetId;
+            const storageKey = `choiceguide-${projectId}-${widgetId}`;
+
+            // Store in local storage
+            localStorage.setItem(storageKey, JSON.stringify(finalAnswers));
+
             try {
-                const result = await createChoiceguide(finalAnswers, props.projectId ,props.widgetId);
+                const result = await createChoicesguideResult(finalAnswers ,props.widgetId);
                 if (result) {
                     notifySuccess();
 
@@ -119,6 +127,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                     submitHandler={onSubmit}
                     secondaryLabel={saveConceptButton || ""}
                     getValuesOnChange={setCurrentAnswers}
+                    allowResetAfterSubmit={false}
                     {...props}
                   />
                   <Toaster />

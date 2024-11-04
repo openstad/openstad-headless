@@ -96,6 +96,210 @@
   transform: translateY(-50%) rotate(180deg);
 }
 
+.infoIconStyle {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: #1671ef;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 10px;
+  color: #fff;
+  margin: 0 0 0 8px;
+  font-family: serif;
+  line-height: 1;
+}
+
+/* custom code editor */
+.editor {
+  position: relative;
+  height: calc(100vh - 430px);
+  min-height: 250px;
+  width: 100%;
+  background: #eee;
+}
+
+#editing,
+#highlighting {
+  padding: 10px;
+  border: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+#editing,
+#highlighting,
+#highlighting * {
+  font-size: 1rem;
+  font-family: monospace;
+  line-height: 1.5;
+  tab-size: 2;
+}
+
+#editing,
+#highlighting {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#editing {
+  z-index: 1;
+}
+#highlighting {
+  z-index: 0;
+}
+
+#editing {
+  color: transparent;
+  background: transparent;
+  caret-color: white;
+}
+
+#editing,
+#highlighting {
+  overflow: auto;
+  white-space: nowrap;
+}
+
+#editing {
+  resize: none;
+}
+
+p code {
+  border-radius: 2px;
+  background-color: #eee;
+  color: #111;
+}
+
+code[class*='language-'],
+pre[class*='language-'] {
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  font-size: 1em;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+
+  border-radius: 5px;
+}
+
+/* Code blocks */
+pre[class*='language-'] {
+  padding: 0.4em 0.8em;
+  margin: 0.5em 0;
+  overflow: auto;
+  background-size: 1em 1em;
+  background: #212728;
+}
+
+code[class*='language-'] {
+  background: #212728;
+  color: white;
+  box-shadow:
+    -0.3em 0 0 0.3em #212728,
+    0.3em 0 0 0.3em #212728;
+}
+
+/* Inline code */
+:not(pre) > code[class*='language-'] {
+  padding: 0.2em;
+  border-radius: 0.3em;
+  box-shadow: none;
+  white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #aaa;
+}
+
+.token.punctuation {
+  color: #999;
+}
+
+.token.namespace {
+  opacity: 0.7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol {
+  color: #9cdcff;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin {
+  color: #d7ba7d;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.token.variable,
+.token.inserted {
+  color: yellowgreen;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: deeppink;
+}
+
+.token.regex,
+.token.important {
+  color: orange;
+}
+
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+.token.italic {
+  font-style: italic;
+}
+
+.token.entity {
+  cursor: help;
+}
+
+.token.deleted {
+  color: red;
+}
+
+pre.diff-highlight.diff-highlight > code .token.deleted:not(.prefix),
+pre > code.diff-highlight.diff-highlight .token.deleted:not(.prefix) {
+  background-color: rgba(255, 0, 0, 0.3);
+  display: inline;
+}
+
+pre.diff-highlight.diff-highlight > code .token.inserted:not(.prefix),
+pre > code.diff-highlight.diff-highlight .token.inserted:not(.prefix) {
+  background-color: rgba(0, 255, 128, 0.3);
+  display: inline;
+}
 .email-iframe {
   height: 100%;
   width: 100%;

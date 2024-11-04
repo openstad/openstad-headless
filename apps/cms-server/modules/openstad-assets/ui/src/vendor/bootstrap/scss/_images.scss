@@ -40,3 +40,58 @@
   @include font-size($figure-caption-font-size);
   color: $figure-caption-color;
 }
+
+
+// image component
+.image-component {
+  --image-width: 100%;
+  --image-object-fit: none;
+
+  height: var(--image-height);
+  object-fit: var(--image-object-fit);
+  width: var(--image-width);
+
+  &.--xsmall {
+    --image-height: 9.375rem;
+  }
+
+  &.--small {
+    --image-height: 15.625rem;
+  }
+
+  &.--normal {
+    --image-height: 21.875rem;
+  }
+
+  &.--large {
+    --image-height: 28.125rem;
+  }
+
+  &.--xlarge {
+    --image-height: 34.375rem;
+  }
+
+
+  &.--contain {
+    --image-object-fit: contain;
+  }
+
+  &.--cover {
+    --image-object-fit: cover;
+  }
+
+  &.--fill {
+    --image-object-fit: fill;
+  }
+
+  &.--none {
+    --image-object-fit: none;
+  }
+}
+
+
+.img-container {
+  &.--aspectRatio-16-9 {
+    aspect-ratio: 16 / 9;
+  }
+}

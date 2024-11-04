@@ -29,7 +29,7 @@ import { defaultFormValues } from "@openstad-headless/resource-form/src/parts/de
 import useTags from "@/hooks/use-tags";
 import { useRouter } from "next/router";
 import InfoDialog from '@/components/ui/info-hover';
-import {Checkbox} from "@/components/ui/checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
     trigger: z.string(),
@@ -45,6 +45,7 @@ const formSchema = z.object({
     maxCharacters: z.string().optional(),
     variant: z.string().optional(),
     multiple: z.boolean().optional(),
+    placeholder: z.string().optional(),
     images: z
         .array(z.object({ image: z.any().optional(), src: z.string() }))
         .optional(),
@@ -98,6 +99,7 @@ export default function WidgetResourceFormItems(
                         }`,
                     title: values.title,
                     description: values.description,
+                    placeholder: values.placeholder,
                     type: values.type,
                     tags: values.tags || firstTagType,
                     fieldType: values.fieldType,
@@ -152,6 +154,7 @@ export default function WidgetResourceFormItems(
         trigger: '0',
         title: '',
         description: '',
+        placeholder: '',
         type: '',
         tags: firstTagType,
         fieldType: '',
@@ -188,6 +191,7 @@ export default function WidgetResourceFormItems(
                 trigger: selectedItem.trigger,
                 title: selectedItem.title || '',
                 description: selectedItem.description || '',
+                placeholder: selectedItem.placeholder || '',
                 type: selectedItem.type || '',
                 tags: selectedItem.tags || firstTagType,
                 fieldType: selectedItem.fieldType || '',
@@ -313,26 +317,34 @@ export default function WidgetResourceFormItems(
         const defaultFormItem = defaultFormValues.find((item) => item.type === form.watch('type'));
 
         if (defaultFormItem) {
-            form.setValue('fieldKey', defaultFormItem.fieldKey || '');
-            form.setValue('title', defaultFormItem.title || '');
-            form.setValue('description', defaultFormItem.description || '');
-            form.setValue('fieldType', defaultFormItem.fieldType || '');
+            if (form.watch('fieldKey') === '') {
+                form.setValue('fieldKey', defaultFormItem.fieldKey || '');
+            }
+            if (form.watch('title') === '') {
+                form.setValue('title', defaultFormItem.title || '');
+            }
+            if (form.watch('description') === '') {
+                form.setValue('description', defaultFormItem.description || '');
+            }
+            if (form.watch('fieldType') === '') {
+                form.setValue('fieldType', defaultFormItem.fieldType || '');
+            }
 
             if (defaultFormItem.fieldType === 'text') {
                 const variant = (defaultFormItem.type === 'summary' || defaultFormItem.type === 'description') ? 'textarea' : 'text input';
                 form.setValue('variant', variant);
             }
-        } else if ( form.watch("type") === 'documentUpload' || form.watch("type") === 'imageUpload' ) {
+        } else if (form.watch("type") === 'documentUpload' || form.watch("type") === 'imageUpload') {
             const recommendedFieldKey =
-              form.watch("type") === 'documentUpload'
-                ? 'documents'
-                : (
-                  form.watch("type") === 'imageUpload'
-                    ? 'images'
-                    : ''
-                );
+                form.watch("type") === 'documentUpload'
+                    ? 'documents'
+                    : (
+                        form.watch("type") === 'imageUpload'
+                            ? 'images'
+                            : ''
+                    );
 
-            form.setValue('fieldKey', recommendedFieldKey );
+            form.setValue('fieldKey', recommendedFieldKey);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [form.watch("type")]);
@@ -342,7 +354,7 @@ export default function WidgetResourceFormItems(
 
         if (key) {
             const isUnique = items.every((item) =>
-              (selectedItem && item.trigger === selectedItem.trigger) || item.fieldKey !== key
+                (selectedItem && item.trigger === selectedItem.trigger) || item.fieldKey !== key
             );
 
             setIsFieldKeyUnique(isUnique);
@@ -455,7 +467,7 @@ export default function WidgetResourceFormItems(
                                                                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexDirection: 'row', marginTop: '10px' }}>
                                                                 <Checkbox
                                                                     onCheckedChange={(checked: boolean) => {
-                                                                        form.setValue(`options.${options.length - 1}.titles.0.isOtherOption`, checked );
+                                                                        form.setValue(`options.${options.length - 1}.titles.0.isOtherOption`, checked);
                                                                     }}
                                                                 />
                                                                 <FormLabel
@@ -664,6 +676,20 @@ export default function WidgetResourceFormItems(
                                                 </FormItem>
                                             )}
                                         />
+
+                                        {form.watch('type') === 'title' && (
+                                            <FormField
+                                                control={form.control}
+                                                name="placeholder"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Placeholder</FormLabel>
+                                                        <Input {...field} />
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        )}
                                         {form.watch('type') !== 'none' && (
                                             <FormField
                                                 control={form.control}
@@ -680,9 +706,9 @@ export default function WidgetResourceFormItems(
 
                                                             <Input {...field} disabled={!!fieldKey} />
                                                             {(!field.value || !isFieldKeyUnique) && (
-                                                              <FormMessage>
-                                                                  { !field.value ? 'Key is verplicht' : 'Key moet uniek zijn' }
-                                                              </FormMessage>
+                                                                <FormMessage>
+                                                                    {!field.value ? 'Key is verplicht' : 'Key moet uniek zijn'}
+                                                                </FormMessage>
                                                             )}
                                                         </FormItem>
                                                     )
@@ -690,79 +716,79 @@ export default function WidgetResourceFormItems(
                                             />
                                         )}
                                         {form.watch('type') === 'tags' && (
-                                          <>
-                                            <FormField
-                                                control={form.control}
-                                                name="tags"
-                                                render={({ field }) => {
-                                                    if (form.watch('fieldKey') !== `tags[${field.value || firstTagType}]`) {
-                                                        form.setValue('fieldKey', `tags[${field.value || firstTagType}]`)
-                                                    }
+                                            <>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="tags"
+                                                    render={({ field }) => {
+                                                        if (form.watch('fieldKey') !== `tags[${field.value || firstTagType}]`) {
+                                                            form.setValue('fieldKey', `tags[${field.value || firstTagType}]`)
+                                                        }
 
-                                                    if (!allTags || allTags.length === 0) {
-                                                        return <p style={{ fontSize: '14px', margin: '20px 0', color: 'red' }}><strong>Geen tags gevonden om te selecteren. Maak dit aan onder het kopje &apos;Tags&apos;</strong></p>;
-                                                    }
+                                                        if (!allTags || allTags.length === 0) {
+                                                            return <p style={{ fontSize: '14px', margin: '20px 0', color: 'red' }}><strong>Geen tags gevonden om te selecteren. Maak dit aan onder het kopje &apos;Tags&apos;</strong></p>;
+                                                        }
 
-                                                    return (
+                                                        return (
+                                                            <FormItem>
+                                                                <FormLabel>Welk type tag moet als keuze in het formulier komen?</FormLabel>
+                                                                <Select
+                                                                    value={field.value || firstTagType}
+                                                                    onValueChange={(value) => {
+                                                                        field.onChange(value);
+                                                                        form.setValue('fieldKey', `tags[${value || firstTagType}]`)
+                                                                    }}>
+                                                                    <SelectTrigger>
+                                                                        <SelectValue />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {allTags.reduce((uniqueTags: any[], tag: any) => {
+                                                                            if (!uniqueTags.some((t) => t.type === tag.type)) {
+                                                                                uniqueTags.push(tag);
+                                                                            }
+                                                                            return uniqueTags;
+                                                                        }, []).map((tag: any) => (
+                                                                            <SelectItem
+                                                                                key={tag.id}
+                                                                                value={tag.type}
+                                                                            >
+                                                                                {tag.type}
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )
+                                                    }}
+                                                />
+
+                                                <FormField
+                                                    control={form.control}
+                                                    name="fieldType"
+                                                    render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>Welk type tag moet als keuze in het formulier komen?</FormLabel>
+                                                            <FormLabel>Hoe wil je de tags weergeven in het formulier?</FormLabel>
+                                                            <FormDescription>De weergave heeft niet alleen invloed op het uiterlijk, maar ook op de werking. Met de keuze voor checkboxes sta je ook toe dat er meerdere tags gekozen kunnen worden.</FormDescription>
                                                             <Select
-                                                                value={field.value || firstTagType}
-                                                                onValueChange={(value) => {
-                                                                    field.onChange(value);
-                                                                    form.setValue('fieldKey', `tags[${value || firstTagType}]`)
-                                                                }}>
-                                                                <SelectTrigger>
-                                                                    <SelectValue />
-                                                                </SelectTrigger>
+                                                                value={field.value}
+                                                                onValueChange={field.onChange}
+                                                            >
+                                                                <FormControl>
+                                                                    <SelectTrigger>
+                                                                        <SelectValue placeholder="Kies type" />
+                                                                    </SelectTrigger>
+                                                                </FormControl>
                                                                 <SelectContent>
-                                                                    {allTags.reduce((uniqueTags: any[], tag: any) => {
-                                                                        if (!uniqueTags.some((t) => t.type === tag.type)) {
-                                                                            uniqueTags.push(tag);
-                                                                        }
-                                                                        return uniqueTags;
-                                                                    }, []).map((tag: any) => (
-                                                                        <SelectItem
-                                                                            key={tag.id}
-                                                                            value={tag.type}
-                                                                        >
-                                                                            {tag.type}
-                                                                        </SelectItem>
-                                                                    ))}
+                                                                    <SelectItem value="select">Dropdown</SelectItem>
+                                                                    <SelectItem value="checkbox">Checkbox</SelectItem>
                                                                 </SelectContent>
                                                             </Select>
                                                             <FormMessage />
                                                         </FormItem>
-                                                    )
-                                                }}
-                                            />
-
-                                            <FormField
-                                                control={form.control}
-                                                name="fieldType"
-                                                render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Hoe wil je de tags weergeven in het formulier?</FormLabel>
-                                                    <FormDescription>De weergave heeft niet alleen invloed op het uiterlijk, maar ook op de werking. Met de keuze voor checkboxes sta je ook toe dat er meerdere tags gekozen kunnen worden.</FormDescription>
-                                                    <Select
-                                                        value={field.value}
-                                                        onValueChange={field.onChange}
-                                                    >
-                                                        <FormControl>
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Kies type" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            <SelectItem value="select">Dropdown</SelectItem>
-                                                            <SelectItem value="checkbox">Checkbox</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>
-                                                )}
-                                            />
-                                          </>
+                                                    )}
+                                                />
+                                            </>
                                         )}
                                         {form.watch('type') !== 'none' && (
                                             <FormField
@@ -806,6 +832,17 @@ export default function WidgetResourceFormItems(
                                         )}
                                         {form.watch('fieldType') === 'text' || form.watch('type') === 'text' && (
                                             <>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="placeholder"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Placeholder</FormLabel>
+                                                            <Input {...field} />
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
                                                 <FormField
                                                     control={form.control}
                                                     name="variant"
@@ -954,9 +991,9 @@ export default function WidgetResourceFormItems(
                                         </Button>
                                     </div>
                                     {(!form.watch('fieldKey') || !isFieldKeyUnique) && (
-                                      <FormMessage>
-                                          { !form.watch('fieldKey') ? 'Key is verplicht' : 'Key moet uniek zijn' }
-                                      </FormMessage>
+                                        <FormMessage>
+                                            {!form.watch('fieldKey') ? 'Key is verplicht' : 'Key moet uniek zijn'}
+                                        </FormMessage>
                                     )}
                                 </div>
                             </div>

@@ -9,6 +9,11 @@ export const WidgetDefinitions = {
     description: 'Keuzewijzermodule',
     image: '/widget_preview/keuzewijzer_preview.png',
   },
+  choiceguideResults: {
+    name: 'Keuzewijzer resultaat',
+    description: 'Keuzewijzer resultaat',
+    image: '/widget_preview/keuzewijzer_preview.png',
+  },
   comments: {
     name: 'Reacties',
     description: 'Reactiemodule',

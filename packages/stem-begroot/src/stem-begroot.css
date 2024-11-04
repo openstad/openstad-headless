@@ -110,6 +110,10 @@
   gap: 1rem;
   align-items: center;
 }
+.budget-overview-row .budget-overview-image{
+  width: 4rem;
+  height: 4rem;
+}
 
 .budget-unused-panel-step-2 {
   background-color: var(

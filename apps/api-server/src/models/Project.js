@@ -168,6 +168,8 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 
       afterCreate: async function (instance, options) {
+        if (options.skipDefaultStatuses) return;
+
         // create a default status
         let defaultStatus = await db.Status.create({
           projectId: instance.id,

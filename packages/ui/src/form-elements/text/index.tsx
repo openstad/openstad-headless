@@ -1,5 +1,13 @@
 import React, { FC, useState, useEffect } from "react";
-import { FormField, FormFieldDescription, FormLabel, Paragraph, Textarea, Textbox } from "@utrecht/component-library-react";
+import {
+    AccordionProvider,
+    FormField,
+    FormFieldDescription,
+    FormLabel,
+    Paragraph,
+    Textarea,
+    Textbox
+} from "@utrecht/component-library-react";
 import { Spacer } from '@openstad-headless/ui/src';
 import './style.css';
 
@@ -28,6 +36,10 @@ export type TextInputProps = {
     type?: string;
     onChange?: (e: { name: string, value: string | Record<number, never> | [] }) => void;
     reset?: (resetFn: () => void) => void;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
+    infoImage?: string;
 }
 
 
@@ -37,7 +49,7 @@ const TextInput: FC<TextInputProps> = ({
     variant,
     fieldKey,
     fieldRequired = false,
-    placeholder = '',
+    placeholder,
     defaultValue = '',
     disabled = false,
     onChange,
@@ -47,9 +59,20 @@ const TextInput: FC<TextInputProps> = ({
     maxCharactersWarning = 'Je hebt nog {maxCharacters} tekens over',
     rows,
     reset,
+    showMoreInfo = false,
+    moreInfoButton = 'Meer informatie',
+    moreInfoContent = '',
+   infoImage = '',
 }) => {
     const randomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const InputComponent = variant === 'textarea' ? Textarea : Textbox;
+
+    class HtmlContent extends React.Component<{ html: any }> {
+        render() {
+            let {html} = this.props;
+            return <div dangerouslySetInnerHTML={{__html: html}}/>;
+        }
+    }
 
     const [isFocused, setIsFocused] = useState(false);
     const [helpText, setHelpText] = useState('');
@@ -73,7 +96,18 @@ const TextInput: FC<TextInputProps> = ({
         setHelpText(helpText);
     }
 
-    const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
+    const getType = (fieldKey: string) => {
+        switch (fieldKey) {
+            case 'email':
+                return 'email';
+            case 'tel':
+                return 'tel';
+            case 'password':
+                return 'password';
+            default:
+                return 'text';
+        }
+    }
 
     const extensions = () => [
         new BoldExtension({}),
@@ -89,6 +123,32 @@ const TextInput: FC<TextInputProps> = ({
         stringHandler: htmlToProsemirrorNode,
     });
 
+    const getAutocomplete = (fieldKey: string) => {
+        switch (fieldKey.toLocaleLowerCase()) {
+            case 'mail':
+                return 'email';
+            case 'tel':
+                return 'tel';
+            case 'password':
+                return 'current-password';
+            case 'voornaam':
+                return 'given-name';
+            case 'achternaam':
+                return 'family-name';
+            case 'straatnaam':
+                return 'street-address';
+            case 'postcode':
+                return 'postal-code';
+            case 'woonplaats':
+                return 'address-level2';
+            case 'land':
+                return 'country';
+            default:
+                return 'on';
+        }
+    }
+
+    const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
     return (
         <FormField type="text">
             {title && (
@@ -98,12 +158,34 @@ const TextInput: FC<TextInputProps> = ({
             )}
             {description &&
                 <>
-                    <FormFieldDescription>
-                        {description}
-                    </FormFieldDescription>
+                    <FormFieldDescription dangerouslySetInnerHTML={{__html: description}} />
                     <Spacer size={.5} />
                 </>
             }
+
+            {showMoreInfo && (
+                <>
+                    <AccordionProvider
+                        sections={[
+                            {
+                                headingLevel: 3,
+                                body: <HtmlContent html={moreInfoContent} />,
+                                expanded: undefined,
+                                label: moreInfoButton,
+                            }
+                        ]}
+                    />
+                    <Spacer size={.5} />
+                </>
+            )}
+
+            {infoImage && (
+                <figure className="info-image-container">
+                    <img src={infoImage} alt=""/>
+                    <Spacer size={.5} />
+                </figure>
+            )}
+
             <div className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}>
                 {InputComponent.displayName === 'Textbox' && (
                     <InputComponent
@@ -164,6 +246,29 @@ const TextInput: FC<TextInputProps> = ({
                     </ThemeProvider>
                 )}
 
+                <InputComponent
+                    id={randomID}
+                    name={fieldKey}
+                    required={fieldRequired}
+                    type={getType(fieldKey)}
+                    placeholder={placeholder}
+                    value={value}
+                    onChange={(e) => {
+                        setValue(e.target.value);
+                        if (onChange) {
+                            onChange({
+                                name: fieldKey,
+                                value: e.target.value,
+                            });
+                        }
+                        characterHelpText(e.target.value.length)
+                    }}
+                    disabled={disabled}
+                    rows={rows}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    autoComplete={getAutocomplete(fieldKey)}
+                />
                 {isFocused && helpText &&
                     <FormFieldDescription className="help-text">{helpText}</FormFieldDescription>
                 }

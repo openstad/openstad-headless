@@ -37,73 +37,83 @@ const minError = (field: string, nr: number) =>
 const maxError = (field: string, nr: number) =>
   `${field} mag maximaal ${nr} karakters bevatten`;
 
-const formSchema = z.object({
-  userId: z.coerce
-    .number({ invalid_type_error: onlyNumbersMessage })
-    .optional(),
-
-  title: z
-    .string()
-    .min(10, minError('Titel', 10))
-    .max(50, maxError('Titel', 50))
-    .default(''),
-  summary: z
-    .string()
-    .min(20, minError('Samenvatting', 20))
-    .max(140, maxError('Samenvatting', 140))
-    .default(''),
-  description: z
-    .string()
-    .min(140, minError('Beschrijving', 140))
-    .max(5000, maxError('Beschrijving', 5000))
-    .default(''),
-
-  budget: z.coerce
-    .number({ invalid_type_error: onlyNumbersMessage })
-    .default(0),
-  budgetMin: z.coerce
-    .number({ invalid_type_error: onlyNumbersMessage })
-    .optional(),
-  budgetMax: z.coerce
-    .number({ invalid_type_error: onlyNumbersMessage })
-    .optional(),
-  budgetInterval: z.coerce
-    .number({ invalid_type_error: onlyNumbersMessage })
-    .optional(),
-
-  startDate: z.date(),
-  publishDate: z.date().optional(),
-
-  modBreak: z.coerce.string().optional(),
-  modBreakUserId: z.coerce
-    .number({ invalid_type_error: onlyNumbersMessage })
-    .optional(),
-  modBreakDate: z.date().optional(),
-
-  location: z.string().optional(),
-  image: z.string().optional(),
-  images: z
-    .array(z.object({ url: z.string() }))
-    .optional()
-    .default([]),
-  document: z.string().optional(),
-  documents: z
-    .array(z.object({ url: z.string().optional(), name: z.string().optional() }))
-    .optional()
-    .default([]),
-
-  extraData: z
-    .object({
-      originalId: z.coerce
+const baseSchema = z.object({
+    userId: z.coerce
         .number({ invalid_type_error: onlyNumbersMessage })
         .optional(),
-    })
-    .default({}),
-  tags: z.number().array().default([]),
-  statuses: z.number().array().default([]),
+
+    title: z.string().default(''),
+    summary: z.string().default(''),
+    description: z.string().default(''),
+
+    budget: z.coerce
+        .number({ invalid_type_error: onlyNumbersMessage })
+        .default(0),
+    budgetMin: z.coerce
+        .number({ invalid_type_error: onlyNumbersMessage })
+        .optional(),
+    budgetMax: z.coerce
+        .number({ invalid_type_error: onlyNumbersMessage })
+        .optional(),
+    budgetInterval: z.coerce
+        .number({ invalid_type_error: onlyNumbersMessage })
+        .optional(),
+
+    startDate: z.date(),
+    publishDate: z.date().optional(),
+
+    modBreak: z.coerce.string().optional(),
+    modBreakUserId: z.coerce
+        .number({ invalid_type_error: onlyNumbersMessage })
+        .optional(),
+    modBreakDate: z.date().optional(),
+
+    location: z.string().optional(),
+    image: z.string().optional(),
+    images: z
+        .array(z.object({ url: z.string() }))
+        .optional()
+        .default([]),
+    document: z.string().optional(),
+    documents: z
+        .array(z.object({ url: z.string().optional(), name: z.string().optional() }))
+        .optional()
+        .default([]),
+
+    extraData: z
+        .object({
+            originalId: z.coerce
+                .number({ invalid_type_error: onlyNumbersMessage })
+                .optional(),
+        })
+        .default({}),
+    tags: z.number().array().default([]),
+    statuses: z.number().array().default([]),
 });
 
-type FormType = z.infer<typeof formSchema>;
+const formSchema = (
+    titleLimits: { min: number; max: number },
+    summaryLimits: { min: number; max: number },
+    descriptionLimits: { min: number; max: number }
+) => baseSchema.extend({
+    title: z
+        .string()
+        .min(titleLimits.min, minError('Titel', titleLimits.min))
+        .max(titleLimits.max, maxError('Titel', titleLimits.max))
+        .default(''),
+    summary: z
+        .string()
+        .min(summaryLimits.min, minError('Samenvatting', summaryLimits.min))
+        .max(summaryLimits.max, maxError('Samenvatting', summaryLimits.max))
+        .default(''),
+    description: z
+        .string()
+        .min(descriptionLimits.min, minError('Beschrijving', descriptionLimits.min))
+        .max(descriptionLimits.max, maxError('Beschrijving', descriptionLimits.max))
+        .default(''),
+});
+
+type FormType = z.infer<typeof baseSchema>;
 
 type Props = {
   onFormSubmit: (body: FormType) => Promise<any>;
@@ -118,6 +128,21 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     project as string,
     id as string
   );
+
+  const titleLimits = {
+    min: projectData?.config?.resources?.titleMinLength || 10,
+    max: projectData?.config?.resources?.titleMaxLength || 50,
+  };
+
+  const summaryLimits = {
+    min: projectData?.config?.resources?.summaryMinLength || 20,
+    max: projectData?.config?.resources?.summaryMaxLength || 140,
+  };
+
+  const descriptionLimits = {
+    min: projectData?.config?.resources?.descriptionMinLength || 140,
+    max: projectData?.config?.resources?.descriptionMaxLength || 5000,
+  };
 
   const { data: tags, error: tagError } = useTags(project as string);
   const { data: statuses, error: statusError } = useStatuses(project as string);
@@ -179,7 +204,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         : new Date(),
       publishDate: existingData?.publishDate
         ? new Date(existingData.publishDate)
-        : undefined,
+        : new Date(),
 
       modBreak: existingData?.modBreak || '',
       modBreakUserId: existingData?.modBreakUserId || undefined,
@@ -202,7 +227,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   );
   const [extraData, setExtraData] = useState(existingData?.extraData || '');
   const form = useForm<FormType>({
-    resolver: zodResolver<any>(formSchema),
+    resolver: zodResolver<any>(formSchema(titleLimits, summaryLimits, descriptionLimits)),
     defaultValues: defaults(),
   });
 
@@ -282,7 +307,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-3/3 grid grid-cols-2 lg:auto-rows-fit" style={{ gap: '2.5rem' }}>
+          className="lg:w-3/3 grid grid-cols-2 lg:auto-rows-fit gap-10">
           <FormField
             control={form.control}
             name="title"
@@ -364,18 +389,14 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
                   {imageFields.map(({ id, url }, index) => {
                     return (
-                      <div key={id} style={{ position: 'relative' }}>
+                      <div key={id} className="relative">
                         <img src={url} alt={url} />
                         <Button
                           color="red"
                           onClick={() => {
                             removeImage(index);
                           }}
-                          style={{
-                            position: 'absolute',
-                            right: 0,
-                            top: 0,
-                          }}>
+                          className="absolute right-0 top-0">
                           <X size={24} />
                         </Button>
                       </div>
@@ -393,43 +414,29 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 <section className="grid col-span-full grid-cols-1 gap-x-4 gap-y-8 ">
                   {documentFields.map(({ id, url, name }, index) => {
                     return (
-                      <div key={id} style={{ position: 'relative', display: 'flex', flexWrap: 'wrap' }}>
-                        <div style={{ position: 'relative', display: 'flex' }}>
+                      <div key={id} className="relative flex flex-wrap">
+                        <div className="relative flex">
                           <Button
                             color="red"
                             onClick={() => {
                               removeFile(index);
                             }}
-                            style={{
-                              position: 'relative',
-                              right: 0,
-                              top: 0,
-                              padding: '0 4px',
-                              marginRight: '5px'
-                            }}>
+                            className="relative right-0 top-0 p-1">
                             <X size={24} />
-                          </Button>
-                          <p>
-                            <a style={{
-                              color: 'blue',
-                              textDecoration: 'underline',
-                              fontSize: '15px',
-                              lineHeight: '1.2'
-                            }}
+                            </Button>
+                            <p>
+                            <a className="text-blue-500 underline text-base leading-5"
                               href={url} target="_blank">
                               {url}
                             </a>
-                          </p>
-                        </div>
-                        <Input
-                          style={{
-                            display: 'block',
-                            width: '100%',
-                          }}
-                          type="text"
-                          name="name"
-                          defaultValue={name}
-                          onBlur={(e) => {
+                            </p>
+                          </div>
+                          <Input
+                            className="block w-full"
+                            type="text"
+                            name="name"
+                            defaultValue={name}
+                            onBlur={(e) => {
                             let array = [...(form.getValues('documents') || [])];
 
                             if (

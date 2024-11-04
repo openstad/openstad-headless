@@ -110,12 +110,15 @@ export default function WidgetChoiceGuideItems(
       const selectedItemWeights = selectedItem.weights || {};
       const valuesWeights = values.weights || {};
 
-      // Merge weights
-      const mergedWeights = { ...selectedItemWeights, ...valuesWeights };
+      Object.keys(valuesWeights).forEach((key) => {
+        if (valuesWeights[key] !== undefined) {
+          selectedItemWeights[key] = valuesWeights[key];
+        }
+      });
 
       setItems((currentItems) =>
           currentItems.map((item) =>
-              item.trigger === selectedItem.trigger ? { ...item, ...values, weights: mergedWeights } : item
+              item.trigger === selectedItem.trigger ? { ...item, ...values, weights: selectedItemWeights } : item
           )
       );
       setItem(null);
@@ -682,6 +685,7 @@ export default function WidgetChoiceGuideItems(
                           form={form}
                           imageLabel="Upload een afbeelding voor boven de vraag"
                           fieldName="uploadInfoImage"
+                          description="Let op: de afbeelding wordt afgesneden op 300px hoogte. Het is handig om de afbeelding op voorhand zelf bij te snijden tot deze hoogte."
                           allowedTypes={["image/*"]}
                           onImageUploaded={(imageResult) => {
                             const result = typeof (imageResult.url) !== 'undefined' ? imageResult.url : '';
@@ -1134,48 +1138,66 @@ export default function WidgetChoiceGuideItems(
                                       control={form.control}
                                       name={`weights.${singleGroup.id}.weight${XY}`}
                                       key={i}
-                                      render={({ field }) => (
-                                        <FormItem>
-                                          <FormControl>
-                                            <div className={`weight-${XY.toLowerCase()}-container`}>
-                                              <Input
-                                                type="number"
-                                                min={0}
-                                                max={100}
-                                                {...field}
-                                                value={ field.value ?? 0 }
-                                              />
-                                            </div>
-                                          </FormControl>
-                                          <FormMessage />
-                                        </FormItem>
-                                      )}
+                                      render={({ field }) => {
+                                        const value = field.value ?? 0;
+                                        const watchValue = form.watch(`weights.${singleGroup.id}.weight${XY}`);
+
+                                        if ( value !== watchValue ) {
+                                          form.setValue(`weights.${singleGroup.id}.weight${XY}`, field.value ?? 0);
+                                        }
+
+                                        return (
+                                            <FormItem>
+                                              <FormControl>
+                                                <div className={`weight-${XY.toLowerCase()}-container`}>
+                                                  <Input
+                                                      type="number"
+                                                      min={0}
+                                                      max={100}
+                                                      {...field}
+                                                      value={field.value ?? 0}
+                                                  />
+                                                </div>
+                                              </FormControl>
+                                              <FormMessage/>
+                                            </FormItem>
+                                        )
+                                      }}
                                     />
                                     <FormField
                                       control={form.control}
                                       name={`weights.${singleGroup.id}.weightAB`}
                                       key={i}
-                                      render={({ field }) => (
-                                        <FormItem>
-                                          <FormControl>
-                                            <Select
-                                                onValueChange={(e: string) => field.onChange(e)}
-                                                value={field.value || 'A'}
-                                            >
+                                      render={({ field }) => {
+                                        const value = field.value || 'A';
+                                        const watchValue = form.watch(`weights.${singleGroup.id}.weightAB`);
+
+                                        if ( value !== watchValue ) {
+                                          form.setValue(`weights.${singleGroup.id}.weightAB`, field.value || 'A');
+                                        }
+
+                                        return (
+                                            <FormItem>
                                               <FormControl>
-                                                <SelectTrigger>
-                                                  <SelectValue placeholder="Kies een optie" />
-                                                </SelectTrigger>
+                                                <Select
+                                                    onValueChange={(e: string) => field.onChange(e)}
+                                                    value={field.value || 'A'}
+                                                >
+                                                  <FormControl>
+                                                    <SelectTrigger>
+                                                      <SelectValue placeholder="Kies een optie"/>
+                                                    </SelectTrigger>
+                                                  </FormControl>
+                                                  <SelectContent>
+                                                    <SelectItem value="A">A</SelectItem>
+                                                    <SelectItem value="B">B</SelectItem>
+                                                  </SelectContent>
+                                                </Select>
                                               </FormControl>
-                                              <SelectContent>
-                                                <SelectItem value="A">A</SelectItem>
-                                                <SelectItem value="B">B</SelectItem>
-                                              </SelectContent>
-                                            </Select>
-                                          </FormControl>
-                                          <FormMessage />
-                                        </FormItem>
-                                        )}
+                                              <FormMessage/>
+                                            </FormItem>
+                                        )
+                                      }}
                                       />
                                   </>
                               ))}

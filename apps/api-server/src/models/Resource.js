@@ -547,7 +547,7 @@ module.exports = function (db, sequelize, DataTypes) {
           {
             model: db.Status,
             as: 'statuses',
-            attributes: ['id', 'name', 'label', 'extraFunctionality'],
+            attributes: ['id', 'name', 'label', 'extraFunctionality', 'color', 'backgroundColor', 'mapIcon'],
             through: { attributes: [] },
             required: false,
           },
@@ -675,7 +675,7 @@ module.exports = function (db, sequelize, DataTypes) {
         include: [
           {
             model: db.Tag,
-            attributes: ['id', 'type', 'name', 'label', 'defaultResourceImage'],
+            attributes: ['id', 'type', 'name', 'label', 'defaultResourceImage', 'documentMapIconColor', 'mapIcon'],
             through: { attributes: [] },
             required: false,
           },
@@ -687,7 +687,7 @@ module.exports = function (db, sequelize, DataTypes) {
           {
             model: db.Status,
             as: 'statuses',
-            attributes: ['id', 'name', 'label', 'extraFunctionality'],
+            attributes: ['id', 'name', 'label', 'extraFunctionality', 'color', 'backgroundColor', 'mapIcon'],
             through: { attributes: [] },
             required: false,
           },
@@ -696,18 +696,14 @@ module.exports = function (db, sequelize, DataTypes) {
 
       selectTags: function (tags) {
         return {
-          include: [
-            {
-              model: db.Tag,
-              attributes: ['id', 'name'],
-              through: { attributes: [] },
-              where: {
-                id: {
-                  [db.Sequelize.Op.in]: tags,
-                },
-              },
+          where: {
+            id: {
+              [db.Sequelize.Op.in]: db.Sequelize.literal(`
+                (SELECT resourceId FROM resource_tags 
+                WHERE tagId IN (${tags.map(tag => `'${tag}'`).join(', ')}))
+              `),
             },
-          ],
+          },
         };
       },
 

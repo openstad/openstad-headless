@@ -30,6 +30,7 @@ function Form({
       secondaryLabel = '',
       secondaryHandler = () => {},
       getValuesOnChange = () => {},
+      allowResetAfterSubmit = true,
       ...props
 }: FormProps) {
     const initialFormValues: { [key: string]: FormValue } = {};
@@ -65,7 +66,7 @@ function Form({
                     behavior: 'smooth'
                 });
             }
-        } else {
+        } else if (allowResetAfterSubmit) {
             resetForm();
         }
     };
@@ -110,11 +111,11 @@ function Form({
         if (Component) {
             return (
                 <Component
-                    {...field}
+                    {...props}
                     index={index}
                     onChange={handleInputChange}
                     reset={(resetFn: () => void) => resetFunctions.current.push(resetFn)}
-                    {...props}
+                    {...field}
                 />
             );
         }

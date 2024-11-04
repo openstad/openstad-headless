@@ -2,24 +2,36 @@
 
       <div class="header-top-bar">
         <div class="container">
-        {% if data.global.showLoginButton and not data.loggedIn %}
-        <div class="login-button">
-          <a href="{{data.baseUrlWithPrefix}}/login">{{data.global.loginButtonLabel}}</a>
-        </div>
-      {% endif %}
+          <div class="topmenu-dynamic-container">
+            {% if data.global.topMenuButtons.length > 0 %}
+              {% for topMenuButton in data.global.topMenuButtons %}
+                {% set buttonHref = data.prefix + topMenuButton.href if (topMenuButton.href and topMenuButton.href.startsWith('/'))  else topMenuButton.href %}
+                <div class="topmenu-buttons">
+                  <a href="{{buttonHref}}">{{topMenuButton.label}}</a>
+                </div>
+              {% endfor %}
+            {% endif %}
+          </div>
+          <div class="topmenu-static-container">
+            {% if data.global.showLoginButton and not data.loggedIn %}
+              <div class="login-button">
+                <a href="{{data.baseUrlWithPrefix}}/login">{{data.global.loginButtonLabel}}</a>
+              </div>
+            {% endif %}
 
-      {% if data.global.showAccountButton and data.loggedIn %}
-        <div class="account-button">
-          <a href="{{data.global.accountButtonHref}}">{{ data.global.accountButtonLabel | replace('[[name]]', data.openstadUser.displayName) | replace('[[displayName]]', data.openstadUser.displayName) }}</a>
-        </div>
-      {% endif %}
+            {% if data.global.showAccountButton and data.loggedIn %}
+              <div class="account-button">
+                <a href="{{data.global.accountButtonHref}}">{{ data.global.accountButtonLabel | replace('[[name]]', data.openstadUser.displayName) | replace('[[displayName]]', data.openstadUser.displayName) }}</a>
+              </div>
+            {% endif %}
 
-      {% if data.loggedIn %}
-        <div class="logout-button">
-          <a href="{{data.baseUrlWithPrefix}}/logout">{{ data.global.logoutButtonLabel | replace('[[name]]', data.openstadUser.displayName) | replace('[[displayName]]', data.openstadUser.displayName) }}</a>
+            {% if data.loggedIn %}
+              <div class="logout-button">
+                <a href="{{data.baseUrlWithPrefix}}/logout">{{ data.global.logoutButtonLabel | replace('[[name]]', data.openstadUser.displayName) | replace('[[displayName]]', data.openstadUser.displayName) }}</a>
+              </div>
+            {% endif %}
+          </div>
         </div>
-      {% endif %}
-    </div>
       </div>
   <div class="container relative main-header-container">
 
@@ -35,7 +47,7 @@
         </a>
         {% elif data.global.siteLogo %}
         <a href="{{data.baseUrlWithPrefix}}{{logoLink}}/" class="logo-uploaded logo-main-container">
-          <img src="{{apos.attachment.url(data.global.siteLogo)}}" alt="Afbeelding van het logo, link naar de homepage" id="logo-image">
+          <img src="{{apos.attachment.url(data.global.siteLogo)}}" alt="{{data.global.logoAltText}}" id="logo-image">
           {% if not data.global.hideSiteTitle %}
           {% if data.global.siteTitle.length > 0%}
           <h2 class="header-subtitle">
@@ -46,7 +58,7 @@
         </a>
         {% else %}
         <a href="{{data.baseUrlWithPrefix}}{{logoLink}}/" class="logo-default logo-main-container">
-          <img class="default" src="/images/logo.png" alt="Afbeelding van het logo, link naar de homepage" id="logo-image">
+          <img class="default" src="/images/logo.png" alt="{{data.global.logoAltText}}" id="logo-image">
         </a>
         {% endif %}
         <div class="header-side-container {{ 'without-site-title' if data.global.hideSiteTitle}}">
@@ -99,7 +111,7 @@
       </div>
 
         <div class="header_navbar-container">
-          <button class="close-button"><span>Close</span></button>
+          <button class="close-button"><span>Menu tonen</span></button>
           {% if data.global.compactMenu %}
             {% set menuData = data.home._children | json | replace("'", "&#39;") %}
             <div id="navbar"

@@ -58,6 +58,18 @@ const EditorMap = ({
     }
   }
 
+  function removeMarker() {
+    setCurrentEditorMarker({
+      lat: undefined,
+      lng: undefined,
+      icon: undefined,
+      doNotCluster: true,
+    });
+    if (onChange) {
+      onChange({ name: fieldName, value: '' });
+    }
+  }
+
   return (
     <>
       <BaseMap
@@ -65,6 +77,7 @@ const EditorMap = ({
         center={currentCenter}
         markers={[currentEditorMarker]}
         onClick={updateLocation}
+        onMarkerClick={removeMarker}
       />
 
       <input

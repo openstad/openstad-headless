@@ -6,6 +6,8 @@ import choicesguide from "./choicesguide";
 import tags from './tags';
 import user from './user';
 import area from './area';
+import datalayer from './datalayer';
+import widget from './widget';
 import areas from './areas';
 import userVote from './user-vote';
 import submissions from './submissions';
@@ -91,6 +93,14 @@ function API(props = {}) {
 
   self.area = {
     fetch: area.fetch.bind(self),
+  };
+
+  self.datalayer = {
+    fetch: datalayer.fetch.bind(self),
+  };
+
+  self.widget = {
+    fetch: widget.fetch.bind(self),
   };
 
   self.areas = {

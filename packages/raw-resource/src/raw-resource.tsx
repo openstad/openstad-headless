@@ -70,6 +70,7 @@ function RawResource(props: RawResourceWidgetProps) {
           progress: resource.progress,
           createDateHumanized: resource.createDateHumanized,
           publishDateHumanized: resource.publishDateHumanized,
+          publishDate: resource.publishDate,
         });
       }
       return nunjucksEnv.renderString(props.rawInput, {

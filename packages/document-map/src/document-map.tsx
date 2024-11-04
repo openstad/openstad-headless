@@ -78,7 +78,11 @@ export type DocumentMapProps = BaseProps &
     loginText?: string;
     backUrlContent?: string;
     backUrlText?: string;
-
+    infoPopupButtonText?: string;
+    openInfoPopupOnInit?: string;
+    closedText?: string;
+    relativePathPrepend?: string;
+    entireDocumentVisible?: 'entirely' | 'onlyTop';
   };
 
 
@@ -108,6 +112,11 @@ function DocumentMap({
   largeDoc = false,
   loginText = 'Inloggen om deel te nemen aan de discussie',
   emptyListText = 'Nog geen reacties geplaatst',
+  infoPopupButtonText = '',
+  openInfoPopupOnInit = 'no',
+  closedText = 'Het insturen van reacties is gesloten, u kunt niet meer reageren',
+  relativePathPrepend = '',
+  entireDocumentVisible = 'onlyTop',
   ...props
 }: DocumentMapProps) {
 
@@ -188,6 +197,12 @@ function DocumentMap({
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCommentValue(e.target.value);
+
+    if (e.target.value.length > 0) {
+      characterHelpText(e.target.value.length);
+    } else {
+      setHelpText('');
+    }
   };
 
 
@@ -239,8 +254,8 @@ function DocumentMap({
   };
 
 
-  const [docWidth, setDocumentWidth] = useState<number>(1920);
-  const [docHeight, setDocumentHeight] = useState<number>(1080)
+  const [docWidth, setDocumentWidth] = useState<number>(0);
+  const [docHeight, setDocumentHeight] = useState<number>(0)
   const [isBoundsSet, setIsBoundsSet] = useState(false);
   const leafletMapRef = useRef<HTMLDivElement>(null);
 
@@ -255,17 +270,46 @@ function DocumentMap({
     setDocumentHeight(imageHeight);
   };
 
+  const [bounds, setBounds] = useState<Array<Array<number>> | null>(null);
 
-  const imageBounds: LatLngBoundsLiteral = [
-    [0, docWidth / 2],
-    [-docHeight, -docWidth / 2]
-  ];
+  useEffect(() => {
+    if (!docWidth || !docHeight) return;
 
+    const basicBounds: LatLngBoundsLiteral = [
+      [0, docWidth / 2],
+      [-docHeight, -docWidth / 2]
+    ];
+
+    const extendedBounds: LatLngBoundsLiteral = [
+      [basicBounds[0][0] + (docHeight * .2), basicBounds[0][1] + (docWidth * .2)],
+      [basicBounds[1][0] - (docHeight * .2), basicBounds[1][1] - (docWidth * .2)]
+    ];
+
+    setBounds(extendedBounds as number[][]);
+  }, [docWidth, docHeight]);
 
   const contentRef = useRef<HTMLDivElement>(null);
-  const [shortLengthError, setShortLengthError] = useState(false);
-  const [longLengthError, setLongLengthError] = useState(false);
   const [randomId, setRandomId] = useState('');
+  const [helpText, setHelpText] = useState('');
+
+  const characterHelpText = (count: number) => {
+    let helpText = '';
+
+    const min = props.comments?.descriptionMinLength || 0;
+    let minWarning = `Nog minimaal ${min - count} karakters`;
+
+    const max = props.comments?.descriptionMaxLength || Infinity;
+
+    if (count < min) {
+      helpText = minWarning;
+    } else if (count > max) {
+      helpText = `Je hebt ${count - max} karakters teveel`;
+    } else {
+      helpText = '';
+    }
+
+    setHelpText(helpText);
+  };
 
   const [toggleMarker, setToggleMarker] = useState(true);
 
@@ -277,17 +321,31 @@ function DocumentMap({
       popupclose: () => {
         setSelectedCommentIndex(-1);
         setSelectedMarkerIndex(-1);
+        setPopupPosition(null);
       },
     });
 
 
     useEffect(() => {
-      if (map && imageBounds && !isBoundsSet) {
-        map.fitBounds(imageBounds);
+      if (map && bounds && !!docHeight && !!docWidth && !isBoundsSet) {
+        if (entireDocumentVisible === 'entirely') {
+          map.fitBounds(bounds as LatLngBoundsLiteral);
+        } else {
+          map.setMaxBounds(bounds as LatLngBoundsLiteral);
+          const topLeft = bounds[0];
+          const topRight = [bounds[0][0], bounds[1][1]];
+
+          const topBounds: LatLngBoundsLiteral = [
+            [topLeft[0], topLeft[1]],
+            [topRight[0], topRight[1]]
+          ];
+
+          map.flyToBounds(topBounds, { animate: true, duration: 0.2 });
+        }
         map.scrollWheelZoom.disable();
         setIsBoundsSet(true);
       }
-    }, [map, imageBounds, isBoundsSet]);
+    }, [map, bounds, isBoundsSet]);
 
     return null;
   };
@@ -302,16 +360,6 @@ function DocumentMap({
     e.preventDefault();
     e.stopPropagation();
 
-    setShortLengthError(false);
-    setLongLengthError(false);
-
-    if (commentValue.length < props.comments?.descriptionMinLength) {
-      setShortLengthError(true);
-    }
-
-    if (commentValue.length > props.comments?.descriptionMaxLength) {
-      setLongLengthError(true);
-    }
     if (
       commentValue.length >= props.comments?.descriptionMinLength
       && commentValue.length <= props.comments?.descriptionMaxLength
@@ -337,8 +385,7 @@ function DocumentMap({
         setFilteredComments(addNewCommentToComments);
         setPopupPosition(null);
         setCommentValue('');
-        setShortLengthError(false);
-        setLongLengthError(false);
+        setHelpText('');
         setSelected([]);
         setSelectedCommentIndex(newIndex);
         setSelectedMarkerIndex(newIndex);
@@ -365,7 +412,7 @@ function DocumentMap({
   useEffect(() => {
     setRandomId(generateRandomId());
     if (window.location.hash.includes('#doc')) {
-      setBackUrl('/' + window.location.hash.split('=')[1] + (window.location.hash.split('=')[2] !== undefined ? '=' + window.location.hash.split('=')[2] : ''));
+      setBackUrl(relativePathPrepend + '/' + window.location.hash.split('=')[1] + (window.location.hash.split('=')[2] !== undefined ? '=' + window.location.hash.split('=')[2] : ''));
     }
   }, []);
 
@@ -512,18 +559,130 @@ function DocumentMap({
       }
     }
 
-    const toggleHelperDialog = (open: boolean) => {
-      const dialog = document.querySelector('dialog.helper-dialog') as HTMLDialogElement;
-      if (dialog) {
-        if (open) {
-          dialog.showModal();
+    const modalRef = useRef<HTMLDivElement | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [manualFocus, setManualFocus] = useState(false);
+
+    const setModalOpen = (state: boolean) => {
+      setIsModalOpen(state);
+      setManualFocus(state);
+    };
+
+    const trapFocus = (event: KeyboardEvent) => {
+      if (!modalRef.current || !isModalOpen) return;
+
+      const focusableElements = modalRef.current.querySelectorAll(
+          'a[href], button, textarea, input, select'
+      );
+      const firstElement = focusableElements[0] as HTMLElement;
+      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+      if (event.key === 'Tab') {
+        if (event.shiftKey) {
+          if (document.activeElement === firstElement) {
+            lastElement.focus();
+            event.preventDefault();
+          }
         } else {
-          dialog.close();
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            event.preventDefault();
+          }
         }
       }
     };
 
-    return (
+
+    const mapRef = useRef<any>(null);
+
+    useEffect(() => {
+      const map = mapRef.current;
+      if (map) {
+        if (popupPosition) {
+          map.setMaxBounds( [] );
+        } else {
+          map.setMaxBounds(bounds);
+        }
+      }
+    }, [popupPosition]);
+
+    useEffect(() => {
+      const handleEsc = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          setModalOpen(false);
+        }
+      };
+
+      if (isModalOpen) {
+        document.addEventListener('keydown', trapFocus);
+        document.addEventListener('keydown', handleEsc);
+      } else {
+        document.removeEventListener('keydown', trapFocus);
+        document.removeEventListener('keydown', handleEsc);
+      }
+
+      return () => {
+        document.removeEventListener('keydown', trapFocus);
+        document.removeEventListener('keydown', handleEsc);
+      };
+    }, [isModalOpen]);
+
+    // Focus management when modal opens
+    useEffect(() => {
+      if (isModalOpen && modalRef.current && manualFocus) {
+        modalRef.current.focus();
+      }
+    }, [isModalOpen]);
+
+    useEffect(() => {
+      if (openInfoPopupOnInit === 'yes') {
+        setIsModalOpen(true);
+        setManualFocus(false);
+      }
+    }, []);
+  
+    const [showButton, setShowButton] = useState(false);
+    const containerRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+      const handleScroll = () => {
+        if (containerRef.current) {
+          const containerTop = containerRef.current.offsetTop;
+          const currentScroll = window.scrollY;
+
+          if (currentScroll > containerTop) {
+            setShowButton(true);
+          } else {
+            setShowButton(false);
+          }
+        }
+      };
+
+      window.addEventListener('scroll', handleScroll);
+
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+      };
+    }, []);
+
+    const scrollToTop = () => {
+      if (containerRef.current) {
+        const container = containerRef.current as HTMLElement;
+        const containerRect = container.getBoundingClientRect();
+        const scrollPosition = window.pageYOffset + containerRect.top;
+
+        window.scrollTo({
+          top: scrollPosition,
+          behavior: 'smooth',
+        });
+      }
+    };
+
+    const configVotingEnabled = props?.votes?.isActive || false;
+    const votingEnabled = configVotingEnabled && args.canComment;
+
+
+    return !bounds ? null : (
       <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
         <div className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
 
@@ -560,12 +719,14 @@ function DocumentMap({
           )}
           <div className='document-container'>
             <MapContainer
-              center={[0, 0]}
-              crs={CRS.Simple}
-              maxZoom={maxZoom}
-              minZoom={minZoom}
-              zoom={zoom}
-              zoomSnap={0}
+                ref={mapRef}
+                center={[0, 0]}
+                crs={CRS.Simple}
+                maxZoom={maxZoom}
+                minZoom={minZoom}
+                zoom={zoom}
+                zoomSnap={0}
+                maxBounds={popupPosition ? undefined : bounds as LatLngBoundsLiteral}
             >
               <MapEvents />
               {filteredComments && filteredComments
@@ -574,7 +735,7 @@ function DocumentMap({
 
                   const firstTag = comment.tags && comment.tags[0];
                   const documentMapIconColor = firstTag && firstTag.documentMapIconColor ? firstTag.documentMapIconColor : '#555588';
-  
+
                   return (
                       <MarkerWithId
                           key={index}
@@ -587,12 +748,17 @@ function DocumentMap({
                 })}
               <ImageOverlay
                 url={resource.images ? resource.images[0].url : ''}
-                bounds={imageBounds}
+                bounds={bounds as LatLngBoundsLiteral}
                 aria-describedby={randomId}
               />
-              {popupPosition && !isDefinitive && (
-                <Popup position={popupPosition}>
-                  {args.canComment && !hasRole(currentUser, args.requiredUserRole) ? (
+              {(popupPosition && !isDefinitive && args.canComment) && (
+                <Popup
+                  position={popupPosition}
+                  eventHandlers={{
+                    popupclose: () => setPopupPosition(null),
+                  }}
+                >
+                  { !hasRole(currentUser, args.requiredUserRole) ? (
                     <>
                       <Paragraph>Om een reactie te plaatsen, moet je ingelogd zijn.</Paragraph>
                       <Spacer size={1} />
@@ -611,8 +777,7 @@ function DocumentMap({
                     <form>
                       <div>
                         <FormLabel htmlFor="commentBox">{addCommentText}</FormLabel>
-                        {shortLengthError && <Paragraph className="--error">De reactie moet minimaal {props.comments?.descriptionMinLength} tekens bevatten</Paragraph>}
-                        {longLengthError && <Paragraph className="--error">De reactie mag maximaal {props.comments?.descriptionMaxLength} tekens bevatten</Paragraph>}
+                        {helpText && <Paragraph className="--error">{helpText}</Paragraph>}
 
                         <Textarea
                           id="commentBox"
@@ -669,16 +834,45 @@ function DocumentMap({
               )}
             </MapContainer>
 
-            <Button className='info-trigger' appearance='primary-action-button' onClick={() => toggleHelperDialog(true)}>
-              <i className="ri-information-line"></i>
-              <span className="sr-only">Hoe werkt het?</span>
-            </Button>
+            { !!args.canComment && (
+              <>
+                <Button className={`info-trigger ${infoPopupButtonText ? 'button-has-text' : ''}`}
+                        appearance='primary-action-button' onClick={() => setModalOpen(true)}>
+                  <i className="ri-information-line"></i>
+                  {infoPopupButtonText && (
+                      <span className="trigger-text">{infoPopupButtonText}</span>
+                  )}
+                  <span className="sr-only">{infoPopupButtonText || 'Hoe werkt het?'}</span>
+                </Button>
+
+
+                <div className="modal-overlay" aria-hidden={isModalOpen ? "false" : "true"}>
+                  <div
+                      ref={modalRef}
+                      className="modal"
+                      role="dialog"
+                      aria-labelledby="modal-title"
+                      aria-modal="true"
+                      tabIndex={-1}
+                  >
+                    <Heading level={2}>Hoe werkt het?</Heading>
+                    <Paragraph>{infoPopupContent}</Paragraph>
+                    <Spacer size={1}/>
+                    <Button appearance='secondary-action-button' aria-label="Close Modal" onClick={() => setModalOpen(false)}>
+                      <i className="ri-close-fill"></i>
+                      <span>Info venster sluiten</span>
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+
           </div>
         </div>
         <div className="content document-map-info-container" ref={contentRef}>
           {!isDefinitive && (
             <>
-              {displayLikes && canComment && (
+              {displayLikes && (
                 <>
                   <Likes
                     {...props}
@@ -692,6 +886,8 @@ function DocumentMap({
                     progressBarDescription={
                       props.likeWidget?.progressBarDescription
                     }
+                    displayDislike={props.likeWidget?.displayDislike}
+                    disabled={!votingEnabled}
                   />
                   <Spacer size={1} />
                 </>
@@ -699,13 +895,20 @@ function DocumentMap({
               {backUrl !== undefined && (
                 <div className="osc back-url-container">
                   <div className="banner">
-                    <Spacer size={2} />
+                    <Spacer size={2}/>
                     <Heading6>{props.backUrlContent}</Heading6>
-                    <Spacer size={1} />
-                    <ButtonLink appearance="primary-action-button" href={backUrl} title="Terug naar overzicht" id={randomId}>{props.backUrlText}</ButtonLink>
-                    <Spacer size={2} />
+                    <Spacer size={1}/>
+                    <a
+                      href={backUrl}
+                      className="utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action"
+                      title="Terug naar overzicht"
+                      id={randomId}
+                    >
+                      {props.backUrlText}
+                    </a>
+                    <Spacer size={2}/>
                   </div>
-                  <Spacer size={2} />
+                  <Spacer size={2}/>
                 </div>
               )}
               <div className='toggleMarkers'>
@@ -751,30 +954,30 @@ function DocumentMap({
           ) : null}
 
           {!isDefinitive && (
-            <Comments
-              {...props}
-              key={refreshComments ? 'refresh' : 'no-refresh'}
-              onlyIncludeTags={selectedTagsString || filteredTagsIdsString || ''}
-              resourceId={resourceId || ''}
-              selectedComment={selectedCommentIndex}
-              setRefreshComments={setRefreshComments}
-              showForm={false}
-              emptyListText={emptyListText}
-              loginText={loginText}
-            />
+            <div ref={containerRef}>
+              <Comments
+                {...props}
+                key={refreshComments ? 'refresh' : 'no-refresh'}
+                onlyIncludeTags={selectedTagsString || filteredTagsIdsString || ''}
+                resourceId={resourceId || ''}
+                selectedComment={selectedCommentIndex}
+                setRefreshComments={setRefreshComments}
+                showForm={false}
+                emptyListText={emptyListText}
+                loginText={loginText}
+                closedText={closedText}
+              />
+            </div>
           )}
         </div>
-        <dialog className='helper-dialog'>
-          <div className="info-dialog">
-            <Heading level={2}>Hoe werkt het?</Heading>
-            <Paragraph>{infoPopupContent}</Paragraph>
-            <Spacer size={1} />
-            <Button appearance='secondary-action-button' onClick={() => toggleHelperDialog(false)}>
-              <i className="ri-close-fill"></i>
-              <span>Info venster sluiten</span>
-            </Button>
-          </div>
-        </dialog>
+
+        <button
+              className={`back-to-top ${showButton ? "show" : ""}`}
+              onClick={scrollToTop}
+          >
+            <i className="ri-arrow-up-line"></i>
+          </button>
+
       </div>
 
     );

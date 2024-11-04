@@ -16,7 +16,7 @@ import '@utrecht/design-tokens/dist/root.css';
 import {
   Paragraph, Link, Heading, Heading2, ButtonGroup, ButtonLink,
 } from '@utrecht/component-library-react';
-import React from 'react';
+import React, { useState } from 'react';
 import { Likes, LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import {
   Comments,
@@ -56,6 +56,8 @@ export type ResourceDetailWidgetProps = {
     projectId?: string;
     resourceId?: string;
     resourceIdRelativePath?: string;
+    backUrlIdRelativePath?: string;
+    backUrlText?: string;
   } & booleanProps & {
     likeWidget?: Omit<
       LikeWidgetProps,
@@ -98,8 +100,11 @@ function ResourceDetail({
   displayDocuments = true,
   documentsTitle = '',
   documentsDesc = '',
+  backUrlText = 'Terug naar het document',
+  backUrlIdRelativePath = '',
   ...props
 }: ResourceDetailWidgetProps) {
+  const [refreshComments, setRefreshComments] = useState(false);
 
   let resourceId: string | undefined = String(getResourceId({
     resourceId: parseInt(props.resourceId || ''),
@@ -142,13 +147,65 @@ function ResourceDetail({
   const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
   const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
 
+  const getIdFromHash = () => {
+    try {
+      const hash = window.location.hash;
+
+      if (hash && hash.includes('#doc=')) {
+        const docParams = hash.split('#doc=')[1];
+
+        const cleanDocParams = docParams.split('#')[0];
+
+        if (cleanDocParams && cleanDocParams.includes('?')) {
+          const queryParams = cleanDocParams.split('?')[1];
+
+          if (queryParams) {
+            const params = queryParams.split('&');
+
+            for (const param of params) {
+              const [key, value] = param.split('=');
+
+              if (value && !isNaN(Number(value))) {
+                return value;
+              }
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error while parsing the hash:', error);
+    }
+
+    return null;
+  };
+
   const getPageHash = () => {
     if (window.location.hash.includes('#doc')) {
-      const url = '/' + window.location.hash.split('=')[1] + (window.location.hash.split('=')[2] !== undefined ? '=' + window.location.hash.split('=')[2] : '');
+      let url = '/' + window.location.hash.split('=')[1] + (window.location.hash.split('=')[2] !== undefined ? '=' + window.location.hash.split('=')[2] : '');
 
-      return <div className="back-url"><Link href={url}>Terug naar het document</Link></div>
+      if ( backUrlIdRelativePath ) {
+        const backUrlId = getIdFromHash();
+
+        if (backUrlId) {
+          url = backUrlIdRelativePath.replace('[id]', backUrlId);
+        }
+      }
+
+      return <div className="back-url"><Link href={url}>{backUrlText}</Link></div>
     }
   };
+
+  // props.commentsWidget?.useSentiments can be undefined, an array or a string with an arrayß
+  let useSentiments = props.commentsWidget?.useSentiments;
+  if (!!useSentiments && typeof useSentiments === 'string') {
+    useSentiments = JSON.parse(useSentiments);
+  }
+
+  const firstStatus = resource.statuses && resource.statuses.length > 0 ? resource.statuses[0] : null;
+  const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
+  const backgroundColorClass = firstStatus && firstStatus.backgroundColor ? `bgColor-${firstStatus.backgroundColor}` : '';
+
+  const statusClasses = `${colorClass} ${backgroundColorClass}`.trim();
 
   return (
     <section>
@@ -164,12 +221,13 @@ function ResourceDetail({
               {displayImage && (
                 <Carousel
                   items={resourceImages}
+                  buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
                   itemRenderer={(i) => (
                     <Image
                       src={i.url}
                       imageFooter={
                         <div>
-                          <Paragraph className="osc-resource-detail-content-item-status">
+                          <Paragraph className={`osc-resource-detail-content-item-status ${statusClasses}`}>
                             {resource.statuses
                               ?.map((s: { name: string }) => s.name)
                               ?.join(', ')}
@@ -182,9 +240,7 @@ function ResourceDetail({
               )}
 
               {displayTitle && resource.title && (
-                <Heading level={1} appearance="utrecht-heading-2">
-                  {resource.title}
-                </Heading>
+                <Heading level={1} appearance="utrecht-heading-2" dangerouslySetInnerHTML={{__html: resource.title}}></Heading>
               )}
 
               {displayModBreak && resource.modBreak && (
@@ -242,7 +298,8 @@ function ResourceDetail({
                 <>
                   <Heading level={2} appearance="utrecht-heading-2">Plaats</Heading>
                   <ResourceDetailMap
-                    resourceId={props.resourceId || '0'}
+                    resourceId={resource.id || resourceId || '0'}
+                    resourceIdRelativePath={props.resourceIdRelativePath || 'openstadResourceId'}
                     {...props}
                     center={resource.location}
                     area={props.resourceDetailMap?.area}
@@ -265,6 +322,7 @@ function ResourceDetail({
                     title={props.likeWidget?.title}
                     yesLabel={props.likeWidget?.yesLabel}
                     noLabel={props.likeWidget?.noLabel}
+                    displayDislike={props.likeWidget?.displayDislike}
                     hideCounters={props.likeWidget?.hideCounters}
                     variant={props.likeWidget?.variant}
                     showProgressBar={props.likeWidget?.showProgressBar}
@@ -343,28 +401,36 @@ function ResourceDetail({
 
       <Spacer size={2} />
 
-      {Array.isArray(props.commentsWidget?.useSentiments) &&
-        props.commentsWidget?.useSentiments?.length ? (
+      {Array.isArray(useSentiments) &&
+        useSentiments?.length ? (
         <section className="resource-detail-comments-container">
           <Comments
             {...props}
+            key={refreshComments ? 'refresh1' : 'no-refresh1'}
+            setRefreshComments={setRefreshComments}
             resourceId={resourceId || ''}
             title={props.commentsWidget?.title}
             emptyListText={props.commentsWidget?.emptyListText}
             formIntro={props.commentsWidget?.formIntro}
             placeholder={props.commentsWidget?.placeholder}
-            sentiment={props.commentsWidget?.useSentiments[0]}
+            loginText={props.commentsWidget?.loginText}
+            closedText={props.commentsWidget?.closedText}
+            sentiment={useSentiments[0]}
           />
 
-          {props.commentsWidget?.useSentiments?.length > 1 && (
+          {useSentiments?.length > 1 && (
             <Comments
               {...props}
+              key={refreshComments ? 'refresh2' : 'no-refresh2'}
+              setRefreshComments={setRefreshComments}
               resourceId={resourceId || ''}
               title={props.commentsWidget_multiple?.title}
               emptyListText={props.commentsWidget_multiple?.emptyListText}
               formIntro={props.commentsWidget_multiple?.formIntro}
               placeholder={props.commentsWidget_multiple?.placeholder}
-              sentiment={props.commentsWidget?.useSentiments[1]}
+              loginText={props.commentsWidget_multiple?.loginText}
+              closedText={props.commentsWidget_multiple?.closedText}
+              sentiment={useSentiments[1]}
             />
           )}
 

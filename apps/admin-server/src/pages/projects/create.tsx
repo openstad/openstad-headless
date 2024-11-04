@@ -108,7 +108,7 @@ export default function CreateProject() {
                 name="projectName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project naam</FormLabel>
+                    <FormLabel>Projectnaam</FormLabel>
                     <FormControl>
                       <Input placeholder="Naam" {...field} />
                     </FormControl>
@@ -134,7 +134,7 @@ export default function CreateProject() {
                 name="importedProjectName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project naam</FormLabel>
+                    <FormLabel>Projectnaam</FormLabel>
                     <FormControl>
                       <Input placeholder="Naam" {...field} />
                     </FormControl>

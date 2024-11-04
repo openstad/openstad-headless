@@ -70,6 +70,36 @@ function status(resource: any): string {
   return resource.statuses.map((status: Status) => status.label || status.name).join(', ');
 }
 
+function formatDate(dateStr: string, formatStr: string): string {
+  if (typeof dateStr !== 'string' || typeof formatStr !== 'string') return '';
+
+  try {
+    const date = new Date(dateStr);
+    const months = [
+      'januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'
+    ];
+
+    const map: { [key: string]: string } = {
+      DD: String(date.getDate()).padStart(2, '0'), // Dag van de maand, 2 cijfers
+      D: String(date.getDate()), // Dag van de maand
+      MMMM: months[date.getMonth()], // Volledige maandnaam
+      MM: String(date.getMonth() + 1).padStart(2, '0'), // Maand, 2 cijfers
+      M: String(date.getMonth() + 1), // Maand
+      YYYY: String(date.getFullYear()), // Volledig jaar
+      YY: String(date.getFullYear()).slice(-2), // Jaar, 2 cijfers
+      hh: String(date.getHours()).padStart(2, '0'), // Uren, 2 cijfers
+      mm: String(date.getMinutes()).padStart(2, '0'), // Minuten, 2 cijfers
+      ss: String(date.getSeconds()).padStart(2, '0'), // Seconden, 2 cijfers
+    };
+
+    // Vervang het formaat door de juiste waarden
+    return formatStr.replace(/DD|D|MMMM|MM|M|YYYY|YY|hh|mm|ss/g, (matched) => map[matched] || '');
+  } catch (e) {
+    // Return de originele string als het parsen mislukt
+    return dateStr;
+  }
+}
+
 // Apply filters to Nunjucks environment
 export function applyFilters(env: nunjucks.Environment) {
   env.addFilter('dump', dump);
@@ -82,4 +112,5 @@ export function applyFilters(env: nunjucks.Environment) {
   env.addFilter('tags', tags);
   env.addFilter('status', status);
   env.addFilter('tagGroup', tagGroup);
+  env.addFilter('formatDate', formatDate);
 }

@@ -221,6 +221,29 @@ module.exports = function( db, sequelize, DataTypes ) {
 				};
 			},
 
+			includeAllComments: function() {
+				return {
+					include: [{
+						model: db.User,
+						attributes: ['id', 'role', 'displayName', 'nickName', 'name', 'email']
+					}],
+					order: [
+						['createdAt', 'ASC']
+					]
+				};
+			},
+
+			includeTags: {
+				include: [
+					{
+						model: db.Tag,
+						attributes: ['id', 'type', 'name', 'label', 'defaultResourceImage'],
+						through: { attributes: [] },
+						required: false,
+					},
+				],
+			},
+
 			includeResource: function() {
 				return {
 					include: [{

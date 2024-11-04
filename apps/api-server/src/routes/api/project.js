@@ -15,8 +15,13 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const removeProtocolFromUrl = require('../../middleware/remove-protocol-from-url');
 const messageStreaming = require('../../services/message-streaming');
 const service = require('../../adapter/openstad/service');
+const fs = require('fs');
+const getWidgetSettings = require('./../widget/widget-settings');
+const widgetDefinitions = getWidgetSettings();
+const createError = require('http-errors');
 
 let router = express.Router({mergeParams: true});
+const {Op} = require("sequelize");
 
 async function getProject(req, res, next, include = []) {
 	const projectId = req.params.projectId;
@@ -52,6 +57,252 @@ async function getProject(req, res, next, include = []) {
     return next(err);
   }
 }
+
+// Function to create tags
+async function createTags(req, tagMap, errors) {
+  for (const tag of req.tags) {
+    try {
+      const newTag = await db.Tag.create({ ...tag, projectId: req.projectId });
+      tagMap[tag.originalId] = newTag.id;
+    } catch (error) {
+      errors.push({ step: 'Create tags', error: error.message });
+    }
+  }
+}
+
+// Function to create statuses
+async function createStatuses(req, statusMap, errors) {
+  for (const status of req.statuses) {
+    try {
+      const newStatus = await db.Status.create({ ...status, projectId: req.projectId });
+      statusMap[status.originalId] = newStatus.id;
+    } catch (error) {
+      errors.push({ step: 'Create statuses', error: error.message });
+    }
+  }
+}
+
+// Function to create widgets
+async function createWidgets(req, widgetMap, newWidgets, errors) {
+  for (const widget of req.widgets) {
+    try {
+      const newWidget = await db.Widget.create({ ...widget, projectId: req.projectId });
+      widgetMap[widget.originalId] = newWidget.id;
+      newWidgets.push(newWidget);
+    } catch (error) {
+      errors.push({ step: 'Create widgets', error: error.message });
+    }
+  }
+}
+
+// Function to get or create a user
+async function getOrCreateUser(userId, userMap, projectId) {
+  if (userMap[userId]) {
+    return userMap[userId];
+  }
+
+  const user = await db.User.findOne({ where: { id: userId }, raw: true });
+
+  if ( !user ) {
+    const newUser = await db.User.create({ idpUser: { provider: 'anonymous', identifier: 'anonymous' }, projectId });
+    userMap[userId] = newUser.id;
+    return newUser.id;
+  }
+
+  delete user.id;
+  user.projectId = projectId;
+  const newUser = await db.User.create(user);
+
+  userMap[userId] = newUser.id;
+  return newUser.id;
+}
+
+// Function to create resources
+async function createResources(req, resourceMap, widgetMap, tagMap, statusMap, userMap, errors) {
+  for (const resource of req.resources) {
+    try {
+      const updateWidgetIds = (singleResource) => {
+        for (const key in singleResource) {
+          if (typeof singleResource[key] === 'object' && singleResource[key] !== null) {
+            updateWidgetIds(singleResource[key]);
+          } else if (key === "widgetId") {
+            singleResource[key] = widgetMap[singleResource[key]];
+          }
+        }
+        return singleResource;
+      }
+
+      const updatedResource = updateWidgetIds(resource);
+
+      // Retrieve or create the user and update the userId in the resource
+      const newUserId = await getOrCreateUser(updatedResource.userId, userMap, req.projectId);
+      updatedResource.userId = newUserId;
+
+      const newResource = await db.Resource.create({ ...updatedResource, projectId: req.projectId });
+      resourceMap[resource.originalId] = newResource.id;
+
+      if (resource.tags) {
+        const validTagIds = await getValidTags(req.projectId, resource.tags.map(tag => tagMap[tag.id]));
+        await newResource.setTags(validTagIds);
+      }
+      if (resource.statuses) {
+        const validStatusIds = await getValidStatuses(req.projectId, resource.statuses.map(status => statusMap[status.id]));
+        await newResource.setStatuses(validStatusIds);
+      }
+    } catch (error) {
+      errors.push({ step: 'Create resources', error: error.message });
+    }
+  }
+}
+
+// Function to update widget IDs in an object
+function updateWidgetIds(obj, widgetMap, resourceMap, tagMap, statusMap, projectId) {
+  for (const key in obj) {
+    if (typeof obj[key] === 'object' && obj[key] !== null) {
+      updateWidgetIds(obj[key], widgetMap, resourceMap, tagMap, statusMap, projectId);
+    } else {
+      if (key === 'projectId') {
+        obj[key] = projectId;
+      }
+      if (key === 'resourceId') {
+        obj[key] = resourceMap[obj[key]];
+      }
+      if (key.includes('tag') || key.includes('Tag')) {
+        if (obj[key]) {
+          let tagValue = typeof obj[key] === 'number' ? obj[key].toString() : obj[key];
+          if (typeof tagValue === 'string' && tagValue !== '') {
+            tagValue = tagValue.split(',').map(id => tagMap[id] || id).join(',');
+            obj[key] = tagValue;
+          }
+        }
+      }
+      if (key.includes('status') || key.includes('Status')) {
+        if (obj[key]) {
+          let statusValue = typeof obj[key] === 'number' ? obj[key].toString() : obj[key];
+          if (typeof statusValue === 'string' && statusValue !== '') {
+            statusValue = statusValue.split(',').map(id => statusMap[id] || id).join(',');
+            obj[key] = statusValue;
+          }
+        }
+      }
+      if (key === 'choiceguideWidgetId') {
+        obj[key] = widgetMap[obj[key]];
+      }
+    }
+  }
+}
+
+// Function to update widget
+async function updateWidget(widgetId, updatedData, errors) {
+  try {
+    await db.Widget.update(updatedData, {
+      where: { id: widgetId }
+    });
+  } catch (error) {
+    errors.push({ step: 'Update widget', error: error.message });
+  }
+}
+
+// Function to update widget IDs in new widgets
+async function updateWidgetIdsInNewWidgets(newWidgets, widgetMap, resourceMap, tagMap, statusMap, projectId, errors) {
+  for (const widget of newWidgets) {
+    try {
+      const updatedData = { config: widget.config };
+      updateWidgetIds(updatedData, widgetMap, resourceMap, tagMap, statusMap, projectId);
+      await updateWidget(widget.id, updatedData, errors);
+    } catch (error) {
+      errors.push({ step: 'Update widget IDs in new widgets', error: error.message });
+    }
+  }
+}
+
+// Function to revert the config resource settings
+async function revertConfigResourceSettings(req, errors) {
+  try {
+    const project = await db.Project.findOne({ where: { id: req.projectId } });
+    const newConfig = project?.config || {};
+    newConfig.resources = req.resourceSettings || {};
+
+    await project.update({ config: newConfig });
+  } catch (error) {
+    errors.push({ step: 'Revert config resource settings', error: error.message });
+  }
+}
+
+// Endpoint to delete duplicated project and its associated data
+router.route('/delete-duplicated-data')
+  .post(auth.can('Project', 'delete'))
+  .post(async function(req, res, next) {
+    const { projectId, tagMap, statusMap, widgetMap, resourceMap, userMap } = req.body;
+
+    try {
+      // Delete duplicated tags
+      if (Object.keys(tagMap).length > 0) {
+        for (const tagId of Object.values(tagMap)) {
+          if (tagId) {
+            await db.Tag.destroy({ where: { id: tagId } });
+          }
+        }
+      }
+
+      // Delete duplicated statuses
+      if (Object.keys(statusMap).length > 0) {
+        for (const statusId of Object.values(statusMap)) {
+          if (statusId) {
+            await db.Status.destroy({ where: { id: statusId } });
+          }
+        }
+      }
+
+      // Delete duplicated widgets
+      if (Object.keys(widgetMap).length > 0) {
+        for (const widgetId of Object.values(widgetMap)) {
+          if (widgetId) {
+            await db.Widget.destroy({ where: { id: widgetId } });
+          }
+        }
+      }
+
+      // Delete duplicated resources
+      if (Object.keys(resourceMap).length > 0) {
+        for (const resourceId of Object.values(resourceMap)) {
+          if (resourceId) {
+            await db.Resource.destroy({ where: { id: resourceId } });
+          }
+        }
+      }
+
+      // Delete duplicated resources
+      if (Object.keys(userMap).length > 0) {
+        for (const userId of Object.values(userMap)) {
+          if (userId) {
+            await db.User.destroy({ where: { id: userId } });
+          }
+        }
+      }
+
+      // Delete the duplicated project
+      const project = await db.Project.findOne({ where: { id: projectId } });
+      if (!project) return next(new Error('Project not found'));
+      if (!project?.config?.project?.projectHasEnded) {
+        const updatedConfig = {
+          ...project.config,
+          project: {
+            ...project.config.project,
+            projectHasEnded: true,
+          }
+        };
+
+        await project.update({ config: updatedConfig });
+      }
+
+      await project.destroy();
+
+      res.json({ success: true });
+    } catch (err) {
+      next(err);
+    }
+  });
 
 // scopes
 // ------
@@ -139,11 +390,25 @@ router.route('/')
 	.post(auth.can('Project', 'create'))
 	.post(removeProtocolFromUrl)
 	.post(async function (req, res, next) {
+    req.widgets = req.body.widgets || [];
+    req.tags = req.body.tags || [];
+    req.statuses = req.body.statuses || [];
+    req.resources = req.body.resources || [];
+    req.resourceSettings = req.body.resourceSettings || {};
+    req.skipDefaultStatuses = req.body.skipDefaultStatuses || false;
+
+    delete req.body.widgets;
+    delete req.body.tags;
+    delete req.body.statuses;
+    delete req.body.resources;
+    delete req.body.resourceSettings;
+
     // create an oauth client if nessecary
     let project = {
       config: req.body.config || {}
     };
     try {
+      project.name = project?.name || req.body?.name || '';
       let providers = await authSettings.providers({ project, useOnlyDefinedOnProject: true });
       let providersDone = [];
       for (let provider of providers) {
@@ -172,9 +437,10 @@ router.route('/')
 	})
 	.post(function(req, res, next) {
 		db.Project
-			.create({ emailConfig: {}, ...req.body })
+			.create({ emailConfig: {}, ...req.body}, { skipDefaultStatuses: req.skipDefaultStatuses })
 			.then(result => {
         req.results = result;
+        req.projectId = result.id;
 
 				return checkHostStatus({id: result.id});
 			})
@@ -184,6 +450,48 @@ router.route('/')
 			})
 			.catch(next)
 	})
+  .post(async function (req, res, next) {
+    const errors = [];
+
+    try {
+      req.query.nomail = true;
+
+      const tagMap = {};
+      const statusMap = {};
+      const widgetMap = {};
+      const userMap = {};
+      const newWidgets = [];
+      const resourceMap = {};
+
+      await createTags(req, tagMap, errors);
+      await createStatuses(req, statusMap, errors);
+      await createWidgets(req, widgetMap, newWidgets, errors);
+      await createResources(req, resourceMap, widgetMap, tagMap, statusMap, userMap, errors);
+      await updateWidgetIdsInNewWidgets(newWidgets, widgetMap, resourceMap, tagMap, statusMap, req.projectId, errors);
+      await revertConfigResourceSettings(req, errors);
+
+      if (errors.length > 0) {
+        return res.status(500).json({
+          errors: errors,
+          duplicatedData: {
+            projectId: req.projectId,
+            tagMap: tagMap,
+            statusMap: statusMap,
+            widgetMap: widgetMap,
+            userMap: userMap,
+            resourceMap: resourceMap,
+            newWidgets: newWidgets,
+          }
+        });
+      }
+
+      res.json(req.projectId);
+      next();
+    } catch (error) {
+      errors.push({ step: 'Overall', error: error.message });
+      res.status(500).json({ errors });
+    }
+  })
 	.post(async function (req, res, next) {
     let publisher = await messageStreaming.getPublisher();
     if (publisher) {
@@ -373,15 +681,20 @@ router.route('/:projectId') //(\\d+)
 
 // delete project
 // ---------
-	.delete(auth.can('Project', 'delete'))
-	.delete(function(req, res, next) {
-		req.results
-			.destroy()
-			.then(() => {
-				res.json({ "project": "deleted" });
-			})
-			.catch(next);
-	})
+  .delete(auth.can('Project', 'delete'))
+  .delete(async function(req, res, next) {
+    const project = await db.Project.findOne({ where: { id: req.params.projectId } });
+    if (!project) return next(new Error('Project not found'));
+    if (!project?.config?.project?.projectHasEnded) { return next(new Error('Project has not ended yet')) }
+
+    try {
+      await project.destroy();
+      res.json({ success: true });
+    } catch (err) {
+      next(err);
+    }
+  })
+
 
 // export a project
 // -------------------
@@ -450,5 +763,59 @@ router.route('/:projectId(\\d+)/:willOrDo(will|do)-anonymize-all-users')
     res.json(req.results);
   })
 
+router.route('/:projectId(\\d+)/css/:componentId?')
+  .get(function (req, res, next) {
+    let css = req.project?.config?.project?.cssCustom || '';
+    
+    if (req.params.componentId) {
+      css += `\n\n#${req.params.componentId} { width: 100%; height: 100%; }`
+    }
+    
+    res.setHeader('Content-Type', 'text/css');
+    res.send(css);
+  });
+
+router.route('/:projectId(\\d+)/widget-css/:widgetType')
+  .get(function (req, res, next) {
+    if (!req.params.widgetType) return next(createError(400, 'Invalid widget type given for fetching settings'));
+    
+    let widgetSettings = widgetDefinitions[req.params.widgetType];
+
+    if (!widgetSettings) {
+      return next(
+        createError(400, 'Invalid widget type given for fetching settings')
+      );
+    }
+    
+    let css = '';
+    
+    widgetSettings.css.forEach((file) => {
+      css += fs.readFileSync(require.resolve(`${widgetSettings.packageName}/${file}`), 'utf8');
+    });
+    
+    res.setHeader('Content-Type', 'text/css');
+    res.send(css);
+  });
+
+async function getValidStatuses(projectId, statuses) {
+  const uniqueIds = Array.from(new Set(statuses));
+
+  const statusesOfProject = await db.Status.findAll({
+    where: { projectId, id: { [Op.in]: uniqueIds } },
+  });
+
+  return statusesOfProject;
+}
+
+async function getValidTags(projectId, tags) {
+  const uniqueIds = Array.from(new Set(tags));
+  const validTags = await db.Tag.findAll({
+    where: {
+      id: uniqueIds,
+      projectId: projectId,
+    },
+  });
+  return validTags.map(tag => tag.id);
+}
 
 module.exports = router;

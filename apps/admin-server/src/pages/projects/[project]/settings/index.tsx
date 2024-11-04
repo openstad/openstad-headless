@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import toast from 'react-hot-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import * as Switch from '@radix-ui/react-switch';
+import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -33,7 +34,6 @@ const formSchema = z.object({
   endDate: z.date().min(new Date(), {
     message: 'De datum moet nog niet geweest zijn!',
   }),
-  cssUrl: z.string().optional(),
   // We don't want to restrict this URL too much
   url: z.string().regex(/^(?:([a-z0-9.:\-_\/]+))?$/g, {
     message: 'De URL mag alleen kleine letters, cijfers, punten, dubbele punten, koppeltekens, onderstrepingstekens en schuine strepen bevatten.'
@@ -55,6 +55,8 @@ export default function ProjectSettings() {
   const [basicAuthActive, setBasicAuthActive] = useState(false);
   const [basicAuthInitial, setBasicAuthInitial] = useState(true);
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const defaults = useCallback(
     () => {
       const currentDate = new Date();
@@ -65,7 +67,6 @@ export default function ProjectSettings() {
       endDate: data?.config?.project?.endDate
         ? new Date(data?.config?.project?.endDate)
         : new Date(currentDate.getFullYear(), currentDate.getMonth() + 3),
-      cssUrl: data?.config?.project?.cssUrl || '',
       url: data?.url || '',
       basicAuthActive: data?.config?.basicAuth?.active || false,
       username: data?.config?.basicAuth?.username || '',
@@ -106,8 +107,7 @@ export default function ProjectSettings() {
       const project = await updateProject(
         {
           project: {
-            endDate: values.endDate,
-            cssUrl: values.cssUrl
+            endDate: values.endDate
           },
           basicAuth: {
             active: values.basicAuthActive,
@@ -144,6 +144,30 @@ export default function ProjectSettings() {
       }
     } catch (error) {
       console.error('could not update', error);
+    }
+  }
+  async function archiveProject() {
+    if (!data?.config?.project?.projectHasEnded) {
+      toast.error('Het project moet eerst beëindigd worden voordat deze actie uitgevoerd kan worden.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/openstad/api/project/${project as string}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (res.ok) {
+        toast.success('Project gearchiveerd!');
+        router.push('/projects');
+      } else {
+        toast.error('Er is helaas iets mis gegaan.');
+      }
+    } catch (error) {
+      console.error('could not delete', error);
     }
   }
 
@@ -196,19 +220,6 @@ export default function ProjectSettings() {
                       fieldName="endDate"
                       label="Einddatum"
                       fieldInfo="Na deze datum is het automatisch niet meer mogelijk om plannen in te dienen, reacties te plaatsen en te stemmen."
-                    />
-                    <FormField
-                      control={form.control}
-                      name="cssUrl"
-                      render={({ field }) => (
-                        <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                          <FormLabel>Huisstijl URL (CSS bestand)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Url" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
                     />
 
                     <div>
@@ -340,13 +351,34 @@ export default function ProjectSettings() {
                   <div className="space-y-2">
                   Het project moet eerst zijn beëindigd voordat deze actie uitgevoerd kan worden.
                   </div>
-                  <Button
-                    variant={'destructive'}
-                    className="mt-4 w-fit"
-                    onClick={() => { }}>
-                    Project archiveren
-                  </Button>
+
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="destructive">Project archiveren</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogTitle>Bevestiging</DialogTitle>
+                      <DialogDescription>
+                        Weet je zeker dat je dit project wilt archiveren? Deze actie kan niet ongedaan gemaakt worden.
+                      </DialogDescription>
+                      <DialogFooter>
+                        <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>
+                          Annuleren
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={() => {
+                            setIsDialogOpen(false);
+                            archiveProject();
+                          }}
+                        >
+                          Bevestigen
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
+
               </div>
             </TabsContent>
           </Tabs>

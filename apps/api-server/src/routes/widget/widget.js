@@ -276,7 +276,9 @@ function getWidgetJavascriptOutput(
   let css = '';
 
   const data = JSON.parse(widgetConfig)
-  const extraCss = data.project?.cssUrl ? `<link href="${data.project.cssUrl}" rel="stylesheet">` : '';
+
+  const extraCssFile = data.project?.cssUrl ? `<link href="${data.project.cssUrl}" rel="stylesheet">` : '';
+  const apiUrl = process.env.URL ?? '';
 
 
 
@@ -347,12 +349,18 @@ function getWidgetJavascriptOutput(
           const redirectUri = encodeURI(window.location.href);
           
           const config = JSON.parse(\`${widgetConfigWithCorrectEscapes}\`.replaceAll("[[REDIRECT_URI]]", redirectUri));
+          let customCss = '';
+          
+          if (config.project.cssCustom) {
+            const customCssUrl = '${apiUrl}/api/project/' + config.projectId + '/css/' + randomComponentId;
+            customCss = \`<link href ="\${customCssUrl}" rel ="stylesheet">\`;
+          }
           
           document.querySelector('head').innerHTML += \`
-            <style>${css}</style>
-            <style>#\${randomComponentId} { width: 100%; height: 100%; }</style>
             <link href="${remixIconCss}" rel="stylesheet">
-            ${extraCss}
+            <link href="${apiUrl}/api/project/\${config.projectId}/widget-css/${widgetType}" rel="stylesheet">
+            ${extraCssFile}
+            \${customCss}
           \`;
           
           function renderWidget () {

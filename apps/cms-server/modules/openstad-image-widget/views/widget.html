@@ -1,29 +1,7 @@
-<style>
-  {{data.widget.formattedImageStyles}}
-</style>
-
 <img
   id="{{data.widget.imageId}}"
-  src="{{ apos.attachment.url(data.widget.uploadedImage, { size: 'max' }) }}"
-  style="width: {{data.widget.width}}; height: {{data.widget.height}}; object-fit: {{data.widget.objectFit}}; "
-
-  {% if data.widget.uploadedImageTitle %}
-    title="{{data.widget.uploadedImageTitle}}"
-  {% endif %}
-
-
-  {% if data.widget.uploadedImageTitle %}
-    title="{{data.widget.uploadedImageTitle}}"
-  {% endif %}
-
-  {% if data.widget.uploadedImageAlt %}
-    alt="{{data.widget.uploadedImageAlt}}"
-  {% else %}
-      alt=" "
-  {% endif %}
-
-
-  {% if data.widget.banner %}
-    class="--negative"
-  {% endif %}
+  src="{{apos.attachment.url(data.widget.uploadedImage)}}"
+  title="{{data.widget.uploadedImageTitle}}"
+  alt="{{data.widget.uploadedImageAlt}}"
+  class="image-component {% if data.widget.banner %} --negative {% endif %} {{data.widget.height}} {{data.widget.objectFit}}"
 />

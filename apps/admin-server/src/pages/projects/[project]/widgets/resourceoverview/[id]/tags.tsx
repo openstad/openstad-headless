@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl, FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
@@ -23,9 +23,11 @@ import { useEffect, useState } from 'react';
 import _ from 'lodash';
 import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import InfoDialog from "@/components/ui/info-hover";
 
 const formSchema = z.object({
   displayTagFilters: z.boolean(),
+  showActiveTags: z.boolean().optional(),
   tagGroups: z
     .array(
       z.object({
@@ -73,6 +75,7 @@ export default function WidgetResourceOverviewTags(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       displayTagFilters: props?.displayTagFilters || false,
+      showActiveTags: props?.showActiveTags || false,
       tagGroups: props.tagGroups || [],
       displayTagGroupName: props?.displayTagGroupName || false,
     },
@@ -93,6 +96,18 @@ export default function WidgetResourceOverviewTags(
               <FormItem>
                 <FormLabel>Filteren op tags weergeven?</FormLabel>
                 {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="showActiveTags"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel style={{display: 'flex'}}>Wil je onder de filters de actieve tags zien waar op is gefilterd? <InfoDialog content={"Dit geeft je de mogelijkheid om de actieve tags te zien waarop momenteel is gefilterd. Dit is vooral handig bij filters waar je meerdere opties kunt selecteren binnen één dropdown. Zo kun je snel een overzicht krijgen van de geselecteerde tags en eenvoudig aanpassen of verwijderen. De actieve tags worden alleen weergegeven bij filteropties die het toestaan om meerdere keuzes tegelijk te selecteren."} /></FormLabel>
+                  {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}

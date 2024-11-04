@@ -9,7 +9,7 @@ import { Dialog } from '@openstad-headless/ui/src';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { elipsize } from '../../lib/ui-helpers';
+import {elipsizeHTML} from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
 import { hasRole } from '@openstad-headless/lib';
 import nunjucks from 'nunjucks';
@@ -25,7 +25,7 @@ import {
   Paragraph,
   Button,
 } from '@utrecht/component-library-react';
-import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
+import { ResourceOverviewMapWidgetProps, dataLayerArray } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -34,7 +34,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     resourceOverviewMapWidget?: Omit<
       ResourceOverviewMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'projectId'
-    >;
+    > & dataLayerArray;
     renderHeader?: (
       widgetProps: ResourceOverviewWidgetProps,
       resources?: any,
@@ -85,12 +85,14 @@ export type ResourceOverviewWidgetProps = BaseProps &
     rawInput?: string;
     bannerText?: string;
     displayDocuments?: boolean;
+    showActiveTags?: boolean;
     documentsTitle?: string;
     documentsDesc?: string;
     displayVariant?: string;
     resetText?: string;
     applyText?: string;
     onFilteredResourcesChange?: (filteredResources: any[]) => void;
+    displayLikeButton?: boolean;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -198,6 +200,12 @@ const defaultItemRenderer = (
   const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images : [{ url: defaultImage }];
   const hasImages = (Array.isArray(resourceImages) && resourceImages.length > 0 && resourceImages[0].url !== '') ? '' : 'resource-has-no-images';
 
+  const firstStatus = resource.statuses && resource.statuses.length > 0 ? resource.statuses[0] : null;
+  const colorClass = firstStatus && firstStatus.color ? `color-${firstStatus.color}` : '';
+  const backgroundColorClass = firstStatus && firstStatus.backgroundColor ? `bgColor-${firstStatus.backgroundColor}` : '';
+
+  const statusClasses = `${colorClass} ${backgroundColorClass}`.trim();
+
   return (
     <>
       {props.displayType === 'cardrow' ? (
@@ -206,19 +214,22 @@ const defaultItemRenderer = (
 
           <Carousel
             items={resourceImages}
+            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
             itemRenderer={(i) => (
               <Image
                 src={i.url}
                 imageFooter={
                   props.displayStatusLabel && (
-                    <div>
+                    <div
+                        className={`${hasImages} ${statusClasses}`}
+                    >
                       <Paragraph className="osc-resource-overview-content-item-status">
                         {resource.statuses?.map((statusTag: any) => (
                           <span className="status-label">{statusTag.label}</span>
                         ))}
                       </Paragraph>
                     </div>
-                  )
+                    )
                 }
               />
             )}
@@ -226,22 +237,22 @@ const defaultItemRenderer = (
 
 
           <div>
-            <Spacer size={1} />
+            <Spacer size={1}/>
             {props.displayTitle ? (
-              <Heading4>
-                <a href={getUrl()} className="resource-card--link_trigger"> {elipsize(resource.title, props.titleMaxLength || 20)} </a>
+               <Heading4>
+                 <a href={getUrl()} className="resource-card--link_trigger" dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.title, props.titleMaxLength || 20)}}/>
               </Heading4>
             ) : null}
 
             {props.displaySummary ? (
               <Paragraph>
-                {elipsize(remirrorCombineText(resource.summary), props.summaryMaxLength || 20)}
+                {elipsizeHTML(remirrorCombineText(resource.summary), props.summaryMaxLength || 20)}
               </Paragraph>
             ) : null}
 
             {props.displayDescription ? (
               <Paragraph className="osc-resource-overview-content-item-description">
-                {elipsize(remirrorCombineText(resource.description), props.descriptionMaxLength || 30)}
+                {elipsizeHTML(remirrorCombineText(resource.description), props.descriptionMaxLength || 30)}
               </Paragraph>
             ) : null}
           </div>
@@ -249,8 +260,8 @@ const defaultItemRenderer = (
           <div className="osc-resource-overview-content-item-footer">
             {props.displayVote ? (
               <>
-                <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} />
-                <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} />
+                <Icon icon="ri-thumb-up-line" variant="big" text={resource.yes} description='Stemmen voor'/>
+                <Icon icon="ri-thumb-down-line" variant="big" text={resource.no} description='Stemmen tegen'/>
               </>
             ) : null}
 
@@ -259,6 +270,7 @@ const defaultItemRenderer = (
                 icon="ri-message-line"
                 variant="big"
                 text={resource.commentCount}
+                description='Aantal reacties'
               />
             ) : null}
           </div>
@@ -268,12 +280,15 @@ const defaultItemRenderer = (
         <div className={`resource-card--link ${hasImages}`}>
           <Carousel
             items={resourceImages}
+            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
             itemRenderer={(i) => (
               <Image
                 src={i.url}
                 imageFooter={
                   props.displayStatusLabel && (
-                    <div>
+                    <div
+                      className={`${hasImages} ${statusClasses}`}
+                    >
                       <Paragraph className="osc-resource-overview-content-item-status">
                         {resource.statuses?.map((statusTag: any) => (
                           <span className="status-label">{statusTag.label}</span>
@@ -290,19 +305,19 @@ const defaultItemRenderer = (
             <Spacer size={1} />
             {props.displayTitle ? (
               <Heading4>
-                <button className="resource-card--link_trigger" onClick={() => onItemClick && onItemClick()}>{elipsize(resource.title, props.titleMaxLength || 20)}</button>
+                <button className="resource-card--link_trigger" onClick={() => onItemClick && onItemClick()} dangerouslySetInnerHTML={{__html: elipsizeHTML(resource.title, props.titleMaxLength || 20)}}></button>
               </Heading4>
             ) : null}
 
             {props.displaySummary ? (
               <Paragraph>
-                {elipsize(remirrorCombineText(resource.summary), props.summaryMaxLength || 20)}
+                {elipsizeHTML(remirrorCombineText(resource.summary), props.summaryMaxLength || 20)}
               </Paragraph>
             ) : null}
 
             {props.displayDescription ? (
               <Paragraph className="osc-resource-overview-content-item-description">
-                {elipsize(remirrorCombineText(resource.description), props.descriptionMaxLength || 30)}
+                {elipsizeHTML(remirrorCombineText(resource.description), props.descriptionMaxLength || 30)}
               </Paragraph>
             ) : null}
           </div>
@@ -343,6 +358,8 @@ function ResourceOverview({
   onlyIncludeTagIds = '',
   onlyIncludeStatusIds = '',
   displayDocuments = false,
+  showActiveTags = false,
+  displayLikeButton = false,
   documentsTitle = '',
   documentsDesc = '',
   displayVariant = '',
@@ -516,6 +533,7 @@ function ResourceOverview({
           <Carousel
             startIndex={resourceDetailIndex}
             items={filteredResources && filteredResources?.length > 0 ? filteredResources : []}
+            buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
             itemRenderer={(item) => (
               <GridderResourceDetail
                 resource={item}
@@ -524,6 +542,7 @@ function ResourceOverview({
                 displayDocuments={displayDocuments}
                 documentsTitle={documentsTitle}
                 documentsDesc={documentsDesc}
+                displayLikeButton={displayLikeButton}
                 onRemoveClick={(resource) => {
                   try {
                     resource
@@ -536,6 +555,7 @@ function ResourceOverview({
                     console.error(e);
                   }
                 }}
+                {...props}
               />
             )}></Carousel>
         }
@@ -551,7 +571,7 @@ function ResourceOverview({
           {props.displaySearchText ? (
             <div className="osc-resourceoverview-search-container col-span-full" role="status">
               {props.textActiveSearch && search && (
-                <Paragraph className="osc-searchtext">
+                <Paragraph className="osc-searchtext" role="status">
                   {props.textActiveSearch
                     .replace('[search]', search)
                     .replace('[zoekterm]', search)}
@@ -576,6 +596,7 @@ function ResourceOverview({
               tagGroups={props.tagGroups || []}
               itemsPerPage={itemsPerPage}
               resources={resources}
+              showActiveTags={showActiveTags}
               onUpdateFilter={(f) => {
                 if (f.tags.length === 0) {
                   setTags(tagIdsToLimitResourcesTo);

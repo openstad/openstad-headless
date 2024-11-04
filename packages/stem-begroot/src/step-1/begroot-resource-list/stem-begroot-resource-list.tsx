@@ -8,7 +8,7 @@ import {
   Spacer,
 } from '@openstad-headless/ui/src';
 
-import { elipsize } from '@openstad-headless/lib/ui-helpers';
+import {elipsizeHTML} from '@openstad-headless/lib/ui-helpers';
 
 import "@utrecht/component-library-css";
 import "@utrecht/design-tokens/dist/root.css";
@@ -83,6 +83,7 @@ export const StemBegrootResourceList = ({
 
               <Carousel
                 items={resourceImages}
+                buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
                 itemRenderer={(i) => (
                   <Image src={i.url} />
                 )}
@@ -98,8 +99,8 @@ export const StemBegrootResourceList = ({
                 </div>
               </section>
               <Heading level={2} appearance="utrecht-heading-4">{resource.title}</Heading>
-              <Paragraph>{elipsize(remirrorCombineText(resource.summary), 100)}</Paragraph>
-              <Paragraph>{elipsize(remirrorCombineText(resource.description), 200)}</Paragraph>
+              <Paragraph>{elipsizeHTML(remirrorCombineText(resource.summary), 100)}</Paragraph>
+              <Paragraph>{elipsizeHTML(remirrorCombineText(resource.description), 200)}</Paragraph>
 
               {
                 originalUrl ? (
@@ -149,8 +150,9 @@ export const StemBegrootResourceList = ({
                 <Button
                   appearance='secondary-action-button'
                   className="osc-stem-begroot-item-action-btn"
-                  onClick={() => {
+                  onClick={(e) => {
                     onResourcePlainClicked(resource, index);
+                    e.currentTarget.classList.add('active-resource');
                   }}>
                   Lees meer
                 </Button>

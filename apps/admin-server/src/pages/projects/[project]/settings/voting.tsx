@@ -31,25 +31,35 @@ import * as Switch from '@radix-ui/react-switch';
 import InfoDialog from '@/components/ui/info-hover';
 
 const formSchema = z.object({
-  isViewable: z.boolean(),
-  isActive: z.boolean(),
-  withExisting: z.enum(['error', 'replace', 'merge']),
-  requiredUserRole: z.enum(['anonymous', 'member']),
+  isViewable: z.boolean().optional(),
+  isActive: z.boolean().optional(),
+  withExisting: z.enum(['error', 'replace', 'merge']).optional(),
+  requiredUserRole: z.enum(['anonymous', 'member']).optional(),
   voteType: z.enum([
     'likes',
     'count',
     'budgeting',
     'countPerTheme',
     'budgetingPerTheme',
-  ]),
-  minResources: z.coerce.number().gt(0),
-  maxResources: z.coerce.number().gt(0),
-  minBudget: z.coerce.number().gt(0),
-  maxBudget: z.coerce.number().gt(0)
-}).refine((data) => data.maxResources > data.minResources, {
+  ]).optional(),
+  minResources: z.coerce.number().gt(-1).optional(),
+  maxResources: z.coerce.number().gt(-1).optional(),
+  minBudget: z.coerce.number().gt(-1).optional(),
+  maxBudget: z.coerce.number().gt(-1).optional()
+}).refine((data) => {
+  if (data.maxResources !== 0 && data.minResources !== undefined && data.maxResources !== undefined) {
+    return data.maxResources > data.minResources;
+  }
+  return true;
+}, {
   message: "De maximale hoeveelheid resources moet groter zijn dan de minimale hoeveelheid.",
   path: ["maxResources"]
-}).refine(data => data.maxBudget > data.minBudget, {
+}).refine((data) => {
+  if (data.maxBudget !== undefined && data.minBudget !== undefined && data.maxBudget !== 0) {
+    return data.maxBudget > data.minBudget;
+  }
+  return true;
+}, {
   message: "De maximale budget moet groter zijn dan het minimale budget.",
   path: ["maxBudget"]
 });

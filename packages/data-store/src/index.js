@@ -5,6 +5,7 @@ import API from './api';
 import useResource from './hooks/use-resource.js';
 import useChoicesguide from './hooks/use-choicesguide';
 import useArea from './hooks/use-area.js';
+import useDatalayer from './hooks/use-datalayer.js';
 import useAreas from './hooks/use-areas.js';
 import useComments from './hooks/use-comments.js';
 import useResources from './hooks/use-resources.js';
@@ -15,6 +16,7 @@ import useSubmissions from './hooks/use-submissions.js';
 import useCommentsByProject from './hooks/use-comments-by-project';
 import useChoiceGuideResults from './hooks/use-choiceguide-results';
 import useUserActivity from './hooks/use-user-activity';
+import useWidget from "./hooks/use-widget";
 
 const windowGlobal = typeof window !== 'undefined' ? window : {};
 
@@ -31,6 +33,7 @@ function DataStore(props = {}) {
   self.useComments = useComments.bind(self);
   self.useResources = useResources.bind(self);
   self.useArea = useArea.bind(self);
+  self.useDatalayer = useDatalayer.bind(self);
   self.useAreas = useAreas.bind(self);
   self.useTags = useTags.bind(self);
   self.useCurrentUser = useCurrentUser.bind(self);
@@ -39,6 +42,7 @@ function DataStore(props = {}) {
   self.useCommentsByProject = useCommentsByProject.bind(self);
   self.useChoiceGuideResults = useChoiceGuideResults.bind(self);
   self.useUserActivity = useUserActivity.bind(self);
+  self.useWidget = useWidget.bind(self);
 
   // current user
   const {

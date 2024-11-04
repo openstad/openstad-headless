@@ -3,6 +3,15 @@ const nunjucks = require('nunjucks');
 const mjml2html = require('mjml');
 const sendMessage = require('../notifications/send-engines');
 
+let nunjucksEnv;
+
+(async () => {
+  const { applyFilters } = await import('../../../../packages/raw-resource/includes/nunjucks-filters-js.cjs');
+
+  nunjucksEnv = new nunjucks.Environment();
+  applyFilters(nunjucksEnv);
+})();
+
 module.exports = ( db, sequelize, DataTypes ) => {
   const NotificationMessage = sequelize.define('notification_message', {
 
@@ -82,12 +91,26 @@ module.exports = ( db, sequelize, DataTypes ) => {
             for (let key of keys) {
               let idkey = key + 'Id';
               let model = key.charAt(0).toUpperCase() + key.slice(1);
+
               if (options.data[idkey]) {
-                if (Array.isArray(options.data[idkey]) && options.data[idkey].length == 1) options.data[idkey] = options.data[idkey][0];
+                // Handle array of ids
+                if (Array.isArray(options.data[idkey]) && options.data[idkey].length == 1) {
+                  options.data[idkey] = options.data[idkey][0];
+                }
+
+                // If there are multiple IDs
                 if (Array.isArray(options.data[idkey])) {
                   templateData[`${key}s`] = await db[model].findAll({ where: { id: options.data[idkey] } });
                 } else {
-                  templateData[key] = await db[model].findByPk(options.data[idkey]);
+                  // Special handling for 'Resource'
+                  if (model === 'Resource') {
+                    templateData[key] = await db.Resource.findByPk(options.data[idkey], {
+                      include: [{ model: db.Tag, attributes: ['name', 'type'] }]
+                    });
+                  } else {
+                    // Default behavior for other models
+                    templateData[key] = await db[model].findByPk(options.data[idkey]);
+                  }
                 }
               }
             }
@@ -96,8 +119,8 @@ module.exports = ( db, sequelize, DataTypes ) => {
           }
 
           try {
-            instance.subject = nunjucks.renderString(template.subject, { ...templateData });
-            let body = nunjucks.renderString(template.body, { ...templateData });
+            instance.subject = nunjucksEnv.renderString(template.subject, { ...templateData });
+            let body = nunjucksEnv.renderString(template.body, { ...templateData });
             body = mjml2html(body);
             instance.body = body.html;
           } catch (err) {

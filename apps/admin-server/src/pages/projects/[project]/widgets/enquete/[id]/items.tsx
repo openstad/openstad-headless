@@ -28,7 +28,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import InfoDialog from '@/components/ui/info-hover';
-import {Checkbox} from "@/components/ui/checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -63,6 +63,7 @@ const formSchema = z.object({
   imageUpload: z.string().optional(),
   fieldRequired: z.boolean().optional(),
   showSmileys: z.boolean().optional(),
+  placeholder: z.string().optional(),
 });
 
 export default function WidgetEnqueteItems(
@@ -91,8 +92,8 @@ export default function WidgetEnqueteItems(
         ...currentItems,
         {
           trigger: `${currentItems.length > 0
-              ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
-              : 1
+            ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
+            : 1
             }`,
           title: values.title,
           key: values.key,
@@ -115,6 +116,7 @@ export default function WidgetEnqueteItems(
           imageDescription: values.imageDescription || '',
           fieldRequired: values.fieldRequired || false,
           showSmileys: values.showSmileys || false,
+          placeholder: values.placeholder || '',
         },
       ]);
     }
@@ -142,8 +144,8 @@ export default function WidgetEnqueteItems(
     } else {
       const newOption = {
         trigger: `${options.length > 0
-            ? parseInt(options[options.length - 1].trigger) + 1
-            : 0
+          ? parseInt(options[options.length - 1].trigger) + 1
+          : 0
           }`,
         titles: values.options?.[values.options.length - 1].titles || [],
       };
@@ -176,6 +178,7 @@ export default function WidgetEnqueteItems(
     imageDescription: '',
     fieldRequired: false,
     showSmileys: false,
+    placeholder: '',
   });
 
   const form = useForm<FormData>({
@@ -219,6 +222,7 @@ export default function WidgetEnqueteItems(
         imageDescription: selectedItem.imageDescription || '',
         fieldRequired: selectedItem.fieldRequired || false,
         showSmileys: selectedItem.showSmileys || false,
+        placeholder: selectedItem.placeholder || '',
       });
       setOptions(selectedItem.options || []);
     }
@@ -437,28 +441,28 @@ export default function WidgetEnqueteItems(
                         />
 
                         <FormField
-                            control={form.control}
-                            // @ts-ignore
-                            name={`options.${options.length - 1}.isOtherOption`}
-                            render={({ field }) => (
-                                <>
-                                <FormItem
-                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexDirection: 'row', marginTop: '10px' }}>
-                                  <Checkbox
-                                      onCheckedChange={(checked: boolean) => {
-                                        form.setValue(`options.${options.length - 1}.titles.0.isOtherOption`, checked );
-                                      }}
-                                  />
-                                  <FormLabel
-                                      style={{ marginTop: 0, marginLeft: '6px' }}>Is &apos;Anders, namelijk...&apos;</FormLabel>
-                                  <FormMessage />
-                                </FormItem>
+                          control={form.control}
+                          // @ts-ignore
+                          name={`options.${options.length - 1}.isOtherOption`}
+                          render={({ field }) => (
+                            <>
+                              <FormItem
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexDirection: 'row', marginTop: '10px' }}>
+                                <Checkbox
+                                  onCheckedChange={(checked: boolean) => {
+                                    form.setValue(`options.${options.length - 1}.titles.0.isOtherOption`, checked);
+                                  }}
+                                />
+                                <FormLabel
+                                  style={{ marginTop: 0, marginLeft: '6px' }}>Is &apos;Anders, namelijk...&apos;</FormLabel>
+                                <FormMessage />
+                              </FormItem>
                               <FormDescription>
-                              Als je deze optie selecteert, wordt er automatisch een tekstveld toegevoegd aan het formulier.
-                              Het tekstveld wordt zichtbaar wanneer deze optie wordt geselecteerd.
+                                Als je deze optie selecteert, wordt er automatisch een tekstveld toegevoegd aan het formulier.
+                                Het tekstveld wordt zichtbaar wanneer deze optie wordt geselecteerd.
                               </FormDescription>
-                                </>
-                              )}
+                            </>
+                          )}
                         />
                       </>
                     )}
@@ -607,7 +611,7 @@ export default function WidgetEnqueteItems(
                             <Input {...field} />
                             {(!field.value || !isFieldKeyUnique) && (
                               <FormMessage>
-                                { !field.value ? 'Key is verplicht' : 'Key moet uniek zijn' }
+                                {!field.value ? 'Key is verplicht' : 'Key moet uniek zijn'}
                               </FormMessage>
                             )}
                           </FormItem>
@@ -625,6 +629,21 @@ export default function WidgetEnqueteItems(
                         </FormItem>
                       )}
                     />
+
+                    {form.watch('questionType') === 'open' && (
+
+                      <FormField
+                        control={form.control}
+                        name="placeholder"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Placeholder</FormLabel>
+                            <Input {...field} />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                     <FormField
                       control={form.control}
                       name="questionType"
@@ -712,7 +731,7 @@ export default function WidgetEnqueteItems(
                       </>
                     )}
 
-                    { form.watch('questionType') === 'none' && (
+                    {form.watch('questionType') === 'none' && (
                       <>
                         <ImageUploader
                           form={form}
@@ -759,7 +778,7 @@ export default function WidgetEnqueteItems(
                       </>
                     )}
 
-                    { form.watch('questionType') === 'images' && (
+                    {form.watch('questionType') === 'images' && (
                       <>
                         <ImageUploader
                           form={form}
@@ -975,7 +994,7 @@ export default function WidgetEnqueteItems(
                   </div>
                   {(!form.watch('fieldKey') || !isFieldKeyUnique) && (
                     <FormMessage>
-                      { !form.watch('fieldKey') ? 'Key is verplicht' : 'Key moet uniek zijn' }
+                      {!form.watch('fieldKey') ? 'Key is verplicht' : 'Key moet uniek zijn'}
                     </FormMessage>
                   )}
                 </div>
