@@ -66,6 +66,33 @@ function adjustMenu() {
     closeButtonSpan.textContent = 'Menu tonen';
   }
 
+  function trapFocus(element) {
+    const focusableElements = element.querySelectorAll('a, button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])');
+    const firstFocusableElement = focusableElements[0];
+    const lastFocusableElement = focusableElements[focusableElements.length - 1];
+  
+    element.addEventListener('keydown', (event) => {
+      const isTabPressed = (event.key === 'Tab' || event.keyCode === 9);
+  
+      if (!isTabPressed) {
+        return;
+      }
+  
+      if (event.shiftKey) {
+        if (document.activeElement === firstFocusableElement) {
+          lastFocusableElement.focus();
+          event.preventDefault();
+        }
+      } else {
+        if (document.activeElement === lastFocusableElement) {
+          firstFocusableElement.focus();
+          event.preventDefault();
+        }
+      }
+    });
+  }
+  
+
   closeButton.addEventListener('click', () => {
     const isExpanded = closeButton.getAttribute('aria-expanded') === 'true';
     closeButton.setAttribute('aria-expanded', !isExpanded);
@@ -73,6 +100,10 @@ function adjustMenu() {
 
     navContainer.classList.toggle('--show');
     closeButtonSpan.textContent = isExpanded ? 'Menu tonen' : 'Menu verbergen';
+
+    if (!isExpanded) {
+      trapFocus(navContainer);
+    }
   });
 
   navbar.addEventListener('focusout', (event) => {
