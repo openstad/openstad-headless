@@ -42,6 +42,7 @@ type booleanProps = {
   | 'displayTags'
   | 'displayStatus'
   | 'displayDocuments'
+  | 'clickableImage'
   | 'displaySocials']: boolean | undefined;
 };
 
@@ -96,6 +97,7 @@ function ResourceDetail({
   displayStatus = true,
   displaySocials = true,
   displayDocuments = true,
+  clickableImage = false,
   documentsTitle = '',
   documentsDesc = '',
   backUrlText = 'Terug naar het document',
@@ -205,6 +207,31 @@ function ResourceDetail({
 
   const statusClasses = `${colorClass} ${backgroundColorClass}`.trim();
 
+  const renderImage = (src: string, clickableImage: boolean) => {
+    const imageElement = (
+      <Image
+        src={src}
+        imageFooter={
+          <div>
+            <Paragraph className={`osc-resource-detail-content-item-status ${statusClasses}`}>
+              {resource.statuses
+                ?.map((s: { name: string }) => s.name)
+                ?.join(', ')}
+            </Paragraph>
+          </div>
+        }
+      />
+    );
+
+    return clickableImage ? (
+      <a href={src} target="_blank" rel="noreferrer">
+        {imageElement}
+      </a>
+    ) : (
+      imageElement
+    );
+  };
+
   return (
     <section>
       <div
@@ -221,18 +248,7 @@ function ResourceDetail({
                   items={resourceImages}
                   buttonText={{ next: 'Volgende afbeelding', previous: 'Vorige afbeelding' }}
                   itemRenderer={(i) => (
-                    <Image
-                      src={i.url}
-                      imageFooter={
-                        <div>
-                          <Paragraph className={`osc-resource-detail-content-item-status ${statusClasses}`}>
-                            {resource.statuses
-                              ?.map((s: { name: string }) => s.name)
-                              ?.join(', ')}
-                          </Paragraph>
-                        </div>
-                      }
-                    />
+                    renderImage(i.url, clickableImage)
                   )}
                 />
               )}

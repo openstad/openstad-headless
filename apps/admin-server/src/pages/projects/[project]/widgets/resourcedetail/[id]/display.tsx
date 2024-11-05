@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import {
-  Form, FormControl,
+  Form, FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -34,6 +34,7 @@ const formSchema = z.object({
   displayDocuments: z.boolean(),
   documentsTitle: z.string().optional(),
   documentsDesc: z.string().optional(),
+  clickableImage: z.boolean(),
 });
 
 export default function WidgetResourceDetailDisplay(
@@ -66,6 +67,7 @@ export default function WidgetResourceDetailDisplay(
       displayStatus: undefinedToTrueOrProp(props?.displayStatus),
       displayLikes: undefinedToTrueOrProp(props?.displayLikes),
       displayDocuments: undefinedToTrueOrProp(props?.displayDocuments),
+      clickableImage: props?.clickableImage || false,
       documentsTitle: props?.documentsTitle || '',
       documentsDesc: props?.documentsDesc || '',
     },
@@ -222,6 +224,23 @@ export default function WidgetResourceDetailDisplay(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Toon de likes widget</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="clickableImage"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Moet de afbeelding in de dialog klikbaar zijn?
+                </FormLabel>
+                <FormDescription>
+                  Als je dit aanvinkt, wordt de afbeelding in de dialog klikbaar en wordt de afbeelding geopend in een nieuw tabblad.
+                </FormDescription>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
