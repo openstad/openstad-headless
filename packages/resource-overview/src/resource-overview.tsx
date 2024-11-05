@@ -91,6 +91,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     applyText?: string;
     onFilteredResourcesChange?: (filteredResources: any[]) => void;
     displayLikeButton?: boolean;
+    clickableImage?: boolean;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -353,6 +354,7 @@ function ResourceOverview({
   displayDocuments = false,
   showActiveTags = false,
   displayLikeButton = false,
+  clickableImage = false,
   documentsTitle = '',
   documentsDesc = '',
   displayVariant = '',
@@ -536,6 +538,7 @@ function ResourceOverview({
                 documentsTitle={documentsTitle}
                 documentsDesc={documentsDesc}
                 displayLikeButton={displayLikeButton}
+                clickableImage={clickableImage}
                 onRemoveClick={(resource) => {
                   try {
                     resource

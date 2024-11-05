@@ -34,6 +34,7 @@ export type GridderResourceDetailProps =
   loginUrl?: string;
   displayDocuments?: boolean;
   displayLikeButton?: boolean;
+  clickableImage?: boolean;
   documentsTitle?: string;
   documentsDesc?: string;
   likeWidget?: Omit<
@@ -51,6 +52,7 @@ export const GridderResourceDetail = ({
   displayLikeButton = false,
   documentsTitle = '',
   documentsDesc = '',
+  clickableImage = false,
   ...props
 }: GridderResourceDetailProps) => {
   // When resource is correctly typed the we will not need :any
@@ -79,17 +81,28 @@ export const GridderResourceDetail = ({
   const resourceImages = (Array.isArray(resource.images) && resource.images.length > 0) ? resource.images?.at(0)?.url : defaultImage;
   const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
 
+  const renderImage = (image: string, clickableImage: boolean) => {
+    const imageComponent = (
+      <Image
+        src={image}
+        className="--aspectRatio-16-9"
+      />
+    );
+
+    return clickableImage ? (
+      <a href={image} target="_blank" rel="noreferrer">
+        {imageComponent}
+      </a>
+    ) : (
+      imageComponent
+    )
+  }
+
   return (
     <>
       <div className="osc-gridder-resource-detail">
         <section className={`osc-gridder-resource-detail-photo ${hasImages}`}>
-          <Image
-            src={resource.images?.at(0)?.url || defaultImage}
-            className="--aspectRatio-16-9"
-          />
-          {/* <div>
-            <button className="osc-load-map-button"></button>
-          </div> */}
+          {renderImage(resource.images?.at(0)?.url || defaultImage, clickableImage)}
 
           <div className="osc-gridder-resource-detail-budget-theme-bar">
             <Heading4>Budget</Heading4>

@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -44,6 +45,7 @@ const formSchema = z.object({
   applyText: z.string().optional(),
   resetText: z.string().optional(),
   displayLikeButton: z.boolean(),
+  clickableImage: z.boolean(),
   // displayRanking: z.boolean(),
   // displayLabel: z.boolean(),
   // displayShareButtons: z.boolean(),
@@ -84,6 +86,7 @@ export default function WidgetResourceOverviewDisplay(
       applyText: props?.applyText || 'Toepassen',
       resetText: props?.resetText || 'Reset',
       displayLikeButton: props?.displayLikeButton || false,
+      clickableImage: props?.clickableImage || false,
       // displayRanking: props?.displayRanking || false,
       // displayLabel: props?.displayLabel || false,
       // displayShareButtons: props?.displayShareButtons || false,
@@ -510,6 +513,23 @@ export default function WidgetResourceOverviewDisplay(
                 <FormLabel>
                   Like button weergeven in de dialog
                 </FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="clickableImage"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Moet de afbeelding in de dialog klikbaar zijn?
+                </FormLabel>
+                <FormDescription>
+                  Als je dit aanvinkt, wordt de afbeelding in de dialog klikbaar en wordt de afbeelding geopend in een nieuw tabblad.
+                </FormDescription>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
