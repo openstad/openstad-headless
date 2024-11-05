@@ -446,6 +446,10 @@ app.use(async function (req, res, next){
 
 });
 
+app.get('/health', (req, res) => {
+  res.send('OK');
+});
+
 setInterval(loadProjects, REFRESH_PROJECTS_INTERVAL);
 
 app.listen(process.env.PORT || 3000);
