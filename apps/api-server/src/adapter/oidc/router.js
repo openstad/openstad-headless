@@ -239,11 +239,25 @@ router
 
     // todo: deze afvanging moet veel eerder!!!
     const isAllowedRedirectDomain = (url, allowedDomains) => {
+      allowedDomains = allowedDomains || [];
+
+      try {
+        const baseUrlHost = process.env.BASE_DOMAIN || process.env.HOSTNAME;
+
+        if ( !!baseUrlHost ) {
+          allowedDomains.push(baseUrlHost);
+          allowedDomains.push('auth.' + baseUrlHost);
+          allowedDomains.push('api.' + baseUrlHost);
+          allowedDomains.push('admin.' + baseUrlHost);
+        }
+      } catch(err) {
+        console.error('Error processing allowed domains:', err);
+      }
+
       let redirectUrlHost = '';
       try {
         redirectUrlHost = new URL(url).hostname;
-      } catch (err) {
-      }
+      } catch (err) {}
 
       // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
       return allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1;

@@ -128,6 +128,20 @@ router
 
     const isAllowedRedirectDomain = (url, project) => {
       let allowedDomains = project?.config?.allowedDomains || [];
+
+      try {
+        const baseUrlHost = process.env.BASE_DOMAIN || process.env.HOSTNAME;
+
+        if ( !!baseUrlHost ) {
+          allowedDomains.push(baseUrlHost);
+          allowedDomains.push('auth.' + baseUrlHost);
+          allowedDomains.push('api.' + baseUrlHost);
+          allowedDomains.push('admin.' + baseUrlHost);
+        }
+      } catch(err) {
+        console.error('Error processing allowed domains:', err);
+      }
+
       if (project.url) {
         try {
           let projectDomain = new URL(project.url).hostname;
