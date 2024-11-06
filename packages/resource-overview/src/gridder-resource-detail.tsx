@@ -23,6 +23,7 @@ import { Icon } from "../../ui/src/icon"
 import {Likes, LikeWidgetProps} from '@openstad-headless/likes/src/likes';
 import { BaseProps } from '@openstad-headless/types/base-props';
 import { ProjectSettingProps } from '@openstad-headless/types/project-setting-props';
+import {hasRole} from "../../lib";
 
 export type GridderResourceDetailProps =
     BaseProps &
@@ -30,8 +31,7 @@ export type GridderResourceDetailProps =
     {
   resource: any;
   onRemoveClick?: (resource: any) => void;
-  isModerator?: boolean;
-  loginUrl?: string;
+  currentUser?: any;
   displayDocuments?: boolean;
   displayLikeButton?: boolean;
   clickableImage?: boolean;
@@ -46,18 +46,20 @@ export type GridderResourceDetailProps =
 export const GridderResourceDetail = ({
   resource,
   onRemoveClick,
-  isModerator = false,
-  loginUrl = '',
   displayDocuments = false,
   displayLikeButton = false,
   documentsTitle = '',
   documentsDesc = '',
   clickableImage = false,
+  currentUser,
   ...props
 }: GridderResourceDetailProps) => {
   // When resource is correctly typed the we will not need :any
   const theme = resource.tags?.filter((t: any) => t.type === 'theme')?.at(0);
   const area = resource.tags?.filter((t: any) => t.type === 'area')?.at(0);
+
+  const resourceUserId = resource?.userId || null;
+  const canDelete = hasRole(currentUser, ['moderator', 'owner'], resourceUserId);
 
   type DocumentType = {
     name?: string;
@@ -173,19 +175,17 @@ export const GridderResourceDetail = ({
               />
             )}
 
-            <Button
-              appearance="primary-action-button"
-              disabled={!isModerator && !loginUrl}
-              onClick={() => {
-                if (!isModerator) {
-                  document.location.href = loginUrl;
-                } else {
+            {canDelete && (
+              <Button
+                appearance="primary-action-button"
+                onClick={() => {
                   if (confirm("Deze actie verwijderd de resource"))
                     onRemoveClick && onRemoveClick(resource);
-                }
-              }}>
-              {isModerator ? 'Verwijder' : 'Inloggen'}
-            </Button>
+                }}
+              >
+                Verwijder
+              </Button>
+            )}
 
           </div>
         </section>
