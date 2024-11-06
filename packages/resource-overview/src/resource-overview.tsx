@@ -479,7 +479,6 @@ function ResourceOverview({
   }, [filteredResources]);
 
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
-  const isModerator = hasRole(currentUser, 'moderator');
 
   const onResourceClick = useCallback(
     (resource: any, index: number) => {
@@ -532,7 +531,7 @@ function ResourceOverview({
             itemRenderer={(item) => (
               <GridderResourceDetail
                 resource={item}
-                isModerator={isModerator}
+                currentUser={currentUser}
                 loginUrl={props.login?.url}
                 displayDocuments={displayDocuments}
                 documentsTitle={documentsTitle}
