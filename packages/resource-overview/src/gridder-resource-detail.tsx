@@ -32,7 +32,6 @@ export type GridderResourceDetailProps =
   resource: any;
   onRemoveClick?: (resource: any) => void;
   currentUser?: any;
-  loginUrl?: string;
   displayDocuments?: boolean;
   displayLikeButton?: boolean;
   clickableImage?: boolean;
@@ -47,7 +46,6 @@ export type GridderResourceDetailProps =
 export const GridderResourceDetail = ({
   resource,
   onRemoveClick,
-  loginUrl = '',
   displayDocuments = false,
   displayLikeButton = false,
   documentsTitle = '',
@@ -180,7 +178,6 @@ export const GridderResourceDetail = ({
             {canDelete && (
               <Button
                 appearance="primary-action-button"
-                disabled={!canDelete && !loginUrl}
                 onClick={() => {
                   if (confirm("Deze actie verwijderd de resource"))
                     onRemoveClick && onRemoveClick(resource);

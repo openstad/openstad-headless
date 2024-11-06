@@ -532,7 +532,6 @@ function ResourceOverview({
               <GridderResourceDetail
                 resource={item}
                 currentUser={currentUser}
-                loginUrl={props.login?.url}
                 displayDocuments={displayDocuments}
                 documentsTitle={documentsTitle}
                 documentsDesc={documentsDesc}
