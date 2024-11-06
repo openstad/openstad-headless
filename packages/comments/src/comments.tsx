@@ -14,6 +14,7 @@ import '@utrecht/design-tokens/dist/root.css';
 import { Button, Paragraph, Heading3, Heading } from '@utrecht/component-library-react';
 import { CommentFormProps } from './types/comment-form-props';
 import toast, {Toaster} from "react-hot-toast";
+import {Filters} from "@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter";
 
 // This type holds all properties needed for this component to work
 export type CommentsWidgetProps = BaseProps &
@@ -39,6 +40,8 @@ export type CommentsWidgetProps = BaseProps &
     customTitle?: string;
     onlyIncludeTags?: string;
     loginText?: string;
+    defaultSorting?: string;
+    sorting?: Array<{ value: string; label: string }>;
     setRefreshComments?: React.Dispatch<any>;
   } & Partial<Pick<CommentFormProps, 'formIntro' | 'placeholder'>>;
 
@@ -108,6 +111,10 @@ function CommentsInner({
     projectId: props.projectId,
     resourceId: resourceId,
   });
+
+  const [sort, setSort] = useState<string | undefined>(
+    props.defaultSorting || "createdAt_asc"
+  );
 
   const [canComment, setCanComment] = useState(args.canComment)
   const [disableSubmit, setDisableSubmit] = useState(false);
@@ -226,8 +233,39 @@ function CommentsInner({
 
         {Array.isArray(comments) && comments.length === 0 ? (
           <Paragraph>{emptyListText}</Paragraph>
-        ) : null}
-        {(comments || []).map((comment: any, index: number) => {
+        ) : ((props.sorting || []).length > 0 && datastore) ? (
+          <>
+            <Filters
+              className="osc-flex-columned"
+              dataStore={datastore}
+              sorting={props.sorting || []}
+              displaySorting={true}
+              defaultSorting={props.defaultSorting || 'createdAt_asc'}
+              onUpdateFilter={(f) => {
+                if (['createdAt_desc', 'createdAt_asc'].includes(f.sort)) {
+                  setSort(f.sort);
+                }
+              }}
+              applyText={'Toepassen'}
+              resources={undefined}
+              displaySearch={false}
+              displayTagFilters={false}
+              searchPlaceholder={''}
+              resetText={'Reset'}
+            />
+
+            <Spacer size={1} />
+          </>
+          ) : null
+        }
+        {(comments || [])
+          ?.sort((a: any, b: any) => {
+            const dateA = new Date(a.createdAt).getTime();
+            const dateB = new Date(b.createdAt).getTime();
+            return sort === 'createdAt_desc' ? dateB - dateA : dateA - dateB;
+          })
+          ?.map((comment: any, index: number) => {
+
           let attributes = { ...args, comment, submitComment, setRefreshComments: refreshComments };
           return <Comment {...attributes} disableSubmit={disableSubmit} index={index} key={index} selected={selectedComment === index} />;
         })}
