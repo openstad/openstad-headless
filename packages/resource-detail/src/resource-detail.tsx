@@ -26,6 +26,9 @@ import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src
 
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
+import { Button } from '@utrecht/component-library-react';
+import {hasRole} from '../../lib';
+
 type booleanProps = {
   [K in
   | 'displayImage'
@@ -232,6 +235,23 @@ function ResourceDetail({
     );
   };
 
+  const { data: currentUser } = datastore.useCurrentUser({ ...props });
+  const resourceUserId = resource?.userId || null;
+  const canDelete = hasRole(currentUser, ['moderator', 'owner'], resourceUserId);
+
+  const onRemoveClick = async (resource: any) => {
+    try {
+      if (typeof resource.delete === 'function') {
+        await resource.delete(resource.id);
+        window.history.back();
+      } else {
+        console.error('Delete method not found on resource');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   return (
     <section>
       <div
@@ -410,6 +430,21 @@ function ResourceDetail({
           </aside>
         ) : null}
       </div>
+
+      {canDelete && (
+        <>
+          <Spacer size={2} />
+          <Button
+            appearance="primary-action-button"
+            onClick={() => {
+              if (confirm("Deze actie verwijderd de resource"))
+                onRemoveClick(resource);
+            }}
+          >
+            Verwijder de inzending
+          </Button>
+        </>
+      )}
 
       <Spacer size={2} />
 
